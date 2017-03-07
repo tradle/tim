@@ -122,7 +122,7 @@ class ResourceRow extends Component {
       }
       if (uri.indexOf('/var/mobile/') === 0)
         params.isStatic = true
-      photo = <Image source={params} style={styles.cellImage}  key={this.getNextKey()} />;
+      photo = <Image source={params} style={styles.cellImage} resizeMode="contain" key={this.getNextKey()} />;
     }
     else {
       if (isContact) {
@@ -591,7 +591,6 @@ var styles = StyleSheet.create({
     height: 60,
     marginRight: 10,
     width: 60,
-    resizeMode: 'contain',
     // borderColor: '#7AAAc3',
     // borderRadius: 30,
     // borderWidth: 1,

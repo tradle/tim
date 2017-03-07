@@ -620,7 +620,7 @@ class MessageList extends Component {
       return (
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
           {network}
-          <ProgressInfo />
+          <ProgressInfo recipient={resource[ROOT_HASH]} />
           <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
           <View style={ sepStyle } />
           {content}
@@ -635,7 +635,7 @@ class MessageList extends Component {
       <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
         <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
           {network}
-          <ProgressInfo />
+          <ProgressInfo recipient={resource[ROOT_HASH]} />
           <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
           <View style={ sepStyle } />
           {content}
@@ -695,6 +695,15 @@ class MessageList extends Component {
         callback: () => this.forgetMe()
       })
       cancelIndex++
+
+      if (this.state.hasProducts) {
+        buttons.push({
+          index: cancelIndex,
+          title: translate('applyForProduct'),
+          callback: () => this.onChooseProduct()
+        })
+        cancelIndex++
+      }
     }
     else
       return

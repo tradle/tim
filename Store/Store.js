@@ -13,9 +13,8 @@ import ReactNative, {
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
-
+import createPoliteQueue from '../utils/polite-queue.js'
 const co = require('bluebird').coroutine
-
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin');
 
@@ -134,6 +133,7 @@ const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 
 const WELCOME_INTERVAL = 600000
+const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 
 // var Tim = require('tim')
 // Tim.enableOptimizations()
@@ -183,6 +183,7 @@ var PORT = 51086
 var TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
 const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
+const ON_RECEIVED_PROGRESS = 0.66
 
 var models = {};
 var list = {};
@@ -249,6 +250,7 @@ const ENCRYPTION_KEY = 'accountkey'
 const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
+const POLITE_TASK_TIMEOUT = __DEV__ ? 60000 : 6000
 
 const {
   newAPIBasedVerification,
@@ -280,6 +282,14 @@ var Store = Reflux.createStore({
     this._loadedResourcesDefer = Q.defer()
     this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
+    this._politeQueue = createPoliteQueue({
+      wait: async function () {
+        await self.onIdle()
+        // give UI a chance to stutter a bit
+        await utils.promiseDelay(ENV.delayBetweenExpensiveTasks || 0)
+      },
+      timeout: POLITE_TASK_TIMEOUT
+    })
 
     NetInfo.isConnected.addEventListener(
       'change',
@@ -525,46 +535,29 @@ var Store = Reflux.createStore({
       overwrite: true,
       context: meDriver,
       methods: [
-        'sign',
-        'signAndSend',
-        'identityPublishStatus',
-        'createObject',
-        'receive'
-      ]
-    })
-
-    this.idlify({
-      overwrite: true,
-      context: meDriver.objects,
-      methods: [
-        'get'
-      ]
-    })
-
-    this.idlify({
-      overwrite: true,
-      context: meDriver.addressBook,
-      methods: [
-        'lookupIdentity',
-        'byPubKey'
+        'createObject'
       ]
     })
   },
 
-  idlify({ context, methods, overwrite }) {
+  idlify({ context, methods, overwrite, delay }) {
     const idlified = overwrite ? context : {}
     methods.forEach(method => {
-      idlified[method] = this.idlifyFunction(context[method], context)
+      idlified[method] = this.idlifyFunction({
+        fn: context[method].bind(context),
+        delay
+      })
     })
 
     return idlified
   },
 
-  idlifyFunction(fn, context) {
+  idlifyFunction({ fn, context, delay }) {
     const self = this
     return async function idlifiedFunction (...args) {
-      await self.onIdle()
-      return fn.apply(context || this, args)
+      return self._politeQueue.push(() => {
+        return fn(...args)
+      })
     }
   },
 
@@ -674,7 +667,7 @@ var Store = Reflux.createStore({
 
     // if (tlsKey) tlsKey = kiki.toKey(tlsKey).priv()
 
-    var tlsKey = driverInfo.tlsKey = TLS_ENABLED && meDriver.keys.filter(k => k.get('purpose') === 'tls')[0]
+    const tlsKey = driverInfo.tlsKey = TLS_ENABLED && meDriver.keys.filter(k => k.get('purpose') === 'tls')[0]
     // var fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
       const start = Date.now()
@@ -1044,7 +1037,7 @@ var Store = Reflux.createStore({
     // save provider's employee
     // if (!hashToUrl[provider.hash]) {
     r.hashToUrl[provider.hash] = getProviderUrl(provider)
-    this.dbPut(SETTINGS + '_1', r)
+    return this.dbPut(SETTINGS + '_1', r)
     // }
   },
   addProvider(provider) {
@@ -1174,6 +1167,10 @@ var Store = Reflux.createStore({
     //   }
     // })
 
+    const receive = this.idlifyFunction({
+      fn: opts => this.receive({ ...opts, transport })
+    })
+
     transport.on('message', async function (msg, from) {
       debug('queuing receipt of msg from', from)
       if (!wsClients.byIdentifier[from]) {
@@ -1185,7 +1182,7 @@ var Store = Reflux.createStore({
       }
 
       const unlock = await self.lockReceive(from)
-      const maybePromise = receive(msg, from)
+      const maybePromise = receive({ msg, from })
       if (!Q.isPromiseAlike(maybePromise)) {
         return process.nextTick(unlock)
       }
@@ -1216,131 +1213,162 @@ var Store = Reflux.createStore({
       // self.trigger({action: 'onlineStatus', online: present})
       self.setProviderOnlineStatus(recipient, present)
     }
+  },
 
-    const receive = this.idlifyFunction(function receive (msg, from) {
-      try {
-        msg = tradleUtils.unserializeMessage(msg)
-        const payload = msg.object
-        debug(`receiving ${payload[TYPE]}`)
+  async receiveIntroduction({ transport, msg, org }) {
+    const { wsClients } = driverInfo
+    const payload = msg.object
+    const { identity } = payload
+    const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(identity)
+    await meDriver.addContactIdentity(identity)
+    await this.addContact(payload, rootHash, msg.forPartials || msg.forContext)
+    const url = utils.keyByValue(wsClients, transport)
+    await this.addToSettings({hash: rootHash, url: url})
+  },
 
-        let org = self._getItem(PROFILE + '_' + from).organization
-        self.trigger({action: 'progressUpdate', progress: 1, recipient: self._getItem(org)})
+  receiveSelfIntroduction({ transport, msg }) {
+    const payload = msg.object
+    const { wsClients } = driverInfo
+    const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    let name = payload.name
+    if (!name  ||  !name.length) {
+      name = payload.identity.name
+      if (name)
+        name = name.formatted
+    }
+    if (!name && payload.message)
+      name = payload.message.split(' ')[0]
 
-        if (payload.context) {
-          let s = PRODUCT_APPLICATION + '_' + payload.context
-          let r = list[s]
-        }
-        switch (payload[TYPE]) {
-        case INTRODUCTION:
-          let rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    // const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    Alert.alert(
+      translate('newContactRequest', name),
+      payload.message || null,
+      [
+        {text: translate('Ok'),
+        onPress: () => {
           return meDriver.addContactIdentity(payload.identity)
           .then(() => {
-            return self.addContact(payload, rootHash, msg.forPartials || msg.forContext)
+            return this.addContact(payload, rootHash)
           })
           .then(() => {
             const url = utils.keyByValue(wsClients, transport)
-            self.addToSettings({hash: rootHash, url: url})
+            this.addToSettings({hash: rootHash, url: url})
           })
-          break
-        case SELF_INTRODUCTION:
-          rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
-          let name = payload.name
-          if (!name  ||  !name.length) {
-            name = payload.identity.name
-            if (name)
-              name = name.formatted
-          }
-          if (!name && payload.message)
-            name = payload.message.split(' ')[0]
+        }},
+        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+      ]
+    )
+  },
 
-          // const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
-          Alert.alert(
-            translate('newContactRequest', name),
-            payload.message || null,
-            [
-              {text: translate('Ok'),
-              onPress: () => {
-                return meDriver.addContactIdentity(payload.identity)
-                .then(() => {
-                  return self.addContact(payload, rootHash)
-                })
-                .then(() => {
-                  const url = utils.keyByValue(wsClients, transport)
-                  self.addToSettings({hash: rootHash, url: url})
-                })
-              }},
-              {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-            ]
-          )
+  async receivePairingRequest({ payload }) {
+    const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    Alert.alert(
+      translate('pairingRequest'),
+      null,
+      [
+        {text: translate('Ok'),
+        onPress: () => {
+          this.trigger({action: 'acceptingPairingRequest', resource: payload})
+          // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
+          // .then(() => {
+          //   Alert.alert(translate('pairingRequestWasProcesseed'))
+          // })
+          // .catch((err) => {
+          //   debugger
+          // })
+        }},
+        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+      ]
+    )
+  },
 
-          // if (name)
-          //   name = name.charAt(0).toUpperCase() + name.slice(1)
+  async receive({ transport, msg, from }) {
+    const self = this
+    const { tlsKey, wsClients } = driverInfo
+    let progressUpdate
+    let willAnnounceProgress = willShowProgressBar(msg)
+    try {
+      msg = tradleUtils.unserializeMessage(msg)
+      const payload = msg.object
+      debug(`receiving ${payload[TYPE]}`)
 
-
-          return
-        default:
-          break
-        }
-      } catch (err) {
-        debug('experienced error receiving message: ' + (err.stack || err.message))
-        try {
-          // debugger
-          const payload = JSON.parse(msg)
-          if (payload[TYPE] === PAIRING_REQUEST) {
-            const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
-            Alert.alert(
-              translate('pairingRequest'),
-              null,
-              [
-                {text: translate('Ok'),
-                onPress: () => {
-                  self.trigger({action: 'acceptingPairingRequest', resource: payload})
-                  // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
-                  // .then(() => {
-                  //   Alert.alert(translate('pairingRequestWasProcesseed'))
-                  // })
-                  // .catch((err) => {
-                  //   debugger
-                  // })
-                }},
-                {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-              ]
-            )
-          }
-          // else if (payload[TYPE] === PAIRING_RESPONSE) {
-          //   return self.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
-          //   .then(() => {
-          //     debugger
-          //     Alert.alert('Pairing was successful')
-          //   })
-          //   .catch((err) => {
-          //     debugger
-          //     Alert.alert(err)
-        //   })
-          // }
-          return
-        } catch (err) {
-          return
-        }
+      let org = this._getItem(PROFILE + '_' + from).organization
+      progressUpdate = willAnnounceProgress && {
+        action: 'progressUpdate',
+        recipient: this._getItem(org)
       }
 
-      // const prop = 'pubKey'
-      // const identifier = tradle.utils.deserializePubKey(new Buffer(from, 'hex'))
-
-      const prop = tlsKey ? 'pubKey' : 'permalink'
-      const identifier = prop === 'permalink' ? from : {
-        type: 'ec',
-        curve: 'curve25519',
-        pub: new Buffer(from, 'hex')
+      if (payload.context) {
+        let s = PRODUCT_APPLICATION + '_' + payload.context
+        let r = list[s]
       }
 
-      meDriver.sender.resume(identifier)
-      return meDriver.receive(msg, { [prop]: identifier })
-        .catch(err => {
-          console.warn('failed to receive msg:', err, msg)
-          debugger
-        })
-    }, this)
+      switch (payload[TYPE]) {
+      case INTRODUCTION:
+        return this.receiveIntroduction({ transport, msg, org })
+      case SELF_INTRODUCTION:
+        return this.receiveSelfIntroduction({ transport, msg, org })
+      default:
+        break
+      }
+    } catch (err) {
+      debug('experienced error receiving message: ' + (err.stack || err.message))
+      if (progressUpdate) {
+        this.trigger({ ...progressUpdate, progress: 1 })
+      }
+
+      let payload
+      try {
+        // debugger
+        payload = JSON.parse(msg)
+      } catch (err) {
+        debug('received invalid json from ' + from)
+        return
+      }
+
+      if (payload[TYPE] === PAIRING_REQUEST) {
+        this.receivePairingRequest({ payload })
+      }
+
+      return
+
+      // else if (payload[TYPE] === PAIRING_RESPONSE) {
+      //   return self.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
+      //   .then(() => {
+      //     debugger
+      //     Alert.alert('Pairing was successful')
+      //   })
+      //   .catch((err) => {
+      //     debugger
+      //     Alert.alert(err)
+    //   })
+      // }
+    }
+
+    // const prop = 'pubKey'
+    // const identifier = tradle.utils.deserializePubKey(new Buffer(from, 'hex'))
+
+    const prop = tlsKey ? 'pubKey' : 'permalink'
+    const identifier = prop === 'permalink' ? from : {
+      type: 'ec',
+      curve: 'curve25519',
+      pub: new Buffer(from, 'hex')
+    }
+
+    if (progressUpdate) {
+      this.trigger({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
+    }
+
+    meDriver.sender.resume(identifier)
+    try {
+      await meDriver.receive(msg, { [prop]: identifier })
+    } catch (err) {
+      console.warn('failed to receive msg:', err, msg)
+    } finally {
+      if (progressUpdate) {
+        this.trigger({ ...progressUpdate, progress: 1 })
+      }
+    }
   },
   setProviderOnlineStatus(permalink, online) {
     if (!SERVICE_PROVIDERS) return
@@ -1416,9 +1444,9 @@ var Store = Reflux.createStore({
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
         let prevPercent
         sendy.on('progress', ({ total, progress }) => {
-          if (total < 30000) return // don't show progress bar for < 30KB
+          if (!willShowProgressBar({ length: total })) return // don't show progress bar for < 30KB
 
-          const percent = 100 * progress / total | 0
+          const percent = ON_RECEIVED_PROGRESS * 100 * progress / total | 0
           if (!percent || percent === prevPercent) return
 
           prevPercent = percent
@@ -2712,6 +2740,7 @@ var Store = Reflux.createStore({
     // }
     this.trigger({action: 'getTemporary', resource: r})
   },
+
   async onAddAll(resource, to, message) {
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
@@ -2719,12 +2748,61 @@ var Store = Reflux.createStore({
     this.trigger({action: 'addItem', resource: r})
     this.dbPut(rId, r)
     let context = resource._context
-    await Q.all(resource.items.map((r) => {
-      r._context = context
-      r.to = to
-      r.from = me
-      return this.onAddItem({ resource: r, noTrigger: true })
-    }))
+    // prepare some whitespace
+    const numRows = 5
+    const messages = new Array(numRows).fill('')
+    const title = 'Importing to profile...   '
+
+    Actions.showModal({
+      title,
+      message: messages.join('\n')
+    })
+
+    for (let i = 0; i < resource.items.length; i++) {
+      await utils.promiseDelay(200)
+      let item = resource.items[i]
+      item._context = context
+      item.to = to
+      item.from = me
+      let displayName = item.title || utils.getDisplayName(item)
+      if (displayName.length > 20) {
+        displayName = displayName.slice(0, 17) + '...'
+      }
+
+      if (i > 0) {
+        let last = messages.length - 1
+        messages[last] = messages[last].replace('importing', 'imported')
+      }
+
+      // let's not run out of room on the screen
+      let next = `importing "${displayName}"`
+      let idx = Math.min(numRows - 1, i)
+      if (messages[idx]) {
+        messages.shift()
+        messages.push(next)
+      } else {
+        messages[idx] = next
+      }
+
+      Actions.showModal({
+        title,
+        message: messages.join('\n\n')
+      })
+
+      let promiseAddItem = this.onAddItem({ resource: item, noTrigger: true })
+      let promiseSentEvent = new Promise(resolve => meDriver.once('sent', resolve))
+      await Promise.all([
+        promiseAddItem,
+        Promise.race([
+          promiseSentEvent,
+          // force continue loop
+          utils.promiseDelay(2000)
+        ])
+      ])
+    }
+
+    await utils.promiseDelay(200)
+    Actions.hideModal()
 
     this.onAddMessage({msg: {
       [TYPE]: REMEDIATION_SIMPLE_MESSAGE,
@@ -6774,20 +6852,23 @@ var Store = Reflux.createStore({
         newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs)
         //============
         if (SERVICE_PROVIDERS && val.verifiers) {
-          val.message = 'Please have this form verified by one of our trusted associates'
+          if (!val.message) {
+            val.message = 'Please have this form verified by one of our trusted associates'
+          }
+
           val.verifiers.forEach((v) => {
-            let serviceProvider = SERVICE_PROVIDERS.filter((sp) => {
+            let serviceProvider = SERVICE_PROVIDERS.find((sp) => {
               if (!utils.urlsEqual(sp.url, v.url)) return
               if (v.id) return v.id === sp.id
 
               return v.permalink === sp.permalink
             })
 
-            if (serviceProvider  &&  serviceProvider.length) {
-              v.provider = serviceProvider[0].org
+            if (serviceProvider) {
+              v.provider = serviceProvider.org
               let org = self._getItem(v.provider)
               v.name = org.name
-              v.id = serviceProvider[0].id
+              v.id = serviceProvider.id
               v.photo = org.photos && org.photos[0].url
             }
             // else
@@ -8004,7 +8085,7 @@ var Store = Reflux.createStore({
       cbs.forEach((fn) => fn())
     }
   },
-  async onIdle(fn) {
+  async onIdle() {
     if (utils.isWeb() || !this._transitioning) return
 
     debug('deferring job till transition finishes')
@@ -8134,6 +8215,14 @@ function fixOldSettings (settings) {
     }
   }
 }
+
+function willShowProgressBar ({ length }) {
+  return length >= MIN_SIZE_FOR_PROGRESS_BAR
+}
+
+// function midpoint (a, b) {
+//   return (a + b) / 2
+// }
 
   // searchFormsToShare(params) {
   //   var modelName = params.modelName;

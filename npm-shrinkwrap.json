@@ -6310,6 +6310,18 @@
       "from": "y18n@>=3.2.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/y18n/-/y18n-3.2.1.tgz"
     },
+    "ya-promise-queue": {
+      "version": "1.0.0",
+      "from": "ya-promise-queue@1.0.0",
+      "resolved": "https://registry.npmjs.org/ya-promise-queue/-/ya-promise-queue-1.0.0.tgz",
+      "dependencies": {
+        "bluebird": {
+          "version": "3.4.7",
+          "from": "bluebird@>=3.4.7 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.7.tgz"
+        }
+      }
+    },
     "yallist": {
       "version": "2.0.0",
       "from": "yallist@>=2.0.0 <3.0.0",

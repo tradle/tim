@@ -198,7 +198,7 @@
     "areYouSureYouWantToConfirmAllItems": "Tap OK to confirm all {1}, or Cancel to continue reviewing",
     "youReviewed": "You reviewed {1} out of {2} items",
     "unknownQRCodeFormat": "Unrecognized QR code format",
-    "confirmedMyData": "You have now copied all your data from {1} to your Digital Wealth Passport",
+    "confirmedMyData": "I've imported my data into my {1}",
     "importData": "Import data",
     "digitalWealthPassport": "Digital Wealth Passport",
     "homePage": "Home",
