@@ -87,7 +87,7 @@ class VerificationMessageRow extends Component {
       vHeaderTextColor = color
     }
     else {
-      color = bankStyle.VERIFIED_LINK_COLOR
+      // color = bankStyle.VERIFIED_LINK_COLOR
       vHeaderTextColor = bankStyle.VERIFIED_HEADER_TEXT_COLOR || bankStyle.VERIFIED_LINK_COLOR
     }
 
@@ -107,7 +107,7 @@ class VerificationMessageRow extends Component {
       isMyMessage ? styles.headerRight : styles.headerLeft,
       {backgroundColor: bankStyle.VERIFIED_HEADER_COLOR, marginTop: 0, paddingVertical: 10}
     ]
-    let bulletStyle = {color: color, marginHorizontal: 7, alignSelf: 'center'}
+    // let bulletStyle = {color: color, marginHorizontal: 7, alignSelf: 'center'}
     let row = this.formatDocument({
                 model: msgModel,
                 verification: resource,
