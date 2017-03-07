@@ -138,9 +138,9 @@ class ResourceRow extends Component {
         var model = utils.getModel(resource[TYPE]).value;
         var icon = model.icon;
         if (icon)
-          photo = <View style={styles.cellImage}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
+          photo = <View style={styles.cell}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
         else if (model.properties.photos)
-          photo = <View style={styles.cellImage} />
+          photo = <View style={styles.cell} />
         else {
           photo = <View style={styles.cellNoImage} />
           noImage = true
@@ -579,6 +579,12 @@ var styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 20,
     backgroundColor: 'transparent'
+  },
+  cell: {
+    backgroundColor: '#ffffff',
+    height: 60,
+    marginRight: 10,
+    width: 60,
   },
   cellImage: {
     backgroundColor: '#ffffff',
