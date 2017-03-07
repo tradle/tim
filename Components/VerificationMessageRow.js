@@ -86,10 +86,6 @@ class VerificationMessageRow extends Component {
       color = '#93BEBA'
       vHeaderTextColor = color
     }
-    else if (isShared) {
-      color = bankStyle.SHARED_WITH_VERIFICATION_BG
-      vHeaderTextColor = color
-    }
     else {
       color = bankStyle.VERIFIED_LINK_COLOR
       vHeaderTextColor = bankStyle.VERIFIED_HEADER_TEXT_COLOR || bankStyle.VERIFIED_LINK_COLOR
