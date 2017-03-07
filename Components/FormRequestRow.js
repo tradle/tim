@@ -85,17 +85,23 @@ class FormRequestRow extends Component {
     let isFormRequest = resource[TYPE] === FORM_REQUEST
     let prop =  this.isOnePropForm()
     let bankStyle = this.props.bankStyle
+    var w = utils.dimensions(FormRequestRow).width
+    let msgWidth = Math.floor(w * 0.8)
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow, prop)
 
     else {
       onPressCall = resource.documentCreated ? null : this.reviewFormsInContext.bind(this)
-      let idx = message.indexOf('...') + 3
+      let idx = message.indexOf('...')
+      if (idx !== -1)
+        idx += 3
+      else
+        idx = 0
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{message.substring(0, idx)}</Text>
                   <View style={chatStyles.rowContainer}>
-                    <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
+                    <Text style={[chatStyles.resourceTitle, {width: msgWidth - 25}, resource.documentCreated || !idx ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
                     {resource.documentCreated  ? null : icon}
                   </View>
                 </View>
@@ -130,8 +136,6 @@ class FormRequestRow extends Component {
     if (formTitle.length > message.length)
       message = formTitle
     // HACK
-    var w = utils.dimensions(FormRequestRow).width
-    let msgWidth = w * 0.8
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     var viewStyle = {flexDirection: 'row', borderTopRightRadius: 10, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
@@ -359,7 +363,6 @@ class FormRequestRow extends Component {
       msg = <View/>
     var headerStyle = {paddingTop: 5, paddingLeft: 10}
     var isShared = this.isShared(verification)
-    let addStyle = {}//onPress ? {} : {borderBottomColor: '#efefef', borderBottomWidth: 1}
 
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
     let bankStyle = this.props.bankStyle
@@ -368,7 +371,7 @@ class FormRequestRow extends Component {
                           <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
                         </View>
 
-    let header = <View style={[addStyle, styles.header]}>
+    let header = <View style={styles.header}>
                    {headerContent}
                    {arrow}
                  </View>
