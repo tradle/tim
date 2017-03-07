@@ -727,8 +727,9 @@ var NavigationBarRouteMapper = {
       org = <View />;
     let photo, uri
     let photoObj
-    if (route.passProps.bankStyle)
-      photoObj = route.passProps.bankStyle.LOGO
+    if (route.passProps.bankStyle) {
+      photoObj = route.passProps.bankStyle.LOGO || route.passProps.bankStyle.logo
+    }
 
     if (!photoObj)
       photoObj = route.id === MESSAGE_LIST        &&

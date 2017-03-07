@@ -81,12 +81,20 @@ class VerificationMessageRow extends Component {
     isMyMessage = isShared
     let bankStyle = this.props.bankStyle
     let color
-    if (isThirdPartyVerification)
+    let vHeaderTextColor
+    if (isThirdPartyVerification) {
       color = '#93BEBA'
-    // else if (isShared)
-    //   color = bankStyle.SHARED_WITH_VERIFICATION_BG
-    else
+      vHeaderTextColor = color
+    }
+    else if (isShared) {
+      color = bankStyle.SHARED_WITH_VERIFICATION_BG
+      vHeaderTextColor = color
+    }
+    else {
       color = bankStyle.VERIFIED_LINK_COLOR
+      vHeaderTextColor = bankStyle.VERIFIED_HEADER_TEXT_COLOR || bankStyle.VERIFIED_LINK_COLOR
+    }
+
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
     var w = utils.dimensions(VerificationMessageRow).width
@@ -126,8 +134,8 @@ class VerificationMessageRow extends Component {
     //               </View>
     renderedRow = <View>
                     <View style={headerStyle}>
-                      <Icon style={[chatStyles.verificationIcon, {color: color}]} size={20} name={'md-checkmark'} />
-                      <Text style={[chatStyles.verificationHeaderText, styles.verificationHeaderText, {color: color}]}>{verifiedBy}</Text>
+                      <Icon style={[chatStyles.verificationIcon, {color: vHeaderTextColor}]} size={20} name={'md-checkmark'} />
+                      <Text style={[chatStyles.verificationHeaderText, styles.verificationHeaderText, {color: vHeaderTextColor}]}>{verifiedBy}</Text>
                     </View>
                     <View style={{marginTop: 15}}>
                       {row}
@@ -176,11 +184,10 @@ class VerificationMessageRow extends Component {
                       {renderedRow}
                     </View>
                     {shareWith}
-                 </View>
-                <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: -10, top: -15}} />
+                  </View>
+                </View>
               </View>
-            </View>
-            {this.getSendStatus()}
+              {this.getSendStatus()}
             </View>
           </TouchableOpacity>
 
