@@ -323,7 +323,7 @@ class FormRequestRow extends Component {
 
     let w = utils.dimensions(FormRequestRow).width * 0.8 - 2
     let bankStyle = this.props.bankStyle
-    let color = bankStyle.VERIFIED_HEADER_COLOR
+    let color = bankStyle.VERIFICATION_BG
     return (
       <View style={[rowStyle, viewStyle, {marginTop: -10, width: w, backgroundColor: bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
         <View style={{flex:1}}>
@@ -364,7 +364,7 @@ class FormRequestRow extends Component {
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
     let bankStyle = this.props.bankStyle
     let arrow = <Icon color={bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 5}}/>
-    var headerContent =  <View style={headerStyle}>
+    var headerContent = <View style={headerStyle}>
                           <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
                         </View>
 
@@ -490,7 +490,7 @@ class FormRequestRow extends Component {
       extend(true, resource, this.props.resource.prefill)
     else {
       // isPrefilled = false
-      isPrefilled = false //ENV.prefillForms && model.id in formDefaults
+      isPrefilled = ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
         extend(true, resource, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
@@ -562,7 +562,7 @@ class FormRequestRow extends Component {
     messagePart = null
     let showMessage = true
     if (sameFormRequestForm  &&  !resource.documentCreated) {
-       link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
+      link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={[chatStyles.textContainer, {justifyContent: 'center'}]}>
                  <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
                    this.createNewResource(form, isMyMessage)
@@ -581,13 +581,12 @@ class FormRequestRow extends Component {
                       ]
                     )
                  }}>
-                 <View style={styles.multiEntryButton}>
-                   <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
-                 </View>
-              </TouchableHighlight>
+                   <View style={styles.multiEntryButton}>
+                     <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
+                   </View>
+                </TouchableHighlight>
               </View>
              </View>
-
     }
     else if (isMyMessage)
       link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
