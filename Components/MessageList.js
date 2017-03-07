@@ -808,7 +808,7 @@ class MessageList extends Component {
     this.props.navigator.push({
       id: 25,
       title: translate('trustedProviders'),
-      titleTextColor: this.props.bankStyle.VERIFIED_HEADER_COLOR,
+      titleTextColor: this.props.bankStyle.VERIFIED_BORDER_COLOR,
       backButtonTitle: 'Back',
       component: VerifierChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
