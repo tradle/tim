@@ -382,6 +382,8 @@ class FormRequestRow extends Component {
 
 
     var orgRow = <View/>
+    let resource = this.props.resource
+    let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     if (verification  && verification.organization) {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
@@ -408,7 +410,7 @@ class FormRequestRow extends Component {
         }
         else
           orgs = verification.organization.title
-        verifiedBy = translate('verifiedBy', orgs)
+        verifiedBy = doShareDocument ? translate('verifiedBy', orgs) : translate('verificationBy', orgs)
       }
       else
         verifiedBy = translate('sentTo', verification.organization.title)
