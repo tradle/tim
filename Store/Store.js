@@ -1607,8 +1607,8 @@ var Store = Reflux.createStore({
     var org = this._getItem(okey)
     if (org) {
       // allow to unhide the previously hidden provider
-      if (newServer  &&  org.inactive)
-        org.inactive = false
+      if (newServer  &&  org._inactive)
+        org._inactive = false
       this.configProvider(sp, org)
       this._mergeItem(okey, sp.org)
       batch.push({type: 'put', key: okey, value: org})
@@ -1795,7 +1795,7 @@ var Store = Reflux.createStore({
         }
         profile._unread = 1
         if (noMessage)
-          profile.inactive = true
+          profile._inactive = true
       }
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
@@ -1826,8 +1826,8 @@ var Store = Reflux.createStore({
       if ((r  &&  r.bot) || noMessage)
         promise = Q()
       else {
-        if (profile.inactive) {
-          profile.inactive = false
+        if (profile._inactive) {
+          profile._inactive = false
           batch.push({type: 'put', key: pkey, value: profile })
         }
 
@@ -3972,7 +3972,7 @@ var Store = Reflux.createStore({
           // }
         }
         else if (params.modelName === PROFILE) {
-          result = result.filter((r) => !r.inactive)
+          result = result.filter((r) => !r._inactive)
         }
 
         if (params.isAggregation)
@@ -4332,7 +4332,7 @@ var Store = Reflux.createStore({
         continue
       if (r.canceled)
         continue;
-      if (isOrg  &&  r.inactive)
+      if (isOrg  &&  r._inactive)
         continue
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
@@ -4811,6 +4811,8 @@ var Store = Reflux.createStore({
           self._getItem(utils.getId(r._context)).product === REMEDIATION) {
         return true
       }
+      if (r._inactive)
+        return true
       if (m.subClassOf === MY_PRODUCT  &&
           r._context                   &&
           self._getItem(utils.getId(r._context)).product === REMEDIATION)
@@ -5296,7 +5298,7 @@ var Store = Reflux.createStore({
         if (fromOrgId === toId)
           return
         var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
-        if (!document)
+        if (!document  ||  !document._inactive)
           return;
 
         // Check if there is at least one verification by the listed in FormRequest verifiers
@@ -7413,12 +7415,29 @@ var Store = Reflux.createStore({
             let contextId = res  &&  res._context  &&  utils.getId(res._context)
             if (contextId) {
               for (let i=0; i<batch.length; i++) {
-                if (batch[i].key === contextId) {
+                if (batch[i].key === contextId  &&  batch[i].type === 'del') {
                   batch.splice(i, 1)
+                  let c = this._getItem(contextId)
+                  c._inactive = true
+                  this.dbBatchPut(contextId, c, batch)
+                  notDeleted[contextId] = c
                   break
                 }
               }
               notDeleted[contextId] = res._context
+            }
+            if (res[TYPE] === VERIFICATION) {
+              let documentId = utils.getId(res.document)
+              for (let i=0; i<batch.length; i++) {
+                if (batch[i].key === documentId  &&  batch[i].type === 'del') {
+                  batch.splice(i, 1)
+                  let doc = this._getItem(documentId)
+                  doc._inactive = true
+                  this.dbBatchPut(documentId, doc, batch)
+                  notDeleted[documentId] = doc
+                  break
+                }
+              }
             }
             this.dbBatchPut(rId, res, batch)
           }
