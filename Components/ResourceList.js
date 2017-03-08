@@ -1051,7 +1051,7 @@ class ResourceList extends Component {
         }},
         {text: translate('Ok'), onPress: () => {
           let r = utils.clone(resource)
-          r.inactive = true
+          r._inactive = true
           Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE]).value})
           this.setState({hideMode: false})
         }},
