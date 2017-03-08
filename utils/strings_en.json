@@ -222,5 +222,6 @@
     "centerID": "Centre ID in frame",
     "dataSecurity": "Data Security",
     "noAccessToServer": "Server is not accessible. Try later.",
-    "next": "Next"
+    "next": "Next",
+    "verificationBy": "Verification by {1}"
 }
