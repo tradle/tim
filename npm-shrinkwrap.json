@@ -70,8 +70,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "git://github.com/tradle/models.git#0b1b7fcafeb4fadf0fa3fdddd9b105e694ad8c99",
-      "resolved": "git://github.com/tradle/models.git#0b1b7fcafeb4fadf0fa3fdddd9b105e694ad8c99",
+      "from": "git://github.com/tradle/models.git#bf81110025fb9eb987de41bc99660ad3b911ef27",
+      "resolved": "git://github.com/tradle/models.git#bf81110025fb9eb987de41bc99660ad3b911ef27",
       "dependencies": {
         "typeforce": {
           "version": "1.10.6",
@@ -1887,7 +1887,7 @@
     },
     "elliptic": {
       "version": "6.3.2",
-      "from": "elliptic@>=6.3.1 <7.0.0",
+      "from": "elliptic@6.3.2",
       "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.3.2.tgz"
     },
     "encoding": {
@@ -6316,9 +6316,9 @@
       "resolved": "https://registry.npmjs.org/ya-promise-queue/-/ya-promise-queue-1.0.0.tgz",
       "dependencies": {
         "bluebird": {
-          "version": "3.4.7",
+          "version": "3.5.0",
           "from": "bluebird@>=3.4.7 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.7.tgz"
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
         }
       }
     },
