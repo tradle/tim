@@ -3719,7 +3719,12 @@ var Store = Reflux.createStore({
     document = this._getItem(utils.getId(document))
     let verifications = document.verifications
     let shareBatchId = new Date().getTime()
-    return this.shareForm(document, to, opts, formResource, shareBatchId)
+    let doShareDocument = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
+    let promise = doShareDocument
+                ? this.shareForm(document, to, opts, formResource, shareBatchId)
+                : Q()
+
+    return promise
     .then(() => {
       var documentId = utils.getId(document)
       if (r[TYPE] === FORM_REQUEST)
@@ -3727,9 +3732,10 @@ var Store = Reflux.createStore({
 
       this.dbBatchPut(key, r, batch)
       // utils.optimizeResource(document)
-      this.addLastMessage(document, batch, to)
-      this.dbBatchPut(documentId, document, batch)
-
+      if (doShareDocument) {
+        this.addLastMessage(document, batch, to)
+        this.dbBatchPut(documentId, document, batch)
+      }
       if (!verifications) {
         this.trigger({action: 'addItem', sendStatus: SENT, resource: document})
         document._sendStatus = SENT
@@ -3747,6 +3753,9 @@ var Store = Reflux.createStore({
           this.dbBatchPut(vId, v, batch)
 
           if (--all === 0) {
+            if (!doShareDocument)
+              this.addLastMessage(ver, batch, to)
+
             defer.resolve()
             return
           }
@@ -7358,6 +7367,7 @@ var Store = Reflux.createStore({
       promises.push(meDriver.forget(r[ROOT_HASH]))
     )
     var batch = []
+    var notDeleted = {}
     return Q.allSettled(promises)
     .then((result) => {
       result.forEach((data) => {
@@ -7400,7 +7410,16 @@ var Store = Reflux.createStore({
               if (idx !== -1)
                 sharedWith.splice(idx, 1)
             })
-
+            let contextId = res  &&  res._context  &&  utils.getId(res._context)
+            if (contextId) {
+              for (let i=0; i<batch.length; i++) {
+                if (batch[i].key === contextId) {
+                  batch.splice(i, 1)
+                  break
+                }
+              }
+              notDeleted[contextId] = res._context
+            }
             this.dbBatchPut(rId, res, batch)
           }
           if (isVerification) {
@@ -7435,18 +7454,22 @@ var Store = Reflux.createStore({
               }
             }
           }
-          if (deleted) {
+          if (deleted  &&  !notDeleted[rId]) {
             if (res._sharedWith) {
               res._sharedWith.forEach((r) => {
                 let org = this._getItem(r.bankRepresentative).organization
                 // this.deleteMessageFromChat(utils.getId(org), res)
               })
             }
-            delete list[rId]
+            // delete list[rId]
             // this.deleteMessageFromChat(orgId, r)
             batch.push({type: 'del', key: rId})
           }
         })
+      })
+      batch.forEach((r) => {
+        if (r.type === 'del')
+          delete list[r.key]
       })
       // this.trigger({action: 'messageList', list: [msg], resource: org, to: resource})
       this.trigger({action: 'messageList', list: [msg], to: org})
