@@ -689,13 +689,12 @@ var Store = Reflux.createStore({
         messenger = url && wsClients.byUrl[url]
       }
 
+      const identifier = self.getIdentifier(recipientInfo)
       if (!messenger) {
+        meDriver.sender.pause(identifier)
         // Alert.alert('meDriver._send recipient not found ' + recipientHash)
         return cb(new Error('recipient not found'))
       }
-
-      const args = arguments
-      const identifier = self.getIdentifier(recipientInfo)
 
       debug(`pushing msg to ${identifier} into network stack`)
       // this timeout is not for sending the entire message
