@@ -2749,7 +2749,8 @@ var Store = Reflux.createStore({
     let context = resource._context
     // prepare some whitespace
     const numRows = 5
-    const messages = new Array(numRows).fill('')
+    const white = ' '.repeat(40)
+    const messages = new Array(numRows).fill(white)
     const title = `${translate('importing')}...          ` // extra whitespace on purpose
 
     Actions.showModal({
@@ -2782,7 +2783,7 @@ var Store = Reflux.createStore({
       }
 
       let idx = Math.min(numRows - 1, i)
-      if (messages[idx]) {
+      if (messages[idx].trim()) {
         messages.shift()
         messages.push(next)
       } else {
