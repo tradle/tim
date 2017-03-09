@@ -108,10 +108,12 @@ class FormRequestRow extends Component {
                 </View>
       }
       else
-        msg = <View key={this.getNextKey()}>{msg}</View>
-
-
-
+        msg = <View style={chatStyles.rowContainer} key={this.getNextKey()}>
+                <View style={{flex: 1}}>
+                  {msg}
+                </View>
+                {resource.documentCreated  ? null : icon}
+              </View>
       renderedRow.push(msg)
     }
     let fromHash = resource.from.id;
