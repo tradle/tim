@@ -92,19 +92,26 @@ class FormRequestRow extends Component {
 
     else {
       onPressCall = resource.documentCreated ? null : this.reviewFormsInContext.bind(this)
-      let idx = message.indexOf('...')
-      if (idx !== -1)
-        idx += 3
-      else
-        idx = 0
+      let msg = this.parseMessage(message)
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
-      let msg = <View key={this.getNextKey()}>
+      if (typeof msg === 'string') {
+        let idx = message.indexOf('...')
+        if (idx !== -1)
+          idx += 3
+        else
+          idx = 0
+        msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{message.substring(0, idx)}</Text>
                   <View style={chatStyles.rowContainer}>
                     <Text style={[chatStyles.resourceTitle, {width: msgWidth - 25}, resource.documentCreated || !idx ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
                     {resource.documentCreated  ? null : icon}
                   </View>
                 </View>
+      }
+      else
+        msg = <View key={this.getNextKey()}>{msg}</View>
+
+
 
       renderedRow.push(msg)
     }
@@ -709,7 +716,7 @@ class FormRequestRow extends Component {
     }
     return <Text style={[chatStyles.resourceTitle, this.props.resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{message1}
              <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
-             <Text>{this.parseMessage(message2, bankStyle, arr)}</Text>
+             <Text>{this.parseMessage(message2, arr)}</Text>
            </Text>
   }
 }
