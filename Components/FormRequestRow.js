@@ -168,7 +168,7 @@ class FormRequestRow extends Component {
       cellStyle = [chatStyles.textContainer, addStyle]
     else
       cellStyle = chatStyles.textContainer
-    let msgContent =  <View style={[rowStyle, viewStyle, shareables ? {backgroundColor: '#ffffff'} : {}]}>
+    let msgContent =  <View style={[rowStyle, viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
                         <View style={{marginTop: 2}}>
                         {ownerPhoto}
                         </View>
@@ -329,8 +329,8 @@ class FormRequestRow extends Component {
     let bankStyle = this.props.bankStyle
     let color = bankStyle.VERIFICATION_BG
     return (
-      <View style={[rowStyle, viewStyle, {marginTop: -10, width: w, backgroundColor: bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
-        <View style={{flex:1}}>
+      <View style={[rowStyle, viewStyle, {marginTop: -15, width: w, backgroundColor: bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
+        <View style={{flex: 1}}>
           <View style={[styles.assistentBox, {backgroundColor: color}]}>
             <Text style={styles.orText}>{'OR'}</Text>
           </View>
@@ -361,10 +361,10 @@ class FormRequestRow extends Component {
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
     else
       msg = <View/>
-    var headerStyle = {paddingTop: 5, paddingLeft: 10}
+    var headerStyle = {paddingTop: 5, paddingLeft: 10, flex: 1}
     var isShared = this.isShared(verification)
 
-    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
+    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16, width: msgWidth - 100}]
     let bankStyle = this.props.bankStyle
     let arrow = <Icon color={bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 5}}/>
     var headerContent = <View style={headerStyle}>
@@ -375,12 +375,11 @@ class FormRequestRow extends Component {
                    {headerContent}
                    {arrow}
                  </View>
+   let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
    if (!isAccordion)
       header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
                  {header}
                </TouchableHighlight>
-
-
     var orgRow = <View/>
     let resource = this.props.resource
     let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
