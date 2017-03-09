@@ -394,6 +394,7 @@ var styles = StyleSheet.create({
     color: '#9b9b9b'
   },
   linkTitle: {
+    fontSize: 18,
     color: '#2892C6'
   },
   description: {
