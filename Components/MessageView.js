@@ -212,6 +212,7 @@ class MessageView extends Component {
     var resource = this.state.resource;
     var model = utils.getModel(resource[TYPE]).value;
     let isVerification = model.id === VERIFICATION
+    let isVerificationTree = isVerification &&  (resource.method || resource.sources)
     let t = resource.dateVerified ? resource.dateVerified : resource.time
     var date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
     var photos = resource.photos
@@ -246,7 +247,7 @@ class MessageView extends Component {
 
 
     let propertySheet
-    if (isVerification)
+    if (isVerificationTree)
       propertySheet = <VerificationView navigator={this.props.navigator}
                                         resource={resource}
                                         bankStyle={this.props.bankStyle}
@@ -276,7 +277,7 @@ class MessageView extends Component {
 
     var checkProps = this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
     var actionPanel
-    if (this.props.isReview  ||  isVerification)
+    if (this.props.isReview  ||  isVerificationTree)
       actionPanel = content
     else {
       actionPanel = <ShowRefList {...this.props}
@@ -331,7 +332,7 @@ class MessageView extends Component {
 
     // var isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     let dateView
-    if (isVerification) {
+    if (isVerificationTree) {
       dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
                   <Text style={styles.dateLabel}>{translate(model.properties.dateVerified, model)}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
@@ -342,7 +343,7 @@ class MessageView extends Component {
     //               <Text style={styles.date}>{date}</Text>
     //             </View>
     // }
-
+    let title = isVerification  ? this.makeViewTitle(model) : null
     return (
       <View style={{height: utils.dimensions().height}}>
       <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
@@ -352,7 +353,7 @@ class MessageView extends Component {
         </View>
         {actionPanel}
       </ScrollView>
-        {this.makeViewTitle(model)}
+        {title}
       </View>
     );
   }

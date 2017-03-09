@@ -331,7 +331,16 @@ class MessageList extends Component {
     if (!resource[TYPE])
       return;
     var model = utils.getModel(resource[TYPE]).value;
-    var title = utils.makeModelTitle(model) //utils.getDisplayName(resource, model.properties);
+    var title //utils.getDisplayName(resource, model.properties);
+
+    if (resource[TYPE] === constants.TYPES.VERIFICATION) {
+      let type = utils.getType(resource.document)
+      if (type)
+        title = translate(utils.getModel(type).value)
+    }
+    if (!title)
+      title = translate(utils.makeModelTitle(model))
+
     var newTitle = title;
     let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
