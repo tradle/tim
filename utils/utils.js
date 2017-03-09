@@ -447,11 +447,12 @@ var utils = {
       if (this.isMessage(m))
         excludeProps = ['from', 'to']
       for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
-        if (meta[p].type === 'array')
+        let prop =  vCols[i]
+        if (meta[prop].type === 'array')
           continue
-        if (!resource[vCols[i]]  ||  excludeProps.indexOf[vCols[i]])
+        if (!resource[prop]  ||  excludeProps.indexOf[prop])
           continue
-        displayName = this.getStringValueForProperty(resource, vCols[i], m.value.properties)
+        displayName = this.getStringValueForProperty(resource, prop, m.value.properties)
       }
     }
     return displayName;
