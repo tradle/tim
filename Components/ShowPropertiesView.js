@@ -305,8 +305,9 @@ class ShowPropertiesView extends Component {
              );
     });
 
-    if (resource.txId || utils.isSealableModel(model)) {
+    if (resource.txId) { // || utils.isSealableModel(model)) {
       let bankStyle = this.props.bankStyle
+
       let header = (<View style={{paddingVertical: 10, paddingHorizontal: 10 }} key={this.getNextKey()}>
                       <View style={[styles.textContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
                         <Text style={styles.bigTitle}>{translate('dataSecurity')}</Text>
@@ -315,19 +316,16 @@ class ShowPropertiesView extends Component {
                       <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: bankStyle.LINK_COLOR}} />
                     </View>)
       let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
-      let txs
-      if (resource.txId) {
-        txs = (
-          <View>
-            <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
-              <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
-              <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
-            </TouchableOpacity>
-          </View>
-        )
-      }
+      let txs = (
+        <View>
+          <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
+            <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
+            <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
+          </TouchableOpacity>
+        </View>
+      )
 
       let content = <View style={{paddingHorizontal: 10}}>
                      <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
