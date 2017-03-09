@@ -4,6 +4,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
+var ResourceView = require('./ResourceView')
 var NewResource = require('./NewResource');
 var ProductChooser = require('./ProductChooser');
 var PhotoList = require('./PhotoList');
@@ -775,9 +776,20 @@ class MessageRow extends Component {
   }
   showMyData() {
     let me = utils.getMe()
+    let title = translate('profile')
+    this.props.navigator.push({
+      title: title,
+      id: 3,
+      component: ResourceView,
+      backButtonTitle: translate('back'),
+      passProps: {
+        resource: me,
+        bankStyle: this.props.bankStyle
+      }
+    })
     // let n = this.props.navigator.getCurrentRoutes().length
     // this.props.navigator.popN(n - 2)
-    this.showResources(me, utils.getModel(me[constants.TYPE]).value.properties.myForms)
+    // this.showResources(me, utils.getModel(me[constants.TYPE]).value.properties.myForms)
   }
 
   onChooseProduct() {
