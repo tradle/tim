@@ -222,7 +222,7 @@ var RowMixin = {
     // var photo = hasPhotos
     //           ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
     //           : <View />;
-    var headerStyle = {flexDirection: 'column', paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 10}
+    var headerStyle = {flex: 1, paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 10}
     var isShared = this.isShared(verification)
 
                     // {verification.dateVerified
@@ -247,7 +247,7 @@ var RowMixin = {
                {arrow}
              </View>
    if (!isAccordion)
-      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
+      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, verification, verification)}>
                  {header}
                </TouchableHighlight>
 
@@ -317,7 +317,7 @@ var RowMixin = {
       else if (this.props.resource.documentCreated) {
         orgRow = <View style={chatStyles.shareView}>
                    {shareView}
-                  <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                  <TouchableHighlight onPress={this.props.onSelect.bind(this, verification, verification)} underlayColor='transparent'>
                     {orgView}
                   </TouchableHighlight>
                 </View>
@@ -335,14 +335,14 @@ var RowMixin = {
                           )}>
                     {shareView}
                    </TouchableHighlight>
-                   <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                   <TouchableHighlight onPress={this.props.onSelect.bind(this, verification, verification)} underlayColor='transparent'>
                      {orgView}
                    </TouchableHighlight>
                 </View>
       }
     }
     let content = <View style={{flex:1}}>
-                     <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                     <TouchableHighlight onPress={this.props.onSelect.bind(this, verification, verification)} underlayColor='transparent'>
                        {msg}
                      </TouchableHighlight>
                      {orgRow}
