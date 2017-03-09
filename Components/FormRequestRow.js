@@ -89,11 +89,10 @@ class FormRequestRow extends Component {
     let msgWidth = Math.floor(w * 0.8)
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow, prop)
-
     else {
       onPressCall = resource.documentCreated ? null : this.reviewFormsInContext.bind(this)
-      let msg = this.parseMessage(message)
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+      let msg = this.parseMessage(message)
       if (typeof msg === 'string') {
         let idx = message.indexOf('...')
         if (idx !== -1)
