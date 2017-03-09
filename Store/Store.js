@@ -5298,7 +5298,7 @@ var Store = Reflux.createStore({
         if (fromOrgId === toId)
           return
         var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
-        if (!document  ||  !document._inactive)
+        if (!document  ||  document._inactive)
           return;
 
         // Check if there is at least one verification by the listed in FormRequest verifiers
