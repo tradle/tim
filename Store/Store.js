@@ -2750,7 +2750,7 @@ var Store = Reflux.createStore({
     // prepare some whitespace
     const numRows = 5
     const messages = new Array(numRows).fill('')
-    const title = 'Importing to profile...   '
+    const title = `${translate('importing')}...          ` // extra whitespace on purpose
 
     Actions.showModal({
       title,
@@ -2763,10 +2763,12 @@ var Store = Reflux.createStore({
       item._context = context
       item.to = to
       item.from = me
-      let displayName = item.title || utils.getDisplayName(item)
-      if (displayName.length > 20) {
-        displayName = displayName.slice(0, 17) + '...'
-      }
+      let itemType = utils.getType(item)
+      let itemModel = utils.getModel(itemType)
+      let displayName = ''
+      if (itemModel) displayName += itemModel.value.title + ': '
+
+      displayName += item.title || utils.getDisplayName(item)
 
       if (i > 0) {
         let last = messages.length - 1
@@ -2774,7 +2776,11 @@ var Store = Reflux.createStore({
       }
 
       // let's not run out of room on the screen
-      let next = `importing "${displayName}"`
+      let next = displayName // `importing "${displayName}"`
+      if (next.length > 30) {
+        next = next.slice(0, 27) + '...'
+      }
+
       let idx = Math.min(numRows - 1, i)
       if (messages[idx]) {
         messages.shift()
