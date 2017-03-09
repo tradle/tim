@@ -322,7 +322,7 @@ class HomePage extends Component {
                   <View style={styles.row}>
                     <Icon name='ios-leaf' color='goldenrod' size={45} style={styles.cellImage} />
                     <View style={[styles.textContainer, {flexDirection: 'row', flex:1}]}>
-                      <Text style={[styles.resourceTitle, {flex: 1}]}>{translate(ENV.profileTitle)}</Text>
+                      <Text style={[styles.resourceTitle, {flex: 1}]}>{translate('profile')}</Text>
                       <Icon color='#AAAAAA' size={20} name={'ios-arrow-forward'} style={{marginTop: 5}}/>
                     </View>
                   </View>
@@ -350,7 +350,7 @@ class HomePage extends Component {
   showProfile() {
     let me = utils.getMe()
     let route = {
-      title: ENV.profileTitle,
+      title: translate('profile'),
       id: 3,
       component: ResourceView,
       titleTextColor: '#7AAAC3',

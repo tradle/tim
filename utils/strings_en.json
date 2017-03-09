@@ -198,7 +198,7 @@
     "areYouSureYouWantToConfirmAllItems": "Tap OK to confirm all {1}, or Cancel to continue reviewing",
     "youReviewed": "You reviewed {1} out of {2} items",
     "unknownQRCodeFormat": "Unrecognized QR code format",
-    "confirmedMyData": "I've imported my data into my {1}",
+    "confirmedMyData": "I've imported my data into my {profileTitle}",
     "importData": "Import data",
     "digitalWealthPassport": "Digital Wealth Passport",
     "homePage": "Home",
@@ -223,5 +223,6 @@
     "dataSecurity": "Data Security",
     "noAccessToServer": "Server is not accessible. Try later.",
     "next": "Next",
-    "verificationBy": "Verification by {1}"
+    "verificationBy": "Verification by {1}",
+    "importing": "Importing"
 }

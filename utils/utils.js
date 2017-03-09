@@ -1740,13 +1740,16 @@ function dateFromParts (parts) {
   return date
 }
 
-function preParseStrings (strings, { appName }) {
+function preParseStrings (strings, { appName, profileTitle }) {
   // TODO: generalize if we need to replace other variables
   const preparsed = {}
+
   for (let key in strings) {
     preparsed[key] = strings[key].replace(/{appName}/g, appName)
+    preparsed[key] = strings[key].replace(/{profileTitle}/g, strings[profileTitle])
   }
 
+  preparsed.profile = strings[profileTitle]
   return preparsed
 }
 
