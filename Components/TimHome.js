@@ -147,7 +147,6 @@ class TimHome extends Component {
   async componentDidMount() {
     this._checkConnectivity()
 
-    console.log('ENV.initWithDeepLink', ENV.initWithDeepLink)
     try {
       const url = await Linking.getInitialURL() || ENV.initWithDeepLink
       if (url)
@@ -198,6 +197,9 @@ class TimHome extends Component {
     if (!qs.alert) return
 
     const { title, message, ok } = JSON.parse(qs.alert)
+    // TODO: support stuff!
+    if (ok !== '/scan') throw new Error(`unsupported deep link: ${ok}`)
+
     const { navigator } = this.props
     while (true) {
       let currentRoute = Navs.getCurrentRoute(navigator)
@@ -221,13 +223,8 @@ class TimHome extends Component {
           text: 'OK',
           onPress: function () {
             // goto
-            if (ok === '/scan') {
-              self.scanFormsQRCode()
-              return resolve()
-            }
-
-            // TODO: support stuff!
-            reject(new Error(`unsupported deep link: ${ok}`))
+            self.scanFormsQRCode()
+            resolve()
           }
         }
       ])
