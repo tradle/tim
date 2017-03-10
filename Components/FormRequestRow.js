@@ -610,9 +610,7 @@ class FormRequestRow extends Component {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
 
       const bankStyle = this.props.bankStyle
-      icon = <View style={{position: 'absolute', bottom: 0, right: 0}}>
-               <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
-             </View>
+      icon = <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
       // link = <View style={chatStyles.rowContainer}>
       //          <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
       //          {resource.documentCreated ? null : icon}
@@ -640,11 +638,13 @@ class FormRequestRow extends Component {
 
     // let messagePart
     if (showMessage)
-      messagePart = <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
+      messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1}, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
 
     let msg = <View key={this.getNextKey()}>
-               {messagePart}
-               {resource.documentCreated ? null : icon}
+               <View style={{flexDirection: 'row'}}>
+                 {messagePart}
+                 {resource.documentCreated ? null : icon}
+               </View>
                {link}
              </View>
     vCols.push(msg);
