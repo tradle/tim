@@ -167,15 +167,39 @@ class TimHome extends Component {
     debug(`opening URL: ${url}`)
 
     let URL = require('url').parse(url)
-    let pathname = URL.pathname
+    let pathname = URL.pathname || URL.hostname
     let query = URL.query
 
     let qs = require('querystring').parse(query)
-    pathname = pathname.substring(1)
+    // strip leading slashes
+    pathname = pathname.replace(/^\//, '')
+
     let state = {firstPage: pathname}
     extend(state, qs)
     this.setState(state)
     Actions.setPreferences(state)
+
+    if (!qs.alert) return
+
+    let alert
+    try {
+      alert = JSON.parse(qs.alert)
+    } catch (err) {}
+
+    const { title, message, ok } = alert
+    Alert.alert(title, message, [
+      {
+        text: 'Cancel'
+      },
+      {
+        text: 'OK',
+        onPress: function () {
+          // goto
+          console.log('GOTO', ok)
+          debugger
+        }
+      }
+    ])
   }
 
   async onStart(params) {
