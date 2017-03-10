@@ -58,7 +58,7 @@ const merged = extend({
   lenientPassword: true,
   requireDeviceLocalAuth: false,
   autoOptInTouchId: false,
-  requireSoftPIN: false,
+  requireSoftPIN: Platform.OS === 'web',
   canUseWebcam: !!getUserMedia,
   locale: locale,
   // timeout after partial scan results have been processed
