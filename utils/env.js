@@ -8,11 +8,14 @@ import extend from 'xtend'
 import environment from '../environment.json'
 
 const LOCAL_IP = (function () {
-  if (Platform.OS === 'android') return '10.0.2.2'
-
-  if (Platform.OS === 'web' || DeviceInfo.getModel() === 'Simulator') {
+  if (Platform.OS === 'web') {
     return 'localhost'
   }
+
+  if (DeviceInfo.isEmulator()) {
+    return Platform.OS === 'android' ? '10.0.2.2' : 'localhost'
+  }
+
 
   return require('./localIP')
 })()
