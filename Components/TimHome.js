@@ -89,6 +89,7 @@ class TimHome extends Component {
       hasMe: utils.getMe()
     };
 
+    this._handleOpenURL = this._handleOpenURL.bind(this)
     this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
@@ -162,7 +163,7 @@ class TimHome extends Component {
         this.state.hasMe !== nextState.hasMe
   }
 
-  _handleOpenURL({url}) {
+  async _handleOpenURL({url}) {
     // return
     debug(`opening URL: ${url}`)
 
@@ -180,6 +181,17 @@ class TimHome extends Component {
     Actions.setPreferences(state)
 
     if (!qs.alert) return
+
+    const { navigator } = this.props
+    while (true) {
+      let currentRoute = Navs.getCurrentRoute(navigator)
+      let { displayName } = currentRoute.component
+      if (displayName === TimHome.displayName || displayName === PasswordCheck.displayName) {
+        await Q.ninvoke(utils, 'onNextTransitionEnd', navigator)
+      } else {
+        break
+      }
+    }
 
     let alert
     try {
