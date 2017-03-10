@@ -7,6 +7,7 @@ var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
 var HomePage = require('./HomePage')
+var HomePageMixin = require('./HomePageMixin')
 var ResourceView = require('./ResourceView');
 var MessageList = require('./MessageList')
 var extend = require('extend')
@@ -199,6 +200,7 @@ class TimHome extends Component {
     } catch (err) {}
 
     const { title, message, ok } = alert
+    let self = this
     Alert.alert(title, message, [
       {
         text: 'Cancel'
@@ -208,6 +210,7 @@ class TimHome extends Component {
         onPress: function () {
           // goto
           console.log('GOTO', ok)
+          self.scanFormsQRCode()
           debugger
         }
       }
@@ -320,7 +323,7 @@ class TimHome extends Component {
       utils.setModels(params.models);
       return
     case 'getProvider':
-      this.showChat(params.provider)
+      this.showChatPage(params.provider)
       // this.setState({
       //   provider: params.provider,
       //   action: 'chat'
@@ -464,7 +467,7 @@ class TimHome extends Component {
           provider: this.state.permalink,
           url: this.state.url
         })
-        // this.showChat(this.state.provider)
+        // this.showChatPage(this.state.provider)
         return
       case 'officialAccounts':
         this.showOfficialAccounts()
@@ -489,7 +492,7 @@ class TimHome extends Component {
 
     this.showOfficialAccounts()
   }
-  showChat(provider) {
+  showChatPage(provider) {
     if (ENV.landingPage) {
       this.showLandingPage(provider, ENV.landingPage)
       return
@@ -987,6 +990,7 @@ class TimHome extends Component {
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 reactMixin(TimHome.prototype, TimerMixin)
+reactMixin(TimHome.prototype, HomePageMixin)
 
 var styles = (function () {
   var dimensions = utils.dimensions(TimHome)
