@@ -1,5 +1,6 @@
 'use strict';
 
+const parseURL = require('url').parse
 var Q = require('q')
 var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
@@ -146,6 +147,7 @@ class TimHome extends Component {
   async componentDidMount() {
     this._checkConnectivity()
 
+    console.log('ENV.initWithDeepLink', ENV.initWithDeepLink)
     try {
       const url = await Linking.getInitialURL() || ENV.initWithDeepLink
       if (url)
@@ -165,11 +167,23 @@ class TimHome extends Component {
   }
 
   async _handleOpenURL({url}) {
-    // return
+    try {
+      await this._unsafeHandleOpenURL({ url })
+    } catch (err) {
+      Alert.alert(
+        translate('oops'),
+        translate('invalidDeepLink')
+      )
+    }
+  }
+
+  async _unsafeHandleOpenURL({ url }) {
     debug(`opening URL: ${url}`)
 
-    let URL = require('url').parse(url)
+    let URL = parseURL(url)
     let pathname = URL.pathname || URL.hostname
+    if (!pathname) throw new Error('failed to parse deep link')
+
     let query = URL.query
 
     let qs = require('querystring').parse(query)
@@ -183,38 +197,41 @@ class TimHome extends Component {
 
     if (!qs.alert) return
 
+    const { title, message, ok } = JSON.parse(qs.alert)
     const { navigator } = this.props
     while (true) {
       let currentRoute = Navs.getCurrentRoute(navigator)
       let { displayName } = currentRoute.component
       if (displayName === TimHome.displayName || displayName === PasswordCheck.displayName) {
+        debug('waiting to throw up deep linked alert until we are past the home screens')
         await Q.ninvoke(utils, 'onNextTransitionEnd', navigator)
       } else {
         break
       }
     }
 
-    let alert
-    try {
-      alert = JSON.parse(qs.alert)
-    } catch (err) {}
+    return new Promise((resolve, reject) => {
+      let self = this
+      Alert.alert(title, message, [
+        {
+          text: 'Cancel',
+          onPress: resolve
+        },
+        {
+          text: 'OK',
+          onPress: function () {
+            // goto
+            if (ok === '/scan') {
+              self.scanFormsQRCode()
+              return resolve()
+            }
 
-    const { title, message, ok } = alert
-    let self = this
-    Alert.alert(title, message, [
-      {
-        text: 'Cancel'
-      },
-      {
-        text: 'OK',
-        onPress: function () {
-          // goto
-          console.log('GOTO', ok)
-          self.scanFormsQRCode()
-          debugger
+            // TODO: support stuff!
+            reject(new Error(`unsupported deep link: ${ok}`))
+          }
         }
-      }
-    ])
+      ])
+    })
   }
 
   async onStart(params) {

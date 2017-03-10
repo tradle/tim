@@ -224,5 +224,6 @@
     "noAccessToServer": "Server is not accessible. Try later.",
     "next": "Next",
     "verificationBy": "Verification by {1}",
-    "importing": "Importing"
+    "importing": "Importing",
+    "invalidDeepLink": "Looks like you clicked an invalid link!"
 }
