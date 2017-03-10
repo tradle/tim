@@ -640,7 +640,7 @@ var NavigationBarRouteMapper = {
     case 'Accept':
       icon = 'ios-send'
       iconSize = 32
-      style = {marginTop: 0}
+      style = {marginTop: utils.isAndroid() ? 15 :  0}
       // style = {marginTop: 5, transform: [
       //     {rotate: '45deg'}
       //   ]}
@@ -821,7 +821,7 @@ var styles = StyleSheet.create({
   icon: {
     width: 25,
     height: 25,
-    marginTop: Platform.OS === 'android' ? 19 : 0
+    marginTop: Platform.OS === 'android' ? 15 : 0
   },
   row: {
     flexDirection: 'row'
