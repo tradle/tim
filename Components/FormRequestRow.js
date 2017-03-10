@@ -621,7 +621,7 @@ class FormRequestRow extends Component {
           onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
         else if (prop) {
           if (prop.ref == PHOTO) {
-            link = <ImageInput prop={prop} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+            link = <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                      <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
                    </ImageInput>
             showMessage = false
@@ -643,10 +643,11 @@ class FormRequestRow extends Component {
     let msg = <View key={this.getNextKey()}>
                <View style={{flexDirection: 'row'}}>
                  {messagePart}
+                 {link}
                  {resource.documentCreated ? null : icon}
                </View>
-               {link}
              </View>
+                 // {resource.documentCreated ? null : icon}
     vCols.push(msg);
     return isReadOnly ? null : onPressCall
     function onOK() {
