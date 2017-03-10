@@ -737,7 +737,7 @@ var NavigationBarRouteMapper = {
                  route.passProps.resource.photos[0]
     if (photoObj)
       uri = utils.getImageUri(photoObj.url);
-    if (route.id === REMEDIATION) {
+    else if (route.id === REMEDIATION) {
       photoObj = route.passProps.to.photos  &&  route.passProps.to.photos[0]
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
