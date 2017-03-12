@@ -2455,11 +2455,20 @@ var Store = Reflux.createStore({
       }
       if (!isReadOnly)
         this.addLastMessage(r, batch)
+      if (r.sources) {
+        let docId = utils.getId(r.document)
+        let docs = []
+        getDocs(r.sources, docId, docs)
+        let supportingDocs = docs.map((r) => this.buildRef(r))
+        let d = this._getItem(docId)
+        d._supportingDocuments = supportingDocs
+        this.dbPut(docId, d)
+        this._setItem(docId, d)
+      }
       return db.batch(batch)
     })
     .then(() => {
       this.addVisualProps(r)
-
       // var rr = {};
       // extend(rr, from);
       // rr.verifiedByMe = r;
@@ -2507,6 +2516,19 @@ var Store = Reflux.createStore({
       debugger
       err = err
     })
+    function getDocs(varr, rId, docs) {
+      if (!varr)
+        return
+      varr.forEach((v) => {
+        if (v.method) {
+          if (utils.getId(v.document) !== rId)
+            docs.push(v.document)
+        }
+        else if (v.sources)
+          self.getDocs(v.sources, rId, docs)
+      })
+    }
+
   },
   addVisualProps(r) {
     let from = this._getItem(r.from || me)
@@ -7527,6 +7549,7 @@ var Store = Reflux.createStore({
       org.lastMessage = null
       org.lastMessageTime = null
       org.lastMessageType = null
+      org.numberOfForms = 0
       self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: org})})
       batch.push({type: 'put', key: orgId, value: org})
       if (batch.length)
