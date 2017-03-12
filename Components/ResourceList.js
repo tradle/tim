@@ -769,6 +769,7 @@ class ResourceList extends Component {
       currency={this.props.currency}
       isOfficialAccounts={this.props.officialAccounts}
       multiChooser={this.props.multiChooser}
+      isChooser={this.props.isChooser}
       showRefResources={this.showRefResources.bind(this)}
       resource={resource}
       chosen={this.state.chosen} />
