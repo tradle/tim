@@ -10,6 +10,7 @@ var Accordion = require('react-native-accordion')
 var Swipeout = require('react-native-swipeout')
 var StyleSheet = require('../StyleSheet')
 var dateformat = require('dateformat')
+var appStyle = require('../styles/appStyle.json')
 
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
@@ -25,6 +26,7 @@ const VERIFICATION = constants.VERIFICATION
 import {
   Image,
   // StyleSheet,
+  Platform,
   Text,
   TouchableHighlight,
   ArticleView,
@@ -151,12 +153,26 @@ class VerificationRow extends Component {
                         </Text>
     else
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
-    var header =  <View style={styles.header} key={this.getNextKey()}>
+    let supportingDocuments
+    if (isForm  &&  resource._supportingDocuments  &&  resource._supportingDocuments.length)
+      supportingDocuments = <View style={{flexDirection: 'row', backgroundColor: '#fff', justifyContent: 'center', paddingTop: 10, paddingRight:5}}>
+                              <Icon name='ios-paper' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+                              <View style={styles.count}>
+                                <Text style={styles.countText}>{resource._supportingDocuments.length}</Text>
+                              </View>
+                            </View>
+
+    var header =  <View style={[styles.header, {flex: 1}]} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10}}>
                       {photo}
                       <View style={[styles.noImageBlock, {flex: 1,  justifyContent: 'center'}]}>
-                        {titleComponent}
-                        {description}
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                          <View style={{flexDirection: 'column', flex: 1}}>
+                            {titleComponent}
+                            {description}
+                          </View>
+                          {supportingDocuments}
+                        </View>
                         <View style={{paddingTop: 3, flexDirection: 'row', justifyContent: 'flex-end'}}>
                           {verifiedBy}
                           {date}
@@ -182,10 +198,13 @@ class VerificationRow extends Component {
       //         </View>
       // }
       // else {
+
         row = <View style={{backgroundColor: '#fff'}}>
                 <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
                   <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
-                     {header}
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                      {header}
+                    </View>
                   </TouchableHighlight>
                 </Swipeout>
               </View>
@@ -422,7 +441,25 @@ var styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     paddingVertical: 5,
     borderBottomColor: '#f0f0f0'
-  }
+  },
+  count: {
+    alignSelf: 'flex-start',
+    minWidth: 18,
+    marginLeft: -7,
+    marginTop: 0,
+    backgroundColor: appStyle.COUNTER_BG_COLOR,
+    paddingHorizontal: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 9,
+    borderColor: appStyle.COUNTER_COLOR,
+    paddingVertical: 1
+  },
+  countText: {
+    fontSize: 12,
+    fontWeight: '600',
+    alignSelf: 'center',
+    color: appStyle.COUNTER_COLOR,
+  },
   // verySmallLettersCenter: {
   //   fontSize: 12,
   //   color: '#2E3B4E'
