@@ -107,7 +107,10 @@ function createPusher (opts) {
   }
 
   function getToken () {
-    if (utils.isIOS()) return Push.requestPermissions()
+    if (utils.isIOS()) {
+      Push.requestPermissions()
+      return gotToken
+    }
 
     return utils.tryWithExponentialBackoff(() => {
       // retry requesting until we succeed
