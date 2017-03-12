@@ -34,6 +34,7 @@ import {
 import React, { Component } from 'react'
 
 import ENV from '../utils/env'
+const FORM = 'tradle.Form'
 
 class ShowRefList extends Component {
   constructor(props) {
@@ -52,14 +53,10 @@ class ShowRefList extends Component {
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
     let propsToShow = []
 
-    let bg
+
     let currentBacklink = this.props.backlink
     let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
-    if (showDetails)
-      bg = {backgroundColor: appStyle.CURRENT_TAB_COLOR}
-    else
-      bg = {}
-
+    let showDocuments = this.props.showDocuments
 
     for (var p in props) {
       if (props[p].hidden)
@@ -93,6 +90,7 @@ class ShowRefList extends Component {
         let count = <View style={styles.count}>
                       <Text style={styles.countText}>{docs.length}</Text>
                     </View>
+        let bg = showDocuments ? {backgroundColor: appStyle.CURRENT_TAB_COLOR} : {}
         refList.push(
           <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={() => this.showDocs(docs)} underlayColor='transparent'>
@@ -111,7 +109,8 @@ class ShowRefList extends Component {
       if (!showDetails)
         return <View/>
     }
-    else if (!isIdentity)
+    else if (!isIdentity) {
+      let bg = showDetails ? {backgroundColor: appStyle.CURRENT_TAB_COLOR} : {}
       refList.push(
         <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
          <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
@@ -124,6 +123,7 @@ class ShowRefList extends Component {
          </TouchableHighlight>
         </View>
       )
+    }
     if (model.viewCols) {
       let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items  &&  props[p].items.backlink)
       if (vCols) {
@@ -150,7 +150,7 @@ class ShowRefList extends Component {
       let count = resource[p]  &&  resource[p].length
       if (count) {
         hasBacklinks = true
-        if (!currentBacklink && !showDetails)
+        if (!currentBacklink  &&  !showDetails &&  !showDocuments)
           currentBacklink = props[p]
         count = <View style={styles.count}>
                   <Text style={styles.countText}>{count}</Text>
@@ -192,7 +192,7 @@ class ShowRefList extends Component {
     if (!showDetails  && (currentBacklink  ||  (this.props.backlinkList  &&  this.props.showDocuments))) {
       var ResourceList = require('./ResourceList')
       backlinkRL = <ResourceList
-                      modelName={currentBacklink.items.ref}
+                      modelName={showDocuments ? FORM : currentBacklink.items.ref}
                       prop={currentBacklink}
                       resource={resource}
                       isBacklink={true}
