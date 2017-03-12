@@ -100,7 +100,7 @@ class FormRequestRow extends Component {
         else
           idx = 0
         msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{message.substring(0, idx)}</Text>
+                  <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{message.substring(0, idx)}</Text>
                   <View style={chatStyles.rowContainer}>
                     <Text style={[chatStyles.resourceTitle, {width: msgWidth - 25}, resource.documentCreated || !idx ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
                     {resource.documentCreated  ? null : icon}
@@ -180,7 +180,7 @@ class FormRequestRow extends Component {
                         <View style={{marginTop: 2}}>
                         {ownerPhoto}
                         </View>
-                        <View style={[cellStyle, shareables ? styles.shareables : {}]}>
+                        <View style={[cellStyle, {backgroundColor: this.props.bankStyle.INCOMING_MESSAGE_BG_COLOR}, shareables ? styles.shareables : {}]}>
                           <View style={[styles.container, {minHeight: 45, justifyContent: 'center'}]}>
                           {this.isShared()
                             ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.SHARED_WITH_BG}]}>
@@ -207,7 +207,7 @@ class FormRequestRow extends Component {
     return (
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: bg}]}>
         {date}
-        <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: '#dddddd', borderRadius: 10, borderTopLeftRadius: 0} : {}}>
+        <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: '#dddddd', backgroundColor: bankStyle.INCOMING_MESSAGE_BG_COLOR, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
           {messageBody}
           {sendStatus}
           {shareables}
@@ -571,6 +571,7 @@ class FormRequestRow extends Component {
     let self = this
     // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
+    const bankStyle = this.props.bankStyle
 
     let str = messagePart ? messagePart : message
     messagePart = null
@@ -609,8 +610,7 @@ class FormRequestRow extends Component {
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
 
-      const bankStyle = this.props.bankStyle
-      icon = <Icon  name={'ios-arrow-forward'} style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
+      icon = <Icon  name={'ios-arrow-forward'} style={{justifyContent: 'flex-end', alignSelf: 'flex-end', color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
       // link = <View style={chatStyles.rowContainer}>
       //          <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
       //          {resource.documentCreated ? null : icon}
@@ -622,7 +622,7 @@ class FormRequestRow extends Component {
         else if (prop) {
           if (prop.ref == PHOTO) {
             link = <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                     <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
+                     <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
                    </ImageInput>
             showMessage = false
           }
@@ -638,7 +638,7 @@ class FormRequestRow extends Component {
 
     // let messagePart
     if (showMessage)
-      messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1}, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
+      messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
 
     let msg = <View key={this.getNextKey()}>
                <View style={{flexDirection: 'row'}}>
@@ -716,7 +716,7 @@ class FormRequestRow extends Component {
       message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
       formType = formType.substring(0, i2)
     }
-    return <Text style={[chatStyles.resourceTitle, this.props.resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{message1}
+    return <Text style={[chatStyles.resourceTitle, this.props.resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{message1}
              <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
              <Text>{this.parseMessage(message2, arr)}</Text>
            </Text>
