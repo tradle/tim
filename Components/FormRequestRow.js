@@ -643,9 +643,9 @@ class FormRequestRow extends Component {
     let msg = <View key={this.getNextKey()}>
                <View style={{flexDirection: 'row'}}>
                  {messagePart}
-                 {link}
                  {resource.documentCreated ? null : icon}
                </View>
+               {link}
              </View>
                  // {resource.documentCreated ? null : icon}
     vCols.push(msg);
