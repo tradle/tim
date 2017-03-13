@@ -9,6 +9,8 @@ var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
 // var ShowPropertiesView = require('./ShowPropertiesView');
 var ShowMessageRefList = require('./ShowMessageRefList');
+var Icon = require('react-native-vector-icons/Ionicons');
+
 var ShowRefList = require('./ShowRefList');
 var VerificationView = require('./VerificationView')
 // var MoreLikeThis = require('./MoreLikeThis');
@@ -24,12 +26,16 @@ var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 const PHOTO = 'tradle.Photo'
 const TYPE = constants.TYPE
+const ITEM = 'tradle.Item'
 // import Prompt from 'react-native-prompt'
 const VERIFICATION = constants.TYPES.VERIFICATION
+
+import ActionSheet from './ActionSheet'
 
 import {
   // StyleSheet,
   ScrollView,
+  TouchableOpacity,
   View,
   Text,
   PropTypes,
@@ -83,17 +89,6 @@ class MessageView extends Component {
       return
     if (utils.getId(params.resource) !== utils.getId(this.props.resource))
       return
-    // if (params.action === 'addVerification') {
-    //   // var currentRoutes = this.props.navigator.getCurrentRoutes();
-    //   // var len = currentRoutes.length;
-    //   // if (currentRoutes[len - 1].id === 5)
-    //   //   this.props.navigator.pop();
-    //   Actions.list({
-    //     modelName: constants.TYPES.MESSAGE,
-    //     to: params.resource
-    //   });
-    //   return
-    // }
     if (params.action === 'getItem') {
       this.setState({
         resource: params.resource,
@@ -109,6 +104,82 @@ class MessageView extends Component {
     else if (params.action === 'showDocuments')
       this.setState({showDocuments: true, backlink: null, backlinkList: params.list, showDetails: false})
   }
+
+  renderActionSheet() {
+    let m = utils.getModel(this.props.resource[TYPE]).value
+    let bl = utils.getPropertiesWithAnnotation(m.properties, 'items')
+    if (utils.isEmpty(bl))
+      return
+
+    let itemBl
+    for (let p in bl) {
+      let l = bl[p]
+      if (!l.items.ref  ||  !l.items.backlink)
+        continue
+      let pm = utils.getModel(l.items.ref).value
+      if (pm.interfaces  &&  pm.interfaces.indexOf(ITEM) !== -1) {
+        itemBl = l
+        break
+      }
+    }
+    if (!itemBl)
+      return
+    let buttons = []
+    if (itemBl.allowToAdd) {
+      buttons = [
+        {
+          text: translate('addNew', itemBl.title),
+          onPress: () => this.addNew(itemBl)
+        }
+      ]
+    }
+
+    buttons.push({ text: translate('cancel') })
+    return (
+      <ActionSheet
+        ref={(o) => {
+          this.ActionSheet = o
+        }}
+        options={buttons}
+      />
+    )
+  }
+
+  addNew(itemBl) {
+    this.setState({hideMode: false})
+    // resource if present is a container resource as for example subreddit for posts or post for comments
+    // if to is passed then resources only of this container need to be returned
+    let r = {};
+    r[TYPE] = itemBl.items.ref
+    r[itemBl.items.backlink] = { id: utils.getId(this.props.resource) }
+
+    // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
+    //   r.relatedTo = this.props.resource.relatedTo;
+
+    r.from = this.props.resource.from
+    r.to = this.props.resource.to
+    r._context = this.props.resource._context
+    let model = utils.getModel(r[TYPE]).value
+
+    let self = this
+    this.props.navigator.push({
+      title: model.title,
+      id: 4,
+      component: NewResource,
+      titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        model: model,
+        bankStyle: this.props.style,
+      resource: r,
+        callback: (resource) => {
+          self.props.navigator.pop()
+        }
+      }
+    })
+  }
+
   verifyOrCreateError() {
     let resource = this.props.resource
     let model = utils.getModel(resource[TYPE]).value
@@ -221,25 +292,6 @@ class MessageView extends Component {
       photos = utils.getResourcePhotos(model, resource)
       let mainPhotoProp = utils.getMainPhotoProperty(model)
       mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
-
-      // let props = model.properties
-      // for (let p in resource) {
-      //   if (!props[p] ||  (props[p].ref !== PHOTO && (!props[p].items || props[p].items.ref !== PHOTO)))
-      //     continue
-      //   if (props[p].mainPhoto)
-      //     mainPhoto = resource[p]
-      //   if (!photos)
-      //     photos = []
-      //   if (props[p].items)
-      //     resource[p].forEach((r) => photos.push(r))
-      //   else
-      //     photos.push(resource[p])
-      // }
-      // if (photos  &&  !mainPhoto) {
-      //   mainPhoto = photos[0]
-      //   if (photos.length === 1)
-      //     photos = null
-      // }
     }
     var inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
@@ -253,16 +305,6 @@ class MessageView extends Component {
                                         bankStyle={this.props.bankStyle}
                                         currency={this.props.currency}
                                         showVerification={this.showVerification.bind(this)}/>
-    // else
-    //   propertySheet = <ShowPropertiesView navigator={this.props.navigator}
-    //                                       resource={resource}
-    //                                       bankStyle={this.props.bankStyle}
-    //                                       errorProps={this.state.errorProps}
-    //                                       currency={this.props.currency}
-    //                                       checkProperties={this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null}
-    //                                       excludedProperties={['tradle.Message.message', 'time', 'photos']}
-    //                                       showRefResource={this.getRefResource.bind(this)}/>
-
     let content = <View>
                     <View style={styles.photoListStyle}>
                       <PhotoList photos={photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
@@ -291,15 +333,6 @@ class MessageView extends Component {
                                  checkProperties={checkProps} >
                       {content}
                     </ShowRefList>
-      // actionPanel = <ShowRefList resource={resource}
-      //                            navigator={this.props.navigator}
-      //                            currency={this.props.currency}
-      //                            bankStyle={this.props.bankStyle}
-      //                            backlink={this.state.backlink}
-      //                            showDetails={this.state.showDetails}
-      //                            backlinkList={this.state.backlinkList} >
-      //                 {content}
-      //               </ShowRefList>
     }
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
@@ -317,15 +350,6 @@ class MessageView extends Component {
       separator = <View />
     }
 
-    // let verificationButton = this.props.isVerifier
-    //                        ? <VerificationButton resource={resource} verify={this.verify.bind(this)} verificationList={this.showResources.bind(this)} edit={this.edit.bind(this)} />
-    //                        : <View />
-    // let editButton = this.props.isVerifier
-    //                ? <VerificationButton resource={resource} edit={this.edit.bind(this)} />
-    //                : <View />
-    // let message = <View style={{padding: 10}}>
-    //                 <Text style={styles.itemTitle}>click done for verifying or check the properties that should be corrected and click Done button</Text>
-    //               </View>
     let msg
     if (resource.message  &&  resource.message.length)
       msg = <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
@@ -338,12 +362,9 @@ class MessageView extends Component {
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
-    // else {
-    //   dateView = <View style={[styles.band, {borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
-    //               <Text style={styles.date}>{date}</Text>
-    //             </View>
-    // }
+    var actionSheet = this.renderActionSheet()
     let title = isVerification  ? this.makeViewTitle(model) : null
+    let footer = actionSheet && this.renderFooter()
     return (
       <View style={{height: utils.dimensions().height}}>
       <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
@@ -354,9 +375,25 @@ class MessageView extends Component {
         {actionPanel}
       </ScrollView>
         {title}
+        {footer}
+        {actionSheet}
       </View>
     );
   }
+  renderFooter() {
+    let icon = 'md-add' //Platform.OS === 'ios' ?  'md-more' : 'md-menu'
+    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    return (
+        <View style={styles.footer}>
+          <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+            <View style={[platformStyles.menuButton, {opacity: 0.4}]}>
+              <Icon name={icon}  size={33}  color={color}/>
+            </View>
+          </TouchableOpacity>
+        </View>
+     )
+  }
+
   onPress(url) {
     this.props.navigator.push({
       id: 7,
@@ -372,49 +409,18 @@ class MessageView extends Component {
     var model = utils.getModel(resource[TYPE]).value;
     var me = utils.getMe();
     var from = this.props.resource.from;
-    // var verificationModel = model.properties.verifications.items.ref;
     let document = {
       id: utils.getId(resource),
       title: resource.message ? resource.message : model.title
     }
-    // var verification = {
-    //   [constants.TYPE]: constants.TYPES.VERIFICATION,
-    //   document: document
-    //   time: new Date().getTime()
-    // }
     var to = [utils.getId(from)]
-    if (utils.isReadOnlyChat(resource)) {
-      // var to = this.props.resource.to
-      // verification = {
-      //   [constants.TYPE]: constants.TYPES.VERIFICATION,
-      //   document: {
-      //     id: utils.getId(resource),
-      //     title: resource.message ? resource.message : model.title
-      //   }
-      // }
+    if (utils.isReadOnlyChat(resource))
       to.push(utils.getId(this.props.resource.to))
-    }
+
     let params = {to: to, document: document}
     if (this.props.resource._context)
       params.context = this.props.resource._context
     Actions.addVerification(params)
-    // verification[constants.TYPE] = verificationModel;
-    // if (verificationModel === constants.TYPES.VERIFICATION)
-    // else {
-    //   this.props.navigator.replace({
-    //     title: resource.message,
-    //     id: 4,
-    //     component: NewResource,
-    //     backButtonTitle: resource.firstName,
-    //     rightButtonTitle: 'Done',
-    //     titleTextColor: '#7AAAC3',
-    //     passProps: {
-    //       model: utils.getModel(verificationModel).value,
-    //       resource: verification,
-    //       // callback: this.createVerification.bind(self)
-    //     }
-    //   });
-    // }
   }
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
@@ -452,11 +458,16 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     alignSelf: 'center',
   },
-  bandV: {
-    height: 30,
-    backgroundColor: '#f7f7f7',
-    borderBottomWidth: 1,
-    alignSelf: 'stretch',
+  footer: {
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    justifyContent: 'flex-end',
+    height: 45,
+    paddingHorizontal: 10,
+    backgroundColor: 'transparent',
+    // borderColor: '#eeeeee',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#cccccc',
   },
 
   band: {
@@ -498,49 +509,3 @@ var styles = StyleSheet.create({
 });
 
 module.exports = MessageView;
-  // edit() {
-  //   let rmodel = utils.getModel('tradle.FormError').value
-  //   let title = translate(rmodel)
-  //   // let form = this.props.resource
-
-  //   this.props.navigator.push({
-  //     title: title,
-  //     id: 4,
-  //     component: MessageView,
-  //     // titleTextColor: '#999999',
-  //     backButtonTitle: translate('back'),
-  //     rightButtonTitle: translate('done'),
-  //     passProps: {
-  //       model: rmodel,
-  //       createFormError: true,
-  //       resource: this.props.resource,
-  //       // resource: {
-  //       //   to: form.from,
-  //       //   from: form.to,
-  //       //   _t: 'tradle.FormError',
-  //       //   prefill: form,
-  //       //   message: translate('pleaseCorrectTheErrors', translate(rmodel), form.from.formatted)
-  //       // },
-  //     }
-  //   })
-  // }
-  // additionalInfo(resource, prop, msg) {
-  //   var rmodel = utils.getModel(resource[constants.TYPE]).value;
-  //   msg = msg.length ? msg : 'Please submit more info';
-  //   var r = {
-  //     _t: prop.items.ref,
-  //     from: utils.getMe(),
-  //     // to: resource.from,
-  //     // time: new Date().getTime(),
-  //     message: msg
-  //   };
-  //   r[prop.items.backlink] = {
-  //     id: utils.getId(resource),
-  //     title: utils.getDisplayName(resource, rmodel.properties)
-  //   }
-  //   Actions.addVerification({r: r, to: [utils.getId(resource.from)]});
-  // }
-
-  // createVerification(resource) {
-  //   Actions.addVerification(resource, true);
-  // }
