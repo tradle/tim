@@ -198,7 +198,7 @@ class TimHome extends Component {
 
     const { title, message, ok } = JSON.parse(qs.alert)
     // TODO: support stuff!
-    if (ok !== '/scan') throw new Error(`unsupported deep link: ${ok}`)
+    if (ok !== '/scan'  &&  ok.indexOf('/chat') === -1) throw new Error(`unsupported deep link: ${ok}`)
 
     const { navigator } = this.props
     while (true) {
@@ -223,7 +223,7 @@ class TimHome extends Component {
           text: 'OK',
           onPress: function () {
             // goto
-            self.scanFormsQRCode()
+            self._unsafeHandleOpenURL({url: 'tradle:/' + ok})
             resolve()
           }
         }
@@ -396,24 +396,24 @@ class TimHome extends Component {
       id: 10,
       title: translate('officialAccounts'),
       // titleTextColor: '#7AAAC3',
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: ResourceList,
-      rightButtonTitle: translate('profile'),
+      rightButtonTitle: 'Profile',
       passProps: passProps,
       onRightButtonPress: {
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
         id: 3,
         component: ResourceView,
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         // titleTextColor: '#7AAAC3',
-        rightButtonTitle: translate('edit'),
+        rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: me.firstName,
           id: 4,
           component: NewResource,
           // titleTextColor: '#7AAAC3',
-          backButtonTitle: translate('back'),
-          rightButtonTitle: translate('done'),
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel(me[constants.TYPE]).value,
             resource: me,
@@ -434,14 +434,14 @@ class TimHome extends Component {
       title: title,
       id: 3,
       component: ResourceView,
-      backButtonTitle: translate('back'),
-      rightButtonTitle: translate('edit'),
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Edit',
       onRightButtonPress: {
         title: title,
         id: 4,
         component: NewResource,
-        backButtonTitle: translate('back'),
-        rightButtonTitle: translate('done'),
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
         passProps: {
           model: utils.getModel(me[constants.TYPE]).value,
           resource: me,
