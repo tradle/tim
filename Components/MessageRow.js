@@ -130,7 +130,9 @@ class MessageRow extends Component {
 
       if (isFormError)
         addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? bankStyle.REQUEST_FULFILLED : bankStyle.FORM_ERROR_BORDER}]; //model.style];
-      if (isMyMessage  &&  !isSimpleMessage && !isFormError) {
+
+      let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
+      if (isMyMessage  &&  !isSimpleMessage && !isFormError  &&  !isRemediationCompleted) {
         let st = isProductApplication
                ? {backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR}
                : {backgroundColor: bankStyle.STRUCTURED_MESSAGE_COLOR}
@@ -252,7 +254,7 @@ class MessageRow extends Component {
                           </View>
                         </View>
 
-      messageBody = isSimpleMessage || isProductApplication
+      messageBody = isSimpleMessage || isProductApplication || isConfirmation
                   ? msgContent
                   : <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
                       {msgContent}
@@ -599,8 +601,8 @@ class MessageRow extends Component {
         vCols.push(
           <View key={self.getNextKey()}>
             <Text style={[style]}>{resource[v]}</Text>
-            <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
-            <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={30} name={'ios-done-all'} />
+            <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -25, opacity: 0.2}]} size={45} name={'ios-flower'} />
+            <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -30}} size={30} name={'ios-done-all'} />
           </View>
         );
 
