@@ -1745,8 +1745,9 @@ function preParseStrings (strings, { appName, profileTitle }) {
   const preparsed = {}
 
   for (let key in strings) {
-    preparsed[key] = strings[key].replace(/{appName}/g, appName)
-    preparsed[key] = strings[key].replace(/{profileTitle}/g, strings[profileTitle])
+    let str = strings[key]
+    preparsed[key] = str.replace(/{appName}/g, appName)
+    preparsed[key] = str.replace(/{profileTitle}/g, strings[profileTitle])
   }
 
   preparsed.profile = strings[profileTitle]
