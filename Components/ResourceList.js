@@ -1006,6 +1006,8 @@ class ResourceList extends Component {
   renderActionSheet() {
     let buttons
     if (this.state.allowToAdd) {
+      if (this.props.isBacklink)
+        return
       buttons = [
         {
           text: translate('addNew', this.props.prop.title),
