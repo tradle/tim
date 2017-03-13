@@ -531,11 +531,11 @@ class MessageList extends Component {
       var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
       // Chooser for trusted party verifier
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
-      if (!isChooser  &&  (!this.state.isConnected  ||  !this.state.onlineStatus)) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
-        maxHeight -=  35
-      if (((this.state.context  &&  this.state.context.product !== REMEDIATION)         ||
-          (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION)) &&
-          (this.props.resource.products  &&  this.props.resource.products.length > 1))
+      let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
+                           (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION)
+      if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  !this.state.onlineStatus)) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
+        maxHeight -= 35
+      if (notRemediation  &&  (this.props.resource.products  &&  this.props.resource.products.length > 1))
         maxHeight -= 45
       // else if (ENV.allowForgetMe)
       //   maxHeight -= 45
