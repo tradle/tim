@@ -15,6 +15,7 @@ import platformStyles from '../styles/platform'
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const FORM_REQUEST = 'tradle.FormRequest'
+const REMEDIATION = 'tradle.Remediation'
 import {
   ListView,
   Text,
@@ -75,7 +76,7 @@ class ProductChooser extends Component {
       }
       else if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE   ||
                this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
-        if (this.props.context)
+        if (this.props.context  &&  this.props.context.product !== REMEDIATION)
           utils.getModel(this.props.context.product).value.forms.forEach((f) => products.push(utils.getModel(f).value))
         else if (params.resource.products  &&  params.resource.products.length) {
           params.resource.products.forEach((r) => {
