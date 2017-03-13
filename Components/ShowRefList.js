@@ -57,6 +57,7 @@ class ShowRefList extends Component {
     let currentBacklink = this.props.backlink
     let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
     let showDocuments = this.props.showDocuments
+    let currentMarker = <View style={{backgroundColor: appStyle.CURRENT_UNDERLINE_COLOR, height: 4, marginTop: -5, alignSelf: 'stretch'}} />
 
     for (var p in props) {
       if (props[p].hidden)
@@ -72,6 +73,7 @@ class ShowRefList extends Component {
       propsToShow.push(p)
     }
     let isMessage = utils.isMessage(resource)
+
     // Show supporting docs
     if (isMessage) {
       let rId = utils.getId(resource)
@@ -90,9 +92,9 @@ class ShowRefList extends Component {
         let count = <View style={styles.count}>
                       <Text style={styles.countText}>{docs.length}</Text>
                     </View>
-        let bg = showDocuments ? {backgroundColor: appStyle.CURRENT_TAB_COLOR} : {}
+        let showCurrent = showDocuments ? currentMarker : null
         refList.push(
-          <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+          <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={() => this.showDocs(docs)} underlayColor='transparent'>
              <View style={styles.item}>
                <View style={{flexDirection: 'row'}}>
@@ -102,6 +104,7 @@ class ShowRefList extends Component {
                <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Documents'}</Text>
              </View>
            </TouchableHighlight>
+           {showCurrent}
           </View>)
       }
     }
@@ -110,9 +113,9 @@ class ShowRefList extends Component {
         return <View/>
     }
     else if (!isIdentity) {
-      let bg = showDetails ? {backgroundColor: appStyle.CURRENT_TAB_COLOR} : {}
+      let showCurrent = showDetails ? currentMarker : null
       refList.push(
-        <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
          <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
            <View style={styles.item}>
              <View style={{flexDirection: 'row'}}>
@@ -121,6 +124,7 @@ class ShowRefList extends Component {
              <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
            </View>
          </TouchableHighlight>
+         {showCurrent}
         </View>
       )
     }
@@ -156,11 +160,11 @@ class ShowRefList extends Component {
                   <Text style={styles.countText}>{count}</Text>
                 </View>
       }
-      let bg = currentBacklink  &&  currentBacklink.name === p
-             ? {backgroundColor: appStyle.CURRENT_TAB_COLOR}
-             : {}
+
+      let showCurrent = currentBacklink  &&  currentBacklink.name === p ? currentMarker : null
+
       refList.push(
-        <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.exploreBacklink.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={styles.item}>
                <View style={{flexDirection: 'row'}}>
@@ -170,6 +174,7 @@ class ShowRefList extends Component {
                <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
              </View>
            </TouchableHighlight>
+           {showCurrent}
          </View>
         );
     })
