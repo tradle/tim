@@ -494,7 +494,7 @@ class MessageRow extends Component {
                 </View>
 
       renderedRow.push(msg)
-      return {onPressCall: this.showMyData.bind(this)}
+      return {onPressCall: isMyMessage ? this.showMyData.bind(this) : null}
     }
 
     var isProductList = model.id === constants.TYPES.PRODUCT_LIST
