@@ -6020,6 +6020,11 @@
       "from": "underscore.string@>=3.0.3 <4.0.0",
       "resolved": "https://registry.npmjs.org/underscore.string/-/underscore.string-3.3.4.tgz"
     },
+    "uniq": {
+      "version": "1.0.1",
+      "from": "uniq@1.0.1",
+      "resolved": "https://registry.npmjs.org/uniq/-/uniq-1.0.1.tgz"
+    },
     "unique-stream": {
       "version": "2.2.1",
       "from": "unique-stream@>=2.0.2 <3.0.0",
