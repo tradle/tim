@@ -419,6 +419,8 @@ class FormRequestRow extends Component {
           orgs = verification.organization.title
         verifiedBy = doShareDocument ? translate('verifiedBy', orgs) : translate('verificationBy', orgs)
       }
+      else if (verification.document._notSent)
+        verifiedBy = translate('fromMyData')
       else
         verifiedBy = translate('sentTo', verification.organization.title)
 
