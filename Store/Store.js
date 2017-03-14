@@ -33,6 +33,10 @@ const QUEUED = 'Queued'
 var debug = Debug('tradle:app:store')
 var employee = require('../people/employee.json')
 
+const PHOTO_ID = 'tradle.PhotoID'
+const PERSONAL_INFO = 'tradle.PersonalInfo'
+const FRIEND = 'Friend'
+
 var Q = require('q');
 Q.longStackSupport = true
 Q.onerror = function (err) {
@@ -125,6 +129,7 @@ const FORM_REQUEST        = 'tradle.FormRequest'
 const PAIRING_REQUEST     = 'tradle.PairingRequest'
 const PAIRING_RESPONSE    = 'tradle.PairingResponse'
 const PAIRING_DATA        = 'tradle.PairingData'
+const ITEM                = 'tradle.Item'
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 const REMEDIATION         = 'tradle.Remediation'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
@@ -1910,8 +1915,8 @@ var Store = Reflux.createStore({
     if (to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
-      if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
-        return
+      // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
+      //   return
       if (!orgRep) {
         var params = {
           action: 'addMessage',
@@ -3075,7 +3080,7 @@ var Store = Reflux.createStore({
         if (isRegistration)
           return handleRegistration()
         else if (isMessage)
-          return handleMessage(params.noTrigger, returnVal)
+          return handleMessage(params.noTrigger, returnVal, params.doNotSend)
         else
           return save(returnVal, isBecomingEmployee)
       })
@@ -3161,7 +3166,7 @@ var Store = Reflux.createStore({
           })
       }
 
-      function handleMessage (noTrigger, returnVal) {
+      function handleMessage (noTrigger, returnVal, doNotSend) {
         // TODO: fix hack
         // hack: we don't know root hash yet, use a fake
         if (returnVal.documentCreated)  {
@@ -3277,16 +3282,17 @@ var Store = Reflux.createStore({
             debugger
           }
 
-
-          let sendParams = {
-            to: {permalink: permalink},
-            link: hash,
-          }
-          if (returnVal._context)
-            sendParams.other = {
-              context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
+          if (!doNotSend) {
+            let sendParams = {
+              to: {permalink: permalink},
+              link: hash,
             }
-          return meDriver.send(sendParams)
+            if (returnVal._context)
+              sendParams.other = {
+                context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
+              }
+            return meDriver.send(sendParams)
+          }
         })
         .then(function (result) {
           if (readOnlyBacklinks.length) {
@@ -3909,7 +3915,7 @@ var Store = Reflux.createStore({
     if (!me) {
       await this.onAddItem({resource: {
               [constants.TYPE]: constants.TYPES.PROFILE,
-              firstName: 'Friend'
+              firstName: FRIEND
             }, isRegistration: true})
     }
 
@@ -4837,6 +4843,11 @@ var Store = Reflux.createStore({
           !params.prop     &&
           (m.subClassOf === FORM || m.id === VERIFICATION) &&
           self._getItem(utils.getId(r._context)).product === REMEDIATION) {
+        let org = m.subClassOf === FORM ? self._getItem(utils.getId(r.to)) : self._getItem(utils.getId(r.from))
+        let remMsg = self.searchMessages({modelName: REMEDIATION_SIMPLE_MESSAGE, to: org})
+        if (remMsg  &&  remMsg.length)
+          return r.time < remMsg[0].time
+
         return true
       }
       if (r._inactive)
@@ -5612,6 +5623,13 @@ var Store = Reflux.createStore({
         this.trigger(params);
       }
       if (model.subClassOf === FORM) {
+        if (model.interfaces.indexOf(ITEM) !== -1) {
+          let {container, item} = getContainerProp(model)
+          if (value[container.name]) {
+            let cRes = this._getItem(utils.getId(value[container.name]))
+            this.onExploreBacklink(cRes, item)
+          }
+        }
         let mlist = this.searchMessages({modelName: FORM})
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
@@ -5622,7 +5640,24 @@ var Store = Reflux.createStore({
         this.trigger({action: 'addItem', error: err.message, resource: value})
       }
       err = err;
-    });
+    })
+    function getContainerProp(model) {
+      let props = model.properties
+      let refProps = utils.getPropertiesWithAnnotation(props, 'ref')
+      for (let p in refProps) {
+        let l = props[p]
+        let container = utils.getModel(l.ref).value
+        if (!utils.isMessage(container))
+          return
+        let cProps = container.properties
+        let containerBl = utils.getPropertiesWithAnnotation(cProps, 'items')
+        for (let c in containerBl)  {
+          if (cProps[c].items.ref === model.id)
+            return {container: props[p], item: cProp[c]}
+        }
+
+      }
+    }
   },
   addLastMessage(value, batch, sharedWith) {
     let model = this.getModel(value[TYPE]).value
@@ -7053,6 +7088,7 @@ var Store = Reflux.createStore({
     //     batch.push({type: 'put', key: key, value: val})
     // }
     // else {
+      let meId = utils.getId(to)
       if (val[TYPE] === MY_EMPLOYEE_PASS) {
         to.isEmployee = true
         to.organization = this.buildRef(org)
@@ -7060,6 +7096,33 @@ var Store = Reflux.createStore({
         to.organization._hasSupportLine = org._hasSupportLine
         this.setMe(to)
         batch.push({type: 'put', key: utils.getId(to), value: to})
+        if (to.firstName === FRIEND) {
+          let toRep = this.getRepresentative(utils.getId(org))
+          toRep = this._getItem(toRep)
+          let result = this.searchMessages({modelName: PERSONAL_INFO, to: org})
+          let fRes = result.filter((r) => utils.getId(r.from) === meId)
+          to.firstName = fRes[0].firstName
+          this._setItem(meId, to)
+          this.dbPut(meId, to)
+        }
+      }
+      else if (val[TYPE] === PHOTO_ID) {
+        let fromId = utils.getId(val.from)
+        let fr = this._getItem(fromId)
+        if (fr.firstName === FRIEND) {
+          let personal = val.scanJson.personal
+          if (personal) {
+            let firstName = personal.firstName
+            if (firstName) {
+              firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+              fr.firstName = firstName
+              this._setItem(fromId, fr)
+              this.dbPut(fromId, fr)
+
+              this.trigger({action: 'addItem', resource: fr})
+            }
+          }
+        }
       }
 
       this.addLastMessage(val, batch)
