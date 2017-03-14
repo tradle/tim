@@ -1,5 +1,6 @@
 'use strict';
 
+const parseURL = require('url').parse
 var Q = require('q')
 var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
@@ -8,6 +9,7 @@ var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
 var HomePage = require('./HomePage')
+var HomePageMixin = require('./HomePageMixin')
 var ResourceView = require('./ResourceView');
 var MessageList = require('./MessageList')
 var extend = require('extend')
@@ -74,6 +76,7 @@ import StatusBar from './StatusBar'
 
 const isLinkingSupported = utils.isIOS() && Linking
 const isAndroid = Platform.OS === 'android'
+const FOOTER_TEXT_COLOR = '#eeeeee'
 import React, { Component, PropTypes } from 'react'
 
 class TimHome extends Component {
@@ -90,6 +93,7 @@ class TimHome extends Component {
       hasMe: utils.getMe()
     };
 
+    this._handleOpenURL = this._handleOpenURL.bind(this)
     this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
@@ -177,20 +181,70 @@ class TimHome extends Component {
         this.state.hasMe !== nextState.hasMe
   }
 
-  _handleOpenURL({url}) {
-    // return
+  async _handleOpenURL({url}) {
+    try {
+      await this._unsafeHandleOpenURL({ url })
+    } catch (err) {
+      Alert.alert(
+        translate('oops'),
+        translate('invalidDeepLink')
+      )
+    }
+  }
+
+  async _unsafeHandleOpenURL({ url }) {
     debug(`opening URL: ${url}`)
 
-    let URL = require('url').parse(url)
-    let pathname = URL.pathname
+    let URL = parseURL(url)
+    let pathname = URL.pathname || URL.hostname
+    if (!pathname) throw new Error('failed to parse deep link')
+
     let query = URL.query
 
     let qs = require('querystring').parse(query)
-    pathname = pathname.substring(1)
+    // strip leading slashes
+    pathname = pathname.replace(/^\//, '')
+
     let state = {firstPage: pathname}
     extend(state, qs)
     this.setState(state)
     Actions.setPreferences(state)
+
+    if (!qs.alert) return
+
+    const { title, message, ok } = JSON.parse(qs.alert)
+    // TODO: support stuff!
+    if (ok !== '/scan'  &&  ok.indexOf('/chat') === -1) throw new Error(`unsupported deep link: ${ok}`)
+
+    const { navigator } = this.props
+    while (true) {
+      let currentRoute = Navs.getCurrentRoute(navigator)
+      let { displayName } = currentRoute.component
+      if (displayName === TimHome.displayName || displayName === PasswordCheck.displayName) {
+        debug('waiting to throw up deep linked alert until we are past the home screens')
+        await Q.ninvoke(utils, 'onNextTransitionEnd', navigator)
+      } else {
+        break
+      }
+    }
+
+    return new Promise((resolve, reject) => {
+      let self = this
+      Alert.alert(title, message, [
+        {
+          text: 'Cancel',
+          onPress: resolve
+        },
+        {
+          text: 'OK',
+          onPress: function () {
+            // goto
+            self._unsafeHandleOpenURL({url: 'tradle:/' + ok})
+            resolve()
+          }
+        }
+      ])
+    })
   }
 
   async onStart(params) {
@@ -299,11 +353,14 @@ class TimHome extends Component {
       utils.setModels(params.models);
       return
     case 'getProvider':
-      this.showChat(params.provider)
+      this.showChatPage(params.provider)
       // this.setState({
       //   provider: params.provider,
       //   action: 'chat'
       // })
+      return
+    case 'noAccessToServer':
+      Alert.alert(translate('noAccessToServer'))
       return
     case 'start':
       this.onStart(params)
@@ -356,7 +413,7 @@ class TimHome extends Component {
       // titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       component: ResourceList,
-      rightButtonTitle: translate('profile'),
+      rightButtonTitle: 'Profile',
       passProps: passProps,
       onRightButtonPress: {
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
@@ -364,7 +421,7 @@ class TimHome extends Component {
         component: ResourceView,
         backButtonTitle: 'Back',
         // titleTextColor: '#7AAAC3',
-        rightButtonTitle: translate('edit'),
+        rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: me.firstName,
           id: 4,
@@ -387,19 +444,19 @@ class TimHome extends Component {
   }
   showHomePage(doReplace) {
     let me = utils.getMe()
-    let title = translate(ENV.profileTitle)
+    let title = translate('profile')
     this.props.navigator[doReplace ? 'replace' : 'push']({
       title: title,
       id: 3,
       component: ResourceView,
-      backButtonTitle: translate('back'),
-      rightButtonTitle: translate('edit'),
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Edit',
       onRightButtonPress: {
         title: title,
         id: 4,
         component: NewResource,
-        backButtonTitle: translate('back'),
-        rightButtonTitle: translate('done'),
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
         passProps: {
           model: utils.getModel(me[constants.TYPE]).value,
           resource: me,
@@ -448,7 +505,7 @@ class TimHome extends Component {
           provider: this.state.permalink,
           url: this.state.url
         })
-        // this.showChat(this.state.provider)
+        // this.showChatPage(this.state.provider)
         return
       case 'officialAccounts':
         this.showOfficialAccounts()
@@ -476,7 +533,7 @@ class TimHome extends Component {
 
     this.showOfficialAccounts()
   }
-  showChat(provider) {
+  showChatPage(provider) {
     if (ENV.landingPage) {
       this.showLandingPage(provider, ENV.landingPage)
       return
@@ -747,7 +804,7 @@ class TimHome extends Component {
     var h = height > 800 ? height - 220 : height - 180
 
     if (!__DEV__ && ENV.landingPage) {
-      return this.getBareSplashScreen()
+      return this.getSplashScreen()
     }
 
     if (this.state.isLoading) {
@@ -781,15 +838,8 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let logo = <TouchableOpacity onPress={() => this._pressHandler()}>
-                <View style={[styles.container]}>
-                  <CustomIcon color='#ffffff' name="tradle" size={getIconSize()} />
-                  <Text style={styles.tradle}>Tradle</Text>
-                </View>
-               </TouchableOpacity>
-
-                          // <Image style={{position: 'absolute', left: 0, opacity: 0.5, width: 100, height: 100}} source={TradleWhite}></Image>
-    let regView = <View  style={{alignSelf: 'center'}}>
+    let regView = !ENV.autoRegister &&
+                  <View  style={{alignSelf: 'center'}}>
                     <FadeInView>
                       <TouchableOpacity  onPress={() => {
                         this.register(this.showFirstPage.bind(this))
@@ -802,11 +852,9 @@ class TimHome extends Component {
                  </View>
 
     return (
-      <View>
+      <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
-        <View style={styles.layout}>
-          <View/>
-          {logo}
+        <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
           <View>
             { utils.getMe()
               ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
@@ -820,10 +868,25 @@ class TimHome extends Component {
             <Text style={errStyle}>{err}</Text>
             {dev}
           </View>
-        </View>
+        </TouchableOpacity>
       </View>
     );
   }
+
+        // <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
+        //   <View style={{flexGrow:1}} />
+        //   { utils.getMe()
+        //     ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
+        //           underlayColor='transparent' onPress={() => this._pressHandler()}>
+        //         <View style={styles.getStarted}>
+        //            <Text style={styles.getStartedText}>Get started</Text>
+        //         </View>
+        //       </TouchableOpacity>
+        //     : regView
+        //   }
+        //   <Text style={errStyle}>{err}</Text>
+        //   {dev}
+        // </TouchableOpacity>
 
   renderVersion() {
     return (
@@ -893,18 +956,6 @@ class TimHome extends Component {
     )
   }
 
-  getBareSplashScreen() {
-    return (
-      <TouchableOpacity style={styles.container}>
-        <BackgroundImage source={BG_IMAGE} />
-        <View style={[styles.splashLayout]}>
-          <View style={{flexGrow: 1}}/>
-          <ActivityIndicator size='large' color='#ffffff' style={{ paddingBottom: 20 }} />
-        </View>
-      </TouchableOpacity>
-    )
-  }
-
   getSplashScreen() {
     const version = __DEV__ && this.renderVersion()
     var {width, height} = utils.dimensions(TimHome)
@@ -914,25 +965,22 @@ class TimHome extends Component {
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
-        <View  style={styles.splashLayout}>
-          <View>
-            <CustomIcon name="tradle" color='#ffffff' size={getIconSize()} />
-            <Text style={styles.tradle}>Tradle</Text>
-            <View style={{paddingTop: 20, alignSelf: 'center'}}>
-              <View style={{alignSelf: 'center'}}>
-                <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
-              </View>
-              {busyReason}
-              {updateIndicator}
-              {submitLogButton}
+        <View style={styles.splashLayout}>
+          <View style={{flexGrow: 1}}/>
+          <View style={{marginBottom: 20}}>
+            <View style={{alignSelf: 'center'}}>
+              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
             </View>
+            {busyReason}
+            {updateIndicator}
+            {submitLogButton}
           </View>
         </View>
         {version}
       </View>
     )
-
   }
+
   pairDevices() {
     this.props.navigator.push({
       title: 'Scan QR Code',
@@ -991,6 +1039,7 @@ class TimHome extends Component {
 
 reactMixin(TimHome.prototype, Reflux.ListenerMixin);
 reactMixin(TimHome.prototype, TimerMixin)
+reactMixin(TimHome.prototype, HomePageMixin)
 
 var styles = (function () {
   var dimensions = utils.dimensions(TimHome)
@@ -1004,12 +1053,12 @@ var styles = (function () {
     },
     tradle: {
       // color: '#7AAAC3',
-      color: '#eeeeee',
+      color: FOOTER_TEXT_COLOR,
       fontSize: height > 450 ? 35 : 25,
       alignSelf: 'center',
     },
     updateIndicator: {
-      color: '#ffffff',
+      color: FOOTER_TEXT_COLOR,
       paddingTop: 10,
       alignSelf: 'center'
     },
@@ -1097,7 +1146,8 @@ var styles = (function () {
     splashLayout: {
       alignItems: 'center',
       justifyContent: 'center',
-      height: height
+      width,
+      height
     },
     layout: {
       justifyContent: 'space-between',

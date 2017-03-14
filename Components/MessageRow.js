@@ -4,6 +4,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var MessageView = require('./MessageView');
+var ResourceView = require('./ResourceView')
 var NewResource = require('./NewResource');
 var ProductChooser = require('./ProductChooser');
 var PhotoList = require('./PhotoList');
@@ -131,7 +132,9 @@ class MessageRow extends Component {
 
       if (isFormError)
         addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? bankStyle.REQUEST_FULFILLED : bankStyle.FORM_ERROR_BORDER}]; //model.style];
-      if (isMyMessage  &&  !isSimpleMessage && !isFormError) {
+
+      let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
+      if (isMyMessage  &&  !isSimpleMessage && !isFormError  &&  !isRemediationCompleted) {
         let st = isProductApplication
                ? {backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR}
                : {backgroundColor: bankStyle.STRUCTURED_MESSAGE_COLOR}
@@ -261,7 +264,7 @@ class MessageRow extends Component {
                           </View>
                         </View>
 
-      messageBody = isSimpleMessage || isProductApplication
+      messageBody = isSimpleMessage || isProductApplication || isConfirmation
                   ? msgContent
                   : <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
                       {msgContent}
@@ -491,14 +494,14 @@ class MessageRow extends Component {
       let msg = <View key={this.getNextKey()}>
                   <View style={{flexDirection: 'row'}}>
                     <View style={{flex: 1}}>
-                      <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message}</Text>
+                      <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
                     </View>
                     <Icon style={{position: 'absolute', bottom: 0, right: 2, color: this.props.bankStyle.LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
                   </View>
                 </View>
 
       renderedRow.push(msg)
-      return {onPressCall: this.showMyData.bind(this)}
+      return {onPressCall: isMyMessage ? this.showMyData.bind(this) : null}
     }
 
     var isProductList = model.id === constants.TYPES.PRODUCT_LIST
@@ -604,8 +607,8 @@ class MessageRow extends Component {
         vCols.push(
           <View key={self.getNextKey()}>
             <Text style={[style]}>{resource[v]}</Text>
-            <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -45, opacity: 0.2}]} size={50} name={'ios-flower'} />
-            <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -10}} size={30} name={'ios-done-all'} />
+            <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -25, opacity: 0.2}]} size={45} name={'ios-flower'} />
+            <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -30}} size={30} name={'ios-done-all'} />
           </View>
         );
 
@@ -781,9 +784,20 @@ class MessageRow extends Component {
   }
   showMyData() {
     let me = utils.getMe()
+    let title = translate('profile')
+    this.props.navigator.push({
+      title: title,
+      id: 3,
+      component: ResourceView,
+      backButtonTitle: translate('back'),
+      passProps: {
+        resource: me,
+        bankStyle: this.props.bankStyle
+      }
+    })
     // let n = this.props.navigator.getCurrentRoutes().length
     // this.props.navigator.popN(n - 2)
-    this.showResources(me, utils.getModel(me[constants.TYPE]).value.properties.myForms)
+    // this.showResources(me, utils.getModel(me[constants.TYPE]).value.properties.myForms)
   }
 
   onChooseProduct() {

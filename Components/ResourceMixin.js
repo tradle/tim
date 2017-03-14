@@ -43,25 +43,40 @@ import React, { Component } from 'react'
 var ResourceMixin = {
   showRefResource(resource, prop) {
     var id = utils.getId(resource)
-    // if (resource[constants.TYPE] + '_' + resource[constants.ROOT_HASH] !== this.state.propValue)
-    if (id !== this.state.propValue)
-      return;
+    // if (id !== this.state.propValue)
+    //   return;
     var type = resource[constants.TYPE] || id.split('_')[0]
     var model = utils.getModel(type).value;
     var title = utils.getDisplayName(resource, model.properties);
-    this.props.navigator.push({
-      title: title,
-      id: 3,
-      component: require('./ResourceView'),
-      titleTextColor: '#7AAAC3',
-      // rightButtonTitle: 'Edit',
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        prop: prop,
-        currency: this.props.currency
-      }
-    });
+    if (utils.isMessage(resource)) {
+      this.props.navigator.push({
+        id: 5,
+        component: require('./MessageView'),
+        backButtonTitle: translate('back'),
+        title: model.title,
+        passProps: {
+          bankStyle: this.props.bankStyle,
+          resource: resource,
+          currency: this.props.currency,
+          country: this.props.country,
+        }
+      })
+    }
+    else {
+      this.props.navigator.push({
+        title: title,
+        id: 3,
+        component: require('./ResourceView'),
+        titleTextColor: '#7AAAC3',
+        // rightButtonTitle: 'Edit',
+        backButtonTitle: translate('back'),
+        passProps: {
+          resource: resource,
+          prop: prop,
+          currency: this.props.currency
+        }
+      })
+    }
   },
   showResources(resource, prop) {
     this.props.navigator.push({
@@ -290,7 +305,7 @@ var ResourceMixin = {
                       <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
                       {arrow}
                     </View>
-                    <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: LINK_COLOR}} />
+                    <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: '#eeeeee'}} />
                   </View>)
 // tada.push("<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{" + utils.makeLabel(p) + "}</Text></View>")
         this.showJson(null, json[p], isView, arr, skipLabels)

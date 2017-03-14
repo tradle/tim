@@ -672,18 +672,23 @@ var NewResourceMixin = {
       timeout: ENV.blinkIDScanTimeoutInternal
     }
 
-    if (documentType.title === 'Passport') {
+    const type = getDocumentTypeFromTitle(documentType.title)
+    switch (type) {
+    case 'passport':
       blinkIDOpts.tooltip = translate('centerPassport')
       // machine readable travel documents (passport)
       blinkIDOpts.mrtd = DEFAULT_BLINK_ID_OPTS.mrtd
-    } else if (documentType.title === 'Driver licence' || documentType.title === 'Driver license') {
+      break
+    case 'license':
       blinkIDOpts.tooltip = translate('centerLicence')
       if (country.title === 'United States') {
         blinkIDOpts.usdl = DEFAULT_BLINK_ID_OPTS.usdl
       } else {
         blinkIDOpts.eudl = DEFAULT_BLINK_ID_OPTS.eudl
       }
-    } else {
+
+      break
+    default:
       blinkIDOpts = {
         ...DEFAULT_BLINK_ID_OPTS,
         ...blinkIDOpts,
@@ -1111,7 +1116,7 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop)
-    let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+    let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
     return (
       <View>
         <View key={this.getNextKey()} ref={prop.name} style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
@@ -1343,7 +1348,7 @@ var NewResourceMixin = {
       if (utils.isWeb()) {
         useImageInput = isScan || !ENV.canUseWebcam
       } else {
-        useImageInput = !isScan
+        useImageInput = !isScan || !BlinkID
       }
 
       if (useImageInput) {
@@ -1792,7 +1797,7 @@ var styles= StyleSheet.create({
   datePicker: {
     // width: dimensions.width - 30,
     marginLeft: 10,
-    paddingLeft: 10,
+    paddingLeft: utils.isWeb() ? 0 : 10,
     justifyContent: 'flex-start',
     borderColor: '#f7f7f7',
     alignSelf: 'stretch'
@@ -1978,6 +1983,14 @@ var styles= StyleSheet.create({
 
 function formatDate (date) {
   return dateformat(date, 'mmm dS, yyyy')
+}
+
+function getDocumentTypeFromTitle (title='') {
+  title = title.toLowerCase()
+  const match = title.match(/(licen[cs]e|passport)/)
+  if (!match) return
+
+  return match[1] === 'passport' ? 'passport' : 'license'
 }
 
 // function parseAnylineDate (date) {

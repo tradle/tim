@@ -15,6 +15,7 @@ import platformStyles from '../styles/platform'
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const FORM_REQUEST = 'tradle.FormRequest'
+const REMEDIATION = 'tradle.Remediation'
 import {
   ListView,
   Text,
@@ -75,11 +76,14 @@ class ProductChooser extends Component {
       }
       else if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE   ||
                this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
-        if (this.props.context)
+        if (this.props.context  &&  this.props.context.product !== REMEDIATION)
           utils.getModel(this.props.context.product).value.forms.forEach((f) => products.push(utils.getModel(f).value))
         else if (params.resource.products  &&  params.resource.products.length) {
           params.resource.products.forEach((r) => {
-            utils.getModel(r).value.forms.forEach((f) => products.push(utils.getModel(f).value))
+            let m = utils.getModel(r).value
+            m.forms.forEach((f) => products.push(utils.getModel(f).value))
+            if (m.additionalForms)
+              m.additionalForms.forEach((f) => products.push(utils.getModel(f).value))
           })
         }
         else
@@ -138,7 +142,9 @@ class ProductChooser extends Component {
     }
     else {
       msg[constants.TYPE] =  FORM_REQUEST,
-      msg.message = translate(model.formRequestMessage || 'fillTheForm', translate(utils.makeModelTitle(model)))
+      msg.message = model.formRequestMessage
+                  ? translate(model.formRequestMessage)
+                  : translate('fillTheForm', translate(utils.makeModelTitle(model)))
           // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
       // product: productModel.id,
       msg.form = model.id

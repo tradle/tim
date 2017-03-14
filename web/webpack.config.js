@@ -8,6 +8,7 @@ var webpack = require('webpack');
 // var HtmlPlugin = require('webpack-html-plugin');
 var HtmlPlugin = require('html-webpack-plugin');
 var HasteResolverPlugin = require('haste-resolver-webpack-plugin');
+var OptimizeJsPlugin = require('optimize-js-plugin')
 // var ManifestPlugin = require('webpack-manifest-plugin');
 // var ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 // var InlineManifestWebpackPlugin = require('inline-manifest-webpack-plugin')
@@ -71,6 +72,12 @@ var common = {
       {
         test   : /\.(ttf|eot|svg|woff(2)?)(\?[a-z0-9-=&.]+)?$/,
         loader : 'file'
+      },
+      // react-infinite-calendar@1 depends on moment + moment-range
+      // whose AMD build is broken
+      {
+        test: /node_modules\/moment-range\/(dist|lib)\/moment-range(\.min)?\.js$/,
+        loader: 'imports?define=>false'
       }
     ]
   },
@@ -237,6 +244,9 @@ if (NODE_ENV === 'development') {
         },
         beautify: false,
         // comments: false
+      }),
+      new OptimizeJsPlugin({
+        sourceMap: true
       }),
       // new webpack.optimize.AggressiveMergingPlugin(),
       new HtmlPlugin({

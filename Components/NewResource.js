@@ -26,7 +26,6 @@ var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')
 var StyleSheet = require('../StyleSheet')
 import ImageInput from './ImageInput'
-var sampleProfile = require('../data/sampleProfile.json')
 var chatStyles = require('../styles/chatStyles')
 
 import CustomIcon from '../styles/customicons'
@@ -67,7 +66,7 @@ import { makeResponsive } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
 
-const BG_IMAGE = ENV.splashBackground
+const BG_IMAGE = ENV.brandBackground
 const DropPage = utils.isWeb() && require('./DropPage')
 
 // DeviceHeight = Dimensions.get('window').height;
@@ -83,7 +82,8 @@ class NewResource extends Component {
     editCols: PropTypes.string,
     callback: PropTypes.func,
     returnRoute: PropTypes.object,
-    additionalInfo: PropTypes.bool
+    additionalInfo: PropTypes.bool,
+    doNotSend: PropTypes.bool
   };
 
   constructor(props) {
@@ -382,11 +382,6 @@ class NewResource extends Component {
         json[p] = this.floatingProps[p]
       }
     }
-    if (this.state.isRegistration) {
-      let sample = utils.clone(sampleProfile)
-      extend(sample, json)
-      json = sample
-    }
     var required = this.props.model.required;
     if (!required) {
       required = []
@@ -543,6 +538,7 @@ class NewResource extends Component {
       params.chat = this.props.chat
     // if (list)
     //   params.shareWith = list
+    params.doNotSend = this.props.doNotSend
     Actions.addItem(params)
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
@@ -841,7 +837,7 @@ class NewResource extends Component {
         submit = <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
                    <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
                      <View style={{backgroundColor: 'transparent', paddingHorizontal: 10, justifyContent: 'center'}}>
-                       <Text style={{fontSize: 24,color: bankStyle.CONTEXT_TEXT_COLOR}}>{translate('Next')}</Text>
+                       <Text style={{fontSize: 24,color: bankStyle.CONTEXT_TEXT_COLOR}}>{translate('next')}</Text>
                      </View>
                    </View>
                  </TouchableOpacity>

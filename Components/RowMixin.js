@@ -246,7 +246,7 @@ var RowMixin = {
                {arrow}
              </View>
    if (!isAccordion)
-      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
+      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, verification, verification)}>
                  {header}
                </TouchableHighlight>
 
@@ -282,6 +282,8 @@ var RowMixin = {
           orgs = verification.organization.title
         verifiedBy = translate('verifiedBy', orgs)
       }
+      else if (verification.document._notSent)
+        verifiedBy = translate('fromMyData')
       else
         verifiedBy = translate('sentTo', verification.organization.title)
 
@@ -316,7 +318,7 @@ var RowMixin = {
       else if (this.props.resource.documentCreated) {
         orgRow = <View style={chatStyles.shareView}>
                    {shareView}
-                  <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                  <TouchableHighlight onPress={this.props.onSelect.bind(this, verification, verification)} underlayColor='transparent'>
                     {orgView}
                   </TouchableHighlight>
                 </View>
@@ -334,14 +336,14 @@ var RowMixin = {
                           )}>
                     {shareView}
                    </TouchableHighlight>
-                   <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                   <TouchableHighlight onPress={this.props.onSelect.bind(this, verification, verification)} underlayColor='transparent'>
                      {orgView}
                    </TouchableHighlight>
                 </View>
       }
     }
     let content = <View style={{flex:1}}>
-                     <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                     <TouchableHighlight onPress={this.props.onSelect.bind(this, verification, verification)} underlayColor='transparent'>
                        {msg}
                      </TouchableHighlight>
                      {orgRow}

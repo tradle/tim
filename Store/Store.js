@@ -13,9 +13,8 @@ import ReactNative, {
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
-
+import createPoliteQueue from '../utils/polite-queue.js'
 const co = require('bluebird').coroutine
-
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin');
 
@@ -34,6 +33,10 @@ const QUEUED = 'Queued'
 var debug = Debug('tradle:app:store')
 var employee = require('../people/employee.json')
 
+const PHOTO_ID = 'tradle.PhotoID'
+const PERSONAL_INFO = 'tradle.PersonalInfo'
+const FRIEND = 'Friend'
+
 var Q = require('q');
 Q.longStackSupport = __DEV__
 Q.onerror = function (err) {
@@ -45,6 +48,7 @@ var ENV = require('../utils/env')
 
 var voc = require('@tradle/models');
 var sampleData = voc.data
+var sampleProfile = require('../data/sampleProfile.json')
 // var currencies = voc.currencies
 // var nationalities = voc.nationalities
 // var countries = voc.countries
@@ -111,7 +115,7 @@ const FORM_REQUEST        = 'tradle.FormRequest'
 const PAIRING_REQUEST     = 'tradle.PairingRequest'
 const PAIRING_RESPONSE    = 'tradle.PairingResponse'
 const PAIRING_DATA        = 'tradle.PairingData'
-const COUNTRY           = 'tradle.Country'
+const ITEM                = 'tradle.Item'
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 const REMEDIATION         = 'tradle.Remediation'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
@@ -120,6 +124,7 @@ const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 
 const WELCOME_INTERVAL = 600000
+const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 
 // var Tim = require('tim')
 // Tim.enableOptimizations()
@@ -169,6 +174,7 @@ var PORT = 51086
 var TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
 const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
+const ON_RECEIVED_PROGRESS = 0.66
 
 var models = {};
 var list = {};
@@ -235,6 +241,7 @@ const ENCRYPTION_KEY = 'accountkey'
 const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
+const POLITE_TASK_TIMEOUT = __DEV__ ? 60000 : 6000
 
 const {
   newAPIBasedVerification,
@@ -265,6 +272,14 @@ var Store = Reflux.createStore({
     this._loadedResourcesDefer = Q.defer()
     this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
+    this._politeQueue = createPoliteQueue({
+      wait: async function () {
+        await self.onIdle()
+        // give UI a chance to stutter a bit
+        await utils.promiseDelay(ENV.delayBetweenExpensiveTasks || 0)
+      },
+      timeout: POLITE_TASK_TIMEOUT
+    })
 
     NetInfo.isConnected.addEventListener(
       'change',
@@ -518,46 +533,29 @@ var Store = Reflux.createStore({
       overwrite: true,
       context: meDriver,
       methods: [
-        'sign',
-        'signAndSend',
-        'identityPublishStatus',
-        'createObject',
-        'receive'
-      ]
-    })
-
-    this.idlify({
-      overwrite: true,
-      context: meDriver.objects,
-      methods: [
-        'get'
-      ]
-    })
-
-    this.idlify({
-      overwrite: true,
-      context: meDriver.addressBook,
-      methods: [
-        'lookupIdentity',
-        'byPubKey'
+        'createObject'
       ]
     })
   },
 
-  idlify({ context, methods, overwrite }) {
+  idlify({ context, methods, overwrite, delay }) {
     const idlified = overwrite ? context : {}
     methods.forEach(method => {
-      idlified[method] = this.idlifyFunction(context[method], context)
+      idlified[method] = this.idlifyFunction({
+        fn: context[method].bind(context),
+        delay
+      })
     })
 
     return idlified
   },
 
-  idlifyFunction(fn, context) {
+  idlifyFunction({ fn, context, delay }) {
     const self = this
     return async function idlifiedFunction (...args) {
-      await self.onIdle()
-      return fn.apply(context || this, args)
+      return self._politeQueue.push(() => {
+        return fn(...args)
+      })
     }
   },
 
@@ -672,7 +670,7 @@ var Store = Reflux.createStore({
 
     // if (tlsKey) tlsKey = kiki.toKey(tlsKey).priv()
 
-    var tlsKey = driverInfo.tlsKey = TLS_ENABLED && meDriver.keys.filter(k => k.get('purpose') === 'tls')[0]
+    const tlsKey = driverInfo.tlsKey = TLS_ENABLED && meDriver.keys.filter(k => k.get('purpose') === 'tls')[0]
     // var fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
       const start = Date.now()
@@ -694,13 +692,12 @@ var Store = Reflux.createStore({
         messenger = url && wsClients.byUrl[url]
       }
 
+      const identifier = self.getIdentifier(recipientInfo)
       if (!messenger) {
+        meDriver.sender.pause(identifier)
         // Alert.alert('meDriver._send recipient not found ' + recipientHash)
         return cb(new Error('recipient not found'))
       }
-
-      const args = arguments
-      const identifier = self.getIdentifier(recipientInfo)
 
       debug(`pushing msg to ${identifier} into network stack`)
       // this timeout is not for sending the entire message
@@ -722,7 +719,8 @@ var Store = Reflux.createStore({
     //     this.initChats()
     // })
     .catch(function(err) {
-      debugger
+      debug('initial getInfo failed:', err)
+      throw err
     })
 
     return Q(meDriver)
@@ -956,6 +954,10 @@ var Store = Reflux.createStore({
           })
         })
         .catch(err => {
+          if (err instanceof TypeError || err instanceof ReferenceError) {
+            throw err
+          }
+
           // forgive individual errors for batch getInfo
           if (id || maxAttempts > 0) throw err
         })
@@ -1040,7 +1042,7 @@ var Store = Reflux.createStore({
     // save provider's employee
     // if (!hashToUrl[provider.hash]) {
     r.hashToUrl[provider.hash] = getProviderUrl(provider)
-    this.dbPut(SETTINGS + '_1', r)
+    return this.dbPut(SETTINGS + '_1', r)
     // }
   },
   addProvider(provider) {
@@ -1170,6 +1172,10 @@ var Store = Reflux.createStore({
     //   }
     // })
 
+    const receive = this.idlifyFunction({
+      fn: opts => this.receive({ ...opts, transport })
+    })
+
     transport.on('message', async function (msg, from) {
       debug('queuing receipt of msg from', from)
       if (!wsClients.byIdentifier[from]) {
@@ -1181,7 +1187,7 @@ var Store = Reflux.createStore({
       }
 
       const unlock = await self.lockReceive(from)
-      const maybePromise = receive(msg, from)
+      const maybePromise = receive({ msg, from })
       if (!Q.isPromiseAlike(maybePromise)) {
         return process.nextTick(unlock)
       }
@@ -1212,131 +1218,162 @@ var Store = Reflux.createStore({
       // self.trigger({action: 'onlineStatus', online: present})
       self.setProviderOnlineStatus(recipient, present)
     }
+  },
 
-    const receive = this.idlifyFunction(function receive (msg, from) {
-      try {
-        msg = tradleUtils.unserializeMessage(msg)
-        const payload = msg.object
-        debug(`receiving ${payload[TYPE]}`)
+  async receiveIntroduction({ transport, msg, org }) {
+    const { wsClients } = driverInfo
+    const payload = msg.object
+    const { identity } = payload
+    const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(identity)
+    await meDriver.addContactIdentity(identity)
+    await this.addContact(payload, rootHash, msg.forPartials || msg.forContext)
+    const url = utils.keyByValue(wsClients, transport)
+    await this.addToSettings({hash: rootHash, url: url})
+  },
 
-        let org = self._getItem(PROFILE + '_' + from).organization
-        self.trigger({action: 'progressUpdate', progress: 1, recipient: self._getItem(org)})
+  receiveSelfIntroduction({ transport, msg }) {
+    const payload = msg.object
+    const { wsClients } = driverInfo
+    const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    let name = payload.name
+    if (!name  ||  !name.length) {
+      name = payload.identity.name
+      if (name)
+        name = name.formatted
+    }
+    if (!name && payload.message)
+      name = payload.message.split(' ')[0]
 
-        if (payload.context) {
-          let s = PRODUCT_APPLICATION + '_' + payload.context
-          let r = list[s]
-        }
-        switch (payload[TYPE]) {
-        case INTRODUCTION:
-          let rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    // const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    Alert.alert(
+      translate('newContactRequest', name),
+      payload.message || null,
+      [
+        {text: translate('Ok'),
+        onPress: () => {
           return meDriver.addContactIdentity(payload.identity)
           .then(() => {
-            return self.addContact(payload, rootHash, msg.forPartials || msg.forContext)
+            return this.addContact(payload, rootHash)
           })
           .then(() => {
             const url = utils.keyByValue(wsClients, transport)
-            self.addToSettings({hash: rootHash, url: url})
+            this.addToSettings({hash: rootHash, url: url})
           })
-          break
-        case SELF_INTRODUCTION:
-          rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
-          let name = payload.name
-          if (!name  ||  !name.length) {
-            name = payload.identity.name
-            if (name)
-              name = name.formatted
-          }
-          if (!name && payload.message)
-            name = payload.message.split(' ')[0]
+        }},
+        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+      ]
+    )
+  },
 
-          // const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
-          Alert.alert(
-            translate('newContactRequest', name),
-            payload.message || null,
-            [
-              {text: translate('Ok'),
-              onPress: () => {
-                return meDriver.addContactIdentity(payload.identity)
-                .then(() => {
-                  return self.addContact(payload, rootHash)
-                })
-                .then(() => {
-                  const url = utils.keyByValue(wsClients, transport)
-                  self.addToSettings({hash: rootHash, url: url})
-                })
-              }},
-              {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-            ]
-          )
+  async receivePairingRequest({ payload }) {
+    const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    Alert.alert(
+      translate('pairingRequest'),
+      null,
+      [
+        {text: translate('Ok'),
+        onPress: () => {
+          this.trigger({action: 'acceptingPairingRequest', resource: payload})
+          // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
+          // .then(() => {
+          //   Alert.alert(translate('pairingRequestWasProcesseed'))
+          // })
+          // .catch((err) => {
+          //   debugger
+          // })
+        }},
+        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+      ]
+    )
+  },
 
-          // if (name)
-          //   name = name.charAt(0).toUpperCase() + name.slice(1)
+  async receive({ transport, msg, from }) {
+    const self = this
+    const { tlsKey, wsClients } = driverInfo
+    let progressUpdate
+    let willAnnounceProgress = willShowProgressBar(msg)
+    try {
+      msg = tradleUtils.unserializeMessage(msg)
+      const payload = msg.object
+      debug(`receiving ${payload[TYPE]}`)
 
-
-          return
-        default:
-          break
-        }
-      } catch (err) {
-        debug('experienced error receiving message: ' + (err.stack || err.message))
-        try {
-          // debugger
-          const payload = JSON.parse(msg)
-          if (payload[TYPE] === PAIRING_REQUEST) {
-            const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
-            Alert.alert(
-              translate('pairingRequest'),
-              null,
-              [
-                {text: translate('Ok'),
-                onPress: () => {
-                  self.trigger({action: 'acceptingPairingRequest', resource: payload})
-                  // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
-                  // .then(() => {
-                  //   Alert.alert(translate('pairingRequestWasProcesseed'))
-                  // })
-                  // .catch((err) => {
-                  //   debugger
-                  // })
-                }},
-                {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-              ]
-            )
-          }
-          // else if (payload[TYPE] === PAIRING_RESPONSE) {
-          //   return self.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
-          //   .then(() => {
-          //     debugger
-          //     Alert.alert('Pairing was successful')
-          //   })
-          //   .catch((err) => {
-          //     debugger
-          //     Alert.alert(err)
-        //   })
-          // }
-          return
-        } catch (err) {
-          return
-        }
+      let org = this._getItem(PROFILE + '_' + from).organization
+      progressUpdate = willAnnounceProgress && {
+        action: 'progressUpdate',
+        recipient: this._getItem(org)
       }
 
-      // const prop = 'pubKey'
-      // const identifier = tradle.utils.deserializePubKey(new Buffer(from, 'hex'))
-
-      const prop = tlsKey ? 'pubKey' : 'permalink'
-      const identifier = prop === 'permalink' ? from : {
-        type: 'ec',
-        curve: 'curve25519',
-        pub: new Buffer(from, 'hex')
+      if (payload.context) {
+        let s = PRODUCT_APPLICATION + '_' + payload.context
+        let r = list[s]
       }
 
-      meDriver.sender.resume(identifier)
-      return meDriver.receive(msg, { [prop]: identifier })
-        .catch(err => {
-          console.warn('failed to receive msg:', err, msg)
-          debugger
-        })
-    }, this)
+      switch (payload[TYPE]) {
+      case INTRODUCTION:
+        return this.receiveIntroduction({ transport, msg, org })
+      case SELF_INTRODUCTION:
+        return this.receiveSelfIntroduction({ transport, msg, org })
+      default:
+        break
+      }
+    } catch (err) {
+      debug('experienced error receiving message: ' + (err.stack || err.message))
+      if (progressUpdate) {
+        this.trigger({ ...progressUpdate, progress: 1 })
+      }
+
+      let payload
+      try {
+        // debugger
+        payload = JSON.parse(msg)
+      } catch (err) {
+        debug('received invalid json from ' + from)
+        return
+      }
+
+      if (payload[TYPE] === PAIRING_REQUEST) {
+        this.receivePairingRequest({ payload })
+      }
+
+      return
+
+      // else if (payload[TYPE] === PAIRING_RESPONSE) {
+      //   return self.onProcessPairingResponse(list[PAIRING_DATA + '_1'].value, payload)
+      //   .then(() => {
+      //     debugger
+      //     Alert.alert('Pairing was successful')
+      //   })
+      //   .catch((err) => {
+      //     debugger
+      //     Alert.alert(err)
+    //   })
+      // }
+    }
+
+    // const prop = 'pubKey'
+    // const identifier = tradle.utils.deserializePubKey(new Buffer(from, 'hex'))
+
+    const prop = tlsKey ? 'pubKey' : 'permalink'
+    const identifier = prop === 'permalink' ? from : {
+      type: 'ec',
+      curve: 'curve25519',
+      pub: new Buffer(from, 'hex')
+    }
+
+    if (progressUpdate) {
+      this.trigger({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
+    }
+
+    meDriver.sender.resume(identifier)
+    try {
+      await meDriver.receive(msg, { [prop]: identifier })
+    } catch (err) {
+      console.warn('failed to receive msg:', err, msg)
+    } finally {
+      if (progressUpdate) {
+        this.trigger({ ...progressUpdate, progress: 1 })
+      }
+    }
   },
   setProviderOnlineStatus(permalink, online) {
     if (!SERVICE_PROVIDERS) return
@@ -1412,9 +1449,9 @@ var Store = Reflux.createStore({
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
         let prevPercent
         sendy.on('progress', ({ total, progress }) => {
-          if (total < 30000) return // don't show progress bar for < 30KB
+          if (!willShowProgressBar({ length: total })) return // don't show progress bar for < 30KB
 
-          const percent = 100 * progress / total | 0
+          const percent = ON_RECEIVED_PROGRESS * 100 * progress / total | 0
           if (!percent || percent === prevPercent) return
 
           prevPercent = percent
@@ -1575,8 +1612,8 @@ var Store = Reflux.createStore({
     var org = this._getItem(okey)
     if (org) {
       // allow to unhide the previously hidden provider
-      if (newServer  &&  org.inactive)
-        org.inactive = false
+      if (newServer  &&  org._inactive)
+        org._inactive = false
       this.configProvider(sp, org)
       this._mergeItem(okey, sp.org)
       batch.push({type: 'put', key: okey, value: org})
@@ -1678,6 +1715,8 @@ var Store = Reflux.createStore({
   },
   configProvider(sp, org) {
     let config = sp.publicConfig
+    if (!config)
+      return
     let orgId = utils.getId(org)
     for (var p in config)
       org['_' + p] = config[p]
@@ -1712,7 +1751,7 @@ var Store = Reflux.createStore({
           if (props[p].ref  &&  utils.getModel(props[p].ref).value.subClassOf === ENUM) {
             let enumList = this.searchNotMessages({modelName: props[p].ref})
             let eprop = utils.getEnumProperty(utils.getModel(props[p].ref).value)
-            let val = enumList.filter((e3116Val) => eVal[eprop] === mObj[p])
+            let val = enumList.filter((eVal) => eVal[eprop] === mObj[p])
             if (val.length)
               mObj[p] = this.buildRef(val[0])
           }
@@ -1764,7 +1803,7 @@ var Store = Reflux.createStore({
         }
         profile._unread = 1
         if (noMessage)
-          profile.inactive = true
+          profile._inactive = true
       }
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
@@ -1795,8 +1834,8 @@ var Store = Reflux.createStore({
       if ((r  &&  r.bot) || noMessage)
         promise = Q()
       else {
-        if (profile.inactive) {
-          profile.inactive = false
+        if (profile._inactive) {
+          profile._inactive = false
           batch.push({type: 'put', key: pkey, value: profile })
         }
 
@@ -1880,8 +1919,8 @@ var Store = Reflux.createStore({
     if (to[TYPE] === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
-      if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
-        return
+      // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
+      //   return
       if (!orgRep) {
         var params = {
           action: 'addMessage',
@@ -2424,11 +2463,20 @@ var Store = Reflux.createStore({
       }
       if (!isReadOnly)
         this.addLastMessage(r, batch)
+      if (r.sources) {
+        let docId = utils.getId(r.document)
+        let docs = []
+        getDocs(r.sources, docId, docs)
+        let supportingDocs = docs.map((r) => this.buildRef(r))
+        let d = this._getItem(docId)
+        d._supportingDocuments = supportingDocs
+        this.dbPut(docId, d)
+        this._setItem(docId, d)
+      }
       return db.batch(batch)
     })
     .then(() => {
       this.addVisualProps(r)
-
       // var rr = {};
       // extend(rr, from);
       // rr.verifiedByMe = r;
@@ -2476,6 +2524,19 @@ var Store = Reflux.createStore({
       debugger
       err = err
     })
+    function getDocs(varr, rId, docs) {
+      if (!varr)
+        return
+      varr.forEach((v) => {
+        if (v.method) {
+          if (utils.getId(v.document) !== rId)
+            docs.push(v.document)
+        }
+        else if (v.sources)
+          self.getDocs(v.sources, rId, docs)
+      })
+    }
+
   },
   addVisualProps(r) {
     let from = this._getItem(r.from || me)
@@ -2559,18 +2620,21 @@ var Store = Reflux.createStore({
     }
     this.trigger({ resource: resource, action: action || 'getItem'});
   },
-  onExploreBacklink(resource, prop) {
+  onExploreBacklink(resource, prop, backlinkAdded) {
     let list = this.searchMessages({
       prop: prop,
       modelName: prop.items.ref,
       to: resource
     })
-    this.trigger({action: 'exploreBacklink', resource: resource, backlink: prop, list: list})
+    this.trigger({action: 'exploreBacklink', resource: resource, backlink: prop, list: list, backlinkAdded: backlinkAdded})
   },
   onGetDetails(resource) {
     this.trigger({action: 'showDetails', resource: resource})
   },
-
+  onGetDocuments(resource, docs) {
+    let list = docs.map((r) => this._getItem(utils.getId(r)))
+    this.trigger({action: 'showDocuments', list: list, resource: resource})
+  },
   getItem(resource) {
     var self = this;
     var modelName = resource[TYPE];
@@ -2706,6 +2770,7 @@ var Store = Reflux.createStore({
     // }
     this.trigger({action: 'getTemporary', resource: r})
   },
+
   async onAddAll(resource, to, message) {
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
@@ -2713,12 +2778,68 @@ var Store = Reflux.createStore({
     this.trigger({action: 'addItem', resource: r})
     this.dbPut(rId, r)
     let context = resource._context
-    await Q.all(resource.items.map((r) => {
-      r._context = context
-      r.to = to
-      r.from = me
-      return this.onAddItem({ resource: r, noTrigger: true })
-    }))
+    // prepare some whitespace
+    const numRows = 5
+    const white = ' '.repeat(40)
+    const messages = new Array(numRows).fill(white)
+    const title = `${translate('importing')}...          ` // extra whitespace on purpose
+
+    Actions.showModal({
+      title,
+      message: messages.join('\n')
+    })
+
+    for (let i = 0; i < resource.items.length; i++) {
+      await utils.promiseDelay(200)
+      let item = resource.items[i]
+      item._context = context
+      item.to = to
+      item.from = me
+      let itemType = utils.getType(item)
+      let itemModel = utils.getModel(itemType)
+      let displayName = ''
+      if (itemModel) displayName += itemModel.value.title + ': '
+
+      displayName += item.title || utils.getDisplayName(item)
+
+      if (i > 0) {
+        let last = messages.length - 1
+        messages[last] = messages[last].replace('importing', 'imported')
+      }
+
+      // let's not run out of room on the screen
+      let next = displayName // `importing "${displayName}"`
+      if (next.length > 30) {
+        next = next.slice(0, 27) + '...'
+      }
+
+      let idx = Math.min(numRows - 1, i)
+      if (messages[idx].trim()) {
+        messages.shift()
+        messages.push(next)
+      } else {
+        messages[idx] = next
+      }
+
+      Actions.showModal({
+        title,
+        message: messages.join('\n\n')
+      })
+
+      let promiseAddItem = this.onAddItem({ resource: item, noTrigger: true })
+      let promiseSentEvent = new Promise(resolve => meDriver.once('sent', resolve))
+      await Promise.all([
+        promiseAddItem,
+        Promise.race([
+          promiseSentEvent,
+          // force continue loop
+          utils.promiseDelay(2000)
+        ])
+      ])
+    }
+
+    await utils.promiseDelay(200)
+    Actions.hideModal()
 
     this.onAddMessage({msg: {
       [TYPE]: REMEDIATION_SIMPLE_MESSAGE,
@@ -2963,7 +3084,7 @@ var Store = Reflux.createStore({
         if (isRegistration)
           return handleRegistration()
         else if (isMessage)
-          return handleMessage(params.noTrigger, returnVal)
+          return handleMessage(params.noTrigger, returnVal, params.doNotSend)
         else
           return save(returnVal, isBecomingEmployee)
       })
@@ -3049,7 +3170,7 @@ var Store = Reflux.createStore({
           })
       }
 
-      function handleMessage (noTrigger, returnVal) {
+      function handleMessage (noTrigger, returnVal, doNotSend) {
         // TODO: fix hack
         // hack: we don't know root hash yet, use a fake
         if (returnVal.documentCreated)  {
@@ -3164,16 +3285,17 @@ var Store = Reflux.createStore({
             debugger
           }
 
-
-          let sendParams = {
-            to: {permalink: permalink},
-            link: hash,
-          }
-          if (returnVal._context)
-            sendParams.other = {
-              context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
+          if (!doNotSend) {
+            let sendParams = {
+              to: {permalink: permalink},
+              link: hash,
             }
-          return meDriver.send(sendParams)
+            if (returnVal._context)
+              sendParams.other = {
+                context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
+              }
+            return meDriver.send(sendParams)
+          }
         })
         .then(function (result) {
           if (readOnlyBacklinks.length) {
@@ -3189,6 +3311,8 @@ var Store = Reflux.createStore({
 
           delete returnVal._sharedWith
           delete returnVal.verifications
+          if (doNotSend)
+            returnVal._notSent = true
           return save(returnVal, true)
         })
         .then(() => {
@@ -3582,6 +3706,7 @@ var Store = Reflux.createStore({
         debugger
       })
     }
+
     // if (resource[TYPE] === VERIFICATION) {
     //   if (!Array.isArray(shareWithList))
     //     sharedWithList = [sharedWithList]
@@ -3634,7 +3759,12 @@ var Store = Reflux.createStore({
     document = this._getItem(utils.getId(document))
     let verifications = document.verifications
     let shareBatchId = new Date().getTime()
-    return this.shareForm(document, to, opts, formResource, shareBatchId)
+    let doShareDocument = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
+    let promise = doShareDocument
+                ? this.shareForm(document, to, opts, formResource, shareBatchId)
+                : Q()
+
+    return promise
     .then(() => {
       var documentId = utils.getId(document)
       if (r[TYPE] === FORM_REQUEST)
@@ -3642,9 +3772,10 @@ var Store = Reflux.createStore({
 
       this.dbBatchPut(key, r, batch)
       // utils.optimizeResource(document)
-      this.addLastMessage(document, batch, to)
-      this.dbBatchPut(documentId, document, batch)
-
+      if (doShareDocument) {
+        this.addLastMessage(document, batch, to)
+        this.dbBatchPut(documentId, document, batch)
+      }
       if (!verifications) {
         this.trigger({action: 'addItem', sendStatus: SENT, resource: document})
         document._sendStatus = SENT
@@ -3662,6 +3793,9 @@ var Store = Reflux.createStore({
           this.dbBatchPut(vId, v, batch)
 
           if (--all === 0) {
+            if (!doShareDocument)
+              this.addLastMessage(ver, batch, to)
+
             defer.resolve()
             return
           }
@@ -3682,6 +3816,15 @@ var Store = Reflux.createStore({
         if (!utils.isMyProduct(document))
           this.addSharedWith(document, document.to, document.time, shareBatchId)
       }
+      if (document._notSent) {
+        delete document._notSent
+        document._creationTime = document.time
+        document.time = new Date().getTime()
+        let docId = utils.getId(document)
+        this._setItem(docId, document)
+        this.dbPut(docId, document)
+      }
+
 
       this.addSharedWith(document, to, time, shareBatchId)
       this.addMessagesToChat(utils.getId(to.organization), document, false, time)
@@ -3813,7 +3956,7 @@ var Store = Reflux.createStore({
     if (!me) {
       await this.onAddItem({resource: {
               [constants.TYPE]: constants.TYPES.PROFILE,
-              firstName: 'Friend'
+              firstName: FRIEND
             }, isRegistration: true})
     }
 
@@ -3904,7 +4047,7 @@ var Store = Reflux.createStore({
           // }
         }
         else if (params.modelName === PROFILE) {
-          result = result.filter((r) => !r.inactive)
+          result = result.filter((r) => !r._inactive)
         }
 
         if (params.isAggregation)
@@ -4252,7 +4395,7 @@ var Store = Reflux.createStore({
         continue
       if (r.canceled)
         continue;
-      if (isOrg  &&  r.inactive)
+      if (isOrg  &&  r._inactive)
         continue
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
@@ -4704,7 +4847,7 @@ var Store = Reflux.createStore({
       }
       let isVerificationR = r[TYPE] === VERIFICATION
       let checkVal = isVerificationR ? self._getItem(r.document) : r
-      let fr = this.checkCriteria(r, query)
+      let fr = self.checkCriteria(r, query)
 
       // let checkProps = self.getModel(checkVal[TYPE]).value.properties
       // var combinedValue = '';
@@ -4732,12 +4875,21 @@ var Store = Reflux.createStore({
       let m = utils.getModel(r[TYPE]).value
       if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION)
         return true
+      if (r._notSent)
+        return true
       if (r._context       &&
           !params.prop     &&
           (m.subClassOf === FORM || m.id === VERIFICATION) &&
           self._getItem(utils.getId(r._context)).product === REMEDIATION) {
+        let org = m.subClassOf === FORM ? self._getItem(utils.getId(r.to)) : self._getItem(utils.getId(r.from))
+        let remMsg = self.searchMessages({modelName: REMEDIATION_SIMPLE_MESSAGE, to: org})
+        if (remMsg  &&  remMsg.length)
+          return r.time < remMsg[0].time + 30000
+
         return true
       }
+      if (r._inactive)
+        return true
       if (m.subClassOf === MY_PRODUCT  &&
           r._context                   &&
           self._getItem(utils.getId(r._context)).product === REMEDIATION)
@@ -5223,7 +5375,7 @@ var Store = Reflux.createStore({
         if (fromOrgId === toId)
           return
         var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
-        if (!document)
+        if (!document  ||  document._inactive)
           return;
 
         // Check if there is at least one verification by the listed in FormRequest verifiers
@@ -5438,8 +5590,12 @@ var Store = Reflux.createStore({
 
     var mid;
 
-    if (isRegistration)
+    if (isRegistration) {
+      let sample = utils.clone(sampleProfile)
+      extend(sample, value)
+      value = sample
       return this.registration(value)
+    }
 
     if (value[TYPE] === SETTINGS)
       return this.addSettings(value, params.maxAttempts ? params.maxAttempts : -1)
@@ -5504,6 +5660,13 @@ var Store = Reflux.createStore({
         this.trigger(params);
       }
       if (model.subClassOf === FORM) {
+        if (model.interfaces.indexOf(ITEM) !== -1) {
+          let {container, item} = getContainerProp(model)
+          if (value[container.name]) {
+            let cRes = this._getItem(utils.getId(value[container.name]))
+            this.onExploreBacklink(cRes, item, true)
+          }
+        }
         let mlist = this.searchMessages({modelName: FORM})
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
@@ -5514,7 +5677,24 @@ var Store = Reflux.createStore({
         this.trigger({action: 'addItem', error: err.message, resource: value})
       }
       err = err;
-    });
+    })
+    function getContainerProp(model) {
+      let props = model.properties
+      let refProps = utils.getPropertiesWithAnnotation(props, 'ref')
+      for (let p in refProps) {
+        let l = props[p]
+        let container = utils.getModel(l.ref).value
+        if (!utils.isMessage(container))
+          continue
+        let cProps = container.properties
+        let containerBl = utils.getPropertiesWithAnnotation(cProps, 'items')
+        for (let c in containerBl)  {
+          if (cProps[c].items.ref === model.id)
+            return {container: props[p], item: cProps[c]}
+        }
+
+      }
+    }
   },
   addLastMessage(value, batch, sharedWith) {
     let model = this.getModel(value[TYPE]).value
@@ -5601,6 +5781,7 @@ var Store = Reflux.createStore({
   registration(value) {
     var self = this
     isLoaded = true;
+
     me = value
     // meDriver = null
     var pKey = utils.getId(me)
@@ -6340,11 +6521,11 @@ var Store = Reflux.createStore({
     // return meDriver.ready()
   },
   dbPut(key, value) {
-    let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
+    let v = utils.isMessage(value)  &&  value[TYPE] !== CONFIRM_PACKAGE_REQUEST ? utils.optimizeResource(value, true) : value
     return db.put(key, v)
   },
   dbBatchPut(key, value, batch) {
-    let v = utils.isMessage(value) ? utils.optimizeResource(value, true) : value
+    let v = utils.isMessage(value)  &&  value[TYPE] !== CONFIRM_PACKAGE_REQUEST ? utils.optimizeResource(value, true) : value
     batch.push({type: 'put', key: key, value: v})
   },
   maybeWatchSeal(msg) {
@@ -6783,20 +6964,23 @@ var Store = Reflux.createStore({
         newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs)
         //============
         if (SERVICE_PROVIDERS && val.verifiers) {
-          val.message = 'Please have this form verified by one of our trusted associates'
+          if (!val.message) {
+            val.message = 'Please have this form verified by one of our trusted associates'
+          }
+
           val.verifiers.forEach((v) => {
-            let serviceProvider = SERVICE_PROVIDERS.filter((sp) => {
+            let serviceProvider = SERVICE_PROVIDERS.find((sp) => {
               if (!utils.urlsEqual(sp.url, v.url)) return
               if (v.id) return v.id === sp.id
 
               return v.permalink === sp.permalink
             })
 
-            if (serviceProvider  &&  serviceProvider.length) {
-              v.provider = serviceProvider[0].org
+            if (serviceProvider) {
+              v.provider = serviceProvider.org
               let org = self._getItem(v.provider)
               v.name = org.name
-              v.id = serviceProvider[0].id
+              v.id = serviceProvider.id
               v.photo = org.photos && org.photos[0].url
             }
             // else
@@ -6942,6 +7126,7 @@ var Store = Reflux.createStore({
     //     batch.push({type: 'put', key: key, value: val})
     // }
     // else {
+      let meId = utils.getId(to)
       if (val[TYPE] === MY_EMPLOYEE_PASS) {
         to.isEmployee = true
         to.organization = this.buildRef(org)
@@ -6949,6 +7134,33 @@ var Store = Reflux.createStore({
         to.organization._hasSupportLine = org._hasSupportLine
         this.setMe(to)
         batch.push({type: 'put', key: utils.getId(to), value: to})
+        if (to.firstName === FRIEND) {
+          let toRep = this.getRepresentative(utils.getId(org))
+          toRep = this._getItem(toRep)
+          let result = this.searchMessages({modelName: PERSONAL_INFO, to: org})
+          let fRes = result.filter((r) => utils.getId(r.from) === meId)
+          to.firstName = fRes[0].firstName
+          this._setItem(meId, to)
+          this.dbPut(meId, to)
+        }
+      }
+      else if (val[TYPE] === PHOTO_ID) {
+        let fromId = utils.getId(val.from)
+        let fr = this._getItem(fromId)
+        if (fr.firstName === FRIEND) {
+          let personal = val.scanJson.personal
+          if (personal) {
+            let firstName = personal.firstName
+            if (firstName) {
+              firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+              fr.firstName = firstName
+              this._setItem(fromId, fr)
+              this.dbPut(fromId, fr)
+
+              this.trigger({action: 'addItem', resource: fr})
+            }
+          }
+        }
       }
 
       this.addLastMessage(val, batch)
@@ -7090,11 +7302,15 @@ var Store = Reflux.createStore({
         isLoaded = true
         if (!myId  &&  data.key === MY_IDENTITIES) {
           myId = data.value.currentIdentity;
-          if (list[myId])
+          if (list[myId]) {
             me = this._getItem(myId)
+            utils.setMe(me)
+          }
         }
-        if (!me  &&  myId  && data.key == myId)
-          me = data.value;
+        if (!me  &&  myId  && data.key == myId) {
+          me = data.value
+          utils.setMe(me)
+        }
         if (data.value[TYPE] === PROFILE) {
           if (data.value.securityCode)
             employees[data.value.securityCode] = data.value
@@ -7197,7 +7413,7 @@ var Store = Reflux.createStore({
         }
       }
       if (me  &&  utils.isEmpty(chatMessages)) {
-        utils.setMe(me)
+        // utils.setMe(me)
         this.initChats()
       }
       if (SERVICE_PROVIDERS)
@@ -7285,6 +7501,7 @@ var Store = Reflux.createStore({
       promises.push(meDriver.forget(r[ROOT_HASH]))
     )
     var batch = []
+    var notDeleted = {}
     return Q.allSettled(promises)
     .then((result) => {
       result.forEach((data) => {
@@ -7327,7 +7544,33 @@ var Store = Reflux.createStore({
               if (idx !== -1)
                 sharedWith.splice(idx, 1)
             })
-
+            let contextId = res  &&  res._context  &&  utils.getId(res._context)
+            if (contextId) {
+              for (let i=0; i<batch.length; i++) {
+                if (batch[i].key === contextId  &&  batch[i].type === 'del') {
+                  batch.splice(i, 1)
+                  let c = this._getItem(contextId)
+                  c._inactive = true
+                  this.dbBatchPut(contextId, c, batch)
+                  notDeleted[contextId] = c
+                  break
+                }
+              }
+              notDeleted[contextId] = res._context
+            }
+            if (res[TYPE] === VERIFICATION) {
+              let documentId = utils.getId(res.document)
+              for (let i=0; i<batch.length; i++) {
+                if (batch[i].key === documentId  &&  batch[i].type === 'del') {
+                  batch.splice(i, 1)
+                  let doc = this._getItem(documentId)
+                  doc._inactive = true
+                  this.dbBatchPut(documentId, doc, batch)
+                  notDeleted[documentId] = doc
+                  break
+                }
+              }
+            }
             this.dbBatchPut(rId, res, batch)
           }
           if (isVerification) {
@@ -7362,18 +7605,22 @@ var Store = Reflux.createStore({
               }
             }
           }
-          if (deleted) {
+          if (deleted  &&  !notDeleted[rId]) {
             if (res._sharedWith) {
               res._sharedWith.forEach((r) => {
                 let org = this._getItem(r.bankRepresentative).organization
                 // this.deleteMessageFromChat(utils.getId(org), res)
               })
             }
-            delete list[rId]
+            // delete list[rId]
             // this.deleteMessageFromChat(orgId, r)
             batch.push({type: 'del', key: rId})
           }
         })
+      })
+      batch.forEach((r) => {
+        if (r.type === 'del')
+          delete list[r.key]
       })
       // this.trigger({action: 'messageList', list: [msg], resource: org, to: resource})
       this.trigger({action: 'messageList', list: [msg], to: org})
@@ -7406,6 +7653,7 @@ var Store = Reflux.createStore({
       org.lastMessage = null
       org.lastMessageTime = null
       org.lastMessageType = null
+      org.numberOfForms = 0
       self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: org})})
       batch.push({type: 'put', key: orgId, value: org})
       if (batch.length)
@@ -8012,7 +8260,7 @@ var Store = Reflux.createStore({
       cbs.forEach((fn) => fn())
     }
   },
-  async onIdle(fn) {
+  async onIdle() {
     if (utils.isWeb() || !this._transitioning) return
 
     debug('deferring job till transition finishes')
@@ -8142,6 +8390,14 @@ function fixOldSettings (settings) {
     }
   }
 }
+
+function willShowProgressBar ({ length }) {
+  return length >= MIN_SIZE_FOR_PROGRESS_BAR
+}
+
+// function midpoint (a, b) {
+//   return (a + b) / 2
+// }
 
   // searchFormsToShare(params) {
   //   var modelName = params.modelName;

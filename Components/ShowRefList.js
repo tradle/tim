@@ -33,10 +33,12 @@ import {
 import React, { Component } from 'react'
 
 import ENV from '../utils/env'
+const FORM = 'tradle.Form'
 
 class ShowRefList extends Component {
   constructor(props) {
     super(props);
+    this.state = {docs: null}
   }
   render() {
     var resource = this.props.resource;
@@ -50,13 +52,11 @@ class ShowRefList extends Component {
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
     let propsToShow = []
 
-    let bg
+
     let currentBacklink = this.props.backlink
-    let showDetails = !isIdentity  &&  (this.props.showDetails || !this.props.backlink)
-    if (showDetails)
-      bg = {backgroundColor: appStyle.CURRENT_TAB_COLOR}
-    else
-      bg = {}
+    let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
+    let showDocuments = this.props.showDocuments
+    let currentMarker = <View style={{backgroundColor: appStyle.CURRENT_UNDERLINE_COLOR, height: 4, marginTop: -5, alignSelf: 'stretch'}} />
 
     for (var p in props) {
       if (props[p].hidden)
@@ -71,14 +71,50 @@ class ShowRefList extends Component {
         continue;
       propsToShow.push(p)
     }
+    let isMessage = utils.isMessage(resource)
+
+    // Show supporting docs
+    if (isMessage) {
+      let rId = utils.getId(resource)
+      let docs
+      if (this.props.showDocuments) {
+        docs = this.props.backlinkList
+        this.state.docs = docs
+      }
+      else if (this.state.docs)
+        docs = this.state.docs
+      else {
+        docs = []
+        this.getDocs(resource.verifications, rId, docs)
+      }
+      if (docs  &&  docs.length) {
+        let count = <View style={styles.count}>
+                      <Text style={styles.countText}>{docs.length}</Text>
+                    </View>
+        let showCurrent = showDocuments ? currentMarker : null
+        refList.push(
+          <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+           <TouchableHighlight onPress={() => this.showDocs(docs)} underlayColor='transparent'>
+             <View style={styles.item}>
+               <View style={{flexDirection: 'row'}}>
+                 <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
+                 {count}
+               </View>
+               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Documents'}</Text>
+             </View>
+           </TouchableHighlight>
+           {showCurrent}
+          </View>)
+      }
+    }
     if (!propsToShow.length) {
       if (!showDetails)
         return <View/>
     }
-
-    else if (!isIdentity)
+    else if (!isIdentity) {
+      let showCurrent = showDetails ? currentMarker : null
       refList.push(
-        <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
          <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
            <View style={styles.item}>
              <View style={{flexDirection: 'row'}}>
@@ -87,8 +123,10 @@ class ShowRefList extends Component {
              <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
            </View>
          </TouchableHighlight>
+         {showCurrent}
         </View>
       )
+    }
     if (model.viewCols) {
       let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items  &&  props[p].items.backlink)
       if (vCols) {
@@ -115,17 +153,17 @@ class ShowRefList extends Component {
       let count = resource[p]  &&  resource[p].length
       if (count) {
         hasBacklinks = true
-        if (!currentBacklink && !showDetails)
+        if (!currentBacklink  &&  !showDetails &&  !showDocuments)
           currentBacklink = props[p]
         count = <View style={styles.count}>
                   <Text style={styles.countText}>{count}</Text>
                 </View>
       }
-      let bg = currentBacklink  &&  currentBacklink.name === p
-             ? {backgroundColor: appStyle.CURRENT_TAB_COLOR}
-             : {}
+
+      let showCurrent = currentBacklink  &&  currentBacklink.name === p ? currentMarker : null
+
       refList.push(
-        <View style={[buttonStyles.container, bg, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.exploreBacklink.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={styles.item}>
                <View style={{flexDirection: 'row'}}>
@@ -135,6 +173,7 @@ class ShowRefList extends Component {
                <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
              </View>
            </TouchableHighlight>
+           {showCurrent}
          </View>
         );
     })
@@ -154,10 +193,10 @@ class ShowRefList extends Component {
     }
     // explore current backlink
     let backlinkRL, details
-    if (!showDetails  && currentBacklink) {
+    if (!showDetails  && (currentBacklink  ||  (this.props.backlinkList  &&  this.props.showDocuments))) {
       var ResourceList = require('./ResourceList')
       backlinkRL = <ResourceList
-                      modelName={currentBacklink.items.ref}
+                      modelName={showDocuments ? FORM : currentBacklink.items.ref}
                       prop={currentBacklink}
                       resource={resource}
                       isBacklink={true}
@@ -165,7 +204,7 @@ class ShowRefList extends Component {
                       navigator={this.props.navigator} />
     }
     if (showDetails) {
-      if (utils.isMessage(resource))
+      if (isMessage)
         details = <ShowPropertiesView { ...this.props }/>
       else
         details = <ShowPropertiesView resource={resource}
@@ -196,9 +235,24 @@ class ShowRefList extends Component {
               </View>
     return this.props.children || <View/>
   }
+  getDocs(varr, rId, docs) {
+    if (!varr)
+      return
+    varr.forEach((v) => {
+      if (v.method) {
+        if (utils.getId(v.document) !== rId)
+          docs.push(v.document)
+      }
+      else if (v.sources)
+        this.getDocs(v.sources, rId, docs)
+    })
+  }
 
   exploreBacklink(resource, prop) {
     Actions.exploreBacklink(resource, prop)
+  }
+  showDocs(docs) {
+    Actions.getDocuments(this.props.resource, docs)
   }
   showDetails() {
     Actions.getDetails(this.props.resource)

@@ -654,12 +654,12 @@ var NavigationBarRouteMapper = {
     var style = {}
     switch (rbTitle) {
     case 'Done':
-      if (route.passProps.bankStyle  &&  route.passProps.bankStyle.submitBarInFooter)
-        return
+      // if (route.passProps.bankStyle  &&  route.passProps.bankStyle.submitBarInFooter)
+      //   return
     case 'Accept':
       icon = 'ios-send'
       iconSize = 32
-      style = {marginTop: 0}
+      style = {marginTop: utils.isAndroid() ? 15 :  0}
       // style = {marginTop: 5, transform: [
       //     {rotate: '45deg'}
       //   ]}
@@ -746,8 +746,9 @@ var NavigationBarRouteMapper = {
       org = <View />;
     let photo, uri
     let photoObj
-    if (route.passProps.bankStyle)
-      photoObj = route.passProps.bankStyle.logo
+    if (route.passProps.bankStyle) {
+      photoObj = route.passProps.bankStyle.LOGO || route.passProps.bankStyle.logo
+    }
 
     if (!photoObj)
       photoObj = route.id === MESSAGE_LIST        &&
@@ -755,7 +756,7 @@ var NavigationBarRouteMapper = {
                  route.passProps.resource.photos[0]
     if (photoObj)
       uri = utils.getImageUri(photoObj.url);
-    if (route.id === REMEDIATION) {
+    else if (route.id === REMEDIATION) {
       photoObj = route.passProps.to.photos  &&  route.passProps.to.photos[0]
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
@@ -837,7 +838,7 @@ var styles = StyleSheet.create({
   icon: {
     width: 25,
     height: 25,
-    marginTop: Platform.OS === 'web' ? 0 : Platform.OS === 'android' ? 19 : 10
+    marginTop: Platform.OS === 'web' ? 0 : Platform.OS === 'android' ? 15 : 0
   },
   row: {
     flexDirection: 'row'
