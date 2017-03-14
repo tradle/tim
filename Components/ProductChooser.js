@@ -1,5 +1,6 @@
 'use strict';
 
+import uniq from 'uniq'
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -35,7 +36,7 @@ class ProductChooser extends Component {
     var orgProducts = this.props.resource.products
     if (orgProducts) {
       orgProducts.forEach(function(m) {
-        products.push(utils.getModel(m).value)
+        products.push(getModel(m))
       })
     }
     else if (this.props.products) {
@@ -71,20 +72,23 @@ class ProductChooser extends Component {
         if (params.resource.products) {
           if (equal(params.resource.products, this.props.resource.products))
             return
-          params.resource.products.forEach((m) => products.push(utils.getModel(m).value))
+
+          products = params.resource.products.map(getModel)
         }
       }
       else if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE   ||
                this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
-        if (this.props.context  &&  this.props.context.product !== REMEDIATION)
-          utils.getModel(this.props.context.product).value.forms.forEach((f) => products.push(utils.getModel(f).value))
+        if (this.props.context  &&  this.props.context.product !== REMEDIATION) {
+          const productModel = utils.getModel(this.props.context.product).value
+          products = getForms(productModel)
+        }
         else if (params.resource.products  &&  params.resource.products.length) {
-          params.resource.products.forEach((r) => {
-            let m = utils.getModel(r).value
-            m.forms.forEach((f) => products.push(utils.getModel(f).value))
-            if (m.additionalForms)
-              m.additionalForms.forEach((f) => products.push(utils.getModel(f).value))
-          })
+          products = params.resource.products
+            .map(getModel)
+            .map(getForms)
+            .reduce((all, batch) => all.concat(batch))
+
+          products = uniq(products)
         }
         else
           products = utils.getAllSubclasses(constants.TYPES.FORM)
@@ -260,6 +264,16 @@ class ProductChooser extends Component {
     );
   }
 }
+
+function getModel (id) {
+  return utils.getModel(id).value
+}
+
+function getForms (model) {
+  const all = model.forms.concat(model.additionalForms || [])
+  return all.map(id => utils.getModel(id).value)
+}
+
 reactMixin(ProductChooser.prototype, Reflux.ListenerMixin);
 
 var styles = StyleSheet.create({

@@ -146,6 +146,7 @@
     "tcomb-validation": "^3.2.1",
     "thunky": "^0.1.0",
     "typeforce": "^1.5.5",
+    "uniq": "1.0.1",
     "url": "^0.10.3",
     "util": "^0.10.3",
     "vm-browserify": "0.0.4",
