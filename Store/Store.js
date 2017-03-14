@@ -4846,7 +4846,7 @@ var Store = Reflux.createStore({
         let org = m.subClassOf === FORM ? self._getItem(utils.getId(r.to)) : self._getItem(utils.getId(r.from))
         let remMsg = self.searchMessages({modelName: REMEDIATION_SIMPLE_MESSAGE, to: org})
         if (remMsg  &&  remMsg.length)
-          return r.time < remMsg[0].time
+          return r.time < remMsg[0].time + 30000
 
         return true
       }
