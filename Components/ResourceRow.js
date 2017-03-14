@@ -607,7 +607,7 @@ var styles = StyleSheet.create({
   },
   cellImage: {
     backgroundColor: '#ffffff',
-    // height: 60,
+    height: 60,
     marginRight: 10,
     width: 60,
     // borderColor: '#7AAAc3',
