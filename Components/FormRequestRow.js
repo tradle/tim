@@ -86,7 +86,7 @@ class FormRequestRow extends Component {
     let prop =  this.isOnePropForm()
     let bankStyle = this.props.bankStyle
     var w = utils.dimensions(FormRequestRow).width
-    let msgWidth = Math.floor(w * 0.8)
+    let msgWidth = Math.floor(w * 0.7)
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow, prop)
     else {
@@ -144,8 +144,6 @@ class FormRequestRow extends Component {
     if (formTitle.length > message.length)
       message = formTitle
     // HACK
-    var w = utils.dimensions(FormRequestRow).width
-    let msgWidth = Math.floor(w * 0.7)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     var viewStyle = {flexDirection: 'row', borderTopRightRadius: 10, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
@@ -394,8 +392,8 @@ class FormRequestRow extends Component {
                    {headerContent}
                    {arrow}
                  </View>
-   let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
-   if (!isAccordion)
+    let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
+    if (!isAccordion)
       header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
                  {header}
                </TouchableHighlight>
