@@ -855,6 +855,7 @@ class TimHome extends Component {
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
         <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
+          <View style={{flexGrow: 1}}/>
           <View>
             { utils.getMe()
               ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
