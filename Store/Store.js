@@ -1413,7 +1413,7 @@ var Store = Reflux.createStore({
   },
 
   getIdentifierPubKey(identityInfo) {
-    identityInfo = identityInfo || meDriver
+    identityInfo = identityInfo || meDriver.identityInfo
     const purpose = TLS_ENABLED ? 'tls' : 'sign'
     const key = tradleUtils.find(identityInfo.keys || identityInfo.object.pubkeys, k => {
       const kPurpose = k.purpose || k.get('purpose')
@@ -2118,10 +2118,9 @@ var Store = Reflux.createStore({
       // SelfIntroduction or IdentityPublishRequest were just sent
       if (noCustomerWaiting)
         return
-      if (isReadOnlyContext) {
-        let context = self._getItem(r._context)
+      if (isReadOnlyContext)
         return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
-      }
+
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
@@ -4507,12 +4506,6 @@ var Store = Reflux.createStore({
       result = retOrgs
     }
     return result
-  },
-  _searchMessages(params) {
-    return this._loadedResourcesDefer.promise
-      .then(() => {
-        return this.searchMessages(params)
-      })
   },
   getEnum(params) {
     let result
