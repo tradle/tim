@@ -2616,13 +2616,13 @@ var Store = Reflux.createStore({
     }
     this.trigger({ resource: resource, action: action || 'getItem'});
   },
-  onExploreBacklink(resource, prop) {
+  onExploreBacklink(resource, prop, forceUpdate) {
     let list = this.searchMessages({
       prop: prop,
       modelName: prop.items.ref,
       to: resource
     })
-    this.trigger({action: 'exploreBacklink', resource: resource, backlink: prop, list: list})
+    this.trigger({action: 'exploreBacklink', resource: resource, backlink: prop, list: list, forceUpdate: forceUpdate})
   },
   onGetDetails(resource) {
     this.trigger({action: 'showDetails', resource: resource})
@@ -5627,7 +5627,7 @@ var Store = Reflux.createStore({
           let {container, item} = getContainerProp(model)
           if (value[container.name]) {
             let cRes = this._getItem(utils.getId(value[container.name]))
-            this.onExploreBacklink(cRes, item)
+            this.onExploreBacklink(cRes, item, true)
           }
         }
         let mlist = this.searchMessages({modelName: FORM})
@@ -5653,7 +5653,7 @@ var Store = Reflux.createStore({
         let containerBl = utils.getPropertiesWithAnnotation(cProps, 'items')
         for (let c in containerBl)  {
           if (cProps[c].items.ref === model.id)
-            return {container: props[p], item: cProp[c]}
+            return {container: props[p], item: cProps[c]}
         }
 
       }
