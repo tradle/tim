@@ -7265,11 +7265,15 @@ var Store = Reflux.createStore({
         isLoaded = true
         if (!myId  &&  data.key === MY_IDENTITIES) {
           myId = data.value.currentIdentity;
-          if (list[myId])
+          if (list[myId]) {
             me = this._getItem(myId)
+            utils.setMe(me)
+          }
         }
-        if (!me  &&  myId  && data.key == myId)
-          me = data.value;
+        if (!me  &&  myId  && data.key == myId) {
+          me = data.value
+          utils.setMe(me)
+        }
         if (data.value[TYPE] === PROFILE) {
           if (data.value.securityCode)
             employees[data.value.securityCode] = data.value
@@ -7372,7 +7376,7 @@ var Store = Reflux.createStore({
         }
       }
       if (me  &&  utils.isEmpty(chatMessages)) {
-        utils.setMe(me)
+        // utils.setMe(me)
         this.initChats()
       }
       if (SERVICE_PROVIDERS)
