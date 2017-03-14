@@ -3815,6 +3815,8 @@ var Store = Reflux.createStore({
       }
       if (document._notSent) {
         delete document._notSent
+        document._creationTime = document.time
+        document.time = new Date().getTime()
         let docId = utils.getId(document)
         this._setItem(docId, document)
         this.dbPut(docId, document)
