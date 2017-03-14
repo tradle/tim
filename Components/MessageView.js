@@ -172,7 +172,8 @@ class MessageView extends Component {
       passProps: {
         model: model,
         bankStyle: this.props.style,
-      resource: r,
+        resource: r,
+        doNotSend: true,
         callback: (resource) => {
           self.props.navigator.pop()
         }

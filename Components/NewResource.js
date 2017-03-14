@@ -77,7 +77,8 @@ class NewResource extends Component {
     editCols: PropTypes.string,
     callback: PropTypes.func,
     returnRoute: PropTypes.object,
-    additionalInfo: PropTypes.bool
+    additionalInfo: PropTypes.bool,
+    doNotSend: PropTypes.bool
   };
 
   constructor(props) {
@@ -518,6 +519,7 @@ class NewResource extends Component {
       params.chat = this.props.chat
     // if (list)
     //   params.shareWith = list
+    params.doNotSend = this.props.doNotSend
     Actions.addItem(params)
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
