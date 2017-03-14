@@ -96,10 +96,10 @@ class MessageView extends Component {
       })
     }
     else if (params.action === 'exploreBacklink') {
-      if (params.backlink !== this.state.backlink)
+      if (params.backlink !== this.state.backlink || params.backlinkAdded) {
         this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false, showDocuments: false})
-      else if (params.backlinkAdded)
         Actions.getItem(this.props.resource)
+      }
     }
     else if (params.action === 'showDetails')
       this.setState({showDetails: true, backlink: null, backlinkList: null, showDocuments: false})
@@ -157,7 +157,7 @@ class MessageView extends Component {
 
     // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
     //   r.relatedTo = this.props.resource.relatedTo;
-
+    let me = utils.getMe()
     r.from = this.props.resource.from
     r.to = this.props.resource.to
     r._context = this.props.resource._context
