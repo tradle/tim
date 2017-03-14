@@ -2616,13 +2616,13 @@ var Store = Reflux.createStore({
     }
     this.trigger({ resource: resource, action: action || 'getItem'});
   },
-  onExploreBacklink(resource, prop, forceUpdate) {
+  onExploreBacklink(resource, prop, backlinkAdded) {
     let list = this.searchMessages({
       prop: prop,
       modelName: prop.items.ref,
       to: resource
     })
-    this.trigger({action: 'exploreBacklink', resource: resource, backlink: prop, list: list, forceUpdate: forceUpdate})
+    this.trigger({action: 'exploreBacklink', resource: resource, backlink: prop, list: list, backlinkAdded: backlinkAdded})
   },
   onGetDetails(resource) {
     this.trigger({action: 'showDetails', resource: resource})
@@ -3308,6 +3308,8 @@ var Store = Reflux.createStore({
 
           delete returnVal._sharedWith
           delete returnVal.verifications
+          if (doNotSend)
+            returnVal._notSent = true
           return save(returnVal, true)
         })
         .then(() => {
@@ -3701,6 +3703,7 @@ var Store = Reflux.createStore({
         debugger
       })
     }
+
     // if (resource[TYPE] === VERIFICATION) {
     //   if (!Array.isArray(shareWithList))
     //     sharedWithList = [sharedWithList]
@@ -3810,6 +3813,13 @@ var Store = Reflux.createStore({
         if (!utils.isMyProduct(document))
           this.addSharedWith(document, document.to, document.time, shareBatchId)
       }
+      if (document._notSent) {
+        delete document._notSent
+        let docId = utils.getId(document)
+        this._setItem(docId, document)
+        this.dbPut(docId, document)
+      }
+
 
       this.addSharedWith(document, to, time, shareBatchId)
       this.addMessagesToChat(utils.getId(to.organization), document, false, time)
@@ -4839,6 +4849,8 @@ var Store = Reflux.createStore({
       let m = utils.getModel(r[TYPE]).value
       if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION)
         return true
+      if (r._notSent)
+        return true
       if (r._context       &&
           !params.prop     &&
           (m.subClassOf === FORM || m.id === VERIFICATION) &&
@@ -5648,7 +5660,7 @@ var Store = Reflux.createStore({
         let l = props[p]
         let container = utils.getModel(l.ref).value
         if (!utils.isMessage(container))
-          return
+          continue
         let cProps = container.properties
         let containerBl = utils.getPropertiesWithAnnotation(cProps, 'items')
         for (let c in containerBl)  {

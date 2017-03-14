@@ -98,6 +98,8 @@ class MessageView extends Component {
     else if (params.action === 'exploreBacklink') {
       if (params.backlink !== this.state.backlink)
         this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false, showDocuments: false})
+      else if (params.backlinkAdded)
+        Actions.getItem(this.props.resource)
     }
     else if (params.action === 'showDetails')
       this.setState({showDetails: true, backlink: null, backlinkList: null, showDocuments: false})
