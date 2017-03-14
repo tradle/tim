@@ -15,7 +15,7 @@ var PasswordGesture = require('react-native-gesture-password')
 var utils = require('../utils/utils')
 var MIN_LENGTH = 5
 var Password1 = ''
-var BG_IMAGE = ENV.splashBackground
+var BG_IMAGE = ENV.brandBackground
 var MODES = {
   check: 'check',
   set: 'set'

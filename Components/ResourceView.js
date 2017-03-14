@@ -21,7 +21,6 @@ var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
-var defaultAppStyle = require('../styles/appStyle.json')
 var ENV = require('../utils/env')
 var StyleSheet = require('../StyleSheet')
 var extend = require('extend');
@@ -113,7 +112,7 @@ class ResourceView extends Component {
   }
   handleEvent(params) {
     let isMe = utils.isMe(this.props.resource)
-    if (params.resource  &&  params.resource[ROOT_HASH] !== this.props.resource[ROOT_HASH]) {
+    if (params.resource  &&  utils.getId(params.resource) !== utils.getId(this.props.resource)) {
       if (isMe) {
         if (params.action === 'addItem') {
           let m = utils.getModel(params.resource[TYPE]).value

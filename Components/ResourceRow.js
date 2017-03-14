@@ -46,6 +46,7 @@ const MONEY = constants.TYPES.MONEY
 // const CHAR_WIDTH = 7
 const DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
+const MAX_LENGTH = 70
 
 var dateProp
 
@@ -122,7 +123,7 @@ class ResourceRow extends Component {
       }
       if (uri.indexOf('/var/mobile/') === 0)
         params.isStatic = true
-      photo = <Image source={params} style={styles.cellImage}  key={this.getNextKey()} />;
+      photo = <Image source={params} style={styles.cellImage} resizeMode="contain" key={this.getNextKey()} />;
     }
     else {
       if (isContact) {
@@ -138,9 +139,9 @@ class ResourceRow extends Component {
         var model = utils.getModel(resource[TYPE]).value;
         var icon = model.icon;
         if (icon)
-          photo = <View style={styles.cellImage}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
+          photo = <View style={styles.cell}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
         else if (model.properties.photos)
-          photo = <View style={styles.cellImage} />
+          photo = <View style={styles.cell} />
         else {
           photo = <View style={styles.cellNoImage} />
           noImage = true
@@ -234,7 +235,7 @@ class ResourceRow extends Component {
         <View key={this.getNextKey()} style={[{opacity: 0.5}, styles.rowWrapper]}>
           <View style={styles.row} key={this.getNextKey()}>
             {photo}
-            <View style={[textStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+            <View style={[textStyle, {flexDirection: 'row', justifyContent: 'center'}]}>
               {this.formatRow(resource, style)}
             </View>
             {dateRow}
@@ -391,6 +392,7 @@ class ResourceRow extends Component {
     var isOfficialAccounts = this.props.isOfficialAccounts
     var color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
     var isContact = resource[TYPE] === PROFILE;
+    var logoNeedsText = resource.style  ? resource.style.LOGO_NEEDS_TEXT : true
     viewCols.forEach((v) => {
       if (v === dateProp)
         return;
@@ -399,7 +401,7 @@ class ResourceRow extends Component {
 
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
-      var style = first ? [styles.resourceTitle, color] : [styles.description, color]
+      var style = first && logoNeedsText ? [styles.resourceTitle, color] : [styles.description, color]
       if (isContact  &&  v === 'organization') {
         style.push({alignSelf: 'flex-end', marginTop: 20})
         style.push(styles.verySmallLetters);
@@ -441,9 +443,24 @@ class ResourceRow extends Component {
             for (let i=0; i<msgParts.length - 1; i++)
               val += msgParts[i];
           }
+          val = val.replace(/\*/g, '')
+          if (isOfficialAccounts  &&  v !== 'lastMessage'  &&  !logoNeedsText)
+            return
           if (isOfficialAccounts  &&  v === 'lastMessage') {
             let isMyLastMessage = val.indexOf('You: ') !== -1
             let lastMessageTypeIcon = <View/>
+            if (val.length > MAX_LENGTH) {
+              val = val.substring(0, MAX_LENGTH)
+              let i = MAX_LENGTH - 1
+              for (; i>=MAX_LENGTH - 10; i--) {
+                let ch = val.charAt(i)
+                if (ch === ' ' || ch === '.' || ch === ',') {
+                  val = val.substring(0, i)
+                  break
+                }
+              }
+              val += '...'
+            }
             if (isMyLastMessage) {
               val = val.substring(5)
               let lastMessageType = resource.lastMessageType
@@ -582,12 +599,17 @@ var styles = StyleSheet.create({
     fontSize: 20,
     backgroundColor: 'transparent'
   },
+  cell: {
+    backgroundColor: '#ffffff',
+    height: 60,
+    marginRight: 10,
+    width: 60,
+  },
   cellImage: {
     backgroundColor: '#ffffff',
     // height: 60,
     marginRight: 10,
     width: 60,
-    resizeMode: 'contain',
     // borderColor: '#7AAAc3',
     // borderRadius: 30,
     // borderWidth: 1,

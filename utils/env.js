@@ -18,6 +18,11 @@ try {
 const LOCAL_IP = window.location.hostname
 
 const splash = {
+  tradle: require('../img/splash1536x2048.png'),
+  aviva: require('../img/Aviva.png')
+}
+
+const brandBG = {
   tradle: require('../img/bg.png'),
   aviva: require('../img/Aviva.png')
 }
@@ -61,6 +66,7 @@ const merged = extend({
   requireSoftPIN: Platform.OS === 'web',
   canUseWebcam: !!getUserMedia,
   locale: locale,
+  autoRegister: false,
   // timeout after partial scan results have been processed
   blinkIDScanTimeoutInternal: 10000,
   // timeout from beginning to end of scan operation
@@ -68,8 +74,15 @@ const merged = extend({
   registerForPushNotifications: true,
   hideVerificationsInChat: false,
   hideProductApplicationInChat: false,
-  splashBackground: 'tradle'
+  landingPage: null, //"AvivaIntroView",
+  showCollapsed: null, //{'tradle.PhotoID': 'document'}
+  splashBackground: 'tradle',
+  brandBackground: 'tradle',
+  delayBetweenExpensiveTasks: 100,
+  appName: 'Tradle'
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
+merged.brandBackground = brandBG[merged.brandBackground]
+
 exports = module.exports = merged

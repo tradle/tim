@@ -352,7 +352,16 @@ class MessageList extends Component {
     if (!resource[TYPE])
       return;
     var model = utils.getModel(resource[TYPE]).value;
-    var title = utils.makeModelTitle(model) //utils.getDisplayName(resource, model.properties);
+    var title //utils.getDisplayName(resource, model.properties);
+
+    if (resource[TYPE] === constants.TYPES.VERIFICATION) {
+      let type = utils.getType(resource.document)
+      if (type)
+        title = translate(utils.getModel(type).value)
+    }
+    if (!title)
+      title = translate(utils.makeModelTitle(model))
+
     var newTitle = title;
     let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
@@ -541,17 +550,19 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
 
-      let hideTextInput = !utils.hasSupportLine(resource)
+      let hideTextInput = !utils.hasSupportLine(resource)  &&  !ENV.allowForgetMe
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
       // Chooser for trusted party verifier
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
-      if (!isChooser  &&  (!this.state.isConnected  ||  !this.state.onlineStatus)) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
-        maxHeight -=  35
-      if (((this.state.context  &&  this.state.context.product !== REMEDIATION)         ||
-          (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION)) &&
-          (this.props.resource.products  &&  this.props.resource.products.length > 1))
+      let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
+                           (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION)
+      if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  !this.state.onlineStatus)) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
+        maxHeight -= 35
+      if (notRemediation  &&  (this.props.resource.products  &&  this.props.resource.products.length > 1))
         maxHeight -= 45
+      // else if (ENV.allowForgetMe)
+      //   maxHeight -= 45
       if (hideTextInput)
       //   maxHeight += 35
         maxHeight -= 10
@@ -629,9 +640,9 @@ class MessageList extends Component {
     let me = utils.getMe()
     let actionSheet = this.renderActionSheet()
     let context = this.state.context
-    // let network
-    // if (this.props.originatingMessage)
-    let network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
+    let network
+    if (this.props.originatingMessage)
+       network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
     if (!context  &&  this.props.resource[TYPE] === PRODUCT_APPLICATION)
       context = this.props.resource
     let separator = {}
@@ -645,7 +656,7 @@ class MessageList extends Component {
       return (
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
           {network}
-          <ProgressInfo />
+          <ProgressInfo recipient={resource[ROOT_HASH]} />
           <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
           <View style={ sepStyle } />
           {content}
@@ -660,7 +671,7 @@ class MessageList extends Component {
       <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
         <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
           {network}
-          <ProgressInfo />
+          <ProgressInfo recipient={resource[ROOT_HASH]} />
           <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={this.props.bankStyle} allContexts={this.state.allContexts} />
           <View style={ sepStyle } />
           {content}
@@ -679,39 +690,60 @@ class MessageList extends Component {
     let resource = this.props.resource
     let me = utils.getMe()
     let hasSupportLine = utils.hasSupportLine(resource)
-    if (!hasSupportLine)
-      return
     let buttons = []
-    let isOrg = resource[TYPE] === TYPES.ORGANIZATION
     let cancelIndex = 1
-    if (this.state.isEmployee  &&  !isOrg) {
-      cancelIndex++
-      buttons.push({
-        index: 0,
-        title: translate('formChooser'),
-        callback: () => this.chooseFormForCustomer()
-      })
-    }
-    else {
-      if (!this.state.isEmployee) {
-        if (this.state.hasProducts) {
+
+    if (hasSupportLine) {
+      let isOrg = this.props.resource[TYPE] === TYPES.ORGANIZATION
+      if (this.state.isEmployee  &&  !isOrg) {
+        cancelIndex++
+        buttons.push({
+          index: 0,
+          title: translate('formChooser'),
+          callback: () => this.chooseFormForCustomer()
+        })
+      }
+      else {
+        if (!this.state.isEmployee) {
+          if (this.state.hasProducts) {
+            buttons.push({
+              index: cancelIndex,
+              title: translate('applyForProduct'),
+              callback: () => this.onChooseProduct()
+            })
+            cancelIndex++
+          }
+        }
+        if (ENV.allowForgetMe) {
           buttons.push({
             index: cancelIndex,
-            title: translate('applyForProduct'),
-            callback: () => this.onChooseProduct()
+            title: translate('forgetMe'),
+            callback: () => this.forgetMe()
           })
           cancelIndex++
         }
       }
-      if (ENV.allowForgetMe) {
+    }
+    else if (ENV.allowForgetMe) {
+      buttons.push({
+        index: cancelIndex,
+        title: translate('forgetMe'),
+        callback: () => this.forgetMe()
+      })
+      cancelIndex++
+
+      if (this.state.hasProducts) {
         buttons.push({
           index: cancelIndex,
-          title: translate('forgetMe'),
-          callback: () => this.forgetMe()
+          title: translate('applyForProduct'),
+          callback: () => this.onChooseProduct()
         })
         cancelIndex++
       }
     }
+    else
+      return
+
 
     buttons.push({
       index: cancelIndex,
@@ -723,7 +755,7 @@ class MessageList extends Component {
 
   renderActionSheet() {
     const buttons = this.getActionSheetItems()
-    if (!buttons) return
+    if (!buttons || !buttons.length) return
     let titles = buttons.map((b) => b.title)
     return (
       <ActionSheet
@@ -812,7 +844,7 @@ class MessageList extends Component {
     this.props.navigator.push({
       id: 25,
       title: translate('trustedProviders'),
-      titleTextColor: this.props.bankStyle.VERIFIED_HEADER_COLOR,
+      titleTextColor: this.props.bankStyle.VERIFIED_BORDER_COLOR,
       backButtonTitle: 'Back',
       component: VerifierChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,

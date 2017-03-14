@@ -672,18 +672,23 @@ var NewResourceMixin = {
       timeout: ENV.blinkIDScanTimeoutInternal
     }
 
-    if (documentType.title === 'Passport') {
+    const type = getDocumentTypeFromTitle(documentType.title)
+    switch (type) {
+    case 'passport':
       blinkIDOpts.tooltip = translate('centerPassport')
       // machine readable travel documents (passport)
       blinkIDOpts.mrtd = DEFAULT_BLINK_ID_OPTS.mrtd
-    } else if (documentType.title === 'Driver licence' || documentType.title === 'Driver license') {
+      break
+    case 'license':
       blinkIDOpts.tooltip = translate('centerLicence')
       if (country.title === 'United States') {
         blinkIDOpts.usdl = DEFAULT_BLINK_ID_OPTS.usdl
       } else {
         blinkIDOpts.eudl = DEFAULT_BLINK_ID_OPTS.eudl
       }
-    } else {
+
+      break
+    default:
       blinkIDOpts = {
         ...DEFAULT_BLINK_ID_OPTS,
         ...blinkIDOpts,
@@ -1343,7 +1348,7 @@ var NewResourceMixin = {
       if (utils.isWeb()) {
         useImageInput = isScan || !ENV.canUseWebcam
       } else {
-        useImageInput = !isScan
+        useImageInput = !isScan || !BlinkID
       }
 
       if (useImageInput) {
@@ -1978,6 +1983,14 @@ var styles= StyleSheet.create({
 
 function formatDate (date) {
   return dateformat(date, 'mmm dS, yyyy')
+}
+
+function getDocumentTypeFromTitle (title='') {
+  title = title.toLowerCase()
+  const match = title.match(/(licen[cs]e|passport)/)
+  if (!match) return
+
+  return match[1] === 'passport' ? 'passport' : 'license'
 }
 
 // function parseAnylineDate (date) {

@@ -785,6 +785,7 @@ class ResourceList extends Component {
       currency={this.props.currency}
       isOfficialAccounts={this.props.officialAccounts}
       multiChooser={this.props.multiChooser}
+      isChooser={this.props.isChooser}
       showRefResources={this.showRefResources.bind(this)}
       resource={resource}
       chosen={this.state.chosen} />
@@ -1021,6 +1022,8 @@ class ResourceList extends Component {
   renderActionSheet() {
     let buttons
     if (this.state.allowToAdd) {
+      if (this.props.isBacklink)
+        return
       buttons = [
         {
           text: translate('addNew', this.props.prop.title),
@@ -1067,7 +1070,7 @@ class ResourceList extends Component {
         }},
         {text: translate('Ok'), onPress: () => {
           let r = utils.clone(resource)
-          r.inactive = true
+          r._inactive = true
           Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE]).value})
           this.setState({hideMode: false})
         }},

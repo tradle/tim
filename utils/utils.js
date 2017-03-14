@@ -47,11 +47,11 @@ const mutexify = require('mutexify')
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm',
-  'Please take a': 'takeAPicture'
+  'Please take a **selfie** picture of your face': 'takeAPicture'
 }
 var translatedStrings = {
-  en: require('./strings_en.json'),
-  nl: require('./strings_nl.json')
+  en: preParseStrings(require('./strings_en.json'), ENV),
+  nl: preParseStrings(require('./strings_nl.json'), ENV)
 }
 
 var encryptionOpts = {
@@ -449,9 +449,12 @@ var utils = {
       if (this.isMessage(m))
         excludeProps = ['from', 'to']
       for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
-        if (!resource[vCols[i]]  ||  excludeProps.indexOf[vCols[i]])
+        let prop =  vCols[i]
+        if (meta[prop].type === 'array')
           continue
-        displayName = this.getStringValueForProperty(resource, vCols[i], m.value.properties)
+        if (!resource[prop]  ||  excludeProps.indexOf[prop])
+          continue
+        displayName = this.getStringValueForProperty(resource, prop, m.value.properties)
       }
     }
     return displayName;
@@ -1833,6 +1836,20 @@ function dateFromParts (parts) {
   date.setUTCMonth(Number(parts.month) - 1)
   date.setUTCDate(Number(parts.day))
   return date
+}
+
+function preParseStrings (strings, { appName, profileTitle }) {
+  // TODO: generalize if we need to replace other variables
+  const preparsed = {}
+
+  for (let key in strings) {
+    let str = strings[key]
+    preparsed[key] = str.replace(/{appName}/g, appName)
+    preparsed[key] = str.replace(/{profileTitle}/g, strings[profileTitle])
+  }
+
+  preparsed.profile = strings[profileTitle]
+  return preparsed
 }
 
 module.exports = utils;
