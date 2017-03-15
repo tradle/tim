@@ -27,6 +27,7 @@ const CUSTOMER_WAITING = 'tradle.CustomerWaiting'
 const MESSAGE = 'tradle.Message'
 const LEARN_MORE_URL = 'https://www.fca.org.uk/news/press-releases/financial-conduct-authority-unveils-successful-sandbox-firms-second-anniversary'// 'https://www.aviva.com/tradle/learnmore'
 const CONTACT_US_URL = 'https://www.aviva.co.uk/contact-us/'
+const MAX_WIDTH = 800
 
 // const LEARN_MORE_URL = 'https://www.aviva.com/tradle/learnmore'
 // const CONTACT_US_ADDRESS = 'tradlesupport@aviva.com'
@@ -50,9 +51,10 @@ class AvivaIntroView extends Component {
   render() {
     const screen = utils.dimensions(AvivaIntroView)
     var bankStyle = this.props.bankStyle
-    let content = <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#ffffff'}}>
-        <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
-           <View style={{paddingHorizontal: 15, backgroundColor: '#ffffff'}}>
+    let content = (
+      <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#ffffff'}}>
+        <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}} style={{alignItems: 'center'}}>
+           <View style={{paddingHorizontal: 15, backgroundColor: '#ffffff'}} style={{maxWidth: MAX_WIDTH}}>
              <Text style={styles.resourceTitle}>Welcome to the Aviva mobile verification service.</Text>
              <Text style={[styles.subTitle, styles.importantText]}>Keeping your money and identity safe is our number 1 priority!</Text>
              <Text style={styles.subTitle}>To use this service you’ll undertake 4 easy steps:</Text>
@@ -105,7 +107,7 @@ class AvivaIntroView extends Component {
            </View>
          </TouchableOpacity>
        </ScrollView>
-
+      )
     let footer = <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
                    <View style={styles.start}>
                      <View style={{backgroundColor: 'transparent', justifyContent: 'center'}}>
@@ -199,7 +201,7 @@ var styles =  StyleSheet.create({
     height: 1,
     alignSelf: 'center',
     backgroundColor: '#eeeeee',
-    width: utils.dimensions().width * 0.7
+    alignSelf: 'stretch'
   },
   subTitle: {
     fontSize: 16,
