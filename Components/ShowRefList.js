@@ -222,7 +222,7 @@ class ShowRefList extends Component {
     }
 
     if (refList.length  ||  !propsToShow.length)
-      return <View>
+      return <View style={{height: utils.dimensions().height}}>
                 <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
                   {refList}
                 </View>
