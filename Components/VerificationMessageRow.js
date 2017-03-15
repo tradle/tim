@@ -93,8 +93,7 @@ class VerificationMessageRow extends Component {
 
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
-    var w = utils.dimensions(VerificationMessageRow).width
-    let msgWidth = Math.min(Math.floor(w * 0.7), 600)
+    var msgWidth = utils.getMessageWidth(VerificationMessageRow)
     if (isReadOnlyChat)
       msgWidth -= 50 // provider icon and padding
     let numberOfCharacters = msgWidth / 12

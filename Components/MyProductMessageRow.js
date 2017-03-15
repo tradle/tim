@@ -70,7 +70,8 @@ class MyProductMessageRow extends Component {
 
     renderedRow.push(<Text  key={this.getNextKey()} style={[chatStyles.formType, {color: '#289427'}]}>{title}</Text>);
     let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
-    let width = Math.floor(utils.dimensions().width * 0.7)
+    // let width = Math.floor(utils.dimensions().width * 0.7)
+    let width = utils.getMessageWidth()
     let vStyle = isMyMessage ? styles.viewStyleR : styles.viewStyleL
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>

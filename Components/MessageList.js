@@ -28,6 +28,7 @@ var ProgressInfo = require('./ProgressInfo')
 var PageView = require('./PageView')
 var extend = require('extend');
 var TimerMixin = require('react-timer-mixin')
+const MAX_WIDTH = 800
 
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
@@ -570,7 +571,11 @@ class MessageList extends Component {
       var marginLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
       var marginRight = 10
-      content = <GiftedMessenger style={{ marginLeft, marginRight }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
+      let width = utils.dimensions().width - 80
+      width = width > MAX_WIDTH ? MAX_WIDTH : width
+      let alignSelf = 'center'
+
+      content = <GiftedMessenger style={{ marginLeft, marginRight, width, alignSelf }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
@@ -642,7 +647,7 @@ class MessageList extends Component {
     let context = this.state.context
     let network
     if (this.props.originatingMessage)
-       network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
+      network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
     if (!context  &&  this.props.resource[TYPE] === PRODUCT_APPLICATION)
       context = this.props.resource
     let separator = {}

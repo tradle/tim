@@ -207,7 +207,7 @@ class MessageRow extends Component {
     }
     // HACK
     var w = utils.dimensions().width
-    let msgWidth = Math.floor(w * 0.7)
+    let msgWidth = utils.getMessageWidth(MessageRow)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
