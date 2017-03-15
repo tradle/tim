@@ -1745,7 +1745,20 @@ var utils = {
   },
   isSealableModel: function (model) {
     return model.subClassOf === 'tradle.Form' || model.subClassOf === 'tradle.MyProduct' || model.id === 'tradle.Verification'
+  },
+  isSavedItem(r) {
+    let m = this.getModel(r[TYPE]).value
+    if (!m.interfaces || m.interfaces.indexOf(ITEM) === -1)
+      return
+    let toId = utils.getId(r.to)
+    let fromId = utils.getId(r.from)
+    return toId === fromId  &&  toId === utils.getId(this.getMe())
   }
+  // isResourceInMyData(r) {
+  //   let toId = utils.getId(r.to)
+  //   let fromId = utils.getId(r.from)
+  //   return toId === fromId  &&  toId === utils.getId(utils.getMe())
+  // },
 }
 
 if (__DEV__) {

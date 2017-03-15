@@ -282,7 +282,7 @@ var RowMixin = {
           orgs = verification.organization.title
         verifiedBy = translate('verifiedBy', orgs)
       }
-      else if (verification.document._notSent)
+      else if (utils.isSavedItem(verification.document))
         verifiedBy = translate('fromMyData')
       else
         verifiedBy = translate('sentTo', verification.organization.title)

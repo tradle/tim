@@ -159,8 +159,8 @@ class MessageView extends Component {
     // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
     //   r.relatedTo = this.props.resource.relatedTo;
     let me = utils.getMe()
-    r.from = this.props.resource.from
-    r.to = this.props.resource.to
+    r.from = me
+    r.to = me
     r._context = this.props.resource._context
     let model = utils.getModel(r[TYPE]).value
 
