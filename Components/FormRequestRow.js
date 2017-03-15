@@ -393,7 +393,7 @@ class FormRequestRow extends Component {
                    {headerContent}
                    {arrow}
                  </View>
-    let msgWidth = utils.getMessageWidth(FormMessageRow) - 100 // Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
+    let msgWidth = utils.getMessageWidth(FormRequestRow) - 100 // Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
     if (!isAccordion)
       header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
                  {header}
