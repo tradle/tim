@@ -87,7 +87,7 @@ class FormRequestRow extends Component {
     let prop =  this.isOnePropForm()
     let bankStyle = this.props.bankStyle
     var w = utils.dimensions(FormRequestRow).width
-    let msgWidth = Math.floor(w * 0.7)
+    let msgWidth = utils.getMessageWidth(FormRequestRow)
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow, prop)
     else {
@@ -144,7 +144,7 @@ class FormRequestRow extends Component {
     let formTitle = isFormRequest ? translate(resource.form) : 'Forms'
     if (formTitle.length > message.length)
       message = formTitle
-    // HACK
+    var w = utils.dimensions(FormRequestRow).width
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     var viewStyle = {flexDirection: 'row', borderTopRightRadius: 10, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
@@ -393,7 +393,7 @@ class FormRequestRow extends Component {
                    {headerContent}
                    {arrow}
                  </View>
-    let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
+    let msgWidth = utils.getMessageWidth(FormMessageRow) - 100 // Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
     if (!isAccordion)
       header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
                  {header}
@@ -589,6 +589,7 @@ class FormRequestRow extends Component {
     let str = messagePart ? messagePart : message
     messagePart = null
     let showMessage = true
+    let noMessage
     if (sameFormRequestForm  &&  !resource.documentCreated) {
       link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={[chatStyles.textContainer, {justifyContent: 'center'}]}>
@@ -635,9 +636,10 @@ class FormRequestRow extends Component {
         else if (prop) {
           if (prop.ref === PHOTO) {
             if (utils.isWeb()) {
-              link = <TouchableHighlight underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
+              link = <TouchableHighlight style={{flex: 1}} underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
                        <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
                      </TouchableHighlight>
+              noMessage = true
             }
             else {
               link = <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
@@ -661,13 +663,23 @@ class FormRequestRow extends Component {
     if (showMessage)
       messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
 
-    let msg = <View key={this.getNextKey()}>
+    let msg
+    if (noMessage)
+      msg = <View key={this.getNextKey()}>
+               <View style={{flexDirection: 'row'}}>
+                 {link}
+                 {resource.documentCreated ? null : icon}
+               </View>
+             </View>
+    else
+      msg = <View key={this.getNextKey()}>
                <View style={{flexDirection: 'row'}}>
                  {messagePart}
                  {resource.documentCreated ? null : icon}
                </View>
                {link}
              </View>
+
                  // {resource.documentCreated ? null : icon}
     vCols.push(msg);
     return isReadOnly ? null : onPressCall
@@ -821,7 +833,7 @@ var styles = StyleSheet.create({
     paddingRight: 3
   },
   orgView: {
-    maxWidth: 0.7 * utils.dimensions().width - 150,
+    maxWidth: utils.getMessageWidth(FormRequestRow) - 150,
     paddingLeft: 3,
     marginRight: 10,
     flex: 1,

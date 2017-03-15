@@ -85,6 +85,7 @@ const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
+const MAX_WIDTH = 800
 
 var LocalizedStrings = require('react-native-localization')
 let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
@@ -1753,12 +1754,20 @@ var utils = {
     let toId = utils.getId(r.to)
     let fromId = utils.getId(r.from)
     return toId === fromId  &&  toId === utils.getId(this.getMe())
-  }
+  },
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
   //   let fromId = utils.getId(r.from)
   //   return toId === fromId  &&  toId === utils.getId(utils.getMe())
   // },
+  getMessageWidth(component) {
+    let width = component ? this.dimensions(component).width : this.dimensions().width
+    width = width > MAX_WIDTH ? MAX_WIDTH : width
+    // if (width > 800)
+    //   width = 800
+    // width = Math.floor(utils.dimensions().width * 0.7)
+    return Math.floor(width * 0.7)
+  }
 }
 
 if (__DEV__) {

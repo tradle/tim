@@ -116,7 +116,7 @@ class FormMessageRow extends Component {
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
     var width = utils.dimensions(FormMessageRow).width
-    let msgWidth =  Math.floor(width * 0.7)
+    let msgWidth =  utils.getMessageWidth(FormMessageRow)
     if (inRow > 0) {
       if (inRow === 1) {
         var ww = Math.max(240, msgWidth / 2)
@@ -164,8 +164,8 @@ class FormMessageRow extends Component {
 
     let isMyMessage = this.isMyMessage()
     let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
-    let width = Math.floor(utils.dimensions().width * 0.7) - (isSharedContext  ? 45 : 0)
-    var viewStyle = {
+    let width = Math.floor(utils.getMessageWidth(FormMessageRow) - (isSharedContext  ? 45 : 0))
+    let viewStyle = {
       width: Math.min(width, 600),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       // marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
