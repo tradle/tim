@@ -495,7 +495,7 @@ class TimHome extends Component {
 
     let me = utils.getMe()
     if (me  &&  me.isEmployee) {
-      this.showContacts()
+      this.showContacts(doReplace)
       return
     }
     if (this.state.firstPage) {
