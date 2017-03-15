@@ -31,6 +31,7 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const ITEM = 'tradle.Item'
 
 var LINK_COLOR
 
@@ -391,8 +392,9 @@ class FormRequestRow extends Component {
     var orgRow = <View/>
     let resource = this.props.resource
     let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
-    if (verification  && verification.organization) {
-      var orgPhoto = verification.organization.photo
+    let isItem = utils.isItem(document)
+    if (verification  && (verification.organization || isItem)) {
+      var orgPhoto = !isItem  &&  verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
       var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
@@ -419,7 +421,7 @@ class FormRequestRow extends Component {
           orgs = verification.organization.title
         verifiedBy = doShareDocument ? translate('verifiedBy', orgs) : translate('verificationBy', orgs)
       }
-      else if (verification.document._notSent)
+      else if (isItem)
         verifiedBy = translate('fromMyData')
       else
         verifiedBy = translate('sentTo', verification.organization.title)

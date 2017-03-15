@@ -1647,6 +1647,10 @@ var utils = {
   },
   isSealableModel: function (model) {
     return model.subClassOf === 'tradle.Form' || model.subClassOf === 'tradle.MyProduct' || model.id === 'tradle.Verification'
+  },
+  isItem(r) {
+    let m = this.getModel(r[TYPE]).value
+    return m.interfaces.indexOf(ITEM) !== -1 && this.getId(r.to) === utils.getId(r.from)
   }
 }
 
