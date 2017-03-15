@@ -5835,7 +5835,7 @@ var Store = Reflux.createStore({
       // We don't have this provider yet
       if (settings  &&  settings.urls.indexOf(value.url) !== -1) {
         // check if all providers were fetched from this server.
-        if (!settings.urlToId.length)
+        if (!Object.keys(settings.urlToId).length)
           allProviders = true
         // check if this provider was already requested but
         // it was not picked up or it was removed on server and may be added again
