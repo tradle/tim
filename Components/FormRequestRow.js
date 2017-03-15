@@ -392,7 +392,7 @@ class FormRequestRow extends Component {
     var orgRow = <View/>
     let resource = this.props.resource
     let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
-    let isItem = utils.isItem(document)
+    let isItem = utils.isSavedItem(document)
     if (verification  && (verification.organization || isItem)) {
       var orgPhoto = !isItem  &&  verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />

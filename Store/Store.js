@@ -3080,7 +3080,7 @@ var Store = Reflux.createStore({
         if (isRegistration)
           return handleRegistration()
         else if (isMessage)
-          return handleMessage(params.noTrigger, returnVal, params.doNotSend)
+          return handleMessage(params.noTrigger, returnVal)
         else
           return save(returnVal, isBecomingEmployee)
       })
@@ -3166,7 +3166,7 @@ var Store = Reflux.createStore({
           })
       }
 
-      function handleMessage (noTrigger, returnVal, doNotSend) {
+      function handleMessage (noTrigger, returnVal) {
         // TODO: fix hack
         // hack: we don't know root hash yet, use a fake
         if (returnVal.documentCreated)  {
@@ -3252,11 +3252,12 @@ var Store = Reflux.createStore({
           var returnValKey = utils.getId(returnVal)
 
           self._setItem(returnValKey, returnVal)
-
-          let org = self._getItem(utils.getId(returnVal.to)).organization
-          let orgId = utils.getId(org)
-          self.addMessagesToChat(orgId, returnVal)
-
+          let org
+          if (!utils.isSavedItem(returnVal)) {
+            org = self._getItem(utils.getId(returnVal.to)).organization
+            let orgId = utils.getId(org)
+            self.addMessagesToChat(orgId, returnVal)
+          }
           var params;
 
           var sendStatus = (self.isConnected) ? SENDING : QUEUED
@@ -3282,7 +3283,7 @@ var Store = Reflux.createStore({
             debugger
           }
 
-          if (!doNotSend) {
+          if (!utils.isSavedItem(returnVal)) {
             let sendParams = {
               to: {permalink: permalink},
               link: hash,
@@ -3308,8 +3309,6 @@ var Store = Reflux.createStore({
 
           delete returnVal._sharedWith
           delete returnVal.verifications
-          if (doNotSend)
-            returnVal._notSent = true
           return save(returnVal, true)
         })
         .then(() => {
@@ -3810,14 +3809,14 @@ var Store = Reflux.createStore({
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
-        if (!utils.isMyProduct(document))
+        if (!utils.isMyProduct(document)  &&  !utils.isSavedItem(document))
           this.addSharedWith(document, document.to, document.time, shareBatchId)
       }
-      if (document._notSent) {
-        delete document._notSent
+      if (utils.isSavedItem(document)) {
         document._creationTime = document.time
         document.time = new Date().getTime()
         let docId = utils.getId(document)
+        document.to = to
         this._setItem(docId, document)
         this.dbPut(docId, document)
       }
@@ -4352,6 +4351,8 @@ var Store = Reflux.createStore({
             })
           }
           else {
+            if (utils.isSavedItem(r))
+              continue
             let org = this._getItem(toId).organization
             if (!org) {
               let fromId = utils.getId(this._getItem(key).from)
@@ -5371,12 +5372,6 @@ var Store = Reflux.createStore({
           })
           if (!foundVerifiedForm)
             return
-          // let sw = sharedWith.filter((r) => {
-          //   if (reps.some((rep) => utils.getId(rep) === r.bankRepresentative))
-          //     return true
-          // })
-          // if (sw.length)
-          //   thisCompanyVerification = true
         }
 
         /*
@@ -5434,7 +5429,9 @@ var Store = Reflux.createStore({
     function addAndCheckShareable(verification) {
       let r = verification.document
       let docType = r[TYPE]
-      let isMyProduct = utils.getModel(docType).value.subClassOf === MY_PRODUCT
+      let docModel = utils.getModel(docType).value
+      let isMyProduct = docModel.subClassOf === MY_PRODUCT
+      let isItem = utils.isSavedItem(r)
       // Allow sharing only of resources that were filled out by me
       if (!isMyProduct  &&  utils.getId(r.from) !== utils.getId(me))
         return
@@ -5459,7 +5456,7 @@ var Store = Reflux.createStore({
         }
       }
       // Check that this is not the resource that was send to me as to an employee
-      if (utils.getId(r.to) !== meId  ||  isMyProduct) {
+      if (utils.getId(r.to) !== meId  ||  isMyProduct  ||  isItem) {
         // Don't add this verification if it's for a previous copy of the document
         // If the this is the newer copy remove the older and push this one
         if (shareableResources[docType].length) {
@@ -5539,11 +5536,12 @@ var Store = Reflux.createStore({
     else if (isNew)
       value[CUR_HASH] = dhtKey //isNew ? dhtKey : value[ROOT_HASH]
 
+    let isInMyData = isMessage &&  utils.isSavedItem(value)
     var batch = [];
     value.time = value.time || new Date().getTime();
     if (isMessage) {
       let isForm = model.subClassOf === FORM
-      if (/*isNew  &&*/  isForm) {
+      if (/*isNew  &&*/  isForm  &&  !isInMyData) {
         if (!value._sharedWith)
           value._sharedWith = []
         this.addSharedWith(value, value.to, new Date().getTime())
@@ -5590,7 +5588,7 @@ var Store = Reflux.createStore({
           r = value
       }
       this._setItem(iKey, value)
-      if (isMessage) {
+      if (isMessage  &&  !isInMyData) {
         let toId = utils.getId(value.to)
         if (toId === meId)
           toId = utils.getId(value.from)
