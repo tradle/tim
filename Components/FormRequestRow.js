@@ -607,8 +607,8 @@ class FormRequestRow extends Component {
               </View>
              </View>
     }
-    else if (isMyMessage)
-      link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
+    // else if (isMyMessage)
+    //   link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  form.subClassOf === MY_PRODUCT
 
