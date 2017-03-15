@@ -1,6 +1,5 @@
 'use strict';
 
-import uniq from 'uniq'
 var NewResource = require('./NewResource');
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -88,7 +87,7 @@ class ProductChooser extends Component {
             .map(getForms)
             .reduce((all, batch) => all.concat(batch))
 
-          products = uniq(products)
+          products = uniqueModels(products)
         }
         else
           products = utils.getAllSubclasses(constants.TYPES.FORM)
@@ -301,5 +300,11 @@ var styles = StyleSheet.create({
     backgroundColor: '#eeeeee',
   }
 });
+
+function uniqueModels (models) {
+  const byId = {}
+  models.forEach(model => byId[model.id] = model)
+  return Object.keys(byId).map(id => byId[id])
+}
 
 module.exports = ProductChooser;
