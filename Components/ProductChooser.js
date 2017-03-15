@@ -271,7 +271,7 @@ function getModel (id) {
 
 function getForms (model) {
   const allForms = model.forms.concat(model.additionalForms || [])
-  return allForms.map(getForms)
+  return allForms.map(getModel)
 }
 
 reactMixin(ProductChooser.prototype, Reflux.ListenerMixin);
