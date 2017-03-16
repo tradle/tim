@@ -25,6 +25,11 @@ const splash = {
   aviva: require('../img/Aviva.png')
 }
 
+const splashContrastColor = {
+  tradle: '#eeeeee',
+  aviva: '#004db5'
+}
+
 const brandBG = {
   tradle: require('../img/bg.png'),
   aviva: require('../img/Aviva.png')
@@ -81,12 +86,14 @@ const merged = extend({
   landingPage: null, //"AvivaIntroView",
   showCollapsed: null, //{'tradle.PhotoID': 'document'}
   splashBackground: 'tradle',
+  splashContrastColor: 'tradle',
   brandBackground: 'tradle',
   delayBetweenExpensiveTasks: 100,
   appName: 'Tradle'
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
+merged.splashContrastColor = splashContrastColor[merged.splashContrastColor]
 merged.brandBackground = brandBG[merged.brandBackground]
 
 exports = module.exports = merged
