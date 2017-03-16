@@ -970,7 +970,7 @@ class TimHome extends Component {
           <View style={{flexGrow: 1}}/>
           <View style={{marginBottom: 20}}>
             <View style={{alignSelf: 'center'}}>
-              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+              <ActivityIndicator hidden='true' size='large' color={FOOTER_TEXT_COLOR} />
             </View>
             {busyReason}
             {updateIndicator}
