@@ -181,6 +181,7 @@ var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet
 var createKeeper = require('@tradle/keeper')
 var cachifyKeeper = require('@tradle/keeper/cachify')
+var createKeeper2 = require('../utils/keeper')
 var crypto = require('crypto')
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
@@ -254,7 +255,8 @@ var driverInfo = (function () {
 //   { type: 'ec', purpose: 'update', curve: 'p256' }
 // ]
 
-const ENCRYPTION_KEY = 'accountkey'
+const ENGINE_KEEPER_ENCRYPTION_KEY = 'accountkey'
+const APP_KEEPER_ENCRYPTION_KEY = 'appkeeperk'
 const DEVICE_ID = 'deviceid'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
@@ -279,8 +281,49 @@ var Store = Reflux.createStore({
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
   init() {
-    var self = this
+    return this.ready = this._init()
+  },
+  async _init() {
+    const self = this
     // Setup components:
+
+    // if (true) {
+    if (false) {
+      await this.wipe()
+      Alert.alert('please refresh')
+      return new Promise(function (resolve) {
+        // hang
+      })
+    }
+
+    // let encryptionKey = '12a1f316d2ee853883fe24f458753faa2ce0650000ca6fd3ab3d0e18933ab9a9'
+    // let plaintextDB = level('plaintextdb', { valueEncoding: 'json' })
+    // plaintextDB = promisify(plaintextDB)
+    // try {
+    //   await plaintextDB.get('initialized')
+    // } catch (err) {
+    //   debug('creating encryption key for app database')
+    //   encryptionKey = crypto.randomBytes(32).toString('hex')
+    //   await utils.setPassword(APP_KEEPER_ENCRYPTION_KEY, encryptionKey)
+    //   await plaintextDB.put('initialized', true)
+    // }
+
+    // if (!encryptionKey) {
+    //   debug('fetching encryption key for app database')
+    //   encryptionKey = await utils.getPassword(APP_KEEPER_ENCRYPTION_KEY)
+    // }
+
+    // debugger
+    // this._models = level('models', { valueEncoding: 'json' })
+
+    // const ldb = createKeeper2({
+    //   path: 'TiM.db',
+    //   db: asyncstorageDown,
+    //   encryption: {
+    //     key: new Buffer(encryptionKey, 'hex')
+    //   }
+    // })
+
     var ldb = level('TiM.db', { valueEncoding: 'json' });
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
     // ldb.query.use(jsonqueryEngine());
@@ -321,18 +364,7 @@ var Store = Reflux.createStore({
     utils.setModels(models);
     this.loadStaticData()
 
-    // if (true) {
-    if (false) {
-      return this.ready = this.wipe()
-        .then(() => {
-          Alert.alert('please refresh')
-          return Q.Promise(function (resolve) {
-            // hang
-          })
-        })
-    }
-
-    this.ready = this.getReady()
+    await this.getReady()
   },
   async getReady() {
     let me
@@ -5772,7 +5804,7 @@ var Store = Reflux.createStore({
 
       return Q.all([
         lookupKeys,
-        utils.getPassword(ENCRYPTION_KEY)
+        utils.getPassword(ENGINE_KEEPER_ENCRYPTION_KEY)
       ])
       .spread((keys, encryptionKey) => {
         return { keys, encryptionKey, identity }
@@ -5853,7 +5885,7 @@ var Store = Reflux.createStore({
     //   //   })
 
     //   // loadIdentityAndKeys = Q.all([
-    //   //   utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
+    //   //   utils.setPassword(ENGINE_KEEPER_ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
     //   //   genIdentity
     //   // ])
     //   // .spread(encryptionKey => encryptionKey)
@@ -5867,7 +5899,7 @@ var Store = Reflux.createStore({
     //     // }
     // }
     // else
-    //   loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
+    //   loadIdentityAndKeys = utils.getPassword(ENGINE_KEEPER_ENCRYPTION_KEY)
 
     if (me.language)
       language = list[utils.getId(me.language)] && this._getItem(utils.getId(me.language))
@@ -5933,7 +5965,7 @@ var Store = Reflux.createStore({
       : Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
 
     return Q.all([
-      utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
+      utils.setPassword(ENGINE_KEEPER_ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
       genIdentity
     ])
     .catch(err => {
@@ -7078,6 +7110,7 @@ var Store = Reflux.createStore({
     let myId
     // console.time('dbStream')
     var orgContacts = {}
+    // return db.dump()
     return utils.dangerousReadDB(db)
     .then((results) => {
       if (!results.length)

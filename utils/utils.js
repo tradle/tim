@@ -14,6 +14,8 @@ import {
   StyleSheet
 } from 'react-native'
 
+import through from 'through2'
+import pump from 'pump'
 import Camera from 'react-native-camera'
 import querystring from 'querystring'
 import AsyncStorage from '../Store/Storage'
@@ -842,8 +844,15 @@ var utils = {
     await Q.ninvoke(db, 'open')
 
     const prefix = db.location + '!'
+    const down = db.db._down
+    const container = down && down.container
+    if (!container) {
+      const results = await Q.nfcall(collect, db.createReadStream())
+      return results
+    }
+
     // dangerous!
-    const keys = db.db._down.container._keys.slice()
+    const keys = container._keys.slice()
     if (!keys.length) return []
 
     const pairs = await AsyncStorage.multiGet(keys.map((key) => prefix + key))
@@ -862,6 +871,23 @@ var utils = {
         }
       })
   },
+  // createKeeperStream(keeper, opts) {
+  //   return pump(
+  //     keeper.createReadStream(opts),
+  //     through.obj(function (data, enc, cb) {
+  //       const wrapper = opts.keys === false ? data : data.value
+  //       const { key, value } = wrapper
+  //       const ret = opts.keys === false ? value :
+  //         opts.values === false ? key : wrapper
+
+  //       cb(null, ret)
+  //     })
+  //   )
+  // },
+  // dumpKeeper: function (keeper, opts) {
+  //   const stream = utils.createKeeperStream(keeper, opts)
+  //   return Q.nfcall(collect, stream)
+  // },
   isEmployee(resource) {
     if (!me.isEmployee)
       return false
@@ -1165,6 +1191,7 @@ var utils = {
   },
 
   getPassword: function (username) {
+    debug(`getting password for username "${username}", service ${ENV.serviceID}`)
     return Keychain.getGenericPassword(username, ENV.serviceID)
   },
 
