@@ -76,7 +76,7 @@ import StatusBar from './StatusBar'
 
 const isLinkingSupported = utils.isIOS() && Linking
 const isAndroid = Platform.OS === 'android'
-const FOOTER_TEXT_COLOR = '#eeeeee'
+const FOOTER_TEXT_COLOR = ENV.splashContrastColor
 import React, { Component, PropTypes } from 'react'
 
 class TimHome extends Component {
