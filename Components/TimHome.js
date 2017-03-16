@@ -1129,7 +1129,7 @@ var styles = (function () {
       shadowOpacity: 0.7
     },
     version: {
-      color: '#ffffff',
+      color: FOOTER_TEXT_COLOR,
       fontSize: 10
     },
     pairDivicesText: {
