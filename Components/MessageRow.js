@@ -721,7 +721,7 @@ class MessageRow extends Component {
 
         let pVal = resource[v]
         let linkIdx = pVal.indexOf('<http')
-        if (linkIdx) {
+        if (linkIdx !== -1) {
           let endLink = pVal.indexOf('>', linkIdx)
           let link = pVal.substring(linkIdx + 1, endLink)
 

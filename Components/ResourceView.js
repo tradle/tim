@@ -296,12 +296,15 @@ class ResourceView extends Component {
                     </View>
                   </TouchableOpacity>
 */
+    let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
+    let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
+    let paddingRight = Platform.OS === 'android' ? 0 : 10
     if (isIdentity) {
       footer = <View style={styles.footer}>
                 <View style={styles.row}>
-                  <TouchableOpacity onPress={this.showBanks.bind(this)} style={{paddingRight: 10}}>
-                    <View style={[platformStyles.conversationButton, {backgroundColor: '#7AAAC3', borderColor: '#7AAAC3', borderWidth: 1, opacity: 0.5}]}>
-                      <ConversationsIcon size={30} color={'#ffffff'} style={{marginLeft: 9, marginRight: 9}} />
+                  <TouchableOpacity onPress={this.showBanks.bind(this)} style={{paddingRight}}>
+                    <View style={[platformStyles.conversationButton, {backgroundColor: bgcolor, borderColor: bgcolor, borderWidth: 1, opacity: 0.5}]}>
+                      <ConversationsIcon size={30} color={color} style={{marginLeft: 9, marginRight: 9}} />
                     </View>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => this.ActionSheet.show()}>

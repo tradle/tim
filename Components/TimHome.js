@@ -76,7 +76,7 @@ import StatusBar from './StatusBar'
 
 const isLinkingSupported = utils.isIOS() && Linking
 const isAndroid = Platform.OS === 'android'
-const FOOTER_TEXT_COLOR = '#eeeeee'
+const FOOTER_TEXT_COLOR = ENV.splashContrastColor
 import React, { Component, PropTypes } from 'react'
 
 class TimHome extends Component {
@@ -970,7 +970,7 @@ class TimHome extends Component {
           <View style={{flexGrow: 1}}/>
           <View style={{marginBottom: 20}}>
             <View style={{alignSelf: 'center'}}>
-              <ActivityIndicator hidden='true' size='large' color='#ffffff'/>
+              <ActivityIndicator hidden='true' size='large' color={FOOTER_TEXT_COLOR} />
             </View>
             {busyReason}
             {updateIndicator}
@@ -1129,7 +1129,7 @@ var styles = (function () {
       shadowOpacity: 0.7
     },
     version: {
-      color: '#ffffff',
+      color: FOOTER_TEXT_COLOR,
       fontSize: 10
     },
     pairDivicesText: {
