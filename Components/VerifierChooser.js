@@ -179,6 +179,15 @@ class VerifierChooser extends Component {
         }), 500)
       }})
     })
+    let bankStyle
+    if (resource.bankStyle) {
+      bankStyle = {}
+      extend(bankStyle, defaultBankStyle)
+      extend(bankStyle, resource.bankStyle)
+    }
+    else
+      bankStyle = defaultBankStyle
+
     this.props.navigator.replace({
       title: resource.name,
       component: MessageList,
@@ -188,7 +197,7 @@ class VerifierChooser extends Component {
         resource: resource,
         modelName: constants.TYPES.MESSAGE,
         currency: this.props.currency,
-        bankStyle:  this.props.bankStyle,
+        bankStyle:  bankStyle,
         // returnChat: provider,
         originatingMessage: this.props.originatingMessage
       }
