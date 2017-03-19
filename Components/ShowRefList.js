@@ -57,7 +57,7 @@ class ShowRefList extends Component {
     let currentBacklink = this.props.backlink
     let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
     let showDocuments = this.props.showDocuments
-    let currentMarker = <View style={{backgroundColor: appStyle.CURRENT_UNDERLINE_COLOR, height: 4, marginTop: -5, alignSelf: 'stretch'}} />
+    let currentMarker = <View style={{backgroundColor: appStyle.CURRENT_UNDERLINE_COLOR, height: 4, marginTop: -5}} />
 
     for (var p in props) {
       if (props[p].hidden)
@@ -94,7 +94,7 @@ class ShowRefList extends Component {
                     </View>
         let showCurrent = showDocuments ? currentMarker : null
         refList.push(
-          <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+          <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={() => this.showDocs(docs)} underlayColor='transparent'>
              <View style={styles.item}>
                <View style={{flexDirection: 'row'}}>
@@ -115,7 +115,7 @@ class ShowRefList extends Component {
     else if (!isIdentity) {
       let showCurrent = showDetails ? currentMarker : null
       refList.push(
-        <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
          <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
            <View style={styles.item}>
              <View style={{flexDirection: 'row'}}>
@@ -164,7 +164,7 @@ class ShowRefList extends Component {
       let showCurrent = currentBacklink  &&  currentBacklink.name === p ? currentMarker : null
 
       refList.push(
-        <View style={[buttonStyles.container, {flex: 1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.exploreBacklink.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
              <View style={styles.item}>
                <View style={{flexDirection: 'row'}}>
@@ -181,7 +181,7 @@ class ShowRefList extends Component {
     const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
     if (showQR) {
       refList.push(
-        <View style={[buttonStyles.container, {flex:1, alignSelf: 'stretch'}]} key={this.getNextKey()}>
+        <View style={[buttonStyles.container, {flex:1}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
              <View style={styles.item}>
                <Icon name={'ios-qr-scanner'}  size={utils.getFontSize(30)}  color='#757575' />
