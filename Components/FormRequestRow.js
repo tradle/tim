@@ -664,14 +664,7 @@ class FormRequestRow extends Component {
       messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
 
     let msg
-    if (noMessage)
-      msg = <View key={this.getNextKey()}>
-               <View style={{flexDirection: 'row'}}>
-                 {link}
-                 {resource.documentCreated ? null : icon}
-               </View>
-             </View>
-    else
+    if (messagePart)
       msg = <View key={this.getNextKey()}>
                <View style={{flexDirection: 'row'}}>
                  {messagePart}
@@ -679,7 +672,20 @@ class FormRequestRow extends Component {
                </View>
                {link}
              </View>
-
+    else
+      msg = <View key={this.getNextKey()}>
+               <View style={{flexDirection: 'row'}}>
+                 {link}
+                 {resource.documentCreated ? null : icon}
+               </View>
+             </View>
+    // let msg = <View key={this.getNextKey()}>
+    //            <View style={{flexDirection: 'row'}}>
+    //              {messagePart}
+    //              {resource.documentCreated ? null : icon}
+    //            </View>
+    //            {link}
+    //          </View>
                  // {resource.documentCreated ? null : icon}
     vCols.push(msg);
     return isReadOnly ? null : onPressCall

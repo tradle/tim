@@ -200,8 +200,7 @@ var styles =  StyleSheet.create({
   separator: {
     height: 1,
     alignSelf: 'center',
-    backgroundColor: '#eeeeee',
-    alignSelf: 'stretch'
+    backgroundColor: '#eeeeee'
   },
   subTitle: {
     fontSize: 16,
