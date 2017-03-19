@@ -526,7 +526,7 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
 
-      let hideTextInput = !utils.hasSupportLine(resource)  &&  !ENV.allowForgetMe
+      let hideTextInput = !utils.hasSupportLine(resource)  // &&  !ENV.allowForgetMe
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
       // Chooser for trusted party verifier
