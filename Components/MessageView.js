@@ -25,9 +25,11 @@ var extend = require('extend');
 var ResourceMixin = require('./ResourceMixin');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+
 const PHOTO = 'tradle.Photo'
 const TYPE = constants.TYPE
 const ITEM = 'tradle.Item'
+const MAX_WIDTH = 800
 // import Prompt from 'react-native-prompt'
 const VERIFICATION = constants.TYPES.VERIFICATION
 
@@ -370,9 +372,11 @@ class MessageView extends Component {
     var actionSheet = this.renderActionSheet()
     let title = isVerification  ? this.makeViewTitle(model) : null
     let footer = actionSheet && this.renderFooter()
+    let width = utils.dimensions().width
+    width = width > MAX_WIDTH ? MAX_WIDTH : width
     return (
-      <View style={{height: utils.dimensions().height}}>
-      <ScrollView  ref='this' style={platformStyles.container} keyboardShouldPersistTaps={true}>
+      <View style={{height: utils.dimensions().height, alignItems: 'center'}}>
+      <ScrollView  ref='this' style={[platformStyles.container, {width: width}]} keyboardShouldPersistTaps={true}>
         {dateView}
         <View style={styles.photoBG}>
           <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>

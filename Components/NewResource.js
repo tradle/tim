@@ -34,6 +34,8 @@ var LINK_COLOR
 const DEFAULT_LINK_COLOR = '#a94442'
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
+const MAX_WIDTH = 800
+
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -749,7 +751,6 @@ class NewResource extends Component {
     // var style = isRegistration
     //           ? DeviceHeight < 600 ? {marginTop: 100} : {marginTop: DeviceHeight / 4}
     //           : platformStyles.container
-    var {width, height} = utils.dimensions(NewResource)
     // var style = [platformStyles.container, {backgroundColor: 'transparent', height: DeviceHeight}]
     // var style = [platformStyles.container, {backgroundColor: 'transparent'}, utils.isWeb() &&  !this.state.isRegistration ?  {borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderTopColor: '#7AAAC3'} : {borderWidth: 0}]
     var style = {backgroundColor: 'transparent'}
@@ -788,8 +789,10 @@ class NewResource extends Component {
     if (!jsons.length)
       jsons = <View/>
 
+    var {width, height} = utils.dimensions(NewResource)
+    width = Math.min(width, MAX_WIDTH)
     var content =
-      <ScrollView style={{backgroundColor: 'transparent'}}
+      <ScrollView style={{backgroundColor: 'transparent', width: width}}
                   ref='scrollView' {...this.scrollviewProps}>
         <View style={[styles.container, formStyle]}>
           { utils.isWeb()
@@ -870,7 +873,7 @@ class NewResource extends Component {
         )
       }
 
-      return <PageView style={platformStyles.container}>
+      return <PageView style={[platformStyles.container, {alignSelf: 'center'}]}>
                {content}
                {submit}
               </PageView>
@@ -882,7 +885,7 @@ class NewResource extends Component {
               </View>
     }
     return (
-      <View style={{height: height}}>
+      <View style={{height: height, width: width}}>
         <BackgroundImage source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', height: height}}>
         {isRegistration

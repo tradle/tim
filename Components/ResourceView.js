@@ -43,6 +43,7 @@ import pick from 'object.pick'
 import Navs from '../utils/navs'
 
 const TALK_TO_EMPLOYEE = '1'
+const MAX_WIDTH = 800
 // const SERVER_URL = 'http://192.168.0.162:44444/'
 
 const SCAN_QR_CODE = 0
@@ -332,7 +333,7 @@ class ResourceView extends Component {
 
     return (
       <PageView style={platformStyles.container}>
-      <ScrollView  ref='this'>
+      <ScrollView  ref='this' style={{width: MAX_WIDTH, alignSelf: 'center'}}>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}>
             {identityPhotoList}
