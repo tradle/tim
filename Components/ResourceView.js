@@ -333,7 +333,7 @@ class ResourceView extends Component {
 
     return (
       <PageView style={platformStyles.container}>
-      <ScrollView  ref='this' style={{width: MAX_WIDTH, alignSelf: 'center'}}>
+      <ScrollView  ref='this' style={{width: Math.min(MAX_WIDTH, utils.dimensions(ResourceView).width), alignSelf: 'center'}}>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}>
             {identityPhotoList}
