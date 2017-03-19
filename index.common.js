@@ -746,9 +746,8 @@ var NavigationBarRouteMapper = {
                         !route.passProps.bankStyle ||
                         route.passProps.bankStyle.LOGO_NEEDS_TEXT
     if (uri) {
-      if (logoNeedsText) {
+      if (logoNeedsText)
         photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 23} : {}]} />
-      }
       else {
         let width
         if (photoObj.width  &&  photoObj.height)
@@ -807,9 +806,9 @@ var styles = StyleSheet.create({
     marginTop: 7,
     marginLeft: 0,
     width: HEIGHT,
-    borderRadius: 13,
-    borderColor: '#cccccc',
-    borderWidth: StyleSheet.hairlineWidth
+    // borderRadius: 13,
+    // borderColor: '#cccccc',
+    // borderWidth: StyleSheet.hairlineWidth
   },
   msgImageNoText: {
     // backgroundColor: '#dddddd',
