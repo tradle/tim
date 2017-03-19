@@ -39,7 +39,6 @@ const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
 const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
-const MAX_WIDTH = 800
 // var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
 
@@ -975,7 +974,7 @@ class ResourceList extends Component {
                   isLoading={this.state.isLoading}/>
     }
     else {
-      content = <ListView style={{width: Math.min(MAX_WIDTH, utils.dimensions().width), alignSelf: 'center'}}
+      content = <ListView style={{width: utils.getContentWidth(), alignSelf: 'center'}}
           dataSource={this.state.dataSource}
           renderHeader={this.renderHeader.bind(this)}
           enableEmptySections={true}

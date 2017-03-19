@@ -118,7 +118,7 @@ class VerifierChooser extends Component {
   }
   render() {
     var model = utils.getModel(this.props.modelName).value;
-    var content = <ListView
+    var content = <ListView style={{width: utils.getContentWidth(), alignSelf: 'center'}}
           dataSource={this.state.dataSource}
           enableEmptySections={true}
           renderRow={this.renderRow.bind(this)}

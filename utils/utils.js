@@ -1767,6 +1767,10 @@ var utils = {
     //   width = 800
     // width = Math.floor(utils.dimensions().width * 0.7)
     return Math.floor(width * 0.7)
+  },
+  getContentWidth(component) {
+    let width = component ? this.dimensions(component).width : this.dimensions().width
+    return ENV.fullScreen ? width : Math.min(width, MAX_WIDTH)
   }
 }
 

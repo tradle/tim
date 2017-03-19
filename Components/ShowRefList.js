@@ -19,7 +19,6 @@ const {
 const constants = require('@tradle/constants') // tradle.constants
 const VERIFICATION = constants.TYPES.VERIFICATION;
 const PRODUCT_APPLICATION = constants.TYPES.PRODUCT_APPLICATION;
-const MAX_WIDTH = 800
 
 import { makeResponsive } from 'react-native-orient'
 import {
@@ -223,7 +222,7 @@ class ShowRefList extends Component {
     }
 
     if (refList.length  ||  !propsToShow.length)
-      return <View style={{height: utils.dimensions().height, width: Math.min(utils.dimensions().width, MAX_WIDTH)}}>
+      return <View style={{height: utils.dimensions().height, width: utils.getContentWidth(ShowRefList)}}>
                 <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
                   {refList}
                 </View>

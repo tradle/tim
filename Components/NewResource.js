@@ -34,8 +34,6 @@ var LINK_COLOR
 const DEFAULT_LINK_COLOR = '#a94442'
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
-const MAX_WIDTH = 800
-
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -790,7 +788,7 @@ class NewResource extends Component {
       jsons = <View/>
 
     var {width, height} = utils.dimensions(NewResource)
-    width = Math.min(width, MAX_WIDTH)
+    width = utils.getContentWidth(NewResource)
     var content =
       <ScrollView style={{backgroundColor: 'transparent', width: width}}
                   ref='scrollView' {...this.scrollviewProps}>

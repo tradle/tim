@@ -28,7 +28,6 @@ var ProgressInfo = require('./ProgressInfo')
 var PageView = require('./PageView')
 var extend = require('extend');
 var TimerMixin = require('react-timer-mixin')
-const MAX_WIDTH = 800
 
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
@@ -572,7 +571,7 @@ class MessageList extends Component {
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
       var marginRight = 10
       let width = utils.dimensions().width
-      width = width > MAX_WIDTH ? MAX_WIDTH : width
+      width = utils.getContentWidth(MessageList)
       let alignSelf = 'center'
 
       content = <GiftedMessenger style={{ marginLeft, marginRight, width, alignSelf }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
