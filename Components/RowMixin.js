@@ -245,8 +245,9 @@ var RowMixin = {
                {header}
                {arrow}
              </View>
+   let me = utils.getMe()
    if (!isAccordion)
-      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, verification, verification)}>
+      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, me.siEmployee ? verification : document, verification)}>
                  {header}
                </TouchableHighlight>
 
