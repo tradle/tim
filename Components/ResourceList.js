@@ -346,11 +346,19 @@ class ResourceList extends Component {
     if (action === 'listSharedWith'  &&  !this.props.chat)
       return
     var list = params.list;
-    if (this.props.multiChooser  &&  list.length) {
-      let sharingChatId = utils.getId(this.props.sharingChat)
-      list = list.filter(r => {
-        return utils.getId(r) !== sharingChatId
-      })
+    if (list.length) {
+      var type = list[0][constants.TYPE];
+      if (type  !== this.props.modelName) {
+        var m = utils.getModel(type).value;
+        if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
+          return;
+      }
+      if (this.props.multiChooser) {
+        let sharingChatId = utils.getId(this.props.sharingChat)
+        list = list.filter(r => {
+          return utils.getId(r) !== sharingChatId
+        })
+      }
     }
 
     let state = {
@@ -727,10 +735,10 @@ class ResourceList extends Component {
 
   renderRow(resource)  {
     var model = this.props.isBacklink
-              ? utils.getModel(resource[TYPE]).value
+              ? utils.getModel(utils.getType(resource)).value
               : utils.getModel(this.props.modelName).value;
     if (model.isInterface)
-      model = utils.getModel(resource[TYPE]).value
+      model = utils.getModel(utils.getType(resource)).value
  // || (model.id === constants.TYPES.FORM)
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
