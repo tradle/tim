@@ -201,7 +201,7 @@ class ShowRefList extends Component {
                       prop={currentBacklink}
                       resource={resource}
                       isBacklink={true}
-                      backlinkList={this.props.backlinkList || []}
+                      backlinkList={this.props.backlinkList || (currentBacklink  &&  resource[currentBacklink.name]) || []}
                       navigator={this.props.navigator} />
     }
     if (showDetails) {

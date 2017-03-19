@@ -39,7 +39,7 @@ const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
 const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
-
+const MAX_WIDTH = 800
 // var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
 
@@ -360,13 +360,13 @@ class ResourceList extends Component {
         if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
           return;
       }
-    }
 
-    if (this.props.multiChooser  &&  list.length) {
-      let sharingChatId = utils.getId(this.props.sharingChat)
-      list = list.filter(r => {
-        return utils.getId(r) !== sharingChatId
-      })
+      if (this.props.multiChooser) {
+        let sharingChatId = utils.getId(this.props.sharingChat)
+        list = list.filter(r => {
+          return utils.getId(r) !== sharingChatId
+        })
+      }
     }
 
     let state = {
@@ -490,7 +490,7 @@ class ResourceList extends Component {
           component: ResourceView,
           // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
-          rightButtonTitle: translate('edit'),
+          rightButtonTitle: 'Edit',
           onRightButtonPress: {
             title: title,
             id: 4,
@@ -706,7 +706,7 @@ class ResourceList extends Component {
         component: ResourceView,
         titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
-        rightButtonTitle: translate('edit'),
+        rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: resourceTitle,
           id: 4,
@@ -746,7 +746,7 @@ class ResourceList extends Component {
               ? utils.getModel(utils.getType(resource)).value
               : utils.getModel(this.props.modelName).value;
     if (model.isInterface)
-      model = utils.getModel(resource[TYPE]).value
+      model = utils.getModel(utils.getType(resource)).value
  // || (model.id === constants.TYPES.FORM)
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
@@ -975,7 +975,7 @@ class ResourceList extends Component {
                   isLoading={this.state.isLoading}/>
     }
     else {
-      content = <ListView
+      content = <ListView style={{width: Math.min(MAX_WIDTH, utils.dimensions().width), alignSelf: 'center'}}
           dataSource={this.state.dataSource}
           renderHeader={this.renderHeader.bind(this)}
           enableEmptySections={true}

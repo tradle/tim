@@ -2586,38 +2586,41 @@ var Store = Reflux.createStore({
   },
 
   onGetItem(key, action) {
-    var resource = {};
+    Q.all([this.myResourcesLoaded])
+    .then(() => {
+      var resource = {};
 
-    extend(resource, this._getItem(utils.getId(key)))
+      extend(resource, this._getItem(utils.getId(key)))
 
-    const resModel = this.getModel(resource[TYPE])
-    if (!resModel || !resModel.value) {
-      throw new Error(`missing model for ${resource[TYPE]}`)
-    }
-
-    var props = this.getModel(resource[TYPE]).value.properties;
-    for (var p in props) {
-      if (p.charAt(0) === '_'  ||  props[p].hidden)
-        continue;
-      var items = props[p].items;
-      if (!items  ||  !items.backlink)
-        continue;
-      var backlink = items.backlink;
-      var itemsModel = this.getModel(items.ref).value;
-      var params = {
-        modelName: items.ref,
-        to: resource,
-        meta: itemsModel,
-        prop: props[p],
-        props: itemsModel.properties
+      const resModel = this.getModel(resource[TYPE])
+      if (!resModel || !resModel.value) {
+        throw new Error(`missing model for ${resource[TYPE]}`)
       }
-      var meta = utils.getModel(items.ref).value
-      var isMessage = utils.isMessage(meta)
-      var result = isMessage ? this.searchMessages(params) : this.searchNotMessages(params)
-      if (result  &&  result.length)
-        resource[p] = result;
-    }
-    this.trigger({ resource: resource, action: action || 'getItem'});
+
+      var props = this.getModel(resource[TYPE]).value.properties;
+      for (var p in props) {
+        if (p.charAt(0) === '_'  ||  props[p].hidden)
+          continue;
+        var items = props[p].items;
+        if (!items  ||  !items.backlink)
+          continue;
+        var backlink = items.backlink;
+        var itemsModel = this.getModel(items.ref).value;
+        var params = {
+          modelName: items.ref,
+          to: resource,
+          meta: itemsModel,
+          prop: props[p],
+          props: itemsModel.properties
+        }
+        var meta = utils.getModel(items.ref).value
+        var isMessage = utils.isMessage(meta)
+        var result = isMessage ? this.searchMessages(params) : this.searchNotMessages(params)
+        if (result  &&  result.length)
+          resource[p] = result;
+      }
+      this.trigger({ resource: resource, action: action || 'getItem'});
+    })
   },
   onExploreBacklink(resource, prop, backlinkAdded) {
     let list = this.searchMessages({
