@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   View,
   Text,
-  Dimensions
+  Dimensions,
+  Platform
 } from 'react-native'
 
 import omit from 'object.omit'
@@ -41,6 +42,10 @@ export default function SimpleModal (props) {
   )
 
   const modalProps = omit(props, ['title', 'message', 'buttons'])
+  if (Platform.OS === 'android' && !modalProps.onRequestClose) {
+    modalProps.onRequestClose = noop
+  }
+
   return (
     <Modal {...modalProps} >
       <View style={style.container}>
