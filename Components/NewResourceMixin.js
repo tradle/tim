@@ -1253,7 +1253,7 @@ var NewResourceMixin = {
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'  ||  prop.ref === 'tradle.Photo'
     let noChooser
-    if (this.props.model  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
+    if (this.props.model  &&  this.props.model.required  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
       // Don't overwrite default country on provider
       if (this.props.country)
         noChooser = true
