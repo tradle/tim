@@ -233,5 +233,7 @@
     "verificationBy": "Verification by {1}",
     "importing": "Importing",
     "invalidDeepLink": "Looks like you clicked an invalid link!",
-    "fromMyData": "from 'My Data'"
+    "fromMyData": "from 'My Data'",
+    "getUserMediaUnknownError": "We're having problems accessing your camera. This may be an issue with your browser We recommend Google Chrome or Firefox.",
+    "getUserMediaPermissionError": "Looks like you've disabled access to the camera. Please re-enable it so you can take photos, and refresh the page!"
 }

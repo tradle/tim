@@ -5,13 +5,16 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  Dimensions
+  Dimensions,
+  Text
 } from 'react-native'
 
 import Camera from 'react-webcam'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive, getDimensions } from 'react-native-orient'
+import { translate, getFontSize } from '../utils/utils'
 
+const debug = require('debug')('tradle:app:camera')
 const ICON_COLOR = '#77ADFC'
 const BG_COLOR = '#fff'
 const DEFAULT_ASPECT_RATIO = 1.33333
@@ -22,13 +25,16 @@ class CameraView extends Component {
   };
 
   static defaultProps = {
-    screenshotFormat: 'image/jpeg'
+    screenshotFormat: 'image/jpeg',
+    getUserMediaUnknownError: translate('getUserMediaUnknownError'),
+    getUserMediaPermissionError: translate('getUserMediaPermissionError')
   };
 
   constructor(props) {
     super(props)
     this.state = {}
   }
+
   async capture() {
     const canvas = this.refs.cam.getCanvas()
     const { width, height } = canvas
@@ -75,13 +81,34 @@ class CameraView extends Component {
         style={styles.camera}
         width={width}
         height={height}
+        onUserMedia={userMediaError => {
+          if (userMediaError) {
+            debug('getUserMedia error', userMediaError)
+            this.setState({ userMediaError })
+          }
+        }}
       />
     )
   }
+
+  renderError() {
+    const error = this.state.userMediaError
+    const message = error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError'
+      ? this.props.getUserMediaPermissionError
+      : this.props.getUserMediaUnknownError
+
+    return (
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.error}>{message}</Text>
+        </View>
+      </View>
+    )
+  }
+
   render() {
-    // if (this.state.canceled) {
-    //   return <View />
-    // }
+    const error = this.state.userMediaError
+    if (error) return this.renderError()
 
     let media
     if (this.state.photo) {
@@ -140,5 +167,11 @@ const styles = StyleSheet.create({
   canvas: {
     width: 0,
     height: 0
+  },
+  errorContainer: {
+    paddingHorizontal: 50
+  },
+  error: {
+    fontSize: getFontSize(30)
   }
 })
