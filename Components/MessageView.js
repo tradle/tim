@@ -15,6 +15,7 @@ var ShowRefList = require('./ShowRefList');
 var VerificationView = require('./VerificationView')
 // var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
+var PageView = require('./PageView')
 
 // var VerificationButton = require('./VerificationButton');
 var Actions = require('../Actions/Actions');
@@ -305,10 +306,11 @@ class MessageView extends Component {
 
 
     let propertySheet
+    let bankStyle = this.props.bankStyle
     if (isVerificationTree)
       propertySheet = <VerificationView navigator={this.props.navigator}
                                         resource={resource}
-                                        bankStyle={this.props.bankStyle}
+                                        bankStyle={bankStyle}
                                         currency={this.props.currency}
                                         showVerification={this.showVerification.bind(this)}/>
     let content = <View>
@@ -363,7 +365,7 @@ class MessageView extends Component {
     // var isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     let dateView
     if (isVerificationTree) {
-      dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: this.props.bankStyle.PRODUCT_ROW_BG_COLOR}]}>
+      dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: bankStyle.PRODUCT_ROW_BG_COLOR}]}>
                   <Text style={styles.dateLabel}>{translate(model.properties.dateVerified, model)}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
@@ -373,9 +375,10 @@ class MessageView extends Component {
     let footer = actionSheet && this.renderFooter()
     let width = utils.dimensions().width
     width = utils.getContentWidth()
+    let contentSeparator = utils.getContentSeparator(bankStyle)
     return (
-      <View style={{height: utils.dimensions().height, alignItems: 'center'}}>
-      <ScrollView  ref='this' style={[platformStyles.container, {width: width}]} keyboardShouldPersistTaps={true}>
+      <PageView style={[platformStyles.container, {height: utils.dimensions().height, alignItems: 'center'}]} separator={contentSeparator}>
+      <ScrollView  ref='this' style={{width: width}} keyboardShouldPersistTaps={true}>
         {dateView}
         <View style={styles.photoBG}>
           <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
@@ -385,7 +388,7 @@ class MessageView extends Component {
         {title}
         {footer}
         {actionSheet}
-      </View>
+      </PageView>
     );
   }
   renderFooter() {
