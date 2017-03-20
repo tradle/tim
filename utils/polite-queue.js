@@ -14,12 +14,14 @@ module.exports = function politeQueue ({ wait, timeout }) {
 
   async function push (fn) {
     let taskPromise
+    let timeoutPromise
     try {
       taskPromise = q.push(fn)
       if (timeout) {
+        timeoutPromise = promiseTimeout(timeout)
         await race([
           taskPromise,
-          promiseTimeout(timeout)
+          timeoutPromise
         ])
       } else {
         await taskPromise
@@ -29,6 +31,8 @@ module.exports = function politeQueue ({ wait, timeout }) {
     } catch (err) {
       debug('task failed', err)
     } finally {
+      if (timeoutPromise) timeoutPromise.clearTimeout()
+
       try {
         await wait()
       } catch (err) {
@@ -42,9 +46,13 @@ module.exports = function politeQueue ({ wait, timeout }) {
 }
 
 function promiseTimeout (millis) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
+  let timeout
+  const promise = new Promise((resolve, reject) => {
+    timeout = setTimeout(() => {
       reject(TIMED_OUT)
     }, millis)
   })
+
+  promise.clearTimeout = () => clearTimeout(timeout)
+  return promise
 }
