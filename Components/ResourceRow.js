@@ -392,7 +392,6 @@ class ResourceRow extends Component {
     var isOfficialAccounts = this.props.isOfficialAccounts
     var color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
     var isContact = resource[TYPE] === PROFILE;
-    var logoNeedsText = resource.style  ? resource.style.LOGO_NEEDS_TEXT : true
     viewCols.forEach((v) => {
       if (v === dateProp)
         return;
@@ -401,7 +400,7 @@ class ResourceRow extends Component {
 
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
-      var style = first && logoNeedsText ? [styles.resourceTitle, color] : [styles.description, color]
+      var style = first ? [styles.resourceTitle, color] : [styles.description, color]
       if (isContact  &&  v === 'organization') {
         style.push({alignSelf: 'flex-end', marginTop: 20})
         style.push(styles.verySmallLetters);
@@ -444,8 +443,6 @@ class ResourceRow extends Component {
               val += msgParts[i];
           }
           val = val.replace(/\*/g, '')
-          if (isOfficialAccounts  &&  v !== 'lastMessage'  &&  !logoNeedsText)
-            return
           if (isOfficialAccounts  &&  v === 'lastMessage') {
             let isMyLastMessage = val.indexOf('You: ') !== -1
             let lastMessageTypeIcon = <View/>
