@@ -220,7 +220,7 @@ var styles =  StyleSheet.create({
     opacity: 0.7
   },
   resourceTitle: {
-    fontSize: 18,
+    fontSize: 25,
     paddingBottom: 15,
     fontWeight: '400',
     color: '#555555',
