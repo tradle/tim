@@ -136,6 +136,7 @@ const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const VERIFIABLE          = 'tradle.Verifiable'
 const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
+const MONEY               = 'tradle.Money'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -1613,8 +1614,8 @@ var Store = Reflux.createStore({
       // allow to unhide the previously hidden provider
       if (newServer  &&  org._inactive)
         org._inactive = false
-      this.configProvider(sp, org)
       this._mergeItem(okey, sp.org)
+      this.configProvider(sp, org)
       batch.push({type: 'put', key: okey, value: org})
     }
     else {
@@ -1734,9 +1735,22 @@ var Store = Reflux.createStore({
       let currency = currencies.filter((c) => {
         return c.code === org._currency || c.currencyName === org._currency
       })
-      if (currency)
-        org.currency = this.buildRef(currency[0])
       delete org._currency
+      if (currency) {
+        org.currency = this.buildRef(currency[0])
+        let code = currency[0].code
+        if (currency[0].symbol)
+          org.currency.symbol = currency[0].symbol
+        else {
+          let currencies = this.getModel(MONEY).value.properties.currency.oneOf
+          for (let i=0; i<currencies.length  &&  !org.currency.symbol; i++) {
+            if (currencies[i][code])
+              org.currency.symbol = currencies[i][code]
+          }
+        }
+        this._setItem(orgId, org)
+        this.dbPut(orgId, org)
+      }
     }
     if (org._defaultPropertyValues) {
       for (let m in org._defaultPropertyValues) {
