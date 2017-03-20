@@ -1048,7 +1048,10 @@ var utils = {
 
   normalizeCurrencySymbol(symbol) {
     // TODO: remove this after fixing encoding bug
-    return symbol
+    if (!symbol  ||  typeof symbol === 'string')
+      return symbol
+    else
+      return symbol.symbol
     // return symbol ? (symbol === '¬' ? '€' : symbol) : symbol
   },
   isSimulator() {
@@ -1755,6 +1758,16 @@ var utils = {
     let fromId = utils.getId(r.from)
     return toId === fromId  &&  toId === utils.getId(this.getMe())
   },
+  getContentSeparator(bankStyle) {
+    let separator = {}
+    if (bankStyle) {
+      if (bankStyle.NAV_BAR_BORDER_COLOR) {
+        separator.borderTopColor = bankStyle.NAV_BAR_BORDER_COLOR
+        separator.borderTopWidth = bankStyle.NAV_BAR_BORDER_WIDTH ||  StyleSheet.hairlineWidth
+      }
+    }
+    return separator
+  },
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
   //   let fromId = utils.getId(r.from)
@@ -1770,7 +1783,7 @@ var utils = {
   },
   getContentWidth(component) {
     let width = component ? this.dimensions(component).width : this.dimensions().width
-    return ENV.fullScreen ? width : Math.min(width, MAX_WIDTH)
+    return ENV.fullScreen ? width - 20 : Math.min(width, MAX_WIDTH)
   }
 }
 
