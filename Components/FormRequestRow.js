@@ -347,7 +347,7 @@ class FormRequestRow extends Component {
     let bankStyle = this.props.bankStyle
     let color = bankStyle.VERIFICATION_BG
     return (
-      <View style={[rowStyle, viewStyle, {marginTop: -10, width: width, backgroundColor: bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
+      <View style={[rowStyle, viewStyle, {marginTop: -10, width: width, backgroundColor: '#ffffff', borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
         <View style={{flex:1}}>
           <View style={[styles.assistentBox, {backgroundColor: color}]}>
             <Text style={styles.orText}>{'OR'}</Text>
@@ -840,8 +840,7 @@ var styles = StyleSheet.create({
   },
   orgView: {
     maxWidth: utils.getMessageWidth(FormRequestRow) - 150,
-    paddingLeft: 3,
-    marginRight: 10,
+    marginLeft: 10,
     flex: 1,
     justifyContent: 'center'
   },
