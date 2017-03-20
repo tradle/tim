@@ -1073,7 +1073,7 @@ var NewResourceMixin = {
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-              <Text style={[style, { width: (utils.dimensions(component).width - 100)}]}>{label}</Text>
+              <Text style={[style, { width: (utils.getContentWidth() - 100)}]}>{label}</Text>
               <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
           </View>
