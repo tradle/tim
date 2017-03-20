@@ -1616,8 +1616,8 @@ var Store = Reflux.createStore({
       // allow to unhide the previously hidden provider
       if (newServer  &&  org._inactive)
         org._inactive = false
-      this.configProvider(sp, org)
       this._mergeItem(okey, sp.org)
+      this.configProvider(sp, org)
       batch.push({type: 'put', key: okey, value: org})
     }
     else {
