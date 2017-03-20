@@ -1095,7 +1095,7 @@ var NewResourceMixin = {
     }
     else {
       label = params.label
-      propLabel = <View style={{marginTop: 20}}/>
+      propLabel = <View style={{marginTop: 20, marginHorizontal: -10}}/>
     }
 
     let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
@@ -1119,10 +1119,10 @@ var NewResourceMixin = {
     let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
     return (
       <View>
-        <View key={this.getNextKey()} ref={prop.name} style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
+        <View key={this.getNextKey()} ref={prop.name} style={[st, { marginHorizontal: 10, paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
           {propLabel}
           <DatePicker
-            style={[styles.datePicker, {width: utils.dimensions(component).width - 30}]}
+            style={[styles.datePicker, {width: utils.dimensions(component).width - 30, paddingBottom: 3}]}
             mode="date"
             placeholder={value}
             format={format}
@@ -1135,9 +1135,9 @@ var NewResourceMixin = {
             customStyles={{
               dateInput: styles.dateInput,
               dateText: styles.dateText,
-              placeholderText: [styles.font18, {
+              placeholderText: [styles.font20, {
                 color: params.value ? '#555555' : '#aaaaaa',
-                paddingLeft: params.value ? 10 : 0
+                paddingLeft: 0
               }],
               dateIconColor: {color: LINK_COLOR},
               dateIcon: styles.dateIcon
@@ -1796,10 +1796,10 @@ var styles= StyleSheet.create({
   },
   datePicker: {
     // width: dimensions.width - 30,
-    marginLeft: 10,
+    // marginLeft: 10,
     paddingLeft: utils.isWeb() ? 0 : 10,
     justifyContent: 'flex-start',
-    borderColor: '#f7f7f7',
+    // borderColor: '#cccccc',
     alignSelf: 'stretch'
   },
   chooserContainer: {
@@ -1912,7 +1912,7 @@ var styles= StyleSheet.create({
     fontSize: 20,
     color: '#555555',
     backgroundColor: 'transparent',
-    marginLeft: 10
+    // marginLeft: 10
   },
   font18: {
     fontSize: 18,
@@ -1952,7 +1952,7 @@ var styles= StyleSheet.create({
     fontSize: 20
   },
   dateLabel: {
-    marginLeft: 10,
+    // marginLeft: 10,
     fontSize: 12,
     marginVertical: 5,
     paddingBottom: 5
