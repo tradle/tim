@@ -825,7 +825,8 @@ class NewResource extends Component {
                    </View>
                  </TouchableOpacity>
 
-      return <PageView style={platformStyles.container}>
+      let contentSeparator = utils.getContentSeparator(bankStyle)
+      return <PageView style={platformStyles.container} separator={contentSeparator}>
                {content}
                {submit}
               </PageView>

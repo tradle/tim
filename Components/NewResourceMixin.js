@@ -1410,6 +1410,7 @@ var NewResourceMixin = {
         modelName:      propRef,
         resource:       resource,
         isRegistration: this.state.isRegistration,
+        bankStyle:      this.props.bankStyle,
         returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       this.setChosenValue.bind(this),
       }

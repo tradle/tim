@@ -618,13 +618,7 @@ class MessageList extends Component {
        network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
     if (!context  &&  this.props.resource[TYPE] === PRODUCT_APPLICATION)
       context = this.props.resource
-    let separator = {}
-    if (bankStyle) {
-      if (bankStyle.NAV_BAR_BORDER_COLOR) {
-        separator.borderTopColor = bankStyle.NAV_BAR_BORDER_COLOR
-        separator.borderTopWidth = bankStyle.NAV_BAR_BORDER_WIDTH ||  StyleSheet.hairlineWidth
-      }
-    }
+    let separator = utils.getContentSeparator(bankStyle)
     if (!bgImage)
       return (
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>

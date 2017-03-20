@@ -997,8 +997,9 @@ class ResourceList extends Component {
     if (!this.props.isChooser && this.props.officialAccounts && this.props.modelName === ORGANIZATION)
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
+    let contentSeparator = utils.getContentSeparator(this.props.bankStyle)
     return (
-      <PageView style={this.props.isBacklink ? {} : platformStyles.container}>
+      <PageView style={this.props.isBacklink ? {} : platformStyles.container} separator={contentSeparator}>
         {network}
         <View style={hasSearchBar ? {height: 0} : {}}>
           {searchBar}
