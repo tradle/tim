@@ -123,6 +123,7 @@ const VERIFIABLE          = 'tradle.Verifiable'
 const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 const MONEY               = 'tradle.Money'
+const CURRENCY            = 'tradle.Currency'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -1735,7 +1736,7 @@ var Store = Reflux.createStore({
       delete org._country
     }
     if (org._currency) {
-      let currencies = this.searchNotMessages({modelName:'tradle.Currency'})
+      let currencies = this.searchNotMessages({modelName: CURRENCY})
       let currency = currencies.filter((c) => {
         return c.code === org._currency || c.currencyName === org._currency
       })
@@ -8302,8 +8303,6 @@ var Store = Reflux.createStore({
       id: utils.getId(resource),
       title: resource.id ? resource.title : utils.getDisplayName(resource)
     }
-    if (resource.currency  &&  resource.currency.symbol)
-      ref.currency.symbol = resource.currency.symbol
     if (resource.time)
       ref.time = resource.time
     return ref
