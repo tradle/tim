@@ -772,9 +772,11 @@ class NewResource extends Component {
                    </TouchableOpacity>
                  </View>
                : <View style={{height: 0}} />
+    var width = isRegistration ? utils.dimensions(NewResource).width : utils.getContentWidth(NewResource)
+    var height = utils.dimensions(NewResource).height
     var formStyle = isRegistration
                   ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
-                  : {justifyContent: 'flex-start'}
+                  : {justifyContent: 'flex-start', width: width}
     let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons = []
     if (jsonProps  &&  jsonProps.length) {
@@ -787,10 +789,8 @@ class NewResource extends Component {
     if (!jsons.length)
       jsons = <View/>
 
-    var {width, height} = utils.dimensions(NewResource)
-    width = utils.getContentWidth(NewResource)
     var content =
-      <ScrollView style={{backgroundColor: 'transparent', width: width}}
+      <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center'}}
                   ref='scrollView' {...this.scrollviewProps}>
         <View style={[styles.container, formStyle]}>
           { utils.isWeb()
@@ -870,8 +870,8 @@ class NewResource extends Component {
           </DropPage>
         )
       }
-
-      return <PageView style={[platformStyles.container, {alignSelf: 'center'}]}>
+      let contentSeparator = utils.getContentSeparator(bankStyle)
+      return <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator}>
                {content}
                {submit}
               </PageView>
@@ -883,9 +883,9 @@ class NewResource extends Component {
               </View>
     }
     return (
-      <View style={{height: height, width: width}}>
+      <View style={{height: height, width: width, backgroundColor: bankStyle.BACKGROUND_COLOR}}>
         <BackgroundImage source={BG_IMAGE} style={styles.bgImage} />
-        <View style={{justifyContent: 'center', height: height}}>
+        <View style={{justifyContent: 'center', alignItems: 'center', height: height}}>
         {isRegistration
           ? <View style={styles.logo}>
               <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
