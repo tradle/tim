@@ -9,6 +9,9 @@ cp node_modules/tcomb-form-native/lib/templates/bootstrap/select.ios.js node_mod
 cp node_modules/react-native-carousel/CarouselPager.android.js node_modules/react-native-carousel/CarouselPager.web.js
 sed -i '' "s/ReactLocalization;/ReactLocalization \|\| \{ language: 'en_US' \};/g" node_modules/react-native-localization/LocalizedStrings.js
 sed -i '' "s/RNDeviceInfo;/RNDeviceInfo \|\| \{};/g" node_modules/react-native-device-info/deviceinfo.js
+sed -i '' "s/this\.opts/opts/g" node_modules/map-stream/index.js
+sed -i '' "s/self\.opts/opts/g" node_modules/map-stream/index.js
+
 # sed -i '' "s/e\.nativeEvent\.contentOffset\.y/this.refs.listView.scrollProperties.offset/g" node_modules/react-native-gifted-messenger/GiftedMessenger.js
 # cd node_modules/node-libs-browser && \
 #   npm i --save buffer@3.6 && \
