@@ -1739,6 +1739,7 @@ var Store = Reflux.createStore({
       let currency = currencies.filter((c) => {
         return c.code === org._currency || c.currencyName === org._currency
       })
+      delete org._currency
       if (currency) {
         org.currency = this.buildRef(currency[0])
         let code = currency[0].code
@@ -1751,8 +1752,9 @@ var Store = Reflux.createStore({
               org.currency.symbol = currencies[i][code]
           }
         }
+        this._setItem(orgId, org)
+        this.dbPut(orgId, org)
       }
-      delete org._currency
     }
     if (org._defaultPropertyValues) {
       for (let m in org._defaultPropertyValues) {
@@ -8300,6 +8302,8 @@ var Store = Reflux.createStore({
       id: utils.getId(resource),
       title: resource.id ? resource.title : utils.getDisplayName(resource)
     }
+    if (resource.currency  &&  resource.currency.symbol)
+      ref.currency.symbol = resource.currency.symbol
     if (resource.time)
       ref.time = resource.time
     return ref
