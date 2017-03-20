@@ -1119,7 +1119,7 @@ var NewResourceMixin = {
     let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
     return (
       <View>
-        <View key={this.getNextKey()} ref={prop.name} style={[st, { marginHorizontal: 10, paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
+        <View key={this.getNextKey()} ref={prop.name} style={[st, { marginHorizontal: 10, paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, height: 60, justifyContent: 'flex-end'}]}>
           {propLabel}
           <DatePicker
             style={[styles.datePicker, {width: utils.dimensions(component).width - 30, paddingBottom: 3}]}
