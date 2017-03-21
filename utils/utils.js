@@ -226,8 +226,8 @@ var utils = {
   compare(r1, r2) {
     if (!r1 || !r2)
       return (r1 || r2) ? false : true
-    let properties = utils.getModel(r1[TYPE]).value.properties
-    let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', 'sharedWith']
+    let properties = this.getModel(r1[TYPE]).value.properties
+    let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
     for (var p in r1) {
       if (!properties[p]  ||  exclude.indexOf(p) !== -1)
         continue
@@ -248,6 +248,8 @@ var utils = {
           if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
             return false
         }
+        else if (properties[p].inlined  ||  (properties[p].ref  &&  this.getModel(properties[p].ref).value.inlined))
+          return this.compare(r1[p], r2[p])
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
@@ -382,7 +384,7 @@ var utils = {
       // return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
     }
     else {
-      let m = utils.getModel(r[TYPE])
+      let m = this.getModel(r[TYPE])
       let id = r[TYPE] + '_' + r[ROOT_HASH]
       return  m  &&  (m.value.subClassOf === FORM  ||  m.value.id === VERIFICATION  ||  m.value.id === MY_PRODUCT)
             ? id + '_' + (r[CUR_HASH] || r[ROOT_HASH])
@@ -487,7 +489,7 @@ var utils = {
     if (!resource[p]  &&  prop.displayAs)
       return this.templateIt(prop, resource);
     if (prop.type == 'object')
-      return resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).value.properties);
+      return resource[p].title || this.getDisplayName(resource[p], this.getModel(resource[p][TYPE]).value.properties);
     else
       return resource[p] + '';
   },
@@ -692,7 +694,7 @@ var utils = {
     var me = utils.getMe()
     if (fromHash == this.getId(me))
       return true;
-    if (utils.getModel(r[TYPE]).value.subClassOf == MY_PRODUCT) {
+    if (this.getModel(r[TYPE]).value.subClassOf == MY_PRODUCT) {
       let org = r.from.organization
       if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
         return true
@@ -770,7 +772,7 @@ var utils = {
           res[p] = this.buildRef(res[p])
           continue
         }
-        if (properties[p].ref  &&  !utils.getModel(properties[p].ref).value.inlined) {
+        if (properties[p].ref  &&  !this.getModel(properties[p].ref).value.inlined) {
 
           // if (properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
           res[p] = this.buildRef(res[p])
@@ -794,7 +796,7 @@ var utils = {
         var rr = {}
         rr.id = utils.getId(r)
         const type = utils.getType(r)
-        var m = utils.getModel(type)
+        var m = this.getModel(type)
         rr.title = utils.getDisplayName(r, m.properties)
         arr.push(rr)
       })
