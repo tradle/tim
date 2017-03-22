@@ -10,7 +10,8 @@ import {
   Linking,
   PixelRatio,
   Platform,
-  PermissionsAndroid
+  PermissionsAndroid,
+  StyleSheet
 } from 'react-native'
 
 import Camera from 'react-native-camera'
