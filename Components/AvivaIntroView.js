@@ -53,7 +53,7 @@ class AvivaIntroView extends Component {
     let content = (
       <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#ffffff'}}>
         <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}} style={{alignItems: 'center'}}>
-           <View style={{paddingHorizontal: 15, backgroundColor: '#ffffff'}} style={{maxWidth: utils.getContentWidth()}}>
+           <View style={{paddingHorizontal: 15, backgroundColor: '#ffffff', maxWidth: utils.getContentWidth()}}>
              <Text style={styles.resourceTitle}>Welcome to the Aviva mobile verification service.</Text>
              <Text style={[styles.subTitle, styles.importantText]}>Keeping your money and identity safe is our number 1 priority!</Text>
              <Text style={styles.subTitle}>To use this service you’ll undertake 4 easy steps:</Text>
