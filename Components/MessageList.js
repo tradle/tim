@@ -547,10 +547,10 @@ class MessageList extends Component {
       }
     }
 
+    let hideTextInput = !utils.hasSupportLine(resource)  // && !ENV.allowForgetMe
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
 
-      let hideTextInput = !utils.hasSupportLine(resource)  //&&  !ENV.allowForgetMe
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
       // Chooser for trusted party verifier
@@ -642,7 +642,7 @@ class MessageList extends Component {
       //   }
       // ]}
     let me = utils.getMe()
-    let actionSheet = this.renderActionSheet()
+    let actionSheet = !hideTextInput  && this.renderActionSheet()
     let context = this.state.context
     let network
     if (this.props.originatingMessage)
