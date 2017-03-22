@@ -6521,7 +6521,7 @@ var Store = Reflux.createStore({
       else if (!isMessage  &&  val[TYPE] === PARTIAL)
         this.trigger({action: 'hasPartials'})
 
-      if (val[TYPE] === APPLICATION_SUBMITTED  && ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword) {
+      if (utils.isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED  && ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword) {
         setTimeout(() => {
           this.trigger({action: 'offerKillSwitchAfterApplication'})
         }, 2000)
