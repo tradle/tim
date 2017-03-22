@@ -188,7 +188,12 @@ async function signIn(navigator, newMe, isChangePassword) {
   let me = utils.getMe()
   // if (!me)
   //   return register(cb)
-  if (me.isAuthenticated  &&  !newMe) return
+
+  if (me.isAuthenticated  &&  !newMe) {
+    if (ENV.offerKillSwitchAfterApplication)
+      return setPassword(navigator, isChangePassword)
+    return
+  }
 
   // if (!me.useTouchId && newMe.useTouchId) {
   //   let has = await hasTouchID()

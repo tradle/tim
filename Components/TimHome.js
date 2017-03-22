@@ -376,6 +376,21 @@ class TimHome extends Component {
       // await signIn(this.props.navigator)
       // this.showFirstPage()
       return
+    case 'offerKillSwitchAfterApplication':
+      if (utils.isWeb()) {
+        Alert.alert(
+          translate('enterPasswordOrWipeOutTheDevice'),
+          null,
+          [
+            {text: translate('wipeTheDevice'), onPress: () => Actions.requestWipe()},
+            {text: translate('enterPassword'), onPress: () => {
+              signIn(this.props.navigator, null, true)
+                .then(() => this.props.navigator.pop())
+            }}
+          ]
+        )
+      }
+      return
     }
   }
 

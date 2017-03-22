@@ -124,6 +124,7 @@ const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 const MONEY               = 'tradle.Money'
 const CURRENCY            = 'tradle.Currency'
+const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -6751,6 +6752,11 @@ var Store = Reflux.createStore({
       }
       else if (!isMessage  &&  val[TYPE] === PARTIAL)
         this.trigger({action: 'hasPartials'})
+      if (utils.isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED  && ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword) {
+        setTimeout(() => {
+          this.trigger({action: 'offerKillSwitchAfterApplication'})
+        }, 2000)
+      }
 //       else
         // this.trigger(retParams)
     })
