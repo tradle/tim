@@ -1,7 +1,9 @@
 'use strict'
 
+import React from 'react'
 import {
   NativeModules,
+  Text,
   findNodeHandle,
   Dimensions,
   Alert,
@@ -21,7 +23,7 @@ import ENV from './env'
 import { getDimensions, getOrientation } from 'react-native-orient'
 import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
-import bankStyles from '../styles/bankStyles'
+import chatStyles from '../styles/chatStyles'
 
 // import Orientation from 'react-native-orientation'
 
@@ -1672,6 +1674,26 @@ var utils = {
     }
     return separator
   },
+  parseMessage(resource, message, bankStyle, idx) {
+    let i1 = message.indexOf('**')
+    let formType, message1, message2
+    let messagePart
+    if (i1 === -1)
+      return message
+    formType = message.substring(i1 + 2)
+    let i2 = formType.indexOf('**')
+    if (i2 !== -1) {
+      message1 = message.substring(0, i1)
+      message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
+      formType = formType.substring(0, i2)
+    }
+    let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
+    idx = idx ? ++idx : 1
+    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{message1}
+             <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
+             <Text>{this.parseMessage(resource, message2, bankStyle, idx)}</Text>
+           </Text>
+  }
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
   //   let fromId = utils.getId(r.from)
