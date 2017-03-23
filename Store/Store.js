@@ -1768,7 +1768,10 @@ var Store = Reflux.createStore({
           }
         }
       }
+      utils.addDefaultPropertyValuesFor(org)
     }
+    if (org._hidePropertyInEdit)
+      utils.addHidePropertyInEditFor(org)
     if (config.greeting) {
       if (typeof config.greeting === 'string')
         org._greeting = config.greeting
