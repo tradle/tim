@@ -368,7 +368,7 @@ class TimHome extends Component {
           [
             {text: translate('wipeTheDevice'), onPress: () => Actions.requestWipe()},
             {text: translate('enterPassword'), onPress: () => {
-              signIn(this.props.navigator)
+              signIn(this.props.navigator, null, true)
                 .then(() => this.props.navigator.pop())
             }}
           ]
