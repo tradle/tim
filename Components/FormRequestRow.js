@@ -537,7 +537,7 @@ class FormRequestRow extends Component {
     if (resource.documentCreated)
       message = resource.message.replace(/\*/g, '')
     else
-      messagePart = this.parseMessage(message)
+      messagePart = utils.parseMessage(resource, message, this.props.bankStyle)
     if (typeof messagePart === 'string')
       messagePart = null
 
