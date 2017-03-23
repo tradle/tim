@@ -1688,7 +1688,7 @@ var utils = {
     let hiddenProps = hidePropertyInEdit[utils.getId(provider)]
     if (hiddenProps) {
       hiddenProps = hiddenProps[modelName]
-      return hiddenProps.indexOf(p) !== -1
+      return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
     }
     return false
   },
