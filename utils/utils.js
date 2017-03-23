@@ -42,6 +42,7 @@ var dateformat = require('dateformat')
 var Backoff = require('backoff')
 var extend = require('xtend')
 var levelErrors = require('levelup/lib/errors')
+
 const Cache = require('lru-cache')
 const mutexify = require('mutexify')
 var strMap = {
@@ -108,6 +109,9 @@ var BACKOFF_DEFAULTS = {
 
 var DEFAULT_FETCH_TIMEOUT = 5000
 var stylesCache = {}
+
+var defaultPropertyValues = {}
+var hidePropertyInEdit = {}
 
 var utils = {
   isEmpty(obj) {
@@ -1674,6 +1678,20 @@ var utils = {
     }
     return separator
   },
+  isHidden(p, resource) {
+    let modelName = resource[TYPE]
+    let meId = this.getId(me)
+    let provider = (utils.getId(resource.from) === meId) ? resource.to.organization : resource.from.organization
+    if (!provider)
+      return false
+
+    let hiddenProps = hidePropertyInEdit[utils.getId(provider)]
+    if (hiddenProps) {
+      hiddenProps = hiddenProps[modelName]
+      return hiddenProps.indexOf(p) !== -1
+    }
+    return false
+  },
   parseMessage(resource, message, bankStyle, idx) {
     let i1 = message.indexOf('**')
     let formType, message1, message2
@@ -1693,6 +1711,12 @@ var utils = {
              <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
              <Text>{this.parseMessage(resource, message2, bankStyle, idx)}</Text>
            </Text>
+  },
+  addDefaultPropertyValuesFor(provider) {
+    defaultPropertyValues[this.getId(provider)] = provider._defaultPropertyValues
+  },
+  addHidePropertyInEditFor(provider) {
+    hidePropertyInEdit[this.getId(provider)] = provider._hidePropertyInEdit
   }
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
