@@ -183,6 +183,7 @@ var NewResourceMixin = {
 //   placeholder: 'Test'
 // }
     // var d = data ? data[i] : null;
+    let resource = this.state.resource
     for (var p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
@@ -198,6 +199,11 @@ var NewResourceMixin = {
       let isReadOnly = props[p].readOnly
       if (isReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
+      if (utils.isHidden(p, resource)) {
+        if (!resource[p])
+          this.setDefaultValue(p, resource, hideProps)
+        continue
+      }
 
       var label = translate(props[p], meta) //props[p].title;
       if (!label)
@@ -1377,7 +1383,22 @@ var NewResourceMixin = {
       inFocus: propName
     });
   },
-
+  setDefaultValue(prop, resource, isHidden) {
+    let defaults = this.props.defaultPropertyValues
+    if (!defaults  ||  resource[prop])
+      return
+    if (this.props.model) {
+      let vals = defaults[this.props.model.id]
+      for (let p in vals) {
+        resource[p] = vals[p]
+        if (isHidden) {
+          if (!this.floatingProps)
+            this.floatingProps = {}
+          this.floatingProps[p] = vals[p]
+        }
+      }
+    }
+  },
   hasError(errors, propName) {
     return (errors && errors[propName]) || this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[propName]
   },
