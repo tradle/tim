@@ -1015,7 +1015,7 @@ var Store = Reflux.createStore({
       self.addProvider(provider)
       self.addToSettings(provider)
 
-      meDriver.addContactIdentity(provider.identity)
+      utils.addContactIdentity(meDriver, { identity: provider.identity })
 
       let employee = this._getItem(PROFILE + '_' + provider.hash)
       currentEmployees[utils.getId(org)] = employee
@@ -1225,17 +1225,17 @@ var Store = Reflux.createStore({
     const { wsClients } = driverInfo
     const payload = msg.object
     const { identity } = payload
-    const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(identity)
-    await meDriver.addContactIdentity(identity)
-    await this.addContact(payload, rootHash, msg.forPartials || msg.forContext)
+    const permalink = utils.getPermalink(identity)
+    await utils.addContactIdentity(meDriver, { identity, permalink })
+    await this.addContact(payload, permalink, msg.forPartials || msg.forContext)
     const url = utils.keyByValue(wsClients, transport)
-    await this.addToSettings({hash: rootHash, url: url})
+    await this.addToSettings({hash: permalink, url: url})
   },
 
   receiveSelfIntroduction({ transport, msg }) {
     const payload = msg.object
     const { wsClients } = driverInfo
-    const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    const rootHash = utils.getPermalink(payload.identity)
     let name = payload.name
     if (!name  ||  !name.length) {
       name = payload.identity.name
@@ -1251,15 +1251,11 @@ var Store = Reflux.createStore({
       payload.message || null,
       [
         {text: translate('Ok'),
-        onPress: () => {
-          return meDriver.addContactIdentity(payload.identity)
-          .then(() => {
-            return this.addContact(payload, rootHash)
-          })
-          .then(() => {
-            const url = utils.keyByValue(wsClients, transport)
-            this.addToSettings({hash: rootHash, url: url})
-          })
+        onPress: async () => {
+          await utils.addContactIdentity(meDriver, { identity: payload.identity })
+          await this.addContact(payload, rootHash)
+          const url = utils.keyByValue(wsClients, transport)
+          this.addToSettings({hash: rootHash, url: url})
         }},
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
       ]
@@ -1267,7 +1263,7 @@ var Store = Reflux.createStore({
   },
 
   async receivePairingRequest({ payload }) {
-    const rootHash = payload.identity[ROOT_HASH] || protocol.linkString(payload.identity)
+    const rootHash = utils.getPermalink(payload.identity)
     Alert.alert(
       translate('pairingRequest'),
       null,
@@ -7865,7 +7861,7 @@ var Store = Reflux.createStore({
 
     let me = this._getItem(PROFILE + '_' + pairingData.identity)
     return this.getDriver(me)
-    .then(() =>  meDriver.addContact(pairingRes.prev))
+    .then(() =>  utils.addContactIdentity(meDriver, { identity: pairingRes.prev }))
     .then(() => {
       Q.ninvoke(meDriver, 'setIdentity', {
         keys: meDriver.keys.concat(pairingRes.identity.pubkeys),

@@ -25,6 +25,7 @@ import { getDimensions, getOrientation } from 'react-native-orient'
 import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
 import chatStyles from '../styles/chatStyles'
+import clone from 'clone'
 
 // import Orientation from 'react-native-orientation'
 
@@ -224,7 +225,8 @@ var utils = {
     return s ? s : args[0]
   },
   clone(resource) {
-    return JSON.parse(JSON.stringify(resource))
+    return clone(resource)
+    // return JSON.parse(JSON.stringify(resource))
   },
   compare(r1, r2) {
     if (!r1 || !r2)
@@ -764,7 +766,7 @@ var utils = {
     return hasSupportLine
   },
   optimizeResource(resource, doNotChangeOriginal) {
-    let res = doNotChangeOriginal ? this.clone(resource) : resource
+    let res = doNotChangeOriginal ? utils.clone(resource) : resource
 
     var properties = this.getModel(res[TYPE]).value.properties
     for (var p in res) {
@@ -1572,8 +1574,14 @@ var utils = {
       return false
     }
   },
+  getPermalink(object) {
+    return object[ROOT_HASH] || protocol.linkString(object)
+  },
   addContactIdentity: async function (node, { identity, permalink }) {
-    if (!permalink) permalink = tradleUtils.hexLink(identity)
+    if (!permalink) permalink = utils.getPermalink(identity)
+
+    // defensive copy
+    identity = utils.clone(identity)
 
     let match
     try {
