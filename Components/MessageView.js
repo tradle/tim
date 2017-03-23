@@ -177,6 +177,7 @@ class MessageView extends Component {
         bankStyle: this.props.style,
         resource: r,
         doNotSend: true,
+        defaultPropertyValues: this.props.defaultPropertyValues,
         callback: (resource) => {
           self.props.navigator.pop()
         }
@@ -334,6 +335,7 @@ class MessageView extends Component {
                                  showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
                                  showRefResource={this.getRefResource.bind(this)}
+                                 defaultPropertyValues={this.props.defaultPropertyValues}
                                  checkProperties={checkProps} >
                       {content}
                     </ShowRefList>
