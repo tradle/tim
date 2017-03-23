@@ -532,12 +532,13 @@ class FormRequestRow extends Component {
   }
 
   formRequest(resource, vCols, prop) {
+    const { bankStyle } = this.props
     let message = resource.message
     let messagePart
     if (resource.documentCreated)
       message = resource.message.replace(/\*/g, '')
     else
-      messagePart = utils.parseMessage(resource, message, this.props.bankStyle)
+      messagePart = utils.parseMessage(resource, message, bankStyle)
     if (typeof messagePart === 'string')
       messagePart = null
 
@@ -575,7 +576,6 @@ class FormRequestRow extends Component {
     let self = this
     // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
-    const bankStyle = this.props.bankStyle
 
     let str = messagePart ? messagePart : message
     messagePart = null
