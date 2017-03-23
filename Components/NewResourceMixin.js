@@ -201,7 +201,7 @@ var NewResourceMixin = {
         continue;
       if (utils.isHidden(p, resource)) {
         if (!resource[p])
-          this.setDefaultValue(p, resource, hideProps)
+          this.setDefaultValue(p, resource, true)
         continue
       }
 
@@ -1385,18 +1385,17 @@ var NewResourceMixin = {
   },
   setDefaultValue(prop, resource, isHidden) {
     let defaults = this.props.defaultPropertyValues
-    if (!defaults  ||  resource[prop])
+    if (!defaults)
       return
-    if (this.props.model) {
-      let vals = defaults[this.props.model.id]
-      for (let p in vals) {
-        resource[p] = vals[p]
-        if (isHidden) {
-          if (!this.floatingProps)
-            this.floatingProps = {}
-          this.floatingProps[p] = vals[p]
-        }
-      }
+    let vals = defaults[resource[constants.TYPE]]
+    if (!vals  ||  !vals[prop])
+      return
+
+    resource[prop] = vals[prop]
+    if (isHidden) {
+      if (!this.floatingProps)
+        this.floatingProps = {}
+      this.floatingProps[prop] = vals[prop]
     }
   },
   hasError(errors, propName) {

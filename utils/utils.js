@@ -1687,20 +1687,6 @@ var utils = {
     }
     return separator
   },
-  isHidden(p, resource) {
-    let modelName = resource[TYPE]
-    let meId = this.getId(me)
-    let provider = (utils.getId(resource.from) === meId) ? resource.to.organization : resource.from.organization
-    if (!provider)
-      return false
-
-    let hiddenProps = hidePropertyInEdit[utils.getId(provider)]
-    if (hiddenProps) {
-      hiddenProps = hiddenProps[modelName]
-      return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
-    }
-    return false
-  },
   parseMessage(resource, message, bankStyle, idx) {
     let i1 = message.indexOf('**')
     let formType, message1, message2
@@ -1726,7 +1712,21 @@ var utils = {
   },
   addHidePropertyInEditFor(provider) {
     hidePropertyInEdit[this.getId(provider)] = provider._hidePropertyInEdit
-  }
+  },
+  isHidden(p, resource) {
+    let modelName = resource[TYPE]
+    let meId = this.getId(me)
+    let provider = (utils.getId(resource.from) === meId) ? resource.to.organization : resource.from.organization
+    if (!provider)
+      return false
+
+    let hiddenProps = hidePropertyInEdit[utils.getId(provider)]
+    if (hiddenProps) {
+      hiddenProps = hiddenProps[modelName]
+      return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
+    }
+    return false
+  },
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
   //   let fromId = utils.getId(r.from)
