@@ -1700,7 +1700,7 @@ var utils = {
     idx = idx ? ++idx : 1
     return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{message1}
              <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
-             <Text>{this.parseMessage(resource, message2, bankStyle, idx)}</Text>
+             <Text>{utils.parseMessage(resource, message2, bankStyle, idx)}</Text>
            </Text>
   }
   // isResourceInMyData(r) {
