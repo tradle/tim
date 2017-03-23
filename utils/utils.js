@@ -1715,17 +1715,18 @@ var utils = {
   },
   isHidden(p, resource) {
     let modelName = resource[TYPE]
+    if (!this.isMessage(this.getModel(modelName).value))
+      return
     let meId = this.getId(me)
     let provider = (utils.getId(resource.from) === meId) ? resource.to.organization : resource.from.organization
     if (!provider)
-      return false
+      return
 
     let hiddenProps = hidePropertyInEdit[utils.getId(provider)]
     if (hiddenProps) {
       hiddenProps = hiddenProps[modelName]
       return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
     }
-    return false
   },
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
