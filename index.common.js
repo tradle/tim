@@ -664,6 +664,9 @@ var NavigationBarRouteMapper = {
       //     {rotate: '45deg'}
       //   ]}
       break
+    case 'Download':
+      icon = 'md-download'
+      break
     case 'Profile':
       icon = 'md-person'
       break
