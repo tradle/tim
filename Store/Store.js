@@ -66,6 +66,7 @@ var debounce = require('debounce')
 var asyncstorageDown = require('asyncstorage-down')
 var levelup = require('levelup')
 var mutexify = require('mutexify')
+
 // var updown = require('level-updown')
 
 var leveldown = require('cachedown')
@@ -1614,6 +1615,7 @@ var Store = Reflux.createStore({
       this._mergeItem(okey, sp.org)
       this.configProvider(sp, org)
       batch.push({type: 'put', key: okey, value: org})
+      this.resetForEmployee(org)
     }
     else {
       let newOrg = {}
@@ -1709,6 +1711,18 @@ var Store = Reflux.createStore({
       debugger
       throw err
     })
+  },
+  resetForEmployee(org) {
+    if (!me  ||  !me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(org))
+      return
+    let myOrg = me.organization
+    if (myOrg._canShareContext === org._canShareContext &&
+        myOrg._hasSupportLine === org._hasSupportLine)
+      return
+    myOrg._canShareContext = org._canShareContext
+    myOrg._hasSupportLine = org._hasSupportLine
+    this.setMe(me)
+    this.dbPut(utils.getId(me), me)
   },
   configProvider(sp, org) {
     let config = sp.publicConfig
@@ -5007,13 +5021,9 @@ var Store = Reflux.createStore({
     }
   },
   onGetAllSharedContexts() {
-    let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
-    if (!list  ||  !list.length)
-      return
-    let l = list.filter((r) => {
-      return utils.isReadOnlyChat(r)
-    })
-    this.trigger({action: 'allSharedContexts', count: l.length})
+    let list = this.getAllSharedContexts()
+    if (list)
+      this.trigger({action: 'allSharedContexts', count: list.length})
   },
   inContext(r, context) {
     return r._context && utils.getId(r._context) === utils.getId(context)
@@ -6913,10 +6923,11 @@ var Store = Reflux.createStore({
       if (val[TYPE] === MY_EMPLOYEE_PASS) {
         to.isEmployee = true
         to.organization = this.buildRef(org)
-        to.organization._canShareContext = org._canShareContext
-        to.organization._hasSupportLine = org._hasSupportLine
-        this.setMe(to)
-        batch.push({type: 'put', key: utils.getId(to), value: to})
+        this.resetForEmployee(org)
+        // to.organization._canShareContext = org._canShareContext
+        // to.organization._hasSupportLine = org._hasSupportLine
+        // this.setMe(to)
+        // batch.push({type: 'put', key: utils.getId(to), value: to})
         if (to.firstName === FRIEND) {
           let toRep = this.getRepresentative(utils.getId(org))
           toRep = this._getItem(toRep)
@@ -7448,6 +7459,15 @@ var Store = Reflux.createStore({
     })
   },
 
+  getAllSharedContexts() {
+    let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
+    if (!list  ||  !list.length)
+      return
+    let l = list.filter((r) => {
+      return utils.isReadOnlyChat(r)
+    })
+    return l
+  },
   cleanup(result) {
     // if (!result.length)
       return Q()
@@ -7457,7 +7477,7 @@ var Store = Reflux.createStore({
     result.forEach((r) => {
       batch.push({type: 'del', key: utils.getId(r), value: r})
       if (this.getModel(r[TYPE]).interfaces) {
-        let id = (utils.getId(r.from) === meId) ? utils.getId(r.from) : utils.getId(r.to)
+        let id = (utils.getId(r.from) === meId) ? utils.getId(r.to) : utils.getId(r.from)
         let rep = this._getItem(id)
         let orgId = rep.bot  &&  rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
 
