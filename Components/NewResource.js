@@ -910,8 +910,10 @@ class NewResource extends Component {
     });
   }
   getItem(bl, styles) {
-    let meta = this.props.model
     let resource = this.state.resource
+    if (utils.isHidden(bl.name, resource))
+      return
+    let meta = this.props.model
     let blmodel = meta
     var counter, count = 0
     let itemsArray = null
