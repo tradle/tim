@@ -59,7 +59,8 @@ var asyncActions = [
   'getProvider',
   'autoRegister',
   'setPreferences',
-  'getDocuments'
+  'getDocuments',
+  'downloadAllSharedContexts'
 ]
 
 var syncActions = [

@@ -65,6 +65,7 @@ var leveldown = require('./leveldown')
 var level = require('./level')
 var debounce = require('debounce')
 var mutexify = require('mutexify')
+const download = require('downloadjs')
 
 const collect = require('stream-collector')
 const tradle = require('@tradle/engine')
@@ -5237,15 +5238,23 @@ var Store = Reflux.createStore({
       })
     }
   },
-  onGetAllSharedContexts() {
-    let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
-    if (!list  ||  !list.length)
-      return
-    let l = list.filter((r) => {
-      return utils.isReadOnlyChat(r)
+  onDownloadAllSharedContexts() {
+    let list = this.getAllSharedContexts()
+    let result = list.map((context) => {
+      let c = utils.optimizeResource(context)
+      let forms = this.searchMessages({modelName: MESSAGE, to: context})
+      if (forms)
+        c.forms = forms.map((r) => utils.optimizeResource(r))
+      return c
     })
-    this.trigger({action: 'allSharedContexts', count: l.length})
+    download(JSON.stringify(result, null, 2), 'datadump.json', 'application/json')
   },
+  onGetAllSharedContexts() {
+    let list = this.getAllSharedContexts()
+    if (list)
+      this.trigger({action: 'allSharedContexts', count: list.length})
+  },
+
   inContext(r, context) {
     return r._context && utils.getId(r._context) === utils.getId(context)
   },
@@ -7679,6 +7688,15 @@ var Store = Reflux.createStore({
     })
   },
 
+  getAllSharedContexts() {
+    let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
+    if (!list  ||  !list.length)
+      return
+    let l = list.filter((r) => {
+      return utils.isReadOnlyChat(r)
+    })
+    return l
+  },
   cleanup(result) {
     // if (!result.length)
       return Q()
@@ -8209,9 +8227,15 @@ var Store = Reflux.createStore({
 
     //    batch.push({type: 'put', key: m.id, value: m});
     // });
+    let isWeb = utils.isWeb()
+    for (var m in models) {
+      if (isWeb  &&  m === PHOTO_ID) {
+        models[m].value.properties['scan'].title = 'Upload'
+        utils.setModels(models)
+      }
 
-    for (var m in models)
       batch.push({type: 'put', key: m, value: models[m].value});
+    }
 
     this.setBusyWith('loadingModels')
 

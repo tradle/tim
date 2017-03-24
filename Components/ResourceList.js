@@ -116,15 +116,18 @@ class ResourceList extends Component {
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
+
+    var routes = this.props.navigator.getCurrentRoutes()
     if (this.props.chat) {
       this.state.sharedWith = {}
-      var routes = this.props.navigator.getCurrentRoutes()
       routes[routes.length - 1].onRightButtonPress = this.done.bind(this)
     }
     else if (this.props.onDone) {
       this.state.sharedWith = {}
-      var routes = this.props.navigator.getCurrentRoutes()
       routes[routes.length - 1].onRightButtonPress = this.props.onDone.bind(this, this.state.chosen)
+    }
+    else if (this.props.onDownload) {
+      routes[routes.length - 1].onRightButtonPress = this.props.onDownload.bind(this)
     }
   }
   done() {
@@ -883,9 +886,11 @@ class ResourceList extends Component {
       component: ResourceList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
+      rightButtonTitle: 'Download',
       passProps: {
         bankStyle: this.props.style,
         modelName: PRODUCT_APPLICATION,
+        onDownload: () => Actions.downloadAllSharedContexts(),
         _readOnly: true
       }
     });

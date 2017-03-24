@@ -85,6 +85,7 @@ const SIG = constants.SIG
 const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
+const PHOTO_ID = 'tradle.PhotoID'
 const PASSWORD_ENC = 'hex'
 const MAX_WIDTH = 800
 
@@ -180,6 +181,9 @@ var utils = {
   translateProperty(property, model) {
     if (!dictionary)
       return property.title || utils.makeLabel(property.name)
+    // HACK for property that changes title in case it is upload or scan
+    if (property.title  &&  this.isWeb()  &&  model.id === PHOTO_ID  &&  property.name === 'scan')
+      return property.title
     let translations = dictionary.properties[property.name]
     let val
     if (translations)
