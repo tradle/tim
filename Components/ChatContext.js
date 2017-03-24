@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 const REMEDIATION = 'tradle.Remediation'
 var constants = require('@tradle/constants');
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PROFILE = constants.TYPES.PROFILE
 
 class ChatContext extends Component {
   props: {
@@ -33,12 +34,13 @@ class ChatContext extends Component {
       return <View/>
     let me = utils.getMe()
     let chat = this.props.chat
+    let isChattingWithPerson = chat[constants.TYPE] === PROFILE
     if (me.isEmployee) {
-      if (chat[constants.TYPE] === constants.TYPES.PROFILE  &&  !me.organization._canShareContext)
+      if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return <View/>
     }
     // No need to show context if provider has only one product and no share context
-    if ((!chat.products  ||  chat.products.length === 1)  &&  !chat._canShareContext)
+    else if ((!chat.products  ||  chat.products.length === 1)  &&  !chat._canShareContext)
       return <View/>
     // if (!this.props.context  ||  this.props.context._readOnly)
     //   return <View/>
@@ -54,7 +56,7 @@ class ChatContext extends Component {
                   </TouchableOpacity>
     // HACK: if me is employee no sharing for now
     let share
-    if (this.props.allContexts || isReadOnlyChat  ||  !chat._canShareContext)
+    if (this.props.allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
       share = <View/>
     // else if (utils.getMe().isEmployee  &&  this.props.chat[constants.TYPE] === constants.TYPES.PROFILE)
     //   share = <View/>
