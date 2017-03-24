@@ -60,7 +60,7 @@ class ImageInput extends Component {
     const { prop, onImage } = this.props
     let options = {returnIsVertical: true, quality: utils.imageQuality, cameraType: this.props.prop.cameraType || 'back'}
     let action
-    if (utils.isSimulator())
+    if (utils.isIOS() && utils.isSimulator())
       action = 'launchImageLibrary'
     else if (!prop.allowPicturesFromLibrary)
       action = 'launchCamera'

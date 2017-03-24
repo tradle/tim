@@ -1,7 +1,9 @@
 'use strict'
 
+import React from 'react'
 import {
   NativeModules,
+  Text,
   findNodeHandle,
   Dimensions,
   Alert,
@@ -24,6 +26,8 @@ import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
 import bankStyles from '../styles/bankStyles'
 import Actions from '../Actions/Actions'
+import chatStyles from '../styles/chatStyles'
+import clone from 'clone'
 
 // import Orientation from 'react-native-orientation'
 
@@ -43,6 +47,7 @@ var Backoff = require('backoff')
 var extend = require('xtend')
 var fetch = global.fetch || require('whatwg-fetch')
 var levelErrors = require('levelup/lib/errors')
+
 const Cache = require('lru-cache')
 const mutexify = require('mutexify')
 var strMap = {
@@ -111,6 +116,9 @@ var BACKOFF_DEFAULTS = {
 
 var DEFAULT_FETCH_TIMEOUT = 5000
 var stylesCache = {}
+
+var defaultPropertyValues = {}
+var hidePropertyInEdit = {}
 
 var utils = {
   isEmpty(obj) {
@@ -229,13 +237,14 @@ var utils = {
     return s ? s : args[0]
   },
   clone(resource) {
-    return JSON.parse(JSON.stringify(resource))
+    return clone(resource)
+    // return JSON.parse(JSON.stringify(resource))
   },
   compare(r1, r2) {
     if (!r1 || !r2)
       return (r1 || r2) ? false : true
-    let properties = utils.getModel(r1[TYPE]).value.properties
-    let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', 'sharedWith']
+    let properties = this.getModel(r1[TYPE]).value.properties
+    let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
     for (var p in r1) {
       if (!properties[p]  ||  exclude.indexOf(p) !== -1)
         continue
@@ -256,6 +265,8 @@ var utils = {
           if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
             return false
         }
+        else if (properties[p].inlined  ||  (properties[p].ref  &&  this.getModel(properties[p].ref).value.inlined))
+          return this.compare(r1[p], r2[p])
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
@@ -390,7 +401,7 @@ var utils = {
       // return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
     }
     else {
-      let m = utils.getModel(r[TYPE])
+      let m = this.getModel(r[TYPE])
       let id = r[TYPE] + '_' + r[ROOT_HASH]
       return  m  &&  (m.value.subClassOf === FORM  ||  m.value.id === VERIFICATION  ||  m.value.id === MY_PRODUCT)
             ? id + '_' + (r[CUR_HASH] || r[ROOT_HASH])
@@ -495,7 +506,7 @@ var utils = {
     if (!resource[p]  &&  prop.displayAs)
       return this.templateIt(prop, resource);
     if (prop.type == 'object')
-      return resource[p].title || this.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).value.properties);
+      return resource[p].title || this.getDisplayName(resource[p], this.getModel(resource[p][TYPE]).value.properties);
     else
       return resource[p] + '';
   },
@@ -700,7 +711,7 @@ var utils = {
     var me = utils.getMe()
     if (fromHash == this.getId(me))
       return true;
-    if (utils.getModel(r[TYPE]).value.subClassOf == MY_PRODUCT) {
+    if (this.getModel(r[TYPE]).value.subClassOf == MY_PRODUCT) {
       let org = r.from.organization
       if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
         return true
@@ -767,7 +778,7 @@ var utils = {
     return hasSupportLine
   },
   optimizeResource(resource, doNotChangeOriginal) {
-    let res = doNotChangeOriginal ? this.clone(resource) : resource
+    let res = doNotChangeOriginal ? utils.clone(resource) : resource
 
     var properties = this.getModel(res[TYPE]).value.properties
     for (var p in res) {
@@ -778,7 +789,7 @@ var utils = {
           res[p] = this.buildRef(res[p])
           continue
         }
-        if (properties[p].ref  &&  !utils.getModel(properties[p].ref).value.inlined) {
+        if (properties[p].ref  &&  !this.getModel(properties[p].ref).value.inlined) {
 
           // if (properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
           res[p] = this.buildRef(res[p])
@@ -802,7 +813,7 @@ var utils = {
         var rr = {}
         rr.id = utils.getId(r)
         const type = utils.getType(r)
-        var m = utils.getModel(type)
+        var m = this.getModel(type)
         rr.title = utils.getDisplayName(r, m.properties)
         arr.push(rr)
       })
@@ -1643,8 +1654,14 @@ var utils = {
       return false
     }
   },
+  getPermalink(object) {
+    return object[ROOT_HASH] || protocol.linkString(object)
+  },
   addContactIdentity: async function (node, { identity, permalink }) {
-    if (!permalink) permalink = tradleUtils.hexLink(identity)
+    if (!permalink) permalink = utils.getPermalink(identity)
+
+    // defensive copy
+    identity = utils.clone(identity)
 
     let match
     try {
@@ -1756,7 +1773,8 @@ var utils = {
     return model.subClassOf === 'tradle.Form' || model.subClassOf === 'tradle.MyProduct' || model.id === 'tradle.Verification'
   },
   isSavedItem(r) {
-    let m = this.getModel(r[TYPE]).value
+    let type = this.getType(r)
+    let m = this.getModel(type).value
     if (!m.interfaces || m.interfaces.indexOf(ITEM) === -1)
       return
     let toId = utils.getId(r.to)
@@ -1772,6 +1790,47 @@ var utils = {
       }
     }
     return separator
+  },
+  parseMessage(resource, message, bankStyle, idx) {
+    let i1 = message.indexOf('**')
+    let formType, message1, message2
+    let messagePart
+    if (i1 === -1)
+      return message
+    formType = message.substring(i1 + 2)
+    let i2 = formType.indexOf('**')
+    if (i2 !== -1) {
+      message1 = message.substring(0, i1)
+      message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
+      formType = formType.substring(0, i2)
+    }
+    let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
+    idx = idx ? ++idx : 1
+    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{message1}
+             <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
+             <Text>{utils.parseMessage(resource, message2, bankStyle, idx)}</Text>
+           </Text>
+  },
+  addDefaultPropertyValuesFor(provider) {
+    defaultPropertyValues[this.getId(provider)] = provider._defaultPropertyValues
+  },
+  addHidePropertyInEditFor(provider) {
+    hidePropertyInEdit[this.getId(provider)] = provider._hidePropertyInEdit
+  },
+  isHidden(p, resource) {
+    let modelName = resource[TYPE]
+    if (!this.isMessage(this.getModel(modelName).value))
+      return
+    let meId = this.getId(me)
+    let provider = (utils.getId(resource.from) === meId) ? resource.to.organization : resource.from.organization
+    if (!provider)
+      return
+
+    let hiddenProps = hidePropertyInEdit[utils.getId(provider)]
+    if (hiddenProps) {
+      hiddenProps = hiddenProps[modelName]
+      return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
+    }
   },
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)

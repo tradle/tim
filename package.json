@@ -51,6 +51,7 @@
     "btoa": "^1.1.2",
     "buffer": "^4.9.1",
     "cachedown": "github:mvayngrib/cachedown#bb59815",
+    "clone": "2.1.1",
     "create-ecdh": "github:mvayngrib/createECDH#b5e05e40",
     "crypto-browserify": "^3.11.0",
     "dateformat": "^1.0.12",

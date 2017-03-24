@@ -748,8 +748,15 @@ class MessageRow extends Component {
             )
           return null
         }
+        else if (isSimpleMessage) {
+          let row = utils.parseMessage(resource, resource[v], this.props.bankStyle)
+          if (typeof row === 'string')
+            vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>)
+          else
+            vCols.push(row)
+        }
         else
-          vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
+          vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>)
       }
       first = false;
 

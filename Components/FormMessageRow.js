@@ -84,7 +84,8 @@ class FormMessageRow extends Component {
           metadata: model,
           bankStyle: bankStyle,
           currency: this.props.currency,
-          callback: this.props.onSelect.bind(this, r)
+          callback: this.props.onSelect.bind(this, r),
+          defaultPropertyValues: this.props.defaultPropertyValues,
         }
       };
     }
@@ -242,6 +243,8 @@ class FormMessageRow extends Component {
         return
       if (properties[v].type === 'array')
         return;
+      if (utils.isHidden(v, resource))
+        return
       if (properties[v].ref) {
         if (resource[v]  &&  properties[v].ref !== PHOTO) {
           vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))

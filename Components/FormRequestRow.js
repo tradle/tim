@@ -93,7 +93,7 @@ class FormRequestRow extends Component {
     else {
       onPressCall = resource.documentCreated ? null : this.reviewFormsInContext.bind(this)
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
-      let msg = this.parseMessage(message)
+      let msg = utils.parseMessage(resource, message, bankStyle)
       if (typeof msg === 'string') {
         let idx = message.indexOf('...')
         if (idx !== -1)
@@ -541,12 +541,13 @@ class FormRequestRow extends Component {
   }
 
   formRequest(resource, vCols, prop) {
+    const { bankStyle } = this.props
     let message = resource.message
     let messagePart
     if (resource.documentCreated)
       message = resource.message.replace(/\*/g, '')
     else
-      messagePart = this.parseMessage(message)
+      messagePart = utils.parseMessage(resource, message, bankStyle)
     if (typeof messagePart === 'string')
       messagePart = null
 
@@ -584,7 +585,6 @@ class FormRequestRow extends Component {
     let self = this
     // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
-    const bankStyle = this.props.bankStyle
 
     let str = messagePart ? messagePart : message
     messagePart = null
@@ -741,26 +741,6 @@ class FormRequestRow extends Component {
     })
   }
 
-  parseMessage(message, arr) {
-    let i1 = message.indexOf('**')
-    let formType, message1, message2
-    let messagePart
-    let bankStyle = this.props.bankStyle
-    if (i1 === -1)
-      return message
-    formType = message.substring(i1 + 2)
-    let i2 = formType.indexOf('**')
-    if (i2 !== -1) {
-      message1 = message.substring(0, i1)
-      message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
-      formType = formType.substring(0, i2)
-    }
-    return <Text style={[chatStyles.resourceTitle, this.props.resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{message1}
-             <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
-             <Text>{this.parseMessage(message2, arr)}</Text>
-           </Text>
-  }
-
   showCamera(prop) {
     this.props.navigator.push({
       title: 'Take a pic',
@@ -836,7 +816,8 @@ var styles = StyleSheet.create({
   },
   shareablesList: {
     marginHorizontal: 0,
-    paddingRight: 3
+    paddingRight: 3,
+    backgroundColor: '#ffffff'
   },
   orgView: {
     maxWidth: utils.getMessageWidth(FormRequestRow) - 150,

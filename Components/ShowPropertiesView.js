@@ -136,9 +136,12 @@ class ShowPropertiesView extends Component {
     var first = true;
     let self = this
     let isPartial = model.id === 'tradle.Partial'
+
     var viewCols = vCols.map((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
+      if (utils.isHidden(p, resource))
+        return
       var pMeta = props[p];
       if (pMeta.type === 'array'  &&  pMeta.items.ref  &&  !pMeta.inlined)
         return

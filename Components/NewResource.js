@@ -374,12 +374,15 @@ class NewResource extends Component {
       if (!value)
         value = {}
     }
+
     // value is a tcomb Struct
     var json = utils.clone(value);
+    let isNew = !resource[constants.ROOT_HASH]
     this.checkEnums(json, resource)
     if (this.floatingProps) {
       for (var p in this.floatingProps) {
-        json[p] = this.floatingProps[p]
+        if (isNew  ||  resource[p] !== this.floatingProps[p])
+          json[p] = this.floatingProps[p]
       }
     }
     var required = this.props.model.required;
@@ -444,13 +447,6 @@ class NewResource extends Component {
           missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
       }
     })
-    // if (this.props.resource                      &&
-    //     this.props.resource[constants.ROOT_HASH] &&
-    //     this.compare(json, this.props.resource)  &&
-    //     this.compare(resource, this.props.resource)) {
-    //   this.setState({err: translate('nothingChanged'), submitted: false})
-    //   return
-    // }
 
     var err = this.validateProperties(json)
     for (var p in err)
@@ -493,10 +489,10 @@ class NewResource extends Component {
 
     // var json = JSON.parse(JSON.stringify(value));
 
-    if (!resource) {
-      resource = {};
-      resource[constants.TYPE] = this.props.model.id;
-    }
+    // if (!resource) {
+    //   resource = {};
+    //   resource[constants.TYPE] = this.props.model.id;
+    // }
     // var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!resource || !resource[constants.ROOT_HASH]);
     // if (isRegistration)
     //   this.state.isRegistration = true;
@@ -980,9 +976,11 @@ class NewResource extends Component {
       }
     });
   }
-  getItem(bl) {
-    let meta = this.props.model
+  getItem(bl, styles) {
     let resource = this.state.resource
+    if (utils.isHidden(bl.name, resource))
+      return
+    let meta = this.props.model
     let blmodel = meta
     var counter, count = 0
     let itemsArray = null
