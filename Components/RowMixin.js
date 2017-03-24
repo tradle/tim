@@ -247,7 +247,8 @@ var RowMixin = {
              </View>
    let me = utils.getMe()
    if (!isAccordion)
-      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, me.siEmployee ? verification : document, verification)}>
+      // header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, verification, verification)}>
+      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, this.props.shareWithRequestedParty ? document : verification, verification)}>
                  {header}
                </TouchableHighlight>
 
@@ -611,7 +612,7 @@ var styles = StyleSheet.create({
     flexDirection: 'column'
   },
   orgView: {
-    maxWidth: 0.7 * utils.dimensions().width - 150,
+    maxWidth: utils.getMessageWidth() - 150,
     paddingLeft: 3,
     marginRight: 10,
     flex: 1,
