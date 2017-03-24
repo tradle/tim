@@ -713,9 +713,5 @@
       "currency": "€",
       "value": 10000
     }
-  },
-  "tradle.EmailAddress": {
-    "_t": "tradle.EmailAddress",
-    "email": "someone@somewhere.nice"
   }
 }
