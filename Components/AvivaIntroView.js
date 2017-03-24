@@ -81,7 +81,7 @@ class AvivaIntroView extends Component {
              <View style={styles.row}>
                <Icon name='ios-pin-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={[styles.icon, {paddingRight: 15}]}/>
                <View style={{justifyContent: 'center'}}>
-                 <Text style={[styles.text, {paddingLeft: 3, width: 280}]}>Provide your address</Text>
+                 <Text style={[styles.text, {paddingLeft: 3, width: 280}]}>Provide your address.</Text>
                </View>
              </View>
              <View style={styles.separator} />
