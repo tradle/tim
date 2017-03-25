@@ -5052,8 +5052,15 @@ var Store = Reflux.createStore({
     let result = list.map((context) => {
       let c = utils.optimizeResource(context)
       let forms = this.searchMessages({modelName: MESSAGE, to: context})
-      if (forms)
-        c.forms = forms.map((r) => utils.optimizeResource(r))
+      // filter out the ProductApplication
+      if (forms  &&  forms.length > 1) {
+        c.forms = []
+        for (let i=0; i<forms.length; i++) {
+          let r = forms[i]
+          if (r[TYPE] !== PRODUCT_APPLICATION)
+            c.forms.push(utils.optimizeResource(r))
+        }
+      }
       return c
     })
     download(JSON.stringify(result, null, 2), 'datadump.json', 'application/json')
