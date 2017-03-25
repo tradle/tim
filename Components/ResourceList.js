@@ -409,6 +409,8 @@ class ResourceList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
+    if (utils.resized(this.props, nextProps))
+      return true
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop !== nextProps.prop)
         return true
@@ -977,7 +979,7 @@ class ResourceList extends Component {
                   isLoading={this.state.isLoading}/>
     }
     else {
-      content = <ListView style={{width: utils.getContentWidth(ResourceList), alignSelf: 'center'}}
+      content = <ListView style={{width: utils.getContentWidth(ResourceList), marginHorizontal: 10, alignSelf: 'center'}}
           dataSource={this.state.dataSource}
           renderHeader={this.renderHeader.bind(this)}
           enableEmptySections={true}

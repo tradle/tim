@@ -75,6 +75,8 @@ class ResourceRow extends Component {
       this.setState({unread: params.resource._unread})
   }
   shouldComponentUpdate(nextProps, nextState) {
+    if (utils.resized(this.props, nextProps))
+      return true
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
       return true
     if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
@@ -249,47 +251,43 @@ class ResourceRow extends Component {
     }
 
     let onPress = this.action.bind(this)
-
     let action
-    if (isOfficialAccounts  &&  !this.props.hideMode)
-      action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'white'}} onPress={() => {
-                  this.props.navigator.push({
-                    component: ResourceList,
-                    title: translate("myDocuments"),
-                    backButtonTitle: translate('back'),
-                    passProps: {
-                      modelName: FORM,
-                      listView: true,
-                      resource: this.props.resource
-                    }
-                  })
-                }}>
-                <View style={textStyle}>
-                   {resource.numberOfForms
-                      ? <View style={{flexDirection: 'row'}}>
-                          <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-                          <View style={[styles.countView, {top: 0, right: -10}]}>
-                            <Text style={styles.countText}>{resource.numberOfForms}</Text>
-                          </View>
-                        </View>
-                      : <View />
-                   }
+    if (isOfficialAccounts  &&  !this.props.hideMode  &&  resource.numberOfForms  &&  !count) {
+      action = <View style={styles.actionView}>
+                  <TouchableHighlight underlayColor='transparent' onPress={() => {
+                    this.props.navigator.push({
+                      component: ResourceList,
+                      title: translate("myDocuments"),
+                      backButtonTitle: translate('back'),
+                      passProps: {
+                        modelName: FORM,
+                        listView: true,
+                        resource: this.props.resource
+                      }
+                    })
+                  }}>
+                    <View style={{flexDirection: 'row', marginRight: 10}}>
+                      <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+                      <View style={[styles.countView, {top: 0, right: -10}]}>
+                        <Text style={styles.countText}>{resource.numberOfForms}</Text>
+                      </View>
+                    </View>
+                  </TouchableHighlight>
                 </View>
-              </TouchableHighlight>
-
                            // <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
                       // <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT} : {}]}>
-    let content =  <View style={[styles.content, bg, {paddingHorizontal: 10, width: utils.getContentWidth(ResourceRow)}]} key={this.getNextKey()}>
+    }
+    let content =  <View style={[styles.content, bg, {paddingHorizontal: 10}]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
-                      <View style={[styles.row, bg, { minHeight: 71, justifyContent: 'center', width: utils.dimensions(ResourceRow).width - 50}]}>
+                      <View style={[styles.row, bg, { minHeight: 71, justifyContent: 'center'}]}>
                         {photo}
                         <View style={textStyle}>
                           {this.formatRow(resource, style)}
                         </View>
                       </View>
                     </TouchableHighlight>
-                    {action}
                     {counter}
+                    {action}
                     {dateRow}
                     {multiChooser}
                     {hideMode}
@@ -474,7 +472,7 @@ class ResourceRow extends Component {
                   lastMessageTypeIcon = <Icon name={icon} size={14} color='#7AAAc3' style={{paddingLeft: 1, marginTop: 1}}/>
               }
             }
-            let w = utils.dimensions(ResourceRow).width - 145
+            let w = utils.getContentWidth(ResourceRow).width - 145
             row = <View style={{flexDirection: 'row'}} key={self.getNextKey()}>
                     <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'} />
                     {lastMessageTypeIcon}
@@ -658,10 +656,16 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     color: '#b4c3cb'
   },
-  countView: {
+  actionView: {
     top: 25,
     position: 'absolute',
     right: 10,
+    justifyContent: 'center',
+  },
+  countView: {
+    top: 25,
+    position: 'absolute',
+    right: 15,
     justifyContent: 'center',
     borderRadius: 10,
     width: 20,
@@ -702,7 +706,7 @@ module.exports = ResourceRow;
       // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
       //   <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
       //     <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
-      //       <View style={[styles.row]} key={this.getNextKey()}>
+    //       <View style={[styles.row]} key={this.getNextKey()}>
       //         {photo}
       //         {orgPhoto}
       //         {onlineStatus}
