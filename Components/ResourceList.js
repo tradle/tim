@@ -1128,9 +1128,10 @@ class ResourceList extends Component {
           </TouchableOpacity>
         </View>
       )
+    let width = utils.getContentWidth()
 
     return  (
-      <View>
+      <View style={{width: width}}>
         <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
           <TouchableOpacity onPress={this.showBanks.bind(this)}>
             <View style={styles.row}>
