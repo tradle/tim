@@ -279,7 +279,7 @@ class ResourceRow extends Component {
 
                            // <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
                       // <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT} : {}]}>
-    let content =  <View style={[styles.content, bg]} key={this.getNextKey()}>
+    let content =  <View style={[styles.content, bg, {paddingHorizontal: 10}]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
                       <View style={[styles.row, bg, { minHeight: 71, justifyContent: 'center', width: utils.dimensions(ResourceRow).width - 50}]}>
                         {photo}
