@@ -335,8 +335,8 @@ class ResourceView extends Component {
       <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center'}}>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}>
-            {identityPhotoList}
           </PhotoView>
+            {identityPhotoList}
         </View>
         {actionPanel}
         <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>

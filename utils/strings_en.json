@@ -101,7 +101,7 @@
     "switchTouchIdOff": "Switch touch ID off",
     "switchTouchIdOn": "Switch touch ID on",
     "noConnection": "{appName} requires a working internet connection which you don't have at the moment",
-    "noConnectionWillProcessLater": "{appName} requires a working internet connection which you don't have at the moment. The request will be processed when connection returns",
+    "noConnectionWillProcessLater": "{appName} requires a working internet connection which you don't have at the moment. The request will be processed when a connection is established",
     "noConnectionForPL": "{appName} requires a working internet connection to request a list of products from {1} which you don't have at the moment",
     "noConnectionForNewProduct": "{1}, {appName} requires a working internet connection to fill out the {2} application.",
     "inProgress": "Your request is in progress",
@@ -234,7 +234,7 @@
     "importing": "Importing",
     "invalidDeepLink": "Looks like you clicked an invalid link!",
     "fromMyData": "from 'My Data'",
-    "getUserMediaUnknownError": "We're having problems accessing your camera. This may be an issue with your browser We recommend Google Chrome or Firefox.",
+    "getUserMediaUnknownError": "We're having problems accessing your camera. This may be an issue with your browser. We recommend Google Chrome or Firefox.",
     "getUserMediaPermissionError": "Looks like you've disabled access to the camera. Please re-enable it so you can take photos, and refresh the page!",
     "enterPasswordOrWipeOutTheDevice": "Enter password or wipe out the device",
     "wipeTheDevice": "Wipe out the device"

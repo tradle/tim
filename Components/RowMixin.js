@@ -188,6 +188,7 @@ var RowMixin = {
     }
   },
   formatDocument(params) {
+    const me = utils.getMe()
     let model = params.model
     let verification = params.verification
     let onPress = params.onPress
@@ -245,10 +246,8 @@ var RowMixin = {
                {header}
                {arrow}
              </View>
-   let me = utils.getMe()
-   if (!isAccordion)
-      // header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, verification, verification)}>
-      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, this.props.shareWithRequestedParty ? document : verification, verification)}>
+    if (!isAccordion)
+      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, me.isEmployee ? verification : document, verification)}>
                  {header}
                </TouchableHighlight>
 

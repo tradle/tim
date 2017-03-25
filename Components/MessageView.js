@@ -16,7 +16,6 @@ var VerificationView = require('./VerificationView')
 // var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
 var PageView = require('./PageView')
-
 // var VerificationButton = require('./VerificationButton');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
@@ -179,6 +178,7 @@ class MessageView extends Component {
         bankStyle: this.props.style,
         resource: r,
         doNotSend: true,
+        defaultPropertyValues: this.props.defaultPropertyValues,
         callback: (resource) => {
           self.props.navigator.pop()
         }
@@ -304,7 +304,6 @@ class MessageView extends Component {
     if (inRow  &&  inRow > 4)
       inRow = 5;
 
-
     let propertySheet
     let bankStyle = this.props.bankStyle
     if (isVerificationTree)
@@ -338,7 +337,8 @@ class MessageView extends Component {
                                  showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
                                  showRefResource={this.getRefResource.bind(this)}
-                                 checkProperties={checkProps}>
+                                 defaultPropertyValues={this.props.defaultPropertyValues}
+                                 checkProperties={checkProps} >
                       {content}
                     </ShowRefList>
     }
@@ -373,8 +373,7 @@ class MessageView extends Component {
     var actionSheet = this.renderActionSheet()
     let title = isVerification  ? this.makeViewTitle(model) : null
     let footer = actionSheet && this.renderFooter()
-    let width = utils.dimensions().width
-    width = utils.getContentWidth()
+    let width = utils.getContentWidth()
     let contentSeparator = utils.getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container, {height: utils.dimensions().height, alignItems: 'center'}]} separator={contentSeparator}>

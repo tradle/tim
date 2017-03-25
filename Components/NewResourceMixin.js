@@ -190,6 +190,7 @@ var NewResourceMixin = {
 //   placeholder: 'Test'
 // }
     // var d = data ? data[i] : null;
+    let resource = this.state.resource
     for (var p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
@@ -205,6 +206,11 @@ var NewResourceMixin = {
       let isReadOnly = props[p].readOnly
       if (isReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
+      if (utils.isHidden(p, resource)) {
+        if (!resource[p])
+          this.setDefaultValue(p, resource, true)
+        continue
+      }
 
       var label = translate(props[p], meta) //props[p].title;
       if (!label)
@@ -1269,7 +1275,7 @@ var NewResourceMixin = {
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'  ||  prop.ref === 'tradle.Photo'
     let noChooser
-    if (this.props.model  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
+    if (this.props.model  &&  this.props.model.required  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
       // Don't overwrite default country on provider
       if (this.props.country)
         noChooser = true
@@ -1393,7 +1399,21 @@ var NewResourceMixin = {
       inFocus: propName
     });
   },
+  setDefaultValue(prop, resource, isHidden) {
+    let defaults = this.props.defaultPropertyValues
+    if (!defaults)
+      return
+    let vals = defaults[resource[constants.TYPE]]
+    if (!vals  ||  !vals[prop])
+      return
 
+    resource[prop] = vals[prop]
+    if (isHidden) {
+      if (!this.floatingProps)
+        this.floatingProps = {}
+      this.floatingProps[prop] = vals[prop]
+    }
+  },
   hasError(errors, propName) {
     return (errors && errors[propName]) || this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[propName]
   },
@@ -1426,6 +1446,7 @@ var NewResourceMixin = {
         modelName:      propRef,
         resource:       resource,
         isRegistration: this.state.isRegistration,
+        bankStyle:      this.props.bankStyle,
         returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       this.setChosenValue.bind(this),
       }

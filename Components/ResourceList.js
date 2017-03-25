@@ -116,7 +116,6 @@ class ResourceList extends Component {
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
-
     var routes = this.props.navigator.getCurrentRoutes()
     if (this.props.chat) {
       this.state.sharedWith = {}
@@ -354,7 +353,6 @@ class ResourceList extends Component {
     if (action === 'listSharedWith'  &&  !this.props.chat)
       return
     var list = params.list;
-
     if (list.length) {
       var type = list[0][constants.TYPE];
       if (type  !== this.props.modelName) {
@@ -362,7 +360,6 @@ class ResourceList extends Component {
         if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
           return;
       }
-
       if (this.props.multiChooser) {
         let sharingChatId = utils.getId(this.props.sharingChat)
         list = list.filter(r => {
@@ -1009,8 +1006,9 @@ class ResourceList extends Component {
     if (!this.props.isChooser && this.props.officialAccounts && this.props.modelName === ORGANIZATION)
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
+    let contentSeparator = utils.getContentSeparator(this.props.bankStyle)
     return (
-      <PageView style={this.props.isBacklink ? {height: utils.dimensions().height} : platformStyles.container}>
+      <PageView style={this.props.isBacklink ? {height: utils.dimensions().height} : platformStyles.container} separator={contentSeparator}>
         {network}
         <View style={hasSearchBar ? {height: 0} : {}}>
           {searchBar}
