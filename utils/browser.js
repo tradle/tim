@@ -4,7 +4,8 @@ import { Platform } from 'react-native'
 let ffPrivateDetector
 let _isFFPrivateBrowsing
 const isFF = /Firefox/.test(navigator.userAgent)
-const isSafari = navigator.userAgent.indexOf('Safari') !==-1 && navigator.userAgent.indexOf('Chrome') === -1
+const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1
+const isChrome = navigator.userAgent.indexOf('Chrome') !== -1
 
 module.exports = {
   isIE: (function isIE () {
@@ -18,6 +19,7 @@ module.exports = {
     return !(global.ActiveXObject) && "ActiveXObject" in global
   })(),
   isFF,
+  isChrome,
   isSafari,
   get _isFFPrivateBrowsing() {
     return _isFFPrivateBrowsing
