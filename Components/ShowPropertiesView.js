@@ -300,7 +300,7 @@ class ShowPropertiesView extends Component {
 
       return (<View key={this.getNextKey()}>
                {separator}
-               <View style={isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}}>
+               <View style={{width: utils.getContentWidth(ShowPropertiesView), flexDirection: isDirectionRow ? 'row' : 'column'}}>
                  <View style={[style, {flexDirection: 'column'}]}>
                    {title}
                    {val}
