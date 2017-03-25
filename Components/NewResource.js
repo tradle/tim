@@ -735,7 +735,7 @@ class NewResource extends Component {
       if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO))
         arrayItems.push(this.getPhotoItem(bl, styles))
       else
-        arrayItems.push(this.getItem(bl))
+        arrayItems.push(this.getItem(bl, styles))
     }
     if (isRegistration)
       Form.stylesheet = rStyles
