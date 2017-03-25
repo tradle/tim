@@ -43,6 +43,7 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
+import { isChrome } from '../utils/browser'
 
 class AvivaIntroView extends Component {
   static displayName = 'AvivaIntroView';
@@ -50,6 +51,12 @@ class AvivaIntroView extends Component {
   render() {
     const screen = utils.dimensions(AvivaIntroView)
     var bankStyle = this.props.bankStyle
+    const warning = !isChrome && (
+      <View style={styles.row}>
+        <Text style={[styles.warning, {paddingLeft: 3, width: screen.width - 40 }]}>WARNING: Not all browsers are supported. If you’re browser is not responding, we recommend you use Chrome.</Text>
+      </View>
+    )
+
     let content = (
       <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#ffffff'}}>
         <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}} style={{alignItems: 'center'}}>
@@ -67,7 +74,7 @@ class AvivaIntroView extends Component {
              <View style={{flexDirection: 'row', paddingVertical: 7}}>
                <Icon name='ios-camera-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
                <View style={{justifyContent: 'center'}}>
-                 <Text style={[styles.text, {width: 280}]}>Use your phone to scan either your UK Passport or UK Driving Licence.</Text>
+                 <Text style={[styles.text, {width: 280}]}>Upload a scan of either your UK Passport or UK Driving Licence.</Text>
                 </View>
              </View>
              <View style={styles.separator} />
@@ -81,13 +88,15 @@ class AvivaIntroView extends Component {
              <View style={styles.row}>
                <Icon name='ios-pin-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={[styles.icon, {paddingRight: 15}]}/>
                <View style={{justifyContent: 'center'}}>
-                 <Text style={[styles.text, {paddingLeft: 3, width: 280}]}>Provide your address.</Text>
+                 <Text style={[styles.text, {paddingLeft: 3, width: 280}]}>Provide your name and address.</Text>
                </View>
              </View>
              <View style={styles.separator} />
              <View style={styles.row}>
                <Text style={[styles.text, {paddingLeft: 3, width: screen.width - 40 }]}>By using this service you agree that Aviva can run an identity check using the details you provide and you agree to our Terms of use and privacy policy.</Text>
              </View>
+             <View style={styles.separator} />
+             {warning}
            </View>
            <View style={styles.centeredRow}>
              <TouchableOpacity style={{paddingRight:10}} onPress={() => this.goto(LEARN_MORE_URL)}>
@@ -208,9 +217,10 @@ var styles =  StyleSheet.create({
     paddingTop: 5,
     paddingVertical: 10
   },
-  text: {
+  warning: {
     fontSize: 14,
-    color: '#757575',
+    fontStyle: 'italic',
+    color: '#ff0000',
   },
   importantText: {
     fontWeight: '800'
