@@ -1231,7 +1231,7 @@ var Store = Reflux.createStore({
     const permalink = utils.getPermalink(identity)
     await utils.addContactIdentity(meDriver, { identity, permalink })
     await this.addContact(payload, permalink, msg.forPartials || msg.forContext)
-    const url = utils.keyByValue(wsClients, transport)
+    const url = utils.keyByValue(wsClients.byUrl, transport)
     await this.addToSettings({hash: permalink, url: url})
   },
 
@@ -1257,7 +1257,7 @@ var Store = Reflux.createStore({
         onPress: async () => {
           await utils.addContactIdentity(meDriver, { identity: payload.identity })
           await this.addContact(payload, rootHash)
-          const url = utils.keyByValue(wsClients, transport)
+          const url = utils.keyByValue(wsClients.byUrl, transport)
           this.addToSettings({hash: rootHash, url: url})
         }},
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
@@ -4381,7 +4381,8 @@ var Store = Reflux.createStore({
     var prop = params.prop;
     var context = params.context
     var _readOnly = params._readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
-
+    if (_readOnly  &&  modelName === PRODUCT_APPLICATION)
+      return this.getAllSharedContexts()
     if (typeof prop === 'string')
       prop = meta[prop];
     var backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
@@ -7513,6 +7514,21 @@ var Store = Reflux.createStore({
       return
     let l = list.filter((r) => {
       return utils.isReadOnlyChat(r)
+    })
+    let ll = l.map((r) => {
+      let forms = this.searchMessages({modelName: MESSAGE, to: r})
+      if (!forms  ||  r._certIssued)
+        return
+      let result = forms.map((rr) => {
+        if (rr[TYPE] === APPLICATION_SUBMITTED) {
+          r._appSubmitted = true
+          this.dbPut(utils.getId(r), r)
+        }
+        else if (this.getModel(rr[TYPE]).subClassOf === MY_PRODUCT) {
+          r._certIssued = true
+          this.dbPut(utils.getId(r), r)
+        }
+      })
     })
     return l
   },
