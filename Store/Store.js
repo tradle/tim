@@ -3327,10 +3327,17 @@ var Store = Reflux.createStore({
               to: {permalink: permalink},
               link: hash,
             }
-            if (returnVal._context)
+            if (returnVal._context) {
               sendParams.other = {
                 context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
               }
+            }
+            else if (returnVal[TYPE] === PRODUCT_APPLICATION) {
+              sendParams.other = {
+                context: returnVal[ROOT_HASH]
+              }
+            }
+
             return meDriver.send(sendParams)
           }
         })
