@@ -112,6 +112,8 @@ class FormMessageRow extends Component {
         borderRadius: 10,
         marginBottom: 3,
       }
+      if (isSharedContext)
+        photoListStyle.marginLeft = 40
     }
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
