@@ -48,6 +48,7 @@ import { isChrome } from '../utils/browser'
 class AvivaIntroView extends Component {
   static displayName = 'AvivaIntroView';
   static orientation = 'portrait';
+  static backButtonDisabled = !__DEV__;
   render() {
     const screen = utils.dimensions(AvivaIntroView)
     var bankStyle = this.props.bankStyle

@@ -23,10 +23,11 @@ var StyleSheet = require('../StyleSheet')
 import {
   Image,
   // StyleSheet,
+  Alert,
   Platform,
   Text,
-  TouchableOpacity,
   TouchableHighlight,
+  TouchableOpacity,
   View
 } from 'react-native';
 
@@ -36,6 +37,8 @@ import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const ASSIGN_RM = 'tradle.AssignRelationshipManager'
+const UNREAD_COLOR = '#FF6D0D'
 const ROOT_HASH = constants.ROOT_HASH
 const TYPE = constants.TYPE
 const FORM = constants.TYPES.FORM
@@ -349,15 +352,40 @@ class ResourceRow extends Component {
     // HACK
     else if (model.id === PRODUCT_APPLICATION) {
       if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
-        let certIssued
-        if (resource._certIssued)
-          certIssued = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
+        let status
+        if (resource._certIssued) {
+          status = 'Completed'
+          color = 'green'
+        }
+        else if (resource._appSubmitted) {
+          status = 'Submitted'
+          color = '#7AAAc3'
+        }
+        if (status)
+          status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}><Text style={{fontSize: 14, color: color}}>{translate(status)}</Text></View>
+        if (!resource._certIssued) {
+          let iname =  this.state.hasRM ||  this.props.resource._relationshipManager ? 'md-log-out' : 'md-log-in'
+          let icolor = this.state.hasRM ||  this.props.resource._relationshipManager ? 'blue' : 'red'
+          let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
+          if (!resource._relationshipManager) {
+            icon = <TouchableOpacity onPress={() => this.assignRM()}>
+                     {icon}
+                   </TouchableOpacity>
+          }
+
+          status = <View style={{flexDirection: 'column', justifyContent: 'center'}}>
+                     {icon}
+                     {status}
+                   </View>
+        }
+
+          // certIssued = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
         return  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   <View style={{padding: 5}}>
                     <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>
                     <Text style={styles.contextOwners}>{resource.from.organization || resource.from.title} -> {resource.to.organization.title}</Text>
                   </View>
-                  {certIssued}
+                  {status}
                 </View>
       }
       return <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>;
@@ -512,6 +540,29 @@ class ResourceRow extends Component {
         </View>
       </TouchableOpacity>
     ];
+  }
+  assignRM() {
+    Alert.alert(
+      translate('areYouSureYouWantToServeThisCustomer', this.props.resource.from.title),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {}},
+        {text: translate('Yes'), onPress: () => {
+          let me = utils.getMe()
+          let msg = {
+            [TYPE]: ASSIGN_RM,
+            employee: me,
+            application: this.props.resource,
+            from: me,
+            to: this.props.resource.to
+          }
+          Actions.addItem({resource: msg})
+          this.setState({hasRM: true})
+        }}
+      ]
+    )
+
+
   }
   onPress(event) {
     let resource = this.props.resource

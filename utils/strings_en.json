@@ -237,5 +237,7 @@
     "getUserMediaUnknownError": "We're having problems accessing your camera. This may be an issue with your browser. We recommend Google Chrome or Firefox.",
     "getUserMediaPermissionError": "Looks like you've disabled access to the camera. Please re-enable it so you can take photos, and refresh the page!",
     "enterPasswordOrWipeOutTheDevice": "Enter password or wipe out the device",
-    "wipeTheDevice": "Wipe out the device"
+    "wipeTheDevice": "Wipe out the device",
+    "areYouSureYouWantToServeThisCustomer": "Are you sure you want to serve this customer?",
+    "approveThisApplicationFor": "Approve or Deny application for {1}"
 }
