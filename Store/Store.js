@@ -279,9 +279,12 @@ var Store = Reflux.createStore({
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
   init() {
-    var self = this
+    return this.ready = this._init()
+  },
+  async _init() {
+    const self = this
     // Setup components:
-    var ldb = level('TiM.db', { valueEncoding: 'json' });
+    const ldb = level('TiM.db', { valueEncoding: 'json' });
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
     // ldb.query.use(jsonqueryEngine());
     db = promisify(ldb);
@@ -323,16 +326,14 @@ var Store = Reflux.createStore({
 
     // if (true) {
     if (false) {
-      return this.ready = this.wipe()
-        .then(() => {
-          Alert.alert('please refresh')
-          return Q.Promise(function (resolve) {
-            // hang
-          })
-        })
+      await this.wipe()
+      Alert.alert('please refresh')
+      return Q.Promise(function (resolve) {
+        // hang
+      })
     }
 
-    this.ready = this.getReady()
+    return this.getReady()
   },
   async getReady() {
     let me

@@ -25,6 +25,7 @@ import { getDimensions, getOrientation } from 'react-native-orient'
 import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
 import chatStyles from '../styles/chatStyles'
+import locker from './locker'
 import clone from 'clone'
 
 // import Orientation from 'react-native-orientation'
@@ -55,11 +56,6 @@ var strMap = {
 var translatedStrings = {
   en: preParseStrings(require('./strings_en.json'), ENV),
   nl: preParseStrings(require('./strings_nl.json'), ENV)
-}
-
-var encryptionOpts = {
-  algorithm:'aes-256-cbc',
-  ivBytes: 16
 }
 
 const tradle = require('@tradle/engine')
@@ -1205,31 +1201,6 @@ var utils = {
       })
   },
 
-  encrypt: function (data, opts) {
-    opts = { ...encryptionOpts, ...opts }
-    var key = opts.key
-    var iv = opts.iv || crypto.randomBytes(opts.ivBytes)
-    var cipher = crypto.createCipheriv(opts.algorithm, key, iv)
-    var ciphertext = Buffer.concat([cipher.update(data), cipher.final()])
-    var parts = [
-      iv,
-      ciphertext
-    ]
-
-    return serialize(parts)
-  },
-
-  decrypt: function (data, opts) {
-    opts = { ...encryptionOpts, ...opts }
-    var parts = unserialize(data)
-    var iv = parts[0]
-    var ciphertext = parts[1]
-    var key = opts.key
-    var decipher = crypto.createDecipheriv(opts.algorithm, key, iv)
-    var m = decipher.update(parts[1])
-    return Buffer.concat([m, decipher.final()])
-  },
-
   resetPasswords: function () {
     return Promise.all([
       Keychain.resetGenericPasswords(),
@@ -1315,29 +1286,7 @@ var utils = {
     return props.photos
   },
 
-  locker: function (opts={}) {
-    const { timeout } = opts
-    const locks = new Map()
-    return function lockID (something) {
-      let lock = locks.get(something)
-      if (!lock) {
-        lock = mutexify()
-        locks.set(something, lock)
-      }
-
-      return new Promise(function (resolve, reject) {
-        lock(function (unlock) {
-          resolve(unlock)
-          if (!timeout) return
-
-          setTimeout(() => {
-            reject(new Error('timed out'))
-            unlock()
-          }, timeout)
-        })
-      })
-    }
-  },
+  locker,
   getMainPhotoProperty(model) {
     let mainPhoto
     let props = model.properties
@@ -1780,37 +1729,6 @@ function rebuf (json) {
 
 function parseDBValue (pair) {
   return pair[1] && rebuf(JSON.parse(pair[1]))
-}
-
-function serialize (buffers) {
-  var parts = [], idx = 0
-  buffers.forEach(function (part) {
-    var len = Buffer(4)
-    if (typeof part === 'string') part = Buffer(part)
-    len.writeUInt32BE(part.length, 0)
-    parts.push(len)
-    idx += len.length
-    parts.push(part)
-    idx += part.length
-  })
-
-  return Buffer.concat(parts)
-}
-
-function unserialize (buf) {
-  var parts = []
-  var l = buf.length, idx = 0
-  while (idx < l) {
-    var dlen = buf.readUInt32BE(idx)
-    idx += 4
-    var start = idx
-    var end = start + dlen
-    var part = buf.slice(start, end)
-    parts.push(part)
-    idx += part.length
-  }
-
-  return parts
 }
 
 function dateFromParts (parts) {
