@@ -5436,9 +5436,12 @@ var Store = Reflux.createStore({
         let toId = utils.getId(value.to)
         if (toId === meId)
           toId = utils.getId(value.from)
-
-        let org = this._getItem(toId).organization
-        this.addMessagesToChat(utils.getId(org), value)
+        if (value.to.organization  &&  value.from.organization  &&  utils.getId(value.to.organization)  !== utils.getId(value.from.organization)) {
+          let org = this._getItem(toId).organization
+          this.addMessagesToChat(utils.getId(org), value)
+        }
+        else if (value._context  &&  utils.isReadOnlyChat(value._context))
+          this.addMessagesToChat(utils.getId(value._context), value)
       }
       if (mid)
         this._setItem(MY_IDENTITIES, mid)
@@ -6904,8 +6907,8 @@ var Store = Reflux.createStore({
           //   }
           // })
         }
-        this.onAddItem({
-          resource: {
+        this.onAddMessgae({
+          msg: {
             [TYPE]: PRODUCT_APPLICATION,
             product: product,
             from: meRef,
@@ -6967,25 +6970,34 @@ var Store = Reflux.createStore({
           this.dbPut(meId, to)
         }
       }
-      else if (val[TYPE] === PHOTO_ID) {
+      else {
         let fromId = utils.getId(val.from)
         let fr = this._getItem(fromId)
         if (fr.firstName === FRIEND) {
-          let personal = val.scanJson.personal
-          if (personal) {
-            let firstName = personal.firstName
-            if (firstName) {
-              firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-              fr.firstName = firstName
-              this._setItem(fromId, fr)
-              this.dbPut(fromId, fr)
-
-              this.trigger({action: 'addItem', resource: fr})
+          if (val[TYPE] === PHOTO_ID) {
+            let personal = val.scanJson.personal
+            if (personal) {
+              let firstName = personal.firstName
+              if (firstName) {
+                firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+                fr.firstName = firstName
+                lastName = personal.lastName
+                if (lastName) {
+                  lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+                  fr.lastName = lastName
+                }
+              }
             }
           }
+          else if (val[TYPE] === NAME) {
+            fr.firstName = val.givenName
+            fr.lastName = val.surname
+          }
+          this._setItem(fromId, fr)
+          this.dbPut(fromId, fr)
+          this.trigger({action: 'addItem', resource: fr})
         }
       }
-
       this.addLastMessage(val, batch)
     }
     if (list[key]) {
