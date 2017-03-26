@@ -41,6 +41,7 @@ var LINK_COLOR
 var LIMIT = 500
 var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
@@ -548,6 +549,7 @@ class MessageList extends Component {
     }
 
     let hideTextInput = !utils.hasSupportLine(resource)  // && !ENV.allowForgetMe
+    let isProductApplication = resource[TYPE] === PRODUCT_APPLICATION
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
 
@@ -556,10 +558,11 @@ class MessageList extends Component {
       // Chooser for trusted party verifier
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
-                           (resource[TYPE] === PRODUCT_APPLICATION && resource.product !== REMEDIATION)
-      if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  !this.state.onlineStatus)) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
+                           (isProductApplication && resource.product !== REMEDIATION)
+
+      if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  !this.state.onlineStatus))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
-      if (notRemediation  &&  (this.props.resource.products  &&  this.props.resource.products.length > 1))
+      if (notRemediation  &&  !hideTextInput) //  &&  this.props.resource.products) //  &&  this.props.resource.products.length > 1))
         maxHeight -= 45
       // else if (ENV.allowForgetMe)
       //   maxHeight -= 45
@@ -646,8 +649,8 @@ class MessageList extends Component {
     let context = this.state.context
     let network
     if (this.props.originatingMessage)
-      network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
-    if (!context  &&  this.props.resource[TYPE] === PRODUCT_APPLICATION)
+       network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
+    if (!context  &&  isProductApplication)
       context = this.props.resource
     let separator = utils.getContentSeparator(bankStyle)
     if (!bgImage)

@@ -974,24 +974,37 @@ class TimHome extends Component {
 
   getSplashScreen() {
     const version = __DEV__ && this.renderVersion()
-    var {width, height} = utils.dimensions(TimHome)
-    var updateIndicator = this.getUpdateIndicator()
-    var submitLogButton = this.getSubmitLogButton()
-    var busyReason = updateIndicator ? null : this.getBusyReason()
+    const { width, height } = utils.dimensions(TimHome)
+    const updateIndicator = this.getUpdateIndicator()
+    const submitLogButton = this.getSubmitLogButton()
+    const busyReason = updateIndicator ? null : this.getBusyReason()
+    const Wrapper = this.state.isLoading ? View : TouchableOpacity
+    const wrapperProps = { style: styles.splashLayout }
+    if (Wrapper === TouchableOpacity) {
+      wrapperProps.onPress = () => this._pressHandler()
+    }
+
+    let spinner
+    if (this.state.isLoading) {
+      spinner = (
+        <View style={{alignSelf: 'center'}}>
+          <ActivityIndicator hidden='true' size='large' color={FOOTER_TEXT_COLOR} />
+        </View>
+      )
+    }
+
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
-        <View style={styles.splashLayout}>
+        <Wrapper { ...wrapperProps }>
           <View style={{flexGrow: 1}}/>
           <View style={{marginBottom: 20}}>
-            <View style={{alignSelf: 'center'}}>
-              <ActivityIndicator hidden='true' size='large' color={FOOTER_TEXT_COLOR} />
-            </View>
+            {spinner}
             {busyReason}
             {updateIndicator}
             {submitLogButton}
           </View>
-        </View>
+        </Wrapper>
         {version}
       </View>
     )

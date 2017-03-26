@@ -21,7 +21,7 @@ var perfDebug = Debug('perf')
 import './utils/shim'
 import './utils/crypto'
 import 'stream'
-
+import debounce from 'debounce'
 // require('./timmy')
 var ResourceList = require('./Components/ResourceList');
 var VerifierChooser = require('./Components/VerifierChooser')
@@ -582,13 +582,13 @@ class TiMApp extends Component {
 
 reactMixin(TiMApp.prototype, Reflux.ListenerMixin)
 
-function goBack (nav) {
+const goBack = debounce(function (nav) {
   const { routes, route, index } = Navs.getCurrentRouteInfo(nav)
   if (index === 0 || route.component.backButtonDisabled) return false
 
   nav.pop()
   return true
-}
+}, 500, true)
 
 var HIT_SLOP = {top:10,right:10,bottom:10,left:10}
 var NavigationBarRouteMapper = {
@@ -675,6 +675,9 @@ var NavigationBarRouteMapper = {
       break
     case 'Share':
       icon = 'md-share'
+      break
+    case 'Approve/Deny':
+      icon = 'md-thumbs-up'
       break
     }
     if (icon)  {

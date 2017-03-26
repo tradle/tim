@@ -35,6 +35,7 @@ var employee = require('../people/employee.json')
 
 const PHOTO_ID = 'tradle.PhotoID'
 const PERSONAL_INFO = 'tradle.PersonalInfo'
+const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const FRIEND = 'Friend'
 
 var Q = require('q');
@@ -264,9 +265,12 @@ var Store = Reflux.createStore({
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
   init() {
-    var self = this
+    return this.ready = this._init()
+  },
+  async _init() {
+    const self = this
     // Setup components:
-    var ldb = level('TiM.db', { valueEncoding: 'json' });
+    const ldb = level('TiM.db', { valueEncoding: 'json' });
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
     // ldb.query.use(jsonqueryEngine());
     db = promisify(ldb);
@@ -316,16 +320,14 @@ var Store = Reflux.createStore({
 
     // if (true) {
     if (false) {
-      return this.ready = this.wipe()
-        .then(() => {
-          Alert.alert('please refresh')
-          return Q.Promise(function (resolve) {
-            // hang
-          })
-        })
+      await this.wipe()
+      Alert.alert('please refresh')
+      return Q.Promise(function (resolve) {
+        // hang
+      })
     }
 
-    this.ready = this.getReady()
+    return this.getReady()
   },
   async getReady() {
     let me
@@ -520,7 +522,7 @@ var Store = Reflux.createStore({
   },
 
   setBusyWith(reason) {
-    this.busyWith = translate(reason)
+    this.busyWith = reason && translate(reason)
     this.triggerBusy()
   },
 
@@ -562,8 +564,14 @@ var Store = Reflux.createStore({
     }
   },
 
-  buildDriver ({ keys, identity, encryption }) {
+  async buildDriver (...args) {
     this.setBusyWith('initializingEngine')
+    const ret = await this._buildDriver(...args)
+    this.setBusyWith(null)
+    return ret
+  },
+
+  _buildDriver ({ keys, identity, encryption }) {
     var self = this
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
@@ -966,9 +974,6 @@ var Store = Reflux.createStore({
         })
         .then(() => meDriver)
     }))
-    .catch(err => {
-      debugger
-    })
     // Not the best way to
   },
 
@@ -3048,7 +3053,7 @@ var Store = Reflux.createStore({
       var identity
       // if (!isNew) // make sure that the values of ref props are not the whole resources but their references
       if (!isSelfIntroduction  &&  !doneWithMultiEntry)
-        utils.optimizeResource(resource)
+        resource = utils.optimizeResource(resource)
 
       var isMessage = utils.isMessage(meta)
       var readOnlyBacklinks = []
@@ -3321,10 +3326,17 @@ var Store = Reflux.createStore({
               to: {permalink: permalink},
               link: hash,
             }
-            if (returnVal._context)
+            if (returnVal._context) {
               sendParams.other = {
                 context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
               }
+            }
+            else if (returnVal[TYPE] === PRODUCT_APPLICATION) {
+              sendParams.other = {
+                context: returnVal[ROOT_HASH]
+              }
+            }
+
             return meDriver.send(sendParams)
           }
         })
@@ -3345,6 +3357,11 @@ var Store = Reflux.createStore({
           return save(returnVal, true)
         })
         .then(() => {
+          if (returnVal[TYPE] === ASSIGN_RM) {
+            let app = self._getItem(returnVal.application)
+            app._relationshipManager = me
+            self.dbPut(utils.getId(app), app)
+          }
           let rId = utils.getId(returnVal.to)
           let to = self._getItem(rId)
 
@@ -4380,7 +4397,8 @@ var Store = Reflux.createStore({
     var prop = params.prop;
     var context = params.context
     var _readOnly = params._readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
-
+    if (_readOnly  &&  modelName === PRODUCT_APPLICATION)
+      return this.getAllSharedContexts()
     if (typeof prop === 'string')
       prop = meta[prop];
     var backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
@@ -5067,8 +5085,24 @@ var Store = Reflux.createStore({
   },
   onGetAllSharedContexts() {
     let list = this.getAllSharedContexts()
-    if (list)
-      this.trigger({action: 'allSharedContexts', count: list.length})
+    if (list) {
+      list.reverse()
+      let relationshipManagers = this.searchMessages({modelName: ASSIGN_RM, to: me.organization})
+      if (relationshipManagers)
+        relationshipManagers.forEach((r) => {
+          let employee = utils.getId(r.employee)
+          let appId = utils.getId(r.application)
+          for (let i=0; i<list.length; i++) {
+            let rId = utils.getId(list[i])
+            if (rId === appId) {
+              list[i]._relationshipManager = true
+              let r = this._getItem(rId)
+              r._relationshipManager = true
+            }
+          }
+        })
+      this.trigger({action: 'allSharedContexts', count: list.length, list: list})
+    }
   },
 
   inContext(r, context) {
@@ -7512,6 +7546,21 @@ var Store = Reflux.createStore({
       return
     let l = list.filter((r) => {
       return utils.isReadOnlyChat(r)
+    })
+    let ll = l.map((r) => {
+      let forms = this.searchMessages({modelName: MESSAGE, to: r})
+      if (!forms  ||  r._certIssued)
+        return
+      let result = forms.map((rr) => {
+        if (rr[TYPE] === APPLICATION_SUBMITTED) {
+          r._appSubmitted = true
+          this.dbPut(utils.getId(r), r)
+        }
+        else if (this.getModel(rr[TYPE]).subClassOf === MY_PRODUCT) {
+          r._certIssued = true
+          this.dbPut(utils.getId(r), r)
+        }
+      })
     })
     return l
   },

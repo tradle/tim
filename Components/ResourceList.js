@@ -544,6 +544,7 @@ class ResourceList extends Component {
     var modelName = constants.TYPES.MESSAGE;
     var self = this;
     let style = this.mergeStyle(resource.style)
+
     var route = {
       component: MessageList,
       id: 11,
@@ -554,7 +555,6 @@ class ResourceList extends Component {
         modelName: modelName,
         currency: resource.currency,
         bankStyle: style,
-      },
     }
     if (isContact) { //  ||  isOrganization) {
       route.title = resource.firstName
@@ -606,7 +606,22 @@ class ResourceList extends Component {
 
     this.props.navigator.push(route);
   }
+  approveDeny(resource) {
+    Alert.alert(
+      translate('approveThisApplicationFor', translate(resource.from.title)),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          console.log('Canceled!')
+        }},
+        {text: translate('Approve'), onPress: () => {
+        }},
+        {text: translate('Deny'), onPress: () => {
+        }},
+      ]
+    )
 
+  }
   _selectResource(resource) {
     var model = utils.getModel(this.props.modelName);
     var title = utils.getDisplayName(resource, model.value.properties);
@@ -779,7 +794,7 @@ class ResourceList extends Component {
         // newContact={this.state.newContact}
   }
   openSharedContextChat(resource) {
-    this.props.navigator.push({
+    var route = {
       // title: translate(utils.getModel(resource.product).value) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
       title: (resource.from.organization || resource.from.title) + '  →  ' + resource.to.organization.title,
       component: MessageList,
@@ -793,7 +808,14 @@ class ResourceList extends Component {
         // currency: params.to.currency,
         bankStyle: this.props.bankStyle || defaultBankStyle
       }
-    })
+    }
+    var isSharedContext = resource[TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
+    if (isSharedContext  &&  resource._relationshipManager  &&  resource._appSubmitted  &&  !resource._certIssued) {
+      route.rightButtonTitle = 'Approve/Deny'
+      route.onRightButtonPress = () => this.approveDeny(resource)
+    }
+    this.props.navigator.push(route)
+
   }
   changeSharedWithList(id, value) {
     this.state.sharedWith[id] = value
@@ -1309,7 +1331,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#246624'
   },
   sharedContextText: {
-    fontSize: 14,
+    fontSize: 12,
     alignSelf: 'center',
     color: '#ffffff'
   },
