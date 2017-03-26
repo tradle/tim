@@ -553,6 +553,7 @@ class ResourceRow extends Component {
             [TYPE]: ASSIGN_RM,
             employee: me,
             application: this.props.resource,
+            _context: this.props.resource,
             from: me,
             to: this.props.resource.to
           }
