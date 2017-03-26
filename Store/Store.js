@@ -1230,7 +1230,7 @@ var Store = Reflux.createStore({
     const permalink = utils.getPermalink(identity)
     await utils.addContactIdentity(meDriver, { identity, permalink })
     await this.addContact(payload, permalink, msg.forPartials || msg.forContext)
-    const url = utils.keyByValue(wsClients, transport)
+    const url = utils.keyByValue(wsClients.byUrl, transport)
     await this.addToSettings({hash: permalink, url: url})
   },
 
@@ -1256,7 +1256,7 @@ var Store = Reflux.createStore({
         onPress: async () => {
           await utils.addContactIdentity(meDriver, { identity: payload.identity })
           await this.addContact(payload, rootHash)
-          const url = utils.keyByValue(wsClients, transport)
+          const url = utils.keyByValue(wsClients.byUrl, transport)
           this.addToSettings({hash: rootHash, url: url})
         }},
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
