@@ -528,7 +528,7 @@ var Store = Reflux.createStore({
   },
 
   setBusyWith(reason) {
-    this.busyWith = translate(reason)
+    this.busyWith = reason && translate(reason)
     this.triggerBusy()
   },
 
@@ -570,8 +570,13 @@ var Store = Reflux.createStore({
     }
   },
 
-  buildDriver ({ keys, identity, encryption }) {
+  async buildDriver (...args) {
     this.setBusyWith('initializingEngine')
+    await this._buildDriver(...args)
+    this.setBusyWith(null)
+  },
+
+  _buildDriver ({ keys, identity, encryption }) {
     var self = this
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
