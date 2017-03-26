@@ -654,6 +654,9 @@ var NavigationBarRouteMapper = {
     case 'Share':
       icon = 'md-share'
       break
+    case 'Approve/Deny':
+      icon = 'md-thumbs-up'
+      break
     }
     if (icon)  {
       let color = /*rbTitle === 'Done' ? '#7AAAC3' : */ '#7AAAC3'
