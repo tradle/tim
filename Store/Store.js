@@ -566,8 +566,9 @@ var Store = Reflux.createStore({
 
   async buildDriver (...args) {
     this.setBusyWith('initializingEngine')
-    await this._buildDriver(...args)
+    const ret = await this._buildDriver(...args)
     this.setBusyWith(null)
+    return ret
   },
 
   _buildDriver ({ keys, identity, encryption }) {
