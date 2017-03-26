@@ -974,9 +974,6 @@ var Store = Reflux.createStore({
         })
         .then(() => meDriver)
     }))
-    .catch(err => {
-      debugger
-    })
     // Not the best way to
   },
 
