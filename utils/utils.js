@@ -75,6 +75,7 @@ const MY_PRODUCT = 'tradle.MyProduct'
 const MESSAGE = 'tradle.Message'
 const ITEM = 'tradle.Item'
 const DOCUMENT = 'tradle.Document'
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const CUR_HASH = constants.CUR_HASH
 const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
@@ -762,8 +763,17 @@ var utils = {
   },
   hasSupportLine(resource) {
     let me = this.getMe()
-    let hasSupportLine = resource._hasSupportLine || (resource[TYPE] === TYPES.PROFILE  && me.isEmployee && me.organization._hasSupportLine)
-    return hasSupportLine
+    if (resource._hasSupportLine)
+      return true
+    if (me.isEmployee && me.organization._hasSupportLine) {
+      if (resource[TYPE] === TYPES.PROFILE)
+        return true
+      if (resource[TYPE] === PRODUCT_APPLICATION) {
+        if (resource._relationshipManager)
+          return true
+      }
+    }
+    return false
   },
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? utils.clone(resource) : resource

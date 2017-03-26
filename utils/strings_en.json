@@ -228,5 +228,7 @@
     "invalidDeepLink": "Looks like you clicked an invalid link!",
     "fromMyData": "from 'My Data'",
     "enterPasswordOrWipeOutTheDevice": "Enter password or wipe out the device",
-    "wipeTheDevice": "Wipe out the device"
+    "wipeTheDevice": "Wipe out the device",
+    "areYouSureYouWantToServeThisCustomer": "Are you sure you want to serve this customer?",
+    "approveThisApplicationFor": "Approve or Deny application for {1}"
 }
