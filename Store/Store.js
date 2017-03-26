@@ -35,6 +35,7 @@ var employee = require('../people/employee.json')
 
 const PHOTO_ID = 'tradle.PhotoID'
 const PERSONAL_INFO = 'tradle.PersonalInfo'
+const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const FRIEND = 'Friend'
 
 var Q = require('q');
@@ -3046,7 +3047,7 @@ var Store = Reflux.createStore({
       var identity
       // if (!isNew) // make sure that the values of ref props are not the whole resources but their references
       if (!isSelfIntroduction  &&  !doneWithMultiEntry)
-        utils.optimizeResource(resource)
+        resource = utils.optimizeResource(resource)
 
       var isMessage = utils.isMessage(meta)
       var readOnlyBacklinks = []
@@ -3344,6 +3345,11 @@ var Store = Reflux.createStore({
           return save(returnVal, true)
         })
         .then(() => {
+          if (returnVal[TYPE] === ASSIGN_RM) {
+            let app = self._getItem(returnVal.application)
+            app._relationshipManager = me
+            self.dbPut(utils.getId(app), app)
+          }
           let rId = utils.getId(returnVal.to)
           let to = self._getItem(rId)
 
@@ -5024,8 +5030,24 @@ var Store = Reflux.createStore({
   },
   onGetAllSharedContexts() {
     let list = this.getAllSharedContexts()
-    if (list)
-      this.trigger({action: 'allSharedContexts', count: list.length})
+    if (list) {
+      list.reverse()
+      let relationshipManagers = this.searchMessages({modelName: ASSIGN_RM, to: me.organization})
+      if (relationshipManagers)
+        relationshipManagers.forEach((r) => {
+          let employee = utils.getId(r.employee)
+          let appId = utils.getId(r.application)
+          for (let i=0; i<list.length; i++) {
+            let rId = utils.getId(list[i])
+            if (rId === appId) {
+              list[i]._relationshipManager = true
+              let r = this._getItem(rId)
+              r._relationshipManager = true
+            }
+          }
+        })
+      this.trigger({action: 'allSharedContexts', count: list.length, list: list})
+    }
   },
   inContext(r, context) {
     return r._context && utils.getId(r._context) === utils.getId(context)
