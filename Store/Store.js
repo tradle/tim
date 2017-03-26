@@ -1616,7 +1616,7 @@ var Store = Reflux.createStore({
       this._mergeItem(okey, sp.org)
       this.configProvider(sp, org)
       batch.push({type: 'put', key: okey, value: org})
-      this.resetForEmployee(org)
+      this.resetForEmployee(me, org)
     }
     else {
       let newOrg = {}
@@ -1713,7 +1713,7 @@ var Store = Reflux.createStore({
       throw err
     })
   },
-  resetForEmployee(org) {
+  resetForEmployee(me, org) {
     if (!me  ||  !me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(org))
       return
     let myOrg = me.organization
@@ -6925,7 +6925,7 @@ var Store = Reflux.createStore({
       if (val[TYPE] === MY_EMPLOYEE_PASS) {
         to.isEmployee = true
         to.organization = this.buildRef(org)
-        this.resetForEmployee(org)
+        this.resetForEmployee(to, org)
         // to.organization._canShareContext = org._canShareContext
         // to.organization._hasSupportLine = org._hasSupportLine
         // this.setMe(to)
