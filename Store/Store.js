@@ -573,8 +573,9 @@ var Store = Reflux.createStore({
 
   async buildDriver (...args) {
     this.setBusyWith('initializingEngine')
-    await this._buildDriver(...args)
+    const ret = await this._buildDriver(...args)
     this.setBusyWith(null)
+    return ret
   },
 
   _buildDriver ({ keys, identity, encryption }) {
@@ -3326,10 +3327,17 @@ var Store = Reflux.createStore({
               to: {permalink: permalink},
               link: hash,
             }
-            if (returnVal._context)
+            if (returnVal._context) {
               sendParams.other = {
                 context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
               }
+            }
+            else if (returnVal[TYPE] === PRODUCT_APPLICATION) {
+              sendParams.other = {
+                context: returnVal[ROOT_HASH]
+              }
+            }
+
             return meDriver.send(sendParams)
           }
         })
