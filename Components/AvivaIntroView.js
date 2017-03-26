@@ -47,6 +47,7 @@ import React, { Component } from 'react'
 class AvivaIntroView extends Component {
   static displayName = 'AvivaIntroView';
   static orientation = 'portrait';
+  static backButtonDisabled = true;
   render() {
     const screen = utils.dimensions(AvivaIntroView)
     var bankStyle = this.props.bankStyle
