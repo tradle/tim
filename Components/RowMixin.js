@@ -251,6 +251,7 @@ var RowMixin = {
       header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, me.isEmployee ? verification : document, verification)}>
                  {header}
                </TouchableHighlight>
+      // header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, this.props.shareWithRequestedParty ? document : verification, verification)}>
 
 
     var orgRow = <View/>

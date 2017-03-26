@@ -315,8 +315,20 @@ class ResourceList extends Component {
         this.props.navigator.push(route)
       return
     }
-    if (action === 'allSharedContexts'  &&  this.props.officialAccounts  &&  this.props.modelName === PROFILE) {
-      this.setState({sharedContextCount: params.count})
+    if (action === 'allSharedContexts') {
+      let state = {
+        sharedContextCount: params.count,
+      }
+      if (this.props.officialAccounts)
+        this.setState(state)
+      else if (this.props._readOnly  &&  this.props.modelName === PRODUCT_APPLICATION) {
+        let list = params.list
+        if (list &&  list.length) {
+          state.list = list
+          state.dataSource = this.state.dataSource.cloneWithRows(list)
+        }
+        this.setState(state)
+      }
       return
     }
     if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
@@ -525,6 +537,7 @@ class ResourceList extends Component {
     var modelName = constants.TYPES.MESSAGE;
     var self = this;
     let style = this.mergeStyle(resource.style)
+
     var route = {
       component: MessageList,
       id: 11,
@@ -535,7 +548,7 @@ class ResourceList extends Component {
         modelName: modelName,
         currency: resource.currency,
         bankStyle: style,
-      },
+      }
       // rightButtonTitle: 'View',
       // onRightButtonPress: {
       //   title: utils.getDisplayName(resource),
@@ -611,7 +624,22 @@ class ResourceList extends Component {
 
     this.props.navigator.push(route);
   }
+  approveDeny(resource) {
+    Alert.alert(
+      translate('approveThisApplicationFor', translate(resource.from.title)),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          console.log('Canceled!')
+        }},
+        {text: translate('Approve'), onPress: () => {
+        }},
+        {text: translate('Deny'), onPress: () => {
+        }},
+      ]
+    )
 
+  }
   _selectResource(resource) {
     var model = utils.getModel(this.props.modelName);
     var title = utils.getDisplayName(resource, model.value.properties);
@@ -783,7 +811,7 @@ class ResourceList extends Component {
     );
   }
   openSharedContextChat(resource) {
-    this.props.navigator.push({
+    var route = {
       // title: translate(utils.getModel(resource.product).value) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
       title: (resource.from.organization || resource.from.title) + '  →  ' + resource.to.organization.title,
       component: MessageList,
@@ -797,7 +825,14 @@ class ResourceList extends Component {
         // currency: params.to.currency,
         bankStyle: this.props.bankStyle || defaultBankStyle
       }
-    })
+    }
+    var isSharedContext = resource[TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
+    if (isSharedContext  &&  resource._relationshipManager  &&  resource._appSubmitted  &&  !resource._certIssued) {
+      route.rightButtonTitle = 'Approve/Deny'
+      route.onRightButtonPress = () => this.approveDeny(resource)
+    }
+    this.props.navigator.push(route)
+
   }
   changeSharedWithList(id, value) {
     this.state.sharedWith[id] = value
@@ -982,15 +1017,19 @@ class ResourceList extends Component {
     var actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     let footer = actionSheet && this.renderFooter()
     var searchBar
-    if (SearchBar  &&  ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length))) {
-      searchBar = (
-        <SearchBar
-          onChangeText={this.onSearchChange.bind(this)}
-          placeholder={translate('search')}
-          showsCancelButton={false}
-          hideBackground={true}
-          />
-      )
+    if (SearchBar) {
+      if (!this.props._readOnly  ||  this.props.modelName !== PRODUCT_APPLICATION) {
+        if ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length)) {
+          searchBar = (
+            <SearchBar
+              onChangeText={this.onSearchChange.bind(this)}
+              placeholder={translate('search')}
+              showsCancelButton={false}
+              hideBackground={true}
+              />
+          )
+        }
+      }
     }
     let network
     if (!this.props.isChooser && this.props.officialAccounts && this.props.modelName === ORGANIZATION)
@@ -1299,7 +1338,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#246624'
   },
   sharedContextText: {
-    fontSize: 14,
+    fontSize: 12,
     alignSelf: 'center',
     color: '#ffffff'
   },
