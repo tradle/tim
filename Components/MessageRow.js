@@ -33,6 +33,7 @@ const PRODUCT_LIST = 'tradle.ProductList'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 const CONFIRMATION = 'tradle.Confirmation'
+const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 
 var CURRENCY_SYMBOL
 var LINK_COLOR
@@ -488,6 +489,22 @@ class MessageRow extends Component {
                 </View>
       renderedRow.push(msg);
       return ({message: str})
+    }
+    if (model.id === APPLICATION_DENIAL  ||  (model.id === CONFIRMATION  &&  isMyMessage)) {
+      let iname = model.id === APPLICATION_DENIAL ? 'md-close-circle' : 'ios-ribbon'
+      let icolor = model.id === APPLICATION_DENIAL ? 'red' : '#ffffff'
+      let msg = <View key={this.getNextKey()}>
+                  <View style={{flexDirection: 'row'}}>
+                    <View style={{flex: 1}}>
+                      <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
+                    </View>
+                    <Icon style={{position: 'absolute', bottom: 0, right: 2, color: icolor}} size={20} name={iname} />
+                  </View>
+                </View>
+
+      renderedRow.push(msg)
+      return {onPressCall: null}
+
     }
     let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
     if (isRemediationCompleted) {

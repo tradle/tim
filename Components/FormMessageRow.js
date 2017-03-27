@@ -19,6 +19,7 @@ var reactMixin = require('react-mixin');
 const MAX_PROPS_IN_FORM = 1
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PHOTO = 'tradle.Photo'
+const IDENTITY = 'tradle.Identity'
 import {
   // StyleSheet,
   Text,
@@ -154,7 +155,7 @@ class FormMessageRow extends Component {
             </View>
   }
   formStub(resource, to) {
-    let hasSentTo = !to || utils.getId(to) !== utils.getId(resource.to.organization)
+    let hasSentTo = !to || (resource.to.organization  && utils.getId(to) !== utils.getId(resource.to.organization))
     let sentTo = hasSentTo
                ? <View style={{padding: 5}}>
                    <Text style={{color: '#7AAAC3', fontSize: 14, alignSelf: 'flex-end'}}>{translate('asSentTo', resource.to.organization.title)}</Text>
@@ -247,8 +248,9 @@ class FormMessageRow extends Component {
         return;
       if (utils.isHidden(v, resource))
         return
-      if (properties[v].ref) {
-        if (resource[v]  &&  properties[v].ref !== PHOTO) {
+      let ref = properties[v].ref
+      if (ref) {
+        if (resource[v]  &&  ref !== PHOTO  &&  ref !== IDENTITY) {
           vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))
           first = false;
         }
