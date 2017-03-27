@@ -7029,11 +7029,10 @@ var Store = Reflux.createStore({
           if (val[TYPE] === PHOTO_ID) {
             let personal = val.scanJson.personal
             if (personal) {
-              let firstName = personal.firstName
+              let { firstName, lastName } = personal
               if (firstName) {
                 firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
                 fr.firstName = firstName
-                lastName = personal.lastName
                 if (lastName) {
                   lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
                   fr.lastName = lastName
