@@ -5111,7 +5111,6 @@ var Store = Reflux.createStore({
   onGetAllSharedContexts() {
     let list = this.getAllSharedContexts()
     if (list) {
-      list.reverse()
       let relationshipManagers = this.searchMessages({modelName: ASSIGN_RM, to: me.organization})
       if (relationshipManagers) {
         let meId = IDENTITY + '_' + me[ROOT_HASH]
@@ -7619,6 +7618,7 @@ var Store = Reflux.createStore({
         }
       })
     })
+    l.reverse()
     return l
   },
   cleanup(result) {
