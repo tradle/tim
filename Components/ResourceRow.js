@@ -66,6 +66,7 @@ class ResourceRow extends Component {
       this.state.resource = props.resource
       this.state.unread = props.resource._unread
     }
+    dateProp = null
   }
   componentDidMount() {
     this.listenTo(Store, 'onRowUpdate');
