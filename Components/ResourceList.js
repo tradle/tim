@@ -555,6 +555,7 @@ class ResourceList extends Component {
         modelName: modelName,
         currency: resource.currency,
         bankStyle: style,
+      }
     }
     if (isContact) { //  ||  isOrganization) {
       route.title = resource.firstName
