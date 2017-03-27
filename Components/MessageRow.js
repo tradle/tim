@@ -494,11 +494,13 @@ class MessageRow extends Component {
       let iname = model.id === APPLICATION_DENIAL ? 'md-close-circle' : 'ios-ribbon'
       let icolor = model.id === APPLICATION_DENIAL ? 'red' : '#ffffff'
       let msg = <View key={this.getNextKey()}>
-                  <View style={{flexDirection: 'row'}}>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                     <View style={{flex: 1}}>
                       <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
                     </View>
-                    <Icon style={{position: 'absolute', bottom: 0, right: 2, color: icolor}} size={20} name={iname} />
+                    <View style={{justifyContent: 'flex-end', paddingLeft:10}}>
+                      <Icon style={{color: icolor}} size={20} name={iname} />
+                    </View>
                   </View>
                 </View>
 
