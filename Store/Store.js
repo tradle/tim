@@ -7019,7 +7019,14 @@ var Store = Reflux.createStore({
       else {
         let fromId = utils.getId(val.from)
         let fr = this._getItem(fromId)
-        if (fr.firstName === FRIEND) {
+        if (val[TYPE] === NAME) {
+          fr.firstName = val.givenName
+          fr.lastName = val.surname
+          this._setItem(fromId, fr)
+          this.dbPut(fromId, fr)
+          this.trigger({action: 'addItem', resource: fr})
+        }
+        else if (fr.firstName === FRIEND) {
           if (val[TYPE] === PHOTO_ID) {
             let personal = val.scanJson.personal
             if (personal) {
@@ -7035,13 +7042,6 @@ var Store = Reflux.createStore({
               }
             }
           }
-          this._setItem(fromId, fr)
-          this.dbPut(fromId, fr)
-          this.trigger({action: 'addItem', resource: fr})
-        }
-        else if (val[TYPE] === NAME) {
-          fr.firstName = val.givenName
-          fr.lastName = val.surname
           this._setItem(fromId, fr)
           this.dbPut(fromId, fr)
           this.trigger({action: 'addItem', resource: fr})
