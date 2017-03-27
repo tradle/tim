@@ -5109,36 +5109,40 @@ var Store = Reflux.createStore({
     download(JSON.stringify(result, null, 2), 'datadump.json', 'application/json')
   },
   onGetAllSharedContexts() {
-    let list = this.getAllSharedContexts()
-    if (list) {
+    Q.all([this.myResourcesLoaded])
+    .then(() => {
+      let list = this.getAllSharedContexts()
+      if (!list)
+        return
       let relationshipManagers = this.searchMessages({modelName: ASSIGN_RM, to: me.organization})
-      if (relationshipManagers) {
-        let meId = IDENTITY + '_' + me[ROOT_HASH]
-        relationshipManagers.forEach((r) => {
-          let employeeId = utils.getId(r.employee)
-          let appId = utils.getId(r.application)
-          for (let i=0; i<list.length; i++) {
-            let pa = list[i]
-            if (pa._assignedRM || pa._relationshipManager)
-              return
-            let rId = utils.getId(list[i])
-            if (rId !== appId)
-              continue
-            if (employeeId === meId) {
-              list[i]._relationshipManager = true
-              let r = this._getItem(rId)
-              pa._relationshipManager = true
-            }
-            // HACK to not to restart the whole thing
-            else
-              pa._assignedRM = utils.clone(r.employee)
-
-            this.dbPut(utils.getId(pa), pa)
+      if (!relationshipManagers)
+        return
+      let meId = IDENTITY + '_' + me[ROOT_HASH]
+      relationshipManagers.forEach((r) => {
+        let employeeId = utils.getId(r.employee)
+        let appId = utils.getId(r.application)
+        for (let i=0; i<list.length; i++) {
+          let pa = list[i]
+          if (pa._assignedRM || pa._relationshipManager)
+            return
+          let rId = utils.getId(list[i])
+          if (rId !== appId)
+            continue
+          if (employeeId === meId) {
+            list[i]._relationshipManager = true
+            let r = this._getItem(rId)
+            pa._relationshipManager = true
           }
-        })
-      }
+          // HACK to not to restart the whole thing
+          else
+            pa._assignedRM = utils.clone(r.employee)
+
+          this.dbPut(utils.getId(pa), pa)
+        }
+      })
+
       this.trigger({action: 'allSharedContexts', count: list.length, list: list})
-    }
+    })
   },
 
   inContext(r, context) {
