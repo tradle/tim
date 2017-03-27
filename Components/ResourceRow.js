@@ -66,6 +66,7 @@ class ResourceRow extends Component {
       this.state.resource = props.resource
       this.state.unread = props.resource._unread
     }
+    dateProp = null
   }
   componentDidMount() {
     this.listenTo(Store, 'onRowUpdate');
@@ -211,6 +212,7 @@ class ResourceRow extends Component {
                      </View>
     var textStyle = /*noImage ? [styles.textContainer, {marginVertical: 7}] :*/ styles.textContainer;
 
+    dateProp = resource[TYPE] === PRODUCT_APPLICATION ? 'time' : dateProp
     let dateRow
     if (!this.props.isChooser  &&  dateProp  &&  resource[dateProp]) {
       var val = utils.formatDate(new Date(resource[dateProp]), true)
@@ -230,6 +232,7 @@ class ResourceRow extends Component {
 
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
+
     var isOpaque = resource[TYPE] === ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
     if (isOpaque)
       return (
