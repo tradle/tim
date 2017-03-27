@@ -6952,7 +6952,7 @@ var Store = Reflux.createStore({
           //   }
           // })
         }
-        this.onAddMessgae({
+        this.onAddMessage({
           msg: {
             [TYPE]: PRODUCT_APPLICATION,
             product: product,
