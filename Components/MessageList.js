@@ -101,6 +101,22 @@ class MessageList extends Component {
       allLoaded: false
     }
   }
+  hasChatContext() {
+    let context = this.props.context
+    if (!context  ||  context.product === REMEDIATION)
+      return false
+    let me = utils.getMe()
+    let chat = this.props.resource
+    let isChattingWithPerson = chat[constants.TYPE] === TYPES.PROFILE
+    if (me.isEmployee) {
+      if (isChattingWithPerson  &&  !me.organization._canShareContext)
+        return false
+    }
+    // No need to show context if provider has only one product and no share context
+    else if ((!chat.products  ||  chat.products.length === 1)  &&  !chat._canShareContext)
+      return false
+    return true
+  }
   componentWillMount() {
     var params = {
       modelName: this.props.modelName,
@@ -536,7 +552,9 @@ class MessageList extends Component {
       let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
                            (isProductApplication && resource.product !== REMEDIATION)
 
-      if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  !this.state.onlineStatus))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
+      if (this.hasChatContext())
+        maxHeight -= 35
+      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  !this.state.onlineStatus))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
       if (notRemediation  &&  !hideTextInput) //  &&  this.props.resource.products) //  &&  this.props.resource.products.length > 1))
         maxHeight -= 45

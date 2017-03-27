@@ -284,7 +284,7 @@ class ResourceRow extends Component {
                       // <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT} : {}]}>
     let content =  <View style={[styles.content, bg]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
-                      <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}]}>
+                      <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 10}]}>
                         {photo}
                         <View style={textStyle}>
                           {this.formatRow(resource, style)}
@@ -355,9 +355,13 @@ class ResourceRow extends Component {
     else if (model.id === PRODUCT_APPLICATION) {
       if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
         let status
-        if (resource._certIssued) {
-          status = 'Completed'
+        if (resource._approved) {
+          status = 'Approved'
           color = 'green'
+        }
+        else  if (resource._denied) {
+          status = 'Denied'
+          color = 'red'
         }
         else if (resource._appSubmitted) {
           status = 'Submitted'
@@ -365,11 +369,19 @@ class ResourceRow extends Component {
         }
         if (status)
           status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}><Text style={{fontSize: 14, color: color}}>{translate(status)}</Text></View>
-        if (!resource._certIssued) {
-          let iname =  this.state.hasRM ||  this.props.resource._relationshipManager ? 'md-log-out' : 'md-log-in'
-          let icolor = this.state.hasRM ||  this.props.resource._relationshipManager ? 'blue' : 'red'
-          let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
-          if (!resource._relationshipManager) {
+        if (!resource._approved  &&  !resource._denied) {
+          let icolor
+          let iname
+          if (this.state.hasRM || resource._relationshipManager) {
+            iname = 'md-log-out'
+            icolor = 'blue'
+          }
+          else {
+            iname = 'md-log-in'
+            icolor = resource._assignedRM ? 'red' : 'green'
+          }
+          let icon = <Icon name={iname} size={25} color={icolor} style={{alignSelf: 'flex-end'}}/>
+          if (!resource._relationshipManager  &&  !resource._assignedRM) {
             icon = <TouchableOpacity onPress={() => this.assignRM()}>
                      {icon}
                    </TouchableOpacity>
@@ -381,7 +393,7 @@ class ResourceRow extends Component {
                    </View>
         }
 
-          // certIssued = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
+          // approved = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
         return  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   <View style={{padding: 5}}>
                     <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>

@@ -39,6 +39,8 @@ const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
 const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
+const CONFIRMATION = 'tradle.Confirmation'
+const DENIAL = 'tradle.ApplicationDenial'
 
 // var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
@@ -625,6 +627,14 @@ class ResourceList extends Component {
     this.props.navigator.push(route);
   }
   approveDeny(resource) {
+    if (resource._denied) {
+      Alert.alert('Application was denied')
+      return
+    }
+    if (resource._approved) {
+      Alert.alert('Application was approved')
+      return
+    }
     Alert.alert(
       translate('approveThisApplicationFor', translate(resource.from.title)),
       null,
@@ -633,9 +643,61 @@ class ResourceList extends Component {
           console.log('Canceled!')
         }},
         {text: translate('Approve'), onPress: () => {
+          if (!resource._appSubmitted)
+            Alert.alert('Application is not yet submitted')
+          else
+            this.approve(resource)
         }},
         {text: translate('Deny'), onPress: () => {
+          this.deny(resource)
         }},
+      ]
+    )
+  }
+  approve(resource) {
+    Alert.alert(
+      translate('approveApplication', resource.from.title),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          console.log('Canceled!')
+        }},
+        {text: translate('Approve'), onPress: () => {
+          let title = utils.makeModelTitle(utils.getModel(resource.product).value)
+          let msg = {
+            [TYPE]: CONFIRMATION,
+            confirmationFor: resource,
+            message: 'Your application for \'' + title + '\' was approved',
+            _context: resource,
+            from: me,
+            to: resource.from
+          }
+          Actions.addMessage({msg: msg})
+        }}
+      ]
+    )
+  }
+  deny(resource) {
+    Alert.alert(
+      translate('denyApplication', resource.from.title),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          console.log('Canceled!')
+        }},
+        {text: translate('Deny'), onPress: () => {
+          let title = utils.makeModelTitle(utils.getModel(resource.product).value)
+          let me = utils.getMe()
+          let msg = {
+            [TYPE]: DENIAL,
+            application: resource,
+            message: 'Your application for \'' + title + '\' was denied',
+            _context: resource,
+            from: me,
+            to: resource.from
+          }
+          Actions.addMessage({msg: msg})
+        }}
       ]
     )
 
@@ -827,7 +889,7 @@ class ResourceList extends Component {
       }
     }
     var isSharedContext = resource[TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
-    if (isSharedContext  &&  resource._relationshipManager  &&  resource._appSubmitted  &&  !resource._certIssued) {
+    if (isSharedContext  &&  resource._relationshipManager  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
       route.rightButtonTitle = 'Approve/Deny'
       route.onRightButtonPress = () => this.approveDeny(resource)
     }

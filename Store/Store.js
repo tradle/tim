@@ -36,6 +36,9 @@ var employee = require('../people/employee.json')
 const PHOTO_ID = 'tradle.PhotoID'
 const PERSONAL_INFO = 'tradle.PersonalInfo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
+const NAME = 'tradle.Name'
+const CONFIRMATION = 'tradle.Confirmation'
+const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const FRIEND = 'Friend'
 
 var Q = require('q');
@@ -372,6 +375,18 @@ var Store = Reflux.createStore({
         value: m
       }
       m[ROOT_HASH] = sha(m)
+      if (!m.properties[TYPE]) {
+        m.properties[TYPE] = {
+          type: 'string',
+          readOnly: true
+        }
+      }
+      if (!m.properties.time) {
+        m.properties.time = {
+          type: 'date',
+          readOnly: true
+        }
+      }
       this.addNameAndTitleProps(m)
       this.addVerificationsToFormModel(m)
       this.addFromAndTo(m)
@@ -749,7 +764,7 @@ var Store = Reflux.createStore({
         // context could be empty if ForgetMe was requested for the provider where form was originally created
         // if (c  &&  c._readOnly) {
         let cId = utils.getId(c)
-        if (utils.isReadOnlyChat(r)) {
+        if (utils.isReadOnlyChat(r)  ||  r[TYPE] === APPLICATION_DENIAL  ||  (r[TYPE] === CONFIRMATION  &&  utils.getId(r.from) === meId)) {
           this.addMessagesToChat(cId, r, true)
           continue
         }
@@ -2135,7 +2150,22 @@ var Store = Reflux.createStore({
       if (!toOrg)
         toOrg = to.organization ? to.organization : to
 
-      self.addMessagesToChat(utils.getId(toOrg), rr)
+      if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
+        let cId = utils.getId(rr._context)
+        self.addMessagesToChat(cId, rr)
+        if (rr[TYPE] === APPLICATION_DENIAL) {
+          let context = self._getItem(rr._context)
+          context._denied = true
+          self.dbPut(cId, context)
+        }
+        else if (rr[TYPE] === CONFIRMATION) {
+          let context = self._getItem(rr._context)
+          context._approved = true
+          self.dbPut(cId, context)
+        }
+      }
+      else
+        self.addMessagesToChat(utils.getId(toOrg), rr)
 
       var params = {
         action: 'addMessage',
@@ -3355,7 +3385,7 @@ var Store = Reflux.createStore({
         .then(() => {
           if (returnVal[TYPE] === ASSIGN_RM) {
             let app = self._getItem(returnVal.application)
-            app._relationshipManager = me
+            app._relationshipManager = true
             self.dbPut(utils.getId(app), app)
           }
           let rId = utils.getId(returnVal.to)
@@ -5041,19 +5071,31 @@ var Store = Reflux.createStore({
     if (list) {
       list.reverse()
       let relationshipManagers = this.searchMessages({modelName: ASSIGN_RM, to: me.organization})
-      if (relationshipManagers)
+      if (relationshipManagers) {
+        let meId = IDENTITY + '_' + me[ROOT_HASH]
         relationshipManagers.forEach((r) => {
-          let employee = utils.getId(r.employee)
+          let employeeId = utils.getId(r.employee)
           let appId = utils.getId(r.application)
           for (let i=0; i<list.length; i++) {
+            let pa = list[i]
+            if (pa._assignedRM || pa._relationshipManager)
+              return
             let rId = utils.getId(list[i])
-            if (rId === appId) {
+            if (rId !== appId)
+              continue
+            if (employeeId === meId) {
               list[i]._relationshipManager = true
               let r = this._getItem(rId)
-              r._relationshipManager = true
+              pa._relationshipManager = true
             }
+            // HACK to not to restart the whole thing
+            else
+              pa._assignedRM = utils.clone(r.employee)
+
+            this.dbPut(utils.getId(pa), pa)
           }
         })
+      }
       this.trigger({action: 'allSharedContexts', count: list.length, list: list})
     }
   },
@@ -6341,6 +6383,7 @@ var Store = Reflux.createStore({
             self.onGetAllPartials(payload)
           self.trigger({ action: 'receivedMessage', msg: msg })
         } catch (err) {
+          debugger
           console.error('2. failed to process received message', err)
         }
       })
@@ -6992,10 +7035,13 @@ var Store = Reflux.createStore({
               }
             }
           }
-          else if (val[TYPE] === NAME) {
-            fr.firstName = val.givenName
-            fr.lastName = val.surname
-          }
+          this._setItem(fromId, fr)
+          this.dbPut(fromId, fr)
+          this.trigger({action: 'addItem', resource: fr})
+        }
+        else if (val[TYPE] === NAME) {
+          fr.firstName = val.givenName
+          fr.lastName = val.surname
           this._setItem(fromId, fr)
           this.dbPut(fromId, fr)
           this.trigger({action: 'addItem', resource: fr})
@@ -7017,6 +7063,10 @@ var Store = Reflux.createStore({
           let context = this._getItem(utils.getId(val._context))
           if (val._context  &&  utils.isReadOnlyChat(val)) // context._readOnly)
             this.addMessagesToChat(utils.getId(context), val)
+          if (val[TYPE] === ASSIGN_RM) {
+            context._assignedRM = val.employee
+            this.dbBatchPut(utils.getId(context), context, batch)
+          }
         }
       }
       // Check that the message was send to the party that is not anyone who created the context it was send from
@@ -7512,7 +7562,7 @@ var Store = Reflux.createStore({
     })
     let ll = l.map((r) => {
       let forms = this.searchMessages({modelName: MESSAGE, to: r})
-      if (!forms  ||  r._certIssued)
+      if (!forms  ||  r._approved)
         return
       let result = forms.map((rr) => {
         if (rr[TYPE] === APPLICATION_SUBMITTED) {
@@ -7520,7 +7570,7 @@ var Store = Reflux.createStore({
           this.dbPut(utils.getId(r), r)
         }
         else if (this.getModel(rr[TYPE]).subClassOf === MY_PRODUCT) {
-          r._certIssued = true
+          r._approved = true
           this.dbPut(utils.getId(r), r)
         }
       })
