@@ -648,6 +648,7 @@ class ResourceList extends Component {
         }},
         {text: translate('Approve'), onPress: () => {
           let title = utils.makeModelTitle(utils.getModel(resource.product).value)
+          let me = utils.getMe()
           let msg = {
             [TYPE]: CONFIRMATION,
             confirmationFor: resource,
