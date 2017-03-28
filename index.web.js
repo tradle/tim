@@ -68,6 +68,10 @@ function init () {
 }
 
 async function testEnvironment () {
+  if (/Mobi/.test(navigator.userAgent)) {
+    throw new Error('This application is not supported in mobile browsers. ' + BROWSER_RECOMMENDATION + ' on desktop')
+  }
+
   if (typeof window === 'object') {
     const crypto = window.crypto || window.msCrypto
     if (!(crypto && crypto.getRandomValues)) {
