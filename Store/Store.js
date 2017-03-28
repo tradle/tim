@@ -7111,10 +7111,7 @@ var Store = Reflux.createStore({
         if (val[TYPE] === PRODUCT_APPLICATION)
           this.addMessagesToChat(utils.getId(val), val)
         else if (val._context) {
-<<<<<<< HEAD
-=======
           let cId = utils.getId(context)
->>>>>>> origin/master
           if (val._context  &&  utils.isReadOnlyChat(val)) // context._readOnly)
             this.addMessagesToChat(cId, val)
           if (val[TYPE] === ASSIGN_RM || val[TYPE] === APPLICATION_DENIAL || val[TYPE] === CONFIRMATION) {
