@@ -6657,6 +6657,7 @@ var Store = Reflux.createStore({
               if (notMe  &&  !notMe.bot) {
                 ++notMe._unread
                 this.dbPut(utils.getId(notMe), notMe)
+                this.trigger({action: 'updateRow', resource: notMe})
               }
               if (isReadOnlyChat) {
                 let contact = this._getItem(val.from)
