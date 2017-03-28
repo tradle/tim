@@ -2153,14 +2153,13 @@ var Store = Reflux.createStore({
       if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
         let cId = utils.getId(rr._context)
         self.addMessagesToChat(cId, rr)
-        if (rr[TYPE] === APPLICATION_DENIAL) {
-          let context = self._getItem(rr._context)
-          context._denied = true
-          self.dbPut(cId, context)
-        }
-        else if (rr[TYPE] === CONFIRMATION) {
-          let context = self._getItem(rr._context)
-          context._approved = true
+        let context = self._getItem(rr._context)
+        if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
+          if (rr[TYPE] === APPLICATION_DENIAL)
+            context._denied = true
+          else
+            context._approved = true
+          self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
           self.dbPut(cId, context)
         }
       }
@@ -5067,36 +5066,57 @@ var Store = Reflux.createStore({
     }
   },
   onGetAllSharedContexts() {
-    let list = this.getAllSharedContexts()
-    if (list) {
-      let relationshipManagers = this.searchMessages({modelName: ASSIGN_RM, to: me.organization})
-      if (relationshipManagers) {
-        let meId = IDENTITY + '_' + me[ROOT_HASH]
-        relationshipManagers.forEach((r) => {
-          let employeeId = utils.getId(r.employee)
-          let appId = utils.getId(r.application)
-          for (let i=0; i<list.length; i++) {
-            let pa = list[i]
-            if (pa._assignedRM || pa._relationshipManager)
-              return
-            let rId = utils.getId(list[i])
-            if (rId !== appId)
-              continue
-            if (employeeId === meId) {
-              list[i]._relationshipManager = true
-              let r = this._getItem(rId)
-              pa._relationshipManager = true
-            }
-            // HACK to not to restart the whole thing
-            else
-              pa._assignedRM = utils.clone(r.employee)
+    Q.all([this.myResourcesLoaded])
+    .then(() => {
+      let list = this.getAllSharedContexts()
+      if (!list)
+        return
+      let org = this._getItem(me.organization)
+      // let deniedList = this.searchMessages({modelName: APPLICATION_DENIAL})
+      // let denied = {}
+      // if (deniedList)
+      //   deniedList.forEach((r) => denied[utils.getId(r), r])
+      // let approvedList = this.searchMessages({modelName: CONFIRMATION})
+      // let approved = {}
+      // if (approvedList)
+      //   approvedList.forEach((r) => approved[utils.getId(r), r])
 
-            this.dbPut(utils.getId(pa), pa)
-          }
-        })
+      let relationshipManagers = this.searchMessages({modelName: ASSIGN_RM, to: me.organization})
+      if (!relationshipManagers) {
+        this.trigger({action: 'allSharedContexts', count: list.length, list: list})
+        return
       }
+      let meId = IDENTITY + '_' + me[ROOT_HASH]
+      relationshipManagers.forEach((r) => {
+        let employeeId = utils.getId(r.employee)
+        let appId = utils.getId(r.application)
+        for (let i=0; i<list.length; i++) {
+          let pa = list[i]
+          let paId = utils.getId(pa)
+          if (pa._denied  ||  pa._approved) {
+            this.dbPut(paId, pa)
+            this._setItem(paId, pa)
+            this.trigger({action: 'addItem', resource: pa})
+            continue
+          }
+          if (pa._assignedRM || pa._relationshipManager)
+            return
+          if (paId !== appId)
+            continue
+          if (employeeId === meId) {
+            pa._relationshipManager = true
+            let r = this._getItem(paId)
+            pa._relationshipManager = true
+          }
+          // HACK to not to restart the whole thing
+          else
+            pa._assignedRM = utils.clone(r.employee)
+
+          this.dbPut(utils.getId(pa), pa)
+        }
+      })
       this.trigger({action: 'allSharedContexts', count: list.length, list: list})
-    }
+    })
   },
   inContext(r, context) {
     return r._context && utils.getId(r._context) === utils.getId(context)
@@ -7058,12 +7078,19 @@ var Store = Reflux.createStore({
         if (val[TYPE] === PRODUCT_APPLICATION)
           this.addMessagesToChat(utils.getId(val), val)
         else if (val._context) {
-          let context = this._getItem(utils.getId(val._context))
+          let cId = utils.getId(context)
           if (val._context  &&  utils.isReadOnlyChat(val)) // context._readOnly)
-            this.addMessagesToChat(utils.getId(context), val)
-          if (val[TYPE] === ASSIGN_RM) {
-            context._assignedRM = val.employee
-            this.dbBatchPut(utils.getId(context), context, batch)
+            this.addMessagesToChat(cId, val)
+          if (val[TYPE] === ASSIGN_RM || val[TYPE] === APPLICATION_DENIAL || val[TYPE] === CONFIRMATION) {
+            if (val[TYPE] === ASSIGN_RM)
+              context._assignedRM = val.employee
+            else if (val[TYPE] === APPLICATION_DENIAL)
+              context._denied = true
+            else
+              context._approved = true
+            this._setItem(cId, context)
+            this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+            this.dbBatchPut(cId, context, batch)
           }
         }
       }

@@ -75,11 +75,17 @@ class ResourceRow extends Component {
     if (params.action === 'connectivity')
       this.setState({isConnected: params.isConnected})
     else if (params.action === 'updateRow'  &&
-             params.resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
-      this.setState({unread: params.resource._unread})
+             params.resource[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
+      if (params.forceUpdate)
+        this.setState({forceUpdate: this.state.forceUpdate ? false : true})
+      else
+        this.setState({unread: params.resource._unread})
+    }
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
+      return true
+    if (this.state.forceUpdate !== nextState.forceUpdate)
       return true
     if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
       return true
