@@ -7,13 +7,16 @@ import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment.json'
 import locale from './locale'
+import browser from './browser'
 
 let getUserMedia
 try {
-  getUserMedia = require('getusermedia')
+  getUserMedia = !browser.isIE && require('getusermedia')
 } catch (err) {
   console.log('getUserMedia not supported', err)
 }
+
+console.log('getUserMedia is available', !!getUserMedia)
 
 const LOCAL_IP = window.location.hostname
 
