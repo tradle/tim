@@ -72,11 +72,12 @@ class MyProductMessageRow extends Component {
     renderedRow.push(<Text  key={this.getNextKey()} style={[chatStyles.formType, {color: '#289427'}]}>{title}</Text>);
     let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
     // let width = Math.floor(utils.dimensions().width * 0.7)
-    let width = utils.getMessageWidth()
+    let width = utils.getMessageWidth() - 50
     let vStyle = isMyMessage ? styles.viewStyleR : styles.viewStyleL
+    // let photo = isMyMessage ? null : this.getOwnerPhoto()
     let messageBody =
       <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-        <View style={[styles.viewStyle, {width: width}]}>
+        <View style={[vStyle, {width: width}]}>
           {this.getOwnerPhoto()}
           <View style={rowStyle}>
             <View style={{flex: 1}}>
