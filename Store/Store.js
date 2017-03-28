@@ -6603,8 +6603,9 @@ var Store = Reflux.createStore({
           let meId = utils.getId(me)
           if (me.isEmployee) {
             let isReadOnlyChat
+            let context = this._getItem(val._context)
             if (val._context)
-              isReadOnlyChat = utils.isReadOnlyChat(this._getItem(val._context))
+              isReadOnlyChat = utils.isReadOnlyChat(context)
             else
               isReadOnlyChat = utils.isReadOnlyChat(val)
             if (!val._context  ||  isReadOnlyChat) {
@@ -6612,6 +6613,18 @@ var Store = Reflux.createStore({
               let notMe = this._getItem(notMeId)
               if (notMe  &&  !notMe.bot) {
                 ++notMe._unread
+              }
+              if (isReadOnlyChat) {
+                let contact = this._getItem(val.from)
+                let hasNameChanged
+                if (contact.firstName === FRIEND)
+                  hasNameChanged = this.changeName(val, contact)
+                if (hasNameChanged) {
+                  context.from = this.buildRef(contact)
+                  this._setItem(contextId, fr)
+                  this.dbPut(contextId, context)
+                  this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+                }
                 this.trigger({action: 'updateRow', resource: notMe})
               }
             }
@@ -7039,32 +7052,35 @@ var Store = Reflux.createStore({
       else {
         let fromId = utils.getId(val.from)
         let fr = this._getItem(fromId)
-        if (val[TYPE] === NAME) {
-          fr.firstName = val.givenName
-          fr.lastName = val.surname
-          this._setItem(fromId, fr)
-          this.dbPut(fromId, fr)
+        if (this.changeName(val, fr))
           this.trigger({action: 'addItem', resource: fr})
-        }
-        else if (fr.firstName === FRIEND) {
-          if (val[TYPE] === PHOTO_ID) {
-            let personal = val.scanJson.personal
-            if (personal) {
-              let { firstName, lastName } = personal
-              if (firstName) {
-                firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-                fr.firstName = firstName
-                if (lastName) {
-                  lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-                  fr.lastName = lastName
-                }
-              }
-            }
-          }
-          this._setItem(fromId, fr)
-          this.dbPut(fromId, fr)
-          this.trigger({action: 'addItem', resource: fr})
-        }
+
+        // if (val[TYPE] === NAME) {
+        //   fr.firstName = val.givenName
+        //   fr.lastName = val.surname
+        //   this._setItem(fromId, fr)
+        //   this.dbPut(fromId, fr)
+        //   this.trigger({action: 'addItem', resource: fr})
+        // }
+        // else if (fr.firstName === FRIEND) {
+        //   if (val[TYPE] === PHOTO_ID) {
+        //     let personal = val.scanJson.personal
+        //     if (personal) {
+        //       let { firstName, lastName } = personal
+        //       if (firstName) {
+        //         firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+        //         fr.firstName = firstName
+        //         if (lastName) {
+        //           lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+        //           fr.lastName = lastName
+        //         }
+        //       }
+        //     }
+        //   }
+        //   this._setItem(fromId, fr)
+        //   this.dbPut(fromId, fr)
+        //   this.trigger({action: 'addItem', resource: fr})
+        // }
       }
       this.addLastMessage(val, batch)
     }
@@ -7126,6 +7142,37 @@ var Store = Reflux.createStore({
       // Don't trigger re-rendering the list if the current and previous messages were of PRODUCT_LIST type
       return false
     }
+  },
+  changeName(val, fr) {
+    let fromId = utils.getId(fr)
+    if (val[TYPE] === NAME) {
+      fr.firstName = val.givenName
+      fr.lastName = val.surname
+      fr.formatted = utils.templateIt(this.getModel(PROFILE).properties.formatted, fr)
+      this._setItem(fromId, fr)
+      this.dbPut(fromId, fr)
+      return true
+    }
+    if (fr.firstName === FRIEND) {
+      if (val[TYPE] !== PHOTO_ID  ||  !val.scanJson)
+        return
+      let personal = val.scanJson.personal
+      if (!personal)
+        return
+      let { firstName, lastName } = personal
+      if (firstName) {
+        firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+        fr.firstName = firstName
+        if (lastName) {
+          lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+          fr.lastName = lastName
+        }
+        this._setItem(fromId, fr)
+        this.dbPut(fromId, fr)
+        return true
+      }
+    }
+    return
   },
   // if the last message showing was PRODUCT_LIST. No need to re-render
   fillFromAndTo(obj, val) {
