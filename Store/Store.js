@@ -6613,6 +6613,7 @@ var Store = Reflux.createStore({
               let notMe = this._getItem(notMeId)
               if (notMe  &&  !notMe.bot) {
                 ++notMe._unread
+                this.trigger({action: 'updateRow', resource: notMe})
               }
               if (isReadOnlyChat) {
                 let contact = this._getItem(val.from)
@@ -6625,7 +6626,6 @@ var Store = Reflux.createStore({
                   this.dbPut(contextId, context)
                   this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
                 }
-                this.trigger({action: 'updateRow', resource: notMe})
               }
             }
             if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION)
