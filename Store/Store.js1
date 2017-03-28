@@ -36,9 +36,7 @@ var employee = require('../people/employee.json')
 const PHOTO_ID = 'tradle.PhotoID'
 const PERSONAL_INFO = 'tradle.PersonalInfo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
-const NAME = 'tradle.Name'
-const CONFIRMATION = 'tradle.Confirmation'
-const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
+
 const FRIEND = 'Friend'
 
 var Q = require('q');
@@ -268,12 +266,9 @@ var Store = Reflux.createStore({
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
   init() {
-    return this.ready = this._init()
-  },
-  async _init() {
-    const self = this
+    var self = this
     // Setup components:
-    const ldb = level('TiM.db', { valueEncoding: 'json' });
+    var ldb = level('TiM.db', { valueEncoding: 'json' });
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
     // ldb.query.use(jsonqueryEngine());
     db = promisify(ldb);
@@ -323,14 +318,16 @@ var Store = Reflux.createStore({
 
     // if (true) {
     if (false) {
-      await this.wipe()
-      Alert.alert('please refresh')
-      return Q.Promise(function (resolve) {
-        // hang
-      })
+      return this.ready = this.wipe()
+        .then(() => {
+          Alert.alert('please refresh')
+          return Q.Promise(function (resolve) {
+            // hang
+          })
+        })
     }
 
-    return this.getReady()
+    this.ready = this.getReady()
   },
   async getReady() {
     let me
@@ -368,18 +365,6 @@ var Store = Reflux.createStore({
         value: m
       }
       m[ROOT_HASH] = sha(m)
-      if (!m.properties[TYPE]) {
-        m.properties[TYPE] = {
-          type: 'string',
-          readOnly: true
-        }
-      }
-      if (!m.properties.time) {
-        m.properties.time = {
-          type: 'date',
-          readOnly: true
-        }
-      }
       this.addNameAndTitleProps(m)
       this.addVerificationsToFormModel(m)
       this.addFromAndTo(m)
@@ -537,7 +522,7 @@ var Store = Reflux.createStore({
   },
 
   setBusyWith(reason) {
-    this.busyWith = reason && translate(reason)
+    this.busyWith = translate(reason)
     this.triggerBusy()
   },
 
@@ -579,14 +564,8 @@ var Store = Reflux.createStore({
     }
   },
 
-  async buildDriver (...args) {
+  buildDriver ({ keys, identity, encryption }) {
     this.setBusyWith('initializingEngine')
-    const ret = await this._buildDriver(...args)
-    this.setBusyWith(null)
-    return ret
-  },
-
-  _buildDriver ({ keys, identity, encryption }) {
     var self = this
     var keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
@@ -762,7 +741,7 @@ var Store = Reflux.createStore({
         // context could be empty if ForgetMe was requested for the provider where form was originally created
         // if (c  &&  c._readOnly) {
         let cId = utils.getId(c)
-        if (utils.isReadOnlyChat(r)  ||  r[TYPE] === APPLICATION_DENIAL  ||  (r[TYPE] === CONFIRMATION  &&  utils.getId(r.from) === meId)) {
+        if (utils.isReadOnlyChat(r)) {
           this.addMessagesToChat(cId, r, true)
           continue
         }
@@ -989,6 +968,9 @@ var Store = Reflux.createStore({
         })
         .then(() => meDriver)
     }))
+    .catch(err => {
+      debugger
+    })
     // Not the best way to
   },
 
@@ -2150,21 +2132,7 @@ var Store = Reflux.createStore({
       if (!toOrg)
         toOrg = to.organization ? to.organization : to
 
-      if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
-        let cId = utils.getId(rr._context)
-        self.addMessagesToChat(cId, rr)
-        let context = self._getItem(rr._context)
-        if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
-          if (rr[TYPE] === APPLICATION_DENIAL)
-            context._denied = true
-          else
-            context._approved = true
-          self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-          self.dbPut(cId, context)
-        }
-      }
-      else
-        self.addMessagesToChat(utils.getId(toOrg), rr)
+      self.addMessagesToChat(utils.getId(toOrg), rr)
 
       var params = {
         action: 'addMessage',
@@ -3355,12 +3323,10 @@ var Store = Reflux.createStore({
               to: {permalink: permalink},
               link: hash,
             }
-            if (returnVal._context) {
+            if (returnVal._context)
               sendParams.other = {
                 context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
               }
-            }
-
             return meDriver.send(sendParams)
           }
         })
@@ -3383,7 +3349,7 @@ var Store = Reflux.createStore({
         .then(() => {
           if (returnVal[TYPE] === ASSIGN_RM) {
             let app = self._getItem(returnVal.application)
-            app._relationshipManager = true
+            app._relationshipManager = me
             self.dbPut(utils.getId(app), app)
           }
           let rId = utils.getId(returnVal.to)
@@ -4421,8 +4387,7 @@ var Store = Reflux.createStore({
     var prop = params.prop;
     var context = params.context
     var _readOnly = params._readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
-    if (_readOnly  &&  modelName === PRODUCT_APPLICATION)
-      return this.getAllSharedContexts()
+
     if (typeof prop === 'string')
       prop = meta[prop];
     var backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
@@ -5108,42 +5073,25 @@ var Store = Reflux.createStore({
     download(JSON.stringify(result, null, 2), 'datadump.json', 'application/json')
   },
   onGetAllSharedContexts() {
-    Q.all([this.myResourcesLoaded])
-    .then(() => {
-      let list = this.getAllSharedContexts()
-      if (!list)
-        return
-      let org = this._getItem(me.organization)
-
+    let list = this.getAllSharedContexts()
+    if (list) {
+      list = list.reverse()
       let relationshipManagers = this.searchMessages({modelName: ASSIGN_RM, to: me.organization})
-      if (!relationshipManagers) {
-        this.trigger({action: 'allSharedContexts', count: list.length, list: list})
-        return
-      }
-      let meId = IDENTITY + '_' + me[ROOT_HASH]
-      relationshipManagers.forEach((r) => {
-        let employeeId = utils.getId(r.employee)
-        let appId = utils.getId(r.application)
-        for (let i=0; i<list.length; i++) {
-          let pa = list[i]
-          if (pa._assignedRM || pa._relationshipManager)
-            return
-          if (paId !== appId)
-            continue
-          if (employeeId === meId) {
-            pa._relationshipManager = true
-            let r = this._getItem(paId)
-            pa._relationshipManager = true
+      if (relationshipManagers)
+        relationshipManagers.forEach((r) => {
+          let employee = utils.getId(r.employee)
+          let appId = utils.getId(r.application)
+          for (let i=0; i<list.length; i++) {
+            let rId = utils.getId(list[i])
+            if (rId === appId) {
+              list[i]._relationshipManager = true
+              let r = this._getItem(rId)
+              r._relationshipManager = true
+            }
           }
-          // HACK to not to restart the whole thing
-          else
-            pa._assignedRM = utils.clone(r.employee)
-
-          this.dbPut(utils.getId(pa), pa)
-        }
-      })
+        })
       this.trigger({action: 'allSharedContexts', count: list.length, list: list})
-    })
+    }
   },
 
   inContext(r, context) {
@@ -5527,12 +5475,9 @@ var Store = Reflux.createStore({
         let toId = utils.getId(value.to)
         if (toId === meId)
           toId = utils.getId(value.from)
-        if (value.to.organization  &&  value.from.organization  &&  utils.getId(value.to.organization)  !== utils.getId(value.from.organization)) {
-          let org = this._getItem(toId).organization
-          this.addMessagesToChat(utils.getId(org), value)
-        }
-        else if (value._context  &&  utils.isReadOnlyChat(value._context))
-          this.addMessagesToChat(utils.getId(value._context), value)
+
+        let org = this._getItem(toId).organization
+        this.addMessagesToChat(utils.getId(org), value)
       }
       if (mid)
         this._setItem(MY_IDENTITIES, mid)
@@ -6427,7 +6372,6 @@ var Store = Reflux.createStore({
             self.onGetAllPartials(payload)
           self.trigger({ action: 'receivedMessage', msg: msg })
         } catch (err) {
-          debugger
           console.error('2. failed to process received message', err)
         }
       })
@@ -6930,7 +6874,6 @@ var Store = Reflux.createStore({
     var pList = isProductList ? val.list : val.models
 
     var noTrigger
-    let isWeb = utils.isWeb()
     if (pList) {
       org.products = []
       pList.forEach((m) => {
@@ -6952,8 +6895,6 @@ var Store = Reflux.createStore({
           this.createEnumResources(m)
 
         if (utils.isMessage(m)) {
-          if (isWeb  &&  m.id === PHOTO_ID)
-            m.properties['scan'].title = 'Upload'
           this.addVerificationsToFormModel(m)
           this.addFromAndTo(m)
         }
@@ -7005,8 +6946,8 @@ var Store = Reflux.createStore({
           //   }
           // })
         }
-        this.onAddMessage({
-          msg: {
+        this.onAddItem({
+          resource: {
             [TYPE]: PRODUCT_APPLICATION,
             product: product,
             from: meRef,
@@ -7068,36 +7009,25 @@ var Store = Reflux.createStore({
           this.dbPut(meId, to)
         }
       }
-      else {
+      else if (val[TYPE] === PHOTO_ID) {
         let fromId = utils.getId(val.from)
         let fr = this._getItem(fromId)
-        if (val[TYPE] === NAME) {
-          fr.firstName = val.givenName
-          fr.lastName = val.surname
-          this._setItem(fromId, fr)
-          this.dbPut(fromId, fr)
-          this.trigger({action: 'addItem', resource: fr})
-        }
-        else if (fr.firstName === FRIEND) {
-          if (val[TYPE] === PHOTO_ID) {
-            let personal = val.scanJson.personal
-            if (personal) {
-              let { firstName, lastName } = personal
-              if (firstName) {
-                firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-                fr.firstName = firstName
-                if (lastName) {
-                  lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-                  fr.lastName = lastName
-                }
-              }
+        if (fr.firstName === FRIEND) {
+          let personal = val.scanJson.personal
+          if (personal) {
+            let firstName = personal.firstName
+            if (firstName) {
+              firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+              fr.firstName = firstName
+              this._setItem(fromId, fr)
+              this.dbPut(fromId, fr)
+
+              this.trigger({action: 'addItem', resource: fr})
             }
           }
-          this._setItem(fromId, fr)
-          this.dbPut(fromId, fr)
-          this.trigger({action: 'addItem', resource: fr})
         }
       }
+
       this.addLastMessage(val, batch)
     }
     if (list[key]) {
@@ -7111,23 +7041,8 @@ var Store = Reflux.createStore({
         if (val[TYPE] === PRODUCT_APPLICATION)
           this.addMessagesToChat(utils.getId(val), val)
         else if (val._context) {
-<<<<<<< HEAD
-=======
-          let cId = utils.getId(context)
->>>>>>> origin/master
           if (val._context  &&  utils.isReadOnlyChat(val)) // context._readOnly)
-            this.addMessagesToChat(cId, val)
-          if (val[TYPE] === ASSIGN_RM || val[TYPE] === APPLICATION_DENIAL || val[TYPE] === CONFIRMATION) {
-            if (val[TYPE] === ASSIGN_RM)
-              context._assignedRM = val.employee
-            else if (val[TYPE] === APPLICATION_DENIAL)
-              context._denied = true
-            else
-              context._approved = true
-            this._setItem(cId, context)
-            this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-            this.dbBatchPut(cId, context, batch)
-          }
+            this.addMessagesToChat(utils.getId(context), val)
         }
       }
       // Check that the message was send to the party that is not anyone who created the context it was send from
@@ -7623,7 +7538,7 @@ var Store = Reflux.createStore({
     })
     let ll = l.map((r) => {
       let forms = this.searchMessages({modelName: MESSAGE, to: r})
-      if (!forms  ||  r._approved)
+      if (!forms  ||  r._certIssued)
         return
       let result = forms.map((rr) => {
         if (rr[TYPE] === APPLICATION_SUBMITTED) {
@@ -7631,12 +7546,11 @@ var Store = Reflux.createStore({
           this.dbPut(utils.getId(r), r)
         }
         else if (this.getModel(rr[TYPE]).subClassOf === MY_PRODUCT) {
-          r._approved = true
+          r._certIssued = true
           this.dbPut(utils.getId(r), r)
         }
       })
     })
-    l.reverse()
     return l
   },
   cleanup(result) {
@@ -8170,8 +8084,14 @@ var Store = Reflux.createStore({
     //    batch.push({type: 'put', key: m.id, value: m});
     // });
     let isWeb = utils.isWeb()
-    for (var m in models)
+    for (var m in models) {
+      if (isWeb  &&  m === PHOTO_ID) {
+        models[m].value.properties['scan'].title = 'Upload'
+        utils.setModels(models)
+      }
+
       batch.push({type: 'put', key: m, value: models[m].value});
+    }
 
     this.setBusyWith('loadingModels')
 

@@ -52,17 +52,10 @@ class AvivaIntroView extends Component {
   render() {
     const screen = utils.dimensions(AvivaIntroView)
     var bankStyle = this.props.bankStyle
-    const warning = !isChrome && (
-      <View style={styles.row}>
-        <Text style={[styles.warning, {paddingLeft: 3, width: screen.width - 40 }]}>WARNING: Not all browsers are supported. If you’re browser is not responding, we recommend you use Chrome.</Text>
-      </View>
-    )
-
-    let content = (
-      <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#ffffff'}}>
-        <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}} style={{alignItems: 'center'}}>
-           <View style={{paddingHorizontal: 15, backgroundColor: '#ffffff', maxWidth: utils.getContentWidth()}}>
-             <Text style={[styles.resourceTitle, {color: bankStyle.CONTEXT_BACKGROUND_COLOR}]}>Welcome to Aviva ID our online verification service.</Text>
+    let content = <ScrollView style={{paddingTop: 20, paddingBottom: 40, backgroundColor: '#ffffff'}}>
+        <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
+           <View style={{paddingHorizontal: 15, backgroundColor: '#ffffff'}}>
+             <Text style={styles.resourceTitle}>Welcome to Aviva ID, our online verification service.</Text>
              <Text style={[styles.subTitle, styles.importantText]}>Keeping your money and identity safe is our number 1 priority!</Text>
              <Text style={styles.subTitle}>To use this service you’ll undertake 4 easy steps:</Text>
              <View style={styles.row}>

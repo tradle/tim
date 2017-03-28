@@ -192,6 +192,8 @@ class MessageList extends Component {
       }
       else if (params.resource[TYPE] === FORM_REQUEST  ||  params.resource[TYPE] === CONFIRM_PACKAGE_REQUEST)
         this.state.addedItem = params.resource
+      else if (params.resource._denied || params.resource._approved)
+        this.state.addedItem = params.resource
       else
         this.state.addedItem = null
       if (params.action === 'addVerification') {
