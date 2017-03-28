@@ -182,7 +182,7 @@ class VerificationMessageRow extends Component {
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: -10, top: -15}} />
+                 <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: isReadOnlyChat ? -50 : 10, top: -15}} />
               </View>
               {this.getSendStatus()}
             </View>
