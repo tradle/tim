@@ -1,3 +1,7 @@
+html {
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+}
+
 fieldset {
     border: 0;
 }
