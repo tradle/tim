@@ -635,7 +635,8 @@ class FormRequestRow extends Component {
           onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
         else if (prop) {
           if (prop.ref === PHOTO) {
-            if (utils.isWeb()) {
+            // TODO: re-use logic from NewResourceMixin
+            if (utils.isWeb() && ENV.canUseWebcam) {
               link = <TouchableHighlight style={{flex: 1}} underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
                        <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
                      </TouchableHighlight>
