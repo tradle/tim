@@ -6929,6 +6929,7 @@ var Store = Reflux.createStore({
     var pList = isProductList ? val.list : val.models
 
     var noTrigger
+    let isWeb = utils.isWeb()
     if (pList) {
       org.products = []
       pList.forEach((m) => {
@@ -6950,6 +6951,8 @@ var Store = Reflux.createStore({
           this.createEnumResources(m)
 
         if (utils.isMessage(m)) {
+          if (isWeb  &&  m.id === PHOTO_ID)
+            m.properties['scan'].title = 'Upload'
           this.addVerificationsToFormModel(m)
           this.addFromAndTo(m)
         }
@@ -8156,14 +8159,8 @@ var Store = Reflux.createStore({
     //    batch.push({type: 'put', key: m.id, value: m});
     // });
     let isWeb = utils.isWeb()
-    for (var m in models) {
-      if (isWeb  &&  m === PHOTO_ID) {
-        models[m].value.properties['scan'].title = 'Upload'
-        utils.setModels(models)
-      }
-
+    for (var m in models)
       batch.push({type: 'put', key: m, value: models[m].value});
-    }
 
     this.setBusyWith('loadingModels')
 
