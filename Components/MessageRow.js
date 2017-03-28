@@ -229,7 +229,7 @@ class MessageRow extends Component {
         sendStatus = this.getSendStatus()
       var sealedStatus = (resource.txId)
                        ? <View style={chatStyles.sealedStatus}>
-                           <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
+                           <Icon name={'ios-ribbon-outline'} size={30} color='#316A99' style={{opacity: 0.5}} />
                          </View>
                        : <View />
 
@@ -491,7 +491,7 @@ class MessageRow extends Component {
       return ({message: str})
     }
     if (model.id === APPLICATION_DENIAL  ||  (model.id === CONFIRMATION  &&  isMyMessage)) {
-      let iname = model.id === APPLICATION_DENIAL ? 'md-close-circle' : 'ios-ribbon'
+      let iname = model.id === APPLICATION_DENIAL ? 'md-close-circle' : 'ios-ribbon-outline'
       let icolor = model.id === APPLICATION_DENIAL ? 'red' : '#ffffff'
       let msg = <View key={this.getNextKey()}>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
