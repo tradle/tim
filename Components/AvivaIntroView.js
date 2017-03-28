@@ -109,7 +109,7 @@ class AvivaIntroView extends Component {
            </View>
          </TouchableOpacity>
        </ScrollView>
-      )
+
     let footer = <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
                    <View style={styles.start}>
                      <View style={{backgroundColor: 'transparent', justifyContent: 'center'}}>
