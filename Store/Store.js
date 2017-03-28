@@ -6525,8 +6525,9 @@ var Store = Reflux.createStore({
     if (utils.getId(me) === fromId)
       val.time = val.time || obj.timestamp
     else {
-      val.time = new Date().getTime()
       val.sentTime = val.time || obj.timestamp
+      if (!val.time)
+        val.time = new Date().getTime()
     }
     // var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
     var type = val[TYPE]
@@ -7649,7 +7650,7 @@ var Store = Reflux.createStore({
         }
       })
     })
-    l.reverse()
+    l.sort((a, b) => b.sentTime - a.sentTime)
     return l
   },
   cleanup(result) {
