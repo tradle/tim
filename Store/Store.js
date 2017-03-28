@@ -172,6 +172,7 @@ var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
 var createKeeper = require('@tradle/keeper')
 var cachifyKeeper = require('@tradle/keeper/cachify')
 var crypto = require('crypto')
+const Aviva = require('../utils/aviva')
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
 var currentEmployees = {}
@@ -363,6 +364,7 @@ var Store = Reflux.createStore({
     voc.forEach((m) => {
       // if (!m[ROOT_HASH])
       //   m[ROOT_HASH] = sha(m);
+      Aviva.preparseModel(m)
       models[m.id] = {
         key: m.id,
         value: m
@@ -6664,12 +6666,12 @@ var Store = Reflux.createStore({
                 let hasNameChanged
                 if (contact.firstName === FRIEND)
                   hasNameChanged = this.changeName(val, contact)
-                if (hasNameChanged) {
-                  context.from = this.buildRef(contact)
-                  this._setItem(contextId, fr)
-                  this.dbPut(contextId, context)
-                  this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-                }
+                // if (hasNameChanged) {
+                //   context.from = this.buildRef(contact)
+                //   this._setItem(contextId, fr)
+                //   this.dbPut(contextId, context)
+                //   this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+                // }
               }
             }
             if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION)
@@ -6968,6 +6970,7 @@ var Store = Reflux.createStore({
           return
         }
 
+        Aviva.preparseModel(m)
         this.addNameAndTitleProps(m)
         models[m.id] = {
           key: m.id,
