@@ -108,7 +108,6 @@
     "react-native-search-bar": "^2.16.0",
     "react-native-splash-screen": "github:crazycodeboy/react-native-splash-screen#v1.0.9",
     "react-native-swipeout": "github:mvayngrib/react-native-swipeout#6939c109",
-    "react-native-tcp": "^3.0.0",
     "react-native-udp": "^1.2.6",
     "react-native-vector-icons": "^2.0.3",
     "react-native-video": "0.9.0",

@@ -5,6 +5,7 @@
 	};
 	objectVersion = 46;
 	objects = {
+
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -252,13 +253,6 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RCTPushNotification;
 		};
-		73AE89E31DD7711600FCD7FD /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = TcpSockets;
-		};
 		73B656711C42F4880068687F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 3D510339A825413A9733521D /* RCTVideo.xcodeproj */;
@@ -389,7 +383,6 @@
 		4C93F2E11FA248488DBBF349 /* SplashScreen.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = SplashScreen.xcodeproj; path = "../node_modules/react-native-splash-screen/ios/SplashScreen.xcodeproj"; sourceTree = "<group>"; };
 		4E2C19FDDDD4447B9C80F765 /* libRNBlinkID.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNBlinkID.a; sourceTree = "<group>"; };
 		59270A791A836561C82111CD /* Pods-Tradle-dev.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle-dev.release.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev.release.xcconfig"; sourceTree = "<group>"; };
-		6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = TcpSockets.xcodeproj; path = "../node_modules/react-native-tcp/ios/TcpSockets.xcodeproj"; sourceTree = "<group>"; };
 		6FB3837D1EEE435CACD658FB /* libSMXCrashlytics.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libSMXCrashlytics.a; sourceTree = "<group>"; };
 		71A5BF1464684D2A8B24B80F /* libRNPasscodeStatus.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNPasscodeStatus.a; sourceTree = "<group>"; };
 		73030AF11D14DC4B0096A864 /* RNFS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFS.xcodeproj; path = "../node_modules/react-native-fs/RNFS.xcodeproj"; sourceTree = "<group>"; };
@@ -768,14 +761,6 @@
 			path = "../node_modules/react-native-env/RNEnvironmentManagerIOS";
 			sourceTree = "<group>";
 		};
-		73AE89C41DD7711600FCD7FD /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				73AE89E41DD7711600FCD7FD /* libTcpSockets.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		73B6565F1C42F4880068687F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -872,7 +857,6 @@
 				083F8D1194934922894AAA06 /* RNVectorIcons.xcodeproj */,
 				36B5640D4902498D93210121 /* RCTOrientation.xcodeproj */,
 				C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */,
-				6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */,
 				DB2A667C83D94D838507B5CF /* RCTAsyncRocksDBStorage.xcodeproj */,
 				AC1BDF1F181A47D6B9CD87BE /* RNBlinkID.xcodeproj */,
 				EDBE902ECF4E436096A40578 /* RNPasscodeStatus.xcodeproj */,
@@ -1194,10 +1178,6 @@
 					ProjectRef = 4C93F2E11FA248488DBBF349 /* SplashScreen.xcodeproj */;
 				},
 				{
-					ProductGroup = 73AE89C41DD7711600FCD7FD /* Products */;
-					ProjectRef = 6ECAAF13C7384B738734FB25 /* TcpSockets.xcodeproj */;
-				},
-				{
 					ProductGroup = 73FE358F1BFA123100EFB313 /* Products */;
 					ProjectRef = 73FE358E1BFA123100EFB313 /* UdpSockets.xcodeproj */;
 				},
@@ -1349,13 +1329,6 @@
 			fileType = archive.ar;
 			path = libRCTPushNotification.a;
 			remoteRef = 73947DA71D3DAEA500C5CC8F /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		73AE89E41DD7711600FCD7FD /* libTcpSockets.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libTcpSockets.a;
-			remoteRef = 73AE89E31DD7711600FCD7FD /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		73B656721C42F4880068687F /* libRCTVideo.a */ = {
@@ -1690,9 +1663,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle;
 				PRODUCT_NAME = Tradle;
@@ -1737,9 +1708,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.tim;
 				PRODUCT_NAME = Tradle;
