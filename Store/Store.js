@@ -6666,12 +6666,13 @@ var Store = Reflux.createStore({
                 let hasNameChanged
                 if (contact.firstName === FRIEND)
                   hasNameChanged = this.changeName(val, contact)
-                // if (hasNameChanged) {
-                //   context.from = this.buildRef(contact)
-                //   this._setItem(contextId, fr)
-                //   this.dbPut(contextId, context)
-                //   this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-                // }
+                if (hasNameChanged) {
+                  context.from = this.buildRef(contact)
+                  let contextId = utils.getId(context)
+                  this._setItem(contextId, context)
+                  this.dbPut(contextId, context)
+                  this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+                }
               }
             }
             if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION)

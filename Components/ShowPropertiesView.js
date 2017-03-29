@@ -147,6 +147,8 @@ class ShowPropertiesView extends Component {
         return
       var val = resource[p];
       if (pMeta.range === 'json') {
+        if (!val)
+          return
         let jsonRows = []
         return this.showJson(pMeta, val, true, jsonRows)
       }
