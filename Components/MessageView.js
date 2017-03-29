@@ -324,7 +324,7 @@ class MessageView extends Component {
 
     var checkProps = this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
     var actionPanel
-    if (this.props.isReview  ||  isVerificationTree)
+    if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
     else {
       actionPanel = <ShowRefList {...this.props}
@@ -374,7 +374,7 @@ class MessageView extends Component {
     let contentSeparator = utils.getContentSeparator(bankStyle)
 
     return (
-      <PageView style={[platformStyles.container, {height: utils.dimensions().height}]} separator={contentSeparator}>
+      <PageView style={[platformStyles.container, {height: utils.dimensions().height - 70}]} separator={contentSeparator}>
       <ScrollView  ref='this' keyboardShouldPersistTaps={true}>
         {dateView}
         <View style={styles.photoBG}>
