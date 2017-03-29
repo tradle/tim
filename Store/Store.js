@@ -6647,9 +6647,11 @@ var Store = Reflux.createStore({
           let meId = utils.getId(me)
           if (me.isEmployee) {
             let isReadOnlyChat
-            let context = this._getItem(val._context)
-            if (val._context)
+            let context
+            if (val._context) {
+              context = this._getItem(val._context)
               isReadOnlyChat = utils.isReadOnlyChat(context)
+            }
             else
               isReadOnlyChat = utils.isReadOnlyChat(val)
             let isNew = val[ROOT_HASH] === val[CUR_HASH]
@@ -6661,7 +6663,7 @@ var Store = Reflux.createStore({
                 this.dbPut(utils.getId(notMe), notMe)
                 this.trigger({action: 'updateRow', resource: notMe})
               }
-              if (isReadOnlyChat) {
+              if (isReadOnlyChat  &&  context) {
                 let contact = this._getItem(val.from)
                 let hasNameChanged
                 if (contact.firstName === FRIEND)
