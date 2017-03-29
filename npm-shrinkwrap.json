@@ -4816,11 +4816,6 @@
       "from": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f",
       "resolved": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f"
     },
-    "react-native-os": {
-      "version": "1.0.2",
-      "from": "react-native-os@latest",
-      "resolved": "https://registry.npmjs.org/react-native-os/-/react-native-os-1.0.2.tgz"
-    },
     "react-native-passcode-status": {
       "version": "1.1.0",
       "from": "react-native-passcode-status@latest",
@@ -4887,40 +4882,6 @@
           "version": "0.1.5",
           "from": "react-tween-state@>=0.1.3 <0.2.0",
           "resolved": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.1.5.tgz"
-        }
-      }
-    },
-    "react-native-tcp": {
-      "version": "3.0.0",
-      "from": "react-native-tcp@latest",
-      "resolved": "https://registry.npmjs.org/react-native-tcp/-/react-native-tcp-3.0.0.tgz",
-      "dependencies": {
-        "buffer": {
-          "version": "5.0.1",
-          "from": "buffer@>=5.0.0 <6.0.0",
-          "resolved": "https://registry.npmjs.org/buffer/-/buffer-5.0.1.tgz",
-          "dependencies": {
-            "base64-js": {
-              "version": "1.2.0",
-              "from": "base64-js@>=1.0.2 <2.0.0",
-              "resolved": "https://registry.npmjs.org/base64-js/-/base64-js-1.2.0.tgz"
-            }
-          }
-        },
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-        },
-        "readable-stream": {
-          "version": "2.2.1",
-          "from": "readable-stream@>=2.0.2 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.1.tgz"
-        },
-        "stream-browserify": {
-          "version": "2.0.1",
-          "from": "stream-browserify@>=2.0.1 <3.0.0",
-          "resolved": "https://registry.npmjs.org/stream-browserify/-/stream-browserify-2.0.1.tgz"
         }
       }
     },
