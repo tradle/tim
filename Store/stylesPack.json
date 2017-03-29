@@ -1,0 +1,18 @@
+{
+ "_t": "tradle.StylesPack",
+ "_r": "1",
+
+"linkColor": "#00ff00",
+
+"productRowBgColor": "#466399",
+"productRowTextColor": "#eeeeee",
+
+"sharedWithBg": "#77ADFC",
+"sharedWithVerificationBg": "#289427",
+
+
+"shareContextTextColor": "#ff0000",
+"shareContextBackgroundColor": "#ECE8FF",
+"currentContextTextColor": "#0000ff",
+"currentContextBackgroundColor": "#f1ffe7"
+}
