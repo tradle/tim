@@ -9,8 +9,6 @@ include ':react-native-blinkid'
 project(':react-native-blinkid').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-blinkid/android')
 include ':react-native-async-storage-snappy'
 project(':react-native-async-storage-snappy').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-async-storage-snappy/android')
-include ':react-native-tcp'
-project(':react-native-tcp').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tcp/android')
 include ':react-native-os'
 project(':react-native-os').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-os/android')
 include ':react-native-local-auth'
