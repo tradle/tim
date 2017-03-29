@@ -4817,9 +4817,9 @@
       "resolved": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f"
     },
     "react-native-os": {
-      "version": "1.0.2",
-      "from": "react-native-os@latest",
-      "resolved": "https://registry.npmjs.org/react-native-os/-/react-native-os-1.0.2.tgz"
+      "version": "1.0.3",
+      "from": "react-native-os@1.0.3",
+      "resolved": "https://registry.npmjs.org/react-native-os/-/react-native-os-1.0.3.tgz"
     },
     "react-native-passcode-status": {
       "version": "1.1.0",
