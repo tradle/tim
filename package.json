@@ -16,10 +16,11 @@
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
     "@tradle/constants": "^1.3.0",
-    "@tradle/engine": "4.1.2",
+    "@tradle/engine": "4.5.1",
     "@tradle/keeper": "^3.1.0",
     "@tradle/models": "github:tradle/models#e37dc8f",
     "@tradle/protocol": "2.3.0",
+    "@tradle/restore": "github:tradle/restore",
     "art": "^0.10.0",
     "assert": "^1.3.0",
     "asyncstorage-down": "^3.1.1",
@@ -141,7 +142,6 @@
     "net": "@tradle/utp",
     "http": "react-native-http",
     "https": "https-browserify",
-    "os": "os-browserify",
     "path": "path-browserify",
     "querystring": "querystring-es3",
     "fs": "react-native-level-fs",
@@ -158,7 +158,8 @@
     "constants": "constants-browserify",
     "domain": "domain-browser",
     "source-map": "^0.5.3",
-    "timers": "timers-browserify"
+    "timers": "timers-browserify",
+    "os": "os-browserify"
   },
   "devDependencies": {
     "@tradle/validate-model": "github:tradle/validate-model",
@@ -201,6 +202,7 @@
     "constants": "constants-browserify",
     "domain": "domain-browser",
     "source-map": "^0.5.3",
-    "timers": "timers-browserify"
+    "timers": "timers-browserify",
+    "os": "react-native-os"
   }
 }

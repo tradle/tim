@@ -35,41 +35,24 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "4.1.2",
+      "version": "4.5.1",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.1.2.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.5.1.tgz",
       "dependencies": {
         "async": {
-          "version": "2.1.5",
+          "version": "2.2.0",
           "from": "async@>=2.0.0-rc.4 <3.0.0",
-          "resolved": "https://registry.npmjs.org/async/-/async-2.1.5.tgz"
-        },
-        "changes-feed": {
-          "version": "1.1.0",
-          "from": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
-          "resolved": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
-          "dependencies": {
-            "readable-stream": {
-              "version": "1.0.34",
-              "from": "readable-stream@>=1.0.33-1 <1.1.0-0",
-              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz"
-            },
-            "through2": {
-              "version": "0.6.5",
-              "from": "through2@>=0.6.3 <0.7.0",
-              "resolved": "https://registry.npmjs.org/through2/-/through2-0.6.5.tgz"
-            }
-          }
-        },
-        "clone": {
-          "version": "2.1.0",
-          "from": "clone@>=2.0.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/clone/-/clone-2.1.0.tgz"
+          "resolved": "https://registry.npmjs.org/async/-/async-2.2.0.tgz"
         },
         "levelup": {
           "version": "1.3.3",
           "from": "levelup@>=1.3.1 <2.0.0",
           "resolved": "https://registry.npmjs.org/levelup/-/levelup-1.3.3.tgz"
+        },
+        "map-stream": {
+          "version": "0.0.7",
+          "from": "map-stream@0.0.7",
+          "resolved": "https://registry.npmjs.org/map-stream/-/map-stream-0.0.7.tgz"
         }
       }
     },
@@ -105,22 +88,47 @@
     "@tradle/protocol": {
       "version": "2.3.0",
       "from": "@tradle/protocol@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz"
+    },
+    "@tradle/restore": {
+      "version": "1.0.0",
+      "from": "git://github.com/tradle/restore.git#6c373f5c0f186431bf0b247ef025296d19d35c81",
+      "resolved": "git://github.com/tradle/restore.git#6c373f5c0f186431bf0b247ef025296d19d35c81",
       "dependencies": {
+        "bluebird": {
+          "version": "3.5.0",
+          "from": "bluebird@>=3.5.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
+        },
+        "debug": {
+          "version": "2.6.3",
+          "from": "debug@>=2.6.3 <3.0.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.3.tgz"
+        },
         "isarray": {
           "version": "1.0.0",
           "from": "isarray@>=1.0.0 <1.1.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
-        "merkle-tree-stream": {
-          "version": "3.0.3",
-          "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-          "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
+        "ms": {
+          "version": "0.7.2",
+          "from": "ms@0.7.2",
+          "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.2.tgz"
+        },
+        "pump": {
+          "version": "1.0.2",
+          "from": "pump@>=1.0.2 <2.0.0",
+          "resolved": "https://registry.npmjs.org/pump/-/pump-1.0.2.tgz"
         },
         "readable-stream": {
-          "version": "2.2.3",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.3.tgz"
+          "version": "2.2.6",
+          "from": "readable-stream@>=2.1.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz"
+        },
+        "through2": {
+          "version": "2.0.3",
+          "from": "through2@>=2.0.3 <3.0.0",
+          "resolved": "https://registry.npmjs.org/through2/-/through2-2.0.3.tgz"
         }
       }
     },
@@ -129,18 +137,6 @@
       "from": "@tradle/wire@>=1.1.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/@tradle/wire/-/wire-1.2.0.tgz",
       "dependencies": {
-        "forward-secrecy": {
-          "version": "1.0.2",
-          "from": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
-          "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
-          "dependencies": {
-            "tweetnacl": {
-              "version": "0.13.3",
-              "from": "tweetnacl@>=0.13.1 <0.14.0",
-              "resolved": "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.13.3.tgz"
-            }
-          }
-        },
         "isarray": {
           "version": "1.0.0",
           "from": "isarray@>=1.0.0 <1.1.0",
@@ -1209,6 +1205,23 @@
       "version": "1.1.3",
       "from": "chalk@>=1.1.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/chalk/-/chalk-1.1.3.tgz"
+    },
+    "changes-feed": {
+      "version": "1.1.0",
+      "from": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "resolved": "git+https://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
+      "dependencies": {
+        "readable-stream": {
+          "version": "1.0.34",
+          "from": "readable-stream@>=1.0.33-1 <1.1.0-0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz"
+        },
+        "through2": {
+          "version": "0.6.5",
+          "from": "through2@>=0.6.3 <0.7.0",
+          "resolved": "https://registry.npmjs.org/through2/-/through2-0.6.5.tgz"
+        }
+      }
     },
     "cheerio": {
       "version": "0.19.0",
@@ -2295,36 +2308,19 @@
       "resolved": "https://registry.npmjs.org/fd-slicer/-/fd-slicer-1.0.1.tgz"
     },
     "feed-indexer": {
-      "version": "1.2.2",
-      "from": "feed-indexer@>=1.2.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.2.2.tgz",
+      "version": "1.3.0",
+      "from": "feed-indexer@1.3.0",
+      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.3.0.tgz",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
           "from": "isarray@>=1.0.0 <1.1.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
-        "level-change-processor": {
-          "version": "1.0.0",
-          "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
-          "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
-          "dependencies": {
-            "isarray": {
-              "version": "0.0.1",
-              "from": "isarray@0.0.1",
-              "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
-            },
-            "readable-stream": {
-              "version": "1.1.14",
-              "from": "readable-stream@>=1.0.33 <2.0.0",
-              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.14.tgz"
-            }
-          }
-        },
         "readable-stream": {
-          "version": "2.2.3",
+          "version": "2.2.6",
           "from": "readable-stream@>=2.1.4 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.3.tgz"
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz"
         }
       }
     },
@@ -2453,6 +2449,18 @@
       "version": "1.0.17",
       "from": "formidable@>=1.0.14 <1.1.0",
       "resolved": "https://registry.npmjs.org/formidable/-/formidable-1.0.17.tgz"
+    },
+    "forward-secrecy": {
+      "version": "1.0.2",
+      "from": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "resolved": "git+https://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "dependencies": {
+        "tweetnacl": {
+          "version": "0.13.3",
+          "from": "tweetnacl@>=0.13.1 <0.14.0",
+          "resolved": "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.13.3.tgz"
+        }
+      }
     },
     "fresh": {
       "version": "0.3.0",
@@ -3249,6 +3257,11 @@
       "from": "jsx-ast-utils@>=1.3.4 <2.0.0",
       "resolved": "https://registry.npmjs.org/jsx-ast-utils/-/jsx-ast-utils-1.4.0.tgz"
     },
+    "key-encoder": {
+      "version": "1.1.6",
+      "from": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff"
+    },
     "keymirror": {
       "version": "0.1.1",
       "from": "keymirror@0.1.1",
@@ -3312,6 +3325,11 @@
       "version": "0.1.7",
       "from": "level-blobs@>=0.1.7 <0.2.0",
       "resolved": "https://registry.npmjs.org/level-blobs/-/level-blobs-0.1.7.tgz"
+    },
+    "level-change-processor": {
+      "version": "1.0.0",
+      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
+      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -3770,17 +3788,17 @@
           "from": "isarray@>=1.0.0 <1.1.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
-        "merkle-tree-stream": {
-          "version": "3.0.3",
-          "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-          "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
-        },
         "readable-stream": {
           "version": "2.1.5",
           "from": "readable-stream@>=2.1.0 <3.0.0",
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
         }
       }
+    },
+    "merkle-tree-stream": {
+      "version": "3.0.3",
+      "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
     },
     "method-override": {
       "version": "2.3.6",
@@ -3990,36 +4008,7 @@
     "nkey-ecdsa": {
       "version": "1.1.0",
       "from": "nkey-ecdsa@latest",
-      "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz",
-      "dependencies": {
-        "asn1.js": {
-          "version": "2.2.1",
-          "from": "asn1.js@>=2.2.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
-          "dependencies": {
-            "bn.js": {
-              "version": "2.2.0",
-              "from": "bn.js@>=2.0.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
-            }
-          }
-        },
-        "bn.js": {
-          "version": "3.3.0",
-          "from": "bn.js@>=3.1.2 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
-        },
-        "elliptic": {
-          "version": "5.2.1",
-          "from": "elliptic@>=5.1.0 <6.0.0",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz"
-        },
-        "key-encoder": {
-          "version": "1.1.6",
-          "from": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
-          "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz"
     },
     "nkey-secp256k1": {
       "version": "1.1.1",
@@ -5243,9 +5232,9 @@
           }
         },
         "readable-stream": {
-          "version": "2.2.2",
-          "from": "readable-stream@>=2.0.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.2.tgz"
+          "version": "2.2.6",
+          "from": "readable-stream@^2.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz"
         }
       }
     },
