@@ -511,7 +511,7 @@ var RowMixin = {
 
 var styles = StyleSheet.create({
   title: {
-    fontSize: 18,
+    fontSize: 17,
     color: '#757575'
   },
   descriptionG: {
@@ -521,7 +521,7 @@ var styles = StyleSheet.create({
     marginTop: 1
   },
   descriptionB: {
-    fontSize: 18,
+    fontSize: 17,
     color: '#757575'
   },
   msgImage: {
