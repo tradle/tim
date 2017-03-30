@@ -6845,14 +6845,11 @@
       "from": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f",
       "resolved": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f"
     },
-<<<<<<< HEAD
-=======
     "react-native-passcode-status": {
       "version": "1.1.0",
       "from": "react-native-passcode-status@latest",
       "resolved": "https://registry.npmjs.org/react-native-passcode-status/-/react-native-passcode-status-1.1.0.tgz"
     },
->>>>>>> origin/master
     "react-native-progress": {
       "version": "3.2.0",
       "from": "react-native-progress@>=3.2.0 <4.0.0",
@@ -6890,8 +6887,6 @@
         }
       }
     },
-<<<<<<< HEAD
-=======
     "react-native-transformable-image": {
       "version": "0.0.18",
       "from": "react-native-transformable-image@0.0.18",
@@ -6902,7 +6897,6 @@
       "from": "react-native-udp@latest",
       "resolved": "https://registry.npmjs.org/react-native-udp/-/react-native-udp-1.2.6.tgz"
     },
->>>>>>> origin/master
     "react-native-vector-icons": {
       "version": "2.1.0",
       "from": "react-native-vector-icons@>=2.0.3 <3.0.0",
