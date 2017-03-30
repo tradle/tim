@@ -164,7 +164,7 @@ class ShowRefList extends Component {
 
       refList.push(
         <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-           <TouchableHighlight onPress={this.exploreBacklink.bind(this, this.props.resource, props[p])} underlayColor='transparent'>
+           <TouchableHighlight onPress={this.exploreBacklink.bind(this, resource, props[p])} underlayColor='transparent'>
              <View style={styles.item}>
                <View style={{flexDirection: 'row'}}>
                  <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
@@ -195,12 +195,27 @@ class ShowRefList extends Component {
     let backlinkRL, details
     if (!showDetails  && (currentBacklink  ||  (this.props.backlinkList  &&  this.props.showDocuments))) {
       var ResourceList = require('./ResourceList')
+      let modelName = showDocuments ? FORM : currentBacklink.items.ref
+      let backlinkList
+      if (currentBacklink) {
+        backlinkList = resource[currentBacklink.name]
+      }
+
+      if (!backlinkList) {
+        backlinkList = this.props.backlinkList
+      }
+
       backlinkRL = <ResourceList
-                      modelName={showDocuments ? FORM : currentBacklink.items.ref}
+                      modelName={modelName}
                       prop={currentBacklink}
+                      sortProperty={utils.getModel(modelName).value.sortProperty}
                       resource={resource}
                       isBacklink={true}
+<<<<<<< HEAD
                       backlinkList={this.props.backlinkList || (currentBacklink  &&  resource[currentBacklink.name]) || []}
+=======
+                      backlinkList={backlinkList}
+>>>>>>> origin/master
                       navigator={this.props.navigator} />
     }
     if (showDetails) {
@@ -214,7 +229,7 @@ class ShowRefList extends Component {
                                       navigator={this.props.navigator} />
     }
     let comment
-    if (ENV.homePageScanQRCodePrompt && !hasBacklinks  &&  utils.getMe()[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
+    if (ENV.homePageScanQRCodePrompt && !hasBacklinks  &&  utils.getMe()[ROOT_HASH] === resource[ROOT_HASH]) {
       comment = <View style={{justifyContent: 'center', alignSelf: 'center', width: 300, marginTop: 200}}>
                   <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{translate('pleaseTapOnMenu')}</Text>
                   <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{translate('scanQRcode')}</Text>

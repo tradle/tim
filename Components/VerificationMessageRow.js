@@ -321,7 +321,7 @@ var styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
-    minHeight: 120,
+    minHeight: 110,
     // resizeMode: 'cover',
     overflow: 'hidden'
   },

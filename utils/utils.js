@@ -1780,6 +1780,11 @@ var utils = {
     let modelName = resource[TYPE]
     if (!this.isMessage(this.getModel(modelName).value))
       return
+    // Check if the resource is one of the remedition resources
+    // and in a reviewing after scan process - there are no from or to in it
+    let isReview = !resource.from
+    if (isReview)
+      return
     let meId = this.getId(me)
     let provider = (utils.getId(resource.from) === meId) ? resource.to.organization : resource.from.organization
     if (!provider)

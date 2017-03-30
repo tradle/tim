@@ -50,6 +50,7 @@ class EnumList extends Component {
           renderRow={this.renderRow.bind(this)}
           automaticallyAdjustContentInsets={false}
           removeClippedSubviews={false}
+          enableEmptySections={true}
           keyboardDismissMode='on-drag'
           keyboardShouldPersistTaps={true}
           initialListSize={200}
@@ -77,8 +78,10 @@ class EnumList extends Component {
   }
   onSearchChange(filter) {
     let vals = this.props.enumProp.oneOf
+    let f = filter.toLowerCase()
     let list = vals.filter((s) => {
-      return Object.keys(s)[0].indexOf(filter) === -1 ? false : true
+      let key = Object.keys(s)[0]
+      return key.toLowerCase().indexOf(f) !== -1
     })
     this.setState({filter: filter, dataSource: this.state.dataSource.cloneWithRows(list)})
   }

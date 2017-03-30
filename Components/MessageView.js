@@ -92,10 +92,15 @@ class MessageView extends Component {
     if (utils.getId(params.resource) !== utils.getId(this.props.resource))
       return
     if (params.action === 'getItem') {
-      this.setState({
+      let state = {
         resource: params.resource,
         isLoading: false
-      })
+      }
+      if (params.currency)
+        state.currency = params.currency
+      if (params.country)
+        state.country = params.country
+      this.setState(state)
     }
     else if (params.action === 'exploreBacklink') {
       if (params.backlink !== this.state.backlink || params.backlinkAdded) {
@@ -179,6 +184,7 @@ class MessageView extends Component {
         resource: r,
         doNotSend: true,
         defaultPropertyValues: this.props.defaultPropertyValues,
+        currency: this.props.currency || this.state.currency,
         callback: (resource) => {
           self.props.navigator.pop()
         }
@@ -326,7 +332,7 @@ class MessageView extends Component {
 
     var checkProps = this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
     var actionPanel
-    if (this.props.isReview  ||  isVerificationTree)
+    if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
     else {
       actionPanel = <ShowRefList {...this.props}

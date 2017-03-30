@@ -1221,7 +1221,7 @@ var NewResourceMixin = {
     r[prop.name] = date.getTime()
     if (!this.floatingProps)
       this.floatingProps = {}
-    this.floatingProps[prop.name] = date
+    this.floatingProps[prop.name] = date.getTime()
     this.setState({
       resource: r,
       inFocus: prop.name

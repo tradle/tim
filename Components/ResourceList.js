@@ -425,6 +425,11 @@ class ResourceList extends Component {
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop !== nextProps.prop)
         return true
+      if (this.props.backlinkList || this.props.backlinkList.length !== nextProps.backlinkList.length)
+        return true
+      // let prop = this.props.prop.name
+      // if (this.props.resource[prop].length !== nextProps.resource[prop].length)
+      //   return true
       // else if (this.state.prop !== nextState.prop)
       //   return true
     }

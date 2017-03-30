@@ -2683,7 +2683,20 @@ var Store = Reflux.createStore({
         if (result  &&  result.length)
           resource[p] = result;
       }
-      this.trigger({ resource: resource, action: action || 'getItem'});
+      let retParams = { resource: resource, action: action || 'getItem'}
+      if (utils.isMessage(resModel)) {
+        let meId = utils.getId(me)
+        let rep = utils.getId(resource.from) === meId ? resource.to : resource.from
+        let orgR = rep.organization
+        if (orgR) {
+          let org = this._getItem(orgR)
+          if (org.currency)
+            retParams.currency = org.currency
+          if (org.country)
+            retParams.country = org.country
+        }
+      }
+      this.trigger(retParams);
     })
   },
   onExploreBacklink(resource, prop, backlinkAdded) {

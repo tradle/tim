@@ -1,9 +1,12 @@
 
 import { constants } from '@tradle/engine'
+import ENV from './env'
 const { TYPE } = constants
+const isAviva = /aviva/i.test(ENV.appName)
+const noop = () => {}
 
 module.exports = {
-  preparseModel
+  preparseModel: isAviva ? preparseModel : noop
 }
 
 function preparseModel (model) {
