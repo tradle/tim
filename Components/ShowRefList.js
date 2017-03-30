@@ -197,13 +197,22 @@ class ShowRefList extends Component {
     if (!showDetails  && (currentBacklink  ||  (this.props.backlinkList  &&  this.props.showDocuments))) {
       var ResourceList = require('./ResourceList')
       let modelName = showDocuments ? FORM : currentBacklink.items.ref
+      let backlinkList
+      if (currentBacklink) {
+        backlinkList = resource[currentBacklink.name]
+      }
+
+      if (!backlinkList) {
+        backlinkList = this.props.backlinkList
+      }
+
       backlinkRL = <ResourceList
                       modelName={modelName}
                       prop={currentBacklink}
                       sortProperty={utils.getModel(modelName).value.sortProperty}
                       resource={resource}
                       isBacklink={true}
-                      backlinkList={resource[currentBacklink.name] || this.props.backlinkList}
+                      backlinkList={backlinkList}
                       navigator={this.props.navigator} />
     }
     if (showDetails) {
