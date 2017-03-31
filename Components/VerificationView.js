@@ -71,9 +71,9 @@ class VerificationView extends Component {
       let displayName = utils.getDisplayName(resource.method, m.properties)
       let val = <View>{this.renderResource(resource, m)}</View>
       let title = <View style={{backgroundColor: this.props.bankStyle.VERIFICATION_BG, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
-                    <Icon name='ios-add-circle-outline' size={25} color='#aaa' style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
+                    <Icon name='ios-add-circle-outline' size={25} color={this.props.bankStyle.VERIFIED_HEADER_TEXT_COLOR} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
                     <View style={{justifyContent: 'center', flexDirection: 'column', paddingLeft: 5, width: utils.dimensions(VerificationView).width - 50}}>
-                      <Text style={{color: '#757575', fontSize: 18}}>{displayName}</Text>
+                      <Text style={{color: this.props.bankStyle.VERIFIED_HEADER_TEXT_COLOR, fontSize: 18}}>{displayName}</Text>
                     </View>
                   </View>
 
@@ -99,7 +99,7 @@ class VerificationView extends Component {
           vTree.push(<View key={this.getNextKey()}>
                        <View style={styles.separator}></View>
                          <View style={[styles.textContainer, {padding: 10, flexDirection: 'row'}]}>
-                           <Icon name='ios-play-outline' size={20} color='#757575' style={{justifyContent: 'center', marginTop: 5, paddingLeft: (currentLayer + 1) * 10}} />
+                           <Icon name='ios-play-outline' size={20} color={this.props.bankStyle.VERIFIED_HEADER_TEXT_COLOR} style={{justifyContent: 'center', marginTop: 5, paddingLeft: (currentLayer + 1) * 10}} />
                            <Text style={[styles.description, {color: this.props.bankStyle.VERIFIED_SOURCES_COLOR}]}>{translate('sourcesBy', r.from.organization ? r.from.organization.title : r.from.title)}</Text>
                          </View>
                       </View>)
