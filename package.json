@@ -104,7 +104,6 @@
     "react-addons-css-transition-group": "15.3.2",
     "react-addons-perf": "~15.2.1",
     "react-addons-shallow-compare": "15.3.2",
-    "react-datepicker": "^0.29.0",
     "react-dom": "15.3.2",
     "react-dropzone": "3.11.0",
     "react-file-input": "github:mvayngrib/react-file-input#472ef05",
