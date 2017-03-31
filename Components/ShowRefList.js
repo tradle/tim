@@ -211,11 +211,7 @@ class ShowRefList extends Component {
                       sortProperty={utils.getModel(modelName).value.sortProperty}
                       resource={resource}
                       isBacklink={true}
-<<<<<<< HEAD
-                      backlinkList={this.props.backlinkList || (currentBacklink  &&  resource[currentBacklink.name]) || []}
-=======
                       backlinkList={backlinkList}
->>>>>>> origin/master
                       navigator={this.props.navigator} />
     }
     if (showDetails) {
