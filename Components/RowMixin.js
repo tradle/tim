@@ -243,7 +243,7 @@ var RowMixin = {
                     <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
                   </View>
 
-    header = <View style={[addStyle, styles.verification, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+    header = <View style={[addStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
                {header}
                {arrow}
              </View>
@@ -541,13 +541,6 @@ var styles = StyleSheet.create({
     fontSize: 18,
     backgroundColor: 'transparent'
   },
-  // employeeImage: {
-  //   // backgroundColor: '#dddddd',
-  //   height: 40,
-  //   marginRight: 3,
-  //   marginLeft: 0,
-  //   width: 40,
-  // },
   cellRoundImage: {
     paddingVertical: 1,
     borderRadius: 20,
@@ -556,7 +549,6 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   cellImage: {
-    // backgroundColor: '#dddddd',
     marginLeft: 10,
     height: 40,
     width: 40,
@@ -564,13 +556,6 @@ var styles = StyleSheet.create({
     borderColor: 'transparent',
     borderRadius:10,
     borderWidth: BORDER_WIDTH,
-  },
-  verification: {
-    // marginHorizontal: -7,
-    // marginVertical: -10,
-    // paddingBottom: 7,
-    // borderRadius: 10,
-    // backgroundColor: '#EDF2CE'
   },
   orgImage: {
     width: 20,
