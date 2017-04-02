@@ -201,7 +201,9 @@ var RowMixin = {
 
     isAccordion = false
 
-    var docModel = utils.getModel(document[constants.TYPE]).value;
+    let isThirdParty = !document[constants.TYPE]
+    let type = document[constants.TYPE] || utils.getType(document)
+    var docModel = utils.getModel(type).value;
     var isMyProduct = docModel.subClassOf === MY_PRODUCT
     var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
     var idx = docModelTitle.indexOf('Verification');
@@ -238,9 +240,13 @@ var RowMixin = {
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
     // let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
     let arrow = <Icon color={this.props.bankStyle.VERIFIED_LINK_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
+
+    let docName
+    if (!isThirdParty)
+      docName = <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
     var header =  <View style={headerStyle}>
-                    <Text style={[hs, {fontSize: 12}]}>{translate(model)}</Text>
-                    <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
+                    <Text style={[hs, {fontSize: isThirdParty ? 16 : 12}]}>{translate(model)}</Text>
+                    {docName}
                   </View>
 
     header = <View style={[addStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
