@@ -18,12 +18,12 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "4.1.2",
+      "version": "4.5.2",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.1.2.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.5.2.tgz",
       "dependencies": {
         "async": {
-          "version": "2.1.5",
+          "version": "2.2.0",
           "from": "async@>=2.0.0-rc.4 <3.0.0",
           "resolved": "https://registry.npmjs.org/async/-/async-2.1.5.tgz"
         },
@@ -36,6 +36,11 @@
           "version": "1.3.3",
           "from": "levelup@>=1.3.1 <2.0.0",
           "resolved": "https://registry.npmjs.org/levelup/-/levelup-1.3.3.tgz"
+        },
+        "map-stream": {
+          "version": "0.0.7",
+          "from": "map-stream@0.0.7",
+          "resolved": "https://registry.npmjs.org/map-stream/-/map-stream-0.0.7.tgz"
         }
       }
     },
@@ -72,6 +77,48 @@
       "version": "2.3.0",
       "from": "@tradle/protocol@latest",
       "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz"
+    },
+    "@tradle/restore": {
+      "version": "1.0.0",
+      "from": "git://github.com/tradle/restore.git#6c373f5c0f186431bf0b247ef025296d19d35c81",
+      "resolved": "git://github.com/tradle/restore.git#6c373f5c0f186431bf0b247ef025296d19d35c81",
+      "dependencies": {
+        "bluebird": {
+          "version": "3.5.0",
+          "from": "bluebird@>=3.5.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
+        },
+        "debug": {
+          "version": "2.6.3",
+          "from": "debug@>=2.6.3 <3.0.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.3.tgz"
+        },
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "ms": {
+          "version": "0.7.2",
+          "from": "ms@0.7.2",
+          "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.2.tgz"
+        },
+        "pump": {
+          "version": "1.0.2",
+          "from": "pump@>=1.0.2 <2.0.0",
+          "resolved": "https://registry.npmjs.org/pump/-/pump-1.0.2.tgz"
+        },
+        "readable-stream": {
+          "version": "2.2.6",
+          "from": "readable-stream@>=2.1.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz"
+        },
+        "through2": {
+          "version": "2.0.3",
+          "from": "through2@>=2.0.3 <3.0.0",
+          "resolved": "https://registry.npmjs.org/through2/-/through2-2.0.3.tgz"
+        }
+      }
     },
     "@tradle/wire": {
       "version": "1.2.0",
@@ -3691,9 +3738,9 @@
       "resolved": "https://registry.npmjs.org/fd-slicer/-/fd-slicer-1.0.1.tgz"
     },
     "feed-indexer": {
-      "version": "1.2.2",
-      "from": "feed-indexer@>=1.2.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.2.2.tgz",
+      "version": "1.3.0",
+      "from": "feed-indexer@1.3.0",
+      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.3.0.tgz",
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
@@ -3701,9 +3748,9 @@
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "readable-stream": {
-          "version": "2.2.3",
+          "version": "2.2.6",
           "from": "readable-stream@>=2.1.4 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.3.tgz"
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz"
         }
       }
     },
@@ -4968,6 +5015,11 @@
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
         }
       }
+    },
+    "level-change-processor": {
+      "version": "1.0.0",
+      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
+      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-change-processor": {
       "version": "1.0.0",
