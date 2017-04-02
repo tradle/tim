@@ -232,6 +232,9 @@ var utils = {
   compare(r1, r2) {
     if (!r1 || !r2)
       return (r1 || r2) ? false : true
+
+    if (!r1[TYPE]) return equal(r1, r2)
+
     let properties = this.getModel(r1[TYPE]).value.properties
     let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
     for (var p in r1) {
