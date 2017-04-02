@@ -100,7 +100,7 @@ async function testEnvironment () {
       throw new Error('This application cannot be used in InPrivate Browsing mode, due to storage and security limitations')
     }
 
-    if (ieVersion < 11) {
+    if (ieVersion < ENV.minIEVersion) {
       throw new Error('This application is not supported this version of this browser. ' + BROWSER_RECOMMENDATION)
     }
   }
