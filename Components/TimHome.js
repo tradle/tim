@@ -377,19 +377,32 @@ class TimHome extends Component {
       // this.showFirstPage()
       return
     case 'offerKillSwitchAfterApplication':
-      if (utils.isWeb()) {
+      if (!utils.isWeb()) return
+
+      if (ENV.wipeAfterApplication) {
         Alert.alert(
-          translate('enterPasswordOrWipeOutTheDevice'),
+          translate('autoEraseTitle'),
+          translate('autoEraseMessage'),
+          []
+        )
+
+        setTimeout(() => {
+          Actions.requestWipe({ confirmed: true })
+        }, 10000)
+      } else if (ENV.offerKillSwitchAfterApplication) {
+        Alert.alert(
+          translate('enterPasswordOrErase'),
           null,
           [
-            {text: translate('wipeTheDevice'), onPress: () => Actions.requestWipe()},
-            {text: translate('enterPassword'), onPress: () => {
+            {text: translate('eraseSession'), onPress: () => Actions.requestWipe()},
+            {text: translate('enterAPassword'), onPress: () => {
               signIn(this.props.navigator, null, true)
                 .then(() => this.props.navigator.pop())
             }}
           ]
         )
       }
+
       return
     }
   }

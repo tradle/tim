@@ -6,18 +6,18 @@ let _isFFPrivateBrowsing
 const isFF = /Firefox/.test(navigator.userAgent)
 const isSafari = navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1
 const isChrome = navigator.userAgent.indexOf('Chrome') !== -1
+const ieVersion = (function msieversion() {
+  // http://stackoverflow.com/questions/19999388/check-if-user-is-using-ie-with-jquery
+  const ua = window.navigator.userAgent
+  const msie = ua.indexOf('MSIE ')
+  if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+    return parseInt(ua.substring(msie + 5, ua.indexOf(".", msie)))
+  }
+}())
 
 module.exports = {
-  isIE: (function isIE () {
-    if (Platform.OS !== 'web') return false
-
-    var ua = global.navigator.userAgent
-    var msie = ua.indexOf("MSIE ")
-    if (msie > 0) return true
-
-    // IE11
-    return !(global.ActiveXObject) && "ActiveXObject" in global
-  })(),
+  ieVersion,
+  isIE: typeof ieVersion === 'number',
   isFF,
   isChrome,
   isSafari,

@@ -3776,7 +3776,12 @@ var Store = Reflux.createStore({
   onReloadModels() {
     this.loadModels()
   },
-  onRequestWipe() {
+  onRequestWipe(opts={}) {
+    if (opts.confirmed) {
+      Actions.reloadDB()
+      return
+    }
+
     Alert.alert(translate('areYouSureAboutWipe'), '', [
       {
         text: 'Cancel',
@@ -3796,10 +3801,14 @@ var Store = Reflux.createStore({
     }
   },
 
-  wipeWeb() {
-    if (global.localStorage) global.localStorage.clear()
+  async wipeWeb() {
+    if (global.localStorage) {
+      global.localStorage.clear()
+      global.localStorage.userWipedDevice = true
+    }
+
     if (global.sessionStorage) global.sessionStorage.clear()
-    if (leveldown.destroyAll) return leveldown.destroyAll()
+    if (leveldown.destroyAll) await leveldown.destroyAll()
   },
 
   wipeMobile() {
@@ -6716,10 +6725,12 @@ var Store = Reflux.createStore({
       else if (!isMessage  &&  val[TYPE] === PARTIAL)
         this.trigger({action: 'hasPartials'})
 
-      if (utils.isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED  && ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword) {
-        setTimeout(() => {
-          this.trigger({action: 'offerKillSwitchAfterApplication'})
-        }, 2000)
+      if (utils.isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED) {
+        if (ENV.wipeAfterApplication || (ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword)) {
+          setTimeout(() => {
+            this.trigger({action: 'offerKillSwitchAfterApplication'})
+          }, 2000)
+        }
       }
 //       else
         // this.trigger(retParams)
