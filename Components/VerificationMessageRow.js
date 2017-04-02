@@ -101,7 +101,6 @@ class VerificationMessageRow extends Component {
       verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
 
     let headerStyle = [
-      chatStyles.verifiedHeader,
       styles.header,
       isMyMessage ? styles.headerRight : styles.headerLeft,
       {backgroundColor: bankStyle.VERIFIED_HEADER_COLOR, marginTop: 0, paddingVertical: 10}
@@ -132,7 +131,7 @@ class VerificationMessageRow extends Component {
                       <Icon style={[chatStyles.verificationIcon, {color: vHeaderTextColor}]} size={20} name={'md-checkmark'} />
                       <Text style={[chatStyles.verificationHeaderText, styles.verificationHeaderText, {color: vHeaderTextColor}]}>{verifiedBy}</Text>
                     </View>
-                    <View style={{marginTop: 15}}>
+                    <View style={{marginVertical: 10}}>
                       {row}
                     </View>
                   </View>
@@ -181,7 +180,7 @@ class VerificationMessageRow extends Component {
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: isReadOnlyChat ? -50 : 10, top: -15}} />
+                 <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: isReadOnlyChat ? -50 : 0, top: -15}} />
               </View>
               {this.getSendStatus()}
             </View>
@@ -303,7 +302,10 @@ var styles = StyleSheet.create({
   },
   header: {
     marginTop: 10,
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    paddingVertical: 5,
+    justifyContent: 'center'
   },
   headerRight: {
     borderTopRightRadius: 0,
@@ -321,7 +323,7 @@ var styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
-    minHeight: 110,
+    // minHeight: 110,
     // resizeMode: 'cover',
     overflow: 'hidden'
   },

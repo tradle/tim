@@ -695,5 +695,60 @@
       "currency": "€",
       "value": 10000
     }
+  },
+  "tradle.PropertyRightsRegistration": {
+    "_t": "tradle.PropertyRightsRegistration",
+    "propertyType": {
+      "id": "tradle.TypesOfProperty_building",
+      "title": "Building"
+    },
+    "cadastralNumber": "77:04:0003001:15343",
+    "area": 134098.8,
+    "fullAddress": "Moscow, st. Kozhuhovskaya 7th",
+    "houseNumber": "9",
+    "fullTitle": "Limited Liability Company \"Kozhukhovskaya-Invest\"",
+    "PSRN": 1057748641646,
+    "TIN": "7727541830",
+    "KPP": "772701001",
+    "registrationDate": "2005-05-04T16:00:00.000Z",
+    "ownerFullAddress": "Moscow, Krzhizhanovsky St.",
+    "ownerType": {
+      "id": "tradle.OwnerType_russianLegalEntity",
+      "title": "Russian legal entity"
+    },
+    "ownerHouseNumber": "23",
+    "ownerUnit": "3",
+    "contactPhone": [{
+      "phoneType": {
+        "id": "tradle.PhoneTypes_4b3d018c5085bc93de73405760a5d2fbcbef6c78",
+        "title": "Mobile"
+      },
+      "number": "+7 495 739-90-99",
+      "_t": "tradle.Phone"
+    }]
+  },
+  "tradle.ApplicantInfo": {
+    "_t": "tradle.ApplicantInfo",
+    "documentType": {
+      "id": "tradle.DocumentType_SOPRT_passport",
+      "title": "Passport of a citizen of the Russian Federation"
+    },
+    "firstName": "Aleksander",
+    "middleName": "Anatolyevich",
+    "lastName": "Rezviy",
+    "SNILS": "031-150-390 89",
+    "series": "46 06",
+    "number": 820043,
+    "issuedBy": "Department of Internal Affairs of the Jubilee Moscow region",
+    "dateIssued": 1120147200000,
+    "mailingAddress": "Moscow, Prospect Mira 7",
+    "phones": [{
+      "phoneType": {
+        "id": "tradle.PhoneTypes_4b3d018c5085bc93de73405760a5d2fbcbef6c78",
+        "title": "Mobile"
+      },
+      "number": "+7 495 739-90-99",
+      "_t": "tradle.Phone"
+    }]
   }
 }

@@ -394,6 +394,9 @@ var Store = Reflux.createStore({
           readOnly: true
         }
       }
+      if (m.subClassOf === ENUM)
+        this.createEnumResources(m)
+
       this.addNameAndTitleProps(m)
       this.addVerificationsToFormModel(m)
       this.addFromAndTo(m)
@@ -2567,8 +2570,15 @@ var Store = Reflux.createStore({
         })
       }
       else if (context && params.isThirdPartySentRequest) {
-        let cOrg = this._getItem(context.to).organization
-        this.addMessagesToChat(utils.getId(cOrg), r)
+        let id
+        if (me.isEmployee) {
+          id = utils.getId(context.to) === utils.getId(me) ? context.from : context.to
+          this.addMessagesToChat(utils.getId(id), r)
+        }
+        else {
+          let cOrg = this._getItem(id).organization
+          this.addMessagesToChat(utils.getId(cOrg), r)
+        }
       }
       else
         this.addMessagesToChat(from.organization ? utils.getId(from.organization) : fromId, r)
@@ -2577,6 +2587,8 @@ var Store = Reflux.createStore({
         this.trigger({action: 'addItem', resource: r});
       else
         this.trigger({action: 'addVerification', resource: r});
+      if (!this._getItem(document))
+        return
 
       var verificationRequestId = utils.getId(r.document);
       var verificationRequest = this._getItem(verificationRequestId)
@@ -2707,6 +2719,8 @@ var Store = Reflux.createStore({
             retParams.currency = org.currency
           if (org.country)
             retParams.country = org.country
+          if (org.style)
+            retParams.style = org.style
         }
       }
       this.trigger(retParams);
@@ -6809,6 +6823,16 @@ var Store = Reflux.createStore({
     }
     return representativeAddedTo
   },
+  isThirdPartyResource(r) {
+    if (!r._context)
+      return
+    let context = this._getItem(r._context)
+    let contextTo = this._getItem(context.to).organization // this._getItem(document.to).organization
+    let rFrom = this._getItem(r.from).organization
+
+    if (utils.getId(rFrom)  !==  utils.getId(contextTo))  //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
+      return true
+  },
   putMessageInDB(val, obj, batch, onMessage) {
     var fromProfile = PROFILE + '_' + (obj.objectinfo ? obj.objectinfo.author : obj.from[ROOT_HASH])
     var from = this._getItem(fromProfile)
@@ -6838,12 +6862,12 @@ var Store = Reflux.createStore({
     if (val[TYPE] === VERIFICATION) {
       let document = this._getItem(utils.getId(val.document))
       if (!document) {
-        debugger
-        return
+        // debugger
+        // return
       }
       let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
       context = context ? this._getItem(context) : null
-      if (context) {
+      if (context  &&  document) {
         let originalTo = context.to.organization // this._getItem(document.to).organization
         let verificationFrom = from.organization
 
