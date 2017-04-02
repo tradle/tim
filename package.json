@@ -18,7 +18,7 @@
     "@tradle/constants": "^1.3.0",
     "@tradle/engine": "4.1.2",
     "@tradle/keeper": "^3.1.0",
-    "@tradle/models": "github:tradle/models#e37dc8f",
+    "@tradle/models": "github:tradle/models#cbf5830",
     "@tradle/protocol": "2.3.0",
     "art": "^0.10.0",
     "assert": "^1.3.0",
@@ -138,10 +138,9 @@
     "zlib": "browserify-zlib",
     "crypto": "react-native-crypto",
     "dns": "dns.js",
-    "net": "@tradle/utp",
+    "net": "react-native-tcp",
     "http": "react-native-http",
     "https": "https-browserify",
-    "os": "os-browserify",
     "path": "path-browserify",
     "querystring": "querystring-es3",
     "fs": "react-native-level-fs",
@@ -158,7 +157,8 @@
     "constants": "constants-browserify",
     "domain": "domain-browser",
     "source-map": "^0.5.3",
-    "timers": "timers-browserify"
+    "timers": "timers-browserify",
+    "os": "react-native-os"
   },
   "devDependencies": {
     "@tradle/validate-model": "github:tradle/validate-model",
@@ -201,6 +201,7 @@
     "constants": "constants-browserify",
     "domain": "domain-browser",
     "source-map": "^0.5.3",
-    "timers": "timers-browserify"
+    "timers": "timers-browserify",
+    "os": "react-native-os"
   }
 }
