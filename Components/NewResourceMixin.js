@@ -1125,7 +1125,7 @@ var NewResourceMixin = {
             customStyles={{
               dateInput: styles.dateInput,
               dateText: styles.dateText,
-              placeholderText: [styles.font18, {
+              placeholderText: [styles.font20, {
                 color: params.value ? '#555555' : '#aaaaaa',
                 paddingLeft: params.value ? 10 : 0
               }],
