@@ -187,6 +187,7 @@ var createKeeper = require('@tradle/keeper')
 var cachifyKeeper = require('@tradle/keeper/cachify')
 var crypto = require('crypto')
 const Aviva = require('../utils/aviva')
+const monitorMissing = require('../utils/missing')
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
 var currentEmployees = {}
@@ -248,7 +249,18 @@ var driverInfo = (function () {
     byIdentifier
   }
 
-  return { wsClients }
+  const restoreMonitors = {}
+  restoreMonitors.add = function ({ node, identifier, url }) {
+    if (restoreMonitors[identifier]) return
+
+    restoreMonitors[identifier] = monitorMissing({
+      node,
+      counterparty: identifier,
+      url: `${url}/restore`
+    })
+  }
+
+  return { wsClients, restoreMonitors }
   // whitelist: [],
 })()
 
@@ -1087,7 +1099,7 @@ var Store = Reflux.createStore({
     //   whitelist.push(provider.txId)
     let self = this
     let tlsKey = driverInfo.tlsKey
-    const wsClients = driverInfo.wsClients
+    const { wsClients, restoreMonitors } = driverInfo
     // const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
 
     // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
@@ -1095,18 +1107,26 @@ var Store = Reflux.createStore({
     debug('adding provider', provider.hash, url)
 
     let transport = wsClients.byUrl[url] || wsClients.byIdentifier[provider.hash]
-    if (transport) {
-      wsClients.add({
-        client: transport,
-        url: url,
-        identifier: provider.hash
-      })
-
-      return transport
+    const transportExists = !!transport
+    let wsClient
+    if (!transport) {
+      wsClient = this.getWsClient(url)
+      transport = this.getTransport(wsClient)
     }
 
-    const wsClient = this.getWsClient(url)
-    transport = this.getTransport(wsClient)
+    wsClients.add({
+      client: transport,
+      url: url,
+      identifier: provider.hash
+    })
+
+    restoreMonitors.add({
+      node: meDriver,
+      url: `${url.replace(/\/+$/, '')}/${provider.id}`,
+      identifier: provider.hash
+    })
+
+    if (transportExists) return
 
     // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     // const wsClient = new WebSocketClient({
@@ -1182,12 +1202,6 @@ var Store = Reflux.createStore({
         .forEach(permalink => updatePresence(permalink, connected))
     }
 
-    wsClients.add({
-      client: transport,
-      url: url,
-      identifier: provider.hash
-    })
-
     // let timeouts = {}
     transport.on('receiving', function (msg) {
       onTransportConnectivityChanged(true)
@@ -1217,13 +1231,8 @@ var Store = Reflux.createStore({
       }
 
       const unlock = await self.lockReceive(from)
-      const maybePromise = receive({ msg, from })
-      if (!Q.isPromiseAlike(maybePromise)) {
-        return process.nextTick(unlock)
-      }
-
       try {
-        await maybePromise
+        await receive({ msg, from })
         debug('received msg from', from)
       } finally {
         unlock()
@@ -1321,6 +1330,10 @@ var Store = Reflux.createStore({
     try {
       msg = tradleUtils.unserializeMessage(msg)
       const payload = msg.object
+      // if (payload[TYPE] === 'tradle.SimpleMessage') {
+      //   if (half()) return
+      // }
+
       debug(`receiving ${payload[TYPE]}`)
 
       let org = this._getItem(PROFILE + '_' + from).organization
@@ -10369,3 +10382,10 @@ function willShowProgressBar ({ length }) {
 //         })
 //       }
 */
+
+// const half = (function () {
+//   let val = false
+//   return function () {
+//     return val = !val
+//   }
+// }())
