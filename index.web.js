@@ -96,12 +96,16 @@ async function testEnvironment () {
   if (isSafari) return
 
   if (isIE) {
-    if (!window.indexedDB) {
-      throw new Error('This application cannot be used in InPrivate Browsing mode, due to storage and security limitations')
+    if (ENV.is === false) {
+      throw new Error('This application is not supported in this browser. ' + BROWSER_RECOMMENDATION)
     }
 
-    if (ieVersion < ENV.minIEVersion) {
+    if (ENV.ie.min && ieVersion < ENV.ie.min) {
       throw new Error('This application is not supported this version of this browser. ' + BROWSER_RECOMMENDATION)
+    }
+
+    if (!window.indexedDB) {
+      throw new Error('This application cannot be used in InPrivate Browsing mode, due to storage and security limitations')
     }
   }
 
