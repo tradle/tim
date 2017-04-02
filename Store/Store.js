@@ -2560,7 +2560,7 @@ var Store = Reflux.createStore({
       else if (context && params.isThirdPartySentRequest) {
         let id
         if (me.isEmployee) {
-          id = utils.getId(context.to) === utils.getId(me) ? context.from : contextTo
+          id = utils.getId(context.to) === utils.getId(me) ? context.from : context.to
           this.addMessagesToChat(utils.getId(id), r)
         }
         else {
