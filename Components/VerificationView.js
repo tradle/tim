@@ -55,7 +55,7 @@ class VerificationView extends Component {
     return (
        <View>
         <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
-          <Text style={[styles.description, {color: this.props.bankStyle.VERIFICATION_BG, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
+          <Text style={[styles.description, {color: this.props.bankStyle.VERIFI, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
         </View>
         {this.renderVerification(resource, utils.getModel(constants.TYPES.VERIFICATION).value, vTree, 0, 0)}
       </View>
