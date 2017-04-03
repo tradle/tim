@@ -11,6 +11,7 @@ var reactMixin = require('react-mixin')
 var dateformat = require('dateformat')
 var Icon = require('react-native-vector-icons/Ionicons')
 var Accordion = require('react-native-accordion')
+import { makeResponsive } from 'react-native-orient'
 
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
@@ -53,7 +54,7 @@ class VerificationView extends Component {
     else
       verifier = resource.from.title
     return (
-       <View>
+       <View style={{width: utils.getContentWidth(VerificationView)}}>
         <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
           <Text style={[styles.description, {color: this.props.bankStyle.VERIFI, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
         </View>
@@ -290,6 +291,8 @@ class VerificationView extends Component {
 }
 reactMixin(VerificationView.prototype, RowMixin);
 reactMixin(VerificationView.prototype, ResourceMixin);
+VerificationView = makeResponsive(VerificationView)
+
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
