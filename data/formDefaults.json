@@ -750,5 +750,19 @@
       "number": "+7 495 739-90-99",
       "_t": "tradle.Phone"
     }]
+  },
+  "tradle.OnfidoApplicant": {
+    "_t": "tradle.OnfidoApplicant",
+    "country": {
+      "id": "tradle.Country_589d4aad918e33dec42dd38b80cc73616556178c",
+      "title": "United Kingdom"
+    },
+    "givenName": "Moog",
+    "surname": "Soni",
+    "dateOfBirth": 355167404413,
+    "buildingNumber": "96",
+    "street": "Thornfield Rd",
+    "town": "Middlesbrough",
+    "postcode": "TS5 5BY"
   }
 }
