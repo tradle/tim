@@ -285,7 +285,7 @@ var ResourceMixin = {
       if (prop  &&  hideGroup  &&  hideGroup.indexOf(p) !== -1)
         continue
       if (typeof json[p] === 'object') {
-        if (utils.isEmpty(json[p]))
+        if (utils.isEmpty(json[p])  ||  this.checkIfJsonEmpty(json[p]))
           continue
         if (Array.isArray(json[p])) {
           json[p].forEach((js) => this.showJson(null, js, isView, jsonRows, skipLabels))
@@ -299,13 +299,15 @@ var ResourceMixin = {
         }
         else
           arr = jsonRows
-        arr.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
-                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                      <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
-                      {arrow}
-                    </View>
-                    <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: '#eeeeee'}} />
-                  </View>)
+        // HACK for Onfido
+        if (p !== 'breakdown')
+          arr.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
+                      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                        <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
+                        {arrow}
+                      </View>
+                      <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: '#eeeeee'}} />
+                    </View>)
 // tada.push("<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{" + utils.makeLabel(p) + "}</Text></View>")
         this.showJson(null, json[p], isView, arr, skipLabels)
         continue
@@ -352,6 +354,17 @@ var ResourceMixin = {
     //           <View style={{height: 1, marginBottom: 10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.LINK_COLOR}} />
     //           {jsonRows}
     //         </View>
+  },
+  checkIfJsonEmpty(json) {
+    for (let p in json) {
+      if (!json[p])
+        continue
+      if (typeof json[p] !== 'object')
+        return false
+      if (!this.checkIfJsonEmpty(json[p]))
+        return false
+    }
+    return true
   },
   makeViewTitle(model) {
     let rTitle
