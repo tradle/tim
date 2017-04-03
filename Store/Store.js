@@ -37,6 +37,7 @@ const PHOTO_ID = 'tradle.PhotoID'
 const PERSONAL_INFO = 'tradle.PersonalInfo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const NAME = 'tradle.Name'
+const APPLICANT = 'tradle.OnfidoApplicant'
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const FRIEND = 'Friend'
@@ -7156,11 +7157,17 @@ var Store = Reflux.createStore({
         if (to.firstName === FRIEND) {
           let toRep = this.getRepresentative(utils.getId(org))
           toRep = this._getItem(toRep)
-          let result = this.searchMessages({modelName: PERSONAL_INFO, to: org})
-          let fRes = result.filter((r) => utils.getId(r.from) === meId)
-          to.firstName = fRes[0].firstName
-          this._setItem(meId, to)
-          this.dbPut(meId, to)
+          let result
+          ;[NAME, PERSONAL_INFO, APPLICANT].some(modelName => {
+            return result = this.searchMessages({modelName, to: org})
+          })
+
+          if (result) {
+            let fRes = result.find((r) => utils.getId(r.from) === meId)
+            to.firstName = fRes.firstName || fRes.givenName
+            this._setItem(meId, to)
+            this.dbPut(meId, to)
+          }
         }
       }
       else {
