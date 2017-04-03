@@ -22,6 +22,7 @@ import CustomIcon from '../styles/customicons'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
 import ConversationsIcon from './ConversationsIcon'
+var avivaTC = require('../html/Aviva_TC.html')
 
 const CUSTOMER_WAITING = 'tradle.CustomerWaiting'
 const MESSAGE = 'tradle.Message'
@@ -93,7 +94,7 @@ class AvivaIntroView extends Component {
              <TouchableOpacity style={{paddingRight:10}} onPress={() => this.goto(LEARN_MORE_URL)}>
                <Text style={[styles.text, {paddingLeft: 5, paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Learn more  &bull;</Text>
              </TouchableOpacity>
-             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showTerms()}>
+             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showTerms(avivaTC)}>
                <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Terms of use  &bull;</Text>
              </TouchableOpacity>
              <TouchableOpacity onPress={() => this.goto(CONTACT_US_URL)}>
@@ -162,15 +163,25 @@ class AvivaIntroView extends Component {
       }
     })
   }
-  showTerms() {
+  showTerms(url) {
+    // this.goto('../html/Aviva_TC.html')
     this.props.navigator.push({
-      title: translate('Terms of use'),
-      id: 3,
-      component: ResourceView,
-      // titleTextColor: '#7AAAC3',
+      id: 7,
+      component: ArticleView,
       backButtonTitle: 'Back',
-      passProps: {resource: termsAndConditions}
-    });
+      title: translate('termsAndConditions'),
+      passProps: {
+        url
+      }
+    })
+    // this.props.navigator.push({
+    //   title: translate('Terms of use'),
+    //   id: 3,
+    //   component: ResourceView,
+    //   // titleTextColor: '#7AAAC3',
+    //   backButtonTitle: 'Back',
+    //   passProps: {resource: termsAndConditions}
+    // });
   }
   goto(url) {
     if (Linking) return Linking.openURL(url)
