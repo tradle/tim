@@ -1,9 +1,11 @@
 import Promise from 'bluebird'
 import Restore from '@tradle/restore'
+import { constants } from '@tradle/engine'
 const debug = require('debug')('tradle:restore')
 const co = Promise.coroutine
 const MAX_BACKOFF = 60000
 const INITIAL_BACKOFF = 1000
+const { TYPE, TYPES } = constants
 
 module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
   const monitor = Restore.conversation.monitorMissing({ node, counterparty })
@@ -34,7 +36,10 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
         msgs = yield res.json()
         msgs.forEach(msg => {
           const { recipientPubKey } = msg
-          recipientPubKey.pub = new Buffer(recipientPubKey.pub.data)
+          bufferizePubKey(recipientPubKey)
+          if (msg.object[TYPE] = TYPES.MESSAGE) {
+            bufferizePubKey(msg.object.recipientPubKey)
+          }
         })
 
         break
@@ -52,4 +57,8 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
   }))
 
   return monitor
+}
+
+function bufferizePubKey (key) {
+  key.pub = new Buffer(key.pub.data)
 }
