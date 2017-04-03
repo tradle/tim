@@ -25,6 +25,8 @@ var extend = require('extend');
 var ResourceMixin = require('./ResourceMixin');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
+var defaultBankStyle = require('../styles/bankStyle.json')
+
 const PHOTO = 'tradle.Photo'
 const TYPE = constants.TYPE
 const ITEM = 'tradle.Item'
@@ -61,7 +63,8 @@ class MessageView extends Component {
       resource: props.resource,
       isConnected: this.props.navigator.isConnected,
       promptVisible: false,
-      isLoading: !props.resource[TYPE]
+      isLoading: !props.resource[TYPE],
+      bankStyle: defaultBankStyle
     };
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     var len = currentRoutes.length;
@@ -103,6 +106,8 @@ class MessageView extends Component {
         let style = {}
         if (this.props.bankStyle)
           extend(style, this.props.bankStyle)
+        else
+          extend(style, defaultBankStyle)
         extend(style, params.style)
         state.bankStyle = style
       }
