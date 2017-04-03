@@ -577,7 +577,7 @@ class MessageList extends Component {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
 
       let h = utils.dimensions(MessageList).height
-      var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
+      var maxHeight = h - (utils.isWeb() ? 0 : utils.isAndroid() ? 85 : 64)
       // Chooser for trusted party verifier
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
@@ -585,7 +585,7 @@ class MessageList extends Component {
 
       if (this.hasChatContext())
         maxHeight -= 35
-      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  !this.state.onlineStatus))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
+      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  this.props.to  &&  !this.state.onlineStatus))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
       if (notRemediation  &&  !hideTextInput) //  &&  this.props.resource.products) //  &&  this.props.resource.products.length > 1))
         maxHeight -= 45
