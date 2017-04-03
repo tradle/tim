@@ -19,7 +19,6 @@ import com.lwansbrough.RCTCamera.RCTCameraPackage;
 import com.microsoft.codepush.react.CodePush;
 import com.oblador.keychain.KeychainPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
-import com.peel.react.rnos.RNOSModule;
 import com.rn.ecc.ECCPackage;
 import com.rnfs.RNFSPackage;
 import com.smixx.fabric.FabricPackage;

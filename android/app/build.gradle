@@ -213,7 +213,6 @@ dependencies {
     compile project(':react-native-async-storage-snappy')
     // compile project(':anyline-ocr-react-native-module')
     compile project(':react-native-blinkid')
-    compile project(':react-native-os')
     compile project(':react-native-local-auth')
     compile project(':react-native-ecc')
     compile project(':react-native-orientation')
