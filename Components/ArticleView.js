@@ -33,7 +33,7 @@ class ArticleView extends Component {
   render() {
     return (
       <WebView style={styles.webView}
-        source={{uri: this.props.url}}
+        source={this.props.url}
         startInLoadingState={true}
         renderError={this.renderError.bind(this)}
         automaticallyAdjustContentInsets={false}
