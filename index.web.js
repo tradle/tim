@@ -43,7 +43,7 @@ if ((ENV.offerKillSwitchAfterApplication || ENV.wipeAfterApplication) && localSt
 
   showAlert({
     title: `All is well`,
-    message: `Your data has been successfully erased from the browser's local storage. Please wait to be contacted by a representative.`
+    message: `Local data successfully deleted\n\nAviva is now processing your verification details and will contact you again shortly. Your data has been erased from the browser's local storage.`
   })
 } else {
   testEnvironment().then(init, alertError)
