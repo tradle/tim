@@ -16,6 +16,8 @@ if (Platform.OS === 'web') {
       return <iframe ref={onRef} style={style} />
 
       function onRef (ref) {
+        if (!ref) return
+
         const iframedoc = ref.contentDocument || ref.contentWindow.document
         iframedoc.body.innerHTML = source
       }
