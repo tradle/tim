@@ -42,6 +42,7 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
         debug(`failed to restore messages from ${counterparty} at ${url}`, err)
       }
 
+      debug(`recovering ${msgs.length} lost messages`)
       yield new Promise(resolve => setTimeout(resolve, backoff))
       backoff = Math.min(backoff * 2, MAX_BACKOFF)
     }
