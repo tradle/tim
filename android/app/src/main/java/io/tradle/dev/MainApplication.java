@@ -57,7 +57,7 @@ public class MainApplication extends Application implements ReactApplication {
         new RNAsyncSnappyStoragePackage(),
         // new TcpSocketsModule(),
         // new AnylinePackage(),
-        new RNOSModule(),
+        // new RNOSModule(),
         new ReactNativePushNotificationPackage(),
         new RNDeviceInfo(),
         new RNFSPackage(),
