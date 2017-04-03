@@ -782,25 +782,35 @@ var utils = {
     let res = doNotChangeOriginal ? utils.clone(resource) : resource
 
     var properties = this.getModel(res[TYPE]).value.properties
-    for (var p in res) {
+    Object.keys(res).forEach(p => {
       if (p.charAt(0) === '_'  ||  !properties[p])
-        continue
+        return
       if (properties[p].type === 'object') {
         if (res[p]  &&  res[p].id  &&  res[p].title) {
           res[p] = this.buildRef(res[p])
-          continue
+          return
         }
         if (properties[p].ref  &&  !this.getModel(properties[p].ref).value.inlined) {
 
           // if (properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
+
+          // TODO: remove this after we add resource validation
+          // on the server side
+          //
+          // currently there are some bad prefill values floating around (empty objects)
+          if (p === 'prefill' && !Object.keys(res[p]).length) {
+            delete res[p]
+            return
+          }
+
           res[p] = this.buildRef(res[p])
         }
-        continue
+        return
       }
       if (properties[p].type !== 'array'  ||
          !properties[p].items.ref         ||
           properties[p].inlined)
-        continue
+        return
       var arr = []
       res[p].forEach(function(r) {
         if (typeof r === 'string')
@@ -819,7 +829,8 @@ var utils = {
         arr.push(rr)
       })
       res[p] = arr
-    }
+    })
+
     return res
   },
 
