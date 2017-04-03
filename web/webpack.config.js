@@ -78,6 +78,10 @@ var common = {
       {
         test: /node_modules\/moment-range\/(dist|lib)\/moment-range(\.min)?\.js$/,
         loader: 'imports?define=>false'
+      },
+      {
+        test: /\.html$/,
+        loader: 'html-loader'
       }
     ]
   },

@@ -23,7 +23,7 @@
       "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.5.2.tgz",
       "dependencies": {
         "async": {
-          "version": "2.2.0",
+          "version": "2.1.5",
           "from": "async@>=2.0.0-rc.4 <3.0.0",
           "resolved": "https://registry.npmjs.org/async/-/async-2.1.5.tgz"
         },
@@ -58,8 +58,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "git://github.com/tradle/models.git#cbf5830916b909e2203d1936c587aee60c0b3444",
-      "resolved": "git://github.com/tradle/models.git#cbf5830916b909e2203d1936c587aee60c0b3444",
+      "from": "git://github.com/tradle/models.git#0a29fabf741be22a91dad210bd19be92e8625e57",
+      "resolved": "git://github.com/tradle/models.git#0a29fabf741be22a91dad210bd19be92e8625e57",
       "dependencies": {
         "@tradle/validate-model": {
           "version": "1.0.0",
@@ -80,8 +80,8 @@
     },
     "@tradle/restore": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/restore.git#6c373f5c0f186431bf0b247ef025296d19d35c81",
-      "resolved": "git://github.com/tradle/restore.git#6c373f5c0f186431bf0b247ef025296d19d35c81",
+      "from": "git://github.com/tradle/restore.git#508f64be9be738215ad10260ce90756e96626c68",
+      "resolved": "git://github.com/tradle/restore.git#508f64be9be738215ad10260ce90756e96626c68",
       "dependencies": {
         "bluebird": {
           "version": "3.5.0",
@@ -419,6 +419,23 @@
       "version": "1.0.1",
       "from": "async-each@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/async-each/-/async-each-1.0.1.tgz"
+    },
+    "asyncstorage-down": {
+      "version": "3.1.1",
+      "from": "asyncstorage-down@>=3.1.1 <4.0.0",
+      "resolved": "https://registry.npmjs.org/asyncstorage-down/-/asyncstorage-down-3.1.1.tgz",
+      "dependencies": {
+        "abstract-leveldown": {
+          "version": "0.12.3",
+          "from": "abstract-leveldown@0.12.3",
+          "resolved": "https://registry.npmjs.org/abstract-leveldown/-/abstract-leveldown-0.12.3.tgz"
+        },
+        "xtend": {
+          "version": "3.0.0",
+          "from": "xtend@>=3.0.0 <3.1.0",
+          "resolved": "https://registry.npmjs.org/xtend/-/xtend-3.0.0.tgz"
+        }
+      }
     },
     "attr-accept": {
       "version": "1.1.0",
@@ -3414,6 +3431,28 @@
       "from": "es6-symbol@>=3.0.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/es6-symbol/-/es6-symbol-3.1.0.tgz"
     },
+    "es6-templates": {
+      "version": "0.2.3",
+      "from": "es6-templates@>=0.2.2 <0.3.0",
+      "resolved": "https://registry.npmjs.org/es6-templates/-/es6-templates-0.2.3.tgz",
+      "dependencies": {
+        "ast-types": {
+          "version": "0.9.6",
+          "from": "ast-types@0.9.6",
+          "resolved": "https://registry.npmjs.org/ast-types/-/ast-types-0.9.6.tgz"
+        },
+        "esprima": {
+          "version": "3.1.3",
+          "from": "esprima@>=3.1.0 <3.2.0",
+          "resolved": "https://registry.npmjs.org/esprima/-/esprima-3.1.3.tgz"
+        },
+        "recast": {
+          "version": "0.11.23",
+          "from": "recast@>=0.11.12 <0.12.0",
+          "resolved": "https://registry.npmjs.org/recast/-/recast-0.11.23.tgz"
+        }
+      }
+    },
     "es6-weak-map": {
       "version": "2.0.1",
       "from": "es6-weak-map@>=2.0.1 <3.0.0",
@@ -4527,6 +4566,11 @@
       "from": "invert-kv@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/invert-kv/-/invert-kv-1.0.0.tgz"
     },
+    "ip-regex": {
+      "version": "1.0.3",
+      "from": "ip-regex@>=1.0.3 <2.0.0",
+      "resolved": "https://registry.npmjs.org/ip-regex/-/ip-regex-1.0.3.tgz"
+    },
     "ipaddr.js": {
       "version": "1.1.1",
       "from": "ipaddr.js@1.1.1",
@@ -5015,11 +5059,6 @@
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
         }
       }
-    },
-    "level-change-processor": {
-      "version": "1.0.0",
-      "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
-      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-change-processor": {
       "version": "1.0.0",
@@ -7071,11 +7110,6 @@
           "resolved": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.1.5.tgz"
         }
       }
-    },
-    "react-native-transformable-image": {
-      "version": "0.0.18",
-      "from": "react-native-transformable-image@0.0.18",
-      "resolved": "https://registry.npmjs.org/react-native-transformable-image/-/react-native-transformable-image-0.0.18.tgz"
     },
     "react-native-udp": {
       "version": "1.2.6",
