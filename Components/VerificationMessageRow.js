@@ -132,7 +132,7 @@ class VerificationMessageRow extends Component {
                       <Icon style={[chatStyles.verificationIcon, {color: vHeaderTextColor}]} size={20} name={'md-checkmark'} />
                       <Text style={[chatStyles.verificationHeaderText, styles.verificationHeaderText, {color: vHeaderTextColor}]}>{verifiedBy}</Text>
                     </View>
-                    <View style={{marginTop: 15}}>
+                    <View style={{marginVertical: 10}}>
                       {row}
                     </View>
                   </View>
@@ -181,7 +181,7 @@ class VerificationMessageRow extends Component {
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: isReadOnlyChat ? -50 : 10, top: -15}} />
+                 <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: isReadOnlyChat ? -50 : 0, top: -15}} />
               </View>
               {this.getSendStatus()}
             </View>
@@ -321,7 +321,7 @@ var styles = StyleSheet.create({
   },
   image: {
     borderRadius: 10,
-    minHeight: 110,
+    // minHeight: 110,
     // resizeMode: 'cover',
     overflow: 'hidden'
   },
