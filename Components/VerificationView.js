@@ -66,7 +66,7 @@ class VerificationView extends Component {
     var resource = resource ? resource : this.props.resource;
     var vModel = utils.getModel(constants.TYPES.VERIFICATION).value
     if (resource.method) {
-      var m = utils.getModel(utils.getType(resource.method[TYPE])).value
+      var m = utils.getModel(utils.getType(resource.method)).value
       let dnProps = utils.getPropertiesWithAnnotation(m.properties, 'displayName')
       let displayName = utils.getDisplayName(resource.method, m.properties)
       let val = <View>{this.renderResource(resource, m)}</View>
