@@ -733,6 +733,8 @@ var NewResourceMixin = {
       //   )
       // }
 
+      if (canceled) return
+
       return Alert.alert(
         translate('documentNotScanning'),
         translate('retryScanning', documentType.title.toLowerCase())
@@ -740,7 +742,7 @@ var NewResourceMixin = {
     }
 
     // const tradleObj = utils.fromMicroBlink(result)
-    var r = {}
+    const r = {}
     extend(true, r, this.state.resource)
 
     r[prop] = {
@@ -749,6 +751,7 @@ var NewResourceMixin = {
       height: result.image.height
     }
 
+    let dateOfExpiry
     ;['mrtd', 'usdl', 'eudl'].some(docType => {
       const scan = result[docType]
       if (!scan) return
@@ -759,6 +762,7 @@ var NewResourceMixin = {
       }
 
       if (document.dateOfExpiry) {
+        dateOfExpiry = document.dateOfExpiry
         document.dateOfExpiry = formatDate(document.dateOfExpiry)
       }
 
@@ -769,6 +773,18 @@ var NewResourceMixin = {
       r[prop + 'Json'] = scan
       return
     })
+
+    if (dateOfExpiry && dateOfExpiry < Date.now()) {
+      // give the BlinkID view time to disappear
+      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
+      await utils.promiseDelay(800)
+      Alert.alert(
+        translate('documentExpiredTitle'),
+        translate('documentExpiredMessage')
+      )
+
+      return
+    }
 
     this.afterScan(r, prop)
   },

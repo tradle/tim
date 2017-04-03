@@ -23,7 +23,7 @@ module.exports = function createCalendarModal (props) {
     onConfirm,
     width=screen.width * 0.8,
     height=screen.height * 0.5,
-    animationType="slide",
+    animationType='slide',
     ...calendarProps
   } = props
 
@@ -31,9 +31,13 @@ module.exports = function createCalendarModal (props) {
     throw new Error('expected "onConfirm" and "onCancel" functions')
   }
 
+  const display = calendarProps.display || 'years'
+  const locale = calendarProps.locale || getDefaultLocaleForDisplay(display)
+
   // sensible defaults
   calendarProps = {
-    locale: euLocale,
+    display,
+    locale,
     theme: defaultTheme,
     showTodayHelper: false,
     selectedDate: Date.now(),
@@ -55,6 +59,11 @@ module.exports = function createCalendarModal (props) {
     <Modal animationType={animationType}>
       <View style={styles.container}>
         <View style={styles.box}>
+          <View style={styles.headerContainer}>
+            <Text style={[styles.header, { color: '#333' /*calendarProps.theme.headerColor*/ }]}>
+              Scroll to find the right date
+            </Text>
+          </View>
           <InfiniteCalendar
             afterSelect={onSelect}
             width={width}
@@ -85,6 +94,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.4)'
+  },
+  headerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 10
+  },
+  header: {
+    fontSize: 20,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   box: {
     padding: 20,
@@ -160,4 +179,15 @@ const euLocale = {
     dow: 1,
     doy: 4
   }
+}
+
+function getDefaultLocaleForDisplay (display) {
+  if (display === 'years') {
+    return {
+      ...euLocale,
+      blank: 'Select a year'
+    }
+  }
+
+  return euLocale
 }

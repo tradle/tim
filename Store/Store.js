@@ -37,6 +37,7 @@ const PHOTO_ID = 'tradle.PhotoID'
 const PERSONAL_INFO = 'tradle.PersonalInfo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const NAME = 'tradle.Name'
+const APPLICANT = 'tradle.OnfidoApplicant'
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const FRIEND = 'Friend'
@@ -173,6 +174,7 @@ var createKeeper = require('@tradle/keeper')
 var cachifyKeeper = require('@tradle/keeper/cachify')
 var crypto = require('crypto')
 const Aviva = require('../utils/aviva')
+const monitorMissing = require('../utils/missing')
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
 var currentEmployees = {}
@@ -234,7 +236,18 @@ var driverInfo = (function () {
     byIdentifier
   }
 
-  return { wsClients }
+  const restoreMonitors = {}
+  restoreMonitors.add = function ({ node, identifier, url }) {
+    if (restoreMonitors[identifier]) return
+
+    restoreMonitors[identifier] = monitorMissing({
+      node,
+      counterparty: identifier,
+      url: `${url}/restore`
+    })
+  }
+
+  return { wsClients, restoreMonitors }
   // whitelist: [],
 })()
 
@@ -382,6 +395,9 @@ var Store = Reflux.createStore({
           readOnly: true
         }
       }
+      if (m.subClassOf === ENUM)
+        this.createEnumResources(m)
+
       this.addNameAndTitleProps(m)
       this.addVerificationsToFormModel(m)
       this.addFromAndTo(m)
@@ -1082,7 +1098,7 @@ var Store = Reflux.createStore({
     //   whitelist.push(provider.txId)
     let self = this
     let tlsKey = driverInfo.tlsKey
-    const wsClients = driverInfo.wsClients
+    const { wsClients, restoreMonitors } = driverInfo
     // const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
 
     // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
@@ -1090,18 +1106,26 @@ var Store = Reflux.createStore({
     debug('adding provider', provider.hash, url)
 
     let transport = wsClients.byUrl[url] || wsClients.byIdentifier[provider.hash]
-    if (transport) {
-      wsClients.add({
-        client: transport,
-        url: url,
-        identifier: provider.hash
-      })
-
-      return transport
+    const transportExists = !!transport
+    let wsClient
+    if (!transport) {
+      wsClient = this.getWsClient(url)
+      transport = this.getTransport(wsClient)
     }
 
-    const wsClient = this.getWsClient(url)
-    transport = this.getTransport(wsClient)
+    wsClients.add({
+      client: transport,
+      url: url,
+      identifier: provider.hash
+    })
+
+    restoreMonitors.add({
+      node: meDriver,
+      url: `${url.replace(/\/+$/, '')}/${provider.id}`,
+      identifier: provider.hash
+    })
+
+    if (transportExists) return
 
     // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
     // const wsClient = new WebSocketClient({
@@ -1177,12 +1201,6 @@ var Store = Reflux.createStore({
         .forEach(permalink => updatePresence(permalink, connected))
     }
 
-    wsClients.add({
-      client: transport,
-      url: url,
-      identifier: provider.hash
-    })
-
     // let timeouts = {}
     transport.on('receiving', function (msg) {
       onTransportConnectivityChanged(true)
@@ -1212,13 +1230,8 @@ var Store = Reflux.createStore({
       }
 
       const unlock = await self.lockReceive(from)
-      const maybePromise = receive({ msg, from })
-      if (!Q.isPromiseAlike(maybePromise)) {
-        return process.nextTick(unlock)
-      }
-
       try {
-        await maybePromise
+        await receive({ msg, from })
         debug('received msg from', from)
       } finally {
         unlock()
@@ -1316,6 +1329,10 @@ var Store = Reflux.createStore({
     try {
       msg = tradleUtils.unserializeMessage(msg)
       const payload = msg.object
+      // if (payload[TYPE] === 'tradle.SimpleMessage') {
+      //   if (half()) return
+      // }
+
       debug(`receiving ${payload[TYPE]}`)
 
       let org = this._getItem(PROFILE + '_' + from).organization
@@ -2554,8 +2571,15 @@ var Store = Reflux.createStore({
         })
       }
       else if (context && params.isThirdPartySentRequest) {
-        let cOrg = this._getItem(context.to).organization
-        this.addMessagesToChat(utils.getId(cOrg), r)
+        let id
+        if (me.isEmployee) {
+          id = utils.getId(context.to) === utils.getId(me) ? context.from : context.to
+          this.addMessagesToChat(utils.getId(id), r)
+        }
+        else {
+          let cOrg = this._getItem(id).organization
+          this.addMessagesToChat(utils.getId(cOrg), r)
+        }
       }
       else
         this.addMessagesToChat(from.organization ? utils.getId(from.organization) : fromId, r)
@@ -2564,6 +2588,8 @@ var Store = Reflux.createStore({
         this.trigger({action: 'addItem', resource: r});
       else
         this.trigger({action: 'addVerification', resource: r});
+      if (!this._getItem(document))
+        return
 
       var verificationRequestId = utils.getId(r.document);
       var verificationRequest = this._getItem(verificationRequestId)
@@ -2694,6 +2720,8 @@ var Store = Reflux.createStore({
             retParams.currency = org.currency
           if (org.country)
             retParams.country = org.country
+          if (org.style)
+            retParams.style = org.style
         }
       }
       this.trigger(retParams);
@@ -3763,7 +3791,12 @@ var Store = Reflux.createStore({
   onReloadModels() {
     this.loadModels()
   },
-  onRequestWipe() {
+  onRequestWipe(opts={}) {
+    if (opts.confirmed) {
+      Actions.reloadDB()
+      return
+    }
+
     Alert.alert(translate('areYouSureAboutWipe'), '', [
       {
         text: 'Cancel',
@@ -3783,10 +3816,14 @@ var Store = Reflux.createStore({
     }
   },
 
-  wipeWeb() {
-    if (global.localStorage) global.localStorage.clear()
+  async wipeWeb() {
+    if (global.localStorage) {
+      global.localStorage.clear()
+      global.localStorage.userWipedDevice = true
+    }
+
     if (global.sessionStorage) global.sessionStorage.clear()
-    if (leveldown.destroyAll) return leveldown.destroyAll()
+    if (leveldown.destroyAll) await leveldown.destroyAll()
   },
 
   wipeMobile() {
@@ -6703,10 +6740,12 @@ var Store = Reflux.createStore({
       else if (!isMessage  &&  val[TYPE] === PARTIAL)
         this.trigger({action: 'hasPartials'})
 
-      if (utils.isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED  && ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword) {
-        setTimeout(() => {
-          this.trigger({action: 'offerKillSwitchAfterApplication'})
-        }, 2000)
+      if (utils.isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED) {
+        if (ENV.wipeAfterApplication || (ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword)) {
+          setTimeout(() => {
+            this.trigger({action: 'offerKillSwitchAfterApplication'})
+          }, 2000)
+        }
       }
 //       else
         // this.trigger(retParams)
@@ -6785,6 +6824,16 @@ var Store = Reflux.createStore({
     }
     return representativeAddedTo
   },
+  isThirdPartyResource(r) {
+    if (!r._context)
+      return
+    let context = this._getItem(r._context)
+    let contextTo = this._getItem(context.to).organization // this._getItem(document.to).organization
+    let rFrom = this._getItem(r.from).organization
+
+    if (utils.getId(rFrom)  !==  utils.getId(contextTo))  //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
+      return true
+  },
   putMessageInDB(val, obj, batch, onMessage) {
     var fromProfile = PROFILE + '_' + (obj.objectinfo ? obj.objectinfo.author : obj.from[ROOT_HASH])
     var from = this._getItem(fromProfile)
@@ -6814,12 +6863,12 @@ var Store = Reflux.createStore({
     if (val[TYPE] === VERIFICATION) {
       let document = this._getItem(utils.getId(val.document))
       if (!document) {
-        debugger
-        return
+        // debugger
+        // return
       }
       let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
       context = context ? this._getItem(context) : null
-      if (context) {
+      if (context  &&  document) {
         let originalTo = context.to.organization // this._getItem(document.to).organization
         let verificationFrom = from.organization
 
@@ -7108,11 +7157,17 @@ var Store = Reflux.createStore({
         if (to.firstName === FRIEND) {
           let toRep = this.getRepresentative(utils.getId(org))
           toRep = this._getItem(toRep)
-          let result = this.searchMessages({modelName: PERSONAL_INFO, to: org})
-          let fRes = result.filter((r) => utils.getId(r.from) === meId)
-          to.firstName = fRes[0].firstName
-          this._setItem(meId, to)
-          this.dbPut(meId, to)
+          let result
+          ;[NAME, PERSONAL_INFO, APPLICANT].some(modelName => {
+            return result = this.searchMessages({modelName, to: org})
+          })
+
+          if (result) {
+            let fRes = result.find((r) => utils.getId(r.from) === meId)
+            to.firstName = fRes.firstName || fRes.givenName
+            this._setItem(meId, to)
+            this.dbPut(meId, to)
+          }
         }
       }
       else {
@@ -10391,3 +10446,10 @@ function willShowProgressBar ({ length }) {
 //         })
 //       }
 */
+
+// const half = (function () {
+//   let val = false
+//   return function () {
+//     return val = !val
+//   }
+// }())

@@ -100,6 +100,13 @@ class MessageView extends Component {
         state.currency = params.currency
       if (params.country)
         state.country = params.country
+      if (params.style) {
+        let style = {}
+        if (this.props.bankStyle)
+          extend(style, this.props.bankStyle)
+        extend(style, params.style)
+        state.bankStyle = style
+      }
       this.setState(state)
     }
     else if (params.action === 'exploreBacklink') {
@@ -180,7 +187,7 @@ class MessageView extends Component {
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
-        bankStyle: this.props.style,
+        bankStyle: this.state.bankStyle || this.props.bankStyle,
         resource: r,
         doNotSend: true,
         defaultPropertyValues: this.props.defaultPropertyValues,
@@ -279,7 +286,7 @@ class MessageView extends Component {
       component: MessageView,
       parentMeta: model,
       passProps: {
-        bankStyle: this.props.bankStyle,
+        bankStyle: this.state.bankStyle || this.props.bankStyle,
         resource: resource,
         currency: this.props.currency,
         document: document,
@@ -311,7 +318,7 @@ class MessageView extends Component {
       inRow = 5;
 
     let propertySheet
-    let bankStyle = this.props.bankStyle
+    let bankStyle = this.state.bankStyle || this.props.style
     if (isVerificationTree)
       propertySheet = <VerificationView navigator={this.props.navigator}
                                         resource={resource}
@@ -342,6 +349,7 @@ class MessageView extends Component {
                                  showDetails={this.state.showDetails}
                                  showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
+                                 bankStyle={this.state.bankStyle || this.props.bankStyle}
                                  showRefResource={this.getRefResource.bind(this)}
                                  defaultPropertyValues={this.props.defaultPropertyValues}
                                  checkProperties={checkProps} >

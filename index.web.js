@@ -16,6 +16,7 @@ import {
   isFF,
   isSafari,
   isIE,
+  ieVersion,
   isFFPrivateBrowsing
 } from './utils/browser'
 
@@ -33,7 +34,20 @@ require('./css/ionicons.min.css')
 require('./css/styles.css')
 
 const BROWSER_RECOMMENDATION = 'Please use Chrome, Safari, Firefox or IE11+'
-testEnvironment().then(init, alertError)
+const ENV = require('./environment.json')
+
+if ((ENV.offerKillSwitchAfterApplication || ENV.wipeAfterApplication) && localStorage.userWipedDevice) {
+  try {
+    localStorage.removeItem('userWipedDevice')
+  } catch (err) {}
+
+  showAlert({
+    title: `All is well`,
+    message: `Your data has been successfully erased from the browser's local storage. Please wait to be contacted by a representative.`
+  })
+} else {
+  testEnvironment().then(init, alertError)
+}
 
 function ensureOneTab () {
   const isOnlyTab = require('onetab')
@@ -81,8 +95,18 @@ async function testEnvironment () {
 
   if (isSafari) return
 
-  if (isIE && !window.indexedDB) {
-    throw new Error('This application cannot be used in InPrivate Browsing mode, due to storage and security limitations')
+  if (isIE) {
+    if (ENV.is === false) {
+      throw new Error('This application is not supported in this browser. ' + BROWSER_RECOMMENDATION)
+    }
+
+    if (ENV.ie.min && ieVersion < ENV.ie.min) {
+      throw new Error('This application is not supported this version of this browser. ' + BROWSER_RECOMMENDATION)
+    }
+
+    if (!window.indexedDB) {
+      throw new Error('This application cannot be used in InPrivate Browsing mode, due to storage and security limitations')
+    }
   }
 
   if (!window.indexedDB) {
@@ -104,10 +128,15 @@ async function testEnvironment () {
 }
 
 function alertError (err) {
-  if (err.message) err = err.message
+  showAlert({
+    title: 'Oh no!',
+    message: err.message || err
+  })
+}
 
+function showAlert ({ title, message }) {
   const rootEl = document.createElement('div')
   rootEl.className = 'react-root'
   document.body.appendChild(rootEl)
-  Alert.alert('Oh no!', err, [])
+  Alert.alert(title, message, [])
 }

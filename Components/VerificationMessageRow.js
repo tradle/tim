@@ -101,7 +101,6 @@ class VerificationMessageRow extends Component {
       verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
 
     let headerStyle = [
-      chatStyles.verifiedHeader,
       styles.header,
       isMyMessage ? styles.headerRight : styles.headerLeft,
       {backgroundColor: bankStyle.VERIFIED_HEADER_COLOR, marginTop: 0, paddingVertical: 10}
@@ -303,7 +302,10 @@ var styles = StyleSheet.create({
   },
   header: {
     marginTop: 10,
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    paddingVertical: 5,
+    justifyContent: 'center'
   },
   headerRight: {
     borderTopRightRadius: 0,

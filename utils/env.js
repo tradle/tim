@@ -88,7 +88,10 @@ const merged = extend({
   splashContrastColor: 'tradle',
   brandBackground: 'tradle',
   delayBetweenExpensiveTasks: 100,
-  appName: 'Tradle'
+  appName: 'Tradle',
+  ie: {
+    min: 11
+  }
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]

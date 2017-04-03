@@ -198,6 +198,7 @@ var RowMixin = {
     var document = verification.document
 
     isAccordion = false
+
     let isThirdParty = !document[constants.TYPE]
     let type = document[constants.TYPE] || utils.getType(document)
     var docModel = utils.getModel(type).value;
@@ -238,6 +239,7 @@ var RowMixin = {
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
     // let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
     let arrow = <Icon color={this.props.bankStyle.VERIFIED_LINK_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
+
     let docName
     if (!isThirdParty)
       docName = <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
@@ -246,7 +248,7 @@ var RowMixin = {
                     {docName}
                   </View>
 
-    header = <View style={[addStyle, styles.verification, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+    header = <View style={[addStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
                {header}
                {arrow}
              </View>
@@ -544,13 +546,6 @@ var styles = StyleSheet.create({
     fontSize: 18,
     backgroundColor: 'transparent'
   },
-  // employeeImage: {
-  //   // backgroundColor: '#dddddd',
-  //   height: 40,
-  //   marginRight: 3,
-  //   marginLeft: 0,
-  //   width: 40,
-  // },
   cellRoundImage: {
     paddingVertical: 1,
     borderRadius: 20,
@@ -559,7 +554,6 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   cellImage: {
-    // backgroundColor: '#dddddd',
     marginLeft: 10,
     height: 40,
     width: 40,
@@ -568,44 +562,6 @@ var styles = StyleSheet.create({
     borderRadius:10,
     borderWidth: BORDER_WIDTH,
   },
-  verification: {
-    // marginHorizontal: -7,
-    // marginVertical: -10,
-    // paddingBottom: 7,
-    // borderRadius: 10,
-    // backgroundColor: '#EDF2CE'
-  },
-  verifiedHeader: {
-    flexDirection: 'row',
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    marginHorizontal: -8,
-    marginTop: -6,
-    justifyContent: 'center'
-  },
-  verificationHeaderText: {
-    fontSize: 18,
-    fontWeight: '500',
-    alignSelf: 'center',
-    color: '#f7f7f7',
-    paddingLeft: 3
-  },
-  verificationBody: {
-    paddingTop: 5,
-    paddingHorizontal: 7,
-    borderRadius: 10,
-    borderColor: '#7AAAC3',
-    borderWidth: StyleSheet.hairlineWidth,
-    marginVertical: 2,
-    backgroundColor: '#ffffff',
-    borderTopRightRadius: 0
-  },
-  row: {
-    // alignItems: 'center',
-    backgroundColor: '#f7f7f7',
-    flexDirection: 'row',
-  },
-
   orgImage: {
     width: 20,
     height: 20,
