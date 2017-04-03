@@ -75,8 +75,9 @@ class AvivaIntroView extends Component {
              <View style={{flexDirection: 'row', paddingVertical: 7}}>
                <Icon name='ios-camera-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
                <View style={{justifyContent: 'center'}}>
-                 <Text style={[styles.text, {width: 280}]}>Upload a scan of either your UK Passport or UK Driving Licence. Please have the scanned image ready to upload from your local filesystem.</Text>
-                </View>
+                 <Text style={[styles.text]}>Upload a scan of either your UK Passport or UK Driving Licence.</Text>
+                 <Text style={styles.importantText}>Please have the scanned image ready to upload from your local filesystem.</Text>
+               </View>
              </View>
              <View style={styles.separator} />
              <View style={styles.row}>
@@ -89,7 +90,7 @@ class AvivaIntroView extends Component {
              <View style={styles.row}>
                <Icon name='ios-pin-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={[styles.icon, {paddingRight: 15}]}/>
                <View style={{justifyContent: 'center'}}>
-                 <Text style={[styles.text, {paddingLeft: 3, width: 280}]}>Provide your name and address.</Text>
+                 <Text style={[styles.text, {paddingLeft: 3}]}>Provide your name and address.</Text>
                </View>
              </View>
              <View style={styles.separator} />
