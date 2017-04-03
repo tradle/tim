@@ -733,6 +733,8 @@ var NewResourceMixin = {
       //   )
       // }
 
+      if (canceled) return
+
       return Alert.alert(
         translate('documentNotScanning'),
         translate('retryScanning', documentType.title.toLowerCase())
