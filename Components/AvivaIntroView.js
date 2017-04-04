@@ -22,7 +22,6 @@ import CustomIcon from '../styles/customicons'
 import platformStyles from '../styles/platform'
 // import { makeResponsive } from 'react-native-orient'
 import ConversationsIcon from './ConversationsIcon'
-var avivaTC = require('../html/Aviva_TC.html')
 
 const CUSTOMER_WAITING = 'tradle.CustomerWaiting'
 const MESSAGE = 'tradle.Message'
@@ -40,11 +39,16 @@ import {
   Text,
   TouchableOpacity,
   Linking,
-  Dimensions
+  Dimensions,
+  Platform
 } from 'react-native'
 
 import React, { Component } from 'react'
 import { isChrome } from '../utils/browser'
+
+const avivaTC = Platform.OS === 'android'
+  ? { uri: 'file:///android_asset/Aviva_TC.html' }
+  : require('../html/Aviva_TC.html')
 
 class AvivaIntroView extends Component {
   static displayName = 'AvivaIntroView';
