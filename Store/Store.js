@@ -5807,7 +5807,7 @@ var Store = Reflux.createStore({
       } catch (err) {
         self.trigger({action: 'addItem', error: err.message, resource: value})
       }
-    if (allProviders)
+    if (allProviders  &&  settings)
       return
     if (settings) {
       if (settings.urls.indexOf(v) === -1)
