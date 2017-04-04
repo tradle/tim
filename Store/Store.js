@@ -38,6 +38,7 @@ const PERSONAL_INFO = 'tradle.PersonalInfo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const NAME = 'tradle.Name'
 const APPLICANT = 'tradle.OnfidoApplicant'
+const ONFIDO_APPLICANT = 'tradle.OnfidoApplicant'
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const FRIEND = 'Friend'
@@ -7101,7 +7102,7 @@ var Store = Reflux.createStore({
           let toRep = this.getRepresentative(utils.getId(org))
           toRep = this._getItem(toRep)
           let result
-          ;[NAME, PERSONAL_INFO, APPLICANT].some(modelName => {
+          ;[NAME, PERSONAL_INFO, APPLICANT, ONFIDO_APPLICANT].some(modelName => {
             return result = this.searchMessages({modelName, to: org})
           })
 
@@ -7646,10 +7647,15 @@ var Store = Reflux.createStore({
           }
         })
       })
+      let hasDeleted
       batch.forEach((r) => {
-        if (r.type === 'del')
+        if (r.type === 'del') {
+          hasDeleted = true
           delete list[r.key]
+        }
       })
+      if (hasDeleted)
+        this.trigger({action: 'addItem', resource: utils.getMe()})
       // this.trigger({action: 'messageList', list: [msg], resource: org, to: resource})
       this.trigger({action: 'messageList', list: [msg], to: org})
       chatMessages[orgId] = []
