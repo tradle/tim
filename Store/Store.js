@@ -6067,11 +6067,7 @@ var Store = Reflux.createStore({
   createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')
     // const globalSalt = crypto.randomBytes(32).toString('hex')
-    const genIdentity = Keychain
-      ? Keychain.generateNewSet({ networkName })
-          .then(keys => Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys))
-      : Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
-
+    const genIdentity = generateIdentity({ networkName })
     return Q.all([
       utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
       genIdentity
@@ -8452,6 +8448,26 @@ function fixOldSettings (settings) {
 
 function willShowProgressBar ({ length }) {
   return length >= MIN_SIZE_FOR_PROGRESS_BAR
+}
+
+async function generateIdentity ({ networkName }) {
+  if (!utils.isWeb()) {
+    if (Keychain) {
+      const keys = await Keychain.generateNewSet({ networkName })
+      return Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys)
+    }
+
+    return Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
+  }
+
+  const defaultKeySet = tradleUtils.defaultKeySet(networkName)
+  const keys = await Q.all(defaultKeySet.map(async function (spec) {
+    const key = await Q.ninvoke(tradleUtils, 'genKey', spec)
+    key.set('purpose', spec.purpose)
+    return key
+  }))
+
+  return Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys)
 }
 
 // function midpoint (a, b) {
