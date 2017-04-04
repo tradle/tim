@@ -229,11 +229,11 @@ var utils = {
     return clone(resource)
     // return JSON.parse(JSON.stringify(resource))
   },
-  compare(r1, r2) {
+  compare(r1, r2, isInlined) {
     if (!r1 || !r2)
       return (r1 || r2) ? false : true
 
-    if (!r1[TYPE]) return equal(r1, r2)
+    if (isInlined) return equal(r1, r2)
 
     let properties = this.getModel(r1[TYPE]).value.properties
     let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
@@ -258,7 +258,7 @@ var utils = {
             return false
         }
         else if (properties[p].inlined  ||  (properties[p].ref  &&  this.getModel(properties[p].ref).value.inlined))
-          return this.compare(r1[p], r2[p])
+          return this.compare(r1[p], r2[p], properties[p].inlined)
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
