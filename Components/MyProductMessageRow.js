@@ -11,6 +11,7 @@ var equal = require('deep-equal')
 var chatStyles = require('../styles/chatStyles')
 
 var reactMixin = require('react-mixin');
+import { makeResponsive } from 'react-native-orient'
 
 import {
   Image,
@@ -72,7 +73,15 @@ class MyProductMessageRow extends Component {
     renderedRow.push(<Text  key={this.getNextKey()} style={[chatStyles.formType, {color: '#289427'}]}>{title}</Text>);
     let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
     // let width = Math.floor(utils.dimensions().width * 0.7)
-    let width = utils.getMessageWidth() - 50
+    let width = utils.getMessageWidth(MyProductMessageRow)
+    let isReadOnlyChat
+    if (this.props.context) {
+      let me = utils.getMe()
+      if (me.isEmployee)
+        isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
+      if (isReadOnlyChat)
+        width -= 50 // provider icon and padding
+    }
     let vStyle = isMyMessage ? styles.viewStyleR : styles.viewStyleL
     // let photo = isMyMessage ? null : this.getOwnerPhoto()
     let messageBody =
@@ -220,6 +229,7 @@ var styles = StyleSheet.create({
   }
 });
 reactMixin(MyProductMessageRow.prototype, RowMixin);
+MyProductMessageRow = makeResponsive(MyProductMessageRow)
 
 module.exports = MyProductMessageRow;
 
