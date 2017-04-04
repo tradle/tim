@@ -28,6 +28,10 @@ var StyleSheet = require('../StyleSheet')
 import ImageInput from './ImageInput'
 var chatStyles = require('../styles/chatStyles')
 
+var guidance = {
+  'tradle.PhotoID': 'Please click on upload and locate that picture you were supposed to take before doing this bit...we did warn you this would be simpler on a phone'
+}
+
 import CustomIcon from '../styles/customicons'
 const ENUM = 'tradle.Enum'
 var LINK_COLOR
@@ -785,6 +789,14 @@ class NewResource extends Component {
     if (!jsons.length)
       jsons = <View/>
 
+    let bankStyle = this.props.bankStyle
+    let guidanceMsg = guidance[meta.id]
+    if (guidanceMsg) {
+      let st ={padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG, alignSelf: 'center'}
+      guidanceMsg = <View style={st}>
+                      <Text style={{fontSize: 18}}>{guidanceMsg}</Text>
+                    </View>
+    }
     var content =
       <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center'}}
                   ref='scrollView' {...this.scrollviewProps}>
@@ -796,6 +808,7 @@ class NewResource extends Component {
               </View>
           }
           <View style={this.state.isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
+            {guidanceMsg}
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
             {button}
             <View style={{marginTop: isRegistration ? 0 : -10, paddingBottom: 20}}>
@@ -822,8 +835,8 @@ class NewResource extends Component {
     //                 </View>
     //               </TouchableOpacity>
     //             </View>
-    // StatusBar.setHidden(true);
-    let bankStyle = this.props.bankStyle
+    // StatusBar.setHidden(true)
+
     if (!isRegistration) {
       if (this.state.err) {
         Alert.alert(this.state.err)
