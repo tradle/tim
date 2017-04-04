@@ -11,5 +11,5 @@ fi
 #source ~/.bash_profile
 echo 'building new docker image...'
 cp ~/.npmrc .npmrc
-docker build -t "tradle/web:$1" .
+docker build -t "tradle/web-app:$1" .
 rm -f .npmrc
