@@ -37,7 +37,7 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
         msgs.forEach(msg => {
           const { recipientPubKey } = msg
           bufferizePubKey(recipientPubKey)
-          if (msg.object[TYPE] = TYPES.MESSAGE) {
+          if (msg.object[TYPE] === TYPES.MESSAGE) {
             bufferizePubKey(msg.object.recipientPubKey)
           }
         })
