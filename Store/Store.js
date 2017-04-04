@@ -5857,8 +5857,9 @@ var Store = Reflux.createStore({
       } catch (err) {
         self.trigger({action: 'addItem', error: err.message, resource: value})
       }
-    if (allProviders)
+    if (allProviders  &&  settings)
       return
+    console.log('addSettings: ' + settings)
     if (settings) {
       if (settings.urls.indexOf(v) === -1)
         self._mergeItem(key, { urls: [...settings.urls, v] })
