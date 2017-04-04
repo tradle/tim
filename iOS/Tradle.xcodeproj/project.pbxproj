@@ -274,13 +274,6 @@
 			remoteGlobalIDString = D8D9DB831C6D03DB009FBC0E;
 			remoteInfo = SMXCrashlytics;
 		};
-		73D9EEC51DD425620067CDC6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RNOS;
-		};
 		73FE359C1BFA123200EFB313 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 73FE358E1BFA123100EFB313 /* UdpSockets.xcodeproj */;
@@ -428,7 +421,6 @@
 		ABE7159BBFD14FFDB6BBF084 /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTVideo.a; sourceTree = "<group>"; };
 		AC1BDF1F181A47D6B9CD87BE /* RNBlinkID.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBlinkID.xcodeproj; path = "../node_modules/react-native-blinkid/ios/RNBlinkID.xcodeproj"; sourceTree = "<group>"; };
 		AF8DF7DF1C49484ABF808B20 /* RCTCamera.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RCTCamera.xcodeproj"; sourceTree = "<group>"; };
-		C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNOS.xcodeproj; path = "../node_modules/react-native-os/ios/RNOS.xcodeproj"; sourceTree = "<group>"; };
 		CB49356B78554325A3737E7D /* libTcpSockets.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libTcpSockets.a; sourceTree = "<group>"; };
 		CD50777E5D0B4885B3B28B19 /* SMXCrashlytics.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = SMXCrashlytics.xcodeproj; path = "../node_modules/react-native-fabric/ios/SMXCrashlytics.xcodeproj"; sourceTree = "<group>"; };
 		D2060B090E534D60987D7048 /* libRCTAsyncRocksDBStorage.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTAsyncRocksDBStorage.a; sourceTree = "<group>"; };
@@ -785,14 +777,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		73D9EEAA1DD425620067CDC6 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				73D9EEC61DD425620067CDC6 /* libRNOS.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		73FE358F1BFA123100EFB313 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -856,7 +840,6 @@
 				AF8DF7DF1C49484ABF808B20 /* RCTCamera.xcodeproj */,
 				083F8D1194934922894AAA06 /* RNVectorIcons.xcodeproj */,
 				36B5640D4902498D93210121 /* RCTOrientation.xcodeproj */,
-				C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */,
 				DB2A667C83D94D838507B5CF /* RCTAsyncRocksDBStorage.xcodeproj */,
 				AC1BDF1F181A47D6B9CD87BE /* RNBlinkID.xcodeproj */,
 				EDBE902ECF4E436096A40578 /* RNPasscodeStatus.xcodeproj */,
@@ -1150,10 +1133,6 @@
 					ProjectRef = FA9D303938764971849716EE /* RNLocalAuth.xcodeproj */;
 				},
 				{
-					ProductGroup = 73D9EEAA1DD425620067CDC6 /* Products */;
-					ProjectRef = C1932A8E8BA74132B608AF40 /* RNOS.xcodeproj */;
-				},
-				{
 					ProductGroup = 73037AF01E391B9000A5910C /* Products */;
 					ProjectRef = EDBE902ECF4E436096A40578 /* RNPasscodeStatus.xcodeproj */;
 				},
@@ -1350,13 +1329,6 @@
 			fileType = archive.ar;
 			path = libSMXCrashlytics.a;
 			remoteRef = 73D77E231E3F90D900DB1F4A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		73D9EEC61DD425620067CDC6 /* libRNOS.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNOS.a;
-			remoteRef = 73D9EEC51DD425620067CDC6 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		73FE359D1BFA123200EFB313 /* libUdpSockets.a */ = {
