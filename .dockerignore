@@ -1,7 +1,7 @@
 .git
 .gitignore
 node_modules/
-web/dist
+#web/dist
 iOS
 android
 TiMTests
