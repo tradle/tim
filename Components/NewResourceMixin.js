@@ -726,7 +726,7 @@ var NewResourceMixin = {
 
       return Alert.alert(
         translate('documentNotScanning'),
-        translate('retryScanning', documentType.title.toLowerCase())
+        translate('retryScanning', documentType.title)
       )
     }
 
