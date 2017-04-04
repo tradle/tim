@@ -117,7 +117,7 @@ class MessageList extends Component {
       return false
 
     let isReadOnlyChat = utils.isReadOnlyChat(context)
-    if (this.props.allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
+    if (this.props.allContexts || isReadOnlyChat) //  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
       return false
 
     return true
@@ -560,11 +560,11 @@ class MessageList extends Component {
                            (isProductApplication && resource.product !== REMEDIATION)
 
       if (this.hasChatContext())
-        maxHeight -= 35
+        maxHeight -= 45
       else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  !this.state.onlineStatus))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
-      if (notRemediation  &&  !hideTextInput) //  &&  this.props.resource.products) //  &&  this.props.resource.products.length > 1))
-        maxHeight -= 45
+      // if (notRemediation  &&  !hideTextInput) //  &&  this.props.resource.products) //  &&  this.props.resource.products.length > 1))
+      //   maxHeight -= 45
       // else if (ENV.allowForgetMe)
       //   maxHeight -= 45
       if (hideTextInput)
