@@ -792,7 +792,7 @@ class NewResource extends Component {
     let bankStyle = this.props.bankStyle
     let guidanceMsg = guidance[meta.id]
     if (guidanceMsg) {
-      let st ={padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG, alignSelf: 'center'}
+      let st ={padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}
       guidanceMsg = <View style={st}>
                       <Text style={{fontSize: 18}}>{guidanceMsg}</Text>
                     </View>
