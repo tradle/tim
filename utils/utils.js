@@ -266,7 +266,7 @@ var utils = {
             return false
         }
         else if (properties[p].inlined  ||  (properties[p].ref  &&  this.getModel(properties[p].ref).value.inlined))
-          return this.compare(r1[p], r2[p], properties[p].inlined)
+          return this.compare(r1[p], r2[p], true)
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
