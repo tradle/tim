@@ -776,7 +776,10 @@ var utils = {
     let me = this.getMe()
     if (resource._hasSupportLine)
       return true
-    if (me.isEmployee && me.organization._hasSupportLine) {
+    if (!me.isEmployee)
+      return
+
+    if (me.organization._hasSupportLine) {
       if (resource[TYPE] === TYPES.PROFILE)
         return true
       if (resource[TYPE] === PRODUCT_APPLICATION) {
@@ -784,7 +787,8 @@ var utils = {
           return true
       }
     }
-    return false
+    else if (resource[TYPE] === TYPES.ORGANIZATION  && utils.getId(me.organization) === utils.getId(resource))
+      return true
   },
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? utils.clone(resource) : resource
