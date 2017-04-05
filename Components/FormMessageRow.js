@@ -168,7 +168,7 @@ class FormMessageRow extends Component {
 
     let isMyMessage = this.isMyMessage()
     let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
-    let width = Math.floor(utils.getMessageWidth(FormMessageRow) - (isSharedContext  ? 45 : 0))
+    let width = Math.floor(utils.getMessageWidth(FormMessageRow)) // - (isSharedContext  ? 45 : 0))
     let viewStyle = {
       width: Math.min(width, 600),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
