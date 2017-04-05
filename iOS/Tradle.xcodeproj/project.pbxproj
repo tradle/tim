@@ -1006,6 +1006,7 @@
 					};
 					73967E4D1E639DDC00AD5854 = {
 						DevelopmentTeam = 94V7783F74;
+						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 1;
@@ -1736,8 +1737,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.aviva;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE = "caa6fe83-40ff-43eb-aafe-b85910e1b247";
+				PROVISIONING_PROFILE_SPECIFIER = "Aviva Dev Profile";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1791,8 +1792,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.aviva;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE = "caa6fe83-40ff-43eb-aafe-b85910e1b247";
+				PROVISIONING_PROFILE_SPECIFIER = "Aviva Dev Profile";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
