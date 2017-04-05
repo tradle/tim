@@ -34,6 +34,9 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
           body: JSON.stringify(req.object)
         })
 
+        // nothing there for us
+        if (res.status === 404) return
+
         msgs = yield res.json()
         msgs.forEach(msg => {
           const { recipientPubKey } = msg
