@@ -54,9 +54,16 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
     }
 
     debug(`recovering ${msgs.length} lost messages`)
-    yield Promise.all(msgs.map(msg => {
-      return node.receive(msg, { permalink: counterparty })
-    }))
+    for (let msg of msgs) {
+      try {
+        yield node.receive(msg, { permalink: counterparty })
+        debug(`recovered msg from ${counterparty}`)
+      } catch (err) {
+        debug(`failed to recover msg from ${counterparty}`, err)
+      } finally {
+        yield new Promise(resolve => setTimeout(resolve, 20))
+      }
+    }
   })
 
   monitor.once('tip', function (tip) {
