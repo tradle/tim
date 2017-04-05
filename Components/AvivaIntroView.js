@@ -49,6 +49,10 @@ const avivaTC = Platform.OS === 'android'
   ? { uri: 'file:///android_asset/Aviva_TC.html' }
   : require('../html/Aviva_TC.html')
 
+const avivaContact = Platform.OS === 'android'
+  ? { uri: 'file:///android_asset/Aviva_Contact.html' }
+  : require('../html/Aviva_Contact.html')
+
 class AvivaIntroView extends Component {
   static displayName = 'AvivaIntroView';
   static orientation = 'portrait';
@@ -98,10 +102,10 @@ class AvivaIntroView extends Component {
              <TouchableOpacity style={{paddingRight:10}} onPress={() => this.goto(LEARN_MORE_URL)}>
                <Text style={[styles.text, {paddingLeft: 5, paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Learn more  &bull;</Text>
              </TouchableOpacity>
-             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showTerms(avivaTC)}>
+             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showHtml(avivaTC, 'termsAndConditions')}>
                <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Terms of use  &bull;</Text>
              </TouchableOpacity>
-             <TouchableOpacity onPress={() => this.goto(CONTACT_US_URL)}>
+             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showHtml(avivaContact, 'contactUs')}>
                <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR, paddingRight: 20}]}>Contact us</Text>
              </TouchableOpacity>
            </View>
@@ -167,15 +171,16 @@ class AvivaIntroView extends Component {
       }
     })
   }
-  showTerms(url) {
+  showHtml(url, title) {
     // this.goto('../html/Aviva_TC.html')
     this.props.navigator.push({
       id: 7,
       component: ArticleView,
       backButtonTitle: 'Back',
-      title: translate('termsAndConditions'),
+      title: translate(title),
       passProps: {
-        url
+        url,
+        bankStyle: this.props.bankStyle
       }
     })
     // this.props.navigator.push({
