@@ -7205,7 +7205,7 @@ var Store = Reflux.createStore({
   },
   changeName(val, fr) {
     let fromId = utils.getId(fr)
-    if (val[TYPE] === NAME) {
+    if (val[TYPE] === NAME  ||  val[TYPE] === APPLICANT) {
       fr.firstName = val.givenName
       fr.lastName = val.surname
       fr.formatted = utils.templateIt(this.getModel(PROFILE).properties.formatted, fr)
@@ -7213,26 +7213,35 @@ var Store = Reflux.createStore({
       this.dbPut(fromId, fr)
       return true
     }
-    if (fr.firstName === FRIEND) {
-      if (val[TYPE] !== PHOTO_ID  ||  !val.scanJson)
-        return
-      let personal = val.scanJson.personal
-      if (!personal)
-        return
-      let { firstName, lastName } = personal
-      if (firstName) {
-        firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-        fr.firstName = firstName
-        if (lastName) {
-          lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-          fr.lastName = lastName
-        }
-        this._setItem(fromId, fr)
-        this.dbPut(fromId, fr)
-        return true
-      }
+    if (fr.firstName !== FRIEND)
+      return
+    if (val[TYPE] !== PHOTO_ID  ||  !val.scanJson)
+      return
+    let firstName, lastName
+    let personal = val.scanJson.personal
+    if (personal) {
+      firstName = personal.firstName
+      lastName = personal.lastName
     }
-    return
+    else {
+      let properties = val.scanJson.properties
+      firstName = properties.first_name
+      lastName = properties.last_name
+    }
+    if (!firstName)
+      return
+    firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+    fr.firstName = firstName
+    if (lastName)
+      fr.lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+    else
+      lastName = ''
+    if (fr.formatted)
+      fr.formatted = firstName + ' ' + lastName
+
+    this._setItem(fromId, fr)
+    this.dbPut(fromId, fr)
+    return true
   },
   // if the last message showing was PRODUCT_LIST. No need to re-render
   fillFromAndTo(obj, val) {
