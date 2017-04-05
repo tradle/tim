@@ -119,6 +119,8 @@ import Navs from './utils/navs'
 var ReactPerf = __DEV__ && require('react-addons-perf')
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
 
+global.SUBMIT_DEBUG_LOG = utils.submitLog
+
 const landingPageMapping = {
   AvivaIntroView: {
     component: AvivaIntroView,
