@@ -32,6 +32,7 @@ const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
+const INTRODUCTION = 'tradle.Introduction'
 
 var CURRENCY_SYMBOL
 var LINK_COLOR
@@ -542,6 +543,22 @@ class MessageRow extends Component {
       return null
       // return {onPressCall: this.addContact.bind(this)}
     }
+    if (model.id === INTRODUCTION) {
+      let profile
+      if (resource.profile)
+        profile = <Text style={[chatStyles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.profile.firstName + ' ' + (resource.profile.lastName ||  '')}</Text>
+
+      let msg = <View key={this.getNextKey()}>
+                  <View style={chatStyles.rowContainer}>
+                    <Text style={[chatStyles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.message}</Text>
+                    {profile}
+                    <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
+                  </View>
+                </View>
+      renderedRow.push(msg);
+      return null
+    }
+
     if (model.id === SHARE_CONTEXT) {
       let w = Math.floor(0.8 * utils.dimensions().width) - 40 // message width - icon size and all the paddings
       let msg = <View key={this.getNextKey()}>
