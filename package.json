@@ -89,7 +89,7 @@
     "nkey": "^2.0.2",
     "nkey-bitcoin": "^1.2.0",
     "nkey-curve25519": "^1.0.1",
-    "nkey-ecdsa": "^1.1.0",
+    "nkey-ecdsa": "github:tradle/nkey-ecdsa#webcrypto",
     "node-haste": "github:mvayngrib/node-haste#766d7e6",
     "node-libs-browser": "^1.0.0",
     "object.omit": "2.0.1",
