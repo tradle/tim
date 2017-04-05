@@ -577,7 +577,7 @@
   "tradle.PhotoID": {
     "documentType": {
       "id": "tradle.IDCardType_e098292ca93efb1611bd94d8ef5d2516489c0e2c",
-      "title": "Valid Driver Licence"
+      "title": "Valid UK Driving Licence"
     },
     "country": {
       "id": "tradle.Country_123",
