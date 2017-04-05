@@ -5969,8 +5969,20 @@
     },
     "nkey-ecdsa": {
       "version": "1.1.0",
-      "from": "nkey-ecdsa@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz"
+      "from": "git://github.com/tradle/nkey-ecdsa.git#5c39e56e776b419f4b8714b5e4b8a0b0e59db97a",
+      "resolved": "git://github.com/tradle/nkey-ecdsa.git#5c39e56e776b419f4b8714b5e4b8a0b0e59db97a",
+      "dependencies": {
+        "asn1.js": {
+          "version": "4.9.1",
+          "from": "asn1.js@>=4.9.1 <5.0.0",
+          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-4.9.1.tgz"
+        },
+        "bluebird": {
+          "version": "3.5.0",
+          "from": "bluebird@>=3.5.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
+        }
+      }
     },
     "nkey-secp256k1": {
       "version": "1.1.1",
