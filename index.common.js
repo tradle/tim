@@ -766,7 +766,7 @@ var NavigationBarRouteMapper = {
       photoObj = route.passProps.to.photos  &&  route.passProps.to.photos[0]
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
-    let logoNeedsText = !route.passProps.resource ||
+    let logoNeedsText = (!route.passProps.resource  &&  route.id !== 7) ||
                         // route.passProps.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION ||
                         !route.passProps.bankStyle ||
                         route.passProps.bankStyle.LOGO_NEEDS_TEXT
