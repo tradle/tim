@@ -6,7 +6,7 @@ var dateformat = require('dateformat')
 var ResourceList = require('./ResourceList')
 var EnumList = require('./EnumList')
 var FloatLabel = require('react-native-floating-labels')
-var Icon = require('react-native-vector-icons/Ionicons');
+var Icon = require('react-native-vector-icons/Ionicons')
 var utils = require('../utils/utils');
 var CameraView = require('./CameraView')
 var translate = utils.translate
@@ -1353,7 +1353,7 @@ var NewResourceMixin = {
     if (isVideo)
       icon = <Icon name='ios-play-outline' size={35}  color={LINK_COLOR} />
     else if (isPhoto)
-      icon = <Icon name='ios-camera-outline' size={35}  color={LINK_COLOR} style={styles.photoIcon}/>
+      icon = <Icon name={prop.icon || 'ios-camera-outline'} size={35}  color={LINK_COLOR} style={styles.photoIcon}/>
     else if (!noChooser)
       icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
 
