@@ -38,6 +38,7 @@ const PERSONAL_INFO = 'tradle.PersonalInfo'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const NAME = 'tradle.Name'
 const APPLICANT = 'tradle.OnfidoApplicant'
+const ONFIDO_APPLICANT = 'tradle.OnfidoApplicant'
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const FRIEND = 'Friend'
@@ -6117,11 +6118,7 @@ var Store = Reflux.createStore({
   createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')
     // const globalSalt = crypto.randomBytes(32).toString('hex')
-    const genIdentity = Keychain
-      ? Keychain.generateNewSet({ networkName })
-          .then(keys => Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys))
-      : Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
-
+    const genIdentity = generateIdentity({ networkName })
     return Q.all([
       utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
       genIdentity
@@ -7162,7 +7159,7 @@ var Store = Reflux.createStore({
           let toRep = this.getRepresentative(utils.getId(org))
           toRep = this._getItem(toRep)
           let result
-          ;[NAME, PERSONAL_INFO, APPLICANT].some(modelName => {
+          ;[NAME, PERSONAL_INFO, APPLICANT, ONFIDO_APPLICANT].some(modelName => {
             return result = this.searchMessages({modelName, to: org})
           })
 
@@ -7715,10 +7712,15 @@ var Store = Reflux.createStore({
           }
         })
       })
+      let hasDeleted
       batch.forEach((r) => {
-        if (r.type === 'del')
+        if (r.type === 'del') {
+          hasDeleted = true
           delete list[r.key]
+        }
       })
+      if (hasDeleted)
+        this.trigger({action: 'addItem', resource: utils.getMe()})
       // this.trigger({action: 'messageList', list: [msg], resource: org, to: resource})
       this.trigger({action: 'messageList', list: [msg], to: org})
       chatMessages[orgId] = []
@@ -8515,6 +8517,26 @@ function fixOldSettings (settings) {
 
 function willShowProgressBar ({ length }) {
   return length >= MIN_SIZE_FOR_PROGRESS_BAR
+}
+
+async function generateIdentity ({ networkName }) {
+  if (!utils.isWeb()) {
+    if (Keychain) {
+      const keys = await Keychain.generateNewSet({ networkName })
+      return Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys)
+    }
+
+    return Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
+  }
+
+  const defaultKeySet = tradleUtils.defaultKeySet(networkName)
+  const keys = await Q.all(defaultKeySet.map(async function (spec) {
+    const key = await Q.ninvoke(tradleUtils, 'genKey', spec)
+    key.set('purpose', spec.purpose)
+    return key
+  }))
+
+  return Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys)
 }
 
 // function midpoint (a, b) {

@@ -29,7 +29,7 @@ import ImageInput from './ImageInput'
 var chatStyles = require('../styles/chatStyles')
 
 var guidance = {
-  'tradle.PhotoID': 'Please click on upload and locate that picture you were supposed to take before doing this bit...we did warn you this would be simpler on a phone'
+  'tradle.PhotoID': 'Please click on Upload and locate that image of your scanned document...we did warn you this would be simpler on a phone :)'
 }
 
 import CustomIcon from '../styles/customicons'
@@ -792,7 +792,7 @@ class NewResource extends Component {
     let bankStyle = this.props.bankStyle
     let guidanceMsg = guidance[meta.id]
     if (guidanceMsg) {
-      let st ={padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG, alignSelf: 'center'}
+      let st ={padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}
       guidanceMsg = <View style={st}>
                       <Text style={{fontSize: 18}}>{guidanceMsg}</Text>
                     </View>
