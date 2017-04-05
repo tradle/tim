@@ -12,11 +12,12 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
   Restore.batchifyMonitor({ monitor, debounce: 100 })
   // monitorMissing({ node: meDriver, debounce: 1000 }).on('batch', function (seq) {
 
-  monitor.on('batch', co(function* (seqs) {
+  const reqSeqs = co(function* ({ seqs, tip }) {
     const req = yield Restore.conversation.request({
       node,
       seqs,
-      from: counterparty
+      tip,
+      counterparty
     })
 
     let res
@@ -45,17 +46,24 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
         break
       } catch (err) {
         debug(`failed to restore messages from ${counterparty} at ${url}`, err)
-        return
       }
 
+      debug('backing off before trying again')
       yield new Promise(resolve => setTimeout(resolve, backoff))
       backoff = Math.min(backoff * 2, MAX_BACKOFF)
     }
 
+    debug(`recovering ${msgs.length} lost messages`)
     yield Promise.all(msgs.map(msg => {
       return node.receive(msg, { permalink: counterparty })
     }))
-  }))
+  })
+
+  monitor.once('tip', function (tip) {
+    reqSeqs({ tip, seqs: [] })
+  })
+
+  monitor.on('batch', reqSeqs)
 
   return monitor
 }
