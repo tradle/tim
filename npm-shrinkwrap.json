@@ -80,8 +80,8 @@
     },
     "@tradle/receive-in-order": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/receive-in-order.git#c7e45ecec84835a59cf4717a2d3ebdf27393d7f1",
-      "resolved": "git://github.com/tradle/receive-in-order.git#c7e45ecec84835a59cf4717a2d3ebdf27393d7f1",
+      "from": "git://github.com/tradle/receive-in-order.git#f59f189954e37155c64e9221810c65e67ae4e53b",
+      "resolved": "git://github.com/tradle/receive-in-order.git#f59f189954e37155c64e9221810c65e67ae4e53b",
       "dependencies": {
         "bluebird": {
           "version": "3.5.0",

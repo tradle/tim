@@ -36,6 +36,11 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url, rec
         if (res.status >= 400) return
 
         msgs = yield res.json()
+        if (!msgs.length) {
+          debug('no messages missing')
+          return
+        }
+
         msgs.forEach(msg => {
           const { recipientPubKey } = msg
           bufferizePubKey(recipientPubKey)

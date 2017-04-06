@@ -73,6 +73,7 @@ var mutexify = require('mutexify')
 const download = require('downloadjs')
 const collect = require('stream-collector')
 const tradle = require('@tradle/engine')
+const enforceOrder = require('@tradle/receive-in-order')
 const tradleUtils = tradle.utils
 const protocol = tradle.protocol
 const constants = require('@tradle/constants') // tradle.constants
@@ -647,7 +648,7 @@ var Store = Reflux.createStore({
     })
 
     var blockchain = new Blockchain(networkName)
-    var wsClients = driverInfo.wsClients
+    const { wsClients, restoreMonitors } = driverInfo
     // var whitelist = driverInfo.whitelist
     // var tlsKey = driverInfo.tlsKey
 
@@ -785,6 +786,20 @@ var Store = Reflux.createStore({
       })
 
       // messenger.setTimeout(60000)
+    }
+
+    const enforcer = enforceOrder({ node: meDriver })
+    enforcer.on('missing', function ({ range, from }) {
+      const monitor = restoreMonitors[from]
+      if (!monitor) return
+
+      monitor.request({
+        seqs: utils.rangeToArray(range)
+      })
+    })
+
+    meDriver.receive = function (msg, from) {
+      return enforcer.receive(msg, from)
     }
 
     // meDriver = timeFunctions(meDriver)
@@ -1162,9 +1177,11 @@ var Store = Reflux.createStore({
       transport = this.getTransport(wsClient)
     }
 
-    const receive = this.idlifyFunction({
-      fn: opts => this.receive({ ...opts, transport })
-    })
+    // const receive = this.idlifyFunction({
+    //   fn: opts => this.receive({ ...opts, transport })
+    // })
+
+    const receive = opts => this.receive({ ...opts, transport })
 
     wsClients.add({
       client: transport,
@@ -1280,13 +1297,13 @@ var Store = Reflux.createStore({
         })
       }
 
-      const unlock = await self.lockReceive(from)
-      try {
+      // const unlock = await self.lockReceive(from)
+      // try {
         await receive({ msg, from })
         debug('received msg from', from)
-      } finally {
-        unlock()
-      }
+      // } finally {
+      //   unlock()
+      // }
     })
 
     transport.setTimeout(40000)
@@ -1404,9 +1421,11 @@ var Store = Reflux.createStore({
 
       switch (payload[TYPE]) {
       case INTRODUCTION:
-        return this.receiveIntroduction({ transport, msg, org })
+        await this.receiveIntroduction({ transport, msg, org })
+        break
       case SELF_INTRODUCTION:
-        return this.receiveSelfIntroduction({ transport, msg, org })
+        await this.receiveSelfIntroduction({ transport, msg, org })
+        break
       default:
         break
       }
@@ -1473,7 +1492,7 @@ var Store = Reflux.createStore({
         try {
           await this.requestIdentity({
             url: wsClients.getFullUrl({ client: transport }),
-            permalink: identifier
+            identifier: err.value
           })
 
           await this.receive({ ...opts, isRetry: true })
@@ -1490,16 +1509,17 @@ var Store = Reflux.createStore({
     }
   },
 
-  async requestIdentity({ url, permalink }) {
-    const response = await utils.fetchWithTimeout(`${url}/identity/${permalink}`, {}, 5000)
+  async requestIdentity({ url, identifier }) {
+    const response = await utils.fetchWithTimeout(`${url}/identity/${identifier}`, {}, 5000)
     if (response.status > 300) {
-      throw new Error('statuc code: ' + response.status)
+      throw new Error('status code: ' + response.status)
     }
 
-    const { object } = await response.json()
-    await this.addContactIdentity({
-      identity: object
-    })
+    const result = await response.json()
+    const identity = result.object
+    const permalink = utils.getPermalink(identity)
+    await this.addContactIdentity({ identity, permalink })
+    await this.addContact({ identity, profile: {} }, permalink)
   },
 
   setProviderOnlineStatus(permalink, online) {
@@ -1922,6 +1942,8 @@ var Store = Reflux.createStore({
   },
 
   addContact(data, hash, noMessage) {
+    data = utils.clone(data)
+
     var ikey = IDENTITY + '_' + hash
     var pkey = PROFILE + '_' + hash
 
