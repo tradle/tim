@@ -35,9 +35,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "4.7.1",
+      "version": "4.8.0",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.7.1.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.8.0.tgz",
       "dependencies": {
         "async": {
           "version": "2.3.0",
@@ -104,8 +104,8 @@
     },
     "@tradle/restore": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/restore.git#0cee91ae26d61b2fbf130566c8848f88f1d50591",
-      "resolved": "git://github.com/tradle/restore.git#0cee91ae26d61b2fbf130566c8848f88f1d50591",
+      "from": "git://github.com/tradle/restore.git#0032a65d1af5e02a2057b26c8c7ac589ba89c2b7",
+      "resolved": "git://github.com/tradle/restore.git#0032a65d1af5e02a2057b26c8c7ac589ba89c2b7",
       "dependencies": {
         "bluebird": {
           "version": "3.5.0",
@@ -2324,17 +2324,15 @@
       "from": "feed-indexer@1.3.0",
       "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.3.0.tgz",
       "dependencies": {
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
         "readable-stream": {
           "version": "2.2.6",
           "from": "readable-stream@>=2.1.4 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz",
-          "dependencies": {
-            "isarray": {
-              "version": "1.0.0",
-              "from": "isarray@>=1.0.0 <1.1.0",
-              "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-            }
-          }
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz"
         }
       }
     },
