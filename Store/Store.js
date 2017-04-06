@@ -88,19 +88,25 @@ var level = function (loc, opts) {
 
 const collect = require('stream-collector')
 const tradle = require('@tradle/engine')
+// const enforceOrder = require('@tradle/receive-in-order')
+const Multiqueue = require('@tradle/multiqueue')
 const tradleUtils = tradle.utils
 const protocol = tradle.protocol
-const constants = require('@tradle/constants') // tradle.constants
+const {
+  NONCE,
+  TYPE,
+  SIG,
+  SEQ,
+  ROOT_HASH,
+  CUR_HASH,
+  PREV_HASH
+} = tradle.constants
+
 const Cache = require('lru-cache')
-const NONCE = constants.NONCE
-const TYPE = constants.TYPE
-const SIG = constants.SIG
-const ROOT_HASH = constants.ROOT_HASH
-const CUR_HASH  = constants.CUR_HASH
-const PREV_HASH  = constants.PREV_HASH
 const NEXT_HASH = '_n'
 const LAST_MESSAGE_TIME = 'lastMessageTime'
 
+const constants = require('@tradle/constants')
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const IDENTITY = constants.TYPES.IDENTITY
 const IDENTITY_PUBLISHING_REQUEST = constants.TYPES.IDENTITY_PUBLISHING_REQUEST
@@ -251,7 +257,9 @@ var driverInfo = (function () {
     getPath({ client }) {
       return utils.keyByValue(byPath, client)
     },
-    getBaseUrl({ client }) {
+    getBaseUrl({ client, identifier }) {
+      if (!client) client = wsClients.byIdentifier[identifier]
+
       return utils.keyByValue(byUrl, client)
     },
     getFullUrl({ client }) {
@@ -275,7 +283,11 @@ var driverInfo = (function () {
     })
   }
 
-  return { wsClients, restoreMonitors }
+  return {
+    wsClients,
+    restoreMonitors,
+    identifierProp: TLS_ENABLED ? 'pubKey' : 'permalink'
+  }
   // whitelist: [],
 })()
 
@@ -323,7 +335,7 @@ var Store = Reflux.createStore({
 
     this.announcePresence = debounce(this.announcePresence.bind(this), 100)
     this._loadedResourcesDefer = Q.defer()
-    this.lockReceive = utils.locker({ timeout: 600000 })
+    // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
     this._politeQueue = createPoliteQueue({
       wait: async function () {
@@ -367,7 +379,7 @@ var Store = Reflux.createStore({
       })
     }
 
-    return this.getReady()
+    await this.getReady()
   },
   onAutoRegister(params) {
     return this.autoRegister()
@@ -654,7 +666,8 @@ var Store = Reflux.createStore({
     })
 
     var blockchain = new Blockchain(networkName)
-    var wsClients = driverInfo.wsClients
+    const { wsClients, restoreMonitors, identifierProp } = driverInfo
+
     // var whitelist = driverInfo.whitelist
     // var tlsKey = driverInfo.tlsKey
 
@@ -786,6 +799,62 @@ var Store = Reflux.createStore({
       })
 
       // messenger.setTimeout(60000)
+    }
+
+    // receive flow:
+    // 1. transport
+    // 2. multiqueue (persists messages until processed, enforces order of processing)
+    // 3. meDriver.receive
+
+    const multiqueue = Multiqueue.create({
+      db: level('receive-queue.db', { valueEncoding: 'json' }),
+      autoincrement: false
+    })
+
+    Multiqueue.monitorMissing({ multiqueue, debounce: 1000 })
+      .on('batch', function ({ lane, missing }) {
+        const monitor = restoreMonitors[lane]
+        if (!monitor) return
+
+        monitor.request({
+          seqs: missing
+        })
+      })
+
+    const processor = Multiqueue.process({
+      multiqueue,
+      worker: async function ({ value, lane }) {
+        // load non plain-js props (e.g. Buffers)
+        value = utils.parseMessageFromDB(value)
+
+        try {
+          await self.receive({
+            msg: value,
+            from: lane
+          })
+        } catch (err) {
+          debug('failed to process message', err)
+        }
+      }
+    })
+
+    processor.start()
+
+    this.queueReceive = function queueReceive ({ msg, from }) {
+      if (Buffer.isBuffer(msg)) {
+        msg = tradleUtils.unserializeMessage(msg)
+      }
+
+      // if (failOneOutOf(3)) {
+      //   debug('dropping', msg.object[TYPE])
+      //   return
+      // }
+
+      return multiqueue.enqueue({
+        seq: msg[SEQ],
+        value: msg,
+        lane: from
+      })
     }
 
     // meDriver = timeFunctions(meDriver)
@@ -1172,9 +1241,11 @@ var Store = Reflux.createStore({
       transport = this.getTransport(wsClient)
     }
 
-    const receive = this.idlifyFunction({
-      fn: opts => this.receive({ ...opts, transport })
-    })
+    // const receive = this.idlifyFunction({
+    //   fn: opts => this.receive({ ...opts, transport })
+    // })
+
+    // const receive = opts => this.receive({ ...opts, transport })
 
     wsClients.add({
       client: transport,
@@ -1187,7 +1258,7 @@ var Store = Reflux.createStore({
       node: meDriver,
       url: `${url.replace(/\/+$/, '')}/${provider.id}`,
       identifier: provider.hash,
-      receive
+      receive: this.queueReceive.bind(this)
     })
 
     if (transportExists) return
@@ -1290,13 +1361,13 @@ var Store = Reflux.createStore({
         })
       }
 
-      const unlock = await self.lockReceive(from)
-      try {
-        await receive({ msg, from })
+      // const unlock = await self.lockReceive(from)
+      // try {
+        await self.queueReceive({ msg, from })
         debug('received msg from', from)
-      } finally {
-        unlock()
-      }
+      // } finally {
+      //   unlock()
+      // }
     })
 
     transport.setTimeout(40000)
@@ -1319,18 +1390,22 @@ var Store = Reflux.createStore({
     }
   },
 
-  async receiveIntroduction({ transport, msg, org }) {
+  queueReceive({ msg, from }) {
+    throw new Error('override me')
+  },
+
+  async receiveIntroduction({ identifier, msg, org }) {
     const { wsClients } = driverInfo
     const payload = msg.object
     const { identity } = payload
     const permalink = utils.getPermalink(identity)
     await this.addContactIdentity({ identity, permalink })
     await this.addContact(payload, permalink, msg.forPartials || msg.forContext)
-    const url = wsClients.getBaseUrl({ client: transport })
+    const url = wsClients.getBaseUrl({ identifier })
     await this.addToSettings({hash: permalink, url: url})
   },
 
-  receiveSelfIntroduction({ transport, msg }) {
+  receiveSelfIntroduction({ identifier, msg }) {
     const payload = msg.object
     const { wsClients } = driverInfo
     const rootHash = utils.getPermalink(payload.identity)
@@ -1352,7 +1427,7 @@ var Store = Reflux.createStore({
         onPress: async () => {
           await this.addContactIdentity({ identity: payload.identity })
           await this.addContact(payload, rootHash)
-          const url = wsClients.getBaseUrl({ client: transport })
+          const url = wsClients.getBaseUrl({ identifier })
           this.addToSettings({hash: rootHash, url: url})
         }},
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
@@ -1384,8 +1459,9 @@ var Store = Reflux.createStore({
 
   async receive(opts) {
     const self = this
-    let { transport, msg, from, isRetry } = opts
-    const { tlsKey, wsClients } = driverInfo
+    let { msg, from, isRetry } = opts
+    const { wsClients, identifierProp } = driverInfo
+    const identifier = from
 
     let progressUpdate
     let willAnnounceProgress = willShowProgressBar(msg)
@@ -1395,10 +1471,6 @@ var Store = Reflux.createStore({
       }
 
       const payload = msg.object
-      // if (payload[TYPE] === 'tradle.SimpleMessage') {
-      //   if (half()) return
-      // }
-
       debug(`receiving ${payload[TYPE]}`)
 
       let org = this._getItem(PROFILE + '_' + from).organization
@@ -1414,9 +1486,11 @@ var Store = Reflux.createStore({
 
       switch (payload[TYPE]) {
       case INTRODUCTION:
-        return this.receiveIntroduction({ transport, msg, org })
+        await this.receiveIntroduction({ msg, org, identifier })
+        break
       case SELF_INTRODUCTION:
-        return this.receiveSelfIntroduction({ transport, msg, org })
+        await this.receiveSelfIntroduction({ msg, org, identifier })
+        break
       default:
         break
       }
@@ -1457,12 +1531,11 @@ var Store = Reflux.createStore({
     // const prop = 'pubKey'
     // const identifier = tradle.utils.deserializePubKey(new Buffer(from, 'hex'))
 
-    const prop = tlsKey ? 'pubKey' : 'permalink'
-    const identifier = prop === 'permalink' ? from : {
-      type: 'ec',
-      curve: 'curve25519',
-      pub: new Buffer(from, 'hex')
-    }
+    // const identifier = prop === 'permalink' ? from : {
+    //   type: 'ec',
+    //   curve: 'curve25519',
+    //   pub: new Buffer(from, 'hex')
+    // }
 
     if (progressUpdate) {
       this.trigger({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
@@ -1470,7 +1543,7 @@ var Store = Reflux.createStore({
 
     meDriver.sender.resume(identifier)
     try {
-      await meDriver.receive(msg, { [prop]: identifier })
+      await meDriver.receive(msg, { [identifierProp]: identifier })
     } catch (err) {
       if (err.type === 'unknownidentity') {
         if (isRetry) {
@@ -1482,8 +1555,8 @@ var Store = Reflux.createStore({
         progressUpdate = null
         try {
           await this.requestIdentity({
-            url: wsClients.getFullUrl({ client: transport }),
-            permalink: identifier
+            url: wsClients.getFullUrl({ identifier }),
+            identifier: err.value
           })
 
           await this.receive({ ...opts, isRetry: true })
@@ -1500,16 +1573,17 @@ var Store = Reflux.createStore({
     }
   },
 
-  async requestIdentity({ url, permalink }) {
-    const response = await utils.fetchWithTimeout(`${url}/identity/${permalink}`, {}, 5000)
+  async requestIdentity({ url, identifier }) {
+    const response = await utils.fetchWithTimeout(`${url}/identity/${identifier}`, {}, 5000)
     if (response.status > 300) {
-      throw new Error('statuc code: ' + response.status)
+      throw new Error('status code: ' + response.status)
     }
 
-    const { object } = await response.json()
-    await this.addContactIdentity({
-      identity: object
-    })
+    const result = await response.json()
+    const identity = result.object
+    const permalink = utils.getPermalink(identity)
+    await this.addContactIdentity({ identity, permalink })
+    await this.addContact({ identity, profile: {} }, permalink)
   },
 
   setProviderOnlineStatus(permalink, online) {
@@ -1561,7 +1635,6 @@ var Store = Reflux.createStore({
   },
 
   getWsClient(baseUrl) {
-    const tlsKey = driverInfo.tlsKey
     const url = utils.joinURL(baseUrl, 'ws?' + querystring.stringify({
       from: this.getIdentifier(),
       // pubKey: this.getIdentifierPubKey()
@@ -1929,6 +2002,8 @@ var Store = Reflux.createStore({
   },
 
   addContact(data, hash, noMessage) {
+    data = utils.clone(data)
+
     var ikey = IDENTITY + '_' + hash
     var pkey = PROFILE + '_' + hash
 
@@ -10512,9 +10587,10 @@ async function generateIdentity ({ networkName }) {
 //       }
 */
 
-// const half = (function () {
-//   let val = false
-//   return function () {
-//     return val = !val
+// const failOneOutOf = (function () {
+//   let i = 0
+//   return function failOneOutOf (n=2) {
+//     i = (i + 1) % n
+//     return i === 0
 //   }
 // }())
