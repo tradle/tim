@@ -1814,6 +1814,16 @@ var utils = {
       return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
     }
   },
+  rangeToArray: function (range) {
+    const [min, max] = range
+    const arr = new Array(max - min + 1)
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] = min + i
+    }
+
+    return arr
+  }
+
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
   //   let fromId = utils.getId(r.from)

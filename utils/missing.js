@@ -5,20 +5,18 @@ const debug = require('debug')('tradle:restore')
 const co = Promise.coroutine
 const MAX_BACKOFF = 60000
 const INITIAL_BACKOFF = 1000
-const { TYPE, TYPES } = constants
+const { SEQ, TYPE, TYPES } = constants
 
 module.exports = function restoreMissingMessages ({ node, counterparty, url, receive }) {
   const monitor = Restore.conversation.monitorMissing({ node, counterparty })
   Restore.batchifyMonitor({ monitor, debounce: 100 })
   // monitorMissing({ node: meDriver, debounce: 1000 }).on('batch', function (seq) {
 
-  const reqSeqs = co(function* ({ seqs, tip }) {
-    const req = yield Restore.conversation.request({
-      node,
-      seqs,
-      tip,
-      counterparty
-    })
+  const reqSeqs = co(function* ({ seqs=[], tip }) {
+    const props = { node, counterparty, seqs }
+    if (typeof tip !== 'undefined') props.tip = tip
+
+    const req = yield Restore.conversation.request(props)
 
     let res
     let msgs
@@ -57,6 +55,8 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url, rec
     }
 
     debug(`recovering ${msgs.length} lost messages`)
+    msgs.sort((a, b) => a[SEQ] - b[SEQ])
+
     for (let msg of msgs) {
       try {
         yield receive({ msg, from: counterparty })
@@ -74,7 +74,7 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url, rec
   })
 
   monitor.on('batch', reqSeqs)
-
+  monitor.request = reqSeqs
   return monitor
 }
 
