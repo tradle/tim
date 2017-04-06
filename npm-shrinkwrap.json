@@ -102,10 +102,22 @@
       "from": "@tradle/protocol@latest",
       "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz"
     },
+    "@tradle/receive-in-order": {
+      "version": "1.0.0",
+      "from": "git://github.com/tradle/receive-in-order.git#c7e45ecec84835a59cf4717a2d3ebdf27393d7f1",
+      "resolved": "git://github.com/tradle/receive-in-order.git#c7e45ecec84835a59cf4717a2d3ebdf27393d7f1",
+      "dependencies": {
+        "bluebird": {
+          "version": "3.5.0",
+          "from": "bluebird@>=3.5.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
+        }
+      }
+    },
     "@tradle/restore": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/restore.git#0032a65d1af5e02a2057b26c8c7ac589ba89c2b7",
-      "resolved": "git://github.com/tradle/restore.git#0032a65d1af5e02a2057b26c8c7ac589ba89c2b7",
+      "from": "git://github.com/tradle/restore.git#ef52a9c1e51393abe269987513902aaf50db6791",
+      "resolved": "git://github.com/tradle/restore.git#ef52a9c1e51393abe269987513902aaf50db6791",
       "dependencies": {
         "bluebird": {
           "version": "3.5.0",
