@@ -35,9 +35,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "4.8.0",
+      "version": "4.8.1",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.8.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.8.1.tgz",
       "dependencies": {
         "async": {
           "version": "2.3.0",
