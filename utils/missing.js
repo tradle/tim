@@ -7,7 +7,7 @@ const MAX_BACKOFF = 60000
 const INITIAL_BACKOFF = 1000
 const { TYPE, TYPES } = constants
 
-module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
+module.exports = function restoreMissingMessages ({ node, counterparty, url, receive }) {
   const monitor = Restore.conversation.monitorMissing({ node, counterparty })
   Restore.batchifyMonitor({ monitor, debounce: 100 })
   // monitorMissing({ node: meDriver, debounce: 1000 }).on('batch', function (seq) {
@@ -35,7 +35,7 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
         })
 
         // nothing there for us
-        if (res.status === 404) return
+        if (res.status >= 400) return
 
         msgs = yield res.json()
         msgs.forEach(msg => {
@@ -59,7 +59,7 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url }) {
     debug(`recovering ${msgs.length} lost messages`)
     for (let msg of msgs) {
       try {
-        yield node.receive(msg, { permalink: counterparty })
+        yield receive({ msg, from: counterparty })
         debug(`recovered msg from ${counterparty}`)
       } catch (err) {
         debug(`failed to recover msg from ${counterparty}`, err)
