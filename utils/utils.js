@@ -1830,6 +1830,9 @@ var utils = {
   getContentWidth(component) {
     let width = component ? this.dimensions(component).width : this.dimensions().width
     return ENV.fullScreen ? width - 20 : Math.min(width, MAX_WIDTH)
+  },
+  setGlobal: function (key, val) {
+    global[key] = val
   }
 }
 
