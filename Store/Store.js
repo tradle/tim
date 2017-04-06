@@ -681,6 +681,7 @@ var Store = Reflux.createStore({
     meDriver.setMaxListeners(0)
 
     console.log('me: ' + meDriver.permalink)
+    utils.setGlobal('TRADLE_USER_PERMALINK', meDriver.permalink)
     meDriver = tradleUtils.promisifyNode(meDriver)
     this.idlifyExpensiveCalls()
 
