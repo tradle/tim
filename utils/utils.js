@@ -1710,15 +1710,22 @@ var utils = {
       return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
     }
   },
-  rangeToArray: function (range) {
-    const [min, max] = range
-    const arr = new Array(max - min + 1)
-    for (let i = 0; i < arr.length; i++) {
-      arr[i] = min + i
+
+  parseMessageFromDB(message) {
+    let object = message
+    while (object[TYPE] === MESSAGE) {
+      let key = object.recipientPubKey
+      if (!Buffer.isBuffer(key.pub)) {
+        key.pub = new Buffer(key.pub.data)
+      }
+
+      object = object.object
+      if (!object) break
     }
 
-    return arr
-  }
+    return message
+  },
+
 
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
