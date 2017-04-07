@@ -1,6 +1,7 @@
 import Promise from 'bluebird'
 import Restore from '@tradle/restore'
 import { constants } from '@tradle/engine'
+const { parseMessageFromDB } = require('./utils')
 const debug = require('debug')('tradle:restore')
 const co = Promise.coroutine
 const MAX_BACKOFF = 60000

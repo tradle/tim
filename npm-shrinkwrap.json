@@ -18,9 +18,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "4.8.1",
+      "version": "4.8.2",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.8.1.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.8.2.tgz",
       "dependencies": {
         "async": {
           "version": "2.1.5",
@@ -73,32 +73,72 @@
         }
       }
     },
+    "@tradle/multiqueue": {
+      "version": "1.1.3",
+      "from": "@tradle/multiqueue@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/multiqueue/-/multiqueue-1.1.3.tgz",
+      "dependencies": {
+        "bluebird": {
+          "version": "3.5.0",
+          "from": "bluebird@>=3.5.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
+        },
+        "debug": {
+          "version": "2.6.3",
+          "from": "debug@>=2.6.3 <3.0.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.3.tgz"
+        },
+        "duplexify": {
+          "version": "3.5.0",
+          "from": "duplexify@>=3.5.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/duplexify/-/duplexify-3.5.0.tgz"
+        },
+        "end-of-stream": {
+          "version": "1.0.0",
+          "from": "end-of-stream@1.0.0",
+          "resolved": "https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.0.0.tgz"
+        },
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "ms": {
+          "version": "0.7.2",
+          "from": "ms@0.7.2",
+          "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.2.tgz"
+        },
+        "once": {
+          "version": "1.3.3",
+          "from": "once@>=1.3.0 <1.4.0",
+          "resolved": "https://registry.npmjs.org/once/-/once-1.3.3.tgz"
+        },
+        "readable-stream": {
+          "version": "2.2.9",
+          "from": "readable-stream@>=2.0.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.9.tgz"
+        },
+        "string_decoder": {
+          "version": "1.0.0",
+          "from": "string_decoder@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.0.tgz"
+        }
+      }
+    },
     "@tradle/protocol": {
       "version": "2.3.0",
       "from": "@tradle/protocol@latest",
       "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz"
     },
-    "@tradle/receive-in-order": {
-      "version": "1.0.0",
-      "from": "git://github.com/tradle/receive-in-order.git#f59f189954e37155c64e9221810c65e67ae4e53b",
-      "resolved": "git://github.com/tradle/receive-in-order.git#f59f189954e37155c64e9221810c65e67ae4e53b",
-      "dependencies": {
-        "bluebird": {
-          "version": "3.5.0",
-          "from": "bluebird@>=3.5.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
-        }
-      }
-    },
     "@tradle/restore": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/restore.git#ef52a9c1e51393abe269987513902aaf50db6791",
-      "resolved": "git://github.com/tradle/restore.git#ef52a9c1e51393abe269987513902aaf50db6791",
+      "from": "git://github.com/tradle/restore.git#70c271572c470bf908259c6b9ce6606e2553d97a",
+      "resolved": "git://github.com/tradle/restore.git#70c271572c470bf908259c6b9ce6606e2553d97a",
       "dependencies": {
-        "bluebird": {
-          "version": "3.5.0",
-          "from": "bluebird@>=3.5.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
+        "co": {
+          "version": "4.6.0",
+          "from": "co@>=4.6.0 <5.0.0",
+          "resolved": "https://registry.npmjs.org/co/-/co-4.6.0.tgz"
         },
         "debug": {
           "version": "2.6.3",
@@ -121,9 +161,14 @@
           "resolved": "https://registry.npmjs.org/pump/-/pump-1.0.2.tgz"
         },
         "readable-stream": {
-          "version": "2.2.6",
-          "from": "readable-stream@>=2.1.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz"
+          "version": "2.2.9",
+          "from": "readable-stream@^2.1.5",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.9.tgz"
+        },
+        "string_decoder": {
+          "version": "1.0.0",
+          "from": "string_decoder@~1.0.0",
+          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.0.tgz"
         },
         "through2": {
           "version": "2.0.3",
@@ -274,6 +319,11 @@
       "version": "1.0.4",
       "from": "aproba@>=1.0.3 <2.0.0",
       "resolved": "https://registry.npmjs.org/aproba/-/aproba-1.0.4.tgz"
+    },
+    "any-promise": {
+      "version": "1.3.0",
+      "from": "any-promise@>=1.3.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/any-promise/-/any-promise-1.3.0.tgz"
     },
     "archive-type": {
       "version": "3.2.0",
@@ -3799,9 +3849,14 @@
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "readable-stream": {
-          "version": "2.2.6",
+          "version": "2.2.8",
           "from": "readable-stream@>=2.1.4 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz"
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.8.tgz"
+        },
+        "string_decoder": {
+          "version": "1.0.0",
+          "from": "string_decoder@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.0.tgz"
         }
       }
     },
@@ -5667,6 +5722,11 @@
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
         }
       }
+    },
+    "merge2": {
+      "version": "1.0.3",
+      "from": "merge2@>=1.0.3 <2.0.0",
+      "resolved": "https://registry.npmjs.org/merge2/-/merge2-1.0.3.tgz"
     },
     "merkle-proofs": {
       "version": "1.0.3",
