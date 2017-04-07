@@ -29,7 +29,7 @@ import ImageInput from './ImageInput'
 var chatStyles = require('../styles/chatStyles')
 
 var guidance = {
-  'tradle.PhotoID': 'Please click on Upload and locate that image of your scanned document...we did warn you this would be simpler on a phone :)'
+  'tradle.PhotoID': 'Please select a document type then click on Upload and locate your previously scanned document from your computer.'
 }
 
 import CustomIcon from '../styles/customicons'
