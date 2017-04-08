@@ -191,8 +191,12 @@ class ShowRefList extends Component {
         )
 
     }
+    if (!hasBacklinks  &&  !showDocuments) {
+      if (showDetails)
+        refList = null
+    }
     // explore current backlink
-    let backlinkRL, details
+    let backlinkRL, details, separator
     if (!showDetails  && (currentBacklink  ||  (this.props.backlinkList  &&  this.props.showDocuments))) {
       var ResourceList = require('./ResourceList')
       let modelName = showDocuments ? FORM : currentBacklink.items.ref
@@ -214,6 +218,8 @@ class ShowRefList extends Component {
                       backlinkList={backlinkList}
                       navigator={this.props.navigator} />
     }
+    else
+      separator = <View style={{height: 2, backgroundColor: 'darkblue'}} />
     if (showDetails) {
       if (isMessage)
         details = <ShowPropertiesView { ...this.props }/>
@@ -232,7 +238,7 @@ class ShowRefList extends Component {
                 </View>
     }
 
-    if (refList.length  ||  !propsToShow.length) {
+    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
       let style = {width: utils.getContentWidth(ShowRefList)}
       if (!isMessage)
         style.height = utils.dimensions().height
