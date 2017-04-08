@@ -483,7 +483,7 @@ class TiMApp extends Component {
     case 6:
       return <NewItem navigator={nav} {...props} />
     case 7:
-      return <ArticleView navigator={nav} url={props.url} />;
+      return <ArticleView navigator={nav} {...props} />;
     case 8:
       return <IdentitiesList navigator={nav}
                   filter={props.filter}
