@@ -382,7 +382,7 @@ var Store = Reflux.createStore({
       debug('Store.init ' + err.stack)
     }
     let doMonitor = true
-    if (!me  &&  ENV.autoRegister  &&  !ENV.registrationWithoutTermsAndConditions) {
+    if (!me  &&  ENV.autoRegister  &&  ENV.registrationWithoutTermsAndConditions) {
       me = await this.autoRegister()
       doMonitor = false
     }
