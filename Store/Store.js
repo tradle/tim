@@ -353,6 +353,20 @@ var Store = Reflux.createStore({
 
     return this.getReady()
   },
+  onAutoRegister(params) {
+    return this.autoRegister()
+    .then(() => {
+      this.setMe(me)
+      return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
+    })
+    .then(() => this.getDriver(me))
+    .then(() => {
+      // this.monitorTim()
+
+      if (me.registeredForPushNotifications)
+        Push.resetBadgeNumber()
+    })
+  },
   async getReady() {
     let me
     try {
@@ -361,7 +375,7 @@ var Store = Reflux.createStore({
       debug('Store.init ' + err.stack)
     }
     let doMonitor = true
-    if (!me  &&  ENV.autoRegister) {
+    if (!me  &&  ENV.autoRegister  &&  !ENV.registrationWithoutTermsAndConditions) {
       me = await this.autoRegister()
       doMonitor = false
     }
@@ -993,6 +1007,7 @@ var Store = Reflux.createStore({
           //     meDriver.receiveMsg.apply(meDriver, arguments)
           //   })
           // }
+          if (utils.getMe())
           results.forEach(provider => {
             this.addProvider(provider)
             Push.subscribe(provider.hash)
@@ -2605,6 +2620,7 @@ var Store = Reflux.createStore({
             verificationRequest.verifications = this.buildRef(newVerification)
         }
       }
+      this.trigger({action: 'getItem', resource: verificationRequest})
       // if (!verificationRequest._sharedWith)
       //   verificationRequest._sharedWith = []
       // verificationRequest._sharedWith.push(fromId)
@@ -3839,17 +3855,10 @@ var Store = Reflux.createStore({
               firstName: FRIEND
             }, isRegistration: true})
     }
-
-    return utils.getMe()
   },
   async onGetProvider(params) {
     await this.ready
     await this._loadedResourcesDefer.promise
-    // try {
-    //   await this.getMe()
-    // } catch(err) {
-    //   debug('Store.onGetProvider', err.stack)
-    // }
     let permalink = params.provider
     let serverUrl = params.url
     let providerBot = this._getItem(PROFILE + '_' + permalink)
@@ -3862,7 +3871,7 @@ var Store = Reflux.createStore({
     }
     if (providerBot) {
       let provider = this._getItem(utils.getId(providerBot.organization))
-      this.trigger({action: 'getProvider', provider: provider})
+      this.trigger({action: 'getProvider', provider: provider, termsAccepted: params.termsAccepted})
     }
   },
   getProviderById(providerId) {
@@ -5794,6 +5803,7 @@ var Store = Reflux.createStore({
         }
         catch (err) {
           if (attempts === maxAttempts) {
+            console.log('No access to the server: ' + v)
             this.trigger({action: 'noAccessToServer'})
             return
           }

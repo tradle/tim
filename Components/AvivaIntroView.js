@@ -5,9 +5,6 @@ var translate = utils.translate
 var PageView = require('./PageView')
 var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var Store = require('../Store/Store');
-var reactMixin = require('react-mixin');
 var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
@@ -119,35 +116,26 @@ class AvivaIntroView extends Component {
     let footer = <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
                    <View style={styles.start}>
                      <View style={{backgroundColor: 'transparent', justifyContent: 'center'}}>
-                       <Text style={{fontSize: 24, color: '#ffffff'}}>Tap to get started</Text>
+                       <Text style={{fontSize: 20, color: '#ffffff'}}>Tap to get started</Text>
                      </View>
                    </View>
                  </TouchableOpacity>
 
-    // var bgImage = bankStyle &&  bankStyle.BACKGROUND_IMAGE
-    // if (bgImage) {
-    //   let {width, height} = utils.dimensions(AvivaIntroView)
-    //   let image = { width, height }
-    //   return (
-    //     <PageView style={platformStyles.container}>
-    //       <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
-    //         {content}
-    //       </Image>
-    //         {footer}
-    //     </PageView>
-    //   );
-    // }
-    // else {
-      return (
-        <PageView style={platformStyles.container}>
-          {content}
-          {footer}
-        </PageView>
-      );
-    // }
+    return (
+      <PageView style={platformStyles.container}>
+        {content}
+        {footer}
+      </PageView>
+    );
   }
   showChat(provider) {
     let me = utils.getMe()
+    if (!me) {
+      this.showTerms()
+      return
+    }
+    this.props.showChat(provider, true)
+    return
     var msg = {
       message: translate('customerWaiting', me.firstName),
       _t: CUSTOMER_WAITING,
@@ -157,7 +145,6 @@ class AvivaIntroView extends Component {
     }
 
     utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
-
     this.props.navigator.push({
       title: provider.name,
       component: MessageList,
@@ -168,6 +155,20 @@ class AvivaIntroView extends Component {
         modelName: MESSAGE,
         currency: this.props.currency,
         bankStyle:  this.props.bankStyle
+      }
+    })
+  }
+  showTerms() {
+    this.props.navigator.push({
+      id: 7,
+      component: ArticleView,
+      backButtonTitle: 'Back',
+      title: translate('termsAndConditions'),
+      passProps: {
+        bankStyle: this.props.bankStyle,
+        action: this.props.autoRegister.bind(this, this.props.resource, this.props.url),
+        url: avivaTC,
+        actionBarTitle: 'Accept and continue'
       }
     })
   }
@@ -202,7 +203,6 @@ class AvivaIntroView extends Component {
     })
   }
 }
-
 // AvivaIntroView = makeResponsive(AvivaIntroView)
 
 var styles =  StyleSheet.create({
