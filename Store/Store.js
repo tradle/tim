@@ -319,6 +319,8 @@ var Store = Reflux.createStore({
       timeout: POLITE_TASK_TIMEOUT
     })
 
+    this._identityPromises = {}
+
     NetInfo.isConnected.addEventListener(
       'change',
       this._handleConnectivityChange.bind(this)
@@ -1085,7 +1087,7 @@ var Store = Reflux.createStore({
       self.addProvider(provider)
       self.addToSettings(provider)
 
-      utils.addContactIdentity(meDriver, { identity: provider.identity })
+      self.addContactIdentity({ identity: provider.identity })
 
       let employee = this._getItem(PROFILE + '_' + provider.hash)
       currentEmployees[utils.getId(org)] = employee
@@ -1102,6 +1104,23 @@ var Store = Reflux.createStore({
       debugger
     })
   },
+
+  async maybeWaitForIdentity({ permalink }) {
+    if (permalink in this._identityPromises) {
+      await this._identityPromises[permalink]
+    }
+  },
+
+  addContactIdentity({ identity, permalink }) {
+    if (!meDriver) return Promise.reject(new Error('engine is not up yet'))
+    if (!permalink) permalink = utils.getPermalink(identity)
+    if (!(permalink in this._identityPromises)) {
+      this._identityPromises[permalink] = utils.addContactIdentity(meDriver, { identity, permalink })
+    }
+
+    return this._identityPromises[permalink]
+  },
+
   onSetProviderStyle(stylePack) {
     const style = utils.interpretStylesPack(stylePack)
   },
@@ -1295,7 +1314,7 @@ var Store = Reflux.createStore({
     const payload = msg.object
     const { identity } = payload
     const permalink = utils.getPermalink(identity)
-    await utils.addContactIdentity(meDriver, { identity, permalink })
+    await this.addContactIdentity({ identity, permalink })
     await this.addContact(payload, permalink, msg.forPartials || msg.forContext)
     const url = wsClients.getBaseUrl({ client: transport })
     await this.addToSettings({hash: permalink, url: url})
@@ -1321,7 +1340,7 @@ var Store = Reflux.createStore({
       [
         {text: translate('Ok'),
         onPress: async () => {
-          await utils.addContactIdentity(meDriver, { identity: payload.identity })
+          await this.addContactIdentity({ identity: payload.identity })
           await this.addContact(payload, rootHash)
           const url = wsClients.getBaseUrl({ client: transport })
           this.addToSettings({hash: rootHash, url: url})
@@ -1478,7 +1497,7 @@ var Store = Reflux.createStore({
     }
 
     const { object } = await response.json()
-    await utils.addContactIdentity(meDriver, {
+    await this.addContactIdentity({
       identity: object
     })
   },
@@ -1801,9 +1820,8 @@ var Store = Reflux.createStore({
 
     var promises = [
       // TODO: evaluate the security of this
-      utils.addContactIdentity(meDriver, {
-        identity: sp.bot.pub,
-        permalink: sp.bot[CUR_HASH]
+      this.addContactIdentity({
+        identity: sp.bot.pub
       })
     ]
 
@@ -2142,7 +2160,8 @@ var Store = Reflux.createStore({
     var toId = IDENTITY + '_' + hash
     rr._sendStatus = self.isConnected ? SENDING : QUEUED
     var noCustomerWaiting
-    return meDriver.sign({ object: toChain })
+    return this.maybeWaitForIdentity({ permalink: hash })
+    .then(() => meDriver.sign({ object: toChain }))
     .then(function(result) {
       toChain = result.object
       let hash = protocol.linkString(result.object)
@@ -8269,7 +8288,7 @@ var Store = Reflux.createStore({
 
     let me = this._getItem(PROFILE + '_' + pairingData.identity)
     return this.getDriver(me)
-    .then(() =>  utils.addContactIdentity(meDriver, { identity: pairingRes.prev }))
+    .then(() =>  this.addContactIdentity({ identity: pairingRes.prev }))
     .then(() => {
       Q.ninvoke(meDriver, 'setIdentity', {
         keys: meDriver.keys.concat(pairingRes.identity.pubkeys),
