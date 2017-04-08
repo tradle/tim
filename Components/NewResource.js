@@ -97,7 +97,7 @@ class NewResource extends Component {
     this.state = {
       resource: r,
       // modalVisible: false,
-      date: new Date(),
+      // date: new Date(),
       isUploading: !isRegistration  &&  (!r[constants.ROOT_HASH] || Object.keys(r).length === 2),
       isRegistration: isRegistration,
       isLoadingVideo: false,
@@ -762,7 +762,6 @@ class NewResource extends Component {
     }
     if (!jsons.length)
       jsons = <View/>
-
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
                   ref='scrollView' {...this.scrollviewProps}
