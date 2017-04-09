@@ -1,25 +1,32 @@
 
+import React, { Component } from 'react'
+
 import {
   Platform,
   WebView
 } from 'react-native'
 
-if (Platform.OS === 'web') {
-  module.exports = props => {
-    var {
-      src,
-      source,
-      style
-    } = props
+import deepEqual from 'deep-equal'
 
+class MyWebView extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    return !deepEqual(nextProps, this.props)
+  }
+  render() {
+    let { src, source, style } = this.props
     if (typeof source === 'string' && source.trim()[0] === '<') {
       return <iframe ref={onRef} style={style} />
 
       function onRef (ref) {
         if (!ref) return
 
-        const iframedoc = ref.contentDocument || ref.contentWindow.document
-        iframedoc.body.innerHTML = source
+        // this is for you, oh naughty Firefox
+        setTimeout(function () {
+          const iframedoc = ref.contentDocument || (ref.contentWindow && ref.contentWindow.document)
+          if (iframedoc) {
+            iframedoc.body.innerHTML = source
+          }
+        }, 100)
       }
     }
 
@@ -29,6 +36,7 @@ if (Platform.OS === 'web') {
       <iframe src={src} style={style}></iframe>
     )
   }
-} else {
-  module.exports = WebView
 }
+
+
+module.exports = MyWebView
