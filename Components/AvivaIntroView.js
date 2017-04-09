@@ -5,9 +5,6 @@ var translate = utils.translate
 var PageView = require('./PageView')
 var Icon = require('react-native-vector-icons/Ionicons');
 var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var Store = require('../Store/Store');
-var reactMixin = require('react-mixin');
 var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
@@ -49,6 +46,10 @@ import { isChrome } from '../utils/browser'
 const avivaTC = Platform.OS === 'android'
   ? { uri: 'file:///android_asset/Aviva_TC.html' }
   : require('../html/Aviva_TC.html')
+
+const avivaContact = Platform.OS === 'android'
+  ? { uri: 'file:///android_asset/Aviva_Contact.html' }
+  : require('../html/Aviva_Contact.html')
 
 class AvivaIntroView extends Component {
   static displayName = 'AvivaIntroView';
@@ -108,10 +109,10 @@ class AvivaIntroView extends Component {
              <TouchableOpacity style={{paddingRight:10}} onPress={() => this.goto(LEARN_MORE_URL)}>
                <Text style={[styles.text, {paddingLeft: 5, paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Learn more  &bull;</Text>
              </TouchableOpacity>
-             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showTerms(avivaTC)}>
+             <TouchableOpacity style={{paddingRight:10}} onPress={utils.getMe() ? this.showHtml.bind(this, avivaTC, 'termsAndConditions') : this.showChat.bind(this, this.props.provider)}>
                <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Terms of use  &bull;</Text>
              </TouchableOpacity>
-             <TouchableOpacity onPress={() => this.goto(CONTACT_US_URL)}>
+             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showHtml(avivaContact, 'contactUs')}>
                <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR, paddingRight: 20}]}>Contact us</Text>
              </TouchableOpacity>
            </View>
@@ -125,67 +126,72 @@ class AvivaIntroView extends Component {
     let footer = <TouchableOpacity onPress={()=>{this.showChat(this.props.resource)}}>
                    <View style={styles.start}>
                      <View style={{backgroundColor: 'transparent', justifyContent: 'center'}}>
-                       <Text style={{fontSize: 24, color: '#ffffff'}}>Click to get started</Text>
+                       <Text style={{fontSize: 20, color: '#ffffff'}}>Click to get started</Text>
                      </View>
                    </View>
                  </TouchableOpacity>
 
-    // var bgImage = bankStyle &&  bankStyle.BACKGROUND_IMAGE
-    // if (bgImage) {
-    //   let {width, height} = utils.dimensions(AvivaIntroView)
-    //   let image = { width, height }
-    //   return (
-    //     <PageView style={platformStyles.container}>
-    //       <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
-    //         {content}
-    //       </Image>
-    //         {footer}
-    //     </PageView>
-    //   );
-    // }
-    // else {
-      return (
-        <PageView style={platformStyles.container}>
-          {content}
-          {footer}
-        </PageView>
-      );
-    // }
+    return (
+      <PageView style={platformStyles.container}>
+        {content}
+        {footer}
+      </PageView>
+    );
   }
   showChat(provider) {
     let me = utils.getMe()
-    var msg = {
-      message: translate('customerWaiting', me.firstName),
-      _t: CUSTOMER_WAITING,
-      from: me,
-      to: provider,
-      time: new Date().getTime()
+    if (!me) {
+      this.showTerms()
+      return
     }
+    this.props.showChat(provider, true)
+    // return
+    // var msg = {
+    //   message: translate('customerWaiting', me.firstName),
+    //   _t: CUSTOMER_WAITING,
+    //   from: me,
+    //   to: provider,
+    //   time: new Date().getTime()
+    // }
 
-    utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
-
-    this.props.navigator.push({
-      title: provider.name,
-      component: MessageList,
-      id: 11,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: provider,
-        modelName: MESSAGE,
-        currency: this.props.currency,
-        bankStyle:  this.props.bankStyle
-      }
-    })
+    // utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
+    // this.props.navigator.push({
+    //   title: provider.name,
+    //   component: MessageList,
+    //   id: 11,
+    //   backButtonTitle: 'Back',
+    //   passProps: {
+    //     resource: provider,
+    //     modelName: MESSAGE,
+    //     currency: this.props.currency,
+    //     bankStyle:  this.props.bankStyle
+    //   }
+    // })
   }
-  showTerms(url) {
-    // this.goto('../html/Aviva_TC.html')
+  showTerms() {
     this.props.navigator.push({
       id: 7,
       component: ArticleView,
       backButtonTitle: 'Back',
       title: translate('termsAndConditions'),
       passProps: {
-        url
+        bankStyle: this.props.bankStyle,
+        action: this.props.autoRegister.bind(this, this.props.resource, this.props.url),
+        url: avivaTC,
+        actionBarTitle: 'Accept and continue'
+      }
+    })
+  }
+  showHtml(url, title) {
+    // this.goto('../html/Aviva_TC.html')
+    this.props.navigator.push({
+      id: 7,
+      component: ArticleView,
+      backButtonTitle: 'Back',
+      title: translate(title),
+      passProps: {
+        url,
+        bankStyle: this.props.bankStyle
       }
     })
     // this.props.navigator.push({
@@ -207,7 +213,6 @@ class AvivaIntroView extends Component {
     })
   }
 }
-
 // AvivaIntroView = makeResponsive(AvivaIntroView)
 
 var styles =  StyleSheet.create({

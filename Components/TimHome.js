@@ -353,7 +353,7 @@ class TimHome extends Component {
       utils.setModels(params.models);
       return
     case 'getProvider':
-      this.showChatPage(params.provider)
+      this.showChatPage(params.provider, params.termsAccepted)
       // this.setState({
       //   provider: params.provider,
       //   action: 'chat'
@@ -533,7 +533,6 @@ class TimHome extends Component {
           provider: this.state.permalink,
           url: this.state.url
         })
-        // this.showChatPage(this.state.provider)
         return
       case 'officialAccounts':
         this.showOfficialAccounts()
@@ -561,13 +560,24 @@ class TimHome extends Component {
 
     this.showOfficialAccounts()
   }
-  showChatPage(provider) {
-    if (ENV.landingPage) {
+  autoRegister(provider) {
+    // this.props.navigator.pop()
+    if (utils.getMe())
+      this.showChatPage(provider, true)
+    else
+      Actions.autoRegister({
+        bot: this.state.permalink,
+        url: this.state.url
+      })
+  }
+
+  showChatPage(provider, termsAccepted) {
+    let me = utils.getMe()
+
+    if (ENV.landingPage  &&  !termsAccepted) {
       this.showLandingPage(provider, ENV.landingPage)
       return
     }
-    return
-    let me = utils.getMe()
     var msg = {
       message: translate('customerWaiting', me.firstName),
       _t: constants.TYPES.CUSTOMER_WAITING,
@@ -582,7 +592,7 @@ class TimHome extends Component {
     extend(style, defaultBankStyle)
     if (provider.style)
       extend(style, provider.style)
-    this.props.navigator.push({
+    let route = {
       title: provider.name,
       component: MessageList,
       id: 11,
@@ -593,7 +603,12 @@ class TimHome extends Component {
         currency: this.props.currency,
         bankStyle:  style
       }
-    })
+    }
+    let routes = this.props.navigator.getCurrentRoutes()
+    if (termsAccepted  &&  routes.length === 3)
+      this.props.navigator.replace(route)
+    else
+      this.props.navigator.push(route)
   }
   showLandingPage(provider, landingPage) {
     let style = {}
@@ -608,7 +623,10 @@ class TimHome extends Component {
       backButtonTitle: __DEV__ ? 'Back' : null,
       passProps: {
         bankStyle: style,
-        resource: provider
+        resource: provider,
+        url: this.state.url,
+        autoRegister: this.autoRegister.bind(this),
+        showChat: this.showChatPage.bind(this)
       }
     })
   }

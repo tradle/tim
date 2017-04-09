@@ -102,7 +102,7 @@ class NewResource extends Component {
     this.state = {
       resource: r,
       // modalVisible: false,
-      date: new Date(),
+      // date: new Date(),
       isUploading: !isRegistration  &&  (!r[constants.ROOT_HASH] || Object.keys(r).length === 2),
       isRegistration: isRegistration,
       isLoadingVideo: false,

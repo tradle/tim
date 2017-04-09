@@ -215,8 +215,9 @@ var driverInfo = (function () {
   const clientToIdentifiers = new Map()
   const byUrl = {}
   const byIdentifier = {}
+  const byPath = {}
   const wsClients = {
-    add({ client, url, identifier }) {
+    add({ client, url, identifier, path }) {
       const identifiers = clientToIdentifiers.get(client) || []
       if (identifiers.indexOf(identifier) === -1) identifiers.push(identifier)
 
@@ -224,6 +225,7 @@ var driverInfo = (function () {
 
       if (url) byUrl[url] = client
       if (identifier) byIdentifier[identifier] = client
+      if (path) byPath[path] = client
 
       return client
     },
@@ -232,18 +234,30 @@ var driverInfo = (function () {
 
       return client && clientToIdentifiers.get(client) || []
     },
+    getPath({ client }) {
+      return utils.keyByValue(byPath, client)
+    },
+    getBaseUrl({ client }) {
+      return utils.keyByValue(byUrl, client)
+    },
+    getFullUrl({ client }) {
+      const base = wsClients.getBaseUrl({ client }).replace(/[/]+$/, '')
+      const path = wsClients.getPath({ client }).replace(/^[/]/, '')
+      return `${base}/${path}`
+    },
     byUrl,
     byIdentifier
   }
 
   const restoreMonitors = {}
-  restoreMonitors.add = function ({ node, identifier, url }) {
+  restoreMonitors.add = function ({ node, identifier, url, receive }) {
     if (restoreMonitors[identifier]) return
 
     restoreMonitors[identifier] = monitorMissing({
       node,
       counterparty: identifier,
-      url: `${url}/restore`
+      url: `${url}/restore`,
+      receive
     })
   }
 
@@ -305,6 +319,8 @@ var Store = Reflux.createStore({
       timeout: POLITE_TASK_TIMEOUT
     })
 
+    this._identityPromises = {}
+
     NetInfo.isConnected.addEventListener(
       'change',
       this._handleConnectivityChange.bind(this)
@@ -346,6 +362,20 @@ var Store = Reflux.createStore({
 
     return this.getReady()
   },
+  onAutoRegister(params) {
+    return this.autoRegister()
+    .then(() => {
+      this.setMe(me)
+      return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
+    })
+    .then(() => this.getDriver(me))
+    .then(() => {
+      // this.monitorTim()
+
+      if (me.registeredForPushNotifications)
+        Push.resetBadgeNumber()
+    })
+  },
   async getReady() {
     let me
     try {
@@ -354,7 +384,7 @@ var Store = Reflux.createStore({
       debug('Store.init ' + err.stack)
     }
     let doMonitor = true
-    if (!me  &&  ENV.autoRegister) {
+    if (!me  &&  ENV.autoRegister  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
       me = await this.autoRegister()
       doMonitor = false
     }
@@ -991,6 +1021,7 @@ var Store = Reflux.createStore({
           //     meDriver.receiveMsg.apply(meDriver, arguments)
           //   })
           // }
+          if (utils.getMe())
           results.forEach(provider => {
             this.addProvider(provider)
             Push.subscribe(provider.hash)
@@ -1055,7 +1086,7 @@ var Store = Reflux.createStore({
       self.addProvider(provider)
       self.addToSettings(provider)
 
-      utils.addContactIdentity(meDriver, { identity: provider.identity })
+      self.addContactIdentity({ identity: provider.identity })
 
       let employee = this._getItem(PROFILE + '_' + provider.hash)
       currentEmployees[utils.getId(org)] = employee
@@ -1072,6 +1103,32 @@ var Store = Reflux.createStore({
       debugger
     })
   },
+
+  async meDriverSend(sendParams) {
+    await this.maybeWaitForIdentity(sendParams.to)
+    await meDriver.send(sendParams)
+  },
+  async meDriverSignAndSend(sendParams) {
+    await this.maybeWaitForIdentity(sendParams.to)
+    await meDriver.signAndSend(sendParams)
+  },
+
+  async maybeWaitForIdentity({ permalink }) {
+    if (permalink in this._identityPromises) {
+      await this._identityPromises[permalink]
+    }
+  },
+
+  addContactIdentity({ identity, permalink }) {
+    if (!meDriver) return Promise.reject(new Error('engine is not up yet'))
+    if (!permalink) permalink = utils.getPermalink(identity)
+    if (!(permalink in this._identityPromises)) {
+      this._identityPromises[permalink] = utils.addContactIdentity(meDriver, { identity, permalink })
+    }
+
+    return this._identityPromises[permalink]
+  },
+
   onSetProviderStyle(stylePack) {
     const style = utils.interpretStylesPack(stylePack)
   },
@@ -1113,16 +1170,22 @@ var Store = Reflux.createStore({
       transport = this.getTransport(wsClient)
     }
 
+    const receive = this.idlifyFunction({
+      fn: opts => this.receive({ ...opts, transport })
+    })
+
     wsClients.add({
       client: transport,
       url: url,
-      identifier: provider.hash
+      identifier: provider.hash,
+      path: provider.id
     })
 
     restoreMonitors.add({
       node: meDriver,
       url: `${url.replace(/\/+$/, '')}/${provider.id}`,
-      identifier: provider.hash
+      identifier: provider.hash,
+      receive
     })
 
     if (transportExists) return
@@ -1215,10 +1278,6 @@ var Store = Reflux.createStore({
     //   }
     // })
 
-    const receive = this.idlifyFunction({
-      fn: opts => this.receive({ ...opts, transport })
-    })
-
     transport.on('message', async function (msg, from) {
       debug('queuing receipt of msg from', from)
       if (!wsClients.byIdentifier[from]) {
@@ -1263,9 +1322,9 @@ var Store = Reflux.createStore({
     const payload = msg.object
     const { identity } = payload
     const permalink = utils.getPermalink(identity)
-    await utils.addContactIdentity(meDriver, { identity, permalink })
+    await this.addContactIdentity({ identity, permalink })
     await this.addContact(payload, permalink, msg.forPartials || msg.forContext)
-    const url = utils.keyByValue(wsClients.byUrl, transport)
+    const url = wsClients.getBaseUrl({ client: transport })
     await this.addToSettings({hash: permalink, url: url})
   },
 
@@ -1289,9 +1348,9 @@ var Store = Reflux.createStore({
       [
         {text: translate('Ok'),
         onPress: async () => {
-          await utils.addContactIdentity(meDriver, { identity: payload.identity })
+          await this.addContactIdentity({ identity: payload.identity })
           await this.addContact(payload, rootHash)
-          const url = utils.keyByValue(wsClients.byUrl, transport)
+          const url = wsClients.getBaseUrl({ client: transport })
           this.addToSettings({hash: rootHash, url: url})
         }},
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
@@ -1321,13 +1380,18 @@ var Store = Reflux.createStore({
     )
   },
 
-  async receive({ transport, msg, from }) {
+  async receive(opts) {
     const self = this
+    let { transport, msg, from, isRetry } = opts
     const { tlsKey, wsClients } = driverInfo
+
     let progressUpdate
     let willAnnounceProgress = willShowProgressBar(msg)
     try {
-      msg = tradleUtils.unserializeMessage(msg)
+      if (Buffer.isBuffer(msg)) {
+        msg = tradleUtils.unserializeMessage(msg)
+      }
+
       const payload = msg.object
       // if (payload[TYPE] === 'tradle.SimpleMessage') {
       //   if (half()) return
@@ -1406,6 +1470,26 @@ var Store = Reflux.createStore({
     try {
       await meDriver.receive(msg, { [prop]: identifier })
     } catch (err) {
+      if (err.type === 'unknownidentity') {
+        if (isRetry) {
+          debug('giving up on receiving message', err)
+          return
+        }
+
+        // avoid emitting two progress updates in finally {}
+        progressUpdate = null
+        try {
+          await this.requestIdentity({
+            url: wsClients.getFullUrl({ client: transport }),
+            permalink: identifier
+          })
+
+          await this.receive({ ...opts, isRetry: true })
+        } catch (err) {
+          debug('failed to fetch identity', err)
+        }
+      }
+
       console.warn('failed to receive msg:', err, msg)
     } finally {
       if (progressUpdate) {
@@ -1413,6 +1497,19 @@ var Store = Reflux.createStore({
       }
     }
   },
+
+  async requestIdentity({ url, permalink }) {
+    const response = await utils.fetchWithTimeout(`${url}/identity/${permalink}`, {}, 5000)
+    if (response.status > 300) {
+      throw new Error('statuc code: ' + response.status)
+    }
+
+    const { object } = await response.json()
+    await this.addContactIdentity({
+      identity: object
+    })
+  },
+
   setProviderOnlineStatus(permalink, online) {
     if (!SERVICE_PROVIDERS) return
 
@@ -1731,9 +1828,8 @@ var Store = Reflux.createStore({
 
     var promises = [
       // TODO: evaluate the security of this
-      utils.addContactIdentity(meDriver, {
-        identity: sp.bot.pub,
-        permalink: sp.bot[CUR_HASH]
+      this.addContactIdentity({
+        identity: sp.bot.pub
       })
     ]
 
@@ -2072,7 +2168,8 @@ var Store = Reflux.createStore({
     var toId = IDENTITY + '_' + hash
     rr._sendStatus = self.isConnected ? SENDING : QUEUED
     var noCustomerWaiting
-    return meDriver.sign({ object: toChain })
+    return this.maybeWaitForIdentity({ permalink: hash })
+    .then(() => meDriver.sign({ object: toChain }))
     .then(function(result) {
       toChain = result.object
       let hash = protocol.linkString(result.object)
@@ -2604,6 +2701,7 @@ var Store = Reflux.createStore({
             verificationRequest.verifications = this.buildRef(newVerification)
         }
       }
+      this.trigger({action: 'getItem', resource: verificationRequest})
       // if (!verificationRequest._sharedWith)
       //   verificationRequest._sharedWith = []
       // verificationRequest._sharedWith.push(fromId)
@@ -2656,7 +2754,7 @@ var Store = Reflux.createStore({
   sendMessageToContextOwners(v, recipients, context) {
     return Q.all(recipients.map((to) => {
       let sendParams = this.packMessage(v, me, to, context)
-      return meDriver.send(sendParams)
+      return this.meDriverSend(sendParams)
     }))
   },
 
@@ -3239,7 +3337,7 @@ var Store = Reflux.createStore({
             }
             self._setItem(utils.getId(msg), msg)
             self.addMessagesToChat(orgId, msg)
-            return meDriver.send(sendParams)
+            return self.meDriverSend(sendParams)
           })
           .catch(function (err) {
             console.log('Store.onAddItem: ' + err.message)
@@ -3404,7 +3502,7 @@ var Store = Reflux.createStore({
               }
             }
 
-            return meDriver.send(sendParams)
+            return self.meDriverSend(sendParams)
           }
         })
         .then(function (result) {
@@ -3605,7 +3703,7 @@ var Store = Reflux.createStore({
             context: resource[ROOT_HASH]
           }      // let sendParams = {
         }
-        return meDriver.send(sendParams)
+        return this.meDriverSend(sendParams)
       })
       .catch((err) => {
         debugger
@@ -3714,7 +3812,7 @@ var Store = Reflux.createStore({
   },
   shareForm(document, to, opts, shareBatchId) {
     var time = new Date().getTime()
-    return meDriver.send({...opts, link: this._getItem(document)[CUR_HASH]})
+    return this.meDriverSend({...opts, link: this._getItem(document)[CUR_HASH]})
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
@@ -3756,7 +3854,7 @@ var Store = Reflux.createStore({
       this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
       this.trigger({action: 'addItem', context: resource.context, resource: ver})
     }
-    let promise = resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
+    let promise = resource[CUR_HASH] ? this.meDriverSend({...opts, link: resource[CUR_HASH]}) : Q()
     return promise
     .then(() => {
       if (ver) {
@@ -3873,17 +3971,10 @@ var Store = Reflux.createStore({
               firstName: FRIEND
             }, isRegistration: true})
     }
-
-    return utils.getMe()
   },
   async onGetProvider(params) {
     await this.ready
     await this._loadedResourcesDefer.promise
-    // try {
-    //   await this.getMe()
-    // } catch(err) {
-    //   debug('Store.onGetProvider', err.stack)
-    // }
     let permalink = params.provider
     let serverUrl = params.url
     let providerBot = this._getItem(PROFILE + '_' + permalink)
@@ -3896,7 +3987,7 @@ var Store = Reflux.createStore({
     }
     if (providerBot) {
       let provider = this._getItem(utils.getId(providerBot.organization))
-      this.trigger({action: 'getProvider', provider: provider})
+      this.trigger({action: 'getProvider', provider: provider, termsAccepted: params.termsAccepted})
     }
   },
   getProviderById(providerId) {
@@ -5844,6 +5935,7 @@ var Store = Reflux.createStore({
         }
         catch (err) {
           if (attempts === maxAttempts) {
+            console.log('No access to the server: ' + v)
             this.trigger({action: 'noAccessToServer'})
             return
           }
@@ -6164,7 +6256,7 @@ var Store = Reflux.createStore({
     if (disableAutoResponse)
       opts.other = { disableAutoResponse: true }
 
-    return meDriver.signAndSend(opts)
+    return this.meDriverSignAndSend(opts)
     .catch(function(err) {
       debugger
     })
@@ -7546,7 +7638,7 @@ var Store = Reflux.createStore({
         delete list[id]
       })
       this.trigger({action: 'messageList', modelName: MESSAGE, to: resource, forgetMeFromCustomer: true})
-      return meDriver.signAndSend({
+      return this.meDriverSignAndSend({
         object: { [TYPE]: FORGOT_YOU },
         to: { permalink: resource[ROOT_HASH] }
       })
@@ -7840,7 +7932,7 @@ var Store = Reflux.createStore({
     this.trigger({action: 'messageList', list: result, resource: resource})
     var key = IDENTITY + '_' + orgRep[ROOT_HASH]
 
-    return meDriver.signAndSend({
+    return this.meDriverSignAndSend({
       object: msg,
       to: { fingerprint: this.getFingerprint(this._getItem(key)) }
     })
@@ -7859,7 +7951,7 @@ var Store = Reflux.createStore({
     let promises = []
 
     for (let rep of orgReps) {
-      promises.push(meDriver.signAndSend({
+      promises.push(this.meDriverSignAndSend({
         object: msg,
         to: { fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH])) }
       })
@@ -8204,7 +8296,7 @@ var Store = Reflux.createStore({
 
     let me = this._getItem(PROFILE + '_' + pairingData.identity)
     return this.getDriver(me)
-    .then(() =>  utils.addContactIdentity(meDriver, { identity: pairingRes.prev }))
+    .then(() =>  this.addContactIdentity({ identity: pairingRes.prev }))
     .then(() => {
       Q.ninvoke(meDriver, 'setIdentity', {
         keys: meDriver.keys.concat(pairingRes.identity.pubkeys),

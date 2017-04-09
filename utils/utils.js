@@ -266,7 +266,7 @@ var utils = {
             return false
         }
         else if (properties[p].inlined  ||  (properties[p].ref  &&  this.getModel(properties[p].ref).value.inlined))
-          return this.compare(r1[p], r2[p], properties[p].inlined)
+          return this.compare(r1[p], r2[p], true)
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
@@ -1814,6 +1814,16 @@ var utils = {
       return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
     }
   },
+  rangeToArray: function (range) {
+    const [min, max] = range
+    const arr = new Array(max - min + 1)
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] = min + i
+    }
+
+    return arr
+  }
+
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
   //   let fromId = utils.getId(r.from)

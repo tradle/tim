@@ -18,9 +18,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
     },
     "@tradle/engine": {
-      "version": "4.5.2",
+      "version": "4.8.1",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.5.2.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-4.8.1.tgz",
       "dependencies": {
         "async": {
           "version": "2.1.5",
@@ -78,10 +78,22 @@
       "from": "@tradle/protocol@latest",
       "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz"
     },
+    "@tradle/receive-in-order": {
+      "version": "1.0.0",
+      "from": "git://github.com/tradle/receive-in-order.git#c7e45ecec84835a59cf4717a2d3ebdf27393d7f1",
+      "resolved": "git://github.com/tradle/receive-in-order.git#c7e45ecec84835a59cf4717a2d3ebdf27393d7f1",
+      "dependencies": {
+        "bluebird": {
+          "version": "3.5.0",
+          "from": "bluebird@>=3.5.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
+        }
+      }
+    },
     "@tradle/restore": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/restore.git#508f64be9be738215ad10260ce90756e96626c68",
-      "resolved": "git://github.com/tradle/restore.git#508f64be9be738215ad10260ce90756e96626c68",
+      "from": "git://github.com/tradle/restore.git#ef52a9c1e51393abe269987513902aaf50db6791",
+      "resolved": "git://github.com/tradle/restore.git#ef52a9c1e51393abe269987513902aaf50db6791",
       "dependencies": {
         "bluebird": {
           "version": "3.5.0",
@@ -5680,12 +5692,12 @@
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
+          "from": "isarray@~1.0.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "readable-stream": {
           "version": "2.2.6",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
+          "from": "readable-stream@^2.0.5",
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.6.tgz"
         }
       }
