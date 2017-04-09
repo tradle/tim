@@ -391,7 +391,7 @@ var Store = Reflux.createStore({
       debug('Store.init ' + err.stack)
     }
     let doMonitor = true
-    if (!me  &&  ENV.autoRegister  &&  ENV.registrationWithoutTermsAndConditions) {
+    if (!me  &&  ENV.autoRegister  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
       me = await this.autoRegister()
       doMonitor = false
     }
@@ -1104,6 +1104,15 @@ var Store = Reflux.createStore({
     .catch((err) => {
       debugger
     })
+  },
+
+  async meDriverSign(sendParams) {
+    await this.maybeWaitForIdentity(sendParams.to)
+    await meDriver.sign(sendParams)
+  },
+  async meDriverSignAndSend(sendParams) {
+    await this.maybeWaitForIdentity(sendParams.to)
+    await meDriver.signAndSend(sendParams)
   },
 
   async maybeWaitForIdentity({ permalink }) {
@@ -2746,7 +2755,7 @@ var Store = Reflux.createStore({
   sendMessageToContextOwners(v, recipients, context) {
     return Q.all(recipients.map((to) => {
       let sendParams = this.packMessage(v, me, to, context)
-      return meDriver.send(sendParams)
+      return this.meDriverSend(sendParams)
     }))
   },
   onGetTo(key) {
@@ -3328,7 +3337,7 @@ var Store = Reflux.createStore({
             }
             self._setItem(utils.getId(msg), msg)
             self.addMessagesToChat(orgId, msg)
-            return meDriver.send(sendParams)
+            return self.meDriverSend(sendParams)
           })
           .catch(function (err) {
             console.log('Store.onAddItem: ' + err.message)
@@ -3494,7 +3503,7 @@ var Store = Reflux.createStore({
               }
             }
 
-            return meDriver.send(sendParams)
+            return self.meDriverSend(sendParams)
           }
         })
         .then(function (result) {
@@ -3695,7 +3704,7 @@ var Store = Reflux.createStore({
             context: resource[ROOT_HASH]
           }      // let sendParams = {
         }
-        return meDriver.send(sendParams)
+        return this.meDriverSend(sendParams)
       })
       .catch((err) => {
         debugger
@@ -3804,7 +3813,7 @@ var Store = Reflux.createStore({
   },
   shareForm(document, to, opts, shareBatchId) {
     var time = new Date().getTime()
-    return meDriver.send({...opts, link: this._getItem(document)[CUR_HASH]})
+    return this.meDriverSend({...opts, link: this._getItem(document)[CUR_HASH]})
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
@@ -3846,7 +3855,7 @@ var Store = Reflux.createStore({
       this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
       this.trigger({action: 'addItem', context: resource.context, resource: ver})
     }
-    let promise = resource[CUR_HASH] ? meDriver.send({...opts, link: resource[CUR_HASH]}) : Q()
+    let promise = resource[CUR_HASH] ? this.meDriverSend({...opts, link: resource[CUR_HASH]}) : Q()
     return promise
     .then(() => {
       if (ver) {
@@ -6196,7 +6205,7 @@ var Store = Reflux.createStore({
     if (disableAutoResponse)
       opts.other = { disableAutoResponse: true }
 
-    return meDriver.signAndSend(opts)
+    return this.meDriverSignAndSend(opts)
     .catch(function(err) {
       debugger
     })
@@ -7568,7 +7577,7 @@ var Store = Reflux.createStore({
         delete list[id]
       })
       this.trigger({action: 'messageList', modelName: MESSAGE, to: resource, forgetMeFromCustomer: true})
-      return meDriver.signAndSend({
+      return this.meDriverSignAndSend({
         object: { [TYPE]: FORGOT_YOU },
         to: { permalink: resource[ROOT_HASH] }
       })
@@ -7862,7 +7871,7 @@ var Store = Reflux.createStore({
     this.trigger({action: 'messageList', list: result, resource: resource})
     var key = IDENTITY + '_' + orgRep[ROOT_HASH]
 
-    return meDriver.signAndSend({
+    return this.meDriverSignAndSend({
       object: msg,
       to: { fingerprint: this.getFingerprint(this._getItem(key)) }
     })
@@ -7881,7 +7890,7 @@ var Store = Reflux.createStore({
     let promises = []
 
     for (let rep of orgReps) {
-      promises.push(meDriver.signAndSend({
+      promises.push(this.meDriverSignAndSend({
         object: msg,
         to: { fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH])) }
       })
