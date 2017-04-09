@@ -87,7 +87,6 @@
     "react-native-fabric-crashlytics": "0.1.8",
     "react-native-flexbox-grid": "^0.2.2",
     "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#pointerEvents",
-    "react-native-fs": "^1.5.1",
     "react-native-gallery": "0.0.17",
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password#6ccf2955",
     "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#72cd032",
