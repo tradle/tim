@@ -47,6 +47,10 @@ module.exports = function createCalendarModal (props) {
   }
 
   let { theme, selectedDate } = calendarProps
+  if (selectedDate.getTime) {
+    selectedDate = selectedDate.getTime()
+  }
+
   const okButtonStyle = {
     backgroundColor: theme.selectionColor
   }
