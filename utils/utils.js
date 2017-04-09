@@ -1822,7 +1822,7 @@ var utils = {
     }
 
     return arr
-  }
+  },
 
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
