@@ -228,7 +228,6 @@ dependencies {
     compile project(':react-native-linear-gradient')
     compile project(':react-native-keychain')
     compile project(':react-native-image-picker')
-    compile project(':react-native-fs')
     compile project(':react-native-device-info')
     compile project(':react-native-code-push')
     compile project(':react-native-camera')
