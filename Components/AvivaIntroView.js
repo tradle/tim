@@ -99,7 +99,7 @@ class AvivaIntroView extends Component {
              <TouchableOpacity style={{paddingRight:10}} onPress={() => this.goto(LEARN_MORE_URL)}>
                <Text style={[styles.text, {paddingLeft: 5, paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Learn more  &bull;</Text>
              </TouchableOpacity>
-             <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showHtml(avivaTC, 'termsAndConditions')}>
+             <TouchableOpacity style={{paddingRight:10}} onPress={utils.getMe() ? this.showHtml.bind(this, avivaTC, 'termsAndConditions') : this.showChat.bind(this, this.props.provider)}>
                <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Terms of use  &bull;</Text>
              </TouchableOpacity>
              <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showHtml(avivaContact, 'contactUs')}>
