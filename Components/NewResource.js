@@ -28,10 +28,6 @@ var StyleSheet = require('../StyleSheet')
 import ImageInput from './ImageInput'
 var chatStyles = require('../styles/chatStyles')
 
-var guidance = {
-  'tradle.PhotoID': 'Please select a document type then click on Upload and locate your previously scanned document from your computer.'
-}
-
 import CustomIcon from '../styles/customicons'
 const ENUM = 'tradle.Enum'
 var LINK_COLOR
@@ -790,12 +786,23 @@ class NewResource extends Component {
       jsons = <View/>
 
     let bankStyle = this.props.bankStyle
-    let guidanceMsg = guidance[meta.id]
-    if (guidanceMsg) {
-      let st ={padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}
-      guidanceMsg = <View style={st}>
-                      <Text style={{fontSize: 18}}>{guidanceMsg}</Text>
+
+    // HACK
+    let guidanceMsg
+    if (meta.id === 'tradle.PhotoID') {
+      guidanceMsg = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                      <Text style={{fontSize: 18}}>{'Uploading a picture of your document to your computer.'}</Text>
+                      <Text style={{fontSize: 18}}>1.
+                        <Text style={{fontSize: 18, paddingLeft: 10}}>Take a photo of your document using your smartphone, tablet, camera or scanner.</Text>
+                      </Text>
+                      <Text style={{fontSize: 18}}>2.
+                        <Text style={{fontSize: 18, paddingLeft: 10}}>Save to your computer by connecting your device to the computer using usb cable or email the photos to yourself and save them to a file on yout computer.</Text>
+                      </Text>
+                      <Text style={{fontSize: 18}}>3.
+                      <Text style={{fontSize: 18, paddingLeft: 10}}>Use the upload option to choose the image from your computer.</Text>
+                      </Text>
                     </View>
+
     }
     var content =
       <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center'}}
