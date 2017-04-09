@@ -86,15 +86,10 @@
       }
     },
     "@tradle/multiqueue": {
-      "version": "1.1.3",
+      "version": "1.2.0",
       "from": "@tradle/multiqueue@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/multiqueue/-/multiqueue-1.1.3.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/multiqueue/-/multiqueue-1.2.0.tgz",
       "dependencies": {
-        "bluebird": {
-          "version": "3.5.0",
-          "from": "bluebird@>=3.5.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
-        },
         "debug": {
           "version": "2.6.3",
           "from": "debug@>=2.6.3 <3.0.0",
@@ -144,8 +139,8 @@
     },
     "@tradle/restore": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/restore.git#70c271572c470bf908259c6b9ce6606e2553d97a",
-      "resolved": "git://github.com/tradle/restore.git#70c271572c470bf908259c6b9ce6606e2553d97a",
+      "from": "git://github.com/tradle/restore.git#a783c0adc0fa52cdd8452d2ea11025f343e737eb",
+      "resolved": "git://github.com/tradle/restore.git#a783c0adc0fa52cdd8452d2ea11025f343e737eb",
       "dependencies": {
         "debug": {
           "version": "2.6.3",
@@ -304,7 +299,7 @@
     },
     "any-promise": {
       "version": "1.3.0",
-      "from": "any-promise@>=1.3.0 <2.0.0",
+      "from": "any-promise@latest",
       "resolved": "https://registry.npmjs.org/any-promise/-/any-promise-1.3.0.tgz"
     },
     "archive-type": {
@@ -965,14 +960,14 @@
       "resolved": "https://registry.npmjs.org/blob/-/blob-0.0.4.tgz"
     },
     "bluebird": {
-      "version": "2.11.0",
-      "from": "bluebird@>=2.8.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-2.11.0.tgz"
+      "version": "3.4.6",
+      "from": "bluebird@3.4.6",
+      "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.6.tgz"
     },
     "bluebird-q": {
-      "version": "1.0.3",
-      "from": "bluebird-q@>=1.0.3 <2.0.0",
-      "resolved": "https://registry.npmjs.org/bluebird-q/-/bluebird-q-1.0.3.tgz"
+      "version": "2.1.1",
+      "from": "bluebird-q@latest",
+      "resolved": "https://registry.npmjs.org/bluebird-q/-/bluebird-q-2.1.1.tgz"
     },
     "bn.js": {
       "version": "4.11.6",
@@ -6446,16 +6441,9 @@
       "resolved": "https://registry.npmjs.org/y18n/-/y18n-3.2.1.tgz"
     },
     "ya-promise-queue": {
-      "version": "1.0.0",
-      "from": "ya-promise-queue@1.0.0",
-      "resolved": "https://registry.npmjs.org/ya-promise-queue/-/ya-promise-queue-1.0.0.tgz",
-      "dependencies": {
-        "bluebird": {
-          "version": "3.5.0",
-          "from": "bluebird@>=3.4.7 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.5.0.tgz"
-        }
-      }
+      "version": "1.1.0",
+      "from": "ya-promise-queue@latest",
+      "resolved": "https://registry.npmjs.org/ya-promise-queue/-/ya-promise-queue-1.1.0.tgz"
     },
     "yallist": {
       "version": "2.0.0",

@@ -40,6 +40,8 @@ if (typeof btoa === 'undefined') global.btoa = require('btoa')
 
 require('debug').formatters.j = require('json-stringify-safe')
 
+require('any-promise/register/bluebird')
+
 // global.location = global.location || { port: 80 }
 
 // ;[
