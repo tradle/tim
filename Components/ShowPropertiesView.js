@@ -203,7 +203,7 @@ class ShowPropertiesView extends Component {
         }
       }
       else if (pMeta.type === 'date')
-        val = dateformat(new Date(val), 'fullDate')
+        val = dateformat(new Date(val), 'fullDate', true)
       // else if (pMeta[constants.SUB_TYPE] === 'email') {
       //   isEmail = true
       //   val = <TouchableOpacity onPress={() => Communications.email([val], null, null, 'My Subject','My body text')}>

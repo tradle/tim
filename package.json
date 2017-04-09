@@ -122,7 +122,7 @@
     "react-native-env": "github:tradle/react-native-env",
     "react-native-flexbox-grid": "^0.2.2",
     "react-native-floating-labels": "github:pgmemk/react-native-floating-labels#pointerEvents",
-    "react-native-fs": "^1.5.1",
+    "react-native-gallery": "0.0.17",
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password#6ccf2955",
     "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#72cd032",
     "react-native-http": "github:tradle/react-native-http#834492d",
