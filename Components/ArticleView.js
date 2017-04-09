@@ -13,7 +13,6 @@ import utils from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 
 var defaultBankStyle = require('../styles/bankStyle.json')
-var utils = require('../utils/utils');
 var translate = utils.translate
 
 
