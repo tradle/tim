@@ -1005,7 +1005,7 @@
 						};
 					};
 					73967E4D1E639DDC00AD5854 = {
-						DevelopmentTeam = 94V7783F74;
+						DevelopmentTeam = 6CCCPR4NGB;
 						ProvisioningStyle = Manual;
 						SystemCapabilities = {
 							com.apple.Keychain = {
@@ -1697,7 +1697,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEAD_CODE_STRIPPING = NO;
 				DEPLOYMENT_POSTPROCESSING = NO;
-				DEVELOPMENT_TEAM = 94V7783F74;
+				DEVELOPMENT_TEAM = 6CCCPR4NGB;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1735,10 +1735,10 @@
 					"-all_load",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.aviva;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uk.aviva.id;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "caa6fe83-40ff-43eb-aafe-b85910e1b247";
-				PROVISIONING_PROFILE_SPECIFIER = "Aviva Dev Profile";
+				PROVISIONING_PROFILE = "d4298664-f89d-48bf-9549-ce2d0743009a";
+				PROVISIONING_PROFILE_SPECIFIER = "Aviva ID Development";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1752,7 +1752,7 @@
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEPLOYMENT_POSTPROCESSING = NO;
-				DEVELOPMENT_TEAM = 94V7783F74;
+				DEVELOPMENT_TEAM = 6CCCPR4NGB;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1790,10 +1790,10 @@
 					"-all_load",
 					"$(inherited)",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.aviva;
+				PRODUCT_BUNDLE_IDENTIFIER = co.uk.aviva.id;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "caa6fe83-40ff-43eb-aafe-b85910e1b247";
-				PROVISIONING_PROFILE_SPECIFIER = "Aviva Dev Profile";
+				PROVISIONING_PROFILE = "d4298664-f89d-48bf-9549-ce2d0743009a";
+				PROVISIONING_PROFILE_SPECIFIER = "Aviva ID Development";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

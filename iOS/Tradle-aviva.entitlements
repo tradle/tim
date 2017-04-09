@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)io.tradle.dev.aviva</string>
+		<string>$(AppIdentifierPrefix)co.uk.aviva.id</string>
 	</array>
 </dict>
 </plist>
