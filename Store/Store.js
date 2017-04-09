@@ -1106,7 +1106,7 @@ var Store = Reflux.createStore({
     })
   },
 
-  async meDriverSign(sendParams) {
+  async meDriverSend(sendParams) {
     await this.maybeWaitForIdentity(sendParams.to)
     await meDriver.sign(sendParams)
   },
