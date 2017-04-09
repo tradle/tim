@@ -135,28 +135,28 @@ class AvivaIntroView extends Component {
       return
     }
     this.props.showChat(provider, true)
-    return
-    var msg = {
-      message: translate('customerWaiting', me.firstName),
-      _t: CUSTOMER_WAITING,
-      from: me,
-      to: provider,
-      time: new Date().getTime()
-    }
+    // return
+    // var msg = {
+    //   message: translate('customerWaiting', me.firstName),
+    //   _t: CUSTOMER_WAITING,
+    //   from: me,
+    //   to: provider,
+    //   time: new Date().getTime()
+    // }
 
-    utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
-    this.props.navigator.push({
-      title: provider.name,
-      component: MessageList,
-      id: 11,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: provider,
-        modelName: MESSAGE,
-        currency: this.props.currency,
-        bankStyle:  this.props.bankStyle
-      }
-    })
+    // utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
+    // this.props.navigator.push({
+    //   title: provider.name,
+    //   component: MessageList,
+    //   id: 11,
+    //   backButtonTitle: 'Back',
+    //   passProps: {
+    //     resource: provider,
+    //     modelName: MESSAGE,
+    //     currency: this.props.currency,
+    //     bankStyle:  this.props.bankStyle
+    //   }
+    // })
   }
   showTerms() {
     this.props.navigator.push({
