@@ -564,9 +564,10 @@ class TimHome extends Component {
         bankStyle:  style
       }
     }
-    // if (termsAccepted)
-    //   this.props.navigator.replace(route)
-    // else
+    let routes = this.props.navigator.getCurrentRoutes()
+    if (termsAccepted  &&  routes.length === 3)
+      this.props.navigator.replace(route)
+    else
       this.props.navigator.push(route)
   }
   showLandingPage(provider, landingPage) {
