@@ -135,11 +135,6 @@
       "from": "git://github.com/tradle/restore.git#70c271572c470bf908259c6b9ce6606e2553d97a",
       "resolved": "git://github.com/tradle/restore.git#70c271572c470bf908259c6b9ce6606e2553d97a",
       "dependencies": {
-        "co": {
-          "version": "4.6.0",
-          "from": "co@>=4.6.0 <5.0.0",
-          "resolved": "https://registry.npmjs.org/co/-/co-4.6.0.tgz"
-        },
         "debug": {
           "version": "2.6.3",
           "from": "debug@>=2.6.3 <3.0.0",
@@ -2503,9 +2498,9 @@
       "resolved": "https://registry.npmjs.org/clone-stats/-/clone-stats-0.0.1.tgz"
     },
     "co": {
-      "version": "3.1.0",
-      "from": "co@3.1.0",
-      "resolved": "https://registry.npmjs.org/co/-/co-3.1.0.tgz"
+      "version": "4.6.0",
+      "from": "co@>=4.0.0 <5.0.0",
+      "resolved": "https://registry.npmjs.org/co/-/co-4.6.0.tgz"
     },
     "coa": {
       "version": "1.0.1",
@@ -9189,7 +9184,14 @@
     "wrap-fn": {
       "version": "0.1.5",
       "from": "wrap-fn@>=0.1.0 <0.2.0",
-      "resolved": "https://registry.npmjs.org/wrap-fn/-/wrap-fn-0.1.5.tgz"
+      "resolved": "https://registry.npmjs.org/wrap-fn/-/wrap-fn-0.1.5.tgz",
+      "dependencies": {
+        "co": {
+          "version": "3.1.0",
+          "from": "co@3.1.0",
+          "resolved": "https://registry.npmjs.org/co/-/co-3.1.0.tgz"
+        }
+      }
     },
     "wrappy": {
       "version": "1.0.2",
