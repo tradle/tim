@@ -1106,9 +1106,9 @@ var NewResourceMixin = {
 
     let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
     let format = 'MMMM Do, YYYY'
+    // let format = 'YYYY-MM-DD'
     let value = params.value &&  moment(new Date(params.value)).format(format)
     let dateProps = {}
-    let date
     if (prop.maxDate  ||  prop.minDate) {
       let maxDate = this.getDateRange(prop.maxDate)
       let minDate = this.getDateRange(prop.minDate)
@@ -1134,9 +1134,9 @@ var NewResourceMixin = {
             format={format}
             confirmBtnText="Confirm"
             cancelBtnText="Cancel"
-            date={params.value ? new Date(params.value) : date ? date : null}
+            date={params.value ? moment.utc(params.value).toDate() : null}
             onDateChange={(date) => {
-              this.changeTime(params.prop, new Date(moment(date, format)))
+              this.changeTime(params.prop, moment.utc(date, format).toDate())
             }}
             customStyles={{
               dateInput: styles.dateInput,
