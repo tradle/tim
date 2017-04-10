@@ -1152,7 +1152,11 @@ var NewResourceMixin = {
             cancelBtnText="Cancel"
             date={params.value ? moment.utc(params.value).toDate() : null}
             onDateChange={(date) => {
-              this.changeTime(params.prop, moment.utc(date, format).toDate())
+              if (!(date instanceof Date)) {
+                date = moment.utc(date, format).toDate()
+              }
+
+              this.changeTime(params.prop, date)
             }}
             customStyles={{
               dateInput: styles.dateInput,

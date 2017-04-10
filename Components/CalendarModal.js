@@ -88,7 +88,8 @@ module.exports = function createCalendarModal (props) {
   )
 
   function onSelect (moment) {
-    selectedDate = moment.toDate().getTime()
+    // throw out timezone data
+    selectedDate = Date.UTC(moment.year(), moment.month(), moment.date())
   }
 }
 
