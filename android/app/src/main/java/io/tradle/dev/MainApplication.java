@@ -20,7 +20,6 @@ import com.microsoft.codepush.react.CodePush;
 import com.oblador.keychain.KeychainPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.rn.ecc.ECCPackage;
-import com.rnfs.RNFSPackage;
 import com.smixx.fabric.FabricPackage;
 import com.tradle.react.UdpSocketsModule;
 
@@ -60,7 +59,6 @@ public class MainApplication extends Application implements ReactApplication {
         // new RNOSModule(),
         new ReactNativePushNotificationPackage(),
         new RNDeviceInfo(),
-        new RNFSPackage(),
         new ImagePickerPackage(),
         new RandomBytesPackage(),
         new KeychainPackage(),

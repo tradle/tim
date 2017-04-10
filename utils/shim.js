@@ -47,6 +47,8 @@ if (typeof global.Buffer === 'undefined') {
   global.Buffer = require('buffer').Buffer
 }
 
+require('any-promise/register/bluebird')
+
 function cleanup (err) {
   console.log('cleanup', arguments)
 }

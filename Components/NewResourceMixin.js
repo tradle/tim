@@ -1123,7 +1123,7 @@ var NewResourceMixin = {
     let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
     let format = 'MMMM Do, YYYY'
     // let format = 'YYYY-MM-DD'
-    let value = params.value &&  moment(new Date(params.value)).format(format)
+    let value = params.value &&  moment.utc(new Date(params.value)).format(format)
     let dateProps = {}
     if (prop.maxDate  ||  prop.minDate) {
       let maxDate = this.getDateRange(prop.maxDate)
