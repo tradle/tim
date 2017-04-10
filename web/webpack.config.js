@@ -166,7 +166,7 @@ if (!isHot) {
       },
       {
         name: 'crypto',
-        path: /node_modules\/.*?(bitcoin|crypto|bn\.js|elliptic|nkey|secp256k1|forward-secrecy)\//
+        path: /node_modules\/.*?(bitcoin|crypto|bn\.js|elliptic|nkey[-a-zA-Z0-9]*|secp256k1|forward-secrecy)\//
       },
       {
         name: 'utils',
