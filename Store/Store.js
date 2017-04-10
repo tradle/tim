@@ -308,6 +308,7 @@ var Store = Reflux.createStore({
   listenables: [Actions],
   // this will be called by all listening components as they register their listeners
   init() {
+    utils.setGlobal('WIPE_DEVICE', this.wipe.bind(this))
     return this.ready = this._init()
   },
   async _init() {
