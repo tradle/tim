@@ -3848,7 +3848,9 @@ var Store = Reflux.createStore({
     let batch = []
     // Get the whole resource
     document = this._getItem(utils.getId(document))
-    let verifications = document.verifications
+    let verifications
+    if (document.verifications)
+      verifications = document.verifications
     let shareBatchId = new Date().getTime()
     let doShareDocument = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
     let promise = doShareDocument
@@ -7044,7 +7046,8 @@ debug('publishMyIdentity: ')
       val.to = inDB.to
       val._context = inDB._context
       val._sharedWith = inDB._sharedWith
-      val.verifications = inDB.verifications
+      if (inDB.verifications)
+        val.verifications = inDB.verifications
       if (val.txId  &&  !inDB.txId) {
         val.time = inDB.time
         val.sealedTime = val.time || obj.timestamp
