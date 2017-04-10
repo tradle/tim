@@ -516,10 +516,12 @@ class MessageList extends Component {
     if (!bgImage  &&  bankStyle.BACKGROUND_COLOR)
       bgStyle = {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
     var alert = <View />
+    let hideTextInput = !utils.hasSupportLine(resource)  // &&  !ENV.allowForgetMe
+
     if (!this.state.list || !this.state.list.length) {
       if (this.props.navigator.isConnected  &&  resource[TYPE] === TYPES.ORGANIZATION) {
         if (this.state.isLoading) {
-          var menuBtn = this.hasMenuButton() && (
+          var menuBtn = !hideTextInput /*this.hasMenuButton() */ && (
             <View style={styles.footer}>
               {this.paintMenuButton()}
             </View>
@@ -551,7 +553,6 @@ class MessageList extends Component {
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
 
-      let hideTextInput = !utils.hasSupportLine(resource)  // &&  !ENV.allowForgetMe
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
       // Chooser for trusted party verifier
@@ -639,7 +640,7 @@ class MessageList extends Component {
       //   }
       // ]}
     let me = utils.getMe()
-    let actionSheet = this.renderActionSheet()
+    let actionSheet = !hideTextInput  && this.renderActionSheet()
     let context = this.state.context
     let network
     if (this.props.originatingMessage)
