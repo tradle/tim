@@ -699,7 +699,9 @@ var Store = Reflux.createStore({
     console.log('me: ' + meDriver.permalink)
     utils.setGlobal('TRADLE_USER_PERMALINK', meDriver.permalink)
     meDriver = tradleUtils.promisifyNode(meDriver)
-    this.idlifyExpensiveCalls()
+    if (Platform.OS !== 'web') {
+      this.idlifyExpensiveCalls()
+    }
 
     // TODO: figure out of we need to publish identities
     meDriver.identityPublishStatus = meDriver.identitySealStatus
