@@ -3,11 +3,14 @@
 import {
   StyleSheet,
   View,
-  Text
+  Text,
+  Dimensions
 } from 'react-native'
 
 import React, { Component, PropTypes } from 'react'
 import Dropzone from 'react-dropzone'
+import { makeResponsive } from 'react-native-orient'
+import deepEqual from 'deep-equal'
 import utils from '../utils/utils'
 
 class DropPage extends Component {
@@ -32,10 +35,15 @@ class DropPage extends Component {
     }
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    return !deepEqual(nextState, this.state) || !deepEqual(nextProps, this.props)
+  }
+
   render() {
+    const { height } = Dimensions.get('window')
     let overlay
     if (this.state.active) {
-      overlay = <View style={styles.overlay} />
+      overlay = <View style={[styles.overlay, { height }]} />
     }
 
     return (
@@ -49,7 +57,7 @@ class DropPage extends Component {
         disableClick="true"
       >
         {overlay}
-        <View style={styles.inner}>
+        <View style={[styles.inner, { height }]}>
           {this.props.children}
         </View>
       </Dropzone>
@@ -62,7 +70,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    height: '100%',
+    flexGrow: 1,
     width: '100%',
     backgroundColor: 'rgba(0, 100, 0, 0.2)',
     borderWidth: 2,
@@ -70,8 +78,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgb(0, 100, 0)'
   },
   inner: {
-    flex: 1,
-    height: '100%'
+    flexGrow: 1
   },
   separator: {
     borderColor: 'transparent',
@@ -80,4 +87,4 @@ const styles = StyleSheet.create({
   },
 })
 
-module.exports = DropPage
+module.exports = makeResponsive(DropPage)
