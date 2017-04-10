@@ -95,7 +95,8 @@ const merged = extend({
   brandBackground: 'tradle',
   delayBetweenExpensiveTasks: 100,
   appName: 'Tradle',
-  navBarHeight: navBarHeight
+  navBarHeight: navBarHeight,
+  timeZoneOffset: new Date().getTimezoneOffset() * 60 * 1000
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
