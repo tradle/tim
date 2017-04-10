@@ -779,7 +779,8 @@ var Store = Reflux.createStore({
       const recipientHash = recipientInfo.permalink
       let messenger = wsClients.byIdentifier[recipientHash]
       if (!messenger) {
-        const url = self._getItem(SETTINGS + '_1').hashToUrl[recipientHash]
+        let hashToUrl = self._getItem(SETTINGS + '_1').hashToUrl
+        const url = hashToUrl  &&  hashToUrl[recipientHash]
         messenger = url && wsClients.byUrl[url]
       }
 

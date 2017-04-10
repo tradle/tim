@@ -71,8 +71,9 @@ import {
 
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles, {MenuIcon} from '../styles/platform'
-var ENV = require('../utils/env')
+import ENV from '../utils/env'
 
+const NAV_BAR_HEIGHT = ENV.navBarHeight
 var currentMessageTime
 
 class MessageList extends Component {
@@ -577,7 +578,7 @@ class MessageList extends Component {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
 
       let h = utils.dimensions(MessageList).height
-      var maxHeight = h - (utils.isWeb() ? 0 : utils.isAndroid() ? 85 : 64)
+      var maxHeight = h - NAV_BAR_HEIGHT
       // Chooser for trusted party verifier
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
