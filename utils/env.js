@@ -35,6 +35,11 @@ const brandBG = {
   aviva: require('../img/Aviva.png')
 }
 
+const navBarHeight = Platform.select({
+  android: 85,
+  ios: 64
+})
+
 const merged = extend({
   GCM_SENDER_ID: '633104277721',
   serviceID: 'tradle',
@@ -89,7 +94,8 @@ const merged = extend({
   splashContrastColor: 'tradle',
   brandBackground: 'tradle',
   delayBetweenExpensiveTasks: 100,
-  appName: 'Tradle'
+  appName: 'Tradle',
+  navBarHeight: navBarHeight
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]

@@ -73,6 +73,7 @@ import ActivityIndicator from './ActivityIndicator'
 import platformStyles, {MenuIcon} from '../styles/platform'
 import ENV from '../utils/env'
 
+const NAV_BAR_HEIGHT = ENV.navBarHeight
 var currentMessageTime
 
 class MessageList extends Component {
@@ -553,7 +554,7 @@ class MessageList extends Component {
 
       let hideTextInput = !utils.hasSupportLine(resource)  // &&  !ENV.allowForgetMe
       let h = utils.dimensions(MessageList).height
-      var maxHeight = h - (Platform.OS === 'android' ? 85 : 64)
+      var maxHeight = h - NAV_BAR_HEIGHT
       // Chooser for trusted party verifier
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
