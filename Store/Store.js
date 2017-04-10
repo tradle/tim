@@ -66,7 +66,7 @@ var sha = require('stable-sha1');
 var utils = require('../utils/utils');
 var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
-var promisify = require('q-level');
+var promisify = require('pify');
 var debounce = require('debounce')
 var asyncstorageDown = require('asyncstorage-down')
 var levelup = require('levelup')
@@ -328,10 +328,12 @@ var Store = Reflux.createStore({
   async _init() {
     const self = this
     // Setup components:
-    const ldb = level('TiM.db', { valueEncoding: 'json' });
+    db = level('TiM.db', { valueEncoding: 'json' });
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
     // ldb.query.use(jsonqueryEngine());
-    db = promisify(ldb);
+    ;['get', 'put', 'batch', 'del'].forEach(method => {
+      db[method] = promisify(db[method].bind(db))
+    })
 
     this.announcePresence = debounce(this.announcePresence.bind(this), 100)
     this._loadedResourcesDefer = Q.defer()
@@ -8439,24 +8441,6 @@ var Store = Reflux.createStore({
           .catch(function(err) {
             err = err;
           });
-  },
-  clearDb() {
-    var self = this;
-    return db.createReadStream()
-    .on('data', function(data) {
-       db.del(data.key, function(err) {
-         err = err;
-       })
-    })
-    .on('error', function (err) {
-      console.log('Oh my!', err.name + ': ' + err.message)
-    })
-    .on('close', function (err) {
-      console.log('Stream closed');
-    })
-    .on('end', function () {
-      console.log('Stream end');
-    })
   },
 
   onStartTransition() {
