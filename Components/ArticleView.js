@@ -79,11 +79,12 @@ var styles = StyleSheet.create({
     color: '#7AAAC3'
   },
   webView: {
+    flexGrow: 1,
     backgroundColor: '#ffffff',
     marginTop: 60,
-    height: utils.isWeb() ? '100%' : 350
-  },
-
+    // don't set height on web
+    // height: utils.isWeb() ? '100%' : 350
+  }
 })
 
 module.exports = ArticleView;
