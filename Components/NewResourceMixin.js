@@ -1339,9 +1339,16 @@ var NewResourceMixin = {
     }
     let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
     color = {color: this.state.isRegistration ? '#eeeeee' : resource && resource[params.prop] ? '#555555' :  '#AAAAAA'}
-    let propView = photoR
-                 ? <Image source={{uri: photoR.url}} style={styles.thumb} />
-                 : <Text style={[styles.input, fontSize, color]}>{label}</Text>
+    let propView
+    if (photoR) {
+      if (utils.isImageDataURL(photoR.url)) {
+        propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
+      } else {
+        propView = <Icon name='ios-paper-outline' size={35} color={LINK_COLOR} />
+      }
+    } else {
+      propView = <Text style={[styles.input, fontSize, color]}>{label}</Text>
+    }
 
     let maxChars = (utils.dimensions(component).width - 20)/10
     if (maxChars < label.length)

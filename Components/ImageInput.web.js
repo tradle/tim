@@ -12,7 +12,12 @@ import {
 } from 'react-native'
 
 import ReactDOM from 'react-dom'
-import utils from '../utils/utils'
+import {
+  readImage,
+  isImageDataURL,
+  translate
+} from '../utils/utils'
+
 const FileInput = Platform.OS === 'web' && require('react-file-input')
 
 const imageInputPropTypes = {
@@ -67,8 +72,12 @@ class ImageInput extends Component {
           name={prop.name}
           placeholder={prop.title || prop.name}
           onChange={e => {
-            utils.readImage(e.target.files[0], function (err, item) {
-              if (err) return Alert.alert('Unable to process file', err.message)
+            readImage(e.target.files[0], function (err, item) {
+              if (err) return Alert.alert(translate('unableToProcessFile'), err.message)
+
+              if (!isImageDataURL(item.url)) {
+                return Alert.alert(translate('unsupportedFormat'), translate('pleaseUploadImage'))
+              }
 
               onImage({
                 ...item,

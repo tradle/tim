@@ -228,7 +228,6 @@
     "centerID": "Centre ID in frame",
     "dataSecurity": "Data Security",
     "onlyImagesSupported": "Please only drop image files",
-    "tryAgainWithImage": "The file you dropped is not an image! Please try again.",
     "noAccessToServer": "Server is not accessible. Try later.",
     "next": "Next",
     "verificationBy": "Verification by {1}",
@@ -247,5 +246,8 @@
     "autoEraseMessage": "We will contact you on the email address you provided. To avoid storing your personal data in the browser, this session will auto-erase in 10 seconds",
     "documentExpiredTitle": "Document expired",
     "documentExpiredMessage": "Please scan a valid document",
-    "contactUs": "Contact us"
+    "contactUs": "Contact us",
+    "unsupportedFormat": "Unsupported format",
+    "pleaseUploadImage": "Please upload an image file",
+    "unableToProcessFile": "Unable to process file"
 }

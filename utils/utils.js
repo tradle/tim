@@ -1340,6 +1340,19 @@ var utils = {
       NativeModules.CodePush.restartApp(false)
     }
   },
+
+  isImageDataURL(dataUrl) {
+    if (!dataUrl) return false
+
+    const mime = utils.getMimeType({ dataUrl })
+    return /^image\//.test(mime)
+  },
+
+  getMimeType({ dataUrl }) {
+    // data:image/jpeg;base64,...
+    return dataUrl.slice(5, dataUrl.indexOf(';'))
+  },
+
   readFile: Platform.OS == 'web' && function readFile (file, cb) {
     var reader  = new FileReader();
     reader.addEventListener('load', function () {
@@ -1352,7 +1365,15 @@ var utils = {
 
   readImage: Platform.OS == 'web' && function readImage (file, cb) {
     utils.readFile(file, function (err, dataUrl) {
-      var image = new window.Image()
+      const mime = utils.getMimeType({ dataUrl })
+      if (!/^image\//.test(mime)) {
+        return cb(null, {
+          url: dataUrl
+        })
+        // return cb(new Error('invalid format'))
+      }
+
+      const image = new window.Image()
       image.addEventListener('error', function (err) {
         if (!err) err = new Error('failed to load image')
 

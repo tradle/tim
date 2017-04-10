@@ -916,8 +916,8 @@ class NewResource extends Component {
   onDropFiles({ prop, files, rejected }) {
     if (!files.length && rejected.length) {
       return Alert.alert(
-        translate('oops') + '!',
-        translate('tryAgainWithImage')
+        translate('unsupportedFormat'),
+        translate('pleaseUploadImage')
       )
     }
 
@@ -925,7 +925,13 @@ class NewResource extends Component {
     // 2. run utils.readImage
     let propName = prop.name
     let resource = this.state.resource
-    utils.readImage(files[0], (a, img) => {
+    utils.readImage(files[0], (err, img) => {
+      // if (err) {
+      //   if (/invalid format/.test(err.message)) {
+      //     Alert.alert('')
+      //   }
+      // }
+
       resource[propName] = img
 
       // if (!this.floatingProps)
