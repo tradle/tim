@@ -36,7 +36,7 @@ export default class DatePickerAdapter extends Component {
   }
   render() {
     const { date, customStyles } = this.props
-    const dateString = date ? dateformat(date, 'UTC:mmm dS, yyyy') : this.props.placeholder
+    const dateString = date ? dateformat(date, 'mmm dS, yyyy') : this.props.placeholder
     const textStyle = customStyles && customStyles.placeholderText
     return (
       <TouchableHighlight underlayColor="transparent" style={this.props.style} onPress={() => this.onPress()}>

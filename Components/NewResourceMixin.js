@@ -1123,7 +1123,8 @@ var NewResourceMixin = {
     let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
     let format = 'MMMM Do, YYYY'
     // let format = 'YYYY-MM-DD'
-    let value = params.value &&  moment.utc(new Date(params.value)).format(format)
+    let valueMoment = params.value && moment.utc(new Date(params.value))
+    let value = valueMoment && valueMoment.format(format)
     let dateProps = {}
     if (prop.maxDate  ||  prop.minDate) {
       let maxDate = this.getDateRange(prop.maxDate)
@@ -1138,7 +1139,16 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop)
+
     let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+
+    // convert from UTC date to local, so DatePicker displays it correctly
+    // e.g. 1999-04-13 UTC -> 1999-04-13 EDT
+    let localizedDate
+    if (valueMoment) {
+      localizedDate = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date())
+    }
+
     return (
       <View>
         <View key={this.getNextKey()} ref={prop.name} style={[st, { marginHorizontal: 10, paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, height: 60, justifyContent: 'flex-end'}]}>
@@ -1150,7 +1160,7 @@ var NewResourceMixin = {
             format={format}
             confirmBtnText="Confirm"
             cancelBtnText="Cancel"
-            date={params.value ? moment.utc(params.value).toDate() : null}
+            date={localizedDate}
             onDateChange={(date) => {
               if (!(date instanceof Date)) {
                 date = moment.utc(date, format).toDate()
