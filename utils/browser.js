@@ -15,9 +15,12 @@ const ieVersion = (function msieversion() {
   }
 }())
 
+const isIE = typeof ieVersion === 'number'
+
 module.exports = {
+  isMobile: /Mobi/.test(navigator.userAgent),
   ieVersion,
-  isIE: typeof ieVersion === 'number',
+  isIE,
   isFF,
   isChrome,
   isSafari,

@@ -9,12 +9,16 @@ import environment from '../environment.json'
 import locale from './locale'
 import browser from './browser'
 
-let getUserMedia
-try {
-  getUserMedia = !browser.isIE && require('getusermedia')
-} catch (err) {
-  console.log('getUserMedia not supported', err)
-}
+const getUserMedia = (function () {
+  if (browser.isIE) return false
+  if (browser.isSafari && !browser.isMobile) return false
+
+  try {
+    return require('getusermedia')
+  } catch (err) {
+    console.log('getUserMedia not supported', err)
+  }
+}())
 
 console.log('getUserMedia is available', !!getUserMedia)
 

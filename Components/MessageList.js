@@ -340,6 +340,8 @@ class MessageList extends Component {
     // Eliminating repeated alerts when connection returns after ForgetMe action
     if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
       return false
+    if (utils.resized(this.props, nextProps))
+      return true
     if (nextState.isConnected !== this.state.isConnected || nextState.onlineStatus !== this.state.onlineStatus)
       return true
     if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
