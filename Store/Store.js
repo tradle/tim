@@ -23,6 +23,7 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
 var Debug = require('debug')
+
 var deepEqual = require('deep-equal')
 var once = require('once')
 
@@ -1189,6 +1190,7 @@ var Store = Reflux.createStore({
 
   async maybeWaitForIdentity({ permalink }) {
     if (permalink in this._identityPromises) {
+      // debug('maybeWaitForIdentity: ' + permalink)
       await this._identityPromises[permalink]
     }
   },
@@ -1197,6 +1199,7 @@ var Store = Reflux.createStore({
     if (!meDriver) return Promise.reject(new Error('engine is not up yet'))
     if (!permalink) permalink = utils.getPermalink(identity)
     if (!(permalink in this._identityPromises)) {
+      // debug('addContactIdentity: ' + permalink)
       this._identityPromises[permalink] = utils.addContactIdentity(meDriver, { identity, permalink })
     }
 
@@ -2769,9 +2772,9 @@ var Store = Reflux.createStore({
 
       var verificationRequestId = utils.getId(r.document);
       var verificationRequest = this._getItem(verificationRequestId)
-      if (!verificationRequest.verifications)
-        verificationRequest.verifications = [];
       if (!r.txId) {
+        if (!verificationRequest.verifications)
+          verificationRequest.verifications = [];
         verificationRequest.verifications.push(this.buildRef(newVerification));
       }
       else {
@@ -6282,7 +6285,7 @@ var Store = Reflux.createStore({
     }
     if (disableAutoResponse)
       opts.other = { disableAutoResponse: true }
-
+debug('publishMyIdentity: ')
     return this.meDriverSignAndSend(opts)
     .catch(function(err) {
       debugger
