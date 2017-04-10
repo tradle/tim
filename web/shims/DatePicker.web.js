@@ -21,7 +21,7 @@ export default class DatePickerAdapter extends Component {
     const { onDateChange } = this.props
     Actions.showModal({
       contents: createCalendarModal({
-        selectedDate: this.props.date,
+        selectedDate: this.props.date || Date.now(),
         onConfirm: function (date) {
           Actions.hideModal()
           onDateChange(new Date(date))
