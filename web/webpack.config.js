@@ -8,6 +8,7 @@ var webpack = require('webpack');
 // var HtmlPlugin = require('webpack-html-plugin');
 var HtmlPlugin = require('html-webpack-plugin');
 var HasteResolverPlugin = require('haste-resolver-webpack-plugin');
+var Visualizer = require('webpack-visualizer-plugin');
 // var OptimizeJsPlugin = require('optimize-js-plugin')
 // var ManifestPlugin = require('webpack-manifest-plugin');
 // var ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
@@ -120,6 +121,9 @@ var common = {
       /environment.json$/,
       require.resolve(envFile)
     ),
+    new Visualizer({
+      filename: 'stats.html'
+    })
     // new WebpackMd5Hash(),
     // new ManifestPlugin({
     //   fileName: 'build-manifest.json'
@@ -132,11 +136,11 @@ var common = {
     //   name: 'webpackManifest'
     // }),
     // new webpack.optimize.OccurrenceOrderPlugin(true),
-    function() {
-      this.plugin('done', function(stats) {
-        fs.writeFileSync(path.join(__dirname, `webpack-stats-${NODE_ENV}.json`), JSON.stringify(stats.toJson()))
-      })
-    }
+    // function() {
+    //   this.plugin('done', function(stats) {
+    //     fs.writeFileSync(path.join(__dirname, `webpack-stats-${NODE_ENV}.json`), JSON.stringify(stats.toJson()))
+    //   })
+    // }
   ],
   node: {
     fs: 'empty',
