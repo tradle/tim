@@ -4,7 +4,10 @@ const { constants } = require('@tradle/engine')
 const ENV = require('./env')
 const { TYPE } = constants
 
-var formDefaults = require('../data/formDefaults.json')
+var formDefaults
+if (__DEV__) {
+  formDefaults = require('../data/formDefaults.json')
+}
 
 module.exports = {
   newAPIBasedVerification,

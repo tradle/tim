@@ -15,7 +15,11 @@ var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin')
 var extend = require('extend')
 var equal = require('deep-equal')
-var formDefaults = require('../data/formDefaults.json')
+var formDefaults
+if (__DEV__) {
+  formDefaults = require('../data/formDefaults.json')
+}
+
 var TradleW = require('../img/TradleW.png')
 var Actions = require('../Actions/Actions');
 import { makeResponsive } from 'react-native-orient'
