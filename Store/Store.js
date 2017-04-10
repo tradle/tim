@@ -222,7 +222,6 @@ var dictionary = {}
 var isAuthenticated
 var meDriver
 // var publishedIdentity
-var driverPromise
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
@@ -338,6 +337,11 @@ var Store = Reflux.createStore({
 
     this.announcePresence = debounce(this.announcePresence.bind(this), 100)
     this._loadedResourcesDefer = Q.defer()
+
+    this._enginePromise = new Promise(resolve => {
+      this._resolveWithEngine = resolve
+    })
+
     // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
     this._politeQueue = createPoliteQueue({
@@ -872,7 +876,8 @@ var Store = Reflux.createStore({
       throw err
     })
 
-    return Q(meDriver)
+    this._resolveWithEngine(meDriver)
+    return this._enginePromise
   },
   initChats() {
     let meId = utils.getId(me)
@@ -1196,14 +1201,15 @@ var Store = Reflux.createStore({
   },
 
   addContactIdentity({ identity, permalink }) {
-    if (!meDriver) return Promise.reject(new Error('engine is not up yet'))
     if (!permalink) permalink = utils.getPermalink(identity)
     if (!(permalink in this._identityPromises)) {
-      // debug('addContactIdentity: ' + permalink)
-      this._identityPromises[permalink] = utils.addContactIdentity(meDriver, { identity, permalink })
+      this._identityPromises[permalink] = this._enginePromise
+        .then(engine => utils.addContactIdentity(engine, { identity, permalink }))
     }
 
-    return this._identityPromises[permalink]
+    // if meDriver is not available, don't lock everything up
+    // add identity as soon as engine is available
+    return meDriver ? this._identityPromises[permalink] : Promise.resolve()
   },
 
   onSetProviderStyle(stylePack) {
@@ -6101,7 +6107,9 @@ var Store = Reflux.createStore({
   },
 
   getDriver(me) {
-    if (driverPromise) return driverPromise
+    if (this._loadingEngine) return this._enginePromise
+
+    this._loadingEngine = true
 
     // var loadIdentityAndKeys
     // var allMyIdentities = list[MY_IDENTITIES]
@@ -6184,7 +6192,7 @@ var Store = Reflux.createStore({
     if (me.language)
       language = list[utils.getId(me.language)] && this._getItem(utils.getId(me.language))
 
-    return driverPromise = this.loadIdentityAndKeys(me)
+    return this.loadIdentityAndKeys(me)
     .then(result => {
       if (!Keychain) {
         let privkeys = result.keys.map(k => {
