@@ -12,6 +12,7 @@ import Dropzone from 'react-dropzone'
 import { makeResponsive } from 'react-native-orient'
 import deepEqual from 'deep-equal'
 import utils from '../utils/utils'
+import { navBarHeight } from '../utils/env'
 
 class DropPage extends Component {
   static propTypes = Dropzone.propTypes;
@@ -40,7 +41,7 @@ class DropPage extends Component {
   }
 
   render() {
-    const { height } = Dimensions.get('window')
+    const height = Dimensions.get('window').height - navBarHeight
     let overlay
     if (this.state.active) {
       overlay = <View style={[styles.overlay, { height }]} />
