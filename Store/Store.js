@@ -4218,7 +4218,9 @@ var Store = Reflux.createStore({
           if (!to.bot) {
             to._unread = 0
             this.dbPut(toId, to)
-            this.trigger({action: 'updateRow', resource: to})
+            .then(() => {
+              this.trigger({action: 'updateRow', resource: to})
+            })
           }
         }
         let orgId
@@ -6885,7 +6887,7 @@ var Store = Reflux.createStore({
             else
               isReadOnlyChat = utils.isReadOnlyChat(val)
             let isNew = val[ROOT_HASH] === val[CUR_HASH]
-            if (!val._context  ||  isReadOnlyChat  ||  isNew) {
+            if (!val._context  ||  isReadOnlyChat) {
               let notMeId = toId === meId ? fromId  : toId
               let notMe = this._getItem(notMeId)
               if (notMe  &&  !notMe.bot) {
@@ -7231,7 +7233,7 @@ var Store = Reflux.createStore({
           if (isWeb  &&  m.id === PHOTO_ID) {
             let scanProp = m.properties['scan']
             scanProp.title = 'Upload'
-            scanProp.icon = 'md-download'
+            // scanProp.icon = 'md-download'
           }
           this.addVerificationsToFormModel(m)
           this.addFromAndTo(m)
