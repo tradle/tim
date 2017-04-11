@@ -62,7 +62,7 @@ class RemediationItemsList extends Component {
 
       Alert.alert(
         msg,
-        translate('areYouSureYouWantToConfirmAllTheForms', translate(utils.getModel(this.props.resource[constants.TYPE]).value)),
+        translate('areYouSureYouWantToConfirmAllItems', numItems),
         [
           {text: translate('cancel'), onPress: () => console.log('Canceled!')},
           {text: translate('OK'), onPress: () => {
