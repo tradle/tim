@@ -1743,24 +1743,28 @@ var utils = {
     if (!data)
       return
     // Disable FormRequest
-    var params = {
-      value: {documentCreated: true},
-      doneWithMultiEntry: true,
-      resource: formRequest,
-      meta: utils.getModel(formRequest[TYPE]).value
-    }
-    Actions.addItem(params)
+    let isFormRequest = formRequest[TYPE] === FORM_REQUEST
 
+    if (isFormRequest) {
+      var params = {
+        value: {documentCreated: true},
+        doneWithMultiEntry: true,
+        resource: formRequest,
+        meta: utils.getModel(formRequest[TYPE]).value
+      }
+      Actions.addItem(params)
+    }
     let photo = {
       url: data.data,
       height: data.height,
       width: data.width
     }
+    let propName = (typeof prop === 'string') ? prop : prop.name
     Actions.addItem({
-      disableFormRequest: formRequest,
+      disableFormRequest: isFormRequest ? formRequest : null,
       resource: {
-        [TYPE]: formRequest.form,
-        [prop.name]: photo,
+        [TYPE]: isFormRequest ? formRequest.form : formRequest.prefill[TYPE],
+        [propName]: photo,
         _context: formRequest._context,
         from: utils.getMe(),
         to: formRequest.from  // FormRequest.from
