@@ -202,6 +202,7 @@
     "areYouSureYouWantToDelete": "Are you sure you want to hide {1}?",
     "hideResource": "Hide {1}",
     "areYouSureYouWantToConfirmAllItems": "Tap OK to confirm all {1}, or Cancel to continue reviewing",
+    "confirmAllItems": "Tap OK to confirm them all, or Cancel to continue reviewing",
     "youReviewed": "You reviewed {1} out of {2} items",
     "youReviewedAll": "You reviewed all {1}",
     "unknownQRCodeFormat": "Unrecognized QR code format",
