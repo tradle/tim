@@ -197,6 +197,7 @@
     "hideResource": "Hide {1}",
     "areYouSureYouWantToConfirmAllItems": "Tap OK to confirm all {1}, or Cancel to continue reviewing",
     "youReviewed": "You reviewed {1} out of {2} items",
+    "youReviewedAll": "You reviewed all {1}",
     "unknownQRCodeFormat": "Unrecognized QR code format",
     "confirmedMyData": "I've imported my data into my {profileTitle}",
     "importData": "Import data",
