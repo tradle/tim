@@ -208,15 +208,17 @@ class ShowRefList extends Component {
       if (!backlinkList) {
         backlinkList = this.props.backlinkList
       }
-
-      backlinkRL = <ResourceList
-                      modelName={modelName}
-                      prop={currentBacklink}
-                      sortProperty={utils.getModel(modelName).value.sortProperty}
-                      resource={resource}
-                      isBacklink={true}
-                      backlinkList={backlinkList}
-                      navigator={this.props.navigator} />
+      if (!backlinkList)
+        backlinkRL = <View/>
+      else
+        backlinkRL = <ResourceList
+                        modelName={modelName}
+                        prop={currentBacklink}
+                        sortProperty={utils.getModel(modelName).value.sortProperty}
+                        resource={resource}
+                        isBacklink={true}
+                        backlinkList={backlinkList}
+                        navigator={this.props.navigator} />
     }
     else
       separator = <View style={{height: 2, backgroundColor: 'darkblue'}} />
@@ -244,7 +246,7 @@ class ShowRefList extends Component {
         style.height = utils.dimensions().height
       return <View style={style}>
                 {separator}
-                <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
+                <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0, minHeight: refList &&  refList.length ? 70 : 0}]} key={'ShowRefList'}>
                   {refList}
                 </View>
                 {this.props.children}
