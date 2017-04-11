@@ -10,6 +10,13 @@ if (typeof process === 'undefined') {
     }
   }
 }
+
+if (typeof self === 'undefined') {
+  // bluebird, i'm looking at you
+  // ...and other libraries that expect global.self as an alias of global.window in a browser-like environment
+  global.self = global
+}
+
 try {
   window.navigator.userAgent = 'react-native'
 } catch (err) {
