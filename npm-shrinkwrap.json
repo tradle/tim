@@ -7172,8 +7172,8 @@
     },
     "react-web": {
       "version": "0.4.1",
-      "from": "git://github.com/mvayngrib/react-web.git#2fd339db92f7f71fbcb6b7809f1ba1c394412471",
-      "resolved": "git://github.com/mvayngrib/react-web.git#2fd339db92f7f71fbcb6b7809f1ba1c394412471",
+      "from": "git://github.com/mvayngrib/react-web.git#f44a43b48ae334a5433619e1cfad620998d2a80b",
+      "resolved": "git://github.com/mvayngrib/react-web.git#f44a43b48ae334a5433619e1cfad620998d2a80b",
       "dependencies": {
         "chalk": {
           "version": "1.1.1",
