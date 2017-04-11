@@ -23,6 +23,7 @@ var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');
 var Debug = require('debug')
+
 var deepEqual = require('deep-equal')
 var once = require('once')
 
@@ -1196,6 +1197,7 @@ var Store = Reflux.createStore({
 
   async maybeWaitForIdentity({ permalink }) {
     if (permalink in this._identityPromises) {
+      // debug('maybeWaitForIdentity: ' + permalink)
       await this._identityPromises[permalink]
     }
   },
@@ -2779,9 +2781,9 @@ var Store = Reflux.createStore({
 
       var verificationRequestId = utils.getId(r.document);
       var verificationRequest = this._getItem(verificationRequestId)
-      if (!verificationRequest.verifications)
-        verificationRequest.verifications = [];
       if (!r.txId) {
+        if (!verificationRequest.verifications)
+          verificationRequest.verifications = [];
         verificationRequest.verifications.push(this.buildRef(newVerification));
       }
       else {
@@ -3849,7 +3851,9 @@ var Store = Reflux.createStore({
     let batch = []
     // Get the whole resource
     document = this._getItem(utils.getId(document))
-    let verifications = document.verifications
+    let verifications
+    if (document.verifications)
+      verifications = document.verifications
     let shareBatchId = new Date().getTime()
     let doShareDocument = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
     let promise = doShareDocument
@@ -6348,7 +6352,7 @@ var Store = Reflux.createStore({
     }
     if (disableAutoResponse)
       opts.other = { disableAutoResponse: true }
-
+debug('publishMyIdentity: ')
     return this.meDriverSignAndSend(opts)
     .catch(function(err) {
       debugger
@@ -7103,7 +7107,8 @@ var Store = Reflux.createStore({
       val.to = inDB.to
       val._context = inDB._context
       val._sharedWith = inDB._sharedWith
-      val.verifications = inDB.verifications
+      if (inDB.verifications)
+        val.verifications = inDB.verifications
       if (val.txId  &&  !inDB.txId) {
         val.time = inDB.time
         val.sealedTime = val.time || obj.timestamp

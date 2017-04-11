@@ -24,6 +24,15 @@ module.exports = {
   isFF,
   isChrome,
   isSafari,
+  isSafariPrivateBrowsing: (function () {
+    try {
+      localStorage.setItem('TEST_SAFARI_PRIVATE_BROWSING', '1')
+      localStorage.removeItem('TEST_SAFARI_PRIVATE_BROWSING')
+      return false
+    } catch (err) {
+      return true
+    }
+  }()),
   get _isFFPrivateBrowsing() {
     return _isFFPrivateBrowsing
   },

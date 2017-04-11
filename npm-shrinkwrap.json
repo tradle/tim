@@ -5007,8 +5007,8 @@
     },
     "key-encoder": {
       "version": "1.1.6",
-      "from": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
-      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#9811b1d85ded6f6d8eb6b48389d80ed17df550ff",
+      "from": "git://github.com/mvayngrib/key-encoder-js.git#459338a5f8884e32b760cbffeec18e2766a07e2e",
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#459338a5f8884e32b760cbffeec18e2766a07e2e",
       "dependencies": {
         "asn1.js": {
           "version": "2.2.1",
@@ -5022,15 +5022,17 @@
             }
           }
         },
-        "bn.js": {
-          "version": "3.3.0",
-          "from": "bn.js@>=3.1.2 <4.0.0",
-          "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
-        },
         "elliptic": {
           "version": "5.2.1",
           "from": "elliptic@>=5.1.0 <6.0.0",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz"
+          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz",
+          "dependencies": {
+            "bn.js": {
+              "version": "3.3.0",
+              "from": "bn.js@>=3.1.1 <4.0.0",
+              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
+            }
+          }
         }
       }
     },
@@ -5115,8 +5117,8 @@
     },
     "level-js": {
       "version": "2.2.3",
-      "from": "git://github.com/mvayngrib/level.js.git#0689751258f415a38db36b7b1a7ba54bfe426453",
-      "resolved": "git://github.com/mvayngrib/level.js.git#0689751258f415a38db36b7b1a7ba54bfe426453",
+      "from": "git://github.com/mvayngrib/level.js.git#f3b104e28ed76d4f6b9fcbb95c4de66b3b3654bd",
+      "resolved": "git://github.com/mvayngrib/level.js.git#f3b104e28ed76d4f6b9fcbb95c4de66b3b3654bd",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.1",
@@ -7170,8 +7172,8 @@
     },
     "react-web": {
       "version": "0.4.1",
-      "from": "git://github.com/mvayngrib/react-web.git#2fd339db92f7f71fbcb6b7809f1ba1c394412471",
-      "resolved": "git://github.com/mvayngrib/react-web.git#2fd339db92f7f71fbcb6b7809f1ba1c394412471",
+      "from": "git://github.com/mvayngrib/react-web.git#f44a43b48ae334a5433619e1cfad620998d2a80b",
+      "resolved": "git://github.com/mvayngrib/react-web.git#f44a43b48ae334a5433619e1cfad620998d2a80b",
       "dependencies": {
         "chalk": {
           "version": "1.1.1",
