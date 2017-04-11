@@ -209,6 +209,9 @@ class ShowRefList extends Component {
       if (!backlinkList) {
         backlinkList = this.props.backlinkList
       }
+      if (!backlinkList)
+        backlinkRL = <View/>
+      else
 
       backlinkRL = <ResourceList
                       modelName={modelName}
