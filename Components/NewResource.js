@@ -439,12 +439,12 @@ class NewResource extends Component {
     for (var p in err)
       missedRequiredOrErrorValue[p] = err[p]
 
-    if ('scanJson' in missedRequiredOrErrorValue) {
-      if (utils.isAndroid() || utils.isWeb()) {
-        delete missedRequiredOrErrorValue.scanJson
-        json.scanJson = { ocrNotSupported: true }
-      }
-    }
+    // if ('scanJson' in missedRequiredOrErrorValue) {
+    //   if (utils.isAndroid() || utils.isWeb()) {
+    //     delete missedRequiredOrErrorValue.scanJson
+    //     json.scanJson = { ocrNotSupported: true }
+    //   }
+    // }
 
     if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       console.log('onSavePressed not all required: submitted = false')
