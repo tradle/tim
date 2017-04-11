@@ -543,10 +543,12 @@ class MessageList extends Component {
     if (!bgImage  &&  bankStyle.BACKGROUND_COLOR)
       bgStyle = {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
     var alert = <View />
+    let hideTextInput = !utils.hasSupportLine(resource)  // &&  !ENV.allowForgetMe
+
     if (!this.state.list || !this.state.list.length) {
       if (this.props.navigator.isConnected  &&  resource[TYPE] === TYPES.ORGANIZATION) {
         if (this.state.isLoading) {
-          var menuBtn = this.hasMenuButton() && (
+          var menuBtn = !hideTextInput /*this.hasMenuButton() */ && (
             <View style={styles.footer}>
               {this.paintMenuButton()}
             </View>
@@ -574,7 +576,6 @@ class MessageList extends Component {
       }
     }
 
-    let hideTextInput = !utils.hasSupportLine(resource)  // && !ENV.allowForgetMe
     let isProductApplication = resource[TYPE] === PRODUCT_APPLICATION
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
