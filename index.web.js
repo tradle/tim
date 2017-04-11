@@ -17,7 +17,8 @@ import {
   isSafari,
   isIE,
   ieVersion,
-  isFFPrivateBrowsing
+  isFFPrivateBrowsing,
+  isSafariPrivateBrowsing
 } from './utils/browser'
 
 if (global.history && global.history.length) {
@@ -93,7 +94,15 @@ async function testEnvironment () {
     }
   }
 
-  if (isSafari) return
+  if (!window.indexedDB) {
+    throw new Error('This application is not supported in this browser. ' + BROWSER_RECOMMENDATION)
+  }
+
+  if (isSafari) {
+    if (isSafariPrivateBrowsing) {
+      throw new Error('This application cannot be used in Private Browsing mode, due to storage and security limitations')
+    }
+  }
 
   if (isIE) {
     if (ENV.is === false) {
@@ -107,10 +116,6 @@ async function testEnvironment () {
     if (!window.indexedDB) {
       throw new Error('This application cannot be used in InPrivate Browsing mode, due to storage and security limitations')
     }
-  }
-
-  if (!window.indexedDB) {
-    throw new Error('This application is not supported in this browser. ' + BROWSER_RECOMMENDATION)
   }
 
   if (isFF) {
