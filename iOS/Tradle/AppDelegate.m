@@ -21,6 +21,8 @@
 #import "RCTLog.h"
 #import "SplashScreen.h"
 
+@import Firebase;
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -74,6 +76,7 @@
 #else
   [SplashScreen show]; //show splash screen
   [Fabric with:@[[Crashlytics class]]];
+  [FIRApp configure];
   // RCTSetLogThreshold(RCTLogLevelInfo);
   // RCTSetLogFunction(CrashlyticsReactLogFunction);
 #endif

@@ -23,6 +23,8 @@ import VideoPlayer from './VideoPlayer'
 import ENV from '../utils/env'
 import DatePicker from 'react-native-datepicker'
 import ImageInput from './ImageInput'
+import Analytics from '../utils/analytics'
+
 import BlinkID from './BlinkID'
 // import INSTRUCTIONS_IMAGE from '../img/scan-passport.jpg'
 // import { parse as parseUSDL } from 'parse-usdl'
@@ -564,6 +566,8 @@ var NewResourceMixin = {
     const promiseTimeout = new Promise((resolve, reject) => {
       setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
     })
+
+    Analytics.sendEvent('scan_document', { type })
 
     let result
     try {

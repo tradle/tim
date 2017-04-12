@@ -103,7 +103,8 @@ const merged = extend({
     min: 11
   },
   navBarHeight: navBarHeight,
-  timeZoneOffset: new Date().getTimezoneOffset() * 60 * 1000
+  timeZoneOffset: new Date().getTimezoneOffset() * 60 * 1000,
+  analyticsIdIsPermalink: false
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
