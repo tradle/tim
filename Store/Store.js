@@ -10,6 +10,7 @@ import ReactNative, {
   AppState
 } from 'react-native'
 
+import Analytics from '../utils/analytics'
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
@@ -300,6 +301,8 @@ var driverInfo = (function () {
 
 const ENCRYPTION_KEY = 'accountkey'
 const DEVICE_ID = 'deviceid'
+const ANALYTICS_KEY = 'analyticskey'
+
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
 const POLITE_TASK_TIMEOUT = __DEV__ ? 60000 : 6000
@@ -341,6 +344,10 @@ var Store = Reflux.createStore({
     this._enginePromise = new Promise(resolve => {
       this._resolveWithEngine = resolve
     })
+
+    getAnalyticsUserId({ promiseEngine: this._enginePromise })
+      .then(Analytics.setUserId)
+      .then(() => Analytics.sendEvent('app_open'))
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
@@ -396,8 +403,7 @@ var Store = Reflux.createStore({
     })
     .then(() => this.getDriver(me))
     .then(() => {
-      // this.monitorTim()
-
+      Analytics.sendEvent('accept_terms')
       if (me.registeredForPushNotifications)
         Push.resetBadgeNumber()
     })
@@ -877,6 +883,9 @@ var Store = Reflux.createStore({
     })
 
     this._resolveWithEngine(meDriver)
+    return this._enginePromise
+  },
+  promiseEngine() {
     return this._enginePromise
   },
   initChats() {
@@ -4014,6 +4023,10 @@ var Store = Reflux.createStore({
 
   },
   async autoRegister() {
+    Analytics.sendEvent('sign_up', {
+      sign_up_method: 'auto'
+    })
+
     let me
     try {
       me = await this.getMe()
@@ -6295,7 +6308,7 @@ var Store = Reflux.createStore({
     }
     if (disableAutoResponse)
       opts.other = { disableAutoResponse: true }
-debug('publishMyIdentity: ')
+
     return this.meDriverSignAndSend(opts)
     .catch(function(err) {
       debugger
@@ -8642,6 +8655,23 @@ async function generateIdentity ({ networkName }) {
   }))
 
   return Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys)
+}
+
+async function getAnalyticsUserId ({ promiseEngine }) {
+  if (ENV.analyticsIdIsPermalink) {
+    const engine = await promiseEngine
+    return engine.permalink
+  }
+
+  let userId
+  try {
+    userId = await AsyncStorage.getItem(ANALYTICS_KEY)
+  } catch (err) {
+    userId = crypto.randomBytes(32).toString('hex')
+    await AsyncStorage.setInterval(ANALYTICS_KEY, userId)
+  }
+
+  return userId
 }
 
 // function midpoint (a, b) {

@@ -107,6 +107,7 @@ Text.defaultProps = function() {
 import React, { Component } from 'react'
 import Push from './utils/push'
 import Navs from './utils/navs'
+import Analytics from './utils/analytics'
 
 var ReactPerf = __DEV__ && require('react-addons-perf')
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
@@ -344,7 +345,7 @@ class TiMApp extends Component {
     Actions.startTransition()
   }
 
-  onNavigatorAfterTransition() {
+  onNavigatorAfterTransition(e) {
     if (ReactPerf) {
       setTimeout(function () {
         ReactPerf.stop()
@@ -352,6 +353,7 @@ class TiMApp extends Component {
       }, 500)
     }
 
+    Analytics.sendNavigationEvent({ route: e.data.route })
     Actions.endTransition()
   }
 
@@ -431,19 +433,6 @@ class TiMApp extends Component {
       this._lockToPortrait()
     } else {
       this._unlockOrientation()
-    }
-
-    if (__DEV__) {
-      let displayName = route.component.displayName
-      if (!displayName) {
-        if (typeof route.component === 'function') {
-          displayName = route.component.name || route.component.toString().match(/function (.*?)\s*\(/)[1]
-        }
-      }
-
-      // if (!displayName || displayName === 'exports') debugger
-
-      debug('navigating to ' + displayName)
     }
 
     var props = route.passProps;

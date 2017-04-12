@@ -4741,6 +4741,11 @@
       "from": "react-native-fabric-crashlytics@latest",
       "resolved": "https://registry.npmjs.org/react-native-fabric-crashlytics/-/react-native-fabric-crashlytics-0.1.8.tgz"
     },
+    "react-native-firebase-analytics": {
+      "version": "1.0.6",
+      "from": "git://github.com/mvayngrib/react-native-firebase-analytics.git#889e594337ebfb91b36ce2b77bc22f1f855cd6c9",
+      "resolved": "git://github.com/mvayngrib/react-native-firebase-analytics.git#889e594337ebfb91b36ce2b77bc22f1f855cd6c9"
+    },
     "react-native-flexbox-grid": {
       "version": "0.2.2",
       "from": "react-native-flexbox-grid@>=0.2.2 <0.3.0",
