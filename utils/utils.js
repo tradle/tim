@@ -810,8 +810,9 @@ var utils = {
           // on the server side
           //
           // currently there are some bad prefill values floating around (empty objects)
-          if (p === 'prefill' && !Object.keys(res[p]).length) {
-            delete res[p]
+          if (p === 'prefill') {
+            if (!Object.keys(res[p]).length)
+              delete res[p]
             return
           }
 
