@@ -567,7 +567,11 @@ var NewResourceMixin = {
       setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
     })
 
-    Analytics.sendEvent('scan_document', { type })
+    Analytics.sendEvent({
+      category: 'widget',
+      action: 'scan_document',
+      label: `blinkid:${type}`
+    })
 
     let result
     try {
@@ -1788,12 +1792,6 @@ function getDocumentTypeFromTitle (title='') {
 }
 
 module.exports = NewResourceMixin
-// function parseAnylineDate (date) {
-//   // yymmdd
-//   const [year, month, day] = [date.slice(0, 2), date.slice(2, 4), date.slice(4, 6)]
-//   return dateFromParts({ day, month, year })
-// }
-
   // nfcModal: {
   //   flex: 1,
   //   justifyContent: 'center',
@@ -1843,6 +1841,12 @@ module.exports = NewResourceMixin
   //   padding: 10,
   //   margin: 40
   // },
+
+// function parseAnylineDate (date) {
+//   // yymmdd
+//   const [year, month, day] = [date.slice(0, 2), date.slice(2, 4), date.slice(4, 6)]
+//   return dateFromParts({ day, month, year })
+// }
 
   // myDateTemplate1(params) {
   //   var labelStyle = {color: '#cccccc', fontSize: 17, paddingBottom: 10};
@@ -2166,80 +2170,3 @@ module.exports = NewResourceMixin
   //   this.afterScan(r, prop)
   // },
 
-  // async maybeReadNFC({ country, ...nfcProps }) {
-  //   if (!PassportReader.isSupported) return
-
-  //   const instructions = country === 'US'
-  //     ? translate('holdPhoneToPassportBackCover')
-  //     : translate('holdPhoneToPassport')
-
-  //   await PassportReader.cancel()
-  //   const { width, height } = Dimensions.get('window')
-
-  //   Actions.showModal({
-  //     onRequestClose: function () {},
-  //     contents: (
-  //       <Modal
-  //         onRequestClose={() => {}}
-  //         animationType="none">
-  //         <View style={styles.nfcModal}>
-  //           <Image source={INSTRUCTIONS_IMAGE} style={{
-  //             resizeMode: 'center',
-  //             width,
-  //             height
-  //           }} />
-  //           <View style={styles.nfcInstructions}>
-  //             <Text style={styles.nfcInstructionsText}>
-  //               {instructions}
-  //             </Text>
-  //           </View>
-  //         </View>
-  //       </Modal>
-  //     )
-  //   })
-
-  //   let nfc
-  //   try {
-  //     nfc = await PassportReader.scan(nfcProps)
-  //   } catch (err) {
-  //     debug('failed to read nfc', err)
-  //     return
-  //   }
-
-  //   const { photo, ...nfcData } = nfc
-  //   const dataRows = Object.keys(nfcData).map(key => {
-  //     return (
-  //       <Text>{key}: {nfcData[key]}</Text>
-  //     )
-  //   })
-
-  //   let ok
-  //   const waitForOK = new Promise(resolve => ok = resolve)
-  //   Actions.showModal({
-  //     onRequestClose: function () {},
-  //     contents: (
-  //       <Modal
-  //         onRequestClose={() => {}}
-  //         animationType="none">
-  //         <View style={styles.nfcModal}>
-  //           <Image source={{uri:photo.base64}} style={{
-  //             resizeMode: 'center',
-  //             width: photo.width,
-  //             height: photo.height
-  //           }} />
-  //           <View style={styles.nfcInstructions}>
-  //             {dataRows}
-  //           </View>
-  //           <TouchableHighlight
-  //             onPress={ok}
-  //             style={{ width: 100, height: 30 }}>
-  //             OK
-  //           </TouchableHighlight>
-  //         </View>
-  //       </Modal>
-  //     )
-  //   })
-
-  //   await waitForOK
-  //   return nfc
-  // },

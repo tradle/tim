@@ -3,14 +3,14 @@ import {
 } from 'react-native'
 
 import Analytics from 'react-native-firebase-analytics'
-import ENV from './env.js'
+import ENV from './env'
+import { getRouteName } from './utils'
 
 let ENABLED
 let PREV_ROUTE
 const debug = require('debug')('tradle:app:analytics')
 
-setEnabled(!__DEV__)
-// setEnabled()
+setEnabled(ENV.analyticsEnabled)
 
 module.exports = (function () {
   const api = {
@@ -42,27 +42,26 @@ module.exports = (function () {
 
 function setEnabled (bool=true) {
   ENABLED = bool
+  debug(`analytics on: ${bool}`)
   Analytics.setEnabled(bool)
 }
 
-function sendEvent (event, data) {
+function sendEvent ({ category, action, label, value }) {
   // event = prefixDev(event)
-  Analytics.logEvent(event, data)
+  Analytics.logEvent(action, { category, label, value })
 }
 
 function sendNavigationEvent ({ route }) {
-  let scene = route.component.displayName
-  if (!scene) {
-    if (typeof route.component === 'function') {
-      scene = route.component.name || route.component.toString().match(/function (.*?)\s*\(/)[1]
-    }
-  }
-
+  const scene = getRouteName(route)
   if (scene === PREV_ROUTE) return
 
   PREV_ROUTE = scene
   debug('navigated to ' + scene)
-  sendEvent('nav', { scene })
+  sendEvent({
+    category: 'ui',
+    action: 'nav',
+    label: scene
+  })
 }
 
 function setUserId (userId) {
