@@ -10,8 +10,7 @@ let ENABLED
 let PREV_ROUTE
 const debug = require('debug')('tradle:app:analytics')
 
-// setEnabled(!__DEV__)
-setEnabled()
+setEnabled(ENV.analyticsEnabled)
 
 module.exports = (function () {
   const api = {
