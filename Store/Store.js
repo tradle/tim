@@ -8735,7 +8735,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
     userId = await AsyncStorage.getItem(ANALYTICS_KEY)
   } catch (err) {
     userId = crypto.randomBytes(32).toString('hex')
-    await AsyncStorage.setInterval(ANALYTICS_KEY, userId)
+    await AsyncStorage.setItem(ANALYTICS_KEY, userId)
   }
 
   return userId
