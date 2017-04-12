@@ -565,7 +565,11 @@ var NewResourceMixin = {
       setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
     })
 
-    Analytics.sendEvent('scan_document', { type })
+    Analytics.sendEvent({
+      category: 'widget',
+      action: 'scan_document',
+      label: `blinkid:${type}`
+    })
 
     let result
     try {

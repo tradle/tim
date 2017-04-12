@@ -347,7 +347,10 @@ var Store = Reflux.createStore({
 
     getAnalyticsUserId({ promiseEngine: this._enginePromise })
       .then(Analytics.setUserId)
-      .then(() => Analytics.sendEvent('app_open'))
+      .then(() => Analytics.sendEvent({
+        category: 'init',
+        action: 'app_open'
+      }))
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
@@ -403,7 +406,12 @@ var Store = Reflux.createStore({
     })
     .then(() => this.getDriver(me))
     .then(() => {
-      Analytics.sendEvent('accept_terms')
+      Analytics.sendEvent({
+        category: 'registration',
+        action: 'accept_terms',
+        label: 'auto-reg'
+      })
+
       if (me.registeredForPushNotifications)
         Push.resetBadgeNumber()
     })
@@ -4023,8 +4031,10 @@ var Store = Reflux.createStore({
 
   },
   async autoRegister() {
-    Analytics.sendEvent('sign_up', {
-      sign_up_method: 'auto'
+    Analytics.sendEvent({
+      category: 'registration',
+      action: 'sign_up',
+      label: 'auto-reg'
     })
 
     let me

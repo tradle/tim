@@ -47,7 +47,7 @@
   touchposeApplication.alwaysShowTouches = YES;
 
 #ifdef DEBUG
-  jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.8:8081/index.ios.bundle?platform=ios&dev=true"];
+  jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.5:8081/index.ios.bundle?platform=ios&dev=true"];
 #else
   jsCodeLocation = [CodePush bundleURL];
     // jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
@@ -73,14 +73,14 @@
   [self.window makeKeyAndVisible];
 
 #ifdef DEBUG
-#else
   [SplashScreen show]; //show splash screen
+#else
   [Fabric with:@[[Crashlytics class]]];
-  [FIRApp configure];
   // RCTSetLogThreshold(RCTLogLevelInfo);
   // RCTSetLogFunction(CrashlyticsReactLogFunction);
 #endif
 
+  [FIRApp configure];
   return YES;
 }
 
