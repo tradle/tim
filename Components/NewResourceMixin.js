@@ -1400,10 +1400,15 @@ var NewResourceMixin = {
       item[constants.TYPE] = props[propName].ref
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[propName]
-    resource[propName] = item
+    var r = {}
+    extend(true, r, this.state.resource)
+    r[propName] = item
+    if (!this.floatingProps)
+      this.floatingProps = {}
+    this.floatingProps[propName] = item
 
     this.setState({
-      resource: resource,
+      resource: r,
       prop: propName,
       inFocus: propName
     });
