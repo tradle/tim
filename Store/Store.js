@@ -399,7 +399,7 @@ var Store = Reflux.createStore({
     await this.getReady()
   },
   onAutoRegister(params) {
-    return this.autoRegister()
+    return this.autoRegister(true)
     .then(() => {
       this.setMe(me)
       return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
@@ -721,7 +721,7 @@ var Store = Reflux.createStore({
 
     meDriver.setMaxListeners(0)
 
-    console.log('me: ' + meDriver.permalink)
+    debug('me: ' + meDriver.permalink)
     meDriver = tradleUtils.promisifyNode(meDriver)
     this.idlifyExpensiveCalls()
 
@@ -4030,7 +4030,7 @@ var Store = Reflux.createStore({
       // });
 
   },
-  async autoRegister() {
+  async autoRegister(noMeYet) {
     Analytics.sendEvent({
       category: 'registration',
       action: 'sign_up',
@@ -4038,10 +4038,12 @@ var Store = Reflux.createStore({
     })
 
     let me
-    try {
-      me = await this.getMe()
-    } catch(err) {
-      debug('Store.autoRegister', err.stack)
+    if (!noMeYet) {
+      try {
+        me = await this.getMe()
+      } catch(err) {
+        debug('Store.autoRegister', err.stack)
+      }
     }
     if (!me) {
       await this.onAddItem({resource: {
