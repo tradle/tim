@@ -212,13 +212,13 @@ class ShowRefList extends Component {
         backlinkRL = <View/>
       else
         backlinkRL = <ResourceList
-                        modelName={modelName}
-                        prop={currentBacklink}
-                        sortProperty={utils.getModel(modelName).value.sortProperty}
-                        resource={resource}
-                        isBacklink={true}
-                        backlinkList={backlinkList}
-                        navigator={this.props.navigator} />
+                      modelName={modelName}
+                      prop={currentBacklink}
+                      sortProperty={utils.getModel(modelName).value.sortProperty}
+                      resource={resource}
+                      isBacklink={true}
+                      backlinkList={backlinkList}
+                      navigator={this.props.navigator} />
     }
     else
       separator = <View style={{height: 2, backgroundColor: 'darkblue'}} />

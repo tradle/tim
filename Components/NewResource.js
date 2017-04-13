@@ -69,9 +69,6 @@ import ENV from '../utils/env'
 const BG_IMAGE = ENV.brandBackground
 const DropPage = utils.isWeb() && require('./DropPage')
 
-// DeviceHeight = Dimensions.get('window').height;
-// DeviceWidth = Dimensions.get('window').width
-
 class NewResource extends Component {
   static displayName = 'NewResource';
   props: {
@@ -101,21 +98,17 @@ class NewResource extends Component {
 
     this.state = {
       resource: r,
-      // modalVisible: false,
-      // date: new Date(),
       isUploading: !isRegistration  &&  (!r[constants.ROOT_HASH] || Object.keys(r).length === 2),
       isRegistration: isRegistration,
       isLoadingVideo: false,
       isPrefilled: this.props.isPrefilled,
       modal: {},
-      // offSet: new Animated.Value(Dimensions.get('window').height),
       termsAccepted: isRegistration ? false : true
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes()
     var currentRoutesLength = currentRoutes.length
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.onSavePressed.bind(this)
 
-    // this._contentOffset = { x: 0, y: 0 }
     this.scrollviewProps = {
       automaticallyAdjustContentInsets:true,
       scrollEventThrottle: 50,
@@ -230,7 +223,6 @@ class NewResource extends Component {
       console.log('addItem: submitted = false')
       Alert.alert(
         params.error,
-        // this.props.navigator.pop()
       )
       var actionParams = {
         query: this.state.filter,
@@ -240,8 +232,6 @@ class NewResource extends Component {
       return
     }
     if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage')) {
-//       console.log('addItem1: submitted = false')
-//       this.state.submitted = false
       return;
     }
     if (this.state.resource[constants.TYPE] !== resource[constants.TYPE])
@@ -263,8 +253,6 @@ class NewResource extends Component {
     }
     if (this.props.callback) {
       utils.onNextTransitionEnd(this.props.navigator, () => this.state.submitted = false)
-      // this.state.submitted = false
-      // console.log('callback: submitted = false')
       this.props.callback(resource);
       return;
     }
@@ -333,7 +321,6 @@ class NewResource extends Component {
   // which providers to share the changes with
   showSharedWithList(newResource) {
     if (!this.props.resource  ||  !this.props.resource._sharedWith)
-      // this.onSavePressed1()
       return
     this.props.navigator.replace({
       id: 10,
@@ -452,12 +439,12 @@ class NewResource extends Component {
     for (var p in err)
       missedRequiredOrErrorValue[p] = err[p]
 
-    if ('scanJson' in missedRequiredOrErrorValue) {
-      if (utils.isAndroid() || utils.isWeb()) {
-        delete missedRequiredOrErrorValue.scanJson
-        json.scanJson = { ocrNotSupported: true }
-      }
-    }
+    // if ('scanJson' in missedRequiredOrErrorValue) {
+    //   if (utils.isAndroid() || utils.isWeb()) {
+    //     delete missedRequiredOrErrorValue.scanJson
+    //     json.scanJson = { ocrNotSupported: true }
+    //   }
+    // }
 
     if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       console.log('onSavePressed not all required: submitted = false')
@@ -469,56 +456,8 @@ class NewResource extends Component {
       this.setState(state)
       return;
     }
-    // if (msg) {
-    //   this.setState({ err: msg });
-    //   this.state.submitted = false
-    //   return;
-    // }
     if (!value)
       debugger
-    // if (!value) {
-    //   var errors = this.refs.form.refs.input.getValue().errors;
-    //   var msg = '';
-    //   var errMsg = errors.forEach(function(err) {
-    //      msg += ' ' + err.message;
-    //   });
-    //   this.setState({ err: msg });
-    //   this.state.submitted = false
-    //   return;
-    // }
-
-    // var json = JSON.parse(JSON.stringify(value));
-
-    // if (!resource) {
-    //   resource = {};
-    //   resource[constants.TYPE] = this.props.model.id;
-    // }
-    // var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!resource || !resource[constants.ROOT_HASH]);
-    // if (isRegistration)
-    //   this.state.isRegistration = true;
-    // if (this.props.chat) {
-    //   let toId = utils.getId(resource.to)
-    //   // resource modifications should be related to the chat where it was changed
-    //   // Check if the resource modified was originally created in this chat
-    //   let chatReps = this.props.chat.contacts
-    //   let foundRep = this.props.chat.contacts.filter((rep) => {
-    //     return rep.id === toId
-    //   })
-    //   if (foundRep.length)
-    //     foundRep = foundRep[0]
-    //   else {
-    //     // find the right representative from the sharedWith property of the resource
-    //     let sharedWith = resource._sharedWith
-    //     sharedWith.forEach(rep => {
-    //       let r = chatReps.filter(r => {
-    //         return r.id === rep.bankRepresentative
-    //       })
-    //       if (r.length)
-    //         foundRep = r[0]
-    //     })
-    //   }
-    //   json.to = foundRep
-    // }
 
     var r = {}
     extend(true, r, resource)
@@ -532,8 +471,6 @@ class NewResource extends Component {
     };
     if (this.props.chat)
       params.chat = this.props.chat
-    // if (list)
-    //   params.shareWith = list
     params.doNotSend = this.props.doNotSend
     Actions.addItem(params)
   }
@@ -551,7 +488,6 @@ class NewResource extends Component {
   }
   addFormValues() {
     var value = this.refs.form.getValue();
-    // var json = value ? JSON.parse(JSON.stringify(value)) : this.refs.form.refs.input.state.value;
     var json = value ? value : this.refs.form.refs.input.state.value;
     var resource = this.state.resource;
     if (!resource) {
@@ -587,27 +523,6 @@ class NewResource extends Component {
   }
 
   onNewPressed(bl) {
-    // if (bl.items.backlink) {
-    //   var model = utils.getModel(bl.items.ref).value;
-    //   var resource = {};
-    //   resource[constants.TYPE] = bl.items.ref;
-    //   resource[bl.items.backlink] = this.props.resource;
-    //   var passProps = {
-    //     model: model,
-    //     // callback: this.props.navigator.pop,
-    //     resource: resource
-    //   }
-    //   this.props.navigator.push({
-    //     id: 4,
-    //     title: 'Add new ' + bl.title,
-    //     backButtonTitle: 'Back',
-    //     component: NewResource,
-    //     rightButtonTitle: 'Done',
-    //     passProps: passProps,
-    //   });
-    //   return;
-    // }
-
     var resource = this.addFormValues();
     this.setState({resource: resource, err: '', inFocus: bl.name});
     // if (bl.name === 'photos') {
@@ -628,7 +543,6 @@ class NewResource extends Component {
           isChooser: true,
           prop: bl,
           callback:    this.setChosenValue.bind(this),
-          // onAddItem: this.onAddItem.bind(this),
           bankStyle: this.props.bankStyle,
           currency: this.props.currency
         }
@@ -640,11 +554,7 @@ class NewResource extends Component {
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
       backButtonTitle: 'Back',
       component: NewItem,
-      rightButtonTitle: 'Done',
-      // onRightButtonPress: {
-      //   stateChange: this.onAddItem.bind(this, bl, ),
-      //   before: this.done.bind(this)
-      // },
+      rightButtonTitle: translate('done'),
       passProps: {
         metadata: bl,
         resource: this.state.resource,

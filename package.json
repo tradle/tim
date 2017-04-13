@@ -236,6 +236,7 @@
     "react-native-splash-screen": false,
     "react-native-keychain": "./web/shims/keychain.js",
     "react-native-datepicker": "./web/shims/DatePicker.web.js",
+    "react-native-firebase-analytics": "./web/shims/analytics.js",
     "react-native-gesture-password": false,
     "react-native-code-push": false,
     "react-native-search-bar": false,
