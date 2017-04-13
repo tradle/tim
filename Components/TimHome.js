@@ -520,12 +520,12 @@ class TimHome extends Component {
 
     this.showOfficialAccounts()
   }
-  autoRegister(provider) {
+  acceptTermsAndChat(provider) {
     // this.props.navigator.pop()
     if (utils.getMe())
       this.showChatPage(provider, true)
     else
-      Actions.autoRegister({
+      Actions.acceptTermsAndChat({
         bot: this.state.permalink,
         url: this.state.url
       })
@@ -585,7 +585,7 @@ class TimHome extends Component {
         bankStyle: style,
         resource: provider,
         url: this.state.url,
-        autoRegister: this.autoRegister.bind(this),
+        acceptTermsAndChat: this.acceptTermsAndChat.bind(this),
         showChat: this.showChatPage.bind(this)
       }
     })

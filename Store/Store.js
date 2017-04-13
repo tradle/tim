@@ -398,23 +398,30 @@ var Store = Reflux.createStore({
 
     await this.getReady()
   },
-  onAutoRegister(params) {
-    return this.autoRegister(true)
-    .then(() => {
+  onAcceptTermsAndChat(params) {
+    me.termsAccepted = true;
+    return this.dbPut(utils.getId(me), me)
+    .then(() =>  {
       this.setMe(me)
-      return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
+      this.trigger({action: 'getProvider', provider: params.bot, termsAccepted: params.termsAccepted})
     })
-    .then(() => this.getDriver(me))
-    .then(() => {
-      Analytics.sendEvent({
-        category: 'registration',
-        action: 'accept_terms',
-        label: 'auto-reg'
-      })
 
-      if (me.registeredForPushNotifications)
-        Push.resetBadgeNumber()
-    })
+    // return this.autoRegister(true)
+    // .then(() => {
+    //   this.setMe(me)
+    //   return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
+    // })
+    // .then(() => this.getDriver(me))
+    // .then(() => {
+    //   Analytics.sendEvent({
+    //     category: 'registration',
+    //     action: 'accept_terms',
+    //     label: 'auto-reg'
+    //   })
+
+    //   if (me.registeredForPushNotifications)
+    //     Push.resetBadgeNumber()
+    // })
   },
   async getReady() {
     let me
@@ -424,7 +431,7 @@ var Store = Reflux.createStore({
       debug('Store.init ' + err.stack)
     }
     let doMonitor = true
-    if (!me  &&  ENV.autoRegister  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
+    if (!me  &&  ENV.autoRegister) { //  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
       me = await this.autoRegister()
       doMonitor = false
     }
