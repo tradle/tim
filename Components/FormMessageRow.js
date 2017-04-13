@@ -136,13 +136,14 @@ class FormMessageRow extends Component {
     var sendStatus = <View />
     if (this.props.sendStatus  &&  this.props.sendStatus !== null)
       sendStatus = this.getSendStatus()
-    // var val = this.getTime(resource);
-    // var date = val
-    //          ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
-    //          : <View />;
+    var val = this.getTime(resource);
+    var date = val
+             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
+             : <View />;
     let bg = bankStyle.BACKGROUND_IMAGE ? {} : {backgroundColor: bankStyle.BACKGROUND_COLOR}
 
     return  <View style={[{margin: 1}, bg]}>
+              {date}
               <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
                 {this.formStub(resource, to)}
               </TouchableHighlight>
