@@ -140,7 +140,7 @@ class FormMessageRow extends Component {
       sendStatus = this.getSendStatus()
     var val = this.getTime(resource);
     var date = val
-             ? <Text style={chatStyles.date}>{val}</Text>
+             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
     let bg = bankStyle.BACKGROUND_IMAGE ? {} : {backgroundColor: bankStyle.BACKGROUND_COLOR}
 

@@ -392,23 +392,30 @@ var Store = Reflux.createStore({
 
     await this.getReady()
   },
-  onAutoRegister(params) {
-    return this.autoRegister()
-    .then(() => {
+  onAcceptTermsAndChat(params) {
+    me.termsAccepted = true;
+    return this.dbPut(utils.getId(me), me)
+    .then(() =>  {
       this.setMe(me)
-      return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
+      this.trigger({action: 'getProvider', provider: params.bot, termsAccepted: params.termsAccepted})
     })
-    .then(() => this.getDriver(me))
-    .then(() => {
-      Analytics.sendEvent({
-        category: 'registration',
-        action: 'accept_terms',
-        label: 'auto-reg'
-      })
 
-      if (me.registeredForPushNotifications)
-        Push.resetBadgeNumber()
-    })
+    // return this.autoRegister(true)
+    // .then(() => {
+    //   this.setMe(me)
+    //   return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
+    // })
+    // .then(() => this.getDriver(me))
+    // .then(() => {
+    //   Analytics.sendEvent({
+    //     category: 'registration',
+    //     action: 'accept_terms',
+    //     label: 'auto-reg'
+    //   })
+
+    //   if (me.registeredForPushNotifications)
+    //     Push.resetBadgeNumber()
+    // })
   },
   async getReady() {
     let me
@@ -418,7 +425,7 @@ var Store = Reflux.createStore({
       debug('Store.init ' + err.stack)
     }
     let doMonitor = true
-    if (!me  &&  ENV.autoRegister  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
+    if (!me  &&  ENV.autoRegister) { //  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
       me = await this.autoRegister()
       doMonitor = false
     }
@@ -4068,7 +4075,7 @@ var Store = Reflux.createStore({
       // });
 
   },
-  async autoRegister() {
+  async autoRegister(noMeYet) {
     Analytics.sendEvent({
       category: 'registration',
       action: 'sign_up',
@@ -4076,10 +4083,12 @@ var Store = Reflux.createStore({
     })
 
     let me
-    try {
-      me = await this.getMe()
-    } catch(err) {
-      debug('Store.autoRegister', err.stack)
+    if (!noMeYet) {
+      try {
+        me = await this.getMe()
+      } catch(err) {
+        debug('Store.autoRegister', err.stack)
+      }
     }
     if (!me) {
       await this.onAddItem({resource: {
