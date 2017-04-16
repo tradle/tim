@@ -171,9 +171,17 @@ class ShowPropertiesView extends Component {
         else
           return;
       }
+      else if (pMeta.type === 'date')
+        val = utils.getDateValue(val)
       else if (pMeta.ref) {
-        if (pMeta.ref === PHOTO)
+        if (pMeta.ref === PHOTO) {
+          if (vCols.length === 1  &&  resource.time)
+            return <View  key={this.getNextKey()} style={{padding: 10}}>
+                     <Text style={styles.title}>{translate('Date')}</Text>
+                     <Text style={[styles.title, styles.description]}>{dateformat(new Date(resource.time), 'mmm d, yyyy')}</Text>
+                   </View>
           return
+        }
         if (pMeta.ref == constants.TYPES.MONEY) {
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
@@ -199,8 +207,7 @@ class ShowPropertiesView extends Component {
           isRef = true;
         }
       }
-      else if (pMeta.type === 'date')
-        val = dateformat(new Date(val), 'fullDate', true)
+
       // else if (pMeta[constants.SUB_TYPE] === 'email') {
       //   isEmail = true
       //   val = <TouchableOpacity onPress={() => Communications.email([val], null, null, 'My Subject','My body text')}>

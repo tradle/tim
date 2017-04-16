@@ -40,7 +40,7 @@ var collect = require('stream-collector')
 var typeforce = require('typeforce')
 var t = require('tcomb-form-native');
 var equal = require('deep-equal')
-// var moment = require('moment');
+var moment = require('moment');
 var dateformat = require('dateformat')
 var Backoff = require('backoff')
 var extend = require('xtend')
@@ -472,6 +472,8 @@ var utils = {
   getStringValueForProperty(resource, p, meta) {
     let displayName = ''
     if (resource[p]) {
+      if (meta[p].type === 'date')
+        return this.getDateValue(resource[p])
       if (meta[p].type !== 'object')
         return resource[p];
       if (resource[p].title)
@@ -492,7 +494,11 @@ var utils = {
     }
     return displayName
   },
-
+  getDateValue(value) {
+    let valueMoment = moment.utc(value)
+    let format = 'MMMM Do, YYYY'
+    return valueMoment && valueMoment.format(format)
+  },
   getPropStringValue(prop, resource) {
     let p = prop.name
     if (!resource[p]  &&  prop.displayAs)
