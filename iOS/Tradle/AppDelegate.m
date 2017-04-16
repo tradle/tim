@@ -73,8 +73,8 @@
   [self.window makeKeyAndVisible];
 
 #ifdef DEBUG
-  [SplashScreen show]; //show splash screen
 #else
+  [SplashScreen show]; //show splash screen
   [Fabric with:@[[Crashlytics class]]];
   // RCTSetLogThreshold(RCTLogLevelInfo);
   // RCTSetLogFunction(CrashlyticsReactLogFunction);
