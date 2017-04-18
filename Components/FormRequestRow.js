@@ -340,13 +340,13 @@ class FormRequestRow extends Component {
       <View style={[rowStyle, viewStyle, {marginTop: -15, width: w, backgroundColor: '#ffffff', borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
         <View style={{flex: 1}}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <View style={{alignSelf: 'stretch', backgroundColor: bankStyle.VERIFIED_BG, height: 1, flex: 5, alignSelf: 'center'}}/>
+            <View style={{backgroundColor: bankStyle.VERIFIED_BG, height: 1, flex: 5, alignSelf: 'center'}}/>
             <View style={{width: 5}} />
             <View style={[styles.assistentBox, {backgroundColor: bankStyle.VERIFIED_BG}]}>
               <Text style={styles.orText}>{'OR'}</Text>
             </View>
             <View style={{width: 5}} />
-            <View style={{alignSelf: 'stretch', backgroundColor: bankStyle.VERIFIED_BG, height: 1, flex: 5, alignSelf: 'center'}}/>
+            <View style={{backgroundColor: bankStyle.VERIFIED_BG, height: 1, flex: 5, alignSelf: 'center'}}/>
           </View>
           <View style={styles.shareablesList}>
             {vtt}
