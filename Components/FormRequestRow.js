@@ -336,12 +336,17 @@ class FormRequestRow extends Component {
 
     let w = utils.dimensions(FormRequestRow).width * 0.8 - 2
     let bankStyle = this.props.bankStyle
-    let color = bankStyle.VERIFICATION_BG
     return (
-      <View style={[rowStyle, viewStyle, {marginTop: -15, width: w, backgroundColor: bankStyle.VERIFIED_BG, borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
+      <View style={[rowStyle, viewStyle, {marginTop: -15, width: w, backgroundColor: '#ffffff', borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
         <View style={{flex: 1}}>
-          <View style={[styles.assistentBox, {backgroundColor: color}]}>
-            <Text style={styles.orText}>{'OR'}</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <View style={{alignSelf: 'stretch', backgroundColor: bankStyle.VERIFIED_BG, height: 1, flex: 5, alignSelf: 'center'}}/>
+            <View style={{width: 5}} />
+            <View style={[styles.assistentBox, {backgroundColor: bankStyle.VERIFIED_BG}]}>
+              <Text style={styles.orText}>{'OR'}</Text>
+            </View>
+            <View style={{width: 5}} />
+            <View style={{alignSelf: 'stretch', backgroundColor: bankStyle.VERIFIED_BG, height: 1, flex: 5, alignSelf: 'center'}}/>
           </View>
           <View style={styles.shareablesList}>
             {vtt}
