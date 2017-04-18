@@ -146,7 +146,7 @@ class VerificationMessageRow extends Component {
     }
 
     let addStyle = [
-      { borderWidth: 0, backgroundColor: 'transparent'}, /*, backgroundColor: isShared ? '#ffffff' : bankStyle.VERIFICATION_BG,*/
+      { borderWidth: 0, backgroundColor: 'transparent'}, /*, backgroundColor: isShared ? '#ffffff' : bankStyle.VERIFIED_BG,*/
       isMyMessage ? styles.headerRight : styles.headerLeft
     ];
 
