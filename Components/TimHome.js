@@ -522,7 +522,8 @@ class TimHome extends Component {
   }
   acceptTermsAndChat(provider) {
     // this.props.navigator.pop()
-    if (utils.getMe())
+    let me = utils.getMe()
+    if (me  &&  me._termsAccepted)
       this.showChatPage(provider, true)
     else
       Actions.acceptTermsAndChat({
