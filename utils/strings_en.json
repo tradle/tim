@@ -206,7 +206,7 @@
     "youReviewed": "You reviewed {1} out of {2} items",
     "youReviewedAll": "You reviewed all {1}",
     "unknownQRCodeFormat": "Unrecognized QR code format",
-    "confirmedMyData": "All imported data could be viewed in {profileTitle}",
+    "confirmedMyData": "All imported data can be viewed in {profileTitle}",
     "importData": "Import data",
     "digitalWealthPassport": "Digital Wealth Passport",
     "homePage": "Home",
