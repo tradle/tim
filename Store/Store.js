@@ -399,11 +399,11 @@ var Store = Reflux.createStore({
     await this.getReady()
   },
   onAcceptTermsAndChat(params) {
-    me.termsAccepted = true;
+    me._termsAccepted = true;
     return this.dbPut(utils.getId(me), me)
     .then(() =>  {
       this.setMe(me)
-      this.trigger({action: 'getProvider', provider: params.bot, termsAccepted: params.termsAccepted})
+      this.trigger({action: 'getProvider', provider: params.bot, termsAccepted: true})
     })
 
     // return this.autoRegister(true)
@@ -1217,11 +1217,11 @@ var Store = Reflux.createStore({
 
   async meDriverSend(sendParams) {
     await this.maybeWaitForIdentity(sendParams.to)
-    await meDriver.send(sendParams)
+    return await meDriver.send(sendParams)
   },
   async meDriverSignAndSend(sendParams) {
     await this.maybeWaitForIdentity(sendParams.to)
-    await meDriver.signAndSend(sendParams)
+    return await meDriver.signAndSend(sendParams)
   },
 
   async maybeWaitForIdentity({ permalink }) {
