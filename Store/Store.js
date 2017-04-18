@@ -403,7 +403,9 @@ var Store = Reflux.createStore({
     return this.dbPut(utils.getId(me), me)
     .then(() =>  {
       this.setMe(me)
-      this.trigger({action: 'getProvider', provider: params.bot, termsAccepted: true})
+      let bot = this._getItem(utils.getId(PROFILE + '_' + params.bot))
+      let provider = this._getItem(bot.organization)
+      this.trigger({action: 'getProvider', provider: provider, termsAccepted: true})
     })
 
     // return this.autoRegister(true)
