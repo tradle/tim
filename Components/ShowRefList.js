@@ -111,21 +111,24 @@ class ShowRefList extends Component {
       if (!showDetails)
         return <View/>
     }
-    else if (!isIdentity) {
+    else if (!isIdentity  &&  this.hasPropsToShow(resource)) {
       let showCurrent = showDetails ? currentMarker : null
-      refList.push(
-        <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-         <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
-           <View style={styles.item}>
-             <View style={{flexDirection: 'row'}}>
-               <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
-             </View>
-             <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
-           </View>
-         </TouchableHighlight>
-         {showCurrent}
-        </View>
-      )
+      let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
+                         <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
+                           <View style={styles.item}>
+                             <View style={{flexDirection: 'row'}}>
+                               <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
+                             </View>
+                             <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
+                           </View>
+                         </TouchableHighlight>
+                         {showCurrent}
+                        </View>
+
+      if (refList.length)
+        refList.splice(0, 0, detailsTab)
+      else
+        refList.push(detailsTab)
     }
     if (model.viewCols) {
       let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items  &&  props[p].items.backlink)
@@ -271,7 +274,14 @@ class ShowRefList extends Component {
         this.getDocs(v.sources, rId, docs)
     })
   }
-
+  hasPropsToShow(resource) {
+    let props = utils.getModel(resource[TYPE]).value.properties
+    for (let p in resource) {
+      if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
+        continue
+      return true
+    }
+  }
   exploreBacklink(resource, prop) {
     Actions.exploreBacklink(resource, prop)
   }

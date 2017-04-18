@@ -392,23 +392,30 @@ var Store = Reflux.createStore({
 
     await this.getReady()
   },
-  onAutoRegister(params) {
-    return this.autoRegister()
-    .then(() => {
+  onAcceptTermsAndChat(params) {
+    me.termsAccepted = true;
+    return this.dbPut(utils.getId(me), me)
+    .then(() =>  {
       this.setMe(me)
-      return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
+      this.trigger({action: 'getProvider', provider: params.bot, termsAccepted: params.termsAccepted})
     })
-    .then(() => this.getDriver(me))
-    .then(() => {
-      Analytics.sendEvent({
-        category: 'registration',
-        action: 'accept_terms',
-        label: 'auto-reg'
-      })
 
-      if (me.registeredForPushNotifications)
-        Push.resetBadgeNumber()
-    })
+    // return this.autoRegister(true)
+    // .then(() => {
+    //   this.setMe(me)
+    //   return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
+    // })
+    // .then(() => this.getDriver(me))
+    // .then(() => {
+    //   Analytics.sendEvent({
+    //     category: 'registration',
+    //     action: 'accept_terms',
+    //     label: 'auto-reg'
+    //   })
+
+    //   if (me.registeredForPushNotifications)
+    //     Push.resetBadgeNumber()
+    // })
   },
   async getReady() {
     let me
@@ -418,7 +425,7 @@ var Store = Reflux.createStore({
       debug('Store.init ' + err.stack)
     }
     let doMonitor = true
-    if (!me  &&  ENV.autoRegister  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
+    if (!me  &&  ENV.autoRegister) { //  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
       me = await this.autoRegister()
       doMonitor = false
     }
@@ -849,11 +856,13 @@ var Store = Reflux.createStore({
       multiqueue,
       worker: async function ({ value, lane }) {
         // load non plain-js props (e.g. Buffers)
-        value = utils.parseMessageFromDB(value)
+        const { length } = value
+        const msg = utils.parseMessageFromDB(value.message)
 
         try {
           await self.receive({
-            msg: value,
+            length,
+            msg,
             from: lane
           })
         } catch (err) {
@@ -865,7 +874,9 @@ var Store = Reflux.createStore({
     processor.start()
 
     this.queueReceive = function queueReceive ({ msg, from }) {
+      let length
       if (Buffer.isBuffer(msg)) {
+        length = msg.length
         msg = tradleUtils.unserializeMessage(msg)
       }
 
@@ -876,7 +887,10 @@ var Store = Reflux.createStore({
 
       return multiqueue.enqueue({
         seq: msg[SEQ],
-        value: msg,
+        value: {
+          message: msg,
+          length
+        },
         lane: from
       })
     }
@@ -1490,12 +1504,12 @@ var Store = Reflux.createStore({
 
   async receive(opts) {
     const self = this
-    let { msg, from, isRetry } = opts
+    let { msg, from, isRetry, length } = opts
     const { wsClients, identifierProp } = driverInfo
     const identifier = from
 
     let progressUpdate
-    let willAnnounceProgress = willShowProgressBar(msg)
+    let willAnnounceProgress = willShowProgressBar({ length })
     try {
       if (Buffer.isBuffer(msg)) {
         msg = tradleUtils.unserializeMessage(msg)
@@ -4068,7 +4082,7 @@ var Store = Reflux.createStore({
       // });
 
   },
-  async autoRegister() {
+  async autoRegister(noMeYet) {
     Analytics.sendEvent({
       category: 'registration',
       action: 'sign_up',
@@ -4076,10 +4090,12 @@ var Store = Reflux.createStore({
     })
 
     let me
-    try {
-      me = await this.getMe()
-    } catch(err) {
-      debug('Store.autoRegister', err.stack)
+    if (!noMeYet) {
+      try {
+        me = await this.getMe()
+      } catch(err) {
+        debug('Store.autoRegister', err.stack)
+      }
     }
     if (!me) {
       await this.onAddItem({resource: {
@@ -8711,7 +8727,7 @@ function fixOldSettings (settings) {
 }
 
 function willShowProgressBar ({ length }) {
-  return length >= MIN_SIZE_FOR_PROGRESS_BAR
+  return typeof length === 'undefined' || length >= MIN_SIZE_FOR_PROGRESS_BAR
 }
 
 async function generateIdentity ({ networkName }) {

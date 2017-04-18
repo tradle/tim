@@ -94,7 +94,7 @@ class MessageList extends Component {
       isLoading: true,
       // selectedAssets: {},
       isConnected: props.navigator.isConnected,
-      onlineStatus: props.resource._online,
+      // onlineStatus: props.resource._online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
       isEmployee:  utils.isEmployee(props.resource),
       filter: props.filter,
@@ -343,8 +343,13 @@ class MessageList extends Component {
       return false
     if (utils.resized(this.props, nextProps))
       return true
-    if (nextState.isConnected !== this.state.isConnected || nextState.onlineStatus !== this.state.onlineStatus)
+    if (nextState.isConnected !== this.state.isConnected)
       return true
+    // undefined - is not yet checked
+    if (typeof this.state.onlineStatus !== 'undefined') {
+      if (nextState.onlineStatus !== this.state.onlineStatus)
+        return true
+    }
     if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
       return true
     if (this.state.hasProducts !== nextState.hasProducts)
@@ -357,8 +362,8 @@ class MessageList extends Component {
         !nextState.list                                   ||
          this.props.orientation !== nextProps.orientation ||
          this.state.allLoaded !== nextState.allLoaded     ||
-         this.state.list.length !== nextState.list.length ||
-         this.state.sendStatus !== nextState.sendStatus)
+         // this.state.sendStatus !== nextState.sendStatus   ||
+         this.state.list.length !== nextState.list.length)
          // this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]))
       return true
     for (var i=0; i<this.state.list.length; i++) {

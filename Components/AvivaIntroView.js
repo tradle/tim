@@ -140,7 +140,7 @@ class AvivaIntroView extends Component {
   }
   showChat(provider) {
     let me = utils.getMe()
-    if (!me) {
+    if (me  &&  !me.termsAccepted) {
       this.showTerms()
       return
     }
@@ -176,7 +176,7 @@ class AvivaIntroView extends Component {
       title: translate('termsAndConditions'),
       passProps: {
         bankStyle: this.props.bankStyle,
-        action: this.props.autoRegister.bind(this, this.props.resource, this.props.url),
+        action: this.props.acceptTermsAndChat.bind(this, this.props.resource, this.props.url),
         url: avivaTC,
         actionBarTitle: 'Accept and continue'
       }

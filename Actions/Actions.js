@@ -57,7 +57,7 @@ var asyncActions = [
   'exploreBacklink',
   'getDetails',
   'getProvider',
-  'autoRegister',
+  'acceptTermsAndChat',
   'setPreferences',
   'getDocuments',
   'downloadAllSharedContexts'

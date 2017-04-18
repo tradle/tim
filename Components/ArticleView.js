@@ -82,6 +82,7 @@ var styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: '#ffffff',
     marginTop: 60,
+    width: '100%'
     // don't set height on web
     // height: utils.isWeb() ? '100%' : 350
   }

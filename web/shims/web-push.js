@@ -12,6 +12,7 @@ const swURL = require('file?name=service-worker.js!./service-worker')
 const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'https://push1.tradle.io'
 // const pushServerURL = `http://${ENV.LOCAL_IP}:48284`
 
+const willRegister = ENV.registerForPushNotifications
 let initialized
 let initialize = new Promise(resolve => {
   initialized = resolve
@@ -20,6 +21,8 @@ let initialize = new Promise(resolve => {
 const Local = require('./no-push')
 
 exports.init = function (opts) {
+  if (!willRegister) return Promise.resolve({})
+
   Local.init(opts)
 
   const node = opts.node
@@ -57,6 +60,8 @@ exports.init = function (opts) {
 }
 
 exports.subscribe = function (publisher) {
+  if (!willRegister) return Promise.resolve()
+
   return initialize.then(opts => {
     const node = opts.node
     return postWithRetry(node, '/subscription', {
