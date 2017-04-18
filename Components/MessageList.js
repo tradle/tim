@@ -568,7 +568,7 @@ class MessageList extends Component {
 
       if (this.hasChatContext())
         maxHeight -= 45
-      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  !this.state.onlineStatus))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
+      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  this.state.onlineStatus === false))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
       // if (notRemediation  &&  !hideTextInput) //  &&  this.props.resource.products) //  &&  this.props.resource.products.length > 1))
       //   maxHeight -= 45

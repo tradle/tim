@@ -393,7 +393,7 @@ class MessageView extends Component {
     let contentSeparator = utils.getContentSeparator(bankStyle)
 
     return (
-      <PageView style={[platformStyles.container, {height: utils.dimensions().height - 70}]} separator={contentSeparator}>
+      <PageView style={[platformStyles.container, {height: utils.dimensions().height - 80}]} separator={contentSeparator}>
       <ScrollView  ref='this' keyboardShouldPersistTaps={true}>
         {dateView}
         <View style={styles.photoBG}>
