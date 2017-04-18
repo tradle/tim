@@ -54,7 +54,7 @@ class VerificationView extends Component {
       verifier = resource.from.title
     return (
        <View>
-        <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.VERIFIED_BG}]}>
+        <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
           <Text style={[styles.description, {color: this.props.bankStyle.VERIFIED_HEADER_TEXT_COLOR, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
         </View>
         {this.renderVerification(resource, utils.getModel(constants.TYPES.VERIFICATION).value, vTree, 0, 0)}
@@ -72,9 +72,9 @@ class VerificationView extends Component {
       let displayName = utils.getDisplayName(resource.method, m.properties)
       let val = <View>{this.renderResource(resource, m)}</View>
       let title = <View style={{backgroundColor: bankStyle.VERIFIED_BG, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
-                    <Icon name='ios-add-circle-outline' size={25} color={bankStyle.VERIFIED_HEADER_TEXT_COLOR} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
+                    <Icon name='ios-add-circle-outline' size={25} color={bankStyle.VERIFIED_TEXT_COLOR} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
                     <View style={{justifyContent: 'center', flexDirection: 'column', paddingLeft: 5, width: utils.dimensions(VerificationView).width - 50}}>
-                      <Text style={{color: bankStyle.VERIFIED_HEADER_TEXT_COLOR, fontSize: 18}}>{displayName}</Text>
+                      <Text style={{color: bankStyle.VERIFIED_TEXT_COLOR, fontSize: 18}}>{displayName}</Text>
                     </View>
                   </View>
 
