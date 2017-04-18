@@ -50,6 +50,7 @@ const ROOT_HASH = constants.ROOT_HASH
 const CUR_HASH = constants.ROOT_CUR
 const TYPE = constants.TYPE
 const TYPES = constants.TYPES
+const PROFILE = TYPES.PROFILE
 
 var StyleSheet = require('../StyleSheet')
 
@@ -108,7 +109,7 @@ class MessageList extends Component {
       return false
     let me = utils.getMe()
     let chat = this.props.resource
-    let isChattingWithPerson = chat[constants.TYPE] === TYPES.PROFILE
+    let isChattingWithPerson = chat[constants.TYPE] === PROFILE
     if (me.isEmployee) {
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return false
@@ -118,7 +119,7 @@ class MessageList extends Component {
       return false
 
     let isReadOnlyChat = utils.isReadOnlyChat(context)
-    if (this.props.allContexts || isReadOnlyChat) //  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
+    if (this.props.allContexts) // || isReadOnlyChat) //  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
       return false
 
     return true
@@ -240,7 +241,7 @@ class MessageList extends Component {
         params.isAggregation !== this.props.isAggregation)
       return;
     if (params.forgetMeFromCustomer) {
-      Actions.list({modelName: TYPES.PROFILE})
+      Actions.list({modelName: PROFILE})
       let routes = this.props.navigator.getCurrentRoutes()
       if (routes[routes.length - 1].component )
       this.props.navigator.popToRoute(routes[1])
@@ -584,12 +585,12 @@ class MessageList extends Component {
       var maxHeight = h - NAV_BAR_HEIGHT
       // Chooser for trusted party verifier
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
-      let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
+      let notRemediation = (this.state.context   &&  this.state.context.product !== REMEDIATION) ||
                            (isProductApplication && resource.product !== REMEDIATION)
 
       if (this.hasChatContext())
         maxHeight -= 45
-      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  !this.state.onlineStatus))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
+      else if (resource[TYPE] !== PROFILE && notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  !this.state.onlineStatus))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
       // if (notRemediation  &&  !hideTextInput) //  &&  this.props.resource.products) //  &&  this.props.resource.products.length > 1))
       //   maxHeight -= 45
@@ -804,7 +805,7 @@ class MessageList extends Component {
   // Context chooser shows all the context of the particular chat.
   // When choosing the context chat will show only the messages in linked to this context.
   contextChooser(context) {
-    let name = this.props.resource[TYPE] === TYPES.PROFILE ? this.props.resource.formatted : this.props.resource.name
+    let name = this.props.resource[TYPE] === PROFILE ? this.props.resource.formatted : this.props.resource.name
     this.props.navigator.push({
       title: translate('contextsFor') + ' ' + name,
       id: 23,
