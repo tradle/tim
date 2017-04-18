@@ -2,13 +2,14 @@ import { EventEmitter } from 'events'
 import { AppState } from 'react-native'
 import { constants } from '@tradle/engine'
 import Actions from '../../Actions/Actions'
+import ENV from '../../utils/env'
 
 const { TYPE } = constants
 const IGNORE_TYPES = [
   'tradle.CustomerWaiting'
 ]
 
-const notificationsSupported = 'Notification' in global
+const notificationsSupported = 'Notification' in global && ENV.registerForPushNotifications
 if (notificationsSupported) requestPermissions()
 
 let tabIsFocused = AppState.currentState === 'active'
