@@ -271,13 +271,15 @@ var ResourceMixin = {
     let hideGroup = prop  &&  hideGroupInJSON[rType]
     let showCollapsed = ENV.showCollapsed  &&  ENV.showCollapsed[rType]
     skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
+    let bankStyle = this.state.bankStyle ||  this.props.bankStyle || defaultBankStyle
     if (prop) {
-      var backlinksBg = {backgroundColor: '#96B9FA', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
+      let bg = isView ? '#96B9FA' : bankStyle.VERIFIED_HEADER_COLOR
+      let color = isView ? '#ffffff' : bankStyle.VERIFIED_HEADER_TEXT_COLOR
+      var backlinksBg = {backgroundColor: bg, paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
       jsonRows.push(<View style={backlinksBg} key={this.getNextKey()}>
-                      <Text  style={[styles.bigTitle, {color: '#ffffff', paddingVertical: 10}]}>{translate(prop)}</Text>
+                      <Text  style={[styles.bigTitle, {color: color, paddingVertical: 10}]}>{translate(prop)}</Text>
                     </View>)
     }
-    let bankStyle = this.props.bankStyle || defaultBankStyle
     let LINK_COLOR = bankStyle.LINK_COLOR
     for (let p in json) {
       // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
@@ -366,15 +368,6 @@ var ResourceMixin = {
     }
     return true
   },
-  makeViewTitle(model) {
-    let rTitle
-    let bankStyle = this.props.bankStyle
-    if (this.props.bankStyle  &&  !this.props.bankStyle.LOGO_NEEDS_TEXT)
-      rTitle = <View style={{alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.NAV_BAR_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center'}}>
-                 <Text style={{fontSize: 24, color: bankStyle.CONTEXT_BACKGROUND_COLOR}}>{translate(model)}</Text>
-               </View>
-    return rTitle
-  }
 }
 
 var styles = StyleSheet.create({
