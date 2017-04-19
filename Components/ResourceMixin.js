@@ -303,7 +303,7 @@ var ResourceMixin = {
     let LINK_COLOR = bankStyle.LINK_COLOR
     if (prop) {
       for (let p in json) {
-        if (typeof json[p] === 'object')
+        if (typeof json[p] === 'object'  ||  p === 'result')
           continue
         let label
         if (!skipLabels  ||  skipLabels.indexOf(p) === -1)
@@ -321,8 +321,12 @@ var ResourceMixin = {
 
     }
     for (let p in json) {
-      if (isOnfido  &&  isBreakdown  && p === 'result')
-        continue
+      if (isOnfido) {
+        if  (isBreakdown  && p === 'result')
+          continue
+        if (p === 'properties')
+          continue
+      }
       // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
       //   continue
       if (prop  &&  hideGroup  &&  hideGroup.indexOf(p) !== -1)
