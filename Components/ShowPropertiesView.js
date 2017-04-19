@@ -147,7 +147,8 @@ class ShowPropertiesView extends Component {
         if (!val)
           return
         let jsonRows = []
-        return this.showJson(pMeta, val, true, jsonRows)
+        let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows}
+        return this.showJson(params)
       }
       var isRef;
       var isItems

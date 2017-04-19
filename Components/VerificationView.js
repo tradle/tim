@@ -217,9 +217,12 @@ class VerificationView extends Component {
       }
       else if (pMeta.type === 'date')
         val = dateformat(new Date(val), 'fullDate')
-      else if (pMeta.range === 'json')
+      else if (pMeta.range === 'json') {
         // let jsonRows = []
-        val = this.showJson(pMeta, val, false, [])
+        let isOnfido = isVerification  && resource.api  &&  resource.api.name === 'onfido'
+        let params = {prop: pMeta, json: val, jsonRows: [], isOnfido: isOnfido}
+        val = this.showJson(params)
+      }
       if (typeof val === 'undefined')
         return <View key={this.getNextKey()}></View>;
       if (!isRef) {
