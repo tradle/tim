@@ -284,9 +284,15 @@ var ResourceMixin = {
     if (prop) {
       let bg = isView ? bankStyle.MY_MESSAGE_BACKGROUND_COLOR : bankStyle.VERIFIED_HEADER_COLOR
       let color = isView ? '#ffffff' : bankStyle.VERIFIED_HEADER_TEXT_COLOR
-      var backlinksBg = {backgroundColor: bg, paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
+      let state
+      if (isOnfido) {
+        let color = json.result === 'clear' ? 'green' : 'red'
+        state = <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
+      }
+      var backlinksBg = {backgroundColor: bg, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
       jsonRows.push(<View style={backlinksBg} key={this.getNextKey()}>
                       <Text  style={[styles.bigTitle, {color: color, paddingVertical: 10}]}>{translate(prop)}</Text>
+                      {state}
                     </View>)
     }
     if (!indent)
@@ -328,7 +334,7 @@ var ResourceMixin = {
         if (p !== 'breakdown') {
           let result
           if (isOnfido && isBreakdown) {
-            let color = isBreakdown  &&  json[p].properties ? {} : {color: bankStyle.LINK_COLOR}
+            let color = isBreakdown  &&  json[p].properties ? {} : {color: json[p].result === 'clear' ?  'green' : 'red'}
             result = <Text style={[styles.bigTitle, color]}>{json[p].result}</Text>
           }
 
