@@ -180,7 +180,7 @@ class FormMessageRow extends Component {
     let headerStyle = [
       chatStyles.verifiedHeader,
       noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
-      {backgroundColor: bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
+      {backgroundColor: isMyMessage ? bankStyle.MY_MESSAGE_BACKGROUND_COLOR : bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
       isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
     ]
 
