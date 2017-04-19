@@ -503,11 +503,11 @@ class MessageRow extends Component {
     let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
     if (isRemediationCompleted) {
       let msg = <View key={this.getNextKey()}>
-                  <View style={{flexDirection: 'row'}}>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                     <View style={{flex: 1}}>
                       <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
                     </View>
-                    <Icon style={{position: 'absolute', bottom: 0, right: 2, color: this.props.bankStyle.LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+                    <Icon style={{color: this.props.bankStyle.LINK_COLOR, paddingLeft: 10}} size={20} name={'ios-arrow-forward'} />
                   </View>
                 </View>
 
