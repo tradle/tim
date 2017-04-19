@@ -845,8 +845,10 @@ var Store = Reflux.createStore({
     })
 
     Multiqueue.monitorMissing({ multiqueue, debounce: 1000 })
-      .on('batch', function ({ lane, missing }) {
-        const monitor = restoreMonitors[lane]
+      .on('batch', function ({ queue, lane, missing }) {
+        if (!queue) queue = lane // compat with v1
+
+        const monitor = restoreMonitors[queue]
         if (!monitor) return
 
         monitor.request({
@@ -856,7 +858,9 @@ var Store = Reflux.createStore({
 
     const processor = Multiqueue.process({
       multiqueue,
-      worker: async function ({ value, lane }) {
+      worker: async function ({ value, queue, lane }) {
+        if (!queue) queue = lane // compat with v1
+
         // load non plain-js props (e.g. Buffers)
         const { length } = value
         const msg = utils.parseMessageFromDB(value.message)
@@ -865,7 +869,7 @@ var Store = Reflux.createStore({
           await self.receive({
             length,
             msg,
-            from: lane
+            from: queue
           })
         } catch (err) {
           debug('failed to process message', err)
@@ -893,6 +897,8 @@ var Store = Reflux.createStore({
           message: msg,
           length
         },
+        queue: from,
+        // compat with v1
         lane: from
       })
     }
