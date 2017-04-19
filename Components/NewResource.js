@@ -688,8 +688,10 @@ class NewResource extends Component {
     if (jsonProps  &&  jsonProps.length) {
       jsonProps.forEach((prop) => {
         let val = this.state.resource[prop.name]
-        if (val)
-          jsons.push(this.showJson(prop, val, false, []))
+        if (val) {
+          let params = {prop: prop, json: val, jsonRows: [], isView: true}
+          jsons.push(this.showJson(params))
+        }
       })
     }
     if (!jsons.length)

@@ -265,22 +265,43 @@ var ResourceMixin = {
     }
     return val
   },
-  showJson(prop, json, isView, jsonRows, skipLabels) {
+  showJson(params) {
+    // let (prop, json, isView, jsonRows, skipLabels, indent, isOnfido} = params
+    let prop = params.prop
+    let json = params.json
+    let isView = params.isView
+    let jsonRows = params.jsonRows
+    let skipLabels = params.skipLabels
+    let indent = params.indent
+    let isOnfido = params.isOnfido
+    let isBreakdown = params.isBreakdown
     // let json = JSON.parse(jsonStr)
     // let jsonRows = []
     let rType = this.props.resource[constants.TYPE]
     let hideGroup = prop  &&  hideGroupInJSON[rType]
     let showCollapsed = ENV.showCollapsed  &&  ENV.showCollapsed[rType]
     skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
+    let bankStyle = this.state.bankStyle ||  this.props.bankStyle || defaultBankStyle
     if (prop) {
-      var backlinksBg = {backgroundColor: '#96B9FA', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
+      let bg = isView ? bankStyle.MY_MESSAGE_BACKGROUND_COLOR : bankStyle.VERIFIED_HEADER_COLOR
+      let color = isView ? '#ffffff' : bankStyle.VERIFIED_HEADER_TEXT_COLOR
+      let state
+      if (isOnfido) {
+        let color = json.result === 'clear' ? 'green' : 'red'
+        state = <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
+      }
+      var backlinksBg = {backgroundColor: bg, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
       jsonRows.push(<View style={backlinksBg} key={this.getNextKey()}>
-                      <Text  style={[styles.bigTitle, {color: '#ffffff', paddingVertical: 10}]}>{translate(prop)}</Text>
+                      <Text  style={[styles.bigTitle, {color: color, paddingVertical: 10}]}>{translate(prop)}</Text>
+                      {state}
                     </View>)
     }
-    let bankStyle = this.props.bankStyle || defaultBankStyle
+    if (!indent)
+      indent = 0
     let LINK_COLOR = bankStyle.LINK_COLOR
     for (let p in json) {
+      if (isOnfido  &&  isBreakdown  && p === 'result')
+        continue
       // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
       //   continue
       if (prop  &&  hideGroup  &&  hideGroup.indexOf(p) !== -1)
@@ -289,9 +310,19 @@ var ResourceMixin = {
         if (utils.isEmpty(json[p])  ||  this.checkIfJsonEmpty(json[p]))
           continue
         if (Array.isArray(json[p])) {
-          json[p].forEach((js) => this.showJson(null, js, isView, jsonRows, skipLabels))
+          json[p].forEach((js) => this.showJson({json: js, isView: isView, jsonRows: []}))
           continue
         }
+        // if (isBreakdown  &&  json[p].properties) {
+        //   jsonRows.push(<View style={{paddingVertical: 10, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
+        //               <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+        //                 <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
+        //                 <Text style={styles.bigTitle}>{json[p].result}</Text>
+        //               </View>
+        //               <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: '#eeeeee'}} />
+        //             </View>)
+        //   continue
+        // }
         let arr, arrow
         if (showCollapsed  &&  showCollapsed === p) {
           arr = []
@@ -301,22 +332,36 @@ var ResourceMixin = {
         else
           arr = jsonRows
         // HACK for Onfido
-        if (p !== 'breakdown')
-          arr.push(<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
+        if (p !== 'breakdown') {
+          let result
+          if (isOnfido && isBreakdown) {
+            let color = isBreakdown  &&  json[p].properties ? {} : {color: json[p].result === 'clear' ?  'green' : 'red'}
+            result = <Text style={[styles.bigTitle, color]}>{json[p].result}</Text>
+          }
+
+          arr.push(<View style={{paddingVertical: 10, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
                       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                         <Text style={styles.bigTitle}>{utils.makeLabel(p)}</Text>
+                        {result}
                         {arrow}
                       </View>
                       <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: '#eeeeee'}} />
                     </View>)
+          if (isBreakdown  &&  json[p].properties)
+            continue
+        }
+        else if (isOnfido)
+          isBreakdown = true
+
 // tada.push("<View style={{paddingVertical: 10, paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}><Text style={styles.bigTitle}>{" + utils.makeLabel(p) + "}</Text></View>")
-        this.showJson(null, json[p], isView, arr, skipLabels)
+        let params = {json: json[p], isView, jsonRows: arr, skipLabels, indent: indent + 1, isOnfido, isBreakdown: isBreakdown}
+        this.showJson(params)
         continue
       }
       let label
       if (!skipLabels  ||  skipLabels.indexOf(p) === -1)
         label = <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
-      jsonRows.push(<View style={{flexDirection: 'row', paddingHorizontal: isView ? 10 : 0}} key={this.getNextKey()}>
+      jsonRows.push(<View style={{flexDirection: 'row', paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
                       {label}
                       <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{json[p]}</Text>
                     </View>)
@@ -367,15 +412,6 @@ var ResourceMixin = {
     }
     return true
   },
-  makeViewTitle(model) {
-    let rTitle
-    let bankStyle = this.props.bankStyle
-    if (this.props.bankStyle  &&  !this.props.bankStyle.LOGO_NEEDS_TEXT)
-      rTitle = <View style={{alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.NAV_BAR_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center'}}>
-                 <Text style={{fontSize: 24, color: bankStyle.CONTEXT_BACKGROUND_COLOR}}>{translate(model)}</Text>
-               </View>
-    return rTitle
-  }
 }
 
 var styles = StyleSheet.create({
@@ -422,8 +458,7 @@ var styles = StyleSheet.create({
     // fontFamily: 'Avenir Next',
     marginTop: 3,
     marginBottom: 0,
-    marginHorizontal: 7,
-    color: '#7AAAC3'
+    marginHorizontal: 7
   },
 
 })

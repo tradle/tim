@@ -408,6 +408,16 @@ class MessageView extends Component {
       </PageView>
     );
   }
+  makeViewTitle(model) {
+    let rTitle
+    let bankStyle = this.state.bankStyle || this.props.bankStyle
+    if (this.props.bankStyle  &&  !this.props.bankStyle.LOGO_NEEDS_TEXT)
+      rTitle = <View style={{alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.NAV_BAR_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center'}}>
+                 <Text style={{fontSize: 24, color:  bankStyle.CONTEXT_BACKGROUND_COLOR}}>{translate(model)}</Text>
+               </View>
+    return rTitle
+  }
+
   renderFooter() {
     let icon = 'md-add' //Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'ios' ? '#ffffff' : 'red'

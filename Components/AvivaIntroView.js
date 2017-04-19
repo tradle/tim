@@ -140,7 +140,7 @@ class AvivaIntroView extends Component {
   }
   showChat(provider) {
     let me = utils.getMe()
-    if (me  &&  !me.termsAccepted) {
+    if (me  &&  !me._termsAccepted) {
       this.showTerms()
       return
     }

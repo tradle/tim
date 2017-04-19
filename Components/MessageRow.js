@@ -517,7 +517,9 @@ class MessageRow extends Component {
     if (isRemediationCompleted) {
       let msg = <View key={this.getNextKey()}>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
+                    <View style={{flex: 1}}>
+                      <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
+                    </View>
                     <Icon style={{color: this.props.bankStyle.LINK_COLOR, paddingLeft: 10}} size={20} name={'ios-arrow-forward'} />
                   </View>
                 </View>

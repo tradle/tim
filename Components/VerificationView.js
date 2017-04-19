@@ -56,7 +56,7 @@ class VerificationView extends Component {
     return (
        <View style={{width: utils.getContentWidth(VerificationView)}}>
         <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}]}>
-          <Text style={[styles.description, {color: this.props.bankStyle.VERIFI, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
+          <Text style={[styles.description, {color: this.props.bankStyle.VERIFIED_HEADER_TEXT_COLOR, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
         </View>
         {this.renderVerification(resource, utils.getModel(constants.TYPES.VERIFICATION).value, vTree, 0, 0)}
       </View>
@@ -66,15 +66,16 @@ class VerificationView extends Component {
   renderVerification(resource, model, vTree, currentLayer) {
     var resource = resource ? resource : this.props.resource;
     var vModel = utils.getModel(constants.TYPES.VERIFICATION).value
+    let bankStyle = this.props.bankStyle
     if (resource.method) {
       var m = utils.getModel(utils.getType(resource.method)).value
       let dnProps = utils.getPropertiesWithAnnotation(m.properties, 'displayName')
       let displayName = utils.getDisplayName(resource.method, m.properties)
       let val = <View>{this.renderResource(resource, m)}</View>
-      let title = <View style={{backgroundColor: this.props.bankStyle.VERIFICATION_BG, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
-                    <Icon name='ios-add-circle-outline' size={25} color={this.props.bankStyle.VERIFIED_HEADER_TEXT_COLOR} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
+      let title = <View style={{backgroundColor: bankStyle.VERIFIED_BG, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
+                    <Icon name='ios-add-circle-outline' size={25} color={bankStyle.VERIFIED_TEXT_COLOR} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
                     <View style={{justifyContent: 'center', flexDirection: 'column', paddingLeft: 5, width: utils.dimensions(VerificationView).width - 50}}>
-                      <Text style={{color: this.props.bankStyle.VERIFIED_HEADER_TEXT_COLOR, fontSize: 18}}>{displayName}</Text>
+                      <Text style={{color: bankStyle.VERIFIED_TEXT_COLOR, fontSize: 18}}>{displayName}</Text>
                     </View>
                   </View>
 
@@ -100,8 +101,8 @@ class VerificationView extends Component {
           vTree.push(<View key={this.getNextKey()}>
                        <View style={styles.separator}></View>
                          <View style={[styles.textContainer, {padding: 10, flexDirection: 'row'}]}>
-                           <Icon name='ios-play-outline' size={20} color={this.props.bankStyle.VERIFIED_HEADER_TEXT_COLOR} style={{justifyContent: 'center', marginTop: 5, paddingLeft: (currentLayer + 1) * 10}} />
-                           <Text style={[styles.description, {color: this.props.bankStyle.VERIFIED_SOURCES_COLOR}]}>{translate('sourcesBy', r.from.organization ? r.from.organization.title : r.from.title)}</Text>
+                           <Icon name='ios-play-outline' size={20} color={bankStyle.VERIFIED_HEADER_TEXT_COLOR} style={{justifyContent: 'center', marginTop: 5, paddingLeft: (currentLayer + 1) * 10}} />
+                           <Text style={[styles.description, {color: bankStyle.VERIFIED_SOURCES_COLOR}]}>{translate('sourcesBy', r.from.organization ? r.from.organization.title : r.from.title)}</Text>
                          </View>
                       </View>)
           this.renderVerification(r, model, vTree, currentLayer + 1)
@@ -163,7 +164,7 @@ class VerificationView extends Component {
         retCols.push(
           <View key={this.getNextKey()}>
              <View style={styles.separator}></View>
-             <View  style={[style, {backgroundColor: this.props.bankStyle.SOURCED_VERIFICATION_BG_COLOR}]}>
+             <View  style={[style, {backgroundColor: this.props.bankStyle.SOURCED_VERIFIED_BG_COLOR}]}>
                <TouchableOpacity onPress={this.showResource.bind(this, r.document, dType)} >
                  <Text style={[styles.title, {color: this.props.bankStyle.SOURCED_VERIFICATION_TEXT_COLOR}]}>{translate(mv.properties.document)}</Text>
                  <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate(utils.getModel(dType).value)}</Text>
@@ -217,9 +218,12 @@ class VerificationView extends Component {
       }
       else if (pMeta.type === 'date')
         val = dateformat(new Date(val), 'fullDate')
-      else if (pMeta.range === 'json')
+      else if (pMeta.range === 'json') {
         // let jsonRows = []
-        val = this.showJson(pMeta, val, false, [])
+        let isOnfido = isVerification  && resource.api  &&  resource.api.name === 'onfido'
+        let params = {prop: pMeta, json: val, jsonRows: [], isOnfido: isOnfido}
+        val = this.showJson(params)
+      }
       if (typeof val === 'undefined')
         return <View key={this.getNextKey()}></View>;
       if (!isRef) {

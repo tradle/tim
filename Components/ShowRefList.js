@@ -56,7 +56,10 @@ class ShowRefList extends Component {
     let currentBacklink = this.props.backlink
     let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
     let showDocuments = this.props.showDocuments
-    let currentMarker = <View style={{backgroundColor: appStyle.CURRENT_UNDERLINE_COLOR, height: 4, marginTop: -5}} />
+
+    let bg = this.props.bankStyle ? this.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR : appStyle.CURRENT_UNDERLINE_COLOR
+
+    let currentMarker = <View style={{backgroundColor: bg, height: 4, marginTop: -5}} />
 
     for (var p in props) {
       if (props[p].hidden)
@@ -224,7 +227,8 @@ class ShowRefList extends Component {
                       navigator={this.props.navigator} />
     }
     else
-      separator = <View style={{height: 2, backgroundColor: 'darkblue'}} />
+      separator = <View style={{height: 2, backgroundColor: bg}} />
+
     if (showDetails) {
       if (isMessage)
         details = <ShowPropertiesView { ...this.props }/>

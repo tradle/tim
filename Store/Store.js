@@ -393,11 +393,13 @@ var Store = Reflux.createStore({
     await this.getReady()
   },
   onAcceptTermsAndChat(params) {
-    me.termsAccepted = true;
+    me._termsAccepted = true;
     return this.dbPut(utils.getId(me), me)
     .then(() =>  {
       this.setMe(me)
-      this.trigger({action: 'getProvider', provider: params.bot, termsAccepted: params.termsAccepted})
+      let bot = this._getItem(utils.getId(PROFILE + '_' + params.bot))
+      let provider = this._getItem(bot.organization)
+      this.trigger({action: 'getProvider', provider: provider, termsAccepted: true})
     })
 
     // return this.autoRegister(true)
@@ -1219,11 +1221,11 @@ var Store = Reflux.createStore({
 
   async meDriverSend(sendParams) {
     await this.maybeWaitForIdentity(sendParams.to)
-    await meDriver.send(sendParams)
+    return await meDriver.send(sendParams)
   },
   async meDriverSignAndSend(sendParams) {
     await this.maybeWaitForIdentity(sendParams.to)
-    await meDriver.signAndSend(sendParams)
+    return await meDriver.signAndSend(sendParams)
   },
 
   async maybeWaitForIdentity({ permalink }) {
@@ -3552,7 +3554,7 @@ var Store = Reflux.createStore({
         let permalink = to[ROOT_HASH]
         var toChain = {}
 
-        let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', '_online', 'idOld']
+        let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', 'idOld']
         // if (isNew)
         //   exclude.push(ROOT_HASH)
         extend(toChain, returnVal)
