@@ -115,6 +115,20 @@ class VerificationMessageRow extends Component {
                 isMyMessage: isMyMessage
               })
 
+    let state, confidence
+    if (resource.sources) {
+      resource.sources.forEach((r) => {
+        if (r.method  &&  r.method.rawData)
+          state = <Text style={{color: r.method.rawData.result === 'clear' ? 'green' : 'red', fontSize: 20}}>{r.method.rawData.result}</Text>
+        else if (r.method.confidence)
+          confidence = <Text style={{color: r.method.confidence > 0.67 ? 'green' : 'red', fontSize: 20, paddingLeft: 5}}>{translate('Confidence') + ': ' + r.method.confidence}</Text>
+      })
+      if (state || confidence)
+        state = <View style={{alignItems: 'flex-end', paddingHorizontal: 10}}>
+                  {state}
+                  {confidence}
+                </View>
+    }
     // renderedRow = <View>
     //                 <View style={headerStyle}>
     //                   <Icon style={[chatStyles.verificationIcon, {color: color}]} size={20} name={'md-checkmark'} />
@@ -134,6 +148,7 @@ class VerificationMessageRow extends Component {
                     </View>
                     <View style={{marginVertical: 10}}>
                       {row}
+                      {state}
                     </View>
                   </View>
 
