@@ -1045,8 +1045,8 @@ var NewResourceMixin = {
     let noChooser
     if (this.props.model  &&  this.props.model.required  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
       // Don't overwrite default country on provider
-      if (this.props.country)
-        noChooser = true
+      // if (this.props.country)
+      //   noChooser = true
       if (resource  &&  !resource[prop.name])
         resource[prop.name] = this.props.country
     }
