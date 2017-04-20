@@ -1750,7 +1750,7 @@ var utils = {
     if (!data)
       return
     // Disable FormRequest
-    let isFormRequest = formRequest[TYPE] === FORM_REQUEST
+    let isFormRequest = formRequest  && formRequest[TYPE] === FORM_REQUEST
 
     if (isFormRequest) {
       var params = {
