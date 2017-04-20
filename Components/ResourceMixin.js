@@ -286,7 +286,7 @@ var ResourceMixin = {
     let bg = isView ? bankStyle.MY_MESSAGE_BACKGROUND_COLOR : bankStyle.VERIFIED_HEADER_COLOR
     let color = isView ? '#ffffff' : bankStyle.VERIFIED_HEADER_TEXT_COLOR
     var backlinksBg = {backgroundColor: bg, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
-    if (prop  &&  isOnfido) {
+    if (prop) {
       let state
       if (isOnfido) {
         let color = json.result === 'clear' ? 'green' : 'red'
@@ -299,12 +299,12 @@ var ResourceMixin = {
     }
     if (!indent)
       indent = 0
-    let textStyle = indent === 1 ? styles.bigTitle : styles.title
+    let textStyle = indent === 1 ||  !isBreakdown  ? styles.bigTitle : styles.title
 
     let LINK_COLOR = bankStyle.LINK_COLOR
-    if (prop) {
+    if (prop  ||  !isBreakdown) {
       for (let p in json) {
-        if (typeof json[p] === 'object')
+        if (typeof json[p] === 'object'  ||  p === 'result')
           continue
         let label
         if (!skipLabels  ||  skipLabels.indexOf(p) === -1)
@@ -322,8 +322,12 @@ var ResourceMixin = {
 
     }
     for (let p in json) {
-      if (isOnfido  &&  isBreakdown  && p === 'result')
-        continue
+      if (isOnfido) {
+        if  (isBreakdown  && p === 'result')
+          continue
+        if (p === 'properties')
+          continue
+      }
       // if (p === 'document_numbers' || p === 'breakdown' || p === 'properties')
       //   continue
       if (prop  &&  hideGroup  &&  hideGroup.indexOf(p) !== -1)

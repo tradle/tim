@@ -70,8 +70,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "git://github.com/tradle/models.git#d54f9728225c0242607933802f5391fd8854bb37",
-      "resolved": "git://github.com/tradle/models.git#d54f9728225c0242607933802f5391fd8854bb37",
+      "from": "git://github.com/tradle/models.git#f8a948da2e098434dc3ae4a9dc44c94bfbdd5f4b",
+      "resolved": "git://github.com/tradle/models.git#f8a948da2e098434dc3ae4a9dc44c94bfbdd5f4b",
       "dependencies": {
         "@tradle/validate-model": {
           "version": "1.0.0",
@@ -5728,7 +5728,24 @@
     "merkle-tree-stream": {
       "version": "3.0.3",
       "from": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
+      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "dependencies": {
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "readable-stream": {
+          "version": "2.2.9",
+          "from": "readable-stream@>=2.0.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.9.tgz"
+        },
+        "string_decoder": {
+          "version": "1.0.0",
+          "from": "string_decoder@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.0.tgz"
+        }
+      }
     },
     "method-override": {
       "version": "2.3.6",

@@ -1710,18 +1710,18 @@ var Store = Reflux.createStore({
       unreliable: wsClient,
       clientForRecipient: function (recipient) {
         const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
-        let prevPercent
-        sendy.on('progress', ({ total, progress }) => {
-          if (!willShowProgressBar({ length: total })) return // don't show progress bar for < 30KB
+        // let prevPercent
+        // sendy.on('progress', ({ total, progress }) => {
+        //   if (!willShowProgressBar({ length: total })) return // don't show progress bar for < 30KB
 
-          const percent = ON_RECEIVED_PROGRESS * 100 * progress / total | 0
-          if (!percent || percent === prevPercent) return
+        //   const percent = ON_RECEIVED_PROGRESS * 100 * progress / total | 0
+        //   if (!percent || percent === prevPercent) return
 
-          prevPercent = percent
-          const org = self._getItem(PROFILE + '_' + recipient).organization
-          self.trigger({action: 'progressUpdate', progress: percent / 100, recipient: self._getItem(org)})
-          debug(`${percent}% of message downloaded from ${recipient}`)
-        })
+        //   prevPercent = percent
+        //   const org = self._getItem(PROFILE + '_' + recipient).organization
+        //   self.trigger({action: 'progressUpdate', progress: percent / 100, recipient: self._getItem(org)})
+        //   debug(`${percent}% of message downloaded from ${recipient}`)
+        // })
 
         if (!tlsKey) return sendy
 
