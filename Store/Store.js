@@ -1536,7 +1536,8 @@ var Store = Reflux.createStore({
       }
 
       const payload = msg.object
-      debug(`receiving ${payload[TYPE]}`)
+      const type = payload[TYPE]
+      debug(`receiving ${type}`)
 
       let org = this._getItem(PROFILE + '_' + from).organization
       progressUpdate = willAnnounceProgress && {
@@ -1549,7 +1550,7 @@ var Store = Reflux.createStore({
         let r = list[s]
       }
 
-      switch (payload[TYPE]) {
+      switch (type) {
       case INTRODUCTION:
         await this.receiveIntroduction({ msg, org, identifier })
         break
@@ -1635,6 +1636,12 @@ var Store = Reflux.createStore({
       if (progressUpdate) {
         this.trigger({ ...progressUpdate, progress: 1 })
       }
+
+      Analytics.sendEvent({
+        category: 'message',
+        action: 'receive',
+        label: msg.object[TYPE]
+      })
     }
   },
 
