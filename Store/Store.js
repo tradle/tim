@@ -2733,7 +2733,10 @@ var Store = Reflux.createStore({
         // Case where employee verifies the form
         if (me &&  me.isEmployee) {
           let rep = this.getRepresentative(utils.getId(me.organization))
-          this.addSharedWith(r, rep, r.time)
+          if (utils.getId(rep.organization) === utils.getId(r.from))
+            this.addSharedWith(r, rep, r.time)
+          else
+            this.addSharedWith(r, r.from, r.time)
         }
         else
           this.addSharedWith(r, r.from, r.time)
@@ -7099,7 +7102,7 @@ var Store = Reflux.createStore({
         let originalTo = context.to.organization // this._getItem(document.to).organization
         let verificationFrom = from.organization
 
-        if (verificationFrom  !==  originalTo) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
+        if (utils.getId(verificationFrom)  !==  utils.getId(originalTo)) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
           val._verifiedBy = from.organization
           to = this._getItem(document.from)  // document from is not changing but to does depending on what party verifies or asks for corrections
           toId = utils.getId(to)
