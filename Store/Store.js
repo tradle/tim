@@ -1225,11 +1225,25 @@ var Store = Reflux.createStore({
 
   async meDriverSend(sendParams) {
     await this.maybeWaitForIdentity(sendParams.to)
-    return await meDriver.send(sendParams)
+    return await this.meDriverExec('send', sendParams)
   },
+
   async meDriverSignAndSend(sendParams) {
     await this.maybeWaitForIdentity(sendParams.to)
-    return await meDriver.signAndSend(sendParams)
+    return await this.meDriverExec('signAndSend', sendParams)
+  },
+
+  async meDriverExec(method, ...args) {
+    const ret = await meDriver[method](...args)
+    if (method === 'send' || method === 'signAndSend') {
+      Analytics.sendEvent({
+        category: 'message',
+        action: 'send',
+        label: ret.object.object[TYPE]
+      })
+    }
+
+    return ret
   },
 
   async maybeWaitForIdentity({ permalink }) {
@@ -2436,7 +2450,7 @@ var Store = Reflux.createStore({
           sendParams.other.disableAutoResponse = true
         }
         const method = toChain[SIG] ? 'send' : 'signAndSend'
-        return meDriver[method](sendParams)
+        return self.meDriverExec(method, sendParams)
         .catch(function (err) {
           debugger
         })
