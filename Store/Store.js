@@ -1883,6 +1883,8 @@ var Store = Reflux.createStore({
     else {
       let newOrg = {}
       extend(newOrg, sp.org)
+      if (newOrg.name.indexOf('[TEST]') === 0)
+        newOrg._isTest = true
       this.configProvider(sp, newOrg)
       batch.push({type: 'put', key: okey, value: newOrg})
       this._setItem(okey, newOrg)
@@ -4142,6 +4144,7 @@ var Store = Reflux.createStore({
             let r2 = result.filter((r) => !r.priority)
             result = r1.concat(r2)
           }
+
           // if (r1) {
           //   r1.forEach((r) => {
           //     SERVICE_PROVIDERS.forEach((sp) => {
@@ -4167,6 +4170,7 @@ var Store = Reflux.createStore({
                       ? { action: 'filteredList', list: result}
                       : { action: params.sponsorName ? 'sponsorsList' : 'list',
                           list: result,
+                          isTest: params.isTest,
                           spinner: params.spinner,
                           isAggregation: params.isAggregation
                         }
@@ -4625,7 +4629,8 @@ var Store = Reflux.createStore({
         rr.numberOfForms = orgToForm[orgId]
         retOrgs.push(rr)
       })
-      result = retOrgs
+      result = retOrgs.filter((r) => r._isTest === params.isTest)
+      // result = retOrgs
     }
     return result;
   },
@@ -5049,7 +5054,11 @@ var Store = Reflux.createStore({
     if (list  &&  list.length)
       this.trigger({action: 'hasPartials', count: list.length})
   },
-
+  onHasTestProviders() {
+    let list = this.searchNotMessages({modelName: ORGANIZATION, isTest: true})
+    let testProviders = list.filter((r) => r._isTest)
+    this.trigger({action: 'hasTestProviders', list: testProviders})
+  },
   onGetAllPartials(resource) {
     let plist = this.searchNotMessages({modelName: PARTIAL})
     if (!plist  ||  !plist.length)

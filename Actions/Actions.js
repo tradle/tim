@@ -59,7 +59,8 @@ var asyncActions = [
   'getProvider',
   'acceptTermsAndChat',
   'setPreferences',
-  'getDocuments'
+  'getDocuments',
+  'hasTestProviders'
 ]
 
 var syncActions = [
