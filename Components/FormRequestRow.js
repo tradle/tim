@@ -673,17 +673,18 @@ class FormRequestRow extends Component {
 
             showMessage = false
           }
-          else
+          else {
             link = <TouchableHighlight onPress={() => this.chooser(prop, prop.name)} underlayColor='transparent'>
-                     {link}
+                     <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
                    </TouchableHighlight>
+            showMessage = false
+          }
         }
         else
           onPressCall = this.createNewResource.bind(this, form, isMyMessage)
       }
     }
 
-    // let messagePart
     if (showMessage)
       messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
 
@@ -698,7 +699,7 @@ class FormRequestRow extends Component {
              </View>
     else
       msg = <View key={this.getNextKey()}>
-               <View style={{flexDirection: 'row'}}>
+               <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                  {link}
                  {resource.documentCreated ? null : icon}
                </View>

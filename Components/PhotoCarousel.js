@@ -70,18 +70,18 @@ class PhotoCarousel extends Component {
 
           photos.push(
                         <View style={[styles.container]} key={key}>
-                          <Image resizeMode='cover' source={{uri: photo.url}} style={{width: w, height: h}}/>
+                          <Image resizeMode='contain' source={{uri: photo.url}} style={{width: w, height: h}}/>
                         </View>
                      )
         }
         else
           photos.push(
             isVertical  ? <View style={styles.container} key={key}>
-                            <Image resizeMode='cover' source={{uri: photo.url}} style={styles.imageV}/>
+                            <Image resizeMode='contain' source={{uri: photo.url}} style={styles.imageV}/>
                           </View>
 
                         : <View style={styles.container} key={key}>
-                            <Image resizeMode='cover' source={{uri: photo.url}} style={styles.image}/>
+                            <Image resizeMode='contain' source={{uri: photo.url}} style={styles.image}/>
                           </View>
         )
       }
