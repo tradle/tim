@@ -4870,6 +4870,11 @@
       "from": "git://github.com/mvayngrib/react-native-keychain.git#6afb4e71f2cdca10dbb648421f2a9ab98ff8b30c",
       "resolved": "git://github.com/mvayngrib/react-native-keychain.git#6afb4e71f2cdca10dbb648421f2a9ab98ff8b30c"
     },
+    "react-native-lazyload": {
+      "version": "1.1.0",
+      "from": "git://github.com/mvayngrib/react-native-lazyload.git#2cb6ffeb2f1203768f87d888d1d549d0a3d90333",
+      "resolved": "git://github.com/mvayngrib/react-native-lazyload.git#2cb6ffeb2f1203768f87d888d1d549d0a3d90333"
+    },
     "react-native-level": {
       "version": "3.0.0",
       "from": "react-native-level@>=3.0.0 <4.0.0",
@@ -4946,6 +4951,11 @@
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         }
       }
+    },
+    "react-native-scrollable-mixin": {
+      "version": "1.0.1",
+      "from": "react-native-scrollable-mixin@>=1.0.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-scrollable-mixin/-/react-native-scrollable-mixin-1.0.1.tgz"
     },
     "react-native-scroller": {
       "version": "0.0.6",

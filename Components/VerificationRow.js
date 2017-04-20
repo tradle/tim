@@ -22,17 +22,23 @@ const PROFILE = constants.TYPES.PROFILE
 
 const TYPE = constants.TYPE
 const VERIFICATION = constants.VERIFICATION
+const IMAGE_PLACEHOLDER = utils.whitePixel
 
 import {
-  Image,
+  // Image,
   // StyleSheet,
   Platform,
   Text,
   TouchableHighlight,
   ArticleView,
   Alert,
-  View
+  // View
 } from 'react-native';
+
+import {
+  LazyloadView as View,
+  LazyloadImage as Image
+} from 'react-native-lazyload'
 
 import React, { Component, PropTypes } from 'react'
 
@@ -78,7 +84,7 @@ class VerificationRow extends Component {
     }
     let hasPhoto = photo != null
     if (photo)
-      photo = <Image source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+      photo = <Image host={this.props.lazy} placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else if (isForm || isVerification)
       photo = <View style={{alignItems: 'center', width: 70}}>
                 <Icon name={model.icon || 'ios-paper-outline'} size={40} style={{marginTop: 8}} color={model.iconColor ? model.iconColor : '#cccccc'} />
@@ -199,7 +205,7 @@ class VerificationRow extends Component {
       // }
       // else {
 
-        row = <View style={{backgroundColor: '#fff'}}>
+        row = <View style={{backgroundColor: '#fff'}} host="lazyload-list">
                 <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
                   <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
                     <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -216,7 +222,7 @@ class VerificationRow extends Component {
                           {rows}
                         </View>
                       </TouchableHighlight>
-      row = <View>
+      row = <View host={this.props.lazy}>
              <Accordion
                header={header}
                style={{alignSelf: 'stretch'}}

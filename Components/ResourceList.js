@@ -863,6 +863,7 @@ class ResourceList extends Component {
 
     if (isVerification  || isForm || isMyProduct)
       return (<VerificationRow
+                lazy={this.props.lazy}
                 onSelect={() => this.selectResource(selectedResource)}
                 key={resource[ROOT_HASH]}
                 navigator={this.props.navigator}
@@ -873,6 +874,7 @@ class ResourceList extends Component {
                 resource={resource} />
       )
     return (<ResourceRow
+      lazy={this.props.lazy}
       onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
       key={resource[ROOT_HASH]}
       hideResource={this.hideResource.bind(this)}

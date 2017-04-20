@@ -220,6 +220,7 @@ class ShowRefList extends Component {
       else
 
       backlinkRL = <ResourceList
+                      lazy={this.props.lazy}
                       modelName={modelName}
                       prop={currentBacklink}
                       sortProperty={utils.getModel(modelName).value.sortProperty}

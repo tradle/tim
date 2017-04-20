@@ -1742,6 +1742,10 @@ var utils = {
     }
 
     return 'unknown'
+  },
+
+  whitePixel: {
+    uri: 'data:image/gif;base64,R0lGODlhAQABAIAAAP7//wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='
   }
 
   // isResourceInMyData(r) {
