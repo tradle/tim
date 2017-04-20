@@ -599,7 +599,7 @@ class FormRequestRow extends Component {
 
     let str = messagePart ? messagePart : message
     messagePart = null
-    let showMessage = true
+    let msg
 
     if (sameFormRequestForm  &&  !resource.documentCreated) {
       link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
@@ -636,38 +636,38 @@ class FormRequestRow extends Component {
       let notLink = resource.documentCreated  ||  isReadOnly  ||  isMyProduct
       if (!isMyProduct)
         icon = <Icon  name={'ios-arrow-forward'} style={{justifyContent: 'flex-end', alignSelf: 'flex-end', color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}} size={20} />
-      // link = <View style={chatStyles.rowContainer}>
-      //          <Text style={[chatStyles.resourceTitle, {color: resource.documentCreated  ||  notLink ?  '#757575' : resource.verifiers ? 'green' : LINK_COLOR}]}>{translate(form)}</Text>
-      //          {resource.documentCreated ? null : icon}
-      //        </View>
-      // link = <View/>
       if (!notLink) {
         if (resource.verifiers)
           onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
-        else if (prop) {
+        else if (!prop)
+          onPressCall = this.createNewResource.bind(this, form, isMyMessage)
+        else  {
           if (prop.ref == PHOTO) {
-            link = <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                     <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
-                   </ImageInput>
-            showMessage = false
+            msg = <View key={this.getNextKey()}>
+                   <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                     <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+                       <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
+                     </ImageInput>
+                     {resource.documentCreated ? null : icon}
+                   </View>
+                 </View>
           }
           else {
-            link = <TouchableHighlight onPress={() => this.chooser(prop, prop.name)} underlayColor='transparent'>
-                     <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
-                   </TouchableHighlight>
-            showMessage = false
+            msg = <View key={this.getNextKey()}>
+                  <TouchableHighlight onPress={() => this.chooser(prop, prop.name)} underlayColor='transparent'>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                      <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
+                      {resource.documentCreated ? null : icon}
+                    </View>
+                  </TouchableHighlight>
+               </View>
           }
         }
-        else
-          onPressCall = this.createNewResource.bind(this, form, isMyMessage)
       }
     }
 
-    if (showMessage)
+    if (!msg) {
       messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
-
-    let msg
-    if (messagePart)
       msg = <View key={this.getNextKey()}>
                <View style={{flexDirection: 'row'}}>
                  {messagePart}
@@ -675,21 +675,7 @@ class FormRequestRow extends Component {
                </View>
                {link}
              </View>
-    else
-      msg = <View key={this.getNextKey()}>
-               <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                 {link}
-                 {resource.documentCreated ? null : icon}
-               </View>
-             </View>
-    // let msg = <View key={this.getNextKey()}>
-    //            <View style={{flexDirection: 'row'}}>
-    //              {messagePart}
-    //              {resource.documentCreated ? null : icon}
-    //            </View>
-    //            {link}
-    //          </View>
-                 // {resource.documentCreated ? null : icon}
+    }
     vCols.push(msg);
     return isReadOnly ? null : onPressCall
     function onOK() {
