@@ -102,9 +102,10 @@ class FormMessageRow extends Component {
     var isMyMessage = this.isMyMessage()
     let bankStyle = this.props.bankStyle
     if (photos) {
-      photos.forEach((p) => {
-        photoUrls.push({url: utils.getImageUri(p.url)});
-      })
+      photoUrls = photos
+      // photos.forEach((p) => {
+      //   photoUrls.push({url: utils.getImageUri(p.url)});
+      // })
       let isSharedContext = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
       photoListStyle = {
         flexDirection: 'row',
@@ -118,11 +119,11 @@ class FormMessageRow extends Component {
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
     var width = utils.dimensions(FormMessageRow).width
-    let msgWidth =  Math.floor(width * 0.8)
+    // let msgWidth =  Math.floor(width * 0.8)
     if (inRow > 0) {
       if (inRow === 1) {
-        var ww = Math.max(240, msgWidth / 2)
-        var hh = ww * 280 / 240
+        var ww = Math.min(240, photoUrls[0].width)
+        var hh = (ww / photoUrls[0].width) * photoUrls[0].height
         photoStyle = [chatStyles.bigImage, {
           width:  ww,
           height: hh
