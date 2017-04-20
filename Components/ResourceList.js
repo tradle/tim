@@ -25,6 +25,7 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/bankStyle.json')
+var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 
 import { makeStylish } from './makeStylish'
@@ -1205,15 +1206,15 @@ class ResourceList extends Component {
       if (!this.state.hasTestProviders || this.props.isTest)
         return
       testProviders = (
-        <View style={{padding: 5, backgroundColor: 'cyan'}}>
+        <View style={styles.testProvidersRow}>
           <TouchableOpacity onPress={this.showTestProviders.bind(this)}>
             <View style={styles.row}>
-              <Icon name='ios-compass-outline' size={utils.getFontSize(45)} color='blue' style={[styles.cellImage, {paddingLeft: 5}]} />
+              <Icon name='ios-pulse-outline' size={utils.getFontSize(45)} color={appStyle.TEST_PROVIDERS_ROW_FG_COLOR} style={[styles.cellImage, {paddingLeft: 5}]} />
               <View style={styles.textContainer}>
-                <Text style={styles.resourceTitle}>{translate('testProviders')}</Text>
+                <Text style={[styles.resourceTitle, styles.testProvidersText]}>{translate('testProviders')}</Text>
               </View>
               <View style={styles.testProviders}>
-                <Text style={styles.testProvidersText}>{this.state.testProviders.length}</Text>
+                <Text style={styles.testProvidersCounter}>{this.state.testProviders.length}</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -1414,13 +1415,20 @@ var styles = StyleSheet.create({
     height:20,
     justifyContent: 'center',
     borderRadius: 10,
-    backgroundColor: 'blue'
+    backgroundColor: appStyle.TEST_PROVIDERS_ROW_FG_COLOR
   },
-  testProvidersText: {
+  testProvidersCounter: {
     fontSize: 12,
     alignSelf: 'center',
-    color: '#ffffff'
+    color: appStyle.TEST_PROVIDERS_ROW_BG_COLOR
   },
+  testProvidersText: {
+    color: appStyle.TEST_PROVIDERS_ROW_FG_COLOR
+  },
+  testProvidersRow: {
+    padding: 5,
+    backgroundColor: appStyle.TEST_PROVIDERS_ROW_BG_COLOR
+  }
 });
 
 module.exports = ResourceList;
