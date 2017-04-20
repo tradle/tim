@@ -96,7 +96,7 @@ class VerificationRow extends Component {
 
     var rows = [];
 
-    let notAccordion = !isMyProduct  &&  !isVerification && !this.props.prop === null || resource.sources || resource.method || isForm
+    let notAccordion = true //!isMyProduct  &&  !isVerification && !this.props.prop === null || resource.sources || resource.method || isForm
     if (r  &&  !notAccordion) {
       this.formatDoc(verificationRequest, r, rows);
       var backlink = this.props.prop &&  this.props.prop.items  &&  this.props.prop.items.backlink;
