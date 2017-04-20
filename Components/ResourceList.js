@@ -108,7 +108,8 @@ class ResourceList extends Component {
       isConnected: this.props.navigator.isConnected,
       userInput: '',
       sharedContextCount: 0,
-      hasPartials: false
+      hasPartials: false,
+      hasTestProviders: false
     };
     if (props.isBacklink  &&  props.backlinkList) {
       this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
@@ -204,6 +205,8 @@ class ResourceList extends Component {
     // else
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.list(params)
+      if (this.props.officialAccounts)
+        Actions.hasTestProviders()
       // StatusBar.setHidden(false);
     });
   }
@@ -337,6 +340,10 @@ class ResourceList extends Component {
       this.setState({hasPartials: true})
       return
     }
+    if (action === 'hasTestProviders') {
+      this.setState({hasTestProviders: params.list  &&  params.list.length, testProviders: params.list})
+      return
+    }
     // if (action === 'exploreBacklink'  &&  this.props.isBacklink  &&  this.props.resource[ROOT_HASH] === params.resource[ROOT_HASH]) {
     //   this.setState({
     //     prop: params.backlink,
@@ -351,6 +358,8 @@ class ResourceList extends Component {
         Alert.alert(params.alert)
         return
       }
+      if (params.isTest  !== this.props.isTest)
+        return
     }
     if ((action !== 'list' &&  action !== 'listSharedWith')  ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
@@ -434,6 +443,8 @@ class ResourceList extends Component {
     if (this.state.sharedContextCount !== nextState.sharedContextCount)
       return true
     if (this.state.hasPartials !== nextState.hasPartials)
+      return true
+    if (this.state.hasTestProviders !== nextState.hasTestProviders)
       return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
@@ -1178,57 +1189,38 @@ class ResourceList extends Component {
   }
 
   renderHeader() {
-    if (!this.props.officialAccounts  ||  this.props.modelName !== PROFILE)
+    if (!this.props.officialAccounts)
       return
-    let partial
-    if (this.state.hasPartials)
-      partial = (
-        <View>
-          <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
-            <TouchableOpacity onPress={this.showPartials.bind(this)}>
-              <View style={styles.row}>
-                <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                <View style={styles.textContainer}>
-                  <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-          <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
-            <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
-              <View style={styles.row}>
-                <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                <View style={styles.textContainer}>
-                  <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-    )
-    if (this.props.modelName !== PROFILE)
-      return partial
+    let testProviders
     let sharedContext
-    if (this.state.sharedContextCount)
-      sharedContext = (
-        <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
-          <TouchableOpacity onPress={this.showContexts.bind(this)}>
+    let partial
+    let conversations
+    let isOrg = this.props.modelName === ORGANIZATION
+    let isProfile = this.props.modelName === PROFILE
+    if (!isOrg  &&  !isProfile)
+      return
+    if (isOrg) {
+      if (!this.state.hasTestProviders)
+        return
+      testProviders = (
+        <View style={{padding: 5, backgroundColor: 'cyan'}}>
+          <TouchableOpacity onPress={this.showTestProviders.bind(this)}>
             <View style={styles.row}>
-              <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+              <Icon name='ios-compass-outline' size={utils.getFontSize(45)} color='blue' style={[styles.cellImage, {paddingLeft: 5}]} />
               <View style={styles.textContainer}>
-                <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
+                <Text style={styles.resourceTitle}>{translate('testProviders')}</Text>
               </View>
-              <View style={styles.sharedContext}>
-                <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+              <View style={styles.testProviders}>
+                <Text style={styles.testProvidersText}>{this.state.testProviders.length}</Text>
               </View>
             </View>
           </TouchableOpacity>
         </View>
       )
-
-    return  (
-      <View>
-        <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+    }
+    else if (isProfile) {
+      // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+      conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
           <TouchableOpacity onPress={this.showBanks.bind(this)}>
             <View style={styles.row}>
               <ConversationsIcon />
@@ -1238,8 +1230,55 @@ class ResourceList extends Component {
             </View>
           </TouchableOpacity>
         </View>
+
+      if (this.state.hasPartials)
+        partial = (
+          <View>
+            <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
+              <TouchableOpacity onPress={this.showPartials.bind(this)}>
+                <View style={styles.row}>
+                  <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+              <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
+                <View style={styles.row}>
+                  <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+      )
+      if (this.state.sharedContextCount)
+        sharedContext = (
+          <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+            <TouchableOpacity onPress={this.showContexts.bind(this)}>
+              <View style={styles.row}>
+                <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
+                </View>
+                <View style={styles.sharedContext}>
+                  <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )
+    }
+    return  (
+      <View>
+        {conversations}
         {sharedContext}
         {partial}
+        {testProviders}
       </View>
     )
   }
@@ -1266,66 +1305,20 @@ class ResourceList extends Component {
       },
     })
   }
-  // scanFormsQRCode() {
-  //   this.setState({hideMode: false})
-  //   this.props.navigator.push({
-  //     title: 'Scan QR Code',
-  //     id: 16,
-  //     component: QRCodeScanner,
-  //     titleTintColor: '#eeeeee',
-  //     backButtonTitle: 'Cancel',
-  //     // rightButtonTitle: 'ion|ios-reverse-camera',
-  //     passProps: {
-  //       onread: this.onread.bind(this)
-  //     }
-  //   })
-  // }
-
-  // onread(result) {
-  //   // Pairing devices QRCode
-  //   if (result.data.charAt(0) === '{') {
-  //     h = JSON.parse(result.data)
-  //     Actions.sendPairingRequest(h)
-  //     this.props.navigator.pop()
-  //     return
-  //   }
-  //   let h = result.data.split(';')
-
-
-  //   // post to server request for the forms that were filled on the web
-  //   let me = utils.getMe()
-  //   switch (h[0]) {
-  //   case WEB_TO_MOBILE:
-  //     let r = {
-  //       _t: 'tradle.GuestSessionProof',
-  //       session: h[1],
-  //       from: {
-  //         id: utils.getId(me),
-  //         title: utils.getDisplayName(me)
-  //       },
-  //       to: {
-  //         id: PROFILE + '_' + h[2]
-  //       }
-  //     }
-  //     Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value}) //, disableAutoResponse: true})
-  //     break
-  //   case TALK_TO_EMPLOYEEE:
-  //     Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
-  //     break
-  //   case APP_QR_CODE:
-  //     Actions.addApp(result.data.substring(h[0].length + 1))
-  //     break
-  //   default:
-  //     // keep scanning
-  //     Alert.alert(
-  //       translate('error'),
-  //       translate('unknownQRCodeFormat')
-  //     )
-
-  //     this.props.navigator.pop()
-  //     break
-  //   }
-  // }
+  showTestProviders() {
+    Actions.list({modelName: ORGANIZATION, isTest: true})
+    this.props.navigator.push({
+      title: 'Partials',
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        modelName: ORGANIZATION,
+        isTest: true
+      },
+    })
+  }
 }
 reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceList.prototype, HomePageMixin)
@@ -1410,6 +1403,81 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     color: '#ffffff'
   },
+  testProviders: {
+    position: 'absolute',
+    right: 5,
+    top: 20,
+    width: 20,
+    height:20,
+    justifyContent: 'center',
+    borderRadius: 10,
+    backgroundColor: 'blue'
+  },
+  testProvidersText: {
+    fontSize: 12,
+    alignSelf: 'center',
+    color: '#ffffff'
+  },
 });
 
 module.exports = ResourceList;
+  // scanFormsQRCode() {
+  //   this.setState({hideMode: false})
+  //   this.props.navigator.push({
+  //     title: 'Scan QR Code',
+  //     id: 16,
+  //     component: QRCodeScanner,
+  //     titleTintColor: '#eeeeee',
+  //     backButtonTitle: 'Cancel',
+  //     // rightButtonTitle: 'ion|ios-reverse-camera',
+  //     passProps: {
+  //       onread: this.onread.bind(this)
+  //     }
+  //   })
+  // }
+
+  // onread(result) {
+  //   // Pairing devices QRCode
+  //   if (result.data.charAt(0) === '{') {
+  //     h = JSON.parse(result.data)
+  //     Actions.sendPairingRequest(h)
+  //     this.props.navigator.pop()
+  //     return
+  //   }
+  //   let h = result.data.split(';')
+
+
+  //   // post to server request for the forms that were filled on the web
+  //   let me = utils.getMe()
+  //   switch (h[0]) {
+  //   case WEB_TO_MOBILE:
+  //     let r = {
+  //       _t: 'tradle.GuestSessionProof',
+  //       session: h[1],
+  //       from: {
+  //         id: utils.getId(me),
+  //         title: utils.getDisplayName(me)
+  //       },
+  //       to: {
+  //         id: PROFILE + '_' + h[2]
+  //       }
+  //     }
+  //     Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof').value}) //, disableAutoResponse: true})
+  //     break
+  //   case TALK_TO_EMPLOYEEE:
+  //     Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
+  //     break
+  //   case APP_QR_CODE:
+  //     Actions.addApp(result.data.substring(h[0].length + 1))
+  //     break
+  //   default:
+  //     // keep scanning
+  //     Alert.alert(
+  //       translate('error'),
+  //       translate('unknownQRCodeFormat')
+  //     )
+
+  //     this.props.navigator.pop()
+  //     break
+  //   }
+  // }
