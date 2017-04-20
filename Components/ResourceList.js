@@ -1308,7 +1308,7 @@ class ResourceList extends Component {
   showTestProviders() {
     Actions.list({modelName: ORGANIZATION, isTest: true})
     this.props.navigator.push({
-      title: 'Partials',
+      title: translate('testProviders'),
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
