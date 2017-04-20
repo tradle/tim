@@ -56,3 +56,4 @@ iOS/Frameworks
 Pods
 *.xcworkspace
 fabric.properties
+fastlane/
