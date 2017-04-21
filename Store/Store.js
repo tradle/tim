@@ -5081,9 +5081,11 @@ var Store = Reflux.createStore({
       this.trigger({action: 'hasPartials', count: list.length})
   },
   onHasTestProviders() {
-    let list = this.searchNotMessages({modelName: ORGANIZATION, isTest: true})
-    let testProviders = list.filter((r) => r._isTest)
-    this.trigger({action: 'hasTestProviders', list: testProviders})
+    const list = this.searchNotMessages({modelName: ORGANIZATION, isTest: true}) || []
+    const testProviders = list.filter((r) => r._isTest)
+    if (testProviders.length) {
+      this.trigger({action: 'hasTestProviders', list: testProviders})
+    }
   },
   onGetAllPartials(resource) {
     let plist = this.searchNotMessages({modelName: PARTIAL})
