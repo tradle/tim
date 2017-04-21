@@ -663,6 +663,7 @@ class FormRequestRow extends Component {
                         <TouchableHighlight style={{flex: 1}} underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
                           <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{str}</Text>
                         </TouchableHighlight>
+                       {resource.documentCreated ? null : icon}
                       </View>
                     </View>
             }
