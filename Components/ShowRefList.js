@@ -218,8 +218,7 @@ class ShowRefList extends Component {
       if (!backlinkList)
         backlinkRL = <View/>
       else
-
-      backlinkRL = <ResourceList
+        backlinkRL = <ResourceList
                       lazy={this.props.lazy}
                       modelName={modelName}
                       prop={currentBacklink}
