@@ -64,7 +64,7 @@ const AUTH_PROPS = ['useTouchId', 'useGesturePassword']
 
 import {
   // StyleSheet,
-  ScrollView,
+  // ScrollView,
   Image,
   View,
   Text,
@@ -75,6 +75,13 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native'
+
+import {
+  LazyloadScrollView,
+} from 'react-native-lazyload'
+
+const ScrollView = LazyloadScrollView
+const LAZY_ID = 'lazyload-list'
 
 import React, { Component } from 'react'
 
@@ -259,7 +266,8 @@ class ResourceView extends Component {
     if (me) {
       let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource)))
       if (!noActionPanel)
-       actionPanel = <ShowRefList resource={resource}
+       actionPanel = <ShowRefList lazy={LAZY_ID}
+                                  resource={resource}
                                   navigator={this.props.navigator}
                                   currency={this.props.currency}
                                   bankStyle={this.props.bankStyle}
@@ -332,7 +340,7 @@ class ResourceView extends Component {
 
     return (
       <PageView style={platformStyles.container}>
-      <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center'}}>
+      <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center'}} name={LAZY_ID}>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}>
           </PhotoView>

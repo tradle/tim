@@ -60,7 +60,8 @@ var asyncActions = [
   'acceptTermsAndChat',
   'setPreferences',
   'getDocuments',
-  'downloadAllSharedContexts'
+  'downloadAllSharedContexts',
+  'hasTestProviders'
 ]
 
 var syncActions = [

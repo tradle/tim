@@ -242,6 +242,7 @@
     "react-native-search-bar": false,
     "react-native-fabric": false,
     "react-native-fabric-crashlytics": false,
+    "react-native-lazyload": "./web/shims/Lazyload",
     "./utils/crashlytics.js": false,
     "./utils/keychain.js": false,
     "./Components/BlinkID.js": false,

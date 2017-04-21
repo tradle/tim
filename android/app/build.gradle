@@ -118,7 +118,7 @@ android {
         applicationId "io.tradle.dev"
         minSdkVersion 17
         targetSdkVersion 22
-        versionCode 2
+        versionCode 3
         versionName "1.0.6"
         ndk {
             abiFilters "armeabi-v7a", "x86"

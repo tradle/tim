@@ -251,5 +251,6 @@
     "contactUs": "Contact us",
     "unsupportedFormat": "Unsupported format",
     "pleaseUploadImage": "Please upload an image file",
-    "unableToProcessFile": "Unable to process file"
+    "unableToProcessFile": "Unable to process file",
+    "testProviders": "Test Providers"
 }

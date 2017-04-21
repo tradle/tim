@@ -121,7 +121,7 @@ class FormMessageRow extends Component {
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
     var width = utils.dimensions(FormMessageRow).width
-    // let msgWidth =  utils.getMessageWidth(FormMessageRow)
+    // let msgWidth =  Math.floor(width * 0.8)
     if (inRow > 0) {
       if (inRow === 1) {
         var ww = Math.min(240, photoUrls[0].width)
