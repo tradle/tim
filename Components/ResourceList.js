@@ -1200,7 +1200,7 @@ class ResourceList extends Component {
     if (!isOrg  &&  !isProfile)
       return
     if (isOrg) {
-      if (!this.state.hasTestProviders)
+      if (!this.state.hasTestProviders || this.props.isTest)
         return
       testProviders = (
         <View style={{padding: 5, backgroundColor: 'cyan'}}>
@@ -1315,7 +1315,8 @@ class ResourceList extends Component {
       titleTextColor: '#7AAAC3',
       passProps: {
         modelName: ORGANIZATION,
-        isTest: true
+        isTest: true,
+        officialAccounts: true
       },
     })
   }
