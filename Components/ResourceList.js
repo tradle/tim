@@ -854,13 +854,13 @@ class ResourceList extends Component {
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
 
-    let selectedResource
-    if (!isVerification)
-      selectedResource = resource
-    else if (resource.sources || resource.method)
-      selectedResource = resource
-    else
-      selectedResource = resource.document
+    let selectedResource = resource
+    // if (!isVerification)
+      // selectedResource = resource
+    // else if (resource.sources || resource.method)
+    //   selectedResource = resource
+    // else
+    //   selectedResource = resource.document
 
     if (isVerification  || isForm || isMyProduct)
       return (<VerificationRow
