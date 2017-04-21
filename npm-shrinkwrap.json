@@ -86,14 +86,14 @@
       }
     },
     "@tradle/multiqueue": {
-      "version": "1.2.0",
-      "from": "git://github.com/tradle/multiqueue.git#c939d17b9359a1e44abd83baa76a64546ab56a3e",
-      "resolved": "git://github.com/tradle/multiqueue.git#c939d17b9359a1e44abd83baa76a64546ab56a3e",
+      "version": "2.1.0",
+      "from": "@tradle/multiqueue@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/multiqueue/-/multiqueue-2.1.0.tgz",
       "dependencies": {
         "debug": {
-          "version": "2.6.3",
+          "version": "2.6.4",
           "from": "debug@>=2.6.3 <3.0.0",
-          "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.3.tgz"
+          "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.4.tgz"
         },
         "duplexify": {
           "version": "3.5.0",
@@ -111,9 +111,9 @@
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "ms": {
-          "version": "0.7.2",
-          "from": "ms@0.7.2",
-          "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.2.tgz"
+          "version": "0.7.3",
+          "from": "ms@0.7.3",
+          "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.3.tgz"
         },
         "once": {
           "version": "1.3.3",
@@ -2487,6 +2487,11 @@
       "from": "flat-tree@>=1.4.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/flat-tree/-/flat-tree-1.4.0.tgz"
     },
+    "for-each": {
+      "version": "0.3.2",
+      "from": "for-each@>=0.3.2 <0.4.0",
+      "resolved": "https://registry.npmjs.org/for-each/-/for-each-0.3.2.tgz"
+    },
     "for-in": {
       "version": "0.1.6",
       "from": "for-in@>=0.1.5 <0.2.0",
@@ -2560,11 +2565,6 @@
       "version": "1.1.0",
       "from": "function-bind@>=1.0.2 <2.0.0",
       "resolved": "https://registry.npmjs.org/function-bind/-/function-bind-1.1.0.tgz"
-    },
-    "functional-red-black-tree": {
-      "version": "1.0.1",
-      "from": "functional-red-black-tree@>=1.0.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz"
     },
     "fwd-stream": {
       "version": "1.0.4",
@@ -2920,11 +2920,6 @@
       "from": "image-size@>=0.3.5 <0.4.0",
       "resolved": "https://registry.npmjs.org/image-size/-/image-size-0.3.5.tgz"
     },
-    "immediate": {
-      "version": "3.2.3",
-      "from": "immediate@>=3.2.3 <4.0.0",
-      "resolved": "https://registry.npmjs.org/immediate/-/immediate-3.2.3.tgz"
-    },
     "immutable": {
       "version": "3.7.6",
       "from": "immutable@3.7.6",
@@ -3059,6 +3054,11 @@
       "version": "1.0.0",
       "from": "is-fullwidth-code-point@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/is-fullwidth-code-point/-/is-fullwidth-code-point-1.0.0.tgz"
+    },
+    "is-function": {
+      "version": "1.0.1",
+      "from": "is-function@>=1.0.0 <1.1.0",
+      "resolved": "https://registry.npmjs.org/is-function/-/is-function-1.0.1.tgz"
     },
     "is-glob": {
       "version": "3.0.0",
@@ -5227,6 +5227,11 @@
       "from": "restore-cursor@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/restore-cursor/-/restore-cursor-1.0.1.tgz"
     },
+    "resumer": {
+      "version": "0.0.0",
+      "from": "resumer@>=0.0.0 <0.1.0",
+      "resolved": "https://registry.npmjs.org/resumer/-/resumer-0.0.0.tgz"
+    },
     "right-align": {
       "version": "0.1.3",
       "from": "right-align@>=0.1.1 <0.2.0",
@@ -5775,6 +5780,11 @@
       "from": "string-width@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/string-width/-/string-width-1.0.2.tgz"
     },
+    "string.prototype.trim": {
+      "version": "1.1.2",
+      "from": "string.prototype.trim@>=1.1.2 <1.2.0",
+      "resolved": "https://registry.npmjs.org/string.prototype.trim/-/string.prototype.trim-1.1.2.tgz"
+    },
     "stringmap": {
       "version": "0.2.2",
       "from": "stringmap@>=0.2.2 <0.3.0",
@@ -5824,6 +5834,11 @@
       "version": "1.0.0",
       "from": "subarg@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/subarg/-/subarg-1.0.0.tgz"
+    },
+    "sublevel-prefixer": {
+      "version": "1.0.0",
+      "from": "sublevel-prefixer@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/sublevel-prefixer/-/sublevel-prefixer-1.0.0.tgz"
     },
     "subleveldown": {
       "version": "2.1.0",
