@@ -3283,6 +3283,10 @@ var Store = Reflux.createStore({
     }
     if (isGuestSessionProof || isBecomingEmployee) {
       checkPublish = this.getDriver(me)
+      .then(() => {
+        if (params.serverUrl)
+          return this.getInfo({serverUrls: [params.serverUrl]})
+      })
       .then(function () {
         // if (publishRequestSent)
           return meDriver.identityPublishStatus()
