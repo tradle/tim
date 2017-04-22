@@ -207,6 +207,7 @@ var TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
 const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
 const ON_RECEIVED_PROGRESS = 0.66
+const NUM_MSGS_BEFORE_REG_FOR_PUSH = __DEV__ ? 3 : 10
 
 var models = {};
 var list = {};
@@ -344,6 +345,14 @@ var Store = Reflux.createStore({
     this._enginePromise = new Promise(resolve => {
       this._resolveWithEngine = resolve
     })
+
+    this._mePromise = new Promise(resolve => {
+      this._resolveWithMe = resolve
+    })
+
+    if (ENV.registerForPushNotifications) {
+      this.setupPushNotifications()
+    }
 
     getAnalyticsUserId({ promiseEngine: this._enginePromise })
       .then(Analytics.setUserId)
@@ -553,6 +562,7 @@ var Store = Reflux.createStore({
       }
     }
     utils.setMe(me)
+    this._resolveWithMe(me)
   },
   onUpdateMe(params) {
     let r = {}
@@ -3157,9 +3167,12 @@ var Store = Reflux.createStore({
       let itemType = utils.getType(item)
       let itemModel = this.getModel(itemType)
       let displayName = ''
-      if (itemModel) displayName += itemModel.title + ': '
+      if (itemModel) displayName += itemModel.title
 
-      displayName += item.title || utils.getDisplayName(item)
+      let resourceDisplayName = item.title || utils.getDisplayName(item)
+      if (resourceDisplayName) {
+        displayName += ': ' + resourceDisplayName
+      }
 
       if (i > 0) {
         let last = messages.length - 1
@@ -6314,11 +6327,6 @@ var Store = Reflux.createStore({
           key: new Buffer(result.encryptionKey, 'hex')
         }
       })
-    })
-    .then(node => {
-      // no need to wait for this to finish
-      Push.init({ me, node, Store: this })
-      return node
     }, err => {
       debugger
       throw err
@@ -6333,6 +6341,27 @@ var Store = Reflux.createStore({
 
     //   return node
     // })
+  },
+  async setupPushNotifications() {
+    const node = await this._enginePromise
+    const onSent = ({ message, object }) => {
+      const type = object.object[TYPE]
+      const model = this.getModel(type)
+      const isForm = model && model.subClassOf === FORM
+      if (type === SIMPLE_MESSAGE || isForm) {
+        Push.init()
+        Push.register()
+        node.removeListener('sent', onSent)
+      }
+    }
+
+    node.on('sent', onSent)
+    const me = await this._mePromise
+    if (me.registeredForPushNotifications || me.pushNotificationsAllowed === false) {
+      node.removeListener('sent', onSent)
+    }
+
+    Push.init({ node, me, Store: this })
   },
   createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')

@@ -238,5 +238,9 @@
     "documentExpiredTitle": "Document expired",
     "documentExpiredMessage": "Please scan a valid document",
     "contactUs": "Contact us",
-    "testProviders": "Test Providers"
+    "testProviders": "Test Providers",
+    "yes": "Yes",
+    "no": "No",
+    "neverMissAMessage": "Never miss a message",
+    "receiveNotifications?": "Would you like to receive notifications?"
 }
