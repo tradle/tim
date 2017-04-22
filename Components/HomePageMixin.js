@@ -41,7 +41,7 @@ var HomePageMixin = {
   onread(isView, result) {
     // Pairing devices QRCode
     result = qrCodeDecoder.fromHex(result.data).data
-    let h
+    let h, code
     if (typeof result.data === 'string') {
       if (result.data.charAt(0) === '{') {
         let h = JSON.parse(result.data)
