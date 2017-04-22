@@ -21,6 +21,7 @@
     "@tradle/models": "github:tradle/models#f8a948d",
     "@tradle/multiqueue": "2.1.0",
     "@tradle/protocol": "2.3.0",
+    "@tradle/qr-schema": "^1.1.0",
     "@tradle/restore": "github:tradle/restore",
     "any-promise": "1.3.0",
     "art": "^0.10.0",
