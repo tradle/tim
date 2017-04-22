@@ -702,17 +702,19 @@ class NewResource extends Component {
     // HACK
     let guidanceMsg
     if (meta.id === 'tradle.PhotoID') {
-      guidanceMsg = <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
-                      <Text style={{fontSize: 18}}>{'Uploading a picture of your document to your computer.'}</Text>
-                      <Text style={{fontSize: 18}}>1.
-                        <Text style={{fontSize: 18, paddingLeft: 10}}>Take a photo of your document using your smartphone, tablet, camera or scanner.</Text>
-                      </Text>
-                      <Text style={{fontSize: 18}}>2.
-                        <Text style={{fontSize: 18, paddingLeft: 10}}>Save to your computer by connecting your device to the computer using usb cable or email the photos to yourself and save them to a file on yout computer.</Text>
-                      </Text>
-                      <Text style={{fontSize: 18}}>3.
-                      <Text style={{fontSize: 18, paddingLeft: 10}}>Use the upload option to choose the image from your computer.</Text>
-                      </Text>
+      guidanceMsg = <View style={{paddingBottom: 10}}>
+                      <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
+                        <Text style={{fontSize: 18}}>{'Uploading a picture of your document to your computer.'}</Text>
+                        <Text style={{fontSize: 18}}>1.
+                          <Text style={{fontSize: 18, paddingLeft: 10}}>Take a photo of your document using your smartphone, tablet, camera or scanner.</Text>
+                        </Text>
+                        <Text style={{fontSize: 18}}>2.
+                          <Text style={{fontSize: 18, paddingLeft: 10}}>Save to your computer by connecting your device to the computer using usb cable or email the photos to yourself and save them to a file on yout computer.</Text>
+                        </Text>
+                        <Text style={{fontSize: 18}}>3.
+                        <Text style={{fontSize: 18, paddingLeft: 10}}>Use the upload option to choose the image from your computer.</Text>
+                        </Text>
+                      </View>
                     </View>
 
     }
