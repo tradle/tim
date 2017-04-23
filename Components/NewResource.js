@@ -704,7 +704,7 @@ class NewResource extends Component {
     if (meta.id === 'tradle.PhotoID') {
       guidanceMsg = <View style={{paddingBottom: 10}}>
                       <View style={{padding: 20, marginHorizontal: -10, backgroundColor: bankStyle.GUIDANCE_MESSAGE_BG}}>
-                        <Text style={{fontSize: 18}}>Uploading a picture of your document to your computer:</Text>
+                        <Text style={{fontSize: 18, paddingBottom: 10}}>Uploading a picture of your document to your computer:</Text>
                         <Text style={{fontSize: 18}}>1.
                           <Text style={{fontSize: 18, paddingLeft: 10}}>Take a photo of your document using your smartphone, tablet, camera or scanner.</Text>
                         </Text>
