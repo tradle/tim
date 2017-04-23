@@ -116,13 +116,6 @@ class TimHome extends Component {
     NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
     Actions.start();
   }
-  // componentDidMount() {
-    // AutomaticUpdates.on()
-    // LinkingIOS.addEventListener('url', this._handleOpenURL);
-    // var url = LinkingIOS.popInitialURL();
-    // if (url)
-    //   this._handleOpenURL({url});
-  // }
   _handleConnectivityChange(isConnected) {
     this.props.navigator.isConnected = isConnected
   }
@@ -151,6 +144,17 @@ class TimHome extends Component {
       const url = await Linking.getInitialURL() || ENV.initWithDeepLink
       if (url)
         this._handleOpenURL({url})
+      if (!utils.getMe()) {
+        if (ENV.autoRegister)
+          this.showFirstPage()
+        else
+          this.setState({isModalOpen: true})
+        // this.register(() => this.showFirstPage())
+        return
+      }
+
+      this.signInAndContinue()
+
     } catch (err) {
       debug('failed to open deep link', err)
     }
@@ -277,16 +281,16 @@ class TimHome extends Component {
     // utils.setModels(params.models);
     this.setState({isLoading: false});
     clearTimeout(this.uhOhTimeout)
-    if (!utils.getMe()) {
-      if (ENV.autoRegister)
-        this.showFirstPage()
-      else
-        this.setState({isModalOpen: true})
-      // this.register(() => this.showFirstPage())
-      return
-    }
+    // if (!utils.getMe()) {
+    //   if (ENV.autoRegister)
+    //     this.showFirstPage()
+    //   else
+    //     this.setState({isModalOpen: true})
+    //   // this.register(() => this.showFirstPage())
+    //   return
+    // }
 
-    this.signInAndContinue()
+    // this.signInAndContinue()
   }
 
   async signInAndContinue() {
