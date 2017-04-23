@@ -43,8 +43,13 @@ import {
 import React, { Component } from 'react'
 import { isChrome } from '../utils/browser'
 
-const avivaTC = { uri: './html/Aviva_TC.html' }
-const avivaContact = { uri: './html/Aviva_Contact.html' }
+const avivaTC = Platform.OS === 'android'
+  ? { uri: 'file:///android_asset/Aviva_TC.html' }
+  : require('../html/Aviva_TC.html')
+
+const avivaContact = Platform.OS === 'android'
+  ? { uri: 'file:///android_asset/Aviva_Contact.html' }
+  : require('../html/Aviva_Contact.html')
 
 class AvivaIntroView extends Component {
   static displayName = 'AvivaIntroView';
