@@ -88,6 +88,7 @@
 		73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73947DA81D3DAEA500C5CC8F /* libRCTPushNotification.a */; };
 		739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
 		739F73091C3F74AE00D9F2FB /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
+		73AC728F1EAEC3BA00A173EC /* splash1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 738ED24A1E6CD41F0067F652 /* splash1536x2048.png */; };
 		73CEDF701C8CCDE8006401AA /* libReactNativeLocalization.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CEDF691C8CCDC7006401AA /* libReactNativeLocalization.a */; };
 		73D77E271E3F911700DB1F4A /* libSMXCrashlytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73D77E241E3F90D900DB1F4A /* libSMXCrashlytics.a */; };
 		73FE359E1BFA124200EFB313 /* libUdpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE359D1BFA123200EFB313 /* libUdpSockets.a */; };
@@ -1443,6 +1444,7 @@
 				73261E361C4AB9FE00292FEE /* environment.json in Resources */,
 				73261E371C4AB9FE00292FEE /* Images.xcassets in Resources */,
 				730DDF181E664ADF0011080D /* LaunchScreen.xib in Resources */,
+				73AC728F1EAEC3BA00A173EC /* splash1536x2048.png in Resources */,
 				73261E381C4AB9FE00292FEE /* Ionicons.ttf in Resources */,
 				730DDF1D1E664D6C0011080D /* Launch Screen.storyboard in Resources */,
 				7307E9151E9DD630003BC00A /* GoogleService-Info.plist in Resources */,
