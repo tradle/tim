@@ -144,6 +144,8 @@ class TimHome extends Component {
       const url = await Linking.getInitialURL() || ENV.initWithDeepLink
       if (url)
         this._handleOpenURL({url})
+      if (!ENV.landingPage)
+        return
       if (!utils.getMe()) {
         if (ENV.autoRegister)
           this.showFirstPage()
@@ -281,16 +283,21 @@ class TimHome extends Component {
     // utils.setModels(params.models);
     this.setState({isLoading: false});
     clearTimeout(this.uhOhTimeout)
-    // if (!utils.getMe()) {
-    //   if (ENV.autoRegister)
-    //     this.showFirstPage()
-    //   else
-    //     this.setState({isModalOpen: true})
-    //   // this.register(() => this.showFirstPage())
-    //   return
-    // }
 
-    // this.signInAndContinue()
+    // Need to laod data for landing page first
+    if (ENV.landingPage)
+      return
+
+    if (!utils.getMe()) {
+      if (ENV.autoRegister)
+        this.showFirstPage()
+      else
+        this.setState({isModalOpen: true})
+      // this.register(() => this.showFirstPage())
+      return
+    }
+
+    this.signInAndContinue()
   }
 
   async signInAndContinue() {
