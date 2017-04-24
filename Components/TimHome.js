@@ -240,7 +240,8 @@ class TimHome extends Component {
   async onStart(params) {
     // prior to registration
     // force install updates before first interaction
-    if (!utils.getMe()) {
+    const me = utils.getMe()
+    if (!(me && me.ensuredUpToDateOnFirstRun)) {
       //   UP_TO_DATE: 0, // The running app is up-to-date
       //   UPDATE_INSTALLED: 1, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
       //   UPDATE_IGNORED: 2, // The app had an optional update and the end-user chose to ignore it
@@ -267,6 +268,10 @@ class TimHome extends Component {
         debug('failed to sync with code push', err)
       } finally {
         this.setState({ downloadingUpdate: false, downloadUpdateProgress: null })
+      }
+
+      if (me) {
+        Actions.updateMe({ ensuredUpToDateOnFirstRun: true })
       }
 
       const hasUpdate = await AutomaticUpdates.hasUpdate()
