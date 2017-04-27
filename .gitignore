@@ -57,3 +57,4 @@ Pods
 *.xcworkspace
 fabric.properties
 fastlane/
+*.plist

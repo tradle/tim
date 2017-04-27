@@ -1746,6 +1746,20 @@ var utils = {
 
   whitePixel: {
     uri: 'data:image/gif;base64,R0lGODlhAQABAIAAAP7//wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='
+  },
+
+  async isLatestVersion() {
+    // no way to detect
+    if (!utils.isIOS()) return true
+
+    const bundleId = DeviceInfo.getBundleId()
+    const qs = querystring.stringify({ bundleId })
+    const res = await utils.fetchWithBackoff(`http://itunes.apple.com/lookup?${qs}`)
+    const json = await res.json()
+    if (json.resultCount < 0) throw new Error('app not found')
+
+    const appVersion = json.results[0].version
+    return appVersion !== DeviceInfo.getVersion()
   }
 
   // isResourceInMyData(r) {

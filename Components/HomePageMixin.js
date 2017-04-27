@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var debug = require('debug')('tradle:app:HomePageMixin')
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
@@ -38,9 +39,25 @@ var HomePageMixin = {
     })
   },
 
+  onUnknownQRCode() {
+    Alert.alert(
+      translate('error'),
+      translate('unknownQRCodeFormat')
+    )
+
+    this.props.navigator.pop()
+  },
+
   onread(isView, result) {
     // Pairing devices QRCode
-    result = qrCodeDecoder.fromHex(result.data).data
+    try {
+      result = qrCodeDecoder.fromHex(result.data).data
+    } catch (err) {
+      debug('failed to parse qrcode', result.data)
+      this.onUnknownQRCode()
+      return
+    }
+
     let h, code
     if (typeof result.data === 'string') {
       if (result.data.charAt(0) === '{') {
@@ -87,12 +104,7 @@ var HomePageMixin = {
       break
     default:
       // keep scanning
-      Alert.alert(
-        translate('error'),
-        translate('unknownQRCodeFormat')
-      )
-
-      this.props.navigator.pop()
+      this.onUnknownQRCode()
       break
     }
   },
