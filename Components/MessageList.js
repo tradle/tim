@@ -342,6 +342,10 @@ class MessageList extends Component {
          this.state.list.length !== nextState.list.length)
          // this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]))
       return true
+
+    if (this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]  &&
+        this.state.sendStatus !== nextState.sendStatus)
+      return true
     for (var i=0; i<this.state.list.length; i++) {
       let r = this.state.list[i]
       let nr = nextState.list[i]
