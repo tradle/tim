@@ -48,3 +48,14 @@ config/
 *.iml
 *.keystore
 code-push
+localIP.json
+google-services.json
+MicroBlink.framework
+MicroBlink.bundle
+iOS/Frameworks
+Pods
+*.xcworkspace
+fabric.properties
+fastlane/
+*.plist
+secrets.xml

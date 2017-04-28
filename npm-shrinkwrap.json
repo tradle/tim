@@ -4812,6 +4812,11 @@
       "from": "git://github.com/tradle/react-native-blinkid.git#d588e440f02fbfb2d6b5af917b265ee5bd730c73",
       "resolved": "git://github.com/tradle/react-native-blinkid.git#d588e440f02fbfb2d6b5af917b265ee5bd730c73"
     },
+    "react-native-branch": {
+      "version": "0.9.7",
+      "from": "react-native-branch@>=0.9.0 <0.10.0",
+      "resolved": "https://registry.npmjs.org/react-native-branch/-/react-native-branch-0.9.7.tgz"
+    },
     "react-native-button": {
       "version": "1.8.2",
       "from": "react-native-button@>=1.3.1 <2.0.0",

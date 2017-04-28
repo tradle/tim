@@ -58,3 +58,4 @@ Pods
 fabric.properties
 fastlane/
 *.plist
+secrets.xml

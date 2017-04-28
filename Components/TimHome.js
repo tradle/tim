@@ -43,6 +43,7 @@ import {
 } from '../utils/localAuth'
 
 import { SyncStatus } from 'react-native-code-push'
+import Linking from '../utils/linking'
 import AutomaticUpdates from '../utils/automaticUpdates'
 import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
@@ -66,7 +67,7 @@ import {
   Image,
   NetInfo,
   ScrollView,
-  Linking,
+  // Linking,
   StatusBar,
   Modal,
   Alert,

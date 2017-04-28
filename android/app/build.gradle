@@ -205,6 +205,7 @@ repositories {
 }
 
 dependencies {
+    compile project(':react-native-branch')
     compile project(':react-native-firebase-analytics')
     compile 'com.google.android.gms:play-services-analytics:10.0.1'
     compile project(':react-native-splash-screen')

@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
 import com.cboy.rn.splashscreen.SplashScreen;
+import io.branch.rnbranch.RNBranchModule;
 
 public class MainActivity extends ReactActivity {
     @Override
@@ -36,4 +37,14 @@ public class MainActivity extends ReactActivity {
       this.sendBroadcast(intent);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        RNBranchModule.initSession(this.getIntent().getData(), this);
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        this.setIntent(intent);
+    }
 }

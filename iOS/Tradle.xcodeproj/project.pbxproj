@@ -26,6 +26,7 @@
 		3D032E2C194C437EBC054F71 /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2060B090E534D60987D7048 /* libRCTAsyncRocksDBStorage.a */; };
 		5162421A1909465CA7AC44B2 /* libRNBlinkID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E2C19FDDDD4447B9C80F765 /* libRNBlinkID.a */; };
 		595E255E879245FDA7D8F9EE /* libRCTOrientation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 049471C98AF542809F110296 /* libRCTOrientation.a */; };
+		5D90573DD9554C18A673C778 /* libRNBranch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 14F947A5DB35447ABE3F6B97 /* libRNBranch.a */; };
 		5E66B670540246B3A0D82BAC /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D491E41C0C9C47B68AC487CA /* Zocial.ttf */; };
 		615E98BE652C4C9397FA6486 /* libRNPasscodeStatus.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 71A5BF1464684D2A8B24B80F /* libRNPasscodeStatus.a */; };
 		6631C852CBA54F67827BCDA4 /* libSMXCrashlytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6FB3837D1EEE435CACD658FB /* libSMXCrashlytics.a */; };
@@ -89,6 +90,7 @@
 		739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
 		739F73091C3F74AE00D9F2FB /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
 		73AC728F1EAEC3BA00A173EC /* splash1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 738ED24A1E6CD41F0067F652 /* splash1536x2048.png */; };
+		73CAA8251EB2E8CC00CD0106 /* libRNBranch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CAA7F41EB2E86300CD0106 /* libRNBranch.a */; };
 		73CEDF701C8CCDE8006401AA /* libReactNativeLocalization.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CEDF691C8CCDC7006401AA /* libReactNativeLocalization.a */; };
 		73D77E271E3F911700DB1F4A /* libSMXCrashlytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73D77E241E3F90D900DB1F4A /* libSMXCrashlytics.a */; };
 		73FE359E1BFA124200EFB313 /* libUdpSockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73FE359D1BFA123200EFB313 /* libUdpSockets.a */; };
@@ -263,6 +265,13 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RCTVideo;
 		};
+		73CAA7F31EB2E86300CD0106 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4AD204EE8CD14D898D7B8C62 /* RNBranch.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B3A3CC361C5B0A070016AC52;
+			remoteInfo = RNBranch;
+		};
 		73CEDF681C8CCDC7006401AA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 73CEDF521C8CCDC6006401AA /* ReactNativeLocalization.xcodeproj */;
@@ -372,11 +381,13 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Tradle/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Tradle/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
+		14F947A5DB35447ABE3F6B97 /* libRNBranch.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNBranch.a; sourceTree = "<group>"; };
 		17FFD8A9DD434C5AB09BCBE9 /* libRNOS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNOS.a; sourceTree = "<group>"; };
 		29F90A6163024FE8B7A7022D /* libRNLocalAuth.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNLocalAuth.a; sourceTree = "<group>"; };
 		2AEA0108AC344DC1BABA82D4 /* libRNFIRAnalytics.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFIRAnalytics.a; sourceTree = "<group>"; };
 		36B5640D4902498D93210121 /* RCTOrientation.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTOrientation.xcodeproj; path = "../node_modules/react-native-orientation/iOS/RCTOrientation.xcodeproj"; sourceTree = "<group>"; };
 		3D510339A825413A9733521D /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
+		4AD204EE8CD14D898D7B8C62 /* RNBranch.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBranch.xcodeproj; path = "../node_modules/react-native-branch/ios/RNBranch.xcodeproj"; sourceTree = "<group>"; };
 		4C93F2E11FA248488DBBF349 /* SplashScreen.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = SplashScreen.xcodeproj; path = "../node_modules/react-native-splash-screen/ios/SplashScreen.xcodeproj"; sourceTree = "<group>"; };
 		4E2C19FDDDD4447B9C80F765 /* libRNBlinkID.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNBlinkID.a; sourceTree = "<group>"; };
 		59270A791A836561C82111CD /* Pods-Tradle-dev.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle-dev.release.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle-dev/Pods-Tradle-dev.release.xcconfig"; sourceTree = "<group>"; };
@@ -481,6 +492,7 @@
 				6631C852CBA54F67827BCDA4 /* libSMXCrashlytics.a in Frameworks */,
 				E18BFE5413F549B3B0653CA2 /* libSplashScreen.a in Frameworks */,
 				0017B32746B747BB9891B12E /* libRNFIRAnalytics.a in Frameworks */,
+				5D90573DD9554C18A673C778 /* libRNBranch.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -525,6 +537,7 @@
 				73D77E271E3F911700DB1F4A /* libSMXCrashlytics.a in Frameworks */,
 				8D2AB8A061455FDA14476CAA /* libPods-Tradle-dev.a in Frameworks */,
 				7307E8F21E9DD5E0003BC00A /* libRNFIRAnalytics.a in Frameworks */,
+				73CAA8251EB2E8CC00CD0106 /* libRNBranch.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -768,6 +781,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		73CAA7DC1EB2E86300CD0106 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				73CAA7F41EB2E86300CD0106 /* libRNBranch.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		73CEDF531C8CCDC6006401AA /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -852,6 +873,7 @@
 				CD50777E5D0B4885B3B28B19 /* SMXCrashlytics.xcodeproj */,
 				4C93F2E11FA248488DBBF349 /* SplashScreen.xcodeproj */,
 				D0AB972E33DD42EFAD54B9AC /* RNFIRAnalytics.xcodeproj */,
+				4AD204EE8CD14D898D7B8C62 /* RNBranch.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1020,6 +1042,9 @@
 							com.apple.Push = {
 								enabled = 1;
 							};
+							com.apple.SafariKeychain = {
+								enabled = 1;
+							};
 						};
 					};
 				};
@@ -1115,6 +1140,10 @@
 				{
 					ProductGroup = 73303A381E30416E00AAE98C /* Products */;
 					ProjectRef = AC1BDF1F181A47D6B9CD87BE /* RNBlinkID.xcodeproj */;
+				},
+				{
+					ProductGroup = 73CAA7DC1EB2E86300CD0106 /* Products */;
+					ProjectRef = 4AD204EE8CD14D898D7B8C62 /* RNBranch.xcodeproj */;
 				},
 				{
 					ProductGroup = 7375407F1D25941500A81EC1 /* Products */;
@@ -1323,6 +1352,13 @@
 			fileType = archive.ar;
 			path = libRCTVideo.a;
 			remoteRef = 73B656711C42F4880068687F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		73CAA7F41EB2E86300CD0106 /* libRNBranch.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNBranch.a;
+			remoteRef = 73CAA7F31EB2E86300CD0106 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		73CEDF691C8CCDC7006401AA /* libReactNativeLocalization.a */ = {
@@ -1643,12 +1679,14 @@
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-splash-screen/ios",
 					"$(SRCROOT)/../node_modules/react-native-firebase-analytics/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);
 				OTHER_LDFLAGS = "-ObjC";
@@ -1692,12 +1730,14 @@
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-splash-screen/ios",
 					"$(SRCROOT)/../node_modules/react-native-firebase-analytics/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);
 				OTHER_LDFLAGS = "-ObjC";
@@ -1745,6 +1785,7 @@
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-splash-screen/ios",
 					"$(SRCROOT)/../node_modules/react-native-firebase-analytics/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1802,6 +1843,7 @@
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-splash-screen/ios",
 					"$(SRCROOT)/../node_modules/react-native-firebase-analytics/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios",
 				);
 				INFOPLIST_FILE = Tradle/Dev.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -1882,6 +1924,7 @@
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-splash-screen/ios",
 					"$(SRCROOT)/../node_modules/react-native-firebase-analytics/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -1943,6 +1986,7 @@
 					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
 					"$(SRCROOT)/../node_modules/react-native-splash-screen/ios",
 					"$(SRCROOT)/../node_modules/react-native-firebase-analytics/ios",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
