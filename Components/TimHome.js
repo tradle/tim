@@ -26,6 +26,7 @@ var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
 var TimerMixin = require('react-timer-mixin')
+var isDeepLink
 
 try {
   var commitHash = require('../version').commit.slice(0, 7)
@@ -137,6 +138,8 @@ class TimHome extends Component {
       debug('failed to check connectivity', err)
     }
   }
+
+
   async componentDidMount() {
     this._checkConnectivity()
 
@@ -144,24 +147,25 @@ class TimHome extends Component {
       const url = await Linking.getInitialURL() || ENV.initWithDeepLink
       if (url)
         this._handleOpenURL({url})
-      if (!ENV.landingPage)
-        return
-      if (!utils.getMe()) {
-        if (ENV.autoRegister)
-          this.showFirstPage()
-        else
-          this.setState({isModalOpen: true})
-        // this.register(() => this.showFirstPage())
-        return
-      }
-
-      this.signInAndContinue()
-
+      if (ENV.landingPage)
+        this.show()
     } catch (err) {
       debug('failed to open deep link', err)
     }
   }
 
+  show() {
+    if (!utils.getMe()) {
+      if (ENV.autoRegister)
+        this.showFirstPage()
+      else
+        this.setState({isModalOpen: true})
+      // this.register(() => this.showFirstPage())
+      return
+    }
+
+    this.signInAndContinue()
+  }
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.submitLogButtonText !== nextState.submitLogButtonText    ||
         this.state.busyWith !== nextState.busyWith                             ||
@@ -173,6 +177,8 @@ class TimHome extends Component {
 
   async _handleOpenURL({url}) {
     try {
+      if (ENV.initWithDeepLink !== url)
+        this.isDeepLink = true
       await this._unsafeHandleOpenURL({ url })
     } catch (err) {
       Alert.alert(
@@ -190,6 +196,13 @@ class TimHome extends Component {
     if (!pathname) throw new Error('failed to parse deep link')
 
     let query = URL.query
+    if (!query) {
+      if (pathname === 'scan') {
+        this.setState({firstPage: pathname})
+        this.show(pathname)
+      }
+      return
+    }
 
     let qs = require('querystring').parse(query)
     // strip leading slashes
@@ -290,19 +303,8 @@ class TimHome extends Component {
     clearTimeout(this.uhOhTimeout)
 
     // Need to laod data for landing page first
-    if (ENV.landingPage)
-      return
-
-    if (!utils.getMe()) {
-      if (ENV.autoRegister)
-        this.showFirstPage()
-      else
-        this.setState({isModalOpen: true})
-      // this.register(() => this.showFirstPage())
-      return
-    }
-
-    this.signInAndContinue()
+    if (!ENV.landingPage)
+      this.show()
   }
 
   async signInAndContinue() {
@@ -326,10 +328,9 @@ class TimHome extends Component {
       })
     }
 
-    if (afterAuthRoute.component.displayName !== TimHome.displayName) {
+    if (afterAuthRoute.component.displayName !== TimHome.displayName  &&  !this.isDeepLink) {
       return this.props.navigator.popToRoute(afterAuthRoute)
     }
-
     return this.showFirstPage()
   }
 
@@ -358,6 +359,9 @@ class TimHome extends Component {
       //   provider: params.provider,
       //   action: 'chat'
       // })
+      return
+    case 'getForms':
+      this.showChat(params)
       return
     case 'noAccessToServer':
       Alert.alert(translate('noAccessToServer'))
@@ -498,6 +502,11 @@ class TimHome extends Component {
     // })
   }
   showFirstPage(doReplace) {
+    let firstPage = this.state.firstPage
+    if (this.isDeepLink)
+      this.state.firstPage = ENV.initWithDeepLink
+    this.isDeepLink = false
+
     var nav = this.props.navigator
     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     let me = utils.getMe()
@@ -505,8 +514,8 @@ class TimHome extends Component {
       this.showContacts()
       return
     }
-    if (this.state.firstPage) {
-      switch (this.state.firstPage) {
+    if (firstPage) {
+      switch (firstPage) {
       case 'chat':
         Actions.getProvider({
           provider: this.state.permalink,
@@ -519,6 +528,9 @@ class TimHome extends Component {
       case 'profile':
         this.showHomePage(doReplace)
         return
+      case 'scan':
+        this.scanFormsQRCode()
+        break
       default:
         if (ENV.homePage)
           this.showHomePage(doReplace)

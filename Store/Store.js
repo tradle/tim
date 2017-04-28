@@ -1132,7 +1132,7 @@ var Store = Reflux.createStore({
     let maxAttempts = params.maxAttempts
     debug('fetching provider info from', serverUrls)
     return Q.all(serverUrls.map(url => {
-      return this.getServiceProviders({url: url, retry: retry, id: id, newServer: newServer})
+      return this.getServiceProviders({url: url, hash: params.hash, retry: retry, id: id, newServer: newServer})
         .then(results => {
           // var httpClient = driverInfo.httpClient
           var wsClients = driverInfo.wsClients
@@ -1771,6 +1771,7 @@ var Store = Reflux.createStore({
     let url = params.url
     let retry = params.retry
     let id = params.id
+    let hash = params.hash
     let newServer = params.newServer
     var self = this
     // return Q.race([
@@ -1835,6 +1836,10 @@ var Store = Reflux.createStore({
       json.providers.forEach(sp => {
         if (id)  {
           if (sp.id !== id)
+            return
+        }
+        if (hash) {
+          if (sp.bot[ROOT_HASH] !== hash)
             return
         }
         else if (providerIds  &&  providerIds.indexOf(sp.id) === -1)
@@ -3297,8 +3302,11 @@ var Store = Reflux.createStore({
     if (isGuestSessionProof || isBecomingEmployee) {
       checkPublish = this.getDriver(me)
       .then(() => {
-        if (params.serverUrl)
-          return this.getInfo({serverUrls: [params.serverUrl]})
+        let provider = params.provider
+        if (provider) {
+          return this.addSettings(provider)
+        }
+          // return this.getInfo({serverUrls: [params.serverUrl]})
       })
       .then(function () {
         // if (publishRequestSent)
@@ -5805,7 +5813,7 @@ var Store = Reflux.createStore({
     }
 
     if (value[TYPE] === SETTINGS)
-      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : -1)
+      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : -1, true)
 
     let meId = utils.getId(me)
     let self = this
@@ -6037,7 +6045,7 @@ var Store = Reflux.createStore({
       err = err;
     });
   },
-  addSettings: co(function* addSettings (value, maxAttempts) {
+  addSettings: co(function* addSettings (value, maxAttempts, getAllProviders) {
     var self = this
     var v = value.url
     if (v.charAt(v.length - 1) === '/')
@@ -6062,6 +6070,10 @@ var Store = Reflux.createStore({
           oneProvider = true
       }
     }
+    else if (getAllProviders  &&  settings.urlToId[value.url]) {
+      delete settings.urlToId[value.url]
+      self._setItem(key, settings)
+    }
     let gotInfo
     if (maxAttempts !== -1) {
       let attempts = 0
@@ -6069,7 +6081,7 @@ var Store = Reflux.createStore({
   //     let maxWait = 60000
       while (true) {
         try {
-          yield this.getInfo({serverUrls: [v], retry: false, id: value.id ? value.id : null, newServer: true, maxAttempts: maxAttempts})
+          yield this.getInfo({serverUrls: [v], retry: false, id: value.id, hash: value.hash, newServer: true, maxAttempts: maxAttempts})
           gotInfo = true
           break;
         }
@@ -6085,16 +6097,46 @@ var Store = Reflux.createStore({
     }
     if (!gotInfo)
       try {
-        yield this.getInfo({serverUrls: [v], retry: true, id: value.id ? value.id : null, newServer: true})
+        yield this.getInfo({serverUrls: [v], retry: true, hash: value.hash, id: value.id, newServer: true})
       } catch (err) {
         self.trigger({action: 'addItem', error: err.message, resource: value})
       }
     if (allProviders  &&  settings)
       return
     if (settings) {
-      if (settings.urls.indexOf(v) === -1)
+      let addHash
+      if (settings.urls.indexOf(v) === -1) {
         self._mergeItem(key, { urls: [...settings.urls, v] })
-      // Save the fact that only some providers are needed from this server
+        addHash = true
+      }
+      else if (value.hash) {
+        addHash = true
+
+        if (settings.hashToUrl) {
+          let hasAllProvidersFromThisServer = true
+          for (let h in settings.hashToUrl) {
+            let provider = self._getItem(PROFILE + '_' + h)
+            let org = self._getItem(provider.organization)
+            if (org.url === v)
+              hasAllProvidersFromThisServer = false
+          }
+          addHash = !hasAllProvidersFromThisServer
+        }
+      }
+      // Case when scanning QR code for not yet added server
+      if (value.hash  &&  addHash) {
+        let sp = SERVICE_PROVIDERS.filter((sp) => sp.permalink === value.hash)
+        value.id = sp[0].id
+
+        // var hashToUrl = settings.hashToUrl
+        // if (!hashToUrl[value.hash])
+        //   hashToUrl[value.hash] = v
+
+        // self._mergeItem(key, { hashToUrl: hashToUrl })
+        // value = self._getItem(key)
+      }
+      // else {
+        // Save the fact that only some providers are needed from this server
       if (value.id) {
         var urlToId = settings.urlToId
         if (!urlToId[v])
@@ -6106,13 +6148,15 @@ var Store = Reflux.createStore({
 
         self._mergeItem(key, { urlToId: urlToId })
       }
+      // }
     }
     else {
       value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
       self._setItem(key, value)
     }
+    value = self._getItem(key)
     self.trigger({action: 'addItem', resource: value})
-    return self.dbPut(key, self._getItem(key))
+    return self.dbPut(key, value)
   }),
   forgetAndReset() {
     var orgs = this.searchNotMessages({modelName: ORGANIZATION})

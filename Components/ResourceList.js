@@ -281,10 +281,6 @@ class ResourceList extends Component {
 
       return;
     }
-    if (action === 'getForms') {
-      this.showChat(params)
-      return
-    }
     if (action === 'talkToEmployee') {
       if (!params.to)
         return

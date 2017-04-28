@@ -92,7 +92,10 @@ var HomePageMixin = {
       Actions.addItem({
         resource: r,
         value: r,
-        serverUrl: result.host,
+        provider: {
+          url: result.host,
+          hash: result.provider
+        },
         meta: utils.getModel('tradle.GuestSessionProof').value,
         disableAutoResponse: true})
       break
