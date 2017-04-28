@@ -40,7 +40,7 @@ module.exports = function createCalendarModal (props) {
     locale,
     theme: defaultTheme,
     showTodayHelper: false,
-    selectedDate: Date.now(),
+    selectedDate: new Date(),
     min: DEFAULT_MIN_DATE,
     minDate: DEFAULT_MIN_DATE,
     ...calendarProps
