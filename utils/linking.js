@@ -1,12 +1,11 @@
 
 import EventEmitter from 'EventEmitter'
 import { Linking } from 'react-native'
-
 import Branch from 'react-native-branch'
 
 Branch.subscribe(bundle => {
   const url = getUrlFromBundle(bundle)
-  if (url) instance.emit('url', url)
+  if (url) instance.emit('url', { url })
 })
 
 async function getInitialURL() {
