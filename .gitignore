@@ -56,6 +56,9 @@ iOS/Frameworks
 Pods
 *.xcworkspace
 fabric.properties
-fastlane/
 *.plist
 secrets.xml
+*/fastlane/.env
+*/fastlane/README.md
+*/fastlane/report.xml
+*/fastlane/service-account-actor.json

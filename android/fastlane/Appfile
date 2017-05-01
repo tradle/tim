@@ -1,0 +1,2 @@
+json_key_file "./fastlane/service-account-actor.json"
+package_name "io.tradle.dev"
