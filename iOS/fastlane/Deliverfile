@@ -1,0 +1,23 @@
+app_identifier "io.tradle.dev.tim" # The bundle identifier of your app
+username "mvayngrib@gmail.com" # your Apple ID user
+submit_for_review true
+force true
+automatic_release true
+price_tier 0
+
+app_review_information(
+  first_name: "Mark",
+  last_name: "Vayngrib",
+  phone_number: "12019256626",
+  email_address: "mark@tradle.io",
+  demo_user: "N/A",
+  demo_password: "N/A",
+  notes: "No demo account needed"
+)
+
+submission_information({
+  export_compliance_encryption_updated: false,
+  export_compliance_uses_encryption: false,
+  content_rights_contains_third_party_content: false,
+  add_id_info_uses_idfa: false
+});

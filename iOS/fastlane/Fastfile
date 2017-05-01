@@ -34,9 +34,9 @@ platform :ios do
 
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
-  lane :beta do |values|
+  lane :testflight do |values|
     match(
-      git_url: "https://github.com/tradle/provision-ios/tree/master/certificates",
+      git_url: "https://github.com/tradle/provision-ios",
       type: "development"
     )
 
@@ -55,14 +55,14 @@ platform :ios do
 
   desc "Deploy a new version to the App Store"
   lane :release do
-    # match(type: "appstore")
+    match(type: "appstore")
     # snapshot
     gym(scheme: "Tradle-dev Release") # Build your app - more options available
     deliver(force: true)
     # frameit
   end
 
-  lane :fabric do |values|
+  lane :beta do |values|
     # build your iOS app
     match(
       git_url: "https://github.com/tradle/provision-ios",
@@ -107,8 +107,6 @@ platform :ios do
   end
 
   lane :travis do
-    cocoapods
-
     create_keychain(
       name: "MATCH_KEYCHAIN_NAME",
       password: "MATCH_KEYCHAIN_PASSWORD",
@@ -133,6 +131,11 @@ platform :ios do
     )
 
     deliver(force:true)
+  end
+
+  desc "Upload to App Store and submit for review"
+  lane :upload do
+    deliver
   end
 
   # You can define as many lanes as you want

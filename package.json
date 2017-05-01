@@ -11,7 +11,10 @@
     "reset": "rm -fr $TMPDIR/react-* && watchman watch-del-all",
     "lint": "eslint --quiet --ignore-path .gitignore .",
     "lintfile": "eslint --quiet --ignore-path .gitignore",
-    "prepush": "npm run lint"
+    "prepush": "npm run lint",
+    "beta": "npm run ios beta",
+    "testflight": "npm run ios testflight",
+    "ios": "cd iOS && fastlane ios $@"
   },
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
