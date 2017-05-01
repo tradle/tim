@@ -39,6 +39,7 @@
 		730DDF1C1E664D6C0011080D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */; };
 		730DDF1D1E664D6C0011080D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */; };
 		731F233E1C31BB6600C3B09D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F233D1C31BB6600C3B09D /* libz.tbd */; };
+		731FE0D41EB6E8BD009CDF8A /* release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 731FE0D31EB6E8BD009CDF8A /* release.xcconfig */; };
 		73261E141C4AB9FE00292FEE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		73261E161C4AB9FE00292FEE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		73261E171C4AB9FE00292FEE /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
@@ -399,6 +400,8 @@
 		730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Tradle/Launch Screen.storyboard"; sourceTree = "<group>"; };
 		731045901D7CE25D0087E82D /* Tradle-dev.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Tradle-dev.entitlements"; sourceTree = "<group>"; };
 		731F233D1C31BB6600C3B09D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		731FDFE41EB6E75C009CDF8A /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = debug.xcconfig; sourceTree = "<group>"; };
+		731FE0D31EB6E8BD009CDF8A /* release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = release.xcconfig; sourceTree = "<group>"; };
 		73261E3F1C4AB9FE00292FEE /* Tradle-dev.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tradle-dev.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		732AB4AD1D18B45600F2DE1C /* CodePush.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = "../node_modules/react-native-code-push/ios/CodePush.xcodeproj"; sourceTree = "<group>"; };
 		732EA0AF1C24AB90000EFAA6 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
@@ -889,6 +892,8 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				731FDFE41EB6E75C009CDF8A /* debug.xcconfig */,
+				731FE0D31EB6E8BD009CDF8A /* release.xcconfig */,
 				7307E9131E9DD627003BC00A /* GoogleService-Info.plist */,
 				731045901D7CE25D0087E82D /* Tradle-dev.entitlements */,
 				9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */,
@@ -1458,6 +1463,7 @@
 				730DDF1C1E664D6C0011080D /* Launch Screen.storyboard in Resources */,
 				7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				731FE0D41EB6E8BD009CDF8A /* release.xcconfig in Resources */,
 				738ED24B1E6CD41F0067F652 /* splash1536x2048.png in Resources */,
 				73FE35D11BFA14F600EFB313 /* Ionicons.ttf in Resources */,
 				EDA552EBDE6041E294013897 /* Entypo.ttf in Resources */,
@@ -1516,7 +1522,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../install-app.sh\n\nif [ \"$CONFIGURATION\" == \"Release\" ]; then\n    PATH=$(bash -l -c 'echo $PATH') ../save-release.sh\nfi;";
+			shellScript = "export NODE_BINARY=node\necho \"BLAHSLDHSLKAHDJKSAHDJSKAHDSJKA\"\n../install-app.sh\n\nif [ \"$CONFIGURATION\" == \"Release\" ]; then\n    PATH=$(bash -l -c 'echo $PATH') ../save-release.sh\nfi;";
 		};
 		73261E3B1C4AB9FE00292FEE /* Fiber / Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1530,7 +1536,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Release\" ]; then\n  ../config/prod/fabric.sh\nfi";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Release\" ]; then\n  ../scripts/fabric-prod.sh\nfi";
 		};
 		7348C39E1C41C02400B9CDF5 /* Fiber / Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1749,7 +1755,7 @@
 		};
 		73261E3D1C4AB9FE00292FEE /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F65DB3B35B79AEDDF2DA8755 /* Pods-Tradle-dev.debug.xcconfig */;
+			baseConfigurationReference = 731FDFE41EB6E75C009CDF8A /* debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Tradle-dev.entitlements";
@@ -1787,7 +1793,7 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase-analytics/ios",
 					"$(SRCROOT)/../node_modules/react-native-branch/ios",
 				);
-				INFOPLIST_FILE = Tradle/Dev.plist;
+				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -1808,7 +1814,7 @@
 		};
 		73261E3E1C4AB9FE00292FEE /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 59270A791A836561C82111CD /* Pods-Tradle-dev.release.xcconfig */;
+			baseConfigurationReference = 731FE0D31EB6E8BD009CDF8A /* release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Tradle-dev.entitlements";
@@ -1845,7 +1851,7 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase-analytics/ios",
 					"$(SRCROOT)/../node_modules/react-native-branch/ios",
 				);
-				INFOPLIST_FILE = Tradle/Dev.plist;
+				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (

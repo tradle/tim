@@ -38,7 +38,7 @@ npm-debug.log
 environment.plist
 environment.json
 environment_preprocess.h
-iOS/Tradle/*.plist
+#iOS/Tradle/*.plist
 release/
 release-*/
 Dockerfile*
@@ -56,9 +56,12 @@ iOS/Frameworks
 Pods
 *.xcworkspace
 fabric.properties
-*.plist
 secrets.xml
 */fastlane/.env
 */fastlane/README.md
 */fastlane/report.xml
 */fastlane/service-account-actor.json
+.env
+.env.*
+debug.xcconfig
+release.xcconfig
