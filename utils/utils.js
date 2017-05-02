@@ -27,6 +27,7 @@ import { post as submitLog } from './debug'
 import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import clone from 'clone'
+import Strings from './strings'
 
 // import Orientation from 'react-native-orientation'
 
@@ -52,10 +53,6 @@ var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm',
   'Please take a **selfie** picture of your face': 'takeAPicture'
-}
-var translatedStrings = {
-  en: preParseStrings(require('./strings_en.json'), ENV),
-  nl: preParseStrings(require('./strings_nl.json'), ENV)
 }
 
 const tradle = require('@tradle/engine')
@@ -86,12 +83,8 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
 
-var LocalizedStrings = require('react-native-localization')
-let defaultLanguage = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()
 var dictionaries = require('@tradle/models').dict
-
-var strings = translatedStrings[defaultLanguage]
-var dictionary = dictionaries[defaultLanguage]
+var dictionary = dictionaries[Strings.language]
 
 var propTypesMap = {
   'string': t.Str,
@@ -125,15 +118,13 @@ var utils = {
     if (!me)
       return
 
+    Strings.setLanguage(me.languageCode)
     if (me.languageCode) {
-      strings = translatedStrings[me.languageCode]
       if (me.dictionary)
         dictionary = me.dictionary
       else if (dictionaries[me.languageCode])
         dictionary = dictionaries[me.languageCode]
     }
-    if (!strings)
-      strings = translatedStrings[defaultLanguage]
   },
   getMe() {
     return me;
@@ -167,9 +158,7 @@ var utils = {
   getModel(modelName) {
     return models ? models[modelName] : null;
   },
-  getDefaultLanguage() {
-    return defaultLanguage
-  },
+  getDefaultLanguage: Strings.getDefaultLanguage,
   translate(...args) {
     if (typeof args[0] === 'string')
       return utils.translateString(...args)
@@ -194,6 +183,7 @@ var utils = {
     return model.title ? model.title : this.makeModelTitle(model, isPlural)
   },
   translateString(...args) {
+    const { strings } = Strings
     if (!strings)
       return args[0]
 
@@ -1760,7 +1750,7 @@ var utils = {
 
     const appVersion = json.results[0].version
     return appVersion !== DeviceInfo.getVersion()
-  }
+  },
 
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
@@ -1826,20 +1816,6 @@ function dateFromParts (parts) {
   date.setUTCMonth(Number(parts.month) - 1)
   date.setUTCDate(Number(parts.day))
   return date
-}
-
-function preParseStrings (strings, { appName, profileTitle }) {
-  // TODO: generalize if we need to replace other variables
-  const preparsed = {}
-
-  for (let key in strings) {
-    let str = strings[key]
-    preparsed[key] = str.replace(/{appName}/g, appName)
-    preparsed[key] = str.replace(/{profileTitle}/g, strings[profileTitle])
-  }
-
-  preparsed.profile = strings[profileTitle]
-  return preparsed
 }
 
 module.exports = utils;

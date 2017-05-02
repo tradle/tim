@@ -1,9 +1,11 @@
 'use strict';
 
+const querystring = require('querystring')
 const parseURL = require('url').parse
 var Q = require('q')
 var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
+var pick = require('object.pick')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
@@ -19,7 +21,7 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
-var debug = require('debug')('Tradle-Home')
+var debug = require('debug')('tradle:app:Home')
 var PasswordCheck = require('./PasswordCheck')
 var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
@@ -49,6 +51,7 @@ import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
 import Navs from '../utils/navs'
 import ENV from '../utils/env'
+import Strings from '../utils/strings'
 
 const BG_IMAGE = ENV.splashBackground
 const PASSWORD_ITEM_KEY = 'app-password'
@@ -147,7 +150,7 @@ class TimHome extends Component {
     try {
       const url = await Linking.getInitialURL() || ENV.initWithDeepLink
       if (url)
-        this._handleOpenURL({url})
+        this._handleOpenURL({ url })
       if (ENV.landingPage)
         this.show()
     } catch (err) {
@@ -192,23 +195,39 @@ class TimHome extends Component {
   async _unsafeHandleOpenURL({ url }) {
     debug(`opening URL: ${url}`)
 
-    let URL = parseURL(url)
+    const URL = parseURL(url)
     let pathname = URL.pathname || URL.hostname
     if (!pathname) throw new Error('failed to parse deep link')
 
     // strip leading slashes
-    pathname = pathname.replace(/^\//, '')
+    pathname = pathname.replace(/^\/+/, '')
 
-    let query = URL.query
+    const { query } = URL
+    const qs = query && querystring.parse(query)
+    // if (qs && qs.env) {
+    //   try {
+    //     const props = querystring.parse(qs.env)
+    //     const allowed = pick(props, ['profileTitle'])
+    //     if (Object.keys(allowed).length) {
+    //       Strings.envify(props)
+    //     }
+    //   } catch (err) {
+    //     debug('bad env in deep link query string')
+    //   }
+    // }
+
     if (!query) {
       if (pathname === 'scan') {
+        const currentRoute = Navs.getCurrentRoute(this.props.navigator)
+        const { displayName } = currentRoute.component
+        if (displayName === 'QRCodeScanner') return
+
         this.setState({firstPage: pathname})
         this.show(pathname)
       }
+
       return
     }
-
-    let qs = require('querystring').parse(query)
 
     let state = {firstPage: pathname}
     extend(state, qs)
