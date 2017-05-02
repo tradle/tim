@@ -391,14 +391,18 @@ class MessageView extends Component {
     let title = isVerification  ? this.makeViewTitle(model) : null
     let footer = actionSheet && this.renderFooter()
     let contentSeparator = utils.getContentSeparator(bankStyle)
+    let bigPhoto
+    if (mainPhoto)
+      bigPhoto = <View style={styles.photoBG}>
+                  <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
+                </View>
+
 
     return (
       <PageView style={[platformStyles.container, {height: utils.dimensions().height - 80}]} separator={contentSeparator}>
       <ScrollView  ref='this' keyboardShouldPersistTaps={true}>
         {dateView}
-        <View style={styles.photoBG}>
-          <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
-        </View>
+        {bigPhoto}
         {actionPanel}
       </ScrollView>
         {title}
