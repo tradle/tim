@@ -3478,13 +3478,19 @@ var Store = Reflux.createStore({
           // if (result &&  result.length) {
           //   result.forEach((fr) => {
             let fr = this._getItem(utils.getId(params.disableFormRequest))
-
-            if (!fr.documentCreated  &&  fr.form === resource[TYPE]) {
-              fr.documentCreated = true
-              let key = utils.getId(fr)
-              self._setItem(key, fr)
-              self.dbPut(key, fr)
-              self.trigger({action: 'addItem', resource: fr})
+            if (!fr.documentCreated) {
+              let addDocumentCreated
+              if (fr[TYPE] === FORM_REQUEST)
+                addDocumentCreated = fr.form === resource[TYPE]
+              else if (fr[TYPE] === FORM_ERROR)
+                addDocumentCreated = fr.prefill[TYPE] === resource[TYPE]
+              if (addDocumentCreated) {
+                fr.documentCreated = true
+                let key = utils.getId(fr)
+                self._setItem(key, fr)
+                self.dbPut(key, fr)
+                self.trigger({action: 'addItem', resource: fr})
+              }
             }
           //   })
           // }
