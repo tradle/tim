@@ -204,17 +204,17 @@ class TimHome extends Component {
 
     const { query } = URL
     const qs = query && querystring.parse(query)
-    // if (qs && qs.env) {
-    //   try {
-    //     const props = querystring.parse(qs.env)
-    //     const allowed = pick(props, ['profileTitle'])
-    //     if (Object.keys(allowed).length) {
-    //       Strings.envify(props)
-    //     }
-    //   } catch (err) {
-    //     debug('bad env in deep link query string')
-    //   }
-    // }
+    if (qs && qs.env) {
+      try {
+        const props = querystring.parse(qs.env)
+        const allowed = pick(props, ['profileTitle'])
+        if (Object.keys(allowed).length) {
+          Strings.envify(props)
+        }
+      } catch (err) {
+        debug('bad env in deep link query string')
+      }
+    }
 
     if (!query) {
       if (pathname === 'scan') {
