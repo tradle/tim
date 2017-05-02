@@ -272,7 +272,7 @@ class FormErrorRow extends Component {
       }
       var style = chatStyles.resourceTitle
       if (isMyMessage)
-        style = [style, {justifyContent: 'flex-end', color: isMyProduct ? '#2892C6' : '#ffffff'}];
+        style = [style, {justifyContent: 'flex-end', color: '#ffffff'}];
 
       let rtype = resource.prefill[constants.TYPE] || utils.getId(resource.prefill).split('_')[0]
       let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-arrow-forward'
