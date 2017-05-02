@@ -1117,9 +1117,7 @@ class ResourceList extends Component {
     return (
       <PageView style={this.props.isBacklink ? {} : platformStyles.container} separator={contentSeparator}>
         {network}
-        <View style={hasSearchBar ? {height: 0} : {}}>
-          {searchBar}
-        </View>
+        {searchBar}
         <View style={styles.separator} />
         {content}
         {footer}
