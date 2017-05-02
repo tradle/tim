@@ -6,6 +6,7 @@ var MyProductMessageRow = require('./MyProductMessageRow')
 var VerificationMessageRow = require('./VerificationMessageRow')
 var FormMessageRow = require('./FormMessageRow')
 var FormRequestRow = require('./FormRequestRow')
+var FormErrorRow = require('./FormErrorRow')
 var NoResources = require('./NoResources')
 var NewResource = require('./NewResource')
 var ProductChooser = require('./ProductChooser')
@@ -44,6 +45,7 @@ const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
+const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
 const ROOT_HASH = constants.ROOT_HASH
@@ -170,12 +172,12 @@ class MessageList extends Component {
         context: this.state.allContexts ? null : this.state.context,
         limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
       }
-
+      let rtype = params.resource[TYPE]
       if (params.resource._sendStatus) {
         this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
       }
-      else if (params.resource[TYPE] === FORM_REQUEST  ||  params.resource[TYPE] === CONFIRM_PACKAGE_REQUEST)
+      else if (rtype === FORM_REQUEST  || rtype === FORM_REQUEST ||  rtype === CONFIRM_PACKAGE_REQUEST)
         this.state.addedItem = params.resource
       else if (params.resource._denied || params.resource._approved)
         this.state.addedItem = params.resource
@@ -487,6 +489,8 @@ class MessageList extends Component {
     props.addedItem = this.state.addedItem
     props.chooseTrustedProvider = this.chooseTrustedProvider
 
+    if (model.id === FORM_ERROR)
+       return <FormErrorRow {...props} />
     return model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST
            ? <FormRequestRow {...props} />
            : <MessageRow {...props} />

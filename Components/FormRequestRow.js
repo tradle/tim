@@ -216,28 +216,6 @@ class FormRequestRow extends Component {
       </View>
     )
   }
-  isOnePropForm() {
-    const resource = this.props.resource;
-    if (resource[TYPE] !== FORM_REQUEST)
-      return
-    const model = utils.getModel(resource.form).value;
-    const props = model.properties
-    let eCols = []
-    for (let p in props) {
-      let prop = props[p]
-      if (!prop.readOnly  &&
-        !prop.hidden      &&
-        !prop.list )
-        eCols.push(props[p])
-    }
-
-    if (eCols.length === 1) {
-      let p = eCols[0]
-      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
-        return p
-    }
-    return
-  }
   chooser(prop, propName) {
     let oResource = this.props.resource
     let model = utils.getModel(oResource.form).value

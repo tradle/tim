@@ -27,9 +27,12 @@ const DEFAULT_CURRENCY_SYMBOL = '£'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
-const ENUM = 'tradle.Enum'
+const FORM_ERROR = 'tradle.FormError'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PHOTO = 'tradle.Photo'
+const ENUM = 'tradle.Enum'
+
 var BORDER_WIDTH = StyleSheet.hairlineWidth
 
 var RowMixin = {
@@ -491,6 +494,33 @@ var RowMixin = {
                // <Text style={styles.sendStatusDefaultText}>{this.props.sendStatus}</Text>
   },
 
+  isOnePropForm() {
+    const resource = this.props.resource;
+    let type = resource[constants.TYPE]
+    let isFormRequest = type === FORM_REQUEST
+    let isFormError = type === FORM_ERROR
+    if (!isFormRequest  &&  !isFormError)
+      return
+    const model = isFormRequest
+                ? utils.getModel(resource.form).value
+                : utils.getModel(resource.prefill[constants.TYPE]).value
+    const props = model.properties
+    let eCols = []
+    for (let p in props) {
+      let prop = props[p]
+      if (!prop.readOnly  &&
+        !prop.hidden      &&
+        !prop.list )
+        eCols.push(props[p])
+    }
+
+    if (eCols.length === 1) {
+      let p = eCols[0]
+      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
+        return p
+    }
+    return
+  }
   // anyOtherRow(prop, backlink, styles) {
   //   var row;
   //   var resource = this.props.resource;
