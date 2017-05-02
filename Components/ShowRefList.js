@@ -228,7 +228,7 @@ class ShowRefList extends Component {
                       backlinkList={backlinkList}
                       navigator={this.props.navigator} />
     }
-    else
+    else if (resource.photos)
       separator = <View style={{height: 2, backgroundColor: bg}} />
 
     if (showDetails) {
