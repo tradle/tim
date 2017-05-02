@@ -43,6 +43,7 @@ import {
 } from '../utils/localAuth'
 
 import { SyncStatus } from 'react-native-code-push'
+import Linking from '../utils/linking'
 import AutomaticUpdates from '../utils/automaticUpdates'
 import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
@@ -66,7 +67,7 @@ import {
   Image,
   NetInfo,
   ScrollView,
-  Linking,
+  // Linking,
   StatusBar,
   Modal,
   Alert,
@@ -175,7 +176,7 @@ class TimHome extends Component {
         this.state.hasMe !== nextState.hasMe
   }
 
-  async _handleOpenURL({url}) {
+  async _handleOpenURL({ url }) {
     try {
       if (ENV.initWithDeepLink !== url)
         this.isDeepLink = true
@@ -195,6 +196,9 @@ class TimHome extends Component {
     let pathname = URL.pathname || URL.hostname
     if (!pathname) throw new Error('failed to parse deep link')
 
+    // strip leading slashes
+    pathname = pathname.replace(/^\//, '')
+
     let query = URL.query
     if (!query) {
       if (pathname === 'scan') {
@@ -205,8 +209,6 @@ class TimHome extends Component {
     }
 
     let qs = require('querystring').parse(query)
-    // strip leading slashes
-    pathname = pathname.replace(/^\//, '')
 
     let state = {firstPage: pathname}
     extend(state, qs)

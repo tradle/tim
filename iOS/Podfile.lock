@@ -1,4 +1,9 @@
 PODS:
+  - Branch (0.14.12):
+    - Branch/Core (= 0.14.12)
+    - Branch/without-IDFA (= 0.14.12)
+  - Branch/Core (0.14.12)
+  - Branch/without-IDFA (0.14.12)
   - Firebase/Core (3.14.0):
     - FirebaseAnalytics (= 3.7.0)
     - FirebaseCore (= 3.5.1)
@@ -15,10 +20,12 @@ PODS:
   - PPBlinkID (2.6.0)
 
 DEPENDENCIES:
+  - Branch
   - Firebase/Core
   - PPBlinkID (~> 2.6.0)
 
 SPEC CHECKSUMS:
+  Branch: f63d9cf82ac09747349a73184a0b739d28781c4d
   Firebase: 85a581fb04e44f63ae9f4fbc8d6dabf4a4c18653
   FirebaseAnalytics: 0d1b7d81d5021155be37702a94ba1ec16d45365d
   FirebaseCore: 225d40532489835a034b8f4e2c9c87fbf4f615a2
@@ -26,6 +33,6 @@ SPEC CHECKSUMS:
   GoogleToolboxForMac: 8e329f1b599f2512c6b10676d45736bcc2cbbeb0
   PPBlinkID: 8dd9df6f0f782c86af24deb65ad6f4a238df4081
 
-PODFILE CHECKSUM: 556af9c09d6c61a993df0352eaad35e9e65f4649
+PODFILE CHECKSUM: 9f868de1b10a476a4007873ae9cab1648498baea
 
 COCOAPODS: 1.1.1
