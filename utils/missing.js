@@ -34,7 +34,7 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url, rec
         })
 
         // nothing there for us
-        if (res.status >= 400) return
+        if (res.status === 204 || res.status >= 400) return
 
         msgs = yield res.json()
         if (!msgs.length) {
