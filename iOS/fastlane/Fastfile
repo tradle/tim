@@ -34,7 +34,7 @@ platform :ios do
 
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
-  lane :testflight do |values|
+  lane :beta_testflight do |values|
     match(
       git_url: "https://github.com/tradle/provision-ios",
       type: "development"
@@ -62,7 +62,7 @@ platform :ios do
     # frameit
   end
 
-  lane :beta do |values|
+  lane :beta_fabric do |values|
     # build your iOS app
     match(
       git_url: "https://github.com/tradle/provision-ios",
