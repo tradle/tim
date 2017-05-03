@@ -12,9 +12,8 @@
     "lint": "eslint --quiet --ignore-path .gitignore .",
     "lintfile": "eslint --quiet --ignore-path .gitignore",
     "prepush": "npm run lint",
-    "beta": "npm run ios beta",
-    "testflight": "npm run ios testflight",
-    "ios": "cd iOS && fastlane ios $@"
+    "ios:testflight": "cd iOS && fastlane ios beta_testflight $@",
+    "ios:fabric": "cd iOS && fastlane ios beta_fabric $@"
   },
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
