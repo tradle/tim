@@ -6399,11 +6399,21 @@ var Store = Reflux.createStore({
       const model = this.getModel(type)
       const isForm = model && model.subClassOf === FORM
       if (type === SIMPLE_MESSAGE || isForm) {
-        Push.init()
-        Push.register()
-        node.removeListener('sent', onSent)
+        initPush()
       }
     }
+
+    // if we're sending a bunch of messages,
+    // let's not interrupt the flow
+    //
+    // this is particularly important during bulk import
+    // where we might send 10 messages, and the push notifications modal
+    // may get clobbered by an update to the Importing... modal
+    const initPush = debounce(once(() => {
+      Push.init()
+      Push.register()
+      node.removeListener('sent', onSent)
+    }), 5000)
 
     node.on('sent', onSent)
     const me = await this._mePromise
