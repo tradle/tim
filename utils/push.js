@@ -125,11 +125,15 @@ function createPusher (opts) {
   async function makeRegistrationAttempt () {
     if (!me.pushNotificationsAllowed) {
       const pushNotificationsAllowed = await preAskUser()
-      Actions.updateMe({ pushNotificationsAllowed })
-      if (!pushNotificationsAllowed) return
+      if (!pushNotificationsAllowed) {
+        Actions.updateMe({ pushNotificationsAllowed })
+        return
+      }
     }
 
     const token = await getToken()
+    Actions.updateMe({ pushNotificationsAllowed: true })
+
     await postWithRetry('/subscriber', {
       [TYPE]: 'tradle.PNSRegistration',
       identity: identity,
@@ -140,6 +144,7 @@ function createPusher (opts) {
 
     registered = true
     Actions.updateMe({ registeredForPushNotifications: true })
+    onRegistered()
   }
 
   function getToken () {
@@ -171,9 +176,11 @@ function createPusher (opts) {
    * @return {[type]}      [description]
    */
   function postWithRetry (path, body) {
-    if (__DEV__) return
+    // if (__DEV__) return
 
-    if (path[0] === '/') path = path.slice(1)
+    while (path[0] === '/') {
+      path = path.slice(1)
+    }
 
     return node.sign({
       object: body
