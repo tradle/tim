@@ -535,7 +535,7 @@ class TimHome extends Component {
       case 'scan':
         this.showScanHelp()
           // this.scanFormsQRCode()
-        break
+        return
       default:
         if (ENV.homePage)
           this.showHomePage(doReplace)
