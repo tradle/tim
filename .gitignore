@@ -63,3 +63,4 @@ secrets.xml
 */fastlane/service-account-actor.json
 .env
 .env.*
+secrets/
