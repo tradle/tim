@@ -1,5 +1,5 @@
 app_identifier "io.tradle.dev.tim" # The bundle identifier of your app
-username "mvayngrib@gmail.com" # your Apple ID user
+username "ios-dev@tradle.io" # your Apple ID user
 submit_for_review true
 force true
 automatic_release true

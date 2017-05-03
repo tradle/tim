@@ -1,5 +1,5 @@
 app_identifier "io.tradle.dev.tim" # The bundle identifier of your app
-apple_id "mvayngrib@gmail.com" # Your Apple email address
+apple_id "ios-dev@tradle.io" # Your Apple email address
 itc_team_name "Tradle Inc"
 team_id "94V7783F74" # Developer Portal Team ID
 
