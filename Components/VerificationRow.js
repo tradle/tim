@@ -205,7 +205,7 @@ class VerificationRow extends Component {
                     {content}
                   </Swipeout>
 
-      row = <View style={{backgroundColor: '#fff'}} host="lazyload-list">
+      row = <View style={{backgroundColor: '#fff'}} host={this.props.lazy}>
              {content}
             </View>
     }

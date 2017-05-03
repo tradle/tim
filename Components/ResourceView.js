@@ -89,10 +89,14 @@ const FINGERPRINT_COLOR = {
   android: '#ff0000'
 }
 
+let INSTANCE_ID = 0
+
 class ResourceView extends Component {
   static displayName = 'ResourceView';
   constructor(props) {
     super(props);
+    this._lazyId = LAZY_ID + INSTANCE_ID++
+
     let me = utils.getMe()
     let resource = props.resource
     this.state = {
@@ -264,7 +268,7 @@ class ResourceView extends Component {
     if (me) {
       let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource)))
       if (!noActionPanel)
-       actionPanel = <ShowRefList lazy={LAZY_ID}
+       actionPanel = <ShowRefList lazy={this._lazyId}
                                   resource={resource}
                                   navigator={this.props.navigator}
                                   currency={this.props.currency}
@@ -338,7 +342,7 @@ class ResourceView extends Component {
 
     return (
       <PageView style={platformStyles.container}>
-      <ScrollView  ref='this' name={LAZY_ID}>
+      <ScrollView  ref='this' name={this._lazyId}>
         <View style={styles.photoBG}>
           <PhotoView resource={resource} navigator={this.props.navigator}>
           </PhotoView>
