@@ -63,5 +63,3 @@ secrets.xml
 */fastlane/service-account-actor.json
 .env
 .env.*
-debug.xcconfig
-release.xcconfig
