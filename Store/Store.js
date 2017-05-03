@@ -15,6 +15,7 @@ import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createPoliteQueue from '../utils/polite-queue.js'
+import createSemaphore from 'psem'
 const co = require('bluebird').coroutine
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin');
@@ -349,6 +350,8 @@ var Store = Reflux.createStore({
     this._mePromise = new Promise(resolve => {
       this._resolveWithMe = resolve
     })
+
+    this._pushSemaphore = createSemaphore().go()
 
     if (ENV.registerForPushNotifications) {
       this.setupPushNotifications()
@@ -3146,6 +3149,15 @@ var Store = Reflux.createStore({
   },
 
   async onAddAll(resource, to, message) {
+    this._pushSemaphore.stop()
+    try {
+      await this._onAddAll(...arguments)
+    } finally {
+      this._pushSemaphore.go()
+    }
+  },
+
+  async _onAddAll(resource, to, message) {
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
     r.documentCreated = true
@@ -6399,21 +6411,10 @@ var Store = Reflux.createStore({
       const model = this.getModel(type)
       const isForm = model && model.subClassOf === FORM
       if (type === SIMPLE_MESSAGE || isForm) {
-        initPush()
+        this.registerForPushNotifications()
+        node.removeListener('sent', onSent)
       }
     }
-
-    // if we're sending a bunch of messages,
-    // let's not interrupt the flow
-    //
-    // this is particularly important during bulk import
-    // where we might send 10 messages, and the push notifications modal
-    // may get clobbered by an update to the Importing... modal
-    const initPush = debounce(once(() => {
-      Push.init()
-      Push.register()
-      node.removeListener('sent', onSent)
-    }), 5000)
 
     node.on('sent', onSent)
     const me = await this._mePromise
@@ -6422,6 +6423,12 @@ var Store = Reflux.createStore({
     }
 
     Push.init({ node, me, Store: this })
+  },
+  async registerForPushNotifications() {
+    await this._pushSemaphore.wait()
+    await utils.promiseDelay(1000)
+    Push.init()
+    Push.register()
   },
   createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')

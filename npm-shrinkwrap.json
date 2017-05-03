@@ -4584,6 +4584,11 @@
       "from": "prr@>=1.0.1 <1.1.0",
       "resolved": "https://registry.npmjs.org/prr/-/prr-1.0.1.tgz"
     },
+    "psem": {
+      "version": "1.0.0",
+      "from": "psem@latest",
+      "resolved": "https://registry.npmjs.org/psem/-/psem-1.0.0.tgz"
+    },
     "pseudomap": {
       "version": "1.0.2",
       "from": "pseudomap@>=1.0.1 <2.0.0",
