@@ -242,5 +242,6 @@
     "yes": "Yes",
     "no": "No",
     "neverMissAMessage": "Never miss a message",
-    "receiveNotifications?": "Would you like to receive notifications?"
+    "receiveNotifications?": "Would you like to receive notifications?",
+    "help": "Help"
 }

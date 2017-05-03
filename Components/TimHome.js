@@ -1,11 +1,9 @@
 'use strict';
 
-const querystring = require('querystring')
 const parseURL = require('url').parse
 var Q = require('q')
 var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
-var pick = require('object.pick')
 var ResourceList = require('./ResourceList');
 var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
@@ -23,12 +21,14 @@ var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
 var debug = require('debug')('tradle:app:Home')
 var PasswordCheck = require('./PasswordCheck')
+var ArticleView = require('./ArticleView');
 var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
 var TimerMixin = require('react-timer-mixin')
 var isDeepLink
+var scanHelp = require('../html/ScanHelp.html')
 
 try {
   var commitHash = require('../version').commit.slice(0, 7)
@@ -51,7 +51,6 @@ import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
 import Navs from '../utils/navs'
 import ENV from '../utils/env'
-import Strings from '../utils/strings'
 
 const BG_IMAGE = ENV.splashBackground
 const PASSWORD_ITEM_KEY = 'app-password'
@@ -150,7 +149,7 @@ class TimHome extends Component {
     try {
       const url = await Linking.getInitialURL() || ENV.initWithDeepLink
       if (url)
-        this._handleOpenURL({ url })
+        this._handleOpenURL({url})
       if (ENV.landingPage)
         this.show()
     } catch (err) {
@@ -195,39 +194,23 @@ class TimHome extends Component {
   async _unsafeHandleOpenURL({ url }) {
     debug(`opening URL: ${url}`)
 
-    const URL = parseURL(url)
+    let URL = parseURL(url)
     let pathname = URL.pathname || URL.hostname
     if (!pathname) throw new Error('failed to parse deep link')
 
     // strip leading slashes
-    pathname = pathname.replace(/^\/+/, '')
+    pathname = pathname.replace(/^\//, '')
 
-    const { query } = URL
-    const qs = query && querystring.parse(query)
-    if (qs && qs.env) {
-      try {
-        const props = querystring.parse(qs.env)
-        const allowed = pick(props, ['profileTitle'])
-        if (Object.keys(allowed).length) {
-          Strings.envify(props)
-        }
-      } catch (err) {
-        debug('bad env in deep link query string')
-      }
-    }
-
+    let query = URL.query
     if (!query) {
       if (pathname === 'scan') {
-        const currentRoute = Navs.getCurrentRoute(this.props.navigator)
-        const { displayName } = currentRoute.component
-        if (displayName === 'QRCodeScanner') return
-
         this.setState({firstPage: pathname})
         this.show(pathname)
       }
-
       return
     }
+
+    let qs = require('querystring').parse(query)
 
     let state = {firstPage: pathname}
     extend(state, qs)
@@ -550,7 +533,8 @@ class TimHome extends Component {
         this.showHomePage(doReplace)
         return
       case 'scan':
-        this.scanFormsQRCode()
+        this.showScanHelp()
+          // this.scanFormsQRCode()
         break
       default:
         if (ENV.homePage)
@@ -568,6 +552,22 @@ class TimHome extends Component {
     }
 
     this.showOfficialAccounts()
+  }
+  showScanHelp() {
+    // this.goto('../html/Aviva_TC.html')
+    this.props.navigator.push({
+      id: 7,
+      component: ArticleView,
+      backButtonTitle: 'Back',
+      title: translate('help'),
+      passProps: {
+        bankStyle: this.props.bankStyle,
+        action: this.scanFormsQRCode.bind(this),
+        url: scanHelp,
+        actionBarTitle: 'Continue'
+      }
+    })
+
   }
   acceptTermsAndChat(provider) {
     // this.props.navigator.pop()
