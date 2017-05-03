@@ -126,7 +126,8 @@ class MessageView extends Component {
   }
 
   renderActionSheet() {
-    let m = utils.getModel(this.props.resource[TYPE]).value
+    var resource = this.state.resource;
+    let m = utils.getModel(resource[TYPE]).value
     let bl = utils.getPropertiesWithAnnotation(m.properties, 'items')
     if (utils.isEmpty(bl))
       return
