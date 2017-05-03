@@ -1,8 +1,13 @@
 
 import EventEmitter from 'EventEmitter'
-import { Linking } from 'react-native'
+import {
+  Platform,
+  Linking
+} from 'react-native'
 import Branch from 'react-native-branch'
 import debounce from 'debounce'
+import { translate } from './utils'
+import { deepLinkHost } from './env'
 
 async function getInitialURL() {
   const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
@@ -10,7 +15,12 @@ async function getInitialURL() {
 }
 
 function getUrlFromBundle ({ uri, params, error }) {
-  if (error) return
+  if (error) {
+    const match = uri && new RegExp(`https?://${deepLinkHost}/(.*)`).exec(uri)
+    if (match) return '/' + match[1]
+
+    return null
+  }
 
   const branchLink = params && params['$deeplink_path']
   return stripProtocol(branchLink || uri)
@@ -29,6 +39,16 @@ instance.removeEventListener = instance.removeListener
 ;(async function init () {
   await getInitialURL()
   Branch.subscribe(debounce(bundle => {
+    // if (error) {
+    //   if (Platform.OS === 'ios' && error.indexOf('310') !== -1) {
+    //     Alert.alert(translate('oops'), translate('behindProxy'))
+    //   } else {
+    //     Alert.alert(translate('oops'), translate('invalidDeepLink'))
+    //   }
+
+    //   return
+    // }
+
     const url = getUrlFromBundle(bundle)
     if (url) instance.emit('url', { url })
   }, 2000, true))
