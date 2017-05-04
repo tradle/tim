@@ -18,22 +18,16 @@ default_platform :android
 platform :android do
   before_all do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
+    #sh "../../scripts/ensure_git_clean.sh"
   end
 
-  lane :patch do
-    ensure_git_status_clean
-    gradle(task: "clean")
-    increment_android_version_code(path: ENV['GRADLE_PATH'])
-
-    # increment_android_version_code(path: "app/build.gradle")
+  lane :inc_build do
+    gradle(task: 'versionBuild')
+    #increment_android_version_code(path: "gradle.properties")
 
     git_commit(
-      path: File.dirname(ENV["GRADLE_PATH"]),
-      message: "bump android deployment version"
-    )
-
-    add_git_tag(
-      tag: "v#{lane_context[SharedValues::ANDROID_VERSION_NAME]}"
+      path: '../android/gradle.properties',
+      message: "Android release version bump"
     )
 
     #push_to_git_remote
@@ -54,13 +48,19 @@ platform :android do
   end
 
   desc "Deploy a new version to the Google Play"
-  lane :deploy do
+  lane :alpha do
+    gradle(task: "assembleRelease")
+    supply(track: "alpha")
+  end
+
+  desc "Deploy a new version to the Google Play"
+  lane :release do
     gradle(task: "assembleRelease")
     supply
   end
 
   desc "Deploy a new version to the Google Play (dry run)"
-  lane :deploy_dryrun do
+  lane :release_dryrun do
     gradle(task: "assembleRelease")
     supply(validate_only: true)
   end

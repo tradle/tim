@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "./changeHost.js && node --max_old_space_size=4096 ./node_modules/.bin/react-native start",
-    "postinstall": "npm run nodeify && npm run installhooks && ./fbdedupe.sh && ./hooks/update_version.sh",
+    "postinstall": "npm run nodeify && npm run installhooks && npm run linksecrets && ./fbdedupe.sh && ./hooks/update_version.sh",
     "nodeify": "./node_modules/.bin/rn-nodeify --hack",
     "installhooks": "cp hooks/* .git/hooks/",
     "rmsymlinks": "find -L . -type l -exec rm {} \\;",
@@ -12,8 +12,14 @@
     "lint": "eslint --quiet --ignore-path .gitignore .",
     "lintfile": "eslint --quiet --ignore-path .gitignore",
     "prepush": "npm run lint",
+    "dev:setup": "cd iOS && bundle install && cd ../android && bundle install && npm run linksecrets",
     "ios:testflight": "cd iOS && fastlane ios beta_testflight $@",
-    "ios:fabric": "cd iOS && fastlane ios beta_fabric $@"
+    "ios:fabric": "cd iOS && fastlane ios beta_fabric $@",
+    "ios:release": "cd iOS && fastlane ios release $@",
+    "android:fabric": "cd iOS && bundle exec fastlane android beta $@",
+    "android:dryrun": "cd iOS && bundle exec fastlane android release_dryrun $@",
+    "android:release": "cd iOS && bundle exec fastlane android release $@",
+    "placesecrets": "./scripts/placesecrets.sh"
   },
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
