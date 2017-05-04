@@ -44,23 +44,6 @@
           "from": "async@>=2.0.0-rc.4 <3.0.0",
           "resolved": "https://registry.npmjs.org/async/-/async-2.3.0.tgz"
         },
-        "changes-feed": {
-          "version": "1.1.0",
-          "from": "mvayngrib/changes-feed",
-          "resolved": "git://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
-          "dependencies": {
-            "readable-stream": {
-              "version": "1.0.34",
-              "from": "readable-stream@>=1.0.33-1 <1.1.0-0",
-              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz"
-            },
-            "through2": {
-              "version": "0.6.5",
-              "from": "through2@>=0.6.3 <0.7.0",
-              "resolved": "https://registry.npmjs.org/through2/-/through2-0.6.5.tgz"
-            }
-          }
-        },
         "levelup": {
           "version": "1.3.3",
           "from": "levelup@1.3.3",
@@ -87,18 +70,18 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "git://github.com/tradle/models.git#f8a948da2e098434dc3ae4a9dc44c94bfbdd5f4b",
+      "from": "tradle/models#f8a948d",
       "resolved": "git://github.com/tradle/models.git#f8a948da2e098434dc3ae4a9dc44c94bfbdd5f4b",
       "dependencies": {
         "@tradle/validate-model": {
           "version": "1.0.0",
-          "from": "git://github.com/tradle/validate.git#a25543d578b3d40d3d573a04a23ceacf4522c9de",
+          "from": "tradle/validate#a25543d",
           "resolved": "git://github.com/tradle/validate.git#a25543d578b3d40d3d573a04a23ceacf4522c9de"
         },
         "typeforce": {
-          "version": "1.10.6",
+          "version": "1.11.1",
           "from": "typeforce@>=1.10.6 <2.0.0",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.10.6.tgz"
+          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.1.tgz"
         }
       }
     },
@@ -107,33 +90,6 @@
       "from": "@tradle/multiqueue@latest",
       "resolved": "https://registry.npmjs.org/@tradle/multiqueue/-/multiqueue-2.1.0.tgz",
       "dependencies": {
-        "changes-feed": {
-          "version": "1.1.0",
-          "from": "mvayngrib/changes-feed",
-          "resolved": "git://github.com/mvayngrib/changes-feed.git#bd106bd1a8b03660e7c6820e279a34bcaac0fd5e",
-          "dependencies": {
-            "isarray": {
-              "version": "0.0.1",
-              "from": "isarray@0.0.1",
-              "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
-            },
-            "readable-stream": {
-              "version": "1.0.34",
-              "from": "readable-stream@>=1.0.33-1 <1.1.0-0",
-              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz"
-            },
-            "string_decoder": {
-              "version": "0.10.31",
-              "from": "string_decoder@>=0.10.0 <0.11.0",
-              "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-0.10.31.tgz"
-            },
-            "through2": {
-              "version": "0.6.5",
-              "from": "through2@^0.6.3",
-              "resolved": "https://registry.npmjs.org/through2/-/through2-0.6.5.tgz"
-            }
-          }
-        },
         "debug": {
           "version": "2.6.4",
           "from": "debug@>=2.6.3 <3.0.0",
@@ -203,29 +159,7 @@
     "@tradle/protocol": {
       "version": "2.3.0",
       "from": "@tradle/protocol@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz",
-      "dependencies": {
-        "isarray": {
-          "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-        },
-        "merkle-tree-stream": {
-          "version": "3.0.3",
-          "from": "mvayngrib/merkle-tree-stream#finalize",
-          "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
-        },
-        "readable-stream": {
-          "version": "2.2.9",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.9.tgz"
-        },
-        "string_decoder": {
-          "version": "1.0.0",
-          "from": "string_decoder@>=1.0.0 <1.1.0",
-          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.0.tgz"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-2.3.0.tgz"
     },
     "@tradle/qr-schema": {
       "version": "1.1.0",
@@ -261,13 +195,13 @@
     },
     "@tradle/restore": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/restore.git#a783c0adc0fa52cdd8452d2ea11025f343e737eb",
+      "from": "tradle/restore",
       "resolved": "git://github.com/tradle/restore.git#a783c0adc0fa52cdd8452d2ea11025f343e737eb",
       "dependencies": {
         "debug": {
-          "version": "2.6.3",
+          "version": "2.6.6",
           "from": "debug@>=2.6.3 <3.0.0",
-          "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.3.tgz"
+          "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.6.tgz"
         },
         "isarray": {
           "version": "1.0.0",
@@ -275,9 +209,9 @@
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "ms": {
-          "version": "0.7.2",
-          "from": "ms@0.7.2",
-          "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.2.tgz"
+          "version": "0.7.3",
+          "from": "ms@0.7.3",
+          "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.3.tgz"
         },
         "pump": {
           "version": "1.0.2",
@@ -306,18 +240,6 @@
       "from": "@tradle/wire@>=1.1.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/@tradle/wire/-/wire-1.2.0.tgz",
       "dependencies": {
-        "forward-secrecy": {
-          "version": "1.0.2",
-          "from": "tradle/forward-secrecy#dev",
-          "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
-          "dependencies": {
-            "tweetnacl": {
-              "version": "0.13.3",
-              "from": "tweetnacl@>=0.13.1 <0.14.0",
-              "resolved": "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.13.3.tgz"
-            }
-          }
-        },
         "isarray": {
           "version": "1.0.0",
           "from": "isarray@>=1.0.0 <1.1.0",
@@ -1313,7 +1235,7 @@
     },
     "cachedown": {
       "version": "1.0.0",
-      "from": "git://github.com/mvayngrib/cachedown.git#bb59815b7a18a047ad7fc12b6644043d8d6aacf9",
+      "from": "mvayngrib/cachedown#bb59815",
       "resolved": "git://github.com/mvayngrib/cachedown.git#bb59815b7a18a047ad7fc12b6644043d8d6aacf9",
       "dependencies": {
         "abstract-leveldown": {
@@ -1384,6 +1306,23 @@
       "version": "1.1.3",
       "from": "chalk@>=1.1.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/chalk/-/chalk-1.1.3.tgz"
+    },
+    "changes-feed": {
+      "version": "1.1.0",
+      "from": "mvayngrib/changes-feed",
+      "resolved": "git://github.com/mvayngrib/changes-feed.git#dbe4f4ce2f0e9a1ba0a98926ab76134320a7ec3a",
+      "dependencies": {
+        "readable-stream": {
+          "version": "1.0.34",
+          "from": "readable-stream@>=1.0.33-1 <1.1.0-0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz"
+        },
+        "through2": {
+          "version": "0.6.5",
+          "from": "through2@>=0.6.3 <0.7.0",
+          "resolved": "https://registry.npmjs.org/through2/-/through2-0.6.5.tgz"
+        }
+      }
     },
     "cheerio": {
       "version": "0.19.0",
@@ -1600,7 +1539,7 @@
     },
     "create-ecdh": {
       "version": "4.0.0",
-      "from": "git://github.com/mvayngrib/createECDH.git#b5e05e40c0a377bace5a985dc19e97499b1c3956",
+      "from": "mvayngrib/createECDH#b5e05e40",
       "resolved": "git://github.com/mvayngrib/createECDH.git#b5e05e40c0a377bace5a985dc19e97499b1c3956"
     },
     "create-error-class": {
@@ -2479,28 +2418,6 @@
           "from": "isarray@>=1.0.0 <1.1.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
-        "level-change-processor": {
-          "version": "1.0.0",
-          "from": "mvayngrib/level-change-processor#7100404",
-          "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
-          "dependencies": {
-            "isarray": {
-              "version": "0.0.1",
-              "from": "isarray@0.0.1",
-              "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
-            },
-            "readable-stream": {
-              "version": "1.1.14",
-              "from": "readable-stream@>=1.0.33 <2.0.0",
-              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.14.tgz"
-            },
-            "string_decoder": {
-              "version": "0.10.31",
-              "from": "string_decoder@>=0.10.0 <0.11.0",
-              "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-0.10.31.tgz"
-            }
-          }
-        },
         "readable-stream": {
           "version": "2.2.8",
           "from": "readable-stream@>=2.1.4 <3.0.0",
@@ -2638,6 +2555,18 @@
       "version": "1.0.17",
       "from": "formidable@>=1.0.14 <1.1.0",
       "resolved": "https://registry.npmjs.org/formidable/-/formidable-1.0.17.tgz"
+    },
+    "forward-secrecy": {
+      "version": "1.0.2",
+      "from": "tradle/forward-secrecy#dev",
+      "resolved": "git://github.com/tradle/forward-secrecy.git#5ad4c2ee429db4b10599efbd41c650b9debbf7fe",
+      "dependencies": {
+        "tweetnacl": {
+          "version": "0.13.3",
+          "from": "tweetnacl@>=0.13.1 <0.14.0",
+          "resolved": "https://registry.npmjs.org/tweetnacl/-/tweetnacl-0.13.3.tgz"
+        }
+      }
     },
     "fresh": {
       "version": "0.3.0",
@@ -3424,6 +3353,37 @@
       "from": "jsx-ast-utils@>=1.3.4 <2.0.0",
       "resolved": "https://registry.npmjs.org/jsx-ast-utils/-/jsx-ast-utils-1.4.0.tgz"
     },
+    "key-encoder": {
+      "version": "1.1.6",
+      "from": "mvayngrib/key-encoder-js",
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#459338a5f8884e32b760cbffeec18e2766a07e2e",
+      "dependencies": {
+        "asn1.js": {
+          "version": "2.2.1",
+          "from": "asn1.js@>=2.2.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
+          "dependencies": {
+            "bn.js": {
+              "version": "2.2.0",
+              "from": "bn.js@>=2.0.0 <3.0.0",
+              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
+            }
+          }
+        },
+        "elliptic": {
+          "version": "5.2.1",
+          "from": "elliptic@>=5.1.0 <6.0.0",
+          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz",
+          "dependencies": {
+            "bn.js": {
+              "version": "3.3.0",
+              "from": "bn.js@>=3.1.1 <4.0.0",
+              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
+            }
+          }
+        }
+      }
+    },
     "keymirror": {
       "version": "0.1.1",
       "from": "keymirror@0.1.1",
@@ -3487,6 +3447,11 @@
       "version": "0.1.7",
       "from": "level-blobs@>=0.1.7 <0.2.0",
       "resolved": "https://registry.npmjs.org/level-blobs/-/level-blobs-0.1.7.tgz"
+    },
+    "level-change-processor": {
+      "version": "1.0.0",
+      "from": "mvayngrib/level-change-processor#7100404",
+      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
@@ -3940,15 +3905,32 @@
           "from": "isarray@>=1.0.0 <1.1.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
-        "merkle-tree-stream": {
-          "version": "3.0.3",
-          "from": "mvayngrib/merkle-tree-stream#finalize",
-          "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
-        },
         "readable-stream": {
           "version": "2.1.5",
           "from": "readable-stream@>=2.1.0 <3.0.0",
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
+        }
+      }
+    },
+    "merkle-tree-stream": {
+      "version": "3.0.3",
+      "from": "mvayngrib/merkle-tree-stream#finalize",
+      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "dependencies": {
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@~1.0.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "readable-stream": {
+          "version": "2.2.9",
+          "from": "readable-stream@^2.0.5",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.9.tgz"
+        },
+        "string_decoder": {
+          "version": "1.0.0",
+          "from": "string_decoder@~1.0.0",
+          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.0.tgz"
         }
       }
     },
@@ -4160,38 +4142,7 @@
     "nkey-ecdsa": {
       "version": "1.1.0",
       "from": "nkey-ecdsa@latest",
-      "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz",
-      "dependencies": {
-        "asn1.js": {
-          "version": "2.2.1",
-          "from": "asn1.js@>=2.2.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
-          "dependencies": {
-            "bn.js": {
-              "version": "2.2.0",
-              "from": "bn.js@>=2.0.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
-            }
-          }
-        },
-        "elliptic": {
-          "version": "5.2.1",
-          "from": "elliptic@>=5.1.0 <6.0.0",
-          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz",
-          "dependencies": {
-            "bn.js": {
-              "version": "3.3.0",
-              "from": "bn.js@>=3.1.1 <4.0.0",
-              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
-            }
-          }
-        },
-        "key-encoder": {
-          "version": "1.1.6",
-          "from": "mvayngrib/key-encoder-js",
-          "resolved": "git://github.com/mvayngrib/key-encoder-js.git#459338a5f8884e32b760cbffeec18e2766a07e2e"
-        }
-      }
+      "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz"
     },
     "nkey-secp256k1": {
       "version": "1.1.1",
@@ -4205,7 +4156,7 @@
     },
     "node-haste": {
       "version": "2.12.0",
-      "from": "git://github.com/mvayngrib/node-haste.git#766d7e6fd8822addd4a097f0fc00df6923da88c2",
+      "from": "mvayngrib/node-haste#766d7e6",
       "resolved": "git://github.com/mvayngrib/node-haste.git#766d7e6fd8822addd4a097f0fc00df6923da88c2"
     },
     "node-int64": {
@@ -4814,8 +4765,8 @@
     },
     "react-native-blinkid": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/react-native-blinkid.git#d588e440f02fbfb2d6b5af917b265ee5bd730c73",
-      "resolved": "git://github.com/tradle/react-native-blinkid.git#d588e440f02fbfb2d6b5af917b265ee5bd730c73"
+      "from": "tradle/react-native-blinkid#be04a03",
+      "resolved": "git://github.com/tradle/react-native-blinkid.git#be04a03c631fe3e54264d05b7d915a214418c631"
     },
     "react-native-branch": {
       "version": "0.9.7",
@@ -4829,7 +4780,7 @@
     },
     "react-native-camera": {
       "version": "0.3.8",
-      "from": "git://github.com/lwansbrough/react-native-camera.git#fb3b12b4f1a2ed8d1b20cc21a9b52117878b2c35",
+      "from": "lwansbrough/react-native-camera#fb3b12b",
       "resolved": "git://github.com/lwansbrough/react-native-camera.git#fb3b12b4f1a2ed8d1b20cc21a9b52117878b2c35"
     },
     "react-native-code-push": {
@@ -4861,7 +4812,7 @@
     },
     "react-native-datepicker": {
       "version": "1.3.2",
-      "from": "git://github.com/pgmemk/react-native-datepicker.git#ce456393807d8a537fd30d6cb4cf60d77dba7840",
+      "from": "pgmemk/react-native-datepicker#ce456393",
       "resolved": "git://github.com/pgmemk/react-native-datepicker.git#ce456393807d8a537fd30d6cb4cf60d77dba7840"
     },
     "react-native-device-info": {
@@ -4876,7 +4827,7 @@
     },
     "react-native-env": {
       "version": "0.0.5",
-      "from": "git://github.com/tradle/react-native-env.git#19361827c84ad4a3a9d761fdadd8d65f0e814856",
+      "from": "tradle/react-native-env",
       "resolved": "git://github.com/tradle/react-native-env.git#19361827c84ad4a3a9d761fdadd8d65f0e814856"
     },
     "react-native-fabric": {
@@ -4891,7 +4842,7 @@
     },
     "react-native-firebase-analytics": {
       "version": "1.0.6",
-      "from": "git://github.com/mvayngrib/react-native-firebase-analytics.git#889e594337ebfb91b36ce2b77bc22f1f855cd6c9",
+      "from": "mvayngrib/react-native-firebase-analytics#v1",
       "resolved": "git://github.com/mvayngrib/react-native-firebase-analytics.git#889e594337ebfb91b36ce2b77bc22f1f855cd6c9"
     },
     "react-native-flexbox-grid": {
@@ -4901,7 +4852,7 @@
     },
     "react-native-floating-labels": {
       "version": "1.1.1",
-      "from": "git://github.com/mvayngrib/react-native-floating-labels.git#c61704d64317805f0f7379142a2b45836dd04ec3",
+      "from": "mvayngrib/react-native-floating-labels#pointerEvents",
       "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#c61704d64317805f0f7379142a2b45836dd04ec3",
       "dependencies": {
         "lodash": {
@@ -4918,7 +4869,7 @@
     },
     "react-native-gesture-password": {
       "version": "0.1.4",
-      "from": "git://github.com/mvayngrib/react-native-gesture-password.git#6ccf29558bdb75e78db18208a4f2c5eff512fe62",
+      "from": "mvayngrib/react-native-gesture-password#6ccf2955",
       "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#6ccf29558bdb75e78db18208a4f2c5eff512fe62"
     },
     "react-native-gesture-responder": {
@@ -4928,7 +4879,7 @@
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "git://github.com/pgmemk/react-native-gifted-messenger.git#72cd03246809d30ac0a2bcccee572e42201e3436",
+      "from": "pgmemk/react-native-gifted-messenger#72cd032",
       "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#72cd03246809d30ac0a2bcccee572e42201e3436"
     },
     "react-native-gifted-spinner": {
@@ -4938,7 +4889,7 @@
     },
     "react-native-http": {
       "version": "1.0.0",
-      "from": "git://github.com/tradle/react-native-http.git#834492dbc792b1dec8ec8f0a1c9671f640339f01",
+      "from": "tradle/react-native-http#834492d",
       "resolved": "git://github.com/tradle/react-native-http.git#834492dbc792b1dec8ec8f0a1c9671f640339f01"
     },
     "react-native-image-picker": {
@@ -4948,12 +4899,12 @@
     },
     "react-native-keychain": {
       "version": "0.3.1",
-      "from": "git://github.com/mvayngrib/react-native-keychain.git#6afb4e71f2cdca10dbb648421f2a9ab98ff8b30c",
+      "from": "mvayngrib/react-native-keychain#6afb4e7",
       "resolved": "git://github.com/mvayngrib/react-native-keychain.git#6afb4e71f2cdca10dbb648421f2a9ab98ff8b30c"
     },
     "react-native-lazyload": {
       "version": "1.1.0",
-      "from": "git://github.com/mvayngrib/react-native-lazyload.git#2cb6ffeb2f1203768f87d888d1d549d0a3d90333",
+      "from": "mvayngrib/react-native-lazyload",
       "resolved": "git://github.com/mvayngrib/react-native-lazyload.git#2cb6ffeb2f1203768f87d888d1d549d0a3d90333"
     },
     "react-native-level": {
@@ -4988,7 +4939,7 @@
     },
     "react-native-orientation": {
       "version": "1.17.0",
-      "from": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f",
+      "from": "yamill/react-native-orientation#2782917",
       "resolved": "git://github.com/yamill/react-native-orientation.git#278291739e2b7c8ab208fdf404e4b139e24b4a3f"
     },
     "react-native-passcode-status": {
@@ -5003,7 +4954,7 @@
     },
     "react-native-prompt": {
       "version": "0.18.4",
-      "from": "git://github.com/pgmemk/react-native-prompt.git#789e25c45541180553f78567649a79a6a6aa98db",
+      "from": "pgmemk/react-native-prompt#789e25c",
       "resolved": "git://github.com/pgmemk/react-native-prompt.git#789e25c45541180553f78567649a79a6a6aa98db"
     },
     "react-native-push-notification": {
@@ -5050,12 +5001,12 @@
     },
     "react-native-splash-screen": {
       "version": "1.0.9",
-      "from": "git://github.com/crazycodeboy/react-native-splash-screen.git#a59c56a6d8906ec3e94e4cf99ef37e29466a059c",
+      "from": "crazycodeboy/react-native-splash-screen#v1.0.9",
       "resolved": "git://github.com/crazycodeboy/react-native-splash-screen.git#a59c56a6d8906ec3e94e4cf99ef37e29466a059c"
     },
     "react-native-swipeout": {
       "version": "2.0.12",
-      "from": "git://github.com/mvayngrib/react-native-swipeout.git#6939c1091773baafd4128bd772fe75e04db623e3",
+      "from": "mvayngrib/react-native-swipeout#6939c109",
       "resolved": "git://github.com/mvayngrib/react-native-swipeout.git#6939c1091773baafd4128bd772fe75e04db623e3",
       "dependencies": {
         "react-tween-state": {
@@ -5412,7 +5363,7 @@
         },
         "length-prefixed-stream": {
           "version": "1.5.1",
-          "from": "git://github.com/mvayngrib/length-prefixed-stream.git#66ea73e646c85a1bc2547b15f6ed0d3f7e5e53f7",
+          "from": "mvayngrib/length-prefixed-stream",
           "resolved": "git://github.com/mvayngrib/length-prefixed-stream.git#66ea73e646c85a1bc2547b15f6ed0d3f7e5e53f7",
           "dependencies": {
             "varint": {
@@ -6480,9 +6431,9 @@
       "resolved": "https://registry.npmjs.org/write/-/write-0.2.1.tgz"
     },
     "write-file-atomic": {
-      "version": "1.3.1",
+      "version": "1.3.4",
       "from": "write-file-atomic@>=1.1.4 <2.0.0",
-      "resolved": "https://registry.npmjs.org/write-file-atomic/-/write-file-atomic-1.3.1.tgz",
+      "resolved": "https://registry.npmjs.org/write-file-atomic/-/write-file-atomic-1.3.4.tgz",
       "dependencies": {
         "graceful-fs": {
           "version": "4.1.11",
