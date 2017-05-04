@@ -28,7 +28,10 @@ var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
 var TimerMixin = require('react-timer-mixin')
 var isDeepLink
-var scanHelp = require('../html/ScanHelp.html')
+
+const scanHelp = Platform.OS === 'android'
+  ? { uri: 'file:///android_asset/ScanHelp.html' }
+  : require('../html/ScanHelp.html')
 
 try {
   var commitHash = require('../version').commit.slice(0, 7)
@@ -554,41 +557,6 @@ class TimHome extends Component {
     this.showOfficialAccounts()
   }
   showScanHelp() {
-    // this.goto('../html/Aviva_TC.html')
-    // Alert.alert(
-    //   'Import Your Data',
-    //   'To import your data, locate the QR code as instructed by your service provider. Then tap OK and scan it.', [
-    //   {
-    //     text: translate('cancel'),
-    //     onPress: () => Actions.hideModal()
-    //   },
-    //   {
-    //     text: translate('ok'),
-    //     onPress: () => {
-    //       Actions.hideModal()
-    //       this.scanFormsQRCode()
-    //     }
-    //   }
-    // ])
-
-    // Actions.showModal({
-    //   title: 'Import Your Data',
-    //   message: 'To import your data, locate the QR code as instructed by your service provider. Then tap OK and scan it.',
-    //   buttons: [
-    //     {
-    //       text: translate('cancel'),
-    //       onPress: () => Actions.hideModal()
-    //     },
-    //     {
-    //       text: translate('ok'),
-    //       onPress: () => {
-    //         Actions.hideModal()
-    //         this.scanFormsQRCode()
-    //       }
-    //     }
-    //   ]
-    // })
-
     this.props.navigator.push({
       id: 7,
       component: ArticleView,
@@ -601,7 +569,6 @@ class TimHome extends Component {
         actionBarTitle: translate('continue')
       }
     })
-
   }
   acceptTermsAndChat(provider) {
     // this.props.navigator.pop()
