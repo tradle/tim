@@ -203,6 +203,7 @@
     "unknownQRCodeFormat": "Unrecognized QR code format",
     "confirmedMyData": "All imported data can be viewed in {profileTitle}",
     "importData": "Import data",
+    "importYourData": "Import Your Data",
     "digitalWealthPassport": "Digital Wealth Passport",
     "homePage": "Home",
     "sponsoredBy": "Sponsored by",
@@ -244,5 +245,6 @@
     "no": "No",
     "neverMissAMessage": "Never miss a message",
     "receiveNotifications?": "Would you like to receive notifications?",
-    "help": "Help"
+    "help": "Help",
+    "continue": "Continue"
 }

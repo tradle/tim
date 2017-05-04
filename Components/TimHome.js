@@ -555,16 +555,50 @@ class TimHome extends Component {
   }
   showScanHelp() {
     // this.goto('../html/Aviva_TC.html')
+    // Alert.alert(
+    //   'Import Your Data',
+    //   'To import your data, locate the QR code as instructed by your service provider. Then tap OK and scan it.', [
+    //   {
+    //     text: translate('cancel'),
+    //     onPress: () => Actions.hideModal()
+    //   },
+    //   {
+    //     text: translate('ok'),
+    //     onPress: () => {
+    //       Actions.hideModal()
+    //       this.scanFormsQRCode()
+    //     }
+    //   }
+    // ])
+
+    // Actions.showModal({
+    //   title: 'Import Your Data',
+    //   message: 'To import your data, locate the QR code as instructed by your service provider. Then tap OK and scan it.',
+    //   buttons: [
+    //     {
+    //       text: translate('cancel'),
+    //       onPress: () => Actions.hideModal()
+    //     },
+    //     {
+    //       text: translate('ok'),
+    //       onPress: () => {
+    //         Actions.hideModal()
+    //         this.scanFormsQRCode()
+    //       }
+    //     }
+    //   ]
+    // })
+
     this.props.navigator.push({
       id: 7,
       component: ArticleView,
       backButtonTitle: 'Back',
-      title: translate('help'),
+      title: translate('importYourData'),
       passProps: {
         bankStyle: this.props.bankStyle,
         action: this.scanFormsQRCode.bind(this),
         url: scanHelp,
-        actionBarTitle: 'Continue'
+        actionBarTitle: translate('continue')
       }
     })
 
