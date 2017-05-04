@@ -4983,8 +4983,8 @@ var Store = Reflux.createStore({
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
         if (!rDoc) {
-          if (params.isForgetting)
-            checkAndFilter(r, i)
+          // if (params.isForgetting)
+          checkAndFilter(r, i)
           continue
         }
 
