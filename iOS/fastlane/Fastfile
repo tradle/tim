@@ -23,8 +23,46 @@ default_platform :ios
 platform :ios do
   before_all do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
+    sh "../../scripts/placesecrets.sh"
+    sh "../../scripts/ensure_git_clean.sh"
     cocoapods
+  end
 
+  lane :commit_version do
+    commit_version_bump(
+      xcodeproj: ENV['IOS_PROJECT'],
+      message: 'iOS release version bump'
+    )
+  end
+
+  lane :inc_major do
+    sh "../../scripts/version_ios.sh major"
+    commit_version
+  end
+
+  lane :inc_minor do
+    sh "../../scripts/version_ios.sh minor"
+    commit_version
+  end
+
+  lane :inc_patch do
+    sh "../../scripts/version_ios.sh patch"
+    commit_version
+  end
+
+  lane :inc_build do
+    sh "../../scripts/version_ios.sh build"
+    commit_version
+  end
+
+  lane :sign_manual do
+    disable_automatic_code_signing(path: ENV['IOS_PROJECT'])
+    commit_version
+  end
+
+  lane :sign_auto do
+    enable_automatic_code_signing(path: ENV['IOS_PROJECT'])
+    commit_version
   end
 
   desc "Runs all the tests"
@@ -32,45 +70,66 @@ platform :ios do
     scan
   end
 
+  desc "Build the app"
+  lane :dryrun do
+    match
+    gym(
+      export_method: 'app-store'
+    )
+  end
+
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta_testflight do |values|
-    match(
-      git_url: "https://github.com/tradle/provision-ios",
-      type: "development"
+    match
+    gym(
+      export_method: 'app-store'
     )
 
-    gym(
-      scheme: "Tradle-dev Release"
-    ) # Build your app - more options available
-
     pilot
-
-    emails = values[:test_email] ? values[:test_email] : nil # ['mark@tradle.io']
-    groups = values[:test_email] ? values[:test_email] : ['Tradle Team'] # You can define groups on the web and reference them here
-
-    # sh "your_script.sh"
-    # You can also use other beta testing services here (run `fastlane actions`)
   end
 
   desc "Deploy a new version to the App Store"
   lane :release do
-    match(type: "appstore")
+    match(
+      type: 'appstore'
+    )
+
     # snapshot
-    gym(scheme: "Tradle-dev Release") # Build your app - more options available
-    deliver(force: true)
+    gym(
+      export_method: 'app-store'
+    )
+
+    deliverit
     # frameit
+  end
+
+  lane :deliverit do
+    changelog = prompt(
+      text: "What's new in this version? ",
+      multi_line_end_keyword: 'END'
+    )
+
+    deliver(
+      force: true,
+      release_notes: ({
+        'default' => changelog,
+        'en-US' => changelog,
+        'en-UK' => changelog
+      }),
+      skip_metadata: false,
+      skip_screenshots: true,
+      skip_binary_upload: true
+    )
   end
 
   lane :beta_fabric do |values|
     # build your iOS app
     match(
-      git_url: "https://github.com/tradle/provision-ios",
-      type: "development"
+      force_for_new_devices: true
     )
 
     gym(
-      scheme: 'Tradle-dev Release',
       export_method: 'development'
     )
 
@@ -85,27 +144,6 @@ platform :ios do
             notifications: true) # Should this distribution notify your testers via email?
   end
 
-  desc "Increment the app version patch"
-  lane :bumpPatch do
-    increment_version_number(
-      bump_type: "patch"
-    )
-  end
-
-  desc "Increment the app version minor"
-  lane :bumpMinor do
-    increment_version_number(
-      bump_type: "minor"
-    )
-  end
-
-  desc "Increment the app version major"
-  lane :bumpMajor do
-    increment_version_number(
-      bump_type: "major"
-    )
-  end
-
   lane :travis do
     create_keychain(
       name: "MATCH_KEYCHAIN_NAME",
@@ -117,16 +155,14 @@ platform :ios do
     )
 
     match(
-      type: "appstore",
-      app_identifier: "io.tradle.dev.tim",
+      type: 'appstore',
       readonly: true,
       keychain_name: "MATCH_KEYCHAIN_NAME",
       keychain_password: "MATCH_KEYCHAIN_PASSWORD"
     )
 
     gym(
-      scheme: "Tradle-dev Release",
-      workspace: "Tradle.xcworkspace",
+      export_method: 'app-store',
       include_bitcode: true
     )
 
