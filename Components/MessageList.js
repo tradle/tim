@@ -850,7 +850,6 @@ class MessageList extends Component {
   // Form request states taht the provider will be accepting verifications from one of the
   // listed providers
   chooseTrustedProvider(r, model, isMyMessage) {
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       id: 25,
       title: translate('trustedProviders'),
