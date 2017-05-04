@@ -674,22 +674,36 @@ class FormRequestRow extends Component {
     }
   }
   reviewFormsInContext() {
-    this.props.navigator.push({
-      id: 29,
-      title: translate("importData"),
-      backButtonTitle: 'Back',
-      component: RemediationItemsList,
-      rightButtonTitle: 'Done',
-      passProps: {
-        modelName: CONFIRM_PACKAGE_REQUEST,
-        resource: this.props.resource,
-        bankStyle: this.props.bankStyle,
-        reviewed: {},
-        to: this.props.to,
-        list: this.props.resource.items,
-        currency: this.props.currency
-      }
-    })
+    Alert.alert(
+      'You are about to import your data from',
+      utils.getDisplayName(this.props.to),
+      [
+        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+        {text: translate('Import'), onPress: this.submitAllForms.bind(this)},
+      ]
+    )
+    // this.props.navigator.push({
+    //   id: 29,
+    //   title: translate("importData"),
+    //   backButtonTitle: 'Back',
+    //   component: RemediationItemsList,
+    //   rightButtonTitle: 'Done',
+    //   passProps: {
+    //     modelName: CONFIRM_PACKAGE_REQUEST,
+    //     resource: this.props.resource,
+    //     bankStyle: this.props.bankStyle,
+    //     reviewed: {},
+    //     to: this.props.to,
+    //     list: this.props.resource.items,
+    //     currency: this.props.currency
+    //   }
+    // })
+  }
+  submitAllForms() {
+    // utils.onNextTransitionEnd(this.props.navigator, () => {
+      Actions.addAll(this.props.resource, this.props.to, translate('confirmedMyData'))
+    // });
+    // this.props.navigator.pop()
   }
 
   onSetMediaProperty(propName, item) {

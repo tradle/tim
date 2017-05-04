@@ -178,9 +178,11 @@ class MessageList extends Component {
         this.state.sendResource = params.resource
       }
       else if (rtype === FORM_REQUEST  || rtype === FORM_REQUEST ||  rtype === CONFIRM_PACKAGE_REQUEST)
-        this.state.addedItem = params.resource
+        this.setState({addedItem: params.resource})
+        // this.state.addedItem = params.resource
       else if (params.resource._denied || params.resource._approved)
-        this.state.addedItem = params.resource
+        this.setState({addedItem: params.resource})
+        // this.state.addedItem = params.resource
       else
         this.state.addedItem = null
       if (params.action === 'addVerification') {
@@ -333,6 +335,8 @@ class MessageList extends Component {
     if (this.state.hasProducts !== nextState.hasProducts)
       return true
     if (this.props.bankStyle !== nextProps.bankStyle)
+      return true
+    if (this.state.addedItem !== nextState.addedItem)
       return true
     // if (this.state.show !== nextState.show)
     //   return true
