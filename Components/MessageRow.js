@@ -15,12 +15,7 @@ var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin')
 var extend = require('extend')
 var equal = require('deep-equal')
-var formDefaults
-if (__DEV__) {
-  formDefaults = require('../data/formDefaults.json')
-}
-
-var TradleW = require('../img/TradleW.png')
+var formDefaults = require('../data/formDefaults.json')
 var Actions = require('../Actions/Actions');
 import { makeResponsive } from 'react-native-orient'
 var StyleSheet = require('../StyleSheet')
@@ -28,7 +23,6 @@ var reactMixin = require('react-mixin');
 var chatStyles = require('../styles/chatStyles')
 
 const MY_PRODUCT = 'tradle.MyProduct'
-const FORM_ERROR = 'tradle.FormError'
 const FORM = 'tradle.Form'
 const SHARE_CONTEXT = 'tradle.ShareContext'
 const ENUM = 'tradle.Enum'
@@ -40,10 +34,8 @@ const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const INTRODUCTION = 'tradle.Introduction'
 
-var CURRENCY_SYMBOL
 var LINK_COLOR
 
-const DEFAULT_CURRENCY_SYMBOL = '£'
 const DEFAULT_LINK_COLOR = '#2892C6'
 
 import {
@@ -68,7 +60,6 @@ class MessageRow extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
     LINK_COLOR = this.props.bankStyle.LINK_COLOR
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   shouldComponentUpdate(nextProps, nextState) {
     return utils.resized(this.props, nextProps)              ||
@@ -94,7 +85,6 @@ class MessageRow extends Component {
     var ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
     let isConfirmation = resource[constants.TYPE] === CONFIRMATION
-    var isFormError = resource[constants.TYPE] === FORM_ERROR
 
     var photoUrls = [];
     var photoListStyle = {height: 3};
@@ -124,7 +114,7 @@ class MessageRow extends Component {
         if (isConfirmation)
           addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: bankStyle.CONFIRMATION_BG}, styles.myConfCell]
         else {
-          let borderColor = isFormError ? bankStyle.REQUEST_FULFILLED : '#efefef'
+          let borderColor = '#efefef'
           let mstyle = {
             borderColor: borderColor,
             backgroundColor: '#ffffff',
@@ -136,11 +126,8 @@ class MessageRow extends Component {
         }
       }
 
-      if (isFormError)
-        addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? bankStyle.REQUEST_FULFILLED : bankStyle.FORM_ERROR_BORDER}]; //model.style];
-
       let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
-      if (isMyMessage  &&  !isSimpleMessage && !isFormError  &&  !isRemediationCompleted) {
+      if (isMyMessage  &&  !isSimpleMessage  &&  !isRemediationCompleted) {
         let st = isProductApplication
                ? {backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR}
                : {backgroundColor: bankStyle.STRUCTURED_MESSAGE_COLOR}
@@ -346,48 +333,6 @@ class MessageRow extends Component {
       }
     })
   }
-  showEditResource() {
-    let errs = {}
-    let r = this.props.resource.prefill
-    if (Array.isArray(this.props.resource.errors)) {
-      for (let p of this.props.resource.errors)
-        errs[p.name] = p.error
-    }
-    else
-      errs = this.props.resource.errors
-
-    let me = utils.getMe()
-    r.from = {
-      id: utils.getId(me),
-      title: utils.getDisplayName(me)
-    }
-    r.to = this.props.resource.from
-
-    // Prefill for testing and demoing
-    // var isPrefilled = model.id in formDefaults
-    // if (isPrefilled)
-    //   extend(true, resource, formDefaults[model.id])
-    let type = utils.getType(r)
-    let model = utils.getModel(type).value
-    this.props.navigator.push({
-      id: 4,
-      title: translate(model),
-      rightButtonTitle: 'Done',
-      backButtonTitle: 'Back',
-      component: NewResource,
-      // titleTextColor: '#7AAAC3',
-      passProps:  {
-        model: model,
-        resource: r,
-        isPrefilled: true,
-        errs: errs,
-        currency: this.props.currency,
-        bankStyle: this.props.bankStyle,
-        originatingMessage: this.props.resource
-      }
-    });
-
-  }
   onPress(link, text) {
     this.props.navigator.push({
       id: 7,
@@ -520,7 +465,7 @@ class MessageRow extends Component {
                     <View style={{flex: 1}}>
                       <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
                     </View>
-                    <Icon style={{color: this.props.bankStyle.LINK_COLOR, paddingLeft: 10}} size={20} name={'ios-arrow-forward'} />
+                    <Icon style={{color: LINK_COLOR, paddingLeft: 10}} size={20} name={'ios-arrow-forward'} />
                   </View>
                 </View>
 
@@ -605,7 +550,6 @@ class MessageRow extends Component {
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
       return
-    var isFormError = model.id === FORM_ERROR
     var first = true;
     var self = this;
 
@@ -632,7 +576,7 @@ class MessageRow extends Component {
         }
         return;
       }
-      var style = isSimpleMessage || isFormError ? chatStyles.resourceTitle : chatStyles.description; //resourceTitle; //(first) ? chatStyles.resourceTitle : styles.description;
+      var style = isSimpleMessage ? chatStyles.resourceTitle : chatStyles.description; //resourceTitle; //(first) ? chatStyles.resourceTitle : styles.description;
       if (isMyMessage)
         style = [style, {justifyContent: 'flex-end', color: isMyProduct ? '#2892C6' : '#ffffff'}];
 
@@ -652,30 +596,6 @@ class MessageRow extends Component {
           </View>
         );
 
-      }
-      else if (isFormError) {
-        let rtype = (resource.prefill[constants.TYPE]) ? resource.prefill[constants.TYPE] : utils.getId(resource.prefill).split('_')[0]
-        let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-alert-outline'
-        let iconSize = resource.documentCreated ? 30 : 25
-        let instruction = resource.message
-        // if (isMyMessage) {
-        //   instruction = translate('errorNotification')
-        // } else if (resource.message.indexOf('Importing') === 0) {
-        //   // hack for tradle.Remediation
-        //   instruction = resource.message
-        // } else {
-        //   instruction = translate('pleaseCorrect')
-        // }
-
-        vCols.push(
-          <View key={self.getNextKey()} style={{paddingBottom: 3}}>
-            <Text style={[style, {color: '#555555'}]}>{instruction} </Text>
-            <View style={chatStyles.rowContainer}>
-              <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-              <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
-            </View>
-          </View>
-        )
       }
       else if (!model.autoCreate) {
         var val = (properties[v].displayAs)
@@ -733,7 +653,7 @@ class MessageRow extends Component {
               else if (!isMyMessage  &&  !resource.documentCreated)
                 onPressCall = self.createNewResource.bind(self, msgModel, isMyMessage);
 
-              color = isMyMessage  &&  !isFormError
+              color = isMyMessage
                     ? {color: self.props.bankStyle.MY_MESSAGE_LINK_COLOR}
                     : {color: '#2892C6'}
               if (isMyMessage)
@@ -774,7 +694,7 @@ class MessageRow extends Component {
           vCols.push(<TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}  key={self.getNextKey()}>
                       <Text style={style}>
                         {pVal.substring(0, linkIdx)}
-                        <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{text || link} </Text>
+                        <Text style={[style, {color: LINK_COLOR}]}>{text || link} </Text>
                         {pVal.substring(endLink + 1)}
                       </Text>
                      </TouchableHighlight>
@@ -801,7 +721,7 @@ class MessageRow extends Component {
       first = false;
 
     });
-    if (!isSimpleMessage  &&  !isFormError  &&  !isMyProduct  &&  !isConfirmation)  {
+    if (!isSimpleMessage  &&  !isMyProduct  &&  !isConfirmation)  {
       let title = translate(model)
       // if (title.length > 30)
       //   title = title.substring(0, 27) + '...'
@@ -817,14 +737,6 @@ class MessageRow extends Component {
       return null
     if (onPressCall)
       return {onPressCall: onPressCall}
-    if (isFormError) {
-      if (resource.documentCreated)
-        return null
-      if (utils.getId(resource.from) === utils.getId(utils.getMe()))
-        return null
-      else
-        return {onPressCall: this.showEditResource.bind(this)}
-    }
     if (isSimpleMessage)
       return isConfirmation ? {isConfirmation: true} : null
     return {onPressCall: this.props.onSelect.bind(this, resource, null)}

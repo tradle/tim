@@ -41,6 +41,7 @@
     "temporarilyLocked": "For your protection, this application has been temporarily locked for {1}",
 
     "pleaseRestartTIM": "Please restart TiM",
+    "ok": "OK",
     "cancel": "Cancel",
     "details": "Details",
     "enterYourName": "Enter your name",
@@ -208,6 +209,7 @@
     "unknownQRCodeFormat": "Unrecognized QR code format",
     "confirmedMyData": "All imported data can be viewed in {profileTitle}",
     "importData": "Import data",
+    "importYourData": "Import Your Data",
     "digitalWealthPassport": "Digital Wealth Passport",
     "homePage": "Home",
     "sponsoredBy": "Sponsored by",
@@ -224,7 +226,7 @@
     "holdPhoneToPassport": "Hold the back of your phone against the front cover of your passport",
     "scanningFailedTryAgain": "Scanning was unsuccessful. Could you please try again?",
     "documentNotScanning": "Oops, something went wrong!",
-    "retryScanning": "Was that a {1}? I couldn't tell. Please try again?\n\nFor best results avoid glare and be sure to position the document within the frame shown.",
+    "retryScanning": "Was that a {1}? I couldn't tell. Please try again?\n\nFor best results, use landscape mode, avoid glare, and be sure to position the document within the frame shown.",
     "centerPassport": "Centre passport photo page in frame",
     "centerLicence": "Centre licence in frame",
     "centerID": "Centre ID in frame",
@@ -252,5 +254,11 @@
     "unsupportedFormat": "Unsupported format",
     "pleaseUploadImage": "Please upload an image file",
     "unableToProcessFile": "Unable to process file",
-    "testProviders": "Test Providers"
+    "testProviders": "Test Providers",
+    "yes": "Yes",
+    "no": "No",
+    "neverMissAMessage": "Never miss a message",
+    "receiveNotifications?": "Would you like to receive notifications?",
+    "help": "Help",
+    "continue": "Continue"
 }

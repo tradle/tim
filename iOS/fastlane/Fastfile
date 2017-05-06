@@ -1,0 +1,164 @@
+# Customise this file, documentation can be found here:
+# https://github.com/fastlane/fastlane/tree/master/fastlane/docs
+# All available actions: https://docs.fastlane.tools/actions
+# can also be listed using the `fastlane actions` command
+
+# Change the syntax highlighting to Ruby
+# All lines starting with a # are ignored when running `fastlane`
+
+# If you want to automatically update fastlane if a new version is available:
+# update_fastlane
+
+# This is the minimum version number required.
+# Update this, if you use features of a newer version
+fastlane_version "2.27.0"
+
+# This value helps us track success metrics for Fastfiles
+# we automatically generate. Feel free to remove this line
+# once you get things running smoothly!
+generated_fastfile_id "056cccb7-a2ca-4533-a405-1e643adc7c31"
+
+default_platform :ios
+
+platform :ios do
+  before_all do
+    # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
+    cocoapods
+
+  end
+
+  desc "Runs all the tests"
+  lane :test do
+    scan
+  end
+
+  desc "Submit a new Beta Build to Apple TestFlight"
+  desc "This will also make sure the profile is up to date"
+  lane :beta_testflight do |values|
+    match(
+      git_url: "https://github.com/tradle/provision-ios",
+      type: "development"
+    )
+
+    gym(
+      scheme: "Tradle-dev Release"
+    ) # Build your app - more options available
+
+    pilot
+
+    emails = values[:test_email] ? values[:test_email] : nil # ['mark@tradle.io']
+    groups = values[:test_email] ? values[:test_email] : ['Tradle Team'] # You can define groups on the web and reference them here
+
+    # sh "your_script.sh"
+    # You can also use other beta testing services here (run `fastlane actions`)
+  end
+
+  desc "Deploy a new version to the App Store"
+  lane :release do
+    match(type: "appstore")
+    # snapshot
+    gym(scheme: "Tradle-dev Release") # Build your app - more options available
+    deliver(force: true)
+    # frameit
+  end
+
+  lane :beta_fabric do |values|
+    # build your iOS app
+    match(
+      git_url: "https://github.com/tradle/provision-ios",
+      type: "development"
+    )
+
+    gym(
+      scheme: 'Tradle-dev Release',
+      export_method: 'development'
+    )
+
+    emails = values[:test_email] ? values[:test_email] : ['mark@tradle.io'] # You can list more emails here
+    groups = values[:test_email] ? nil : nil # You can define groups on the web and reference them here
+
+    crashlytics(api_token: ENV['CRASHLYTICS_API_TOKEN'],
+             build_secret: ENV['CRASHLYTICS_BUILD_SECRET'],
+                   emails: emails,
+                   groups: groups,
+                    notes: 'Distributed with fastlane', # Check out the changelog_from_git_commits action
+            notifications: true) # Should this distribution notify your testers via email?
+  end
+
+  desc "Increment the app version patch"
+  lane :bumpPatch do
+    increment_version_number(
+      bump_type: "patch"
+    )
+  end
+
+  desc "Increment the app version minor"
+  lane :bumpMinor do
+    increment_version_number(
+      bump_type: "minor"
+    )
+  end
+
+  desc "Increment the app version major"
+  lane :bumpMajor do
+    increment_version_number(
+      bump_type: "major"
+    )
+  end
+
+  lane :travis do
+    create_keychain(
+      name: "MATCH_KEYCHAIN_NAME",
+      password: "MATCH_KEYCHAIN_PASSWORD",
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      add_to_search_list: true
+    )
+
+    match(
+      type: "appstore",
+      app_identifier: "io.tradle.dev.tim",
+      readonly: true,
+      keychain_name: "MATCH_KEYCHAIN_NAME",
+      keychain_password: "MATCH_KEYCHAIN_PASSWORD"
+    )
+
+    gym(
+      scheme: "Tradle-dev Release",
+      workspace: "Tradle.xcworkspace",
+      include_bitcode: true
+    )
+
+    deliver(force:true)
+  end
+
+  desc "Upload to App Store and submit for review"
+  lane :upload do
+    deliver
+  end
+
+  # You can define as many lanes as you want
+
+  after_all do |lane|
+    # This block is called, only if the executed lane was successful
+
+    # slack(
+    #   message: "Successfully deployed new App Update."
+    # )
+  end
+
+  error do |lane, exception|
+    # slack(
+    #   message: exception.message,
+    #   success: false
+    # )
+  end
+end
+
+
+# More information about multiple platforms in fastlane: https://github.com/fastlane/fastlane/blob/master/fastlane/docs/Platforms.md
+# All available actions: https://docs.fastlane.tools/actions
+
+# fastlane reports which actions are used
+# No personal data is recorded. Learn more at https://github.com/fastlane/enhancer

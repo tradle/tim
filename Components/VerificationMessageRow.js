@@ -117,10 +117,12 @@ class VerificationMessageRow extends Component {
     let state, confidence
     if (resource.sources) {
       resource.sources.forEach((r) => {
-        if (r.method  &&  r.method.rawData)
-          state = <Text style={{color: r.method.rawData.result === 'clear' ? 'green' : 'red', fontSize: 20}}>{r.method.rawData.result}</Text>
-        else if (r.method.confidence)
-          confidence = <Text style={{color: r.method.confidence > 0.67 ? 'green' : 'red', fontSize: 20, paddingLeft: 5}}>{translate('Confidence') + ': ' + r.method.confidence}</Text>
+        if (r.method) {
+          if  (r.method.rawData)
+            state = <Text style={{color: r.method.rawData.result === 'clear' ? 'green' : 'red', fontSize: 20}}>{r.method.rawData.result}</Text>
+          else if (r.method.confidence)
+            confidence = <Text style={{color: r.method.confidence > 0.67 ? 'green' : 'red', fontSize: 20, paddingLeft: 5}}>{translate('Confidence') + ': ' + r.method.confidence}</Text>
+        }
       })
       if (state || confidence)
         state = <View style={{alignItems: 'flex-end', paddingHorizontal: 10}}>

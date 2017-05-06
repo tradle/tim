@@ -20,13 +20,19 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
-var debug = require('debug')('Tradle-Home')
+var debug = require('debug')('tradle:app:Home')
 var PasswordCheck = require('./PasswordCheck')
+var ArticleView = require('./ArticleView');
 var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var QRCodeScanner = require('./QRCodeScanner')
 var TimerMixin = require('react-timer-mixin')
+var isDeepLink
+
+const scanHelp = Platform.OS === 'android'
+  ? { uri: 'file:///android_asset/ScanHelp.html' }
+  : require('../html/ScanHelp.html')
 
 try {
   var commitHash = require('../version.json').commit.slice(0, 7)
@@ -43,6 +49,7 @@ import {
 } from '../utils/localAuth'
 
 import { SyncStatus } from 'react-native-code-push'
+import Linking from '../utils/linking'
 import AutomaticUpdates from '../utils/automaticUpdates'
 import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
@@ -66,7 +73,6 @@ import {
   Image,
   NetInfo,
   ScrollView,
-  Linking,
   Modal,
   Alert,
   Platform
@@ -121,13 +127,6 @@ class TimHome extends Component {
 
     Actions.start();
   }
-  // componentDidMount() {
-    // AutomaticUpdates.on()
-    // LinkingIOS.addEventListener('url', this._handleOpenURL);
-    // var url = LinkingIOS.popInitialURL();
-    // if (url)
-    //   this._handleOpenURL({url});
-  // }
   _handleConnectivityChange(isConnected) {
     this.props.navigator.isConnected = isConnected
   }
@@ -151,6 +150,8 @@ class TimHome extends Component {
       debug('failed to check connectivity', err)
     }
   }
+
+
   async componentDidMount() {
     this._checkConnectivity()
 
@@ -164,14 +165,27 @@ class TimHome extends Component {
         url = ENV.initWithDeepLink
       }
 
-      if (url) {
+      if (url)
         this._handleOpenURL({url})
-      }
+      if (ENV.landingPage)
+        this.show()
     } catch (err) {
       debug('failed to open deep link', err)
     }
   }
 
+  show() {
+    if (!utils.getMe()) {
+      if (ENV.autoRegister)
+        this.showFirstPage()
+      else
+        this.setState({isModalOpen: true})
+      // this.register(() => this.showFirstPage())
+      return
+    }
+
+    this.signInAndContinue()
+  }
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.submitLogButtonText !== nextState.submitLogButtonText    ||
         this.state.busyWith !== nextState.busyWith                             ||
@@ -181,8 +195,10 @@ class TimHome extends Component {
         this.state.hasMe !== nextState.hasMe
   }
 
-  async _handleOpenURL({url}) {
+  async _handleOpenURL({ url }) {
     try {
+      if (ENV.initWithDeepLink !== url)
+        this.isDeepLink = true
       await this._unsafeHandleOpenURL({ url })
     } catch (err) {
       Alert.alert(
@@ -199,11 +215,19 @@ class TimHome extends Component {
     let pathname = URL.pathname || URL.hostname
     if (!pathname) throw new Error('failed to parse deep link')
 
-    let query = URL.query
-
-    let qs = require('querystring').parse(query)
     // strip leading slashes
     pathname = pathname.replace(/^\//, '')
+
+    let query = URL.query
+    if (!query) {
+      if (pathname === 'scan') {
+        this.setState({firstPage: pathname})
+        this.show(pathname)
+      }
+      return
+    }
+
+    let qs = require('querystring').parse(query)
 
     let state = {firstPage: pathname}
     extend(state, qs)
@@ -250,7 +274,8 @@ class TimHome extends Component {
   async onStart(params) {
     // prior to registration
     // force install updates before first interaction
-    if (!utils.getMe()) {
+    const me = utils.getMe()
+    if (!(me && me.ensuredUpToDateOnFirstRun)) {
       //   UP_TO_DATE: 0, // The running app is up-to-date
       //   UPDATE_INSTALLED: 1, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
       //   UPDATE_IGNORED: 2, // The app had an optional update and the end-user chose to ignore it
@@ -279,6 +304,10 @@ class TimHome extends Component {
         this.setState({ downloadingUpdate: false, downloadUpdateProgress: null })
       }
 
+      if (me) {
+        Actions.updateMe({ ensuredUpToDateOnFirstRun: true })
+      }
+
       const hasUpdate = await AutomaticUpdates.hasUpdate()
       if (hasUpdate) return AutomaticUpdates.install()
     }
@@ -293,16 +322,10 @@ class TimHome extends Component {
     // utils.setModels(params.models);
     this.setState({isLoading: false});
     clearTimeout(this.uhOhTimeout)
-    if (!utils.getMe()) {
-      if (ENV.autoRegister)
-        this.showFirstPage()
-      else
-        this.setState({isModalOpen: true})
-      // this.register(() => this.showFirstPage())
-      return
-    }
 
-    this.signInAndContinue()
+    // Need to laod data for landing page first
+    if (!ENV.landingPage)
+      this.show()
   }
 
   async signInAndContinue() {
@@ -326,10 +349,9 @@ class TimHome extends Component {
       })
     }
 
-    if (afterAuthRoute.component.displayName !== TimHome.displayName) {
+    if (afterAuthRoute.component.displayName !== TimHome.displayName  &&  !this.isDeepLink) {
       return this.props.navigator.popToRoute(afterAuthRoute)
     }
-
     return this.showFirstPage()
   }
 
@@ -358,6 +380,9 @@ class TimHome extends Component {
       //   provider: params.provider,
       //   action: 'chat'
       // })
+      return
+    case 'getForms':
+      this.showChat(params)
       return
     case 'noAccessToServer':
       Alert.alert(translate('noAccessToServer'))
@@ -510,6 +535,11 @@ class TimHome extends Component {
     // })
   }
   showFirstPage(doReplace) {
+    let firstPage = this.state.firstPage
+    if (this.isDeepLink)
+      this.state.firstPage = ENV.initWithDeepLink
+    this.isDeepLink = false
+
     var nav = this.props.navigator
     if (!utils.isWeb()) {
       nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
@@ -526,8 +556,8 @@ class TimHome extends Component {
       this.showContacts(doReplace)
       return
     }
-    if (this.state.firstPage) {
-      switch (this.state.firstPage) {
+    if (firstPage) {
+      switch (firstPage) {
       case 'chat':
         Actions.getProvider({
           provider: this.state.permalink,
@@ -540,9 +570,10 @@ class TimHome extends Component {
       case 'profile':
         this.showHomePage(doReplace)
         return
-      case 'officialAccounts':
-        this.showOfficialAccounts()
-        break
+      case 'scan':
+        this.showScanHelp()
+          // this.scanFormsQRCode()
+        return
       default:
         if (ENV.homePage)
           this.showHomePage(doReplace)
@@ -559,6 +590,20 @@ class TimHome extends Component {
     }
 
     this.showOfficialAccounts()
+  }
+  showScanHelp() {
+    this.props.navigator.push({
+      id: 7,
+      component: ArticleView,
+      backButtonTitle: 'Back',
+      title: translate('importYourData'),
+      passProps: {
+        bankStyle: this.props.bankStyle,
+        action: this.scanFormsQRCode.bind(this),
+        url: scanHelp,
+        actionBarTitle: translate('continue')
+      }
+    })
   }
   acceptTermsAndChat(provider) {
     // this.props.navigator.pop()

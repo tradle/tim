@@ -15,6 +15,7 @@ var Dir = Camera && Camera.Type
 
 
 class QRCodeScanner extends Component {
+  static displayName = 'QRCodeScanner';
   constructor(props) {
     super(props)
     this.state = {

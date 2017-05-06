@@ -126,7 +126,8 @@ class MessageView extends Component {
   }
 
   renderActionSheet() {
-    let m = utils.getModel(this.props.resource[TYPE]).value
+    var resource = this.state.resource;
+    let m = utils.getModel(resource[TYPE]).value
     let bl = utils.getPropertiesWithAnnotation(m.properties, 'items')
     if (utils.isEmpty(bl))
       return
@@ -393,13 +394,18 @@ class MessageView extends Component {
     let footer = actionSheet && this.renderFooter()
     let width = utils.getContentWidth()
     let contentSeparator = utils.getContentSeparator(bankStyle)
+    let bigPhoto
+    if (mainPhoto)
+      bigPhoto = <View style={styles.photoBG}>
+                  <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
+                </View>
+
+
     return (
       <PageView style={[platformStyles.container, {height: utils.dimensions().height, alignItems: 'center'}]} separator={contentSeparator}>
       <ScrollView  ref='this' style={{width: width}} keyboardShouldPersistTaps={true}>
         {dateView}
-        <View style={styles.photoBG}>
-          <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
-        </View>
+        {bigPhoto}
         {actionPanel}
       </ScrollView>
         {title}

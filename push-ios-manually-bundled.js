@@ -4,7 +4,7 @@
 
 const proc = require('child_process')
 const fs = require('fs')
-const build = fs.readFileSync('./iOS/Tradle/Dev.plist', { encoding: 'utf8' })
+const build = fs.readFileSync('./iOS/Tradle/Info.plist', { encoding: 'utf8' })
 const match = build.match(/CFBundleVersion<\/key>\n\s+<string>([\d\.]+)/)
 const version = match && match[1].split('.').slice(0, 3).join('.')
 if (!version) throw new Error('unable to parse version from Dev.plist')

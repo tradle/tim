@@ -9,45 +9,66 @@ import {
 import Push from 'react-native-push-notification'
 const debug = require('debug')('tradle:push')
 import extend from 'xtend/mutable'
+import once from 'once'
 import utils from './utils'
 import ENV from './env'
+
+const { translate } = utils
 const constants = require('@tradle/engine').constants
 const TYPE = constants.TYPE
 const Actions = require('../Actions/Actions')
+const DENIED_ERROR = new Error('denied')
+// const PushModal = require('../Components/PushModal')
 const pushServerURL = ENV.pushServerURL
 const isMobile = () => utils.isIOS() || utils.isAndroid()
 
-let initialized
-let preinitialized
-const initialize = new Promise(resolve => initialized = resolve)
-const preinitialize = new Promise(resolve => preinitialized = resolve)
+let onInitialized
+let onRegistered
+const whenInitialized = new Promise(resolve => onInitialized = resolve)
+const whenRegistered = new Promise(resolve => onRegistered = resolve)
 
 // only allow this to run once
-exports.init = utils.promiseThunky(opts => {
-  preinitialized()
-  return createPusher(opts).then(initialized)
+exports.init = once(function (opts) {
+  return onInitialized(createPusher(opts))
 })
 
-exports.subscribe = function (publisher) {
-  return initialize.then(pusher => pusher.subscribe && pusher.subscribe(publisher))
+exports.register = async function () {
+  const pusher = await whenInitialized
+  return pusher.register()
 }
 
-exports.resetBadgeNumber = function () {
-  return initialize.then(pusher => pusher.resetBadgeNumber && pusher.resetBadgeNumber())
+exports.subscribe = async function (publisher) {
+  const pusher = await whenInitialized
+  await whenRegistered
+  return pusher.subscribe(publisher)
+}
+
+exports.resetBadgeNumber = async function () {
+  const pusher = await whenInitialized
+  await whenRegistered
+  return pusher.resetBadgeNumber()
+}
+
+function waitsFor (prerequisite, fn) {
+  return async function runAfterPrerequisite (...args) {
+    await prerequisite
+    return fn(...args)
+  }
 }
 
 function createPusher (opts) {
-  if (__DEV__ || utils.isSimulator() || !isMobile() || !ENV.registerForPushNotifications) {
-    return Promise.resolve({})
+  // if (__DEV__ || utils.isSimulator() || !isMobile() || !ENV.registerForPushNotifications) {
+  if (!isMobile() || !ENV.registerForPushNotifications) {
+    return getAPIPlaceholder(opts)
   }
 
-  const me = opts.me
-  const node = opts.node
-  const Store = opts.Store
-  const identity = node.identity
+  const { me, node, Store } = opts
+  const { identity } = node
 
   let registered = me.registeredForPushNotifications
-  let registrationInProgress
+  if (registered) onRegistered()
+
+  let regPromise
   let unread = me.unreadPushNotifications || 0
   let resolveWithToken
   let gotToken = new Promise(resolve => resolveWithToken = resolve)
@@ -80,30 +101,50 @@ function createPusher (opts) {
     requestPermissions: false
   })
 
-  return register()
-    .then(() => {
-      // API
-      return { subscribe, resetBadgeNumber }
-    })
+  return {
+    isRegistered,
+    register: waitsFor(whenInitialized, register),
+    subscribe: waitsFor(whenRegistered, subscribe),
+    resetBadgeNumber: waitsFor(whenRegistered, resetBadgeNumber)
+  }
+
+  function isRegistered () {
+    return registered
+  }
 
   function register () {
-    if (registered) return Promise.resolve()
-    if (registrationInProgress) return registrationInProgress
+    if (isRegistered()) return Promise.resolve()
+    if (me.pushNotificationsAllowed === false) return Promise.resolve()
+    if (!regPromise) {
+      regPromise = makeRegistrationAttempt()
+    }
 
-    return registrationInProgress = getToken()
-      .then(token => {
-        return postWithRetry('/subscriber', {
-          [TYPE]: 'tradle.PNSRegistration',
-          identity: identity,
-          token: token,
-          // apple push notifications service
-          protocol: ENV.isIOS() ? 'apns' : 'gcm'
-        })
-      })
-      .then(() => {
-        registered = true
-        Actions.updateMe({ registeredForPushNotifications: true })
-      })
+    return regPromise
+  }
+
+  async function makeRegistrationAttempt () {
+    if (!me.pushNotificationsAllowed) {
+      const pushNotificationsAllowed = await preAskUser()
+      if (!pushNotificationsAllowed) {
+        Actions.updateMe({ pushNotificationsAllowed })
+        return
+      }
+    }
+
+    const token = await getToken()
+    Actions.updateMe({ pushNotificationsAllowed: true })
+
+    await postWithRetry('/subscriber', {
+      [TYPE]: 'tradle.PNSRegistration',
+      identity: identity,
+      token: token,
+      // apple push notifications service
+      protocol: ENV.isIOS() ? 'apns' : 'gcm'
+    })
+
+    registered = true
+    Actions.updateMe({ registeredForPushNotifications: true })
+    onRegistered()
   }
 
   function getToken () {
@@ -135,7 +176,11 @@ function createPusher (opts) {
    * @return {[type]}      [description]
    */
   function postWithRetry (path, body) {
-    if (path[0] === '/') path = path.slice(1)
+    // if (__DEV__) return
+
+    while (path[0] === '/') {
+      path = path.slice(1)
+    }
 
     return node.sign({
       object: body
@@ -266,4 +311,43 @@ function createPusher (opts) {
       )
     })
   }
+}
+
+function getAPIPlaceholder ({ me }) {
+  const unbreakable = Promise.resolve()
+  const willResolve = () => unbreakable
+
+  return {
+    isRegistered: () => me.registeredForPushNotifications,
+    register: willResolve,
+    subscribe: willResolve,
+    resetBadgeNumber: willResolve
+  }
+}
+
+async function preAskUser () {
+  const askUser = new Promise((resolve, reject) => {
+    Actions.showModal({
+      title: translate('neverMissAMessage'),
+      message: translate('receiveNotifications?'),
+      buttons: [
+        {
+          text: translate('no'),
+          onPress: () => resolve(false)
+        },
+        {
+          text: translate('yes'),
+          onPress: () => resolve(true)
+        }
+      ]
+    })
+  })
+
+
+  const result = await askUser
+  Actions.hideModal()
+  // give modal time to hide
+  // https://github.com/facebook/react-native/issues/10471
+  await utils.promiseDelay(800)
+  return result
 }

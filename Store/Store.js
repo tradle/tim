@@ -15,6 +15,7 @@ import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createPoliteQueue from '../utils/polite-queue.js'
+import createSemaphore from 'psem'
 const co = require('bluebird').coroutine
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin');
@@ -193,6 +194,7 @@ var TIM_PATH_PREFIX = 'me'
 // If app restarts in less then 10 minutes keep it authenticated
 const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
 const ON_RECEIVED_PROGRESS = 0.66
+const NUM_MSGS_BEFORE_REG_FOR_PUSH = __DEV__ ? 3 : 10
 
 var models = {};
 var list = {};
@@ -330,6 +332,16 @@ var Store = Reflux.createStore({
     this._enginePromise = new Promise(resolve => {
       this._resolveWithEngine = resolve
     })
+
+    this._mePromise = new Promise(resolve => {
+      this._resolveWithMe = resolve
+    })
+
+    this._pushSemaphore = createSemaphore().go()
+
+    if (ENV.registerForPushNotifications) {
+      this.setupPushNotifications()
+    }
 
     getAnalyticsUserId({ promiseEngine: this._enginePromise })
       .then(Analytics.setUserId)
@@ -547,6 +559,7 @@ var Store = Reflux.createStore({
       }
     }
     utils.setMe(me)
+    this._resolveWithMe(me)
   },
   onUpdateMe(params) {
     let r = {}
@@ -1124,7 +1137,7 @@ var Store = Reflux.createStore({
     let maxAttempts = params.maxAttempts
     debug('fetching provider info from', serverUrls)
     return Q.all(serverUrls.map(url => {
-      return this.getServiceProviders({url: url, retry: retry, id: id, newServer: newServer})
+      return this.getServiceProviders({url: url, hash: params.hash, retry: retry, id: id, newServer: newServer})
         .then(results => {
           // var httpClient = driverInfo.httpClient
           var wsClients = driverInfo.wsClients
@@ -1763,6 +1776,7 @@ var Store = Reflux.createStore({
     let url = params.url
     let retry = params.retry
     let id = params.id
+    let hash = params.hash
     let newServer = params.newServer
     var self = this
     // return Q.race([
@@ -1827,6 +1841,10 @@ var Store = Reflux.createStore({
       json.providers.forEach(sp => {
         if (id)  {
           if (sp.id !== id)
+            return
+        }
+        if (hash) {
+          if (sp.bot[ROOT_HASH] !== hash)
             return
         }
         else if (providerIds  &&  providerIds.indexOf(sp.id) === -1)
@@ -3135,6 +3153,15 @@ var Store = Reflux.createStore({
   },
 
   async onAddAll(resource, to, message) {
+    this._pushSemaphore.stop()
+    try {
+      await this._onAddAll(...arguments)
+    } finally {
+      this._pushSemaphore.go()
+    }
+  },
+
+  async _onAddAll(resource, to, message) {
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
     r.documentCreated = true
@@ -3161,9 +3188,12 @@ var Store = Reflux.createStore({
       let itemType = utils.getType(item)
       let itemModel = this.getModel(itemType)
       let displayName = ''
-      if (itemModel) displayName += itemModel.title + ': '
+      if (itemModel) displayName += itemModel.title
 
-      displayName += item.title || utils.getDisplayName(item)
+      let resourceDisplayName = item.title || utils.getDisplayName(item)
+      if (resourceDisplayName) {
+        displayName += ': ' + resourceDisplayName
+      }
 
       if (i > 0) {
         let last = messages.length - 1
@@ -3287,6 +3317,13 @@ var Store = Reflux.createStore({
     }
     if (isGuestSessionProof || isBecomingEmployee) {
       checkPublish = this.getDriver(me)
+      .then(() => {
+        let provider = params.provider
+        if (provider) {
+          return this.addSettings(provider)
+        }
+          // return this.getInfo({serverUrls: [params.serverUrl]})
+      })
       .then(function () {
         // if (publishRequestSent)
           return meDriver.identityPublishStatus()
@@ -3457,13 +3494,19 @@ var Store = Reflux.createStore({
           // if (result &&  result.length) {
           //   result.forEach((fr) => {
             let fr = this._getItem(utils.getId(params.disableFormRequest))
-
-            if (!fr.documentCreated  &&  fr.form === resource[TYPE]) {
-              fr.documentCreated = true
-              let key = utils.getId(fr)
-              self._setItem(key, fr)
-              self.dbPut(key, fr)
-              self.trigger({action: 'addItem', resource: fr})
+            if (!fr.documentCreated) {
+              let addDocumentCreated
+              if (fr[TYPE] === FORM_REQUEST)
+                addDocumentCreated = fr.form === resource[TYPE]
+              else if (fr[TYPE] === FORM_ERROR)
+                addDocumentCreated = fr.prefill[TYPE] === resource[TYPE]
+              if (addDocumentCreated) {
+                fr.documentCreated = true
+                let key = utils.getId(fr)
+                self._setItem(key, fr)
+                self.dbPut(key, fr)
+                self.trigger({action: 'addItem', resource: fr})
+              }
             }
           //   })
           // }
@@ -4979,8 +5022,8 @@ var Store = Reflux.createStore({
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
         if (!rDoc) {
-          if (params.isForgetting)
-            checkAndFilter(r, i)
+          // if (params.isForgetting)
+          checkAndFilter(r, i)
           continue
         }
 
@@ -5844,7 +5887,7 @@ var Store = Reflux.createStore({
     }
 
     if (value[TYPE] === SETTINGS)
-      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : -1)
+      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : -1, true)
 
     let meId = utils.getId(me)
     let self = this
@@ -6076,7 +6119,7 @@ var Store = Reflux.createStore({
       err = err;
     });
   },
-  addSettings: co(function* addSettings (value, maxAttempts) {
+  addSettings: co(function* addSettings (value, maxAttempts, getAllProviders) {
     var self = this
     var v = value.url
     if (v.charAt(v.length - 1) === '/')
@@ -6101,6 +6144,10 @@ var Store = Reflux.createStore({
           oneProvider = true
       }
     }
+    else if (getAllProviders  &&  settings.urlToId[value.url]) {
+      delete settings.urlToId[value.url]
+      self._setItem(key, settings)
+    }
     let gotInfo
     if (maxAttempts !== -1) {
       let attempts = 0
@@ -6108,7 +6155,7 @@ var Store = Reflux.createStore({
   //     let maxWait = 60000
       while (true) {
         try {
-          yield this.getInfo({serverUrls: [v], retry: false, id: value.id ? value.id : null, newServer: true, maxAttempts: maxAttempts})
+          yield this.getInfo({serverUrls: [v], retry: false, id: value.id, hash: value.hash, newServer: true, maxAttempts: maxAttempts})
           gotInfo = true
           break;
         }
@@ -6124,7 +6171,7 @@ var Store = Reflux.createStore({
     }
     if (!gotInfo)
       try {
-        yield this.getInfo({serverUrls: [v], retry: true, id: value.id ? value.id : null, newServer: true})
+        yield this.getInfo({serverUrls: [v], retry: true, hash: value.hash, id: value.id, newServer: true})
       } catch (err) {
         self.trigger({action: 'addItem', error: err.message, resource: value})
       }
@@ -6132,9 +6179,39 @@ var Store = Reflux.createStore({
       return
     console.log('addSettings: ' + settings)
     if (settings) {
-      if (settings.urls.indexOf(v) === -1)
+      let addHash
+      if (settings.urls.indexOf(v) === -1) {
         self._mergeItem(key, { urls: [...settings.urls, v] })
-      // Save the fact that only some providers are needed from this server
+        addHash = true
+      }
+      else if (value.hash) {
+        addHash = true
+
+        if (settings.hashToUrl) {
+          let hasAllProvidersFromThisServer = true
+          for (let h in settings.hashToUrl) {
+            let provider = self._getItem(PROFILE + '_' + h)
+            let org = self._getItem(provider.organization)
+            if (org.url === v)
+              hasAllProvidersFromThisServer = false
+          }
+          addHash = !hasAllProvidersFromThisServer
+        }
+      }
+      // Case when scanning QR code for not yet added server
+      if (value.hash  &&  addHash) {
+        let sp = SERVICE_PROVIDERS.filter((sp) => sp.permalink === value.hash)
+        value.id = sp[0].id
+
+        // var hashToUrl = settings.hashToUrl
+        // if (!hashToUrl[value.hash])
+        //   hashToUrl[value.hash] = v
+
+        // self._mergeItem(key, { hashToUrl: hashToUrl })
+        // value = self._getItem(key)
+      }
+      // else {
+        // Save the fact that only some providers are needed from this server
       if (value.id) {
         var urlToId = settings.urlToId
         if (!urlToId[v])
@@ -6146,13 +6223,15 @@ var Store = Reflux.createStore({
 
         self._mergeItem(key, { urlToId: urlToId })
       }
+      // }
     }
     else {
       value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
       self._setItem(key, value)
     }
+    value = self._getItem(key)
     self.trigger({action: 'addItem', resource: value})
-    return self.dbPut(key, self._getItem(key))
+    return self.dbPut(key, value)
   }),
   forgetAndReset() {
     var orgs = this.searchNotMessages({modelName: ORGANIZATION})
@@ -6367,11 +6446,6 @@ var Store = Reflux.createStore({
           key: new Buffer(result.encryptionKey, 'hex')
         }
       })
-    })
-    .then(node => {
-      // no need to wait for this to finish
-      Push.init({ me, node, Store: this })
-      return node
     }, err => {
       debugger
       throw err
@@ -6386,6 +6460,32 @@ var Store = Reflux.createStore({
 
     //   return node
     // })
+  },
+  async setupPushNotifications() {
+    const node = await this._enginePromise
+    const onSent = ({ message, object }) => {
+      const type = object.object[TYPE]
+      const model = this.getModel(type)
+      const isForm = model && model.subClassOf === FORM
+      if (type === SIMPLE_MESSAGE || isForm) {
+        this.registerForPushNotifications()
+        node.removeListener('sent', onSent)
+      }
+    }
+
+    node.on('sent', onSent)
+    const me = await this._mePromise
+    if (me.registeredForPushNotifications || me.pushNotificationsAllowed === false) {
+      node.removeListener('sent', onSent)
+    }
+
+    Push.init({ node, me, Store: this })
+  },
+  async registerForPushNotifications() {
+    await this._pushSemaphore.wait()
+    await utils.promiseDelay(1000)
+    Push.init()
+    Push.register()
   },
   createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')

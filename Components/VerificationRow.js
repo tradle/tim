@@ -195,26 +195,19 @@ class VerificationRow extends Component {
               </TouchableHighlight>
             </View>
     else if (notAccordion) {
-      // if (parentResource[TYPE] !== PROFILE) {
-      //   let oPhoto = org && <Image source={{uri: org.photo.url}} style={{width: 60, height: 60}}/>
-      //   let by = <View style={{justifyContent: 'center'}}><Text style={styles.rTitle}>{translate('verifiedBy', org.title)}</Text></View>
-      //   row = <View style={{height: 80, backgroundColor: '#fff', flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 15}}>
-      //            {oPhoto}
-      //            {by}
-      //         </View>
-      // }
-      // else {
+      let content = <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+                      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                        {header}
+                      </View>
+                    </TouchableHighlight>
+      if (!isVerification)
+        content = <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+                    {content}
+                  </Swipeout>
 
-        row = <View style={{backgroundColor: '#fff'}} host="lazyload-list">
-                <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
-                  <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
-                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                      {header}
-                    </View>
-                  </TouchableHighlight>
-                </Swipeout>
-              </View>
-      // }
+      row = <View style={{backgroundColor: '#fff'}} host={this.props.lazy}>
+             {content}
+            </View>
     }
     else {
       var content = <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>

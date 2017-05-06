@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react');
+var debug = require('debug')('tradle:app:HomePageMixin')
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
@@ -11,6 +12,7 @@ var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/bankStyle.json')
 var MessageList = require('./MessageList')
 var extend = require('extend')
+const qrCodeDecoder = require('@tradle/qr-schema')
 
 import {
   Alert
@@ -37,51 +39,75 @@ var HomePageMixin = {
     })
   },
 
+  onUnknownQRCode() {
+    Alert.alert(
+      translate('error'),
+      translate('unknownQRCodeFormat')
+    )
+
+    this.props.navigator.pop()
+  },
+
   onread(isView, result) {
     // Pairing devices QRCode
-    if (result.data.charAt(0) === '{') {
-      let h = JSON.parse(result.data)
-      Actions.sendPairingRequest(h)
-      this.props.navigator.pop()
+    try {
+      result = qrCodeDecoder.fromHex(result.data).data
+    } catch (err) {
+      debug('failed to parse qrcode', result.data)
+      this.onUnknownQRCode()
       return
     }
-    let h = result.data.split(';')
+
+    let h, code
+    if (typeof result.data === 'string') {
+      if (result.data.charAt(0) === '{') {
+        let h = JSON.parse(result.data)
+        Actions.sendPairingRequest(h)
+        this.props.navigator.pop()
+        return
+      }
+      else {
+        h = result.data.split(';')
+        code = h[0]
+      }
+    }
+    else
+     code = result.schema === 'ImportData' ? WEB_TO_MOBILE : "0" // result.dataHash, result.provider]
 
     // post to server request for the forms that were filled on the web
     let me = utils.getMe()
-    switch (h[0]) {
+    switch (code) {
     case WEB_TO_MOBILE:
       let r = {
         _t: 'tradle.GuestSessionProof',
-        session: h[1],
+        session: result.dataHash,
         from: {
           id: utils.getId(me),
           title: utils.getDisplayName(me)
         },
         to: {
-          id: PROFILE + '_' + h[2]
+          id: PROFILE + '_' + result.provider
         }
       }
       Actions.addItem({
         resource: r,
         value: r,
+        provider: {
+          url: result.host,
+          hash: result.provider
+        },
         meta: utils.getModel('tradle.GuestSessionProof').value,
         disableAutoResponse: true})
       break
     case TALK_TO_EMPLOYEEE:
-      Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
+      Actions.getEmployeeInfo(result.data.substring(code.length + 1))
       break
     case APP_QR_CODE:
-      Actions.addApp(result.data.substring(h[0].length + 1))
+      Actions.addApp(result.data.substring(code.length + 1))
       break
     default:
       // keep scanning
-      Alert.alert(
-        translate('error'),
-        translate('unknownQRCodeFormat')
-      )
-
-      this.props.navigator.pop()
+      this.onUnknownQRCode()
       break
     }
   },

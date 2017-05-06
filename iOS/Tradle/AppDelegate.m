@@ -20,6 +20,7 @@
 #import <asl.h>
 #import "RCTLog.h"
 #import "SplashScreen.h"
+#import "RNBranch.h"
 
 @import Firebase;
 
@@ -46,6 +47,7 @@
   QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
   touchposeApplication.alwaysShowTouches = YES;
 
+  [RNBranch initSessionWithLaunchOptions:launchOptions isReferrable:YES];
 #ifdef DEBUG
   jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.5:8081/index.ios.bundle?platform=ios&dev=true"];
 #else
@@ -86,7 +88,16 @@
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-  return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
+  if (![RNBranch handleDeepLink:url]) {
+    // do other deep link routing for the Facebook SDK, Pinterest SDK, etc
+    return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
+  }
+
+  return YES;
+}
+
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray *restorableObjects))restorationHandler {
+  return [RNBranch continueUserActivity:userActivity];
 }
 
 // Required to register for notifications
@@ -102,6 +113,7 @@
 // Required for the notification event.
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)notification fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
+//  [RNBranch handlePushNotification:notification];
   [RCTPushNotificationManager didReceiveRemoteNotification:notification];
 
   // call completionHandler after 20 seconds (30 is max)

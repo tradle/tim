@@ -287,10 +287,6 @@ class ResourceList extends Component {
 
       return;
     }
-    if (action === 'getForms') {
-      this.showChat(params)
-      return
-    }
     if (action === 'talkToEmployee') {
       if (!params.to)
         return
@@ -838,13 +834,13 @@ class ResourceList extends Component {
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
 
-    let selectedResource
-    if (!isVerification)
-      selectedResource = resource
-    else if (resource.sources || resource.method)
-      selectedResource = resource
-    else
-      selectedResource = resource.document
+    let selectedResource = resource
+    // if (!isVerification)
+      // selectedResource = resource
+    // else if (resource.sources || resource.method)
+    //   selectedResource = resource
+    // else
+    //   selectedResource = resource.document
 
     if (isVerification  || isForm || isMyProduct)
       return (<VerificationRow
@@ -1107,10 +1103,8 @@ class ResourceList extends Component {
     return (
       <PageView style={this.props.isBacklink ? {height: utils.dimensions().height} : platformStyles.container} separator={contentSeparator}>
         {network}
-        <View style={hasSearchBar ? {height: 0} : {}}>
-          {searchBar}
-        </View>
-        <View style={this.props.isBacklink ? {} : styles.separator} />
+        {searchBar}
+        <View style={styles.separator} />
         {content}
         {footer}
         {actionSheet}
