@@ -5,8 +5,7 @@ import {
 
 import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
-// import environment from '../environment.json'
-import environment from '../env/a2-local.json'
+import environment from '../environment.json'
 import locale from './locale'
 import browser from './browser'
 

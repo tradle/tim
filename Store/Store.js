@@ -6483,7 +6483,6 @@ var Store = Reflux.createStore({
   async registerForPushNotifications() {
     await this._pushSemaphore.wait()
     await utils.promiseDelay(1000)
-    Push.init()
     Push.register()
   },
   createNewIdentity() {

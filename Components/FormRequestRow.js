@@ -701,7 +701,7 @@ class FormRequestRow extends Component {
   }
   reviewFormsInContext() {
     Alert.alert(
-      'You are about to import your data from',
+      translate('importDataPrompt'),
       utils.getDisplayName(this.props.to),
       [
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},

@@ -1,5 +1,5 @@
 target 'Tradle-dev' do
-  pod 'PPBlinkID', '~> 2.6.0'
+  pod 'PPBlinkID', '~> 2.7.1'
   pod 'Firebase/Core'
   pod 'Branch'
 end

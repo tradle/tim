@@ -1881,6 +1881,13 @@ var utils = {
     return appVersion !== DeviceInfo.getVersion()
   },
 
+  waitsFor: function (prerequisite, fn) {
+    return async function runAfterPrerequisite (...args) {
+      await prerequisite
+      return fn(...args)
+    }
+  },
+
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)
   //   let fromId = utils.getId(r.from)

@@ -1780,7 +1780,11 @@ var styles= StyleSheet.create({
 })
 
 function formatDate (date) {
-  return dateformat(date, 'mmm dS, yyyy')
+  if (typeof date === 'string') {
+    return dateformat(date, 'mmm dS, yyyy')
+  }
+
+  return dateformat(new Date(date), 'UTC:mmm dS, yyyy')
 }
 
 function getDocumentTypeFromTitle (title='') {

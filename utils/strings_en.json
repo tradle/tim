@@ -260,5 +260,6 @@
     "neverMissAMessage": "Never miss a message",
     "receiveNotifications?": "Would you like to receive notifications?",
     "help": "Help",
-    "continue": "Continue"
+    "continue": "Continue",
+    "importDataPrompt": "You are about to import your data from"
 }
