@@ -13,7 +13,7 @@ import once from 'once'
 import utils from './utils'
 import ENV from './env'
 
-const { translate } = utils
+const { translate, waitsFor } = utils
 const constants = require('@tradle/engine').constants
 const TYPE = constants.TYPE
 const Actions = require('../Actions/Actions')
@@ -47,13 +47,6 @@ exports.resetBadgeNumber = async function () {
   const pusher = await whenInitialized
   await whenRegistered
   return pusher.resetBadgeNumber()
-}
-
-function waitsFor (prerequisite, fn) {
-  return async function runAfterPrerequisite (...args) {
-    await prerequisite
-    return fn(...args)
-  }
 }
 
 function createPusher (opts) {
