@@ -228,10 +228,10 @@ class TimHome extends Component {
     }
 
     let qs = require('querystring').parse(query)
-
     let state = {firstPage: pathname}
     extend(state, qs)
-    this.setState(state)
+    extend(this.state, state)
+    // this.setState(state)
     Actions.setPreferences(state)
 
     if (!qs.alert) return
