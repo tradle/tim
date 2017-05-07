@@ -67,7 +67,7 @@ function createPusher (opts) {
   let resolveWithToken
   let gotToken = new Promise(resolve => resolveWithToken = resolve)
 
-  PushImpl.init({ onNotification })
+  PushImpl.init({ onNotification, node })
 
   return {
     isRegistered,
