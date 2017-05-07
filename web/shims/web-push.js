@@ -59,6 +59,9 @@ exports.init = function (opts) {
   )
 }
 
+exports.register = async function register () {
+}
+
 exports.subscribe = function (publisher) {
   if (!willRegister) return Promise.resolve()
 
