@@ -12,6 +12,7 @@ import extend from 'xtend/mutable'
 import once from 'once'
 import utils from './utils'
 import ENV from './env'
+import PushImpl from './push-impl'
 
 const { translate, waitsFor } = utils
 const constants = require('@tradle/engine').constants
@@ -66,33 +67,7 @@ function createPusher (opts) {
   let resolveWithToken
   let gotToken = new Promise(resolve => resolveWithToken = resolve)
 
-  Push.configure({
-    // (optional) Called when Token is generated (iOS and Android)
-    onRegister: device => {
-      // console.log(device)
-      resolveWithToken(device.token)
-    },
-
-    // (required) Called when a remote or local notification is opened or received
-    onNotification: onNotification,
-
-    // ANDROID ONLY: (optional) GCM Sender ID.
-    senderID: ENV.GCM_SENDER_ID,
-
-    // IOS ONLY (optional): default: all - Permissions to register.
-    permissions: {
-      alert: true,
-      badge: true,
-      sound: true
-    },
-
-    /**
-      * IOS ONLY: (optional) default: true
-      * - Specified if permissions will requested or not,
-      * - if not, you must call PushNotificationsHandler.requestPermissions() later
-      */
-    requestPermissions: false
-  })
+  PushImpl.init({ onNotification })
 
   return {
     isRegistered,
@@ -124,7 +99,7 @@ function createPusher (opts) {
       }
     }
 
-    const token = await getToken()
+    const token = await PushImpl.getToken()
     Actions.updateMe({ pushNotificationsAllowed: true })
 
     await postWithRetry('/subscriber', {
@@ -138,28 +113,6 @@ function createPusher (opts) {
     registered = true
     Actions.updateMe({ registeredForPushNotifications: true })
     onRegistered()
-  }
-
-  function getToken () {
-    if (utils.isIOS()) {
-      Push.requestPermissions()
-      return gotToken
-    }
-
-    return utils.tryWithExponentialBackoff(() => {
-      // retry requesting until we succeed
-      return Promise.race([
-        gotToken,
-        failIn(5000)
-      ])
-    }, { initialDelay: 1000 })
-  }
-
-  function failIn (millis) {
-    return utils.promiseDelay(millis)
-      .then(() => {
-        throw new Error('timed out')
-      })
   }
 
   /**
@@ -244,7 +197,7 @@ function createPusher (opts) {
         })
       }
 
-      Push.localNotification(localNotification)
+      PushImpl.localNotification(localNotification)
     })
 
     setTimeout(unsubscribe, 20000)
