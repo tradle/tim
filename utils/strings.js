@@ -30,7 +30,8 @@ const StringUtils = module.exports = {
   },
   envify(env) {
     currentEnv = { ...ENV, ...env }
-    return currentStrings = envify(RAW_STRINGS[currentLanguage], currentEnv)
+    currentStrings = envify(RAW_STRINGS[currentLanguage], currentEnv)
+    return currentStrings
   }
 }
 
@@ -40,8 +41,9 @@ function envify (strings, { appName, profileTitle }) {
 
   for (let key in strings) {
     let str = strings[key]
-    preparsed[key] = str.replace(/{appName}/g, appName)
-    preparsed[key] = str.replace(/{profileTitle}/g, strings[profileTitle])
+    preparsed[key] = str
+      .replace(/\{appName\}/g, appName)
+      .replace(/\{profileTitle\}/g, strings[profileTitle])
   }
 
   preparsed.profile = strings[profileTitle] || strings.profile
