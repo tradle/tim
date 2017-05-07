@@ -65,7 +65,6 @@
 		73261E311C4AB9FE00292FEE /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7364872F1C34703500713F09 /* libRNECC.a */; };
 		73261E321C4AB9FE00292FEE /* libRCTVideo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ABE7159BBFD14FFDB6BBF084 /* libRCTVideo.a */; };
 		73261E331C4AB9FE00292FEE /* libRNLocalAuth.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 29F90A6163024FE8B7A7022D /* libRNLocalAuth.a */; };
-		73261E361C4AB9FE00292FEE /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
 		73261E371C4AB9FE00292FEE /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		73261E381C4AB9FE00292FEE /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73FE35D01BFA14F600EFB313 /* Ionicons.ttf */; };
 		732AB4B31D18B46800F2DE1C /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732AB4B21D18B45600F2DE1C /* libCodePush.a */; };
@@ -89,7 +88,6 @@
 		738ED24B1E6CD41F0067F652 /* splash1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 738ED24A1E6CD41F0067F652 /* splash1536x2048.png */; };
 		73947DA91D3DAEAA00C5CC8F /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73947DA81D3DAEA500C5CC8F /* libRCTPushNotification.a */; };
 		739F72F01C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
-		739F73091C3F74AE00D9F2FB /* environment.json in Resources */ = {isa = PBXBuildFile; fileRef = 739F73081C3F74AE00D9F2FB /* environment.json */; };
 		73AC728F1EAEC3BA00A173EC /* splash1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 738ED24A1E6CD41F0067F652 /* splash1536x2048.png */; };
 		73CAA8251EB2E8CC00CD0106 /* libRNBranch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CAA7F41EB2E86300CD0106 /* libRNBranch.a */; };
 		73CEDF701C8CCDE8006401AA /* libReactNativeLocalization.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CEDF691C8CCDC7006401AA /* libReactNativeLocalization.a */; };
@@ -421,7 +419,6 @@
 		73947DA31D3DAEA500C5CC8F /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		739F72EE1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNEnvironmentManagerIOS.h; sourceTree = "<group>"; };
 		739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNEnvironmentManagerIOS.m; sourceTree = "<group>"; };
-		739F73081C3F74AE00D9F2FB /* environment.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = environment.json; path = Tradle/environment.json; sourceTree = "<group>"; };
 		73CEDF521C8CCDC6006401AA /* ReactNativeLocalization.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeLocalization.xcodeproj; path = "../node_modules/react-native-localization/ReactNativeLocalization.xcodeproj"; sourceTree = "<group>"; };
 		73FE358E1BFA123100EFB313 /* UdpSockets.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UdpSockets.xcodeproj; path = "../node_modules/react-native-udp/ios/UdpSockets.xcodeproj"; sourceTree = "<group>"; };
 		73FE35BB1BFA13E400EFB313 /* BVLinearGradient.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BVLinearGradient.xcodeproj; path = "../node_modules/react-native-linear-gradient/BVLinearGradient.xcodeproj"; sourceTree = "<group>"; };
@@ -897,7 +894,6 @@
 				7307E9131E9DD627003BC00A /* GoogleService-Info.plist */,
 				731045901D7CE25D0087E82D /* Tradle-dev.entitlements */,
 				9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */,
-				739F73081C3F74AE00D9F2FB /* environment.json */,
 				739F72ED1C3F742B00D9F2FB /* RNEnvironmentManagerIOS */,
 				73FE35D01BFA14F600EFB313 /* Ionicons.ttf */,
 				13B07FAE1A68108700A75B9A /* Tradle */,
@@ -1459,7 +1455,6 @@
 			files = (
 				733D940C1E60B579009E594D /* Aviva.plist in Resources */,
 				9B41626D1C6F9BBD00A93B7C /* FontAwesome.ttf in Resources */,
-				739F73091C3F74AE00D9F2FB /* environment.json in Resources */,
 				730DDF1C1E664D6C0011080D /* Launch Screen.storyboard in Resources */,
 				7385C6BB1C4C24A700B92CDA /* Dev.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
@@ -1483,7 +1478,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */,
-				73261E361C4AB9FE00292FEE /* environment.json in Resources */,
 				73261E371C4AB9FE00292FEE /* Images.xcassets in Resources */,
 				730DDF181E664ADF0011080D /* LaunchScreen.xib in Resources */,
 				73AC728F1EAEC3BA00A173EC /* splash1536x2048.png in Resources */,
