@@ -234,10 +234,6 @@ class MessageRow extends Component {
       }
       else
         cellStyle = chatStyles.textContainer
-      if (isFormError) {
-        viewStyle.maxWidth = Math.min(600, msgWidth)
-        viewStyle.width =  Math.min(600, message.length * utils.getFontSize(10) + 40)
-      }
 
       let msgContent =  <View style={[rowStyle, viewStyle]}>
                           <View style={{marginTop: 2}}>
