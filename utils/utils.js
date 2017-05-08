@@ -1741,6 +1741,7 @@ var utils = {
       return
     // Disable FormRequest
     let isFormRequest = formRequest  && formRequest[TYPE] === FORM_REQUEST
+    let isFormError = formRequest  && formRequest[TYPE] === FORM_ERROR
 
     if (isFormRequest) {
       var params = {
@@ -1758,7 +1759,7 @@ var utils = {
     }
     let propName = (typeof prop === 'string') ? prop : prop.name
     Actions.addItem({
-      disableFormRequest: isFormRequest ? formRequest : null,
+      disableFormRequest: isFormRequest || isFormError ? formRequest : null,
       resource: {
         [TYPE]: isFormRequest ? formRequest.form : formRequest.prefill[TYPE],
         [propName]: photo,

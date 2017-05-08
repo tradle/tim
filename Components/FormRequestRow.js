@@ -748,25 +748,25 @@ class FormRequestRow extends Component {
     })
   }
 
-  showCamera(prop) {
-    this.props.navigator.push({
-      title: 'Take a pic',
-      backButtonTitle: 'Back',
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        onTakePic: this.onTakePic.bind(this, prop)
-      }
-    });
-  }
+  // showCamera(prop) {
+  //   this.props.navigator.push({
+  //     title: 'Take a pic',
+  //     backButtonTitle: 'Back',
+  //     id: 12,
+  //     component: CameraView,
+  //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+  //     passProps: {
+  //       onTakePic: this.onTakePic.bind(this, prop)
+  //     }
+  //   });
+  // }
 
-  onTakePic(prop, data) {
-    if (!data)
-      return
-    utils.onTakePic(prop, data, this.props.resource)
-    this.props.navigator.pop()
-  }
+  // onTakePic(prop, data) {
+  //   if (!data)
+  //     return
+  //   utils.onTakePic(prop, data, this.props.resource)
+  //   this.props.navigator.pop()
+  // }
 }
 
 function isMultientry(resource) {

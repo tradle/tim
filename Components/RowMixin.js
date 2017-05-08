@@ -7,6 +7,7 @@ var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
 var Icon = require('react-native-vector-icons/Ionicons');
 import CustomIcon from '../styles/customicons'
+var CameraView = require('./CameraView')
 var StyleSheet = require('../StyleSheet')
 var chatStyles = require('../styles/chatStyles')
 var cnt = 0;
@@ -14,6 +15,7 @@ import {
   Text,
   View,
   Alert,
+  Navigator,
   // StyleSheet,
   Platform,
   TouchableHighlight,
@@ -519,7 +521,27 @@ var RowMixin = {
         return p
     }
     return
+  },
+  showCamera(prop) {
+    this.props.navigator.push({
+      title: 'Take a pic',
+      backButtonTitle: 'Back',
+      id: 12,
+      component: CameraView,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        onTakePic: this.onTakePic.bind(this, prop)
+      }
+    });
+  },
+
+  onTakePic(prop, data) {
+    if (!data)
+      return
+    utils.onTakePic(prop, data, this.props.resource)
+    this.props.navigator.pop()
   }
+
   // anyOtherRow(prop, backlink, styles) {
   //   var row;
   //   var resource = this.props.resource;

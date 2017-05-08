@@ -142,13 +142,27 @@ class FormErrorRow extends Component {
     else
       cellStyle = chatStyles.textContainer
     if (prop  &&  prop.ref == PHOTO) {
-      messageBody = <View style={[rowStyle, viewStyle]}>
-                     <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                      <View style={cellStyle}>
+      if (utils.isWeb() && ENV.canUseWebcam) {
+        let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : bankStyle.LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+        messageBody = <View key={this.getNextKey()}>
+                <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                  <TouchableHighlight style={{flex: 1}} underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
+                    <View style={cellStyle}>
                       {renderedRow}
-                      </View>
-                     </ImageInput>
-                   </View>
+                    </View>
+                  </TouchableHighlight>
+                 {resource.documentCreated ? null : icon}
+                </View>
+              </View>
+      }
+      else
+        messageBody = <View style={[rowStyle, viewStyle]}>
+                       <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+                        <View style={cellStyle}>
+                        {renderedRow}
+                        </View>
+                       </ImageInput>
+                     </View>
     }
     else {
       let msgContent =  <View style={[rowStyle, viewStyle]}>
