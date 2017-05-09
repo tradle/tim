@@ -13,6 +13,8 @@
     "lintfile": "eslint --quiet --ignore-path .gitignore",
     "prepush": "npm run lint",
     "dev:setup": "cd iOS && bundle install && cd ../android && bundle install && npm run linksecrets",
+    "bundle:ios": "./bundle.sh ios",
+    "bundle:android": "./bundle.sh android",
     "ios:testflight": "cd iOS && fastlane ios beta_testflight $@",
     "ios:fabric": "cd iOS && fastlane ios beta_fabric $@",
     "ios:release": "cd iOS && fastlane ios release $@",
