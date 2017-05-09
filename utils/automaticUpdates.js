@@ -38,9 +38,21 @@ async function hasUpdate () {
   }
 }
 
-async function install () {
+async function install (opts={}) {
+  const { warn=true, delay=3000 } = opts
   const item = await AsyncStorage.getItem(CODE_UPDATE_KEY)
   if (!item) return false
+
+  if (warn) {
+    Actions.showModal({
+      title: utils.translate('installingUpdate') + '...',
+      message: utils.translate('restartingApp')
+    })
+  }
+
+  if (typeof delay === 'number' && delay > 0) {
+    await utils.promiseDelay(delay)
+  }
 
   await AsyncStorage.removeItem(CODE_UPDATE_KEY)
   CodePush.restartApp()
