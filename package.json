@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "./changeHost.js && node --max_old_space_size=4096 ./node_modules/.bin/react-native start",
-    "postinstall": "npm run nodeify && npm run installhooks && npm run linksecrets && ./fbdedupe.sh && ./hooks/update_version.sh",
+    "postinstall": "npm run nodeify && npm run installhooks && npm run placesecrets && ./fbdedupe.sh && ./hooks/update_version.sh",
     "nodeify": "./node_modules/.bin/rn-nodeify --hack",
     "installhooks": "cp hooks/* .git/hooks/",
     "rmsymlinks": "find -L . -type l -exec rm {} \\;",
@@ -12,7 +12,7 @@
     "lint": "eslint --quiet --ignore-path .gitignore .",
     "lintfile": "eslint --quiet --ignore-path .gitignore",
     "prepush": "npm run lint",
-    "dev:setup": "cd iOS && bundle install && cd ../android && bundle install && npm run linksecrets",
+    "dev:setup": "cd iOS && bundle install && cd ../android && bundle install && npm run placesecrets",
     "bundle:ios": "./bundle.sh ios",
     "bundle:android": "./bundle.sh android",
     "ios:testflight": "cd iOS && fastlane ios beta_testflight $@",
