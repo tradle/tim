@@ -5607,8 +5607,8 @@ var Store = Reflux.createStore({
         // Filter out the verification from the same company
         var fromId = utils.getId(val.from)
         var fromOrgId = utils.getId(this._getItem(fromId).organization)
-        if (fromOrgId === toId)
-          return
+        // if (fromOrgId === toId)
+        //   return
         var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
         if (!document  ||  document._inactive)
           return;
