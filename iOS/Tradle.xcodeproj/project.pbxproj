@@ -14,7 +14,6 @@
 		730DDF1D1E664D6C0011080D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 730DDF1B1E664D6C0011080D /* Launch Screen.storyboard */; };
 		73261E141C4AB9FE00292FEE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		73261E161C4AB9FE00292FEE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		73261E171C4AB9FE00292FEE /* RNEnvironmentManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */; };
 		73261E1A1C4AB9FE00292FEE /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 731F233D1C31BB6600C3B09D /* libz.tbd */; };
 		73261E1B1C4AB9FE00292FEE /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
 		73261E1C1C4AB9FE00292FEE /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -349,8 +348,6 @@
 		738ED24A1E6CD41F0067F652 /* splash1536x2048.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = splash1536x2048.png; path = ../img/splash1536x2048.png; sourceTree = "<group>"; };
 		739033371E1D444100E2FB31 /* libPods-Tradle-dev.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libPods-Tradle-dev.a"; path = "../../../Library/Developer/Xcode/DerivedData/Tradle-ggebxcvwncukinfhemslyyyvcgkh/Build/Products/Debug-iphonesimulator/libPods-Tradle-dev.a"; sourceTree = "<group>"; };
 		73947DA31D3DAEA500C5CC8F /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
-		739F72EE1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNEnvironmentManagerIOS.h; sourceTree = "<group>"; };
-		739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNEnvironmentManagerIOS.m; sourceTree = "<group>"; };
 		73CEDF521C8CCDC6006401AA /* ReactNativeLocalization.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeLocalization.xcodeproj; path = "../node_modules/react-native-localization/ReactNativeLocalization.xcodeproj"; sourceTree = "<group>"; };
 		73FE358E1BFA123100EFB313 /* UdpSockets.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UdpSockets.xcodeproj; path = "../node_modules/react-native-udp/ios/UdpSockets.xcodeproj"; sourceTree = "<group>"; };
 		73FE35BB1BFA13E400EFB313 /* BVLinearGradient.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = BVLinearGradient.xcodeproj; path = "../node_modules/react-native-linear-gradient/BVLinearGradient.xcodeproj"; sourceTree = "<group>"; };
@@ -646,16 +643,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		739F72ED1C3F742B00D9F2FB /* RNEnvironmentManagerIOS */ = {
-			isa = PBXGroup;
-			children = (
-				739F72EE1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.h */,
-				739F72EF1C3F742B00D9F2FB /* RNEnvironmentManagerIOS.m */,
-			);
-			name = RNEnvironmentManagerIOS;
-			path = "../node_modules/react-native-env/RNEnvironmentManagerIOS";
-			sourceTree = "<group>";
-		};
 		73B6565F1C42F4880068687F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -777,7 +764,6 @@
 				7307E9131E9DD627003BC00A /* GoogleService-Info.plist */,
 				731045901D7CE25D0087E82D /* Tradle-dev.entitlements */,
 				9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */,
-				739F72ED1C3F742B00D9F2FB /* RNEnvironmentManagerIOS */,
 				73FE35D01BFA14F600EFB313 /* Ionicons.ttf */,
 				13B07FAE1A68108700A75B9A /* Tradle */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -889,7 +875,7 @@
 				TargetAttributes = {
 					73261E121C4AB9FE00292FEE = {
 						DevelopmentTeam = 94V7783F74;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.Keychain = {
 								enabled = 1;
@@ -1401,7 +1387,6 @@
 			files = (
 				73261E141C4AB9FE00292FEE /* AppDelegate.m in Sources */,
 				73261E161C4AB9FE00292FEE /* main.m in Sources */,
-				73261E171C4AB9FE00292FEE /* RNEnvironmentManagerIOS.m in Sources */,
 				73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1473,8 +1458,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "26d342f3-11a8-4ed3-8ef3-bd014c508496";
-				PROVISIONING_PROFILE_SPECIFIER = "match Development io.tradle.dev.tim";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1486,7 +1471,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Tradle-dev.entitlements";
 				CODE_SIGN_IDENTITY = "";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEPLOYMENT_POSTPROCESSING = NO;
 				DEVELOPMENT_TEAM = 94V7783F74;
 				ENABLE_BITCODE = NO;
@@ -1531,8 +1516,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "0754dee2-3f6c-450d-a387-5954ef744a32";
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore io.tradle.dev.tim";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

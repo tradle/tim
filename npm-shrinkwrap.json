@@ -4825,11 +4825,6 @@
       "from": "react-native-ecc@latest",
       "resolved": "https://registry.npmjs.org/react-native-ecc/-/react-native-ecc-1.4.0.tgz"
     },
-    "react-native-env": {
-      "version": "0.0.5",
-      "from": "tradle/react-native-env",
-      "resolved": "git://github.com/tradle/react-native-env.git#19361827c84ad4a3a9d761fdadd8d65f0e814856"
-    },
     "react-native-fabric": {
       "version": "0.3.2",
       "from": "react-native-fabric@>=0.3.0 <0.4.0",

@@ -96,7 +96,6 @@
     "react-native-datepicker": "github:pgmemk/react-native-datepicker#ce456393",
     "react-native-device-info": "0.9.9",
     "react-native-ecc": "^1.4.0",
-    "react-native-env": "github:tradle/react-native-env",
     "react-native-fabric": "0.3.2",
     "react-native-fabric-crashlytics": "0.1.8",
     "react-native-firebase-analytics": "github:mvayngrib/react-native-firebase-analytics#v1",
