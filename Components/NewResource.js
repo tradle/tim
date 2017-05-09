@@ -374,9 +374,10 @@ class NewResource extends Component {
     }
     var required = this.props.model.required;
     if (!required) {
+      let props = this.props.model.properties
       required = []
-      for (var p in this.props.model.properties) {
-        if (p.charAt(0) !== '_')
+      for (var p in props) {
+        if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
           required.push(p)
       }
     }
