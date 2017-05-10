@@ -7,6 +7,7 @@ import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment.json'
 
+// const DEV_PUSH_SERVER = 'https://push1.tradle.io'
 const LOCAL_IP = (function () {
   if (Platform.OS === 'web') {
     return 'localhost'
@@ -19,6 +20,9 @@ const LOCAL_IP = (function () {
 
   return require('./localIP')
 })()
+
+const DEV_PUSH_SERVER = 'https://push1.tradle.io' //`http://${LOCAL_IP}:48284`
+const PROD_PUSH_SERVER = 'https://push1-prod.tradle.io'
 
 const splash = {
   tradle: require('../img/splash1536x2048.png'),
@@ -45,8 +49,8 @@ const merged = extend({
   serviceID: 'tradle',
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
-  LOCAL_SERVER: `http://${LOCAL_IP}:44444`,
-  pushServerURL: __DEV__ ? `http://${LOCAL_IP}:48284` : 'https://push1.tradle.io',
+  LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
+  pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   isAndroid: function () {
     return Platform.OS === 'android'
   },

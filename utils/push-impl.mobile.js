@@ -37,7 +37,7 @@ exports.localNotification = function localNotification (opts) {
   return Push.localNotification(opts)
 }
 
-exports.getToken = async function getToken () {
+exports.register = async function register () {
   if (Platform.OS === 'ios') {
     Push.requestPermissions()
     return promiseToken

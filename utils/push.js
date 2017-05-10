@@ -3,11 +3,12 @@
 
 import {
   AppState,
-  Alert
+  Alert,
+  Platform
 } from 'react-native'
 
 import Push from 'react-native-push-notification'
-const debug = require('debug')('tradle:push')
+const debug = require('debug')('tradle:app:push')
 import extend from 'xtend/mutable'
 import once from 'once'
 import utils from './utils'
@@ -21,7 +22,8 @@ const Actions = require('../Actions/Actions')
 const DENIED_ERROR = new Error('denied')
 // const PushModal = require('../Components/PushModal')
 const pushServerURL = ENV.pushServerURL
-const isMobile = () => utils.isIOS() || utils.isAndroid()
+const isMobile = () => Platform.OS === 'ios' || Platform.OS === 'android'
+const NOTIFICATION_CAN_HAVE_DATA = Platform.OS === 'ios' || Platform.OS === 'web'
 
 let onInitialized
 let onRegistered
@@ -51,8 +53,7 @@ exports.resetBadgeNumber = async function () {
 }
 
 function createPusher (opts) {
-  // if (__DEV__ || utils.isSimulator() || !isMobile() || !ENV.registerForPushNotifications) {
-  if (!isMobile() || !ENV.registerForPushNotifications) {
+  if (!ENV.registerForPushNotifications) {
     return getAPIPlaceholder(opts)
   }
 
@@ -63,10 +64,7 @@ function createPusher (opts) {
   if (registered) onRegistered()
 
   let regPromise
-  let unread = me.unreadPushNotifications || 0
-  let resolveWithToken
-  let gotToken = new Promise(resolve => resolveWithToken = resolve)
-
+  const unread = me.unreadPushNotifications || 0
   PushImpl.init({ onNotification, node })
 
   return {
@@ -92,23 +90,32 @@ function createPusher (opts) {
 
   async function makeRegistrationAttempt () {
     if (!me.pushNotificationsAllowed) {
-      const pushNotificationsAllowed = await preAskUser()
+      let pushNotificationsAllowed
+      if (PushImpl.havePermission) {
+        pushNotificationsAllowed = await PushImpl.havePermission()
+      }
+
       if (!pushNotificationsAllowed) {
-        Actions.updateMe({ pushNotificationsAllowed })
-        return
+        const pushNotificationsAllowed = await preAskUser()
+        if (!pushNotificationsAllowed) {
+          Actions.updateMe({ pushNotificationsAllowed })
+          return
+        }
       }
     }
 
-    const token = await PushImpl.getToken()
+    const token = await PushImpl.register()
     Actions.updateMe({ pushNotificationsAllowed: true })
 
-    await postWithRetry('/subscriber', {
-      [TYPE]: 'tradle.PNSRegistration',
-      identity: identity,
-      token: token,
-      // apple push notifications service
-      protocol: ENV.isIOS() ? 'apns' : 'gcm'
-    })
+    if (token) {
+      await postWithRetry('/subscriber', {
+        [TYPE]: 'tradle.PNSRegistration',
+        identity: identity,
+        token: token,
+        // apple push notifications service
+        protocol: ENV.isIOS() ? 'apns' : 'gcm'
+      })
+    }
 
     registered = true
     Actions.updateMe({ registeredForPushNotifications: true })
@@ -152,6 +159,12 @@ function createPusher (opts) {
     })
   }
 
+  function onLocalNotification ({ message }) {
+    Actions.viewChat({
+      permalink: message.author
+    })
+  }
+
   function onNotification (notification) {
 // {
 //     foreground: false, // BOOLEAN: If the notification was received in foreground or not
@@ -161,32 +174,47 @@ function createPusher (opts) {
 // }
 
     debug('NOTIFICATION:', notification)
-    if (notification.foreground) {
-      return resetBadgeNumber()
+    const appIsActive = AppState.currentState === 'active'
+    const unread = appIsActive ? 0 : utils.getMe().unreadPushNotifications
+    const { foreground, userInteraction, data } = notification
+    if (foreground) return
+
+    if (appIsActive) resetBadgeNumber()
+
+    if (NOTIFICATION_CAN_HAVE_DATA && userInteraction) {
+      const author = data && data.message && data.message.author
+      if (author) return onLocalNotification(data)
     }
 
     if (unread) return
 
-    Actions.updateMe({ unreadPushNotifications: ++unread })
+    Actions.updateMe({ unreadPushNotifications: unread + 1 })
 
     const unsubscribe = Store.listen(function (event) {
       if (AppState.currentState === 'active') return unsubscribe()
       if (event.action !== 'receivedMessage') return
 
-      const msg = event.msg
-
       unsubscribe()
+      showLocalNotification({ message: event.msg })
+    })
 
-      // const type = msg.object.object[TYPE]
-
+    function showLocalNotification ({ message }) {
       const localNotification = {
-        message: 'You have unread messages'
+        message: translate('unreadMessages')
       }
 
-      if (ENV.isAndroid()) {
+      const userInfo = {
+        message: {
+          type: message.object[TYPE],
+          author: message.author
+        }
+      }
+
+      switch (Platform.OS) {
+      case 'android':
         extend(localNotification, {
           id: 0, // only ever show one
-          title: "Tradle", // (optional)
+          title: ENV.appName, // (optional)
           // ticker: "My Notification Ticker", // (optional)
           autoCancel: true, // (optional) default: true
           largeIcon: "ic_launcher", // (optional) default: "ic_launcher"
@@ -195,10 +223,15 @@ function createPusher (opts) {
           vibrate: true, // (optional) default: true
           vibration: 300, // vibration length in milliseconds, ignored if vibrate=false, default: 1000
         })
+
+        break
+      default:
+        localNotification.userInfo = userInfo
+        break
       }
 
       PushImpl.localNotification(localNotification)
-    })
+    }
 
     setTimeout(unsubscribe, 20000)
 
@@ -238,7 +271,6 @@ function createPusher (opts) {
   }
 
   function resetBadgeNumber () {
-    unread = 0
     Actions.updateMe({ unreadPushNotifications: 0 })
     if (ENV.isAndroid()) return Push.cancelAllLocalNotifications()
     if (!ENV.isIOS()) return

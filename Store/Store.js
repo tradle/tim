@@ -229,7 +229,7 @@ var meDriver
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + ENV.LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? [ENV.LOCAL_TRADLE_SERVER] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -8797,7 +8797,7 @@ var Store = Reflux.createStore({
     const current = list[key] || {}
     list[key] = { key, value: { ...current.value, ...value } }
   },
-  onViewChat(msg) {
+  onViewChat({ permalink }) {
     // let to = this._getItem(PROFILE + '_' + msg.to[ROOT_HASH])
     // let chat = to.organization ? this._getItem(to.organization) : to
     // this.trigger({action: 'showChat', to: to})
