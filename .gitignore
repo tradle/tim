@@ -65,4 +65,4 @@ secrets.xml
 .env.*
 secrets/
 iOS/GoogleService-Info.plist
-environment-aviva-local.json environment-aviva.json environment-blinkid.json environment-empty.json environment-hackathon.json environment-local.json environment-ubs.json environment.json
+environment*.json
