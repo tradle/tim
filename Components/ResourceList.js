@@ -30,6 +30,8 @@ var StyleSheet = require('../StyleSheet')
 
 import { makeStylish } from './makeStylish'
 import { makeResponsive } from 'react-native-orient'
+var Debug = require('debug')
+var debug = Debug('tradle:app:messageList')
 
 // const WEB_TO_MOBILE = '0'
 // const TALK_TO_EMPLOYEEE = '1'
@@ -175,6 +177,14 @@ class ResourceList extends Component {
       });
       return
     }
+    let me = utils.getMe()
+    if (me  &&  me.isEmployee && this.props.officialAccounts) {
+      utils.onNextTransitionEnd(this.props.navigator, () => {
+        debug('request for models')
+        Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
+      });
+    }
+
     var params = {
       modelName: this.props.modelName,
       // to: this.props.resource
@@ -889,6 +899,9 @@ class ResourceList extends Component {
         bankStyle: this.props.bankStyle || defaultBankStyle
       }
     }
+    debug('request for models')
+    Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
+
     var isSharedContext = resource[TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
     if (isSharedContext  &&  resource._relationshipManager  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
       route.rightButtonTitle = 'Approve/Deny'

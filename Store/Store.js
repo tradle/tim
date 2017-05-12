@@ -16,6 +16,8 @@ import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createPoliteQueue from '../utils/polite-queue.js'
 import createSemaphore from 'psem'
+
+var EventEmitter = require('events')
 const co = require('bluebird').coroutine
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin');
@@ -57,6 +59,7 @@ var ENV = require('../utils/env')
 var voc = require('@tradle/models');
 var sampleData = voc.data
 var sampleProfile = require('../data/sampleProfile.json')
+
 // var currencies = voc.currencies
 // var nationalities = voc.nationalities
 // var countries = voc.countries
@@ -320,6 +323,8 @@ var Store = Reflux.createStore({
     const self = this
     // Setup components:
     db = level('TiM.db', { valueEncoding: 'json' });
+    this._emitter = new EventEmitter()
+
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
     // ldb.query.use(jsonqueryEngine());
     ;['get', 'put', 'batch', 'del'].forEach(method => {
@@ -2360,7 +2365,7 @@ var Store = Reflux.createStore({
       else if (!isWelcome)
         self.addLastMessage(r, batch)
 
-      if (!isWelcome  ||  utils.isEmployee(r.to))
+      if (!isWelcome) //  ||  utils.isEmployee(r.to))
         return
       if (!orgRep)
         return
@@ -2569,10 +2574,11 @@ var Store = Reflux.createStore({
       if (!arr  ||  !arr.length) {
         var toRootHash = hash
 
-        sendParams.other = {
-          forward: toRootHash
-        }
         let rep = this.getRepresentative(utils.getId(me.organization))
+        if (rep[ROOT_HASH] !== toRootHash)
+          sendParams.other = {
+            forward: toRootHash
+          }
 
         sendParams.to = { permalink: rep[ROOT_HASH] }
       }
@@ -6796,6 +6802,25 @@ var Store = Reflux.createStore({
             const originalRecipient = await meDriver.addressBook.byPubKey(msg.object.object.recipientPubKey)
             obj.to = {[ROOT_HASH]: originalRecipient.permalink}
             obj.parsed = {data: payload.object}
+
+            let bot = self._getItem(PROFILE + '_' + obj.from[ROOT_HASH])
+
+            let rtype
+            let t = obj.parsed.data[TYPE]
+            if (t === PRODUCT_APPLICATION)
+              rtype = obj.parsed.data.product
+            else if (t === FORM_REQUEST)
+              rtype = obj.parsed.data.form
+            else
+              rtype = t
+
+            let debugStr = 'SharedContext: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + rtype + '; hasModel = ' + self.getModel(rtype)
+            debug(debugStr)
+            if (utils.isEmployee(bot)  &&  !self.getModel(rtype)) {
+              debug('SharedContext: request for models')
+              await self.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
+            }
+
             obj[ROOT_HASH] = protocol.linkString(obj.parsed.data)
             if (!obj.parsed.data[CUR_HASH])
               obj[CUR_HASH] = obj[ROOT_HASH]
@@ -6855,6 +6880,15 @@ var Store = Reflux.createStore({
 
         const old = utils.toOldStyleWrapper(msg)
         old.to = { [ROOT_HASH]: meDriver.permalink }
+        let rtype = old.parsed.data[TYPE]
+        if (rtype === PRODUCT_APPLICATION  &&  me.isEmployee) {
+          let bot = self._getItem(PROFILE + '_' + old.from[ROOT_HASH])
+          // debug('org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + old.parsed.data.product + '; hasModel = ' + (self.getModel(old.parsed.data.product)!== null))
+          if (utils.isEmployee(bot)  &&  !self.getModel(old.parsed.data.product)) {
+            debug('request for models')
+            await self.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
+          }
+        }
         try {
           await self.putInDb(old, true)
           if (payload[TYPE] === PARTIAL)
@@ -7047,6 +7081,7 @@ var Store = Reflux.createStore({
         // this.trigger({action: 'list', list: orgList, forceUpdate: true})
         this.trigger({action: 'getItem', resource: this._getItem(utils.getId(from.organization))})
       }
+      let triggerForModel
 
       if (isConfirmation  &&  isMyMessage) {
         var fOrg = from.organization
@@ -7073,6 +7108,7 @@ var Store = Reflux.createStore({
             else
               isReadOnlyChat = utils.isReadOnlyChat(val)
             let isNew = val[ROOT_HASH] === val[CUR_HASH]
+
             if (!val._context  ||  isReadOnlyChat) {
               let notMeId = toId === meId ? fromId  : toId
               let notMe = this._getItem(notMeId)
@@ -7095,9 +7131,28 @@ var Store = Reflux.createStore({
                 }
               }
             }
-            if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION)
+            if (val[TYPE] === PRODUCT_APPLICATION)  {
+              if (!this.getModel([val.product]))
+                triggerForModel = val.product
+            }
+            else if (val[TYPE] === FORM_REQUEST) {
+              if (!this.getModel([val.form]))
+                triggerForModel = val.product
+            }
+            else if (this.getModel(val[TYPE]))
+               triggerForModel = val[TYPE]
+            if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION  &&  !triggerForModel)
               this.onGetAllSharedContexts()
           }
+        }
+        if (triggerForModel) {
+          this._emitter.once('model:' + triggerForModel, () => {
+            if (val[TYPE] === PRODUCT_APPLICATION)
+              this.onGetAllSharedContexts()
+            else
+              this.trigger({action: 'addItem', resource: val})
+          })
+          return
         }
         this.trigger({action: 'addItem', resource: val})
       }
@@ -7234,10 +7289,20 @@ var Store = Reflux.createStore({
         // debugger
         // return
       }
-      let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
+      let context
+      if (obj.object.context) {
+        let pa = this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context)
+        if (pa)
+          context = this._getItem(pa)
+      }
+      else
+        context = this._getItem(document._context)
+
+      // context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
       context = context ? this._getItem(context) : null
       if (context  &&  document) {
-        let originalTo = context.to.organization // this._getItem(document.to).organization
+        let toBot = this._getItem(utils.getId(context.to))
+        let originalTo = toBot.organization // this._getItem(document.to).organization
         let verificationFrom = from.organization
 
         if (utils.getId(verificationFrom)  !==  utils.getId(originalTo)) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
@@ -7403,7 +7468,8 @@ var Store = Reflux.createStore({
           console.log('ModelsPack: the name you chose is the same as one of Tradle\'s core Models. Please rename and resend the model')
           return
         }
-
+        if (!this.getModel(m.id))
+          this._emitter.emit('model:' + m.id)
         Aviva.preparseModel(m)
         this.addNameAndTitleProps(m)
         models[m.id] = {
