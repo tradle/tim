@@ -73,6 +73,7 @@ const MESSAGE = 'tradle.Message'
 const ITEM = 'tradle.Item'
 const DOCUMENT = 'tradle.Document'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const CUSTOMER_WAITING = constants.TYPES.CUSTOMER_WAITING
 const CUR_HASH = constants.CUR_HASH
 const NONCE = constants.NONCE
 const ROOT_HASH = constants.ROOT_HASH
@@ -1639,6 +1640,18 @@ var utils = {
       ]
     )
   },
+  requestForModels() {
+    let me = utils.getMe()
+    var msg = {
+      message: this.translate('customerWaiting', me.firstName),
+      _t: CUSTOMER_WAITING,
+      from: me,
+      to: me.organization,
+      time: new Date().getTime()
+    }
+    return msg
+  },
+
   isSealableModel: function (model) {
     return model.subClassOf === 'tradle.Form' || model.subClassOf === 'tradle.MyProduct' || model.id === 'tradle.Verification'
   },

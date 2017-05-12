@@ -170,6 +170,12 @@ class ResourceList extends Component {
       });
       return
     }
+    let me = utils.getMe()
+    if (me  &&  me.isEmployee && this.props.officialAccounts) {
+      utils.onNextTransitionEnd(this.props.navigator, () => {
+        Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
+      });
+    }
     var params = {
       modelName: this.props.modelName,
     };
@@ -904,13 +910,13 @@ class ResourceList extends Component {
         bankStyle: this.props.bankStyle || defaultBankStyle
       }
     }
+    Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
     var isSharedContext = resource[TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
     if (isSharedContext  &&  resource._relationshipManager  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
       route.rightButtonTitle = 'Approve/Deny'
       route.onRightButtonPress = () => this.approveDeny(resource)
     }
     this.props.navigator.push(route)
-
   }
   changeSharedWithList(id, value) {
     this.state.sharedWith[id] = value
