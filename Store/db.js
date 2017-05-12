@@ -1,37 +1,38 @@
+import crypto from 'crypto'
 import {
   getPassword,
   setPassword,
-  randomHex
+  promisifyDB
 } from '../utils/utils'
 
 import leveldown from './leveldown'
 import createKeeper from '../utils/keeper'
-import promisify from 'q-level'
 
 const KEY_PREFIX = 'dbencryptionkey'
+const KEY_ENCODING = 'hex'
 
-module.exports = async function encryptedDB ({ path }) {
+module.exports = async function createEncryptedDB ({ path }) {
   const keyName = `${KEY_PREFIX}_${path}`
   const encryptionKey = await getOrCreateEncryptionKey(keyName)
   const keeper = createKeeper({
     path,
     db: leveldown,
     encryption: {
-      key: new Buffer(encryptionKey, 'hex')
+      key: encryptionKey
     }
   })
 
-  return promisify(keeper)
+  return promisifyDB(keeper)
 }
 
 async function getOrCreateEncryptionKey (keyName) {
   let encryptionKey
-
   try {
     encryptionKey = await getPassword(keyName)
+    encryptionKey = new Buffer(encryptionKey, KEY_ENCODING)
   } catch (err) {
-    encryptionKey = randomHex(32)
-    await setPassword(keyName, encryptionKey)
+    encryptionKey = crypto.randomBytes(32)
+    await setPassword(keyName, encryptionKey.toString(KEY_ENCODING))
   }
 
   return encryptionKey
