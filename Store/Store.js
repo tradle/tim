@@ -6834,8 +6834,8 @@ var Store = Reflux.createStore({
         let rtype = old.parsed.data[TYPE]
         if (rtype === PRODUCT_APPLICATION  &&  me.isEmployee) {
           let bot = self._getItem(PROFILE + '_' + old.from[ROOT_HASH])
-          debug('org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + obj.parsed.data.product + '; hasModel = ' + (self.getModel(obj.parsed.data.product)!== null))
-          if (utils.isEmployee(org)  &&  !self.getModel(old.parsed.data.product)) {
+          // debug('monitorTim: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + old.parsed.data.product + '; hasModel = ' + (self.getModel(old.parsed.data.product)!== null))
+          if (utils.isEmployee(bot)  &&  !self.getModel(old.parsed.data.product)) {
             debug('request for models')
             await self.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
           }
