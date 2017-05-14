@@ -16,7 +16,6 @@ import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createPoliteQueue from '../utils/polite-queue.js'
 import createSemaphore from 'psem'
-
 var EventEmitter = require('events')
 const co = require('bluebird').coroutine
 var TimerMixin = require('react-timer-mixin')
@@ -217,7 +216,7 @@ var meDriver
 var ready;
 var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? ['http://' + ENV.LOCAL_IP + ':44444'] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? [ENV.LOCAL_TRADLE_SERVER] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -324,7 +323,6 @@ var Store = Reflux.createStore({
     // Setup components:
     db = level('TiM.db', { valueEncoding: 'json' });
     this._emitter = new EventEmitter()
-
     // ldb = levelQuery(level('TiM.db', { valueEncoding: 'json' }));
     // ldb.query.use(jsonqueryEngine());
     ;['get', 'put', 'batch', 'del'].forEach(method => {
@@ -2579,7 +2577,6 @@ var Store = Reflux.createStore({
           sendParams.other = {
             forward: toRootHash
           }
-
         sendParams.to = { permalink: rep[ROOT_HASH] }
       }
     }
@@ -5807,7 +5804,17 @@ var Store = Reflux.createStore({
         shareableResourcesRootToOrgs[hash] = o
       }
       else {
-        let oId = utils.getId(verification.organization)
+        let org = verification.organization
+        if (!org) {
+          if (verification._verifiedBy)
+            org = verification._verifiedBy
+          else {
+            let rep = self._getItem(verification.from)
+            org = rep && rep.organization
+          }
+        }
+
+        let oId = utils.getId(org)
         let oo = o.filter((r) => utils.getId(r) === oId)
         if (oo.length)
           return
@@ -6803,8 +6810,6 @@ var Store = Reflux.createStore({
             obj.to = {[ROOT_HASH]: originalRecipient.permalink}
             obj.parsed = {data: payload.object}
 
-            let bot = self._getItem(PROFILE + '_' + obj.from[ROOT_HASH])
-
             let rtype
             let t = obj.parsed.data[TYPE]
             if (t === PRODUCT_APPLICATION)
@@ -6814,10 +6819,11 @@ var Store = Reflux.createStore({
             else
               rtype = t
 
-            let debugStr = 'SharedContext: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + rtype + '; hasModel = ' + self.getModel(rtype)
-            debug(debugStr)
+            let bot = self._getItem(PROFILE + '_' + obj.from[ROOT_HASH])
+            // let debugStr = 'SharedContext: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + rtype + '; hasModel = ' + self.getModel(rtype)
+            // debug(debugStr)
             if (utils.isEmployee(bot)  &&  !self.getModel(rtype)) {
-              debug('SharedContext: request for models')
+              // debug('SharedContext: request for models')
               await self.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
             }
 
@@ -6883,7 +6889,7 @@ var Store = Reflux.createStore({
         let rtype = old.parsed.data[TYPE]
         if (rtype === PRODUCT_APPLICATION  &&  me.isEmployee) {
           let bot = self._getItem(PROFILE + '_' + old.from[ROOT_HASH])
-          // debug('org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + old.parsed.data.product + '; hasModel = ' + (self.getModel(old.parsed.data.product)!== null))
+          // debug('monitorTim: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + old.parsed.data.product + '; hasModel = ' + (self.getModel(old.parsed.data.product)!== null))
           if (utils.isEmployee(bot)  &&  !self.getModel(old.parsed.data.product)) {
             debug('request for models')
             await self.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
@@ -7082,7 +7088,6 @@ var Store = Reflux.createStore({
         this.trigger({action: 'getItem', resource: this._getItem(utils.getId(from.organization))})
       }
       let triggerForModel
-
       if (isConfirmation  &&  isMyMessage) {
         var fOrg = from.organization
         var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
@@ -7139,7 +7144,7 @@ var Store = Reflux.createStore({
               if (!this.getModel([val.form]))
                 triggerForModel = val.product
             }
-            else if (this.getModel(val[TYPE]))
+            else if (!this.getModel(val[TYPE]))
                triggerForModel = val[TYPE]
             if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION  &&  !triggerForModel)
               this.onGetAllSharedContexts()
@@ -7289,6 +7294,7 @@ var Store = Reflux.createStore({
         // debugger
         // return
       }
+
       let context
       if (obj.object.context) {
         let pa = this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context)
@@ -7297,8 +7303,7 @@ var Store = Reflux.createStore({
       }
       else
         context = this._getItem(document._context)
-
-      // context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
+      // let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
       context = context ? this._getItem(context) : null
       if (context  &&  document) {
         let toBot = this._getItem(utils.getId(context.to))
@@ -7468,6 +7473,7 @@ var Store = Reflux.createStore({
           console.log('ModelsPack: the name you chose is the same as one of Tradle\'s core Models. Please rename and resend the model')
           return
         }
+
         if (!this.getModel(m.id))
           this._emitter.emit('model:' + m.id)
         Aviva.preparseModel(m)
@@ -8859,7 +8865,7 @@ var Store = Reflux.createStore({
     const current = list[key] || {}
     list[key] = { key, value: { ...current.value, ...value } }
   },
-  onViewChat(msg) {
+  onViewChat({ permalink }) {
     // let to = this._getItem(PROFILE + '_' + msg.to[ROOT_HASH])
     // let chat = to.organization ? this._getItem(to.organization) : to
     // this.trigger({action: 'showChat', to: to})

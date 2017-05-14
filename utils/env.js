@@ -24,6 +24,9 @@ console.log('getUserMedia is available', !!getUserMedia)
 
 const LOCAL_IP = window.location.hostname
 
+const DEV_PUSH_SERVER = 'https://push1.tradle.io' //`http://${LOCAL_IP}:48284`
+const PROD_PUSH_SERVER = 'https://push1-prod.tradle.io'
+
 const splash = {
   tradle: require('../img/splash1536x2048.png'),
   aviva: require('../img/Aviva.png')
@@ -50,8 +53,8 @@ const merged = extend({
   serviceID: 'tradle',
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
-  LOCAL_SERVER: `http://${LOCAL_IP}:44444`,
-  pushServerURL: __DEV__ ? `http://${LOCAL_IP}:48284` : 'https://push1.tradle.io',
+  LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
+  pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   isAndroid: function () {
     return Platform.OS === 'android'
   },

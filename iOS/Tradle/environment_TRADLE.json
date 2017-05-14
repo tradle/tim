@@ -1,7 +1,0 @@
-{
-  "appName": "Tradle",
-  "topLevelProvider": {
-    "name": "Tradle",
-    "baseUrl": "https://tradle.io/bank/"
-  }
-}

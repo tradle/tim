@@ -67,3 +67,5 @@ secrets.xml
 .env
 .env.*
 secrets/
+iOS/GoogleService-Info.plist
+environment*.json

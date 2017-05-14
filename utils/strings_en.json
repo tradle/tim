@@ -261,5 +261,7 @@
     "receiveNotifications?": "Would you like to receive notifications?",
     "help": "Help",
     "continue": "Continue",
-    "importDataPrompt": "You are about to import your data from"
+    "importDataPrompt": "You are about to import your data from",
+    "unreadMessages": "You have unread messages",
+    "messageWaitingFrom": "You have a new message from {1}"
 }

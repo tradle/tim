@@ -7086,11 +7086,6 @@
       "from": "react-native-device-info@>=0.9.0 <0.10.0",
       "resolved": "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-0.9.9.tgz"
     },
-    "react-native-env": {
-      "version": "0.0.5",
-      "from": "tradle/react-native-env",
-      "resolved": "git://github.com/tradle/react-native-env.git#19361827c84ad4a3a9d761fdadd8d65f0e814856"
-    },
     "react-native-flexbox-grid": {
       "version": "0.2.2",
       "from": "react-native-flexbox-grid@>=0.2.2 <0.3.0",
