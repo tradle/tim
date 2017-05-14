@@ -425,7 +425,7 @@ var Store = Reflux.createStore({
     // return this.autoRegister(true)
     // .then(() => {
     //   this.setMe(me)
-    //   return this.onGetProvider({provider: params.bot, url: params.url, termsAccepted: true})
+    //   return this.onGetProvider({permalink: params.bot, url: params.url, termsAccepted: true})
     // })
     // .then(() => this.getDriver(me))
     // .then(() => {
@@ -4150,10 +4150,10 @@ var Store = Reflux.createStore({
   async onGetProvider(params) {
     await this.ready
     await this._loadedResourcesDefer.promise
-    let permalink = params.provider
+    let permalink = params.permalink
     let serverUrl = params.url
     let providerBot = this._getItem(PROFILE + '_' + permalink)
-    if (!providerBot) {
+    if (!providerBot  &&  serverUrl) {
       await this.onAddItem({
         resource: {[constants.TYPE]: constants.TYPES.SETTINGS, url: serverUrl},
         maxAttempts: 5
@@ -8798,6 +8798,7 @@ var Store = Reflux.createStore({
     list[key] = { key, value: { ...current.value, ...value } }
   },
   onViewChat({ permalink }) {
+    this.onGetProvider({ permalink })
     // let to = this._getItem(PROFILE + '_' + msg.to[ROOT_HASH])
     // let chat = to.organization ? this._getItem(to.organization) : to
     // this.trigger({action: 'showChat', to: to})
