@@ -365,8 +365,11 @@ var NewResourceMixin = {
         if (!ref) {
           if (type === 'number'  ||  type === 'string')
             ref = constants.TYPES.MONEY
-          else
-            continue;
+          else {
+            ref = props[p].items.ref
+            if (!ref  ||  utils.getModel(ref).value.subClassOf !== ENUM)
+              continue;
+          }
         }
         if (ref === constants.TYPES.MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
@@ -1070,10 +1073,14 @@ var NewResourceMixin = {
       else {
         let rModel
         // var m = utils.getId(resource[params.prop]).split('_')[0]
-        rModel = utils.getModel(prop.ref).value
+        rModel = utils.getModel(prop.ref  ||  prop.items.ref).value
         label = utils.getDisplayName(resource[params.prop], rModel.properties)
-        if (!label)
-          label = resource[params.prop].title
+        if (!label) {
+          if (prop.items  &&  rModel.subClassOf === ENUM)
+            resource[params.prop].forEach((r) => label += label ? ', ' + r.title : r.title)
+          else
+            label = resource[params.prop].title
+        }
         if (rModel.subClassOf  &&  rModel.subClassOf === ENUM)
           label = utils.createAndTranslate(label, true)
       }
@@ -1202,10 +1209,11 @@ var NewResourceMixin = {
     var value = this.refs.form.input;
 
     var filter = event.nativeEvent.text;
-    var propRef = prop.ref
+    var propRef = prop.ref || prop.items.ref
     var m = utils.getModel(propRef).value;
     var currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
+
+    let route = {
       title: translate(prop), //m.title,
       // titleTextColor: '#7AAAC3',
       id: 10,
@@ -1221,11 +1229,24 @@ var NewResourceMixin = {
         isRegistration: this.state.isRegistration,
         bankStyle:      this.props.bankStyle,
         returnRoute:    currentRoutes[currentRoutes.length - 1],
-        callback:       this.setChosenValue.bind(this),
+        callback:       this.setChosenValue.bind(this)
       }
-    });
-  },
+    }
+    if (prop.type === 'array'  && m.subClassOf === ENUM) {
+      route.passProps.multiChooser = true
+      route.rightButtonTitle = 'Done'
+      route.passProps.onDone = this.multiChooser.bind(this, prop)
+    }
 
+    this.props.navigator.push(route)
+  },
+  multiChooser(prop, values) {
+    let vArr = []
+    for (let v in values)
+      vArr.push(values[v])
+    this.setChosenValue(prop.name, vArr)
+    this.props.navigator.pop()
+  },
   // setting chosen from the list property on the resource like for ex. Organization on Contact
   setChosenValue(propName, value) {
     var resource = {}
@@ -1243,20 +1264,25 @@ var NewResourceMixin = {
     else if (this.props.model.properties[propName].type === 'array') {
       let prop = this.props.model.properties[propName]
       if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !utils.getModel(prop.items.ref).value.inlined) {
-        let v = utils.buildRef(value)
+        if (!Array.isArray(value))
+          value = [value]
 
-        if (value.photos)
-          v.photo = value.photos[0].url
+        let v = value.map((vv) => {
+          let val = utils.buildRef(vv)
+          if (vv.photos)
+            val.photo = vv.photos[0].url
+          return val
+        })
         if (!resource[propName]) {
           resource[propName] = []
-          resource[propName].push(v)
+          resource[propName] = v
         }
         else {
           let arr = resource[propName].filter((r) => {
             return r.id === v.id
           })
           if (!arr.length)
-            resource[propName].push(v)
+            resource[propName] = v
         }
 
         setItemCount = true

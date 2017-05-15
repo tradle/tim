@@ -83,7 +83,7 @@ const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
-
+const ENUM = 'tradle.Enum'
 var dictionaries = require('@tradle/models').dict
 var dictionary = dictionaries[Strings.language]
 
@@ -403,7 +403,10 @@ var utils = {
     //   return;
     var itemsMeta = {};
     for (var p in props) {
-      if (props[p].type == 'array')  //  &&  required[p]) {
+      if (props[p].type !== 'array')  //  &&  required[p]) {
+        continue
+      let ref = props[p].items.ref
+      if (!ref  ||  this.getModel(ref).value.subClassOf !== ENUM)
         itemsMeta[p] = props[p];
     }
     return itemsMeta;
@@ -433,7 +436,7 @@ var utils = {
       if (p.charAt(0) === '_')
         continue
       if (!meta[p].displayName) {
-        if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
+        if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === ENUM)
           return resource[p];
         continue
       }

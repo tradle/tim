@@ -115,8 +115,13 @@ class ResourceList extends Component {
     if (props.isBacklink  &&  props.backlinkList) {
       this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
     }
-    if (props.multiChooser)
+    if (props.multiChooser) {
       this.state.chosen = {}
+      let resource = this.props.resource
+      let prop = this.props.prop
+      if (prop  &&  resource[prop.name])
+        resource[prop.name].forEach((r) => this.state.chosen[utils.getId(r)] = r)
+    }
     var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
@@ -378,7 +383,7 @@ class ResourceList extends Component {
         if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
           return;
       }
-      if (this.props.multiChooser) {
+      if (this.props.multiChooser  &&  !this.props.isChooser) {
         let sharingChatId = utils.getId(this.props.sharingChat)
         list = list.filter(r => {
           return utils.getId(r) !== sharingChatId

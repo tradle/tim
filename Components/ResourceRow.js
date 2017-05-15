@@ -60,8 +60,13 @@ class ResourceRow extends Component {
     if (props.changeSharedWithList)
       this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
-    if (props.multiChooser)
-      this.state.isChosen = false
+    if (props.multiChooser) {
+      // multivalue ENUM property
+      if (props.chosen  &&  props.chosen[utils.getId(props.resource)])
+        this.state.isChosen = true
+      else
+        this.state.isChosen = false
+    }
     if (props.resource[TYPE] === PROFILE) {
       this.state.resource = props.resource
       this.state.unread = props.resource._unread
@@ -198,12 +203,12 @@ class ResourceRow extends Component {
 
     var cancelResource
     if (this.props.onCancel  ||  (this.state && this.state.sharedWith))
-      cancelResource = <View style={styles.multiChooser}>
+      cancelResource = <View style={styles.chooser}>
                          <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : style ? color.color : '#dddddd'} />
                        </View>
     var hideMode
     if (this.props.hideMode)
-      hideMode = <View style={styles.multiChooser}>
+      hideMode = <View style={styles.chooser}>
                   <TouchableHighlight underlayColor='transparent' onPress={() => this.props.hideResource(resource)}>
                     <Icon name='ios-remove-circle'  size={25}  color='#F63D37' />
                   </TouchableHighlight>
@@ -320,7 +325,7 @@ class ResourceRow extends Component {
     }
     else {
       this.setState({isChosen: true})
-      this.props.chosen[id] = ''
+      this.props.chosen[id] = resource
     }
   }
   action() {
@@ -748,6 +753,12 @@ var styles = StyleSheet.create({
     backgroundColor: appStyle.COUNTER_BG_COLOR
   },
   multiChooser: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    backgroundColor: 'transparent'
+  },
+  chooser: {
     position: 'absolute',
     right: 10,
     top: 25,
