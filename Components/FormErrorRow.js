@@ -121,12 +121,7 @@ class FormErrorRow extends Component {
     let msgWidth = w * 0.8
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-    if (message) {
-      if (message.charAt(0) === '[')
-        viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
-    }
-    viewStyle.width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(18) + 40) : msgWidth
+    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', maxWidth: Math.min(600, msgWidth), width:  Math.min(600, message.length * utils.getFontSize(10) + 40)};
 
     if (this.props.sendStatus  &&  this.props.sendStatus !== null)
       sendStatus = this.getSendStatus()
