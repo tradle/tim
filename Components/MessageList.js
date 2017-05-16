@@ -106,7 +106,7 @@ class MessageList extends Component {
     }
   }
   hasChatContext() {
-    let context = this.state.context
+    let context = this.state.context || this.props.context
     if (!context  ||  context.product === REMEDIATION)
       return false
     let me = utils.getMe()
@@ -121,7 +121,9 @@ class MessageList extends Component {
       return false
 
     let isReadOnlyChat = utils.isReadOnlyChat(context)
-    if (this.props.allContexts) // || isReadOnlyChat) //  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
+    if (isReadOnlyChat  &&  chat._relationshipManager)
+      return true
+    if (this.props.allContexts || isReadOnlyChat) //  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
       return false
 
     return true

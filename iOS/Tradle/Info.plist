@@ -98,7 +98,7 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>branch_key</key>
-	<string>key_live_pmFxDC1nPm65ZbAh8PxwMjfjEyjllLzB</string>
+	<string>$(BRANCH_KEY)</string>
 	<key>branch_universal_link_domains</key>
 	<string>link.tradle.io</string>
 </dict>

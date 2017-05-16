@@ -560,7 +560,7 @@ class TimHome extends Component {
       switch (firstPage) {
       case 'chat':
         Actions.getProvider({
-          provider: this.state.permalink,
+          permalink: this.state.permalink,
           url: this.state.url
         })
         return
