@@ -589,6 +589,13 @@ class TimHome extends Component {
       this.showLandingPage(provider, ENV.landingPage)
       return
     }
+    // Check if the current page is the same we need
+    let routes = this.props.navigator.getCurrentRoutes()
+    let currentRoute = routes[routes.length - 1]
+    if (currentRoute.id === 11) {
+      if (utils.getId(currentRoute.passProps.resource) === utils.getId(provider))
+        return
+    }
     var msg = {
       message: translate('customerWaiting', me.firstName),
       _t: constants.TYPES.CUSTOMER_WAITING,
@@ -615,7 +622,6 @@ class TimHome extends Component {
         bankStyle:  style
       }
     }
-    let routes = this.props.navigator.getCurrentRoutes()
     if (termsAccepted  &&  routes.length === 3)
       this.props.navigator.replace(route)
     else
