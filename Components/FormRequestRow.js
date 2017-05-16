@@ -32,6 +32,7 @@ const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const ITEM = 'tradle.Item'
+const IPROOV_SELFIE = 'tradle.IProovSelfie'
 
 var LINK_COLOR
 
@@ -216,7 +217,7 @@ class FormRequestRow extends Component {
       </View>
     )
   }
-  chooser(prop, propName) {
+  chooser(prop) {
     let oResource = this.props.resource
     let model = utils.getModel(oResource.form).value
     let resource = {
@@ -244,7 +245,7 @@ class FormRequestRow extends Component {
         resource:       resource,
         returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       (prop, val) => {
-          resource[propName] = utils.buildRef(val)
+          resource[prop.name] = utils.buildRef(val)
           Actions.addItem({resource: resource})
         },
       }
@@ -630,9 +631,19 @@ class FormRequestRow extends Component {
                    </View>
                  </View>
           }
+          else if (form.id === IPROOV_SELFIE) {
+            msg = <View key={this.getNextKey()}>
+                  <TouchableHighlight onPress={() => this.showIproovScanner(prop, prop.name)} underlayColor='transparent'>
+                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                      <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
+                      {resource.documentCreated ? null : icon}
+                    </View>
+                  </TouchableHighlight>
+               </View>
+          }
           else {
             msg = <View key={this.getNextKey()}>
-                  <TouchableHighlight onPress={() => this.chooser(prop, prop.name)} underlayColor='transparent'>
+                  <TouchableHighlight onPress={() => this.chooser(prop)} underlayColor='transparent'>
                     <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                       <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.INCOMING_MESSAGE_TEXT_COLOR}, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{str}</Text>
                       {resource.documentCreated ? null : icon}
@@ -673,6 +684,28 @@ class FormRequestRow extends Component {
       Actions.addItem(params)
     }
   }
+
+  showIproovScanner() {
+    // Iproov.scan
+    const token = this.fakeIproof({username: utils.getMe()[constants.ROOT_HASH]})
+    this.props.resource.token = token
+    let r = this.props.resource
+    Actions.addItem({
+      disableFormRequest: r,
+      resource: {
+        [TYPE]: r.form,
+        token: token,
+        from: r.to,
+        to: r.from,
+        _context: r._context
+      }
+    })
+  }
+
+  fakeIproof({ userid }) {
+    return Math.random().toString()
+  }
+
   reviewFormsInContext() {
     Alert.alert(
       translate('importDataPrompt'),
