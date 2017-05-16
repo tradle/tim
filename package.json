@@ -37,8 +37,7 @@
     "deploy:static": "npm run build:static && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=static GIT_DEPLOY_REPO=mv ./deploy.sh",
     "deploy:local": "npm run build:local && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=local GIT_DEPLOY_REPO=mv ./deploy.sh",
     "deploy:bots": "npm run build:bots && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=bots GIT_DEPLOY_REPO=mv ./deploy.sh",
-    "lint": "eslint --quiet --ignore-path .gitignore .",
-    "prepush": "npm run lint"
+    "lint": "eslint --quiet --ignore-path .gitignore ."
   },
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
