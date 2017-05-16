@@ -40,7 +40,10 @@ export default class DatePickerAdapter extends Component {
     const textStyle = customStyles && customStyles.placeholderText
     return (
       <TouchableHighlight underlayColor="transparent" style={this.props.style} onPress={() => this.onPress()}>
-        <Text style={textStyle}>{dateString}</Text>
+        <View>
+          <Text style={textStyle}>{dateString}</Text>
+          <input style={styles.hidden} type="text" onFocus={() => this.onPress()} />
+        </View>
       </TouchableHighlight>
     )
   }
@@ -48,5 +51,9 @@ export default class DatePickerAdapter extends Component {
 
 const styles = StyleSheet.create({
   fix: {
+  },
+  hidden: {
+    width: 0,
+    height: 0
   }
 })
