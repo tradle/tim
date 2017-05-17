@@ -43,6 +43,7 @@
 		73303A9E1E3045CE00AAE98C /* libRNBlinkID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73303A4F1E30416E00AAE98C /* libRNBlinkID.a */; };
 		7348E4911D9D8D1B00328628 /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7348E4731D9D8CDD00328628 /* tradle.ttf */; };
 		734EF80E1E2E95D900E3A9C4 /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 734EF80C1E2E947200E3A9C4 /* libRCTAsyncRocksDBStorage.a */; };
+		735A6BA41ECBD550001C925A /* RNIproov.m in Sources */ = {isa = PBXBuildFile; fileRef = 735A6BA31ECBD550001C925A /* RNIproov.m */; };
 		73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 73683CFB1CC443B300E178CF /* QTouchposeApplication.m */; };
 		736FF6F71E66148500BC5ED7 /* libSplashScreen.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 736FF6F41E6610E200BC5ED7 /* libSplashScreen.a */; };
 		7375409D1D25942300A81EC1 /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 737540931D25941500A81EC1 /* libRNDeviceInfo.a */; };
@@ -53,8 +54,8 @@
 		73CAA8251EB2E8CC00CD0106 /* libRNBranch.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CAA7F41EB2E86300CD0106 /* libRNBranch.a */; };
 		73CEDF701C8CCDE8006401AA /* libReactNativeLocalization.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73CEDF691C8CCDC7006401AA /* libReactNativeLocalization.a */; };
 		73D77E271E3F911700DB1F4A /* libSMXCrashlytics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73D77E241E3F90D900DB1F4A /* libSMXCrashlytics.a */; };
-		8D2AB8A061455FDA14476CAA /* libPods-Tradle-dev.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A3881422957FEADB4DD80CD /* libPods-Tradle-dev.a */; };
 		9BE3302D1D90762600A8292D /* libRCTOrientation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BE3301A1D9072E300A8292D /* libRCTOrientation.a */; };
+		BFDEA870D4419AD46F4D9CB9 /* Pods_Tradle_dev.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DAE990E76741D82A46F1F9D /* Pods_Tradle_dev.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -318,6 +319,7 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Tradle/main.m; sourceTree = "<group>"; };
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		29F90A6163024FE8B7A7022D /* libRNLocalAuth.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNLocalAuth.a; sourceTree = "<group>"; };
+		2DAE990E76741D82A46F1F9D /* Pods_Tradle_dev.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Tradle_dev.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		36B5640D4902498D93210121 /* RCTOrientation.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTOrientation.xcodeproj; path = "../node_modules/react-native-orientation/iOS/RCTOrientation.xcodeproj"; sourceTree = "<group>"; };
 		3D510339A825413A9733521D /* RCTVideo.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTVideo.xcodeproj; path = "../node_modules/react-native-video/RCTVideo.xcodeproj"; sourceTree = "<group>"; };
 		4AD204EE8CD14D898D7B8C62 /* RNBranch.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBranch.xcodeproj; path = "../node_modules/react-native-branch/ios/RNBranch.xcodeproj"; sourceTree = "<group>"; };
@@ -338,6 +340,8 @@
 		7348C3B61C41C04F00B9CDF5 /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
 		7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		7348E4731D9D8CDD00328628 /* tradle.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = tradle.ttf; sourceTree = "<group>"; };
+		735A6BA21ECBD550001C925A /* RNIproov.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RNIproov.h; path = Tradle/RNIproov.h; sourceTree = "<group>"; };
+		735A6BA31ECBD550001C925A /* RNIproov.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RNIproov.m; path = Tradle/RNIproov.m; sourceTree = "<group>"; };
 		7364872A1C34703500713F09 /* RNECC.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNECC.xcodeproj; path = "../node_modules/react-native-ecc/ios/RNECC.xcodeproj"; sourceTree = "<group>"; };
 		7365BF281C3461E600B0A512 /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		73683CFA1CC443B300E178CF /* QTouchposeApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QTouchposeApplication.h; sourceTree = "<group>"; };
@@ -356,7 +360,6 @@
 		7792D3B3CB564D30820C6FBC /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 0; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
-		8A3881422957FEADB4DD80CD /* libPods-Tradle-dev.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tradle-dev.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9B10B2E61C1A05EE00A20159 /* ART.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ART.xcodeproj; path = "../node_modules/react-native/Libraries/ART/ART.xcodeproj"; sourceTree = "<group>"; };
 		9B2E51471CAD7DBC000439E6 /* RNImagePicker.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNImagePicker.xcodeproj; path = "../node_modules/react-native-image-picker/ios/RNImagePicker.xcodeproj"; sourceTree = "<group>"; };
 		9B41626C1C6F9BBD00A93B7C /* FontAwesome.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
@@ -415,9 +418,9 @@
 				73303A9E1E3045CE00AAE98C /* libRNBlinkID.a in Frameworks */,
 				73037B151E391BA500A5910C /* libRNPasscodeStatus.a in Frameworks */,
 				73D77E271E3F911700DB1F4A /* libSMXCrashlytics.a in Frameworks */,
-				8D2AB8A061455FDA14476CAA /* libPods-Tradle-dev.a in Frameworks */,
 				7307E8F21E9DD5E0003BC00A /* libRNFIRAnalytics.a in Frameworks */,
 				73CAA8251EB2E8CC00CD0106 /* libRNBranch.a in Frameworks */,
+				BFDEA870D4419AD46F4D9CB9 /* Pods_Tradle_dev.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -500,6 +503,8 @@
 		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
+				735A6BA21ECBD550001C925A /* RNIproov.h */,
+				735A6BA31ECBD550001C925A /* RNIproov.m */,
 				730DDF151E664ADF0011080D /* LaunchScreen.xib */,
 				733D940B1E60B579009E594D /* Aviva.plist */,
 				9BFC36381DD7C3E100E739AF /* Tradle.entitlements */,
@@ -638,7 +643,7 @@
 				7376086A1E1B2385002D0B45 /* AssetsLibrary.framework */,
 				7348C3B61C41C04F00B9CDF5 /* Fabric.framework */,
 				7348C3B71C41C04F00B9CDF5 /* Crashlytics.framework */,
-				8A3881422957FEADB4DD80CD /* libPods-Tradle-dev.a */,
+				2DAE990E76741D82A46F1F9D /* Pods_Tradle_dev.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1385,6 +1390,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				735A6BA41ECBD550001C925A /* RNIproov.m in Sources */,
 				73261E141C4AB9FE00292FEE /* AppDelegate.m in Sources */,
 				73261E161C4AB9FE00292FEE /* main.m in Sources */,
 				73683CFC1CC443B300E178CF /* QTouchposeApplication.m in Sources */,

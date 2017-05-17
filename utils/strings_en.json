@@ -201,7 +201,7 @@
     "youReviewed": "You reviewed {1} out of {2} items",
     "youReviewedAll": "You reviewed all {1}",
     "unknownQRCodeFormat": "Unrecognized QR code format",
-    "confirmedMyData": "All imported data can be viewed in {profileTitle}",
+    "confirmedMyData": "All imported data can be viewed in your {profileTitle}",
     "importData": "Import data",
     "importYourData": "Import Your Data",
     "digitalWealthPassport": "Digital Wealth Passport",
@@ -249,5 +249,9 @@
     "continue": "Continue",
     "importDataPrompt": "You are about to import your data from",
     "unreadMessages": "You have unread messages",
-    "messageWaitingFrom": "You have a new message from {1}"
+    "messageWaitingFrom": "You have a new message from {1}",
+    "iproovFailedTitle": "Oops! Something went wrong",
+    "iproovFailedMessage": "Please try again. For best results, keep your face centered in the oval during the color flashes.",
+    "iproovErrorTitle": "Oops! Something went wrong",
+    "iproovErrorMessage": "Please wait a bit and try again"
 }
