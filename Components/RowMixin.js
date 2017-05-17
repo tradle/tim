@@ -531,7 +531,7 @@ var RowMixin = {
       return;
 
     let r = this.props.resource
-    let isFormError = r[TYPE] === FORM_ERROR
+    let isFormError = r[constants.TYPE] === FORM_ERROR
     Actions.addItem({
       disableFormRequest: r,
       resource: {
