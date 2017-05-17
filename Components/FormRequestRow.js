@@ -54,8 +54,6 @@ import {
 import React, { Component } from 'react'
 
 import ENV from '../utils/env'
-import IProov from 'react-native-iproov'
-import { coroutine as co } from 'bluebird'
 
 class FormRequestRow extends Component {
   constructor(props) {
@@ -721,56 +719,6 @@ class FormRequestRow extends Component {
     // this.props.navigator.pop()
   }
 }
-
-FormRequestRow.prototype.showIproovScanner = co(function* () {
-  const me = utils.getMe()
-  const opts = {
-    username: me[constants.ROOT_HASH],
-    serviceProvider: ENV.iProov.apiKey,
-    animated: true
-  }
-
-  const enroll = !me.iproovEnrolled
-  let result
-  try {
-    if (enroll) {
-      result = yield IProov.enroll(opts)
-    } else {
-      result = yield IProov.verify(opts)
-    }
-  } catch (err) {
-    debug('experienced iProov error', err.code, err.name)
-    Alert.alert(translate('iproovErrorTitle'), translate('iproovErrorMessage'))
-    return
-  }
-
-  const { success, token, reason } = result
-  if (!success) {
-    debug('iProov failed', reason)
-    Alert.alert(translate('iproovFailedTitle'), translate('iproovFailedMessage'))
-    return
-  }
-
-  debug('iProov succeeded!')
-  if (enroll) {
-    Actions.updateMe({ iproovEnrolled: true })
-  }
-
-  this.props.resource.token = token
-  let r = this.props.resource
-
-  Actions.addItem({
-    disableFormRequest: r,
-    resource: {
-      [TYPE]: r.form,
-      token: token,
-      enroll: enroll,
-      from: r.to,
-      to: r.from,
-      _context: r._context
-    }
-  })
-})
 
 function isMultientry(resource) {
   if (!resource.product)

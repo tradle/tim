@@ -1,5 +1,6 @@
 'use strict';
 
+const debug = require('debug')('tradle:app:RowMixin')
 var React = require('react');
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -20,6 +21,10 @@ import {
   TouchableHighlight,
   Image
 } from 'react-native';
+
+import IProov from 'react-native-iproov'
+import { coroutine as co } from 'bluebird'
+import ENV from '../utils/env'
 
 const SHOW_TIME_INTERVAL = 60000
 var CURRENCY_SYMBOL
@@ -543,27 +548,57 @@ var RowMixin = {
       }
     })
   },
-  showIproovScanner() {
-    // Iproov.scan
-    const token = this.fakeIproof({username: utils.getMe()[constants.ROOT_HASH]})
-    this.props.resource.token = token
-    let r = this.props.resource
+
+  showIproovScanner: co(function* () {
+    const me = utils.getMe()
+    const opts = {
+      username: me[constants.ROOT_HASH],
+      serviceProvider: ENV.iProov.apiKey,
+      animated: true
+    }
+
+    const enroll = !me.iproovEnrolled
+    let result
+    try {
+      if (enroll) {
+        result = yield IProov.enroll(opts)
+      } else {
+        result = yield IProov.verify(opts)
+      }
+    } catch (err) {
+      debug('experienced iProov error', err.code, err.name)
+      Alert.alert(translate('iproovErrorTitle'), translate('iproovErrorMessage'))
+      return
+    }
+
+    const { success, token, reason } = result
+    if (!success) {
+      debug('iProov failed', reason)
+      Alert.alert(translate('iproovFailedTitle'), translate('iproovFailedMessage'))
+      return
+    }
+
+    debug('iProov succeeded!')
+    if (enroll) {
+      Actions.updateMe({ iproovEnrolled: true })
+    }
+
+    const r = this.props.resource
+    r.token = token
+
     let isFormError = r[constants.TYPE] === FORM_ERROR
     Actions.addItem({
       disableFormRequest: r,
       resource: {
-        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.fo,
+        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.form,
         token: token,
+        enroll: enroll,
         from: r.to,
         to: r.from,
         _context: r._context
       }
     })
-  },
-
-  fakeIproof({ userid }) {
-    return Math.random().toString()
-  }
+  })
 
 
   // anyOtherRow(prop, backlink, styles) {
