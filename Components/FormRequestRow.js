@@ -685,27 +685,6 @@ class FormRequestRow extends Component {
     }
   }
 
-  showIproovScanner() {
-    // Iproov.scan
-    const token = this.fakeIproof({username: utils.getMe()[constants.ROOT_HASH]})
-    this.props.resource.token = token
-    let r = this.props.resource
-    Actions.addItem({
-      disableFormRequest: r,
-      resource: {
-        [TYPE]: r.form,
-        token: token,
-        from: r.to,
-        to: r.from,
-        _context: r._context
-      }
-    })
-  }
-
-  fakeIproof({ userid }) {
-    return Math.random().toString()
-  }
-
   reviewFormsInContext() {
     Alert.alert(
       translate('importDataPrompt'),
@@ -738,23 +717,6 @@ class FormRequestRow extends Component {
     // });
     // this.props.navigator.pop()
   }
-
-  onSetMediaProperty(propName, item) {
-    if (!item)
-      return;
-    let formRequest = this.props.resource
-    Actions.addItem({
-      disableFormRequest: formRequest,
-      resource: {
-        [TYPE]: formRequest.form,
-        [propName]: item,
-        _context: formRequest._context,
-        from: utils.getMe(),
-        to: formRequest.from  // FormRequest.from
-      }
-    })
-  }
-
 }
 
 function isMultientry(resource) {

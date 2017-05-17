@@ -5,6 +5,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
+var Actions = require('../Actions/Actions');
 var Icon = require('react-native-vector-icons/Ionicons');
 import CustomIcon from '../styles/customicons'
 var StyleSheet = require('../StyleSheet')
@@ -502,9 +503,10 @@ var RowMixin = {
     let isFormError = type === FORM_ERROR
     if (!isFormRequest  &&  !isFormError)
       return
-    const model = isFormRequest
-                ? utils.getModel(resource.form).value
-                : utils.getModel(resource.prefill[constants.TYPE]).value
+    let ftype = isFormRequest
+              ? resource.form
+              : resource.prefill[constants.TYPE]
+    const model = utils.getModel(ftype).value
     const props = model.properties
     let eCols = []
     for (let p in props) {
@@ -517,13 +519,53 @@ var RowMixin = {
 
     if (eCols.length === 1) {
       let p = eCols[0]
-      if (resource.form === IPROOV_SELFIE)
+      if (ftype === IPROOV_SELFIE)
         return p
       if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
         return p
     }
     return
+  },
+  onSetMediaProperty(propName, item) {
+    if (!item)
+      return;
+
+    let r = this.props.resource
+    let isFormError = r[TYPE] === FORM_ERROR
+    Actions.addItem({
+      disableFormRequest: r,
+      resource: {
+        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.fo,
+        [propName]: item,
+        _context: r._context,
+        from: utils.getMe(),
+        to: r.from
+      }
+    })
+  },
+  showIproovScanner() {
+    // Iproov.scan
+    const token = this.fakeIproof({username: utils.getMe()[constants.ROOT_HASH]})
+    this.props.resource.token = token
+    let r = this.props.resource
+    let isFormError = r[constants.TYPE] === FORM_ERROR
+    Actions.addItem({
+      disableFormRequest: r,
+      resource: {
+        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.fo,
+        token: token,
+        from: r.to,
+        to: r.from,
+        _context: r._context
+      }
+    })
+  },
+
+  fakeIproof({ userid }) {
+    return Math.random().toString()
   }
+
+
   // anyOtherRow(prop, backlink, styles) {
   //   var row;
   //   var resource = this.props.resource;
