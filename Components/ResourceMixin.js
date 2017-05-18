@@ -109,8 +109,10 @@ var ResourceMixin = {
     var vCols = pMeta.viewCols;
     if (!vCols) {
       vCols = [];
-      for (var p in itemsMeta)
-        vCols.push(p);
+      for (var p in itemsMeta) {
+        if (p.charAt(0) !== '_'  &&  !itemsMeta[p].hidden)
+          vCols.push(p);
+      }
     }
     var cnt = val.length;
     var self = this;
