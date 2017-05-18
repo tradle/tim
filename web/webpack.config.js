@@ -243,7 +243,7 @@ if (NODE_ENV === 'development') {
       ],
       loaders: [
         getBabelLoader()
-      ]
+      ].concat(getMaybeLoaders())
     },
     plugins: [
       new webpack.optimize.DedupePlugin(),
@@ -362,4 +362,20 @@ function isExternal (module) {
 
 function notNull (a) {
   return !!a
+}
+
+function getMaybeLoaders () {
+  const loaders = [{
+    test: /data\/formDefaults\.json$/,
+    loader: 'null-loader'
+  }]
+
+  if (['a2', 'a2-local', 'ae', 'ae2'].indexOf(PROVIDERS) === -1) {
+    loaders.push({
+      test: /aviva.*\.(html|jpe?g|png)$/i,
+      loader: 'null-loader'
+    })
+  }
+
+  return loaders
 }
