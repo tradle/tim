@@ -22,7 +22,6 @@ import {
   Image
 } from 'react-native';
 
-// import IProov from 'react-native-iproov'
 import { coroutine as co } from 'bluebird'
 import ENV from '../utils/env'
 
@@ -550,6 +549,11 @@ var RowMixin = {
   },
 
   showIproovScanner: co(function* () {
+    if (!ENV.iProov) {
+      return Alert.alert('IProov is not set up')
+    }
+
+    const IProov = require('../utils/iproov')
     const me = utils.getMe()
     const opts = {
       username: me[constants.ROOT_HASH],
@@ -558,23 +562,20 @@ var RowMixin = {
     }
 
     const enroll = !me.iproovEnrolled
-    // let result
-    // try {
-    //   if (enroll) {
-    //     result = yield IProov.enroll(opts)
-    //   } else {
-    //     result = yield IProov.verify(opts)
-    //   }
-    // } catch (err) {
-    //   debug('experienced iProov error', err.code, err.name)
-    //   Alert.alert(translate('iproovErrorTitle'), translate('iproovErrorMessage'))
-    //   return
-    // }
+    let result
+    try {
+      if (enroll) {
+        result = yield IProov.enroll(opts)
+      } else {
+        result = yield IProov.verify(opts)
+      }
+    } catch (err) {
+      debug('experienced iProov error', err.code, err.name)
+      Alert.alert(translate('iproovErrorTitle'), translate('iproovErrorMessage'))
+      return
+    }
 
-    // const { success, token, reason } = result
-    let success = true
-    let token = '12434534jhkjh3k564k57457jk65h7kj5h67kj5h6'
-    let reason = 'Everything OK'
+    const { success, token, reason } = result
     if (!success) {
       debug('iProov failed', reason)
       Alert.alert(translate('iproovFailedTitle'), translate('iproovFailedMessage'))
