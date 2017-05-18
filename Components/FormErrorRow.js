@@ -141,7 +141,7 @@ class FormErrorRow extends Component {
       cellStyle = addStyle
     else
       cellStyle = chatStyles.textContainer
-    var messageBody;
+    var messageBody
     if (prop) {
       if (prop.ref == PHOTO) {
         messageBody = <View style={[rowStyle, viewStyle]}>
