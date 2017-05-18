@@ -307,7 +307,7 @@ var NewResourceMixin = {
 
         }
         else if (type === 'string') {
-          if (props[p].maxLength > 100)
+          if (props[p].maxLength > 300)
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
           if (props[p].oneOf) {
@@ -744,45 +744,63 @@ var NewResourceMixin = {
   },
 
   myTextInputTemplate(params) {
-    var label = translate(params.prop, params.model)
-    if (params.prop.units) {
-      label += (params.prop.units.charAt(0) === '[')
-             ? ' ' + params.prop.units
-             : ' (' + params.prop.units + ')'
+    let prop = params.prop
+    var label = translate(prop, params.model)
+    if (prop.units) {
+      label += (prop.units.charAt(0) === '[')
+             ? ' ' + prop.units
+             : ' (' + prop.units + ')'
     }
     else
       label += params.required ? '' : ' (' + translate('optional') + ')'
     let lStyle = styles.labelStyle
 
-    if (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY  &&  !params.required) {
+    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY  &&  !params.required) {
       let maxChars = (utils.dimensions(component).width - 60)/utils.getFontSize(9)
       // let some space for wrapping
-      if (maxChars < label.length  &&  (!this.state.resource[params.prop.name] || !this.state.resource[params.prop.name].length))
+      if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
         lStyle = [lStyle, {marginTop: 0}]
     }
-    let lcolor = this.getLabelAndBorderColor(params.prop.name)
+    let lcolor = this.getLabelAndBorderColor(prop.name)
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
-    let multiline = params.prop.maxLength > 100
+    let multiline = prop.maxLength > 100
+    let help = prop.ref !== constants.TYPES.MONEY  && this.getHelp(prop)
+    let st = {} //help ? {flexDirection: 'row', justifyContent: 'space-between'} : {}
+
     return (
-      <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
+      <View style={{flex: 5, paddingBottom: this.hasError(params.errors, prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
         <FloatLabel
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
           multiline={multiline}
-          autoCapitalize={this.state.isRegistration  ||  (params.prop.name !== 'url' &&  (!params.prop.keyboard || params.prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
-          onFocus={this.inputFocused.bind(this, params.prop.name)}
+          autoCapitalize={this.state.isRegistration  ||  (prop.name !== 'url' &&  (!prop.keyboard || prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
+          onFocus={this.inputFocused.bind(this, prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
           value={params.value}
           keyboardShouldPersistTaps={true}
           keyboardType={params.keyboard || 'default'}
-          onChangeText={this.onChangeText.bind(this, params.prop)}
+          onChangeText={this.onChangeText.bind(this, prop)}
           underlineColorAndroid='transparent'
-        >{label}</FloatLabel>
+        >{label}
+        </FloatLabel>
+          {help}
           {this.getErrorView(params)}
       </View>
     );
+  },
+  getHelp(prop, isEnum) {
+    if (!prop.description)
+      return
+    let isPrimitive = !isEnum && prop.type !== 'object'
+    // let help = <TouchableHighlight underlayColor='transparent' onPress={() => Alert.alert(prop.title, prop.description)}>
+    //              <Icon name='ios-help-circle' size={20} color='#7AAAC3' style={{position: 'absolute',  right: isEnum ? 2 : 12, bottom: isEnum ? 15 : 25}} />
+    //            </TouchableHighlight>
+    let help = <TouchableHighlight underlayColor='transparent' onPress={() => Alert.alert(prop.title, prop.description)}>
+                 <Icon name='ios-help-circle' size={20} color='#7AAAC3' style={{position: 'absolute',  right: isEnum ? 2 : 12, bottom: isEnum ? 15 : isPrimitive ? 12 : 25}} />
+               </TouchableHighlight>
+    return help
   },
 
   getErrorView(params) {
@@ -834,6 +852,7 @@ var NewResourceMixin = {
     }
 
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
+    let help = this.getHelp(prop)
     return (
       <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
@@ -893,7 +912,7 @@ var NewResourceMixin = {
     if (valueMoment) {
       localizedDate = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date())
     }
-
+    let help = this.getHelp(prop)
     return (
       <View>
         <View key={this.getNextKey()} ref={prop.name} style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
@@ -921,6 +940,7 @@ var NewResourceMixin = {
             }}
             {...dateProps}
           />
+          {help}
         </View>
         {this.getErrorView(params)}
        </View>
@@ -1148,11 +1168,12 @@ var NewResourceMixin = {
       actionItem = <TouchableHighlight underlayColor='transparent' onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
                      {content}
                    </TouchableHighlight>
-
+    let help = this.getHelp(prop)
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
         {propLabel}
         {actionItem}
+        {help}
         {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
       </View>
     );
@@ -1381,6 +1402,7 @@ var NewResourceMixin = {
     else
       error = <View/>
     var value = prop ? params.value : this.state.resource[enumProp.name]
+    let help = this.getHelp(prop, true)
     return (
       <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
@@ -1389,6 +1411,7 @@ var NewResourceMixin = {
               <Text style={styles.enumText}>{value}</Text>
               <Icon name='ios-arrow-down'  size={15}  color={LINK_COLOR}  style={[styles.icon1, styles.enumProp]} />
             </View>
+            {help}
            {error}
           </View>
         </TouchableHighlight>
