@@ -84,8 +84,8 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
 const ENUM = 'tradle.Enum'
-var dictionaries = require('@tradle/models').dict
-var dictionary = dictionaries[Strings.language]
+// var dictionaries = require('@tradle/models').dict
+var dictionary //= dictionaries[Strings.language]
 
 var propTypesMap = {
   'string': t.Str,
@@ -123,8 +123,8 @@ var utils = {
     if (me.languageCode) {
       if (me.dictionary)
         dictionary = me.dictionary
-      else if (dictionaries[me.languageCode])
-        dictionary = dictionaries[me.languageCode]
+      // else if (dictionaries[me.languageCode])
+      //   dictionary = dictionaries[me.languageCode]
     }
   },
   getMe() {
@@ -180,7 +180,7 @@ var utils = {
   },
   translateModel(model, isPlural) {
     if (dictionary  &&  dictionary.models[model.id])
-      return dictionary.models[model.id]
+      return dictionary.models[model.id]  ||  this.makeModelTitle(model, isPlural)
     return model.title ? model.title : this.makeModelTitle(model, isPlural)
   },
   translateString(...args) {
