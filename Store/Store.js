@@ -1805,7 +1805,7 @@ var Store = Reflux.createStore({
     let languageCode
     if (me) {
       language = me.language
-      if (language && list[utils.getId(language)]) {
+      if (language) {
         language = this._getItem(utils.getId(language))
         languageCode = language.code
       }
@@ -8784,13 +8784,23 @@ var Store = Reflux.createStore({
     list[key] = { key, value }
   },
   _getItem(r) {
-    if (typeof r === 'string')
-      return list[r] ? list[r].value : null
+    if (typeof r === 'string') {
+      if (list[r])
+        return list[r].value
+      let rtype = utils.getType(r)
+      if (this.getModel(rtype).subClassOf === ENUM) {
+        let eValues = enums[rtype]
+        let eVal = eValues.filter((ev) => utils.getId(ev) === r)
+        if (eVal.length)
+          return eVal[0]
+      }
+    }
     else if (r.value)
       return r.value
     else {
       let rr = list[utils.getId(r)]
-      return rr ? rr.value : null
+      if (rr)
+        return rr.value
     }
   },
   _mergeItem(key, value) {
