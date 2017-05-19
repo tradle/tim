@@ -186,11 +186,11 @@ var utils = {
   translateString(...args) {
     const { strings } = Strings
     if (!strings)
-      return args[0]
+      return this.makeLabel(args[0])
 
     let s = strings[args[0]]
     if (!s)
-      return args[0]
+      return this.makeLabel(args[0])
 
     // if (args.length === 2  &&  typeof args[1] === 'object') {
     //   let pos = 0
