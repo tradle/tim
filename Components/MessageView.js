@@ -317,6 +317,8 @@ class MessageView extends Component {
       let mainPhotoProp = utils.getMainPhotoProperty(model)
       mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
     }
+    else if (photos.length === 1)
+      mainPhoto = photos[0]
     var inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
