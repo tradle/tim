@@ -762,7 +762,7 @@ var Store = Reflux.createStore({
       fixOldSettings(settings)
 
       let updateSettings
-      if (__DEV__  &&  settings  &&  settings.urls) {
+      if (settings  &&  settings.urls) {
         let urls = settings.urls
         // HACK for non-static ip
         if (SERVICE_PROVIDERS_BASE_URL_DEFAULTS) {
