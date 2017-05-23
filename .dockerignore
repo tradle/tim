@@ -1,11 +1,4 @@
-.git
-.gitignore
-node_modules/
-#web/dist
-iOS
-android
-TiMTests
-video
-*.mp4
-*.log
-webpack-stats*.json
+*
+!web/dist
+!run.sh
+!version.json
