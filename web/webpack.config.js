@@ -121,9 +121,9 @@ var common = {
       /environment.json$/,
       require.resolve(envFile)
     ),
-    new Visualizer({
-      filename: 'stats.html'
-    })
+    // new Visualizer({
+    //   filename: path.join('stats.html')
+    // })
     // new WebpackMd5Hash(),
     // new ManifestPlugin({
     //   fileName: 'build-manifest.json'
