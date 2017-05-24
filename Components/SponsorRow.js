@@ -17,7 +17,7 @@ var extend = require('extend')
 // var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 // const PRIORITY_HEIGHT = 100
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
 var StyleSheet = require('../StyleSheet')
 var ArticleView = require('./ArticleView')

@@ -94,7 +94,7 @@ import {
 import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
-import defaultBankStyle from './styles/bankStyle.json'
+import defaultBankStyle from './styles/defaultBankStyle.json'
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
@@ -398,7 +398,7 @@ class TiMApp extends Component {
           onWillFocus={(newRoute) => {
             let style = newRoute.passProps.bankStyle
             if (style)
-              this.setState({navBarBgColor: style.NAV_BAR_BACKGROUND_COLOR || 'transparent'})
+              this.setState({navBarBgColor: style.navBarBackgroundColor || 'transparent'})
             else
               this.setState({navBarBgColor: 'transparent'})
           }}
@@ -563,8 +563,8 @@ var NavigationBarRouteMapper = {
       return <View/>
 
     var color = '#7AAAC3'
-    if (route.passProps.bankStyle  &&  route.passProps.bankStyle.LINK_COLOR)
-      color = route.passProps.bankStyle.LINK_COLOR
+    if (route.passProps.bankStyle  &&  route.passProps.bankStyle.linkColor)
+      color = route.passProps.bankStyle.linkColor
 
     var previousRoute = navState.routeStack[index - 1];
     var lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
@@ -607,7 +607,7 @@ var NavigationBarRouteMapper = {
     if (route.tintColor)
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
-      style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
+      style.push({color: route.passProps.bankStyle.linkColor || '#7AAAC3'})
     var title
 
     var rbTitle = route.rightButtonTitle
@@ -713,7 +713,7 @@ var NavigationBarRouteMapper = {
     let photo, uri
     let photoObj
     if (route.passProps.bankStyle) {
-      photoObj = route.passProps.bankStyle.LOGO || route.passProps.bankStyle.logo
+      photoObj = route.passProps.bankStyle.logo || route.passProps.bankStyle.logo
     }
 
     if (!photoObj)
@@ -729,7 +729,7 @@ var NavigationBarRouteMapper = {
     let logoNeedsText = (!route.passProps.resource  &&  route.id !== 7) ||
                         // route.passProps.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION ||
                         !route.passProps.bankStyle ||
-                        route.passProps.bankStyle.LOGO_NEEDS_TEXT
+                        route.passProps.bankStyle.logoNeedsText
     if (uri) {
       if (logoNeedsText)
         photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 23} : {}]} />

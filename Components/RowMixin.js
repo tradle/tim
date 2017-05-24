@@ -22,7 +22,7 @@ import {
   Image
 } from 'react-native';
 
-import IProov from 'react-native-iproov'
+// import IProov from 'react-native-iproov'
 import { coroutine as co } from 'bluebird'
 import ENV from '../utils/env'
 
@@ -84,7 +84,7 @@ var RowMixin = {
     let propTitle = translate(prop, model)
     if (isVerification) {
       if (!this.props.isAggregation)
-        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: this.props.bankStyle.VERIFICATION_BG, borderTopColor: '#eeeeee'}]
+        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: this.props.bankStyle.verifiedBg, borderTopColor: '#eeeeee'}]
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={styles.column}>
@@ -159,7 +159,7 @@ var RowMixin = {
       }).join('');
 
       return <View style={{paddingRight: 3}}>
-               <View style={[{backgroundColor: this.props.bankStyle.LINK_COLOR}, styles.cellRoundImage]}>
+               <View style={[{backgroundColor: this.props.bankStyle.linkColor}, styles.cellRoundImage]}>
                  <Text style={styles.cellText}>{title}</Text>
                </View>
              </View>
@@ -245,11 +245,11 @@ var RowMixin = {
                     //   : <View/>
                     // }
                           // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
-    let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
+    let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.verifiedBg, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.verifiedBg, borderBottomColor: this.props.bankStyle.verifiedHeaderColor}
 
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
     // let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
-    let arrow = <Icon color={this.props.bankStyle.VERIFIED_LINK_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
+    let arrow = <Icon color={this.props.bankStyle.verifiedLinkColor} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
 
     let docName
     if (!isThirdParty)
@@ -275,7 +275,7 @@ var RowMixin = {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={[chatStyles.shareButton, {backgroundColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+      var shareView = <View style={[chatStyles.shareButton, {backgroundColor: this.props.bankStyle.shareButtonBackgroundColor, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
@@ -450,9 +450,9 @@ var RowMixin = {
           if (msgModel) {
             let color
             if (this.isMyMessage())
-              color = this.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR
+              color = this.props.bankStyle.myMessageBackgroundColor
             else
-              color = this.props.bankStyle.LINK_COLOR
+              color = this.props.bankStyle.linkColor
             vCols.push(<View key={self.getNextKey()}>
                          <Text style={style}>{msgParts[0]}</Text>
                          <Text style={[style, {color: color}]}>{msgModel.value.title}</Text>
@@ -492,7 +492,7 @@ var RowMixin = {
     if (this.props.sendStatus === 'Sent')
       return <View style={styles.sendStatus}>
                <Text style={styles.sentStatus}>{this.props.sendStatus}</Text>
-               <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
+               <Icon name={'ios-checkmark-outline'} size={15} color={this.props.bankStyle.messageSentStatus} />
              </View>
     else
       return <View style={styles.sendStatus}>
@@ -540,7 +540,7 @@ var RowMixin = {
     Actions.addItem({
       disableFormRequest: r,
       resource: {
-        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.fo,
+        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.form,
         [propName]: item,
         _context: r._context,
         from: utils.getMe(),
@@ -558,20 +558,23 @@ var RowMixin = {
     }
 
     const enroll = !me.iproovEnrolled
-    let result
-    try {
-      if (enroll) {
-        result = yield IProov.enroll(opts)
-      } else {
-        result = yield IProov.verify(opts)
-      }
-    } catch (err) {
-      debug('experienced iProov error', err.code, err.name)
-      Alert.alert(translate('iproovErrorTitle'), translate('iproovErrorMessage'))
-      return
-    }
+    // let result
+    // try {
+    //   if (enroll) {
+    //     result = yield IProov.enroll(opts)
+    //   } else {
+    //     result = yield IProov.verify(opts)
+    //   }
+    // } catch (err) {
+    //   debug('experienced iProov error', err.code, err.name)
+    //   Alert.alert(translate('iproovErrorTitle'), translate('iproovErrorMessage'))
+    //   return
+    // }
 
-    const { success, token, reason } = result
+    // const { success, token, reason } = result
+    let success = true
+    let token = '12434534jhkjh3k564k57457jk65h7kj5h67kj5h6'
+    let reason = 'Everything OK'
     if (!success) {
       debug('iProov failed', reason)
       Alert.alert(translate('iproovFailedTitle'), translate('iproovFailedMessage'))

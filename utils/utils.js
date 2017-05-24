@@ -1671,8 +1671,8 @@ var utils = {
     let separator = {}
     if (bankStyle) {
       if (bankStyle.NAV_BAR_BORDER_COLOR) {
-        separator.borderTopColor = bankStyle.NAV_BAR_BORDER_COLOR
-        separator.borderTopWidth = bankStyle.NAV_BAR_BORDER_WIDTH ||  StyleSheet.hairlineWidth
+        separator.borderTopColor = bankStyle.navBarBorderColor
+        separator.borderTopWidth = bankStyle.navBarBorderWidth ||  StyleSheet.hairlineWidth
       }
     }
     return separator
@@ -1692,8 +1692,8 @@ var utils = {
     }
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
-    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{message1}
-             <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
+    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
+             <Text style={{color: bankStyle.linkColor}}>{formType}</Text>
              <Text>{utils.parseMessage(resource, message2, bankStyle, idx)}</Text>
            </Text>
   },

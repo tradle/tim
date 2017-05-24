@@ -160,8 +160,8 @@ class ShowPropertiesView extends Component {
         else if (this.props.checkProperties) {
           if (p.indexOf('_group') === p.length - 6) {
             return (<View style={{padding: 15}} key={this.getNextKey()}>
-                      <View key={this.getNextKey()}  style={{borderBottomColor: this.props.bankStyle.LINK_COLOR, borderBottomWidth: 1, paddingBottom: 5}}>
-                        <Text style={{fontSize: 22, color: this.props.bankStyle.LINK_COLOR}}>{translate(pMeta)}</Text>
+                      <View key={this.getNextKey()}  style={{borderBottomColor: this.props.bankStyle.linkColor, borderBottomWidth: 1, paddingBottom: 5}}>
+                        <Text style={{fontSize: 22, color: this.props.bankStyle.linkColor}}>{translate(pMeta)}</Text>
                       </View>
                     </View>
              );
@@ -247,7 +247,7 @@ class ShowPropertiesView extends Component {
 
             if (!key)
               return
-            labels.push(<View style={{justifyContent: 'space-between', flexDirection: 'row'}} key={this.getNextKey()}>
+            labels.push(<View style={styles.row} key={this.getNextKey()}>
                            <Text style={[styles.title]}>{key}</Text>
                            <Text style={[styles.title, {color: '#2e3b4e'}]}>{value}</Text>
                         </View>)
@@ -279,7 +279,7 @@ class ShowPropertiesView extends Component {
                       <TouchableOpacity underlayColor='transparent' onPress={() => {
                         this.setState({promptVisible: pMeta})
                       }}>
-                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.LINK_COLOR} style={{marginTop: 10}}/>
+                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.linkColor} style={{marginTop: 10}}/>
                       </TouchableOpacity>
                       <Prompt
                         title={translate('fieldErrorMessagePrompt')}
@@ -321,29 +321,29 @@ class ShowPropertiesView extends Component {
     if (resource.txId) { // || utils.isSealableModel(model)) {
       let bankStyle = this.props.bankStyle
 
-      let header = (<View style={{paddingVertical: 10, paddingHorizontal: 10 }} key={this.getNextKey()}>
-                      <View style={[styles.textContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+      let header = (<View style={{padding: 10 }} key={this.getNextKey()}>
+                      <View style={[styles.textContainer, styles.row]}>
                         <Text style={styles.bigTitle}>{translate('dataSecurity')}</Text>
-                        <Icon color={bankStyle.LINK_COLOR} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
+                        <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
                       </View>
-                      <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: bankStyle.LINK_COLOR}} />
+                      <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: bankStyle.linkColor}} />
                     </View>)
       let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
       let txs = (
         <View>
           <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
-            <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
+            <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
-            <Text style={[styles.description, {color: bankStyle.LINK_COLOR}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
+            <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
           </TouchableOpacity>
         </View>
       )
 
       let content = <View style={{paddingHorizontal: 10}}>
                      <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
-                       <Text style={{color: '#9b9b9b', fontSize: 16, marginHorizontal: 7, paddingBottom: 10}}>{description}
-                         <Text style={{color: bankStyle.LINK_COLOR, paddingHorizontal: 7}}> Learn more</Text>
+                       <Text style={styles.content}>{description}
+                         <Text style={{color: bankStyle.linkColor, paddingHorizontal: 7}}> Learn more</Text>
                        </Text>
                      </TouchableOpacity>
                      {txs}
@@ -390,6 +390,16 @@ reactMixin(ShowPropertiesView.prototype, ResourceMixin);
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
+  },
+  row: {
+    justifyContent: 'space-between',
+    flexDirection: 'row'
+  },
+  content: {
+    color: '#9b9b9b',
+    fontSize: 16,
+    marginHorizontal: 7,
+    paddingBottom: 10
   },
   separator: {
     height: 1,

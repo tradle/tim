@@ -50,8 +50,8 @@ class MyProductMessageRow extends Component {
     var ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
 
-    let addStyle = [chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR , borderColor: this.props.bankStyle.CONFIRMATION_COLOR}];
-    // let rowStyle = [chatStyles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
+    let addStyle = [chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.productBgColor , borderColor: this.props.bankStyle.confirmationColor}];
+    // let rowStyle = [chatStyles.row,  {backgroundColor: this.props.bankStyle.backgroundColor}];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
@@ -59,7 +59,7 @@ class MyProductMessageRow extends Component {
 
     // var viewStyle = {flexDirection: 'row', alignSelf: 'flex-start', width: DeviceWidth - 50};
 
-    var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
+    var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.productBgColor ? {backgroundColor: this.props.bankStyle.productBgColor} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
     renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[chatStyles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
                                <Text style={styles.issuedBy}>{translate('issuedBy', orgName)}</Text>
@@ -160,12 +160,12 @@ class MyProductMessageRow extends Component {
         let isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
-          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 18}]
+          style = [style, {color: self.props.bankStyle.confirmationColor, fontSize: 18}]
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
-              <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR}, styles.flower]} size={50} name={'ios-flower'} />
-              <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR}, styles.done} size={30} name={'ios-done-all'} />
+              <Icon style={[{color: self.props.bankStyle.confirmationColor}, styles.flower]} size={50} name={'ios-flower'} />
+              <Icon style={{color: self.props.bankStyle.confirmationColor}, styles.done} size={30} name={'ios-done-all'} />
             </View>
           );
 

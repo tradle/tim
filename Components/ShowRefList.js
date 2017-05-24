@@ -58,7 +58,7 @@ class ShowRefList extends Component {
     let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
     let showDocuments = this.props.showDocuments
 
-    let bg = this.props.bankStyle ? this.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR : appStyle.CURRENT_UNDERLINE_COLOR
+    let bg = this.props.bankStyle ? this.props.bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
 
     let currentMarker = <View style={{backgroundColor: bg, height: 4, marginTop: -5}} />
 

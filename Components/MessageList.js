@@ -267,7 +267,7 @@ class MessageList extends Component {
       }
       return
     }
-    LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.LINK_COLOR
+    LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.linkColor
     let isEmployee = utils.isEmployee(resource)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let productToForms = this.gatherForms(list)
@@ -531,10 +531,10 @@ class MessageList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     var resource = this.props.resource
     let bankStyle = this.props.bankStyle
-    var bgImage = bankStyle &&  bankStyle.BACKGROUND_IMAGE
+    var bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
     var bgStyle = {}
-    if (!bgImage  &&  bankStyle.BACKGROUND_COLOR)
-      bgStyle = {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
+    if (!bgImage  &&  bankStyle.backgroundColor)
+      bgStyle = {backgroundColor: this.props.bankStyle.backgroundColor}
     var alert = <View />
     let hideTextInput = !utils.hasSupportLine(resource)  // &&  !ENV.allowForgetMe
 
@@ -859,7 +859,7 @@ class MessageList extends Component {
     this.props.navigator.push({
       id: 25,
       title: translate('trustedProviders'),
-      titleTextColor: this.props.bankStyle.VERIFIED_BORDER_COLOR,
+      titleTextColor: this.props.bankStyle.verifiedBorderColor,
       backButtonTitle: 'Back',
       component: VerifierChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,

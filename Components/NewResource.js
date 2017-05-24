@@ -81,7 +81,7 @@ class NewResource extends Component {
   constructor(props) {
     super(props);
     if (this.props.bankStyle)
-      LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
+      LINK_COLOR = this.props.bankStyle.linkColor || DEFAULT_LINK_COLOR
     else
       LINK_COLOR = DEFAULT_LINK_COLOR
     var r = {};
@@ -726,9 +726,9 @@ class NewResource extends Component {
       var submit
       if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
-                   <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
+                   <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
                      <View style={{backgroundColor: 'transparent', paddingHorizontal: 10, justifyContent: 'center'}}>
-                       <Text style={{fontSize: 24,color: bankStyle.CONTEXT_TEXT_COLOR}}>{translate('next')}</Text>
+                       <Text style={{fontSize: 24,color: bankStyle.contextTextColor}}>{translate('next')}</Text>
                      </View>
                    </View>
                  </TouchableOpacity>
@@ -740,8 +740,8 @@ class NewResource extends Component {
               </PageView>
     }
     let title
-    if (!isRegistration  &&  !bankStyle.LOGO_NEEDS_TEXT) {
-      title = <View style={{backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 25, justifyContent: 'center', alignItems: 'center'}}>
+    if (!isRegistration  &&  !bankStyle.logoNeedsText) {
+      title = <View style={{backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 25, justifyContent: 'center', alignItems: 'center'}}>
                 {translate(meta)}
               </View>
     }

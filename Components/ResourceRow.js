@@ -17,7 +17,7 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 // const PRIORITY_HEIGHT = 100
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 

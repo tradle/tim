@@ -24,7 +24,8 @@ var PasswordCheck = require('./PasswordCheck')
 var ArticleView = require('./ArticleView');
 var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
+
 var QRCodeScanner = require('./QRCodeScanner')
 var TimerMixin = require('react-timer-mixin')
 var isDeepLink

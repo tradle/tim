@@ -48,7 +48,7 @@ class ChatContext extends Component {
     let bankStyle = this.props.bankStyle
     let isShareContext = chat[constants.TYPE] === PRODUCT_APPLICATION && isReadOnlyChat
 
-    let content = <Text style={[{color: this.props.allContexts ? bankStyle.CURRENT_CONTEXT_TEXT_COLOR : bankStyle.SHARE_CONTEXT_TEXT_COLOR}, styles.text]}>{translate(utils.getModel(context.product).value)}</Text>
+    let content = <Text style={[{color: this.props.allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(context.product).value)}</Text>
     let chooser = context  &&  isShareContext
                 ? <View style={styles.contextBar}>{content}</View>
                 : <TouchableOpacity onPress={this.props.contextChooser} style={styles.contextBar}>
@@ -62,9 +62,9 @@ class ChatContext extends Component {
     //   share = <View/>
     else
       share = <TouchableOpacity onPress={this.props.shareWith} style={{position: 'absolute', right: 10, padding: 10}}>
-                <Icon size={22} name='md-share' color={bankStyle.SHARE_CONTEXT_TEXT_COLOR} style={{marginRight: 10, paddingLeft: 20}} />
+                <Icon size={22} name='md-share' color={bankStyle.shareContextTextColor} style={{marginRight: 10, paddingLeft: 20}} />
               </TouchableOpacity>
-    let bar = {backgroundColor: this.props.allContexts ? bankStyle.CURRENT_CONTEXT_BACKGROUND_COLOR : bankStyle.SHARE_CONTEXT_BACKGROUND_COLOR}
+    let bar = {backgroundColor: this.props.allContexts ? bankStyle.currentContextBackgroundColor : bankStyle.shareContextBackgroundColor}
     return (
             <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
               {chooser}

@@ -6,12 +6,10 @@ var translate = utils.translate
 var Icon = require('react-native-vector-icons/Ionicons');
 var equal = require('deep-equal')
 var StyleSheet = require('../StyleSheet')
-// var ResourceView = require('./ResourceView');
-// var ResourceList = require('./ResourceList');
 var PhotoList = require('./PhotoList')
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
 import ENV from '../utils/env'
 
@@ -95,7 +93,7 @@ var ResourceMixin = {
   },
 
   renderItems(val, pMeta, cancelItem) {
-    let LINK_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.LINK_COLOR) || '#7AAAC3'
+    let LINK_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.linkColor) || '#7AAAC3'
     var itemsMeta = pMeta.items.properties;
     var prop = pMeta
     if (!itemsMeta) {
@@ -252,7 +250,7 @@ var ResourceMixin = {
         val += ' ' + pMeta.units
 
       if (val === NOT_SPECIFIED)
-        val = <Text style={[styles.description, {color: this.props.bankStyle.LINK}]}>{val}</Text>
+        val = <Text style={[styles.description, {color: this.props.bankStyle.linkColor}]}>{val}</Text>
       else if (typeof val === 'number')
         val = <Text style={styles.description}>{val}</Text>;
       else if (typeof val === 'boolean')
@@ -284,8 +282,8 @@ var ResourceMixin = {
     skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
     let bankStyle = this.state.bankStyle ||  this.props.bankStyle || defaultBankStyle
 
-    let bg = isView ? bankStyle.MY_MESSAGE_BACKGROUND_COLOR : bankStyle.VERIFIED_HEADER_COLOR
-    let color = isView ? '#ffffff' : bankStyle.VERIFIED_HEADER_TEXT_COLOR
+    let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
+    let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
     var backlinksBg = {backgroundColor: bg, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
     if (prop) {
       let state
@@ -302,7 +300,7 @@ var ResourceMixin = {
       indent = 0
     let textStyle = indent === 1 ||  !isBreakdown  ? styles.bigTitle : styles.title
 
-    let LINK_COLOR = bankStyle.LINK_COLOR
+    let LINK_COLOR = bankStyle.linkColor
     if (prop  ||  !isBreakdown) {
       for (let p in json) {
         if (typeof json[p] === 'object'  ||  p === 'result')
@@ -354,7 +352,7 @@ var ResourceMixin = {
         if (showCollapsed  &&  showCollapsed === p) {
           arr = []
           jsonRows.push(arr)
-          arrow = <Icon color={bankStyle.LINK_COLOR} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
+          arrow = <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
         }
         else
           arr = jsonRows
@@ -490,209 +488,3 @@ var styles = StyleSheet.create({
 })
 
 module.exports = ResourceMixin;
-/*
-  renderResource(resource, model) {
-    var resource = resource ? resource : this.props.resource;
-    var modelName = resource[constants.TYPE];
-    if (!model)
-      model = utils.getModel(modelName)
-    // var model = utils.getModel(modelName).value;
-    var vCols = vCols = model.viewCols
-    let props = model.properties
-
-    if (!vCols) {
-      vCols = [];
-      for (var p in props) {
-        if (p != constants.TYPE)
-          vCols.push(p)
-      }
-    }
-    var isMessage = model.interfaces;
-    if (!isMessage) {
-      var len = vCols.length;
-      for (var i=0; i<len; i++) {
-        if (props[vCols[i]].displayName) {
-          vCols.splice(i, 1);
-          len--;
-        }
-      }
-    }
-    var first = true;
-    let self = this
-    var viewCols = vCols.map((p) => {
-      var val = resource[p];
-      var pMeta = model.properties[p];
-      var isRef;
-      var isItems
-      var isDirectionRow;
-      // var isEmail
-      if (!val) {
-        if (pMeta.displayAs)
-          val = utils.templateIt(pMeta, resource);
-        else if (this.props.checkProperties) {
-          if (p.indexOf('_group') === p.length - 6) {
-            return (<View style={{padding: 15}} key={this.getNextKey()}>
-                      <View key={this.getNextKey()}  style={{borderBottomColor: this.props.bankStyle.LINK_COLOR, borderBottomWidth: 1, paddingBottom: 5}}>
-                        <Text style={{fontSize: 22, color: this.props.bankStyle.LINK_COLOR}}>{translate(pMeta)}</Text>
-                      </View>
-                    </View>
-             );
-          }
-          else
-            val = NOT_SPECIFIED
-        }
-        else
-          return;
-      }
-      else if (pMeta.ref) {
-        if (pMeta.ref == constants.TYPES.MONEY) {
-          let c = utils.normalizeCurrencySymbol(val.currency)
-          val = (c || CURRENCY_SYMBOL) + val.value
-        }
-        else if (pMeta.inlined)
-          return this.renderResource(val, utils.getModel(val[constants.TYPE]).value)
-
-        // Could be enum like props
-        else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
-          val = val.title
-        else if (this.props.showVerification) {
-          // ex. property that is referencing to the Organization for the contact
-          var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
-
-          // val = <TouchableOpacity onPress={this.props.showVerification.bind(this, val, pMeta)}>
-          val=  <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
-               // </TouchableOpacity>
-
-          isRef = true;
-        }
-      }
-      else if (pMeta.type === 'date')
-        val = dateformat(new Date(val), 'fullDate')
-        // val = utils.formatDate(val);
-      // else if (pMeta[constants.SUB_TYPE] === 'email') {
-      //   isEmail = true
-      //   val = <TouchableOpacity onPress={() => Communications.email([val], null, null, 'My Subject','My body text')}>
-      //       <Text  style={[styles.title, styles.linkTitle]}>{val}</Text>
-      //   </TouchableOpacity>
-
-      // }
-
-      if (!val)
-        return <View key={this.getNextKey()}></View>;
-      if (!isRef) {
-        if (val instanceof Array) {
-          if (pMeta.items.backlink)
-            return <View  key={this.getNextKey()} />
-
-          var vCols = pMeta.viewCols;
-          if (!vCols)
-            vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).value.viewCols
-          var cnt = val.length;
-          val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
-
-          isItems = true
-          first = false;
-          title = <View style={{flexDirection: 'row'}}>
-                    <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-                    {cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS
-                      ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
-                      : <View />
-                    }
-                  </View>
-
-          var separator = first
-                    ? <View />
-                    : <View style={styles.separator}></View>;
-          if (cnt > 3)
-            val = <View key={this.getNextKey()}>
-                    {separator}
-                    <Accordion
-                      header={title}
-                      content={val}
-                      underlayColor='transparent'
-                      easing='easeInCirc' />
-                 </View>
-          else {
-            val = <View key={this.getNextKey()}>
-                   {title}
-                   {val}
-                 </View>
-          }
-        }
-        else  {
-          if (props[p].units  &&  props[p].units.charAt(0) != '[')
-            val += ' ' + props[p].units
-
-          if (val === NOT_SPECIFIED)
-            val = <Text style={[styles.description, {color: this.props.bankStyle.LINK}]}>{val}</Text>
-          else if (typeof val === 'number')
-            val = <Text style={styles.description}>{val}</Text>;
-          else if (typeof val === 'boolean')
-            val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
-          else if (pMeta.type === 'boolean')
-            val = <Text style={styles.description}>{val.title}</Text>;
-          else if (pMeta.type !== 'object'  &&  (typeof val === 'string')  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
-            val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
-          else if (modelName === TERMS_AND_CONDITIONS)
-            val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
-          else
-            val = <Text style={[styles.description]} numberOfLines={2}>{val}</Text>;
-
-        }
-      }
-      var title = pMeta.skipLabel  ||  isItems
-                ? <View />
-                : <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-      var separator = first
-                    ? <View />
-                    : <View style={styles.separator}></View>;
-
-      first = false;
-      let style = [styles.textContainer, {padding: 10}]
-      if (isDirectionRow)
-        style.push({flexDirection: 'row'})
-      else
-        style.push({flexDirection: 'column'})
-
-      return (<View key={this.getNextKey()}>
-               {separator}
-               <View style={isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}}>
-                 <View style={[style, {flexDirection: 'column'}]}>
-                   {title}
-                   {val}
-                 </View>
-               </View>
-             </View>
-             );
-    });
-
-    let retCols = []
-    viewCols.forEach((v) => {
-      if (!v)
-        return
-      if (Array.isArray(v)) {
-        v.forEach((vv) => {
-          retCols.push(vv)
-        })
-      }
-      else
-        retCols.push(v)
-    })
-    if (resource.txId) {
-      retCols.push(<View key={this.getNextKey()}>
-                     <View style={styles.separator}></View>
-                     <View style={[styles.textContainer, {padding: 10}]}>
-                       <Text style={styles.title}>{translate('irrefutableProofs')}</Text>
-                       <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
-                         <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
-                       </TouchableOpacity>
-                       <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
-                         <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
-                       </TouchableOpacity>
-                      </View>
-                    </View>)
-    }
-    return retCols;
-  }
-
-*/

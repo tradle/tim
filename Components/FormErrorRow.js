@@ -76,18 +76,11 @@ class FormErrorRow extends Component {
     else {
       var fromHash = resource.from.id;
       if (isMyMessage)
-        addStyle = [chatStyles.myCell, {backgroundColor: bankStyle.MY_MESSAGE_BACKGROUND_COLOR}]
-      else {
-        let borderColor = bankStyle.REQUEST_FULFILLED
-        let mstyle = {
-          borderColor: borderColor,
-          backgroundColor: '#ffffff',
-          borderTopLeftRadius: 0
-        }
-        addStyle = [chatStyles.verificationBody, {flex: 1}, mstyle]
-      }
+        addStyle = [chatStyles.myCell, {backgroundColor: bankStyle.myMessageBackgroundColor}]
+      else
+        addStyle = [chatStyles.verificationBody, {flex: 1, borderTopLeftRadius: 0}]
 
-      addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? bankStyle.REQUEST_FULFILLED : bankStyle.FORM_ERROR_BORDER}]; //model.style];
+      addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.formErrorBg, borderColor: resource.documentCreated ? bankStyle.fixErrorColor : bankStyle.formErrorBorder}]; //model.style];
     }
     var properties = model.properties;
 
@@ -165,7 +158,7 @@ class FormErrorRow extends Component {
     if (!messageBody) {
       let shared
       if (this.isShared())
-        shared = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.SHARED_WITH_BG}]}>
+        shared = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
                    <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
                  </View>
 
@@ -185,7 +178,7 @@ class FormErrorRow extends Component {
                     </TouchableHighlight>
     }
     var model = utils.getModel(this.props.resource[TYPE]).value;
-    var bg = bankStyle.BACKGROUND_IMAGE ? 'transparent' : bankStyle.BACKGROUND_COLOR
+    var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     return (
       <View style={[styles.viewStyle, {backgroundColor: bg, width: width}]}>
         {date}
@@ -276,8 +269,8 @@ class FormErrorRow extends Component {
         <View key={self.getNextKey()} style={{paddingBottom: 3}}>
           <Text style={[style, {color: '#555555'}]}>{resource.message} </Text>
           <View style={chatStyles.rowContainer}>
-            <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
+            <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype).value)}</Text>
+            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.fixErrorColor : self.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
           </View>
         </View>
       )

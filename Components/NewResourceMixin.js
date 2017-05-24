@@ -87,7 +87,7 @@ var NewResourceMixin = {
     component = params.component
 
     if (this.props.bankStyle)
-      LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
+      LINK_COLOR = this.props.bankStyle.linkColor || DEFAULT_LINK_COLOR
     else
       LINK_COLOR = DEFAULT_LINK_COLOR
 
@@ -768,8 +768,15 @@ var NewResourceMixin = {
     let help = prop.ref !== constants.TYPES.MONEY  && this.getHelp(prop)
     let st = {} //help ? {flexDirection: 'row', justifyContent: 'space-between'} : {}
 
+    let paddingBottom
+    if (this.hasError(params.errors, prop.name))
+      paddingBottom = 10
+    else if (Platform.OS === 'ios')
+      paddingBottom = 10
+    else
+      paddingBottom = 7
     return (
-      <View style={{flex: 5, paddingBottom: this.hasError(params.errors, prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
+      <View style={{flex: 5, paddingBottom: paddingBottom}}>
         <FloatLabel
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
@@ -791,12 +798,19 @@ var NewResourceMixin = {
     );
   },
   getHelp(prop, isEnum) {
-    if (!prop.description)
-      return
+    // if (prop.description)
+    //   return (
+    //     <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
+    //       <Text style={{fontSize: 14, color: '#555555'}}>{prop.description}</Text>
+    //     </View>
+    //   )
+    // else
+    //   return (
+    //     <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
+    //       <Text style={{fontSize: 14, color: '#555555'}}>{prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title}</Text>
+    //     </View>
+    //   )
     let isPrimitive = !isEnum && prop.type !== 'object'
-    // let help = <TouchableHighlight underlayColor='transparent' onPress={() => Alert.alert(prop.title, prop.description)}>
-    //              <Icon name='ios-help-circle' size={20} color='#7AAAC3' style={{position: 'absolute',  right: isEnum ? 2 : 12, bottom: isEnum ? 15 : 25}} />
-    //            </TouchableHighlight>
     let help = <TouchableHighlight underlayColor='transparent' onPress={() => Alert.alert(prop.title, prop.description)}>
                  <Icon name='ios-help-circle' size={20} color='#7AAAC3' style={{position: 'absolute',  right: isEnum ? 2 : 12, bottom: isEnum ? 15 : isPrimitive ? 12 : 25}} />
                </TouchableHighlight>
@@ -1357,6 +1371,7 @@ var NewResourceMixin = {
            ?  ' (' + CURRENCY_SYMBOL + ')'
            : ''
     return (
+      <View>
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           {
              this.myTextInputTemplate({
@@ -1381,6 +1396,8 @@ var NewResourceMixin = {
                   })
         }
       </View>
+      {this.getHelp(params.prop)}
+      </View>
     );
   },
 
@@ -1402,7 +1419,7 @@ var NewResourceMixin = {
     else
       error = <View/>
     var value = prop ? params.value : this.state.resource[enumProp.name]
-    let help = this.getHelp(prop, true)
+    // let help = this.getHelp(prop, true)
     return (
       <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
@@ -1411,7 +1428,6 @@ var NewResourceMixin = {
               <Text style={styles.enumText}>{value}</Text>
               <Icon name='ios-arrow-down'  size={15}  color={LINK_COLOR}  style={[styles.icon1, styles.enumProp]} />
             </View>
-            {help}
            {error}
           </View>
         </TouchableHighlight>

@@ -14,14 +14,12 @@ var Icon = require('react-native-vector-icons/Ionicons');
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var SupervisoryViewPerProvider = require('./SupervisoryViewPerProvider')
-var defaultBankStyle = require('../styles/bankStyle.json')
 var StyleSheet = require('../StyleSheet')
 import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-// var bankStyles = require('../styles/bankStyles')
 
 import React, { Component, PropTypes } from 'react'
 import {

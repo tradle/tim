@@ -252,7 +252,7 @@ class ProductChooser extends Component {
   var err = this.state.err
             ? <View style={styles.errContainer}><Text style={styles.err}>{this.state.err}</Text></View>
             : <View />;
-    var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.BACKGROUND_COLOR ? {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR} : {backgroundColor: '#ffffff'}
+    var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.backgroundColor ? {backgroundColor: this.props.bankStyle.backgroundColor} : {backgroundColor: '#ffffff'}
       // <View style={[styles.container, bgStyle]}>
     return (
       <PageView style={[styles.container, bgStyle, searchBar ? {marginTop: 64} : {marginTop: 0}]}>

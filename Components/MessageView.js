@@ -4,19 +4,14 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
 var ArticleView = require('./ArticleView');
-// var FromToView = require('./FromToView');
 var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
-// var ShowPropertiesView = require('./ShowPropertiesView');
-var ShowMessageRefList = require('./ShowMessageRefList');
 var Icon = require('react-native-vector-icons/Ionicons');
 
 var ShowRefList = require('./ShowRefList');
 var VerificationView = require('./VerificationView')
-// var MoreLikeThis = require('./MoreLikeThis');
 var NewResource = require('./NewResource');
 var PageView = require('./PageView')
-// var VerificationButton = require('./VerificationButton');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var Store = require('../Store/Store');
@@ -25,7 +20,7 @@ var extend = require('extend');
 var ResourceMixin = require('./ResourceMixin');
 var HELP_COLOR = 'blue'
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
 const PHOTO = 'tradle.Photo'
 const TYPE = constants.TYPE
@@ -355,7 +350,7 @@ class MessageView extends Component {
                                  showDetails={this.state.showDetails}
                                  showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
-                                 bankStyle={this.state.bankStyle || this.props.bankStyle}
+                                 bankStyle={bankStyle}
                                  showRefResource={this.getRefResource.bind(this)}
                                  defaultPropertyValues={this.props.defaultPropertyValues}
                                  checkProperties={checkProps} >
@@ -385,7 +380,7 @@ class MessageView extends Component {
     // var isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     let dateView
     if (isVerificationTree) {
-      dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: bankStyle.PRODUCT_ROW_BG_COLOR}]}>
+      dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: bankStyle.productRowBgColor}]}>
                   <Text style={styles.dateLabel}>{translate(model.properties.dateVerified, model)}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
@@ -417,9 +412,9 @@ class MessageView extends Component {
   makeViewTitle(model) {
     let rTitle
     let bankStyle = this.state.bankStyle || this.props.bankStyle
-    if (this.props.bankStyle  &&  !this.props.bankStyle.LOGO_NEEDS_TEXT)
-      rTitle = <View style={{alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.NAV_BAR_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center'}}>
-                 <Text style={{fontSize: 24, color:  bankStyle.CONTEXT_BACKGROUND_COLOR}}>{translate(model)}</Text>
+    if (this.props.bankStyle  &&  !this.props.bankStyle.logoNeedsText)
+      rTitle = <View style={{alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.navBarBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center'}}>
+                 <Text style={{fontSize: 24, color:  bankStyle.contextBackgroundColor}}>{translate(model)}</Text>
                </View>
     return rTitle
   }
