@@ -766,7 +766,7 @@ var NewResourceMixin = {
       lStyle = [lStyle, {color: lcolor}]
     let multiline = prop.maxLength > 100
     let help = prop.ref !== constants.TYPES.MONEY  && this.getHelp(prop)
-    let st = {} //help ? {flexDirection: 'row', justifyContent: 'space-between'} : {}
+    let st = help ? {} : {flex: 5}
 
     let paddingBottom
     if (this.hasError(params.errors, prop.name))
@@ -776,7 +776,7 @@ var NewResourceMixin = {
     else
       paddingBottom = 7
     return (
-      <View style={{flex: 5, paddingBottom: paddingBottom}}>
+      <View style={st}>
         <FloatLabel
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
@@ -798,23 +798,12 @@ var NewResourceMixin = {
     );
   },
   getHelp(prop, isEnum) {
-    // if (prop.description)
-    //   return (
-    //     <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
-    //       <Text style={{fontSize: 14, color: '#555555'}}>{prop.description}</Text>
-    //     </View>
-    //   )
-    // else
-    //   return (
-    //     <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
-    //       <Text style={{fontSize: 14, color: '#555555'}}>{prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title}</Text>
-    //     </View>
-    //   )
-    let isPrimitive = !isEnum && prop.type !== 'object'
-    let help = <TouchableHighlight underlayColor='transparent' onPress={() => Alert.alert(prop.title, prop.description)}>
-                 <Icon name='ios-help-circle' size={20} color='#7AAAC3' style={{position: 'absolute',  right: isEnum ? 2 : 12, bottom: isEnum ? 15 : isPrimitive ? 12 : 25}} />
-               </TouchableHighlight>
-    return help
+    if (prop.description)
+      return (
+        <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
+          <Text style={{fontSize: 14, color: '#555555'}}>{prop.description}</Text>
+        </View>
+      )
   },
 
   getErrorView(params) {
