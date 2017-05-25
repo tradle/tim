@@ -804,6 +804,12 @@ var NewResourceMixin = {
           <Text style={{fontSize: 14, color: '#555555'}}>{prop.description}</Text>
         </View>
       )
+    else
+      return (
+        <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
+          <Text style={{fontSize: 14, color: '#555555'}}>{prop.title}</Text>
+        </View>
+      )
   },
 
   getErrorView(params) {
@@ -868,6 +874,7 @@ var NewResourceMixin = {
             </View>
           </View>
         </TouchableHighlight>
+        {help}
         {this.getErrorView(params)}
       </View>
     )
@@ -917,8 +924,8 @@ var NewResourceMixin = {
     }
     let help = this.getHelp(prop)
     return (
-      <View>
-        <View key={this.getNextKey()} ref={prop.name} style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
+      <View key={this.getNextKey()} ref={prop.name}>
+        <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
           {propLabel}
           <DatePicker
             style={[styles.datePicker, {width: utils.dimensions(component).width - 30}]}
@@ -943,7 +950,7 @@ var NewResourceMixin = {
             }}
             {...dateProps}
           />
-          {help}
+        {help}
         </View>
         {this.getErrorView(params)}
        </View>
