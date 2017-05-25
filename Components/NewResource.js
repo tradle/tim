@@ -853,7 +853,6 @@ class NewResource extends Component {
                     ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
                     : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
                   }
-
                 </View>
     }
     var err = this.state.missedRequiredOrErrorValue
@@ -903,6 +902,7 @@ class NewResource extends Component {
             {actionableCounter}
           </View>
         </View>
+        {this.getHelp(bl)}
         {error}
       </View>
     );
@@ -980,6 +980,7 @@ class NewResource extends Component {
             </ImageInput>
           </View>
         </View>
+        {this.getHelp(bl)}
         {error}
       </View>
     );

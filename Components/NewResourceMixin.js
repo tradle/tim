@@ -792,8 +792,8 @@ var NewResourceMixin = {
           underlineColorAndroid='transparent'
         >{label}
         </FloatLabel>
-          {help}
-          {this.getErrorView(params)}
+        {help}
+        {this.getErrorView(params)}
       </View>
     );
   },
@@ -804,12 +804,12 @@ var NewResourceMixin = {
           <Text style={{fontSize: 14, color: '#555555'}}>{prop.description}</Text>
         </View>
       )
-    // else
-    //   return (
-    //     <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
-    //       <Text style={{fontSize: 14, color: '#555555'}}>{prop.title}</Text>
-    //     </View>
-    //   )
+    else
+      return (
+        <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
+          <Text style={{fontSize: 14, color: '#555555'}}>{prop.title}</Text>
+        </View>
+      )
   },
 
   getErrorView(params) {
@@ -1151,6 +1151,7 @@ var NewResourceMixin = {
                     {icon}
                   </View>
 
+    let help = this.getHelp(prop)
     let actionItem
     if (isVideo ||  isPhoto) {
       // HACK
@@ -1163,7 +1164,7 @@ var NewResourceMixin = {
       }
 
       if (useImageInput) {
-        var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: 7}
+        var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: help ? 0 : 7}
         let m = utils.getModel(prop.ref).value
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                        {content}
@@ -1178,7 +1179,6 @@ var NewResourceMixin = {
       actionItem = <TouchableHighlight underlayColor='transparent' onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
                      {content}
                    </TouchableHighlight>
-    let help = this.getHelp(prop)
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
         {propLabel}
