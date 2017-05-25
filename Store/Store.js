@@ -5688,6 +5688,7 @@ var Store = Reflux.createStore({
     // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
       let r = verification.document
+
       let docType = r[TYPE]
       let docModel = self.getModel(docType)
       let isMyProduct = docModel.subClassOf === MY_PRODUCT
@@ -5695,6 +5696,15 @@ var Store = Reflux.createStore({
       // Allow sharing only of resources that were filled out by me
       if (!isMyProduct  &&  utils.getId(r.from) !== utils.getId(me))
         return
+
+      if (to[TYPE] === ORGANIZATION  &&  !to._isTest) {
+        let rToOrg = r.to.organization
+        if (rToOrg) {
+          if (self._getItem(rToOrg)._isTest)
+            return
+        }
+      }
+
       var v = shareableResources[docType];
       if (!v)
         shareableResources[docType] = [];
