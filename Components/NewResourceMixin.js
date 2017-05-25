@@ -804,12 +804,12 @@ var NewResourceMixin = {
           <Text style={{fontSize: 14, color: '#555555'}}>{prop.description}</Text>
         </View>
       )
-    else
-      return (
-        <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
-          <Text style={{fontSize: 14, color: '#555555'}}>{prop.title}</Text>
-        </View>
-      )
+    // else
+    //   return (
+    //     <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
+    //       <Text style={{fontSize: 14, color: '#555555'}}>{prop.title}</Text>
+    //     </View>
+    //   )
   },
 
   getErrorView(params) {
