@@ -1905,6 +1905,9 @@ var Store = Reflux.createStore({
         .filter(r => r.state === 'fulfilled')
         .map(r => r.value)
     })
+    .catch((err) => {
+      debugger
+    })
   },
   addInfo(sp, url, newServer) {
     var okey = sp.org ? utils.getId(sp.org) : null
@@ -5853,7 +5856,7 @@ var Store = Reflux.createStore({
     }
 
     if (value[TYPE] === SETTINGS)
-      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : -1, true)
+      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : 1, true)
 
     let meId = utils.getId(me)
     let self = this
@@ -6090,7 +6093,8 @@ var Store = Reflux.createStore({
     var v = value.url
     if (v.charAt(v.length - 1) === '/')
       v = v.substring(0, v.length - 1)
-
+    if (v.indexOf('http') === -1)
+      v = 'https://' + v
     var key = SETTINGS + '_1'
     const settings = this._getItem(key)
     let allProviders, oneProvider
