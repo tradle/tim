@@ -69,8 +69,11 @@ class VerificationMessageRow extends Component {
       let me = utils.getMe()
       if (me.isEmployee) {
         isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
-        if  (isReadOnlyChat)
-          isThirdPartyVerification = utils.getId(resource.organization) !== utils.getId(this.props.context.to.organization)
+        if  (isReadOnlyChat) {
+          // could be shared by customer in this case 'from' will be referring to customer
+          let org = resource.organization || resource.to.organization
+          isThirdPartyVerification = utils.getId(org) !== utils.getId(this.props.context.to.organization)
+        }
         else if (this.props.to[constants.TYPE] === constants.TYPES.PROFILE)
           isThirdPartyVerification = utils.getId(me) !== utils.getId(this.props.context.to) || (resource._verifiedBy  &&  utils.getId(me.organization) !== utils.getId(resource._verifiedBy))
       }
