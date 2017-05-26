@@ -4042,25 +4042,18 @@ var Store = Reflux.createStore({
     })
   },
 
-  shareVerification(resource, to, opts, shareBatchId) {
+  shareVerification(ver, to, opts, shareBatchId) {
     var time = new Date().getTime()
     var toId = utils.getId(to)
-    var ver
-    if (resource[ROOT_HASH]) {
-      // Show sending status to not to keep customer in suspense
-      if (!resource.sharedWith)
-        resource.sharedWith = []
-      ver = this._getItem(utils.getId(resource))
-      this.addSharedWith(ver, to, time, shareBatchId)
-      ver._sendStatus = this.isConnected ? SENDING : QUEUED
+    if (!ver._sharedWith)
+      ver._sharedWith = []
+    this.addSharedWith(ver, to, time, shareBatchId)
 
-      // utils.optimizeResource(ver, true)
+    ver._sendStatus = this.isConnected ? SENDING : QUEUED
+    this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
+    this.trigger({action: 'addItem', context: ver.context, resource: ver})
 
-      this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
-      this.trigger({action: 'addItem', context: resource.context, resource: ver})
-    }
-    let promise = resource[CUR_HASH] ? this.meDriverSend({...opts, link: resource[CUR_HASH]}) : Q()
-    return promise
+    return this.meDriverSend({...opts, link: ver[CUR_HASH]})
     .then(() => {
       if (ver) {
         this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver})
