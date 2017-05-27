@@ -2,7 +2,8 @@ import { NativeModules } from 'react-native'
 import Errors from './iproov-errors'
 
 const iProov = promisify(NativeModules.RNIproov || {})
-export default {
+
+module.exports = {
   ...iProov,
   Errors
 }
