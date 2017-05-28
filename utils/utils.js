@@ -1670,7 +1670,7 @@ var utils = {
   getContentSeparator(bankStyle) {
     let separator = {}
     if (bankStyle) {
-      if (bankStyle.NAV_BAR_BORDER_COLOR) {
+      if (bankStyle.navBarBorderColor) {
         separator.borderTopColor = bankStyle.navBarBorderColor
         separator.borderTopWidth = bankStyle.navBarBorderWidth ||  StyleSheet.hairlineWidth
       }
