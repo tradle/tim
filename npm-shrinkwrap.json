@@ -4910,8 +4910,8 @@
     },
     "react-native-async-storage-rocks": {
       "version": "1.0.0",
-      "from": "react-native-async-storage-rocks@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-async-storage-rocks/-/react-native-async-storage-rocks-1.0.0.tgz"
+      "from": "react-native-async-storage-rocks@>=2.0.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-async-storage-rocks/-/react-native-async-storage-rocks-2.0.0.tgz"
     },
     "react-native-async-storage-snappy": {
       "version": "1.1.0",
