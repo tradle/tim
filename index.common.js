@@ -21,7 +21,7 @@ import debounce from 'debounce'
 var ResourceList = require('./Components/ResourceList');
 var VerifierChooser = require('./Components/VerifierChooser')
 
-var VideoPlayer = require('./Components/VideoPlayer')
+// var VideoPlayer = require('./Components/VideoPlayer')
 var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
@@ -56,7 +56,7 @@ import Log from './Components/Log'
 var utils = require('./utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons'
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
@@ -109,7 +109,9 @@ import Push from './utils/push'
 import Navs from './utils/navs'
 import Analytics from './utils/analytics'
 
-var ReactPerf = __DEV__ && require('react-addons-perf')
+var ReactPerf = __DEV__ && require('ReactPerf')
+// if (ReactPerf) ReactPerf.toggle()
+
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
 
 const landingPageMapping = {
@@ -511,8 +513,8 @@ class TiMApp extends Component {
                 content={props.content}
                 fullScreen={props.fullScreen}
                 dimension={props.dimension} />
-    case 18:
-      return <VideoPlayer {...props} />
+    // case 18:
+    //   return <VideoPlayer {...props} />
     case 19:
       return <GridItemsList navigator={nav} {...props} />
     case PASSWORD_CHECK:

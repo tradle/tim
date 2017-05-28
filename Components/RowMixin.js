@@ -7,7 +7,7 @@ var translate = utils.translate
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
 var Actions = require('../Actions/Actions');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 import CustomIcon from '../styles/customicons'
 var StyleSheet = require('../StyleSheet')
 var chatStyles = require('../styles/chatStyles')

@@ -8,7 +8,7 @@ var PhotoView = require('./PhotoView');
 var PhotoList = require('./PhotoList');
 var ShowRefList = require('./ShowRefList');
 var PageView = require('./PageView')
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var IdentitiesList = require('./IdentitiesList');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');

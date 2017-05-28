@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 
-import Video from 'react-native-video'
+// import Video from 'react-native-video'
 var utils = require('../utils/utils')
 
 class VideoPlayer extends React.Component {

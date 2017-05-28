@@ -7,7 +7,7 @@ var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var dateformat = require('dateformat')
 var PhotoList = require('./PhotoList');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')

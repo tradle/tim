@@ -5,7 +5,7 @@ var dateformat = require('dateformat')
 var ResourceList = require('./ResourceList')
 var EnumList = require('./EnumList')
 var FloatLabel = require('react-native-floating-labels')
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var utils = require('../utils/utils');
 var CameraView = require('./CameraView')
 var translate = utils.translate
@@ -16,7 +16,7 @@ var driverLicenseParser = require('../utils/driverLicenseParser')
 const debug = require('debug')('tradle:app:blinkid')
 var focusUri = require('../video/Focus1.mp4')
 
-import VideoPlayer from './VideoPlayer'
+// import VideoPlayer from './VideoPlayer'
 // import omit from 'object.omit'
 // import pick from 'object.pick'
 import ENV from '../utils/env'
@@ -663,35 +663,35 @@ var NewResourceMixin = {
     this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
     this.setState({ resource })
   },
-  showVideo(params) {
-    let onEnd = (err) => {
-      Alert.alert(
-        'Ready to scan?',
-        null,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              this.props.navigator.pop()
-              this.showCamera(params)
-            }
-          }
-        ]
-      )
-    }
+  // showVideo(params) {
+  //   let onEnd = (err) => {
+  //     Alert.alert(
+  //       'Ready to scan?',
+  //       null,
+  //       [
+  //         {
+  //           text: 'OK',
+  //           onPress: () => {
+  //             this.props.navigator.pop()
+  //             this.showCamera(params)
+  //           }
+  //         }
+  //       ]
+  //     )
+  //   }
 
-    this.props.navigator.push({
-      id: 18,
-      component: VideoPlayer,
-      passProps: {
-        source: focusUri,
-        onEnd: onEnd,
-        onError: onEnd,
-        muted: true,
-        navigator: this.props.navigator
-      },
-    })
-  },
+  //   this.props.navigator.push({
+  //     id: 18,
+  //     component: VideoPlayer,
+  //     passProps: {
+  //       source: focusUri,
+  //       onEnd: onEnd,
+  //       onError: onEnd,
+  //       muted: true,
+  //       navigator: this.props.navigator
+  //     },
+  //   })
+  // },
 
   showCamera(params) {
     // if (utils.isAndroid()) {
@@ -786,7 +786,7 @@ var NewResourceMixin = {
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
           value={params.value}
-          keyboardShouldPersistTaps={true}
+          keyboardShouldPersistTaps="always"
           keyboardType={params.keyboard || 'default'}
           onChangeText={this.onChangeText.bind(this, prop)}
           underlineColorAndroid='transparent'

@@ -5,7 +5,6 @@ import android.app.Application;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
-import com.brentvatne.react.ReactVideoPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
 import io.branch.rnbranch.RNBranchPackage;
@@ -15,6 +14,7 @@ import com.cboy.rn.splashscreen.SplashScreenReactPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
+import com.facebook.soloader.SoLoader;
 import com.github.yamill.orientation.OrientationPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
@@ -46,7 +46,7 @@ public class MainApplication extends Application implements ReactApplication {
     }
 
     @Override
-    protected boolean getUseDeveloperSupport() {
+    public boolean getUseDeveloperSupport() {
       return BuildConfig.DEBUG;
     }
 
@@ -67,7 +67,6 @@ public class MainApplication extends Application implements ReactApplication {
         new ImagePickerPackage(),
         new RandomBytesPackage(),
         new KeychainPackage(),
-        new ReactVideoPackage(),
         new VectorIconsPackage(),
         new UdpSocketsModule(),
         new ReactNativeLocalizationPackage(),
@@ -91,6 +90,7 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
+    SoLoader.init(this, /* native exopackage */ false);
     Branch.getAutoInstance(this);
   }
 }

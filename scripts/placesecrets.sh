@@ -23,6 +23,7 @@ mk_links() {
   cp ./secrets/ios/GoogleService-Info.plist ./iOS/
 
   echo "placing android build and runtime secrets"
+  cp ./secrets/android/fabric.properties ./android/app/
   cp ./secrets/android/google-services.json ./android/app/
   cp ./secrets/android/my-release-key.keystore ./android/app
   cp ./secrets/android/service-account-actor.json ./android/fastlane/

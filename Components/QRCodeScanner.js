@@ -9,7 +9,7 @@ import Camera from 'react-native-camera'
 import debounce from 'debounce'
 
 var ICON_BORDER_COLOR = '#D7E6ED'
-var Icon = require('react-native-vector-icons/Ionicons')
+import Icon from 'react-native-vector-icons/Ionicons'
 var Dir = Camera.constants.Type
 
 

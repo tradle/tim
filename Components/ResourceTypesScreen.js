@@ -136,7 +136,7 @@ class ResourceTypesScreen extends Component {
       renderRow={this.renderRow.bind(this)}
       automaticallyAdjustContentInsets={false}
       keyboardDismissMode='on-drag'
-      keyboardShouldPersistTaps={true}
+      keyboardShouldPersistTaps="always"
       showsVerticalScrollIndicator={false} />;
 
     var err = this.state.err

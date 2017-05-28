@@ -7,7 +7,7 @@ import {
 } from 'react-native'
 // var Camera = require('react-native-camera');
 import Camera from 'react-native-camera'
-var Icon = require('react-native-vector-icons/Ionicons')
+import Icon from 'react-native-vector-icons/Ionicons'
 
 import React, { Component } from 'react'
 

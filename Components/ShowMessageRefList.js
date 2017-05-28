@@ -4,7 +4,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var ResourceList = require('./ResourceList');
 var MessageList = require('./MessageList');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var buttonStyles = require('../styles/buttonStyles');
 var constants = require('@tradle/constants');
 var reactMixin = require('react-mixin');

@@ -5,7 +5,7 @@ var Q = require('q')
 var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
 var ResourceList = require('./ResourceList');
-var VideoPlayer = require('./VideoPlayer')
+// var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
 var HomePage = require('./HomePage')
 var HomePageMixin = require('./HomePageMixin')
@@ -825,28 +825,28 @@ class TimHome extends Component {
     this.props.navigator.push(route);
   }
 
-  showVideoTour(cb) {
-    let onEnd = (err) => {
-      if (err) debug('failed to load video', err)
-      cb()
-    }
+//   showVideoTour(cb) {
+//     let onEnd = (err) => {
+//       if (err) debug('failed to load video', err)
+//       cb()
+//     }
 
-    this.props.navigator.replace({
-      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      id: 18,
-//      title: 'Tradle',
-//      titleTintColor: '#eeeeee',
-      component: VideoPlayer,
-      rightButtonTitle: __DEV__ ? 'Skip' : undefined,
-      passProps: {
-        uri: 'videotour',
-        onEnd: onEnd,
-        onError: onEnd,
-        navigator: this.props.navigator
-      },
-      onRightButtonPress: onEnd
-    })
-  }
+//     this.props.navigator.replace({
+//       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+//       id: 18,
+// //      title: 'Tradle',
+// //      titleTintColor: '#eeeeee',
+//       component: VideoPlayer,
+//       rightButtonTitle: __DEV__ ? 'Skip' : undefined,
+//       passProps: {
+//         uri: 'videotour',
+//         onEnd: onEnd,
+//         onError: onEnd,
+//         navigator: this.props.navigator
+//       },
+//       onRightButtonPress: onEnd
+//     })
+//   }
   onReloadDBPressed() {
     utils.setMe(null);
     utils.setModels(null);
