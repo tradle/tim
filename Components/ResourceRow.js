@@ -778,6 +778,7 @@ var styles = StyleSheet.create({
   },
   countText: {
     fontSize: 12,
+    marginLeft: -7,
     fontWeight: '600',
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,
