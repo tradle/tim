@@ -3,7 +3,6 @@
 var utils = require('../utils/utils');
 var constants = require('@tradle/constants');
 var translate = utils.translate
-var bankStyles = require('../styles/bankStyles')
 var StyleSheet = require('../StyleSheet')
 
 var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
@@ -24,8 +23,8 @@ import React, { Component } from 'react'
 class MessageTypeRow extends Component {
   constructor(props) {
     super(props);
-    PRODUCT_ROW_BG_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.PRODUCT_ROW_BG_COLOR) || DEFAULT_PRODUCT_ROW_BG_COLOR
-    PRODUCT_ROW_TEXT_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.PRODUCT_ROW_TEXT_COLOR) || DEFAULT_PRODUCT_ROW_TEXT_COLOR
+    PRODUCT_ROW_BG_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.productRowBgColor) || DEFAULT_PRODUCT_ROW_BG_COLOR
+    PRODUCT_ROW_TEXT_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.productRowTextColor) || DEFAULT_PRODUCT_ROW_TEXT_COLOR
   }
   render() {
     var resource = this.props.resource;

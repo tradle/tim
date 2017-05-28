@@ -90,9 +90,8 @@ const PASSWORD_ENC = 'hex'
 const MAX_WIDTH = 800
 
 const ENUM = 'tradle.Enum'
-
-var dictionaries = require('@tradle/models').dict
-var dictionary = dictionaries[Strings.language]
+// var dictionaries = require('@tradle/models').dict
+var dictionary //= dictionaries[Strings.language]
 
 var propTypesMap = {
   'string': t.Str,
@@ -130,8 +129,8 @@ var utils = {
     if (me.languageCode) {
       if (me.dictionary)
         dictionary = me.dictionary
-      else if (dictionaries[me.languageCode])
-        dictionary = dictionaries[me.languageCode]
+      // else if (dictionaries[me.languageCode])
+      //   dictionary = dictionaries[me.languageCode]
     }
   },
   getMe() {
@@ -190,17 +189,17 @@ var utils = {
   },
   translateModel(model, isPlural) {
     if (dictionary  &&  dictionary.models[model.id])
-      return dictionary.models[model.id]
+      return dictionary.models[model.id]  ||  this.makeModelTitle(model, isPlural)
     return model.title ? model.title : this.makeModelTitle(model, isPlural)
   },
   translateString(...args) {
     const { strings } = Strings
     if (!strings)
-      return args[0]
+      return this.makeLabel(args[0])
 
     let s = strings[args[0]]
     if (!s)
-      return args[0]
+      return this.makeLabel(args[0])
 
     // if (args.length === 2  &&  typeof args[1] === 'object') {
     //   let pos = 0
@@ -1802,8 +1801,8 @@ var utils = {
     let separator = {}
     if (bankStyle) {
       if (bankStyle.NAV_BAR_BORDER_COLOR) {
-        separator.borderTopColor = bankStyle.NAV_BAR_BORDER_COLOR
-        separator.borderTopWidth = bankStyle.NAV_BAR_BORDER_WIDTH ||  StyleSheet.hairlineWidth
+        separator.borderTopColor = bankStyle.navBarBorderColor
+        separator.borderTopWidth = bankStyle.navBarBorderWidth ||  StyleSheet.hairlineWidth
       }
     }
     return separator
@@ -1823,8 +1822,8 @@ var utils = {
     }
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
-    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{message1}
-             <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
+    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
+             <Text style={{color: bankStyle.linkColor}}>{formType}</Text>
              <Text>{utils.parseMessage(resource, message2, bankStyle, idx)}</Text>
            </Text>
   },

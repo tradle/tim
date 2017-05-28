@@ -1808,7 +1808,7 @@ var Store = Reflux.createStore({
     let languageCode
     if (me) {
       language = me.language
-      if (language && list[utils.getId(language)]) {
+      if (language) {
         language = this._getItem(utils.getId(language))
         languageCode = language.code
       }
@@ -1907,6 +1907,9 @@ var Store = Reflux.createStore({
       return results
         .filter(r => r.state === 'fulfilled')
         .map(r => r.value)
+    })
+    .catch((err) => {
+      debugger
     })
   },
   addInfo(sp, url, newServer) {
@@ -4043,25 +4046,18 @@ var Store = Reflux.createStore({
     })
   },
 
-  shareVerification(resource, to, opts, shareBatchId) {
+  shareVerification(ver, to, opts, shareBatchId) {
     var time = new Date().getTime()
     var toId = utils.getId(to)
-    var ver
-    if (resource[ROOT_HASH]) {
-      // Show sending status to not to keep customer in suspense
-      if (!resource.sharedWith)
-        resource.sharedWith = []
-      ver = this._getItem(utils.getId(resource))
-      this.addSharedWith(ver, to, time, shareBatchId)
-      ver._sendStatus = this.isConnected ? SENDING : QUEUED
+    if (!ver._sharedWith)
+      ver._sharedWith = []
+    this.addSharedWith(ver, to, time, shareBatchId)
 
-      // utils.optimizeResource(ver, true)
+    ver._sendStatus = this.isConnected ? SENDING : QUEUED
+    this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
+    this.trigger({action: 'addItem', context: ver.context, resource: ver})
 
-      this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
-      this.trigger({action: 'addItem', context: resource.context, resource: ver})
-    }
-    let promise = resource[CUR_HASH] ? this.meDriverSend({...opts, link: resource[CUR_HASH]}) : Q()
-    return promise
+    return this.meDriverSend({...opts, link: ver[CUR_HASH]})
     .then(() => {
       if (ver) {
         this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver})
@@ -5745,6 +5741,7 @@ var Store = Reflux.createStore({
     // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
       let r = verification.document
+
       let docType = r[TYPE]
       let docModel = self.getModel(docType)
       let isMyProduct = docModel.subClassOf === MY_PRODUCT
@@ -5752,6 +5749,15 @@ var Store = Reflux.createStore({
       // Allow sharing only of resources that were filled out by me
       if (!isMyProduct  &&  utils.getId(r.from) !== utils.getId(me))
         return
+
+      if (to[TYPE] === ORGANIZATION  &&  !to._isTest) {
+        let rToOrg = r.to.organization
+        if (rToOrg) {
+          if (self._getItem(rToOrg)._isTest)
+            return
+        }
+      }
+
       var v = shareableResources[docType];
       if (!v)
         shareableResources[docType] = [];
@@ -5899,7 +5905,7 @@ var Store = Reflux.createStore({
     }
 
     if (value[TYPE] === SETTINGS)
-      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : -1, true)
+      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : 1, true)
 
     let meId = utils.getId(me)
     let self = this
@@ -6136,7 +6142,8 @@ var Store = Reflux.createStore({
     var v = value.url
     if (v.charAt(v.length - 1) === '/')
       v = v.substring(0, v.length - 1)
-
+    if (v.indexOf('http') === -1)
+      v = 'https://' + v
     var key = SETTINGS + '_1'
     const settings = this._getItem(key)
     let allProviders, oneProvider
@@ -8852,13 +8859,23 @@ var Store = Reflux.createStore({
     list[key] = { key, value }
   },
   _getItem(r) {
-    if (typeof r === 'string')
-      return list[r] ? list[r].value : null
+    if (typeof r === 'string') {
+      if (list[r])
+        return list[r].value
+      let rtype = utils.getType(r)
+      if (this.getModel(rtype).subClassOf === ENUM) {
+        let eValues = enums[rtype]
+        let eVal = eValues.filter((ev) => utils.getId(ev) === r)
+        if (eVal.length)
+          return eVal[0]
+      }
+    }
     else if (r.value)
       return r.value
     else {
       let rr = list[utils.getId(r)]
-      return rr ? rr.value : null
+      if (rr)
+        return rr.value
     }
   },
   _mergeItem(key, value) {

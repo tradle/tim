@@ -4,7 +4,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var RowMixin = require('./RowMixin');
 var ResourceList = require('./ResourceList')
 // var Swipeout = require('react-native-swipeout')
@@ -16,7 +16,7 @@ var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 // const PRIORITY_HEIGHT = 100
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 

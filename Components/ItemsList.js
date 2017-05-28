@@ -7,7 +7,7 @@ var reactMixin = require('react-mixin');
 var extend = require('extend');
 var equal = require('deep-equal')
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import React, { Component } from 'react'
 import {
@@ -157,7 +157,7 @@ class ItemsList extends Component {
           removeClippedSubviews={false}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps={true}
+          keyboardShouldPersistTaps="always"
           showsVerticalScrollIndicator={false} />
       </View>
     );

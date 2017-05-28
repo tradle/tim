@@ -2,7 +2,7 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var buttonStyles = require('../styles/buttonStyles');
 var appStyle = require('../styles/appStyle.json')
 var reactMixin = require('react-mixin');
@@ -57,7 +57,7 @@ class ShowRefList extends Component {
     let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
     let showDocuments = this.props.showDocuments
 
-    let bg = this.props.bankStyle ? this.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR : appStyle.CURRENT_UNDERLINE_COLOR
+    let bg = this.props.bankStyle ? this.props.bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
 
     let currentMarker = <View style={{backgroundColor: bg, height: 4, marginTop: -5}} />
 

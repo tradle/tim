@@ -8,8 +8,7 @@ var ResourceView = require('./ResourceView')
 var NewResource = require('./NewResource');
 var ProductChooser = require('./ProductChooser');
 var PhotoList = require('./PhotoList');
-var Icon = require('react-native-vector-icons/Ionicons');
-var groupByEveryN = utils.groupByEveryN
+import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin')
@@ -59,7 +58,7 @@ class MessageRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
     var me = utils.getMe();
-    LINK_COLOR = this.props.bankStyle.LINK_COLOR
+    LINK_COLOR = this.props.bankStyle.linkColor
   }
   shouldComponentUpdate(nextProps, nextState) {
     return utils.resized(this.props, nextProps)              ||
@@ -106,13 +105,13 @@ class MessageRow extends Component {
       var fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = [chatStyles.myCell, {backgroundColor: bankStyle.MY_MESSAGE_BACKGROUND_COLOR}]
+          addStyle = [chatStyles.myCell, {backgroundColor: bankStyle.myMessageBackgroundColor}]
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
       else {
         if (isConfirmation)
-          addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: bankStyle.CONFIRMATION_BG}, styles.myConfCell]
+          addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: bankStyle.confirmationColor}, styles.myConfCell]
         else {
           let borderColor = '#efefef'
           let mstyle = {
@@ -128,9 +127,7 @@ class MessageRow extends Component {
 
       let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
       if (isMyMessage  &&  !isSimpleMessage  &&  !isRemediationCompleted) {
-        let st = isProductApplication
-               ? {backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR}
-               : {backgroundColor: bankStyle.STRUCTURED_MESSAGE_COLOR}
+        let st = {backgroundColor: bankStyle.contextBackgroundColor}
         addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       }
     }
@@ -246,7 +243,7 @@ class MessageRow extends Component {
                           <View style={cellStyle}>
                             <View style={styles.container}>
                             {this.isShared()
-                              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.SHARED_WITH_BG}]}>
+                              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
                                   <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
                                 </View>
                               : <View />
@@ -290,7 +287,7 @@ class MessageRow extends Component {
     var model = utils.getModel(this.props.resource[constants.TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
-    var bg = bankStyle.BACKGROUND_IMAGE ? 'transparent' : bankStyle.BACKGROUND_COLOR
+    var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     return (
       <View style={[viewStyle, {backgroundColor: bg, paddingRight: isMyMessage ? 10 : 0}]}>
         {date}
@@ -428,7 +425,7 @@ class MessageRow extends Component {
       let str = !this.props.navigator.isConnected  &&  this.props.isLast
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
               : translate('newProductMsg', translate(msgModel))
-      let color = isMyMessage ? this.props.bankStyle.CONTEXT_TEXT_COLOR : '#757575'
+      let color = isMyMessage ? this.props.bankStyle.contextTextColor : '#757575'
       let msg = !this.props.navigator.isConnected  &&  this.props.isLast
               ? <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: color}]}>{str}</Text>
@@ -533,7 +530,7 @@ class MessageRow extends Component {
     }
     if (model.id === APPLICATION_SUBMITTED) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, {color: this.props.bankStyle.CONFIRMATION_COLOR}]}>{resource.message}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: this.props.bankStyle.confirmationColor}]}>{resource.message}</Text>
                 </View>
       renderedRow.push(msg);
       return null
@@ -587,12 +584,12 @@ class MessageRow extends Component {
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       else if (isConfirmation) {
-        style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR}, chatStyles.resourceTitle]
+        style = [style, {color: self.props.bankStyle.confirmationColor}, chatStyles.resourceTitle]
         vCols.push(
           <View key={self.getNextKey()}>
             <Text style={[style]}>{resource[v]}</Text>
-            <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -25, opacity: 0.2}]} size={45} name={'ios-flower'} />
-            <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR, alignSelf: 'flex-end', marginTop: -30}} size={30} name={'ios-done-all'} />
+            <Icon style={[{color: self.props.bankStyle.confirmationColor, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -25, opacity: 0.2}]} size={45} name={'ios-flower'} />
+            <Icon style={{color: self.props.bankStyle.confirmationColor, alignSelf: 'flex-end', marginTop: -30}} size={30} name={'ios-done-all'} />
           </View>
         );
 
@@ -618,9 +615,9 @@ class MessageRow extends Component {
         if (msgParts.length === 2) {
           if (resource.welcome) {
             let bg  = isMyMessage
-                      ? self.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR
+                      ? self.props.bankStyle.myMessageBackgroundColor
                       : '#ffffff'
-            let color = isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR
+            let color = isMyMessage ? self.props.bankStyle.myMessageLinkColor : LINK_COLOR
             let msg = <View key={self.getNextKey()}>
                         <Text style={style}>{msgParts[0]}</Text>
                         <View style={chatStyles.rowContainer}>
@@ -654,14 +651,14 @@ class MessageRow extends Component {
                 onPressCall = self.createNewResource.bind(self, msgModel, isMyMessage);
 
               color = isMyMessage
-                    ? {color: self.props.bankStyle.MY_MESSAGE_LINK_COLOR}
+                    ? {color: self.props.bankStyle.myMessageLinkColor}
                     : {color: '#2892C6'}
               if (isMyMessage)
                 link = <Text style={[style, color]}>{translate(msgModel)}</Text>
               else
                 link = <View style={chatStyles.rowContainer}>
                            <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.MY_MESSAGE_LINK_COLOR : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.myMessageLinkColor : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -726,7 +723,7 @@ class MessageRow extends Component {
       // if (title.length > 30)
       //   title = title.substring(0, 27) + '...'
 
-      vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.STRUCTURED_MESSAGE_BORDER}]} key={this.getNextKey()}>{title}</Text>);
+      vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.contextBorderColor}]} key={this.getNextKey()}>{title}</Text>);
     }
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {

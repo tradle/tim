@@ -12,7 +12,7 @@ var Reflux = require('reflux');
 var constants = require('@tradle/constants');
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var StyleSheet = require('../StyleSheet')
 var TimerMixin = require('react-timer-mixin')
 
@@ -125,7 +125,7 @@ class VerifierChooser extends Component {
           automaticallyAdjustContentInsets={false}
           removeClippedSubviews={false}
           keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps={true}
+          keyboardShouldPersistTaps="always"
           initialListSize={10}
           pageSize={20}
           scrollRenderAhead={10}

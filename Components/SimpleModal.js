@@ -65,7 +65,7 @@ export default function SimpleModal (props) {
 
 const DEFAULT_STYLES = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.4)'
@@ -81,7 +81,7 @@ const DEFAULT_STYLES = StyleSheet.create({
     // boxShadow: '2px 2px 10px rgba(0, 0, 0, 0.2)'
   },
   head: {
-    flex: 1,
+    flexGrow: 1,
     flexDirection: 'row',
     marginBottom: 20,
     paddingBottom: 15,
@@ -107,7 +107,7 @@ const DEFAULT_STYLES = StyleSheet.create({
     fontSize: 20
   },
   buttonsContainer: {
-    flex: 1,
+    flexGrow: 1,
     flexDirection: 'row',
     justifyContent: CENTER ? 'center' : 'flex-end'
   },

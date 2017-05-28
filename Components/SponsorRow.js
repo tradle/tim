@@ -5,7 +5,7 @@ var translate = utils.translate
 import LinearGradient from 'react-native-linear-gradient';
 // var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var RowMixin = require('./RowMixin');
 var ResourceList = require('./ResourceList')
 // var Swipeout = require('react-native-swipeout')
@@ -17,7 +17,7 @@ var extend = require('extend')
 // var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
 // const PRIORITY_HEIGHT = 100
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
 var StyleSheet = require('../StyleSheet')
 var ArticleView = require('./ArticleView')

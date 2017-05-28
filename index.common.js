@@ -26,7 +26,7 @@ import debounce from 'debounce'
 var ResourceList = require('./Components/ResourceList');
 var VerifierChooser = require('./Components/VerifierChooser')
 
-var VideoPlayer = require('./Components/VideoPlayer')
+// var VideoPlayer = require('./Components/VideoPlayer')
 var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
@@ -61,7 +61,7 @@ import Log from './Components/Log'
 var utils = require('./utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons'
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
@@ -101,8 +101,7 @@ import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
 import Transitions from './utils/transitions'
-import defaultBankStyle from './styles/bankStyle.json'
-// import Calendar from './Components/Calendar'
+import defaultBankStyle from './styles/defaultBankStyle.json'
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
@@ -117,7 +116,9 @@ import Push from './utils/push'
 import Navs from './utils/navs'
 import Analytics from './utils/analytics'
 
-var ReactPerf = __DEV__ && require('react-addons-perf')
+var ReactPerf = __DEV__ && !utils.isWeb() && require('react-addons-perf')
+// if (ReactPerf) ReactPerf.toggle()
+
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
 
 utils.setGlobal('SUBMIT_DEBUG_LOG', utils.submitLog)
@@ -412,7 +413,7 @@ class TiMApp extends Component {
           onWillFocus={(newRoute) => {
             let style = newRoute.passProps.bankStyle
             if (style)
-              this.setState({navBarBgColor: style.NAV_BAR_BACKGROUND_COLOR || 'transparent'})
+              this.setState({navBarBgColor: style.navBarBackgroundColor || 'transparent'})
             else
               this.setState({navBarBgColor: 'transparent'})
           }}
@@ -528,8 +529,8 @@ class TiMApp extends Component {
                 content={props.content}
                 fullScreen={props.fullScreen}
                 dimension={props.dimension} />
-    case 18:
-      return <VideoPlayer {...props} />
+    // case 18:
+    //   return <VideoPlayer {...props} />
     case 19:
       return <GridItemsList navigator={nav} {...props} />
     case PASSWORD_CHECK:
@@ -580,8 +581,8 @@ var NavigationBarRouteMapper = {
       return <View/>
 
     var color = '#7AAAC3'
-    if (route.passProps.bankStyle  &&  route.passProps.bankStyle.LINK_COLOR)
-      color = route.passProps.bankStyle.LINK_COLOR
+    if (route.passProps.bankStyle  &&  route.passProps.bankStyle.linkColor)
+      color = route.passProps.bankStyle.linkColor
 
     var previousRoute = navState.routeStack[index - 1];
     var lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
@@ -625,7 +626,7 @@ var NavigationBarRouteMapper = {
     if (route.tintColor)
       style.push({color: route.tintColor});
     else if (route.passProps.bankStyle)
-      style.push({color: route.passProps.bankStyle.LINK_COLOR || '#7AAAC3'})
+      style.push({color: route.passProps.bankStyle.linkColor || '#7AAAC3'})
 
     style.push({fontSize: utils.getFontSize(20)})
     var title
@@ -736,7 +737,7 @@ var NavigationBarRouteMapper = {
     let photo, uri
     let photoObj
     if (route.passProps.bankStyle) {
-      photoObj = route.passProps.bankStyle.LOGO || route.passProps.bankStyle.logo
+      photoObj = route.passProps.bankStyle.logo || route.passProps.bankStyle.logo
     }
 
     if (!photoObj)
@@ -752,7 +753,7 @@ var NavigationBarRouteMapper = {
     let logoNeedsText = (!route.passProps.resource  &&  route.id !== 7) ||
                         // route.passProps.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION ||
                         !route.passProps.bankStyle ||
-                        route.passProps.bankStyle.LOGO_NEEDS_TEXT
+                        route.passProps.bankStyle.logoNeedsText
     if (uri) {
       if (logoNeedsText)
         photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 23} : {}]} />

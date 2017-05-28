@@ -137,7 +137,7 @@ class IdentitiesList extends Component {
           removeClippedSubviews={false}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps={true}
+          keyboardShouldPersistTaps="always"
           showsVerticalScrollIndicator={false} />
       </View>
     );

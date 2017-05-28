@@ -6,7 +6,7 @@ var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
 // var DashboardView = require('./DashboardView')
 var ResourceList = require('./ResourceList');
-var VideoPlayer = require('./VideoPlayer')
+// var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
 var HomePage = require('./HomePage')
 var HomePageMixin = require('./HomePageMixin')
@@ -25,7 +25,8 @@ var PasswordCheck = require('./PasswordCheck')
 var ArticleView = require('./ArticleView');
 var FadeInView = require('./FadeInView')
 var TouchIDOptIn = require('./TouchIDOptIn')
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
+
 var QRCodeScanner = require('./QRCodeScanner')
 var TimerMixin = require('react-timer-mixin')
 var isDeepLink
@@ -624,6 +625,13 @@ class TimHome extends Component {
       this.showLandingPage(provider, ENV.landingPage)
       return
     }
+    // Check if the current page is the same we need
+    let routes = this.props.navigator.getCurrentRoutes()
+    let currentRoute = routes[routes.length - 1]
+    if (currentRoute.id === 11) {
+      if (utils.getId(currentRoute.passProps.resource) === utils.getId(provider))
+        return
+    }
     var msg = {
       message: translate('customerWaiting', me.firstName),
       _t: constants.TYPES.CUSTOMER_WAITING,
@@ -650,7 +658,6 @@ class TimHome extends Component {
         bankStyle:  style
       }
     }
-    let routes = this.props.navigator.getCurrentRoutes()
     if (termsAccepted  &&  routes.length === 3)
       this.props.navigator.replace(route)
     else
@@ -853,28 +860,28 @@ class TimHome extends Component {
     this.props.navigator.push(route);
   }
 
-  showVideoTour(cb) {
-    let onEnd = (err) => {
-      if (err) debug('failed to load video', err)
-      cb()
-    }
+//   showVideoTour(cb) {
+//     let onEnd = (err) => {
+//       if (err) debug('failed to load video', err)
+//       cb()
+//     }
 
-    this.props.navigator.replace({
-      // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      id: 18,
-//      title: 'Tradle',
-//      titleTintColor: '#eeeeee',
-      component: VideoPlayer,
-      rightButtonTitle: __DEV__ ? 'Skip' : undefined,
-      passProps: {
-        uri: 'videotour',
-        onEnd: onEnd,
-        onError: onEnd,
-        navigator: this.props.navigator
-      },
-      onRightButtonPress: onEnd
-    })
-  }
+//     this.props.navigator.replace({
+//       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+//       id: 18,
+// //      title: 'Tradle',
+// //      titleTintColor: '#eeeeee',
+//       component: VideoPlayer,
+//       rightButtonTitle: __DEV__ ? 'Skip' : undefined,
+//       passProps: {
+//         uri: 'videotour',
+//         onEnd: onEnd,
+//         onError: onEnd,
+//         navigator: this.props.navigator
+//       },
+//       onRightButtonPress: onEnd
+//     })
+//   }
   onReloadDBPressed() {
     utils.setMe(null);
     utils.setModels(null);

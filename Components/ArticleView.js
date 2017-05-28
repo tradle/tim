@@ -12,7 +12,8 @@ import WebView from './WebView'
 import utils from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 
-var defaultBankStyle = require('../styles/bankStyle.json')
+// var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var translate = utils.translate
 
 
@@ -49,9 +50,9 @@ class ArticleView extends Component {
       return wView
 
     let action = <TouchableOpacity onPress={this.props.action}>
-                   <View style={{marginHorizontal: -3, backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
+                   <View style={{marginHorizontal: -3, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
                      <View style={{backgroundColor: 'transparent', paddingHorizontal: 10, justifyContent: 'center'}}>
-                       <Text style={{fontSize: 20,color: bankStyle.CONTEXT_TEXT_COLOR}}>{translate(this.props.actionBarTitle || 'next')}</Text>
+                       <Text style={{fontSize: 20,color: bankStyle.contextTextColor}}>{translate(this.props.actionBarTitle || 'next')}</Text>
                      </View>
                    </View>
                  </TouchableOpacity>

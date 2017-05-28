@@ -7,7 +7,7 @@ var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 var dateformat = require('dateformat')
 var PhotoList = require('./PhotoList');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
@@ -143,7 +143,7 @@ class FormMessageRow extends Component {
     var date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
-    let bg = bankStyle.BACKGROUND_IMAGE ? {} : {backgroundColor: bankStyle.BACKGROUND_COLOR}
+    let bg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
 
     return  <View style={[{margin: 1}, bg]}>
               {date}
@@ -183,7 +183,7 @@ class FormMessageRow extends Component {
     let headerStyle = [
       chatStyles.verifiedHeader,
       noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
-      {backgroundColor: isMyMessage ? bankStyle.MY_MESSAGE_BACKGROUND_COLOR : bankStyle.SHARED_WITH_BG}, // opacity: isShared ? 0.5 : 1},
+      {backgroundColor: isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg}, // opacity: isShared ? 0.5 : 1},
       isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
     ]
 

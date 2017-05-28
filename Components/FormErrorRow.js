@@ -3,13 +3,12 @@
 var utils = require('../utils/utils');
 var translate = utils.translate
 var NewResource = require('./NewResource');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin')
 var extend = require('extend')
 var equal = require('deep-equal')
-var Actions = require('../Actions/Actions');
 import { makeResponsive } from 'react-native-orient'
 var StyleSheet = require('../StyleSheet')
 var reactMixin = require('react-mixin');
@@ -19,8 +18,10 @@ import ImageInput from './ImageInput'
 const FORM_ERROR = 'tradle.FormError'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
+const IPROOV_SELFIE = 'tradle.IProovSelfie'
 
 const DEFAULT_LINK_COLOR = '#2892C6'
+const TYPE = constants.TYPE
 
 import {
   Image,
@@ -50,7 +51,7 @@ class FormErrorRow extends Component {
   }
   render() {
     var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
 
     var isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
     var to = this.props.to;
@@ -75,18 +76,11 @@ class FormErrorRow extends Component {
     else {
       var fromHash = resource.from.id;
       if (isMyMessage)
-        addStyle = [chatStyles.myCell, {backgroundColor: bankStyle.MY_MESSAGE_BACKGROUND_COLOR}]
-      else {
-        let borderColor = bankStyle.REQUEST_FULFILLED
-        let mstyle = {
-          borderColor: borderColor,
-          backgroundColor: '#ffffff',
-          borderTopLeftRadius: 0
-        }
-        addStyle = [chatStyles.verificationBody, {flex: 1}, mstyle]
-      }
+        addStyle = [chatStyles.myCell, {backgroundColor: bankStyle.myMessageBackgroundColor}]
+      else
+        addStyle = [chatStyles.verificationBody, {flex: 1, borderTopLeftRadius: 0}]
 
-      addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.FORM_ERROR_BG, borderColor: resource.documentCreated ? bankStyle.REQUEST_FULFILLED : bankStyle.FORM_ERROR_BORDER}]; //model.style];
+      addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.formErrorBg, borderColor: resource.documentCreated ? bankStyle.fixErrorColor : bankStyle.formErrorBorder}]; //model.style];
     }
     var properties = model.properties;
 
@@ -96,25 +90,24 @@ class FormErrorRow extends Component {
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
-    var messageBody;
     var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
-    if (message) {
-      let parts = utils.splitMessage(message)
-      if (parts.length == 2)
-        message = parts[0].length > parts[1].length ? parts[0] : parts[1]
-      else
-        message = parts[0]
-      let strName = utils.getStringName(message)
-      if (strName)
-        message = translate(strName)
-      if (resource.form) {
-        let formTitle = translate(resource.form)
-        if (formTitle.length > message.length)
-          message = formTitle
-      }
-    }
+    // if (message) {
+    //   let parts = utils.splitMessage(message)
+    //   if (parts.length == 2)
+    //     message = parts[0].length > parts[1].length ? parts[0] : parts[1]
+    //   else
+    //     message = parts[0]
+    //   let strName = utils.getStringName(message)
+    //   if (strName)
+    //     message = translate(strName)
+    //   if (resource.form) {
+    //     let formTitle = translate(resource.form)
+    //     if (formTitle.length > message.length)
+    //       message = formTitle
+    //   }
+    // }
     let prop =  this.isOnePropForm()
     // HACK
     var w = utils.dimensions(FormErrorRow).width
@@ -138,7 +131,7 @@ class FormErrorRow extends Component {
       cellStyle = chatStyles.textContainer
     if (prop  &&  prop.ref == PHOTO) {
       if (utils.isWeb() && ENV.canUseWebcam) {
-        let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.MY_MESSAGE_LINK_COLOR : bankStyle.LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
+        let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor}} size={20} name={'ios-arrow-forward'} />
         messageBody = <View key={this.getNextKey()}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   <TouchableHighlight style={{flex: 1}} underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
@@ -150,7 +143,16 @@ class FormErrorRow extends Component {
                 </View>
               </View>
       }
-      else
+      else if (resource.prefill[TYPE] === IPROOV_SELFIE) {
+        messageBody = <View key={this.getNextKey()}>
+                        <TouchableHighlight onPress={() => this.showIproovScanner(prop, prop.name)} underlayColor='transparent'>
+                        <View style={cellStyle}>
+                           {renderedRow}
+                        </View>
+                        </TouchableHighlight>
+                     </View>
+      }
+      else {
         messageBody = <View style={[rowStyle, viewStyle]}>
                        <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                         <View style={cellStyle}>
@@ -158,56 +160,39 @@ class FormErrorRow extends Component {
                         </View>
                        </ImageInput>
                      </View>
+      }
     }
-    else {
-      let msgContent =  <View style={[rowStyle, viewStyle]}>
-                          <View style={{marginTop: 2}}>
-                          {ownerPhoto}
-                          </View>
-                          <View style={cellStyle}>
-                            <View style={styles.container}>
-                            {this.isShared()
-                              ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.SHARED_WITH_BG}]}>
-                                  <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
-                                </View>
-                              : <View />
-                            }
-                            {renderedRow}
-                           </View>
-                           {sealedStatus}
-                          </View>
-                        </View>
-
+    if (!messageBody) {
+      let shared
+      if (this.isShared())
+        shared = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
+                   <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
+                 </View>
 
       messageBody = <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-                      {msgContent}
+                      <View style={[rowStyle, viewStyle]}>
+                        <View style={{marginTop: 2}}>
+                          {ownerPhoto}
+                        </View>
+                        <View style={cellStyle}>
+                          <View style={styles.container}>
+                          {shared}
+                          {renderedRow}
+                         </View>
+                         {sealedStatus}
+                        </View>
+                      </View>
                     </TouchableHighlight>
     }
-    // var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
-    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
-    var bg = bankStyle.BACKGROUND_IMAGE ? 'transparent' : bankStyle.BACKGROUND_COLOR
+    var model = utils.getModel(this.props.resource[TYPE]).value;
+    var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     return (
-      <View style={[viewStyle, {backgroundColor: bg}]}>
+      <View style={[styles.viewStyle, {backgroundColor: bg, width: width}]}>
         {date}
         {messageBody}
         {sendStatus}
       </View>
     )
-  }
-  onSetMediaProperty(propName, item) {
-    if (!item)
-      return;
-    let formRequest = this.props.resource
-    Actions.addItem({
-      disableFormRequest: formRequest,
-      resource: {
-        [constants.TYPE]: formRequest.prefill[constants.TYPE],
-        [propName]: item,
-        _context: formRequest._context,
-        from: utils.getMe(),
-        to: formRequest.from  // FormRequest.from
-      }
-    })
   }
 
   showEditResource() {
@@ -254,9 +239,9 @@ class FormErrorRow extends Component {
   }
   formatRow(isMyMessage, renderedRow) {
     var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
 
-    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnlyChat = this.props.to[TYPE]  &&  utils.isReadOnlyChat(resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
@@ -281,9 +266,9 @@ class FormErrorRow extends Component {
       }
       var style = chatStyles.resourceTitle
       if (isMyMessage)
-        style = [style, {justifyContent: 'flex-end', color: '#ffffff'}];
+        style = [style, styles.myMessage];
 
-      let rtype = resource.prefill[constants.TYPE] || utils.getId(resource.prefill).split('_')[0]
+      let rtype = resource.prefill[TYPE] || utils.getId(resource.prefill).split('_')[0]
       let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-arrow-forward'
       let iconSize = resource.documentCreated ? 30 : 20
 
@@ -291,8 +276,8 @@ class FormErrorRow extends Component {
         <View key={self.getNextKey()} style={{paddingBottom: 3}}>
           <Text style={[style, {color: '#555555'}]}>{resource.message} </Text>
           <View style={chatStyles.rowContainer}>
-            <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.FORM_ERROR_COLOR}]}>{translate(utils.getModel(rtype).value)}</Text>
-            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.REQUEST_FULFILLED : self.props.bankStyle.FORM_ERROR_COLOR} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
+            <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype).value)}</Text>
+            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.fixErrorColor : self.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
           </View>
         </View>
       )
@@ -321,6 +306,18 @@ var styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 18
   },
+  viewStyle: {
+    margin: 1,
+    backgroundColor: '#f7f7f7'
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  myMessage: {
+    justifyContent: 'flex-end',
+    color: '#ffffff'
+  }
 });
 reactMixin(FormErrorRow.prototype, RowMixin);
 reactMixin(FormErrorRow.prototype, ResourceMixin)

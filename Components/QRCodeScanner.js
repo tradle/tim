@@ -10,7 +10,7 @@ import utils from '../utils/utils'
 import debounce from 'debounce'
 var Camera = utils.isWeb() ? null : require('react-native-camera').default
 var ICON_BORDER_COLOR = '#D7E6ED'
-var Icon = require('react-native-vector-icons/Ionicons')
+import Icon from 'react-native-vector-icons/Ionicons'
 var Dir = Camera && Camera.Type
 
 

@@ -5,7 +5,7 @@ var translate = utils.translate
 var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 import CustomIcon from '../styles/customicons'
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
@@ -69,8 +69,11 @@ class VerificationMessageRow extends Component {
       let me = utils.getMe()
       if (me.isEmployee) {
         isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
-        if  (isReadOnlyChat)
-          isThirdPartyVerification = utils.getId(resource.organization) !== utils.getId(this.props.context.to.organization)
+        if  (isReadOnlyChat) {
+          // could be shared by customer in this case 'from' will be referring to customer
+          let org = resource.organization || resource.to.organization
+          isThirdPartyVerification = utils.getId(org) !== utils.getId(this.props.context.to.organization)
+        }
         else if (this.props.to[constants.TYPE] === constants.TYPES.PROFILE)
           isThirdPartyVerification = utils.getId(me) !== utils.getId(this.props.context.to) || (resource._verifiedBy  &&  utils.getId(me.organization) !== utils.getId(resource._verifiedBy))
       }
@@ -88,7 +91,7 @@ class VerificationMessageRow extends Component {
     }
     else {
       // color = bankStyle.VERIFIED_LINK_COLOR
-      vHeaderTextColor = bankStyle.VERIFIED_HEADER_TEXT_COLOR || bankStyle.VERIFIED_LINK_COLOR
+      vHeaderTextColor = bankStyle.verifiedHeaderTextColor || bankStyle.verifiedLinkColor
     }
 
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
@@ -103,7 +106,7 @@ class VerificationMessageRow extends Component {
     let headerStyle = [
       styles.header,
       isMyMessage ? styles.headerRight : styles.headerLeft,
-      {backgroundColor: bankStyle.VERIFIED_HEADER_COLOR, marginTop: 0, paddingVertical: 10}
+      {backgroundColor: bankStyle.verifiedHeaderColor, marginTop: 0, paddingVertical: 10}
     ]
     // let bulletStyle = {color: color, marginHorizontal: 7, alignSelf: 'center'}
     let row = this.formatDocument({
@@ -190,14 +193,14 @@ class VerificationMessageRow extends Component {
               <View style={[chatStyles.row, viewStyle]}>
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
-                  <View style={[{width: msgWidth}, styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.VERIFIED_BORDER_COLOR}, isMyMessage ? styles.headerRight : styles.headerLeft]}>
+                  <View style={[{width: msgWidth}, styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.verifiedBorderColor}, isMyMessage ? styles.headerRight : styles.headerLeft]}>
                     <View style={[{width: msgWidth-2}, styles.image, addStyle]}>
                       {renderedRow}
                     </View>
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.VERIFIED_BORDER_COLOR} style={{position: 'absolute', right: isReadOnlyChat ? -50 : 0, top: -15}} />
+                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={{position: 'absolute', right: isReadOnlyChat ? -50 : 0, top: -15}} />
               </View>
               {this.getSendStatus()}
             </View>
