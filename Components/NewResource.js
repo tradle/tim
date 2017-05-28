@@ -16,7 +16,7 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
 var reactMixin = require('react-mixin');
@@ -678,7 +678,7 @@ class NewResource extends Component {
     var content =
       <ScrollView style={{backgroundColor: 'transparent'}}
                   ref='scrollView' {...this.scrollviewProps}
-                  keyboardShouldPersistTaps={true}
+                  keyboardShouldPersistTaps="always"
                   keyboardDismissMode={isRegistration || Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
         <View style={[styles.container, formStyle]}
           onStartShouldSetResponderCapture={(e) => {

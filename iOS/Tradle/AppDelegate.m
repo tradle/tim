@@ -8,21 +8,22 @@
  */
 
 #import "AppDelegate.h"
-#import "RCTRootView.h"
-#import "RCTBundleURLProvider.h"
-#import "RCTLinkingManager.h"
+#import <React/RCTBundleURLProvider.h>
+#import <React/RCTRootView.h>
+#import <React/RCTLinkingManager.h>
+#import <React/RCTLog.h>
+#import <React/RCTPushNotificationManager.h>
+#import <React/RCTEventEmitter.h>
 #import "CodePush.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
 #import "QTouchposeApplication.h"
-#import "RCTPushNotificationManager.h"
 #import "Orientation.h"
 #import <asl.h>
-#import "RCTLog.h"
 #import "SplashScreen.h"
 #import "RNBranch.h"
 
-@import Firebase;
+#import "Firebase.h"
 
 @implementation AppDelegate
 
@@ -49,7 +50,8 @@
 
   [RNBranch initSessionWithLaunchOptions:launchOptions isReferrable:YES];
 #ifdef DEBUG
-  jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.5:8081/index.ios.bundle?platform=ios&dev=true"];
+ jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+  // jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.5:8081/index.ios.bundle?platform=ios&dev=true"];
 #else
   jsCodeLocation = [CodePush bundleURL];
     // jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];

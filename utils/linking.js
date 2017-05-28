@@ -10,7 +10,9 @@ import { translate } from './utils'
 import { deepLinkHost } from './env'
 
 async function getInitialURL() {
-  const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
+  // const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
+  const bundle = await Branch.getFirstReferringParams()
+  if (Object.keys(bundle).length) debugger
   return getUrlFromBundle(bundle) || await Linking.getInitialURL()
 }
 
