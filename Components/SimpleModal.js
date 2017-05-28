@@ -66,7 +66,7 @@ export default function SimpleModal (props) {
 const DEFAULT_STYLES = StyleSheet.create({
   container: {
     flexGrow: 1,
-    alignItems: 'center',
+    // alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
     paddingHorizontal: 10
