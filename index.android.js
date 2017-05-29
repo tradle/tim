@@ -1,7 +1,7 @@
-import { NativeModules } from 'react-native'
+import { AsyncStorage } from 'react-native'
 import AsyncSnappyStorage from 'react-native-async-storage-snappy'
+AsyncStorage.setBackend(AsyncSnappyStorage)
 AsyncSnappyStorage.encrypt()
-NativeModules.AsyncRocksDBStorage = AsyncSnappyStorage
 
 // require('./utils/perf')
 require('./index.common')

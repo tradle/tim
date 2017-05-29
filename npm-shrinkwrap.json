@@ -3629,7 +3629,33 @@
     "key-encoder": {
       "version": "1.1.6",
       "from": "mvayngrib/key-encoder-js",
-      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#d1532b12179481830a3e253d3ac140cebbf69dd0"
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#d1532b12179481830a3e253d3ac140cebbf69dd0",
+      "dependencies": {
+        "asn1.js": {
+          "version": "2.2.1",
+          "from": "asn1.js@>=2.2.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
+          "dependencies": {
+            "bn.js": {
+              "version": "2.2.0",
+              "from": "bn.js@>=2.0.0 <3.0.0",
+              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
+            }
+          }
+        },
+        "elliptic": {
+          "version": "5.2.1",
+          "from": "elliptic@>=5.1.0 <6.0.0",
+          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-5.2.1.tgz",
+          "dependencies": {
+            "bn.js": {
+              "version": "3.3.0",
+              "from": "bn.js@>=3.1.1 <4.0.0",
+              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-3.3.0.tgz"
+            }
+          }
+        }
+      }
     },
     "kind-of": {
       "version": "3.0.4",
@@ -4072,7 +4098,24 @@
     "merkle-tree-stream": {
       "version": "3.0.3",
       "from": "mvayngrib/merkle-tree-stream#finalize",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
+      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "dependencies": {
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "readable-stream": {
+          "version": "2.2.9",
+          "from": "readable-stream@>=2.0.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.9.tgz"
+        },
+        "string_decoder": {
+          "version": "1.0.1",
+          "from": "string_decoder@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.1.tgz"
+        }
+      }
     },
     "method-override": {
       "version": "2.3.9",
@@ -4742,8 +4785,8 @@
     },
     "react-native": {
       "version": "0.42.3",
-      "from": "react-native@>=0.42.3 <0.43.0",
-      "resolved": "https://registry.npmjs.org/react-native/-/react-native-0.42.3.tgz",
+      "from": "tradle/react-native#42",
+      "resolved": "git://github.com/tradle/react-native.git#3a4539f45fc8dd0ddfd0afcca0d932f734f691d5",
       "dependencies": {
         "async": {
           "version": "2.4.1",
@@ -4909,7 +4952,7 @@
       "resolved": "https://registry.npmjs.org/react-native-animatable/-/react-native-animatable-0.6.1.tgz"
     },
     "react-native-async-storage-rocks": {
-      "version": "1.0.0",
+      "version": "2.0.0",
       "from": "react-native-async-storage-rocks@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/react-native-async-storage-rocks/-/react-native-async-storage-rocks-2.0.0.tgz"
     },
