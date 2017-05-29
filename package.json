@@ -83,7 +83,7 @@
     "querystring-es3": "^0.2.1",
     "react": "^15.4.2",
     "react-mixin": "~1.2.2",
-    "react-native": "^0.42.3",
+    "react-native": "github:tradle/react-native#42",
     "react-native-accordion": "^1.0.1",
     "react-native-actionsheet": "^2.0.3",
     "react-native-animatable": "^0.6.1",
