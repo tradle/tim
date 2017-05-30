@@ -61,8 +61,19 @@ class MyProductMessageRow extends Component {
 
     var hdrStyle = {backgroundColor: '#289427'} //this.props.bankStyle.productBgColor ? {backgroundColor: this.props.bankStyle.productBgColor} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
+
+    var w = utils.dimensions(MyProductMessageRow).width
+    let msgWidth = Math.min(Math.floor(w * 0.8), 600)
+    let isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
+    if (isReadOnlyChat)
+      msgWidth -= 50 // provider icon and padding
+    let numberOfCharacters = msgWidth / 12
+    let issuedBy = translate('issuedBy', orgName)
+    if (issuedBy.length > numberOfCharacters)
+      issuedBy = issuedBy.substring(0, numberOfCharacters) + '..'
+
     renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[chatStyles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
-                               <Text style={styles.issuedBy}>{translate('issuedBy', orgName)}</Text>
+                               <Text style={styles.issuedBy}>{issuedBy}</Text>
                             </View>
                             );
     let title = translate(model)
