@@ -7255,7 +7255,7 @@ var Store = Reflux.createStore({
         let originalTo = toBot.organization // this._getItem(document.to).organization
         let verificationFrom = from.organization
 
-        if (utils.getId(verificationFrom)  !==  utils.getId(originalTo)) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
+        if (verificationFrom  &&  utils.getId(verificationFrom)  !==  utils.getId(originalTo)) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
           val._verifiedBy = from.organization
           to = this._getItem(document.from)  // document from is not changing but to does depending on what party verifies or asks for corrections
           toId = utils.getId(to)
