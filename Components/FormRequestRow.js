@@ -268,6 +268,7 @@ class FormRequestRow extends Component {
     var chatOrg = this.props.to[TYPE] === constants.TYPES.ORGANIZATION  &&  utils.getId(this.props.to)
     let shareableResources = this.props.shareableResources.verifications
     let providers = this.props.shareableResources.providers
+    let resourceContextId = utils.getId(resource._context)
     for (var t in  shareableResources) {
       if (t !== formModel.id)
         continue
@@ -277,6 +278,9 @@ class FormRequestRow extends Component {
       ver.forEach((r) => {
         let document = r.document
         if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
+          return
+        // Dont' share forms for the same product
+        if (resourceContextId === utils.getId(document._context))
           return
         var vModel = utils.getModel(r[TYPE]);
         var doc = this.formatShareables({
