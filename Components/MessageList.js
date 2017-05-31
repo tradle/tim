@@ -14,7 +14,7 @@ var VerifierChooser = require('./VerifierChooser')
 var ResourceList = require('./ResourceList')
 var ChatContext = require('./ChatContext')
 var ContextChooser = require('./ContextChooser')
-var Icon = require('react-native-vector-icons/Ionicons')
+import Icon from 'react-native-vector-icons/Ionicons'
 var utils = require('../utils/utils')
 var translate = utils.translate
 var reactMixin = require('react-mixin')
@@ -610,7 +610,7 @@ class MessageList extends Component {
         submitOnReturn={true}
         underlineColorAndroid='transparent'
         menu={this.generateMenu.bind(this)}
-        keyboardShouldPersistTaps={utils.isWeb() ? false : true}
+        keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
         hideTextInput={hideTextInput}

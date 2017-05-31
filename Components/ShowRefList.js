@@ -2,7 +2,7 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var buttonStyles = require('../styles/buttonStyles');
 var appStyle = require('../styles/appStyle.json')
 var reactMixin = require('react-mixin');
@@ -323,6 +323,7 @@ var styles = StyleSheet.create({
   },
   countText: {
     fontSize: 12,
+    marginLeft: -7,
     fontWeight: '600',
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,

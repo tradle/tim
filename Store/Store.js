@@ -56,8 +56,29 @@ Q.onerror = function (err) {
 var ENV = require('../utils/env')
 var AddressBook = require('NativeModules').AddressBook;
 
-var voc = require('@tradle/models');
-var sampleData = voc.data
+const tradle = require('@tradle/engine')
+const tradleUtils = tradle.utils
+const protocol = tradle.protocol
+const {
+  NONCE,
+  TYPE,
+  SIG,
+  SEQ,
+  ROOT_HASH,
+  CUR_HASH,
+  PREV_HASH
+} = tradle.constants
+
+const sampleData = require('@tradle/models').data
+const voc = (function () {
+  const models = require('@tradle/models').concat(require('@tradle/custom-models'))
+  models.forEach(model => {
+    if (model.id) models[model.id] = model
+  })
+
+  return models
+}())
+
 var sampleProfile = require('../data/sampleProfile.json')
 // var currencies = voc.currencies
 // var nationalities = voc.nationalities
@@ -91,20 +112,8 @@ var level = function (loc, opts) {
 }
 
 const collect = require('stream-collector')
-const tradle = require('@tradle/engine')
 // const enforceOrder = require('@tradle/receive-in-order')
 const Multiqueue = require('@tradle/multiqueue')
-const tradleUtils = tradle.utils
-const protocol = tradle.protocol
-const {
-  NONCE,
-  TYPE,
-  SIG,
-  SEQ,
-  ROOT_HASH,
-  CUR_HASH,
-  PREV_HASH
-} = tradle.constants
 
 const Cache = require('lru-cache')
 const NEXT_HASH = '_n'

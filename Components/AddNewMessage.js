@@ -3,7 +3,7 @@
 var utils = require('../utils/utils');
 var ChatMessage = require('./ChatMessage');
 // var SelectPhotoList = require('./SelectPhotoList');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var extend = require('extend');
 var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');

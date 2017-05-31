@@ -125,7 +125,7 @@ class VerifierChooser extends Component {
           automaticallyAdjustContentInsets={false}
           removeClippedSubviews={false}
           keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps={true}
+          keyboardShouldPersistTaps="always"
           initialListSize={10}
           pageSize={20}
           scrollRenderAhead={10}

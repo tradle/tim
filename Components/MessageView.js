@@ -6,7 +6,7 @@ var constants = require('@tradle/constants');
 var ArticleView = require('./ArticleView');
 var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 
 var ShowRefList = require('./ShowRefList');
 var VerificationView = require('./VerificationView')
@@ -398,7 +398,7 @@ class MessageView extends Component {
 
     return (
       <PageView style={[platformStyles.container, {height: utils.dimensions().height - 80}]} separator={contentSeparator}>
-      <ScrollView  ref='this' keyboardShouldPersistTaps={true}>
+      <ScrollView  ref='this' keyboardShouldPersistTaps="always">
         {dateView}
         {bigPhoto}
         {actionPanel}

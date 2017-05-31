@@ -5,7 +5,7 @@ var translate = utils.translate
 import LinearGradient from 'react-native-linear-gradient';
 var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var RowMixin = require('./RowMixin');
 var ResourceList = require('./ResourceList')
 // var Swipeout = require('react-native-swipeout')
@@ -198,8 +198,8 @@ class ResourceRow extends Component {
       extend(style, defaultBankStyle)
       style = extend(style, resource.style)
     }
-    let bg = style ? {backgroundColor: style.LIST_BG} : {}
-    let color = style ? {color: style.LIST_COLOR} : {}
+    let bg = style ? {backgroundColor: style.listBg} : {}
+    let color = style ? {color: style.listColor} : {}
 
     var cancelResource
     if (this.props.onCancel  ||  (this.state && this.state.sharedWith))
@@ -269,7 +269,7 @@ class ResourceRow extends Component {
 
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode)
-      action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: 'white'}} onPress={() => {
+      action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: '#ffffff'}} onPress={() => {
                   this.props.navigator.push({
                     component: ResourceList,
                     title: translate("myDocuments"),
@@ -642,16 +642,10 @@ var styles = StyleSheet.create({
     fontSize: 14,
   },
   row: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     // justifyContent: 'space-around',
     flexDirection: 'row',
-    padding: 5,
-  },
-  rowV: {
-    // backgroundColor: 'white',
-    // justifyContent: 'space-around',
-    // flexDirection: 'row',
     padding: 5,
   },
   content: {
@@ -719,7 +713,7 @@ var styles = StyleSheet.create({
     // color: '#7AAAc3'
   },
   online: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     alignItems: 'center',
     // alignSelf: 'flex-end',
@@ -778,6 +772,7 @@ var styles = StyleSheet.create({
   },
   countText: {
     fontSize: 12,
+    marginLeft: -7,
     fontWeight: '600',
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,

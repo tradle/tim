@@ -9,7 +9,7 @@ var MessageView = require('./MessageView')
 var ResourceMixin = require('./ResourceMixin')
 var reactMixin = require('react-mixin')
 var dateformat = require('dateformat')
-var Icon = require('react-native-vector-icons/Ionicons')
+import Icon from 'react-native-vector-icons/Ionicons'
 var Accordion = require('react-native-accordion')
 
 var NOT_SPECIFIED = '[not specified]'

@@ -5,7 +5,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var NewResource = require('./NewResource');
 var RemediationItemsList = require('./RemediationItemsList')
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
 var ResourceList = require('./ResourceList')
 var RowMixin = require('./RowMixin');

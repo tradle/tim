@@ -113,7 +113,7 @@ class ContextChooser extends Component {
         automaticallyAdjustContentInsets={false}
         renderHeader={this.renderHeader.bind(this)}
         keyboardDismissMode='on-drag'
-        keyboardShouldPersistTaps={true}
+        keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false} />;
 
     var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.backgroundColor ? {backgroundColor: this.props.bankStyle.backgroundColor} : {backgroundColor: '#ffffff'}

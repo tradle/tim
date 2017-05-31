@@ -2,28 +2,9 @@ PODS:
   - Alamofire (4.4.0)
   - AlamofireImage (3.2.0):
     - Alamofire (~> 4.1)
-  - Branch (0.14.12):
-    - Branch/Core (= 0.14.12)
-    - Branch/without-IDFA (= 0.14.12)
-  - Branch/Core (0.14.12)
-  - Branch/without-IDFA (0.14.12)
   - CocoaAsyncSocket (7.6.1)
-  - Firebase/Core (3.17.0):
-    - FirebaseAnalytics (= 3.9.0)
-    - FirebaseCore (= 3.6.0)
-  - FirebaseAnalytics (3.9.0):
-    - FirebaseCore (~> 3.6)
-    - FirebaseInstanceID (~> 1.0)
-    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-  - FirebaseCore (3.6.0):
-    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-  - FirebaseInstanceID (1.0.10):
-    - FirebaseCore (~> 3.6)
-  - GoogleToolboxForMac/Defines (2.1.1)
-  - GoogleToolboxForMac/NSData+zlib (2.1.1):
-    - GoogleToolboxForMac/Defines (= 2.1.1)
   - GPUImage (0.1.7)
-  - GZIP (1.1.1)
+  - GZIP (1.2)
   - iProov (5.1.0):
     - Alamofire (~> 4.3)
     - AlamofireImage (~> 3.2)
@@ -39,8 +20,6 @@ PODS:
   - Socket.IO-Client-Swift (8.3.3)
 
 DEPENDENCIES:
-  - Branch
-  - Firebase/Core
   - iProov (from `https://github.com/iProov/iproov-ios-pod.git`)
   - PPBlinkID (~> 2.7.1)
 
@@ -56,21 +35,15 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Alamofire: dc44b1600b800eb63da6a19039a0083d62a6a62d
   AlamofireImage: 157ed682cc81d3b9db4fb90c1f12180ac552d93b
-  Branch: f63d9cf82ac09747349a73184a0b739d28781c4d
   CocoaAsyncSocket: 7eadd3f59e1a6c84e2aefc93e9ff7b55156fe174
-  Firebase: 4b66b5b59c43edac745b87f0c87e42cdd0279c13
-  FirebaseAnalytics: e5fe8486efc01bec33f6bf82e2fa9fce4b124052
-  FirebaseCore: 9691ee2ade70c098d7cf92440f4303f16d83ca75
-  FirebaseInstanceID: b9eedd6846fb5e1f0f7279e1deaa7a7e4cf8392e
-  GoogleToolboxForMac: 8e329f1b599f2512c6b10676d45736bcc2cbbeb0
   GPUImage: 733a5f0fab92df9de1c37ba9df520a833ccb406d
-  GZIP: f8beb59597f651e6970a45b816508a9c6d700b77
+  GZIP: 1c1c898472f4ac8054888b9d8006b925963fcf17
   iProov: 21532de97a8d0c5ec7bdbc52cb2c99c7952d6c54
   KeychainAccess: a986406022dfc7c634c691ad3bec670cc6a32002
   MBProgressHUD: 4890f671c94e8a0f3cf959aa731e9de2f036d71a
   PPBlinkID: 48fffa519ba83ca5b31ec9f191c17c3dfe430f76
   Socket.IO-Client-Swift: a2faffdbde89c63aebc5d631041530c1068b02b8
 
-PODFILE CHECKSUM: 49fa4677fa7f385da34f6dcbe9069062ceb04c4e
+PODFILE CHECKSUM: eca8c284a4c5010eb067a0023fed345261e465f9
 
 COCOAPODS: 1.2.1

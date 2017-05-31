@@ -246,7 +246,7 @@ class ProductChooser extends Component {
         enableEmptySections={true}
         automaticallyAdjustContentInsets={false}
         keyboardDismissMode='on-drag'
-        keyboardShouldPersistTaps={true}
+        keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false} />;
 
   var err = this.state.err

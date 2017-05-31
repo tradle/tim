@@ -1,5 +1,5 @@
-scheme "Tradle-dev Release"
-#clean true
+scheme "Release"
+clean true
 output_name "Tradle"
 workspace "Tradle.xcworkspace"
 xcconfig "release.xcconfig"
