@@ -1088,8 +1088,12 @@ var NewResourceMixin = {
       if (this.props.model) {
         let vals = defaults[this.props.model.id]
         for (let v in vals) {
-          if (!resource[v])
+          if (!resource[v]) {
             resource[v] = vals[v]
+            if (!this.floatingProps)
+              this.floatingProps = {}
+            this.floatingProps[v] = vals[v]
+          }
         }
       }
     }
@@ -1111,8 +1115,11 @@ var NewResourceMixin = {
           else
             label = resource[params.prop].title
         }
-        if (rModel.subClassOf  &&  rModel.subClassOf === ENUM)
+        if (rModel.subClassOf  &&  rModel.subClassOf === ENUM) {
+          if (!label)
+            label = resource[params.prop]
           label = utils.createAndTranslate(label, true)
+        }
       }
       style = textStyle
       propLabel = <Text style={[styles.labelDirty, color]}>{params.label}</Text>
