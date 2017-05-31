@@ -1831,6 +1831,8 @@ var Store = Reflux.createStore({
       return response.json()
     })
     .then(function (json) {
+      json = utils.normalizeGetInfoResponse(json)
+
       if (json.dictionary) {
         extend(true, dictionary, json.dictionary)
         if (me) {

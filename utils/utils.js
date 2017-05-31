@@ -84,6 +84,7 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
 const ENUM = 'tradle.Enum'
+const STYLES_PACK = 'tradle.StylesPack'
 // var dictionaries = require('@tradle/models').dict
 var dictionary //= dictionaries[Strings.language]
 
@@ -140,6 +141,32 @@ var utils = {
   getModels() {
     return models;
   },
+  normalizeGetInfoResponse(json) {
+    json.providers.forEach(provider => {
+      if (provider.style) {
+        provider.style = utils.toStylesPack(provider.style)
+      }
+    })
+
+    return json
+  },
+  toStylesPack(oldStylesFormat) {
+    if (oldStylesFormat[TYPE] === STYLES_PACK) return oldStylesFormat
+
+    const { properties } = utils.getModel(STYLES_PACK).value
+    const pack = {
+      [TYPE]: STYLES_PACK
+    }
+
+    for (let bad in oldStylesFormat) {
+      let good = utils.joinCamelCase(bad.split('_'))
+      if (good in properties) {
+        pack[good] = oldStylesFormat[bad]
+      }
+    }
+
+    return pack
+  },
   // temporary, let's hope
   interpretStylesPack(stylesPack) {
     let interpreted = {}
@@ -152,6 +179,21 @@ var utils = {
     })
 
     return interpreted
+  },
+  joinCamelCase(parts) {
+    return parts.map((part, i) => {
+      if (part.toUpperCase() === part) {
+        // avoid breaking already camelcased strings
+        part = part.toLowerCase()
+      }
+
+      if (i !== 0) {
+        part = part[0].toUpperCase() + part.slice(1)
+      }
+
+      return part
+    })
+    .join('')
   },
   splitCamelCase(str) {
     return str.split(/(?=[A-Z])/g)
