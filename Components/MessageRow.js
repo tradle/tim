@@ -292,7 +292,7 @@ class MessageRow extends Component {
     var photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
     var bg = bankStyle.BACKGROUND_IMAGE ? 'transparent' : bankStyle.BACKGROUND_COLOR
     return (
-      <View style={[viewStyle, {backgroundColor: bg, paddingRight: isMyMessage ? 10 : 0}]}>
+      <View style={[viewStyle, {backgroundColor: bg}]}>
         {date}
         {messageBody}
         <View style={photoListStyle}>
