@@ -4,7 +4,7 @@ var MessageView = require('./MessageView')
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 import platformStyles from '../styles/platform'
 var Actions = require('../Actions/Actions')
 
@@ -128,14 +128,14 @@ class RemediationItemsList extends Component {
 
   render() {
     return (
-      <View style={[platformStyles.container, {borderTopColor: this.props.bankStyle.LINK_COLOR, borderTopWidth: StyleSheet.hairlineWidth}]}>
+      <View style={[platformStyles.container, {borderTopColor: this.props.bankStyle.linkColor, borderTopWidth: StyleSheet.hairlineWidth}]}>
         <ListView ref='listview'
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
           removeClippedSubviews={false}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps={true}
+          keyboardShouldPersistTaps="always"
           showsVerticalScrollIndicator={false} />
       </View>
     );

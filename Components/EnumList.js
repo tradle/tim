@@ -52,7 +52,7 @@ class EnumList extends Component {
           removeClippedSubviews={false}
           enableEmptySections={true}
           keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps={true}
+          keyboardShouldPersistTaps="always"
           initialListSize={200}
           pageSize={200}
           showsVerticalScrollIndicator={false} />;

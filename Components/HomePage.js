@@ -21,12 +21,12 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var QRCodeScanner = require('./QRCodeScanner')
 var QRCode = require('./QRCode')
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var StyleSheet = require('../StyleSheet')
 
 const WEB_TO_MOBILE = '0'
@@ -228,7 +228,7 @@ class HomePage extends Component {
           automaticallyAdjustContentInsets={false}
           removeClippedSubviews={false}
           keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps={true}
+          keyboardShouldPersistTaps="always"
           initialListSize={10}
           pageSize={20}
           scrollRenderAhead={10}

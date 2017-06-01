@@ -1,0 +1,58 @@
+{
+  "_t": "tradle.StylePack",
+  "linkColor": "#2892C6",
+  "productRowBgColor": "#466399",
+  "productRowTextColor": "#eeeeee",
+  "guildanceMessageBg": "#eeeeee",
+
+  "sharedWithBg": "#77ADFC",
+  "sharedWithVerificationBg": "#289427",
+
+  "verifiedHeaderColor": "#FFF1E8",
+  "verifiedLinkColor": "#FF6D0D",
+  "verifiedBg": "#FF6D0D",
+  "verifiedTextColor": "#FFF1E8",
+
+  "verifiedCourcesColor": "#3A5280",
+  "verifiedBorderColor": "#FF6D0D",
+  "verifiedHeaderTextColor": "#FF6D0D",
+
+  "confirmationColor": "#289427",
+  "confirmationBg": "#ffffff",
+
+  "fixErrorColor": "#3A5280",
+
+  "backgroundColor": "#f7f7f7",
+
+  "productBgColor": "#F4FAE8",
+  "myMessageLinkColor": "#C5EFFB",
+  "myMessageBackgroundColor": "#77ADFC",
+
+  "formErrorBorder": "#FA0100",
+  "formErrorColor": "#FA0100",
+  "formErrorBg": "#ffffff",
+
+  "shareContextTextColor": "#7D6EC4",
+  "shareContextBackgroundColor": "#ECE8FF",
+  "currentContextTextColor": "#555555",
+  "currentContextBackgroundColor": "#f1ffe7",
+
+  "contextBackgroundColor": "#77ADFC",
+  "contextTextColor": "#ffffff",
+  "contextBorderColor":"#558bda",
+
+  "shareButtonBackgroundColor": "#4982B1",
+
+  "incomingMessageBgColor": "#ffffff",
+  "incomingMessageTextColor": "#555555",
+  "incomingMessageOpaqueTextColor": "#aaaaaa",
+
+  "listBg": "#ffffff",
+  "listColor": "#555555",
+  "sourcedVerificationBgColor": "#EDF5F8",
+  "sourcedVerificationTextColor": "#555555",
+
+  "navBarBorderColor": "#7AAAC3",
+  "logoNeedsText": false,
+  "navBarBorderWidth": 1
+}

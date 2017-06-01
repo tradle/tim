@@ -105,11 +105,11 @@ async function testEnvironment () {
   }
 
   if (isIE) {
-    if (ENV.is === false) {
+    if (ENV.ie === false) {
       throw new Error('This application is not supported in this browser. ' + BROWSER_RECOMMENDATION)
     }
 
-    if (ENV.ie.min && ieVersion < ENV.ie.min) {
+    if (ENV.ie && ENV.ie.min && ieVersion < ENV.ie.min) {
       throw new Error('This application is not supported this version of this browser. ' + BROWSER_RECOMMENDATION)
     }
 

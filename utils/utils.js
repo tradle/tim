@@ -90,9 +90,9 @@ const PASSWORD_ENC = 'hex'
 const MAX_WIDTH = 800
 
 const ENUM = 'tradle.Enum'
-
-var dictionaries = require('@tradle/models').dict
-var dictionary = dictionaries[Strings.language]
+const STYLES_PACK = 'tradle.StylesPack'
+// var dictionaries = require('@tradle/models').dict
+var dictionary //= dictionaries[Strings.language]
 
 var propTypesMap = {
   'string': t.Str,
@@ -130,8 +130,8 @@ var utils = {
     if (me.languageCode) {
       if (me.dictionary)
         dictionary = me.dictionary
-      else if (dictionaries[me.languageCode])
-        dictionary = dictionaries[me.languageCode]
+      // else if (dictionaries[me.languageCode])
+      //   dictionary = dictionaries[me.languageCode]
     }
   },
   getMe() {
@@ -147,6 +147,32 @@ var utils = {
   getModels() {
     return models;
   },
+  normalizeGetInfoResponse(json) {
+    json.providers.forEach(provider => {
+      if (provider.style) {
+        provider.style = utils.toStylesPack(provider.style)
+      }
+    })
+
+    return json
+  },
+  toStylesPack(oldStylesFormat) {
+    if (oldStylesFormat[TYPE] === STYLES_PACK) return oldStylesFormat
+
+    const { properties } = utils.getModel(STYLES_PACK).value
+    const pack = {
+      [TYPE]: STYLES_PACK
+    }
+
+    for (let bad in oldStylesFormat) {
+      let good = utils.joinCamelCase(bad.split('_'))
+      if (good in properties) {
+        pack[good] = oldStylesFormat[bad]
+      }
+    }
+
+    return pack
+  },
   // temporary, let's hope
   interpretStylesPack(stylesPack) {
     let interpreted = {}
@@ -159,6 +185,21 @@ var utils = {
     })
 
     return interpreted
+  },
+  joinCamelCase(parts) {
+    return parts.map((part, i) => {
+      if (part.toUpperCase() === part) {
+        // avoid breaking already camelcased strings
+        part = part.toLowerCase()
+      }
+
+      if (i !== 0) {
+        part = part[0].toUpperCase() + part.slice(1)
+      }
+
+      return part
+    })
+    .join('')
   },
   splitCamelCase(str) {
     return str.split(/(?=[A-Z])/g)
@@ -190,17 +231,17 @@ var utils = {
   },
   translateModel(model, isPlural) {
     if (dictionary  &&  dictionary.models[model.id])
-      return dictionary.models[model.id]
+      return dictionary.models[model.id]  ||  this.makeModelTitle(model, isPlural)
     return model.title ? model.title : this.makeModelTitle(model, isPlural)
   },
   translateString(...args) {
     const { strings } = Strings
     if (!strings)
-      return args[0]
+      return this.makeLabel(args[0])
 
     let s = strings[args[0]]
     if (!s)
-      return args[0]
+      return this.makeLabel(args[0])
 
     // if (args.length === 2  &&  typeof args[1] === 'object') {
     //   let pos = 0
@@ -1801,9 +1842,9 @@ var utils = {
   getContentSeparator(bankStyle) {
     let separator = {}
     if (bankStyle) {
-      if (bankStyle.NAV_BAR_BORDER_COLOR) {
-        separator.borderTopColor = bankStyle.NAV_BAR_BORDER_COLOR
-        separator.borderTopWidth = bankStyle.NAV_BAR_BORDER_WIDTH ||  StyleSheet.hairlineWidth
+      if (bankStyle.navBarBorderColor) {
+        separator.borderTopColor = bankStyle.navBarBorderColor
+        separator.borderTopWidth = bankStyle.navBarBorderWidth ||  StyleSheet.hairlineWidth
       }
     }
     return separator
@@ -1823,8 +1864,8 @@ var utils = {
     }
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
-    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.INCOMING_MESSAGE_OPAQUE_TEXT_COLOR} : {}]}>{message1}
-             <Text style={{color: bankStyle.LINK_COLOR}}>{formType}</Text>
+    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
+             <Text style={{color: bankStyle.linkColor}}>{formType}</Text>
              <Text>{utils.parseMessage(resource, message2, bankStyle, idx)}</Text>
            </Text>
   },
@@ -1868,6 +1909,18 @@ var utils = {
     }
 
     return message
+  },
+  hasBacklinks(model) {
+    let hasBacklinks
+    let props = model.properties
+    for (var p in props) {
+      if (props[p].hidden)
+        continue
+      if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
+        continue;
+      hasBacklinks = true
+    }
+    return hasBacklinks
   },
 
   getRouteName(route) {

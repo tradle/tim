@@ -11,7 +11,7 @@ import PhotoList from './PhotoList';
 // var SwitchIdentity = require('./SwitchIdentity');
 var ShowRefList = require('./ShowRefList');
 var PageView = require('./PageView')
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var IdentitiesList = require('./IdentitiesList');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
@@ -20,7 +20,7 @@ var reactMixin = require('react-mixin');
 var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var ENV = require('../utils/env')
 var StyleSheet = require('../StyleSheet')
 var extend = require('extend');
@@ -269,7 +269,7 @@ class ResourceView extends Component {
     var isMe = utils.isMe(resource)
     if (me) {
       let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource)))
-      if (!noActionPanel)
+      if (!noActionPanel  &&  utils.hasBacklinks(model))
        actionPanel = <ShowRefList lazy={this._lazyId}
                                   resource={resource}
                                   navigator={this.props.navigator}

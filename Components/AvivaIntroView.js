@@ -3,13 +3,13 @@
 var utils = require('../utils/utils');
 var translate = utils.translate
 var PageView = require('./PageView')
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var Actions = require('../Actions/Actions');
 var ResourceMixin = require('./ResourceMixin');
 var QRCode = require('./QRCode')
 var MessageList = require('./MessageList')
 var ResourceView = require('./ResourceView')
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var ENV = require('../utils/env')
 var StyleSheet = require('../StyleSheet')
 var extend = require('extend');
@@ -76,14 +76,14 @@ class AvivaIntroView extends Component {
              <Text style={[styles.subTitle, styles.importantText]}>Keeping your money and identity safe is our number 1 priority!</Text>
              <Text style={styles.subTitle}>To use this service you’ll undertake 4 easy steps:</Text>
              <View style={styles.row}>
-               <Icon name='ios-mail-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
+               <Icon name='ios-mail-outline' size={40} color={bankStyle.contextBackgroundColor} style={styles.icon}/>
                <View style={{justifyContent: 'center'}}>
                  <Text style={styles.text}>Provide your email address.</Text>
                </View>
              </View>
              <View style={styles.separator} />
              <View style={{flexDirection: 'row', paddingVertical: 7}}>
-               <Icon name='ios-camera-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
+               <Icon name='ios-camera-outline' size={40} color={bankStyle.contextBackgroundColor} style={styles.icon}/>
                <View style={{justifyContent: 'center'}}>
                  <Text style={[styles.text]}>Upload a scan of either your UK Passport or UK Driving Licence.</Text>
                  <Text style={styles.importantText}>Please have the scanned image ready to upload from your local filesystem.</Text>
@@ -91,14 +91,14 @@ class AvivaIntroView extends Component {
              </View>
              <View style={styles.separator} />
              <View style={styles.row}>
-               <Icon name='ios-contact-outline' size={36} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={styles.icon}/>
+               <Icon name='ios-contact-outline' size={36} color={bankStyle.contextBackgroundColor} style={styles.icon}/>
                <View style={{justifyContent: 'center'}}>
                  <Text style={[styles.text, {justifyContent: 'center'}]}>Take a ‘selfie’ picture of your face.</Text>
                </View>
              </View>
              <View style={styles.separator} />
              <View style={styles.row}>
-               <Icon name='ios-pin-outline' size={40} color={bankStyle.CONTEXT_BACKGROUND_COLOR} style={[styles.icon, {paddingRight: 15}]}/>
+               <Icon name='ios-pin-outline' size={40} color={bankStyle.contextBackgroundColor} style={[styles.icon, {paddingRight: 15}]}/>
                <View style={{justifyContent: 'center'}}>
                  <Text style={[styles.text, {paddingLeft: 3}]}>Provide your name and address.</Text>
                </View>
@@ -112,17 +112,17 @@ class AvivaIntroView extends Component {
            </View>
            <View style={styles.centeredRow}>
              <TouchableOpacity style={{paddingRight:10}} onPress={() => this.goto(LEARN_MORE_URL)}>
-               <Text style={[styles.text, {paddingLeft: 5, paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Learn more  &bull;</Text>
+               <Text style={[styles.text, {paddingLeft: 5, paddingTop: 10, color: bankStyle.linkColor}]}>Learn more  &bull;</Text>
              </TouchableOpacity>
              <TouchableOpacity style={{paddingRight:10}} onPress={onPressTerms}>
-               <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR}]}>Terms of use  &bull;</Text>
+               <Text style={[styles.text, {paddingTop: 10, color: bankStyle.linkColor}]}>Terms of use  &bull;</Text>
              </TouchableOpacity>
              <TouchableOpacity style={{paddingRight:10}} onPress={() => this.showHtml(avivaContact, 'contactUs')}>
-               <Text style={[styles.text, {paddingTop: 10, color: bankStyle.LINK_COLOR, paddingRight: 20}]}>Contact us</Text>
+               <Text style={[styles.text, {paddingTop: 10, color: bankStyle.linkColor, paddingRight: 20}]}>Contact us</Text>
              </TouchableOpacity>
            </View>
            <View style={[styles.centeredRow, { marginBottom: 10 }]}>
-             <CustomIcon name="tradle" size={16} style={[styles.icon]} color={bankStyle.CONTEXT_BACKGROUND_COLOR} />
+             <CustomIcon name="tradle" size={16} style={[styles.icon]} color={bankStyle.contextBackgroundColor} />
              <Text style={[styles.text]}>Powered by Tradle</Text>
            </View>
          </TouchableOpacity>

@@ -10,7 +10,8 @@ import { translate } from './utils'
 import { deepLinkHost } from './env'
 
 async function getInitialURL() {
-  const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
+  // const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
+  const bundle = await Branch.getFirstReferringParams()
   return getUrlFromBundle(bundle) || await Linking.getInitialURL()
 }
 
@@ -23,12 +24,13 @@ function getUrlFromBundle ({ uri, params, error }) {
   }
 
   const branchLink = params && params['$deeplink_path']
-  return stripProtocol(branchLink || uri)
+  const link = branchLink || uri
+  return link && stripProtocol(link)
 }
 
 function stripProtocol (url) {
   // turn tradle://profile into /profile
-  return url && url.replace(/^.*?:\/\//, '/')
+  return url.replace(/^.*?:\/\//, '/')
 }
 
 const instance = new EventEmitter()

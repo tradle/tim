@@ -6,7 +6,7 @@ var dateformat = require('dateformat')
 var ResourceList = require('./ResourceList')
 var EnumList = require('./EnumList')
 var FloatLabel = require('react-native-floating-labels')
-var Icon = require('react-native-vector-icons/Ionicons')
+import Icon from 'react-native-vector-icons/Ionicons';
 var utils = require('../utils/utils');
 var CameraView = require('./CameraView')
 var translate = utils.translate
@@ -17,7 +17,7 @@ var StyleSheet = require('../StyleSheet')
 const debug = require('debug')('tradle:app:blinkid')
 var focusUri = require('../video/Focus1.mp4')
 
-import VideoPlayer from './VideoPlayer'
+// import VideoPlayer from './VideoPlayer'
 // import omit from 'object.omit'
 // import pick from 'object.pick'
 import ENV from '../utils/env'
@@ -95,7 +95,7 @@ var NewResourceMixin = {
     component = params.component
 
     if (this.props.bankStyle)
-      LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
+      LINK_COLOR = this.props.bankStyle.linkColor || DEFAULT_LINK_COLOR
     else
       LINK_COLOR = DEFAULT_LINK_COLOR
 
@@ -305,7 +305,7 @@ var NewResourceMixin = {
 
         }
         else if (type === 'string') {
-          if (props[p].maxLength > 100)
+          if (props[p].maxLength > 300)
             options.fields[p].multiline = true;
           options.fields[p].autoCorrect = false;
           if (props[p].oneOf) {
@@ -665,35 +665,35 @@ var NewResourceMixin = {
     this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
     this.setState({ resource })
   },
-  showVideo(params) {
-    let onEnd = (err) => {
-      Alert.alert(
-        'Ready to scan?',
-        null,
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              this.props.navigator.pop()
-              this.showCamera(params)
-            }
-          }
-        ]
-      )
-    }
+  // showVideo(params) {
+  //   let onEnd = (err) => {
+  //     Alert.alert(
+  //       'Ready to scan?',
+  //       null,
+  //       [
+  //         {
+  //           text: 'OK',
+  //           onPress: () => {
+  //             this.props.navigator.pop()
+  //             this.showCamera(params)
+  //           }
+  //         }
+  //       ]
+  //     )
+  //   }
 
-    this.props.navigator.push({
-      id: 18,
-      component: VideoPlayer,
-      passProps: {
-        source: focusUri,
-        onEnd: onEnd,
-        onError: onEnd,
-        muted: true,
-        navigator: this.props.navigator
-      },
-    })
-  },
+  //   this.props.navigator.push({
+  //     id: 18,
+  //     component: VideoPlayer,
+  //     passProps: {
+  //       source: focusUri,
+  //       onEnd: onEnd,
+  //       onError: onEnd,
+  //       muted: true,
+  //       navigator: this.props.navigator
+  //     },
+  //   })
+  // },
 
   showCamera(params) {
     // if (utils.isAndroid()) {
@@ -744,52 +744,78 @@ var NewResourceMixin = {
   },
 
   myTextInputTemplate(params) {
-    var label = translate(params.prop, params.model)
-    if (params.prop.units) {
-      label += (params.prop.units.charAt(0) === '[')
-             ? ' ' + params.prop.units
-             : ' (' + params.prop.units + ')'
+    let prop = params.prop
+    var label = translate(prop, params.model)
+    if (prop.units) {
+      label += (prop.units.charAt(0) === '[')
+             ? ' ' + prop.units
+             : ' (' + prop.units + ')'
     }
     else
       label += params.required ? '' : ' (' + translate('optional') + ')'
     let lStyle = styles.labelStyle
 
-    if (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY  &&  !params.required) {
+    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY  &&  !params.required) {
       let maxChars = (utils.dimensions(component).width - 60)/utils.getFontSize(9)
       // let some space for wrapping
-      if (maxChars < label.length  &&  (!this.state.resource[params.prop.name] || !this.state.resource[params.prop.name].length))
+      if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
         lStyle = [lStyle, {marginTop: 0}]
     }
-    let lcolor = this.getLabelAndBorderColor(params.prop.name)
+    let lcolor = this.getLabelAndBorderColor(prop.name)
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
 
     // avoid <input type="number"> on web
     // it good-naturedly interferes with validation
-    const keyboard = utils.isWeb() || !params.keyboard ? 'default': params.keyboard
-    let multiline = params.prop.maxLength > 100
+    let multiline = prop.maxLength > 100
+    let help = prop.ref !== constants.TYPES.MONEY  && this.getHelp(prop)
+    let st = help ? {} : {flex: 5}
+
+    let paddingBottom
+    if (this.hasError(params.errors, prop.name))
+      paddingBottom = 10
+    else if (Platform.OS === 'ios')
+      paddingBottom = 10
+    else
+      paddingBottom = 7
     return (
-      <View style={{flex: 5, paddingBottom: this.hasError(params.errors, params.prop.name) ? 10 : Platform.OS === 'ios' ? 10 : 7}}>
+      <View style={st}>
         <FloatLabel
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
           multiline={multiline}
-          autoCapitalize={this.state.isRegistration  ||  (params.prop.name !== 'url' &&  (!params.prop.keyboard || params.prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
-          onFocus={this.inputFocused.bind(this, params.prop.name)}
+          autoCapitalize={this.state.isRegistration  ||  (prop.name !== 'url' &&  (!prop.keyboard || prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
+          onFocus={this.inputFocused.bind(this, prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
           value={params.value}
           onKeyPress={this.onKeyPress.bind(this, params.onSubmitEditing)}
-          onChangeText={this.onChangeText.bind(this, params.prop)}
+          onChangeText={this.onChangeText.bind(this, prop)}
           underlineColorAndroid='transparent'
-        >{label}</FloatLabel>
-          {this.getErrorView(params)}
+        >{label}
+        </FloatLabel>
+        {help}
+        {this.getErrorView(params)}
       </View>
     );
   },
   onKeyPress(onSubmit, key) {
     if (key.nativeEvent.code === 'Enter')
       onSubmit()
+  },
+  getHelp(prop, isEnum) {
+    if (prop.description)
+      return (
+        <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
+          <Text style={{fontSize: 14, color: '#555555'}}>{prop.description}</Text>
+        </View>
+      )
+    // else
+    //   return (
+    //     <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
+    //       <Text style={{fontSize: 14, color: '#555555'}}>{prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title + ' ' + prop.title}</Text>
+    //     </View>
+    //   )
   },
 
   getErrorView(params) {
@@ -841,6 +867,7 @@ var NewResourceMixin = {
     }
 
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
+    let help = this.getHelp(prop)
     return (
       <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
@@ -853,6 +880,7 @@ var NewResourceMixin = {
             </View>
           </View>
         </TouchableHighlight>
+        {help}
         {this.getErrorView(params)}
       </View>
     )
@@ -901,10 +929,10 @@ var NewResourceMixin = {
     if (valueMoment) {
       localizedDate = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date())
     }
-
+    let help = this.getHelp(prop)
     return (
-      <View>
-        <View key={this.getNextKey()} ref={prop.name} style={[st, { marginHorizontal: 10, paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, height: 60, justifyContent: 'flex-end'}]}>
+      <View key={this.getNextKey()} ref={prop.name}>
+        <View style={[st, { marginHorizontal: 10, paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, height: 60, justifyContent: 'flex-end'}]}>
           {propLabel}
           <DatePicker
             style={[styles.datePicker, {width: utils.dimensions(component).width - 30, paddingBottom: 3}]}
@@ -933,6 +961,7 @@ var NewResourceMixin = {
             }}
             {...dateProps}
           />
+        {help}
         </View>
         {this.getErrorView(params)}
        </View>
@@ -1070,8 +1099,12 @@ var NewResourceMixin = {
       if (this.props.model) {
         let vals = defaults[this.props.model.id]
         for (let v in vals) {
-          if (!resource[v])
+          if (!resource[v]) {
             resource[v] = vals[v]
+            if (!this.floatingProps)
+              this.floatingProps = {}
+            this.floatingProps[v] = vals[v]
+          }
         }
       }
     }
@@ -1093,8 +1126,11 @@ var NewResourceMixin = {
           else
             label = resource[params.prop].title
         }
-        if (rModel.subClassOf  &&  rModel.subClassOf === ENUM)
+        if (rModel.subClassOf  &&  rModel.subClassOf === ENUM) {
+          if (!label)
+            label = resource[params.prop]
           label = utils.createAndTranslate(label, true)
+        }
       }
       style = textStyle
       propLabel = <Text style={[styles.labelDirty, color]}>{params.label}</Text>
@@ -1140,6 +1176,7 @@ var NewResourceMixin = {
                     {icon}
                   </View>
 
+    let help = this.getHelp(prop)
     let actionItem
     if (isVideo ||  isPhoto) {
       // HACK
@@ -1152,7 +1189,7 @@ var NewResourceMixin = {
       }
 
       if (useImageInput) {
-        var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: 7}
+        var aiStyle = {flex: 7, paddingTop: 15, paddingBottom: help ? 0 : 7}
         let m = utils.getModel(prop.ref).value
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                        {content}
@@ -1167,11 +1204,11 @@ var NewResourceMixin = {
       actionItem = <TouchableHighlight underlayColor='transparent' onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
                      {content}
                    </TouchableHighlight>
-
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
         {propLabel}
         {actionItem}
+        {help}
         {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
       </View>
     );
@@ -1355,6 +1392,7 @@ var NewResourceMixin = {
            ?  ' (' + CURRENCY_SYMBOL + ')'
            : ''
     return (
+      <View>
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           {
              this.myTextInputTemplate({
@@ -1379,6 +1417,8 @@ var NewResourceMixin = {
                   })
         }
       </View>
+      {this.getHelp(params.prop)}
+      </View>
     );
   },
 
@@ -1400,6 +1440,7 @@ var NewResourceMixin = {
     else
       error = <View/>
     var value = prop ? params.value : this.state.resource[enumProp.name]
+    // let help = this.getHelp(prop, true)
     return (
       <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>

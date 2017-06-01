@@ -19,12 +19,11 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var constants = require('@tradle/constants');
-var Icon = require('react-native-vector-icons/Ionicons');
-// var QRCodeScanner = require('./QRCodeScanner')
-// var QRCode = require('./QRCode')
+import Icon from 'react-native-vector-icons/Ionicons';
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
-var defaultBankStyle = require('../styles/bankStyle.json')
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
+
 var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 
@@ -32,10 +31,6 @@ import { makeStylish } from './makeStylish'
 import { makeResponsive } from 'react-native-orient'
 var Debug = require('debug')
 var debug = Debug('tradle:app:messageList')
-
-// const WEB_TO_MOBILE = '0'
-// const TALK_TO_EMPLOYEEE = '1'
-// const APP_QR_CODE = '5'
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PARTIAL = 'tradle.Partial'
@@ -46,7 +41,6 @@ const ORGANIZATION = constants.TYPES.ORGANIZATION
 const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
 
-// var bankStyles = require('../styles/bankStyles')
 const ENUM = 'tradle.Enum'
 
 import React, { Component, PropTypes } from 'react'
@@ -588,19 +582,6 @@ class ResourceList extends Component {
     }
     if (isContact) { //  ||  isOrganization) {
       route.title = resource.firstName
-      // route.rightButtonTitle = translate('profile')
-
-      // route.onRightButtonPress = {
-      //   title: title,
-      //   id: 3,
-      //   component: ResourceView,
-      //   titleTextColor: '#7AAAC3',
-      //   backButtonTitle: 'Back',
-      //   passProps: {
-      //     bankStyle: style,
-      //     resource: resource
-      //   }
-      // }
       var isMe = isContact ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
       if (isMe) {
         route.onRightButtonPress.rightButtonTitle = 'Edit'
@@ -1086,7 +1067,7 @@ class ResourceList extends Component {
           automaticallyAdjustContentInsets={false}
           removeClippedSubviews={false}
           keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
-          keyboardShouldPersistTaps={utils.isWeb() ? false : true}
+          keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
           initialListSize={1000}
           showsVerticalScrollIndicator={false} />;
     }

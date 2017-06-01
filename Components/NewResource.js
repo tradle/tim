@@ -16,7 +16,7 @@ var Actions = require('../Actions/Actions');
 var Store = require('../Store/Store');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
 var PageView = require('./PageView')
@@ -86,7 +86,7 @@ class NewResource extends Component {
   constructor(props) {
     super(props);
     if (this.props.bankStyle)
-      LINK_COLOR = this.props.bankStyle.LINK_COLOR || DEFAULT_LINK_COLOR
+      LINK_COLOR = this.props.bankStyle.linkColor || DEFAULT_LINK_COLOR
     else
       LINK_COLOR = DEFAULT_LINK_COLOR
     var r = {};
@@ -767,9 +767,9 @@ class NewResource extends Component {
       var submit
       if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={this.onSavePressed.bind(this)} style={{width: '100%'}}>
-                   <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
+                   <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
                      <View style={{backgroundColor: 'transparent', paddingHorizontal: 10, justifyContent: 'center'}}>
-                       <Text style={{fontSize: 24,color: bankStyle.CONTEXT_TEXT_COLOR}}>{translate('next')}</Text>
+                       <Text style={{fontSize: 24,color: bankStyle.contextTextColor}}>{translate('next')}</Text>
                      </View>
                    </View>
                  </TouchableOpacity>
@@ -808,8 +808,8 @@ class NewResource extends Component {
               </PageView>
     }
     let title
-    if (!isRegistration  &&  !bankStyle.LOGO_NEEDS_TEXT) {
-      title = <View style={{backgroundColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopColor: bankStyle.CONTEXT_BACKGROUND_COLOR, borderTopWidth: StyleSheet.hairlineWidth, height: 25, justifyContent: 'center', alignItems: 'center'}}>
+    if (!isRegistration  &&  !bankStyle.logoNeedsText) {
+      title = <View style={{backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 25, justifyContent: 'center', alignItems: 'center'}}>
                 {translate(meta)}
               </View>
     }
@@ -1036,6 +1036,7 @@ class NewResource extends Component {
             {actionableCounter}
           </View>
         </View>
+        {this.getHelp(bl)}
         {error}
       </View>
     );
@@ -1114,6 +1115,7 @@ class NewResource extends Component {
             </ImageInput>
           </View>
         </View>
+        {this.getHelp(bl)}
         {error}
       </View>
     );

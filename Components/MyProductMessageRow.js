@@ -4,7 +4,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var NewResource = require('./NewResource');
-var Icon = require('react-native-vector-icons/Ionicons');
+import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
@@ -51,8 +51,8 @@ class MyProductMessageRow extends Component {
     var ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
 
-    let addStyle = [chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR , borderColor: this.props.bankStyle.CONFIRMATION_COLOR}];
-    // let rowStyle = [chatStyles.row,  {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}];
+    let addStyle = [chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.productBgColor , borderColor: this.props.bankStyle.confirmationColor}];
+    // let rowStyle = [chatStyles.row,  {backgroundColor: this.props.bankStyle.backgroundColor}];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date}>{val}</Text>
@@ -62,8 +62,19 @@ class MyProductMessageRow extends Component {
 
     var hdrStyle = {backgroundColor: '#289427', paddingVertical: 5} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     var orgName = resource.from.organization  ? resource.from.organization.title : ''
+
+    var w = utils.dimensions(MyProductMessageRow).width
+    let msgWidth = Math.min(Math.floor(w * 0.8), 600)
+    let isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
+    if (isReadOnlyChat)
+      msgWidth -= 50 // provider icon and padding
+    let numberOfCharacters = msgWidth / 12
+    let issuedBy = translate('issuedBy', orgName)
+    if (issuedBy.length > numberOfCharacters)
+      issuedBy = issuedBy.substring(0, numberOfCharacters) + '..'
+
     renderedRow.splice(0, 0, <View  key={this.getNextKey()} style={[chatStyles.verifiedHeader, hdrStyle, {marginHorizontal: -8, marginTop: -7, marginBottom: 7, paddingBottom: 5}]}>
-                               <Text style={styles.issuedBy}>{translate('issuedBy', orgName)}</Text>
+                               <Text style={styles.issuedBy}>{issuedBy}</Text>
                             </View>
                             );
     let title = translate(model)
@@ -74,14 +85,14 @@ class MyProductMessageRow extends Component {
     let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
     // let width = Math.floor(utils.dimensions().width * 0.7)
     let width = utils.getMessageWidth(MyProductMessageRow)
-    let isReadOnlyChat
-    if (this.props.context) {
-      let me = utils.getMe()
-      if (me.isEmployee)
-        isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
-      if (isReadOnlyChat)
-        width -= 50 // provider icon and padding
-    }
+    // let isReadOnlyChat
+    // if (this.props.context) {
+    //   let me = utils.getMe()
+    //   if (me.isEmployee)
+    //     isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
+    //   if (isReadOnlyChat)
+    //     width -= 50 // provider icon and padding
+    // }
     let vStyle = isMyMessage ? styles.viewStyleR : styles.viewStyleL
     // let photo = isMyMessage ? null : this.getOwnerPhoto()
     let messageBody =
@@ -171,12 +182,12 @@ class MyProductMessageRow extends Component {
         let isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
-          style = [style, {color: self.props.bankStyle.CONFIRMATION_COLOR, fontSize: 18}]
+          style = [style, {color: self.props.bankStyle.confirmationColor, fontSize: 18}]
           vCols.push(
             <View key={self.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
-              <Icon style={[{color: self.props.bankStyle.CONFIRMATION_COLOR}, styles.flower]} size={50} name={'ios-flower'} />
-              <Icon style={{color: self.props.bankStyle.CONFIRMATION_COLOR}, styles.done} size={30} name={'ios-done-all'} />
+              <Icon style={[{color: self.props.bankStyle.confirmationColor}, styles.flower]} size={50} name={'ios-flower'} />
+              <Icon style={{color: self.props.bankStyle.confirmationColor}, styles.done} size={30} name={'ios-done-all'} />
             </View>
           );
 

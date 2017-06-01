@@ -1,11 +1,13 @@
 'use strict';
 
+const debug = require('debug')('tradle:app:RowMixin')
 var React = require('react');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
 var Accordion = require('react-native-accordion')
-var Icon = require('react-native-vector-icons/Ionicons');
+var Actions = require('../Actions/Actions');
+import Icon from 'react-native-vector-icons/Ionicons';
 import CustomIcon from '../styles/customicons'
 var CameraView = require('./CameraView')
 var StyleSheet = require('../StyleSheet')
@@ -22,6 +24,9 @@ import {
   Image
 } from 'react-native';
 
+import { coroutine as co } from 'bluebird'
+import ENV from '../utils/env'
+
 const SHOW_TIME_INTERVAL = 60000
 var CURRENCY_SYMBOL
 const DEFAULT_CURRENCY_SYMBOL = '£'
@@ -34,6 +39,7 @@ const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PHOTO = 'tradle.Photo'
 const ENUM = 'tradle.Enum'
+const IPROOV_SELFIE = 'tradle.IProovSelfie'
 
 var BORDER_WIDTH = StyleSheet.hairlineWidth
 
@@ -79,7 +85,7 @@ var RowMixin = {
     let propTitle = translate(prop, model)
     if (isVerification) {
       if (!this.props.isAggregation)
-        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: this.props.bankStyle.VERIFICATION_BG, borderTopColor: '#eeeeee'}]
+        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: this.props.bankStyle.verifiedBg, borderTopColor: '#eeeeee'}]
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={styles.column}>
@@ -152,7 +158,7 @@ var RowMixin = {
       }).join('');
 
       return <View style={{paddingRight: 3}}>
-               <View style={[{color: '#ffffff', backgroundColor: this.props.bankStyle.LINK_COLOR}, styles.cellRoundImage]}>
+               <View style={[{color: '#ffffff', backgroundColor: this.props.bankStyle.linkColor}, styles.cellRoundImage]}>
                  <Text style={styles.cellText}>{title}</Text>
                </View>
              </View>
@@ -239,11 +245,11 @@ var RowMixin = {
                     //   : <View/>
                     // }
                           // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
-    let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.VERIFICATION_BG, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.VERIFICATION_BG, borderBottomColor: this.props.bankStyle.VERIFIED_HEADER_COLOR}
+    let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.verifiedBg, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.verifiedBg, borderBottomColor: this.props.bankStyle.verifiedHeaderColor}
 
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16}]
     // let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
-    let arrow = <Icon color={this.props.bankStyle.VERIFIED_LINK_COLOR} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
+    let arrow = <Icon color={this.props.bankStyle.verifiedLinkColor} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
 
     let docName
     if (!isThirdParty)
@@ -269,7 +275,7 @@ var RowMixin = {
       var orgPhoto = verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={[chatStyles.shareButton, {backgroundColor: this.props.bankStyle.SHARE_BUTTON_BACKGROUND_COLOR, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+      var shareView = <View style={[chatStyles.shareButton, {backgroundColor: this.props.bankStyle.shareButtonBackgroundColor, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
@@ -444,9 +450,9 @@ var RowMixin = {
           if (msgModel) {
             let color
             if (this.isMyMessage())
-              color = this.props.bankStyle.MY_MESSAGE_BACKGROUND_COLOR
+              color = this.props.bankStyle.myMessageBackgroundColor
             else
-              color = this.props.bankStyle.LINK_COLOR
+              color = this.props.bankStyle.linkColor
             vCols.push(<View key={self.getNextKey()}>
                          <Text style={style}>{msgParts[0]}</Text>
                          <Text style={[style, {color: color}]}>{msgModel.value.title}</Text>
@@ -486,7 +492,7 @@ var RowMixin = {
     if (this.props.sendStatus === 'Sent')
       return <View style={styles.sendStatus}>
                <Text style={styles.sentStatus}>{this.props.sendStatus}</Text>
-               <Icon name={'ios-checkmark-outline'} size={15} color='#009900' />
+               <Icon name={'ios-checkmark-outline'} size={15} color={this.props.bankStyle.messageSentStatus} />
              </View>
     else
       return <View style={styles.sendStatus}>
@@ -502,9 +508,10 @@ var RowMixin = {
     let isFormError = type === FORM_ERROR
     if (!isFormRequest  &&  !isFormError)
       return
-    const model = isFormRequest
-                ? utils.getModel(resource.form).value
-                : utils.getModel(resource.prefill[constants.TYPE]).value
+    let ftype = isFormRequest
+              ? resource.form
+              : resource.prefill[constants.TYPE]
+    const model = utils.getModel(ftype).value
     const props = model.properties
     let eCols = []
     for (let p in props) {
@@ -517,6 +524,8 @@ var RowMixin = {
 
     if (eCols.length === 1) {
       let p = eCols[0]
+      if (ftype === IPROOV_SELFIE)
+        return p
       if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
         return p
     }
@@ -540,7 +549,80 @@ var RowMixin = {
       return
     utils.onTakePic(prop, data, this.props.resource)
     this.props.navigator.pop()
-  }
+  },
+  onSetMediaProperty(propName, item) {
+    if (!item)
+      return;
+
+    let r = this.props.resource
+    let isFormError = r[constants.TYPE] === FORM_ERROR
+    Actions.addItem({
+      disableFormRequest: r,
+      resource: {
+        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.form,
+        [propName]: item,
+        _context: r._context,
+        from: utils.getMe(),
+        to: r.from
+      }
+    })
+  },
+
+  showIproovScanner: co(function* () {
+    if (!ENV.iProov) {
+      return Alert.alert('IProov is not set up')
+    }
+
+    const IProov = require('../utils/iproov')
+    const me = utils.getMe()
+    const opts = {
+      username: me[constants.ROOT_HASH],
+      serviceProvider: ENV.iProov.apiKey,
+      animated: true
+    }
+
+    const enroll = !me.iproovEnrolled
+    let result
+    try {
+      if (enroll) {
+        result = yield IProov.enroll(opts)
+      } else {
+        result = yield IProov.verify(opts)
+      }
+    } catch (err) {
+      debug('experienced iProov error', err.code, err.name)
+      Alert.alert(translate('iproovErrorTitle'), translate('iproovErrorMessage'))
+      return
+    }
+
+    const { success, token, reason } = result
+    if (!success) {
+      debug('iProov failed', reason)
+      Alert.alert(translate('iproovFailedTitle'), translate('iproovFailedMessage'))
+      return
+    }
+
+    debug('iProov succeeded!')
+    if (enroll) {
+      Actions.updateMe({ iproovEnrolled: true })
+    }
+
+    const r = this.props.resource
+    r.token = token
+
+    let isFormError = r[constants.TYPE] === FORM_ERROR
+    Actions.addItem({
+      disableFormRequest: r,
+      resource: {
+        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.form,
+        token: token,
+        enroll: enroll,
+        from: r.to,
+        to: r.from,
+        _context: r._context
+      }
+    })
+  })
 
   // anyOtherRow(prop, backlink, styles) {
   //   var row;

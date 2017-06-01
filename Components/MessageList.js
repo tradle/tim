@@ -14,7 +14,7 @@ var VerifierChooser = require('./VerifierChooser')
 var ResourceList = require('./ResourceList')
 var ChatContext = require('./ChatContext')
 var ContextChooser = require('./ContextChooser')
-var Icon = require('react-native-vector-icons/Ionicons')
+import Icon from 'react-native-vector-icons/Ionicons'
 var utils = require('../utils/utils')
 var translate = utils.translate
 var reactMixin = require('react-mixin')
@@ -289,7 +289,7 @@ class MessageList extends Component {
       }
       return
     }
-    LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.LINK_COLOR
+    LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.linkColor
     let isEmployee = utils.isEmployee(resource)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let productToForms = this.gatherForms(list)
@@ -558,10 +558,10 @@ class MessageList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     var resource = this.props.resource
     let bankStyle = this.props.bankStyle
-    var bgImage = bankStyle &&  bankStyle.BACKGROUND_IMAGE
+    var bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
     var bgStyle = {}
-    if (!bgImage  &&  bankStyle.BACKGROUND_COLOR)
-      bgStyle = {backgroundColor: this.props.bankStyle.BACKGROUND_COLOR}
+    if (!bgImage  &&  bankStyle.backgroundColor)
+      bgStyle = {backgroundColor: this.props.bankStyle.backgroundColor}
     var alert = <View />
     let hideTextInput = !utils.hasSupportLine(resource)  // &&  !ENV.allowForgetMe
 
@@ -643,7 +643,7 @@ class MessageList extends Component {
         submitOnReturn={true}
         underlineColorAndroid='transparent'
         menu={this.generateMenu.bind(this)}
-        keyboardShouldPersistTaps={utils.isWeb() ? false : true}
+        keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         initialListSize={LIMIT}
         hideTextInput={hideTextInput}
@@ -893,7 +893,7 @@ class MessageList extends Component {
     this.props.navigator.push({
       id: 25,
       title: translate('trustedProviders'),
-      titleTextColor: this.props.bankStyle.VERIFIED_BORDER_COLOR,
+      titleTextColor: this.props.bankStyle.verifiedBorderColor,
       backButtonTitle: 'Back',
       component: VerifierChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,

@@ -1,5 +1,8 @@
-target 'Tradle-dev' do
+platform :ios, '9.0'
+target 'Tradle' do
+  use_frameworks!
+
   pod 'PPBlinkID', '~> 2.7.1'
-  pod 'Firebase/Core'
-  pod 'Branch'
+#  pod 'Firebase/Core'
+  pod 'iProov', :git => 'https://github.com/iProov/iproov-ios-pod.git'
 end
