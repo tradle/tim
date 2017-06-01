@@ -1940,7 +1940,7 @@ var Store = Reflux.createStore({
     else {
       let newOrg = {}
       extend(newOrg, sp.org)
-      if (sp.sandbox === true)
+      if (sp.publicConfig  &&   sp.publicConfig.sandbox === true)
         newOrg._isTest = true
       // if (newOrg.name.indexOf('[TEST]') === 0)
       //   newOrg._isTest = true
