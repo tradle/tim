@@ -1780,6 +1780,18 @@ var utils = {
 
     return message
   },
+  hasBacklinks(model) {
+    let hasBacklinks
+    let props = model.properties
+    for (var p in props) {
+      if (props[p].hidden)
+        continue
+      if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
+        continue;
+      hasBacklinks = true
+    }
+    return hasBacklinks
+  },
 
   getRouteName(route) {
     const { displayName } = route.component

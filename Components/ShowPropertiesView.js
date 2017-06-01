@@ -133,6 +133,7 @@ class ShowPropertiesView extends Component {
     var first = true;
     let self = this
     let isPartial = model.id === 'tradle.Partial'
+    let isMethod = model.subClassOf === 'tradle.Method'
 
     var viewCols = vCols.map((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
@@ -147,7 +148,10 @@ class ShowPropertiesView extends Component {
         if (!val)
           return
         let jsonRows = []
-        let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows}
+
+        let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
+
+        let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido}
         return this.showJson(params)
       }
       var isRef;
