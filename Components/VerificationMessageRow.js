@@ -114,7 +114,7 @@ class VerificationMessageRow extends Component {
                 model: msgModel,
                 verification: resource,
                 onPress: this.verify.bind(this),
-                isAccordion: isThirdPartyVerification,
+                // isAccordion: isThirdPartyVerification,
                 isMyMessage: isMyMessage
               })
 

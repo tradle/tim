@@ -286,7 +286,7 @@ class FormRequestRow extends Component {
         var doc = this.formatShareables({
           model: formModel,
           verification: r,
-          isAccordion: totalShareables > 1,
+          // isAccordion: totalShareables > 1,
           providers: providers  &&  providers[document[constants.ROOT_HASH]]
         })
         if (cnt) {
@@ -352,7 +352,6 @@ class FormRequestRow extends Component {
     let model = params.model
     let verification = params.verification
     let onPress = params.onPress
-    let isAccordion = false //params.isAccordion
     let providers = params.providers  // providers the document was shared with
 
     var document = verification.document
@@ -378,15 +377,13 @@ class FormRequestRow extends Component {
                           <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
                         </View>
 
-    let header = <View style={styles.header}>
-                   {headerContent}
-                   {arrow}
-                 </View>
-   let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
-   if (!isAccordion)
-      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
-                 {header}
-               </TouchableHighlight>
+    let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
+    let header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
+                   <View style={styles.header}>
+                     {headerContent}
+                     {arrow}
+                   </View>
+                 </TouchableHighlight>
     var orgRow = <View/>
     let resource = this.props.resource
     let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
@@ -477,21 +474,10 @@ class FormRequestRow extends Component {
                    </View>
 
     // var verifiedBy = verification && verification.organization ? verification.organization.title : ''
-    return isAccordion
-        ? ( <View style={{marginTop: 5}} key={this.getNextKey()}>
-             <Accordion
-               header={header}
-               style={{padding: 5}}
-               content={content}
-               underlayColor='transparent'
-               easing='easeOutCirc' />
-            </View>
-          )
-        : ( <View style={{flex: 1}} key={this.getNextKey()}>
-               {header}
-               {content}
-             </View>
-           );
+    return <View style={{flex: 1}} key={this.getNextKey()}>
+             {header}
+             {content}
+           </View>
   }
 
   createNewResource(model, isMyMessage) {
