@@ -11,6 +11,7 @@ var ResourceView = require('./ResourceView')
 var reactMixin = require('react-mixin')
 var dateformat = require('dateformat')
 import Icon from 'react-native-vector-icons/Ionicons'
+import { makeResponsive } from 'react-native-orient'
 
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
@@ -295,6 +296,8 @@ class VerificationView extends Component {
 }
 reactMixin(VerificationView.prototype, RowMixin);
 reactMixin(VerificationView.prototype, ResourceMixin);
+VerificationView = makeResponsive(VerificationView)
+
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
