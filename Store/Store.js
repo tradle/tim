@@ -55,8 +55,29 @@ Q.onerror = function (err) {
 
 var ENV = require('../utils/env')
 
-var voc = require('@tradle/models');
-var sampleData = voc.data
+const tradle = require('@tradle/engine')
+const tradleUtils = tradle.utils
+const protocol = tradle.protocol
+const {
+  NONCE,
+  TYPE,
+  SIG,
+  SEQ,
+  ROOT_HASH,
+  CUR_HASH,
+  PREV_HASH
+} = tradle.constants
+
+const sampleData = require('@tradle/models').data
+const voc = (function () {
+  const models = require('@tradle/models').concat(require('@tradle/custom-models'))
+  models.forEach(model => {
+    if (model.id) models[model.id] = model
+  })
+
+  return models
+}())
+
 var sampleProfile = require('../data/sampleProfile.json')
 
 // var currencies = voc.currencies
@@ -77,20 +98,8 @@ var debounce = require('debounce')
 var mutexify = require('mutexify')
 const download = require('downloadjs')
 const collect = require('stream-collector')
-const tradle = require('@tradle/engine')
 // const enforceOrder = require('@tradle/receive-in-order')
 const Multiqueue = require('@tradle/multiqueue')
-const tradleUtils = tradle.utils
-const protocol = tradle.protocol
-const {
-  NONCE,
-  TYPE,
-  SIG,
-  SEQ,
-  ROOT_HASH,
-  CUR_HASH,
-  PREV_HASH
-} = tradle.constants
 
 const Cache = require('lru-cache')
 const NEXT_HASH = '_n'
@@ -1825,6 +1834,8 @@ var Store = Reflux.createStore({
       return response.json()
     })
     .then(function (json) {
+      json = utils.normalizeGetInfoResponse(json)
+
       if (json.dictionary) {
         extend(true, dictionary, json.dictionary)
         if (me) {
@@ -1846,6 +1857,8 @@ var Store = Reflux.createStore({
           if (sp.id !== id)
             return
         }
+        if (sp.org.name.indexOf('[TEST]') === 0)
+          return
         if (hash) {
           if (sp.bot[ROOT_HASH] !== hash)
             return
@@ -1930,8 +1943,10 @@ var Store = Reflux.createStore({
     else {
       let newOrg = {}
       extend(newOrg, sp.org)
-      if (newOrg.name.indexOf('[TEST]') === 0)
+      if (sp.publicConfig  &&   sp.publicConfig.sandbox === true)
         newOrg._isTest = true
+      // if (newOrg.name.indexOf('[TEST]') === 0)
+      //   newOrg._isTest = true
       this.configProvider(sp, newOrg)
       batch.push({type: 'put', key: okey, value: newOrg})
       this._setItem(okey, newOrg)
@@ -2077,23 +2092,24 @@ var Store = Reflux.createStore({
         this.dbPut(orgId, org)
       }
     }
-    if (org._defaultPropertyValues) {
-      for (let m in org._defaultPropertyValues) {
-        let mm = this.getModel(m)
-        let props = mm.properties
-        let mObj = org._defaultPropertyValues[m]
-        for (let p in mObj) {
-          if (props[p].ref  &&  this.getModel(props[p].ref).subClassOf === ENUM) {
-            let enumList = this.searchNotMessages({modelName: props[p].ref})
-            let eprop = utils.getEnumProperty(this.getModel(props[p].ref))
-            let val = enumList.filter((eVal) => eVal[eprop] === mObj[p])
-            if (val.length)
-              mObj[p] = this.buildRef(val[0])
-          }
-        }
-      }
-      utils.addDefaultPropertyValuesFor(org)
-    }
+    // if (org._defaultPropertyValues) {
+    //   debugger
+    //   for (let m in org._defaultPropertyValues) {
+    //     let mm = this.getModel(m)
+    //     let props = mm.properties
+    //     let mObj = org._defaultPropertyValues[m]
+    //     for (let p in mObj) {
+    //       if (props[p].ref  &&  this.getModel(props[p].ref).subClassOf === ENUM) {
+    //         let enumList = this.searchNotMessages({modelName: props[p].ref})
+    //         let eprop = utils.getEnumProperty(this.getModel(props[p].ref))
+    //         let val = enumList.filter((eVal) => eVal[eprop] === mObj[p])
+    //         if (val.length)
+    //           mObj[p] = this.buildRef(val[0])
+    //       }
+    //     }
+    //   }
+    //   utils.addDefaultPropertyValuesFor(org)
+    // }
     if (org._hidePropertyInEdit)
       utils.addHidePropertyInEditFor(org)
     if (config.greeting) {
@@ -3394,8 +3410,24 @@ var Store = Reflux.createStore({
       // Add items properties if they were created
       var json = utils.clone(value) // maybe not the best way to copy, try `clone`?
       for (p in resource) {
-        if (props[p]  &&  props[p].type === 'array')
+        if (!props[p])
+          continue
+        if (props[p].type === 'array')
           json[p] = resource[p];
+        let ref = props[p].ref
+        // Chaeck if valid enum value
+        if (ref  &&  this.getModel(ref).subClassOf === ENUM) {
+          if ((typeof json[p] === 'string')  ||  !this._getItem(utils.getId(json[p]))) {
+            let enumList = this.searchNotMessages({modelName: ref})
+            let eprop = utils.getEnumProperty(this.getModel(ref))
+            let val = enumList.filter((eVal) => eVal[eprop] === json[p])
+            if (val.length) {
+              if (resource[p] === json[p])
+                resource[p] = this.buildRef(val[0])
+              json[p] = this.buildRef(val[0])
+            }
+          }
+        }
       }
       if (!json[TYPE])
         json[TYPE] = meta.id;
@@ -5095,7 +5127,7 @@ var Store = Reflux.createStore({
     }
     function doFilterOut(r, toId, idx) {
       let m = self.getModel(r[TYPE])
-      if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION)
+      if (m.id === PRODUCT_APPLICATION  &&  (r.product === REMEDIATION || !utils.getModel(r.product)))
         return true
       if (r._notSent)
         return true
@@ -6030,7 +6062,7 @@ var Store = Reflux.createStore({
         return
       dn = translate('sharedForm', translate(model), orgName)
       sharedWithOrg.lastMessage = dn
-      sharedWithOrg.lastMessageTime = value.time;
+      sharedWithOrg.lastMessageTime = value.time
       sharedWithOrg.lastMessageType = messageType
       batch.push({type: 'put', key: utils.getId(sharedWithOrg), value: sharedWithOrg});
       this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
@@ -6056,8 +6088,17 @@ var Store = Reflux.createStore({
       let docType = utils.getId(value.document).split('_')[0]
       dn = translate('receivedVerification', translate(this.getModel(docType)))
     }
-    else if (model.id === PRODUCT_APPLICATION)
-      dn = this.getModel(value.product).title
+    else if (model.id === PRODUCT_APPLICATION) {
+      let m = this.getModel(value.product)
+      dn = m  &&  m.title
+      if (!dn) {
+        let s = value.product.split('.')
+          // insert a space before all caps
+        dn  = s[s.length - 1].replace(/([A-Z])/g, ' $1')
+          // uppercase the first character
+          .replace(/^./, function(str){ return str.toUpperCase(); }).trim()
+      }
+    }
     else if (model.subClassOf === MY_PRODUCT)
       dn = translate('receivedProduct', translate(model))
     else if (model.subClassOf === FORM) {
@@ -7317,7 +7358,7 @@ var Store = Reflux.createStore({
         let originalTo = toBot.organization // this._getItem(document.to).organization
         let verificationFrom = from.organization
 
-        if (utils.getId(verificationFrom)  !==  utils.getId(originalTo)) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
+        if (verificationFrom  &&  utils.getId(verificationFrom)  !==  utils.getId(originalTo)) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
           val._verifiedBy = from.organization
           to = this._getItem(document.from)  // document from is not changing but to does depending on what party verifies or asks for corrections
           toId = utils.getId(to)

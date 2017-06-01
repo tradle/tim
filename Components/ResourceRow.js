@@ -200,8 +200,8 @@ class ResourceRow extends Component {
       extend(style, defaultBankStyle)
       style = extend(style, resource.style)
     }
-    let bg = style ? {backgroundColor: style.LIST_BG} : {}
-    let color = style ? {color: style.LIST_COLOR} : {}
+    let bg = style ? {backgroundColor: style.listBg} : {}
+    let color = style ? {color: style.listColor} : {}
 
     var cancelResource
     if (this.props.onCancel  ||  (this.state && this.state.sharedWith))
@@ -270,31 +270,34 @@ class ResourceRow extends Component {
 
     let onPress = this.action.bind(this)
     let action
-    if (isOfficialAccounts  &&  !this.props.hideMode  &&  resource.numberOfForms  &&  !count) {
+    if (isOfficialAccounts  &&  !this.props.hideMode)
       action = <View style={styles.actionView}>
-                  <TouchableHighlight underlayColor='transparent' onPress={() => {
-                    this.props.navigator.push({
-                      component: ResourceList,
-                      title: translate("myDocuments"),
-                      backButtonTitle: translate('back'),
-                      passProps: {
-                        modelName: FORM,
-                        listView: true,
-                        resource: this.props.resource
-                      }
-                    })
-                  }}>
-                    <View style={{flexDirection: 'row', marginRight: 10}}>
-                      <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-                      <View style={[styles.countView, {top: 0, right: -10}]}>
-                        <Text style={styles.countText}>{resource.numberOfForms}</Text>
-                      </View>
-                    </View>
-                  </TouchableHighlight>
+                <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: '#ffffff'}} onPress={() => {
+                  this.props.navigator.push({
+                    component: ResourceList,
+                    title: translate("myDocuments"),
+                    backButtonTitle: translate('back'),
+                    passProps: {
+                      modelName: FORM,
+                      listView: true,
+                      resource: this.props.resource
+                    }
+                  })
+                }}>
+                <View style={textStyle}>
+                   {resource.numberOfForms
+                      ? <View style={{flexDirection: 'row'}}>
+                          <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+                          <View style={styles.count}>
+                            <Text style={styles.countText}>{resource.numberOfForms}</Text>
+                          </View>
+                        </View>
+                      : <View />
+                   }
                 </View>
-                           // <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
-                      // <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT} : {}]}>
-    }
+               </TouchableHighlight>
+              </View>
+
     let content =  <View style={[styles.content, bg, {paddingHorizontal: 10}]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
                       <View style={[styles.row, bg, { minHeight: 71, justifyContent: 'center'}]}>
@@ -645,16 +648,10 @@ var styles = StyleSheet.create({
     fontSize: 14,
   },
   row: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     // justifyContent: 'space-around',
     flexDirection: 'row',
-    padding: 5,
-  },
-  rowV: {
-    // backgroundColor: 'white',
-    // justifyContent: 'space-around',
-    // flexDirection: 'row',
     padding: 5,
   },
   content: {
@@ -720,7 +717,7 @@ var styles = StyleSheet.create({
     // color: '#7AAAc3'
   },
   online: {
-    backgroundColor: 'white',
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     alignItems: 'center',
     // alignSelf: 'flex-end',
@@ -787,6 +784,7 @@ var styles = StyleSheet.create({
   // },
   countText: {
     fontSize: 12,
+    marginLeft: -7,
     fontWeight: '600',
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,

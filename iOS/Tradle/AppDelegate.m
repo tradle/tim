@@ -50,8 +50,10 @@
 
   [RNBranch initSessionWithLaunchOptions:launchOptions isReferrable:YES];
 #ifdef DEBUG
- jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
-  // jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.5:8081/index.ios.bundle?platform=ios&dev=true"];
+  jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+  if (jsCodeLocation == nil) {
+    jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.5:8081/index.ios.bundle?platform=ios&dev=true"];
+  }
 #else
   jsCodeLocation = [CodePush bundleURL];
     // jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
@@ -80,7 +82,6 @@
 #else
   [SplashScreen show]; //show splash screen
   [Fabric with:@[[Crashlytics class]]];
-  [FIRApp configure];
   // RCTSetLogThreshold(RCTLogLevelInfo);
   // RCTSetLogFunction(CrashlyticsReactLogFunction);
 #endif

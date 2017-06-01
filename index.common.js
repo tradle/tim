@@ -33,14 +33,14 @@ var TimHome = require('./Components/TimHome');
 
 var AvivaIntroView = require('./Components/AvivaIntroView')
 
-var HomePage = require('./Components/HomePage')
+// var HomePage = require('./Components/HomePage')
 var PasswordCheck = require('./Components/PasswordCheck');
 var LockScreen = require('./Components/LockScreen')
 var TouchIDOptIn = require('./Components/TouchIDOptIn');
-var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
+// var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
-var ItemsList = require('./Components/ItemsList')
+// var ItemsList = require('./Components/ItemsList')
 var RemediationItemsList = require('./Components/RemediationItemsList')
 var GridItemsList = require('./Components/GridItemsList')
 var ResourceView = require('./Components/ResourceView');
@@ -466,13 +466,13 @@ class TiMApp extends Component {
     switch (route.id) {
     case TIM_HOME: //1
       return <TimHome navigator={nav} {...props}/>;
-    case 2:
-      return <ResourceTypesScreen navigator={nav}
-                  modelName={props.modelName}
-                  resource={props.resource}
-                  returnRoute={props.returnRoute}
-                  sendForm={props.sendForm}
-                  callback={props.callback} />;
+    // case 2:  // Adding new model online
+    //   return <ResourceTypesScreen navigator={nav}
+    //               modelName={props.modelName}
+    //               resource={props.resource}
+    //               returnRoute={props.returnRoute}
+    //               sendForm={props.sendForm}
+    //               callback={props.callback} />;
     case 3:
       return <ResourceView navigator={nav} {...props } />
     case NEW_RESOURCE: // 4
@@ -489,8 +489,8 @@ class TiMApp extends Component {
                   list={props.list}
                   callback={props.callback}
                   modelName={props.modelName} />;
-    case 9:
-      return <ItemsList navigator={nav} {...props} />
+    // case 9:
+    //   return <ItemsList navigator={nav} {...props} />
     case MESSAGE_LIST: //11
       return <MessageList navigator={nav} {...props} />
     case 12:
@@ -553,8 +553,8 @@ class TiMApp extends Component {
       return <Log navigator={nav} {...props} />
     case REMEDIATION:
       return <RemediationItemsList navigator={nav} {...props} />
-    case 30:
-      return <HomePage navigator={nav} {...props} />
+    // case 30:
+    //   return <HomePage navigator={nav} {...props} />
     case AVIVA_INTRO_VIEW:
       return <AvivaIntroView navigator={nav} {...props} />
     case 10:

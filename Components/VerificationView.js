@@ -7,10 +7,10 @@ var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin')
 var MessageView = require('./MessageView')
 var ResourceMixin = require('./ResourceMixin')
+var ResourceView = require('./ResourceView')
 var reactMixin = require('react-mixin')
 var dateformat = require('dateformat')
 import Icon from 'react-native-vector-icons/Ionicons'
-var Accordion = require('react-native-accordion')
 import { makeResponsive } from 'react-native-orient'
 
 var NOT_SPECIFIED = '[not specified]'
@@ -71,24 +71,15 @@ class VerificationView extends Component {
       var m = utils.getModel(utils.getType(resource.method)).value
       let dnProps = utils.getPropertiesWithAnnotation(m.properties, 'displayName')
       let displayName = utils.getDisplayName(resource.method, m.properties)
-      let val = <View>{this.renderResource(resource, m)}</View>
-      let title = <View style={{backgroundColor: bankStyle.verifiedBg, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
+      // let val = <View>{this.renderResource(resource, m)}</View>
+      vTree.push(<TouchableOpacity onPress={() => this.showMethod(resource)} key={this.getNextKey()}>
+                  <View style={{backgroundColor: bankStyle.verifiedBg, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
                     <Icon name='ios-add-circle-outline' size={25} color={bankStyle.verifiedTextColor} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
                     <View style={{justifyContent: 'center', flexDirection: 'column', paddingLeft: 5, width: utils.dimensions(VerificationView).width - 50}}>
                       <Text style={{color: bankStyle.verifiedTextColor, fontSize: 18}}>{displayName}</Text>
                     </View>
                   </View>
-
-      vTree.push(
-          <View key={this.getNextKey()}>
-            <View style={styles.separator}></View>
-            <Accordion
-              header={title}
-              content={val}
-              underlayColor='transparent'
-              easing='easeInCirc' />
-         </View>
-      )
+                </TouchableOpacity>)
     }
     else if (resource.sources) {
       let arrow = ''
@@ -111,7 +102,17 @@ class VerificationView extends Component {
     }
     return vTree
   }
-
+  showMethod(r) {
+    var m = utils.getModel(utils.getType(r.method)).value
+    this.props.navigator.push({
+      title: utils.makeModelTitle(m),
+      id: 3,
+      component: ResourceView,
+      // titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      passProps: {resource: r.method}
+    })
+  }
   onPress(url, event) {
     var model = utils.getModel(this.props.resource[TYPE]).value;
     this.props.navigator.push({
