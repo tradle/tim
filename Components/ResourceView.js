@@ -265,7 +265,7 @@ class ResourceView extends Component {
     var isMe = utils.isMe(resource)
     if (me) {
       let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource)))
-      if (!noActionPanel)
+      if (!noActionPanel  &&  utils.hasBacklinks(model))
        actionPanel = <ShowRefList lazy={this._lazyId}
                                   resource={resource}
                                   navigator={this.props.navigator}
