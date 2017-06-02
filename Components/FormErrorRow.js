@@ -114,7 +114,8 @@ class FormErrorRow extends Component {
     let msgWidth = w * 0.8
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', width: utils.getMessageWidth(FormErrorRow)};
+    var width = utils.getMessageWidth(FormErrorRow)
+    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', width};
 
     if (this.props.sendStatus  &&  this.props.sendStatus !== null)
       sendStatus = this.getSendStatus()
