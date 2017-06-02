@@ -18,7 +18,8 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var extend = require('extend');
 var ResourceMixin = require('./ResourceMixin');
-var HELP_COLOR = 'blue'
+import { makeResponsive } from 'react-native-orient'
+
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
@@ -466,7 +467,7 @@ class MessageView extends Component {
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
 reactMixin(MessageView.prototype, ResourceMixin);
-
+MessageView = makeResponsive(MessageView)
 var styles = StyleSheet.create({
   itemTitle: {
     fontSize: 18,
