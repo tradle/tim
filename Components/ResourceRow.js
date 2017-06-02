@@ -272,7 +272,7 @@ class ResourceRow extends Component {
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode)
       action = <View style={styles.actionView}>
-                <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: '#ffffff'}} onPress={() => {
+                <TouchableHighlight underlayColor='transparent' onPress={() => {
                   this.props.navigator.push({
                     component: ResourceList,
                     title: translate("myDocuments"),
@@ -784,7 +784,7 @@ var styles = StyleSheet.create({
   // },
   countText: {
     fontSize: 12,
-    marginLeft: -7,
+    // marginLeft: -7,
     fontWeight: '600',
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,
