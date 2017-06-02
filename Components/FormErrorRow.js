@@ -129,6 +129,7 @@ class FormErrorRow extends Component {
       cellStyle = addStyle
     else
       cellStyle = chatStyles.textContainer
+    var messageBody
     if (prop  &&  prop.ref == PHOTO) {
       if (utils.isWeb() && ENV.canUseWebcam) {
         let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor}} size={20} name={'ios-arrow-forward'} />
