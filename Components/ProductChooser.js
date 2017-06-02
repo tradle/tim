@@ -92,6 +92,8 @@ class ProductChooser extends Component {
         else
           products = utils.getAllSubclasses(constants.TYPES.FORM)
       }
+      else
+        return
       this.setState({
         products: products,
         dataSource: this.state.dataSource.cloneWithRows(products),
