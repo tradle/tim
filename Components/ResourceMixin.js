@@ -239,7 +239,7 @@ var ResourceMixin = {
                   renderHeader={() => header}
                   renderContent={() => val}
                   underlayColor='transparent'
-                  easing='easeInCirc' />
+                  easing='easeIn' />
              </View>
       else {
         val = <View key={this.getNextKey()}>
