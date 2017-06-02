@@ -5,7 +5,6 @@ var React = require('react');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
-var Accordion = require('react-native-accordion')
 var Actions = require('../Actions/Actions');
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomIcon from '../styles/customicons'
@@ -203,12 +202,9 @@ var RowMixin = {
     let model = params.model
     let verification = params.verification
     let onPress = params.onPress
-    let isAccordion = params.isAccordion
     let providers = params.providers  // providers the document was shared with
 
     var document = verification.document
-
-    isAccordion = false
 
     let isThirdParty = !document[constants.TYPE]
     let type = document[constants.TYPE] || utils.getType(document)
@@ -254,19 +250,20 @@ var RowMixin = {
     let docName
     if (!isThirdParty)
       docName = <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
-    var header =  <View style={headerStyle}>
-                    <Text style={[hs, {fontSize: isThirdParty ? 16 : 12}]}>{translate(model)}</Text>
-                    {docName}
-                  </View>
 
-    header = <View style={[addStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
-               {header}
-               {arrow}
-             </View>
-    if (!isAccordion)
-      header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, me.isEmployee ? verification : document, verification)}>
-                 {header}
-               </TouchableHighlight>
+    var headerContent = <View style={headerStyle}>
+                          <Text style={[hs, {fontSize: isThirdParty ? 16 : 12}]}>{translate(model)}</Text>
+                          {docName}
+                        </View>
+
+
+
+    let header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, me.isEmployee ? verification : document, verification)}>
+                   <View style={[addStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+                     {headerContent}
+                     {arrow}
+                   </View>
+                 </TouchableHighlight>
       // header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, this.props.shareWithRequestedParty ? document : verification, verification)}>
 
 
@@ -369,21 +366,10 @@ var RowMixin = {
                    </View>
 
     // var verifiedBy = verification && verification.organization ? verification.organization.title : ''
-    return isAccordion
-        ? ( <View style ={{marginTop: 5}} key={this.getNextKey()}>
-             <Accordion
-               header={header}
-               style={{padding: 5}}
-               content={content}
-               underlayColor='transparent'
-               easing='easeOutCirc' />
-            </View>
-          )
-        : ( <View style={{flex: 1}} key={this.getNextKey()}>
+    return  <View style={{flex: 1}} key={this.getNextKey()}>
                {header}
                {content}
              </View>
-           );
   },
 
   formatDocument1(model, resource, renderedRow) {

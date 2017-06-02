@@ -8,7 +8,7 @@ var RowMixin = require('./RowMixin')
 var ResourceMixin = require('./ResourceMixin')
 var reactMixin = require('react-mixin')
 var dateformat = require('dateformat')
-var Accordion = require('react-native-accordion')
+var Accordion = require('react-native-collapsible/Accordion')
 import Icon from 'react-native-vector-icons/Ionicons'
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
@@ -360,8 +360,9 @@ class ShowPropertiesView extends Component {
                     </View>
 
       let row = <Accordion
-                  header={header}
-                  content={content}
+                  sections={['txId']}
+                  renderHeader={() => header}
+                  renderContent={() => content}
                   underlayColor='transparent'
                   easing='easeInCirc' />
       viewCols.push(
