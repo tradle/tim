@@ -364,7 +364,7 @@ class ShowPropertiesView extends Component {
                   renderHeader={() => header}
                   renderContent={() => content}
                   underlayColor='transparent'
-                  easing='easeInCirc' />
+                  easing='easeIn' />
       viewCols.push(
           <View key={this.getNextKey()}>
             {row}

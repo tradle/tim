@@ -222,8 +222,9 @@ var ResourceMixin = {
       var cnt = val.length;
       val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
       let title = pMeta.title || utils.makeLabel(pMeta.name)
+      const titleEl = <Text style={styles.title}>{title}</Text>
       let header = <View style={{flexDirection: 'row'}}>
-                    <Text style={styles.title}>{title}</Text>
+                    {titleEl}
                     {cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS
                       ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
                       : <View />
@@ -239,11 +240,11 @@ var ResourceMixin = {
                   renderHeader={() => header}
                   renderContent={() => val}
                   underlayColor='transparent'
-                  easing='easeInCirc' />
+                  easing='easeIn' />
              </View>
       else {
         val = <View key={this.getNextKey()}>
-               {title}
+               {titleEl}
                {val}
              </View>
       }
