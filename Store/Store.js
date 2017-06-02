@@ -4662,6 +4662,8 @@ var Store = Reflux.createStore({
         continue
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
+      if (isOrg  &&  r.name.indexOf('[TEST]') === 0)
+        continue
       if (!query) {
         foundResources[key] = r
         continue;
