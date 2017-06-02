@@ -121,6 +121,7 @@
     "react-native-actionsheet": "^2.0.3",
     "react-native-animatable": "github:oblador/react-native-animatable#d72c092",
     "react-native-carousel": "github:tradle/react-native-carousel",
+    "react-native-collapsible": "^0.8.0",
     "react-native-datepicker": "github:pgmemk/react-native-datepicker#ce456393",
     "react-native-device-info": "0.9.9",
     "react-native-flexbox-grid": "^0.2.2",

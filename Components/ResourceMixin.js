@@ -8,7 +8,8 @@ var equal = require('deep-equal')
 var StyleSheet = require('../StyleSheet')
 var PhotoList = require('./PhotoList')
 var constants = require('@tradle/constants');
-var Accordion = require('react-native-accordion')
+// var Accordion = require('react-native-accordion')
+var Accordion = require('react-native-collapsible/Accordion')
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
 import ENV from '../utils/env'
@@ -220,9 +221,10 @@ var ResourceMixin = {
         vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).value.viewCols
       var cnt = val.length;
       val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
-
-      let title = <View style={{flexDirection: 'row'}}>
-                    <Text style={styles.title}>{pMeta.title || utils.makeLabel(pMeta.name)}</Text>
+      let title = pMeta.title || utils.makeLabel(pMeta.name)
+      const titleEl = <Text style={styles.title}>{title}</Text>
+      let header = <View style={{flexDirection: 'row'}}>
+                    {titleEl}
                     {cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS
                       ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
                       : <View />
@@ -234,14 +236,15 @@ var ResourceMixin = {
         val = <View key={this.getNextKey()}>
                 {separator}
                 <Accordion
-                  header={title}
-                  content={val}
+                  sections={[title]}
+                  renderHeader={() => header}
+                  renderContent={() => val}
                   underlayColor='transparent'
-                  easing='easeInCirc' />
+                  easing='easeIn' />
              </View>
       else {
         val = <View key={this.getNextKey()}>
-               {title}
+               {titleEl}
                {val}
              </View>
       }
@@ -403,9 +406,10 @@ var ResourceMixin = {
           arr.splice(0, 1)
           let content = <View>{arr}</View>
           let row =  <Accordion
-                       header={header}
+                       sections={[utils.makeLabel(showCollapsed)]}
+                       renderHeader={() => header}
                        style={{alignSelf: 'stretch'}}
-                       content={content}
+                       renderContent={() => <View>{arr}</View>}
                        underlayColor='transparent'
                        easing='easeOutQuad' />
           jsonRows.splice(i, 1, row)
