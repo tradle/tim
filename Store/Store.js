@@ -4393,6 +4393,16 @@ var Store = Reflux.createStore({
         if (params.to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(params.to)) {
           if (!params.context)
             params.context = params.to
+          // Filter out the resource submitted by employee in the shared context chat.
+          // Otherwise there are duplicates messages submitted by employee and its bot
+          let cId = utils.getId(params.context)
+          let meId = IDENTITY + '_' + me[ROOT_HASH]
+          let meProfileId = utils.getId(utils.getMe())
+          let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
+          let rm = assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
+          if (rm && rm.length)
+            result = result.filter((r) => utils.getId(r.from) !== meProfileId)
+          retParams.list = result
         }
         else {
           if (params.to.organization)
