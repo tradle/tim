@@ -2259,109 +2259,119 @@ var Store = Reflux.createStore({
     let isWelcome = params.isWelcome
     let requestForForm = params.requestForForm
     let cb = params.cb
-    var disableAutoResponse = params.disableAutoResponse
-
-    var self = this
-    let m = this.getModel(r[TYPE])
-    var props = m.properties;
-    if (!r.time)
-      r.time = new Date().getTime();
-    var toOrg
-    // r.to could be a reference to a resource
-    var to = this._getItem(r.to)
-    // if (!r.to[TYPE])
-    //   r.to = this._getItem(r.to)
+    let disableAutoResponse = params.disableAutoResponse
+    let rr = {};
+    let context
+    let toOrg
+    let toId
+    let to
+    let props
     let isReadOnlyContext
-    if (to[TYPE] === ORGANIZATION) {
-      var orgId = utils.getId(r.to)
-      var orgRep = this.getRepresentative(orgId)
-      // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
-      //   return
-      if (!orgRep) {
-        var params = {
-          action: 'addMessage',
-          error: 'No ' + r.to.name + ' representative was found'
-        }
-        this.trigger(params);
-        return
-      }
-      toOrg = r.to
-      r.to = orgRep
-    }
-    else
-      isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
-
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
-
-    var rr = {};
-    var context
-    if (r._context) {
-      rr._context = r._context
-      context = this._getItem(r._context)
-    }
-    for (var p in r) {
-      if (!props[p])
-        continue
-      if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
-        rr[p] = this.buildRef(r[p])
-      else
-        rr[p] = r[p];
-    }
-    // let firstTime
-    if (r[TYPE] === PRODUCT_APPLICATION) {
-      let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
-      if (result) {
-        result = result.filter((r) => {
-          return (r.message === r.message  &&  !r.documentCreated) ? true : false
-        })
-        if (result.length) {
-          result.forEach((r) => {
-            const rid = utils.getId(r)
-            self._mergeItem(rid, { documentCreated: true })
-          })
-        }
-      }
-    }
     let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
-    //   if (!this.isConnected) {
-    //     let result = this.searchMessages({modelName: PRODUCT_LIST, to: toOrg})
-    //     firstTime = !result  ||  !result.length
-    //   }
-    // }
-    rr[NONCE] = this.getNonce()
-    var toChain = {
-      [TYPE]: rr[TYPE],
-      [NONCE]: rr[NONCE],
-      time: r.time
-    }
-    if (rr.message)
-      toChain.message = rr.message
-    if (rr.photos)
-      toChain.photos = rr.photos
-    if (isSelfIntroduction)
-      toChain.profile = { firstName: me.firstName }
-    if (r.list)
-      rr.list = r.list
-    let required = m.required
-    if (required) {
-      required.forEach((p) => {
-        toChain[p] = rr[p]
-      })
-      // HACK
-      delete toChain.from
-      delete toChain.to
-    }
-    var batch = []
+    let toChain
+    let orgRep
+    let orgId
+    let noCustomerWaiting
+    var batch
     var error
     var welcomeMessage
-    // var promise = Q(protocol.linkString(toChain))
-    let hash = r.to[ROOT_HASH]
-    if (!hash)
-      hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-    var toId = IDENTITY + '_' + hash
-    rr._sendStatus = self.isConnected ? SENDING : QUEUED
-    var noCustomerWaiting
-    return this.maybeWaitForIdentity({ permalink: hash })
+
+    var self = this
+
+    return this._loadedResourcesDefer.promise
+    .then(() => {
+      let m = this.getModel(r[TYPE])
+      props = m.properties;
+      if (!r.time)
+        r.time = new Date().getTime();
+      // r.to could be a reference to a resource
+      to = this._getItem(r.to)
+      // if (!r.to[TYPE])
+      //   r.to = this._getItem(r.to)
+      if (to[TYPE] === ORGANIZATION) {
+        orgId = utils.getId(r.to)
+        orgRep = this.getRepresentative(orgId)
+        // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
+        //   return
+        if (!orgRep) {
+          var params = {
+            action: 'addMessage',
+            error: 'No ' + r.to.name + ' representative was found'
+          }
+          this.trigger(params);
+          return
+        }
+        toOrg = r.to
+        r.to = orgRep
+      }
+      else
+        isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
+
+      if (r._context) {
+        rr._context = r._context
+        context = this._getItem(r._context)
+      }
+      for (var p in r) {
+        if (!props[p])
+          continue
+        if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
+          rr[p] = this.buildRef(r[p])
+        else
+          rr[p] = r[p];
+      }
+      // let firstTime
+      if (r[TYPE] === PRODUCT_APPLICATION) {
+        let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+        if (result) {
+          result = result.filter((r) => {
+            return (r.message === r.message  &&  !r.documentCreated) ? true : false
+          })
+          if (result.length) {
+            result.forEach((r) => {
+              const rid = utils.getId(r)
+              self._mergeItem(rid, { documentCreated: true })
+            })
+          }
+        }
+      }
+      //   if (!this.isConnected) {
+      //     let result = this.searchMessages({modelName: PRODUCT_LIST, to: toOrg})
+      //     firstTime = !result  ||  !result.length
+      //   }
+      // }
+      rr[NONCE] = this.getNonce()
+      toChain = {
+        [TYPE]: rr[TYPE],
+        [NONCE]: rr[NONCE],
+        time: r.time
+      }
+      if (rr.message)
+        toChain.message = rr.message
+      if (rr.photos)
+        toChain.photos = rr.photos
+      if (isSelfIntroduction)
+        toChain.profile = { firstName: me.firstName }
+      if (r.list)
+        rr.list = r.list
+      let required = m.required
+      if (required) {
+        required.forEach((p) => {
+          toChain[p] = rr[p]
+        })
+        // HACK
+        delete toChain.from
+        delete toChain.to
+      }
+      batch = []
+      // var promise = Q(protocol.linkString(toChain))
+      let hash = r.to[ROOT_HASH]
+      if (!hash)
+        hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
+      toId = IDENTITY + '_' + hash
+      rr._sendStatus = self.isConnected ? SENDING : QUEUED
+      return this.maybeWaitForIdentity({ permalink: hash })
+    })
     .then(() => meDriver.sign({ object: toChain }))
     .then(function(result) {
       toChain = result.object
