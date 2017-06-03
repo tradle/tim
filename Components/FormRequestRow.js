@@ -268,7 +268,7 @@ class FormRequestRow extends Component {
     var chatOrg = this.props.to[TYPE] === constants.TYPES.ORGANIZATION  &&  utils.getId(this.props.to)
     let shareableResources = this.props.shareableResources.verifications
     let providers = this.props.shareableResources.providers
-    let resourceContextId = utils.getId(resource._context)
+    let resourceContextId = resource._context  &&  utils.getId(resource._context)
     for (var t in  shareableResources) {
       if (t !== formModel.id)
         continue
