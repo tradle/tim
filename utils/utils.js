@@ -1922,7 +1922,22 @@ var utils = {
     }
     return hasBacklinks
   },
-
+  ungroup(model, arr, includeGroupProp) {
+    if (!arr)
+      return
+    let props = model.properties
+    let newArr = []
+    arr.forEach((p) => {
+      if (p.indexOf('_group') !== -1  && props[p].list) {
+        if (includeGroupProp)
+          newArr.push(p)
+        props[p].list.forEach((pr) => newArr.push(pr))
+      }
+      else
+        newArr.push(p)
+    })
+    return newArr
+  },
   getRouteName(route) {
     const { displayName } = route.component
     if (displayName) return displayName

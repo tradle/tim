@@ -8,8 +8,7 @@ var equal = require('deep-equal')
 var StyleSheet = require('../StyleSheet')
 var PhotoList = require('./PhotoList')
 var constants = require('@tradle/constants');
-// var Accordion = require('react-native-accordion')
-var Accordion = require('react-native-collapsible/Accordion')
+var Accordion = require('./Accordion')
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
 import ENV from '../utils/env'
@@ -237,8 +236,8 @@ var ResourceMixin = {
                 {separator}
                 <Accordion
                   sections={[title]}
-                  renderHeader={() => header}
-                  renderContent={() => val}
+                  header={header}
+                  content={val}
                   underlayColor='transparent'
                   easing='easeIn' />
              </View>
@@ -407,9 +406,9 @@ var ResourceMixin = {
           let content = <View>{arr}</View>
           let row =  <Accordion
                        sections={[utils.makeLabel(showCollapsed)]}
-                       renderHeader={() => header}
+                       header={header}
                        style={{alignSelf: 'stretch'}}
-                       renderContent={() => <View>{arr}</View>}
+                       content={<View>{arr}</View>}
                        underlayColor='transparent'
                        easing='easeOutQuad' />
           jsonRows.splice(i, 1, row)
