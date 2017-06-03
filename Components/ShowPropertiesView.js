@@ -8,7 +8,7 @@ var RowMixin = require('./RowMixin')
 var ResourceMixin = require('./ResourceMixin')
 var reactMixin = require('react-mixin')
 var dateformat = require('dateformat')
-var Accordion = require('react-native-collapsible/Accordion')
+var Accordion = require('./Accordion')
 import Icon from 'react-native-vector-icons/Ionicons'
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
@@ -72,6 +72,7 @@ class ShowPropertiesView extends Component {
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
     var vCols = model.viewCols
+
     var props = model.properties;
     if (this.props.checkProperties) {
       if (!vCols) {
@@ -82,15 +83,16 @@ class ShowPropertiesView extends Component {
           vCols.push(p)
         }
       }
-
+      else
+        vCols = utils.ungroup(model, vCols)
       let v = []
       vCols.forEach((p) => {
         if (p.charAt(0) === '_'  ||  props[p].hidden) //  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
           return
         v.push(p)
-        let idx = p.indexOf('_group')
-        if (idx !== -1  &&  idx === p.length - 6)
-          props[p].list.forEach((p) => v.push(p))
+        // let idx = p.indexOf('_group')
+        // if (idx !== -1  &&  idx === p.length - 6)
+        //   props[p].list.forEach((p) => v.push(p))
       })
       vCols = v
     }
@@ -355,8 +357,8 @@ class ShowPropertiesView extends Component {
 
       let row = <Accordion
                   sections={['txId']}
-                  renderHeader={() => header}
-                  renderContent={() => content}
+                  header={header}
+                  content={content}
                   underlayColor='transparent'
                   easing='easeIn' />
       viewCols.push(
