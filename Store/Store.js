@@ -4746,6 +4746,19 @@ var Store = Reflux.createStore({
       })
       result = retPeople
     }
+    if (isOrg) {
+      // cloning orgs to re-render the org list with the correct number of forms
+      let retOrgs = []
+      result.forEach((r) => {
+        let orgId = utils.getId(r)
+        let rr = {}
+        extend(true, rr, r)
+        rr.numberOfForms = orgToForm[orgId]
+        retOrgs.push(rr)
+      })
+      result = retOrgs.filter((r) => r._isTest === params.isTest)
+      // result = retOrgs
+    }
     if (result.length === 1)
       return result
     // var sortProp = params.sortProperty;
@@ -4779,20 +4792,7 @@ var Store = Reflux.createStore({
       }
     }
 
-    if (isOrg) {
-      // cloning orgs to re-render the org list with the correct number of forms
-      let retOrgs = []
-      result.forEach((r) => {
-        let orgId = utils.getId(r)
-        let rr = {}
-        extend(true, rr, r)
-        rr.numberOfForms = orgToForm[orgId]
-        retOrgs.push(rr)
-      })
-      result = retOrgs.filter((r) => r._isTest === params.isTest)
-      // result = retOrgs
-    }
-    return result
+    return result;
   },
   getEnum(params) {
     let result
