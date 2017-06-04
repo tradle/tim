@@ -1,4 +1,23 @@
 'use strict'
+/*
+  To use SimpleModal you need to write something like that
+
+    Actions.showModal({
+      title: translate('approveThisApplicationFor', translate(resource.from.title)),
+      buttons: [
+        {
+          text: translate('cancel'),
+          onPress: () => {  Actions.hideModal(); console.log('Canceled!')}
+        },
+        {
+          text: translate('Ok'),
+          onPress: () => {
+            this.ok(resource)
+          }
+        }
+      ]
+    })
+*/
 
 import React from 'react'
 import {

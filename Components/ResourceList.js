@@ -616,24 +616,30 @@ class ResourceList extends Component {
       Alert.alert('Application was approved')
       return
     }
-    Alert.alert(
-      translate('approveThisApplicationFor', translate(resource.from.title)),
-      null,
-      [
-        {text: translate('cancel'), onPress: () => {
-          console.log('Canceled!')
-        }},
-        {text: translate('Approve'), onPress: () => {
-          if (!resource._appSubmitted)
-            Alert.alert('Application is not yet submitted')
-          else
-            this.approve(resource)
-        }},
-        {text: translate('Deny'), onPress: () => {
-          this.deny(resource)
-        }},
+    Actions.showModal({
+      title: translate('approveThisApplicationFor', translate(resource.from.title)),
+      buttons: [
+        {
+          text: translate('cancel'),
+          onPress: () => {  Actions.hideModal(); console.log('Canceled!')}
+        },
+        {
+          text: translate('Approve'),
+          onPress: () => {
+            if (!resource._appSubmitted)
+              Alert.alert('Application is not yet submitted')
+            else
+              this.approve(resource)
+          }
+        },
+        {
+          text: translate('Deny'),
+          onPress: () => {
+            this.deny(resource)
+          }
+        },
       ]
-    )
+    })
   }
   approve(resource) {
     Alert.alert(
