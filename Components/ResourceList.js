@@ -39,6 +39,7 @@ const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
 
 const ENUM = 'tradle.Enum'
+const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
 
 import React, { Component, PropTypes } from 'react'
 import {
@@ -342,8 +343,14 @@ class ResourceList extends Component {
       this.setState({hasPartials: true})
       return
     }
-    if (action === 'hasTestProviders') {
-      this.setState({hasTestProviders: params.list  &&  params.list.length, testProviders: params.list})
+    if (action === 'hasTestProviders'  &&  this.props.officialAccounts) {
+      let l = this.addTestProvidersRow(this.state.list)
+      this.setState({
+        hasTestProviders: params.list  &&  params.list.length ? true : false,
+        testProviders: params.list,
+        list: l,
+        dataSource: this.state.dataSource.cloneWithRows(l),
+      })
       return
     }
     // if (action === 'exploreBacklink'  &&  this.props.isBacklink  &&  this.props.resource[ROOT_HASH] === params.resource[ROOT_HASH]) {
@@ -384,6 +391,7 @@ class ResourceList extends Component {
         })
       }
     }
+    list = this.addTestProvidersRow(list)
 
     let state = {
       dataSource: this.state.dataSource.cloneWithRows(list),
@@ -421,6 +429,16 @@ class ResourceList extends Component {
     }
 
     this.setState(state)
+  }
+  addTestProvidersRow(l) {
+    if (!l  ||  !this.props.officialAccounts)
+      return l
+    l.push({
+      [TYPE]: ORGANIZATION,
+      name: 'Sandbox',
+      _isTest: true
+    })
+    return l
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
@@ -831,7 +849,8 @@ class ResourceList extends Component {
     //   selectedResource = resource
     // else
     //   selectedResource = resource.document
-
+    if (model.id === ORGANIZATION  &&  resource.name === 'Sandbox'  &&  resource._isTest)
+      return this.renderTestProviders()
     if (isVerification  || isForm || isMyProduct)
       return (<VerificationRow
                 lazy={this.props.lazy}
@@ -889,6 +908,31 @@ class ResourceList extends Component {
   changeSharedWithList(id, value) {
     this.state.sharedWith[id] = value
   }
+
+  renderTestProviders() {
+    if (!this.state.hasTestProviders  ||  this.props.isTest)
+      return <View/>
+    return (
+      <View>
+        <View style={styles.testProvidersRow} key={'testProviders_1'}>
+          <TouchableOpacity onPress={this.showTestProviders.bind(this)}>
+            <View style={styles.row}>
+              <Icon name='ios-pulse-outline' size={utils.getFontSize(45)} color={appStyle.TEST_PROVIDERS_ROW_FG_COLOR} style={[styles.cellImage, {paddingLeft: 5}]} />
+              <View style={styles.textContainer}>
+                <Text style={[styles.resourceTitle, styles.testProvidersText]}>{translate('testProviders')}</Text>
+              </View>
+              <View style={styles.testProviders}>
+                <Text style={styles.testProvidersCounter}>{this.state.testProviders.length}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+        <View style={{padding: 10, backgroundColor: 'transparent'}}>
+          <Text style={styles.testProvidersDescription}>{sandboxDesc}</Text>
+        </View>
+      </View>
+    )
+  }
   renderFooter() {
     var me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
@@ -896,6 +940,7 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName).value;
     if (!this.props.prop  &&  model.id !== ORGANIZATION)
       return <View />
+
     // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
     //   return <View />
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
@@ -1162,34 +1207,34 @@ class ResourceList extends Component {
   renderHeader() {
     if (!this.props.officialAccounts)
       return
-    let testProviders
     let sharedContext
     let partial
     let conversations
+    let testProviders
     let isOrg = this.props.modelName === ORGANIZATION
     let isProfile = this.props.modelName === PROFILE
     if (!isOrg  &&  !isProfile)
       return
     if (isOrg) {
-      if (!this.state.hasTestProviders || this.props.isTest)
-        return
-      testProviders = (
-        <View style={styles.testProvidersRow}>
-          <TouchableOpacity onPress={this.showTestProviders.bind(this)}>
-            <View style={styles.row}>
-              <Icon name='ios-pulse-outline' size={utils.getFontSize(45)} color={appStyle.TEST_PROVIDERS_ROW_FG_COLOR} style={[styles.cellImage, {paddingLeft: 5}]} />
-              <View style={styles.textContainer}>
-                <Text style={[styles.resourceTitle, styles.testProvidersText]}>{translate('testProviders')}</Text>
-              </View>
-              <View style={styles.testProviders}>
-                <Text style={styles.testProvidersCounter}>{this.state.testProviders.length}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
-      )
+      if (!this.state.hasTestProviders  ||  this.props.isTest)
+        return <View/>
+      // testProviders = (
+      //   <View style={styles.testProvidersRow}>
+      //     <TouchableOpacity onPress={this.showTestProviders.bind(this)}>
+      //       <View style={styles.row}>
+      //         <Icon name='ios-pulse-outline' size={utils.getFontSize(45)} color={appStyle.TEST_PROVIDERS_ROW_FG_COLOR} style={[styles.cellImage, {paddingLeft: 5}]} />
+      //         <View style={styles.textContainer}>
+      //           <Text style={[styles.resourceTitle, styles.testProvidersText]}>{translate('testProviders')}</Text>
+      //         </View>
+      //         <View style={styles.testProviders}>
+      //           <Text style={styles.testProvidersCounter}>{this.state.testProviders.length}</Text>
+      //         </View>
+      //       </View>
+      //     </TouchableOpacity>
+      //   </View>
+      // )
     }
-    else if (isProfile) {
+    if (isProfile) {
       // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
       conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
           <TouchableOpacity onPress={this.showBanks.bind(this)}>
@@ -1395,7 +1440,12 @@ var styles = StyleSheet.create({
   },
   testProvidersRow: {
     padding: 5,
+    flex: 1,
     backgroundColor: appStyle.TEST_PROVIDERS_ROW_BG_COLOR
+  },
+  testProvidersDescription: {
+    fontSize: 16,
+    color: '#757575'
   }
 });
 
