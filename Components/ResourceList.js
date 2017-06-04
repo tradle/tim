@@ -344,9 +344,10 @@ class ResourceList extends Component {
       return
     }
     if (action === 'hasTestProviders'  &&  this.props.officialAccounts) {
-      if (!params.list)
+      if (!params.list  ||  !params.list.length)
         return
-      let l = this.addTestProvidersRow(this.state.list)
+
+      let l = this.addTestProvidersRow(this.state.list  ||  [])
       this.setState({
         hasTestProviders: true,
         testProviders: params.list,
