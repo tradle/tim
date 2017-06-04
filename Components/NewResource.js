@@ -34,6 +34,7 @@ var LINK_COLOR
 const DEFAULT_LINK_COLOR = '#a94442'
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
+const SETTINGS = 'tradle.Settings'
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -126,7 +127,7 @@ class NewResource extends Component {
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.inFocus !== nextState.inFocus                ||
-           this.state.resource !== nextState.resource              ||
+           this.state.disableEditing !== nextState.disableEditing    ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
@@ -200,6 +201,11 @@ class NewResource extends Component {
         resource: params.resource,
         isUploading: false
       })
+      return
+    }
+    if (params.action === 'noAccessToServer') {
+      this.setState({submitted: true, disableEditing: false})
+      this.props.navigator.pop()
       return
     }
     if (params.action === 'getTemporary') {
@@ -372,9 +378,10 @@ class NewResource extends Component {
           json[p] = this.floatingProps[p]
       }
     }
-    var required = this.props.model.required;
+    let model = this.props.model
+    let props = model.properties
+    var required = utils.ungroup(model, model.required)
     if (!required) {
-      let props = this.props.model.properties
       required = []
       for (var p in props) {
         if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
@@ -390,7 +397,7 @@ class NewResource extends Component {
           delete json[p]
         }
         else if (typeof v === 'object')  {
-          let ref = this.props.model.properties[p].ref
+          let ref = props[p].ref
           if (ref) {
             let rModel = utils.getModel(ref).value
             if (ref === constants.TYPES.MONEY) {
@@ -402,7 +409,7 @@ class NewResource extends Component {
             else if (ref === 'tradle.Photo')
               return
             else if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
-              var units = this.props.model.properties[p].units
+              var units = props[p].units
               if (units)
                 v = v.value
               else {
@@ -413,17 +420,17 @@ class NewResource extends Component {
               return
             }
           }
-          else if (this.props.model.properties[p].type === 'array'  &&  !v.length) {
+          else if (props[p].type === 'array'  &&  !v.length) {
             missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
             return
           }
         }
       }
-      if (this.props.model.properties[p].type  === 'boolean'  &&  typeof v !== 'undefined')
+      if (props[p].type  === 'boolean'  &&  typeof v !== 'undefined')
         return
       var isDate = Object.prototype.toString.call(v) === '[object Date]'
       if (!v  ||  (isDate  &&  isNaN(v.getTime())))  {
-        var prop = this.props.model.properties[p]
+        var prop = props[p]
         if (prop.items  &&  prop.items.backlink)
           return
         if ((prop.ref) ||  isDate  ||  prop.items) {
@@ -460,6 +467,9 @@ class NewResource extends Component {
     if (!value)
       debugger
 
+    // HACK: adding new server url action should disable keyboard on submission
+    if (resource[constants.TYPE] === SETTINGS)
+      this.setState({submitted: false, disableEditing: true})
     var r = {}
     extend(true, r, resource)
     json._context = r._context ||  (this.props.originatingMessage  &&  this.props.originatingMessage._context)
@@ -569,6 +579,7 @@ class NewResource extends Component {
   render() {
     if (this.state.isUploading)
       return <View/>
+
     var props = this.props;
     var parentBG = {backgroundColor: '#7AAAC3'};
     var resource = this.state.resource;
@@ -597,7 +608,8 @@ class NewResource extends Component {
         model: model,
         items: arrays,
         onEndEditing: this.onEndEditing.bind(this),
-        component: NewResource
+        component: NewResource,
+        editable: this.state.disableEditing ? !this.state.disableEditing : true
       };
     if (this.props.editCols)
       params.editCols = this.props.editCols;
@@ -610,7 +622,6 @@ class NewResource extends Component {
         params.errors[r.name] = r.error
       })
     }
-
     var options = this.getFormFields(params);
 
     var Model = t.struct(model);
@@ -745,6 +756,10 @@ class NewResource extends Component {
             </View>
           </View>
         </View>
+        {this.state.disableEditing
+           ? <ActivityIndicator animating={true} size='large' color='#7AAAC3'/>
+           : <View/ >
+        }
       </ScrollView>
 
     // var submit

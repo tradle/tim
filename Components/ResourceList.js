@@ -352,9 +352,12 @@ class ResourceList extends Component {
       return
     }
     if (action === 'hasTestProviders'  &&  this.props.officialAccounts) {
-      let l = this.addTestProvidersRow(this.state.list)
+      if (!params.list  ||  !params.list.length)
+        return
+
+      let l = this.addTestProvidersRow(this.state.list  ||  [])
       this.setState({
-        hasTestProviders: params.list  &&  params.list.length ? true : false,
+        hasTestProviders: true,
         testProviders: params.list,
         list: l,
         dataSource: this.state.dataSource.cloneWithRows(l),
