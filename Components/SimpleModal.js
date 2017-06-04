@@ -141,6 +141,7 @@ const DEFAULT_STYLES = StyleSheet.create({
     paddingRight: 15,
     paddingTop: 10,
     paddingBottom: 10,
+    marginLeft: 5
   },
   cancel: {
     marginRight: 10
