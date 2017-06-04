@@ -280,7 +280,7 @@ class FormRequestRow extends Component {
         if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
           return
         // Dont' share forms for the same product
-        if (resourceContextId === utils.getId(document._context))
+        if (resourceContextId  &&  document._context  && resourceContextId === utils.getId(document._context))
           return
         var vModel = utils.getModel(r[TYPE]);
         var doc = this.formatShareables({
