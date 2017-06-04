@@ -1,4 +1,23 @@
 'use strict'
+/*
+  To use SimpleModal you need to write something like that
+
+    Actions.showModal({
+      title: translate('approveThisApplicationFor', translate(resource.from.title)),
+      buttons: [
+        {
+          text: translate('cancel'),
+          onPress: () => {  Actions.hideModal(); console.log('Canceled!')}
+        },
+        {
+          text: translate('Ok'),
+          onPress: () => {
+            this.ok(resource)
+          }
+        }
+      ]
+    })
+*/
 
 import React from 'react'
 import {
@@ -122,6 +141,7 @@ const DEFAULT_STYLES = StyleSheet.create({
     paddingRight: 15,
     paddingTop: 10,
     paddingBottom: 10,
+    marginLeft: 5
   },
   cancel: {
     marginRight: 10

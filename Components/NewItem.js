@@ -4,14 +4,13 @@ var t = require('tcomb-form-native');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var extend = require('extend');
-// var logError = require('logError');
-// var SelectPhotoList = require('./SelectPhotoList');
 var myStyles = require('../styles/styles');
 var constants = require('@tradle/constants');
 var NewResourceMixin = require('./NewResourceMixin');
 var PageView = require('./PageView')
 var reactMixin = require('react-mixin');
 import platformStyles from '../styles/platform'
+import { makeResponsive } from 'react-native-orient'
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
@@ -50,6 +49,11 @@ class NewItem extends Component {
     // currentRoutes[currentRoutesLength - 1].onRightButtonPress = {
     //   stateChange: this.onSavePressed.bind(this)
     // };
+    this.scrollviewProps = {
+      automaticallyAdjustContentInsets:true,
+      scrollEventThrottle: 50,
+      onScroll: this.onScroll.bind(this)
+    };
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.onSavePressed.bind(this)
   }
   onSavePressed() {
@@ -184,12 +188,6 @@ class NewItem extends Component {
       this.state.options = null;
     return !hasError;
   }
-  // addItem(value) {
-  //   var propName = this.props.metadata.name;
-  //   var json = utils.clone(value);
-  //   this.props.onAddItem(propName, json);
-  //   return true;
-  // }
   render() {
     var props = this.props;
     var err = props.err || this.state.err || '';
@@ -204,8 +202,6 @@ class NewItem extends Component {
     var params = {
         meta: meta,
         model: model,
-        // chooser: this.props.chooser.bind(this),
-        // template: this.props.template.bind(this),
         onSubmitEditing: this.onSavePressed.bind(this),
         component: NewItem
     };
@@ -223,16 +219,17 @@ class NewItem extends Component {
         }
       }
     }
-
-        // <SelectPhotoList style={{marginTop: -40}}
-        //   metadata={this.props.metadata}
-        //   navigator={this.props.navigator}
-        //   onSelect={this.onSelect.bind(this)} />
+    var {width, height} = utils.dimensions(NewItem)
     return (
-      <PageView style={platformStyles.container}>
-        <View style={{marginLeft: 10, marginRight: 20, marginBottom: 15 }}>
-          <Form ref='form' type={Model} options={options} />
-        </View>
+      <PageView style={[platformStyles.container]}>
+        <ScrollView style={{backgroundColor: 'transparent'}}
+                    ref='scrollView' {...this.scrollviewProps}
+                    keyboardShouldPersistTaps="always"
+                    keyboardDismissMode={'on-drag'}>
+          <View style={{marginLeft: 10, marginRight: 20, marginBottom: 15 }}>
+            <Form ref='form' type={Model} options={options} />
+          </View>
+        </ScrollView>
         {error}
       </PageView>
     );
@@ -247,37 +244,9 @@ class NewItem extends Component {
   }
 }
 reactMixin(NewItem.prototype, NewResourceMixin);
+NewItem = makeResponsive(NewItem)
 
 var styles = StyleSheet.create({
-  imageContainer: {
-    flex: 1,
-  },
-  row: {
-    flexDirection: 'row',
-    flex: 1,
-    alignSelf: 'center'
-  },
-  buttons: {
-    flex: 1,
-    flexDirection: 'row',
-  },
-  buttonText: {
-    fontSize: 16,
-    color: 'white',
-    alignSelf: 'center',
-  },
-  button: {
-    height: 36,
-    width: 100,
-    flex: 1,
-    backgroundColor: '#ffffff',
-    borderColor: '#6093ae',
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 10,
-    justifyContent: 'center',
-    alignSelf: 'center'
-  },
   err: {
     paddingVertical: 10,
     fontSize: 20,
@@ -286,22 +255,3 @@ var styles = StyleSheet.create({
 
 });
 module.exports = NewItem;
-
-// tryiing to add custom validation of typed props e.g email
-    // if (propName == 'contact'  &&  value.type === 'email') {
-    //    var validated = /(.)+@(.)+/.test(value);
-    //   if (!validate) {
-    //      this.setState({
-    //         options: {
-    //           fields: {
-    //             identifier: {
-    //               hasError: true,
-    //               error: 'Invalid email'
-    //             }
-    //           }
-    //         }
-    //     });
-    //     return;
-    //   }
-
-    // }

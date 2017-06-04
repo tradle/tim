@@ -179,8 +179,18 @@ var NewResourceMixin = {
           eCols[p] = props[p]
       }
     }
+    var required = utils.ungroup(meta, meta.required)
+    required = utils.arrayToObject(required);
 
-    var required = utils.arrayToObject(meta.required);
+// var TcombType = transform({
+//   "type": "string",
+//   "enum": ["Street", "Avenue", "Boulevard"]
+// });
+
+// model['test'] = TcombType
+// options.fields['test'] = {
+//   placeholder: 'Test'
+// }
     // var d = data ? data[i] : null;
     let resource = this.state.resource
     for (var p in eCols) {
@@ -329,6 +339,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     onSubmitEditing: onSubmitEditing.bind(this),
                     errors: params.errors,
+                    editable: params.editable,
                     keyboard: props[p].keyboard ||  (type === 'number' ? 'numeric' : 'default'),
                   })
 
@@ -784,6 +795,7 @@ var NewResourceMixin = {
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
           multiline={multiline}
+          editable={params.editable}
           autoCapitalize={this.state.isRegistration  ||  (prop.name !== 'url' &&  (!prop.keyboard || prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
@@ -1072,8 +1084,9 @@ var NewResourceMixin = {
     var propLabel
     var isItem = this.props.metadata != null
     var prop
-    if (this.props.model)
-      prop = this.props.model.properties[params.prop]
+    let model = this.props.model
+    if (model)
+      prop = model.properties[params.prop]
     else if (this.props.metadata.items.properties)
       prop = this.props.metadata.items.properties[params.prop]
     else
@@ -1087,7 +1100,8 @@ var NewResourceMixin = {
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'  ||  prop.ref === 'tradle.Photo'
     let noChooser
-    if (this.props.model  &&  this.props.model.required  &&  prop.ref === COUNTRY  &&  this.props.model.required.indexOf(prop.name)) {
+    let required = model  &&  utils.ungroup(model.required)
+    if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(prop.name)) {
       // Don't overwrite default country on provider
       // if (this.props.country)
       //   noChooser = true
@@ -1096,8 +1110,8 @@ var NewResourceMixin = {
     }
     else if (this.props.defaultPropertyValues)  {
       let defaults = this.props.defaultPropertyValues
-      if (this.props.model) {
-        let vals = defaults[this.props.model.id]
+      if (model) {
+        let vals = defaults[model.id]
         for (let v in vals) {
           if (!resource[v]) {
             resource[v] = vals[v]
@@ -1402,6 +1416,7 @@ var NewResourceMixin = {
                     required: params.required,
                     model: params.model,
                     errors: params.errors,
+                    editable: params.editable,
                     keyboard: 'numeric',
                   })
           }
