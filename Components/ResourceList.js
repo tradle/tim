@@ -212,7 +212,7 @@ class ResourceList extends Component {
     // else
     utils.onNextTransitionEnd(this.props.navigator, () => {
       Actions.list(params)
-      if (this.props.officialAccounts)
+      if (this.props.officialAccounts  &&  this.props.modelName === ORGANIZATION)
         Actions.hasTestProviders()
       // StatusBar.setHidden(false);
     });
