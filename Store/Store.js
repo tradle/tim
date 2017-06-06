@@ -262,7 +262,9 @@ var driverInfo = (function () {
 
       return utils.keyByValue(byUrl, client)
     },
-    getFullUrl({ client }) {
+    getFullUrl({ client, identifier }) {
+      if (!client) client = wsClients.byIdentifier[identifier]
+
       const base = wsClients.getBaseUrl({ client }).replace(/[/]+$/, '')
       const path = wsClients.getPath({ client }).replace(/^[/]/, '')
       return `${base}/${path}`
