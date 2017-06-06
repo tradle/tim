@@ -802,8 +802,8 @@ var NewResourceMixin = {
   getHelp(prop, isEnum) {
     if (prop.description)
       return (
-        <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
-          <Text style={{fontSize: 14, color: '#555555'}}>{prop.description}</Text>
+        <View style={{backgroundColor: '#efefef', marginHorizontal: 10, padding: 5}}>
+          <Text style={{fontSize: 14, color: '#757575'}}>{prop.description}</Text>
         </View>
       )
     // else
