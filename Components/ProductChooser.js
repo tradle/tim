@@ -68,12 +68,14 @@ class ProductChooser extends Component {
     let products = []
     if (params.action === 'getItem') {
       if (this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH]) {
-        if (params.resource.products) {
+        if (params.resource.products  &&  params.resource.products.length) {
           if (equal(params.resource.products, this.props.resource.products))
             return
 
           products = params.resource.products.map(getModel)
         }
+        else
+          products = this.props.products
       }
       else if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE   ||
                this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
