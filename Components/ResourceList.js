@@ -442,7 +442,7 @@ class ResourceList extends Component {
     this.setState(state)
   }
   addTestProvidersRow(l) {
-    if (!l  ||  !this.props.officialAccounts)
+    if (!l  ||  !this.props.officialAccounts || this.props.modelName !== ORGANIZATION)
       return l
     l.push({
       [TYPE]: ORGANIZATION,
