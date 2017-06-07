@@ -2157,6 +2157,8 @@ var Store = Reflux.createStore({
         if (noMessage)
           profile._inactive = true
       }
+      if (!profile.firstName)
+        profile.firstName = '[unknown]'
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
       var identity = data.identity
