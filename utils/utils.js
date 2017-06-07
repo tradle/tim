@@ -313,8 +313,9 @@ var utils = {
     stringName = stringName.replace(/[^a-zA-Z0-9]/g, '')
     // stringName = stringName.charAt(0).toLowerCase() + stringName.slice(1)
     let t = utils.translate(stringName)
+    let tt =  t.replace(/\s/g, '')
     // return t !== stringName ? t : (isEnumValue ? s : utils.makeLabel(s))
-    return t !== stringName ? t : s
+    return tt !== stringName ? t : s
   },
   makeModelTitle(model, isPlural) {
     if (typeof model === 'string')
