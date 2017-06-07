@@ -208,9 +208,10 @@ var NewResourceMixin = {
       let isReadOnly = props[p].readOnly
       if (isReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
+      this.setDefaultValue(p, data, true)
       if (utils.isHidden(p, resource)) {
-        if (!resource[p])
-          this.setDefaultValue(p, resource, true)
+        // if (!resource[p])
+        //   this.setDefaultValue(p, resource, true)
         continue
       }
 
@@ -818,8 +819,8 @@ var NewResourceMixin = {
   getHelp(prop, isEnum) {
     if (prop.description)
       return (
-        <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
-          <Text style={{fontSize: 14, color: '#555555'}}>{prop.description}</Text>
+        <View style={{backgroundColor: '#efefef', marginHorizontal: 10, padding: 5}}>
+          <Text style={{fontSize: 14, color: '#757575'}}>{prop.description}</Text>
         </View>
       )
     // else
@@ -1108,20 +1109,20 @@ var NewResourceMixin = {
       if (resource  &&  !resource[prop.name])
         resource[prop.name] = this.props.country
     }
-    else if (this.props.defaultPropertyValues)  {
-      let defaults = this.props.defaultPropertyValues
-      if (model) {
-        let vals = defaults[model.id]
-        for (let v in vals) {
-          if (!resource[v]) {
-            resource[v] = vals[v]
-            if (!this.floatingProps)
-              this.floatingProps = {}
-            this.floatingProps[v] = vals[v]
-          }
-        }
-      }
-    }
+    // else if (this.props.defaultPropertyValues)  {
+    //   let defaults = this.props.defaultPropertyValues
+    //   if (model) {
+    //     let vals = defaults[model.id]
+    //     for (let v in vals) {
+    //       if (!resource[v]) {
+    //         resource[v] = vals[v]
+    //         if (!this.floatingProps)
+    //           this.floatingProps = {}
+    //         this.floatingProps[v] = vals[v]
+    //       }
+    //     }
+    //   }
+    // }
     if (resource && resource[params.prop]) {
       if (isPhoto) {
         label = prop.title
@@ -1249,7 +1250,11 @@ var NewResourceMixin = {
       inFocus: propName
     });
   },
-  setDefaultValue(prop, resource, isHidden) {
+  setDefaultValue(prop, data, isHidden) {
+    // no defaults if edit mode
+    let resource = this.state.resource
+    if (resource[prop]  ||  resource[constants.ROOT_HASH])
+      return
     let defaults = this.props.defaultPropertyValues
     if (!defaults)
       return
@@ -1257,6 +1262,7 @@ var NewResourceMixin = {
     if (!vals  ||  !vals[prop])
       return
 
+    data[prop] = vals[prop]
     resource[prop] = vals[prop]
     if (isHidden) {
       if (!this.floatingProps)
