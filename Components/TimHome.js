@@ -81,7 +81,7 @@ import {
 import ActivityIndicator from './ActivityIndicator'
 import StatusBar from './StatusBar'
 
-const isLinkingSupported = utils.isIOS() && Linking
+const isLinkingSupported = (utils.isIOS() || utils.isWeb()) && Linking
 const isAndroid = Platform.OS === 'android'
 const FOOTER_TEXT_COLOR = ENV.splashContrastColor
 import React, { Component, PropTypes } from 'react'

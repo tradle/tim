@@ -248,7 +248,7 @@
     "react-native-lazyload": "./web/shims/Lazyload",
     "./utils/crashlytics.js": false,
     "./utils/keychain.js": false,
-    "./utils/linking.js": false,
+    "./utils/linking.js": "./utils/linking.web.js",
     "./Components/BlinkID.js": false,
     "./Components/Anyline.js": false,
     "./Components/CameraView.js": "./Components/CameraView.web.js",
