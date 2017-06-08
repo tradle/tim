@@ -2165,6 +2165,7 @@ var Store = Reflux.createStore({
       }
       if (!profile.firstName)
         profile.firstName = '[unknown]'
+
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
       var identity = data.identity
       identity[ROOT_HASH] = hash
