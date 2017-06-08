@@ -673,6 +673,7 @@ class ResourceList extends Component {
     })
   }
   approve(resource) {
+    Actions.hideModal()
     Alert.alert(
       translate('approveApplication', resource.from.title),
       null,
@@ -697,6 +698,7 @@ class ResourceList extends Component {
     )
   }
   deny(resource) {
+    Actions.hideModal()
     Alert.alert(
       translate('denyApplication', resource.from.title),
       null,
