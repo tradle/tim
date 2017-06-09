@@ -381,7 +381,7 @@ class MessageList extends Component {
         title = translate(utils.getModel(type).value)
     }
     if (!title)
-      title = translate(utils.makeModelTitle(model))
+      title = translate(model) //translate(utils.makeModelTitle(model))
 
     var newTitle = title;
     let me = utils.getMe()
