@@ -5072,8 +5072,9 @@ var Store = Reflux.createStore({
     if (result  &&  result.length  &&  isBacklinkProp  &&  modelName === FORM) {
       // Filter out the older versions of the resources
       return getFreshResources(result)
-
     }
+    else
+      return result
     function getFreshResources(result) {
     // Filter out the older versions of the resources
       let rootHashes = []
