@@ -33,6 +33,7 @@ import BlinkID from './BlinkID'
 import createMarkdownRenderer from 'rn-markdown'
 
 const Markdown = createMarkdownRenderer()
+Markdown.renderer.container = View
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
