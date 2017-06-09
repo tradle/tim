@@ -211,7 +211,7 @@ var ResourceMixin = {
     });
   },
   renderSimpleProp(val, pMeta, modelName) {
-    if (val instanceof Array) {
+    if (Array.isArray(val)) {
       if (pMeta.items.backlink)
         return <View  key={this.getNextKey()} />
 

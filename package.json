@@ -146,6 +146,7 @@
     "readable-stream": "^1.0.33",
     "reflux": "^0.4.1",
     "regenerator": "^0.8.42",
+    "rn-markdown": "^1.0.3",
     "sendy": "3.2.0",
     "sendy-axolotl": "^1.0.1",
     "sendy-ws": "1.5.2",

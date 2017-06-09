@@ -229,7 +229,6 @@ class ShowPropertiesView extends Component {
       if (!val)
         return //<View key={this.getNextKey()}></View>;
       if (!isRef) {
-        isItems = Array.isArray(val)
         if (isPartial  &&  p === 'leaves') {
           let labels = []
           let type = val.find((l) => l.key === constants.TYPE  &&  l.value).value
@@ -266,8 +265,18 @@ class ShowPropertiesView extends Component {
                     {labels}
                   </View>
         }
-        else if (isItems  &&  pMeta.items.ref === PHOTO)
-          return
+        isItems = Array.isArray(val)
+        if (isItems) {
+          if  (pMeta.items.ref === PHOTO)
+            return
+          if (utils.getModel(pMeta.items.ref).value.subClassOf === ENUM) {
+            let values = val.map((v) => utils.getDisplayName(v)).join(', ')
+            return <View style={{paddingLeft: 10}} key={this.getNextKey()}>
+                     <Text style={[styles.title]}>{pMeta.title}</Text>
+                     <Text style={[styles.description]}>{values}</Text>
+                  </View>
+          }
+        }
         val = this.renderSimpleProp(val, pMeta, modelName)
       }
       var title

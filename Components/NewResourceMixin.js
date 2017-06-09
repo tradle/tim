@@ -30,6 +30,9 @@ import BlinkID from './BlinkID'
 // import { parse as parseUSDL } from 'parse-usdl'
 
 // import Anyline from './Anyline'
+import createMarkdownRenderer from 'rn-markdown'
+
+const Markdown = createMarkdownRenderer()
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
@@ -763,8 +766,8 @@ var NewResourceMixin = {
              ? ' ' + prop.units
              : ' (' + prop.units + ')'
     }
-    else
-      label += params.required ? '' : ' (' + translate('optional') + ')'
+    else if (params.required)
+      label += ' *'
     let lStyle = styles.labelStyle
 
     if (prop.ref  &&  prop.ref === constants.TYPES.MONEY  &&  !params.required) {
@@ -807,8 +810,8 @@ var NewResourceMixin = {
           underlineColorAndroid='transparent'
         >{label}
         </FloatLabel>
-        {help}
         {this.getErrorView(params)}
+        {help}
       </View>
     );
   },
@@ -817,12 +820,34 @@ var NewResourceMixin = {
       onSubmit()
   },
   getHelp(prop, isEnum) {
-    if (prop.description)
-      return (
-        <View style={{backgroundColor: '#efefef', marginHorizontal: 10, padding: 5}}>
-          <Text style={{fontSize: 14, color: '#757575'}}>{prop.description}</Text>
-        </View>
-      )
+    if (!prop.description)
+      return <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}/>
+
+        // borderBottomWidth: 1,
+    // borderBottomColor: '#cccccc',
+const markdownStyles = {
+  heading1: {
+    fontSize: 24,
+    color: 'purple',
+  },
+  link: {
+    color: 'darkblue',
+  },
+  mailTo: {
+    color: 'orange',
+  },
+  text: {
+    color: '#757575',
+    fontStyle: 'italic'
+  },
+}
+    return (
+      <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, paddingBottom: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}>
+        <Markdown markdownStyles={markdownStyles}>
+          {prop.description}
+        </Markdown>
+      </View>
+    )
     // else
     //   return (
     //     <View style={{backgroundColor: '#eeeeee', marginHorizontal: 10, padding: 5}}>
@@ -870,7 +895,8 @@ var NewResourceMixin = {
              ? ' ' + params.prop.units
              : ' (' + params.prop.units + ')'
     }
-    label += params.required ? '' : ' (' + translate('optional') + ')'
+    if (params.required)
+      label += ' *'
 
     var value = params.value
     var doWrap = label.length > 30
@@ -911,6 +937,8 @@ var NewResourceMixin = {
     }
     else {
       label = params.label
+      if (params.required)
+        label += ' *'
       propLabel = <View style={{marginTop: 20, marginHorizontal: -10}}/>
     }
 
@@ -1156,6 +1184,8 @@ var NewResourceMixin = {
     }
     else {
       label = params.label
+      if (params.required)
+        label += ' *'
       style = [labelStyle, color]
       propLabel = <View/>
     }
@@ -1190,7 +1220,7 @@ var NewResourceMixin = {
     else if (!noChooser)
       icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
 
-    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', borderBottomColor: lcolor}]}>
+    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row'}]}>
                     {propView}
                     {icon}
                   </View>
@@ -1411,7 +1441,8 @@ var NewResourceMixin = {
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
     var label = params.label
-    label += params.required ? '' : ' (optional)'
+    if (params.required)
+      label += ' *'
     label += (params.prop.ref  &&  params.prop.ref === constants.TYPES.MONEY)
            ?  ' (' + CURRENCY_SYMBOL + ')'
            : ''
@@ -1685,8 +1716,8 @@ var styles= StyleSheet.create({
   booleanContainer: {
     height: 60,
     borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
-    borderBottomWidth: 1,
+    // borderBottomColor: '#cccccc',
+    // borderBottomWidth: 1,
     justifyContent: 'center',
     marginHorizontal: 10,
     // marginBottom: 10,
@@ -1708,11 +1739,11 @@ var styles= StyleSheet.create({
     alignSelf: 'stretch'
   },
   chooserContainer: {
-    height: 45,
+    minHeight: 45,
     marginTop: 20,
     borderColor: '#ffffff',
-    borderBottomColor: '#cccccc',
-    borderBottomWidth: 1,
+    // borderBottomColor: '#cccccc',
+    // borderBottomWidth: 1,
     marginHorizontal: 10,
     // justifyContent: 'center',
     position: 'relative',
@@ -1737,11 +1768,11 @@ var styles= StyleSheet.create({
     backgroundColor: 'transparent'
   },
   formInput: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc',
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#eeeeee',
     marginHorizontal: 10,
     paddingLeft: 0,
-    borderColor: '#cccccc',
+    // borderColor: '#cccccc',
   },
   regInput: {
     borderWidth: 0,
@@ -1807,9 +1838,9 @@ var styles= StyleSheet.create({
     height: 35,
     paddingBottom: 5,
     marginTop: 5,
-    borderWidth: 1,
+    // borderWidth: 1,
     borderColor: 'transparent',
-    borderBottomColor: '#cccccc',
+    // borderBottomColor: '#eeeeee',
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
