@@ -5189,6 +5189,11 @@
         }
       }
     },
+    "react-native-collapsible": {
+      "version": "0.8.0",
+      "from": "react-native-collapsible@>=0.8.0 <0.9.0",
+      "resolved": "https://registry.npmjs.org/react-native-collapsible/-/react-native-collapsible-0.8.0.tgz"
+    },
     "react-native-crypto": {
       "version": "2.0.1",
       "from": "react-native-crypto@latest",
