@@ -93,7 +93,6 @@
     "react-native-branch": "^1.1.1",
     "react-native-camera": "^0.6.0",
     "react-native-code-push": "^1.17.4-beta",
-    "react-native-collapsible": "^0.8.0",
     "react-native-crypto": "^2.0.1",
     "react-native-datepicker": "github:pgmemk/react-native-datepicker#ce456393",
     "react-native-device-info": "0.9.9",
@@ -132,7 +131,7 @@
     "readable-stream": "^1.0.33",
     "reflux": "^0.4.1",
     "regenerator": "^0.8.42",
-    "rn-markdown": "^1.0.3",
+    "rn-markdown": "^1.1.1",
     "sendy": "3.2.0",
     "sendy-axolotl": "^1.0.1",
     "sendy-ws": "1.5.2",
@@ -156,7 +155,7 @@
     "zlib": "browserify-zlib",
     "crypto": "react-native-crypto",
     "dns": "dns.js",
-    "net": "@tradle/utp",
+    "net": "react-native-tcp",
     "http": "react-native-http",
     "https": "https-browserify",
     "path": "path-browserify",
@@ -176,7 +175,8 @@
     "domain": "domain-browser",
     "source-map": "^0.5.3",
     "timers": "timers-browserify",
-    "os": "os-browserify"
+    "os": "react-native-os",
+    "tls": false
   },
   "devDependencies": {
     "@tradle/validate-model": "github:tradle/validate-model",
@@ -219,6 +219,7 @@
     "domain": "domain-browser",
     "source-map": "^0.5.3",
     "timers": "timers-browserify",
-    "os": "react-native-os"
+    "os": "react-native-os",
+    "tls": false
   }
 }
