@@ -319,7 +319,7 @@ function getBabelLoader () {
     // exclude node_modules, include react & tcomb
     // /node_modules\/(?!(.*)?(react|tcomb))/,
     loader.exclude.push(
-      /node_modules\/(?!react|tcomb)/
+      /node_modules\/(?!react|tcomb|rn-markdown)/
     )
   }
 

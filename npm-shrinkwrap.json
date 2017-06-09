@@ -5347,13 +5347,30 @@
       "dependencies": {
         "asn1.js": {
           "version": "2.2.1",
-          "from": "asn1.js@>=2.2.0 <3.0.0",
+          "from": "asn1.js@^2.2.0",
           "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
           "dependencies": {
             "bn.js": {
               "version": "2.2.0",
-              "from": "bn.js@>=2.0.0 <3.0.0",
+              "from": "bn.js@^2.0.0",
               "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
+            }
+          }
+        },
+        "elliptic": {
+          "version": "6.4.0",
+          "from": "elliptic@^6.4.0",
+          "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.0.tgz",
+          "dependencies": {
+            "hmac-drbg": {
+              "version": "1.0.1",
+              "from": "hmac-drbg@^1.0.0",
+              "resolved": "https://registry.npmjs.org/hmac-drbg/-/hmac-drbg-1.0.1.tgz"
+            },
+            "minimalistic-crypto-utils": {
+              "version": "1.0.1",
+              "from": "minimalistic-crypto-utils@^1.0.0",
+              "resolved": "https://registry.npmjs.org/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz"
             }
           }
         }
@@ -5909,10 +5926,20 @@
       "from": "map-stream@0.0.6",
       "resolved": "https://registry.npmjs.org/map-stream/-/map-stream-0.0.6.tgz"
     },
+    "marked": {
+      "version": "0.3.6",
+      "from": "marked@>=0.3.6 <0.4.0",
+      "resolved": "https://registry.npmjs.org/marked/-/marked-0.3.6.tgz"
+    },
     "math-expression-evaluator": {
       "version": "1.2.14",
       "from": "math-expression-evaluator@>=1.2.14 <2.0.0",
       "resolved": "https://registry.npmjs.org/math-expression-evaluator/-/math-expression-evaluator-1.2.14.tgz"
+    },
+    "marked": {
+      "version": "0.3.6",
+      "from": "marked@>=0.3.6 <0.4.0",
+      "resolved": "https://registry.npmjs.org/marked/-/marked-0.3.6.tgz"
     },
     "media-typer": {
       "version": "0.3.0",
@@ -6051,18 +6078,18 @@
       "dependencies": {
         "isarray": {
           "version": "1.0.0",
-          "from": "isarray@>=1.0.0 <1.1.0",
+          "from": "isarray@~1.0.0",
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "readable-stream": {
-          "version": "2.2.9",
-          "from": "readable-stream@>=2.0.5 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.9.tgz"
+          "version": "2.2.11",
+          "from": "readable-stream@^2.0.5",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.11.tgz"
         },
         "string_decoder": {
-          "version": "1.0.1",
-          "from": "string_decoder@>=1.0.0 <1.1.0",
-          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.1.tgz"
+          "version": "1.0.2",
+          "from": "string_decoder@~1.0.0",
+          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.2.tgz"
         }
       }
     },
@@ -8079,6 +8106,11 @@
       "version": "1.0.1",
       "from": "ripemd160@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/ripemd160/-/ripemd160-1.0.1.tgz"
+    },
+    "rn-markdown": {
+      "version": "1.1.1",
+      "from": "rn-markdown@latest",
+      "resolved": "https://registry.npmjs.org/rn-markdown/-/rn-markdown-1.1.1.tgz"
     },
     "rndm": {
       "version": "1.2.0",

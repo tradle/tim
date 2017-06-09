@@ -1649,7 +1649,6 @@
 					"$(inherited)",
 					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
-					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Branch.framework/Headers",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -1711,7 +1710,6 @@
 					"$(inherited)",
 					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
-					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/Branch.framework/Headers",
 				);
 				HEADER_SEARCH_PATHS = (
