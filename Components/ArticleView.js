@@ -40,7 +40,7 @@ class ArticleView extends Component {
     let bankStyle = this.props.bankStyle || defaultBankStyle
     let actionBarTitle = this.props.actionBarTitle
     let wView = <WebView style={styles.webView}
-                  source={this.props.url}
+                  source={this.props.href ? {uri: this.props.href} : this.props.url}
                   startInLoadingState={true}
                   renderError={this.renderError.bind(this)}
                   automaticallyAdjustContentInsets={false}
