@@ -1736,7 +1736,7 @@ var utils = {
       if (resource[TYPE] === FORM_REQUEST) {
         let form = this.getModel(resource.form).value
         if (form.subClassOf === MY_PRODUCT)
-          linkColor = '#dddddd'
+          linkColor = '#aaaaaa'
       }
     }
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
