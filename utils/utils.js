@@ -1728,15 +1728,21 @@ var utils = {
       return message
     formType = message.substring(i1 + 2)
     let i2 = formType.indexOf('**')
+    let linkColor = bankStyle.linkColor
     if (i2 !== -1) {
       message1 = message.substring(0, i1)
       message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
       formType = formType.substring(0, i2)
+      if (resource[TYPE] === FORM_REQUEST) {
+        let form = this.getModel(resource.form).value
+        if (form.subClassOf === MY_PRODUCT)
+          linkColor = '#dddddd'
+      }
     }
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
     return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
-             <Text style={{color: bankStyle.linkColor}}>{formType}</Text>
+             <Text style={{color: linkColor}}>{formType}</Text>
              <Text>{utils.parseMessage(resource, message2, bankStyle, idx)}</Text>
            </Text>
   },
