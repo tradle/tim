@@ -199,7 +199,8 @@ class FormRequestRow extends Component {
 
     // onPressCall = prop  &&  !prop.allowPicturesFromLibrary ? this.showCamera({prop: prop}) : onPressCall
     let messageBody
-    if (prop)
+    let isMyProduct = isFormRequest  &&  utils.getModel(resource.form).value.subClassOf === MY_PRODUCT
+    if (prop  ||  isMyProduct)
       messageBody = msgContent
     else
       messageBody = <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
