@@ -20,6 +20,8 @@ const MAX_PROPS_IN_FORM = 1
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PHOTO = 'tradle.Photo'
 const IDENTITY = 'tradle.Identity'
+const ENUM = 'tradle.Enum'
+
 import {
   // StyleSheet,
   Text,
@@ -246,8 +248,17 @@ class FormMessageRow extends Component {
     viewCols.forEach(function(v) {
       if (vCols.length > MAX_PROPS_IN_FORM)
         return
-      if (properties[v].type === 'array')
+      if (properties[v].type === 'array') {
+        if (resource[v]  &&  properties[v].items.ref  &&  utils.getModel(properties[v].items.ref).value.subClassOf === ENUM) {
+          let val
+          resource[v].forEach((r) => {
+            let title = utils.getDisplayName(r)
+            val = val ? val + '\n' + title : title
+          })
+          vCols.push(self.getPropRow(properties[v], resource, val))
+        }
         return;
+      }
       if (utils.isHidden(v, resource))
         return
       let ref = properties[v].ref

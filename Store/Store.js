@@ -4532,6 +4532,7 @@ var Store = Reflux.createStore({
       this.trigger(retParams)
     })
   },
+
   getCurrentContext(to, orgId) {
     let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
     if (!c  ||  !c.length)
@@ -4887,8 +4888,8 @@ var Store = Reflux.createStore({
 //         thisChatMessages = chatMessages[chatId]
 //       }
     }
-
-    if (!thisChatMessages  &&  (!params.to || chatId === meId  || (params.prop  &&  params.prop.items  &&  params.prop.items.backlink))) {
+    let isBacklinkProp = (params.prop  &&  params.prop.items  &&  params.prop.items.backlink)
+    if (!thisChatMessages  &&  (!params.to || chatId === meId  || isBacklinkProp)) {
       thisChatMessages = []
       let isInterface = meta.isInterface
       let isForm = meta.id === FORM
@@ -5114,10 +5115,26 @@ var Store = Reflux.createStore({
     if (!foundResources.length)
       return
     // Minor hack before we intro sort property here
-    return   params._readOnly  &&  modelName === PRODUCT_APPLICATION
-           ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
-           : foundResources.reverse()
-
+    let result = params._readOnly  &&  modelName === PRODUCT_APPLICATION
+               ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
+               : foundResources.reverse()
+    if (result  &&  result.length  &&  isBacklinkProp  &&  modelName === FORM) {
+      // Filter out the older versions of the resources
+      return getFreshResources(result)
+    }
+    else
+      return result
+    function getFreshResources(result) {
+    // Filter out the older versions of the resources
+      let rootHashes = []
+      let newResult = result.reverse().filter((r) => {
+        let ret = rootHashes.indexOf(r[ROOT_HASH]) === -1
+        if (ret)
+          rootHashes.push(r[ROOT_HASH])
+        return ret
+      })
+      return newResult.reverse()
+    }
     function checkAndFilter(r, i) {
       if (!query) {
         if (!filterOutForms  ||  !doFilterOut(r, chatId, i)) {

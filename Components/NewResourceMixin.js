@@ -15,6 +15,7 @@ var StyleSheet = require('../StyleSheet')
 // var QRCodeScanner = require('./QRCodeScanner')
 // var driverLicenseParser = require('../utils/driverLicenseParser')
 const debug = require('debug')('tradle:app:blinkid')
+var ArticleView = require('./ArticleView')
 var focusUri = require('../video/Focus1.mp4')
 
 // import VideoPlayer from './VideoPlayer'
@@ -34,6 +35,7 @@ import createMarkdownRenderer from 'rn-markdown'
 
 const Markdown = createMarkdownRenderer()
 Markdown.renderer.container = View
+
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
@@ -62,6 +64,7 @@ import {
   Text,
   View,
   TouchableHighlight,
+  TouchableOpacity,
   Platform,
   Image,
   Alert,
@@ -70,6 +73,7 @@ import {
   Switch,
   DatePickerAndroid,
 } from 'react-native';
+
 
 var LINK_COLOR, DEFAULT_LINK_COLOR = '#a94442'
 // import transform from 'tcomb-json-schema'
@@ -93,6 +97,31 @@ var NewResourceMixin = {
   },
   getScrollOffset() {
     return { ...this._contentOffset }
+  },
+  createMarkdownLink() {
+    Markdown.renderer.link = props => {
+      const { markdown } = props
+      const { href } = markdown
+      return (
+        <TouchableOpacity onPress={() => {
+          this.props.navigator.push({
+            id: 7,
+            component: ArticleView,
+            backButtonTitle: 'Back',
+            title: translate(markdown.children[0].children[0].text),
+            passProps: {
+              bankStyle: this.props.bankStyle,
+              href: href
+            }
+          })
+
+        }}>
+          <View>
+            {props.children}
+          </View>
+        </TouchableOpacity>
+      )
+    }
   },
   getFormFields(params) {
     CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol ||  this.props.currency : DEFAULT_CURRENCY_SYMBOL
@@ -494,7 +523,7 @@ var NewResourceMixin = {
           required: !maybe
         })
     }
-
+    this.createMarkdownLink()
     return options;
   },
   getNextKey() {
@@ -826,22 +855,22 @@ var NewResourceMixin = {
 
         // borderBottomWidth: 1,
     // borderBottomColor: '#cccccc',
-const markdownStyles = {
-  heading1: {
-    fontSize: 24,
-    color: 'purple',
-  },
-  link: {
-    color: 'darkblue',
-  },
-  mailTo: {
-    color: 'orange',
-  },
-  text: {
-    color: '#757575',
-    fontStyle: 'italic'
-  },
-}
+    const markdownStyles = {
+      heading1: {
+        fontSize: 24,
+        color: 'purple',
+      },
+      link: {
+        color: 'darkblue',
+      },
+      mailTo: {
+        color: 'orange',
+      },
+      text: {
+        color: '#757575',
+        fontStyle: 'italic'
+      },
+    }
     return (
       <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, paddingBottom: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}>
         <Markdown markdownStyles={markdownStyles}>

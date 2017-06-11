@@ -380,6 +380,11 @@ class ResourceList extends Component {
       }
       if (params.isTest  !== this.props.isTest)
         return
+      if (params.list) {
+        let m = utils.getModel(params.list[0][TYPE]).value
+        if (m.id !== this.props.modelName  &&  m.subClassOf !== this.props.modelName)
+          return
+      }
     }
     if ((action !== 'list' &&  action !== 'listSharedWith')  ||  !params.list || params.isAggregation !== this.props.isAggregation)
       return;
