@@ -1934,22 +1934,21 @@ var Store = Reflux.createStore({
       // allow to unhide the previously hidden provider
       if (newServer  &&  org._inactive)
         org._inactive = false
+      if (!org._isTest  &&  sp.publicConfig  &&   sp.publicConfig.sandbox === true)
+        org._isTest = true
       this._mergeItem(okey, sp.org)
-      this.configProvider(sp, org)
-      batch.push({type: 'put', key: okey, value: org})
-      this.resetForEmployee(me, org)
     }
     else {
-      let newOrg = {}
-      extend(newOrg, sp.org)
-      if (sp.publicConfig  &&   sp.publicConfig.sandbox === true)
-        newOrg._isTest = true
+      org = {}
+      extend(org, sp.org)
       // if (newOrg.name.indexOf('[TEST]') === 0)
       //   newOrg._isTest = true
-      this.configProvider(sp, newOrg)
-      batch.push({type: 'put', key: okey, value: newOrg})
-      this._setItem(okey, newOrg)
     }
+
+    this.configProvider(sp, org)
+    this.resetForEmployee(me, org)
+    batch.push({type: 'put', key: okey, value: org})
+    this._setItem(okey, org)
 
     list[okey].value._online = true
     if (sp.style)
@@ -2054,6 +2053,7 @@ var Store = Reflux.createStore({
     if (!config)
       return
     let orgId = utils.getId(org)
+    org._isTest = sp.publicConfig.sandbox
     for (var p in config)
       org['_' + p] = config[p]
 
