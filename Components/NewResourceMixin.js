@@ -855,7 +855,7 @@ var NewResourceMixin = {
       },
     }
     return (
-      <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, paddingBottom: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}>
+      <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 10, paddingBottom: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}>
         <Markdown markdownStyles={markdownStyles}>
           {prop.description}
         </Markdown>
@@ -1399,8 +1399,12 @@ var NewResourceMixin = {
 
         setItemCount = true
       }
-      else
+      else {
         resource[propName] = value
+        if (!this.floatingProps)
+          this.floatingProps = {}
+        this.floatingProps[propName] = resource[propName]
+      }
     }
     else {
       var id = utils.getId(value)
