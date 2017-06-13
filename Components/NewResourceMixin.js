@@ -778,18 +778,20 @@ var NewResourceMixin = {
   },
 
   myTextInputTemplate(params) {
-    let prop = params.prop
-    var label = translate(prop, params.model)
+    let {prop, required, model, editable, keyboard, value} = params
+    var label = translate(prop, model)
+    if (!this.state.resource[prop.name])
+      label = '✂' + label
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
              ? ' ' + prop.units
              : ' (' + prop.units + ')'
     }
-    else if (params.required)
+    else if (required)
       label += ' *'
     let lStyle = styles.labelStyle
 
-    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY  &&  !params.required) {
+    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY  &&  !required) {
       let maxChars = (utils.dimensions(component).width - 60)/utils.getFontSize(9)
       // let some space for wrapping
       if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
@@ -810,14 +812,14 @@ var NewResourceMixin = {
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
           multiline={multiline}
-          editable={params.editable}
+          editable={editable}
           autoCapitalize={this.state.isRegistration  ||  (prop.name !== 'url' &&  (!prop.keyboard || prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
-          value={params.value}
+          value={value}
           keyboardShouldPersistTaps="always"
-          keyboardType={params.keyboard || 'default'}
+          keyboardType={keyboard || 'default'}
           onChangeText={this.onChangeText.bind(this, prop)}
           underlineColorAndroid='transparent'
         >{label}
@@ -867,46 +869,42 @@ var NewResourceMixin = {
   getErrorView(params) {
     var error
     if (params.noError)
-      error = <View />
-    else {
-      var err = this.state.missedRequiredOrErrorValue
-              ? this.state.missedRequiredOrErrorValue[params.prop.name]
-              : null
-      if (!err  &&  params.errors  &&  params.errors[params.prop.name])
-        err = params.errors[params.prop.name]
+      return
+    var err = this.state.missedRequiredOrErrorValue
+            ? this.state.missedRequiredOrErrorValue[params.prop.name]
+            : null
+    if (!err  &&  params.errors  &&  params.errors[params.prop.name])
+      err = params.errors[params.prop.name]
 
-      error = err
-                ? <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
-                    <Text style={styles.font14, {color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
-                  </View>
-                : <View key={this.getNextKey()} />
-    }
-    return error
+    if (err)
+      return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
+               <Text style={styles.font14, {color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+             </View>
   },
 
   myBooleanTemplate(params) {
+    let {prop, model, value, required} = params
+
     var labelStyle = styles.booleanLabel
     var textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
 
-    let prop = params.prop
     let resource = this.state.resource
 
-    let style = (resource && (typeof resource[params.prop.name] !== 'undefined'))
+    let style = (resource && (typeof resource[prop.name] !== 'undefined'))
               ? textStyle
               : labelStyle
     // if (Platform.OS === 'ios')
     //   style = [style, {paddingLeft: 10}]
 
-    var label = translate(params.prop, params.model)
-    if (params.prop.units) {
-      label += (params.prop.units.charAt(0) === '[')
-             ? ' ' + params.prop.units
-             : ' (' + params.prop.units + ')'
+    var label = translate(prop, model)
+    if (prop.units) {
+      label += (prop.units.charAt(0) === '[')
+             ? ' ' + prop.units
+             : ' (' + prop.units + ')'
     }
-    if (params.required)
+    if (required)
       label += ' *'
 
-    var value = params.value
     var doWrap = label.length > 30
     if (doWrap  &&  utils.isAndroid()) {
       label = label.substring(0, 27) + '...'
