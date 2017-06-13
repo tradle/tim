@@ -791,8 +791,13 @@ var NewResourceMixin = {
   myTextInputTemplate(params) {
     let {prop, required, model, editable, keyboard, value} = params
     var label = translate(prop, model)
-    if (!this.state.resource[prop.name])
-      label = '✄ ' + label
+    if (!this.state.resource[prop.name]) {
+      if (Platform.OS === 'web')
+        label = '✄ ' + label
+      else
+        label = '✂' + label
+    }
+
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
              ? ' ' + prop.units
