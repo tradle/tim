@@ -782,25 +782,27 @@ var NewResourceMixin = {
     var label = translate(params.prop, params.model)
 
     return (
-      <View style={[styles.divider, {borderBottomColor: LINK_COLOR}]}>
+      <View style={[styles.divider, {borderBottomColor: LINK_COLOR, paddingVertical: 5}]}>
         <Text style={[styles.dividerText, {color: LINK_COLOR}]}>{label}</Text>
       </View>
     );
   },
 
   myTextInputTemplate(params) {
-    let prop = params.prop
-    var label = translate(prop, params.model)
+    let {prop, required, model, editable, keyboard, value} = params
+    var label = translate(prop, model)
+    if (!this.state.resource[prop.name])
+      label = '✄ ' + label
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
              ? ' ' + prop.units
              : ' (' + prop.units + ')'
     }
-    else if (params.required)
+    else if (required)
       label += ' *'
     let lStyle = styles.labelStyle
 
-    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY  &&  !params.required) {
+    if (prop.ref  &&  prop.ref === constants.TYPES.MONEY  &&  !required) {
       let maxChars = (utils.dimensions(component).width - 60)/utils.getFontSize(9)
       // let some space for wrapping
       if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
@@ -814,22 +816,17 @@ var NewResourceMixin = {
     // it good-naturedly interferes with validation
     let multiline = prop.maxLength > 100
     let help = prop.ref !== constants.TYPES.MONEY  && this.getHelp(prop)
-    let st = help ? {} : {flex: 5}
+    let st = {paddingBottom: 10}
+    if (!help)
+      st.flex = 5
 
-    let paddingBottom
-    if (this.hasError(params.errors, prop.name))
-      paddingBottom = 10
-    else if (Platform.OS === 'ios')
-      paddingBottom = 10
-    else
-      paddingBottom = 7
     return (
       <View style={st}>
         <FloatLabel
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
           multiline={multiline}
-          editable={params.editable}
+          editable={editable}
           autoCapitalize={this.state.isRegistration  ||  (prop.name !== 'url' &&  (!prop.keyboard || prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
@@ -872,7 +869,7 @@ var NewResourceMixin = {
       },
     }
     return (
-      <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, paddingBottom: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}>
+      <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 10, paddingBottom: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}>
         <Markdown markdownStyles={markdownStyles}>
           {prop.description}
         </Markdown>
@@ -889,46 +886,42 @@ var NewResourceMixin = {
   getErrorView(params) {
     var error
     if (params.noError)
-      error = <View />
-    else {
-      var err = this.state.missedRequiredOrErrorValue
-              ? this.state.missedRequiredOrErrorValue[params.prop.name]
-              : null
-      if (!err  &&  params.errors  &&  params.errors[params.prop.name])
-        err = params.errors[params.prop.name]
+      return
+    var err = this.state.missedRequiredOrErrorValue
+            ? this.state.missedRequiredOrErrorValue[params.prop.name]
+            : null
+    if (!err  &&  params.errors  &&  params.errors[params.prop.name])
+      err = params.errors[params.prop.name]
 
-      error = err
-                ? <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
-                    <Text style={styles.font14, {color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
-                  </View>
-                : <View key={this.getNextKey()} />
-    }
-    return error
+    if (err)
+      return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
+               <Text style={styles.font14, {color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+             </View>
   },
 
   myBooleanTemplate(params) {
+    let {prop, model, value, required} = params
+
     var labelStyle = styles.booleanLabel
     var textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
 
-    let prop = params.prop
     let resource = this.state.resource
 
-    let style = (resource && (typeof resource[params.prop.name] !== 'undefined'))
+    let style = (resource && (typeof resource[prop.name] !== 'undefined'))
               ? textStyle
               : labelStyle
     // if (Platform.OS === 'ios')
     //   style = [style, {paddingLeft: 10}]
 
-    var label = translate(params.prop, params.model)
-    if (params.prop.units) {
-      label += (params.prop.units.charAt(0) === '[')
-             ? ' ' + params.prop.units
-             : ' (' + params.prop.units + ')'
+    var label = translate(prop, model)
+    if (prop.units) {
+      label += (prop.units.charAt(0) === '[')
+             ? ' ' + prop.units
+             : ' (' + prop.units + ')'
     }
-    if (params.required)
+    if (required)
       label += ' *'
 
-    var value = params.value
     var doWrap = label.length > 30
     if (doWrap  &&  utils.isAndroid()) {
       label = label.substring(0, 27) + '...'
@@ -938,13 +931,15 @@ var NewResourceMixin = {
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
     let help = this.getHelp(prop)
     return (
-      <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>
+      <View style={{paddingBottom: 10}} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
           this.onChangeText.bind(this, prop, !value)
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-              <Text style={[style, { width: (utils.getContentWidth() - 100)}]}>{label}</Text>
+              <View style={{justifyContent: 'center'}}>
+                <Text style={style}>{label}</Text>
+              </View>
               <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
           </View>
@@ -1427,8 +1422,12 @@ var NewResourceMixin = {
 
         setItemCount = true
       }
-      else
+      else {
         resource[propName] = value
+        if (!this.floatingProps)
+          this.floatingProps = {}
+        this.floatingProps[propName] = resource[propName]
+      }
     }
     else {
       var id = utils.getId(value)
@@ -1744,7 +1743,8 @@ var styles= StyleSheet.create({
     marginVertical: 2
   },
   booleanContainer: {
-    height: 60,
+    minHeight: 45,
+    marginTop: 20,
     borderColor: '#ffffff',
     // borderBottomColor: '#cccccc',
     // borderBottomWidth: 1,
@@ -1910,6 +1910,7 @@ var styles= StyleSheet.create({
     fontSize: 14
   },
   booleanLabel: {
+    // marginTop: 2,
     color: '#aaaaaa',
     fontSize: 20
   },

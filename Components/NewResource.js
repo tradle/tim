@@ -731,7 +731,7 @@ class NewResource extends Component {
 
     }
     var content =
-      <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center'}}
+      <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center', paddingTop:10}}
                   ref='scrollView' {...this.scrollviewProps}>
         <View style={[styles.container, formStyle]}>
           { utils.isWeb()
