@@ -771,7 +771,7 @@ var NewResourceMixin = {
     var label = translate(params.prop, params.model)
 
     return (
-      <View style={[styles.divider, {borderBottomColor: LINK_COLOR}]}>
+      <View style={[styles.divider, {borderBottomColor: LINK_COLOR, paddingVertical: 5}]}>
         <Text style={[styles.dividerText, {color: LINK_COLOR}]}>{label}</Text>
       </View>
     );
@@ -800,15 +800,10 @@ var NewResourceMixin = {
       lStyle = [lStyle, {color: lcolor}]
     let multiline = prop.maxLength > 100
     let help = prop.ref !== constants.TYPES.MONEY  && this.getHelp(prop)
-    let st = help ? {} : {flex: 5}
+    let st = {paddingBottom: 10}
+    if (!help)
+      st.flex = 5
 
-    let paddingBottom
-    if (this.hasError(params.errors, prop.name))
-      paddingBottom = 10
-    else if (Platform.OS === 'ios')
-      paddingBottom = 10
-    else
-      paddingBottom = 7
     return (
       <View style={st}>
         <FloatLabel
