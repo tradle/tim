@@ -916,13 +916,15 @@ var NewResourceMixin = {
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
     let help = this.getHelp(prop)
     return (
-      <View style={{paddingBottom: 10, flex: 5}} key={this.getNextKey()} ref={prop.name}>
+      <View style={{paddingBottom: 10}} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
           this.onChangeText.bind(this, prop, !value)
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-              <Text style={[style, { width: (utils.dimensions(component).width - 100)}]}>{label}</Text>
+              <View style={{justifyContent: 'center'}}>
+                <Text style={style}>{label}</Text>
+              </View>
               <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
             </View>
           </View>
@@ -1706,7 +1708,8 @@ var styles= StyleSheet.create({
     marginVertical: 2
   },
   booleanContainer: {
-    height: 60,
+    minHeight: 45,
+    marginTop: 20,
     borderColor: '#ffffff',
     // borderBottomColor: '#cccccc',
     // borderBottomWidth: 1,
@@ -1869,6 +1872,7 @@ var styles= StyleSheet.create({
     fontSize: 14
   },
   booleanLabel: {
+    // marginTop: 2,
     color: '#aaaaaa',
     fontSize: 20
   },

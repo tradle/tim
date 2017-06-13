@@ -688,7 +688,7 @@ class NewResource extends Component {
     if (!jsons.length)
       jsons = <View/>
     var content =
-      <ScrollView style={{backgroundColor: 'transparent'}}
+      <ScrollView style={{backgroundColor: 'transparent', paddingTop:10}}
                   ref='scrollView' {...this.scrollviewProps}
                   keyboardShouldPersistTaps="always"
                   keyboardDismissMode={isRegistration || Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
