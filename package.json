@@ -5,7 +5,7 @@
   "scripts": {
     "start": "REACT_DEBUGGER='rndebugger-open --open --port 8081' && node --max_old_space_size=4096 ./node_modules/.bin/react-native start",
     "start:chrome": "&& node --max_old_space_size=4096 ./node_modules/.bin/react-native start",
-    "postinstall": "npm run nodeify && npm run installhooks && npm run placesecrets && ./fbdedupe.sh && ./hooks/update_version.sh",
+    "postinstall": "npm run nodeify && npm run installhooks && npm run placesecrets && ./fbdedupe.sh && ./hooks/update_version.sh && npm run fixasyncstorage",
     "nodeify": "./node_modules/.bin/rn-nodeify --hack",
     "installhooks": "cp hooks/* .git/hooks/",
     "rmsymlinks": "find -L . -type l -exec rm {} \\;",
@@ -22,7 +22,8 @@
     "android:fabric": "cd iOS && bundle exec fastlane android beta $@",
     "android:dryrun": "cd iOS && bundle exec fastlane android release_dryrun $@",
     "android:release": "cd iOS && bundle exec fastlane android release $@",
-    "placesecrets": "./scripts/placesecrets.sh"
+    "placesecrets": "./scripts/placesecrets.sh",
+    "fixasyncstorage": "cp AsyncStorage/AsyncStorage.js1 node_modules/react-native/Libraries/Storage/AsyncStorage.js && cp AsyncStorage/AsyncStorageTypes.js1 node_modules/react-native/Libraries/Storage/AsyncStorageTypes.js"
   },
   "dependencies": {
     "@tradle/cb-blockr": "^3.2.0",
@@ -83,7 +84,7 @@
     "querystring-es3": "^0.2.1",
     "react": "^15.4.2",
     "react-mixin": "~1.2.2",
-    "react-native": "github:tradle/react-native#42",
+    "react-native": "^0.42.3",
     "react-native-accordion": "^1.0.1",
     "react-native-actionsheet": "^2.0.3",
     "react-native-animatable": "^0.6.1",
@@ -107,7 +108,7 @@
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password#6ccf2955",
     "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#72cd032",
     "react-native-http": "github:tradle/react-native-http#834492d",
-    "react-native-image-picker": "^0.22.7",
+    "react-native-image-picker": "0.22.7",
     "react-native-keychain": "github:mvayngrib/react-native-keychain#rn40",
     "react-native-lazyload": "github:mvayngrib/react-native-lazyload",
     "react-native-level": "^3.0.0",
