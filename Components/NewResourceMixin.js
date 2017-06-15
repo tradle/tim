@@ -863,7 +863,8 @@ var NewResourceMixin = {
         color: 'purple',
       },
       link: {
-        color: 'darkblue',
+        color: this.props.bankStyle.linkColor,
+        textDecorationLine: 'none'
       },
       mailTo: {
         color: 'orange',

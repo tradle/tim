@@ -20,13 +20,8 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#9d5bd60f8831ddd3323ba1fa05188e4b107c2089",
+      "resolved": "git://github.com/tradle/custom-models.git#f3b5c55e1ae1645bf60f0155dc400fcee4f03a09",
       "dependencies": {
-        "@tradle/validate-model": {
-          "version": "1.0.0",
-          "from": "tradle/validate#a25543d",
-          "resolved": "git://github.com/tradle/validate.git#a25543d578b3d40d3d573a04a23ceacf4522c9de"
-        },
         "typeforce": {
           "version": "1.11.1",
           "from": "typeforce@>=1.10.6 <2.0.0",
@@ -101,11 +96,6 @@
           "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.1.tgz"
         }
       }
-    },
-    "@tradle/models-files": {
-      "version": "1.0.1",
-      "from": "tradle/models-files",
-      "resolved": "git://github.com/tradle/models-files.git#3235bd815fd3fa50f2815228f4587a533b348f32"
     },
     "@tradle/multiqueue": {
       "version": "2.1.0",
@@ -5347,19 +5337,19 @@
       "dependencies": {
         "asn1.js": {
           "version": "2.2.1",
-          "from": "asn1.js@^2.2.0",
+          "from": "asn1.js@>=2.2.0 <3.0.0",
           "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
           "dependencies": {
             "bn.js": {
               "version": "2.2.0",
-              "from": "bn.js@^2.0.0",
+              "from": "bn.js@>=2.0.0 <3.0.0",
               "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
             }
           }
         },
         "elliptic": {
           "version": "6.4.0",
-          "from": "elliptic@^6.4.0",
+          "from": "elliptic@>=6.4.0 <7.0.0",
           "resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.0.tgz",
           "dependencies": {
             "hmac-drbg": {
