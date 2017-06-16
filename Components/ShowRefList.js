@@ -48,6 +48,7 @@ class ShowRefList extends Component {
     let self = this
     var refList = [];
     var isIdentity = model.id === TYPES.PROFILE;
+    var isOrg = model.id === TYPES.ORGANIZATION;
     var me = utils.getMe()
     var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
@@ -56,6 +57,8 @@ class ShowRefList extends Component {
 
     let currentBacklink = this.props.backlink
     let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
+    if (showDetails  &&  isOrg)
+      showDetails = false
     let showDocuments = this.props.showDocuments
 
     let bg = this.props.bankStyle ? this.props.bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
@@ -115,7 +118,7 @@ class ShowRefList extends Component {
       if (!showDetails)
         return <View/>
     }
-    else if (!isIdentity  &&  this.hasPropsToShow(resource)) {
+    else if (!isOrg  &&  !isIdentity  &&  this.hasPropsToShow(resource)) {
       let showCurrent = showDetails ? currentMarker : null
       let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
                          <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>

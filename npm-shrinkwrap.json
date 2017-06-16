@@ -82,8 +82,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "tradle/models#c3cca09",
-      "resolved": "git://github.com/tradle/models.git#c3cca09c7d191830ac32d9754917b31fae216f0f",
+      "from": "tradle/models#18b3c6f",
+      "resolved": "git://github.com/tradle/models.git#18b3c6fcccb2f4d9096aa6689cbad420233a5f52",
       "dependencies": {
         "@tradle/validate-model": {
           "version": "1.0.0",
