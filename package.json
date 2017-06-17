@@ -29,7 +29,8 @@
     "deploy:static": "npm run build:static && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=static GIT_DEPLOY_REPO=mv ./deploy.sh",
     "deploy:local": "npm run build:local && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=local GIT_DEPLOY_REPO=mv ./deploy.sh",
     "deploy:bots": "npm run build:bots && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=bots GIT_DEPLOY_REPO=mv ./deploy.sh",
-    "updateimage": "npm run build:serverinenv && ./buildimage.sh env && docker push tradle/web-app",
+    "docker:build": "npm run build:serverinenv && ./buildimage.sh env",
+    "docker:push": "docker push tradle/web-app",
     "lint": "eslint --quiet --ignore-path .gitignore ."
   },
   "dependencies": {
