@@ -16,12 +16,12 @@ PODS:
     - Socket.IO-Client-Swift (~> 8.3)
   - KeychainAccess (3.0.2)
   - MBProgressHUD (1.0.0)
-  - PPBlinkID (2.7.1)
+  - PPBlinkID (2.9.0)
   - Socket.IO-Client-Swift (8.3.3)
 
 DEPENDENCIES:
   - iProov (from `https://github.com/iProov/iproov-ios-pod.git`)
-  - PPBlinkID (~> 2.7.1)
+  - PPBlinkID (~> 2.9.0)
 
 EXTERNAL SOURCES:
   iProov:
@@ -41,9 +41,9 @@ SPEC CHECKSUMS:
   iProov: 21532de97a8d0c5ec7bdbc52cb2c99c7952d6c54
   KeychainAccess: a986406022dfc7c634c691ad3bec670cc6a32002
   MBProgressHUD: 4890f671c94e8a0f3cf959aa731e9de2f036d71a
-  PPBlinkID: 48fffa519ba83ca5b31ec9f191c17c3dfe430f76
+  PPBlinkID: 9d785c5c3fd0fc27b81ade490b6f558cf21f4b50
   Socket.IO-Client-Swift: a2faffdbde89c63aebc5d631041530c1068b02b8
 
-PODFILE CHECKSUM: eca8c284a4c5010eb067a0023fed345261e465f9
+PODFILE CHECKSUM: 512cc91360d4ea5cc441202e0a1d0d4afc454fcd
 
 COCOAPODS: 1.2.1
