@@ -372,7 +372,7 @@ class ResourceList extends Component {
       }
       if (params.isTest  !== this.props.isTest)
         return
-      if (params.list) {
+      if (params.list  &&  params.list.length) {
         let m = utils.getModel(params.list[0][TYPE]).value
         if (m.id !== this.props.modelName  &&  m.subClassOf !== this.props.modelName)
           return
