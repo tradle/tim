@@ -219,10 +219,10 @@ class NewItem extends Component {
         }
       }
     }
-    var {width, height} = utils.dimensions(NewItem)
+    var width = utils.getContentWidth(NewItem)
     return (
       <PageView style={[platformStyles.container]}>
-        <ScrollView style={{backgroundColor: 'transparent'}}
+        <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center'}}
                     ref='scrollView' {...this.scrollviewProps}
                     keyboardShouldPersistTaps="always"
                     keyboardDismissMode={'on-drag'}>

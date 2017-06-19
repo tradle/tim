@@ -305,6 +305,7 @@ var NewResourceMixin = {
                     label: label,
                     prop:  props[p],
                     model: meta,
+                    required: !maybe,
                     errors: params.errors,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
@@ -791,12 +792,12 @@ var NewResourceMixin = {
   myTextInputTemplate(params) {
     let {prop, required, model, editable, keyboard, value} = params
     var label = translate(prop, model)
-    if (!this.state.resource[prop.name]) {
-      if (Platform.OS === 'web')
-        label = '✄ ' + label
-      else
-        label = '✂' + label
-    }
+    // if (!this.state.isRegistration  &&  !this.state.resource[prop.name]) {
+    //   if (Platform.OS === 'web')
+    //     label = '✄ ' + label
+    //   else
+    //     label = '✂' + label
+    // }
 
     if (prop.units) {
       label += (prop.units.charAt(0) === '[')
@@ -851,11 +852,14 @@ var NewResourceMixin = {
     if (key.nativeEvent.code === 'Enter')
       onSubmit()
   },
-  getHelp(prop, isEnum) {
-    if (!prop.description)
+  getHelp(prop, noSeparator) {
+    if (!prop.description) {
+      if (noSeparator)
+        return
       return <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}/>
 
         // borderBottomWidth: 1,
+    }
     // borderBottomColor: '#cccccc',
     const markdownStyles = {
       heading1: {
@@ -956,7 +960,7 @@ var NewResourceMixin = {
     )
   },
   myDateTemplate(params) {
-    var prop = params.prop
+    var {prop, required} = params
     let resource = this.state.resource
     let label, style, propLabel
     let hasValue = resource && resource[prop.name]
@@ -968,8 +972,6 @@ var NewResourceMixin = {
     }
     else {
       label = params.label
-      if (params.required)
-        label += ' *'
       propLabel = <View style={{marginTop: 20, marginHorizontal: -10}}/>
     }
 
@@ -991,7 +993,7 @@ var NewResourceMixin = {
       dateProps.format = prop.format
 
     if (!value)
-      value = translate(params.prop)
+      value = translate(params.prop)  + (required  &&  ' *')
 
     let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
 
@@ -1001,7 +1003,7 @@ var NewResourceMixin = {
     if (valueMoment) {
       localizedDate = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date())
     }
-    let help = this.getHelp(prop)
+    let help = this.getHelp(prop, true)
     return (
       <View key={this.getNextKey()} ref={prop.name}>
         <View style={[st, { marginHorizontal: 10, paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, height: 60, justifyContent: 'flex-end'}]}>
