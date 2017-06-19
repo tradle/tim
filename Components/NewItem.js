@@ -219,7 +219,6 @@ class NewItem extends Component {
         }
       }
     }
-    var {width, height} = utils.dimensions(NewItem)
     return (
       <PageView style={[platformStyles.container]}>
         <ScrollView style={{backgroundColor: 'transparent'}}
