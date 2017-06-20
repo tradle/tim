@@ -18,6 +18,7 @@ var CURRENCY_SYMBOL
 const ITEM = 'tradle.Item'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM = 'tradle.Form'
+const ORGANIZATION = 'tradle.Organization'
 const PROFILE = constants.TYPES.PROFILE
 
 const TYPE = constants.TYPE
@@ -62,7 +63,7 @@ class VerificationRow extends Component {
   }
 
   render() {
-    var resource = this.props.resource;
+    let {resource, isChooser, lazy, parentResource, onSelect, prop } = this.props
     var model = utils.getModel(resource[TYPE]).value;
     var isMyProduct = model.subClassOf === MY_PRODUCT
     var isForm = model.subClassOf === FORM
@@ -84,7 +85,7 @@ class VerificationRow extends Component {
     }
     let hasPhoto = photo != null
     if (photo)
-      photo = <Image host={this.props.lazy} placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+      photo = <Image host={lazy} placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else if (isForm || isVerification)
       photo = <View style={{alignItems: 'center', width: 70}}>
                 <Icon name={model.icon || 'ios-paper-outline'} size={40} style={{marginTop: 8}} color={model.iconColor ? model.iconColor : '#cccccc'} />
@@ -102,10 +103,10 @@ class VerificationRow extends Component {
 
     var rows = [];
 
-    let notAccordion = true //!isMyProduct  &&  !isVerification && !this.props.prop === null || resource.sources || resource.method || isForm
+    let notAccordion = true //!isMyProduct  &&  !isVerification && !prop === null || resource.sources || resource.method || isForm
     // if (r  &&  !notAccordion) {
     //   this.formatDoc(verificationRequest, r, rows);
-    //   var backlink = this.props.prop &&  this.props.prop.items  &&  this.props.prop.items.backlink;
+    //   var backlink = prop &&  prop.items  &&  prop.items.backlink;
     //   if (resource.txId)
     //     rows.push(
     //         <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
@@ -116,7 +117,7 @@ class VerificationRow extends Component {
     // }
 
     var verifiedBy, org
-    if (!this.props.isChooser  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
+    if (!isChooser  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
       var contentRows = [];
 
       if (isMyProduct)
@@ -141,7 +142,7 @@ class VerificationRow extends Component {
                       </View>
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource, model.properties)
     let title
-    if (this.props.isChooser  ||  model.interfaces.indexOf(ITEM) !== -1)
+    if (isChooser  ||  model.interfaces.indexOf(ITEM) !== -1)
       title = dn //utils.getDisplayName(resource, model.properties)
     if (!title || !title.length)
       title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
@@ -164,6 +165,20 @@ class VerificationRow extends Component {
                               </View>
                             </View>
 
+    let sharedFrom
+    if (isForm  &&  prop  &&  parentResource[TYPE] === ORGANIZATION) {
+      if (utils.getId(resource.to.organization) !== utils.getId(parentResource)) {
+        let img
+        if (resource.to.photo)
+          sharedFrom = <View style={{flexDirection: 'row', height: 25}}>
+                        <Image source={{uri: utils.getImageUri(resource.to.photo)}}  style={[{height: 20, width: 20, alignSelf: 'center', opacity: 0.7}]} />
+                        <Text style={[styles.verifiedBy, {paddingLeft: 5, alignSelf: 'center'}]}>Shared from {resource.to.organization.title}</Text>
+                      </View>
+        else
+          sharedFrom = <Text style={styles.verifiedBy}>Shared from {resource.to.organization.title}</Text>
+      }
+    }
+
     var header =  <View style={[styles.header, {flex: 1}]} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10}}>
                       {photo}
@@ -175,7 +190,8 @@ class VerificationRow extends Component {
                           </View>
                           {supportingDocuments}
                         </View>
-                        <View style={{paddingTop: 3, flexDirection: 'row', justifyContent: 'flex-end'}}>
+                          {sharedFrom}
+                        <View style={{marginTop: sharedFrom ? -3 : 3, flexDirection: 'row', justifyContent: 'flex-end'}}>
                           {verifiedBy}
                           {date}
                         </View>
@@ -184,14 +200,14 @@ class VerificationRow extends Component {
                   </View>
 
     var row
-    if (this.props.isChooser)
+    if (isChooser)
       row = <View>
-              <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+              <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
                {header}
               </TouchableHighlight>
             </View>
     else if (notAccordion) {
-      let content = <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+      let content = <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
                       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                         {header}
                       </View>
@@ -201,17 +217,17 @@ class VerificationRow extends Component {
                     {content}
                   </Swipeout>
 
-      row = <View style={{backgroundColor: '#fff'}} host={this.props.lazy}>
+      row = <View style={{backgroundColor: '#fff'}} host={lazy}>
              {content}
             </View>
     }
     // else {
-    //   var content = <TouchableHighlight onPress={this.props.onSelect.bind(this)} underlayColor='transparent'>
+    //   var content = <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
     //                     <View style={styles.textContainer}>
     //                       {rows}
     //                     </View>
     //                   </TouchableHighlight>
-    //   row = <View host={this.props.lazy}>
+    //   row = <View host={lazy}>
     //          <Accordion
     //            header={header}
     //            style={{alignSelf: 'stretch'}}

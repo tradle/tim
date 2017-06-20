@@ -5028,26 +5028,27 @@ var Store = Reflux.createStore({
 
       }
 
-      var isSharedWith = false, timeResourcePair = null
+      var isSharedWith //, timeResourcePair = null
       if (r._sharedWith  &&  toOrgId) {
-        var sharedWith = r._sharedWith.filter((r) => {
+        let sharedWith = r._sharedWith.filter((r) => {
           let org = this._getItem(r.bankRepresentative).organization
           return (org) ? utils.getId(org) === toOrgId : false
         })
         isSharedWith = sharedWith.length !== 0
-        if (isSharedWith) {
-          timeResourcePair = {
-            time: sharedWith[0].timeShared,
-            resource: r
-          }
-        }
+        // if (isSharedWith) {
+        //   timeResourcePair = {
+        //     time: sharedWith[0].timeShared,
+        //     resource: r
+        //   }
+        // }
       }
 
       if (chatTo) {
         // backlinks like myVerifications, myDocuments etc. on Profile
         if (backlink  &&  r[backlink]) {
           var s = params.resource ? utils.getId(params.resource) : chatId
-          if (s === utils.getId(r[backlink])  &&  checkAndFilter(r, i)) {
+          let doFurtherCheck = s === utils.getId(r[backlink]) || isSharedWith
+          if (doFurtherCheck  &&  checkAndFilter(r, i)) {
             if (limit  &&  foundResources.length === limit)
               break
           }

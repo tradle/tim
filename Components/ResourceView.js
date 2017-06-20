@@ -114,9 +114,9 @@ class ResourceView extends Component {
       currentRoutes[len - 1].onRightButtonPress = this.props.action.bind(this)
   }
   componentWillMount() {
-    let resource = this.props.resource
-    if (resource.id  ||  resource[TYPE] === PROFILE)
-      Actions.getItem(resource)
+    // let resource = this.props.resource
+    // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
+    Actions.getItem(this.props.resource)
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
@@ -268,7 +268,7 @@ class ResourceView extends Component {
     var actionPanel
     var isMe = utils.isMe(resource)
     if (me) {
-      let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (!me.organization  ||  utils.getId(me.organization) !== utils.getId(resource)))
+      let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (me.organization  &&  utils.getId(me.organization) !== utils.getId(resource)))
       if (!noActionPanel  &&  utils.hasBacklinks(model))
        actionPanel = <ShowRefList lazy={this._lazyId}
                                   resource={resource}
@@ -335,20 +335,21 @@ class ResourceView extends Component {
     else
       otherPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
     let propertySheet
-    if (resource[TYPE] !== PROFILE)
+    if (resource[TYPE] !== PROFILE  &&  !isOrg)
       propertySheet = <ShowPropertiesView resource={resource}
                         showRefResource={this.getRefResource.bind(this)}
                         currency={this.props.currency}
                         excludedProperties={['photos']}
                         navigator={this.props.navigator} />
-
+    let photoView
+    if (!isOrg)
+      photoView = <PhotoView resource={resource} navigator={this.props.navigator}/>
     return (
       <PageView style={platformStyles.container}>
       <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center'}} name={this._lazyId}>
         <View style={styles.photoBG}>
-          <PhotoView resource={resource} navigator={this.props.navigator}>
-          </PhotoView>
-            {identityPhotoList}
+          {photoView}
+          {identityPhotoList}
         </View>
         {actionPanel}
         <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>

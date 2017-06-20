@@ -7,6 +7,7 @@ var constants = require('@tradle/constants');
 import Icon from 'react-native-vector-icons/Ionicons';
 var RowMixin = require('./RowMixin');
 var ResourceList = require('./ResourceList')
+var ResourceView = require('./ResourceView')
 // var Swipeout = require('react-native-swipeout')
 
 var equal = require('deep-equal')
@@ -270,18 +271,17 @@ class ResourceRow extends Component {
 
     let onPress = this.action.bind(this)
     let action
-    if (isOfficialAccounts  &&  !this.props.hideMode)
+    if (isOfficialAccounts  &&  !this.props.hideMode) {
+      var title = utils.makeTitle(utils.getDisplayName(resource))
       action = <View style={styles.actionView}>
                 <TouchableHighlight underlayColor='transparent' onPress={() => {
                   this.props.navigator.push({
-                    component: ResourceList,
-                    title: translate("myDocuments"),
-                    backButtonTitle: translate('back'),
-                    passProps: {
-                      modelName: FORM,
-                      listView: true,
-                      resource: this.props.resource
-                    }
+                    title: title,
+                    id: 3,
+                    component: ResourceView,
+                    // titleTextColor: '#7AAAC3',
+                    backButtonTitle: 'Back',
+                    passProps: {resource: resource}
                   })
                 }}>
                 <View style={textStyle}>
@@ -297,7 +297,7 @@ class ResourceRow extends Component {
                 </View>
                </TouchableHighlight>
               </View>
-
+    }
     let content =  <View style={[styles.content, bg, {paddingHorizontal: 10}]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
                       <View style={[styles.row, bg, { minHeight: 71, justifyContent: 'center'}]}>
@@ -370,7 +370,7 @@ class ResourceRow extends Component {
     // HACK
     else if (model.id === PRODUCT_APPLICATION) {
       if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
-        let status
+        let status, color
         if (resource._approved) {
           status = 'Approved'
           color = 'green'
@@ -540,7 +540,7 @@ class ResourceRow extends Component {
             row = <View style={{flexDirection: 'row'}} key={self.getNextKey()}>
                     <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'} />
                     {lastMessageTypeIcon}
-                    <Text style={[style, {width: w, paddingLeft: 2}]}>{val}</Text>
+                    <Text style={[style, {width: w, paddingLeft: 2, color: '#aaaaaa'}]}>{val}</Text>
                   </View>
           }
           else {

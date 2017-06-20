@@ -266,7 +266,7 @@ class ShowPropertiesView extends Component {
                   </View>
         }
         isItems = Array.isArray(val)
-        if (isItems) {
+        if (isItems  &&  pMeta.items.ref) {
           if  (pMeta.items.ref === PHOTO)
             return
           if (utils.getModel(pMeta.items.ref).value.subClassOf === ENUM) {

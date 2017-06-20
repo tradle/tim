@@ -304,6 +304,7 @@ var NewResourceMixin = {
           options.fields[p].template = this.myDateTemplate.bind(this, {
                     label: label,
                     prop:  props[p],
+                    required: !maybe,
                     model: meta,
                     required: !maybe,
                     errors: params.errors,
