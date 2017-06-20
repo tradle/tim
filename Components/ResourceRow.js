@@ -299,15 +299,15 @@ class ResourceRow extends Component {
       //         </TouchableHighlight>
 
       action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: '#ffffff'}} onPress={() => {
-        this.props.navigator.push({
-          title: title,
-          id: 3,
-          component: ResourceView,
-          // titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          passProps: {resource: resource}
-        })
-      }}>
+                  this.props.navigator.push({
+                    title: title,
+                    id: 3,
+                    component: ResourceView,
+                    // titleTextColor: '#7AAAC3',
+                    backButtonTitle: 'Back',
+                    passProps: {resource: resource}
+                  })
+                }}>
 
                 <View style={textStyle}>
                    {resource.numberOfForms
