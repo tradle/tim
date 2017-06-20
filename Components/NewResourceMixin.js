@@ -835,12 +835,10 @@ var NewResourceMixin = {
       </View>
     );
   },
-  getHelp(prop, noSeparator) {
-    if (!prop.description) {
-      if (noSeparator)
-        return
+  getHelp(prop) {
+    if (!prop.description)
       return <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}/>
-    }
+
     // borderBottomColor: '#cccccc',
     const markdownStyles = {
       heading1: {
@@ -983,7 +981,7 @@ var NewResourceMixin = {
     if (valueMoment) {
       localizedDate = new Date(valueMoment.year(), valueMoment.month(), valueMoment.date())
     }
-    let help = this.getHelp(prop, true)
+    let help = this.getHelp(prop)
     return (
       <View key={this.getNextKey()} ref={prop.name}>
         <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
