@@ -685,8 +685,19 @@ class NewResource extends Component {
         }
       })
     }
-    if (!jsons.length)
-      jsons = <View/>
+    // add server url sometimes takes a while
+    let wait
+    if (this.state.disableEditing)
+      wait = <View style={{alignItems: 'center', marginTop: 50}}>
+               <ActivityIndicator animating={true} size='large' color='#7AAAC3'/>
+             </View>
+
+
+    let loadingVideo
+      loadingVideo = <View style={{alignItems: 'center', marginTop: 50}}>
+                       <ActivityIndicator animating={true} size='large' color='#ffffff'/>
+                    </View>
+
     var content =
       <ScrollView style={{backgroundColor: 'transparent', paddingTop:10}}
                   ref='scrollView' {...this.scrollviewProps}
@@ -708,18 +719,10 @@ class NewResource extends Component {
               {arrayItems}
             </View>
             {jsons}
-            <View style={{alignItems: 'center', marginTop: 50}}>
-             {this.state.isLoadingVideo
-                  ? <ActivityIndicator animating={true} size='large' color='#ffffff'/>
-                  : <View/>
-               }
-            </View>
+            {loadingVideo}
           </View>
         </View>
-        {this.state.disableEditing
-           ? <ActivityIndicator animating={true} size='large' color='#7AAAC3'/>
-           : <View/ >
-        }
+        {wait}
       </ScrollView>
 
     // var submit
