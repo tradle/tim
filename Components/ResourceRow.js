@@ -6,7 +6,6 @@ var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
 import Icon from 'react-native-vector-icons/Ionicons';
 var RowMixin = require('./RowMixin');
-var ResourceList = require('./ResourceList')
 var ResourceView = require('./ResourceView')
 // var Swipeout = require('react-native-swipeout')
 
@@ -179,12 +178,6 @@ class ResourceRow extends Component {
                   {onlineStatus}
                 </View>
               </View>
-      // photo = <View style={[{flexDirection: 'row', alignItems: 'center'}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT - 10} : {}]}>
-      //           <View>
-      //             {photo}
-      //             {onlineStatus}
-      //           </View>
-      //         </View>
     }
 
     var rId = utils.getId(this.props.resource)
