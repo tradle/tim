@@ -1,6 +1,6 @@
 'use strict';
 
-var ResourceRow = require('./ResourceRow');
+// var ResourceRow = require('./ResourceRow');
 var MessageList = require('./MessageList');
 var PageView = require('./PageView')
 var utils = require('../utils/utils');
@@ -110,6 +110,7 @@ class VerifierChooser extends Component {
   }
 
   renderRow(resource)  {
+    var ResourceRow = require('./ResourceRow')
     return <ResourceRow
               onSelect={() => this.showVerifier(resource)}
               isChooser={true}
