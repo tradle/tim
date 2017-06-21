@@ -225,10 +225,12 @@ class TimHome extends Component {
         this.setState({firstPage: pathname})
         this.show(pathname)
       }
-      return
+      if (pathname !== 'conversations')
+        return
     }
 
-    let qs = require('querystring').parse(query)
+    let qs = qs ? require('querystring').parse(query) : {}
+
     let state = {firstPage: pathname}
     extend(state, qs)
     extend(this.state, state)
@@ -566,6 +568,7 @@ class TimHome extends Component {
         })
         return
       case 'officialAccounts':
+      case 'conversations':
         this.showOfficialAccounts()
         return
       case 'profile':
