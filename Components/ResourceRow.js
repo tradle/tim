@@ -7,7 +7,6 @@ var ArticleView = require('./ArticleView');
 var constants = require('@tradle/constants');
 import Icon from 'react-native-vector-icons/Ionicons';
 var RowMixin = require('./RowMixin');
-var ResourceList = require('./ResourceList')
 var ResourceView = require('./ResourceView')
 // var Swipeout = require('react-native-swipeout')
 
@@ -177,12 +176,6 @@ class ResourceRow extends Component {
                   {onlineStatus}
                 </View>
               </View>
-      // photo = <View style={[{flexDirection: 'row', alignItems: 'center'}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT - 10} : {}]}>
-      //           <View>
-      //             {photo}
-      //             {onlineStatus}
-      //           </View>
-      //         </View>
     }
 
     var rId = utils.getId(this.props.resource)
@@ -273,41 +266,18 @@ class ResourceRow extends Component {
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode) {
         var title = utils.makeTitle(utils.getDisplayName(resource))
-      // action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: '#ffffff'}} onPress={() => {
-      //             this.props.navigator.push({
-      //               component: ResourceList,
-      //               title: translate("myDocuments"),
-      //               backButtonTitle: translate('back'),
-      //               passProps: {
-      //                 modelName: FORM,
-      //                 listView: true,
-      //                 resource: this.props.resource
-      //               }
-      //             })
-      //           }}>
-      //           <View style={textStyle}>
-      //              {resource.numberOfForms
-      //                 ? <View style={{flexDirection: 'row'}}>
-      //                     <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-      //                     <View style={styles.count}>
-      //                       <Text style={styles.countText}>{resource.numberOfForms}</Text>
-      //                     </View>
-      //                   </View>
-      //                 : <View />
-      //              }
-      //           </View>
-      //         </TouchableHighlight>
-
-      action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: '#ffffff'}} onPress={() => {
-                  this.props.navigator.push({
-                    title: title,
-                    id: 3,
-                    component: ResourceView,
-                    // titleTextColor: '#7AAAC3',
-                    backButtonTitle: 'Back',
-                    passProps: {resource: resource}
-                  })
-                }}>
+      action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: '#ffffff'}}
+                  onPress={() => {
+                    this.props.navigator.push({
+                      title: title,
+                      id: 3,
+                      component: ResourceView,
+                      // titleTextColor: '#7AAAC3',
+                      backButtonTitle: 'Back',
+                      passProps: {resource: resource}
+                    })
+                  }}
+                >
 
                 <View style={textStyle}>
                    {resource.numberOfForms
@@ -321,8 +291,6 @@ class ResourceRow extends Component {
                    }
                 </View>
               </TouchableHighlight>
-                           // <Text style={{fontWeight: '600', marginLeft: 2, marginTop: Platform.OS === 'ios' ? -5 : -5, color: '#7AAAc3'}}>{resource.numberOfForms}</Text>
-                      // <View style={[styles.row, bg, { width: utils.dimensions(ResourceRow).width - 50}, isOfficialAccounts && resource.priority ? {height: PRIORITY_HEIGHT} : {}]}>
     }
     let content =  <View style={[styles.content, bg]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
