@@ -694,6 +694,7 @@ class NewResource extends Component {
 
 
     let loadingVideo
+    if (this.state.isLoadingVideo)
       loadingVideo = <View style={{alignItems: 'center', marginTop: 50}}>
                        <ActivityIndicator animating={true} size='large' color='#ffffff'/>
                     </View>
