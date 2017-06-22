@@ -222,7 +222,11 @@ class TimHome extends Component {
     this.setState(state)
     Actions.setPreferences(state)
 
-    if (!qs.alert) return
+    if (!qs.alert) {
+      if (utils.getMe())
+        this.showFirstPage()
+      return
+    }
 
     const { title, message, ok } = JSON.parse(qs.alert)
     // TODO: support stuff!
