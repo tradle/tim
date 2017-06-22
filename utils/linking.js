@@ -7,7 +7,19 @@ import {
 import Branch from 'react-native-branch'
 import debounce from 'debounce'
 import { translate } from './utils'
-import { deepLinkHost } from './env'
+import { appScheme, deepLinkHost } from './env'
+
+const uriRegexes = [
+  `https?://${deepLinkHost}/(.*)`,
+  `${appScheme}://(.*)`
+].map(pattern => new RegExp(pattern))
+
+const matchURI = uri => {
+  for (let regex of uriRegexes) {
+    let match = regex.exec(uri)
+    if (match) return '/' + match[1]
+  }
+}
 
 async function getInitialURL() {
   // const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
@@ -17,10 +29,7 @@ async function getInitialURL() {
 
 function getUrlFromBundle ({ uri, params, error }) {
   if (error) {
-    const match = uri && new RegExp(`https?://${deepLinkHost}/(.*)`).exec(uri)
-    if (match) return '/' + match[1]
-
-    return null
+    return matchURI(uri)
   }
 
   const branchLink = params && params['$deeplink_path']

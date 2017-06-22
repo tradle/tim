@@ -103,7 +103,8 @@ const merged = extend({
   timeZoneOffset: new Date().getTimezoneOffset() * 60 * 1000,
   analyticsIdIsPermalink: __DEV__,
   analyticsEnabled: !__DEV__,
-  deepLinkHost: 'link.tradle.io'
+  deepLinkHost: 'link.tradle.io',
+  appScheme: 'tradle'
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
