@@ -215,7 +215,7 @@ class TimHome extends Component {
         return
     }
 
-    let qs = qs ? require('querystring').parse(query) : {}
+    let qs = query ? require('querystring').parse(query) : {}
 
     let state = {firstPage: pathname}
     extend(state, qs)
