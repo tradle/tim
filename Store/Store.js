@@ -5941,9 +5941,11 @@ var Store = Reflux.createStore({
         else if (value._context  &&  utils.isReadOnlyChat(value._context))
           this.addMessagesToChat(utils.getId(value._context), value)
       }
-      if (mid)
+      if (mid) {
         this._setItem(MY_IDENTITIES, mid)
-      else if (!isNew  &&  iKey === meId) {
+        return
+      }
+      if (!isNew  &&  iKey === meId) {
         if (me.language || value.language) {
           if (value.language) {
             if (!me.language  ||  (utils.getId(me.language) !== utils.getId(value.language)))
@@ -5974,6 +5976,11 @@ var Store = Reflux.createStore({
       }
     })
     .then(() => {
+      if (isMessage  &&  value[TYPE] === NAME) {
+        let contact = this._getItem(value.from)
+        if (this.changeName(value, contact))
+          this.trigger({action: 'addItem', resource: contact})
+      }
       var  params = {action: newLanguage ? 'languageChange' : 'addItem', resource: value};
       // registration or profile editing
       if (!noTrigger) {
@@ -7633,33 +7640,6 @@ var Store = Reflux.createStore({
         let fr = this._getItem(fromId)
         if (this.changeName(val, fr))
           this.trigger({action: 'addItem', resource: fr})
-
-        // if (val[TYPE] === NAME) {
-        //   fr.firstName = val.givenName
-        //   fr.lastName = val.surname
-        //   this._setItem(fromId, fr)
-        //   this.dbPut(fromId, fr)
-        //   this.trigger({action: 'addItem', resource: fr})
-        // }
-        // else if (fr.firstName === FRIEND) {
-        //   if (val[TYPE] === PHOTO_ID) {
-        //     let personal = val.scanJson.personal
-        //     if (personal) {
-        //       let { firstName, lastName } = personal
-        //       if (firstName) {
-        //         firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-        //         fr.firstName = firstName
-        //         if (lastName) {
-        //           lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
-        //           fr.lastName = lastName
-        //         }
-        //       }
-        //     }
-        //   }
-        //   this._setItem(fromId, fr)
-        //   this.dbPut(fromId, fr)
-        //   this.trigger({action: 'addItem', resource: fr})
-        // }
       }
       this.addLastMessage(val, batch)
     }
