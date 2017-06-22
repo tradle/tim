@@ -2,7 +2,7 @@
 import EventEmitter from 'EventEmitter'
 import {
   Platform,
-  Linking
+  Linking,
 } from 'react-native'
 import Branch from 'react-native-branch'
 import debounce from 'debounce'
@@ -28,7 +28,7 @@ async function getInitialURL() {
 }
 
 function getUrlFromBundle ({ uri, params, error }) {
-  if (error) {
+  if (uri || error) {
     return matchURI(uri)
   }
 
