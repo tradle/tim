@@ -53,7 +53,6 @@ const PROFILE = constants.TYPES.PROFILE
 
 const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
-const T_AND_C = 'tradle.TermsAndConditions'
 const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const AUTH_PROPS = ['useTouchId', 'useGesturePassword']
@@ -110,9 +109,10 @@ class ResourceView extends Component {
       currentRoutes[len - 1].onRightButtonPress = this.props.action.bind(this)
   }
   componentWillMount() {
-    // let resource = this.props.resource
+    let resource = this.props.resource
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
-    Actions.getItem(this.props.resource)
+    if (resource.id || resource[constants.ROOT_HASH])
+      Actions.getItem(resource)
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
