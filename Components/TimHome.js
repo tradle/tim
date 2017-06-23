@@ -224,7 +224,7 @@ class TimHome extends Component {
 
     if (!qs.alert) {
       if (utils.getMe())
-        this.showFirstPage()
+        this.showFirstPage(true)
       return
     }
 
@@ -475,7 +475,7 @@ class TimHome extends Component {
       }
     });
   }
-  showHomePage(doReplace) {
+  showHomePage() {
     let me = utils.getMe()
     let title = translate('profile')
     this.props.navigator.push({
@@ -514,14 +514,17 @@ class TimHome extends Component {
     //   }
     // })
   }
-  showFirstPage(doReplace) {
+  showFirstPage(noResetNavStack) {
     let firstPage = this.state.firstPage
     if (this.isDeepLink)
       this.state.firstPage = ENV.initWithDeepLink
-    this.isDeepLink = false
+    if (!noResetNavStack) {
+      var nav = this.props.navigator
+      nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
+    }
 
-    var nav = this.props.navigator
-    nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
+    this.isDeepLink = false
+// /chat?url=https://ubs.tradle.io&permalink=72d63e70bd75e65cf94e2d1f7f04c59816ad183801b981428a8a0d1abbf00190
     let me = utils.getMe()
     if (me  &&  me.isEmployee) {
       this.showContacts()
@@ -540,7 +543,7 @@ class TimHome extends Component {
         this.showOfficialAccounts()
         return
       case 'profile':
-        this.showHomePage(doReplace)
+        this.showHomePage()
         return
       case 'scan':
         this.showScanHelp()
@@ -548,7 +551,7 @@ class TimHome extends Component {
         return
       default:
         if (ENV.homePage)
-          this.showHomePage(doReplace)
+          this.showHomePage()
         else
           this.showOfficialAccounts()
       }
@@ -557,7 +560,7 @@ class TimHome extends Component {
     }
 
     if (ENV.homePage) {
-      this.showHomePage(doReplace)
+      this.showHomePage()
       return
     }
 
@@ -743,7 +746,7 @@ class TimHome extends Component {
 
       this.setState({hasMe: true})
       Actions.setAuthenticated(true)
-      this.showFirstPage(true)
+      this.showFirstPage()
     }
     // let nav = self.props.navigator
     // route.passProps.callback = (me) => {
@@ -813,7 +816,7 @@ class TimHome extends Component {
       .then (() => {
         this.setState({hasMe: true})
         Actions.setAuthenticated(true)
-        this.showFirstPage(true)
+        this.showFirstPage()
         // cb()
       })
 
@@ -1234,286 +1237,3 @@ function getIconSize (dimensions) {
 }
 
 module.exports = TimHome;
-  // signIn(cb) {
-  //   let self = this
-  //   if (this.state.message) {
-  //     this.restartTiM()
-  //     return
-  //   }
-
-  //   let me = utils.getMe()
-  //   if (!me) return this.register()
-
-  //   if (isAuthenticated()) {
-  //     return cb()
-  //   }
-
-  //   let doneWaiting
-  //   let authPromise = isAuthenticated() ? Q()
-  //     : me.useTouchId ? touchIDWithFallback()
-  //     : passwordAuth()
-
-  //   return authPromise
-  //     .then(() => {
-  //       setAuthenticated(true)
-  //       cb()
-  //     })
-  //     .catch(err => {
-  //       if (err.name == 'LAErrorUserCancel' || err.name === 'LAErrorSystemCancel') {
-  //         self.props.navigator.popToTop()
-  //       } else {
-  //         lockUp(err.message || 'Authentication failed')
-  //       }
-  //     })
-
-  //   function touchIDWithFallback() {
-  //     return authenticateUser()
-  //     .catch((err) => {
-  //       if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1) {
-  //         return passwordAuth()
-  //       }
-
-  //       throw err
-  //     })
-  //   }
-
-  //   function passwordAuth () {
-  //     return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
-  //       .catch(err => {
-  //         // registration must have been aborted.
-  //         // ask user to set a password
-  //         return Q.ninvoke(self, 'setPassword')
-  //       })
-  //       .then(() => {
-  //         return Q.ninvoke(self, 'checkPassword')
-  //       })
-  //   }
-
-  //   function lockUp (err) {
-  //     self.setState({isModalOpen: true})
-  //     loopAlert(err)
-  //     setTimeout(() => {
-  //       doneWaiting = true
-  //       // let the user try again
-  //       self.signIn(cb)
-  //     }, __DEV__ ? 5000 : 5 * 60 * 1000)
-  //   }
-
-  //   function loopAlert (err) {
-  //     Alert.alert(err, null, [
-  //       {
-  //         text: 'OK',
-  //         onPress: () => !doneWaiting && loopAlert(err)
-  //       }
-  //     ])
-  //   }
-  // }
-  // async _localAuth() {
-    // if (this.state.authenticating) return
-
-    // if (!this.state.authenticated) {
-    //   this.setState({ authenticating: true })
-    //   try {
-    //     await authenticateUser()
-    //   } catch (err)  {
-    //     this.setState({ authenticating: false })
-    //     throw err
-    //   }
-    // }
-
-    // this.showFirstPage()
-    // if (this.state.authenticating) {
-    //   this.setState({ authenticating: false })
-    // }
-  // }
-  //////////////////////// LAST CHANGE - 07/12/2016
-  // signUp(cb) {
-  //   var nav = this.props.navigator
-  //   nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
-  //   let self = this
-  //   this.setPassword(function(err) {
-  //     if (err)
-  //       debug('failed to set password', err)
-  //     else {
-  //       cb()
-  //     }
-  //   })
-  //   // this.showFirstPage(true);
-  //   // this.props.navigator.popToTop();
-  // }
-  // signIn(cb) {
-  //   let me = utils.getMe()
-  //   if (!me)
-  //     return this.register(cb)
-
-  //   if (me.isAuthenticated  &&  !this.state.newMe)
-  //     return cb()
-
-  //   let doneWaiting
-  //   let authPromise
-  //   if (me.useTouchId  &&  me.useGesturePassword) {
-  //     if (this.state.newMe) {
-  //       if (!newMe.useTouchId)
-  //         authPromise = touchIDWithFallback()
-  //       else
-  //         authPromise = passwordAuth()
-  //     }
-  //     else
-  //       authPromise = touchIDAndPasswordAuth()
-  //   }
-  //   else if (me.useTouchId)
-  //     authPromise = touchIDWithFallback()
-  //   else
-  //     authPromise = passwordAuth()
-  //   let self = this
-  //   return authPromise
-  //     .then(() => {
-  //       Actions.setAuthenticated(true)
-  //       cb()
-  //     })
-  //     .catch(err => {
-  //       if (err.name == 'LAErrorUserCancel' || err.name === 'LAErrorSystemCancel') {
-  //         self.props.navigator.popToTop()
-  //       } else {
-  //         lockUp(err.message || 'Authentication failed')
-  //       }
-  //     })
-
-  //   function touchIDAndPasswordAuth() {
-  //     if (isAndroid) return passwordAuth()
-
-  //     return authenticateUser()
-  //     .then(() => {
-  //       return passwordAuth()
-  //     })
-  //     .catch((err) => {
-  //       debugger
-  //       throw err
-  //     })
-  //   }
-
-  //   function touchIDWithFallback() {
-  //     if (isAndroid) return passwordAuth()
-
-  //     return authenticateUser()
-  //     .catch((err) => {
-  //       if (err.name === 'LAErrorUserFallback' || err.name.indexOf('TouchID') !== -1) {
-  //         return passwordAuth()
-  //       }
-
-  //       throw err
-  //     })
-  //   }
-
-  //   function passwordAuth () {
-  //     return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
-  //       .then(
-  //         () =>  Q.ninvoke(self, 'checkPassword'),
-  //         // registration must have been aborted.
-  //         // ask user to set a password
-  //         (err) => Q.ninvoke(self, 'setPassword')
-  //       )
-  //   }
-
-  //   function lockUp (err) {
-  //     self.setState({isModalOpen: true})
-  //     loopAlert(err)
-  //     setTimeout(() => {
-  //       doneWaiting = true
-  //       // let the user try again
-  //       signIn(cb, this.props.navigator)
-  //     }, __DEV__ ? 5000 : 5 * 60 * 1000)
-  //   }
-
-  //   function loopAlert (err) {
-  //     Alert.alert(err, null, [
-  //       {
-  //         text: 'OK',
-  //         onPress: () => !doneWaiting && loopAlert(err)
-  //       }
-  //     ])
-  //   }
-  // }
-  // setPassword(cb) {
-  //   let self = this
-  //   this.props.navigator.push({
-  //     component: PasswordCheck,
-  //     id: 20,
-  //     passProps: {
-  //       mode: PasswordCheck.Modes.set,
-  //       validate: (pass) => { return pass.length > 4 },
-  //       promptSet: translate('pleaseDrawPassword'),
-  //       promptInvalidSet: translate('passwordLimitations'),
-  //       onSuccess: (pass) => {
-  //         Keychain.setGenericPassword(PASSWORD_ITEM_KEY, utils.hashPassword(pass))
-  //         .then(() => {
-  //           Actions.updateMe({ isRegistered: true })
-  //           return hasTouchID()
-  //         })
-  //         .then((askTouchID) => {
-  //           if (askTouchID) {
-  //             return self.props.navigator.replace({
-  //               component: TouchIDOptIn,
-  //               id: 21,
-  //               rightButtonTitle: 'Skip',
-  //               passProps: {
-  //                 optIn: () => {
-  //                   Actions.updateMe({ useTouchId: true })
-  //                   cb()
-  //                 }
-  //               },
-  //               onRightButtonPress: cb.bind(this)
-  //             })
-  //           }
-
-  //           cb()
-  //         })
-  //         .catch(err => {
-  //           debugger
-  //         })
-  //       },
-  //       onFail: () => {
-  //         debugger
-  //         Alert.alert('Oops!')
-  //       }
-  //     }
-  //   })
-  // }
-  // checkPassword(cb, doReplace) {
-  //   let nav = this.props.navigator
-  //   // HACK
-  //   let routes = nav.getCurrentRoutes()
-  //   if (routes[routes.length - 1].id === 20)
-  //     return
-
-  //   let route = {
-  //     component: PasswordCheck,
-  //     id: 20,
-  //     passProps: {
-  //       mode: PasswordCheck.Modes.check,
-  //       maxAttempts: 3,
-  //       promptCheck: translate('drawYourPassword'), //Draw your gesture password',
-  //       promptRetryCheck: translate('gestureNotRecognized'), //Gesture not recognized, please try again',
-  //       isCorrect: (pass) => {
-  //         return Keychain.getGenericPassword(PASSWORD_ITEM_KEY)
-  //           .then((stored) => {
-  //             return stored === utils.hashPassword(pass)
-  //           })
-  //           .catch(err => {
-  //             return false
-  //           })
-  //       },
-  //       onSuccess: () => {
-  //         cb()
-  //       },
-  //       onFail: (err) => {
-  //         cb(err || new Error('For the safety of your data, ' +
-  //           'this application has been temporarily locked. ' +
-  //           'Please try in 5 minutes.'))
-  //         // lock up the app for 10 mins? idk
-  //       }
-  //     }
-  //   }
-
-  //   nav.push(route)
-  // }
