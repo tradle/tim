@@ -92,6 +92,7 @@ var utils = require('../utils/utils');
 var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('pify');
+var collect = promisify(require('stream-collector'))
 var debounce = require('debounce')
 var asyncstorageDown = require('asyncstorage-down')
 var levelup = require('levelup')
@@ -111,7 +112,6 @@ var level = function (loc, opts) {
   return levelup(loc, opts)
 }
 
-const collect = require('stream-collector')
 // const enforceOrder = require('@tradle/receive-in-order')
 const Multiqueue = require('@tradle/multiqueue')
 
@@ -6772,7 +6772,7 @@ var Store = Reflux.createStore({
 
           return Q.all([
             meDriver.addressBook.lookupIdentity({ permalink: wrapper.author }),
-            Q.nfcall(collect, msgStream)
+            collect(msgStream)
           ])
           .spread(function (authorInfo, messages) {
             const match = messages.filter(m => m.author === authorInfo.permalink)[0]
