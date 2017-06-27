@@ -180,6 +180,7 @@ const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 const Sendy = require('sendy')
 const SendyWS = require('sendy-ws')
 const TLSClient = require('sendy-axolotl')
+const AWSClient = require('@tradle/aws-client')
 // const DSA = require('@tradle/otr').DSA
 // const BigInt = require('@tradle/otr/vendor/bigint')
 // const BigIntTimes = {}
@@ -324,6 +325,10 @@ const ANALYTICS_KEY = 'analyticskey'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
 const POLITE_TASK_TIMEOUT = __DEV__ ? 60000 : 6000
+const isInAWS = provider => {
+  const url = getProviderUrl(provider)
+  return /\.amazonaws.com$/.test(parseURL(url).host)
+}
 
 const {
   newAPIBasedVerification,
@@ -847,7 +852,7 @@ var Store = Reflux.createStore({
       })
     }
 
-    function trySend (msg, recipientInfo, cb) {
+    const trySend = co(function* (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
       if (self._yuki && recipientHash === self._yuki.permalink) {
         return self._yuki.receive({ message: msg.unserialized.object })
@@ -855,32 +860,45 @@ var Store = Reflux.createStore({
           .catch(cb)
       }
 
-      let messenger = wsClients.byIdentifier[recipientHash]
-      if (!messenger) {
+      let transport = wsClients.byIdentifier[recipientHash]
+      if (!transport) {
         let hashToUrl = self._getItem(SETTINGS + '_1').hashToUrl
         const url = hashToUrl  &&  hashToUrl[recipientHash]
-        messenger = url && wsClients.byUrl[url]
+        transport = url && wsClients.byUrl[url]
       }
 
       const identifier = self.getIdentifier(recipientInfo)
-      if (!messenger) {
+      if (!transport) {
         meDriver.sender.pause(identifier)
         // Alert.alert('meDriver._send recipient not found ' + recipientHash)
         return cb(new Error('recipient not found'))
       }
 
       debug(`pushing msg to ${identifier} into network stack`)
-      // this timeout is not for sending the entire message
-      // but rather an idle connection timeout
-      messenger.send(identifier, msg, function (err) {
+      if (transport instanceof AWSClient) {
+        try {
+          yield transport.ready()
+          yield transport.send({
+            link: msg.unserialized.link,
+            message: msg
+          })
+        } catch (err) {
+          return cb(err)
+        }
+
+        cb()
+        return
+      }
+
+      transport.send(identifier, msg, function (err) {
         if (err) debug(`failed to deliver message to ${identifier}: ${err.message}`)
         else debug(`delivered message to ${identifier}`)
 
         cb(err)
       })
 
-      // messenger.setTimeout(60000)
-    }
+      // transport.setTimeout(60000)
+    })
 
     // receive flow:
     // 1. transport
@@ -1350,7 +1368,49 @@ var Store = Reflux.createStore({
     return this.dbPut(SETTINGS + '_1', r)
     // }
   },
+
+  addAWSProvider: co(function* (provider) {
+    const self = this
+    const node = yield this._enginePromise
+    const counterparty = provider.hash
+    const url = getProviderUrl(provider)
+    const { wsClients } = driverInfo
+    let client = wsClients.byUrl[url] || wsClients.byIdentifier[counterparty]
+    if (client) return
+
+    const position = {
+      sent: yield monitorMissing.getTip({ node, counterparty, sent: true }),
+      received: yield monitorMissing.getTip({ node, counterparty })
+    }
+
+    client = new AWSClient({
+      endpoint: url,
+      node,
+      position,
+      // TODO: generate long-lived clientId: `${node.permalink}${nonce}`
+      clientId: `${node.permalink}${node.permalink}`
+    })
+
+    wsClients.add({
+      client,
+      url,
+      identifier: counterparty,
+      path: provider.id
+    })
+
+    client.onmessage = co(function* (msg) {
+      debug(`receiving msg ${msg._n} from ${counterparty}`)
+      yield self.queueReceive({ msg, from: counterparty })
+    })
+  }),
+
   addProvider(provider) {
+    let self = this
+    const url = getProviderUrl(provider)
+    if (isInAWS(provider)) {
+      return this.addAWSProvider(provider)
+    }
+
     // let httpClient = driverInfo.httpClient
     // httpClient.addRecipient(
     //   provider.hash,
@@ -1360,13 +1420,10 @@ var Store = Reflux.createStore({
     // let whitelist = driverInfo.whitelist
     // if (provider.txId)
     //   whitelist.push(provider.txId)
-    let self = this
-    let tlsKey = driverInfo.tlsKey
-    const { wsClients, restoreMonitors } = driverInfo
+    const { tlsKey, wsClients, restoreMonitors } = driverInfo
     // const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
 
     // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
-    const url = getProviderUrl(provider)
     debug('adding provider', provider.hash, url)
 
     let transport = wsClients.byUrl[url] || wsClients.byIdentifier[provider.hash]
