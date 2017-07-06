@@ -65,6 +65,7 @@ import {
   Text,
   Platform,
   TextInput,
+  ListView,
   Dimensions,
   Modal,
   Alert,
@@ -96,12 +97,18 @@ class ResourceView extends Component {
 
     let me = utils.getMe()
     let resource = props.resource
+    const dataSource = new ListView.DataSource({
+      rowHasChanged: function(row1, row2) {
+        return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
+      }
+    })
     this.state = {
       resource: resource,
       isLoading:  resource[TYPE] && resource[TYPE] !== PROFILE ? false : true, //props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
       useGesturePassword: me && me.useGesturePassword,
+      dataSource: dataSource.cloneWithRows([resource])
     }
     let currentRoutes = this.props.navigator.getCurrentRoutes()
     let len = currentRoutes.length
@@ -194,13 +201,13 @@ class ResourceView extends Component {
       break
     case 'exploreBacklink':
       if (params.backlink !== this.state.backlink)
-        this.setState({backlink: params.backlink, backlinkList: params.list})
+        this.setState({backlink: params.backlink})
       break
-    default:
-      if (params.resource)
-        Actions.getItem(params.resource)
-        // this.onResourceUpdate(params)
-      break
+    // default:
+    //   if (params.resource  &&  action !== 'onlineStatus')
+    //     Actions.getItem(params.resource)
+    //     // this.onResourceUpdate(params)
+    //   break
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -241,6 +248,15 @@ class ResourceView extends Component {
       }
     });
   }
+  // renderRow(resource) {
+  //      return <ShowRefList lazy={this._lazyId}
+  //               resource={this.state.resource}
+  //               navigator={this.props.navigator}
+  //               currency={this.props.currency}
+  //               bankStyle={this.props.bankStyle}
+  //               backlink={this.state.backlink}
+  //               backlinkList={this.state.backlinkList}/>
+  // }
 
   render() {
     if (this.state.isLoading)
@@ -340,29 +356,76 @@ class ResourceView extends Component {
     let photoView
     if (!isOrg)
       photoView = <PhotoView resource={resource} navigator={this.props.navigator}/>
+    // return (
+    //   <PageView style={platformStyles.container}>
+    //     <View style={styles.photoBG}>
+    //       {photoView}
+    //       {identityPhotoList}
+    //     </View>
+    //     {actionPanel}
+    //   </PageView>
+    //  );
+
+
+
     return (
       <PageView style={platformStyles.container}>
-      <ScrollView  ref='this' name={this._lazyId}>
-        <View style={styles.photoBG}>
-          {photoView}
-          {identityPhotoList}
-        </View>
-        {actionPanel}
-        <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-          <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
-            <View style={styles.modalBackgroundStyle}>
-              {qrcode}
-            </View>
-          </TouchableOpacity>
-        </Modal>
-        {otherPhotoList}
-        {propertySheet}
-        {menu}
-      </ScrollView>
-      {footer}
-
+        <ScrollView  ref='this' name={this._lazyId}>
+          <View style={styles.photoBG}>
+            {photoView}
+            {identityPhotoList}
+          </View>
+          {actionPanel}
+          <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+            <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
+              <View style={styles.modalBackgroundStyle}>
+                {qrcode}
+              </View>
+            </TouchableOpacity>
+          </Modal>
+          {otherPhotoList}
+          {propertySheet}
+          {menu}
+        </ScrollView>
+       {footer}
       </PageView>
-    );
+     );
+
+
+    // return (
+    //   <PageView style={platformStyles.container}>
+    //   <ListView  ref='this' name={this._lazyId}
+    //     automaticallyAdjustContentInsets={false}
+    //     removeClippedSubviews={false}
+    //     keyboardDismissMode='on-drag'
+    //     keyboardShouldPersistTaps="always"
+    //     initialListSize={10}
+    //     renderHeader={() => (
+    //       <View style={styles.photoBG}>
+    //         {photoView}
+    //         {identityPhotoList}
+    //       </View>
+    //     )}
+    //     dataSource={this.state.dataSource}
+    //     renderRow={this.renderRow.bind(this)}
+    //     renderFooter={() => {
+    //       return (
+    //         <View>
+    //       <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+    //         <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
+    //           <View style={styles.modalBackgroundStyle}>
+    //             {qrcode}
+    //           </View>
+    //         </TouchableOpacity>
+    //       </Modal>
+    //       {otherPhotoList}
+    //       {propertySheet}
+    //       {menu}
+    //       </View>
+    //     )}} />
+    //   {footer}
+    //   </PageView>
+    // );
   }
 
   // renderActionSheet() {

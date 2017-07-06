@@ -253,7 +253,7 @@ class NewResource extends Component {
     if (isMessage) {
       if (this.props.originatingMessage  &&  resource[constants.ROOT_HASH] !== this.props.originatingMessage[constants.ROOT_HASH]) {
         var params = {
-          value: {documentCreated: true, document: resource[constants.NONCE]},
+          value: {_documentCreated: true, document: resource[constants.NONCE]},
           resource: this.props.originatingMessage,
           meta: utils.getModel(this.props.originatingMessage[constants.TYPE]).value
         }
@@ -646,11 +646,7 @@ class NewResource extends Component {
     else
       Form.stylesheet = stylesheet
 
-    // var style = isRegistration
-    //           ? DeviceHeight < 600 ? {marginTop: 100} : {marginTop: DeviceHeight / 4}
-    //           : platformStyles.container
     var {width, height} = utils.dimensions(NewResource)
-    // var style = [platformStyles.container, {backgroundColor: 'transparent', height: DeviceHeight}]
     if (!options)
       options = {}
     options.auto = 'placeholders';
@@ -786,7 +782,7 @@ class NewResource extends Component {
       component: ResourceView,
       title: translate('termsAndConditions'),
       backButtonTitle: translate('back'),
-      rightButtonTitle: translate('Accept'),
+      rightButtonTitle: 'Accept',
       passProps: {
         resource: termsAndConditions,
         action: this.acceptTsAndCs.bind(this)

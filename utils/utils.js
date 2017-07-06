@@ -85,6 +85,7 @@ const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
 const ENUM = 'tradle.Enum'
 const STYLES_PACK = 'tradle.StylesPack'
+const MSG_LINK = '_msg'
 // var dictionaries = require('@tradle/models').dict
 var dictionary //= dictionaries[Strings.language]
 
@@ -212,7 +213,7 @@ var utils = {
   },
   translateProperty(property, model) {
     if (!dictionary)
-      return property.title || utils.makeLabel(property.name)
+      return property.title || this.makeLabel(property.name)
     let translations = dictionary.properties[property.name]
     let val
     if (translations)
@@ -467,10 +468,12 @@ var utils = {
   },
   getDisplayName(resource, meta) {
     if (!meta) {
-      if (resource.title)
-        return resource.title
-      if (resource.id)
-        return ""
+      if (!resource[TYPE]) {
+        if (resource.id   &&   resource.title)
+          return resource.title
+        if (resource.id)
+          return ""
+      }
       meta = this.getModel(resource[TYPE]).value.properties
     }
     let m = resource[TYPE] ? this.getModel(resource[TYPE]) : null
@@ -530,6 +533,15 @@ var utils = {
         return dn
     }
     return displayName
+  },
+  getPropByTitle(props, propTitle) {
+    let propTitleLC = propTitle.toLowerCase()
+    for (let p in props) {
+      let prop = props[p]
+      let pTitle = prop.title || this.makeLabel(p)
+      if (pTitle.toLowerCase() === propTitleLC)
+        return p
+    }
   },
   getDateValue(value) {
     let valueMoment = moment.utc(value)
@@ -827,8 +839,43 @@ var utils = {
   },
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? utils.clone(resource) : resource
+    let m = this.getModel(res[TYPE]).value
+    if (!m.interfaces)
+      res = this.optimizeResource1(resource, doNotChangeOriginal)
+    else {
+      var properties = m.properties
+      var exclude = ['from', 'to', 'time']
+      Object.keys(res).forEach(p => {
+        if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
+          return
 
-    var properties = this.getModel(res[TYPE]).value.properties
+        delete res[p]
+      })
+    }
+    if (!this.isMessage(m))
+      return res
+
+    if (res._sharedWith) {
+      res._sharedWith.forEach((r) => {
+        if (r.shareBatchId)
+          r.shareBatchId = utils.buildRef(r.shareBatchId)
+      })
+    }
+
+    delete res.to.organization
+    delete res.to.photo
+    delete res.from.organization
+    delete res.from.photo
+    if (res._context)
+      res._context = this.buildRef(res._context)
+
+    return res
+  },
+
+  optimizeResource1(resource, doNotChangeOriginal) {
+    let res = doNotChangeOriginal ? utils.clone(resource) : resource
+    let m = this.getModel(res[TYPE]).value
+    var properties = m.properties
     Object.keys(res).forEach(p => {
       if (p.charAt(0) === '_'  ||  !properties[p])
         return
@@ -878,7 +925,6 @@ var utils = {
       })
       res[p] = arr
     })
-
     return res
   },
 
@@ -1161,7 +1207,7 @@ var utils = {
       wrapper[ROOT_HASH] = wrapper.permalink
       wrapper[TYPE] = wrapper.type
     }
-
+    wrapper[MSG_LINK] = wrapper.link
     return wrapper
   },
   setupSHACaching: function setupSHACaching (protocol) {
@@ -1741,7 +1787,7 @@ var utils = {
     }
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
-    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
+    return <Text key={key} style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
              <Text style={{color: linkColor}}>{formType}</Text>
              <Text>{utils.parseMessage(resource, message2, bankStyle, idx)}</Text>
            </Text>

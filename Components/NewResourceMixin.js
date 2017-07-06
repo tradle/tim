@@ -918,6 +918,7 @@ var NewResourceMixin = {
     }
 
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
+    let msgWidth = utils.dimensions(component).width - 90 // 90 - 40 margins + 50 switch
     let help = this.getHelp(prop)
     return (
       <View style={{paddingBottom: 10}} key={this.getNextKey()} ref={prop.name}>
@@ -926,10 +927,10 @@ var NewResourceMixin = {
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-              <View style={{justifyContent: 'center'}}>
+              <View style={{justifyContent: 'center', width: msgWidth}}>
                 <Text style={style}>{label}</Text>
               </View>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
+              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} style={{justifyContent: 'flex-end'}}/>
             </View>
           </View>
         </TouchableHighlight>

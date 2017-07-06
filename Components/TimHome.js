@@ -5,6 +5,7 @@ var Q = require('q')
 var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
 var ResourceList = require('./ResourceList');
+var Datagrid = require('./Datagrid')
 // var VideoPlayer = require('./VideoPlayer')
 var NewResource = require('./NewResource');
 // var HomePage = require('./HomePage')
@@ -73,6 +74,7 @@ import {
   Image,
   NetInfo,
   ScrollView,
+  Dimensions,
   // Linking,
   StatusBar,
   Modal,
@@ -542,6 +544,9 @@ class TimHome extends Component {
       case 'conversations':
         this.showOfficialAccounts()
         return
+      // case 'conversations':
+      //   this.showRL()
+      //   return
       case 'profile':
         this.showHomePage()
         return
@@ -657,6 +662,60 @@ class TimHome extends Component {
       }
     })
   }
+
+  showRL() {
+    const me = utils.getMe()
+    let type = 'tradle.Verification'
+    let h = Dimensions.get('window').height
+    let limit = h < 770 ? 20 : 40
+
+    let route = {
+      title: translate(utils.makeModelTitle(utils.getModel(type).value)),
+      id: 31,
+      component: Datagrid,
+      backButtonTitle: translate('back'),
+      passProps: {
+        modelName: type,
+        isConnected: this.state.isConnected,
+        officialAccounts: true,
+        limit: limit,
+        bankStyle: defaultBankStyle,
+        listView: true,
+      },
+      rightButtonTitle: translate('profile'),
+      onRightButtonPress: {
+        title: 'Profile',
+        id: 3,
+        component: ResourceView,
+        backButtonTitle: translate('back'),
+        rightButtonTitle: translate('edit'),
+        onRightButtonPress: {
+          title: utils.getDisplayName(me),
+          id: 4,
+          component: NewResource,
+          backButtonTitle: translate('back'),
+          rightButtonTitle: translate('done'),
+          passProps: {
+            model: utils.getModel(me[constants.TYPE]).value,
+            resource: me,
+            bankStyle: defaultBankStyle
+          }
+        },
+        passProps: {
+          resource: me,
+          bankStyle: defaultBankStyle
+        }
+      }
+    }
+    // if (doReplace)
+    //   nav.replace(route)
+    // else
+    var nav = this.props.navigator
+    nav.push(route)
+
+  }
+
+
   showOfficialAccounts() {
     const me = utils.getMe()
     let passProps = {
