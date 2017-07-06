@@ -179,7 +179,7 @@ class MessageList extends Component {
         this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
       }
-      else if (rtype === FORM_REQUEST  || rtype === FORM_REQUEST ||  rtype === CONFIRM_PACKAGE_REQUEST || rtype === FORM_ERROR)
+      else if (rtype === FORM_REQUEST  ||  rtype === CONFIRM_PACKAGE_REQUEST || rtype === FORM_ERROR)
         this.setState({addedItem: params.resource})
         // this.state.addedItem = params.resource
       else if (params.resource._denied || params.resource._approved)
@@ -305,7 +305,7 @@ class MessageList extends Component {
   gatherForms(list) {
     let productToForms = {}
     list.forEach((r) => {
-      if (r[TYPE] === FORM_REQUEST  &&  r.documentCreated  &&  r.document) {
+      if (r[TYPE] === FORM_REQUEST  &&  r._documentCreated  &&  r.document) {
         var l = productToForms[r.product]
         if (!l) {
           l = {}

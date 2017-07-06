@@ -640,7 +640,7 @@ class MessageRow extends Component {
                 msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
               if (s.length === 2)
                 onPressCall = self.editForm.bind(self, msgParts[1], msgParts[0])
-              else if (!isMyMessage  &&  !resource.documentCreated)
+              else if (!isMyMessage  &&  !resource._documentCreated)
                 onPressCall = self.createNewResource.bind(self, msgModel, isMyMessage);
 
               color = isMyMessage
@@ -650,8 +650,8 @@ class MessageRow extends Component {
                 link = <Text style={[style, color]}>{translate(msgModel)}</Text>
               else
                 link = <View style={chatStyles.rowContainer}>
-                           <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.myMessageLinkColor : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                           <Text style={[style, {color: resource._documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
+                           <Icon style={[{marginTop: 2}, resource._documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.myMessageLinkColor : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct

@@ -59,6 +59,10 @@ var ENV = require('../utils/env')
 var AddressBook = require('NativeModules').AddressBook;
 
 const tradle = require('@tradle/engine')
+var myCustomIndexes
+// build indexes to enable searching by subClassOf
+// and by from + subClassOf
+
 const tradleUtils = tradle.utils
 const protocol = tradle.protocol
 const {
@@ -70,6 +74,8 @@ const {
   CUR_HASH,
   PREV_HASH
 } = tradle.constants
+
+const MSG_LINK = '_msg'
 
 const sampleData = require('@tradle/models').data
 const utils = require('../utils/utils');
@@ -223,11 +229,12 @@ var TIM_PATH_PREFIX = 'me'
 const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
 const ON_RECEIVED_PROGRESS = 0.66
 const NUM_MSGS_BEFORE_REG_FOR_PUSH = __DEV__ ? 3 : 10
-
+const ALL_MESSAGES = '_all'
 var models = {};
 var list = {};
 var enums = {}
 var chatMessages = {}
+
 var temporaryResources = {}
 var employees = {};
 var db;
@@ -617,50 +624,12 @@ var Store = Reflux.createStore({
 
     let meId = utils.getId(me)
     let r = {}
-    // extend(true, r, me, {
-    //   isAuthenticated: authenticated,
-    //   dateAuthenticated: Date.now()
-    // })
     this.onUpdateMe({
       isAuthenticated: authenticated,
       dateAuthenticated: Date.now()
     })
 
-    // this.setMe(r)
     this.trigger({ action: 'authenticated', value: authenticated })
-    // if (authenticated)
-    //   return
-    // let me = utils.getMe()
-    // let settings = list[SETTINGS + '_1'].value
-    // if (utils.isEmpty(settings.hashToUrl))
-    //   return
-    // let time = new Date().getTime()
-    // let toChain = {
-    //   [TYPE]: 'tradle.AppState',
-    //   [NONCE]: this.getNonce(),
-    //   state: 'background'
-    // }
-
-    // Object.keys(settings.hashToUrl).forEach(id => {
-    //   let to = list[id].value
-    //   if (!to.pubkeys) return
-
-    //   let result = this.searchMessages({modelName: MESSAGE, to: to, limit: 1})
-    //   if (result  &&  time - result[0].time < 36000) {
-    //     meDriver.signAndSend({
-    //       object: toChain,
-    //       to: { fingerprint: self.getFingerprint(list[toId].value) }
-    //     })
-    //     .catch(function (err) {
-    //       debugger
-    //     })
-    //   }
-    // })
-    // return db.put(meId, r)
-    // .then(() => {
-    //   self.trigger({action: 'authenticated'})
-    // })
-
   },
   getSettings() {
     var self = this
@@ -723,10 +692,46 @@ var Store = Reflux.createStore({
   async buildDriver (...args) {
     this.setBusyWith('initializingEngine')
     const ret = await this._buildDriver(...args)
+    this.buildCustomIndexes()
     this.setBusyWith(null)
     return ret
   },
+  buildCustomIndexes() {
+    var self = this
+    myCustomIndexes = tradle.dbs.msgMeta({
+      node: meDriver,
+      db: 'msgMetaIIII.db',
+      props: [
+        'subClassOf',
+        'fromAndSubClassOf',
+        'timeAndFromAndSubClassOf',
+        'typeAndToAndTime',
+        'typeAndTime'
+      ],
+      getProps: function (wrapper) {
+        const payload = wrapper.object.object
+        const props = {}
+        // get payload
+        const model = self.getModel(payload[TYPE])
+        if (!model)
+          return props
 
+        props.author = wrapper.author
+        props.recipient = wrapper.recipient
+        props.timestamp = payload.time || wrapper.timestamp
+        if (model.subClassOf) {
+          props.subClassOf = model.subClassOf
+          props.fromAndSubClassOf = wrapper.author + '!' + model.subClassOf
+          props.timeAndFromAndSubClassOf = payload.time + '!' + wrapper.author + '!' + model.subClassOf
+        }
+        props.typeAndTime = payload[TYPE] + '!' + (payload.time || wrapper.timestamp)
+        props.typeAndToAndTime = payload[TYPE] + '!' + wrapper.recipient + '!' + (payload.time || wrapper.timestamp)
+
+        return props
+      }
+    })
+    return myCustomIndexes
+  },
   _buildDriver ({ keys, identity, encryption }) {
     var self = this
     var keeper = createKeeper({
@@ -1056,13 +1061,13 @@ var Store = Reflux.createStore({
       let r = this._getItem(messages[i].id)
       let product = r.product || (r._context && this._getItem(r._context).product)
 
-      if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r.documentCreated)
+      if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r._documentCreated)
       // delete list[id]
         let forms = productToForms[product]
         if (!forms)
           productToForms[product] = {}
         let formIdx = productToForms[product][r.form]
-        if (typeof formIdx !== 'undefined'  &&  !r.documentCreated)
+        if (typeof formIdx !== 'undefined'  &&  !r._documentCreated)
           removeMsg.push(formIdx)
           // messages.splice(formIdx, 1)
 
@@ -2344,7 +2349,8 @@ var Store = Reflux.createStore({
   onSetPreferences(preferences) {
     this.preferences = preferences
   },
-  onAddMessage(params) {
+
+  onAddMessage (params) {
     let r = params.msg
     let isWelcome = params.isWelcome
     let requestForForm = params.requestForForm
@@ -2398,29 +2404,10 @@ var Store = Reflux.createStore({
       else
         rr[p] = r[p];
     }
-    // let firstTime
-    if (r[TYPE] === PRODUCT_APPLICATION) {
-      let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
-      if (result) {
-        result = result.filter((r) => {
-          return (r.message === r.message  &&  !r.documentCreated) ? true : false
-        })
-        if (result.length) {
-          result.forEach((r) => {
-            const rid = utils.getId(r)
-            self._mergeItem(rid, { documentCreated: true })
-          })
-        }
-      }
-    }
+
     let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
-    //   if (!this.isConnected) {
-    //     let result = this.searchMessages({modelName: PRODUCT_LIST, to: toOrg})
-    //     firstTime = !result  ||  !result.length
-    //   }
-    // }
     rr[NONCE] = this.getNonce()
-    var toChain = {
+    let toChain = {
       [TYPE]: rr[TYPE],
       [NONCE]: rr[NONCE],
       time: r.time
@@ -2452,7 +2439,30 @@ var Store = Reflux.createStore({
     var toId = IDENTITY + '_' + hash
     rr._sendStatus = self.isConnected ? SENDING : QUEUED
     var noCustomerWaiting
-    return this.maybeWaitForIdentity({ permalink: hash })
+    // let firstTime
+    let promise
+    if (r[TYPE] === PRODUCT_APPLICATION)
+      promise = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+    if (!promise)
+      promise = Q()
+    return promise
+    .then((result) => {
+    // if (r[TYPE] === PRODUCT_APPLICATION) {
+    //   let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+      if (result) {
+        result = result.filter((r) => {
+          return (r.message === r.message  &&  !r._documentCreated) ? true : false
+        })
+        if (result.length) {
+          result.forEach((r) => {
+            const rid = utils.getId(r)
+            self._mergeItem(rid, { _documentCreated: true })
+          })
+        }
+      }
+    // }
+      return this.maybeWaitForIdentity({ permalink: hash })
+    })
     .then(() => meDriver.sign({ object: toChain }))
     .then(function(result) {
       toChain = result.object
@@ -2723,8 +2733,8 @@ var Store = Reflux.createStore({
   //         m.product === rr.product  &&
   //         m.form === rr.form        &&
   //         !m.document               &&
-  //         !m.documentCreated) {
-  //       m.documentCreated = true
+  //         !m._documentCreated) {
+  //       m._documentCreated = true
   //       batch.push({type: 'put', key: utils.getId(m), value: m})
   //     }
   //   })
@@ -2735,7 +2745,7 @@ var Store = Reflux.createStore({
   // Every chat has it's own messages array where
   // all the messages present in order they were received
   addMessagesToChat(id, r, isInit, timeShared) {
-    if (r.documentCreated  &&  !isInit)
+    if (r._documentCreated  &&  !isInit)
       return
     if (!r.time  &&  !timeShared)
       return
@@ -2749,6 +2759,8 @@ var Store = Reflux.createStore({
     //   }
     // }
     // Check if this is a shared context
+    if (r[TYPE] === SELF_INTRODUCTION)
+      return
     if (r._context) {
       let c = this._getItem(r._context)
       // context could be empty if ForgetMe was requested for the provider where form was originally created
@@ -2757,11 +2769,14 @@ var Store = Reflux.createStore({
         id = utils.getId(r._context)
     }
     let messages = chatMessages[id]
+    let allMessages = chatMessages[ALL_MESSAGES]
+    if (!allMessages) {
+      allMessages = []
+      chatMessages[ALL_MESSAGES] = allMessages
+    }
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
       if (!isInit) {
-        if (r[TYPE] === SELF_INTRODUCTION)
-          return
         if (r[TYPE] === PRODUCT_LIST) {
           let msgId = messages[messages.length - 1].id
           if (msgId.split('_')[0] === PRODUCT_LIST)
@@ -2784,18 +2799,22 @@ var Store = Reflux.createStore({
       messages = []
       chatMessages[id] = messages
     }
-    messages.push({id: utils.getId(r), time: timeShared ? timeShared : r.time})
+    let stub = {id: utils.getId(r), time: timeShared ? timeShared : r.time}
+    messages.push(stub)
+    allMessages.push(stub)
   },
   // cleanup
   deleteMessageFromChat(id, r) {
-    let messages = chatMessages[id]
-    if (messages) {
-      let rid = utils.getId(r)
-      for (let i=0; i<messages.length; i++)
-        if (messages[i].id === rid) {
-          messages.splice(i, 1)
-          break
-        }
+    let messages = [chatMessages[id], chatMessages[ALL_MESSAGES]]
+    for (let i=0; i<2; i++) {
+      if (messages) {
+        let rid = utils.getId(r)
+        for (let i=0; i<messages.length; i++)
+          if (messages[i].id === rid) {
+            messages.splice(i, 1)
+            break
+          }
+      }
     }
   },
   getRepresentatives(orgId) {
@@ -2883,11 +2902,6 @@ var Store = Reflux.createStore({
       var promise = dontSend
                    ? Q()
                    : this.sendMessageToContextOwners(result.object, to, context)
-                 // meDriver.signAndSend(sendParams)
-                    // meDriver.signAndSend({
-                    //   object: toChain,
-                    //   to: { fingerprint: this.getFingerprint(list[key].value) }
-                    // })
       return promise
     })
     .then(() => {
@@ -2901,28 +2915,10 @@ var Store = Reflux.createStore({
             this.addSharedWith(r, rep, r.time)
           else
             this.addSharedWith(r, r.from, r.time)
-          // let rep = this.getRepresentative(utils.getId(me.organization))
-          // this.addSharedWith(r, rep, r.time)
         }
         else
           this.addSharedWith(r, r.from, r.time)
       }
-      // if (dontSend  &&  r.sources) {
-      //   let result = self.searchMessages({modelName: VERIFICATION, to: r.to})
-      //   r.sources.forEach((s) => {
-      //     let from = s.from
-      //     delete s.from
-
-      //     s[ROOT_HASH] = tradleUtils.hexLink(s)
-      //     s.from = from
-      //     let v = this._getItem(VERIFICATION + '_' + s[ROOT_HASH])
-      //     if (v)  {
-      //       if (!v._verifies)
-      //         v._verifies = []
-      //       v._verifies.push(utils.clone(v.document))
-      //     }
-      //   })
-      // }
       var batch = [];
       this.dbBatchPut(key, r, batch);
       let len = batch.length
@@ -2931,8 +2927,14 @@ var Store = Reflux.createStore({
         let c = this._getItem(utils.getId(r._context));
         isReadOnly = utils.isReadOnlyChat(c) //c  &&  c._readOnly
       }
-      if (!isReadOnly)
-        this.addLastMessage(r, batch)
+      if (!isReadOnly) {
+        let vr = this._getItem(r.document)
+        vr._verificationsCount = !vr._verificationsCount ? 1 : ++vr._verificationsCount
+        this.dbBatchPut(utils.getId(vr), vr, batch);
+
+        this.addBacklinksTo(utils.getMe(), r, batch)
+        this.addBacklinksTo(this._getItem(r.from), r, batch)
+      }
       if (r.sources) {
         let docId = utils.getId(r.document)
         let docs = []
@@ -3065,65 +3067,80 @@ var Store = Reflux.createStore({
     r._sharedWith.push(this.createSharedWith(id, time, shareBatchId))
   },
 
-  onGetItem(key, action) {
-    Q.all([this.myResourcesLoaded])
-    .then(() => {
-      var resource = {};
+  async onGetItem(key, action) {
+    // await this._loadedResourcesDefer.promise
+    let r = this._getItem(utils.getId(key))
+    var resource = {};
+    if (utils.isMessage(this.getModel(r[TYPE]))) {
+      let res = await meDriver.objects.get(r[CUR_HASH])
+      extend(resource, res.object)
+    }
 
-      extend(resource, this._getItem(utils.getId(key)))
+    extend(resource, r)
 
-      const resModel = this.getModel(resource[TYPE])
-      if (!resModel) {
-        throw new Error(`missing model for ${resource[TYPE]}`)
-      }
+    const resModel = this.getModel(resource[TYPE])
+    if (!resModel) {
+      throw new Error(`missing model for ${resource[TYPE]}`)
+    }
 
-      var props = resModel.properties;
-      for (var p in props) {
-        if (p.charAt(0) === '_'  ||  props[p].hidden)
-          continue;
-        var items = props[p].items;
-        if (!items  ||  !items.backlink)
-          continue;
-        var backlink = items.backlink;
-        var itemsModel = this.getModel(items.ref);
-        var params = {
-          modelName: items.ref,
-          to: resource,
-          meta: itemsModel,
-          prop: props[p],
-          props: itemsModel.properties
-        }
-        var meta = this.getModel(items.ref)
-        var isMessage = utils.isMessage(meta)
-        var result = isMessage ? this.searchMessages(params) : this.searchNotMessages(params)
-        if (result  &&  result.length)
-          resource[p] = result;
+    var props = resModel.properties;
+    for (var p in props) {
+      if (p.charAt(0) === '_'  ||  props[p].hidden)
+        continue;
+      var items = props[p].items;
+      if (!items  ||  !items.backlink)
+        continue;
+      var backlink = items.backlink;
+      var itemsModel = this.getModel(items.ref);
+      var params = {
+        modelName: items.ref,
+        to: resource,
+        meta: itemsModel,
+        prop: props[p],
+        props: itemsModel.properties
       }
-      let retParams = { resource: resource, action: action || 'getItem'}
-      if (utils.isMessage(resModel)) {
-        let meId = utils.getId(me)
-        let rep = utils.getId(resource.from) === meId ? resource.to : resource.from
-        let orgR = rep.organization
-        if (orgR) {
-          let org = this._getItem(orgR)
-          if (org.currency)
-            retParams.currency = org.currency
-          if (org.country)
-            retParams.country = org.country
-          if (org.style)
-            retParams.style = org.style
-        }
+      var meta = this.getModel(items.ref)
+      var isMessage = utils.isMessage(meta)
+
+      var result = isMessage ? await this.searchMessages(params) : this.searchNotMessages(params)
+      if (result  &&  result.length)
+        resource[p] = result;
+    }
+    let retParams = { resource: resource, action: action || 'getItem'}
+    if (utils.isMessage(resModel)) {
+      let meId = utils.getId(me)
+      let rep = utils.getId(resource.from) === meId ? resource.to : resource.from
+      let orgR = rep.organization
+      if (orgR) {
+        let org = this._getItem(orgR)
+        if (org.currency)
+          retParams.currency = org.currency
+        if (org.country)
+          retParams.country = org.country
+        if (org.style)
+          retParams.style = org.style
       }
-      this.trigger(retParams);
-    })
+    }
+    this.trigger(retParams);
   },
   onExploreBacklink(resource, prop, backlinkAdded) {
-    let list = this.searchMessages({
-      prop: prop,
-      modelName: prop.items.ref,
-      to: resource
-    })
-    this.trigger({action: 'exploreBacklink', resource: resource, backlink: prop, list: list, backlinkAdded: backlinkAdded})
+    // return this.searchMessages({
+    //   prop: prop,
+    //   modelName: prop.items.ref,
+    //   to: resource
+    // })
+    // .then((list) => {
+      this.trigger({
+        action: 'exploreBacklink',
+        resource: resource,
+        backlink: prop,
+        // list: list,
+        backlinkAdded: backlinkAdded
+      })
+    // })
+    // .catch((err) => {
+    //   debugger
+    // })
   },
   onGetDetails(resource) {
     this.trigger({action: 'showDetails', resource: resource})
@@ -3280,7 +3297,7 @@ var Store = Reflux.createStore({
   async _onAddAll(resource, to, message) {
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
-    r.documentCreated = true
+    r._documentCreated = true
     this.trigger({action: 'addItem', resource: r})
     this.dbPut(rId, r)
     let context = resource._context
@@ -3377,7 +3394,7 @@ var Store = Reflux.createStore({
     //   }
     // })
   },
-  onAddItem(params) {
+  async onAddItem(params) {
     var self = this
     var resource = params.resource
     var value = params.value
@@ -3396,7 +3413,6 @@ var Store = Reflux.createStore({
     var additionalInfo = params.additionalInfo;
     // Check if there are references to other resources
     var refProps = {};
-    var promises = [];
     var foundRefs = [];
     var props = meta.properties;
 
@@ -3415,13 +3431,19 @@ var Store = Reflux.createStore({
         resource.to = utils.clone(utils.getId(context.to) === utils.getId(me) ? context.from : context.to)
     }
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
+    if (isGuestSessionProof) {
+      resource[TYPE] = PRODUCT_APPLICATION
+      resource.product = REMEDIATION
+    }
+
     var isNew = !resource[ROOT_HASH];
 
     if (!isNew  &&  !resource[CUR_HASH])
       resource[CUR_HASH] = protocol.linkString(resource)
 
     var checkPublish
-    var isBecomingEmployee = isNew ? false : becomingEmployee(resource)
+
+    var isBecomingEmployee = isNew ? false : await becomingEmployee(resource)
     if (isBecomingEmployee) {
       if (isBecomingEmployee.error) {
         this.trigger({action: 'addItem', error: isBecomingEmployee.error})
@@ -3430,291 +3452,269 @@ var Store = Reflux.createStore({
       isBecomingEmployee = isBecomingEmployee.isBecomingEmployee
     }
     // Data were obtaipackmy scanning QR code of the forms that were entered on Web
-    if (isGuestSessionProof) {
-      resource[TYPE] = PRODUCT_APPLICATION
-      resource.product = REMEDIATION
-    }
     if (isGuestSessionProof || isBecomingEmployee) {
-      checkPublish = this.getDriver(me)
-      .then(() => {
-        let provider = params.provider
-        if (provider) {
-          return this.addSettings(provider)
-        }
-          // return this.getInfo({serverUrls: [params.serverUrl]})
-      })
-      .then(function () {
-        // if (publishRequestSent)
-          return meDriver.identityPublishStatus()
-      })
-      .then(function(status) {
-        if (!status.watches.link  &&  !status.link) {
-          let rep = isBecomingEmployee
-                  ? self.getRepresentative(utils.getId(resource.organization))
-                  : self._getItem(utils.getId(resource.to))
-          return self.publishMyIdentity(rep, params.disableAutoResponse)
-        }
-        else {
-          let orgRep
-          if (isBecomingEmployee) {
-            let orgId = utils.getId(resource.organization)
-            orgRep = self.getRepresentative(orgId)
-          }
-          else
-            orgRep = self._getItem(utils.getId(resource.to))
-
-          console.log('Store.onAddItem: type = ' + resource[TYPE] + (resource.to ? '; to = ' + resource.to.title : ''))
-
-          var msg = {
-            message: me.firstName + ' is waiting for the response',
-            [TYPE]: SELF_INTRODUCTION,
-            identity: meDriver.identity,
-            profile: {
-              firstName: me.firstName,
-            },
-            from: me,
-            to: orgRep
-          }
-
-          return self.onAddMessage({msg: msg, disableAutoResponse: params.disableAutoResponse})
-        }
-      })
-    } else {
-      checkPublish = Q()
-    }
-
-    return checkPublish
-    .then(() => {
-      for (var p in resource) {
-        if (!props[p] ||  props[p].type !== 'object')
-          continue
-        var ref = props[p].ref;
-        if (!ref  ||  !resource[p])
-          continue
-        let refModel = this.getModel(ref)
-        if (refModel.inlined  ||  refModel.subClassOf === ENUM)
-          continue;
-
-        var rValue = utils.getId(resource[p])
-        refProps[rValue] = p;
-        if (list[rValue]) {
-          var elm = {value: this._getItem(rValue), state: 'fulfilled'};
-          foundRefs.push(elm);
-        }
-        else
-          promises.push(Q.ninvoke(db, 'get', rValue));
+      await this.getDriver(me)
+      let provider = params.provider
+      if (provider)
+        await this.addSettings(provider)
+      let status = await meDriver.identityPublishStatus()
+      if (!status.watches.link  &&  !status.link) {
+        let rep = isBecomingEmployee
+                ? self.getRepresentative(utils.getId(resource.organization))
+                : self._getItem(utils.getId(resource.to))
+        await self.publishMyIdentity(rep, params.disableAutoResponse)
       }
-      // Add items properties if they were created
-      var json = utils.clone(value) // maybe not the best way to copy, try `clone`?
-      for (p in resource) {
-        if (!props[p])
-          continue
-        if (props[p].type === 'array')
-          json[p] = resource[p];
-        let ref = props[p].ref
-        // Chaeck if valid enum value
-        if (ref  &&  this.getModel(ref).subClassOf === ENUM) {
-          if ((typeof json[p] === 'string')  ||  !this._getItem(utils.getId(json[p]))) {
-            let enumList = this.searchNotMessages({modelName: ref})
-            let eprop = utils.getEnumProperty(this.getModel(ref))
-            let val = enumList.filter((eVal) => eVal[eprop] === json[p])
-            if (val.length) {
-              if (resource[p] === json[p])
-                resource[p] = this.buildRef(val[0])
-              json[p] = this.buildRef(val[0])
-            }
-          }
-        }
-      }
-      if (!json[TYPE])
-        json[TYPE] = meta.id;
-      var error = this.checkRequired(json, props);
-      if (error) {
-        foundRefs.forEach(function(val) {
-          var propValue = utils.getId(val.value)
-          var prop = refProps[propValue];
-          json[prop] = val.value;
-        });
-
-        this.trigger({
-          action: 'addItem',
-          // list: list,
-          resource: json,
-          error: error
-        });
-        return;
-      }
-
-      // if (error) {
-      //   this.listenables[0].addItem.failed(error);
-      //   return;
-      // }
-      var returnVal
-      var identity
-      // if (!isNew) // make sure that the values of ref props are not the whole resources but their references
-      if (!isSelfIntroduction  &&  !doneWithMultiEntry)
-        resource = utils.optimizeResource(resource)
-
-      var isMessage = utils.isMessage(meta)
-      var readOnlyBacklinks = []
-      return Q.allSettled(promises)
-      .then(function(results) {
-        let allFoundRefs = foundRefs.concat(results);
-        allFoundRefs.forEach(function(val) {
-          if (val.state !== 'fulfilled')
-            return
-          var value = val.value;
-          var propValue = utils.getId(value)
-          var prop = refProps[propValue];
-
-          var title = utils.getDisplayName(value, self.getModel(value[TYPE]).properties);
-          json[prop] = self.buildRef(value)
-        });
-
-        if (isMessage  &&  !json.documentCreated  &&  (!isRemediation ||  !json.time))
-          json.time = new Date().getTime();
-        if (isNew  ||  !value.documentCreated) //(meta.id !== FORM_ERROR  &&  meta.id !== FORM_REQUEST  &&  !meta.id === FORM_ERROR))
-          resource.time = new Date().getTime();
-
-        if (!resource  ||  isNew)
-          returnVal = json
-        else {
-          returnVal = {};
-          extend(true, returnVal, resource);
-          for (var p in json)
-            // Could be metadata property that is why it preceeds the next 'else'
-            if (!returnVal[p])
-              returnVal[p] = json[p];
-            else if (!props[p])
-              continue
-            else if (!props[p].readOnly  &&  !props[p].immutable)
-              returnVal[p] = json[p];
-        }
-        for (let p in props) {
-          if (!returnVal[p]  &&  props[p].backlink  &&  props[p].ref  &&  props[p].readOnly)
-            readOnlyBacklinks.push(props[p])
-        }
-        if (readOnlyBacklinks.length) {
-          readOnlyBacklinks.forEach((prop) => {
-            let pm = self.getModel(prop.ref)
-            let isMessage = utils.isMessage(pm)
-            if (isMessage) {
-              let result = self.searchMessages({modelName: prop.ref, context: context})
-              if (result  &&  result.length)
-                returnVal[prop.name] = self.buildRef(result[0])
-            }
-          })
-        }
-
-        if (!isRegistration) {
-          // HACK to not to republish identity
-          if (returnVal[TYPE] !== PROFILE)
-            returnVal[NONCE] = self.getNonce()
-        }
-        if (params.chat) {
-          let chatId = utils.getId(params.chat)
-          returnVal.to = self.buildRef(self.getRepresentative(chatId))
-        }
-
-        if (isRegistration)
-          return handleRegistration()
-        else if (isMessage)
-          return handleMessage(params.noTrigger, returnVal)
-        else
-          return save(returnVal, isBecomingEmployee)
-      })
-      .then(() => {
-        if (params.disableFormRequest) {
-          // let result = self.searchMessages({modelName: FORM_REQUEST, to: resource.to, context: resource._context})
-          // if (result &&  result.length) {
-          //   result.forEach((fr) => {
-            let fr = this._getItem(utils.getId(params.disableFormRequest))
-            if (!fr.documentCreated) {
-              let addDocumentCreated
-              if (fr[TYPE] === FORM_REQUEST)
-                addDocumentCreated = fr.form === resource[TYPE]
-              else if (fr[TYPE] === FORM_ERROR)
-                addDocumentCreated = fr.prefill[TYPE] === resource[TYPE]
-              if (addDocumentCreated) {
-                fr.documentCreated = true
-                let key = utils.getId(fr)
-                self._setItem(key, fr)
-                self.dbPut(key, fr)
-                self.trigger({action: 'addItem', resource: fr})
-              }
-            }
-          //   })
-          // }
-        }
+      else {
+        let orgRep
         if (isBecomingEmployee) {
           let orgId = utils.getId(resource.organization)
-          let orgRep = self.getRepresentative(orgId)
-
-          let msg = {
-            [TYPE]: PRODUCT_APPLICATION,
-            product: EMPLOYEE_ONBOARDING,
-            time: new Date().getTime()
-          }
-          self.trigger({action: 'employeeOnboarding', to: this._getItem(orgId)})
-          meDriver.createObject({object: msg})
-          .then((data) => {
-            let hash = data.link
-            msg = utils.clone(msg)
-            msg[CUR_HASH] = hash
-            msg[ROOT_HASH] = hash
-            msg._context = self.buildRef(msg)
-            msg.to = self.buildRef(orgRep)
-            msg.from = self.buildRef(me)
-
-            let sendParams = {
-              link: hash,
-              to: { permalink: orgRep[ROOT_HASH] },
-              other: { context: hash }
-            }
-            self._setItem(utils.getId(msg), msg)
-            self.addMessagesToChat(orgId, msg)
-            return self.meDriverSend(sendParams)
-          })
-          .catch(function (err) {
-            console.log('Store.onAddItem: ' + err.message)
-            debugger
-          })
+          orgRep = self.getRepresentative(orgId)
         }
-        else if (params.cb) {
-          if (returnVal[TYPE] !== SETTINGS)
-            params.cb(returnVal)
-          else {
-            // return newly created provider
-            SERVICE_PROVIDERS.forEach((r) => {
-              if (r.id === returnVal.id  &&  utils.urlsEqual(r.url, returnVal.url))
-                params.cb(self._getItem(utils.getId(r.org)))
-            })
-          }
+        else
+          orgRep = self._getItem(utils.getId(resource.to))
+
+        console.log('Store.onAddItem: type = ' + resource[TYPE] + (resource.to ? '; to = ' + resource.to.title : ''))
+
+        var msg = {
+          message: me.firstName + ' is waiting for the response',
+          [TYPE]: SELF_INTRODUCTION,
+          identity: meDriver.identity,
+          profile: {
+            firstName: me.firstName,
+          },
+          from: me,
+          to: orgRep
         }
-      })
 
-      function handleRegistration () {
-        self.trigger({action: 'runVideo'})
-        return Q.all([
-            self.loadDB(),
-            utils.resetPasswords()
-          ])
-          .then(function () {
-            return self.getDriver(returnVal)
-          })
-          .then(function () {
-            if (!resource || isNew) {
-              returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
-            }
-
-            return save(returnVal)
-          })
+        await self.onAddMessage({msg: msg, disableAutoResponse: params.disableAutoResponse})
       }
+    }
+    let results = []
+
+    for (var p in resource) {
+      if (!props[p] ||  props[p].type !== 'object')
+        continue
+      var ref = props[p].ref;
+      if (!ref  ||  !resource[p])
+        continue
+      let refModel = this.getModel(ref)
+      if (refModel.inlined  ||  refModel.subClassOf === ENUM)
+        continue;
+
+      var rValue = utils.getId(resource[p])
+      refProps[rValue] = p;
+      if (list[rValue]) {
+        var elm = {value: this._getItem(rValue), state: 'fulfilled'};
+        foundRefs.push(elm);
+      }
+      else
+        results.push(await db.get(rValue))
+    }
+    // Add items properties if they were created
+    var json = utils.clone(value) // maybe not the best way to copy, try `clone`?
+    for (p in resource) {
+      if (!props[p])
+        continue
+      if (props[p].type === 'array')
+        json[p] = resource[p];
+      let ref = props[p].ref
+      // Chaeck if valid enum value
+      if (ref  &&  this.getModel(ref).subClassOf === ENUM) {
+        if ((typeof json[p] === 'string')  ||  !this._getItem(utils.getId(json[p]))) {
+          let enumList = this.searchNotMessages({modelName: ref})
+          let eprop = utils.getEnumProperty(this.getModel(ref))
+          let val = enumList.filter((eVal) => eVal[eprop] === json[p])
+          if (val.length) {
+            if (resource[p] === json[p])
+              resource[p] = this.buildRef(val[0])
+            json[p] = this.buildRef(val[0])
+          }
+        }
+      }
+    }
+    if (!json[TYPE])
+      json[TYPE] = meta.id;
+    var error = this.checkRequired(json, props);
+    if (error) {
+      foundRefs.forEach(function(val) {
+        var propValue = utils.getId(val.value)
+        var prop = refProps[propValue];
+        json[prop] = val.value;
+      });
+
+      this.trigger({
+        action: 'addItem',
+        // list: list,
+        resource: json,
+        error: error
+      });
+      return;
+    }
+
+    if (!isSelfIntroduction  &&  !doneWithMultiEntry)
+      resource = utils.optimizeResource(resource, true)
+
+    let allFoundRefs = foundRefs.concat(results);
+    allFoundRefs.forEach((val) => {
+      if (val.state !== 'fulfilled')
+        return
+      var value = val.value;
+      var propValue = utils.getId(value)
+      var prop = refProps[propValue];
+
+      var title = utils.getDisplayName(value, this.getModel(value[TYPE]).properties);
+      json[prop] = this.buildRef(value)
+    })
+
+    var isMessage = utils.isMessage(meta)
+    if (isMessage  &&  !json._documentCreated  &&  (!isRemediation ||  !json.time))
+      json.time = new Date().getTime();
+    if (isNew  ||  !value._documentCreated) //(meta.id !== FORM_ERROR  &&  meta.id !== FORM_REQUEST  &&  !meta.id === FORM_ERROR))
+      resource.time = new Date().getTime();
+
+    var returnVal
+    if (!resource  ||  isNew)
+      returnVal = json
+    else {
+      returnVal = {};
+      extend(true, returnVal, resource);
+      for (var p in json) {
+        // Could be metadata property that is why it preceeds the next 'else'
+        if (!returnVal[p])
+          returnVal[p] = json[p];
+        else if (!props[p])
+          continue
+        else if (!props[p].readOnly  &&  !props[p].immutable)
+          returnVal[p] = json[p];
+      }
+    }
+
+    var readOnlyBacklinks = []
+    for (let p in props) {
+      if (!returnVal[p]  &&  props[p].backlink  &&  props[p].ref  &&  props[p].readOnly)
+        readOnlyBacklinks.push(props[p])
+    }
+    if (readOnlyBacklinks.length) {
+      for (let i=0; i<readOnlyBacklinks.length; i++) {
+        let prop = readOnlyBacklinks[i]
+        let pm = self.getModel(prop.ref)
+        let isMessage = utils.isMessage(pm)
+        if (isMessage) {
+          let result = await this.searchMessages({modelName: prop.ref, context: context})
+          if (result  &&  result.length)
+            returnVal[prop.name] = this.buildRef(result[0])
+        }
+      }
+
+    }
+
+    if (!isRegistration) {
+      // HACK to not to republish identity
+      if (returnVal[TYPE] !== PROFILE)
+        returnVal[NONCE] = self.getNonce()
+    }
+    if (params.chat) {
+      let chatId = utils.getId(params.chat)
+      returnVal.to = self.buildRef(self.getRepresentative(chatId))
+    }
+
+    if (isRegistration)
+      await handleRegistration()
+    else if (isMessage)
+      await handleMessage(params.noTrigger, returnVal)
+    else
+      await save(returnVal, isBecomingEmployee)
+    if (params.disableFormRequest) {
+      // let result = self.searchMessages({modelName: FORM_REQUEST, to: resource.to, context: resource._context})
+      // if (result &&  result.length) {
+      //   result.forEach((fr) => {
+        let fr = this._getItem(utils.getId(params.disableFormRequest))
+        if (!fr._documentCreated) {
+          let addDocumentCreated
+          if (fr[TYPE] === FORM_REQUEST)
+            addDocumentCreated = fr.form === resource[TYPE]
+          else if (fr[TYPE] === FORM_ERROR)
+            addDocumentCreated = fr.prefill[TYPE] === resource[TYPE]
+          if (addDocumentCreated) {
+            fr._documentCreated = true
+            let key = utils.getId(fr)
+            self._setItem(key, fr)
+            self.dbPut(key, fr)
+            self.trigger({action: 'addItem', resource: fr})
+          }
+        }
+      //   })
+      // }
+    }
+    if (isBecomingEmployee) {
+      let orgId = utils.getId(resource.organization)
+      let orgRep = self.getRepresentative(orgId)
+
+      let msg = {
+        [TYPE]: PRODUCT_APPLICATION,
+        product: EMPLOYEE_ONBOARDING,
+        time: new Date().getTime()
+      }
+      self.trigger({action: 'employeeOnboarding', to: this._getItem(orgId)})
+      let data = await meDriver.createObject({object: msg})
+
+      let hash = data.link
+      msg = utils.clone(msg)
+      msg[CUR_HASH] = hash
+      msg[ROOT_HASH] = hash
+      msg._context = self.buildRef(msg)
+      msg.to = self.buildRef(orgRep)
+      msg.from = self.buildRef(me)
+
+      let sendParams = {
+        link: hash,
+        to: { permalink: orgRep[ROOT_HASH] },
+        other: { context: hash }
+      }
+      self._setItem(utils.getId(msg), msg)
+      self.addMessagesToChat(orgId, msg)
+      try {
+        await self.meDriverSend(sendParams)
+      }
+      catch(err) {
+        console.log('Store.onAddItem: ' + err.message)
+        debugger
+      }
+    }
+    else if (params.cb) {
+      if (returnVal[TYPE] !== SETTINGS)
+        params.cb(returnVal)
+      else {
+        // return newly created provider
+        SERVICE_PROVIDERS.forEach((r) => {
+          if (r.id === returnVal.id  &&  utils.urlsEqual(r.url, returnVal.url))
+            params.cb(self._getItem(utils.getId(r.org)))
+        })
+      }
+    }
+
+    function handleRegistration () {
+      self.trigger({action: 'runVideo'})
+      return Q.all([
+          self.loadDB(),
+          utils.resetPasswords()
+        ])
+        .then(function () {
+          return self.getDriver(returnVal)
+        })
+        .then(function () {
+          if (!resource || isNew) {
+            returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
+          }
+
+          return save(returnVal)
+        })
+    }
 
       function handleMessage (noTrigger, returnVal) {
         // TODO: fix hack
         // hack: we don't know root hash yet, use a fake
-        if (returnVal.documentCreated)  {
+        if (returnVal._documentCreated)  {
           // when all the multientry forms are filled out and next form is requested
           // do not show the last form request for the multientry form it is confusing for the user
           if (doneWithMultiEntry) {
@@ -3733,15 +3733,21 @@ var Store = Reflux.createStore({
               }
             }
           }
-          var params = {action: 'addItem', resource: returnVal}
-          // return self.disableOtherFormRequestsLikeThis(returnVal)
-          // .then(() => {
-            // don't save until the real resource is created
-          list[utils.getId(returnVal)].value = returnVal
-          self.trigger(params);
-          return self.onIdle()
+          // return new Promise(resolve => meDriver.objects.get(returnVal[CUR_HASH]))
+           return meDriver.objects.get(returnVal[CUR_HASH])
+          .then((obj) => {
+            let r = obj.object
+            extend(r, returnVal)
+            var params = {action: 'addItem', resource: r}
+            // return self.disableOtherFormRequestsLikeThis(returnVal)
+            // .then(() => {
+              // don't save until the real resource is created
+            list[utils.getId(returnVal)].value = returnVal
+            self.trigger(params);
+            return self.onIdle()
+          })
           .then(() => {
-            save(returnVal)
+            save(returnVal, true)
           })
           .catch(function(err) {
             debugger
@@ -3869,7 +3875,9 @@ var Store = Reflux.createStore({
 
           if (!isNew  ||  self.getModel(returnVal[TYPE]).subClassOf !== FORM)
             return
-          let allFormRequests = self.searchMessages({modelName: FORM_REQUEST, to: to})
+          return self.searchMessages({modelName: FORM_REQUEST, to: to})
+        })
+        .then((allFormRequests) => {
           let formRequests = allFormRequests  &&  allFormRequests.filter((r) => {
             if (r.document === returnVal[NONCE])
               return true
@@ -3894,9 +3902,9 @@ var Store = Reflux.createStore({
           r.maxAttempts = params.maxAttempts
         return self._putResourceInDB(r)
       }
-    })
+    // })
 
-    function becomingEmployee(resource) {
+    async function becomingEmployee(resource) {
       if (resource[TYPE] !== PROFILE)
         return
 
@@ -3907,7 +3915,8 @@ var Store = Reflux.createStore({
       let newOrgId = utils.getId(resource.organization)
 
       if (meOrgId  &&  meOrgId !== newOrgId) {
-        if (self.checkIfEmployeeAlready())
+        let isEmployee = checkIfEmployeeAlready()
+        if (isEmployee)
           return {error: 'Can\'t change employment'}
       }
       if (!meOrgId) {
@@ -3920,15 +3929,15 @@ var Store = Reflux.createStore({
           return {isBecomingEmployee: true}
       }
       else if (meOrgId)
-        return self.checkIfEmployeeAlready()
+        return await checkIfEmployeeAlready()
     }
-  },
-  checkIfEmployeeAlready() {
-    let result = this.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
-    if (!result || result.every(r => r.revoked))
-      return {isBecomingEmployee: true}
-    let meId = utils.getId(me)
-    return {isBecomingEmployee: !(result.some((r) => meId === utils.getId(r.to)))}
+    async function checkIfEmployeeAlready() {
+      let result = await self.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
+      if (!result || result.every(r => r.revoked))
+        return {isBecomingEmployee: true}
+      let meId = utils.getId(me)
+      return {isBecomingEmployee: !(result.some((r) => meId === utils.getId(r.to)))}
+    }
   },
   onAddApp(serverUrl) {
     const parts = serverUrl.split(';')
@@ -3968,28 +3977,25 @@ var Store = Reflux.createStore({
   onGetMe() {
     this.trigger({action: 'getMe', me: me})
   },
-  onCleanup() {
+  async onCleanup() {
     // var me  = utils.getMe()
     if (!me)
       return
     // Delete all resources but the last one. Every time custome enters the chat RM will receive
     // CustomerWaiting and the customer will receive ProductList message. So there is no point to keep them
-    var result = this.searchMessages({to: me, modelName: CUSTOMER_WAITING, isForgetting: true});
+    let result = await this.searchMessages({to: me, modelName: CUSTOMER_WAITING, isForgetting: true})
     if (!result)
       return
     if (result.length)
       delete result[result.length - 1]
-
-    return this.cleanup(result)
-    .then(() => {
-      result = this.searchMessages({to: me, modelName: PRODUCT_LIST, isForgetting: true});
-      if (result  &&  result.length) {
-        delete result[result.length - 1]
-        return this.cleanup(result)
-      }
-    })
-
+    await this.cleanup(result)
+    result = await this.searchMessages({to: me, modelName: PRODUCT_LIST, isForgetting: true});
+    if (result  &&  result.length) {
+      delete result[result.length - 1]
+      return this.cleanup(result)
+    }
   },
+
   onShare(resource, shareWithList, originatingResource) {
     const self = this
     if (resource[TYPE] === PRODUCT_APPLICATION) {
@@ -4064,11 +4070,11 @@ var Store = Reflux.createStore({
     // })
   },
   shareAll(document, to, formResource) {
-    var documentCreated = formResource.documentCreated
+    var documentCreated = formResource._documentCreated
     var key = utils.getId(formResource)
     var r = this._getItem(key)
     // disable FormRequest from being used again
-    r.documentCreated = true
+    r._documentCreated = true
     this.trigger({action: 'addItem', context: formResource.context, resource: r})
     if (documentCreated)
       return
@@ -4321,269 +4327,238 @@ var Store = Reflux.createStore({
       });
     }
   },
-  getList(params) {
+  async getList(params) {
     var meta = this.getModel(params.modelName)
+    var {modelName, prop, list, to, context, loadEarlierMessages, allLoaded, fromView, isAggregation, isForgetting, sponsorName, isTest, start, limit, listView, _readOnly, spinner} = params
     var isMessage = utils.isMessage(meta)
     if (!isMessage) {
-      params.fromView = true
-      return this._searchNotMessages(params)
-      .then((result) => {
-        let isOrg = params.modelName === ORGANIZATION
-        if (!result) {
-          // First time. No connection no providers yet loaded
-          if (!this.isConnected  &&  isOrg)
-            this.trigger({action: 'list', alert: translate('noConnection')})
+      fromView = true
+      let result = await this._searchNotMessages(params)
+      let isOrg = modelName === ORGANIZATION
+      if (!result) {
+        // First time. No connection no providers yet loaded
+        if (!this.isConnected  &&  isOrg)
+          this.trigger({action: 'list', alert: translate('noConnection')})
+        // else if (params.query)
+        //   this.trigger({action: 'list', alert: translate('notFound', meta)})
+        return
+      }
+      if (!SERVICE_PROVIDERS)
+        this.trigger({action: 'onlineStatus', onlineStatus: false})
 
-          return
-        }
-        if (!SERVICE_PROVIDERS)
-          this.trigger({action: 'onlineStatus', onlineStatus: false})
-
-        if (isOrg) {
-          let r1 = result.filter((r) => r.priority)
-          if (r1) {
-            let r2 = result.filter((r) => !r.priority)
-            result = r1.concat(r2)
-          }
-
-          // if (r1) {
-          //   r1.forEach((r) => {
-          //     SERVICE_PROVIDERS.forEach((sp) => {
-          //       if (utils.getId(r) === sp.org)
-          //         r._styles = sp.style
-          //     })
-          //   })
-          //   let r2 = result.filter((r) => !r.priority)
-          //   result = r1.concat(r2)
-          // }
-        }
-        else if (params.modelName === PROFILE) {
-          result = result.filter((r) => !r._inactive)
+      if (isOrg) {
+        let r1 = result.filter((r) => r.priority)
+        if (r1) {
+          let r2 = result.filter((r) => !r.priority)
+          result = r1.concat(r2)
         }
 
-        if (params.isAggregation)
-          result = this.getDependencies(result);
-        var shareableResources;
-        if (params.sponsorName) {
-          result = result.filter((r) => r.name === params.sponsorName)
-        }
-        var retParams = params.list
-                      ? { action: 'filteredList', list: result}
-                      : { action: params.sponsorName ? 'sponsorsList' : 'list',
-                          list: result,
-                          isTest: params.isTest,
-                          spinner: params.spinner,
-                          isAggregation: params.isAggregation
-                        }
-        if (params.prop)
-          retParams.prop = params.prop;
+        // if (r1) {
+        //   r1.forEach((r) => {
+        //     SERVICE_PROVIDERS.forEach((sp) => {
+        //       if (utils.getId(r) === sp.org)
+        //         r._styles = sp.style
+        //     })
+        //   })
+        //   let r2 = result.filter((r) => !r.priority)
+        //   result = r1.concat(r2)
+        // }
+      }
+      else if (modelName === PROFILE) {
+        result = result.filter((r) => !r._inactive)
+      }
 
-        this.trigger(retParams);
-      })
+      if (isAggregation)
+        result = this.getDependencies(result);
+      if (sponsorName) {
+        result = result.filter((r) => r.name === sponsorName)
+      }
+      let retParams = list
+                    ? { action: 'filteredList', list: result}
+                    : { action: sponsorName ? 'sponsorsList' : 'list',
+                        list: result,
+                        isTest: isTest,
+                        spinner: spinner,
+                        isAggregation: isAggregation
+                      }
+      if (prop)
+        retParams.prop = prop;
+      retParams.start = start
+      retParams.gridView = params.gridView
+
+      this.trigger(retParams);
+      return
     }
 
-    return this._searchMessages(params)
-    .then((result) => {
-      if (!result)
-        return
-      if (params.isAggregation)
-        result = this.getDependencies(result);
+    let shareableResources;
+    let retParams
+    let result = await this._searchMessages(params)
+    if (!result)
+      return
+    if (isAggregation)
+      result = this.getDependencies(result);
 
-      if ((ENV.hideVerificationsInChat  ||  ENV.hideProductApplicationInChat)  &&
-          params.modelName === MESSAGE      &&
-          params.to                         &&
-          params.to[TYPE] === ORGANIZATION  &&
-          !params.isForgetting) {
-        for (let i=result.length - 1; i>=0; i--)
-          if (result[i][TYPE] === VERIFICATION) {
-            if (ENV.hideVerificationsInChat)
-              result.splice(i, 1)
-          }
-          else if (result[i][TYPE] === PRODUCT_APPLICATION) {
-            if (ENV.hideProductApplicationInChat)
-              result.splice(i, 1)
-          }
+    if ((ENV.hideVerificationsInChat  ||  ENV.hideProductApplicationInChat)  &&
+        modelName === MESSAGE      &&
+        to                         &&
+        to[TYPE] === ORGANIZATION  &&
+        !isForgetting) {
+      for (let i=result.length - 1; i>=0; i--)
+        if (result[i][TYPE] === VERIFICATION) {
+          if (ENV.hideVerificationsInChat)
+            result.splice(i, 1)
+        }
+        else if (result[i][TYPE] === PRODUCT_APPLICATION) {
+          if (ENV.hideProductApplicationInChat)
+            result.splice(i, 1)
+        }
+    }
+    retParams = {
+      action: !listView  &&  !prop && !_readOnly ? 'messageList' : 'list',
+      list: result,
+      spinner: spinner,
+      to: to,
+      isAggregation: isAggregation
+    }
+    let hasMore = limit  &&  result.length > limit
+    if (loadEarlierMessages || hasMore) {
+      if (hasMore)  {
+        result.splice(0, 1)
+        retParams.allLoaded = true
       }
-      var shareableResources;
-      var retParams = {
-        action: !params.listView  &&  !params.prop && !params._readOnly ? 'messageList' : 'list',
-        list: result,
-        spinner: params.spinner,
-        to: params.to,
-        isAggregation: params.isAggregation
+      retParams.loadEarlierMessages = true
+    }
+    // if (params.modelName === FORM)
+    //   retParams.requestedModelName = FORM
+    retParams.requestedModelName = modelName
+    if (!isAggregation  &&  to  &&  !prop) {
+      if (to[TYPE] !== PROFILE  ||  !me.isEmployee) {
+        // let to = list[utils.getId(to)].value
+        // if (to  &&  to[TYPE] === ORGANIZATION)
+        // entering the chat should clear customer's unread indicator
+        shareableResources = await this.getShareableResources(result, to)
       }
-      let hasMore = params.limit  &&  result.length > params.limit
-      if (params.loadEarlierMessages || hasMore) {
-        if (hasMore)  {
-          result.splice(0, 1)
-          retParams.allLoaded = true
+      if (me.isEmployee  && to[TYPE] === PROFILE) {
+        let toId = utils.getId(to)
+        let to = this._getItem(toId)
+        if (!to.bot) {
+          to._unread = 0
+          this.dbPut(toId, to)
+          .then(() => {
+            this.trigger({action: 'updateRow', resource: to})
+          })
         }
-        retParams.loadEarlierMessages = true
       }
-      // if (params.modelName === FORM)
-      //   retParams.requestedModelName = FORM
-      retParams.requestedModelName = params.modelName
-      if (!params.isAggregation  &&  params.to  &&  !params.prop) {
-        if (params.to[TYPE] !== PROFILE  ||  !me.isEmployee) {
-          // let to = list[utils.getId(params.to)].value
-          // if (to  &&  to[TYPE] === ORGANIZATION)
-          // entering the chat should clear customer's unread indicator
-          shareableResources = this.getShareableResources(result, params.to)
-        }
-        if (me.isEmployee  && params.to[TYPE] === PROFILE) {
-          let toId = utils.getId(params.to)
-          let to = this._getItem(toId)
-          if (!to.bot) {
-            to._unread = 0
-            this.dbPut(toId, to)
-            .then(() => {
-              this.trigger({action: 'updateRow', resource: to})
-            })
-          }
-        }
-        let orgId
+      let orgId
 
-        if (params.to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(params.to)) {
-          if (!params.context)
-            params.context = params.to
-          // Filter out the resource submitted by employee in the shared context chat.
-          // Otherwise there are duplicates messages submitted by employee and its bot
-          let cId = utils.getId(params.context)
-          let meId = IDENTITY + '_' + me[ROOT_HASH]
-          let meProfileId = utils.getId(utils.getMe())
-          let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
-          let rm = assignedRM && assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
-          if (rm && rm.length)
-            result = result.filter((r) => utils.getId(r.from) !== meProfileId)
-          retParams.list = result
-        }
-        else {
-          if (params.to.organization)
-            orgId = utils.getId(params.to.organization)
-          else if (params.to[TYPE] === ORGANIZATION)
-              orgId = utils.getId(params.to)
+      if (to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)) {
+        if (!context)
+          context = to
+        // Filter out the resource submitted by employee in the shared context chat.
+        // Otherwise there are duplicates messages submitted by employee and its bot
+        let cId = utils.getId(context)
+        let meId = IDENTITY + '_' + me[ROOT_HASH]
+        let meProfileId = utils.getId(utils.getMe())
+        let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
+        let rm = assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
+        if (rm && rm.length)
+          result = result.filter((r) => utils.getId(r.from) !== meProfileId)
+        retParams.list = result
+      }
+      else {
+        if (to.organization)
+          orgId = utils.getId(to.organization)
+        else if (to[TYPE] === ORGANIZATION)
+            orgId = utils.getId(to)
 
-          if (orgId) {
-            let rep = this.getRepresentative(orgId)
-            if (rep  &&  !rep.bot)
-              retParams.isEmployee = true
+        if (orgId) {
+          let rep = this.getRepresentative(orgId)
+          if (rep  &&  !rep.bot)
+            retParams.isEmployee = true
 
-            // Filter forms verified by a different provider and leave only verifications
-            if (params.modelName === MESSAGE) {
-              let rmIdx = []
-              let sharedVerifiedForms = []
-              for (let i=0; i<result.length; i++) {
-                let r = result[i]
-                let m = this.getModel(r[TYPE])
-                // So not show remediation PA in chat
-                if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION) {
+          // Filter forms verified by a different provider and leave only verifications
+          if (modelName === MESSAGE) {
+            result.forEach(r => this.addVisualProps(r))
+            let rmIdx = []
+            let sharedVerifiedForms = []
+            for (let i=0; i<result.length; i++) {
+              let r = result[i]
+              let m = this.getModel(r[TYPE])
+              // So not show remediation PA in chat
+              if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION) {
+                rmIdx.push(i)
+                continue
+              }
+              // Product created in Remediation show only from profile view
+              if (m.subClassOf === MY_PRODUCT  &&  r._context) {
+                if (this._getItem(utils.getId(r._context)).product === REMEDIATION) {
                   rmIdx.push(i)
                   continue
                 }
-                // Product created in Remediation show only from profile view
-                if (m.subClassOf === MY_PRODUCT  &&  r._context) {
-                  if (this._getItem(utils.getId(r._context)).product === REMEDIATION) {
-                    rmIdx.push(i)
-                    continue
-                  }
-                }
-                if (m.subClassOf !== FORM)
+              }
+              if (m.subClassOf !== FORM)
+                continue
+              // Case when event to dosplay ML is before the new resource was sent
+              let formCreatorId = r.to.organization
+                                ? utils.getId(r.to.organization)
+                                : utils.getId(this._getItem(utils.getId(r.to)).organization)
+              if (formCreatorId === orgId)
+                continue
+              let fId = utils.getId(r)
+              for (let ii = i+1; ii<result.length; ii++) {
+                let v = result[ii]
+                if (v[TYPE] !== VERIFICATION)
                   continue
-                // Case when event to dosplay ML is before the new resource was sent
-                let formCreatorId = r.to.organization
-                                  ? utils.getId(r.to.organization)
-                                  : utils.getId(this._getItem(utils.getId(r.to)).organization)
-                if (formCreatorId === orgId)
-                  continue
-                let fId = utils.getId(r)
-                for (let ii = i+1; ii<result.length; ii++) {
-                  let v = result[ii]
-                  if (v[TYPE] !== VERIFICATION)
-                    continue
-                  if (utils.getId(v.document) === fId) {
-                    let vFromId = utils.getId(v.from.organization)
-                    // If this is this provider's verification then the form was shared
-                    //  without verification and the stub needs to be shown
-                    if (vFromId === orgId)
-                      break
-                    sharedVerifiedForms.push(i)
-                  }
-                }
-              }
-              if (rmIdx) {
-                for (let i=rmIdx.length - 1; i>=0; i--)
-                  result.splice(rmIdx[i], 1)
-              }
-              if (sharedVerifiedForms.length) {
-                for (let i = sharedVerifiedForms.length - 1; i>=0; i--)
-                  result.splice(sharedVerifiedForms[i], 1)
-              }
-              // Pin last unfulfilled Form Request from current context
-              let rContext = result.length  &&  result[result.length - 1]._context
-              if (rContext)
-                for (let i=result.length - 1; i>=0; i--) {
-                  let r = result[i]
-                  if (r[TYPE] === FORM_REQUEST) {
-                    if (!r.documentCreated  &&  utils.getId(r._context) === utils.getId(rContext)) {
-                      result.splice(i, 1)
-                      result.push(r)
-                    }
+                if (utils.getId(v.document) === fId) {
+                  let vFromId = utils.getId(v.from.organization)
+                  // If this is this provider's verification then the form was shared
+                  //  without verification and the stub needs to be shown
+                  if (vFromId === orgId)
                     break
-                  }
+                  sharedVerifiedForms.push(i)
                 }
+              }
+            }
+            if (rmIdx) {
+              for (let i=rmIdx.length - 1; i>=0; i--)
+                result.splice(rmIdx[i], 1)
+            }
+            if (sharedVerifiedForms.length) {
+              for (let i = sharedVerifiedForms.length - 1; i>=0; i--)
+                result.splice(sharedVerifiedForms[i], 1)
+            }
+            // Pin last unfulfilled Form Request from current context
+            let rContext = result.length  &&  result[result.length - 1]._context
+            if (rContext) {
+              for (let i=result.length - 1; i>=0; i--) {
+                let r = result[i]
+                if (r[TYPE] !== FORM_REQUEST)
+                  continue
+                if (!r._documentCreated  &&  utils.getId(r._context) === utils.getId(rContext)) {
+                  result.splice(i, 1)
+                  result.push(r)
+                }
+                break
+              }
             }
           }
         }
-
-        if (params.context)
-          retParams.context = params.context
-        else if (params.modelName !== PRODUCT_APPLICATION)
-          retParams.context = this.getCurrentContext(params.to, orgId)
-  /*
-        // Filter out forms that were shared, leave only verifications
-        if (params.to  &&  params.to[TYPE] === ORGANIZATION  &&  !utils.isEmployee(params.to)) {//  &&  utils.getId(params.to) !== meId) {
-          let toId = utils.getId(this.getRepresentative(utils.getId(params.to)))
-          result = result.filter((r) => {
-            // if (r[TYPE] !== VERIFICATION  ||  !r._sharedWith ||  r._sharedWith.length === 0)
-            //   return
-            if (this.getModel(r[TYPE]).value.subClassOf !== FORM)
-              return true
-            let rId = utils.getId(r.to)
-            return (utils.getId(r.from) === meId  &&  rId !== toId) ? false : true
-            // let shV = r._sharedWith.forEach((rr) => {
-            //   if (rr.bankRepresentative === toId) {
-            //     let d = this._getItem(r.document)
-            //     if (utils.getId(d.to) !== toId)
-            //       filterOutForms.push(utils.getId(r.document))
-            //   }
-            // })
-          })
-          retParams.list = result
-        }
-  */
       }
-    // if (isMessage) {
-    //   let orgId = utils.getId(params.to)
-    //   let styles
-    //   if (SERVICE_PROVIDERS)
-    //      styles = SERVICE_PROVIDERS.filter((sp) => {
-    //         if (sp.org === orgId)
-    //           return true
-    //       })
-    //   if (styles  &&  styles.length)
-    //     retParams.style = styles[0].style
-    // }
 
-      if (shareableResources)
-        retParams.shareableResources = shareableResources
-      if (params.prop)
-        retParams.prop = params.prop
-      this.trigger(retParams)
-    })
+      if (!context  &&  modelName !== PRODUCT_APPLICATION)
+        context = await this.getCurrentContext(to, orgId)
+    }
+    if (context)
+      retParams.context = context
+    if (shareableResources)
+      retParams.shareableResources = shareableResources
+    if (prop)
+      retParams.prop = prop
+    this.trigger(retParams)
   },
 
-  getCurrentContext(to, orgId) {
-    let c = this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
+  async getCurrentContext(to, orgId) {
+    let c = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
     if (!c  ||  !c.length)
       return
 
@@ -4612,16 +4587,6 @@ var Store = Reflux.createStore({
     return contexts[0]
   },
 
-  searchResources(params) {
-    var meta = this.getModel(params.modelName)
-    var isMessage = utils.isMessage(meta)
-    if (isMessage) //  ||  meta.id === FORM)
-      return this.searchMessages(params);
-    else {
-      params.fromView = true
-      return this.searchNotMessages(params);
-    }
-  },
   onListSharedWith(resource, chat) {
     let sharedWith = resource._sharedWith
     if (!sharedWith)
@@ -4645,24 +4610,94 @@ var Store = Reflux.createStore({
       return this.searchNotMessages(params)
     })
   },
+  async searchInDB(params) {
+    await this.ready
+    await this._loadedResourcesDefer.promise
+    let {modelName, limit, startRec, sortProperty, asc, to, prop} = params
+    let criteria = startRec || modelName + '_'
+    let time = startRec ? startRec.time : new Date(0).getTime()
+
+    // return await collect(db.createReadStream({ [prop]: criteria, end: modelName + '_\xff', limit: 10, keys: false }))
+
+    // let result = await collect(myCustomIndexes.timeAndFromAndSubClassOf({
+    //   start: time + '!' + me[ROOT_HASH] + '!tradle.Form',
+    //   end: new Date().getTime() + '!' + me[ROOT_HASH] + '!tradle.Form\xff',
+    //   limit: limit || 10,
+    //   keys: false,
+    //   // get the actual object, not just metadata
+    //   body: true
+    // }))
+    let result
+    if (to) {
+      let toId = utils.getId(to)
+      result = await collect(myCustomIndexes.typeAndToAndTime({
+        gt: modelName + '!' + toId + '!' + time,
+        lte: modelName + '!' + toId + '!' + new Date().getTime(),
+        limit: limit || 10,
+        keys: false,
+        // get the actual object, not just metadata
+        body: true
+      }))
+    }
+    else
+      result = await collect(myCustomIndexes.typeAndTime({
+        gt: modelName + '!' + time,
+        lte: modelName + '!' + new Date().getTime(),
+        limit: limit || 10,
+        keys: false,
+        // get the actual object, not just metadata
+        body: true
+      }))
+
+    let returnList = result.map((msgInfo) => {
+      let r = msgInfo.object.object
+      let author = [PROFILE, msgInfo.author].join('_')
+      let recipient = [PROFILE, msgInfo.recipient].join('_')
+      r[ROOT_HASH] = msgInfo.permalnk || msgInfo.link
+      r[CUR_HASH] = msgInfo.link
+      r.time = r.time || msgInfo.timestamp
+      r._context = [PRODUCT_APPLICATION, msgInfo.object.context].join('_')
+      r.from = { id:  author,  title: utils.getDisplayName(this._getItem(author))}
+      r.to = { id: recipient, title: utils.getDisplayName(this._getItem(recipient)) }
+      return r
+    })
+    return returnList
+  },
+
+
+
+// // search index
+// await collect(myCustomIndexes.subClassOf({
+//   eq: 'tradle.Form',
+//   keys: false,
+//   // get the actual object, not just metadata
+//   body: true
+// }))
+
+// // search index
+// await collect(myCustomIndexes.fromAndSubClassOf({
+//   eq: swissre.permalnk + '!' + 'tradle.Form',
+//   keys: false,
+//   // get the actual object, not just metadata
+//   body: true
+// }))
+
   searchNotMessages(params) {
     if (params.list)
       return params.list.map((r) => this._getItem(r))
-
     var foundResources = {};
-    var modelName = params.modelName;
+    let {modelName, limit, to, start, notVerified, query, all, isTest, fromView, sortProperty, asc} = params
     var meta = this.getModel(modelName)
+    let ids = myCustomIndexes
     if (meta.subClassOf === ENUM)
       return this.getEnum(params)
-    var to = params.to;
-    var notVerified = params.notVerified
     var props = meta.properties;
     var containerProp, resourceId;
+    var foundRecs = 0
 
-    let isOrg = params.modelName == ORGANIZATION
-    let sortProp = params.sortProperty
-                 ? params.sortProperty
-                 : isOrg  &&  !params.sortProperty ? LAST_MESSAGE_TIME : meta.sort
+    let isOrg = modelName == ORGANIZATION
+
+    let sortProp = sortProperty || (isOrg ? LAST_MESSAGE_TIME : meta.sort)
 
     var isIdentity = modelName === PROFILE;
     // to variable if present is a container resource as for example subreddit for posts or post for comments
@@ -4675,8 +4710,18 @@ var Store = Reflux.createStore({
         }
       }
     }
-    var query = params.query;
-
+    var searchProp
+    if (query) {
+      let pidx = query.indexOf(':')
+      if (pidx !== -1) {
+        let p = query.substring(0, pidx).trim()
+        let prop = utils.getPropByTitle(props, p)
+        if (prop) {
+          searchProp = prop.name
+          query = query.substring(pidx + 1).trim()
+        }
+      }
+    }
     var required = meta.required;
     var meId = me ? utils.getId(me) : null
     var subclasses = utils.getAllSubclasses(modelName).map(function(r) {
@@ -4726,7 +4771,7 @@ var Store = Reflux.createStore({
         else
           continue
       }
-      else if (params.fromView  &&  isIdentity  &&  r.bot)
+      else if (fromView  &&  isIdentity  &&  r.bot)
         continue
       else if (notVerified  &&  (r.verifications  &&  r.verifications.length))
         continue
@@ -4739,21 +4784,25 @@ var Store = Reflux.createStore({
       if (isOrg  &&  r.name.indexOf('[TEST]') === 0)
         continue
       if (!query) {
+        if (start  &&  foundRecs < start) {
+          foundRecs++
+          continue
+        }
         foundResources[key] = r
+        if (limit  &&  Object.keys(foundResources).length === limit)
+          break
         continue;
       }
-      var fr = this.checkCriteria(r, query)
-      // var combinedValue = '';
-      // for (var rr in props) {
-      //   if (rr.charAt(0) === '_')
-      //     continue
-      //   if (r[rr] instanceof Array)
-      //     continue;
-      //   combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
-      // }
-      // if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) != -1))) {
-      if (fr)
+      var fr = this.checkCriteria(r, query, searchProp)
+      if (fr) {
+        if (start  &&  foundRecs < start) {
+          foundRecs++
+          continue
+        }
         foundResources[key] = r
+        if (limit  &&  Object.keys(foundResources).length === limit)
+          break
+      }
     }
     // Don't show current 'me' contact in contact list or my identities list
     if (!containerProp  &&  me  &&  isIdentity) {
@@ -4780,7 +4829,7 @@ var Store = Reflux.createStore({
     //     }
     //   });
     // }
-    if (isIdentity  && !params.all && me.isEmployee) {
+    if (isIdentity  && !all && me.isEmployee) {
       let retPeople = []
       // Filter out the employees of other service providers from contact list
       // This will go away when thru-bot communications will deployed
@@ -4810,40 +4859,52 @@ var Store = Reflux.createStore({
         rr.numberOfForms = orgToForm[orgId]
         retOrgs.push(rr)
       })
-      result = retOrgs.filter((r) => r._isTest === params.isTest)
+      result = retOrgs.filter((r) => r._isTest === isTest)
       // result = retOrgs
     }
-    if (result.length === 1)
+    if (result.length === 1  ||  !sortProp)
       return result
-    // var sortProp = params.sortProperty;
-    if (sortProp) {
-      var asc = (typeof params.asc != 'undefined') ? params.asc : false;
-      if (props[sortProp].type == 'date') {
-        result.sort(function(a,b) {
-          var aVal = a[sortProp] ? a[sortProp] : 0;
-          var bVal = b[sortProp] ? b[sortProp] : 0;
-          if (asc)
-            return aVal - bVal;
-          else
-            return bVal - aVal;
-        });
-      }
-      else if (props[sortProp].type == 'string')  {
-        let sortPropToR = {}
-        let arr = result.map((r) => {
-          sortPropToR[r[sortProp]] = r
-          return r[sortProp]
-        })
-        arr.sort();
+    // sortProp = sortProperty || sortProp
+    asc = (typeof asc != 'undefined') ? asc : false;
+    if (props[sortProp].type == 'date') {
+      result.sort(function(a,b) {
+        var aVal = a[sortProp] ? a[sortProp] : 0;
+        var bVal = b[sortProp] ? b[sortProp] : 0;
         if (asc)
-          arr = arr.reverse();
-        result = arr.map((s) => sortPropToR[s])
-      }
-      else if (props[sortProp].type == 'number') {
-        result.sort(function(a, b) {
-          return asc ? a - b : b - a
-        });
-      }
+          return aVal - bVal;
+        else
+          return bVal - aVal;
+      });
+    }
+    else if (props[sortProp].type == 'string')  {
+      let sortPropToR = {}
+      let arr = result.map((r) => {
+        sortPropToR[r[sortProp]] = r
+        return r[sortProp]
+      })
+      arr.sort();
+      if (asc)
+        arr = arr.reverse();
+      result = arr.map((s) => sortPropToR[s])
+    }
+    else if (props[sortProp].type == 'number') {
+      result.sort(function(a, b) {
+        return asc ? a[sortProp] - b[sortProp] : b[sortProp] - a[sortProp]
+      });
+    }
+    else if (props[sortProp].ref) {
+      let sortPropToR = {}
+      let arr = result.map((r) => {
+        sortPropToR[r[sortProp].title] = r
+        return r[sortProp].title
+      })
+      arr.sort();
+      if (asc)
+        arr = arr.reverse();
+      result = arr.map((s) => sortPropToR[s])
+      // result.sort(function(a, b) {
+      //   return asc ? a[sortProp].title - b[sortProp].title : b[sortProp].title - a[sortProp].title
+      // })
     }
 
     return result;
@@ -4856,14 +4917,32 @@ var Store = Reflux.createStore({
     else
       return enumList
   },
-  checkCriteria(r, query) {
+  checkCriteria(r, query, prop) {
     if (!query)
       return r
     let props = this.getModel(r[TYPE]).properties
+    if (prop  &&  rr[prop]) {
+      let val = utils.getStringPropertyValue(r, prop, props)
+      return (val.toLowerCase().indexOf(query.toLowerCase()) === -1) ? null : r
+    }
     var combinedValue = '';
     for (var rr in props) {
-      if (rr.charAt(0) === '_'  ||   Array.isArray(r[rr]))
+      if (!r[rr]  ||  rr.charAt(0) === '_'  ||   Array.isArray(r[rr]))
         continue;
+      if (props[rr].type === 'object') {
+        let title = utils.getDisplayName(r[rr], props)
+        combinedValue += combinedValue ? ' ' + title : title
+        continue
+      }
+      else if (props[rr].type === 'date') {
+        if (!isNaN(r[rr])) {
+          let d = new Date(r[rr]).toString()
+          combinedValue += combinedValue ? ' ' + d : d
+          continue
+        }
+
+      }
+
       combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
     }
     if (!combinedValue)
@@ -4875,18 +4954,18 @@ var Store = Reflux.createStore({
   },
   _searchMessages(params) {
     return this._loadedResourcesDefer.promise
-      .then(() => {
-        return this.searchMessages(params)
-      })
+    .then(() => {
+      return this.searchMessages(params)
+    })
   },
   searchMessages(params) {
+    // await this._loadedResourcesDefer.promise
     var self = this
-    var query = params.query;
-    var modelName = params.modelName;
+
+    var {resource, query, modelName, prop, context, _readOnly, to, listView, isForgetting, lastId, limit} = params
+
     var meta = this.getModel(modelName)
-    var prop = params.prop;
-    var context = params.context
-    var _readOnly = params._readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
+    var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
     if (_readOnly  &&  modelName === PRODUCT_APPLICATION)
       return this.getAllSharedContexts()
     if (typeof prop === 'string')
@@ -4899,9 +4978,9 @@ var Store = Reflux.createStore({
     var meId = utils.getId(me)
     var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
 
-    let filterOutForms = !params.listView  &&  !params.isForgetting  &&  params.to  &&  params.to[TYPE] === ORGANIZATION  //&&  !utils.isEmployee(params.to)
+    let filterOutForms = !listView  &&  !isForgetting  &&  to  &&  to[TYPE] === ORGANIZATION  //&&  !utils.isEmployee(params.to)
 
-    var chatTo = params.to
+    var chatTo = to
     if (chatTo  &&  chatTo.id)
       chatTo = this._getItem(utils.getId(chatTo))
     var chatId = chatTo ? utils.getId(chatTo) : null;
@@ -4917,7 +4996,7 @@ var Store = Reflux.createStore({
       chatTo = rep
       chatId = utils.getId(chatTo)
       // isChatWithOrg = false
-      toOrgId = utils.getId(params.to)
+      toOrgId = utils.getId(to)
       toOrg = this._getItem(toOrgId)
       thisChatMessages = chatMessages[toOrgId]
     }
@@ -4937,14 +5016,18 @@ var Store = Reflux.createStore({
 //         thisChatMessages = chatMessages[chatId]
 //       }
     }
-    let isBacklinkProp = (params.prop  &&  params.prop.items  &&  params.prop.items.backlink)
-    if (!thisChatMessages  &&  (!params.to || chatId === meId  || isBacklinkProp)) {
+    let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
+    if (!thisChatMessages  &&  (!to || chatId === meId  || isBacklinkProp)) {
+      let allMessages = chatMessages[ALL_MESSAGES]
       thisChatMessages = []
       let isInterface = meta.isInterface
       let isForm = meta.id === FORM
       let isMessage = meta.id === MESSAGE
-      Object.keys(list).forEach(key => {
-        let r = self._getItem(key)
+      if (!allMessages)
+        return
+      //Object.keys(list).forEach(key => {
+      allMessages.forEach((res) => {
+        let r = self._getItem(res.id)
         let type = r[TYPE]
         let m = self.getModel(type)
         if (!m) return
@@ -4955,15 +5038,15 @@ var Store = Reflux.createStore({
             if (m.subClassOf === FORM) {
               // Make sure to not return Items and Documents in this list
               let ilen = m.interfaces.length
-              if (params.isForgetting  ||  ilen === 1  ||  (ilen === 2  &&  m.interfaces.indexOf(VERIFIABLE) !== -1))
+              if (isForgetting  ||  ilen === 1  ||  (ilen === 2  &&  m.interfaces.indexOf(VERIFIABLE) !== -1))
                 addMessage = true
             }
           }
-          else if (params.isForgetting  || (isInterface  &&  m.interfaces  &&  m.interfaces.indexOf(meta.id) !== -1)) //  && (!isMessage  ||  m.value.interfaces.length === 1))) {
+          else if (isForgetting  || (isInterface  &&  m.interfaces  &&  m.interfaces.indexOf(meta.id) !== -1)) //  && (!isMessage  ||  m.value.interfaces.length === 1))) {
             addMessage = true
         }
         if (addMessage)
-          thisChatMessages.push({id: key, time: r.time})
+          thisChatMessages.push({id: res.id, time: r.time})
 
       })
 
@@ -5001,77 +5084,199 @@ var Store = Reflux.createStore({
     var implementors = isAllMessages ? utils.getImplementors(modelName) : null;
     var isVerification = modelName === VERIFICATION  ||  meta.subClassOf === VERIFICATION;
 
-    // for (var key in list) {
-    let lastId = params.lastId
-    let ii = thisChatMessages.length - 1
-    if (lastId) {
-      for (; ii>=0; ii--) {
-        if (thisChatMessages[ii].id === lastId) {
-          ii--
-          break
+    let resourceId = resource ? utils.getId(resource) : null
+    let list
+    let links = []
+    if (isBacklinkProp) {
+      let j = 0
+      if (lastId) {
+        for (; j<thisChatMessages.length; j++) {
+          if (thisChatMessages[j].id === lastId) {
+            j++
+            break
+          }
         }
       }
+      for (let i=j; i<thisChatMessages.length; i++) {
+        // checkResource(i)
+        let link = thisChatMessages[i].id.split('_')
+        if (!meta.isInterface) {
+          if (link[0] !== modelName) {
+            var rModel = this.getModel(link[0])
+            // Checks for the first level of subClasses
+            if (rModel.subClassOf !== modelName)
+              continue
+          }
+        }
+        links.push(link[link.length - 1])
+        if (limit  &&  links.length === limit)
+          break
+      }
+      if (!links.length)
+        return
+      // return getBacklinks(thisChatMessages, params)
     }
-    let resourceId = params.resource ? utils.getId(params.resource) : null
-    for (let i=ii; i>=0; i--) {
-      var key = thisChatMessages[i].id
-      var r = this._getItem(key)
-      var iMeta = null;
-      if (isAllMessages)
-        iMeta = this.getModel(key.split('_')[0])
-      else if (r[TYPE] !== modelName) {
-        var rModel = this.getModel(r[TYPE])
-        // Checks for the first level of subClasses
-        if (rModel.subClassOf !== modelName)
-          continue;
+    else {
+      let ii = thisChatMessages.length - 1
+      if (lastId) {
+        for (; ii>=0; ii--) {
+          if (thisChatMessages[ii].id === lastId) {
+            ii--
+            break
+          }
+        }
       }
-      if (!iMeta)
-        iMeta = meta;
+      for (let i=ii; i>=0; i--) {
+        let link = thisChatMessages[i].id.split('_')
+        if (!meta.isInterface) {
+          if (link[0] !== modelName) {
+            var rModel = this.getModel(link[0])
+            // Checks for the first level of subClasses
+            if (rModel.subClassOf !== modelName)
+              continue
+          }
+        }
+        links.push(link[link.length - 1])
+        if (limit  &&  foundResources.length === limit)
+          break
+      }
+    }
+    if (!links.length)
+      return
+    return Promise.all(links.map(r => meDriver.objects.get(r)))
+    .then((result) => {
+      list = transformResult(result)
+      if (isBacklinkProp) {
+        let container = resource  ||  to
+        if (container[TYPE] === ORGANIZATION  && ['to', 'from'].indexOf(backlink) !== -1)
+          container = this.getRepresentative(utils.getId(container))
+
+        let rId = utils.getId(container)
+        list = list.filter((r) => {
+          return r[backlink]  &&  utils.getId(r[backlink]) === rId
+        })
+      }
+      if (isVerification) {
+        return Promise.all(list.map((r) => {
+          let link = this._getItem(r.document)[CUR_HASH]
+          return meDriver.objects.get(link)
+        }))
+      }
+      else
+        return Q()
+    })
+    .then((result) => {
+      if (!result)
+        return foundResources
+      result = transformResult(result)
+      list.forEach((r) => {
+        let docId = r.document.id
+        for (let i=0; i<result.length; i++) {
+          let d = result[i]
+          if (utils.getId(d) === docId) {
+            r.document = d
+            r._context = d.context
+            break
+          }
+        }
+      })
+      return list
+    })
+    .then(() => {
+      if (isBacklinkProp)
+        return list
+      let promises = []
+      list.forEach((r) => {
+        promises.push(checkResource(r))
+      })
+      return Q.all(promises)
+    })
+    .then(() => {
+      if (isBacklinkProp)
+        return list
+      if (!foundResources.length)
+        return
+      // Minor hack before we intro sort property here
+      let result = params._readOnly  &&  modelName === PRODUCT_APPLICATION
+                 ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
+                 : foundResources.reverse()
+      if (result  &&  result.length  &&  isBacklinkProp  &&  modelName === FORM) {
+        // Filter out the older versions of the resources
+        return getFreshResources(result)
+      }
+      else
+        return result
+    })
+    function transformResult(result) {
+      return result.map((msgInfo) => {
+        let r = msgInfo.object
+        r[ROOT_HASH] = msgInfo.permalnk || msgInfo.link
+        r[CUR_HASH] = msgInfo.link
+        r.time = r.time || msgInfo.timestamp
+        let c = msgInfo.object.context
+        if (c)
+          r._context = [PRODUCT_APPLICATION, c].join('_')
+        let cachedRes = self._getItem(utils.getId(r))
+        extend(r, cachedRes)
+        return r
+      })
+
+    }
+    async function checkResource(r) {
+      // var key = thisChatMessages[i].id
+      // var r = self._getItem(key)
       if (r.canceled)
-        continue;
-      if (context) {
-        if (!this.inContext(r, context))
-          continue
+        return
+      if (!meta.isInterface) {
+        let rModel = self.getModel(r[TYPE])
+        if (r[TYPE] !== modelName) {
+          if (rModel.subClassOf !== modelName)
+            return
+        }
       }
-      // if (r._context  &&  this._getItem(r._context)._readOnly)
+      if (context) {
+        if (!self.inContext(r, context))
+          return
+      }
+      // if (r._context  &&  self._getItem(r._context)._readOnly)
       //   continue
       var isFormError = isAllMessages && r[TYPE] === FORM_ERROR
       // Make sure that the messages that are showing in chat belong to the conversation between these participants
-      if (isVerification) {
-        if (r.document) {
-          var d = this._getItem(utils.getId(r.document))
-          if (!d)
-            continue
-
-          if (params.resource  &&  resourceId !== meId  && utils.getId(params.resource) !== utils.getId(d))
-            continue
-          r.document = d;
-        }
-      }
-      else if (isFormError) {
-        let prefill = r.prefill.id ? this._getItem(utils.getId(r.prefill)) : r.prefill
-        r.prefill =  prefill ? prefill : r.prefill
-      }
+      // if (isVerification) {
+      //   if (r.document) {
+      //     var d = self._getItem(utils.getId(r.document))
+      //     if (!d)
+      //       return
+      //     if (resource  &&  resourceId !== meId  && utils.getId(resource) !== utils.getId(d))
+      //       return
+      //     r.document = d;
+      //   }
+      // }
+      // else if (isFormError) {
+      //   let prefill = self._getItem(utils.getId(r.prefill))
+      //   r.prefill =  prefill ? prefill : r.prefill
+      // }
 
       // HACK to not show service message in customer stream
-      else if (r.message  &&  r.message.length)  {
-        if (r[TYPE] === SELF_INTRODUCTION  &&  !params.isForgetting && (utils.getId(r.to) !== meId))
-          continue
+      // else
+      if (r.message  &&  r.message.length)  {
+        if (r[TYPE] === SELF_INTRODUCTION  &&  !isForgetting && (utils.getId(r.to) !== meId))
+          return
         if (r.message === '[already published](tradle.Identity)')
-          continue
+          return
         var m = utils.splitMessage(r.message)
 
         if (m.length === 2) {
           if (m[1] === PROFILE)
-            continue;
+            return
         }
         if (chatTo.organization  &&  r[TYPE] === constants.TYPES.CUSTOMER_WAITING) {
           var rid = utils.getId(chatTo.organization);
 
-          // var org = this._getItem(utils.getId(r.to)).organization
+          // var org = self._getItem(utils.getId(r.to)).organization
           // var orgId = utils.getId(org)
-          if (!utils.isEmployee(this._getItem(rid)))
-            continue;
+          if (!utils.isEmployee(self._getItem(rid)))
+            return
         }
 
       }
@@ -5079,7 +5284,7 @@ var Store = Reflux.createStore({
       var isSharedWith //, timeResourcePair = null
       if (r._sharedWith  &&  toOrgId) {
         let sharedWith = r._sharedWith.filter((r) => {
-          let org = this._getItem(r.bankRepresentative).organization
+          let org = self._getItem(r.bankRepresentative).organization
           return (org) ? utils.getId(org) === toOrgId : false
         })
         isSharedWith = sharedWith.length !== 0
@@ -5094,44 +5299,42 @@ var Store = Reflux.createStore({
       if (chatTo) {
         // backlinks like myVerifications, myDocuments etc. on Profile
         if (backlink  &&  r[backlink]) {
-          var s = params.resource ? utils.getId(params.resource) : chatId
+          var s = resource ? utils.getId(resource) : chatId
           let doFurtherCheck = s === utils.getId(r[backlink]) || isSharedWith
-          if (doFurtherCheck  &&  checkAndFilter(r, i)) {
-            if (limit  &&  foundResources.length === limit)
-              break
-          }
+          if (doFurtherCheck)
+            await checkAndFilter(r)
 
-          continue;
+          return;
         }
 
-        var m = this.getModel(r[TYPE])
+        var m = self.getModel(r[TYPE])
         var isVerificationR = r[TYPE] === VERIFICATION  ||  m.subClassOf === VERIFICATION
         var isForm = m.subClassOf === FORM
         var isMyProduct = m.subClassOf === MY_PRODUCT
         let isProductApplication = m.id === PRODUCT_APPLICATION
         if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isProductApplication)
           // check if this is verification resource
-          continue;
+          return;
         // var fromID = utils.getId(r.from);
         var toID = utils.getId(r.to);
 
         if (params.strict) {
           if (chatId !== toID)
-            continue
+            return
         }
       }
       if (params.strict  &&  chatId !== utils.getId(r.to))
-        continue
+        return
 
       if (r._sharedWith  &&  toOrgId  &&  !isSharedWith)
-        continue
+        return
       if (isVerificationR) {
         var doc = {};
         var rDoc = list[utils.getId(r.document)]
         if (!rDoc) {
           // if (params.isForgetting)
-          checkAndFilter(r, i)
-          continue
+          await checkAndFilter(r)
+          return
         }
 
         // TODO: check if we can copy by reference
@@ -5157,23 +5360,8 @@ var Store = Reflux.createStore({
         r.document = doc;
       }
       // primitive filtering for this commit
-      if (checkAndFilter(r, i)) {
-        if (limit  &&  foundResources.length === limit)
-          break
-      }
+      await checkAndFilter(r)
     }
-    if (!foundResources.length)
-      return
-    // Minor hack before we intro sort property here
-    let result = params._readOnly  &&  modelName === PRODUCT_APPLICATION
-               ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
-               : foundResources.reverse()
-    if (result  &&  result.length  &&  isBacklinkProp  &&  modelName === FORM) {
-      // Filter out the older versions of the resources
-      return getFreshResources(result)
-    }
-    else
-      return result
     function getFreshResources(result) {
     // Filter out the older versions of the resources
       let rootHashes = []
@@ -5185,9 +5373,9 @@ var Store = Reflux.createStore({
       })
       return newResult.reverse()
     }
-    function checkAndFilter(r, i) {
+    async function checkAndFilter(r, i) {
       if (!query) {
-        if (!filterOutForms  ||  !doFilterOut(r, chatId, i)) {
+        if (!filterOutForms  ||  !(await doFilterOut(r, chatId, i))) {
           foundResources.push(self.fillMessage(r))
           return true
         }
@@ -5196,40 +5384,27 @@ var Store = Reflux.createStore({
       let checkVal = isVerificationR ? self._getItem(r.document) : r
       let fr = self.checkCriteria(r, query)
 
-      // let checkProps = self.getModel(checkVal[TYPE]).value.properties
-      // var combinedValue = '';
-      // for (var rr in checkProps) {
-      //   if (!checkVal[rr])
-      //     continue
-      //   if (checkVal[rr] instanceof Array)
-      //    continue;
-      //   let val = (checkProps[rr].type === 'object') ? checkVal[rr].title || '' : checkVal[rr]
-      //   if (!val)
-      //     continue
-      //   combinedValue += combinedValue ? ' ' + val : val
-      // }
-      // if (!combinedValue  ||  (combinedValue  &&  (!query || combinedValue.toLowerCase().indexOf(query.toLowerCase()) !== -1))) {
       if (fr) {
         // foundResources[key] = this.fillMessage(r);
-        if (!filterOutForms  ||  !doFilterOut(r, chatId, i)) {
+        if (!filterOutForms  ||  !(await doFilterOut(r, chatId, i))) {
           foundResources.push(self.fillMessage(r))
           return true
         }
       }
       return false
     }
-    function doFilterOut(r, toId, idx) {
+    async function doFilterOut(r, toId, idx) {
       let m = self.getModel(r[TYPE])
       if (m.id === PRODUCT_APPLICATION  &&  (r.product === REMEDIATION || !utils.getModel(r.product)))
         return true
-      if (r._notSent)
-        return true
+      // if (r._notSent)
+      //   return true
       if (r._context       &&
           !params.prop     &&
           (m.subClassOf === FORM || m.id === VERIFICATION) &&
           self._getItem(utils.getId(r._context)).product === REMEDIATION) {
         let org = m.subClassOf === FORM ? self._getItem(utils.getId(r.to)) : self._getItem(utils.getId(r.from))
-        let remMsg = self.searchMessages({modelName: REMEDIATION_SIMPLE_MESSAGE, to: org})
+        let remMsg = await self.searchMessages({modelName: REMEDIATION_SIMPLE_MESSAGE, to: org})
         if (remMsg  &&  remMsg.length)
           return r.time < remMsg[0].time + 30000
 
@@ -5244,39 +5419,10 @@ var Store = Reflux.createStore({
 
 
       return false
-      // if (m.subClassOf !== FORM)
-      //   return false
-      // // for employee
-      // let meId = utils.getId(me)
-      // if (utils.getId(r.from) !== meId)
-      //   return false
-
-      // let rId = utils.getId(r.to)
-      // if (rId === toId  ||  !r._sharedWith  ||  r._sharedWith.length === 1)
-      //   return false
-
-      // for (let i=idx; i<thisChatMessages.length; i++) {
-      //   let msg = self._getItem(thisChatMessages[i].id)
-      //   if (msg[TYPE] !== VERIFICATION)
-      //     continue
-      //   let item = self._getItem(utils.getId(msg.from))
-      //   if (utils.getId(item.organization) === toId)
-      //     return false
-
-      //   if (!msg._sharedWith)
-      //     return false
-
-      //   for (let ii=0; ii<r._sharedWith.length; ii++) {
-      //     let shareBatchId = r._sharedWith[ii].shareBatchId
-      //     if (msg._sharedWith.some((share) => shareBatchId  &&  share.shareBatchId === shareBatchId))
-      //       return true
-      //   }
-      // }
-      // return false
     }
   },
-  onGetAllContexts(params) {
-    let list = this.searchMessages(params)
+  async onGetAllContexts(params) {
+    let list = await this.searchMessages(params)
     let l = list  &&  list.filter((r) => r.formsCount)
     this.trigger({action: 'allContexts', list: l, to: params.to})
   },
@@ -5578,55 +5724,11 @@ var Store = Reflux.createStore({
     }
   },
   onGetAllSharedContexts() {
-    Q.all([this.myResourcesLoaded])
+    Q.all([this._loadedResourcesDefer])
     .then(() => {
       let list = this.getAllSharedContexts()
       if (!list)
         return
-      // let org = this._getItem(me.organization)
-      // let deniedList = this.searchMessages({modelName: APPLICATION_DENIAL})
-      // let denied = {}
-      // if (deniedList)
-      //   deniedList.forEach((r) => denied[utils.getId(r), r])
-      // let approvedList = this.searchMessages({modelName: CONFIRMATION})
-      // let approved = {}
-      // if (approvedList)
-      //   approvedList.forEach((r) => approved[utils.getId(r), r])
-
-      // let relationshipManagers = this.searchMessages({modelName: ASSIGN_RM, to: me.organization})
-      // if (!relationshipManagers) {
-      //   this.trigger({action: 'allSharedContexts', count: list.length, list: list})
-      //   return
-      // }
-      // let meId = IDENTITY + '_' + me[ROOT_HASH]
-      // relationshipManagers.forEach((r) => {
-      //   let employeeId = utils.getId(r.employee)
-      //   let appId = utils.getId(r.application)
-      //   for (let i=0; i<list.length; i++) {
-      //     let pa = list[i]
-      //     let paId = utils.getId(pa)
-      //     if (pa._denied  ||  pa._approved) {
-      //       this.dbPut(paId, pa)
-      //       this._setItem(paId, pa)
-      //       this.trigger({action: 'addItem', resource: pa})
-      //       continue
-      //     }
-      //     if (pa._assignedRM || pa._relationshipManager)
-      //       return
-      //     if (paId !== appId)
-      //       continue
-      //     if (employeeId === meId) {
-      //       pa._relationshipManager = true
-      //       let r = this._getItem(paId)
-      //       pa._relationshipManager = true
-      //     }
-      //     // HACK to not to restart the whole thing
-      //     else
-      //       pa._assignedRM = utils.clone(r.employee)
-
-      //     this.dbPut(utils.getId(pa), pa)
-      //   }
-      // })
       this.trigger({action: 'allSharedContexts', count: list.length, list: list})
     })
   },
@@ -5664,7 +5766,7 @@ var Store = Reflux.createStore({
 
   // Gathers resources that were created on this official account to figure out if the
   // customer has some other official accounts where he already submitted this information
-  getShareableResources(foundResources, to) {
+  async getShareableResources(foundResources, to) {
     if (!foundResources)
       return
     var verTypes = [];
@@ -5679,7 +5781,7 @@ var Store = Reflux.createStore({
         continue;
       // documentCreated identifier is set when the document of this type was created
       // and we don't want to create it again from this same notification
-      if (r[TYPE] !== FORM_REQUEST  ||  r.documentCreated)
+      if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated)
         continue;
       if (utils.getId(r.to)  !==  meId)
         continue
@@ -5693,8 +5795,8 @@ var Store = Reflux.createStore({
       // let rr = simpleLinkMessages[msgParts[1]]
       let rr = simpleLinkMessages[r.form]
       if (rr) {
-        rr.documentCreated = true
-        this._getItem(utils.getId(rr)).documentCreated = true
+        rr._documentCreated = true
+        this._getItem(utils.getId(rr))._documentCreated = true
         continue
       }
       simpleLinkMessages[r.form] = r
@@ -5714,7 +5816,7 @@ var Store = Reflux.createStore({
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
     var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
     var self = this
-    var productsToShare = this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true})
+    var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true})
     if (productsToShare  &&  productsToShare.length) {
       productsToShare.forEach((r) => {
         let fromId = utils.getId(r.from)
@@ -5756,77 +5858,80 @@ var Store = Reflux.createStore({
       return {verifications: shareableResources}
 
     let toId = utils.getId(to)
-    var l = this.searchMessages({modelName: VERIFICATION})
-    if (l)
-      l.forEach((val) => {
-        var doc = val.document
-        var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
-        if (verTypes.indexOf(docType) === -1)
-          return;
-        var id = utils.getId(val.to.id);
-        if (id !== meId)
-          return
-        // Filter out the verification from the same company
-        var fromId = utils.getId(val.from)
-        var fromOrgId = utils.getId(this._getItem(fromId).organization)
-        // if (fromOrgId === toId)
-        //   return
-        var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
-        if (!document  ||  document._inactive)
-          return;
+    let l = await this.searchMessages({modelName: VERIFICATION})
+    if (!l)
+      return
+    l.forEach((val) => {
+      var id = utils.getId(val.to.id);
+      if (id !== meId)
+        return
 
-        // Check if there is at least one verification by the listed in FormRequest verifiers
-        if (hasVerifiers  &&  hasVerifiers[docType]) {
-          let verifiers = hasVerifiers[docType]
-          let foundVerifiedForm
-          verifiers.forEach((v) => {
-            let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
-            if (!provider.length)
-              return
-            let spReps = this.getRepresentatives(utils.getId(provider[0].org))
-            let sw = val._sharedWith.filter((r) => {
-              return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
-            })
-            if (sw.length)
-              foundVerifiedForm = true
-          })
-          if (!foundVerifiedForm)
+      var doc = val.document
+      var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
+      if (verTypes.indexOf(docType) === -1)
+        return;
+      // Filter out the verification from the same company
+      // var fromId = utils.getId(val.from)
+      // var fromOrgId = utils.getId(this._getItem(fromId).organization)
+      // if (fromOrgId === toId)
+      //   return
+      var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
+      if (!document  ||  document._inactive)
+        return;
+
+      // Check if there is at least one verification by the listed in FormRequest verifiers
+      if (hasVerifiers  &&  hasVerifiers[docType]) {
+        let verifiers = hasVerifiers[docType]
+        let foundVerifiedForm
+        verifiers.forEach((v) => {
+          let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
+          if (!provider.length)
             return
-        }
+          let spReps = this.getRepresentatives(utils.getId(provider[0].org))
+          let sw = val._sharedWith.filter((r) => {
+            return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
+          })
+          if (sw.length)
+            foundVerifiedForm = true
+        })
+        if (!foundVerifiedForm)
+          return
+      }
 
-        /*
-        if (to  &&  org  &&  document.verifications) {
-          var thisCompanyVerification;
-          for (var i=0; i<document.verifications.length; i++) {
-            var v = this._getItem(utils.getId(document.verifications[i]));
+      /*
+      if (to  &&  org  &&  document.verifications) {
+        var thisCompanyVerification;
+        for (var i=0; i<document.verifications.length; i++) {
+          var v = this._getItem(utils.getId(document.verifications[i]));
 
-            if (v.organization  &&  utils.getId(org) === utils.getId(v.organization)) {
-              let sharedWith = doc._sharedWith
-              if (!sharedWith)
-                thisCompanyVerification = true;
-              else {
-                let sw = sharedWith.filter((r) => {
-                  if (reps.some((rep) => utils.getId(rep) === r.bankRepresentative)))
-                    return true
-                })
-                if (sw.length)
-                  thisCompanyVerification = true
-              }
-              break;
+          if (v.organization  &&  utils.getId(org) === utils.getId(v.organization)) {
+            let sharedWith = doc._sharedWith
+            if (!sharedWith)
+              thisCompanyVerification = true;
+            else {
+              let sw = sharedWith.filter((r) => {
+                if (reps.some((rep) => utils.getId(rep) === r.bankRepresentative)))
+                  return true
+              })
+              if (sw.length)
+                thisCompanyVerification = true
             }
+            break;
           }
-          // if (thisCompanyVerification)
-          //   return;
         }
-        */
-        var value = {};
-        extend(value, val);
-        value.document = document;
+        // if (thisCompanyVerification)
+        //   return;
+      }
+      */
+      var value = {};
+      extend(value, val);
+      value.document = document;
 
-        addAndCheckShareable(value)
-      })
+      this.addVisualProps(value)
+      addAndCheckShareable(value)
+    })
     // Allow sharing non-verified forms
-    let context = this.getCurrentContext(to)
+    let context = await this.getCurrentContext(to)
     verTypes.forEach((verType) => {
       if (hasVerifiers  &&  hasVerifiers[verType])
         return
@@ -5958,7 +6063,7 @@ var Store = Reflux.createStore({
 
     var isMessage = utils.isMessage(model)
     var originalR = list[utils.getId(value)]
-    var isNew = !value[ROOT_HASH] || !value[CUR_HASH] || (!isMessage  &&  !originalR)
+    var isNew = value[ROOT_HASH] === value[CUR_HASH] || (!isMessage  &&  !originalR)
     if (value[TYPE] === SETTINGS) {
       if (isNew) {
         if (SERVICE_PROVIDERS_BASE_URL_DEFAULTS.includes(value.url))
@@ -6016,6 +6121,12 @@ var Store = Reflux.createStore({
       return this.addSettings(value, params.maxAttempts ? params.maxAttempts : 1, true)
 
     let meId = utils.getId(me)
+    if (isMessage  &&  isNew) {
+      this.addBacklinksTo(me, value, batch)
+      let toR = this._getItem(value.to)
+      this.addBacklinksTo(toR, value, batch)
+    }
+
     let self = this
     db.batch(batch)
     .then(() => {
@@ -6092,7 +6203,7 @@ var Store = Reflux.createStore({
             this.onExploreBacklink(cRes, item, true)
           }
         }
-        let mlist = this.searchMessages({modelName: FORM})
+        // let mlist = this.searchMessages({modelName: FORM})
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
       }
@@ -6210,6 +6321,47 @@ var Store = Reflux.createStore({
     r.lastMessageType = messageType
     batch.push({type: 'put', key: utils.getId(r), value: r});
     this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
+  },
+
+  addBacklinksTo(resource, msg, batch) {
+    let msgModel = this.getModel(msg[TYPE])
+    if (!msgModel.interfaces  ||  msgModel.interfaces.indexOf(MESSAGE) === -1)
+      return
+    let msgId = utils.getId(msg)
+    let rId = utils.getId(resource)
+    if (resource[TYPE] === PROFILE  &&  resource.bot)
+      resource = this._getItem(resource.organization)
+    let resModel = this.getModel(resource[TYPE])
+
+    var props = resModel.properties
+    let changedCounts
+    for (var p in props) {
+      if (p.charAt(0) === '_'  ||  props[p].hidden)
+        continue;
+      var items = props[p].items;
+      if (!items  ||  !items.backlink)
+        continue;
+      var backlink = items.backlink;
+      if (!msg[backlink])
+        continue
+
+      var itemsModel = this.getModel(items.ref);
+      if (itemsModel.id !== msg[TYPE]  &&  msgModel.subClassOf !== itemsModel.id)
+        continue
+
+      if (utils.getId(msg[backlink]) === rId) {
+        let cntProp = '_' + p + 'Count'
+        changedCounts = true
+
+        let cnt = resource[cntProp]
+        if (cnt)
+          resource[cntProp] = ++cnt
+        else
+          resource[cntProp] = 1
+      }
+    }
+    if (changedCounts  &&  batch)
+      this.dbBatchPut(utils.getId(resource), resource, batch);
   },
 
   registration(value) {
@@ -6963,6 +7115,7 @@ var Store = Reflux.createStore({
             if (!obj.parsed.data[CUR_HASH])
               obj[CUR_HASH] = obj[ROOT_HASH]
 
+            obj[MSG_LINK] = msg.link
             await self.putInDb(obj, true)
             self.trigger({ action: 'receivedMessage', msg: msg })
           } catch (err) {
@@ -7007,7 +7160,9 @@ var Store = Reflux.createStore({
           var r = {
             [TYPE]: type,
             [ROOT_HASH]: msg.partialinfo.permalink,
-            [CUR_HASH]: msg.partialinfo.link
+            [CUR_HASH]: msg.partialinfo.link,
+            [MSG_LINK]: msg.link
+
           }
           payload.resource = {id: utils.getId(r)}
           payload.providerInfo = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
@@ -7017,6 +7172,7 @@ var Store = Reflux.createStore({
         //   debugger
 
         const old = utils.toOldStyleWrapper(msg)
+
         old.to = { [ROOT_HASH]: meDriver.permalink }
         let rtype = old.parsed.data[TYPE]
         if (rtype === PRODUCT_APPLICATION  &&  me.isEmployee) {
@@ -7094,7 +7250,7 @@ var Store = Reflux.createStore({
     return this._loadedResourcesDefer.promise
     .then(() => this._putInDb(obj, onMessage) || Q())
   },
-  _putInDb(obj, onMessage) {
+  async _putInDb(obj, onMessage) {
     // defensive copy
     var self = this
     var val = extend(true, {}, obj.parsed.data)
@@ -7103,6 +7259,7 @@ var Store = Reflux.createStore({
 
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
+    val[MSG_LINK] = obj[MSG_LINK]
 
     var fromId = obj.objectinfo
                ? obj.objectinfo.author
@@ -7157,7 +7314,7 @@ var Store = Reflux.createStore({
       if (isMessage) {
         // if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
         //   return
-        noTrigger = this.putMessageInDB(val, obj, batch, onMessage)
+        noTrigger = await this.putMessageInDB(val, obj, batch, onMessage)
         if (type === VERIFICATION)
           return
       }
@@ -7168,9 +7325,6 @@ var Store = Reflux.createStore({
       val._sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
 
     self._mergeItem(key, val)
-    // var retParams = {
-    //   action: isMessage ? 'messageList' : 'list'
-    // }
 
     var resultList
 
@@ -7179,130 +7333,98 @@ var Store = Reflux.createStore({
       var toId = PROFILE + '_' + obj.to[ROOT_HASH]
       var meId = PROFILE + '_' + me[ROOT_HASH]
       isMyMessage = isMessage ? (toId !== meId  &&  fromId !== meId) : false
-      // let to = this._getItem(toId)
-      // var isSelfIntroduction = model.id === SELF_INTRODUCTION
-      // if (isMyMessage) {
-      //   var id = !isSelfIntroduction  &&  toId === meId ? fromId : toId
-      //   if (!noTrigger  &&  id) {
-      //     var to = this._getItem(id)
-      //     if (to.organization) {
-      //       var org =  this._getItem(utils.getId(to.organization))
-      //       resultList = this.searchMessages({to: org, modelName: MESSAGE})
-      //     }
-      //     else
-      //       resultList = this.searchMessages({to: to, modelName: MESSAGE})
-      //     retParams.list = resultList
-      //     var shareableResources = this.getShareableResources(resultList, to);
-      //     if (shareableResources)
-      //       retParams.shareableResources = shareableResources
-      //     retParams.resource = to
-      //   }
-      // }
     }
-    // else if (!onMessage  &&  val[TYPE] != PROFILE) {
-    //   resultList = this.searchNotMessages({modelName: val[TYPE]})
-    //   retParams.list = resultList
-    // }
 
-    return db.batch(batch)
-    .then(() => {
-      // if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
-      //   this.forgotYou(from)
-      // }
-
-      // else
-      if (model.id === PRODUCT_LIST  &&  isMyMessage) {
-        // var orgList = this.searchNotMessages({modelName: ORGANIZATION})
-        // this.trigger({action: 'list', list: orgList, forceUpdate: true})
-        this.trigger({action: 'getItem', resource: this._getItem(utils.getId(from.organization))})
+    await db.batch(batch)
+    if (model.id === PRODUCT_LIST  &&  isMyMessage) {
+      // var orgList = this.searchNotMessages({modelName: ORGANIZATION})
+      // this.trigger({action: 'list', list: orgList, forceUpdate: true})
+      this.trigger({action: 'getItem', resource: this._getItem(utils.getId(from.organization))})
+    }
+    let triggerForModel
+    if (isConfirmation  &&  isMyMessage) {
+      var fOrg = from.organization
+      var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
+      var msg = {
+        message: me.firstName + ' is waiting for the response',
+        [TYPE]: constants.TYPES.CUSTOMER_WAITING,
+        from: me,
+        to: org,
+        time: new Date().getTime()
       }
-      let triggerForModel
-      if (isConfirmation  &&  isMyMessage) {
-        var fOrg = from.organization
-        var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
-        var msg = {
-          message: me.firstName + ' is waiting for the response',
-          [TYPE]: constants.TYPES.CUSTOMER_WAITING,
-          from: me,
-          to: org,
-          time: new Date().getTime()
-        }
-        this.onAddMessage({msg: msg, isWelcome: true})
-      }
-      else if (isMessage  &&  !noTrigger) {
-        if (onMessage) {
-          let meId = utils.getId(me)
-          if (me.isEmployee) {
-            let isReadOnlyChat
-            let context
-            if (val._context) {
-              context = this._getItem(val._context)
-              isReadOnlyChat = utils.isReadOnlyChat(context)
-            }
-            else
-              isReadOnlyChat = utils.isReadOnlyChat(val)
-            if (!val._context  ||  isReadOnlyChat) {
-              let notMeId = toId === meId ? fromId  : toId
-              let notMe = this._getItem(notMeId)
-              if (notMe  &&  !notMe.bot) {
-                ++notMe._unread
-                this.dbPut(utils.getId(notMe), notMe)
-                this.trigger({action: 'updateRow', resource: notMe})
-              }
-              if (isReadOnlyChat  &&  context) {
-                let contact = this._getItem(val.from)
-                let hasNameChanged
-                if (contact.firstName === FRIEND)
-                  hasNameChanged = this.changeName(val, contact)
-                if (hasNameChanged) {
-                  context.from = this.buildRef(contact)
-                  let contextId = utils.getId(context)
-                  this._setItem(contextId, context)
-                  this.dbPut(contextId, context)
-                  this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-                }
-              }
-            }
-            if (val[TYPE] === PRODUCT_APPLICATION)  {
-              if (!this.getModel([val.product]))
-                triggerForModel = val.product
-            }
-            else if (val[TYPE] === FORM_REQUEST) {
-              if (!this.getModel([val.form]))
-                triggerForModel = val.product
-            }
-            else if (!this.getModel(val[TYPE]))
-               triggerForModel = val[TYPE]
-            if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION  &&  !triggerForModel)
-              this.onGetAllSharedContexts()
+      this.onAddMessage({msg: msg, isWelcome: true})
+    }
+    else if (isMessage  &&  !noTrigger) {
+      if (onMessage) {
+        let meId = utils.getId(me)
+        if (me.isEmployee) {
+          let isReadOnlyChat
+          let context
+          if (val._context) {
+            context = this._getItem(val._context)
+            isReadOnlyChat = utils.isReadOnlyChat(context)
           }
+          else
+            isReadOnlyChat = utils.isReadOnlyChat(val)
+          if (!val._context  ||  isReadOnlyChat) {
+            let notMeId = toId === meId ? fromId  : toId
+            let notMe = this._getItem(notMeId)
+            if (notMe  &&  !notMe.bot) {
+              ++notMe._unread
+              this.dbPut(utils.getId(notMe), notMe)
+              this.trigger({action: 'updateRow', resource: notMe})
+            }
+            if (isReadOnlyChat  &&  context) {
+              let contact = this._getItem(val.from)
+              let hasNameChanged
+              if (contact.firstName === FRIEND)
+                hasNameChanged = this.changeName(val, contact)
+              if (hasNameChanged) {
+                context.from = this.buildRef(contact)
+                let contextId = utils.getId(context)
+                this._setItem(contextId, context)
+                this.dbPut(contextId, context)
+                this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+              }
+            }
+          }
+          if (val[TYPE] === PRODUCT_APPLICATION)  {
+            if (!this.getModel([val.product]))
+              triggerForModel = val.product
+          }
+          else if (val[TYPE] === FORM_REQUEST) {
+            if (!this.getModel([val.form]))
+              triggerForModel = val.product
+          }
+          else if (!this.getModel(val[TYPE]))
+             triggerForModel = val[TYPE]
+          if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION  &&  !triggerForModel)
+            this.onGetAllSharedContexts()
         }
-        if (triggerForModel) {
-          this._emitter.once('model:' + triggerForModel, () => {
-            if (val[TYPE] === PRODUCT_APPLICATION)
-              this.onGetAllSharedContexts()
-            else
-              this.trigger({action: 'addItem', resource: val})
-          })
-          return
-        }
-        this.trigger({action: 'addItem', resource: val})
       }
-      else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
-        var orgList = this.searchNotMessages({modelName: ORGANIZATION})
-        this.trigger({action: 'list', list: orgList, forceUpdate: true})
+      if (triggerForModel) {
+        this._emitter.once('model:' + triggerForModel, () => {
+          if (val[TYPE] === PRODUCT_APPLICATION)
+            this.onGetAllSharedContexts()
+          else
+            this.trigger({action: 'addItem', resource: val})
+        })
+        return
       }
-      else if (!isMessage  &&  val[TYPE] === PARTIAL)
-        this.trigger({action: 'hasPartials'})
+      this.trigger({action: 'addItem', resource: val})
+    }
+    else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
+      var orgList = this.searchNotMessages({modelName: ORGANIZATION})
+      this.trigger({action: 'list', list: orgList, forceUpdate: true})
+    }
+    else if (!isMessage  &&  val[TYPE] === PARTIAL)
+      this.trigger({action: 'hasPartials'})
 
-      if (utils.isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED  && ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword) {
-        setTimeout(() => {
-          this.trigger({action: 'offerKillSwitchAfterApplication'})
-        }, 2000)
-      }
-//       else
-        // this.trigger(retParams)
-    })
+    if (utils.isWeb()  &&  val[TYPE] === APPLICATION_SUBMITTED  && ENV.offerKillSwitchAfterApplication  &&  !utils.getMe().useGesturePassword) {
+      setTimeout(() => {
+        this.trigger({action: 'offerKillSwitchAfterApplication'})
+      }, 2000)
+    }
   },
   putIdentityInDB(val, batch) {
     var profile = {}
@@ -7387,7 +7509,8 @@ var Store = Reflux.createStore({
     if (utils.getId(rFrom)  !==  utils.getId(contextTo))  //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
       return true
   },
-  putMessageInDB(val, obj, batch, onMessage) {
+
+  async putMessageInDB(val, obj, batch, onMessage) {
     var fromProfile = PROFILE + '_' + (obj.objectinfo ? obj.objectinfo.author : obj.from[ROOT_HASH])
     var from = this._getItem(fromProfile)
 
@@ -7404,8 +7527,6 @@ var Store = Reflux.createStore({
 
     let key = utils.getId(val)
 
-    // if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
-    //   return
     var toId = PROFILE + '_' + obj.to[ROOT_HASH]
     var to = this._getItem(toId)
     var meId = utils.getId(me)
@@ -7444,29 +7565,12 @@ var Store = Reflux.createStore({
         }
       }
     }
-    // if (val[TYPE] === VERIFICATION  && me.isEmployee  &&  meId === toId) {
-    //   let document = this._getItem(val.document)
-    //   if (utils.getId(document.from) === meId) {
-    //     val._verifiedBy = from.organization
-    //     fromProfile = document.from
-    //     from = this._getItem(fromProfile)
-    //   }
-    // }
 
     var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
     var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
     var inDB
     if (onMessage) {
       let fromId = utils.getId(from)
-      // let meId = utils.getId(me)
-      // if (me.isEmployee) {
-      //   let notMeId = toId === meId ? fromId  : toId
-      //   let notMe = this._getItem(notMeId)
-      //   if (!notMe.bot) {
-      //     ++notMe._unread
-      //     // this.trigger({action: 'updateRow', resource: notMe})
-      //   }
-      // }
       let profileModel = this.getModel(PROFILE)
       val.from = {
         id: fromId,
@@ -7476,7 +7580,6 @@ var Store = Reflux.createStore({
         id: toId,
         title: to.formatted || to.firstName
       }
-      // self.fillFromAndTo(obj, val)
     }
     else {
       let inDB = this._getItem(key)
@@ -7492,16 +7595,8 @@ var Store = Reflux.createStore({
       }
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
-    // if (val[TYPE] === PRODUCT_APPLICATION  &&  isReadOnly) {
-    //   // props that are convenient for displaying in shared context
-    //   val.from.organization = this._getItem(utils.getId(val.from)).organization
-    //   val.to.organization = this._getItem(utils.getId(val.to)).organization
-    //   // val._readOnly = true
-    // }
     let isNew = val[ROOT_HASH] === val[CUR_HASH]
     if (obj.object.context  &&  val[TYPE] !== PRODUCT_APPLICATION) {
-      // if (!val._contexts)
-      //   val._contexts = []
       let contextId = PRODUCT_APPLICATION + '_' + obj.object.context
       let context = this._getItem(contextId)
 
@@ -7514,18 +7609,14 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: contextId, value: context})
         val._context = this.buildRef(context)
       }
-      // val._contexts.push(this.buildRef(context))
     }
     else if (val[TYPE] === FORM_REQUEST  &&  isNew) {
       let product = val.product
-      let contexts = this.searchMessages({modelName: PRODUCT_APPLICATION, to: org})
+      let contexts = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: org})
       if (contexts) {
         let i = contexts.length - 1
         for (; i>=0; i--)
           if (contexts[i].product === product) {
-          // if (!val._contexts)
-          //   val._contexts = []
-          // val._contexts.push(this.buildRef(contexts[i]))
             val._context = this.buildRef(contexts[i])
             break
           }
@@ -7562,28 +7653,21 @@ var Store = Reflux.createStore({
               v.id = serviceProvider.id
               v.photo = org.photos && org.photos[0].url
             }
-            // else
-            //   this.getInfo([v.url], true) //, id)
           })
         }
       }
 
-      let formRequests = this.searchMessages({modelName: FORM_REQUEST, to: org})
+      let formRequests = await this.searchMessages({modelName: FORM_REQUEST, to: org})
       if (formRequests)
         formRequests.forEach((r) => {
-          if (!r.documentCreated  &&  r.form === val.form) {
-            r.documentCreated = true
+          if (!r._documentCreated  &&  r.form === val.form) {
+            r._documentCreated = true
             let rId = utils.getId(r)
-            this._getItem(rId).documentCreated = true
+            this._getItem(rId)._documentCreated = true
             batch.push({type: 'put', key: rId, value: r})
           }
         })
     }
-    // if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
-    //   this.forgotYou(from)
-    //   return
-    // }
-
     var isProductList = val[TYPE] === PRODUCT_LIST
     var isModelsPack = val[TYPE] === MODELS_PACK
     var pList = isProductList ? val.list : val.models
@@ -7632,7 +7716,7 @@ var Store = Reflux.createStore({
           // ENV.autoRegister                &&
           // org.products.length === 1) {
         let meRef = this.buildRef(utils.getMe())
-        let pa = this.searchMessages({modelName: PRODUCT_APPLICATION})
+        let pa = await this.searchMessages({modelName: PRODUCT_APPLICATION})
         let product = org.products[0]
         let hasThisProductApp
         if (pa) {
@@ -7654,15 +7738,6 @@ var Store = Reflux.createStore({
           this.addMessagesToChat(utils.getId(org), msg)
           this.trigger({action: 'addMessage', resource: msg})
           db.put(msgId, msg)
-
-          // this.onAddMessage({
-          //   msg: {
-          //     [TYPE]: SIMPLE_MESSAGE,
-          //     message: translate(this.preferences._message),
-          //     to: val.from,
-          //     from: meRef
-          //   }
-          // })
         }
         this.onAddMessage({
           msg: {
@@ -7690,42 +7765,26 @@ var Store = Reflux.createStore({
     let isVerification = type === VERIFICATION  || (model  && model.subClassOf === VERIFICATION)
     if (isVerification) {
       this.onAddVerification({r: val, notOneClickVerification: false, dontSend: true, isThirdPartySentRequest: isThirdPartySentRequest})
-      // if (!val.txId) {
-      //   var o = {}
-      //   extend(o, obj)
-      //   o.txId = Math.random() + '';
-      //   setTimeout(() => {
-      //     self.putInDb(o)
-
-      //   }, 5000);
-      // }
       return
     }
-    // if (model.subClassOf === MY_PRODUCT)
-    //   val.from.organization = this._getItem(utils.getId(val.from)).organization
     if (!isProductList  &&  !isReadOnly) {
-    //   if (!from.lastMessageTime || (new Date() - from.lastMessageTime) > WELCOME_INTERVAL)
-    //     batch.push({type: 'put', key: key, value: val})
-    // }
-    // else {
       let meId = utils.getId(to)
       if (val[TYPE] === MY_EMPLOYEE_PASS) {
         to.isEmployee = true
         to.organization = this.buildRef(org)
         this.resetForEmployee(to, org)
-        // to.organization._canShareContext = org._canShareContext
-        // to.organization._hasSupportLine = org._hasSupportLine
-        // this.setMe(to)
-        // batch.push({type: 'put', key: utils.getId(to), value: to})
         if (to.firstName === FRIEND) {
           let toRep = this.getRepresentative(utils.getId(org))
           toRep = this._getItem(toRep)
-          let result
-          ;[NAME, PERSONAL_INFO, APPLICANT].some(modelName => {
-            return result = this.searchMessages({modelName, to: org})
-          })
+          let result = []
+          let arr = [NAME, PERSONAL_INFO, APPLICANT]
+          for (let j=0; j<arr.length; j++) {
+            let sr = await this.searchMessages({modelName: arr[j], to: org})
+            if (sr)
+              result = result.concat(sr)
+          }
 
-          if (result) {
+          if (result.length) {
             let fRes = result.find((r) => utils.getId(r.from) === meId)
             to.firstName = fRes.firstName || fRes.givenName
             this._setItem(meId, to)
@@ -7755,15 +7814,19 @@ var Store = Reflux.createStore({
           let cId = utils.getId(context)
           if (val._context  &&  utils.isReadOnlyChat(val)) // context._readOnly)
             this.addMessagesToChat(cId, val)
-          if (val[TYPE] === ASSIGN_RM || val[TYPE] === APPLICATION_DENIAL || val[TYPE] === CONFIRMATION || val[TYPE] === APPLICATION_SUBMITTED) {
-            if (val[TYPE] === ASSIGN_RM)
-              context._assignedRM = val.employee
-            else if (val[TYPE] === APPLICATION_DENIAL)
-              context._denied = true
-            else if (val[TYPE] === APPLICATION_SUBMITTED)
-              context._appSubmitted = true
-            else
-              context._approved = true
+
+          let changed = true
+          if (val[TYPE] === ASSIGN_RM)
+            context._assignedRM = val.employee
+          else if (val[TYPE] === APPLICATION_DENIAL)
+            context._denied = true
+          else if (val[TYPE] === APPLICATION_SUBMITTED)
+            context._appSubmitted = true
+          else if (val[TYPE] === CONFIRMATION)
+            context._approved = true
+          else
+            changed = false
+          if (changed) {
             this._setItem(cId, context)
             this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
             this.dbBatchPut(cId, context, batch)
@@ -7909,6 +7972,8 @@ var Store = Reflux.createStore({
     }
   },
   loadMyResources() {
+    //   this._loadedResourcesDefer.resolve()
+    // return
     const self = this;
     let myId
     // console.time('dbStream')
@@ -7991,9 +8056,6 @@ var Store = Reflux.createStore({
       }
 
       console.log('Stream ended');
-      // console.timeEnd('dbStream')
-      // if (me)
-      //   utils.setMe(me);
       var noModels = utils.isEmpty(models);
       if (noModels)
         return self.loadModels();
@@ -8001,29 +8063,43 @@ var Store = Reflux.createStore({
         me = null
       console.log('Stream closed');
       utils.setModels(models);
-      if (me) {
-        // db resource do not have properties needed for rendering
-        let allMessages = self.searchMessages({modelName: MESSAGE, to: me})
-        if (allMessages) {
-          allMessages.forEach((r) => {
-            r = self.addVisualProps(r)
-            self._setItem(utils.getId(r), r)
-            // let props = ['from', 'to']
-            // let pvals = [self._getItem(r.from.id), self._getItem(r.to.id)]
-            // for (let i=0; i<props.length; i++) {
-            //   let v = pvals[i]
-            //   if (!v.organization)
-            //     continue
-            //   r[props[i]].organization = v.organization
-            //   let org = self._getItem(v.organization)
-            //   if (org.photos)
-            //     r[props[i]].organization.photo = org.photos[0]
-            // }
-          })
-        }
-      }
     })
     .then(() => {
+      if (list) {
+debug('META size before ' + JSON.stringify(list).length)
+for (let p in list) {
+  let v = list[p].value
+  if (!v.from &&  !v.to)
+    continue
+  let doPut
+  if (v._sharedWith) {
+    v._sharedWith.forEach((r) => {
+      if (r.shareBatchId) {
+        r.shareBatchId = utils.buildRef(r.shareBatchId)
+        doPut = true
+      }
+    })
+  }
+  if (v._context  &&  !v._context.id) {
+    v._context = this.buildRef(v._context)
+    doPut = true
+  }
+
+  if (v.from.organization) {
+    delete v.from.organization
+    delete v.from.photo
+    doPut = true
+  }
+  else if (v.to.organization) {
+    delete v.to.organization
+    delete v.to.photo
+    doPut = true
+  }
+  if (doPut)
+    db.put(p, v)
+}
+debug('META size after ' + JSON.stringify(list).length)
+}
       if (me  &&  me.isEmployee) {
         let changed
         let orgId = utils.getId(me.organization)
@@ -8043,8 +8119,17 @@ var Store = Reflux.createStore({
         }
       }
       if (me  &&  utils.isEmpty(chatMessages)) {
-        // utils.setMe(me)
         this.initChats()
+        // if (me) {
+        //   // db resource do not have properties needed for rendering
+        //   let allMessages = self.searchMessages({modelName: MESSAGE, to: me})
+        //   if (allMessages) {
+        //     allMessages.forEach((r) => {
+        //       r = self.addVisualProps(r)
+        //       self._setItem(utils.getId(r), r)
+        //     })
+        //   }
+        // }
       }
     })
     .then(() => {
@@ -8066,18 +8151,22 @@ var Store = Reflux.createStore({
   },
   // Received by employee/bot request from customer. And all the customer resources on FI side gets deleted
   forgetMe(resource) {
-    let result = this.searchMessages({modelName: MESSAGE, to: resource, isForgetting: true})
     let batch = []
     let ids = []
-    result.forEach((r) => {
-      let id = utils.getId(r)
-      batch.push({type: 'del', key: id})
+
+    return this.searchMessages({modelName: MESSAGE, to: resource, isForgetting: true})
+    .then((result) => {
+      result.forEach((r) => {
+        let id = utils.getId(r)
+        batch.push({type: 'del', key: id})
+        ids.push(id)
+      })
+      let id = utils.getId(resource)
       ids.push(id)
+      batch.push({type: 'del', key: id})
+
+      return db.batch(batch)
     })
-    let id = utils.getId(resource)
-    ids.push(id)
-    batch.push({type: 'del', key: id})
-    return db.batch(batch)
     .then(() => {
       ids.forEach((id) => {
         this.deleteMessageFromChat(utils.getId(resource), this._getItem(id))
@@ -8266,7 +8355,9 @@ var Store = Reflux.createStore({
       return db.batch(batch)
     })
     .then(function() {
-      var result = self.searchMessages({to: org, modelName: MESSAGE, isForgetting: true});
+      return self.searchMessages({to: org, modelName: MESSAGE, isForgetting: true})
+    })
+    .then((result) => {
       batch = []
       if (result)
         result.forEach(function(r) {
@@ -8301,17 +8392,18 @@ var Store = Reflux.createStore({
     })
   },
 
-  getAllSharedContexts() {
-    let list = this.searchMessages({modelName: PRODUCT_APPLICATION})
+  async getAllSharedContexts() {
+    let list = await this.searchMessages({modelName: PRODUCT_APPLICATION})
     if (!list  ||  !list.length)
       return
     let l = list.filter((r) => {
       return utils.isReadOnlyChat(r)
     })
-    let ll = l.map((r) => {
-      let forms = this.searchMessages({modelName: MESSAGE, to: r})
+    for (let i=0; i<l.length; i++) {
+      let r = l[i]
+      let forms = await this.searchMessages({modelName: MESSAGE, to: r})
       if (!forms  ||  r._approved)
-        return
+        continue
       let result = forms.map((rr) => {
         if (rr[TYPE] === APPLICATION_SUBMITTED) {
           r._appSubmitted = true
@@ -8322,7 +8414,7 @@ var Store = Reflux.createStore({
           this.dbPut(utils.getId(r), r)
         }
       })
-    })
+    }
     l.sort((a, b) => b.sentTime - a.sentTime)
     return l
   },
@@ -8346,41 +8438,6 @@ var Store = Reflux.createStore({
     return db.batch(batch)
     .catch(function(err) {
       err = err
-    })
-  },
-  onTalkToRepresentative(resource, org) {
-    var orgRep = resource[TYPE] === ORGANIZATION
-               ? this.getRepresentative(utils.getId(resource))
-               : resource
-    if (!orgRep) {
-      var msg = {
-        [TYPE]: SIMPLE_MESSAGE,
-        [NONCE]: this.getNonce(),
-        message: 'All representatives are currently assisting other customers. Please try again later'
-      }
-      msg.from = this.buildRef(resource)
-      msg.to = this.buildRef(me)
-      msg.id = sha(msg)
-      result.push(msg)
-      this.trigger({action: 'messageList', list: result, resource: resource})
-      return
-    }
-    var result = this.searchMessages({to: resource, modelName: MESSAGE});
-    var msg = {
-      [TYPE]: SIMPLE_MESSAGE,
-      [NONCE]: this.getNonce(),
-      message: 'Representative will be with you shortly. Please tell us how can we help you today?'
-    }
-    msg.from = this.buildRef(resource)
-    msg.to = this.buildRef(me)
-    msg.id = sha(msg)
-    result.push(msg)
-    this.trigger({action: 'messageList', list: result, resource: resource})
-    var key = IDENTITY + '_' + orgRep[ROOT_HASH]
-
-    return this.meDriverSignAndSend({
-      object: msg,
-      to: { fingerprint: this.getFingerprint(this._getItem(key)) }
     })
   },
   onForgetMe(resource, noTrigger) {
@@ -8943,7 +9000,9 @@ var Store = Reflux.createStore({
     return ref
   },
   _setItem(key, value) {
-    list[key] = { key, value }
+    let interfaces = this.getModel(value[TYPE]).interfaces
+    let isMessage = interfaces  &&  interfaces.indexOf(MESSAGE) !== -1
+    list[key] = { key, value: isMessage ? utils.optimizeResource(value, true)  : value}
   },
   _getItem(r) {
     if (typeof r === 'string') {
@@ -8975,17 +9034,6 @@ var Store = Reflux.createStore({
     // let chat = to.organization ? this._getItem(to.organization) : to
     // this.trigger({action: 'showChat', to: to})
   },
-  // onGetDocumentsFor(requestedDocumentType) {
-  //   if (requestedDocumentType !== 'tradle.PersonalInfo')
-  //     return
-  //   let m = this.getModel(requestedDocumentType)
-  //   let evidentiaryDocTypes = m.evidentiaryDocuments
-  //   let docTypeToDocs = {}
-  //   evidentiaryDocTypes.forEach((d) => {
-  //     docTypeToDocs[d] = this.searchMessages(d)
-  //   })
-  //   this.trigger({action: 'documentsFor', documentType: requestedDocumentType, documents: docTypeToDocs})
-  // }
   onShowModal(modal) {
     this.trigger({ action: 'showModal', modal })
   },
@@ -10214,7 +10262,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
       let r = this._getItem(messages[i].id)
-      if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r.documentCreated)
+      if (r[TYPE] === FORM_REQUEST  &&  !r.document) {// && r._documentCreated)
       // delete list[id]
         let forms = productToForms[r.product]
         if (!forms)
@@ -10804,7 +10852,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 //       function handleMessage2 (noTrigger, returnVal) {
 //         // TODO: fix hack
 //         // hack: we don't know root hash yet, use a fake
-//         if (returnVal.documentCreated)  {
+//         if (returnVal._documentCreated)  {
 //           // when all the multientry forms are filled out and next form is requested
 //           // do not show the last form request for the multientry form it is confusing for the user
 //           if (doneWithMultiEntry) {
@@ -11016,3 +11064,344 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 //     return i === 0
 //   }
 // }())
+  // async onAddMessage(params) {
+  //   let r = params.msg
+  //   let isWelcome = params.isWelcome
+  //   let requestForForm = params.requestForForm
+  //   let cb = params.cb
+  //   var disableAutoResponse = params.disableAutoResponse
+
+  //   var self = this
+  //   let m = this.getModel(r[TYPE])
+  //   var props = m.properties;
+  //   if (!r.time)
+  //     r.time = new Date().getTime();
+  //   var toOrg
+  //   // r.to could be a reference to a resource
+  //   var to = this._getItem(r.to)
+  //   // if (!r.to[TYPE])
+  //   //   r.to = this._getItem(r.to)
+  //   let isReadOnlyContext
+  //   if (to[TYPE] === ORGANIZATION) {
+  //     var orgId = utils.getId(r.to)
+  //     var orgRep = this.getRepresentative(orgId)
+  //     // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
+  //     //   return
+  //     if (!orgRep) {
+  //       var params = {
+  //         action: 'addMessage',
+  //         error: 'No ' + r.to.name + ' representative was found'
+  //       }
+  //       this.trigger(params);
+  //       return
+  //     }
+  //     toOrg = r.to
+  //     r.to = orgRep
+  //   }
+  //   else
+  //     isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
+
+
+  //   let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
+
+  //   var rr = {};
+  //   var context
+  //   if (r._context) {
+  //     rr._context = r._context
+  //     context = this._getItem(r._context)
+  //   }
+  //   for (var p in r) {
+  //     if (!props[p])
+  //       continue
+  //     if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
+  //       rr[p] = this.buildRef(r[p])
+  //     else
+  //       rr[p] = r[p];
+  //   }
+  //   // let firstTime
+  //   if (r[TYPE] === PRODUCT_APPLICATION) {
+  //     let result = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+  //     if (result) {
+  //       result = result.filter((r) => {
+  //         return (r.message === r.message  &&  !r._documentCreated) ? true : false
+  //       })
+  //       if (result.length) {
+  //         result.forEach((r) => {
+  //           const rid = utils.getId(r)
+  //           self._mergeItem(rid, { _documentCreated: true })
+  //         })
+  //       }
+  //     }
+  //   }
+  //   let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
+  //   rr[NONCE] = this.getNonce()
+  //   var toChain = {
+  //     [TYPE]: rr[TYPE],
+  //     [NONCE]: rr[NONCE],
+  //     time: r.time
+  //   }
+  //   if (rr.message)
+  //     toChain.message = rr.message
+  //   if (rr.photos)
+  //     toChain.photos = rr.photos
+  //   if (isSelfIntroduction)
+  //     toChain.profile = { firstName: me.firstName }
+  //   if (r.list)
+  //     rr.list = r.list
+  //   let required = m.required
+  //   if (required) {
+  //     required.forEach((p) => {
+  //       toChain[p] = rr[p]
+  //     })
+  //     // HACK
+  //     delete toChain.from
+  //     delete toChain.to
+  //   }
+  //   var batch = []
+  //   var error
+  //   var welcomeMessage
+  //   // var promise = Q(protocol.linkString(toChain))
+  //   let hash = r.to[ROOT_HASH]
+  //   if (!hash)
+  //     hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
+  //   var toId = IDENTITY + '_' + hash
+  //   rr._sendStatus = self.isConnected ? SENDING : QUEUED
+  //   var noCustomerWaiting
+  //   await this.maybeWaitForIdentity({ permalink: hash })
+  //   let obj = await meDriver.sign({ object: toChain })
+
+  //   toChain = obj.object
+  //   let hash = protocol.linkString(toChain)
+
+  //   rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
+  //   let isProductApplication = r[TYPE] === PRODUCT_APPLICATION
+  //   if (isProductApplication) {
+  //     rr._context = r._context = {id: utils.getId(r), title: r.product}
+  //     let params = {
+  //       action: 'addItem',
+  //       resource: rr,
+  //       // sendStatus: sendStatus
+  //     }
+  //     self.trigger(params)
+  //     self.addLastMessage(r, batch)
+  //   }
+  //   else if (!isWelcome)
+  //     self.addLastMessage(r, batch)
+
+  //   if (isWelcome  &&  orgRep) {
+  //     // if (!isWelcome) //  ||  utils.isEmployee(r.to))
+  //     //   return
+  //     // if (!orgRep)
+  //     //   return
+  //     if (orgRep.lastMessageTime) {
+  //       isWelcome = orgRep.lastMessage === r.message
+  //       // if (!isWelcome)
+  //       //   return;
+  //     }
+  //     // var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
+  //     // Create welcome message without saving it in DB
+  //     // welcomeMessage = {}
+  //     if (isWelcome  &&  !me.txId) {
+  //     // if (me.txId)
+  //     //   return
+
+  //     // ProductApplication was requested as a part of verification process from different provider
+  //     if (isProductApplication)
+  //       isWelcome = false
+  //     // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
+  //     // prevent the not needed duplicate expensive operations for obtaining ProductList
+  //     await self.getDriver(me)
+  //     // .then(function () {
+  //     if (/*!self.isConnected  || */ !publishRequestSent[orgId])
+  //         // return
+  //       // TODO:
+  //       // do we need identity publish status anymore
+  //       let status = await meDriver.identityPublishStatus()
+  //     // })
+  //     // .then(function(status) {
+  //     if (status/* || !self.isConnected*/) {
+  //       publishRequestSent[orgId] = true
+  //       if (!status.watches.link  &&  !status.link) {
+  //         if (isCustomerWaiting)
+  //           noCustomerWaiting = true
+  //         await self.publishMyIdentity(orgRep)
+  //       }
+  //       else {
+  //         // self.updateMe()
+  //         var allMyIdentities = self._getItem(MY_IDENTITIES)
+  //         var all = allMyIdentities.allIdentities
+  //         var curId = allMyIdentities.currentIdentity
+
+  //         let identity = all.filter((id) => id.id === curId)
+  //         console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
+  //         var msg = {
+  //           message: me.firstName + ' is waiting for the response',
+  //           [TYPE]: SELF_INTRODUCTION,
+  //           identity: identity[0].publishedIdentity,
+  //           profile: {
+  //             firstName: me.firstName
+  //           },
+  //           from: me,
+  //           to: r.to
+  //         }
+  //         if (isCustomerWaiting)
+  //           noCustomerWaiting = true
+  //         await self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
+  //       }
+  //     }
+  //     }
+  //   // if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+  //   //   return;
+  //   if (!isWelcome  ||  !utils.isEmpty(welcomeMessage) {
+
+  //     // Temporary untill the real hash is known
+  //     var key = utils.getId(rr)
+
+  //     rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
+  //     if (r[TYPE] === PRODUCT_APPLICATION)
+  //       rr.to.organization = self.buildRef(to)
+
+  //     self._setItem(key, rr)
+
+  //     if (!toOrg)
+  //       toOrg = to.organization ? to.organization : to
+
+  //     if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
+  //       let cId = utils.getId(rr._context)
+  //       self.addMessagesToChat(cId, rr)
+  //       let context = self._getItem(rr._context)
+  //       if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
+  //         if (rr[TYPE] === APPLICATION_DENIAL)
+  //           context._denied = true
+  //         else
+  //           context._approved = true
+  //         self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+  //         self.dbPut(cId, context)
+  //       }
+  //     }
+  //     else
+  //       self.addMessagesToChat(utils.getId(toOrg), rr)
+
+  //     var params = {
+  //       action: 'addMessage',
+  //       resource: isWelcome ? welcomeMessage : rr
+  //     }
+  //     if (error)
+  //       params.error = error
+  //     self.trigger(params)
+  //     if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
+  //       await self.getDriver(me)
+  //   }
+  //   // SelfIntroduction or IdentityPublishRequest were just sent
+  //   let result
+  //   if (!noCustomerWaiting) {
+  //     if (isReadOnlyContext)
+  //       result = await self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
+
+  //     else if (self._getItem(toId).pubkeys) {
+  //       // let sendParams = self.packMessage(r, toChain)
+  //       let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
+  //       if (disableAutoResponse) {
+  //         if (!sendParams.other)
+  //           sendParams.other = {}
+  //         sendParams.other.disableAutoResponse = true
+  //       }
+  //       const method = toChain[SIG] ? 'send' : 'signAndSend'
+  //       result = await self.meDriverExec(method, sendParams)
+  //       // .catch(function (err) {
+  //       //   debugger
+  //       // })
+  //     }
+  //   }
+  //   if (!requestForForm  &&  isWelcome)
+  //     return
+  //   if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+  //     return
+  //   if (isReadOnlyContext)
+  //     return
+  //   // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
+  //   if (!toOrg)
+  //     toOrg = to.organization ? to.organization : to
+
+  //   let orgId = utils.getId(toOrg)
+  //   // self.deleteMessageFromChat(orgId, rr)
+  //   // delete list[rr[TYPE] + '_' + tmpKey]
+
+  //   // saving the new message
+  //   const data = utils.toOldStyleWrapper(result.message)
+  //   if (data)  {
+  //     rr[ROOT_HASH] = data[ROOT_HASH]
+  //     rr[CUR_HASH] = data[CUR_HASH]
+  //   }
+  //   var key = utils.getId(rr)
+
+  //   self.dbBatchPut(key, rr, batch)
+  //   // rr._sendStatus = self.isConnected ? SENDING : QUEUED
+
+  //   self._setItem(key, rr)
+  //   // self.addMessagesToChat(orgId, rr)
+  //   await db.batch(batch)
+  // // })
+  //   // .catch(function(err) {
+  //   //   debugger
+  //   // })
+  //   // .finally(() => {
+  //  if (cb)
+  //    cb(rr)
+  // },
+  // searchResources(params) {
+  //   var meta = this.getModel(params.modelName)
+  //   var isMessage = utils.isMessage(meta)
+  //   if (isMessage) //  ||  meta.id === FORM)
+  //     return this.searchMessages(params);
+  //   else {
+  //     params.fromView = true
+  //     return this.searchNotMessages(params);
+  //   }
+  // },
+  // async onTalkToRepresentative(resource, org) {
+  //   var orgRep = resource[TYPE] === ORGANIZATION
+  //              ? this.getRepresentative(utils.getId(resource))
+  //              : resource
+  //   if (!orgRep) {
+  //     var msg = {
+  //       [TYPE]: SIMPLE_MESSAGE,
+  //       [NONCE]: this.getNonce(),
+  //       message: 'All representatives are currently assisting other customers. Please try again later'
+  //     }
+  //     msg.from = this.buildRef(resource)
+  //     msg.to = this.buildRef(me)
+  //     msg.id = sha(msg)
+  //     result.push(msg)
+  //     this.trigger({action: 'messageList', list: result, resource: resource})
+  //     return
+  //   }
+  //   var result = await this.searchMessages({to: resource, modelName: MESSAGE});
+  //   var msg = {
+  //     [TYPE]: SIMPLE_MESSAGE,
+  //     [NONCE]: this.getNonce(),
+  //     message: 'Representative will be with you shortly. Please tell us how can we help you today?'
+  //   }
+  //   msg.from = this.buildRef(resource)
+  //   msg.to = this.buildRef(me)
+  //   msg.id = sha(msg)
+  //   result.push(msg)
+  //   this.trigger({action: 'messageList', list: result, resource: resource})
+  //   var key = IDENTITY + '_' + orgRep[ROOT_HASH]
+
+  //   return this.meDriverSignAndSend({
+  //     object: msg,
+  //     to: { fingerprint: this.getFingerprint(this._getItem(key)) }
+  //   })
+  // },
+  // onGetDocumentsFor(requestedDocumentType) {
+  //   if (requestedDocumentType !== 'tradle.PersonalInfo')
+  //     return
+  //   let m = this.getModel(requestedDocumentType)
+  //   let evidentiaryDocTypes = m.evidentiaryDocuments
+  //   let docTypeToDocs = {}
+  //   evidentiaryDocTypes.forEach((d) => {
+  //     docTypeToDocs[d] = this.searchMessages(d)
+  //   })
+  //   this.trigger({action: 'documentsFor', documentType: requestedDocumentType, documents: docTypeToDocs})
+  // }

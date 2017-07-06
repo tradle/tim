@@ -80,7 +80,7 @@ class FormErrorRow extends Component {
       else
         addStyle = [chatStyles.verificationBody, {flex: 1, borderTopLeftRadius: 0}]
 
-      addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.formErrorBg, borderColor: resource.documentCreated ? bankStyle.fixErrorColor : bankStyle.formErrorBorder}]; //model.style];
+      addStyle = [addStyle, chatStyles.verificationBody, {backgroundColor: bankStyle.formErrorBg, borderColor: resource._documentCreated ? bankStyle.fixErrorColor : bankStyle.formErrorBorder}]; //model.style];
     }
     var properties = model.properties;
 
@@ -271,15 +271,15 @@ class FormErrorRow extends Component {
         style = [style, styles.myMessage];
 
       let rtype = resource.prefill[TYPE] || utils.getId(resource.prefill).split('_')[0]
-      let iconName = resource.documentCreated ? 'ios-done-all' : 'ios-arrow-forward'
-      let iconSize = resource.documentCreated ? 30 : 20
+      let iconName = resource._documentCreated ? 'ios-done-all' : 'ios-arrow-forward'
+      let iconSize = resource._documentCreated ? 30 : 20
 
       vCols.push(
         <View key={self.getNextKey()} style={{paddingBottom: 3}}>
           <Text style={[style, {color: '#555555'}]}>{resource.message} </Text>
           <View style={chatStyles.rowContainer}>
-            <Text style={[style, {color: resource.documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype).value)}</Text>
-            <Icon name={iconName} size={iconSize} color={resource.documentCreated || isReadOnlyChat ? self.props.bankStyle.fixErrorColor : self.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
+            <Text style={[style, {color: resource._documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype).value)}</Text>
+            <Icon name={iconName} size={iconSize} color={resource._documentCreated || isReadOnlyChat ? self.props.bankStyle.fixErrorColor : self.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
           </View>
         </View>
       )
@@ -291,7 +291,7 @@ class FormErrorRow extends Component {
     }
     if (isReadOnlyChat)
       return null
-    if (resource.documentCreated)
+    if (resource._documentCreated)
       return null
     if (utils.getId(resource.from) === utils.getId(utils.getMe()))
       return null

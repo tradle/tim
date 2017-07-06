@@ -27,6 +27,8 @@ var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 
+import InfiniteScrollView from 'react-native-infinite-scroll-view';
+import {Column as Col, Row} from 'react-native-flexbox-grid'
 import { makeStylish } from './makeStylish'
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
@@ -38,9 +40,13 @@ const ORGANIZATION = constants.TYPES.ORGANIZATION
 const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
 
+const MONEY = 'tradle.Money'
+const FORM = 'tradle.Form'
 const ENUM = 'tradle.Enum'
 const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
 
+var CURRENCY_SYMBOL
+var cnt = 0
 import React, { Component, PropTypes } from 'react'
 import {
   ListView,
@@ -70,7 +76,7 @@ const SearchBar = (function () {
 
 import ConversationsIcon from './ConversationsIcon'
 
-class ResourceList extends Component {
+class GridList extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
@@ -83,7 +89,7 @@ class ResourceList extends Component {
     isAggregation: PropTypes.bool,
     isRegistration: PropTypes.bool,
     isBacklink: PropTypes.bool,
-    backlinkList: PropTypes.array
+    // backlinkList: PropTypes.array
   };
   constructor(props) {
     super(props);
@@ -107,7 +113,8 @@ class ResourceList extends Component {
       sharedContextCount: 0,
       refreshing: false,
       hasPartials: false,
-      hasTestProviders: false
+      hasTestProviders: false,
+      isGrid:  this.props.modelName !== FORM//this.props.modelName === constants.TYPES.VERIFICATION
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
@@ -149,17 +156,54 @@ class ResourceList extends Component {
   }
   componentWillReceiveProps(props) {
     if (props.isBacklink) {
-      if (!props.backlinkList)
+      if (!props.resource['_' + props.prop.name + 'Count'])
         return
-      else if (props.backlinkList.length)
-        this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
-      else
-        this.state.dataSource = this.state.dataSource.cloneWithRows([])
+
+      this.state.dataSource = this.state.dataSource.cloneWithRows([])
+      this.state.isLoading = true;
+
+      let params = this.getParamsForBacklinkList(props)
+      Actions.list(params)
+      // else if (props.backlinkList.length)
+      //   this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
+      // else
+      //   this.state.dataSource = this.state.dataSource.cloneWithRows([])
     }
     if (props.provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(props.provider)))) {
       Actions.list({modelName: ORGANIZATION})
       // this.state.customStyles = props.customStyles
     }
+  }
+  getParamsForBacklinkList(props) {
+    var params = {
+      modelName: props.modelName,
+      // limit: 10
+    };
+    if (props._readOnly)
+      params._readOnly = true
+
+    if (props.isAggregation)
+      params.isAggregation = true;
+    if (props.sortProperty)
+      params.sortProperty = props.sortProperty;
+    if (props.prop)
+      params.prop = utils.getModel(props.resource[TYPE]).value.properties[props.prop.name];
+    if (params.prop) {
+      let m = utils.getModel(props.resource[TYPE]).value
+      // case when for example clicking on 'Verifications' on Form page
+      if (m.interfaces)
+        // if (utils.getModel(props.modelName).value.interfaces)
+        //   params.to = props.resource.to
+        params.resource = props.resource
+      else if (params.prop.items  &&  params.prop.items.backlink)
+        params.to = props.resource
+
+//       params.resource = props.resource
+    }
+    else
+      params.to = props.resource
+    params.listView = props.listView
+    return params
   }
   componentWillUnmount() {
     if (this.props.navigator.getCurrentRoutes().length === 1)
@@ -178,35 +222,35 @@ class ResourceList extends Component {
         Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
       });
     }
-    var params = {
-      modelName: this.props.modelName,
-      // limit: 10
-    };
-    if (this.props._readOnly)
-      params._readOnly = true
+    let params = this.getParamsForBacklinkList(this.props)
+//     var params = {
+//       modelName: this.props.modelName,
+//       // limit: 10
+//     };
+//     if (this.props._readOnly)
+//       params._readOnly = true
 
-    if (this.props.isAggregation)
-      params.isAggregation = true;
-    if (this.props.sortProperty)
-      params.sortProperty = this.props.sortProperty;
-    if (this.props.prop)
-      params.prop = utils.getModel(this.props.resource[TYPE]).value.properties[this.props.prop.name];
-    if (params.prop) {
-      let m = utils.getModel(this.props.resource[TYPE]).value
-      // case when for example clicking on 'Verifications' on Form page
-      if (m.interfaces)
-        // if (utils.getModel(this.props.modelName).value.interfaces)
-        //   params.to = this.props.resource.to
-        params.resource = this.props.resource
-      else if (params.prop.items  &&  params.prop.items.backlink)
-        params.to = this.props.resource
+//     if (this.props.isAggregation)
+//       params.isAggregation = true;
+//     if (this.props.sortProperty)
+//       params.sortProperty = this.props.sortProperty;
+//     if (this.props.prop)
+//       params.prop = utils.getModel(this.props.resource[TYPE]).value.properties[this.props.prop.name];
+//     if (params.prop) {
+//       let m = utils.getModel(this.props.resource[TYPE]).value
+//       // case when for example clicking on 'Verifications' on Form page
+//       if (m.interfaces)
+//         // if (utils.getModel(this.props.modelName).value.interfaces)
+//         //   params.to = this.props.resource.to
+//         params.resource = this.props.resource
+//       else if (params.prop.items  &&  params.prop.items.backlink)
+//         params.to = this.props.resource
 
-//       params.resource = this.props.resource
-    }
-    else
-      params.to = this.props.resource
-    params.listView = this.props.listView
-    params.limit = 10
+// //       params.resource = this.props.resource
+//     }
+//     else
+//       params.to = this.props.resource
+//     params.listView = this.props.listView
     // this.state.isLoading = true;
 
     // if (this.props.tabLabel) {
@@ -214,8 +258,10 @@ class ResourceList extends Component {
     StatusBar.setHidden(false);
     // }
     // else
-    if (this.props.isBacklink)
+    if (this.props.isBacklink) {
+      // params.limit = 10
       Actions.list(params)
+    }
     else
       utils.onNextTransitionEnd(this.props.navigator, () => {
         Actions.list(params)
@@ -405,6 +451,12 @@ class ResourceList extends Component {
           return utils.getId(r) !== sharingChatId
         })
       }
+      if (params.start) {
+        let l = []
+        this.state.list.forEach((r) => l.push(r))
+        list.forEach((r) => l.push(r))
+        list = l
+      }
     }
     list = this.addTestProvidersRow(list)
 
@@ -412,6 +464,7 @@ class ResourceList extends Component {
       dataSource: this.state.dataSource.cloneWithRows(list),
       list: list,
       isLoading: false,
+      refreshing: false
     }
 
     if (!list.length) {
@@ -794,7 +847,7 @@ class ResourceList extends Component {
     this.props.navigator.push({
       title: backlinksTitle,
       id: 10,
-      component: ResourceList,
+      component: GridList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
@@ -845,7 +898,10 @@ class ResourceList extends Component {
     });
   }
 
-  renderRow(resource)  {
+  renderRow(resource, sectionId, rowId)  {
+    if (this.state.isGrid  ||  this.props.modelName === constants.TYPES.VERIFICATION)
+      return this.renderGridRow(resource, sectionId, rowId)
+
     var model = this.props.isBacklink
               ? utils.getModel(utils.getType(resource)).value
               : utils.getModel(this.props.modelName).value;
@@ -866,6 +922,7 @@ class ResourceList extends Component {
     //   selectedResource = resource
     // else
     //   selectedResource = resource.document
+
     if (model.id === ORGANIZATION  &&  resource.name === 'Sandbox'  &&  resource._isTest)
       return this.renderTestProviders()
     if (isVerification  || isForm || isMyProduct)
@@ -898,6 +955,230 @@ class ResourceList extends Component {
       chosen={this.state.chosen} />
     );
   }
+  getGridCols() {
+    let model = utils.getModel(this.props.modelName).value
+    let props = model.properties
+    let viewCols = model.gridCols || model.viewCols
+    if (!viewCols)
+      return
+    let vCols = []
+    viewCols.forEach((v) => {
+      if (/*!props[v].readOnly &&*/ !props[v].list)
+        vCols.push(v)
+    })
+    // if (vCols.length === 7)
+    //   vCols.splice(6, 1)
+    return vCols
+  }
+  getNextKey(resource) {
+    return resource[constants.ROOT_HASH] + '_' + cnt++
+  }
+  addDateProp(resource, dateProp, style) {
+    var properties = utils.getModel(resource[constants.TYPE] || resource.id).value.properties;
+    if (properties[dateProp]  &&  properties[dateProp].style)
+      style = [style, properties[dateProp].style];
+    var val = utils.formatDate(new Date(resource[dateProp]));
+
+    // return !properties[dateProp]  ||  properties[dateProp].skipLabel || style
+    //     ? <Text style={style} key={this.getNextKey()}>{val}</Text>
+    //     : <View style={{flexDirection: 'row'}} key={this.getNextKey()}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
+
+    return <Text style={style} key={this.getNextKey(resource)}>{val}</Text>;
+  }
+
+  renderGridRow(resource, sectionId, rowId)  {
+    let viewCols = this.getGridCols()
+
+    let key = this.getNextKey(resource)
+    let size = viewCols ? viewCols.length : 1
+    let colSize =  utils.dimensions(GridList).width < 736 ? size / 2 : 1
+
+    let cols
+    if (viewCols) {
+      cols = viewCols.map((v) => (
+        <Col sm={colSize} md={1} lg={1} style={styles.col} key={key + v}>
+          {this.formatCol(resource, v) || <View />}
+        </Col>
+      ))
+    }
+    else {
+      var color = this.props.isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
+      var style = [styles.description, color]
+      // cols = <Col sm={size} md={1} lg={1} style={styles.col} key={key + rowId}>
+      //         {this.formatCol(resource, null) || <View />}
+      //       </Col>
+      let m = utils.getModel(this.props.modelName).value
+      let rModel = utils.getModel(resource[TYPE]).value
+      let typeTitle
+      if (rModel.id !== m.id  &&  rModel.subClassOf === m.id)
+        typeTitle = <Text style={styles.type}>{utils.makeModelTitle(rModel)}</Text>
+      let cellStyle = {paddingVertical: 3, paddingLeft: 7}
+      cols = <View style={cellStyle}>
+               {typeTitle}
+               <Col sm={1} md={1} lg={1} style={styles.col} key={key + rowId}>
+                 <Text style={style}>{utils.getDisplayName(resource)}</Text>
+               </Col>
+             </View>
+    }
+    return  <Row size={size} style={{borderBottomColor: '#f5f5f5', borderBottomWidth: 1, backgroundColor: rowId % 2 ? '#f9f9f9' : 'transparent'}} key={key} nowrap>
+              {cols}
+            </Row>
+  }
+  formatCol(resource, prop, style) {
+    var self = this;
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
+
+    // if (!prop) {
+    //   let m = utils.getModel(this.props.modelName).value
+    //   let row = <Text style={styles.description} key={this.getNextKey(resource)}>{utils.getDisplayName(resource)}</Text>
+    //   if (m.isInterface || m.id === FORM) {
+    //     row = <View key={this.getNextKey(resource)}>
+    //             <Text style={styles.type}>{utils.makeModelTitle(model)}</Text>
+    //             {row}
+    //           </View>
+    //   }
+    //   return <View style={cellStyle}>{row}</View>
+
+    // }
+    var properties = model.properties;
+
+    var isOfficialAccounts = this.props.isOfficialAccounts
+    var color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
+    var isContact = resource[TYPE] === PROFILE;
+    let v = prop
+    let backlink
+    if (properties[v].type === 'array') {
+      if (properties[v].items.backlink)
+        backlink = v;
+    }
+
+    if (properties[v].type === 'array')
+      return
+
+    if (!resource[v]  &&  !properties[v].displayAs)
+      return
+
+    var style = [styles.description, color]
+    if (isContact  &&  v === 'organization') {
+      style.push({alignSelf: 'flex-end', marginTop: 20})
+      style.push(styles.verySmallLetters);
+    }
+    if (properties[v].style)
+      style.push(properties[v].style);
+    let ref = properties[v].ref;
+    let row
+    let cellStyle = {paddingVertical: 3, paddingLeft: 7}
+    if (ref) {
+      if (!resource[v])
+        return
+      let refM = utils.getModel(ref).value
+      if (ref == MONEY)
+        row = <Text style={style} key={this.getNextKey(resource)}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
+      else {
+        row = <Text style={styles.description} key={this.getNextKey(resource)}>{utils.getDisplayName(resource[v])}</Text>
+        if (refM.isInterface || refM.id === FORM) {
+          let resType = utils.getType(resource[v])
+          let resM = utils.getModel(resType).value
+          // row = <View key={this.getNextKey(resource)}>
+          //         <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{utils.makeModelTitle(resM)}</Text>
+          //         {row}
+          //       </View>
+          row = <View key={this.getNextKey(resource)}>
+                  <Text style={styles.type}>{utils.makeModelTitle(resM)}</Text>
+                  {row}
+                </View>
+        }
+        if (refM.subClassOf !== ENUM) {
+          let isMessage = utils.isMessage(resource)
+          row = <TouchableOpacity onPress={() => {
+                  this.props.navigator.push({
+                    title: utils.getDisplayName(resource),
+                    id: isMessage ? 5 : 3,
+                    component: isMessage ?  MessageView : ResourceView,
+                    bankStyle: this.props.bankStyle,
+                    // titleTextColor: '#7AAAC3',
+                    backButtonTitle: 'Back',
+                    passProps: {resource: resource}
+                  });
+                  }}>
+                  {row}
+                </TouchableOpacity>
+        }
+      }
+      return <View style={cellStyle}>{row}</View>
+    }
+    if (properties[v].type === 'date')
+      return <View style={cellStyle}>{this.addDateProp(resource, v)}</View>
+
+    if (resource[v]  &&  (typeof resource[v] != 'string'))
+      return <View style={cellStyle}><Text style={style} numberOfLines={1} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
+    if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
+      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(self)} numberOfLines={1} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
+
+    var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
+    let msgParts = utils.splitMessage(val);
+    if (msgParts.length <= 2)
+      val = msgParts[0];
+    else {
+      val = '';
+      for (let i=0; i<msgParts.length - 1; i++)
+        val += msgParts[i];
+    }
+    val = val.replace(/\*/g, '')
+    return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
+  }
+
+  renderGridHeader() {
+    // if (this.state.isLoading)
+    //   return <View/>
+    var model = utils.getModel(this.props.modelName).value
+    var viewCols = this.getGridCols() // model.gridCols || model.viewCols;
+    if (!viewCols)
+      return <View />
+    var props = model.properties
+    let size = viewCols.length
+    let smCol = size/2
+    let cols = viewCols.map((p) => (
+              <Col sm={smCol} md={1} lg={1} style={styles.col} key={p + cnt}>
+                <TouchableOpacity onPress={() => this.sort(p)}>
+                  <Text style={styles.cell}>
+                    {props[p].title.toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+              </Col>
+            ))
+    return <View style={{backgroundColor: '#FBFFE5'}} key='Datagrid_h1'>
+            <Row size={size} style={styles.headerRow} key='Datagrid_h2' nowrap>
+              {cols}
+            </Row>
+          </View>
+
+  }
+  async _loadMoreContentAsync() {
+    if (this.state.refreshing) {
+      // debugger
+      return
+    }
+    this.state.refreshing = true
+    let list = this.state.list
+    Actions.list({
+      modelName: this.props.modelName,
+      sortProperty: this.props.sortProp,
+      asc: this.props.order,
+      // limit: this.props.limit || 10,
+      start: list.length,
+      gridView: this.state.isGrid,
+      startRec: list[this.state.list.length - 1]
+    })
+
+    // In this example, we're assuming cursor-based pagination, where any
+    // additional data can be accessed at this.props.listData.nextUrl.
+    //
+    // If nextUrl is set, that means there is more data. If nextUrl is unset,
+    // then there is no existing data, and you should fetch from scratch.
+    // this.props.dispatch(fetchMoreContent(this.props.listData.nextUrl));
+  }
+
   openSharedContextChat(resource) {
     var route = {
       // title: translate(utils.getModel(resource.product).value) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
@@ -1019,7 +1300,7 @@ class ResourceList extends Component {
     this.props.navigator.push({
       title: translate('sharedContext'),
       id: 10,
-      component: ResourceList,
+      component: GridList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
@@ -1099,8 +1380,9 @@ class ResourceList extends Component {
   }
   render() {
     var content;
+    var {isGrid, filter, dataSource, isLoading, refreshing, list} = this.state
     var model = utils.getModel(this.props.modelName).value;
-    if (this.state.dataSource.getRowCount() === 0   &&
+    if (dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
         !utils.getMe().organization                 &&
         model.subClassOf !== ENUM                   &&
@@ -1108,38 +1390,40 @@ class ResourceList extends Component {
         this.props.modelName !== ORGANIZATION  &&
         (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
       content = <NoResources
-                  filter={this.state.filter}
+                  filter={filter}
                   model={model}
-                  isLoading={this.state.isLoading}/>
+                  isLoading={isLoading}/>
     }
-    else {
-      content = <ListView
-          dataSource={this.state.dataSource}
-          renderHeader={this.renderHeader.bind(this)}
-          enableEmptySections={true}
-          renderRow={this.renderRow.bind(this)}
-          automaticallyAdjustContentInsets={false}
-          removeClippedSubviews={false}
-          keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps="always"
-          initialListSize={10}
-          pageSize={20}
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this._onRefresh.bind(this)}
-            />
-          }
-          scrollRenderAhead={10}
-          showsVerticalScrollIndicator={false} />;
-    }
+    content = <ListView
+      dataSource={dataSource}
+      renderHeader={this.renderHeader.bind(this)}
+      enableEmptySections={true}
+      renderRow={this.renderRow.bind(this)}
+      automaticallyAdjustContentInsets={false}
+      removeClippedSubviews={false}
+      keyboardDismissMode='on-drag'
+      keyboardShouldPersistTaps="always"
+      initialListSize={10}
+      pageSize={20}
+      canLoadMore={true}
+      renderScrollComponent={props => <InfiniteScrollView {...props} />}
+      onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
+      refreshControl={
+        <RefreshControl
+          refreshing={this.state.refreshing}
+          onRefresh={this._loadMoreContentAsync.bind(this)}
+        />
+      }
+      scrollRenderAhead={10}
+      showsVerticalScrollIndicator={false} />;
+
     let me = utils.getMe()
     var actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     let footer = actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar) {
       if (!this.props._readOnly  ||  this.props.modelName !== PRODUCT_APPLICATION) {
-        if ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length)) {
+        if ((list && list.length > 10) || (filter  &&  filter.length)) {
           searchBar = (
             <SearchBar
               onChangeText={this.onSearchChange.bind(this)}
@@ -1156,6 +1440,7 @@ class ResourceList extends Component {
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     let contentSeparator = utils.getContentSeparator(this.props.bankStyle)
+
     return (
       <PageView style={this.props.isBacklink ? {} : platformStyles.container} separator={contentSeparator}>
         {network}
@@ -1233,6 +1518,8 @@ class ResourceList extends Component {
   }
 
   renderHeader() {
+    if (this.state.isGrid  ||  this.props.modelName === constants.TYPES.VERIFICATION)
+      return this.renderGridHeader()
     if (!this.props.officialAccounts)
       return
     let sharedContext
@@ -1341,7 +1628,7 @@ class ResourceList extends Component {
     this.props.navigator.push({
       title: 'Partials',
       id: 10,
-      component: ResourceList,
+      component: GridList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
@@ -1354,7 +1641,7 @@ class ResourceList extends Component {
     this.props.navigator.push({
       title: translate('testProviders'),
       id: 10,
-      component: ResourceList,
+      component: GridList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
@@ -1365,9 +1652,9 @@ class ResourceList extends Component {
     })
   }
 }
-reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
-reactMixin(ResourceList.prototype, HomePageMixin)
-ResourceList = makeStylish(ResourceList)
+reactMixin(GridList.prototype, Reflux.ListenerMixin);
+reactMixin(GridList.prototype, HomePageMixin)
+GridList = makeStylish(GridList)
 
 var styles = StyleSheet.create({
   // container: {
@@ -1474,10 +1761,38 @@ var styles = StyleSheet.create({
   testProvidersDescription: {
     fontSize: 16,
     color: '#757575'
+  },
+  col: {
+    paddingVertical: 5,
+    paddingLeft: 7
+    // borderRightColor: '#aaaaaa',
+    // borderRightWidth: 0,
+  },
+  cell: {
+    paddingVertical: 5,
+    fontSize: 14,
+    paddingLeft: 7
+    // paddingHorizontal: 3
+    // alignSelf: 'center'
+  },
+  headerRow: {
+    borderBottomColor: '#cccccc',
+    borderBottomWidth: 1,
+    // borderTopColor: '#cccccc',
+    // borderTopWidth: 1
+  },
+  type: {
+    fontSize: 18,
+    color: '#555555'
+  },
+  description: {
+    fontSize: 16,
+    color: '#999999'
   }
+
 });
 
-module.exports = ResourceList;
+module.exports = GridList;
   // scanFormsQRCode() {
   //   this.setState({hideMode: false})
   //   this.props.navigator.push({
@@ -1537,4 +1852,53 @@ module.exports = ResourceList;
   //     this.props.navigator.pop()
   //     break
   //   }
+  // }
+  // renderGrid() {
+  //   let content = <ListView
+  //       dataSource={this.state.dataSource}
+  //       renderHeader={this.renderGridHeader.bind(this)}
+  //       enableEmptySections={true}
+  //       renderRow={this.renderGridRow.bind(this)}
+  //       automaticallyAdjustContentInsets={false}
+  //       removeClippedSubviews={false}
+  //       keyboardDismissMode='on-drag'
+  //       keyboardShouldPersistTaps="always"
+  //       initialListSize={10}
+  //       pageSize={20}
+  //       canLoadMore={true}
+  //       renderScrollComponent={props => <InfiniteScrollView {...props} />}
+  //       onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
+  //       refreshControl={
+  //         <RefreshControl
+  //           refreshing={this.state.refreshing}
+  //           onRefresh={this._loadMoreContentAsync.bind(this)}
+  //         />
+  //       }
+  //       scrollRenderAhead={10}
+  //       showsVerticalScrollIndicator={false} />
+
+  //   var searchBar
+  //   if (SearchBar) {
+  //     if (!this.props._readOnly  ||  this.props.modelName !== PRODUCT_APPLICATION) {
+  //       if (this.state.dataSource.getRowCount() > 10 || (this.state.filter  &&  this.state.filter.length)) {
+  //         searchBar = (
+  //           <SearchBar ref='searchBar'
+  //             onChangeText={this.onSearchChange.bind(this)}
+  //             placeholder={translate('search')}
+  //             showsCancelButton={false}
+  //             hideBackground={true}
+  //             />
+  //         )
+  //       }
+  //     }
+  //   }
+
+  //   return (
+  //     <PageView style={this.props.isBacklink ? {} : platformStyles.container}>
+  //       <NetworkInfoProvider connected={this.state.isConnected} />
+  //       {searchBar}
+  //       <View style={styles.separator} />
+  //       {content}
+  //     </PageView>
+  //   );
   // }

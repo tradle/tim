@@ -19,11 +19,12 @@ import 'stream'
 import debounce from 'debounce'
 // require('./timmy')
 var ResourceList = require('./Components/ResourceList');
+var Datagrid = require('./Components/Datagrid')
 var VerifierChooser = require('./Components/VerifierChooser')
 
 // var VideoPlayer = require('./Components/VideoPlayer')
 var EnumList = require('./Components/EnumList')
-// var GridList = require('./Components/GridList');
+var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
 var MarkdownPropertyEdit = require('./Components/MarkdownPropertyEdit')
 
@@ -494,16 +495,6 @@ class TiMApp extends Component {
 
     case 14:
       return <PhotoCarousel {...props} />
-    // case 15:
-    //   return <GridList navigator={nav}
-    //               filter={props.filter}
-    //               resource={props.resource}
-    //               prop={props.prop}
-    //               returnRoute={props.returnRoute}
-    //               callback={props.callback}
-    //               isAggregation={props.isAggregation}
-    //               sortProperty={props.sortProperty}
-    //               modelName={props.modelName} />;
     case 15:
       return <ProductChooser navigator={nav} {...props} />
     case 16:
@@ -542,6 +533,8 @@ class TiMApp extends Component {
     //   return <HomePage navigator={nav} {...props} />
     case AVIVA_INTRO_VIEW:
       return <AvivaIntroView navigator={nav} {...props} />
+    case 30:
+      return <GridList navigator={nav} {...props} />
     case 31:
       return <MarkdownPropertyEdit navigator={nav} {...props} />
     case 10:

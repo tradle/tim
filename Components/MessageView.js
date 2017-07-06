@@ -519,10 +519,10 @@ var styles = StyleSheet.create({
     // paddingTop: 3,
     // marginTop: -10,
   },
-  rowContainer: {
-    paddingBottom: 10,
-    // paddingHorizontal: 10
-  },
+  // rowContainer: {
+  //   paddingBottom: 10,
+  //   // paddingHorizontal: 10
+  // },
   date: {
     fontSize: 14,
     marginTop: 5,
