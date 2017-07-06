@@ -34,7 +34,7 @@ var asyncActions = [
   'share',
   'startTransition',
   'endTransition',
-  'talkToRepresentative',
+  // 'talkToRepresentative',
   'saveTemporary',
   'cleanup',
   'forgetMe',
