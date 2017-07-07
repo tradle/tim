@@ -7495,8 +7495,8 @@ var Store = Reflux.createStore({
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
-        if (isModelsPack  &&  m.id.indexOf('tradle.') === 0) {
-          console.log('ModelsPack: the name you chose is the same as one of Tradle\'s core Models. Please rename and resend the model')
+        if (isModelsPack  &&  /^tradle\.[^.]+$/.test(m.id)) {
+          console.log('ModelsPack: the tradle.* namespace is reserved. Please rename and resend the model')
           return
         }
 
