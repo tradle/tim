@@ -66,6 +66,7 @@
     "https-browserify": "0.0.1",
     "inherits": "^2.0.1",
     "json-stringify-safe": "^5.0.1",
+    "level-change-processor": "github:mvayngrib/level-change-processor",
     "levelup": "^0.18.6",
     "lru-cache": "^4.0.1",
     "map-stream": "0.0.6",
