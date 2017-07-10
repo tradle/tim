@@ -531,30 +531,34 @@ var Store = Reflux.createStore({
 
     if (r._sendStatus !== SENT) {
       this.trigger({action: 'updateItem', sendStatus: SENT, resource: r})
+      r._msg = link
       r._sendStatus = SENT
       this.dbPut(objId, r)
     }
     let msg = await meDriver.objects.get(link)
     let obj = await this._keeper.get(link)
+
     msg.object = obj
     this.maybeWatchSeal(msg)
   },
   async newObject (msg) {
     let {objectinfo, link} = msg
 
-    let obj = await this._keeper.get(link)
-    msg.object = obj
-
-    if (msg.author === me[CUR_HASH])
-      return
-
-    const payload = msg.object.object
-    msgToObj[link] = utils.getId({
-      [TYPE]: payload[TYPE],
+    let objId = utils.getId({
+      [TYPE]: objectinfo.type,
       [ROOT_HASH]: objectinfo.permalink,
       [ROOT_HASH]: objectinfo.link,
     })
+    msgToObj[link] = objId
+    if (msg.author === me[CUR_HASH])
+      return
+
+    let obj = await this._keeper.get(link)
+    msg.object = obj
+
     this.maybeWatchSeal(msg)
+
+    const payload = msg.object.object
     if (payload[TYPE] === MESSAGE) {
       let obj = msg.object
       obj.from = {[ROOT_HASH]: msg.objectinfo.author}
@@ -2634,11 +2638,11 @@ var Store = Reflux.createStore({
       let isProductApplication = r[TYPE] === PRODUCT_APPLICATION
       if (isProductApplication) {
         rr._context = r._context = {id: utils.getId(r), title: r.product}
-        let params = {
-          action: 'addItem',
-          resource: rr,
-          // sendStatus: sendStatus
-        }
+        // let params = {
+        //   action: 'addItem',
+        //   resource: rr,
+        //   // sendStatus: sendStatus
+        // }
         // self.trigger(params)
         self.addLastMessage(r, batch)
       }
@@ -5283,10 +5287,11 @@ var Store = Reflux.createStore({
     let resourceId = resource ? utils.getId(resource) : null
     let list
     let links = []
-    let linksSaved
-    let j = lastId
-          ? thisChatMessages.findIndex(({ id }) => id === lastId)
-          : 0
+    let j
+    if (lastId)
+      j = thisChatMessages.findIndex(({ id }) => id === lastId)
+    else
+      j = isBacklinkProp ? 0 : thisChatMessages.length - 1
 
     if (isBacklinkProp) {
       for (let i=j; i<thisChatMessages.length; i++) {
