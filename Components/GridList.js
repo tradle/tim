@@ -955,6 +955,15 @@ class GridList extends Component {
       chosen={this.state.chosen} />
     );
   }
+  sort(prop) {
+    let order = this.state.order
+    let curOrder = this.state.order[prop]
+
+    order[prop] = curOrder ? false : true
+
+    this.setState({order: order, sortProperty: prop})
+    Actions.list({modelName: this.props.modelName, sortProperty: prop, asc: order[prop], gridView: true})
+  }
   getGridCols() {
     let model = utils.getModel(this.props.modelName).value
     let props = model.properties
