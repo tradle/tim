@@ -305,7 +305,7 @@ class MessageList extends Component {
   gatherForms(list) {
     let productToForms = {}
     list.forEach((r) => {
-      if (r[TYPE] === FORM_REQUEST  &&  r._documentCreated  &&  r.document) {
+      if (r[TYPE] === FORM_REQUEST  &&  r._documentCreated  &&  r._document) {
         var l = productToForms[r.product]
         if (!l) {
           l = {}
