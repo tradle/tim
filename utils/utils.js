@@ -845,11 +845,14 @@ var utils = {
     else {
       var properties = m.properties
       var exclude = ['from', 'to', 'time']
+      let isVerification = m.id === VERIFICATION
       Object.keys(res).forEach(p => {
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
           return
-
-        delete res[p]
+        if (isVerification  &&  p === 'document')
+          res[p] = this.buildRef(res[p])
+        else
+          delete res[p]
       })
     }
     if (!this.isMessage(m))
@@ -857,7 +860,7 @@ var utils = {
 
     if (res._sharedWith) {
       res._sharedWith.forEach((r) => {
-        if (r.shareBatchId)
+        if (r.shareBatchId  &&  (typeof r.shareBatchId === 'object'))
           r.shareBatchId = utils.buildRef(r.shareBatchId)
       })
     }
