@@ -517,15 +517,13 @@ var Store = Reflux.createStore({
       switch (value.topic) {
       case 'sent':
         return self.sent(value.link)
-        break
       case 'newobj':
         let {objectinfo} = value
         if (!objectinfo)
           break
         return self.newObject(value)
-        break
       case 'readseal':
-        debugger
+        return self.readseal(value)
       }
     }      // worker: (event, cb) => {
   },
@@ -4837,6 +4835,28 @@ var Store = Reflux.createStore({
     this.trigger(retParams)
   },
 
+  getAllMessages() {
+    return collect(meDriver.objects.createReadStream())
+    .filter((r) => r.type === MESSAGE  &&  r.object.type !== PRODUCT_LIST)
+    .map((r) => {
+      let obj = {}
+      let {object, objectinfo} = r
+
+      obj = object.object
+      if (obj.message  &&  !obj.message.length)
+        delete obj.message
+
+      if (object.context)
+        obj._context = object.context
+      obj._author = objectinfo.author || r.author
+      obj._link = objectinfo.link
+      obj._permalink = objectinfo.permalink
+      obj._time = r.timestamp
+      if (obj.sentStatus)
+        obj._sendstatus = obj.sendstatus
+      return obj
+    })
+  },
   async getCurrentContext(to, orgId) {
     let c = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
     if (!c  ||  !c.length)
@@ -5239,6 +5259,7 @@ var Store = Reflux.createStore({
     })
   },
   searchMessages(params) {
+
     // await this._loadedResourcesDefer.promise
     var self = this
 
