@@ -277,7 +277,7 @@ class GridList extends Component {
   }
 
   onListUpdate(params) {
-    var {action, error} = action;
+    var {action, error} = params
     if (action === 'addApp') {
       this.props.navigator.pop()
       if (error)
