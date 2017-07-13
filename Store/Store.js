@@ -674,6 +674,7 @@ var Store = Reflux.createStore({
     }
   },
   readseal(seal) {
+    let self = this
     const link = seal.link
     meDriver.objects.get(link)
       .then(function(obj) {
@@ -3045,6 +3046,7 @@ var Store = Reflux.createStore({
   deleteMessageFromChat(id, r) {
     let rid = utils.getId(r)
 
+    let allMessages = chatMessages[ALL_MESSAGES]
     let allIdx = allMessages.findIndex(({ id }) => id === rid)
     allMessages.splice(allIdx, 1)
 
