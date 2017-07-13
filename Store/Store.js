@@ -3183,7 +3183,7 @@ var Store = Reflux.createStore({
 
         this.addBacklinksTo(ADD, me, r, batch)
         this.setMe(me)
-        this.trigger({action: 'addItem', resource: me})
+        this.trigger({action: 'addItem', resource: utils.clone(me)})
         this.addBacklinksTo(ADD, this._getItem(r.from), r, batch)
       }
       if (r.sources) {
@@ -8672,7 +8672,8 @@ var Store = Reflux.createStore({
     })
     .then((result) => {
       batch = []
-      if (result)
+      if (result) {
+        let allMessages = chatMessages[ALL_MESSAGES]
         result.forEach(function(r) {
           let doDelete = r[TYPE] === SELF_INTRODUCTION  ||  (r[TYPE] === SIMPLE_MESSAGE  &&  r.message  &&  r.message.indexOf('Congratulations') === 0)
           if (doDelete) {
@@ -8683,7 +8684,7 @@ var Store = Reflux.createStore({
             allMessages.splice(idx, 1)
           }
         })
-
+      }
       // resource.numberOfForms = 0
 
       // reps.forEach((r) => {
