@@ -38,6 +38,9 @@ const SENT = 'Sent'
 const SENDING = 'Sending'
 const QUEUED = 'Queued'
 
+const ADD = 1
+const DELETE = -1
+
 var debug = Debug('tradle:app:store')
 var employee = require('../people/employee.json')
 
@@ -165,6 +168,7 @@ const PAIRING_REQUEST     = 'tradle.PairingRequest'
 const PAIRING_RESPONSE    = 'tradle.PairingResponse'
 const PAIRING_DATA        = 'tradle.PairingData'
 const ITEM                = 'tradle.Item'
+const DOCUMENT            = 'tradle.Document'
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
 const REMEDIATION         = 'tradle.Remediation'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
@@ -520,6 +524,8 @@ var Store = Reflux.createStore({
           break
         return self.newObject(value)
         break
+      case 'readseal':
+        debugger
       }
     }      // worker: (event, cb) => {
   },
@@ -667,7 +673,64 @@ var Store = Reflux.createStore({
       console.error('2. failed to process received message', err)
     }
   },
+  readseal(seal) {
+    const link = seal.link
+    meDriver.objects.get(link)
+      .then(function(obj) {
+        if (obj.object[TYPE] === IDENTITY && obj.link === meDriver.link) {
+          return
+        }
 
+        const wrapper = { ...seal, ...obj }
+        save(wrapper)
+      })
+
+    function save (wrapper) {
+        // return
+      const getFromTo = wrapper.type === 'tradle.Message'
+        ? Q(wrapper)
+        : getAuthorForObject(wrapper)
+
+      return getFromTo
+        .then(msgInfo => {
+          wrapper.from = { [ROOT_HASH]: msgInfo.author }
+          wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
+          wrapper = utils.toOldStyleWrapper(wrapper)
+          if (!wrapper.objectinfo) {
+            wrapper.objectinfo = tradleUtils.pick(wrapper, 'author', 'type', 'link', 'permalink', 'prevlink')
+          }
+
+          return self.putInDb(wrapper)
+        })
+        .catch(function (err) {
+          console.error('unable to get message for object', wrapper)
+          debugger
+        })
+    }
+
+    function getAuthorForObject (wrapper) {
+      // objects don't really have a from/to
+      // so this will need to be redesigned
+      const msgStream = meDriver.objects.messagesWithObject({
+        permalink: wrapper.permalink,
+        link: link
+      })
+
+      return Q.all([
+        meDriver.addressBook.lookupIdentity({ permalink: wrapper.author }),
+        collect(msgStream)
+      ])
+      .spread(function (authorInfo, messages) {
+        const match = messages.filter(m => m.author === authorInfo.permalink)[0]
+        // if (!match) throw new Error('unable to get message for object')
+        if (!match) {
+          console.error('unable to get message for object', wrapper)
+          throw new Error('unable to get message for object')
+        }
+        return match
+      })
+    }
+  },
   addModels() {
     voc.forEach((m) => {
       // if (!m[ROOT_HASH])
@@ -2980,17 +3043,30 @@ var Store = Reflux.createStore({
   },
   // cleanup
   deleteMessageFromChat(id, r) {
+    let rid = utils.getId(r)
+
+    let allIdx = allMessages.findIndex(({ id }) => id === rid)
+    allMessages.splice(allIdx, 1)
+
     let messages = [chatMessages[id], chatMessages[ALL_MESSAGES]]
-    for (let i=0; i<2; i++) {
-      if (messages) {
-        let rid = utils.getId(r)
-        for (let i=0; i<messages.length; i++)
-          if (messages[i].id === rid) {
-            messages.splice(i, 1)
-            break
-          }
-      }
+    if (messages) {
+      let idx = messages.findIndex(({ id }) => id === rid)
+      messages.splice(allIdx, 1)
     }
+    // for (let i=0; i<2; i++) {
+    //   if (messages) {
+    //     let rid = utils.getId(r)
+
+    //     let allIdx = allMessages.findIndex(({ id }) => id === rid)
+    //     allMessages.splice(allIdx, 1)
+
+    //     for (let i=0; i<messages.length; i++)
+    //       if (messages[i].id === rid) {
+    //         messages.splice(i, 1)
+    //         break
+    //       }
+    //   }
+    // }
   },
   getRepresentatives(orgId) {
     var result = this.searchNotMessages({modelName: PROFILE, all: true})
@@ -3103,8 +3179,10 @@ var Store = Reflux.createStore({
         vr._verificationsCount = !vr._verificationsCount ? 1 : ++vr._verificationsCount
         this.dbBatchPut(utils.getId(vr), vr, batch);
 
-        this.addBacklinksTo(utils.getMe(), r, batch)
-        this.addBacklinksTo(this._getItem(r.from), r, batch)
+        this.addBacklinksTo(ADD, me, r, batch)
+        this.setMe(me)
+        this.trigger({action: 'addItem', resource: me})
+        this.addBacklinksTo(ADD, this._getItem(r.from), r, batch)
       }
       if (r.sources) {
         let docId = utils.getId(r.document)
@@ -3233,7 +3311,8 @@ var Store = Reflux.createStore({
     let id = utils.getId(shareWith)
     if (id === utils.getId(utils.getMe()))
       debugger
-    let hasThisShare = r._sharedWith.some((r) => r.shareBatchId === shareBatchId)
+    // let hasThisShare = r._sharedWith.some((r) => r.shareBatchId === shareBatchId)
+    let hasThisShare = r._sharedWith.some((r) => r.bankRepresentative === id)
     if (!hasThisShare)
       r._sharedWith.push(this.createSharedWith(id, time, shareBatchId))
   },
@@ -3887,198 +3966,198 @@ var Store = Reflux.createStore({
         })
     }
 
-      function handleMessage (noTrigger, returnVal) {
-        // TODO: fix hack
-        // hack: we don't know root hash yet, use a fake
-        if (returnVal._documentCreated)  {
-          // when all the multientry forms are filled out and next form is requested
-          // do not show the last form request for the multientry form it is confusing for the user
-          if (doneWithMultiEntry) {
-            let ptype = returnVal[TYPE] === FORM_REQUEST && returnVal.product
-            if (ptype) {
-              let multiEntryForms = self.getModel(ptype).multiEntryForms
-              if (multiEntryForms  &&  multiEntryForms.indexOf(returnVal.form) !== -1) {
-                let rid = returnVal.from.organization.id
-                self.deleteMessageFromChat(rid, returnVal)
-                let id = utils.getId(returnVal)
-                delete list[id]
-                db.del(id)
-                var params = {action: 'addItem', resource: returnVal}
-                self.trigger(params);
-                return
-              }
-            }
-          }
-          // return new Promise(resolve => meDriver.objects.get(returnVal[CUR_HASH]))
-           return meDriver.objects.get(returnVal[CUR_HASH])
-          .then((obj) => {
-            let r = obj.object
-            extend(r, returnVal)
-            var params = {action: 'addItem', resource: r}
-            // return self.disableOtherFormRequestsLikeThis(returnVal)
-            // .then(() => {
-              // don't save until the real resource is created
-            list[utils.getId(returnVal)].value = returnVal
-            self.trigger(params);
-            return self.onIdle()
-          })
-          .then(() => {
-            save(returnVal, true)
-          })
-          .catch(function(err) {
-            debugger
-          })
-          // })
-        }
-        // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
-        // and reset it after the real root hash will be known
-        let isNew = returnVal[ROOT_HASH] == null
-        let isForm = self.getModel(returnVal[TYPE]).subClassOf === FORM
-        if (!isNew  &&  isForm) {
-          let formId = utils.getId(returnVal)
-          let prevRes = self._getItem(formId)
-          if (utils.compare(returnVal, prevRes)) {
-            self.trigger({action: 'noChanges'})
-            return
-          }
-        }
-
-
-        let rId = utils.getId(returnVal.to)
-        let to = self._getItem(rId)
-        let permalink = to[ROOT_HASH]
-        var toChain = {}
-
-        let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', 'idOld']
-        // if (isNew)
-        //   exclude.push(ROOT_HASH)
-        extend(toChain, returnVal)
-        for (let p of exclude)
-          delete toChain[p]
-
-        if (!isNew) {
-          toChain[PREV_HASH] = returnVal[CUR_HASH]
-          let properties = self.getModel(returnVal[TYPE]).properties
-          for (let p in toChain)
-            if (!properties[p]  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH)
-              delete toChain[p]
-        }
-
-        // toChain.time = returnVal.time
-
-        var key = IDENTITY + '_' + to[ROOT_HASH]
-
-        // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
-        return meDriver.createObject({object: toChain})
-        .then((data) => {
-          let hash = data.link
-          if (isNew)
-            returnVal[ROOT_HASH] = hash
-          returnVal[CUR_HASH] = hash
-
-          var returnValKey = utils.getId(returnVal)
-
-          self._setItem(returnValKey, returnVal)
-          let org
-          if (!utils.isSavedItem(returnVal)) {
-            org = self._getItem(utils.getId(returnVal.to)).organization
-            let orgId = utils.getId(org)
-            self.addMessagesToChat(orgId, returnVal)
-          }
-          var params;
-
-          var sendStatus = (self.isConnected) ? SENDING : QUEUED
-          if (isGuestSessionProof) {
-            org = self._getItem(utils.getId(org))
-            params = {action: 'getForms', to: org}
-          }
-          else {
-            returnVal._sendStatus = sendStatus
-            // if (isNew)
-            self.addVisualProps(returnVal)
-            params = {
-              action: 'addItem',
-              resource: returnVal
-            }
-          }
-
-          var m = self.getModel(returnVal[TYPE])
-          try {
-            if (!noTrigger)
+    function handleMessage (noTrigger, returnVal) {
+      // TODO: fix hack
+      // hack: we don't know root hash yet, use a fake
+      if (returnVal._documentCreated)  {
+        // when all the multientry forms are filled out and next form is requested
+        // do not show the last form request for the multientry form it is confusing for the user
+        if (doneWithMultiEntry) {
+          let ptype = returnVal[TYPE] === FORM_REQUEST && returnVal.product
+          if (ptype) {
+            let multiEntryForms = self.getModel(ptype).multiEntryForms
+            if (multiEntryForms  &&  multiEntryForms.indexOf(returnVal.form) !== -1) {
+              let rid = returnVal.from.organization.id
+              self.deleteMessageFromChat(rid, returnVal)
+              let id = utils.getId(returnVal)
+              delete list[id]
+              db.del(id)
+              var params = {action: 'addItem', resource: returnVal}
               self.trigger(params);
-          } catch (err) {
-            debugger
-          }
-
-          if (!utils.isSavedItem(returnVal)) {
-            let sendParams = {
-              to: {permalink: permalink},
-              link: hash,
+              return
             }
-            if (returnVal._context) {
-              sendParams.other = {
-                context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
-              }
-            }
-
-            return self.meDriverSend(sendParams)
           }
-        })
-        .then(function (result) {
-          if (readOnlyBacklinks.length) {
-            readOnlyBacklinks.forEach((prop) => {
-              let topR = returnVal[prop.name]
-              if (topR) {
-                if (!topR[prop.backlink])
-                  topR[prop.backlink] = []
-                topR[prop.backlink].push(self.buildRef(returnVal))
-              }
-            })
-          }
-
-          delete returnVal._sharedWith
-          delete returnVal.verifications
-          return save(returnVal, true)
+        }
+        // return new Promise(resolve => meDriver.objects.get(returnVal[CUR_HASH]))
+         return meDriver.objects.get(returnVal[CUR_HASH])
+        .then((obj) => {
+          let r = obj.object
+          extend(r, returnVal)
+          var params = {action: 'addItem', resource: r}
+          // return self.disableOtherFormRequestsLikeThis(returnVal)
+          // .then(() => {
+            // don't save until the real resource is created
+          list[utils.getId(returnVal)].value = returnVal
+          self.trigger(params);
+          return self.onIdle()
         })
         .then(() => {
-          if (returnVal[TYPE] === ASSIGN_RM) {
-            let app = self._getItem(returnVal.application)
-            app._relationshipManager = true
-            self.dbPut(utils.getId(app), app)
-          }
-          let rId = utils.getId(returnVal.to)
-          let to = self._getItem(rId)
-
-          if (!isNew  ||  self.getModel(returnVal[TYPE]).subClassOf !== FORM)
-            return
-          return self.searchMessages({modelName: FORM_REQUEST, to: to})
+          save(returnVal, true)
         })
-        .then((allFormRequests) => {
-          let formRequests = allFormRequests  &&  allFormRequests.filter((r) => {
-            if (r.document === returnVal[NONCE])
-              return true
-          })
-          if (formRequests  &&  formRequests.length) {
-            let req = formRequests[0]
-            req.document = utils.getId(returnVal)
-            // returnVal = req
-            return save(req, true)
-          }
+        .catch(function(err) {
+          debugger
         })
+        // })
       }
-      function save (returnVal, noTrigger) {
-        let r = {
-          type: returnVal[TYPE],
-          resource: returnVal,
-          roothash: returnVal[ROOT_HASH],
-          isRegistration: isRegistration,
-          noTrigger: noTrigger
+      // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
+      // and reset it after the real root hash will be known
+      let isNew = returnVal[ROOT_HASH] == null
+      let isForm = self.getModel(returnVal[TYPE]).subClassOf === FORM
+      if (!isNew  &&  isForm) {
+        let formId = utils.getId(returnVal)
+        let prevRes = self._getItem(formId)
+        if (utils.compare(returnVal, prevRes)) {
+          self.trigger({action: 'noChanges'})
+          return
         }
-        if (params.maxAttempts)
-          r.maxAttempts = params.maxAttempts
-        return self._putResourceInDB(r)
       }
-    // })
+
+
+      let rId = utils.getId(returnVal.to)
+      let to = self._getItem(rId)
+      let permalink = to[ROOT_HASH]
+      var toChain = {}
+
+      let exclude = ['to', 'from', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', 'idOld']
+      // if (isNew)
+      //   exclude.push(ROOT_HASH)
+      extend(toChain, returnVal)
+      for (let p of exclude)
+        delete toChain[p]
+
+      if (!isNew) {
+        toChain[PREV_HASH] = returnVal[CUR_HASH]
+        let properties = self.getModel(returnVal[TYPE]).properties
+        for (let p in toChain)
+          if (!properties[p]  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH)
+            delete toChain[p]
+      }
+
+      // toChain.time = returnVal.time
+
+      var key = IDENTITY + '_' + to[ROOT_HASH]
+
+      // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
+      return meDriver.createObject({object: toChain})
+      .then((data) => {
+        let hash = data.link
+        if (isNew)
+          returnVal[ROOT_HASH] = hash
+        returnVal[CUR_HASH] = hash
+
+        var returnValKey = utils.getId(returnVal)
+
+        self._setItem(returnValKey, returnVal)
+        let org
+        if (!utils.isSavedItem(returnVal)) {
+          org = self._getItem(utils.getId(returnVal.to)).organization
+          let orgId = utils.getId(org)
+          self.addMessagesToChat(orgId, returnVal)
+        }
+        var params;
+
+        var sendStatus = (self.isConnected) ? SENDING : QUEUED
+        if (isGuestSessionProof) {
+          org = self._getItem(utils.getId(org))
+          params = {action: 'getForms', to: org}
+        }
+        else {
+          returnVal._sendStatus = sendStatus
+          // if (isNew)
+          self.addVisualProps(returnVal)
+          params = {
+            action: 'addItem',
+            resource: returnVal
+          }
+        }
+
+        var m = self.getModel(returnVal[TYPE])
+        try {
+          if (!noTrigger)
+            self.trigger(params);
+        } catch (err) {
+          debugger
+        }
+
+        if (!utils.isSavedItem(returnVal)) {
+          let sendParams = {
+            to: {permalink: permalink},
+            link: hash,
+          }
+          if (returnVal._context) {
+            sendParams.other = {
+              context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
+            }
+          }
+
+          return self.meDriverSend(sendParams)
+        }
+      })
+      .then(function (result) {
+        if (readOnlyBacklinks.length) {
+          readOnlyBacklinks.forEach((prop) => {
+            let topR = returnVal[prop.name]
+            if (topR) {
+              if (!topR[prop.backlink])
+                topR[prop.backlink] = []
+              topR[prop.backlink].push(self.buildRef(returnVal))
+            }
+          })
+        }
+
+        delete returnVal._sharedWith
+        delete returnVal.verifications
+        return save(returnVal, true)
+      })
+      .then(() => {
+        if (returnVal[TYPE] === ASSIGN_RM) {
+          let app = self._getItem(returnVal.application)
+          app._relationshipManager = true
+          self.dbPut(utils.getId(app), app)
+        }
+        let rId = utils.getId(returnVal.to)
+        let to = self._getItem(rId)
+
+        if (!isNew  ||  self.getModel(returnVal[TYPE]).subClassOf !== FORM)
+          return
+        return self.searchMessages({modelName: FORM_REQUEST, to: to})
+      })
+      .then((allFormRequests) => {
+        let formRequests = allFormRequests  &&  allFormRequests.filter((r) => {
+          if (r.document === returnVal[NONCE])
+            return true
+        })
+        if (formRequests  &&  formRequests.length) {
+          let req = formRequests[0]
+          req.document = utils.getId(returnVal)
+          // returnVal = req
+          return save(req, true)
+        }
+      })
+    }
+    function save (returnVal, noTrigger) {
+      let r = {
+        modelName: returnVal[TYPE],
+        resource: returnVal,
+        dhtKey: returnVal[ROOT_HASH],
+        isRegistration: isRegistration,
+        noTrigger: noTrigger
+      }
+      if (params.maxAttempts)
+        r.maxAttempts = params.maxAttempts
+      return self._putResourceInDB(r)
+    }
+  // })
 
     async function becomingEmployee(resource) {
       if (resource[TYPE] !== PROFILE)
@@ -4090,11 +4169,6 @@ var Store = Reflux.createStore({
       let meOrgId = me.organization ? utils.getId(me.organization) : null
       let newOrgId = utils.getId(resource.organization)
 
-      if (meOrgId  &&  meOrgId !== newOrgId) {
-        let isEmployee = checkIfEmployeeAlready()
-        if (isEmployee)
-          return {error: 'Can\'t change employment'}
-      }
       if (!meOrgId) {
         if (!SERVICE_PROVIDERS)
           return {error: 'Can\'t verify if provider is active at this time. Try again later'}
@@ -4104,8 +4178,12 @@ var Store = Reflux.createStore({
         if (o  &&  o.length)
           return {isBecomingEmployee: true}
       }
-      else if (meOrgId)
-        return await checkIfEmployeeAlready()
+      else {
+        let isEmployee = await checkIfEmployeeAlready()
+        if (isEmployee.isBecomingEmployee  &&  meOrgId !== newOrgId)
+          return {error: 'Can\'t change employment'}
+        return isEmployee
+      }
     }
     async function checkIfEmployeeAlready() {
       let result = await self.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
@@ -4688,36 +4766,36 @@ var Store = Reflux.createStore({
               }
               if (m.subClassOf !== FORM)
                 continue
-              // Case when event to dosplay ML is before the new resource was sent
+              // Case when event to display ML is before the new resource was sent
               let formCreatorId = r.to.organization
                                 ? utils.getId(r.to.organization)
                                 : utils.getId(this._getItem(utils.getId(r.to)).organization)
               if (formCreatorId === orgId)
                 continue
-              let fId = utils.getId(r)
-              let thisProviderVerifications = {}
-              for (let ii = i+1; ii<result.length; ii++) {
-                let v = result[ii]
-                if (v[TYPE] !== VERIFICATION)
-                  continue
-                if (utils.getId(v.document) === fId) {
-                  // debugger
-                  let vFromId = utils.getId(v.from.organization)
-                  // If this is this provider's verification then the form was shared
-                  //  without verification and the stub needs to be shown
-                  if (vFromId === orgId) {
-                    thisProviderVerifications[fId] = true
-                    let idx = sharedVerifiedForms.indexOf(i)
-                    if (idx !== -1)
-                      sharedVerifiedForms.splice(idx, 1)
-                    break
-                  }
-                  else if (thisProviderVerifications[fId])
-                    break
-                  if (sharedVerifiedForms.indexOf(i) === -1)
-                    sharedVerifiedForms.push(i)
-                }
-              }
+              // let fId = utils.getId(r)
+              // let thisProviderVerifications = {}
+              // for (let ii = i+1; ii<result.length  &&  !to._canShareContext; ii++) {
+              //   let v = result[ii]
+              //   if (v[TYPE] !== VERIFICATION)
+              //     continue
+              //   if (utils.getId(v.document) === fId) {
+              //     // debugger
+              //     let vFromId = utils.getId(v.from.organization)
+              //     // If this is this provider's verification then the form was shared
+              //     //  without verification and the stub needs to be shown
+              //     if (vFromId === orgId) {
+              //       thisProviderVerifications[fId] = true
+              //       let idx = sharedVerifiedForms.indexOf(i)
+              //       if (idx !== -1)
+              //         sharedVerifiedForms.splice(idx, 1)
+              //       break
+              //     }
+              //     else if (thisProviderVerifications[fId])
+              //       break
+              //     if (sharedVerifiedForms.indexOf(i) === -1)
+              //       sharedVerifiedForms.push(i)
+              //   }
+              // }
             }
             if (rmIdx) {
               for (let i=rmIdx.length - 1; i>=0; i--)
@@ -5349,17 +5427,34 @@ var Store = Reflux.createStore({
       return list
     })
     .then(() => {
-      if (isBacklinkProp)
-        return list
+      if (isBacklinkProp) {
+        if (query) {
+          let promises = []
+          list.forEach((r) => {
+            promises.push(checkAndFilter(r))
+          })
+          return Q.all(promises)
+        }
+        else
+          return list
+      }
       let promises = []
       list.forEach((r) => {
         promises.push(checkResource(r))
       })
       return Q.all(promises)
     })
-    .then(() => {
-      if (isBacklinkProp)
+    .then((checked) => {
+      if (isBacklinkProp) {
+        if (query) {
+          let l = []
+          for (let i=list.length - 1; i>=0; i--)
+            if (checked[i])
+              l.push(list[i])
+          list = l
+        }
         return list
+      }
       if (!foundResources.length)
         return
       // Minor hack before we intro sort property here
@@ -6232,11 +6327,8 @@ var Store = Reflux.createStore({
     return crypto.randomBytes(32).toString('hex')
   },
   _putResourceInDB(params) {
-    var modelName = params.type
+    var {modelName, isRegistration, noTrigger, dhtKey, maxAttempts} = params
     var value = params.resource
-    var dhtKey = params.roothash
-    var isRegistration = params.isRegistration
-    var noTrigger = params.noTrigger
     // Cleanup null form values
     for (var p in value) {
       if (!value[p]  &&  (typeof value[p] === 'undefined'))
@@ -6306,14 +6398,19 @@ var Store = Reflux.createStore({
     }
 
     if (value[TYPE] === SETTINGS)
-      return this.addSettings(value, params.maxAttempts ? params.maxAttempts : 1, true)
+      return this.addSettings(value, maxAttempts ? maxAttempts : 1, true)
 
     let meId = utils.getId(me)
     if (isMessage  &&  isNew) {
-      this.addBacklinksTo(me, value, batch)
-      let toR = this._getItem(value.to)
+      this.addBacklinksTo(ADD, me, value, batch)
+      this.setMe(me)
+      this.trigger({action: 'addItem', resource: me})
+
+      let toR = utils.getId(value.from) === meId
+              ? this._getItem(value.to)
+              : this._getItem(value.from)
       // if (!toR.organization)
-        this.addBacklinksTo(toR, value, batch)
+      this.addBacklinksTo(ADD, toR, value, batch)
     }
 
     let self = this
@@ -6374,15 +6471,22 @@ var Store = Reflux.createStore({
       }
     })
     .then(() => {
-      if (isMessage  &&  value[TYPE] === NAME) {
+      if (isMessage) { //  &&  value[TYPE] === NAME) {
         let contact = this._getItem(value.from)
-        if (this.changeName(value, contact))
-          this.trigger({action: 'addItem', resource: contact})
+        if (!contact.bot)
+          return this.changeName(value, contact)
+        // if (this.changeName(value, contact))
+        //   this.trigger({action: 'addItem', resource: contact})
       }
-      var  params = {action: newLanguage ? 'languageChange' : 'addItem', resource: value};
+    })
+    .then((contact) => {
+      if (contact)
+        this.trigger({action: 'addItem', resource: contact})
+
+      var  triggerParams = {action: newLanguage ? 'languageChange' : 'addItem', resource: value};
       // registration or profile editing
       if (!noTrigger) {
-        this.trigger(params);
+        this.trigger(triggerParams);
       }
       if (model.subClassOf === FORM) {
         if (model.interfaces.indexOf(ITEM) !== -1) {
@@ -6512,8 +6616,8 @@ var Store = Reflux.createStore({
     this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
   },
 
-  addBacklinksTo(resource, msg, batch) {
-    let msgModel = this.getModel(msg[TYPE])
+  addBacklinksTo(action, resource, msg, batch) {
+    let msgModel = this.getModel(utils.getType(msg))
     if (!msgModel.interfaces  ||  msgModel.interfaces.indexOf(MESSAGE) === -1)
       return
     let msgId = utils.getId(msg)
@@ -6522,6 +6626,7 @@ var Store = Reflux.createStore({
       resource = this._getItem(resource.organization)
     let resModel = this.getModel(resource[TYPE])
 
+    let isProfile = resource[TYPE] === PROFILE
     var props = resModel.properties
     let changedCounts
     for (var p in props) {
@@ -6534,25 +6639,38 @@ var Store = Reflux.createStore({
       if (!msg[backlink])
         continue
 
-      var itemsModel = this.getModel(items.ref);
-      if (itemsModel.id !== msg[TYPE]  &&  msgModel.subClassOf !== itemsModel.id)
+      var itemsModel = this.getModel(items.ref)
+      if (itemsModel.isInterface) {
+        if (msgModel.interfaces.indexOf(items.ref) === -1)
+          continue
+      }
+      else if (itemsModel.id !== msg[TYPE]  &&  msgModel.subClassOf !== itemsModel.id)
         continue
 
+      if (isProfile  &&  items.ref === FORM) {
+        if (msgModel.interfaces.indexOf(ITEM) !== -1  ||  msgModel.interfaces.indexOf(DOCUMENT) !== -1)
+          continue
+      }
       if (utils.getId(msg[backlink]) === rId) {
         let cntProp = '_' + p + 'Count'
         changedCounts = true
 
         let cnt = resource[cntProp]
         if (cnt)
-          resource[cntProp] = ++cnt
+          resource[cntProp] = action === ADD ? ++cnt : --cnt
         else
-          resource[cntProp] = 1
+          resource[cntProp] = action === ADD ? 1 : 0
+        break
       }
     }
-    if (changedCounts  &&  batch)
-      this.dbBatchPut(utils.getId(resource), resource, batch);
+    if (!changedCounts)
+      return
+    rId = utils.getId(resource)
+    if (batch)
+      this.dbBatchPut(rId, resource, batch);
+    else
+      this.dbPut(rId, resource)
   },
-
   registration(value) {
     var self = this
     isLoaded = true;
@@ -8004,8 +8122,9 @@ var Store = Reflux.createStore({
       else {
         let fromId = utils.getId(val.from)
         let fr = this._getItem(fromId)
-        if (this.changeName(val, fr))
-          this.trigger({action: 'addItem', resource: fr})
+        let changeFr = await this.changeName(val, fr)
+        if (changeFr)
+          this.trigger({action: 'addItem', resource: changeFr})
       }
       this.addLastMessage(val, batch)
     }
@@ -8072,15 +8191,21 @@ var Store = Reflux.createStore({
       return false
     }
   },
-  changeName(val, fr) {
+  async changeName(val, fr) {
     let fromId = utils.getId(fr)
+    let meId = utils.getId(me)
+    let isMe = utils.getId(fr) === meId
     if (val[TYPE] === NAME  ||  val[TYPE] === APPLICANT) {
+      if (isMe)
+        fr = utils.clone(fr)
       fr.firstName = val.givenName
       fr.lastName = val.surname
       fr.formatted = utils.templateIt(this.getModel(PROFILE).properties.formatted, fr)
       this._setItem(fromId, fr)
-      this.dbPut(fromId, fr)
-      return true
+      if (isMe)
+        this.setMe(fr)
+      await this.dbPut(fromId, fr)
+      return fr
     }
     if (fr.firstName !== FRIEND)
       return
@@ -8098,6 +8223,10 @@ var Store = Reflux.createStore({
     if (!firstName)
       return
     firstName = firstName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+
+    if (isMe)
+      fr = utils.clone(fr)
+
     fr.firstName = firstName
     if (lastName)
       fr.lastName = lastName.toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
@@ -8105,10 +8234,12 @@ var Store = Reflux.createStore({
       lastName = ''
     if (fr.formatted)
       fr.formatted = firstName + ' ' + lastName
+    if (isMe)
+      this.setMe(fr)
 
     this._setItem(fromId, fr)
-    this.dbPut(fromId, fr)
-    return true
+    await this.dbPut(fromId, fr)
+    return fr
   },
   // if the last message showing was PRODUCT_LIST. No need to re-render
   fillFromAndTo(obj, val) {
@@ -8507,10 +8638,12 @@ var Store = Reflux.createStore({
             }
             // delete list[rId]
             // this.deleteMessageFromChat(orgId, r)
+            this.addBacklinksTo(DELETE, me, res)
             batch.push({type: 'del', key: rId})
           }
         })
       })
+      this.trigger({action: 'addItem', resource: me})
       let hasDeleted
       batch.forEach((r) => {
         if (r.type === 'del') {
@@ -8522,6 +8655,12 @@ var Store = Reflux.createStore({
         this.trigger({action: 'addItem', resource: utils.getMe()})
       // this.trigger({action: 'messageList', list: [msg], resource: org, to: resource})
       this.trigger({action: 'messageList', list: [msg], to: org})
+      let messages = chatMessages[orgId]
+      let allMessages = chatMessages[ALL_MESSAGES]
+      messages.forEach((r) => {
+        let idx = allMessages.findIndex(({ id }) => id === r.id)
+        allMessages.splice(idx, 1)
+      })
       chatMessages[orgId] = []
 
       return db.batch(batch)
@@ -8538,6 +8677,8 @@ var Store = Reflux.createStore({
             var id = utils.getId(r)
             batch.push({type: 'del', key: id})
             delete list[id]
+            let idx = allMessages.findIndex(({ id }) => id === r.id)
+            allMessages.splice(idx, 1)
           }
         })
 
@@ -9181,7 +9322,10 @@ var Store = Reflux.createStore({
       if (list[r])
         return list[r].value
       let rtype = utils.getType(r)
-      if (this.getModel(rtype).subClassOf === ENUM) {
+      let m = this.getModel(rtype)
+      if (!m)
+        return
+      if (m.subClassOf === ENUM) {
         let eValues = enums[rtype]
         let eVal = eValues.filter((ev) => utils.getId(ev) === r)
         if (eVal.length)
