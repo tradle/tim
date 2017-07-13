@@ -125,27 +125,39 @@ class ResourceView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
+    let {resource, action, error, pairingData, to, backlink} = params
+
     let isMe = utils.isMe(this.props.resource)
-    if (params.resource  &&  utils.getId(params.resource) !== utils.getId(this.props.resource)) {
-      if (isMe) {
-        if (params.action === 'addItem') {
-          let m = utils.getModel(params.resource[TYPE]).value
-          if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
+    if (resource) {
+      if (utils.getId(resource) !== utils.getId(this.props.resource)) {
+        if (isMe) {
+          if (action === 'addItem') {
+            let m = utils.getModel(resource[TYPE]).value
+            if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
+              Actions.getItem(utils.getMe())
+          }
+          else if (action === 'addMessage'  &&  resource[TYPE] === 'tradle.ConfirmPackageRequest')
             Actions.getItem(utils.getMe())
         }
-        else if (params.actions === 'addMessage'  &&  params.resource[TYPE] === 'tradle.ConfirmPackageRequest')
-          Actions.getItem(utils.getMe())
+        return
       }
-      return
+      // if (isMe  &&  action === 'addItem') {
+      //   this.setState({resource: resource})
+      //   return
+      // }
     }
 
-    switch (params.action) {
+    switch (action) {
+    case 'addItem':
+      if (resource  &&  isMe)
+        this.setState({resource: resource})
+      break
     case 'showIdentityList':
       this.onShowIdentityList(params)
       break
     case 'getItem':
       this.setState({
-        resource: params.resource,
+        resource: resource,
         isLoading: false
       })
       break
@@ -153,21 +165,21 @@ class ResourceView extends Component {
       this.showChat(params)
       break
     case 'genPairingData':
-      if (params.error)
-        Alert.alert(params.error)
+      if (error)
+        Alert.alert(error)
       else
-        this.setState({pairingData: params.pairingData, isModalOpen: true})
+        this.setState({pairingData: pairingData, isModalOpen: true})
       break
     case 'invalidPairingRequest':
       this.props.navigator.pop()
-      Alert.alert(translate(params.error))
+      Alert.alert(translate(error))
       break
     case 'acceptingPairingRequest':
       this.closeModal()
       // check signature
       signIn(this.props.navigator, utils.getMe())
         .then(() => {
-          Actions.pairingRequestAccepted(params.resource)
+          Actions.pairingRequestAccepted(resource)
         })
       break
     case 'pairingRequestAccepted':
@@ -181,15 +193,15 @@ class ResourceView extends Component {
       // this.props.navigator.jumpTo(routes[1])
       let style = {}
       extend(style, defaultBankStyle)
-      if (params.to.style)
-        style = extend(style, params.to.style)
+      if (to.style)
+        style = extend(style, to.style)
       this.props.navigator.replacePreviousAndPop({
         component: MessageList,
-        title: utils.getDisplayName(params.to),
+        title: utils.getDisplayName(to),
         id: 11,
         backButtonTitle: 'Back',
         passProps: {
-          resource: params.to,
+          resource: to,
           filter: '',
           modelName: constants.TYPES.MESSAGE,
           // currency: params.organization.currency,
@@ -200,12 +212,12 @@ class ResourceView extends Component {
       // this.props.navigator.jumpTo(routes[2])
       break
     case 'exploreBacklink':
-      if (params.backlink !== this.state.backlink)
-        this.setState({backlink: params.backlink})
+      if (backlink !== this.state.backlink)
+        this.setState({backlink: backlink})
       break
     // default:
-    //   if (params.resource  &&  action !== 'onlineStatus')
-    //     Actions.getItem(params.resource)
+    //   if (resource  &&  action !== 'onlineStatus')
+    //     Actions.getItem(resource)
     //     // this.onResourceUpdate(params)
     //   break
     }

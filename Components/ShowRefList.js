@@ -160,13 +160,14 @@ class ShowRefList extends Component {
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark';
-      let count = resource['_' + p + 'Count'] // &&  resource[p].length
-      if (count) {
+      let cnt = resource['_' + p + 'Count'] // &&  resource[p].length
+      let count
+      if (cnt) {
         hasBacklinks = true
         if (!currentBacklink  &&  !showDetails &&  !showDocuments)
           currentBacklink = props[p]
         count = <View style={styles.count}>
-                  <Text style={styles.countText}>{count}</Text>
+                  <Text style={styles.countText}>{cnt}</Text>
                 </View>
       }
 

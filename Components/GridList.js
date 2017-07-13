@@ -99,7 +99,8 @@ class GridList extends Component {
         return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
       }
     })
-
+    let {modelName} = this.props
+    let model = utils.getModel(modelName).value
     this.state = {
       // isLoading: utils.getModels() ? false : true,
       isLoading: true,
@@ -114,7 +115,7 @@ class GridList extends Component {
       refreshing: false,
       hasPartials: false,
       hasTestProviders: false,
-      isGrid:  this.props.modelName !== FORM//this.props.modelName === constants.TYPES.VERIFICATION
+      isGrid:  modelName !== FORM  &&  !model.isInterface//this.props.modelName === constants.TYPES.VERIFICATION
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
@@ -156,8 +157,8 @@ class GridList extends Component {
   }
   componentWillReceiveProps(props) {
     if (props.isBacklink) {
-      if (!props.resource['_' + props.prop.name + 'Count'])
-        return
+      // if (!props.resource['_' + props.prop.name + 'Count'])
+      //   return
 
       this.state.dataSource = this.state.dataSource.cloneWithRows([])
       this.state.isLoading = true;
@@ -276,15 +277,15 @@ class GridList extends Component {
   }
 
   onListUpdate(params) {
-    var action = params.action;
+    var {action, error} = action;
     if (action === 'addApp') {
       this.props.navigator.pop()
-      if (params.error)
-        Alert.alert(params.error)
+      if (error)
+        Alert.alert(error)
       // Actions.list(ORGANIZATION)
       return
     }
-    if (params.error)
+    if (error)
       return;
     // if (params.action === 'onlineStatus') {
     //   this.setState({serverOffline: !params.online})
@@ -427,8 +428,15 @@ class GridList extends Component {
         return
       if (params.list  &&  params.list.length) {
         let m = utils.getModel(params.list[0][TYPE]).value
-        if (m.id !== this.props.modelName  &&  m.subClassOf !== this.props.modelName)
-          return
+        if (m.id !== this.props.modelName)  {
+          let model = utils.getModel(this.props.modelName).value
+          if (model.isInterface) {
+            if (m.interfaces  &&  m.interfaces.indexOf(this.props.modelName) === -1)
+              return
+          }
+          else if (m.subClassOf !== this.props.modelName)
+            return
+        }
       }
     }
     if ((action !== 'list' &&  action !== 'listSharedWith')  ||  !params.list || params.isAggregation !== this.props.isAggregation)
@@ -440,9 +448,9 @@ class GridList extends Component {
     var list = params.list;
     if (list.length) {
       var type = list[0][constants.TYPE];
-      if (type  !== this.props.modelName) {
+      if (type  !== this.props.modelName  &&  !this.props.isBacklink) {
         var m = utils.getModel(type).value;
-        if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
+        if (m.subClassOf != this.props.modelName)
           return;
       }
       if (this.props.multiChooser  &&  !this.props.isChooser) {
@@ -522,6 +530,8 @@ class GridList extends Component {
       // else if (this.state.prop !== nextState.prop)
       //   return true
     }
+    if (this.state.dataSource.getRowCount() !== nextState.dataSource.getRowCount())
+      return true
     if (this.state.hideMode !== nextState.hideMode)
       return true
     if (this.props.provider !== nextProps.provider)
