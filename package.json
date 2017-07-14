@@ -13,8 +13,6 @@
     "lint": "eslint --quiet --ignore-path .gitignore .",
     "lintfile": "eslint --quiet --ignore-path .gitignore",
     "prepush": "npm run lint",
-    "gencomponents": "node scripts/genComponentsMap.js",
-    "precommit": "npm run gencomponents",
     "dev:setup": "cd iOS && bundle install && cd ../android && bundle install && npm run placesecrets",
     "bundle:ios": "./bundle.sh ios",
     "bundle:android": "./bundle.sh android",

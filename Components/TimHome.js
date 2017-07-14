@@ -4,8 +4,13 @@ const parseURL = require('url').parse
 var Q = require('q')
 var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
-import Components from './'
+var ResourceList = require('./ResourceList');
+// var VideoPlayer = require('./VideoPlayer')
+var NewResource = require('./NewResource');
+// var HomePage = require('./HomePage')
 var HomePageMixin = require('./HomePageMixin')
+var ResourceView = require('./ResourceView');
+var MessageList = require('./MessageList')
 var extend = require('extend')
 var utils = require('../utils/utils');
 var translate = utils.translate
@@ -15,8 +20,13 @@ var Store = require('../Store/Store');
 var reactMixin = require('react-mixin');
 var constants = require('@tradle/constants');
 var debug = require('debug')('tradle:app:Home')
+var PasswordCheck = require('./PasswordCheck')
+var ArticleView = require('./ArticleView');
+var FadeInView = require('./FadeInView')
+var TouchIDOptIn = require('./TouchIDOptIn')
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
+var QRCodeScanner = require('./QRCodeScanner')
 var TimerMixin = require('react-timer-mixin')
 var isDeepLink
 
@@ -222,7 +232,6 @@ class TimHome extends Component {
     // TODO: support stuff!
     if (ok !== '/scan'  &&  ok.indexOf('/chat') === -1) throw new Error(`unsupported deep link: ${ok}`)
 
-    const { PasswordCheck } = Components
     const { navigator } = this.props
     while (true) {
       let currentRoute = Navs.getCurrentRoute(navigator)
@@ -436,20 +445,20 @@ class TimHome extends Component {
       title: translate('officialAccounts'),
       // titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
-      component: Components.ResourceList,
+      component: ResourceList,
       rightButtonTitle: 'Profile',
       passProps: passProps,
       onRightButtonPress: {
         title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
         id: 3,
-        component: Components.ResourceView,
+        component: ResourceView,
         backButtonTitle: 'Back',
         // titleTextColor: '#7AAAC3',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: me.firstName,
           id: 4,
-          component: Components.NewResource,
+          component: NewResource,
           // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
@@ -472,13 +481,13 @@ class TimHome extends Component {
     this.props.navigator.push({
       title: title,
       id: 3,
-      component: Components.ResourceView,
+      component: ResourceView,
       backButtonTitle: 'Back',
       rightButtonTitle: 'Edit',
       onRightButtonPress: {
         title: title,
         id: 4,
-        component: Components.NewResource,
+        component: NewResource,
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
@@ -560,7 +569,7 @@ class TimHome extends Component {
   showScanHelp() {
     this.props.navigator.push({
       id: 7,
-      component: Components.ArticleView,
+      component: ArticleView,
       backButtonTitle: 'Back',
       title: translate('importYourData'),
       passProps: {
@@ -613,7 +622,7 @@ class TimHome extends Component {
       extend(style, provider.style)
     let route = {
       title: provider.name,
-      component: Components.MessageList,
+      component: MessageList,
       id: 11,
       backButtonTitle: 'Back',
       passProps: {
@@ -662,7 +671,7 @@ class TimHome extends Component {
     let route = {
       title: translate('officialAccounts'),
       id: 10,
-      component: Components.ResourceList,
+      component: ResourceList,
       backButtonTitle: translate('back'),
       passProps: {
         modelName: constants.TYPES.ORGANIZATION,
@@ -674,13 +683,13 @@ class TimHome extends Component {
       onRightButtonPress: {
         title: title,
         id: 3,
-        component: Components.ResourceView,
+        component: ResourceView,
         backButtonTitle: translate('back'),
         rightButtonTitle: translate('edit'),
         onRightButtonPress: {
           title: title,
           id: 4,
-          component: Components.NewResource,
+          component: NewResource,
           backButtonTitle: translate('back'),
           rightButtonTitle: translate('done'),
           passProps: {
@@ -712,7 +721,7 @@ class TimHome extends Component {
 
     let model = utils.getModel(modelName).value;
     let route = {
-      component: Components.NewResource,
+      component: NewResource,
       titleTextColor: '#BCD3E6',
       id: 4,
       passProps: {
@@ -763,7 +772,7 @@ class TimHome extends Component {
 
       return new Promise(resolve => {
         this.props.navigator.replace({
-          component: Components.TouchIDOptIn,
+          component: TouchIDOptIn,
           id: 21,
           rightButtonTitle: 'Skip',
           noLeftButton: true,
@@ -788,7 +797,7 @@ class TimHome extends Component {
 
     let model = utils.getModel(modelName).value;
     let route = {
-      component: Components.NewResource,
+      component: NewResource,
       titleTextColor: '#BCD3E6',
       id: 4,
       passProps: {
@@ -875,7 +884,6 @@ class TimHome extends Component {
       return this.getSplashScreen(h)
     }
 
-    const { FadeInView } = Components
     var err = this.state.err || '';
     var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
     var myId = utils.getMe();
@@ -1053,7 +1061,7 @@ class TimHome extends Component {
     this.props.navigator.push({
       title: 'Scan QR Code',
       id: 16,
-      component: Components.QRCodeScanner,
+      component: QRCodeScanner,
       titleTintColor: '#eeeeee',
       backButtonTitle: 'Cancel',
       // rightButtonTitle: 'ion|ios-reverse-camera',
@@ -1074,7 +1082,7 @@ class TimHome extends Component {
 
   //   var model = utils.getModel(constants.TYPES.SETTINGS).value
   //   var route = {
-  //     component: Components.NewResource,
+  //     component: NewResource,
   //     title: translate('settings'),
   //     backButtonTitle: translate('back'),
   //     rightButtonTitle: translate('done'),

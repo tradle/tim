@@ -2,17 +2,23 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-import Components from './'
+var PageView = require('./PageView')
 import Icon from 'react-native-vector-icons/Ionicons';
 var Actions = require('../Actions/Actions');
+var ResourceMixin = require('./ResourceMixin');
+var QRCode = require('./QRCode')
+var MessageList = require('./MessageList')
+var ResourceView = require('./ResourceView')
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var ENV = require('../utils/env')
 var StyleSheet = require('../StyleSheet')
 var extend = require('extend');
+var ArticleView = require('./ArticleView');
 var termsAndConditions = require('../termsAndConditions.json')
 import CustomIcon from '../styles/customicons'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
+import ConversationsIcon from './ConversationsIcon'
 
 const CUSTOMER_WAITING = 'tradle.CustomerWaiting'
 const MESSAGE = 'tradle.Message'
@@ -121,10 +127,10 @@ class AvivaIntroView extends Component {
                  </TouchableOpacity>
 
     return (
-      <Components.PageView style={platformStyles.container}>
+      <PageView style={platformStyles.container}>
         {content}
         {footer}
-      </Components.PageView>
+      </PageView>
     );
   }
   showChat(provider) {
@@ -146,7 +152,7 @@ class AvivaIntroView extends Component {
     // utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
     // this.props.navigator.push({
     //   title: provider.name,
-    //   component: Components.MessageList,
+    //   component: MessageList,
     //   id: 11,
     //   backButtonTitle: 'Back',
     //   passProps: {
@@ -160,7 +166,7 @@ class AvivaIntroView extends Component {
   showTerms() {
     this.props.navigator.push({
       id: 7,
-      component: Components.ArticleView,
+      component: ArticleView,
       backButtonTitle: 'Back',
       title: translate('termsAndConditions'),
       passProps: {
@@ -175,7 +181,7 @@ class AvivaIntroView extends Component {
     // this.goto('../html/Aviva_TC.html')
     this.props.navigator.push({
       id: 7,
-      component: Components.ArticleView,
+      component: ArticleView,
       backButtonTitle: 'Back',
       title: translate(title),
       passProps: {
@@ -186,7 +192,7 @@ class AvivaIntroView extends Component {
     // this.props.navigator.push({
     //   title: translate('Terms of use'),
     //   id: 3,
-    //   component: Components.ResourceView,
+    //   component: ResourceView,
     //   // titleTextColor: '#7AAAC3',
     //   backButtonTitle: 'Back',
     //   passProps: {resource: termsAndConditions}
@@ -197,7 +203,7 @@ class AvivaIntroView extends Component {
 
     this.props.navigator.push({
       id: 7,
-      component: Components.ArticleView,
+      component: ArticleView,
       passProps: { url }
     })
   }
