@@ -18,41 +18,15 @@ import './utils/crypto'
 import 'stream'
 import debounce from 'debounce'
 // require('./timmy')
-var ResourceList = require('./Components/ResourceList');
-var VerifierChooser = require('./Components/VerifierChooser')
+import Components from './Components'
 
 // var VideoPlayer = require('./Components/VideoPlayer')
-var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
-var TimHome = require('./Components/TimHome');
-
-var AvivaIntroView = require('./Components/AvivaIntroView')
 
 // var HomePage = require('./Components/HomePage')
-var PasswordCheck = require('./Components/PasswordCheck');
-var LockScreen = require('./Components/LockScreen')
-var TouchIDOptIn = require('./Components/TouchIDOptIn');
 // var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
-var NewResource = require('./Components/NewResource');
-var NewItem = require('./Components/NewItem');
 // var ItemsList = require('./Components/ItemsList')
-var RemediationItemsList = require('./Components/RemediationItemsList')
-var GridItemsList = require('./Components/GridItemsList')
-var ResourceView = require('./Components/ResourceView');
-var MessageView = require('./Components/MessageView');
-var MessageList = require('./Components/MessageList');
-var ArticleView = require('./Components/ArticleView');
-var IdentitiesList = require('./Components/IdentitiesList');
-var SupervisoryViewPerProvider = require('./Components/SupervisoryViewPerProvider')
-var SupervisoryView = require('./Components/SupervisoryView')
 // var SelectPhotoList = require('./Components/SelectPhotoList');
-var ProductChooser = require('./Components/ProductChooser')
-var ContextChooser = require('./Components/ContextChooser')
-var CameraView = require('./Components/CameraView');
-var PhotoCarousel = require('./Components/PhotoCarousel');
-var QRCode = require('./Components/QRCode')
-var QRCodeScanner = require('./Components/QRCodeScanner')
-import Log from './Components/Log'
 var utils = require('./utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
@@ -93,7 +67,6 @@ import {
 
 import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
-import SimpleModal from './Components/SimpleModal'
 import defaultBankStyle from './styles/defaultBankStyle.json'
 
 let originalGetDefaultProps = Text.getDefaultProps;
@@ -116,7 +89,7 @@ var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
 
 const landingPageMapping = {
   AvivaIntroView: {
-    component: AvivaIntroView,
+    component: Components.AvivaIntroView,
     id: AVIVA_INTRO_VIEW
   }
 }
@@ -152,7 +125,7 @@ class TiMApp extends Component {
         id: 1,
         // title: 'Trust in Motion',
         // titleTextColor: '#7AAAC3',
-        component: TimHome,
+        component: Components.TimHome,
         passProps: props,
         navBarBgColor: 'transparent'
       },
@@ -236,7 +209,7 @@ class TiMApp extends Component {
 
           Actions.setAuthenticated(false)
           Actions.start()
-          // TODO: auth flow should not be here OR in TimHome
+          // TODO: auth flow should not be here OR in Components.TimHome
           // it should be more like Actions.auth()
           // and then handled in one place
         }, UNAUTHENTICATE_AFTER_BG_MILLIS)
@@ -303,7 +276,7 @@ class TiMApp extends Component {
       var route = {
         title: r.name ||  'Chat',
         backButtonTitle: 'Back',
-        component: MessageList,
+        component: Components.MessageList,
         id: 11,
         passProps: {
           resource: r, //{'_t': type, '_r': rId},
@@ -321,7 +294,7 @@ class TiMApp extends Component {
         initialRoute: {
           title: r.name ||  'Chat',
           // backButtonTitle: 'Back',
-          component: MessageList,
+          component: Components.MessageList,
           id: 11,
           passProps: {
             resource: r, //{'_t': type, '_r': rId},
@@ -374,7 +347,7 @@ class TiMApp extends Component {
     }
 
     return (
-      <SimpleModal
+      <Components.SimpleModal
         animationType="slide"
         transparent={true}
         {...modal}
@@ -410,7 +383,7 @@ class TiMApp extends Component {
               return route.sceneConfig;
 
             const config = {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:200}
-            if (route.component === PasswordCheck) {
+            if (route.component === Components.PasswordCheck) {
               config.gestures = {}
             }
 
@@ -449,7 +422,7 @@ class TiMApp extends Component {
 
     switch (route.id) {
     case TIM_HOME: //1
-      return <TimHome navigator={nav} {...props}/>;
+      return <Components.TimHome navigator={nav} {...props}/>;
     // case 2:  // Adding new model online
     //   return <ResourceTypesScreen navigator={nav}
     //               modelName={props.modelName}
@@ -458,17 +431,17 @@ class TiMApp extends Component {
     //               sendForm={props.sendForm}
     //               callback={props.callback} />;
     case 3:
-      return <ResourceView navigator={nav} {...props } />
+      return <Components.ResourceView navigator={nav} {...props } />
     case NEW_RESOURCE: // 4
-      return <NewResource navigator={nav} {...props } />
+      return <Components.NewResource navigator={nav} {...props } />
     case 5:
-      return <MessageView navigator={nav} {...props} />
+      return <Components.MessageView navigator={nav} {...props} />
     case 6:
-      return <NewItem navigator={nav} {...props} />
+      return <Components.NewItem navigator={nav} {...props} />
     case 7:
-      return <ArticleView navigator={nav} {...props} />;
+      return <Components.ArticleView navigator={nav} {...props} />;
     case 8:
-      return <IdentitiesList navigator={nav}
+      return <Components.IdentitiesList navigator={nav}
                   filter={props.filter}
                   list={props.list}
                   callback={props.callback}
@@ -476,10 +449,10 @@ class TiMApp extends Component {
     // case 9:
     //   return <ItemsList navigator={nav} {...props} />
     case MESSAGE_LIST: //11
-      return <MessageList navigator={nav} {...props} />
+      return <Components.MessageList navigator={nav} {...props} />
     case 12:
-      return <CameraView navigator={nav} {...props}/>
-      // <CameraView navigator={nav}
+      return <Components.CameraView navigator={nav} {...props}/>
+      // <Components.CameraView navigator={nav}
       //             onTakePic={props.onTakePic}
       //             resource={props.resource}
       //             prop={props.prop}/>
@@ -492,7 +465,7 @@ class TiMApp extends Component {
     //             onSelectingEnd={props.onSelectingEnd} />
 
     case 14:
-      return <PhotoCarousel {...props} />
+      return <Components.PhotoCarousel {...props} />
     // case 15:
     //   return <GridList navigator={nav}
     //               filter={props.filter}
@@ -504,46 +477,46 @@ class TiMApp extends Component {
     //               sortProperty={props.sortProperty}
     //               modelName={props.modelName} />;
     case 15:
-      return <ProductChooser navigator={nav} {...props} />
+      return <Components.ProductChooser navigator={nav} {...props} />
     case 16:
-      return <QRCodeScanner navigator={nav}
+      return <Components.QRCodeScanner navigator={nav}
                 onread={props.onread} />
     case 17:
-      return <QRCode navigator={nav}
+      return <Components.QRCode navigator={nav}
                 content={props.content}
                 fullScreen={props.fullScreen}
                 dimension={props.dimension} />
     // case 18:
     //   return <VideoPlayer {...props} />
     case 19:
-      return <GridItemsList navigator={nav} {...props} />
+      return <Components.GridItemsList navigator={nav} {...props} />
     case PASSWORD_CHECK:
-      return <PasswordCheck navigator={nav} {...props} />
+      return <Components.PasswordCheck navigator={nav} {...props} />
     case 21:
-      return <TouchIDOptIn navigator={nav} { ...props } />
+      return <Components.TouchIDOptIn navigator={nav} { ...props } />
     case 22:
-      return <EnumList navigator={nav} { ...props } />
+      return <Components.EnumList navigator={nav} { ...props } />
     case 23:
-      return <ContextChooser navigator={nav} {...props} />
+      return <Components.ContextChooser navigator={nav} {...props} />
     case 24:
-      return <LockScreen navigator={nav} {...props} />
+      return <Components.LockScreen navigator={nav} {...props} />
     case 25:
-      return <VerifierChooser navigator={nav} {...props} />
+      return <Components.VerifierChooser navigator={nav} {...props} />
     case 26:
-      return <SupervisoryViewPerProvider navigator={nav} {...props} />
+      return <Components.Components.SupervisoryViewPerProvider navigator={nav} {...props} />
     case 27:
-      return <SupervisoryView navigator={nav} {...props} />
+      return <Components.SupervisoryView navigator={nav} {...props} />
     case 28:
-      return <Log navigator={nav} {...props} />
+      return <Components.Log navigator={nav} {...props} />
     case REMEDIATION:
-      return <RemediationItemsList navigator={nav} {...props} />
+      return <Components.RemediationItemsList navigator={nav} {...props} />
     // case 30:
     //   return <HomePage navigator={nav} {...props} />
     case AVIVA_INTRO_VIEW:
-      return <AvivaIntroView navigator={nav} {...props} />
+      return <Components.AvivaIntroView navigator={nav} {...props} />
     case 10:
     default: // 10
-      return <ResourceList navigator={nav} {...props} />
+      return <Components.ResourceList navigator={nav} {...props} />
     }
   }
 }
@@ -587,7 +560,7 @@ var NavigationBarRouteMapper = {
               : <Text style={style}>
                   {lbTitle}
                 </Text>
-    if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
+    if (route.component === Components.ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
       Actions.cleanup()
 
     let status = <View/>
@@ -1009,7 +982,7 @@ function isPortraitOnlyRoute (route) {
   //       initialRoute={{
   //         title: 'All Contacts',
   //         titleTextColor: '#7AAAC3',
-  //         component: ResourceList,
+  //         component: Components.ResourceList,
   //         passProps: passProps
   //       }} />
   //   }
@@ -1030,7 +1003,7 @@ function isPortraitOnlyRoute (route) {
   //           title: 'Sign Up',
   //           backButtonTitle: 'Back',
   //           titleTextColor: '#7AAAC3',
-  //           component: NewResource,
+  //           component: Components.NewResource,
   //           passProps: {page: page},
   //         }}/>
   //     );

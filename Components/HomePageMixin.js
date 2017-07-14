@@ -5,15 +5,12 @@ var debug = require('debug')('tradle:app:HomePageMixin')
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
-var QRCodeScanner = require('./QRCodeScanner')
 var Actions = require('../Actions/Actions')
-var ResourceList = require('./ResourceList')
-var MessageList = require('./MessageList')
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
-var MessageList = require('./MessageList')
 var extend = require('extend')
 const qrCodeDecoder = require('@tradle/qr-schema')
 
+import Components from './'
 import {
   Alert
 } from 'react-native';
@@ -29,7 +26,7 @@ var HomePageMixin = {
     this.props.navigator.push({
       title: 'Scan QR Code',
       id: 16,
-      component: QRCodeScanner,
+      component: Components.QRCodeScanner,
       titleTintColor: '#eeeeee',
       backButtonTitle: 'Cancel',
       // rightButtonTitle: 'ion|ios-reverse-camera',
@@ -123,7 +120,7 @@ var HomePageMixin = {
 
     var route = {
       title: params.to.name,
-      component: MessageList,
+      component: Components.MessageList,
       id: 11,
       backButtonTitle: 'Back',
       passProps: {
@@ -141,7 +138,7 @@ var HomePageMixin = {
     this.props.navigator.push({
       title: translate('officialAccounts'),
       id: 10,
-      component: ResourceList,
+      component: Components.ResourceList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
