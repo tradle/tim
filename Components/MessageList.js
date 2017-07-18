@@ -39,10 +39,9 @@ import { makeStylish } from './makeStylish'
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
 
 var LINK_COLOR
-var LIMIT = 20
+var LIMIT = 10
 var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
@@ -145,28 +144,31 @@ class MessageList extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
+    let {action, error, context, shareableResources, online, list, loadEarlierMessages, to, isConnected, sendStatus, forgetMeFromCustomer, isAggregation} = params
     if (params.error)
       return
 
     let resource = this.props.resource
-    if (params.action === 'connectivity') {
-      this.setState({isConnected: params.isConnected})
+    if (action === 'connectivity') {
+      this.setState({isConnected: isConnected})
       return
     }
-    if (params.action === 'onlineStatus') {
-      if (params.resource  &&  utils.getId(params.resource) == utils.getId(this.props.resource))
+    if (action === 'onlineStatus') {
+      if (params.resource  &&  utils.getId(params.resource) == utils.getId(resource))
       // if (params.resource  &&  params.resource[constants.ROOT_HASH] === this.props.resource[ROOT_HASH])
       //   state.resource = resource
-        this.setState({onlineStatus: params.online})
+        this.setState({onlineStatus: online})
       return
     }
-    if (params.to  &&  params.to[ROOT_HASH] !== resource[ROOT_HASH])
+    if (to  &&  to[ROOT_HASH] !== resource[ROOT_HASH])
       return
-    if (params.action === 'getItem'  &&  utils.getId(params.resource) === utils.getId(this.props.resource)) {
+    if (action === 'getItem'  &&  utils.getId(params.resource) === utils.getId(resource)) {
       this.setState({hasProducts: this.hasProducts(params.resource) })
       return
     }
-    if (params.action === 'addItem'  ||  params.action === 'addVerification') {
+    if (action === 'addItem'  ||  action === 'addVerification') {
+      if (!utils.isMessage(params.resource))
+        return
       var actionParams = {
         query: this.state.filter,
         modelName: this.props.modelName,
@@ -185,9 +187,27 @@ class MessageList extends Component {
       else if (params.resource._denied || params.resource._approved)
         this.setState({addedItem: params.resource})
         // this.state.addedItem = params.resource
-      else
-        this.state.addedItem = null
-      if (params.action === 'addVerification') {
+      else {
+        if (rtype === FORM_REQUEST) {
+          if (params.resource._documentCreated) {
+            let rId = utils.getId(params.resource._documentCreated)
+            let idx = this.state.list.findIndex((r) => utils.getId(r) === rId)
+            this.state.list.splice(idx, 1, params.resource)
+            this.setState({addedItem: params.resource})
+            return
+          }
+        }
+        if (rtype !== TYPES.PRODUCT_LIST) {
+          this.setState({addedItem: params.resource})
+          let list = this.state.list
+          list.push(params.resource)
+          this.setState({list: list})
+          return
+        }
+        else
+          this.state.addedItem = null
+      }
+      if (action === 'addVerification') {
         if (this.props.originatingMessage  &&  this.props.originatingMessage.verifiers)  {
           let docType = utils.getId(params.resource.document).split('_')[0]
           this.state.verifiedByTrustedProvider = this.props.originatingMessage.form === docType
@@ -197,19 +217,18 @@ class MessageList extends Component {
         else
           this.state.verifiedByTrustedProvider = null
       }
-
-      Actions.list(actionParams);
+      Actions.list(actionParams)
       return;
     }
     this.state.newItem = false
-    if (params.action === 'updateItem') {
+    if (action === 'updateItem') {
       this.setState({
-        sendStatus: params.sendStatus,
+        sendStatus: sendStatus,
         sendResource: params.resource
       })
       return
     }
-    if (params.action === 'addMessage') {
+    if (action === 'addMessage') {
       this.state.sendStatus = params.resource._sendStatus
       this.state.sendResource = params.resource
       Actions.list({
@@ -220,11 +239,11 @@ class MessageList extends Component {
       });
       return
     }
-    if ( params.action !== 'messageList'                   ||
-        (!params.list  &&  !params.forgetMeFromCustomer)   ||
-        params.isAggregation !== this.props.isAggregation)
-      return;
-    if (params.forgetMeFromCustomer) {
+    if (isAggregation !== this.props.isAggregation)
+      return
+    if (action !== 'messageList')
+      return
+    if (forgetMeFromCustomer) {
       Actions.list({modelName: TYPES.PROFILE})
       let routes = this.props.navigator.getCurrentRoutes()
       if (routes[routes.length - 1].component )
@@ -240,8 +259,7 @@ class MessageList extends Component {
       if (!doUpdate)
         return;
     }
-    var list = params.list;
-    if (params.loadEarlierMessages  &&  this.state.postLoad) {
+    if (loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
         this.state = {
@@ -260,13 +278,16 @@ class MessageList extends Component {
           list: list,
           noScroll: true,
           allLoaded: allLoaded,
-          context: params.context,
+          context: context,
           productToForms: productToForms,
           loadEarlierMessages: !allLoaded
         })
       }
       return
     }
+    if (!list  &&  !forgetMeFromCustomer)
+      return
+
     LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.linkColor
     let isEmployee = utils.isEmployee(resource)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
@@ -287,12 +308,12 @@ class MessageList extends Component {
         // dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
         list: list,
-        shareableResources: params.shareableResources,
+        shareableResources: shareableResources,
         allLoaded: false,
         addedItem: this.state.addedItem,
-        context: params.context,
+        context: context,
         isEmployee: isEmployee,
-        loadEarlierMessages: params.loadEarlierMessages,
+        loadEarlierMessages: loadEarlierMessages,
         productToForms: productToForms
       });
     }
@@ -340,8 +361,6 @@ class MessageList extends Component {
       return true
     if (this.state.addedItem !== nextState.addedItem)
       return true
-    // if (this.state.show !== nextState.show)
-    //   return true
     if (!this.state.list                                  ||
         !nextState.list                                   ||
          this.props.orientation !== nextProps.orientation ||
@@ -556,17 +575,6 @@ class MessageList extends Component {
                     </View>
         }
       }
-      else {
-        // if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
-        //   alert = (resource[TYPE] === TYPES.ORGANIZATION)
-        //         ? Alert.alert(translate('noConnectionForPL', resource.name))
-        //         : Alert.alert(translate('noConnection'))
-        // }
-        // content =  <NoResources
-        //             filter={this.state.filter}
-        //             model={model}
-        //             isLoading={this.state.isLoading}/>
-      }
     }
 
     let isProductApplication = resource[TYPE] === PRODUCT_APPLICATION
@@ -615,21 +623,8 @@ class MessageList extends Component {
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
         hideTextInput={hideTextInput}
       />
-        // returnKeyType={false}
-        // keyboardShouldPersistTaps={false}
-        // keyboardDismissMode='none'
     }
 
-    // var addNew = (model.isInterface)
-    //        ? <AddNewMessage navigator={this.props.navigator}
-    //                         resource={resource}
-    //                         modelName={this.props.modelName}
-    //                         onAddNewPressed={this.onAddNewPressed.bind(this)}
-    //                         onMenu={this.showMenu.bind(this)}
-    //                         onPhotoSelect={this.onPhotoSelect.bind(this)}
-    //                         callback={this.addedMessage.bind(this)} />
-    //        : <View/>;
-                            // onTakePicPressed={this.onTakePicPressed.bind(this)}
     var isOrg = !this.props.isAggregation  &&  resource  &&  resource[TYPE] === TYPES.ORGANIZATION
     var chooser
     if (isOrg)
@@ -645,20 +640,6 @@ class MessageList extends Component {
     var sepStyle = { height: 1,backgroundColor: 'transparent' }
     if (!this.state.allLoaded  && !this.props.navigator.isConnected  &&  this.state.isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
-          // <View style={{flex: 10}}>
-          //   <SearchBar
-          //     onChangeText={this.onSearchChange.bind(this)}
-          //     placeholder='Search'
-          //     showsCancelButton={false}
-          //     hideBackground={true} />
-          // </View>
-    // if (this.state.isEmployee) {
-      // let buttons = {[
-      //   {
-      //     onPress: this.chooseFormForCustomer.bind(this)
-      //     title: translate('formChooser')
-      //   }
-      // ]}
     let me = utils.getMe()
     let actionSheet = !hideTextInput  && this.renderActionSheet()
     let context = this.state.context
@@ -876,13 +857,6 @@ class MessageList extends Component {
   generateMenu(show) {
     if (!show || !this.ActionSheet)
       return <View/>
-    // {
-    //   return <TouchableHighlight underlayColor='transparent' onPress={this.onSubmitEditing.bind(this)}>
-    //            <View style={[platformStyles.menuButton, {backgroundColor: LINK_COLOR,}]}>
-    //              <Icon name='ios-send'  size={33}  color='#ffffff' />
-    //            </View>
-    //         </TouchableHighlight>
-    // }
     return  <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
               {this.paintMenuButton()}
             </TouchableOpacity>
@@ -910,16 +884,8 @@ class MessageList extends Component {
       modelName: this.props.modelName,
       to: this.props.resource,
     })
-    // var list = this.state.list
     var earlierMessages = []
-    //   list[list.length - 1],
-    //   list[list.length - 2],
-    //   list[list.length - 3]
-    // ];
     this.state.postLoad = callback
-    // setTimeout(() => {
-    //   callback(earlierMessages, false); // when second parameter is true, the "Load earlier messages" button will be hidden
-    // }, 1000);
   }
   checkStart(evt) {
     evt = evt

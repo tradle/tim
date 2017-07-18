@@ -95,7 +95,7 @@ var propTypesMap = {
   'date': t.Dat,
   'number': t.Num
 };
-var models, me;
+var models, me, modelsForStub;
 var BACKOFF_DEFAULTS = {
   randomisationFactor: 0,
   initialDelay: 1000,
@@ -138,9 +138,15 @@ var utils = {
   },
   setModels(modelsRL) {
     models = modelsRL;
+    modelsForStub = {}
+    for (let m in models)
+      modelsForStub[m] = models[m].value
   },
   getModels() {
     return models;
+  },
+  getModelsForStub() {
+    return modelsForStub
   },
   normalizeGetInfoResponse(json) {
     json.providers.forEach(provider => {
@@ -855,6 +861,7 @@ var utils = {
           delete res[p]
       })
     }
+    delete res._cached
     if (!this.isMessage(m))
       return res
 
@@ -1123,6 +1130,8 @@ var utils = {
       }
     })
   },
+
+  rebuf,
 
   joinURL(...parts) {
     var first = parts.shift()

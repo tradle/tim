@@ -215,7 +215,7 @@ class ResourceRow extends Component {
                          <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
                        </TouchableHighlight>
                      </View>
-    var textStyle = /*noImage ? [styles.textContainer, {marginVertical: 7}] :*/ styles.textContainer;
+    var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
 
     dateProp = resource[TYPE] === PRODUCT_APPLICATION ? 'time' : dateProp
     let dateRow

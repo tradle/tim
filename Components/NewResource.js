@@ -253,7 +253,7 @@ class NewResource extends Component {
     if (isMessage) {
       if (this.props.originatingMessage  &&  resource[constants.ROOT_HASH] !== this.props.originatingMessage[constants.ROOT_HASH]) {
         var params = {
-          value: {_documentCreated: true, _document: resource[constants.NONCE]},
+          value: {_documentCreated: true, _document: utils.getId(resource)},
           resource: this.props.originatingMessage,
           meta: utils.getModel(this.props.originatingMessage[constants.TYPE]).value
         }

@@ -213,10 +213,12 @@ class FormMessageRow extends Component {
       <View style={st, viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
         <View style={[{flex:1}, chatStyles.verificationBody]}>
-          <View style={headerStyle}>
-            {sealedStatus}
-            <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
-            <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'} style={{marginTop: 2, position: 'absolute', right: 10}}/>
+          <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}]}>
+            <View>
+              {sealedStatus}
+              <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
+            </View>
+            <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
           </View>
           {row}
         </View>

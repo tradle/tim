@@ -26,6 +26,7 @@
     "fixasyncstorage": "cp AsyncStorage/AsyncStorage.js1 node_modules/react-native/Libraries/Storage/AsyncStorage.js && cp AsyncStorage/AsyncStorageTypes.js1 node_modules/react-native/Libraries/Storage/AsyncStorageTypes.js"
   },
   "dependencies": {
+    "@tradle/build-resource": "github:tradle/build-resource",
     "@tradle/cb-blockr": "^3.2.0",
     "@tradle/constants": "^1.3.0",
     "@tradle/custom-models": "github:tradle/custom-models",
@@ -36,6 +37,8 @@
     "@tradle/protocol": "2.3.0",
     "@tradle/qr-schema": "^1.1.0",
     "@tradle/restore": "github:tradle/restore",
+    "@tradle/validate-model": "github:tradle/validate-model",
+    "@tradle/validate-resource": "github:tradle/validate-resource",
     "any-promise": "1.3.0",
     "art": "^0.10.0",
     "assert": "^1.3.0",

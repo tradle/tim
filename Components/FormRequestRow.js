@@ -248,7 +248,7 @@ class FormRequestRow extends Component {
         returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       (prop, val) => {
           resource[prop.name] = utils.buildRef(val)
-          Actions.addItem({resource: resource})
+          Actions.addItem({resource: resource, disableFormRequest: oResource})
         },
       }
     });
