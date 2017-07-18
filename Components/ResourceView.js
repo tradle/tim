@@ -97,18 +97,18 @@ class ResourceView extends Component {
 
     let me = utils.getMe()
     let resource = props.resource
-    const dataSource = new ListView.DataSource({
-      rowHasChanged: function(row1, row2) {
-        return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
-      }
-    })
+    // const dataSource = new ListView.DataSource({
+    //   rowHasChanged: function(row1, row2) {
+    //     return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
+    //   }
+    // })
     this.state = {
       resource: resource,
       isLoading:  resource[TYPE] && resource[TYPE] !== PROFILE ? false : true, //props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
       useGesturePassword: me && me.useGesturePassword,
-      dataSource: dataSource.cloneWithRows([resource])
+      // dataSource: dataSource.cloneWithRows([resource])
     }
     let currentRoutes = this.props.navigator.getCurrentRoutes()
     let len = currentRoutes.length

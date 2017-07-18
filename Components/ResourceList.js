@@ -37,6 +37,7 @@ const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
+const LIMIT = 10
 
 const ENUM = 'tradle.Enum'
 const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
@@ -597,6 +598,7 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,
+        limit: LIMIT,
         filter: '',
         modelName: modelName,
         currency: resource.currency,

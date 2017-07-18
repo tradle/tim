@@ -1074,7 +1074,7 @@ var NewResourceMixin = {
       dateProps.format = prop.format
 
     if (!value)
-      value = translate(params.prop)  + (required  &&  ' *')
+      value = translate(params.prop)  + (required  ?  ' *' : '')
     let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
 
     // convert from UTC date to local, so DatePicker displays it correctly
