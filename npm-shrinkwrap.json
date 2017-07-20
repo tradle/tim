@@ -87,8 +87,8 @@
     },
     "@tradle/custom-models": {
       "version": "4.10.10",
-      "from": "tradle/custom-models#dd0220e",
-      "resolved": "git://github.com/tradle/custom-models.git#dd0220ef35e17457d76470472f0f48101e91fd36",
+      "from": "tradle/custom-models#chatitem",
+      "resolved": "git://github.com/tradle/custom-models.git#ecd077507cbe4468a9da4bbb3f1a6fb77ab30eee",
       "dependencies": {
         "typeforce": {
           "version": "1.11.5",
@@ -163,8 +163,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#ae17de44448d6734b920f802cb64008d9dad5aa1",
+      "from": "tradle/models#chatitem",
+      "resolved": "git://github.com/tradle/models.git#6bbbdb5c08d9547cf424c7f7b6c02388171205af",
       "dependencies": {
         "typeforce": {
           "version": "1.11.5",
@@ -302,9 +302,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "2.3.0",
-      "from": "@tradle/validate-model@>=2.3.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-2.3.0.tgz",
+      "version": "3.0.0",
+      "from": "@tradle/validate-model@>=3.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-3.0.0.tgz",
       "dependencies": {
         "typeforce": {
           "version": "1.11.5",

@@ -156,6 +156,7 @@ const {
  SETTINGS,
 } = constants.TYPES
 
+const ENVELOPE = 'tradle.Message'
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
 // const SHARED_RESOURCE     = 'tradle.SharedResource'

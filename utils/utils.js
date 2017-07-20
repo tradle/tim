@@ -82,7 +82,8 @@ var {
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 const MY_PRODUCT = 'tradle.MyProduct'
-const MESSAGE = 'tradle.Message'
+const MESSAGE = constants.TYPES.MESSAGE
+const ENVELOPE = 'tradle.Message'
 const ITEM = 'tradle.Item'
 const DOCUMENT = 'tradle.Document'
 
@@ -1258,7 +1259,7 @@ var utils = {
     if (!wrapper.permalink) return wrapper
 
     if (wrapper.object) {
-      const payload = wrapper.object[TYPE] === 'tradle.Message' ? wrapper.object.object : wrapper.object
+      const payload = wrapper.object[TYPE] === ENVELOPE ? wrapper.object.object : wrapper.object
       const link = protocol.linkString(payload)
       wrapper[CUR_HASH] = link
       wrapper[ROOT_HASH] = payload[ROOT_HASH] || link
@@ -1901,7 +1902,7 @@ var utils = {
 
   parseMessageFromDB(message) {
     let object = message
-    while (object[TYPE] === MESSAGE) {
+    while (object[TYPE] === ENVELOPE) {
       let key = object.recipientPubKey
       if (!Buffer.isBuffer(key.pub)) {
         key.pub = new Buffer(key.pub.data)

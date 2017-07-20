@@ -1,6 +1,7 @@
 'use strict'
 
 import './utils/errors'
+import constants from './utils/constants'
 import SplashScreen from 'react-native-splash-screen'
 
 // import './utils/logAll'
@@ -58,7 +59,6 @@ var QRCodeScanner = require('./Components/QRCodeScanner')
 import Log from './Components/Log'
 var utils = require('./utils/utils');
 var translate = utils.translate
-var constants = require('@tradle/constants');
 import Icon from 'react-native-vector-icons/Ionicons'
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';
@@ -67,6 +67,7 @@ import Reflux from 'reflux'
 import Store from './Store/Store'
 import extend from 'extend'
 var StyleSheet = require('./StyleSheet')
+const { MESSAGE } = constants.TYPES
 
 const TIM_HOME = 1
 const NEW_RESOURCE = 4
@@ -301,7 +302,7 @@ class TiMApp extends Component {
           r[constants.TYPE] = 'tradle.Organization';
       }
     }
-    var props = {modelName: 'tradle.Message'};
+    var props = {modelName: MESSAGE};
 
     if (this.state.navigator) {
       var currentRoutes = this.state.navigator.getCurrentRoutes();
@@ -312,7 +313,7 @@ class TiMApp extends Component {
         id: 11,
         passProps: {
           resource: r, //{'_t': type, '_r': rId},
-          modelName: 'tradle.Message',
+          modelName: MESSAGE,
           // prop: prop
         }
       }
@@ -330,7 +331,7 @@ class TiMApp extends Component {
           id: 11,
           passProps: {
             resource: r, //{'_t': type, '_r': rId},
-            modelName: 'tradle.Message',
+            modelName: MESSAGE,
             // prop: prop
           }
         },
