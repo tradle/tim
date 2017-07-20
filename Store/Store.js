@@ -4354,7 +4354,7 @@ var Store = Reflux.createStore({
           let meId = IDENTITY + '_' + me[ROOT_HASH]
           let meProfileId = utils.getId(utils.getMe())
           let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
-          let rm = assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
+          let rm = assignedRM && assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
           if (rm && rm.length)
             result = result.filter((r) => utils.getId(r.from) !== meProfileId)
           retParams.list = result
