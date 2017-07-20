@@ -4761,7 +4761,8 @@ var Store = Reflux.createStore({
         rr.numberOfForms = orgToForm[orgId]
         retOrgs.push(rr)
       })
-      result = retOrgs.filter((r) => r._isTest === params.isTest)
+      if (!params.prop)
+        result = retOrgs.filter((r) => r._isTest === params.isTest)
       // result = retOrgs
     }
     if (result.length === 1)
