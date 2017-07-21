@@ -1378,15 +1378,16 @@ var Store = Reflux.createStore({
     let client = wsClients.byUrl[url] || wsClients.byIdentifier[counterparty]
     if (client) return
 
-    const position = {
-      sent: yield monitorMissing.getTip({ node, counterparty, sent: true }),
-      received: yield monitorMissing.getTip({ node, counterparty })
-    }
+    // const position = {
+    //   sent: yield monitorMissing.getTip({ node, counterparty, sent: true }),
+    //   received: yield monitorMissing.getTip({ node, counterparty })
+    // }
 
     client = new AWSClient({
       endpoint: url,
       node,
-      position,
+      counterparty,
+      // position,
       // TODO: generate long-lived clientId: `${node.permalink}${nonce}`
       clientId: `${node.permalink}${node.permalink}`
     })
@@ -1650,6 +1651,14 @@ var Store = Reflux.createStore({
     )
   },
 
+  triggerProgress(update) {
+    debug(`progress receiving from ${update.recipient[ROOT_HASH]}: ${update.progress}`)
+    this.trigger({
+      action: 'progressUpdate',
+      ...update
+    })
+  },
+
   async receive(opts) {
     const self = this
     let { msg, from, isRetry, length } = opts
@@ -1669,7 +1678,6 @@ var Store = Reflux.createStore({
 
       let org = this._getItem(PROFILE + '_' + from).organization
       progressUpdate = willAnnounceProgress && {
-        action: 'progressUpdate',
         recipient: this._getItem(org)
       }
 
@@ -1691,7 +1699,7 @@ var Store = Reflux.createStore({
     } catch (err) {
       debug('experienced error receiving message: ' + (err.stack || err.message))
       if (progressUpdate) {
-        this.trigger({ ...progressUpdate, progress: 1 })
+        this.triggerProgress({ ...progressUpdate, progress: 1 })
       }
 
       let payload
@@ -1732,7 +1740,7 @@ var Store = Reflux.createStore({
     // }
 
     if (progressUpdate) {
-      this.trigger({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
+      this.triggerProgress({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
     }
 
     meDriver.sender.resume(identifier)
@@ -1762,7 +1770,7 @@ var Store = Reflux.createStore({
       console.warn('failed to receive msg:', err, msg)
     } finally {
       if (progressUpdate) {
-        this.trigger({ ...progressUpdate, progress: 1 })
+        this.triggerProgress({ ...progressUpdate, progress: 1 })
       }
 
       Analytics.sendEvent({
@@ -1866,7 +1874,7 @@ var Store = Reflux.createStore({
 
         //   prevPercent = percent
         //   const org = self._getItem(PROFILE + '_' + recipient).organization
-        //   self.trigger({action: 'progressUpdate', progress: percent / 100, recipient: self._getItem(org)})
+        //   self.triggerProgress({ progress: percent / 100, recipient: self._getItem(org)})
         //   debug(`${percent}% of message downloaded from ${recipient}`)
         // })
 

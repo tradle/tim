@@ -9,6 +9,7 @@ import React, { Component, PropTypes } from 'react'
 import { constants } from '@tradle/engine'
 import utils from '../utils/utils'
 
+const debug = require('debug')('tradle:app:progressbar')
 const Store = require('../Store/Store');
 const Reflux = require('reflux');
 const reactMixin = require('react-mixin');
@@ -38,8 +39,10 @@ class ProgressInfo extends Component {
   onProgressUpdate({ action, recipient, progress }) {
     if (action !== 'progressUpdate' || !recipient) return
 
+    debug(`${recipient} progress ${progress}`)
     recipient = recipient[PERMALINK] || recipient
     if (this.state.progress > progress) {
+      debug(`delaying ${recipient} progress update`)
       return this.setTimeout(() => {
         this.onProgressUpdate({ action, recipient, progress })
       }, 100)
@@ -54,6 +57,7 @@ class ProgressInfo extends Component {
       if (progress >= dest) {
         this._reset()
         if (progress >= 1) {
+          debug('finished, scheduling clear')
           this._finishTimeout = this.setTimeout(() => {
             this._reset()
             this.setState({ progress: 0 })
@@ -66,6 +70,7 @@ class ProgressInfo extends Component {
       const bigInc = (dest - progress) / 3
       progress += Math.max(bigInc, 0.01)
       progress = Math.min(dest, progress)
+      debug(`updating ${recipient} progress: ${progress}`)
       this.setState({ progress })
     }, 30)
   }
