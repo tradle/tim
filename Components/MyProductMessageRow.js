@@ -45,8 +45,11 @@ class MyProductMessageRow extends Component {
     // Check if the provider that issued the MyProduct is the same as the one that
     // the chat user currently viewing it. If not that means that this MyProduct was shared
     // by user
-    if (utils.getId(resource.from.organization) !== utils.getId(this.props.to))
-      isMyMessage = true
+    let isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
+    if (resource.from.organization  &&  !isReadOnlyChat) {
+      if (utils.getId(resource.from.organization) !== utils.getId(this.props.to))
+        isMyMessage = true
+    }
     var ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
 
@@ -64,7 +67,6 @@ class MyProductMessageRow extends Component {
 
     var w = utils.dimensions(MyProductMessageRow).width
     let msgWidth = Math.min(Math.floor(w * 0.8), 600)
-    let isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
     if (isReadOnlyChat)
       msgWidth -= 50 // provider icon and padding
     let numberOfCharacters = msgWidth / 12
