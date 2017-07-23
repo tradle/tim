@@ -473,6 +473,8 @@ var utils = {
     return props
   },
   getDisplayName(resource, meta) {
+    if (Array.isArray(resource))
+      return
     if (!meta) {
       if (!resource[TYPE]) {
         if (resource.id   &&   resource.title)
