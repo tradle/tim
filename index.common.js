@@ -580,8 +580,8 @@ var NavigationBarRouteMapper = {
               : <Text style={style}>
                   {lbTitle}
                 </Text>
-    if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
-      Actions.cleanup()
+    // if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
+    //   Actions.cleanup()
 
     let status = <View/>
     return (
@@ -696,8 +696,8 @@ var NavigationBarRouteMapper = {
     var org;
     if (route.passProps.modelName                       &&
         route.passProps.modelName === 'tradle.Message'  &&
-        route.passProps.resource.organization           &&
         route.passProps.resource                        &&
+        route.passProps.resource.organization           &&
         route.passProps.resource[constants.TYPE] === constants.TYPES.PROFILE)
           // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
