@@ -43,11 +43,13 @@ class FormErrorRow extends Component {
     super(props);
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return !equal(this.props.resource, nextProps.resource)   ||
-           !equal(this.props.to, nextProps.to)               ||
-           this.props.addedItem !== nextProps.addedItem      ||
-           this.props.orientation !== nextProps.orientation  ||
-           this.props.sendStatus !== nextProps.sendStatus
+    let {to, resource, addedItem, sendStatus, orientation} = this.props
+    return !equal(resource, nextProps.resource)   ||
+           !equal(to, nextProps.to)               ||
+           (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
+           // this.props.addedItem !== nextProps.addedItem      ||
+           orientation !== nextProps.orientation  ||
+           sendStatus !== nextProps.sendStatus
   }
   render() {
     var resource = this.props.resource;
