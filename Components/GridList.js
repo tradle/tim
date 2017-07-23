@@ -99,35 +99,38 @@ class GridList extends Component {
         return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
       }
     })
-    let {modelName} = this.props
+    let {resource, officialAccounts, modelName, prop, filter, serverOffline} = this.props
     let model = utils.getModel(modelName).value
+
+    let viewCols = this.getGridCols()
+    let size = viewCols ? viewCols.length : 1
+    this.isSmallScreen = utils.dimensions(GridList).width < 736
     this.state = {
       // isLoading: utils.getModels() ? false : true,
       isLoading: true,
       dataSource,
-      allowToAdd: this.props.prop  &&  this.props.prop.allowToAdd,
-      filter: this.props.filter,
+
+      allowToAdd: prop  &&  prop.allowToAdd,
+      filter: filter,
       hideMode: false,  // hide provider
-      serverOffline: this.props.serverOffline,
+      serverOffline: serverOffline,
       isConnected: this.props.navigator.isConnected,
       userInput: '',
       sharedContextCount: 0,
       refreshing: false,
       hasPartials: false,
       hasTestProviders: false,
-      isGrid:  modelName !== FORM  &&  !model.isInterface//this.props.modelName === constants.TYPES.VERIFICATION
+      isGrid:  !this.isSmallScreen  &&  !officialAccounts  && modelName !== FORM  &&  !model.isInterface//this.props.modelName === constants.TYPES.VERIFICATION
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
     // }
     if (props.multiChooser) {
       this.state.chosen = {}
-      let resource = this.props.resource
-      let prop = this.props.prop
       if (prop  &&  resource[prop.name])
         resource[prop.name].forEach((r) => this.state.chosen[utils.getId(r)] = r)
     }
-    var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
+    var isRegistration = this.props.isRegistration ||  (resource  &&  resource[TYPE] === PROFILE  &&  !resource[ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
     var routes = this.props.navigator.getCurrentRoutes()
@@ -211,11 +214,22 @@ class GridList extends Component {
       StatusBar.setHidden(true)
   }
   componentWillMount() {
-    if (this.props.chat) {
+    let {chat, resource, search, modelName} = this.props
+    if (chat) {
       utils.onNextTransitionEnd(this.props.navigator, () => {
-        Actions.listSharedWith(this.props.resource, this.props.chat)
+        Actions.listSharedWith(resource, chat)
       });
       return
+    }
+    if (this.props.search) {
+      if (!utils.getModel(modelName).value.isInterface) {
+        Actions.list({
+          modelName: modelName,
+          filterResource: resource,
+          search: true
+        })
+        return
+      }
     }
     let me = utils.getMe()
     if (me  &&  me.isEmployee && this.props.officialAccounts) {
@@ -597,6 +611,7 @@ class GridList extends Component {
           backButtonTitle: 'Back',
           passProps: {
             resource: resource,
+            search: this.props.search,
             bankStyle: this.props.bankStyle || defaultBankStyle
           }
         });
@@ -898,6 +913,46 @@ class GridList extends Component {
   }
 
   onSearchChange(filter) {
+    if (this.props.search) {
+      let modelName = filter
+      if (modelName === FORM || modelName === 'Form')
+        return
+      let model = utils.getModel(modelName)
+      if (!model) {
+        modelName = 'tradle.' + modelName
+        model = utils.getModel(modelName)
+        if (!model)
+          return
+      }
+      model = model.value
+      this.props.navigator.push({
+        title: 'Search ' + utils.makeModelTitle(model),
+        id: 4,
+        component: NewResource,
+        titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: model,
+          resource: resource,
+          search: true,
+          bankStyle: this.props.bankStyle || defaultBankStyle,
+        }
+      })
+      return
+    }
+
+    let {to, prop, listView, resource, modelName} = this.props
+    this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
+    Actions.list({
+      query: this.state.filter,
+      modelName: modelName,
+      to: resource,
+      prop: prop,
+      listView: listView
+    });
+  }
+  onSearchChange1() {
     this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     Actions.list({
       query: this.state.filter,
@@ -909,8 +964,14 @@ class GridList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    if (this.state.isGrid  ||  this.props.modelName === constants.TYPES.VERIFICATION)
+    if (this.state.isGrid) {
+      // let viewCols = this.getGridCols()
+      // let size = viewCols ? viewCols.length : 1
+      // let isSmallScreen = utils.dimensions(GridList).width < 736
+      // let showList = this.props.search  &&  isSmallScreen  &&  size > 2
+      // if (!showList)
       return this.renderGridRow(resource, sectionId, rowId)
+    }
 
     var model = this.props.isBacklink
               ? utils.getModel(utils.getType(resource)).value
@@ -935,16 +996,19 @@ class GridList extends Component {
 
     if (model.id === ORGANIZATION  &&  resource.name === 'Sandbox'  &&  resource._isTest)
       return this.renderTestProviders()
-    if (isVerification  || isForm || isMyProduct)
+    let isMessage = utils.isMessage(resource)
+    if (isMessage) //isVerification  || isForm || isMyProduct)
       return (<VerificationRow
                 lazy={this.props.lazy}
                 onSelect={() => this.selectResource(selectedResource)}
                 key={resource[ROOT_HASH]}
+                modelName={this.props.modelName}
                 navigator={this.props.navigator}
                 prop={this.props.prop}
                 parentResource={this.props.resource}
                 currency={this.props.currency}
                 isChooser={this.props.isChooser}
+                search={this.props.search}
                 resource={resource} />
       )
     return (<ResourceRow
@@ -1002,16 +1066,15 @@ class GridList extends Component {
     //     ? <Text style={style} key={this.getNextKey()}>{val}</Text>
     //     : <View style={{flexDirection: 'row'}} key={this.getNextKey()}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
 
-    return <Text style={style} key={this.getNextKey(resource)}>{val}</Text>;
+    return <Text style={style} key={this.getNextKey(resource)}>{val}</Text>
   }
 
   renderGridRow(resource, sectionId, rowId)  {
     let viewCols = this.getGridCols()
+    let size = viewCols ? viewCols.length : 1
+    let colSize =  this.isSmallScreen ? size / 2 : 1
 
     let key = this.getNextKey(resource)
-    let size = viewCols ? viewCols.length : 1
-    let colSize =  utils.dimensions(GridList).width < 736 ? size / 2 : 1
-
     let cols
     if (viewCols) {
       cols = viewCols.map((v) => (
@@ -1039,9 +1102,15 @@ class GridList extends Component {
                </Col>
              </View>
     }
-    return  <Row size={size} style={{borderBottomColor: '#f5f5f5', borderBottomWidth: 1, backgroundColor: rowId % 2 ? '#f9f9f9' : 'transparent'}} key={key} nowrap>
-              {cols}
-            </Row>
+    let row = <Row size={size} style={{borderBottomColor: '#f5f5f5', paddingVertical: 5, borderBottomWidth: 1, backgroundColor: rowId % 2 ? '#f9f9f9' : 'transparent'}} key={key} nowrap>
+                {cols}
+              </Row>
+    if (this.props.search)
+      return  <TouchableOpacity  onPress={() => this.selectResource(resource)}>
+                {row}
+              </TouchableOpacity>
+    else
+      return row
   }
   formatCol(resource, prop, style) {
     var self = this;
@@ -1156,7 +1225,7 @@ class GridList extends Component {
       return <View />
     var props = model.properties
     let size = viewCols.length
-    let smCol = size/2
+    let smCol = this.isSmallScreen ? size/2 : 1
     let cols = viewCols.map((p) => (
               <Col sm={smCol} md={1} lg={1} style={styles.col} key={p + cnt}>
                 <TouchableOpacity onPress={() => this.sort(p)}>
@@ -1441,17 +1510,21 @@ class GridList extends Component {
     let footer = actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar) {
-      if (!this.props._readOnly  ||  this.props.modelName !== PRODUCT_APPLICATION) {
-        if ((list && list.length > 10) || (filter  &&  filter.length)) {
-          searchBar = (
-            <SearchBar
-              onChangeText={this.onSearchChange.bind(this)}
-              placeholder={translate('search')}
-              showsCancelButton={false}
-              hideBackground={true}
-              />
-          )
-        }
+      let hasSearch = this.props.search
+      if (!hasSearch) {
+        hasSearch = !this.props._readOnly  ||  this.props.modelName !== PRODUCT_APPLICATION
+        if (hasSearch)
+          hasSearch = (list && list.length > 10) || (filter  &&  filter.length)
+      }
+      if (hasSearch) {
+        searchBar = (
+          <SearchBar
+            onChangeText={this.onSearchChange.bind(this)}
+            placeholder={translate('search')}
+            showsCancelButton={false}
+            hideBackground={true}
+            />
+        )
       }
     }
     let network
@@ -1537,17 +1610,16 @@ class GridList extends Component {
   }
 
   renderHeader() {
-    if (this.state.isGrid  ||  this.props.modelName === constants.TYPES.VERIFICATION)
-      return this.renderGridHeader()
-    if (!this.props.officialAccounts)
+    if (!this.props.officialAccounts  &&  !this.props.search)
       return
     let sharedContext
     let partial
     let conversations
+    let search
     let testProviders
     let isOrg = this.props.modelName === ORGANIZATION
     let isProfile = this.props.modelName === PROFILE
-    if (!isOrg  &&  !isProfile)
+    if (!isOrg  &&  !isProfile  &&  !this.props.search)
       return
     if (isOrg) {
       if (!this.state.hasTestProviders  ||  this.props.isTest)
@@ -1569,6 +1641,16 @@ class GridList extends Component {
       // )
     }
     if (isProfile) {
+      search = <View style={{padding: 5, backgroundColor: '#f7f7f7'}}>
+          <TouchableOpacity onPress={this.showSearch.bind(this)}>
+            <View style={styles.row}>
+              <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+              <View style={styles.textContainer}>
+                <Text style={styles.resourceTitle}>{translate('Explore data')}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
       // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
       conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
           <TouchableOpacity onPress={this.showBanks.bind(this)}>
@@ -1623,6 +1705,10 @@ class GridList extends Component {
           </View>
         )
     }
+    else {
+      if (this.state.isGrid)
+        return this.renderGridHeader()
+    }
     return  (
       <View>
         {conversations}
@@ -1632,6 +1718,20 @@ class GridList extends Component {
       </View>
     )
   }
+  showSearch() {
+    this.props.navigator.push({
+      title: 'Explore data',
+      id: 31,
+      component: GridList,
+      backButtonTitle: 'Back',
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        modelName: constants.TYPES.MESSAGE,
+        search: true
+      },
+    })
+  }
+
   showPartials() {
     Actions.getAllPartials()
     this.props.navigator.push({
