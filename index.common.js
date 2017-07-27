@@ -625,6 +625,9 @@ var NavigationBarRouteMapper = {
       //     {rotate: '45deg'}
       //   ]}
       break
+    case 'Search':
+      icon = 'md-search'
+      break
     case 'Profile':
       icon = 'md-person'
       break
