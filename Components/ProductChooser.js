@@ -56,10 +56,10 @@ class ProductChooser extends Component {
   }
   componentWillMount() {
     let r = this.props.resource
-    let id = r[constants.TYPE] === constants.TYPES.PROFILE  ||  r[constants.TYPE] === PRODUCT_APPLICATION
-           ? utils.getId(utils.getMe().organization)
-           : utils.getId(r)
-    Actions.getItem(id)
+    if (r[constants.TYPE] === constants.TYPES.PROFILE  ||  r[constants.TYPE] === PRODUCT_APPLICATION)
+      r = utils.getMe().organization
+
+    Actions.getItem({resource: r})
   }
   componentDidMount() {
     this.listenTo(Store, 'onNewProductAdded');

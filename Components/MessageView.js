@@ -73,7 +73,7 @@ class MessageView extends Component {
   componentWillMount() {
     // if (this.props.resource.id)
     if (!this.props.isReview)
-      Actions.getItem(this.props.resource)
+      Actions.getItem({resource: this.props.resource, search: this.props.search})
   }
 
   componentDidMount() {
@@ -111,7 +111,7 @@ class MessageView extends Component {
     else if (params.action === 'exploreBacklink') {
       if (params.backlink !== this.state.backlink || params.backlinkAdded) {
         this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false, showDocuments: false})
-        Actions.getItem(this.props.resource)
+        Actions.getItem({resource: this.props.resource})
       }
     }
     else if (params.action === 'showDetails')
