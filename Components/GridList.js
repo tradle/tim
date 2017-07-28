@@ -1,7 +1,7 @@
 'use strict';
 
 var NoResources = require('./NoResources');
-var ResourceRow = require('./ResourceRow');
+// var ResourceRow = require('./ResourceRow');
 var ResourceView = require('./ResourceView');
 var VerificationRow = require('./VerificationRow');
 var NewResource = require('./NewResource');
@@ -32,6 +32,7 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import { makeStylish } from './makeStylish'
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
 const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
@@ -39,13 +40,47 @@ const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
+const MODEL = 'tradle.Model'
 
 const MONEY = 'tradle.Money'
 const FORM = 'tradle.Form'
 const ENUM = 'tradle.Enum'
+const PHOTO = 'tradle.Photo'
+
+const METHOD = 'tradle.Method'
+
+let excludeFromBrowsing = [
+  FORM,
+  PRODUCT_LIST,
+  ENUM,
+  constants.TYPES.INTRODUCTION,
+  constants.TYPES.SELF_INTRODUCTION,
+  constants.TYPES.CUSTOMER_WAITING,
+  constants.TYPES.FINANCIAL_PRODUCT,
+  'tradle.ForgetMe',
+  'tradle.ForgotYou',
+  'tradle.GuestSessionProof',
+  'tradle.MerkleNode',
+  'tradle.MerkleLeaf',
+  'tradle.StylesPack',
+  'tradle.ModelsPack',
+  'tradle.ShareContext',
+  'tradle.File',
+  'tradle.Ack',
+  'tradle.AppState',
+  'tradle.Aspect',
+  'tradle.ConfirmPackageRequest',
+  'tradle.IdentityPublishRequest',
+  'tradle.IdentityPublished',
+  'tradle.SecurityCode',
+  'tradle.TermsAndConditions',
+  PROFILE
+]
+
 const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
 
 var CURRENCY_SYMBOL
+var LIMIT
 var cnt = 0
 import React, { Component, PropTypes } from 'react'
 import {
@@ -99,12 +134,13 @@ class GridList extends Component {
         return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
       }
     })
-    let {resource, officialAccounts, modelName, prop, filter, serverOffline} = this.props
+    let {resource, officialAccounts, modelName, prop, filter, serverOffline, search} = this.props
     let model = utils.getModel(modelName).value
 
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
     this.isSmallScreen = utils.dimensions(GridList).width < 736
+    LIMIT = 20 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
       isLoading: true,
@@ -120,6 +156,7 @@ class GridList extends Component {
       refreshing: false,
       hasPartials: false,
       hasTestProviders: false,
+      resource: search  &&  resource,
       isGrid:  !this.isSmallScreen  &&  !officialAccounts  && modelName !== FORM  &&  !model.isInterface//this.props.modelName === constants.TYPES.VERIFICATION
     };
     // if (props.isBacklink  &&  props.backlinkList) {
@@ -222,11 +259,18 @@ class GridList extends Component {
       return
     }
     if (this.props.search) {
-      if (!utils.getModel(modelName).value.isInterface) {
+      if (this.props.isModel) {
+        let modelsArr = this.filterModels()
+        this.state.dataSource = this.state.dataSource.cloneWithRows(modelsArr)
+        return
+        // Actions.listModels({modelName})
+      }
+      else {
         Actions.list({
           modelName: modelName,
           filterResource: resource,
-          search: true
+          search: true,
+          limit: LIMIT
         })
         return
       }
@@ -238,45 +282,9 @@ class GridList extends Component {
       });
     }
     let params = this.getParamsForBacklinkList(this.props)
-//     var params = {
-//       modelName: this.props.modelName,
-//       // limit: 10
-//     };
-//     if (this.props._readOnly)
-//       params._readOnly = true
-
-//     if (this.props.isAggregation)
-//       params.isAggregation = true;
-//     if (this.props.sortProperty)
-//       params.sortProperty = this.props.sortProperty;
-//     if (this.props.prop)
-//       params.prop = utils.getModel(this.props.resource[TYPE]).value.properties[this.props.prop.name];
-//     if (params.prop) {
-//       let m = utils.getModel(this.props.resource[TYPE]).value
-//       // case when for example clicking on 'Verifications' on Form page
-//       if (m.interfaces)
-//         // if (utils.getModel(this.props.modelName).value.interfaces)
-//         //   params.to = this.props.resource.to
-//         params.resource = this.props.resource
-//       else if (params.prop.items  &&  params.prop.items.backlink)
-//         params.to = this.props.resource
-
-// //       params.resource = this.props.resource
-//     }
-//     else
-//       params.to = this.props.resource
-//     params.listView = this.props.listView
-    // this.state.isLoading = true;
-
-    // if (this.props.tabLabel) {
-    //   Actions.list(params)
     StatusBar.setHidden(false);
-    // }
-    // else
-    if (this.props.isBacklink) {
-      // params.limit = 10
+    if (this.props.isBacklink)
       Actions.list(params)
-    }
     else
       utils.onNextTransitionEnd(this.props.navigator, () => {
         Actions.list(params)
@@ -434,8 +442,11 @@ class GridList extends Component {
     // }
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
-      if (!params.list  &&  params.alert) {
-        Alert.alert(params.alert)
+      if (!params.list) {
+        if (params.alert)
+          Alert.alert(params.alert)
+        else if (this.props.search  &&  !this.props.isModel)
+          this.setState({list: [], dataSource: this.state.dataSource.cloneWithRows([])})
         return
       }
       if (params.isTest  !== this.props.isTest)
@@ -480,6 +491,7 @@ class GridList extends Component {
         list = l
       }
     }
+
     list = this.addTestProvidersRow(list)
 
     let state = {
@@ -496,6 +508,9 @@ class GridList extends Component {
         this.setState(state)
       return;
     }
+    if (this.props.search  &&  params.resource)
+      state.resource = params.resource
+
     var type = list[0][TYPE];
     if (type  !== this.props.modelName  &&  this.props.modelName !== params.requestedModelName) {
       var m = utils.getModel(type).value;
@@ -532,6 +547,8 @@ class GridList extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
+      return true
+    if (this.state.resource !== nextState.resource)
       return true
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop !== nextProps.prop)
@@ -592,9 +609,10 @@ class GridList extends Component {
 
     var isOrganization = this.props.modelName === ORGANIZATION;
     var m = utils.getModel(resource[TYPE]).value;
-    if (!isContact          &&
-        !isOrganization     &&
-        !this.props.callback) {
+    let isView = this.props.search  ||
+                 (!isContact  &&  !isOrganization  &&  !this.props.callback)
+
+    if (isView) {
       if (isMessage) {
         let title
         if (isVerificationR) {
@@ -912,20 +930,37 @@ class GridList extends Component {
     });
   }
 
-  onSearchChange(filter) {
-    if (this.props.search) {
-      let modelName = filter
-      if (modelName === FORM || modelName === 'Form')
-        return
-      let model = utils.getModel(modelName)
-      if (!model) {
-        modelName = 'tradle.' + modelName
-        model = utils.getModel(modelName)
-        if (!model)
-          return
-      }
-      model = model.value
-      this.props.navigator.push({
+
+  selectModel(model) {
+    // var value = this.refs.form.getValue();
+    // if (!value) {
+    //   value = this.refs.form.refs.input.state.value;
+    //   if (!value)
+    //     value = {}
+    // }
+    // this.checkEnums(value, this.state.resource)
+    // Actions.list({
+    //   // query: filter,
+    //   modelName: this.props.model.id,
+    //   listView: true,
+    //   search: true
+    // });
+    // let {model} = this.props
+    this.props.navigator.push({
+      id: 31,
+      title: translate('Search ' + utils.makeModelTitle(model)),
+      backButtonTitle: 'Back',
+      component: GridList,
+      passProps: {
+        modelName: model.id,
+        resource: {},
+        bankStyle: this.props.bankStyle,
+        currency: this.props.currency,
+        limit: 20,
+        search: true
+      },
+      rightButtonTitle: 'Search',
+      onRightButtonPress: {
         title: 'Search ' + utils.makeModelTitle(model),
         id: 4,
         component: NewResource,
@@ -934,26 +969,58 @@ class GridList extends Component {
         rightButtonTitle: 'Done',
         passProps: {
           model: model,
-          resource: resource,
+          resource: this.state.resource,
           search: true,
           bankStyle: this.props.bankStyle || defaultBankStyle,
         }
-      })
+      }
+    })
+  }
+
+  // selectModel1(model) {
+  //   this.props.navigator.push({
+  //     title: 'Search ' + utils.makeModelTitle(model),
+  //     id: 4,
+  //     component: NewResource,
+  //     titleTextColor: '#7AAAC3',
+  //     backButtonTitle: 'Back',
+  //     rightButtonTitle: 'Done',
+  //     passProps: {
+  //       model: model,
+  //       // resource: resource,
+  //       search: true,
+  //       bankStyle: this.props.bankStyle || defaultBankStyle,
+  //     }
+  //   })
+  // }
+  filterModels(filter) {
+    let models = utils.getModels()
+    let mArr = []
+    let filterLower = filter && filter.toLowerCase()
+    for (let m in models) {
+      let mm = models[m].value
+      if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
+          !mm.isInterface                &&
+           mm.subClassOf !== ENUM        &&
+           mm.subClassOf !== METHOD      &&
+          mm.subClassOf !== constants.TYPES.FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
+        if (filter) {
+          if (utils.makeModelTitle(mm).toLowerCase().indexOf(filterLower) !== -1)
+            mArr.push(mm)
+        }
+        else
+          mArr.push(mm)
+      }
+    }
+    return mArr
+  }
+  onSearchChange(filter) {
+    this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
+    if (this.props.search  &&  this.props.isModel) {
+      let mArr = this.filterModels(filter)
+      this.setState({dataSource: this.state.dataSource.cloneWithRows(mArr)})
       return
     }
-
-    let {to, prop, listView, resource, modelName} = this.props
-    this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
-    Actions.list({
-      query: this.state.filter,
-      modelName: modelName,
-      to: resource,
-      prop: prop,
-      listView: listView
-    });
-  }
-  onSearchChange1() {
-    this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     Actions.list({
       query: this.state.filter,
       modelName: this.props.modelName,
@@ -964,7 +1031,7 @@ class GridList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    if (this.state.isGrid) {
+    if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION) {
       // let viewCols = this.getGridCols()
       // let size = viewCols ? viewCols.length : 1
       // let isSmallScreen = utils.dimensions(GridList).width < 736
@@ -973,9 +1040,13 @@ class GridList extends Component {
       return this.renderGridRow(resource, sectionId, rowId)
     }
 
-    var model = this.props.isBacklink
-              ? utils.getModel(utils.getType(resource)).value
-              : utils.getModel(this.props.modelName).value;
+    var model
+    if (this.props.isModel)
+      model = resource
+    else if (this.props.isBacklink)
+      model = utils.getModel(utils.getType(resource)).value
+    else
+      model = utils.getModel(this.props.modelName).value;
     if (model.isInterface)
       model = utils.getModel(utils.getType(resource)).value
  // || (model.id === constants.TYPES.FORM)
@@ -997,7 +1068,7 @@ class GridList extends Component {
     if (model.id === ORGANIZATION  &&  resource.name === 'Sandbox'  &&  resource._isTest)
       return this.renderTestProviders()
     let isMessage = utils.isMessage(resource)
-    if (isMessage) //isVerification  || isForm || isMyProduct)
+    if (isMessage  &&  resource !== model  && model.id !== PRODUCT_APPLICATION) //isVerification  || isForm || isMyProduct)
       return (<VerificationRow
                 lazy={this.props.lazy}
                 onSelect={() => this.selectResource(selectedResource)}
@@ -1008,9 +1079,11 @@ class GridList extends Component {
                 parentResource={this.props.resource}
                 currency={this.props.currency}
                 isChooser={this.props.isChooser}
+                searchCriteria={this.props.search ? this.state.resource : null}
                 search={this.props.search}
                 resource={resource} />
       )
+    let ResourceRow = require('./ResourceRow')
     return (<ResourceRow
       lazy={this.props.lazy}
       onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
@@ -1024,19 +1097,23 @@ class GridList extends Component {
       isOfficialAccounts={this.props.officialAccounts}
       multiChooser={this.props.multiChooser}
       isChooser={this.props.isChooser}
+      selectModel={this.selectModel.bind(this)}
       showRefResources={this.showRefResources.bind(this)}
       resource={resource}
       chosen={this.state.chosen} />
     );
   }
   sort(prop) {
-    let order = this.state.order
-    let curOrder = this.state.order[prop]
+    let order = this.state.order || {}
+    let curOrder = order[prop]
 
     order[prop] = curOrder ? false : true
-
     this.setState({order: order, sortProperty: prop})
-    Actions.list({modelName: this.props.modelName, sortProperty: prop, asc: order[prop], gridView: true})
+
+    let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
+    if (this.props.search)
+      extend(params, {search: true, filterResource: this.state.resource, limit: LIMIT})
+    Actions.list(params)
   }
   getGridCols() {
     let model = utils.getModel(this.props.modelName).value
@@ -1046,7 +1123,7 @@ class GridList extends Component {
       return
     let vCols = []
     viewCols.forEach((v) => {
-      if (/*!props[v].readOnly &&*/ !props[v].list)
+      if (/*!props[v].readOnly &&*/ !props[v].list  &&  props[v].range !== 'json')
         vCols.push(v)
     })
     // if (vCols.length === 7)
@@ -1065,20 +1142,23 @@ class GridList extends Component {
     // return !properties[dateProp]  ||  properties[dateProp].skipLabel || style
     //     ? <Text style={style} key={this.getNextKey()}>{val}</Text>
     //     : <View style={{flexDirection: 'row'}} key={this.getNextKey()}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
-
+    if (this.props.search  &&  this.state.resource  &&  this.state.resource[dateProp])
+      style = [style, {fontWeight: '600'}]
     return <Text style={style} key={this.getNextKey(resource)}>{val}</Text>
   }
 
   renderGridRow(resource, sectionId, rowId)  {
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
+    let widthCols = utils.dimensions(GridList).width / 100
+    size = Math.min(size, Math.floor(widthCols * 100/100))
     let colSize =  this.isSmallScreen ? size / 2 : 1
 
     let key = this.getNextKey(resource)
     let cols
     if (viewCols) {
       cols = viewCols.map((v) => (
-        <Col sm={colSize} md={1} lg={1} style={styles.col} key={key + v}>
+        <Col sm={colSize} md={1} lg={1} style={styles.col} key={key + v} style={{justifyContent: 'center'}}>
           {this.formatCol(resource, v) || <View />}
         </Col>
       ))
@@ -1094,7 +1174,7 @@ class GridList extends Component {
       let typeTitle
       if (rModel.id !== m.id  &&  rModel.subClassOf === m.id)
         typeTitle = <Text style={styles.type}>{utils.makeModelTitle(rModel)}</Text>
-      let cellStyle = {paddingVertical: 3, paddingLeft: 7}
+      let cellStyle = {paddingVertical: 5, paddingLeft: 7}
       cols = <View style={cellStyle}>
                {typeTitle}
                <Col sm={1} md={1} lg={1} style={styles.col} key={key + rowId}>
@@ -1102,7 +1182,7 @@ class GridList extends Component {
                </Col>
              </View>
     }
-    let row = <Row size={size} style={{borderBottomColor: '#f5f5f5', paddingVertical: 5, borderBottomWidth: 1, backgroundColor: rowId % 2 ? '#f9f9f9' : 'transparent'}} key={key} nowrap>
+    let row = <Row size={size} style={styles.gridRow, {backgroundColor: rowId % 2 ? '#f9f9f9' : 'transparent'}} key={key} nowrap>
                 {cols}
               </Row>
     if (this.props.search)
@@ -1131,7 +1211,7 @@ class GridList extends Component {
     var properties = model.properties;
 
     var isOfficialAccounts = this.props.isOfficialAccounts
-    var color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
+    var color = isOfficialAccounts && style ? {color: style.listColor} : {}
     var isContact = resource[TYPE] === PROFILE;
     let v = prop
     let backlink
@@ -1156,12 +1236,20 @@ class GridList extends Component {
     let ref = properties[v].ref;
     let row
     let cellStyle = {paddingVertical: 3, paddingLeft: 7}
+
+    let criteria = this.props.search  &&  this.state.resource  &&  this.state.resource[v]
+
     if (ref) {
       if (!resource[v])
         return
+      if (criteria)
+        style.push({fontWeight: '600'})
+
       let refM = utils.getModel(ref).value
-      if (ref == MONEY)
+      if (ref === MONEY)
         row = <Text style={style} key={this.getNextKey(resource)}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
+      else if (ref === PHOTO)
+        row = <Image source={{uri: resource[v].url}} style={{width: 40, height: 40}} />
       else {
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{utils.getDisplayName(resource[v])}</Text>
         if (refM.isInterface || refM.id === FORM) {
@@ -1198,10 +1286,13 @@ class GridList extends Component {
     if (properties[v].type === 'date')
       return <View style={cellStyle}>{this.addDateProp(resource, v)}</View>
 
-    if (resource[v]  &&  (typeof resource[v] != 'string'))
-      return <View style={cellStyle}><Text style={style} numberOfLines={1} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
-    if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(self)} numberOfLines={1} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
+    if (resource[v]  &&  (typeof resource[v] != 'string')) {
+      if (criteria)
+        style.push({fontWeight: '600'})
+      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
+    }
+    if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') === 0  ||  resource[v].indexOf('https://') === 0))
+      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(self)} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
 
     var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
     let msgParts = utils.splitMessage(val);
@@ -1213,7 +1304,40 @@ class GridList extends Component {
         val += msgParts[i];
     }
     val = val.replace(/\*/g, '')
-    return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
+    if (criteria) {
+      if (criteria.indexOf('*') === -1) {
+        style.push({fontWeight: '600'})
+        return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
+      }
+      else {
+        let parts = this.highlightCriteria(resource, val, criteria, style)
+        return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{parts}</Text></View>
+      }
+    }
+    else {
+      if (this.props.isModel  &&  (v === 'form'  ||  v === 'product')) {
+        let m = utils.getModel(v)
+        if (m)
+          val = utils.makeModelTitle(m.value)
+      }
+      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
+    }
+  }
+  highlightCriteria(resource,val, criteria, style) {
+    criteria = criteria.replace('*', '')
+    let idx = val.indexOf(criteria)
+    let part
+    let parts = []
+
+    if (idx > 0) {
+      parts.push(<Text style={style} key={this.getNextKey(resource)}>{val.substring(0, idx)}</Text>)
+      idx++
+    }
+    parts.push(<Text style={[style, {fontWeight: '800'}]} key={this.getNextKey(resource)}>{val.substring(idx, idx + criteria.length)}</Text>)
+    idx += criteria.length
+    if (idx < val.length)
+      parts.push(<Text style={style} key={this.getNextKey(resource)}>{val.substring(idx)}</Text>)
+    return parts
   }
 
   renderGridHeader() {
@@ -1223,19 +1347,32 @@ class GridList extends Component {
     var viewCols = this.getGridCols() // model.gridCols || model.viewCols;
     if (!viewCols)
       return <View />
-    var props = model.properties
-    let size = viewCols.length
+
+    let size = viewCols ? viewCols.length : 1
+    let widthCols = utils.dimensions(GridList).width / 100
+    size = Math.min(size, Math.floor(widthCols * 100/100))
+
     let smCol = this.isSmallScreen ? size/2 : 1
-    let cols = viewCols.map((p) => (
-              <Col sm={smCol} md={1} lg={1} style={styles.col} key={p + cnt}>
-                <TouchableOpacity onPress={() => this.sort(p)}>
-                  <Text style={styles.cell}>
-                    {props[p].title.toUpperCase()}
-                  </Text>
-                </TouchableOpacity>
-              </Col>
-            ))
-    return <View style={{backgroundColor: '#FBFFE5'}} key='Datagrid_h1'>
+    let {sortProperty, order} = this.state
+    var props = model.properties
+    let cols = viewCols.map((p) => {
+      let colStyle
+      if (sortProperty  &&  sortProperty === p) {
+        let asc = order[sortProperty]
+        colStyle = [styles.col, asc ? {borderTopWidth: 4, borderTopColor: '#7AAAC3'} : {borderBottomWidth: 4, borderBottomColor: '#7AAAC3'}]
+      }
+      else
+        colStyle = styles.col
+      return <Col sm={smCol} md={1} lg={1} style={colStyle} key={p + cnt}>
+        <TouchableOpacity onPress={() => this.sort(p)}>
+          <Text style={styles.cell}>
+            {props[p].title.toUpperCase()}
+          </Text>
+        </TouchableOpacity>
+      </Col>
+    })
+
+    return <View style={{backgroundColor: '#f7f7f7'}} key='Datagrid_h1'>
             <Row size={size} style={styles.headerRow} key='Datagrid_h2' nowrap>
               {cols}
             </Row>
@@ -1243,16 +1380,19 @@ class GridList extends Component {
 
   }
   async _loadMoreContentAsync() {
+    // debugger
     if (this.state.refreshing) {
-      // debugger
       return
     }
+    debugger
     this.state.refreshing = true
     let list = this.state.list
     Actions.list({
       modelName: this.props.modelName,
       sortProperty: this.props.sortProp,
       asc: this.props.order,
+      limit: LIMIT,
+      search: this.props.search,
       // limit: this.props.limit || 10,
       start: list.length,
       gridView: this.state.isGrid,
@@ -1468,14 +1608,15 @@ class GridList extends Component {
   }
   render() {
     var content;
-    var {isGrid, filter, dataSource, isLoading, refreshing, list} = this.state
-    var model = utils.getModel(this.props.modelName).value;
+    var {isGrid, filter, dataSource, isLoading, refreshing} = this.state
+    var {isChooser, modelName} = this.props
+    var model = utils.getModel(modelName).value;
     if (dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
         !utils.getMe().organization                 &&
         model.subClassOf !== ENUM                   &&
-        !this.props.isChooser                       &&
-        this.props.modelName !== ORGANIZATION  &&
+        !isChooser                       &&
+        modelName !== ORGANIZATION  &&
         (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
       content = <NoResources
                   filter={filter}
@@ -1496,12 +1637,6 @@ class GridList extends Component {
       canLoadMore={true}
       renderScrollComponent={props => <InfiniteScrollView {...props} />}
       onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
-      refreshControl={
-        <RefreshControl
-          refreshing={this.state.refreshing}
-          onRefresh={this._loadMoreContentAsync.bind(this)}
-        />
-      }
       scrollRenderAhead={10}
       showsVerticalScrollIndicator={false} />;
 
@@ -1509,29 +1644,29 @@ class GridList extends Component {
     var actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     let footer = actionSheet && this.renderFooter()
     var searchBar
+    var {search, isModel, _readOnly, isChooser, officialAccounts} = this.props
+
     if (SearchBar) {
-      let hasSearch = this.props.search
-      if (!hasSearch) {
-        hasSearch = !this.props._readOnly  ||  this.props.modelName !== PRODUCT_APPLICATION
+      let hasSearch = isModel
+      if (!hasSearch  && !search) {
+        let hasSearch = !_readOnly  ||  modelName !== PRODUCT_APPLICATION
         if (hasSearch)
-          hasSearch = (list && list.length > 10) || (filter  &&  filter.length)
+          hasSearch = (dataSource && dataSource.getRowCount() > 10) || (filter  &&  filter.length)
       }
       if (hasSearch) {
-        searchBar = (
-          <SearchBar
-            onChangeText={this.onSearchChange.bind(this)}
-            placeholder={translate('search')}
-            showsCancelButton={false}
-            hideBackground={true}
-            />
-        )
+        searchBar = <SearchBar
+                      onChangeText={this.onSearchChange.bind(this)}
+                      placeholder={translate('search')}
+                      showsCancelButton={false}
+                      hideBackground={true}
+                      />
       }
     }
     let network
-    if (!this.props.isChooser && this.props.officialAccounts && this.props.modelName === ORGANIZATION)
+    if (!isChooser && officialAccounts && modelName === ORGANIZATION)
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-    let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
-    let contentSeparator = utils.getContentSeparator(this.props.bankStyle)
+    // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
+    let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(this.props.bankStyle)
 
     return (
       <PageView style={this.props.isBacklink ? {} : platformStyles.container} separator={contentSeparator}>
@@ -1617,9 +1752,10 @@ class GridList extends Component {
     let conversations
     let search
     let testProviders
-    let isOrg = this.props.modelName === ORGANIZATION
-    let isProfile = this.props.modelName === PROFILE
-    if (!isOrg  &&  !isProfile  &&  !this.props.search)
+    let isSearch = this.props.search
+    let isOrg = !isSearch  &&  this.props.modelName === ORGANIZATION
+    let isProfile = !isSearch  &&  this.props.modelName === PROFILE
+    if (!isOrg  &&  !isProfile  &&  !isSearch)
       return
     if (isOrg) {
       if (!this.state.hasTestProviders  ||  this.props.isTest)
@@ -1706,7 +1842,7 @@ class GridList extends Component {
         )
     }
     else {
-      if (this.state.isGrid)
+      if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION)
         return this.renderGridHeader()
     }
     return  (
@@ -1829,16 +1965,6 @@ var styles = StyleSheet.create({
     marginRight: 10,
     width: 50,
   },
-  menuButton: {
-    marginTop: -23,
-    paddingVertical: 5,
-    paddingHorizontal: 21,
-    borderRadius: 24,
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
   sharedContext: {
     position: 'absolute',
     right: 5,
@@ -1883,7 +2009,7 @@ var styles = StyleSheet.create({
   },
   col: {
     paddingVertical: 5,
-    paddingLeft: 7
+    // paddingLeft: 7
     // borderRightColor: '#aaaaaa',
     // borderRightWidth: 0,
   },
@@ -1906,9 +2032,14 @@ var styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    color: '#999999'
+    color: '#555555'
+  },
+  gridRow: {
+    borderBottomColor: '#f5f5f5',
+    paddingVertical: 5,
+    paddingRight: 7,
+    borderBottomWidth: 1
   }
-
 });
 
 module.exports = GridList;
@@ -2020,4 +2151,44 @@ module.exports = GridList;
   //       {content}
   //     </PageView>
   //   );
+  // }
+  // onSearchChange2(filter) {
+  //   if (this.props.search) {
+  //     let modelName = filter
+  //     if (modelName === FORM || modelName === 'Form')
+  //       return
+  //     let model = utils.getModel(modelName)
+  //     if (!model) {
+  //       modelName = 'tradle.' + modelName
+  //       model = utils.getModel(modelName)
+  //       if (!model)
+  //         return
+  //     }
+  //     model = model.value
+  //     this.props.navigator.push({
+  //       title: 'Search ' + utils.makeModelTitle(model),
+  //       id: 4,
+  //       component: NewResource,
+  //       titleTextColor: '#7AAAC3',
+  //       backButtonTitle: 'Back',
+  //       rightButtonTitle: 'Done',
+  //       passProps: {
+  //         model: model,
+  //         resource: resource,
+  //         search: true,
+  //         bankStyle: this.props.bankStyle || defaultBankStyle,
+  //       }
+  //     })
+  //     return
+  //   }
+
+  //   let {to, prop, listView, resource, modelName} = this.props
+  //   this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
+  //   Actions.list({
+  //     query: this.state.filter,
+  //     modelName: modelName,
+  //     to: resource,
+  //     prop: prop,
+  //     listView: listView
+  //   });
   // }
