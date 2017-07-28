@@ -64,9 +64,11 @@ class FormRequestRow extends Component {
     LINK_COLOR = this.props.bankStyle.linkColor
   }
   shouldComponentUpdate(nextProps, nextState) {
+    let {resource} = this.props
     return !equal(this.props.resource, nextProps.resource)   ||
            !equal(this.props.to, nextProps.to)               ||
-           this.props.addedItem !== nextProps.addedItem      ||
+           (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
+           // this.props.addedItem !== nextProps.addedItem      ||
            this.props.orientation !== nextProps.orientation  ||
            this.props.sendStatus !== nextProps.sendStatus
   }

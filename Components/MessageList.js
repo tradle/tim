@@ -144,7 +144,11 @@ class MessageList extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    let {action, error, context, shareableResources, online, list, loadEarlierMessages, to, isConnected, sendStatus, forgetMeFromCustomer, isAggregation} = params
+    let {
+      action, error, context, shareableResources, online,
+        list, loadEarlierMessages, to, isConnected, sendStatus,
+        forgetMeFromCustomer, isAggregation
+      } = params
     if (params.error)
       return
 
@@ -157,6 +161,7 @@ class MessageList extends Component {
       if (params.resource  &&  utils.getId(params.resource) == utils.getId(resource))
       // if (params.resource  &&  params.resource[constants.ROOT_HASH] === this.props.resource[ROOT_HASH])
       //   state.resource = resource
+      if (online !== this.state.onlineStatus)
         this.setState({onlineStatus: online})
       return
     }
@@ -183,30 +188,11 @@ class MessageList extends Component {
       }
       else if (rtype === FORM_REQUEST  ||  rtype === CONFIRM_PACKAGE_REQUEST || rtype === FORM_ERROR)
         this.setState({addedItem: params.resource})
-        // this.state.addedItem = params.resource
       else if (params.resource._denied || params.resource._approved)
         this.setState({addedItem: params.resource})
-        // this.state.addedItem = params.resource
-      else {
-        if (rtype === FORM_REQUEST) {
-          if (params.resource._documentCreated) {
-            let rId = utils.getId(params.resource._documentCreated)
-            let idx = this.state.list.findIndex((r) => utils.getId(r) === rId)
-            this.state.list.splice(idx, 1, params.resource)
-            this.setState({addedItem: params.resource})
-            return
-          }
-        }
-        if (rtype !== TYPES.PRODUCT_LIST) {
-          this.setState({addedItem: params.resource})
-          let list = this.state.list
-          list.push(params.resource)
-          this.setState({list: list})
-          return
-        }
-        else
-          this.state.addedItem = null
-      }
+      else
+        this.state.addedItem = null
+
       if (action === 'addVerification') {
         if (this.props.originatingMessage  &&  this.props.originatingMessage.verifiers)  {
           let docType = utils.getId(params.resource.document).split('_')[0]
@@ -344,31 +330,40 @@ class MessageList extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     // Eliminating repeated alerts when connection returns after ForgetMe action
-    if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
+    if (!this.state.list  &&  !nextState.list)
       return false
-    if (nextState.isConnected !== this.state.isConnected)
+    if (!this.state.list || !nextState.list)
+      return true
+    if (this.state.list.length !== nextState.list.length)
+      return true
+    // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
+    //   return false
+    if (nextState.isConnected !== this.state.isConnected  &&  this.state.isLoading === nextState.isLoading)
       return true
     // undefined - is not yet checked
     if (typeof this.state.onlineStatus !== 'undefined') {
       if (nextState.onlineStatus !== this.state.onlineStatus)
         return true
     }
-    if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
+    if (this.state.context !== nextState.context) {
+      if (!this.state.context  ||  !nextState.context)
+        return true
+      if (utils.getId(this.state.context)  !==  utils.getId(nextState.context))
+        return true
+    }
+    if (this.state.allContexts !== nextState.allContexts)
       return true
     if (this.state.hasProducts !== nextState.hasProducts)
       return true
     if (this.props.bankStyle !== nextProps.bankStyle)
       return true
-    if (this.state.addedItem !== nextState.addedItem)
+    // if (this.state.addedItem !== nextState.addedItem)
+    //   return true
+    if (this.props.orientation !== nextProps.orientation ||
+        this.state.allLoaded !== nextState.allLoaded)
       return true
-    if (!this.state.list                                  ||
-        !nextState.list                                   ||
-         this.props.orientation !== nextProps.orientation ||
-         this.state.allLoaded !== nextState.allLoaded     ||
-         // this.state.sendStatus !== nextState.sendStatus   ||
-         this.state.list.length !== nextState.list.length)
+         // this.state.sendStatus !== nextState.sendStatus   ||)
          // this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]))
-      return true
 
     if (this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]  &&
         this.state.sendStatus !== nextState.sendStatus)
