@@ -547,7 +547,7 @@ var Store = Reflux.createStore({
         return self.readseal(value)
       case 'error':
         debugger
-        console.log(err)
+        console.log(data)
       }
     }      // worker: (event, cb) => {
   },
