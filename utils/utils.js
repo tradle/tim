@@ -856,8 +856,14 @@ var utils = {
       var properties = m.properties
       var exclude = ['from', 'to', 'time']
       let isVerification = m.id === VERIFICATION
+      let isProductApplication = m.id === PRODUCT_APPLICATION
+      let isFormRequest = m.id === FORM_REQUEST
       Object.keys(res).forEach(p => {
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
+          return
+        if (isProductApplication  &&  p === 'product')
+          return
+        if (isFormRequest  &&  (p === 'product'  ||  p === 'form'))
           return
         if (isVerification  &&  p === 'document')
           res[p] = this.buildRef(res[p])
