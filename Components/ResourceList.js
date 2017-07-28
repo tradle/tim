@@ -8,6 +8,7 @@ var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
 var MessageView = require('./MessageView')
 var PageView = require('./PageView')
+var GridList = require('./GridList')
 var SupervisoryView = require('./SupervisoryView')
 import ActionSheet from './ActionSheet'
 var utils = require('../utils/utils');
@@ -837,13 +838,44 @@ class ResourceList extends Component {
   }
 
   onSearchChange(filter) {
+    if (this.props.search) {
+      let modelName = filter
+      let model = utils.getModel(modelName)
+      if (!model)
+        return
+      model = model.value
+      this.props.navigator.push({
+        title: 'Search ' + utils.makeModelTitle(model),
+        id: 4,
+        component: NewResource,
+        titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: model,
+          resource: resource,
+          search: true,
+          bankStyle: this.props.bankStyle || defaultBankStyle,
+        }
+      })
+      // filter = filter.substring(idx + 1).trim()
+      // Actions.list({
+      //   query: filter,
+      //   modelName: modelName,
+      //   listView: listView,
+      //   search: true
+      // });
+      return
+    }
+
+    let {to, prop, listView, resource, modelName} = this.props
     this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     Actions.list({
       query: this.state.filter,
-      modelName: this.props.modelName,
-      to: this.props.resource,
-      prop: this.props.prop,
-      listView: this.props.listView
+      modelName: modelName,
+      to: resource,
+      prop: prop,
+      listView: listView
     });
   }
 
@@ -877,6 +909,7 @@ class ResourceList extends Component {
                 key={resource[ROOT_HASH]}
                 navigator={this.props.navigator}
                 prop={this.props.prop}
+                modelName={this.props.modelName}
                 parentResource={this.props.resource}
                 currency={this.props.currency}
                 isChooser={this.props.isChooser}
@@ -1264,7 +1297,18 @@ class ResourceList extends Component {
       //   </View>
       // )
     }
+    let search
     if (isProfile) {
+      search = <View style={{padding: 5, backgroundColor: '#f7f7f7'}}>
+          <TouchableOpacity onPress={this.showSearch.bind(this)}>
+            <View style={styles.row}>
+              <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5, marginRight: 0}]} />
+              <View style={styles.textContainer}>
+                <Text style={styles.resourceTitle}>{translate('Explore data')}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
       // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
       conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
           <TouchableOpacity onPress={this.showBanks.bind(this)}>
@@ -1276,6 +1320,7 @@ class ResourceList extends Component {
             </View>
           </TouchableOpacity>
         </View>
+
 
       if (this.state.hasPartials)
         partial = (
@@ -1321,12 +1366,27 @@ class ResourceList extends Component {
     }
     return  (
       <View>
+        {search}
         {conversations}
         {sharedContext}
         {partial}
         {testProviders}
       </View>
     )
+  }
+  showSearch() {
+    this.props.navigator.push({
+      title: 'Explore data',
+      id: 31,
+      component: GridList,
+      backButtonTitle: 'Back',
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        modelName: constants.TYPES.MESSAGE,
+        isModel: true,
+        search: true
+      },
+    })
   }
   showPartials() {
     Actions.getAllPartials()
