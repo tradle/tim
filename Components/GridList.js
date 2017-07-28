@@ -1158,7 +1158,7 @@ class GridList extends Component {
     let cols
     if (viewCols) {
       cols = viewCols.map((v) => (
-        <Col sm={colSize} md={1} lg={1} style={styles.col} key={key + v} style={{justifyContent: 'center'}}>
+        <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent: 'center'}]} key={key + v}>
           {this.formatCol(resource, v) || <View />}
         </Col>
       ))
