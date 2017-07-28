@@ -119,7 +119,7 @@ class ResourceView extends Component {
     let resource = this.props.resource
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     if (resource.id || resource[constants.ROOT_HASH])
-      Actions.getItem(resource)
+      Actions.getItem({resource: resource})
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
@@ -131,13 +131,14 @@ class ResourceView extends Component {
     if (resource) {
       if (utils.getId(resource) !== utils.getId(this.props.resource)) {
         if (isMe) {
+          let me = utils.getMe()
           if (action === 'addItem') {
             let m = utils.getModel(resource[TYPE]).value
             if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
-              Actions.getItem(utils.getMe())
+              Actions.getItem({resource: me})
           }
           else if (action === 'addMessage'  &&  resource[TYPE] === 'tradle.ConfirmPackageRequest')
-            Actions.getItem(utils.getMe())
+            Actions.getItem({resource: me})
         }
         return
       }
@@ -322,16 +323,6 @@ class ResourceView extends Component {
 
     let footer
     let conversations
-/*
-                  <TouchableOpacity onPress={this.showBanks.bind(this)}>
-                    <View style={styles.conversationsRow}>
-                      <ConversationsIcon size={35} style={{marginTop: 2, marginRight: 10}} />
-                      <View style={{justifyContent: 'center'}}>
-                        <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-*/
     let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
     let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
     let paddingRight = Platform.OS === 'android' ? 0 : 10
@@ -552,7 +543,7 @@ class ResourceView extends Component {
 
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);
-    Actions.getItem(resource.id);
+    Actions.getItem({resource: resource});
   }
 
   changePreferences(action) {
