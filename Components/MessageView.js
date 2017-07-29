@@ -72,7 +72,7 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    if (!this.props.isReview)
+    if (!this.props.isReview  &&  this.props.resource.id)
       Actions.getItem({resource: this.props.resource, search: this.props.search})
   }
 
