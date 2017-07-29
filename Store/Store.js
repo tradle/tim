@@ -192,6 +192,7 @@ const CONFIRMATION        = 'tradle.Confirmation'
 const APPLICATION_DENIAL  = 'tradle.ApplicationDenial'
 const COUNTRY             = 'tradle.Country'
 const PHOTO               = 'tradle.Photo'
+const SELFIE              = 'tradle.Selfie'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -5876,15 +5877,26 @@ var Store = Reflux.createStore({
     let startTime = Date.now()
     let cnt = start
     let list = []
+    let refsObj = {}
+
     return Promise.all(allLinks.map(r => {
       return handleOne(r)
     }))
     .then((l) => {
-      if (isBacklinkProp)
+      if (isBacklinkProp) {
+        list.forEach((r) => {
+          if (r[TYPE] === VERIFICATION)
+            r.document = refsObj[utils.getId(r.document)]
+        })
         return list
+      }
       if (!foundResources.length)
         return
 
+      foundResources.forEach((r) => {
+        if (r[TYPE] === VERIFICATION)
+          r.document = refsObj[utils.getId(r.document)]
+      })
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a.time - b.time)
       let result = params._readOnly  &&  modelName === PRODUCT_APPLICATION
@@ -5913,18 +5925,8 @@ var Store = Reflux.createStore({
         self._setItem(rId, r)
         // list = self.transformResult(result)
 
-        let refsObj = {}
         if (refs.indexOf(r[CUR_HASH]) !== -1)
           refsObj[utils.getId(r)] = r
-
-        let idx = links.indexOf(r[CUR_HASH])
-        if (idx !== -1) {
-          let isVerificationR = r[TYPE] === VERIFICATION
-          if (isVerificationR) {
-            let docId = utils.getId(r.document)
-            r.document = refsObj[docId] || self._getItem(docId)
-          }
-        }
 
         if (isBacklinkProp) {
           let container = resource  ||  to
@@ -6898,6 +6900,11 @@ var Store = Reflux.createStore({
     let meId = utils.getId(me)
     if (isMessage  &&  isNew) {
       this.addBacklinksTo(ADD, me, value, batch)
+      if (value[TYPE] === SELFIE) {
+        if (!me.photos)
+          me.photos = []
+        me.photos.push(value.selfie)
+      }
       this.setMe(me)
       this.trigger({action: 'addItem', resource: me})
 
