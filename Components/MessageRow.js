@@ -54,9 +54,6 @@ import ENV from '../utils/env'
 class MessageRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    var me = utils.getMe();
     LINK_COLOR = this.props.bankStyle.linkColor
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -149,7 +146,7 @@ class MessageRow extends Component {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
 
-        let isReadOnlyChat = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context) //this.props.context  &&  this.props.context._readOnly
+        let isReadOnlyChat = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
         photoListStyle = {
           flexDirection: 'row',
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
@@ -411,7 +408,7 @@ class MessageRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
-    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
 
     if (model.id === PRODUCT_APPLICATION) {
       let msgModel = utils.getModel(resource.product).value
