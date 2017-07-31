@@ -12,6 +12,7 @@ var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 import { makeResponsive } from 'react-native-orient'
+
 var StyleSheet = require('../StyleSheet')
 var chatStyles = require('../styles/chatStyles')
 var reactMixin = require('react-mixin');
@@ -21,6 +22,7 @@ const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PHOTO = 'tradle.Photo'
 const IDENTITY = 'tradle.Identity'
 const ENUM = 'tradle.Enum'
+const SENT = 'Sent'
 
 import {
   // StyleSheet,
@@ -35,15 +37,14 @@ import React, { Component } from 'react'
 class FormMessageRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    var me = utils.getMe();
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return !equal(this.props.resource, nextProps.resource) ||
-           !equal(this.props.to, nextProps.to)             ||
+    let {resource, to, orientation} = this.props
+    return utils.getId(resource) !== utils.getId(nextProps.resource) ||
+           !equal(to, nextProps.to)             ||
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
-           this.props.orientation != nextProps.orientation ||
-           this.props.sendStatus !== nextProps.sendStatus
+           orientation != nextProps.orientation ||
+           (this.props.sendStatus !== SENT  &&  this.props.sendStatus !== nextProps.sendStatus)
   }
 
   onPress(event) {
@@ -109,7 +110,7 @@ class FormMessageRow extends Component {
       // photos.forEach((p) => {
       //   photoUrls.push({url: utils.getImageUri(p.url)});
       // })
-      let isSharedContext = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
+      let isSharedContext = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.resource._context)
       photoListStyle = {
         flexDirection: 'row',
         alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
@@ -137,9 +138,7 @@ class FormMessageRow extends Component {
       else
         photoStyle = chatStyles.image;
     }
-    var sendStatus = <View />
-    if (this.props.sendStatus  &&  this.props.sendStatus !== null)
-      sendStatus = this.getSendStatus()
+    let sendStatus = this.getSendStatus()
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
@@ -170,7 +169,7 @@ class FormMessageRow extends Component {
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let isMyMessage = this.isMyMessage()
-    let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
+    let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.resource._context)
 
     var viewStyle = {
       width: Math.floor(utils.dimensions().width * 0.8), // - (isSharedContext  ? 45 : 0),

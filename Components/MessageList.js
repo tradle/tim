@@ -186,12 +186,13 @@ class MessageList extends Component {
         this.state.sendStatus = params.resource._sendStatus
         this.state.sendResource = params.resource
       }
-      else if (rtype === FORM_REQUEST  ||  rtype === CONFIRM_PACKAGE_REQUEST || rtype === FORM_ERROR)
+      if (rtype === FORM_REQUEST  ||  rtype === CONFIRM_PACKAGE_REQUEST || rtype === FORM_ERROR)
         this.setState({addedItem: params.resource})
       else if (params.resource._denied || params.resource._approved)
         this.setState({addedItem: params.resource})
       else
-        this.state.addedItem = null
+        this.setState({addedItem: null})
+        // this.state.addedItem = null
 
       if (action === 'addVerification') {
         if (this.props.originatingMessage  &&  this.props.originatingMessage.verifiers)  {

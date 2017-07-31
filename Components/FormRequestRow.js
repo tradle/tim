@@ -18,9 +18,9 @@ var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults.json')
 var TradleW = require('../img/TradleW.png')
 var Actions = require('../Actions/Actions');
-import { makeResponsive } from 'react-native-orient'
 var StyleSheet = require('../StyleSheet')
 var reactMixin = require('react-mixin');
+
 var chatStyles = require('../styles/chatStyles')
 
 const TYPE = constants.TYPE
@@ -58,19 +58,26 @@ import ENV from '../utils/env'
 class FormRequestRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[TYPE] || resource.id).value;
-    var me = utils.getMe();
+    this.state = {}
     LINK_COLOR = this.props.bankStyle.linkColor
   }
   shouldComponentUpdate(nextProps, nextState) {
-    let {resource} = this.props
-    return !equal(this.props.resource, nextProps.resource)   ||
-           !equal(this.props.to, nextProps.to)               ||
-           (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
-           // this.props.addedItem !== nextProps.addedItem      ||
-           this.props.orientation !== nextProps.orientation  ||
-           this.props.sendStatus !== nextProps.sendStatus
+    let {resource, to, orientation} = this.props
+    if (this.props.sendStatus !== nextProps.sendStatus)
+      return true
+    let rid = utils.getId(resource)
+    if (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === rid) {
+      // HACK for when the form status that is fulfilling this request changes the rendering uses
+      // the old list for that
+      if (nextProps.addedItem._documentCreated  &&  !nextProps.resource._documentCreated)
+        return false
+      return true
+    }
+    if (rid !== utils.getId(nextProps.resource) ||  //!equal(resource, nextProps.resource)    ||
+        !equal(to, nextProps.to)                ||
+        orientation !== nextProps.orientation)
+      return true
+    return false
   }
   render() {
     let resource = this.props.resource;
@@ -158,8 +165,7 @@ class FormRequestRow extends Component {
     }
     viewStyle.width =  Math.min(msgWidth, message.length * utils.getFontSize(18) + 40)
 
-
-    if (this.props.sendStatus  &&  this.props.sendStatus !== null)
+    if (this.state  &&  this.state.sendStatus  &&  this.state.sendStatus !== null)
       sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
                      ? <View style={chatStyles.sealedStatus}>
@@ -485,13 +491,14 @@ class FormRequestRow extends Component {
 
   createNewResource(model, isMyMessage) {
     var resource = {
-      'from': this.props.resource.to,
-      'to': this.props.resource.from,
-      _context: this.props.context
+      from: this.props.resource.to,
+      to: this.props.resource.from,
+      _context: this.props.resource._context,
+      [TYPE]: model.id
     }
     // if (this.props.resource[TYPE] !== FORM_REQUEST)
     //   resource.message = this.props.resource.message;
-    resource[TYPE] = model.id;
+    // resource[TYPE] = model.id;
     var isPrefilled = this.props.resource.prefill
     // Prefill for testing and demoing
     if (isPrefilled)
@@ -565,7 +572,7 @@ class FormRequestRow extends Component {
               ? {color: '#AFBBA8'}
               : {color: '#2892C6'}
     let link, icon
-    let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
     let self = this
     // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
@@ -785,6 +792,5 @@ var styles = StyleSheet.create({
   }
 });
 reactMixin(FormRequestRow.prototype, RowMixin)
-FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;
