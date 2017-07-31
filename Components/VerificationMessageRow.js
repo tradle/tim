@@ -30,13 +30,12 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
+const MY_PRODUCT = 'tradle.MyProduct'
+const FORM = 'tradle.Form'
 
 class VerificationMessageRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    var me = utils.getMe();
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (this.props.orientation !== nextProps.orientation  &&  this.props.orientation !== 'UNKNOWN'  &&  nextProps.orientation !== 'UNKNOWN')
@@ -65,17 +64,17 @@ class VerificationMessageRow extends Component {
 
     let isThirdPartyVerification
     let isReadOnlyChat
-    if (this.props.context) {
+    if (this.props.resource._context) {
       let me = utils.getMe()
       if (me.isEmployee) {
         isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
         if  (isReadOnlyChat) {
           // could be shared by customer in this case 'from' will be referring to customer
           let org = resource.organization || resource.to.organization
-          isThirdPartyVerification = utils.getId(org) !== utils.getId(this.props.context.to.organization)
+          isThirdPartyVerification = utils.getId(org) !== utils.getId(this.props.resource._context.to.organization)
         }
         else if (this.props.to[constants.TYPE] === constants.TYPES.PROFILE)
-          isThirdPartyVerification = utils.getId(me) !== utils.getId(this.props.context.to) || (resource._verifiedBy  &&  utils.getId(me.organization) !== utils.getId(resource._verifiedBy))
+          isThirdPartyVerification = utils.getId(me) !== utils.getId(this.props.resource._context.to) || (resource._verifiedBy  &&  utils.getId(me.organization) !== utils.getId(resource._verifiedBy))
       }
       else
         isThirdPartyVerification = resource._verifiedBy != null && utils.getId(resource._verifiedBy)  !== utils.getId(resource.organization)// &&  utils.getId(this.props.context.to.organization) !== utils.getId(resource._verifiedBy)
@@ -291,6 +290,180 @@ class VerificationMessageRow extends Component {
     }
     this.props.navigator.push(route);
   }
+  formatDocument(params) {
+    const me = utils.getMe()
+    let model = params.model
+    let verification = params.verification
+    let onPress = params.onPress
+    let providers = params.providers  // providers the document was shared with
+
+    var document = verification.document
+
+    let isThirdParty = !document[constants.TYPE]
+    let type = document[constants.TYPE] || utils.getType(document)
+    var docModel = utils.getModel(type).value;
+    var isMyProduct = docModel.subClassOf === MY_PRODUCT
+    var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
+    var idx = docModelTitle.indexOf('Verification');
+    var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
+
+    var msg;
+    if (document.message  &&  docModel.subClassOf !== FORM)
+      msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
+    // else if (!onPress) {
+    //   msg = <View><Text style={styles.description}>{translate('seeTheForm')}</Text></View>
+    //   // var rows = [];
+    //   // this.formatDocument1(model, document, rows);
+    //   // msg = <View>{rows}</View>
+    // }
+    else
+      msg = <View/>
+
+    // var hasPhotos = document  &&  document.photos  &&  document.photos.length
+    // var photo = hasPhotos
+    //           ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
+    //           : <View />;
+    var headerStyle = {flex: 1, paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 10}
+    var isShared = this.isShared(verification)
+
+                    // {verification.dateVerified
+                    //   ? <View style={{flexDirection: 'row'}}>
+                    //       <Text style={{fontSize: 12, color: this.props.bankStyle.VERIFIED_HEADER_COLOR, fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
+                    //     </View>
+                    //   : <View/>
+                    // }
+                          // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
+    let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.verifiedBg, borderWidth: BORDER_WIDTH, borderColor: this.props.bankStyle.verifiedBg, borderBottomColor: this.props.bankStyle.verifiedHeaderColor}
+
+    let hs = /*isShared ? chatStyles.description :*/ [styles.vheader, {fontSize: 16}]
+    // let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
+    let arrow = <Icon color={this.props.bankStyle.verifiedLinkColor} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
+
+    let docName
+    if (!isThirdParty)
+      docName = <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
+
+    var headerContent = <View style={headerStyle}>
+                          <Text style={[hs, {fontSize: isThirdParty ? 16 : 12}]}>{translate(model)}</Text>
+                          {docName}
+                        </View>
+
+
+
+    let header = <TouchableOpacity onPress={this.props.onSelect.bind(this, me.isEmployee ? verification : document, verification)}>
+                   <View style={[addStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+                     {headerContent}
+                     {arrow}
+                   </View>
+                 </TouchableOpacity>
+      // header = <TouchableOpacity underlayColor='transparent' onPress={this.props.onSelect.bind(this, this.props.shareWithRequestedParty ? document : verification, verification)}>
+
+
+    var orgRow = <View/>
+    if (verification  && verification.organization) {
+      var orgPhoto = verification.organization.photo
+                   ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
+                   : <View />
+      var shareView = <View style={[chatStyles.shareButton, {backgroundColor: this.props.bankStyle.shareButtonBackgroundColor, opacity: this.props.resource._documentCreated ? 0.3 : 1}]}>
+                        <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
+                        <Text style={chatStyles.shareText}>{translate('Share')}</Text>
+                      </View>
+      var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
+                   ? this.props.to.name
+                   : (this.props.to.organization ? this.props.to.organization.title : null);
+      // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
+      let verifiedBy
+      if (isMyProduct)
+        verifiedBy = translate('issuedBy', verification.organization.title)
+      // Not verified Form - still shareable
+      else if (verification[constants.ROOT_HASH]) {
+        let orgs
+        if (providers) {
+          providers.forEach((p) => {
+            if (!orgs)
+              orgs = p.title
+            else
+              orgs += ', ' + p.title
+          })
+        }
+        else
+          orgs = verification.organization.title
+        verifiedBy = translate('verifiedBy', orgs)
+      }
+      else if (utils.isSavedItem(verification.document))
+        verifiedBy = translate('fromMyData')
+      else
+        verifiedBy = translate('sentTo', verification.organization.title)
+
+      var orgView = <View style={styles.orgView}>
+                      <Text style={chatStyles.description}>
+                        {verifiedBy}
+                      </Text>
+                        {verification.dateVerified
+                          ? <View style={{flexDirection: 'row'}}>
+                              <Text style={{fontSize: 12, color: '#757575', fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
+                            </View>
+                          : <View/>
+                        }
+                      </View>
+
+                         // <Text style={[styles.title, {color: '#2E3B4E'}]}>{verification.organization.title.length < 30 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'}</Text>
+      if (onPress) {
+        // if (!this.props.resource._documentCreated)
+        //      <TouchableOpacity underlayColor='transparent' onPress={onPress ? onPress : () =>
+        //                     Alert.alert(
+        //                       'Sharing ' + docTitle + ' ' + verifiedBy,
+        //                       'with ' + orgTitle,
+        //                       [
+        //                         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+        //                         {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+        //                       ]
+        //                   )}>
+        //             {shareView}
+        //           </TouchableOpacity>
+
+      }
+      else if (this.props.resource._documentCreated) {
+        orgRow = <View style={chatStyles.shareView}>
+                   {shareView}
+                  <TouchableOpacity onPress={this.props.onSelect.bind(this, verification, verification)}>
+                    {orgView}
+                  </TouchableOpacity>
+                </View>
+      }
+      else {
+        orgRow = <View style={chatStyles.shareView}>
+                   <TouchableOpacity onPress={onPress ? onPress : () =>
+                            Alert.alert(
+                              'Sharing ' + docTitle + ' ' + verifiedBy,
+                              'with ' + orgTitle,
+                              [
+                                {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                                {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+                              ]
+                          )}>
+                    {shareView}
+                   </TouchableOpacity>
+                   <TouchableOpacity onPress={this.props.onSelect.bind(this, verification, verification)}>
+                     {orgView}
+                   </TouchableOpacity>
+                </View>
+      }
+    }
+    let content = <View style={{flex:1}}>
+                     <TouchableOpacity onPress={this.props.onSelect.bind(this, verification, verification)}>
+                       {msg}
+                     </TouchableOpacity>
+                     {orgRow}
+                   </View>
+
+    // var verifiedBy = verification && verification.organization ? verification.organization.title : ''
+    return  <View style={{flex: 1}} key={this.getNextKey()}>
+               {header}
+               {content}
+             </View>
+  }
+
 }
 var styles = StyleSheet.create({
   shareWithInquirer: {
@@ -354,6 +527,19 @@ var styles = StyleSheet.create({
     // borderColor: '#D4D4B8'
   },
   center: {
+    justifyContent: 'center'
+  },
+  vheader: {
+    fontSize: 18,
+    marginTop: 2,
+    color: '#757575'
+    // paddingRight: 10
+  },
+  orgView: {
+    maxWidth: 0.8 * utils.dimensions().width - 150,
+    paddingLeft: 3,
+    marginRight: 10,
+    flex: 1,
     justifyContent: 'center'
   },
   shareWithText: {
