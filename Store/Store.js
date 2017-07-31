@@ -580,7 +580,7 @@ var Store = Reflux.createStore({
       return
 
     let obj = await this._keeper.get(link)
-    msg.object = obj
+    msg.object = utils.clone(obj)
 
     this.maybeWatchSeal(msg)
 
@@ -990,18 +990,18 @@ var Store = Reflux.createStore({
   },
   _buildDriver ({ keys, identity, encryption }) {
     var self = this
-    var keeper = level('unencrypted-keeper', {
-      valueEncoding: {
-        encode: json => JSON.stringify(json),
-        decode: json => utils.rebuf(JSON.parse(json))
-      }
-    })
-
-    // var keeper = createKeeper({
-    //   path: path.join(TIM_PATH_PREFIX, 'keeper'),
-    //   db: asyncstorageDown,
-    //   encryption: encryption
+    // var keeper = level('unencrypted-keeper', {
+    //   valueEncoding: {
+    //     encode: json => JSON.stringify(json),
+    //     decode: json => utils.rebuf(JSON.parse(json))
+    //   }
     // })
+
+    var keeper = createKeeper({
+      path: path.join(TIM_PATH_PREFIX, 'keeper'),
+      db: asyncstorageDown,
+      encryption: encryption
+    })
 
     cachifyKeeper(keeper, {
       max: 100
@@ -3302,8 +3302,8 @@ var Store = Reflux.createStore({
     var res = {};
 
     if (utils.isMessage(this.getModel(r[TYPE]))) {
-      let res = await this._keeper.get(r[CUR_HASH])
-      extend(res, res.object)
+      let kres = await this._keeper.get(r[CUR_HASH])
+      extend(res, kres.object)
     }
 
     extend(res, r)
@@ -3741,7 +3741,8 @@ var Store = Reflux.createStore({
       if (!utils.isMessage(elm))
         foundRefs.push({value: elm, state: 'fulfilled'})
       else {
-        results.push(await this._keeper.get(elm[CUR_HASH]))
+        let kres = await this._keeper.get(elm[CUR_HASH])
+        results.push(utils.clone(kres))
         if (results.length) {
           let r = results[0]
           extend(r, elm)
@@ -3976,13 +3977,15 @@ var Store = Reflux.createStore({
         }
         // return new Promise(resolve => meDriver.objects.get(returnVal[CUR_HASH]))
         return self._keeper.get(returnVal[CUR_HASH])
-        .then((r) => {
+        .then((res) => {
+          let r = utils.clone(res)
           extend(r, returnVal)
+          self._setItem(utils.getId(returnVal), returnVal)
           var params = {action: 'addItem', resource: r}
           // return self.disableOtherFormRequestsLikeThis(returnVal)
           // .then(() => {
             // don't save until the real resource is created
-          list[utils.getId(returnVal)].value = returnVal
+          // list[utils.getId(returnVal)].value = returnVal
           self.trigger(params);
           return self.onIdle()
         })
@@ -5826,6 +5829,8 @@ var Store = Reflux.createStore({
         let obj = utils.clone(result)
         extend(r, obj)
         self._setItem(rId, r)
+        if (r._context  &&  r[TYPE] !== PRODUCT_APPLICATION)
+          r._context = self._getItem(r._context)
         // list = self.transformResult(result)
 
         if (refs.indexOf(r[CUR_HASH]) !== -1)
