@@ -43,14 +43,24 @@ class FormErrorRow extends Component {
     super(props);
   }
   shouldComponentUpdate(nextProps, nextState) {
-    let {to, resource, addedItem, sendStatus, orientation} = this.props
-    return !equal(resource, nextProps.resource)   ||
-           !equal(to, nextProps.to)               ||
-           (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
-           // this.props.addedItem !== nextProps.addedItem      ||
-           orientation !== nextProps.orientation  ||
-           sendStatus !== nextProps.sendStatus
+    let {resource, to, orientation} = this.props
+    if (this.props.sendStatus !== nextProps.sendStatus)
+      return true
+    let rid = utils.getId(resource)
+    if (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === rid) {
+      // HACK for when the form status that is fulfilling this request changes the rendering uses
+      // the old list for that
+      if (nextProps.addedItem._documentCreated  &&  !nextProps.resource._documentCreated)
+        return false
+      return true
+    }
+    if (rid !== utils.getId(nextProps.resource) ||  //!equal(resource, nextProps.resource)    ||
+        !equal(to, nextProps.to)                ||
+        orientation !== nextProps.orientation)
+      return true
+    return false
   }
+
   render() {
     var resource = this.props.resource;
     var model = utils.getModel(resource[TYPE] || resource.id).value;
@@ -92,24 +102,6 @@ class FormErrorRow extends Component {
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
-    var sendStatus = <View />
-    // HACK that solves the case when the message is short and we don't want it to be displayed
-    // in a bigger than needed bubble
-    // if (message) {
-    //   let parts = utils.splitMessage(message)
-    //   if (parts.length == 2)
-    //     message = parts[0].length > parts[1].length ? parts[0] : parts[1]
-    //   else
-    //     message = parts[0]
-    //   let strName = utils.getStringName(message)
-    //   if (strName)
-    //     message = translate(strName)
-    //   if (resource.form) {
-    //     let formTitle = translate(resource.form)
-    //     if (formTitle.length > message.length)
-    //       message = formTitle
-    //   }
-    // }
     let prop =  this.isOnePropForm()
     // HACK
     var w = utils.dimensions(FormErrorRow).width
@@ -123,8 +115,7 @@ class FormErrorRow extends Component {
     }
     let width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(18) + 40) : msgWidth
     viewStyle.width = width
-    if (this.props.sendStatus  &&  this.props.sendStatus !== null)
-      sendStatus = this.getSendStatus()
+    let sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
                      ? <View style={chatStyles.sealedStatus}>
                          <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />
@@ -236,7 +227,7 @@ class FormErrorRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[TYPE] || resource.id).value;
 
-    let isReadOnlyChat = this.props.to[TYPE]  &&  utils.isReadOnlyChat(resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnlyChat = this.props.to[TYPE]  &&  utils.isReadOnlyChat(resource, this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
