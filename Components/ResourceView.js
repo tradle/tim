@@ -636,17 +636,10 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
       color: '#757575',
     },
     footer: {
-      // flexDirection: 'row',
-      // flexWrap: 'nowrap',
-      // alignItems: Platform.OS === 'android' ? 'center' : 'flex-start',
-      // justifyContent: 'space-between',
-      // alignSelf: 'stretch',
       height: 45,
-      width: dimensions.width,
       backgroundColor: '#efefef',
       borderColor: '#eeeeee',
       borderWidth: 1,
-      // borderTopColor: '#cccccc',
       alignItems: 'flex-end',
       paddingRight: 10,
     }
