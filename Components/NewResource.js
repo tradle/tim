@@ -136,10 +136,14 @@ class NewResource extends Component {
            // this.state.modalVisible != nextState.modalVisible ||
   }
   componentWillMount() {
-    if (this.state.resource[constants.ROOT_HASH]  &&  Object.keys(this.state.resource).length === 2)
-      Actions.getItem({resource: this.state.resource})
+    let { resource } = this.state
+    // Profile gets changed every time there is a new photo added through for ex. Selfie
+    if (utils.getId(utils.getMe()) === utils.getId(resource))
+      Actions.getItem({resource: resource})
+    if (resource[constants.ROOT_HASH]  &&  Object.keys(resource).length === 2)
+      Actions.getItem({resource: resource})
     else if (this.state.isUploading)
-      Actions.getTemporary(this.state.resource[constants.TYPE])
+      Actions.getTemporary(resource[constants.TYPE])
   }
 
   componentDidMount() {
