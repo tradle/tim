@@ -132,6 +132,7 @@ class MessageList extends Component {
       to: this.props.resource,
       prop: this.props.prop,
       context: this.props.context,
+      gatherForms: true,
       limit: LIMIT
     }
     if (this.props.isAggregation)
@@ -144,61 +145,76 @@ class MessageList extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    let {
-      action, error, context, shareableResources, online,
-        list, loadEarlierMessages, to, isConnected, sendStatus,
-        forgetMeFromCustomer, isAggregation
-      } = params
-    if (params.error)
+    let {action, error, to, isConnected} = params
+    if (error)
       return
-
-    let resource = this.props.resource
     if (action === 'connectivity') {
       this.setState({isConnected: isConnected})
       return
     }
+    let chatWith = this.props.resource
+    if (to  &&  to[ROOT_HASH] !== chatWith[ROOT_HASH])
+      return
+
+    let { resource, online, productToForms } = params
     if (action === 'onlineStatus') {
-      if (params.resource  &&  utils.getId(params.resource) == utils.getId(resource))
-      // if (params.resource  &&  params.resource[constants.ROOT_HASH] === this.props.resource[ROOT_HASH])
-      //   state.resource = resource
+      if (resource  &&  utils.getId(resource) == utils.getId(chatWith))
+      // if (resource  &&  resource[constants.ROOT_HASH] === this.props.resource[ROOT_HASH])
+      //   state.resource = chatWith
       if (online !== this.state.onlineStatus)
         this.setState({onlineStatus: online})
       return
     }
-    if (to  &&  to[ROOT_HASH] !== resource[ROOT_HASH])
-      return
-    if (action === 'getItem'  &&  utils.getId(params.resource) === utils.getId(resource)) {
-      this.setState({hasProducts: this.hasProducts(params.resource) })
+    if (action === 'getItem'  &&  utils.getId(resource) === utils.getId(chatWith)) {
+      this.setState({hasProducts: this.hasProducts(resource) })
+      if (productToForms)
+        this.setState({productToForms: productToForms})
       return
     }
+
     if (action === 'addItem'  ||  action === 'addVerification') {
-      if (!utils.isMessage(params.resource))
+      if (!utils.isMessage(resource))
         return
+      let rid = utils.getId(chatWith)
+      let fid = resource.from.organization &&  utils.getId(resource.from.organization)
+      let tid = resource.to.organization && utils.getId(resource.to.organization)
+      if (rid !== fid  &&  rid !== tid)
+        return
+
       var actionParams = {
         query: this.state.filter,
         modelName: this.props.modelName,
-        to: resource,
+        to: chatWith,
         context: this.state.allContexts ? null : this.state.context,
         limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
       }
-      let rtype = params.resource[TYPE]
-      if (params.resource._sendStatus) {
-        this.state.sendStatus = params.resource._sendStatus
-        this.state.sendResource = params.resource
+      let rtype = resource[TYPE]
+      if (resource._sendStatus) {
+        this.state.sendStatus = resource._sendStatus
+        this.state.sendResource = resource
       }
-      if (rtype === FORM_REQUEST  ||  rtype === CONFIRM_PACKAGE_REQUEST || rtype === FORM_ERROR)
-        this.setState({addedItem: params.resource})
-      else if (params.resource._denied || params.resource._approved)
-        this.setState({addedItem: params.resource})
+      let addedItem
+      if (rtype === FORM_REQUEST            ||
+          rtype === CONFIRM_PACKAGE_REQUEST ||
+          rtype === FORM_ERROR              ||
+          resource._denied                  ||
+          resource._approved)
+        addedItem = resource
       else
-        this.setState({addedItem: null})
-        // this.state.addedItem = null
+        addedItem = null
+
+      let state = {
+        addedItem: addedItem
+      }
+      if (productToForms)
+        state.productToForms = productToForms
+      this.setState(state)
 
       if (action === 'addVerification') {
         if (this.props.originatingMessage  &&  this.props.originatingMessage.verifiers)  {
-          let docType = utils.getId(params.resource.document).split('_')[0]
+          let docType = utils.getId(resource.document).split('_')[0]
           this.state.verifiedByTrustedProvider = this.props.originatingMessage.form === docType
-                                               ? params.resource
+                                               ? resource
                                                : null
         }
         else
@@ -207,29 +223,35 @@ class MessageList extends Component {
       Actions.list(actionParams)
       return;
     }
+    let {sendStatus} = params
+
     this.state.newItem = false
     if (action === 'updateItem') {
       this.setState({
         sendStatus: sendStatus,
-        sendResource: params.resource
+        sendResource: resource
       })
       return
     }
     if (action === 'addMessage') {
-      this.state.sendStatus = params.resource._sendStatus
-      this.state.sendResource = params.resource
+      this.state.sendStatus = resource._sendStatus
+      this.state.sendResource = resource
       Actions.list({
         modelName: this.props.modelName,
-        to: resource,
+        to: chatWith,
         limit: this.state.list ? this.state.list.length + 1 : LIMIT,
         context: this.state.allContexts ? null : this.state.context
       });
       return
     }
+    let { isAggregation } = params
     if (isAggregation !== this.props.isAggregation)
       return
     if (action !== 'messageList')
       return
+
+    let { forgetMeFromCustomer} = params
+
     if (forgetMeFromCustomer) {
       Actions.list({modelName: TYPES.PROFILE})
       let routes = this.props.navigator.getCurrentRoutes()
@@ -237,10 +259,12 @@ class MessageList extends Component {
       this.props.navigator.popToRoute(routes[1])
       return
     }
-    if (params.resource  &&  params.resource[ROOT_HASH] != resource[ROOT_HASH]) {
+    let { context, shareableResources, list, loadEarlierMessages } = params
+
+    if (resource  &&  resource[ROOT_HASH] != chatWith[ROOT_HASH]) {
       var doUpdate
-      if (resource[TYPE] === TYPES.ORGANIZATION  &&  params.resource.organization) {
-        if (resource[TYPE] + '_' + resource[ROOT_HASH] === utils.getId(params.resource.organization))
+      if (chatWith[TYPE] === TYPES.ORGANIZATION  &&  resource.organization) {
+        if (utils.getId(chatWith) === utils.getId(resource.organization))
           doUpdate = true
       }
       if (!doUpdate)
@@ -260,13 +284,12 @@ class MessageList extends Component {
         this.state.list.forEach((r) => {
           list.push(r)
         })
-        let productToForms = this.gatherForms(list)
         this.setState({
           list: list,
           noScroll: true,
           allLoaded: allLoaded,
           context: context,
-          productToForms: productToForms,
+          productToForms: this.state.productToForms,
           loadEarlierMessages: !allLoaded
         })
       }
@@ -276,10 +299,8 @@ class MessageList extends Component {
       return
 
     LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.linkColor
-    let isEmployee = utils.isEmployee(resource)
+    let isEmployee = utils.isEmployee(chatWith)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
-      let productToForms = this.gatherForms(list)
-
       var type = list[0][TYPE];
       if (type  !== this.props.modelName) {
         var model = utils.getModel(this.props.modelName).value;
@@ -301,7 +322,7 @@ class MessageList extends Component {
         context: context,
         isEmployee: isEmployee,
         loadEarlierMessages: loadEarlierMessages,
-        productToForms: productToForms
+        productToForms: productToForms || this.state.productToForms
       });
     }
     else
@@ -309,25 +330,6 @@ class MessageList extends Component {
   }
   hasProducts(resource) {
     return resource.products && resource.products.length
-  }
-  gatherForms(list) {
-    let productToForms = {}
-    list.forEach((r) => {
-      if (r[TYPE] === FORM_REQUEST  &&  r._documentCreated  &&  r._document) {
-        var l = productToForms[r.product]
-        if (!l) {
-          l = {}
-          productToForms[r.product] = l
-        }
-        let forms = l[r.form]
-        if (!forms) {
-          forms = []
-          l[r.form] = forms
-        }
-        forms.push(r.document)
-      }
-    })
-    return productToForms
   }
   shouldComponentUpdate(nextProps, nextState) {
     // Eliminating repeated alerts when connection returns after ForgetMe action
@@ -356,6 +358,22 @@ class MessageList extends Component {
       return true
     if (this.state.hasProducts !== nextState.hasProducts)
       return true
+
+    if (nextState.productToForms) {
+      if (!this.state.productToForms)
+        return true
+      let thisKeys = Object.keys(this.state.productToForms)
+      let nextKeys = Object.keys(nextState.productToForms)
+      if (thisKeys.length !== nextKeys.length)
+        return true
+
+      let keys = thisKeys.filter((key) => nextKeys.indexOf(key) === -1)
+      if (keys && keys.length)
+        return true
+
+    }
+
+
     if (this.props.bankStyle !== nextProps.bankStyle)
       return true
     // if (this.state.addedItem !== nextState.addedItem)
