@@ -207,15 +207,22 @@ var RowMixin = {
     }
     return utils.getId(resource.organization) !== utils.getId(to)
   },
-  getSendStatus(resource) {
-    let sendStatus = this.props.sendStatus || this.props.resource._sendStatus
+  getSendStatus() {
+    let { resource } = this.props
+    let sendStatus = resource._sendStatus
     if (!sendStatus)
       return <View />
-    let icon
-    if (sendStatus === SENT)
-      icon = <Icon name={'ios-checkmark-outline'} size={15} color={this.props.bankStyle.messageSentStatus} />
+    let icon, msg
+    if (sendStatus === SENT) {
+      icon = <Icon name={'md-done-all'} size={15} color={this.props.bankStyle.messageSentStatus || '#009900'} />
+      if (resource._sentTime)
+        msg = <Text style={styles.sentStatus}>{utils.formatDate(resource._sentTime)}</Text>
+    }
+    else
+        msg = <Text style={styles.sentStatus}>{sendStatus}</Text>
+
     return <View style={styles.sendStatus}>
-             <Text style={styles.sentStatus}>{sendStatus}</Text>
+             {msg}
              {icon}
            </View>
   },
@@ -384,8 +391,8 @@ var styles = StyleSheet.create({
     flexDirection: 'column'
   },
   sentStatus: {
-    fontSize: 14,
-    color: '#009900',
+    fontSize: 12,
+    color: '#757575',
     marginRight: 3
   },
   sendStatus: {
