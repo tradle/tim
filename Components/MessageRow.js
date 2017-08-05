@@ -57,7 +57,7 @@ class MessageRow extends Component {
     LINK_COLOR = this.props.bankStyle.linkColor
   }
   shouldComponentUpdate(nextProps, nextState) {
-    let {to, resource, addedItem, sendStatus, orientation} = this.props
+    let {to, resource, orientation} = this.props
     return !equal(resource, nextProps.resource)   ||
            !equal(to, nextProps.to)               ||
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||

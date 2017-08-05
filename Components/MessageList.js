@@ -193,19 +193,19 @@ class MessageList extends Component {
       //   this.state.sendStatus = resource._sendStatus
       //   this.state.sendResource = resource
       // }
-      let addedItem
+      // let addedItem
       let replace
       if (rtype === FORM_REQUEST            ||
           rtype === CONFIRM_PACKAGE_REQUEST ||
           rtype === FORM_ERROR              ||
           resource._denied                  ||
           resource._approved) {
-        addedItem = resource
+        // addedItem = resource
         if (resource._documentCreated  ||  resource._denied  ||  resource._approved)
           replace = true
       }
-      else
-        addedItem = null
+      // else
+      //   addedItem = null
 
       let list
       list = this.state.list || []
@@ -219,7 +219,7 @@ class MessageList extends Component {
       }
 
       let state = {
-        addedItem: addedItem,
+        // addedItem: addedItem,
         list: list
       }
       if (productToForms)
@@ -338,7 +338,7 @@ class MessageList extends Component {
         list: list,
         shareableResources: shareableResources,
         allLoaded: false,
-        addedItem: this.state.addedItem,
+        // addedItem: this.state.addedItem,
         context: context,
         isEmployee: isEmployee,
         loadEarlierMessages: loadEarlierMessages,
@@ -396,8 +396,8 @@ class MessageList extends Component {
 
     if (this.props.bankStyle !== nextProps.bankStyle)
       return true
-    if (nextState.addedItem  &&  this.state.addedItem !== nextState.addedItem)
-      return true
+    // if (nextState.addedItem  &&  this.state.addedItem !== nextState.addedItem)
+    //   return true
     if (this.props.orientation !== nextProps.orientation ||
         this.state.allLoaded !== nextState.allLoaded)
       return true
@@ -546,7 +546,7 @@ class MessageList extends Component {
     props.productToForms = this.state.productToForms
     props.shareableResources = this.state.shareableResources
     props.isAggregation = isAggregation
-    props.addedItem = this.state.addedItem
+    // props.addedItem = this.state.addedItem
     props.chooseTrustedProvider = this.chooseTrustedProvider
 
     if (model.id === FORM_ERROR)
@@ -642,8 +642,8 @@ class MessageList extends Component {
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
         messages={this.state.list}
         // messageSent={this.state.sendResource}
-        messageSentStatus={this.state.sendStatus}
-        addedItem={this.state.addedItem}
+        // messageSentStatus={this.state.sendStatus}
+        // addedItem={this.state.addedItem}
         customStyle={this.state.customStyle}
         enableEmptySections={true}
         autoFocus={false}
