@@ -49,7 +49,7 @@ class FormErrorRow extends Component {
     if (resource._documentCreated !== nextProps.resource._documentCreated ||
         resource._sendStatus !== nextProps.resource._sendStatus)
       return true
-    // let rid = utils.getId(resource)
+    let rid = utils.getId(resource)
     // if (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === rid) {
     //   // HACK for when the form status that is fulfilling this request changes the rendering uses
     //   // the old list for that
