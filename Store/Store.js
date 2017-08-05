@@ -576,9 +576,14 @@ var Store = Reflux.createStore({
     let r = this._getItem(objId)
 
     if (r && r._sendStatus !== SENT) {
-      this.trigger({action: 'updateItem', sendStatus: SENT, resource: r})
       r._msg = link
       r._sendStatus = SENT
+
+      let rr = await this._keeper.get(r[ROOT_HASH])
+      let res = {}
+      extend(res, rr)
+      extend(res, r)
+      this.trigger({action: 'updateItem', sendStatus: SENT, resource: res})
       this.dbPut(objId, r)
     }
     let msg = await meDriver.objects.get(link)
@@ -2874,6 +2879,8 @@ var Store = Reflux.createStore({
       }
       else
         self.addMessagesToChat(utils.getId(toOrg), rr)
+
+      this.addVisualProps(rr)
 
       var params = {
         action: 'addMessage',
@@ -8271,6 +8278,8 @@ var Store = Reflux.createStore({
         if (val[TYPE] === FORM_REQUEST) {
           var fid = this._getItem(val.from)
           productToForms = await this.gatherForms(fid)
+          if (val._context)
+            val._context = this._getItem(val._context)
         }
         this.trigger({action: 'addItem', resource: val, productToForms: productToForms})
       }
