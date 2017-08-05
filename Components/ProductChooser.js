@@ -64,6 +64,9 @@ class ProductChooser extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onNewProductAdded');
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    return nextState.products !== this.state.products
+  }
   onNewProductAdded(params) {
     let products = []
     if (params.action === 'getItem') {
