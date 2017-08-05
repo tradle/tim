@@ -561,6 +561,7 @@ var Store = Reflux.createStore({
     if (r && r._sendStatus !== SENT) {
       r._msg = link
       r._sendStatus = SENT
+      r._sentTime = new Date().getTime()
 
       let rr = await this._keeper.get(r[ROOT_HASH])
       let res = {}
@@ -8036,7 +8037,7 @@ var Store = Reflux.createStore({
     if (utils.getId(me) === fromId)
       val.time = val.time || obj.timestamp
     else {
-      val.sentTime = val.time || obj.timestamp
+      val._sentTime = val.time || obj.timestamp
       if (!val.time)
         val.time = new Date().getTime()
     }
@@ -9189,7 +9190,7 @@ var Store = Reflux.createStore({
         }
       })
     }
-    l.sort((a, b) => b.sentTime - a.sentTime)
+    l.sort((a, b) => b._sentTime - a._sentTime)
     return l
   },
   cleanup(result) {
