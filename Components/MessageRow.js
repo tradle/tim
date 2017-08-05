@@ -60,10 +60,10 @@ class MessageRow extends Component {
     let {to, resource, addedItem, sendStatus, orientation} = this.props
     return !equal(resource, nextProps.resource)   ||
            !equal(to, nextProps.to)               ||
-           (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
+           // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
            // this.props.addedItem !== nextProps.addedItem      ||
-           orientation !== nextProps.orientation  ||
-           sendStatus !== nextProps.sendStatus
+           // sendStatus !== nextProps.sendStatus               ||
+           orientation !== nextProps.orientation
   }
   render() {
     var resource = this.props.resource;
@@ -175,7 +175,6 @@ class MessageRow extends Component {
     else
       showMessageBody = true;
     var messageBody;
-    var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
     if (message  &&  !isProductApplication) {
@@ -197,7 +196,7 @@ class MessageRow extends Component {
     var w = utils.dimensions(MessageRow).width
     let msgWidth = w * 0.8
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
-
+    let sendStatus
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
@@ -209,8 +208,7 @@ class MessageRow extends Component {
         viewStyle.width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(18) + 40) : msgWidth
 
 
-      if (this.props.sendStatus  &&  this.props.sendStatus !== null)
-        sendStatus = this.getSendStatus()
+      sendStatus = this.getSendStatus()
       var sealedStatus = (resource.txId)
                        ? <View style={chatStyles.sealedStatus}>
                            <Icon name={'ios-ribbon'} size={30} color='#316A99' style={{opacity: 0.5}} />

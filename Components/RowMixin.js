@@ -208,7 +208,7 @@ var RowMixin = {
     return utils.getId(resource.organization) !== utils.getId(to)
   },
   getSendStatus(resource) {
-    let sendStatus = this.props.sendStatus
+    let sendStatus = this.props.sendStatus || this.props.resource._sendStatus
     if (!sendStatus)
       return <View />
     let icon
