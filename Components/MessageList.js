@@ -172,7 +172,7 @@ class MessageList extends Component {
       return
     }
 
-    if (action === 'addItem'  ||  action === 'addVerification') {
+    if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
       if (!utils.isMessage(resource))
         return
       let rid = utils.getId(chatWith)
@@ -189,22 +189,38 @@ class MessageList extends Component {
         limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
       }
       let rtype = resource[TYPE]
-      if (resource._sendStatus) {
-        this.state.sendStatus = resource._sendStatus
-        this.state.sendResource = resource
-      }
+      // if (resource._sendStatus) {
+      //   this.state.sendStatus = resource._sendStatus
+      //   this.state.sendResource = resource
+      // }
       let addedItem
+      let replace
       if (rtype === FORM_REQUEST            ||
           rtype === CONFIRM_PACKAGE_REQUEST ||
           rtype === FORM_ERROR              ||
           resource._denied                  ||
-          resource._approved)
+          resource._approved) {
         addedItem = resource
+        if (resource._documentCreated  ||  resource._denied  ||  resource._approved)
+          replace = true
+      }
       else
         addedItem = null
 
+      let list
+      list = this.state.list || []
+      if (replace) {
+        let resourceId = utils.getId(resource)
+        list = list.map((r) => utils.getId(r) === resourceId ? resource : r)
+      }
+      else {
+        list = list.map((r) => r)
+        list.push(resource)
+      }
+
       let state = {
-        addedItem: addedItem
+        addedItem: addedItem,
+        list: list
       }
       if (productToForms)
         state.productToForms = productToForms
@@ -220,30 +236,34 @@ class MessageList extends Component {
         else
           this.state.verifiedByTrustedProvider = null
       }
-      Actions.list(actionParams)
+      // Actions.list(actionParams)
       return;
     }
     let {sendStatus} = params
 
     this.state.newItem = false
     if (action === 'updateItem') {
+      let resourceId = utils.getId(resource)
+      let list = this.state.list.map((r) => utils.getId(r) === resourceId ? resource : r)
+
       this.setState({
-        sendStatus: sendStatus,
-        sendResource: resource
+        // sendStatus: sendStatus,
+        // sendResource: resource,
+        list: list
       })
       return
     }
-    if (action === 'addMessage') {
-      this.state.sendStatus = resource._sendStatus
-      this.state.sendResource = resource
-      Actions.list({
-        modelName: this.props.modelName,
-        to: chatWith,
-        limit: this.state.list ? this.state.list.length + 1 : LIMIT,
-        context: this.state.allContexts ? null : this.state.context
-      });
-      return
-    }
+    // if (action === 'addMessage') {
+    //   this.state.sendStatus = resource._sendStatus
+    //   this.state.sendResource = resource
+    //   Actions.list({
+    //     modelName: this.props.modelName,
+    //     to: chatWith,
+    //     limit: this.state.list ? this.state.list.length + 1 : LIMIT,
+    //     context: this.state.allContexts ? null : this.state.context
+    //   });
+    //   return
+    // }
     let { isAggregation } = params
     if (isAggregation !== this.props.isAggregation)
       return
@@ -376,23 +396,24 @@ class MessageList extends Component {
 
     if (this.props.bankStyle !== nextProps.bankStyle)
       return true
-    // if (this.state.addedItem !== nextState.addedItem)
-    //   return true
+    if (nextState.addedItem  &&  this.state.addedItem !== nextState.addedItem)
+      return true
     if (this.props.orientation !== nextProps.orientation ||
         this.state.allLoaded !== nextState.allLoaded)
       return true
          // this.state.sendStatus !== nextState.sendStatus   ||)
          // this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]))
 
-    if (this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]  &&
-        this.state.sendStatus !== nextState.sendStatus)
-      return true
+    // if (this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]  &&
+    //     this.state.sendStatus !== nextState.sendStatus)
+    //   return true
     for (var i=0; i<this.state.list.length; i++) {
       let r = this.state.list[i]
       let nr = nextState.list[i]
       if (r[TYPE] !== nr[TYPE]            ||
           r[ROOT_HASH] !== nr[ROOT_HASH]  ||
-          r[CUR_HASH] !== nr[CUR_HASH])
+          r[CUR_HASH] !== nr[CUR_HASH]    ||
+          r._sendStatus !== nr._sendStatus)
         return true
     }
     return false
@@ -498,11 +519,11 @@ class MessageList extends Component {
       return  <MyProductMessageRow {...props} />
 
       // messageNumber: rowId,
-    let sendStatus = this.state.sendStatus &&  this.state.sendResource[ROOT_HASH] === resource[ROOT_HASH]
-                   ? this.state.sendStatus : (resource._sendStatus === 'Sent' ? null : resource._sendStatus)
+    // let sendStatus = this.state.sendStatus &&  this.state.sendResource[ROOT_HASH] === resource[ROOT_HASH]
+    //                ? this.state.sendStatus : (resource._sendStatus === 'Sent' ? null : resource._sendStatus)
     var moreProps = {
       share: this.share.bind(this),
-      sendStatus: sendStatus,
+      // sendStatus: sendStatus,
       currency: this.props.resource.currency || this.props.currency,
       country: this.props.resource.country,
       defaultPropertyValues: this.props.resource._defaultPropertyValues,
@@ -620,7 +641,7 @@ class MessageList extends Component {
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
         messages={this.state.list}
-        messageSent={this.state.sendResource}
+        // messageSent={this.state.sendResource}
         messageSentStatus={this.state.sendStatus}
         addedItem={this.state.addedItem}
         customStyle={this.state.customStyle}
