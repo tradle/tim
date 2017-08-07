@@ -156,7 +156,7 @@ class MessageList extends Component {
     if (to  &&  to[ROOT_HASH] !== chatWith[ROOT_HASH])
       return
 
-    let { resource, online, productToForms } = params
+    let { resource, online, productToForms, shareableResources } = params
     if (action === 'onlineStatus') {
       if (resource  &&  utils.getId(resource) == utils.getId(chatWith))
       // if (resource  &&  resource[constants.ROOT_HASH] === this.props.resource[ROOT_HASH])
@@ -224,6 +224,8 @@ class MessageList extends Component {
       }
       if (productToForms)
         state.productToForms = productToForms
+      if (shareableResources)
+        state.shareableResources = shareableResources
       this.setState(state)
 
       if (action === 'addVerification') {
@@ -289,7 +291,7 @@ class MessageList extends Component {
       this.props.navigator.popToRoute(routes[1])
       return
     }
-    let { context, shareableResources, list, loadEarlierMessages } = params
+    let { context, list, loadEarlierMessages } = params
 
     if (resource  &&  resource[ROOT_HASH] != chatWith[ROOT_HASH]) {
       var doUpdate
