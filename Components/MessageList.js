@@ -178,7 +178,7 @@ class MessageList extends Component {
       let rid = utils.getId(chatWith)
       let fid = resource.from.organization &&  utils.getId(resource.from.organization)
       let tid = resource.to.organization && utils.getId(resource.to.organization)
-      if (rid !== fid  &&  rid !== tid)
+      if (rid !== fid  &&  rid !== tid  &&  !to)
         return
 
       var actionParams = {
@@ -244,7 +244,17 @@ class MessageList extends Component {
     this.state.newItem = false
     if (action === 'updateItem') {
       let resourceId = utils.getId(resource)
-      let list = this.state.list.map((r) => utils.getId(r) === resourceId ? resource : r)
+      let replaced
+      let list = this.state.list.map((r) => {
+        if (utils.getId(r) === resourceId) {
+          replaced = true
+          return resource
+        }
+        else
+          return r
+      })
+      if (!replaced  &&  to)
+        list.push(resource)
 
       this.setState({
         // sendStatus: sendStatus,

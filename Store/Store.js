@@ -3369,6 +3369,8 @@ var Store = Reflux.createStore({
       if (verifiedBy.photos)
         r._verifiedBy.photo = verifiedBy.photos[0]
     }
+    if (r._context)
+      r._context = this._getItem(r._context)
     return r
   },
   sendMessageToContextOwners(v, recipients, context) {
@@ -4447,13 +4449,19 @@ var Store = Reflux.createStore({
     //   debugger
     // })
   },
-  shareAll(document, to, formResource) {
+  async shareAll(document, to, formResource) {
     var documentCreated = formResource._documentCreated
     var key = utils.getId(formResource)
     var r = this._getItem(key)
     // disable FormRequest from being used again
     r._documentCreated = true
-    this.trigger({action: 'addItem', context: formResource.context, resource: r})
+
+    let kr = await this._keeper.get(r[CUR_HASH])
+    let resource = utils.clone(r)
+    extend(resource, kr)
+
+    this.addVisualProps(resource)
+    this.trigger({action: 'addItem', context: formResource.context, resource: resource})
     if (documentCreated)
       return
 
@@ -4481,71 +4489,54 @@ var Store = Reflux.createStore({
     let batch = []
     // Get the whole resource
     document = this._getItem(utils.getId(document))
-    let verifications
-    if (document.verifications)
-      verifications = document.verifications
+    // let verifications
+    // if (document.verifications)
+    //   verifications = document.verifications
 
     let shareBatchId = new Date().getTime()
     let doShareDocument = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
-    let promise = doShareDocument
-                ? this.shareForm(document, to, opts, formResource, shareBatchId)
-                : Q()
+    if (doShareDocument)
+      await this.shareForm(document, to, opts, formResource, shareBatchId)
 
-    return promise
-    .then(() => {
-      var documentId = utils.getId(document)
-      if (r[TYPE] === FORM_REQUEST)
-        r.document = documentId
+    var documentId = utils.getId(document)
+    if (r[TYPE] === FORM_REQUEST)
+      r.document = documentId
 
-      this.dbBatchPut(key, r, batch)
-      // utils.optimizeResource(document)
-      if (doShareDocument) {
-        this.addLastMessage(document, batch, to)
-        this.dbBatchPut(documentId, document, batch)
-      }
-      // let m = this.getModel(VERIFICATION)
-      let docModel = this.getModel(document[TYPE])
-      var params = {
-        modelName: VERIFICATION,
-        to: document,
-        // meta: m,
-        prop: docModel.properties['verifications'],
-        // props: m.properties
-      }
+    this.dbBatchPut(key, r, batch)
+    // utils.optimizeResource(document)
+    if (doShareDocument) {
+      this.addLastMessage(document, batch, to)
+      this.dbBatchPut(documentId, document, batch)
+      document._sendStatus = SENT
+      this.trigger({action: 'addItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
+    }
+    // let m = this.getModel(VERIFICATION)
+    let docModel = this.getModel(document[TYPE])
+    var params = {
+      modelName: VERIFICATION,
+      to: document,
+      // meta: m,
+      prop: docModel.properties['verifications'],
+      // props: m.properties
+    }
 
-      return this.searchMessages(params)
-    })
-    .then((verifications) => {
-      if (!verifications) {
-        this.trigger({action: 'addItem', sendStatus: SENT, resource: document})
-        document._sendStatus = SENT
-        return
-      }
+    let verifications  = await this.searchMessages(params)
+    if (!verifications)
+      return
 
-      let all = verifications.length
-      let defer = Q.defer()
-      verifications.forEach((v) => {
-        let ver = this._getItem(v)
-        return this.shareVerification(ver, to, opts, shareBatchId)
-        .then(() => {
-          let vId = utils.getId(ver)
-          let v = this._getItem(vId)
-          this.dbBatchPut(vId, v, batch)
 
-          if (--all === 0) {
-            if (!doShareDocument)
-              this.addLastMessage(ver, batch, to)
+    let all = verifications.length
+    for (let i=0; i<all; i++) {
+      let ver = this._getItem(verifications[i])
+      await this.shareVerification(ver, to, opts, shareBatchId)
+      let vId = utils.getId(ver)
+      let v = this._getItem(vId)
+      this.dbBatchPut(vId, v, batch)
+    }
+    if (!doShareDocument)
+      this.addLastMessage(verifications[all - 1], batch, to)
 
-            defer.resolve()
-            return
-          }
-        })
-      })
-      return defer.promise
-    })
-    .then(() => {
-      db.batch(batch)
-    })
+    db.batch(batch)
   },
   shareForm(document, to, opts, shareBatchId) {
     var time = new Date().getTime()
@@ -4582,13 +4573,17 @@ var Store = Reflux.createStore({
     this.addSharedWith(ver, to, time, shareBatchId)
 
     ver._sendStatus = this.isConnected ? SENDING : QUEUED
-    this.addMessagesToChat(utils.getId(to.organization), ver, false, time)
-    this.trigger({action: 'addItem', context: ver.context, resource: ver})
+    let orgId = utils.getId(to.organization)
+    this.addMessagesToChat(orgId, ver, false, time)
+
+    this.addVisualProps(ver)
+    let toOrg = this._getItem(orgId)
+    this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
 
     return this.meDriverSend({...opts, link: ver[CUR_HASH]})
     .then(() => {
       if (ver) {
-        this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver})
+        this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver, to: toOrg})
         ver._sendStatus = SENT
       }
     })
@@ -6688,6 +6683,8 @@ var Store = Reflux.createStore({
       if (!document  ||  document._inactive)
         return;
 
+      if (checkIfWasShared(document))
+        return
       // Check if there is at least one verification by the listed in FormRequest verifiers
       if (hasVerifiers  &&  hasVerifiers[docType]) {
         let verifiers = hasVerifiers[docType]
@@ -6741,13 +6738,20 @@ var Store = Reflux.createStore({
     })
     // Allow sharing non-verified forms
     let context = await this.getCurrentContext(to)
-    verTypes.forEach((verType) => {
+    for (let i=0; i<verTypes.length; i++) {
+      let verType = verTypes[i]
       if (hasVerifiers  &&  hasVerifiers[verType])
         return
-      var l = this.searchNotMessages({modelName: verType, notVerified: true})
-      if (!l)
+      var ll = await this.searchMessages({modelName: verType})
+      // var l = this.searchNotMessages({modelName: verType, notVerified: true})
+      if (!ll)
         return
-      l.forEach((r) => {
+
+      ll.forEach((r) => {
+        if (r.verificationsCount)
+          return
+        if (checkIfWasShared(r))
+          return
         if (!context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
           let rr = {
             [TYPE]: VERIFICATION,
@@ -6757,8 +6761,18 @@ var Store = Reflux.createStore({
           addAndCheckShareable(rr)
         }
       })
-    })
+    }
     return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
+
+    function checkIfWasShared(document) {
+      if (document._sharedWith) {
+        if (document._sharedWith.some((r) => {
+          let org = self._getItem(r.bankRepresentative).organization
+          return org  &&  utils.getId(org) === toId
+        }))
+          return true
+      }
+    }
     // Allow sharing only the last version of the resource
     function addAndCheckShareable(verification) {
       let r = verification.document
@@ -9939,7 +9953,7 @@ var Store = Reflux.createStore({
           forms = []
           l[r.form] = forms
         }
-        forms.push(r.document)
+        forms.push(r._document)
       }
     })
     return productToForms
