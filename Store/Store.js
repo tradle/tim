@@ -8193,14 +8193,16 @@ var Store = Reflux.createStore({
         return
       }
       if (val[TYPE] !== SIMPLE_MESSAGE) {
-        let productToForms
         if (val[TYPE] === FORM_REQUEST) {
           var fid = this._getItem(val.from)
-          productToForms = await this.gatherForms(fid)
+          let productToForms = await this.gatherForms(fid)
           if (val._context)
             val._context = this._getItem(val._context)
+          let shareables = await this.getShareableResources([val], val.to)
+          this.trigger({action: 'addItem', resource: val, shareableResources: shareables})
         }
-        this.trigger({action: 'addItem', resource: val, productToForms: productToForms})
+        else
+          this.trigger({action: 'addItem', resource: val})
       }
     }
     else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
