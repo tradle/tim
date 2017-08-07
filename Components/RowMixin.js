@@ -221,9 +221,20 @@ var RowMixin = {
     else
         msg = <Text style={styles.sentStatus}>{sendStatus}</Text>
 
-    return <View style={styles.sendStatus}>
-             {msg}
-             {icon}
+    let routes = this.props.navigator.getCurrentRoutes()
+    var w = utils.dimensions(routes[routes.length - 1].component).width
+    let msgWidth = Math.min(Math.floor(w * 0.8), 600)
+
+    var isMyMessage = this.isMyMessage();
+
+    let view = <View style={styles.sendStatus}>
+                 {msg}
+                 {icon}
+               </View>
+    if (isMyMessage)
+      return view
+    return <View style={{width: msgWidth}}>
+             {view}
            </View>
   },
 
