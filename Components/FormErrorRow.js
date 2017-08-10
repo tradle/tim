@@ -15,7 +15,6 @@ var reactMixin = require('react-mixin');
 var chatStyles = require('../styles/chatStyles')
 import ImageInput from './ImageInput'
 
-const FORM_ERROR = 'tradle.FormError'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
