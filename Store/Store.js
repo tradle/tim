@@ -4058,6 +4058,7 @@ var Store = Reflux.createStore({
     }
     } catch (err) {
       debugger
+      debug('onAddItem', err.stack)
     }
     function handleRegistration () {
       self.trigger({action: 'runVideo'})
@@ -5879,32 +5880,14 @@ var Store = Reflux.createStore({
     let all = {}
     if (isBacklinkProp) {
       for (let i=j; i<thisChatMessages.length; i++) {
-        let stub = thisChatMessages[i]
-        let r = this._getItem(stub)
-        if (r[TYPE] === VERIFICATION) {
-          let doc = this._getItem(r.document.id)
-          refs.push(doc[CUR_HASH])
-          all[doc[CUR_HASH]] = utils.getId(r.document)
-        }
-        let link = addLink(modelName, links, stub)
-        if (link)
-          all[link] = thisChatMessages[i].id
+        addReferenceLink(thisChatMessages[i])
         if (limit  &&  links.length === limit)
           break
       }
     }
     else if (typeof lastId === 'undefined' || j) {
       for (let i=j; i>=0; i--) {
-        let stub = thisChatMessages[i]
-        let r = this._getItem(stub)
-        if (r[TYPE] === VERIFICATION) {
-          let doc = this._getItem(utils.getId(r.document))
-          refs.push(doc[CUR_HASH])
-          all[doc[CUR_HASH]] = utils.getId(r.document)
-        }
-        let link = addLink(modelName, links, stub)
-        if (link)
-          all[link] = thisChatMessages[i].id
+        addReferenceLink(thisChatMessages[i])
         if (limit  &&  links.length === limit)
           break
       }
@@ -5944,6 +5927,8 @@ var Store = Reflux.createStore({
       foundResources.forEach((r) => {
         if (r[TYPE] === VERIFICATION)
           r.document = refsObj[utils.getId(r.document)]
+        else if (r[TYPE] === FORM_ERROR)
+          r.prefill = refsObj[utils.getId(r.prefill)]
       })
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a.time - b.time)
@@ -5962,7 +5947,22 @@ var Store = Reflux.createStore({
         return result
     })
 
-
+    function addReferenceLink(stub) {
+      let r = self._getItem(stub)
+      if (r[TYPE] === VERIFICATION) {
+        let doc = self._getItem(r.document.id)
+        refs.push(doc[CUR_HASH])
+        all[doc[CUR_HASH]] = utils.getId(r.document)
+      }
+      else if (r[TYPE] === FORM_ERROR) {
+        let prefill = self._getItem(r.prefill.id)
+        refs.push(prefill[CUR_HASH])
+        all[prefill[CUR_HASH]] = utils.getId(r.prefill)
+      }
+      let link = addLink(modelName, links, stub)
+      if (link)
+        all[link] = stub.id
+    }
     function handleOne(link) {
       let rId = all[link]
       let r = self._getItem(rId)
