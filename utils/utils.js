@@ -858,6 +858,7 @@ var utils = {
       let isVerification = m.id === VERIFICATION
       let isProductApplication = m.id === PRODUCT_APPLICATION
       let isFormRequest = m.id === FORM_REQUEST
+      let isFormError = m.id === FORM_ERROR
       Object.keys(res).forEach(p => {
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
           return
@@ -867,6 +868,10 @@ var utils = {
           return
         if (isVerification  &&  p === 'document')
           res[p] = this.buildRef(res[p])
+        else if (isFormError  &&  p === 'prefill') {
+          if (res[ROOT_HASH])
+            res[p] = this.buildRef(res[p])
+        }
         else
           delete res[p]
       })
