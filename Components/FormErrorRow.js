@@ -15,7 +15,6 @@ var reactMixin = require('react-mixin');
 var chatStyles = require('../styles/chatStyles')
 import ImageInput from './ImageInput'
 
-const FORM_ERROR = 'tradle.FormError'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
@@ -186,13 +185,21 @@ class FormErrorRow extends Component {
 
   showEditResource() {
     let errs = {}
-    let r = this.props.resource.prefill
-    if (Array.isArray(this.props.resource.errors)) {
-      for (let p of this.props.resource.errors)
-        errs[p.name] = p.error
+    let requestedProperties = {}
+    let {resource} = this.props
+    let r = resource.prefill
+    if (resource.errors  &&  resource.errors.length) {
+      if (Array.isArray(resource.errors)) {
+        for (let p of resource.errors)
+          errs[p.name] = p.error
+      }
+      else
+        errs = this.props.resource.errors
     }
-    else
-      errs = this.props.resource.errors
+    else if (resource.requestedProperties) {
+      for (let p of resource.requestedProperties)
+        requestedProperties[p.name] = p.message || ''
+    }
 
     let me = utils.getMe()
     r.from = {
@@ -219,6 +226,7 @@ class FormErrorRow extends Component {
         resource: r,
         isPrefilled: true,
         errs: errs,
+        requestedProperties: requestedProperties,
         currency: this.props.currency,
         bankStyle: this.props.bankStyle,
         originatingMessage: this.props.resource

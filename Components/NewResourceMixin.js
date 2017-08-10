@@ -116,13 +116,11 @@ var NewResourceMixin = {
     }
   },
   getFormFields(params) {
-    CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol ||  this.props.currency : DEFAULT_CURRENCY_SYMBOL
+    let {currency, bankStyle} = this.props
+    CURRENCY_SYMBOL = currency ? currency.symbol ||  currency : DEFAULT_CURRENCY_SYMBOL
     component = params.component
 
-    if (this.props.bankStyle)
-      LINK_COLOR = this.props.bankStyle.linkColor || DEFAULT_LINK_COLOR
-    else
-      LINK_COLOR = DEFAULT_LINK_COLOR
+    LINK_COLOR = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
     var meta = this.props.model  ||  this.props.metadata;
     var model = params.model;  // For the form
@@ -163,7 +161,7 @@ var NewResourceMixin = {
       }
     }
 
-    var editCols;
+    var editCols
     if (this.props.editCols) {
       editCols = {};
       this.props.editCols.forEach(function(r) {
@@ -204,20 +202,28 @@ var NewResourceMixin = {
           eCols[p] = props[p]
       }
     }
+    let { errs, requestedProperties } = this.props
+    if (requestedProperties) {
+      for (let p in requestedProperties) {
+        if (!eCols[p]) {
+          let idx = p.indexOf('_group')
+          eCols[p] = props[p]
+          if (idx !== -1  &&  props[p].list)
+            props[p].list.forEach((pp) => eCols[pp] = props[pp])
+        }
+      }
+    }
+    else if (data) {
+      for (let p in data) {
+        if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
+          eCols[p] = props[p]
+      }
+    }
     var required = utils.ungroup(meta, meta.required)
     required = utils.arrayToObject(required);
 
-// var TcombType = transform({
-//   "type": "string",
-//   "enum": ["Street", "Avenue", "Boulevard"]
-// });
-
-// model['test'] = TcombType
-// options.fields['test'] = {
-//   placeholder: 'Test'
-// }
-    // var d = data ? data[i] : null;
     let resource = this.state.resource
+    let { search } = this.props
     for (var p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
@@ -231,7 +237,7 @@ var NewResourceMixin = {
       var formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
       let isReadOnly = props[p].readOnly
-      if (isReadOnly  &&  !this.props.search) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
+      if (isReadOnly  &&  !search) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
       this.setDefaultValue(p, data, true)
       if (utils.isHidden(p, resource)) {
@@ -243,8 +249,8 @@ var NewResourceMixin = {
       var label = translate(props[p], meta) //props[p].title;
       if (!label)
         label = utils.makeLabel(p);
-      let errMessage = (this.props.errs  &&  this.props.errs[p])
-                     ? this.props.errs[p]
+      let errMessage = (errs  &&  errs[p])
+                     ? errs[p]
                      : translate('thisFieldIsRequired')
       options.fields[p] = {
         error: errMessage, //'This field is required',
@@ -273,23 +279,15 @@ var NewResourceMixin = {
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
-      // HACK for registration screen
-      // if (this.state.isRegistration  &&  params.editCols.length === 1)
-      //   options.fields[p].placeholder = translate('enterYourName')
-
       if (props[p].description)
         options.fields[p].help = props[p].description;
       if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
         options.fields[p] = {'editable':  false };
-      // if (formType  &&   (formType === t.Num  ||  formType === t.Str))
-      //   formType = null
 
       if (formType) {
         if (props[p].keyboard)
           options.fields[p].keyboardType = props[p].keyboard
 
-        // if (this.onChange)
-        //   options.fields[p].onChange = this.onChange.bind(this);
         model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
         if (data  &&  (type == 'date')) {
           model[p] = t.Str
@@ -301,8 +299,6 @@ var NewResourceMixin = {
                     errors: params.errors,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
-          // if (!this.state.modal || typeof this.state.modal[p] === 'undefined')
-          //   this.state.modal[p] = false
 
           if (data[p])
             data[p] = new Date(data[p]);
@@ -344,7 +340,7 @@ var NewResourceMixin = {
           }
         }
         else if (type === 'number') {
-          if (!this.props.search) {
+          if (!search) {
             if (!props[p].keyboard)
               options.fields[p].keyboardType = 'numeric'
             if (data  &&  data[p]  &&  (typeof data[p] != 'number'))
@@ -368,7 +364,7 @@ var NewResourceMixin = {
                     required: !maybe,
                     errors: params.errors,
                     editable: params.editable,
-                    keyboard: props[p].keyboard ||  (!this.props.search && type === 'number' ? 'numeric' : 'default'),
+                    keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -437,22 +433,11 @@ var NewResourceMixin = {
                     errors: params.errors,
                   })
 
-
-          // options.fields[p].template = textTemplate.bind(this, {
-          //           label: label,
-          //           prop:  props[p],
-          //           value: data[p] ? data[p] + '' : null,
-          //           keyboard: units  &&  units.charAt(0) === '[' ? 'numbers-and-punctuation' : 'numeric',
-          //           required: !maybe,
-          //         })
-
-          // options.fields[p].template = moneyTemplate.bind({}, props[p])
-
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
           options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           continue;
         }
-        else if (this.props.search  &&  ref === PHOTO)
+        else if (search  &&  ref === PHOTO)
           continue
 
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
@@ -701,35 +686,6 @@ var NewResourceMixin = {
     this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
     this.setState({ resource })
   },
-  // showVideo(params) {
-  //   let onEnd = (err) => {
-  //     Alert.alert(
-  //       'Ready to scan?',
-  //       null,
-  //       [
-  //         {
-  //           text: 'OK',
-  //           onPress: () => {
-  //             this.props.navigator.pop()
-  //             this.showCamera(params)
-  //           }
-  //         }
-  //       ]
-  //     )
-  //   }
-
-  //   this.props.navigator.push({
-  //     id: 18,
-  //     component: VideoPlayer,
-  //     passProps: {
-  //       source: focusUri,
-  //       onEnd: onEnd,
-  //       onError: onEnd,
-  //       muted: true,
-  //       navigator: this.props.navigator
-  //     },
-  //   })
-  // },
 
   showCamera(params) {
     // if (utils.isAndroid()) {
@@ -2376,3 +2332,32 @@ module.exports = NewResourceMixin
   //   this.afterScan(r, prop)
   // },
 
+  // showVideo(params) {
+  //   let onEnd = (err) => {
+  //     Alert.alert(
+  //       'Ready to scan?',
+  //       null,
+  //       [
+  //         {
+  //           text: 'OK',
+  //           onPress: () => {
+  //             this.props.navigator.pop()
+  //             this.showCamera(params)
+  //           }
+  //         }
+  //       ]
+  //     )
+  //   }
+
+  //   this.props.navigator.push({
+  //     id: 18,
+  //     component: VideoPlayer,
+  //     passProps: {
+  //       source: focusUri,
+  //       onEnd: onEnd,
+  //       onError: onEnd,
+  //       muted: true,
+  //       navigator: this.props.navigator
+  //     },
+  //   })
+  // },
