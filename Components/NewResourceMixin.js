@@ -203,6 +203,23 @@ var NewResourceMixin = {
           eCols[p] = props[p]
       }
     }
+    let { errs, requestedProperties } = this.props
+    if (requestedProperties) {
+      for (let p in requestedProperties) {
+        if (!eCols[p]) {
+          let idx = p.indexOf('_group')
+          eCols[p] = props[p]
+          if (idx !== -1  &&  props[p].list)
+            props[p].list.forEach((pp) => eCols[pp] = props[pp])
+        }
+      }
+    }
+    else if (data) {
+      for (let p in data) {
+        if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
+          eCols[p] = props[p]
+      }
+    }
     var required = utils.ungroup(meta, meta.required)
     required = utils.arrayToObject(required);
 

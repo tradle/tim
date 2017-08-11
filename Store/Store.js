@@ -3322,6 +3322,9 @@ var Store = Reflux.createStore({
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
     var isNew = !resource[ROOT_HASH];
 
+    if (!isNew  &&  !resource[CUR_HASH])
+      resource[CUR_HASH] = protocol.linkString(resource)
+
     var checkPublish
     var isBecomingEmployee = isNew ? false : becomingEmployee(resource)
     if (isBecomingEmployee) {
@@ -4951,7 +4954,7 @@ var Store = Reflux.createStore({
         }
       }
       else if (isFormError) {
-        let prefill = this._getItem(utils.getId(r.prefill))
+        let prefill = r.prefill.id ? this._getItem(utils.getId(r.prefill)) : r.prefill
         r.prefill =  prefill ? prefill : r.prefill
       }
 
