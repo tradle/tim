@@ -31,7 +31,7 @@
     "@tradle/custom-models": "github:tradle/custom-models",
     "@tradle/engine": "4.8.2",
     "@tradle/keeper": "^3.1.0",
-    "@tradle/models": "github:tradle/models#18b3c6f",
+    "@tradle/models": "github:tradle/models#e8066ae",
     "@tradle/multiqueue": "2.1.0",
     "@tradle/protocol": "2.3.0",
     "@tradle/qr-schema": "^1.1.0",
