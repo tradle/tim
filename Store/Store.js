@@ -2473,21 +2473,25 @@ var Store = Reflux.createStore({
       if (!toOrg)
         toOrg = to.organization ? to.organization : to
 
-      if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
-        let cId = utils.getId(rr._context)
-        self.addMessagesToChat(cId, rr)
-        let context = self._getItem(rr._context)
-        if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
-          if (rr[TYPE] === APPLICATION_DENIAL)
-            context._denied = true
-          else
-            context._approved = true
-          self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-          self.dbPut(cId, context)
-        }
-      }
-      else
+      if (!rr._context)
         self.addMessagesToChat(utils.getId(toOrg), rr)
+      else {
+        let context = self._getItem(rr._context)
+        if  (utils.isReadOnlyChat(context)) {
+          let cId = utils.getId(rr._context)
+          self.addMessagesToChat(cId, rr)
+          if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
+            if (rr[TYPE] === APPLICATION_DENIAL)
+              context._denied = true
+            else
+              context._approved = true
+            self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+            self.dbPut(cId, context)
+          }
+        }
+        else
+          self.addMessagesToChat(utils.getId(toOrg), rr)
+      }
 
       var params = {
         action: 'addMessage',
@@ -4405,7 +4409,7 @@ var Store = Reflux.createStore({
           let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
           let rm = assignedRM && assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
           if (rm && rm.length)
-            result = result.filter((r) => utils.getId(r.from) !== meProfileId)
+            result = result.filter((r) => r[TYPE] === FORM_ERROR || utils.getId(r.from) !== meProfileId)
           retParams.list = result
         }
         else {
