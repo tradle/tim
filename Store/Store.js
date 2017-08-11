@@ -92,23 +92,12 @@ var utils = require('../utils/utils');
 var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('pify');
-var collect = promisify(require('stream-collector'))
+var leveldown = require('./leveldown')
+var level = require('./level')
 var debounce = require('debounce')
 var mutexify = require('mutexify')
-
-// var updown = require('level-updown')
-
-var leveldown = require('cachedown')
-leveldown.setLeveldown(asyncstorageDown)
-var level = function (loc, opts) {
-  opts = opts || {}
-  opts.db = opts.db || function () {
-    return leveldown.apply(null, arguments)
-      .maxSize(100) // max cache size
-  }
-
-  return levelup(loc, opts)
-}
+const download = require('downloadjs')
+const collect = require('stream-collector')
 
 // const enforceOrder = require('@tradle/receive-in-order')
 const Multiqueue = require('@tradle/multiqueue')
@@ -2085,14 +2074,14 @@ var Store = Reflux.createStore({
       delete org._country
     }
     if (org._currency) {
-      let currencies = this.searchNotMessages({modelName: CURRENCY})
-      let currency = currencies.filter((c) => {
-        return c.code === org._currency || c.currencyName === org._currency
+      let currencies = this.searchNotMessages({modelName:'tradle.Currency'})
+      let currency = currencies  &&  currencies.filter((c) => {
+        return c.code === org._currency || c.id === org._currency
       })
       delete org._currency
       if (currency) {
-        org.currency = this.buildRef(currency[0])
-        let code = currency[0].code
+        org.currency = utils.clone(currency[0])
+        let code = currency[0].id
         if (currency[0].symbol)
           org.currency.symbol = currency[0].symbol
         else {
@@ -2105,8 +2094,7 @@ var Store = Reflux.createStore({
         this._setItem(orgId, org)
         this.dbPut(orgId, org)
       }
-    }
-    // if (org._defaultPropertyValues) {
+    }    // if (org._defaultPropertyValues) {
     //   debugger
     //   for (let m in org._defaultPropertyValues) {
     //     let mm = this.getModel(m)

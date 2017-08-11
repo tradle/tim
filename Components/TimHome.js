@@ -505,7 +505,7 @@ class TimHome extends Component {
   showHomePage() {
     let me = utils.getMe()
     let title = translate('profile')
-    this.props.navigator[doReplace ? 'replace' : 'push']({
+    this.props.navigator.push({
       title: title,
       id: 3,
       component: ResourceView,
