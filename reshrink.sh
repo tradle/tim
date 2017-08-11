@@ -8,4 +8,4 @@ sed -i '' 's/\"node-libs-browser\": \"\^0.6.0\"/"node-libs-browser": "^1.0.0"/' 
 npm dedupe
 npm prune
 npm shrinkwrap
-./web.sh
+npm run nodeify

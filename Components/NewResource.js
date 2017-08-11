@@ -742,6 +742,7 @@ class NewResource extends Component {
                     <PhotoView resource={resource} navigator={this.props.navigator}/>
                   </View>
     let loadingVideo
+    if (this.state.isLoadingVideo)
       loadingVideo = <View style={{alignItems: 'center', marginTop: 50}}>
                        <ActivityIndicator animating={true} size='large' color='#ffffff'/>
                     </View>

@@ -135,6 +135,12 @@ android {
         javaMaxHeapSize "4g"
     }
     signingConfigs {
+        debug {
+            storeFile file(MYAPP_RELEASE_STORE_FILE)
+            storePassword pass
+            keyAlias MYAPP_RELEASE_KEY_ALIAS
+            keyPassword pass
+        }
         release {
             storeFile file(MYAPP_RELEASE_STORE_FILE)
             storePassword pass

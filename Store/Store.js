@@ -92,12 +92,24 @@ var utils = require('../utils/utils');
 var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('pify');
-var leveldown = require('./leveldown')
-var level = require('./level')
+var collect = promisify(require('stream-collector'))
 var debounce = require('debounce')
 var mutexify = require('mutexify')
-const download = require('downloadjs')
-const collect = require('stream-collector')
+
+// var updown = require('level-updown')
+
+var leveldown = require('cachedown')
+leveldown.setLeveldown(asyncstorageDown)
+var level = function (loc, opts) {
+  opts = opts || {}
+  opts.db = opts.db || function () {
+    return leveldown.apply(null, arguments)
+      .maxSize(100) // max cache size
+  }
+
+  return levelup(loc, opts)
+}
+
 // const enforceOrder = require('@tradle/receive-in-order')
 const Multiqueue = require('@tradle/multiqueue')
 
@@ -3341,6 +3353,9 @@ var Store = Reflux.createStore({
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
     var isNew = !resource[ROOT_HASH];
 
+    if (!isNew  &&  !resource[CUR_HASH])
+      resource[CUR_HASH] = protocol.linkString(resource)
+
     var checkPublish
     var isBecomingEmployee = isNew ? false : becomingEmployee(resource)
     if (isBecomingEmployee) {
@@ -5006,7 +5021,7 @@ var Store = Reflux.createStore({
         }
       }
       else if (isFormError) {
-        let prefill = this._getItem(utils.getId(r.prefill))
+        let prefill = r.prefill.id ? this._getItem(utils.getId(r.prefill)) : r.prefill
         r.prefill =  prefill ? prefill : r.prefill
       }
 
@@ -6844,7 +6859,7 @@ var Store = Reflux.createStore({
 
           return Q.all([
             meDriver.addressBook.lookupIdentity({ permalink: wrapper.author }),
-            Q.nfcall(collect, msgStream)
+            collect(msgStream)
           ])
           .spread(function (authorInfo, messages) {
             const match = messages.filter(m => m.author === authorInfo.permalink)[0]
@@ -7573,8 +7588,8 @@ var Store = Reflux.createStore({
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
-        if (isModelsPack  &&  m.id.indexOf('tradle.') === 0) {
-          console.log('ModelsPack: the name you chose is the same as one of Tradle\'s core Models. Please rename and resend the model')
+        if (isModelsPack  &&  /^tradle\.[^.]+$/.test(m.id)) {
+          console.log('ModelsPack: the tradle.* namespace is reserved. Please rename and resend the model')
           return
         }
 

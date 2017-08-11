@@ -91,8 +91,7 @@ class ImageInput extends Component {
         url: 'data:image/jpeg;base64,' + response.data,
         isVertical: response.isVertical,
         width: response.width,
-        height: response.height,
-        chooseFromLibraryButtonTitle: ''
+        height: response.height
       })
     })
   }

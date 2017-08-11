@@ -555,7 +555,8 @@ var RowMixin = {
   },
 
   showIproovScanner: co(function* () {
-    if (!ENV.iProov) {
+    const apiKey = ENV.iProov && Platform.select(ENV.iProov.apiKey)
+    if (!apiKey) {
       return Alert.alert('IProov is not set up')
     }
 
@@ -563,7 +564,7 @@ var RowMixin = {
     const me = utils.getMe()
     const opts = {
       username: me[constants.ROOT_HASH],
-      serviceProvider: ENV.iProov.apiKey,
+      serviceProvider: apiKey,
       animated: true
     }
 
