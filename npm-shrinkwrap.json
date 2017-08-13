@@ -41,8 +41,8 @@
     },
     "@tradle/custom-models": {
       "version": "4.10.10",
-      "from": "tradle/custom-models#15b6636",
-      "resolved": "git://github.com/tradle/custom-models.git#15b66361757b92a0d5acb8753317856eeee6b689",
+      "from": "tradle/custom-models",
+      "resolved": "git://github.com/tradle/custom-models.git#30865f34a76e467665155de0a202eb4b7ef64419",
       "dependencies": {
         "typeforce": {
           "version": "1.11.3",
@@ -87,13 +87,13 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "tradle/models#18b3c6f",
-      "resolved": "git://github.com/tradle/models.git#18b3c6fcccb2f4d9096aa6689cbad420233a5f52",
+      "from": "tradle/models",
+      "resolved": "git://github.com/tradle/models.git#c628f9be404957cf6bf028e73c5c8834dad5398e",
       "dependencies": {
         "typeforce": {
-          "version": "1.11.1",
-          "from": "typeforce@>=1.10.6 <2.0.0",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.1.tgz"
+          "version": "1.11.3",
+          "from": "typeforce@^1.10.6",
+          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.3.tgz"
         }
       }
     },
