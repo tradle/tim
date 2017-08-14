@@ -18,7 +18,7 @@ const debug = require('debug')('tradle:app:blinkid')
 var ArticleView = require('./ArticleView')
 var focusUri = require('../video/Focus1.mp4')
 
-var plugins = require('@tradle/biz-plugins')
+var plugins = [] //require('@tradle/biz-plugins')
 
 // import VideoPlayer from './VideoPlayer'
 // import omit from 'object.omit'
@@ -220,6 +220,9 @@ var NewResourceMixin = {
     let { errs, requestedProperties } = this.props
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
+    if (!requestedProperties)
+      requestedProperties = this.getRequestedProperties(data)
+
     if (requestedProperties) {
       for (let p in requestedProperties) {
         if (!eCols[p]) {
