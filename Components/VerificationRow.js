@@ -239,7 +239,12 @@ class VerificationRow extends Component {
     return row
   }
   revokeDocument() {
-    var resource = this.props.resource
+    let resource = this.props.resource
+    let title
+    if (resource.to.organization)
+      title = resource.to.organization.title
+    else
+      title = resource.to.title
     Alert.alert(
       translate('confirmRevoke', resource.to.organization.title),
       null,
