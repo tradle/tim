@@ -2787,6 +2787,9 @@ var Store = Reflux.createStore({
   getRepresentative(orgId) {
     if (currentEmployees[orgId])
       return currentEmployees[orgId]
+    let org = this._getItem(orgId)
+    if (org.name.toUpperCase() === 'YUKI')
+      return me
     var result = this.searchNotMessages({modelName: PROFILE, all: true})
     var orgRep;
     result.some((ir) =>  {
