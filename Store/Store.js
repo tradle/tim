@@ -21,6 +21,8 @@ const co = require('bluebird').coroutine
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin');
 
+var yuki = require('../yuki.json')
+
 var path = require('path')
 var Reflux = require('reflux');
 var Actions = require('../Actions/Actions');
@@ -407,7 +409,6 @@ var Store = Reflux.createStore({
     this.loadModels()
     utils.setModels(models);
     this.loadStaticData()
-
     // if (true) {
     if (false) {
       await this.wipe()
@@ -467,6 +468,7 @@ var Store = Reflux.createStore({
       await this.getDriver(me)
       if (doMonitor)
         this.monitorTim()
+      this.addYuki()
     }
 
     if (me && me.registeredForPushNotifications) {
@@ -1251,6 +1253,51 @@ var Store = Reflux.createStore({
     .catch((err) => {
       debugger
     })
+  },
+
+  addYuki() {
+    let sp =  utils.clone(yuki)
+    let orgId = `${ORGANIZATION}_${sp.org[ROOT_HASH]}`
+    var org = this._getItem(orgId)
+    if (!org) {
+      org = sp.org
+      org._online = true
+      org.contacts = [utils.optimizeResource(me)]
+      this._setItem(orgId, org)
+    }
+    if (sp.dictionary) {
+      extend(true, dictionary, json.dictionary)
+      if (me) {
+        me.dictionary = dictionary
+        if (language)
+          me.language = language
+        this.setMe(me)
+      }
+    }
+    if (!SERVICE_PROVIDERS)
+      SERVICE_PROVIDERS = []
+
+    let duplicateSP = null
+    let isDuplicate = SERVICE_PROVIDERS.some((r) => {
+      // return deepEqual(r.org, sp.org)
+      if (r.id === yuki.id)
+        duplicateSP = r
+    })
+
+    if (isDuplicate)
+      return
+
+    sp.bot = this._getItem(`${IDENTITY}_${me[ROOT_HASH]}`)
+    sp.bot.permalink = me[ROOT_HASH]
+
+    let newSp = {
+      id: sp.id,
+      org: utils.getId(sp.org),
+      url: '',
+      permalink: sp.bot.permalink,
+    }
+    // Check is this is an update SP info
+    SERVICE_PROVIDERS.push(newSp)
   },
 
   async meDriverSend(sendParams) {
