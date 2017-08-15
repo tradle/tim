@@ -7469,7 +7469,7 @@ var Store = Reflux.createStore({
         if (pa)
           context = this._getItem(pa)
       }
-      else
+      else if (document._context)
         context = this._getItem(document._context)
       // let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
       context = context ? this._getItem(context) : null
