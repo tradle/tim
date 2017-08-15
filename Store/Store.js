@@ -472,7 +472,6 @@ var Store = Reflux.createStore({
       await this.getDriver(me)
       if (doMonitor)
         this.monitorTim()
-      this.addYuki()
     }
 
     if (me && me.registeredForPushNotifications) {
@@ -1253,47 +1252,12 @@ var Store = Reflux.createStore({
 
   addYuki() {
     let sp =  utils.clone(yuki)
-    let orgId = `${ORGANIZATION}_${sp.org[ROOT_HASH]}`
-    var org = this._getItem(orgId)
-    if (!org) {
-      org = sp.org
-      org._online = true
-      org.contacts = [utils.optimizeResource(me)]
-      this._setItem(orgId, org)
-    }
-    // if (sp.dictionary) {
-    //   extend(true, dictionary, json.dictionary)
-    //   if (me) {
-    //     me.dictionary = dictionary
-    //     if (language)
-    //       me.language = language
-    //     this.setMe(me)
-    //   }
-    // }
     if (!SERVICE_PROVIDERS)
       SERVICE_PROVIDERS = []
+    // sp.org.contacts = [utils.optimizeResource(me)]
 
-    let duplicateSP = null
-    let isDuplicate = SERVICE_PROVIDERS.some((r) => {
-      // return deepEqual(r.org, sp.org)
-      if (r.id === yuki.id)
-        duplicateSP = r
-    })
-
-    if (isDuplicate)
-      return
-
-    sp.bot = this._getItem(`${IDENTITY}_${me[ROOT_HASH]}`)
-    sp.bot.permalink = me[ROOT_HASH]
-
-    let newSp = {
-      id: sp.id,
-      org: utils.getId(sp.org),
-      url: '',
-      permalink: sp.bot.permalink,
-    }
-    // Check is this is an update SP info
-    SERVICE_PROVIDERS.push(newSp)
+    this.parseProvider(sp)
+    return this.addInfo(sp)
   },
 
   async meDriverSend(sendParams) {
@@ -1831,7 +1795,7 @@ var Store = Reflux.createStore({
 
   // Gets info about companies in this app, their bot representatives and their styles
   getServiceProviders(params) {
-    let url = params.url
+    let originalUrl = params.url
     let retry = params.retry
     let id = params.id
     let hash = params.hash
@@ -1851,15 +1815,14 @@ var Store = Reflux.createStore({
     var providerIds
     if (!id) {
       let settings = this._getItem(SETTINGS + '_1')
-      if (settings  &&  settings.urlToId  &&  settings.urlToId[url])
-        providerIds = settings.urlToId[url]
+      if (settings  &&  settings.urlToId  &&  settings.urlToId[originalUrl])
+        providerIds = settings.urlToId[originalUrl]
     }
     const doFetch = retry
                   ? utils.fetchWithBackoff
                   : utils.fetchWithTimeout
 
-    let originalUrl = url
-    url = utils.joinURL(url, 'info')
+    let url = utils.joinURL(originalUrl, 'info')
     let languageCode
     if (me) {
       language = me.language
@@ -1879,7 +1842,7 @@ var Store = Reflux.createStore({
         throw new Error('Cannot access: ' + url)
       return response.json()
     })
-    .then(function (json) {
+    .then((json) => {
       json = utils.normalizeGetInfoResponse(json)
 
       if (json.dictionary) {
@@ -1888,7 +1851,7 @@ var Store = Reflux.createStore({
           me.dictionary = dictionary
           if (language)
             me.language = language
-          self.setMe(me)
+          this.setMe(me)
         }
       }
       let newProviders
@@ -1899,65 +1862,59 @@ var Store = Reflux.createStore({
 
       var promises = []
       json.providers.forEach(sp => {
-        if (id)  {
-          if (sp.id !== id)
-            return
-        }
-        if (sp.org.name.indexOf('[TEST]') === 0)
-          return
-        if (hash) {
-          if (sp.bot[ROOT_HASH] !== hash)
-            return
-        }
-        else if (providerIds  &&  providerIds.indexOf(sp.id) === -1)
-          return
-        // else if (sp.id !== 'eres'  &&  !list[PROFILE + '_' + sp.bot[ROOT_HASH]])
+        // if (id)  {
+        //   if (sp.id !== id)
+        //     return
+        // }
+        // if (sp.org.name.indexOf('[TEST]') === 0)
         //   return
-        if (!sp.org[ROOT_HASH]) {
-          sp.org[ROOT_HASH] = protocol.linkString(sp.org)
-        }
+        // if (hash) {
+        //   if (sp.bot[ROOT_HASH] !== hash)
+        //     return
+        // }
+        // else if (providerIds  &&  providerIds.indexOf(sp.id) === -1)
+        //   return
+        // // else if (sp.id !== 'eres'  &&  !list[PROFILE + '_' + sp.bot[ROOT_HASH]])
+        // //   return
+        // if (!sp.org[ROOT_HASH]) {
+        //   sp.org[ROOT_HASH] = protocol.linkString(sp.org)
+        // }
 
-        let duplicateSP = null
-        let isDuplicate = SERVICE_PROVIDERS.some((r) => {
-          // return deepEqual(r.org, sp.org)
-          if (r.org === utils.getId(sp.org))
-            duplicateSP = r
-        })
+        // let isDuplicate = SERVICE_PROVIDERS.some((r) => r.org === utils.getId(sp.org)
+        // if (isDuplicate)
+        //   return
 
-        if (isDuplicate)
-          return
+        // sp.bot.permalink = sp.bot.pub[ROOT_HASH] || protocol.linkString(sp.bot.pub)
 
-        sp.bot.permalink = sp.bot.pub[ROOT_HASH] || protocol.linkString(sp.bot.pub)
-
-        let newSp = {
-          id: sp.id,
-          org: utils.getId(sp.org),
-          url: originalUrl,
-          style: sp.style,
-          permalink: sp.bot.permalink,
-          publicConfig: sp.publicConfig
-        }
-        // Check is this is an update SP info
-        let oldSp
-        for (let i=0; !newProviders  &&  i<SERVICE_PROVIDERS.length; i++) {
-          let r = SERVICE_PROVIDERS[i]
-          if (r.id === sp.id  &&  r.url === originalUrl) {
-            oldSp = SERVICE_PROVIDERS[i]
-            SERVICE_PROVIDERS[i] = newSp
-            break
-          }
-        }
-        if (!oldSp)
-          SERVICE_PROVIDERS.push(newSp)
-
-        promises.push(self.addInfo(sp, originalUrl, newServer))
+        // let newSp = {
+        //   id: sp.id,
+        //   org: utils.getId(sp.org),
+        //   url: originalUrl,
+        //   style: sp.style,
+        //   permalink: sp.bot.permalink,
+        //   publicConfig: sp.publicConfig
+        // }
+        // // Check is this is an update SP info
+        // let oldSp
+        // for (let i=0; !newProviders  &&  i<SERVICE_PROVIDERS.length; i++) {
+        //   let r = SERVICE_PROVIDERS[i]
+        //   if (r.id === sp.id  &&  r.url === originalUrl) {
+        //     oldSp = SERVICE_PROVIDERS[i]
+        //     SERVICE_PROVIDERS[i] = newSp
+        //     break
+        //   }
+        // }
+        // if (!oldSp)
+        //   SERVICE_PROVIDERS.push(newSp)
+        this.parseProvider(sp, params, providerIds, newProviders)
+        promises.push(this.addInfo(sp, originalUrl, newServer))
       })
       if (utils.getMe())
-        self.setMe(utils.getMe())
+        this.setMe(utils.getMe())
       return Q.allSettled(promises)
     })
     .then((results) => {
-      let list = self.searchNotMessages({modelName: ORGANIZATION})
+      let list = this.searchNotMessages({modelName: ORGANIZATION})
       this.trigger({
         action: 'list',
         list: list,
@@ -1970,6 +1927,60 @@ var Store = Reflux.createStore({
     .catch((err) => {
       debugger
     })
+  },
+  parseProvider(sp, params, providerIds, newProviders) {
+    if (!params)
+      params = {}
+    let originalUrl = params.url
+    let id = params.id
+    let hash = params.hash
+
+    if (id)  {
+      if (sp.id !== id)
+        return
+    }
+    if (sp.org.name.indexOf('[TEST]') === 0)
+      return
+    if (hash) {
+      if (sp.bot[ROOT_HASH] !== hash)
+        return
+    }
+    else if (providerIds  &&  providerIds.indexOf(sp.id) === -1)
+      return
+    // else if (sp.id !== 'eres'  &&  !list[PROFILE + '_' + sp.bot[ROOT_HASH]])
+    //   return
+    if (!sp.org[ROOT_HASH]) {
+      sp.org[ROOT_HASH] = protocol.linkString(sp.org)
+    }
+
+    let isDuplicate = SERVICE_PROVIDERS.some((r) => r.org === utils.getId(sp.org))
+    if (isDuplicate)
+      return
+
+    sp.bot.permalink = sp.bot.pub[ROOT_HASH] || protocol.linkString(sp.bot.pub)
+
+    let newSp = {
+      id: sp.id,
+      org: utils.getId(sp.org),
+      url: originalUrl,
+      style: sp.style,
+      permalink: sp.bot.permalink,
+      publicConfig: sp.publicConfig
+    }
+    // Check is this is an update SP info
+    let oldSp
+    for (let i=0; !newProviders  &&  i<SERVICE_PROVIDERS.length; i++) {
+      let r = SERVICE_PROVIDERS[i]
+      if (r.id === sp.id  &&  r.url === originalUrl) {
+        oldSp = SERVICE_PROVIDERS[i]
+        SERVICE_PROVIDERS[i] = newSp
+        break
+      }
+    }
+    if (!oldSp)
+      SERVICE_PROVIDERS.push(newSp)
+
+    // promises.push(self.addInfo(sp, originalUrl, newServer))
   },
   addInfo(sp, url, newServer) {
     var okey = sp.org ? utils.getId(sp.org) : null
@@ -8001,6 +8012,9 @@ var Store = Reflux.createStore({
         // utils.setMe(me)
         this.initChats()
       }
+      return this.addYuki()
+    })
+    .then((yuki) => {
       if (SERVICE_PROVIDERS)
         SERVICE_PROVIDERS.forEach((p) => this._getItem(p.org)._online = true)
       else {
