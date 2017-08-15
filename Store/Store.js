@@ -1261,15 +1261,15 @@ var Store = Reflux.createStore({
       org.contacts = [utils.optimizeResource(me)]
       this._setItem(orgId, org)
     }
-    if (sp.dictionary) {
-      extend(true, dictionary, json.dictionary)
-      if (me) {
-        me.dictionary = dictionary
-        if (language)
-          me.language = language
-        this.setMe(me)
-      }
-    }
+    // if (sp.dictionary) {
+    //   extend(true, dictionary, json.dictionary)
+    //   if (me) {
+    //     me.dictionary = dictionary
+    //     if (language)
+    //       me.language = language
+    //     this.setMe(me)
+    //   }
+    // }
     if (!SERVICE_PROVIDERS)
       SERVICE_PROVIDERS = []
 
