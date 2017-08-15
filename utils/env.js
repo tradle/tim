@@ -110,7 +110,8 @@ const merged = extend({
   analyticsIdIsPermalink: __DEV__,
   analyticsEnabled: !__DEV__,
   deepLinkHost: 'link.tradle.io',
-  appScheme: 'tradle'
+  appScheme: 'tradle',
+  yukiOn: true
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]

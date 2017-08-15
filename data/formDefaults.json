@@ -14,7 +14,6 @@
       "id": "tradle.AddressType_0f643323a50e6264ed05bead4dde9d63b5fd59bc",
       "title": "Physical"
     },
-    "message": "",
     "address1": "22 Broadway",
     "city": "NY",
     "region": "NY",
@@ -76,7 +75,6 @@
       "id": "tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a",
       "title": "US"
     },
-    "message": "",
     "residenceCountry": {
       "id": "tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a",
       "title": "US"
@@ -145,7 +143,6 @@
       "id": "tradle.Country_ecccd57aee4a2a420e316764d456a13acf0b4db9b4f47f0fd9c1511aa34da446",
       "title": "Netherlands"
     },
-    "message": "",
     "houseValue": {
       "value": "350000",
       "currency": "€"
@@ -413,7 +410,6 @@
       "id": "tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a",
       "title": "US"
     },
-    "message": "",
     "citizenship": {
       "id": "tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a",
       "title": "US"
@@ -429,7 +425,6 @@
       "id": "tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a",
       "title": "US"
     },
-    "message": "",
     "streetAddress": "1023 Broadway",
     "city": "New York",
     "postalCode": "10001",
@@ -446,7 +441,6 @@
       "id": "tradle.IdentityDocumentType_ee443d15603d7e12b7dd2c2a5c804973733d4c41",
       "title": "Other ID document/ID card"
     },
-    "message": "",
     "documentNumber": 123234,
     "issuingAuthority": "US Dept of Sate",
     "dateOfIssue": "4/26/2012",
@@ -497,7 +491,6 @@
       "id": "tradle.Currency_efb585b2d312810c60a9d3b75d80be980b2b9ff9",
       "title": "US Dollar"
     },
-    "message": "",
     "limitIL": {
       "value": "1000000",
       "currency": "$"
@@ -548,7 +541,6 @@
       "id": "tradle.Nationality_3adb8e0d4833c55d836d7fb3b8c2891da3d07216",
       "title": "American"
     },
-    "message": "",
     "startDate": "9/28/1996",
     "shareholding": 100,
     "dateOfBirth": "9/28/1971"
@@ -617,7 +609,6 @@
       "id": "tradle.Country_8645e28a0956255427696d0eb912f545388ecadc",
       "title": "United States"
     },
-    "message": "",
     "passportNumber": 1234567890,
     "surname": "Smorg",
     "givenName": "Johno",
@@ -657,7 +648,6 @@
       "id": "tradle.Country_8645e28a0956255427696d0eb912f545388ecadc",
       "title": "United States"
     },
-    "message": "",
     "numberOfEmployees": 20,
     "officialAddress": "1 Mars Way",
     "photos": [
@@ -684,7 +674,6 @@
       "value": 1000
     },
     "averageTxsPerMonth": 2000,
-    "message": "",
     "numberOfChargebacks": 10,
     "settlementCurrency": {
       "currency": "€",
