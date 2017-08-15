@@ -582,8 +582,6 @@ class NewResource extends Component {
       var len = resource.message  &&  utils.splitMessage(resource.message).length;
       if (len < 2)
         showSendVerificationForm = true;
-      else
-        data.message = '';
     }
     var params = {
         meta: meta,

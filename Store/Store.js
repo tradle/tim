@@ -21,7 +21,7 @@ const co = require('bluebird').coroutine
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin');
 
-var yuki = require('../yuki.json')
+var yukiConfig = require('../yuki.json')
 
 var path = require('path')
 var Reflux = require('reflux');
@@ -72,13 +72,14 @@ const {
 } = tradle.constants
 
 const sampleData = require('@tradle/models').data
+const utils = require('../utils/utils');
 const voc = (function () {
   const models = require('@tradle/models').concat(require('@tradle/custom-models'))
   models.forEach(model => {
     if (model.id) models[model.id] = model
   })
 
-  return models
+  return utils.clone(models)
 }())
 
 var sampleProfile = require('../data/sampleProfile.json')
@@ -90,7 +91,6 @@ var sampleProfile = require('../data/sampleProfile.json')
 var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
-var utils = require('../utils/utils');
 var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
 var promisify = require('pify');
@@ -208,8 +208,10 @@ var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
 var createKeeper = require('@tradle/keeper')
 var cachifyKeeper = require('@tradle/keeper/cachify')
 var crypto = require('crypto')
+const loadYuki = require('./yuki').loadOrCreate
 const Aviva = require('../utils/aviva')
 const monitorMissing = require('../utils/missing')
+const identityUtils = require('../utils/identity')
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
 var currentEmployees = {}
@@ -423,7 +425,22 @@ var Store = Reflux.createStore({
     }
 
     await this.getReady()
+    if (ENV.yukiOn) {
+      await this._setupYuki()
+    }
   },
+
+  async _setupYuki() {
+    const node = await this._enginePromise
+    this._yuki = await loadYuki({
+      node,
+      db: level('~yuki')
+    })
+
+    await this.addYuki()
+    await this._yuki.welcome()
+  },
+
   onAcceptTermsAndChat(params) {
     me._termsAccepted = true;
     return this.dbPut(utils.getId(me), me)
@@ -832,6 +849,12 @@ var Store = Reflux.createStore({
 
     function trySend (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
+      if (self._yuki && recipientHash === self._yuki.permalink) {
+        return self._yuki.receive({ message: msg.unserialized.object })
+          .then(() => cb())
+          .catch(cb)
+      }
+
       let messenger = wsClients.byIdentifier[recipientHash]
       if (!messenger) {
         let hashToUrl = self._getItem(SETTINGS + '_1').hashToUrl
@@ -1251,7 +1274,18 @@ var Store = Reflux.createStore({
   },
 
   addYuki() {
-    let sp =  utils.clone(yuki)
+    const sp =  utils.clone(yukiConfig)
+    sp.bot = {
+      [ROOT_HASH]: this._yuki.permalink,
+      [CUR_HASH]: this._yuki.permalink,
+      pub: this._yuki.identity,
+      profile: {
+        name: {
+          firstName: 'Yuki'
+        }
+      }
+    }
+
     if (!SERVICE_PROVIDERS)
       SERVICE_PROVIDERS = []
     // sp.org.contacts = [utils.optimizeResource(me)]
@@ -2781,8 +2815,8 @@ var Store = Reflux.createStore({
     if (currentEmployees[orgId])
       return currentEmployees[orgId]
     let org = this._getItem(orgId)
-    if (org.name.toUpperCase() === 'YUKI')
-      return me
+    // if (org.name.toUpperCase() === 'YUKI')
+    //   return me
     var result = this.searchNotMessages({modelName: PROFILE, all: true})
     var orgRep;
     result.some((ir) =>  {
@@ -6597,7 +6631,7 @@ var Store = Reflux.createStore({
   createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')
     // const globalSalt = crypto.randomBytes(32).toString('hex')
-    const genIdentity = generateIdentity({ networkName })
+    const genIdentity = identityUtils.generateIdentity({ networkName })
     return Q.all([
       utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
       genIdentity
@@ -8012,9 +8046,8 @@ var Store = Reflux.createStore({
         // utils.setMe(me)
         this.initChats()
       }
-      return this.addYuki()
     })
-    .then((yuki) => {
+    .then(() => {
       if (SERVICE_PROVIDERS)
         SERVICE_PROVIDERS.forEach((p) => this._getItem(p.org)._online = true)
       else {
@@ -9015,26 +9048,6 @@ function fixOldSettings (settings) {
 
 function willShowProgressBar ({ length }) {
   return typeof length === 'undefined' || length >= MIN_SIZE_FOR_PROGRESS_BAR
-}
-
-async function generateIdentity ({ networkName }) {
-  if (!utils.isWeb()) {
-    if (Keychain) {
-      const keys = await Keychain.generateNewSet({ networkName })
-      return Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys)
-    }
-
-    return Q.ninvoke(tradleUtils, 'newIdentity', { networkName })
-  }
-
-  const defaultKeySet = tradleUtils.defaultKeySet(networkName)
-  const keys = await Q.all(defaultKeySet.map(async function (spec) {
-    const key = await Q.ninvoke(tradleUtils, 'genKey', spec)
-    key.set('purpose', spec.purpose)
-    return key
-  }))
-
-  return Q.ninvoke(tradleUtils, 'newIdentityForKeys', keys)
 }
 
 async function getAnalyticsUserId ({ promiseEngine }) {
