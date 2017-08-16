@@ -13,55 +13,6 @@
   "style": {
     "_t": "tradle.StylesPack"
   },
-  "bot": {
-    "pub": {
-      "_s": "CkkKBHAyNTYSQQQR32vIV/mjdKbNici2VeGDyfIHzgyRgvBmGLeiygrEzXc31xhg08O/cTqx3wKdEBLw/fY0nN30sm8tuGn6YKmsEkcwRQIhAMwyu1X/oxR496MCTiBJ09FKQO/DoJdOvA5enO0VDoGOAiBMQv6n98JsI2OGl09y2VgDybaPbjaAWmr2KxVwerbkTQ==",
-      "_t": "tradle.Identity",
-      "pubkeys": [
-        {
-          "networkName": "testnet",
-          "purpose": "payment",
-          "type": "bitcoin",
-          "fingerprint": "mkZeb6LJBRMmi9SePXQsDT3a6D9kQZtmWB",
-          "pub": "026e8628d0d7aafcec3d7261ee806122574ef54ab638aede268bc44ee170945184"
-        },
-        {
-          "networkName": "testnet",
-          "purpose": "messaging",
-          "type": "bitcoin",
-          "fingerprint": "n1SJzLtDHWAeHpPdRYKXjsi38ftdqnhPD3",
-          "pub": "0374430bb817f22317963394c058b208bfde140cac45463c41dac37acc1f7e75d0"
-        },
-        {
-          "curve": "p256",
-          "purpose": "sign",
-          "type": "ec",
-          "pub": "048c83c322932fd0f7a0ce4cb9c213aae5d64bd59d0152fb8b264d6faf8446747c8309c12dd5b8b9a8701838fdf6d9d7ecd7d2024021ae8680f859d37ea2b1c66a",
-          "fingerprint": "646ab5c4b24265e2c3f97bdd1e5fcdfde186b886a865f3ae83f2370fbfab1f7c"
-        },
-        {
-          "curve": "p256",
-          "purpose": "update",
-          "type": "ec",
-          "pub": "0411df6bc857f9a374a6cd89c8b655e183c9f207ce0c9182f06618b7a2ca0ac4cd7737d71860d3c3bf713ab1df029d1012f0fdf6349cddf4b26f2db869fa60a9ac",
-          "fingerprint": "50e86c89c47f77a2819a21eed21d991dc39e7b168614c06ec2ea7dc173962bb4"
-        },
-        {
-          "purpose": "tls",
-          "type": "ec",
-          "curve": "curve25519",
-          "pub": "28cc6951fa902661eb83610c98e9b3e686894cf122b04c0fcf4162bc88fee935",
-          "fingerprint": "c313f3a3fb27280eea985780408c4c2a49278283160d9a83752441b16da2d302"
-        }
-      ]
-    },
-    "profile": {
-      "name": {}
-    },
-    "txId": null,
-    "_r": "56ae8d65c42e3647b82db586447e9d3f3596bc16a2b38586969ee06b5d61d308",
-    "_c": "56ae8d65c42e3647b82db586447e9d3f3596bc16a2b38586969ee06b5d61d308"
-  },
   "publicConfig": {
     "canShareContext": true,
     "hasSupportLine": true
