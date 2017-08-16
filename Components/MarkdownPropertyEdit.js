@@ -77,28 +77,23 @@ class MarkdownPropertyEdit extends Component {
     let {value} = this.state
     let markdown
     if (value && value.length)
-      markdown = <View style={{backgroundColor: value.length ? '#f7f7f7' : 'transparent', paddingBottom: 5}}>
+      markdown = <View style={[styles.container, {backgroundColor: value.length ? '#f7f7f7' : 'transparent', paddingBottom: 5 }]}>
                   <Markdown contentContainerStyle={styles.container} markdownStyles={markdownStyles}>
                     {value}
                   </Markdown>
                 </View>
     return (
       <PageView style={platformStyles.container}>
-        <ScrollView style={{padding:10}}
-                    ref='scrollView' {...this.scrollviewProps}
-                    keyboardShouldPersistTaps="always"
-                    keyboardDismissMode={Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
-          <TextInput
-            style={{borderBottomColor: '#eeeeee', borderBottomWidth: 1, height: 300, fontSize: 16 }}
-            ref='textInput'
-            onChangeText={this.onChangeText.bind(this)}
-            value={value}
-            underlineColorAndroid={this.props.underlineColorAndroid}
-            multiline={true}
-            numberOfLines={10}
-          />
-          {markdown}
-        </ScrollView>
+        <TextInput
+          style={{borderBottomColor: '#eeeeee', borderBottomWidth: 1, height: 300, fontSize: 16 }}
+          ref='textInput'
+          onChangeText={this.onChangeText.bind(this)}
+          value={value}
+          underlineColorAndroid={this.props.underlineColorAndroid}
+          multiline={true}
+          numberOfLines={10}
+        />
+        {markdown}
       </PageView>
     )
   }
