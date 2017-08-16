@@ -10,7 +10,7 @@
     "@tradle/biz-plugins": {
       "version": "1.0.0",
       "from": "tradle/biz-plugins",
-      "resolved": "git://github.com/tradle/biz-plugins.git#fdfa5a63798a92facf7d0912b5c451cb08aa807e"
+      "resolved": "git://github.com/tradle/biz-plugins.git#f3d40329f44a76d88818855d3b90aa40160f8993"
     },
     "@tradle/build-resource": {
       "version": "1.0.0",
@@ -323,11 +323,6 @@
         }
       }
     },
-    "abbrev": {
-      "version": "1.0.9",
-      "from": "abbrev@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/abbrev/-/abbrev-1.0.9.tgz"
-    },
     "@tradle/yuki": {
       "version": "1.0.0",
       "from": "tradle/yuki",
@@ -360,6 +355,11 @@
         }
       }
 >>>>>>> yuki first cut
+    },
+    "abbrev": {
+      "version": "1.0.9",
+      "from": "abbrev@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/abbrev/-/abbrev-1.0.9.tgz"
     },
     "absolute-path": {
       "version": "0.0.0",
@@ -2359,6 +2359,11 @@
       "from": "domutils@>=1.4.0 <1.5.0",
       "resolved": "https://registry.npmjs.org/domutils/-/domutils-1.4.3.tgz"
     },
+    "dot-prop": {
+      "version": "4.2.0",
+      "from": "dot-prop@>=4.2.0 <5.0.0",
+      "resolved": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz"
+    },
     "download": {
       "version": "4.4.3",
       "from": "download@>=4.1.2 <5.0.0",
@@ -2395,11 +2400,6 @@
       "version": "1.4.7",
       "from": "downloadjs@latest",
       "resolved": "https://registry.npmjs.org/downloadjs/-/downloadjs-1.4.7.tgz"
-    },
-    "dot-prop": {
-      "version": "4.2.0",
-      "from": "dot-prop@>=4.2.0 <5.0.0",
-      "resolved": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz"
     },
     "drbg.js": {
       "version": "1.0.1",
@@ -2872,11 +2872,6 @@
       "from": "feed-indexer@1.3.0",
       "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.3.0.tgz",
       "dependencies": {
-        "inherits": {
-          "version": "2.0.3",
-          "from": "inherits@>=2.0.3 <2.1.0",
-          "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
-        },
         "isarray": {
           "version": "1.0.0",
           "from": "isarray@>=1.0.0 <1.1.0",
@@ -3681,11 +3676,6 @@
       "version": "1.0.1",
       "from": "is-obj@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/is-obj/-/is-obj-1.0.1.tgz"
-    },
-    "is-object": {
-      "version": "0.1.2",
-      "from": "is-object@>=0.1.2 <0.2.0",
-      "resolved": "https://registry.npmjs.org/is-object/-/is-object-0.1.2.tgz"
     },
     "is-posix-bracket": {
       "version": "0.1.1",
@@ -6635,11 +6625,6 @@
           "version": "0.1.4",
           "from": "duplexer2@>=0.1.0 <0.2.0",
           "resolved": "https://registry.npmjs.org/duplexer2/-/duplexer2-0.1.4.tgz"
-        },
-        "inherits": {
-          "version": "2.0.3",
-          "from": "inherits@~2.0.3",
-          "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
         },
         "isarray": {
           "version": "1.0.0",
