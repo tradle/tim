@@ -25,6 +25,7 @@ var VerifierChooser = require('./Components/VerifierChooser')
 var EnumList = require('./Components/EnumList')
 // var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
+var MarkdownPropertyEdit = require('./Components/MarkdownPropertyEdit')
 
 var AvivaIntroView = require('./Components/AvivaIntroView')
 
@@ -541,6 +542,8 @@ class TiMApp extends Component {
     //   return <HomePage navigator={nav} {...props} />
     case AVIVA_INTRO_VIEW:
       return <AvivaIntroView navigator={nav} {...props} />
+    case 31:
+      return <MarkdownPropertyEdit navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />

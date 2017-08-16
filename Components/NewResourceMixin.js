@@ -35,6 +35,7 @@ import BlinkID from './BlinkID'
 import createMarkdownRenderer from 'rn-markdown'
 
 const Markdown = createMarkdownRenderer()
+var MarkdownPropertyEdit = require('./MarkdownPropertyEdit')
 
 
 var constants = require('@tradle/constants');
@@ -211,6 +212,8 @@ var NewResourceMixin = {
     let { errs, requestedProperties } = this.props
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
+    if (!requestedProperties)
+      requestedProperties = this.getRequestedProperties(data)
     if (requestedProperties) {
       for (let p in requestedProperties) {
         if (!eCols[p]) {
@@ -378,6 +381,17 @@ var NewResourceMixin = {
                     label: label,
                     prop:  props[p],
                     model: meta,
+                  })
+        }
+        else if (type === 'string'  &&  props[p].markdown) {
+          options.fields[p].template = this.myMarkdownTextInputTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    model: meta,
+                    value: data  &&  data[p] ? data[p] + '' : null,
+                    required: !maybe,
+                    errors: params.errors,
+                    editable: params.editable,
                   })
         }
         else if (!options.fields[p].multiline && (type === 'string'  ||  type === 'number')) {
@@ -834,6 +848,64 @@ var NewResourceMixin = {
     );
   },
 
+  myMarkdownTextInputTemplate(params) {
+    let {prop, required, model, editable, value} = params
+    var label = translate(prop, model)
+    if (required)
+      label += ' *'
+
+    let {bankStyle} = this.props
+    let lcolor = bankStyle.linkColor
+    let lStyle = [styles.labelStyle, {color: lcolor, fontSize: 20, margin: 5}]
+    let vStyle = { padding: 10, flexDirection: 'row', justifyContent: 'space-between', marginRight: 10}
+    let multiline = prop.maxLength > 100
+    let help = prop.ref !== MONEY  && this.getHelp(prop)
+    let st = {paddingBottom: 10, marginHorizontal: -10}
+    if (!help)
+      st.flex = 5
+    let markdown
+    if (value  &&  value.length)
+      markdown = <View style={{padding: 20, backgroundColor: '#f7f7f7', }}>
+                   <Markdown contentContainerStyle={{ margin:20 }} markdownStyles={this.getMarkdownStyles()}>
+                     {value || ''}
+                   </Markdown>
+                 </View>
+
+    return <View style={st}>
+             <TouchableOpacity onPress={this.showMarkdownEditView.bind(this, prop)}>
+               <View style={vStyle}>
+                 <Text style={lStyle}>{utils.translate('Please click here to view/edit')}</Text>
+                 <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
+               </View>
+             </TouchableOpacity>
+             {markdown}
+          </View>
+  },
+
+  showMarkdownEditView(prop) {
+    this.props.navigator.push({
+      title: translate(prop), //m.title,
+      // titleTextColor: '#7AAAC3',
+      id: 31,
+      component: MarkdownPropertyEdit,
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        prop:           prop,
+        resource:       this.state.resource,
+        bankStyle:      this.props.bankStyle,
+        Markdown:       Markdown,
+        // returnRoute:    currentRoutes[currentRoutes.length - 1],
+        callback:       this.onChangeText.bind(this)
+      }
+    })
+
+    // resource[prop.name] = date.getTime()
+    // if (!this.floatingProps)
+    //   this.floatingProps = {}
+    // this.floatingProps[prop.name] = date.getTime()
+  },
+
   myTextInputTemplate(params) {
     let {prop, required, model, editable, keyboard, value} = params
     var label = translate(prop, model)
@@ -891,11 +963,7 @@ var NewResourceMixin = {
       </View>
     );
   },
-  getHelp(prop) {
-    if (!prop.description)
-      return <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}/>
-
-    // borderBottomColor: '#cccccc',
+  getMarkdownStyles() {
     const markdownStyles = {
       heading1: {
         fontSize: 24,
@@ -913,9 +981,16 @@ var NewResourceMixin = {
         fontStyle: 'italic'
       },
     }
+    return markdownStyles
+  },
+  getHelp(prop) {
+    if (!prop.description)
+      return <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}/>
+
+    // borderBottomColor: '#cccccc',
     return (
       <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 10, paddingBottom: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}>
-        <Markdown markdownStyles={markdownStyles}>
+        <Markdown markdownStyles={this.getMarkdownStyles()}>
           {prop.description}
         </Markdown>
       </View>
