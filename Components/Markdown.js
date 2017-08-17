@@ -2,7 +2,7 @@
 
 import React, { Component, PropTypes } from 'react'
 import createMarkdownRenderer from 'rn-markdown'
-
+import ArticleView from './ArticleView'
 import {
   TouchableOpacity,
   View

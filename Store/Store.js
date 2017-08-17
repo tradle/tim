@@ -213,7 +213,7 @@ const Aviva = require('../utils/aviva')
 const monitorMissing = require('../utils/missing')
 const identityUtils = require('../utils/identity')
 // var tutils = require('@tradle/utils')
-var isTest, orig21inalMe;
+var isTest, originalMe;
 var currentEmployees = {}
 
 // var tim;
