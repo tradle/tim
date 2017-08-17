@@ -3,6 +3,9 @@
 import React, { Component, PropTypes } from 'react'
 import createMarkdownRenderer from 'rn-markdown'
 import ArticleView from './ArticleView'
+import utils from '../utils/utils'
+var translate = utils.translate
+
 import {
   TouchableOpacity,
   View

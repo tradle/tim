@@ -826,18 +826,20 @@ var NewResourceMixin = {
       label += ' *'
 
     let {bankStyle} = this.props
-    let lcolor = bankStyle.linkColor
-    let lStyle = [styles.labelStyle, {color: lcolor, fontSize: 20, margin: 5}]
-    let vStyle = { padding: 10, flexDirection: 'row', justifyContent: 'space-between', marginRight: 10}
+    let hasValue = value  &&  value.length
+    let lcolor = hasValue ? '#555555' : this.getLabelAndBorderColor(prop.name)
+
+    let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
+    let vStyle = { height: 45, marginTop: 10, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10}
     let multiline = prop.maxLength > 100
     let help = prop.ref !== MONEY  && this.getHelp(prop)
-    let st = {paddingBottom: 10, marginHorizontal: -10}
+    let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
     let markdown, title
-    if (value  &&  value.length) {
-      markdown = <View style={{padding: 20, backgroundColor: '#f7f7f7', }}>
-                   <Markdown contentContainerStyle={{ margin:20 }} markdownStyles={this.getMarkdownStyles()}>
+    if (hasValue) {
+      markdown = <View style={styles.markdown}>
+                   <Markdown markdownStyles={this.getMarkdownStyles()}>
                      {value || ''}
                    </Markdown>
                  </View>
@@ -1996,6 +1998,12 @@ var styles= StyleSheet.create({
     color: '#AAAAAA',
     // alignSelf: 'center',
     // paddingLeft: 10
+  },
+  markdown: {
+    backgroundColor: '#f7f7f7',
+    paddingVertical: 10,
+    marginHorizontal: -10,
+    paddingHorizontal: 20
   },
 })
 
