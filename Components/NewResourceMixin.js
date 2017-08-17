@@ -834,26 +834,26 @@ var NewResourceMixin = {
     let st = {paddingBottom: 10, marginHorizontal: -10}
     if (!help)
       st.flex = 5
-    let markdown
+    let markdown, title
     if (value  &&  value.length) {
       markdown = <View style={{padding: 20, backgroundColor: '#f7f7f7', }}>
                    <Markdown contentContainerStyle={{ margin:20 }} markdownStyles={this.getMarkdownStyles()}>
                      {value || ''}
                    </Markdown>
-                   <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} style={{position: 'absolute', right: 10, top:  10}}/>
                  </View>
+      title = translate(prop)
     }
     else
-      markdown = <View style={vStyle}>
-                   <Text style={lStyle}>{utils.translate('Please click here to view/edit')}</Text>
-                   <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
-                 </View>
-
+      title = utils.translate('Please click here to view/edit')
 
     return <View style={st}>
              <TouchableOpacity onPress={this.showMarkdownEditView.bind(this, prop)}>
-               {markdown}
+               <View style={vStyle}>
+                 <Text style={lStyle}>{title}</Text>
+                 <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
+               </View>
              </TouchableOpacity>
+             {markdown}
           </View>
   },
 
