@@ -213,7 +213,7 @@ const Aviva = require('../utils/aviva')
 const monitorMissing = require('../utils/missing')
 const identityUtils = require('../utils/identity')
 // var tutils = require('@tradle/utils')
-var isTest, originalMe;
+var isTest, orig21inalMe;
 var currentEmployees = {}
 
 // var tim;
@@ -2164,7 +2164,7 @@ var Store = Reflux.createStore({
         return c.code === org._currency || c.currencyName === org._currency
       })
       delete org._currency
-      if (currency) {
+      if (currency  &&  currency.length) {
         org.currency = this.buildRef(currency[0])
         let code = currency[0].code
         if (currency[0].symbol)

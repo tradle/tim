@@ -32,11 +32,8 @@ import BlinkID from './BlinkID'
 // import { parse as parseUSDL } from 'parse-usdl'
 
 // import Anyline from './Anyline'
-import createMarkdownRenderer from 'rn-markdown'
-
-const Markdown = createMarkdownRenderer()
 var MarkdownPropertyEdit = require('./MarkdownPropertyEdit')
-
+var Markdown = require('./Markdown')
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
@@ -94,31 +91,6 @@ var NewResourceMixin = {
   },
   getScrollOffset() {
     return { ...this._contentOffset }
-  },
-  createMarkdownLink() {
-    Markdown.renderer.link = props => {
-      const { markdown } = props
-      const { href } = markdown
-      return (
-        <TouchableOpacity onPress={() => {
-          this.props.navigator.push({
-            id: 7,
-            component: ArticleView,
-            backButtonTitle: 'Back',
-            title: translate(markdown.children[0].children[0].text),
-            passProps: {
-              bankStyle: this.props.bankStyle,
-              href: href
-            }
-          })
-
-        }}>
-          <View>
-            {props.children}
-          </View>
-        </TouchableOpacity>
-      )
-    }
   },
   getFormFields(params) {
     CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol ||  this.props.currency : DEFAULT_CURRENCY_SYMBOL
@@ -552,7 +524,6 @@ var NewResourceMixin = {
           required: !maybe
         })
     }
-    this.createMarkdownLink()
     return options;
   },
   getNextKey() {
@@ -864,21 +835,25 @@ var NewResourceMixin = {
     if (!help)
       st.flex = 5
     let markdown
-    if (value  &&  value.length)
+    if (value  &&  value.length) {
       markdown = <View style={{padding: 20, backgroundColor: '#f7f7f7', }}>
                    <Markdown contentContainerStyle={{ margin:20 }} markdownStyles={this.getMarkdownStyles()}>
                      {value || ''}
                    </Markdown>
+                   <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} style={{position: 'absolute', right: 10, top:  10}}/>
                  </View>
+    }
+    else
+      markdown = <View style={vStyle}>
+                   <Text style={lStyle}>{utils.translate('Please click here to view/edit')}</Text>
+                   <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
+                 </View>
+
 
     return <View style={st}>
              <TouchableOpacity onPress={this.showMarkdownEditView.bind(this, prop)}>
-               <View style={vStyle}>
-                 <Text style={lStyle}>{utils.translate('Please click here to view/edit')}</Text>
-                 <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
-               </View>
+               {markdown}
              </TouchableOpacity>
-             {markdown}
           </View>
   },
 
@@ -894,16 +869,9 @@ var NewResourceMixin = {
         prop:           prop,
         resource:       this.state.resource,
         bankStyle:      this.props.bankStyle,
-        Markdown:       Markdown,
-        // returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       this.onChangeText.bind(this)
       }
     })
-
-    // resource[prop.name] = date.getTime()
-    // if (!this.floatingProps)
-    //   this.floatingProps = {}
-    // this.floatingProps[prop.name] = date.getTime()
   },
 
   myTextInputTemplate(params) {

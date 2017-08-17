@@ -19,7 +19,6 @@ var reactMixin = require('react-mixin');
 import Icon from 'react-native-vector-icons/Ionicons';
 var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
-var reactMixin = require('react-mixin');
 var equal = require('deep-equal')
 var constants = require('@tradle/constants');
 var termsAndConditions = require('../termsAndConditions.json')

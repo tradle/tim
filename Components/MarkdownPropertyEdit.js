@@ -10,6 +10,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 // var constants = require('@tradle/constants');
 var StyleSheet = require('../StyleSheet')
 import platformStyles from '../styles/platform'
+var Markdown = require('./Markdown')
 
 import {
   Platform,
@@ -56,7 +57,7 @@ class MarkdownPropertyEdit extends Component {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let {bankStyle, Markdown} = this.props
+    let {bankStyle} = this.props
     const markdownStyles = {
       heading1: {
         fontSize: 24,
