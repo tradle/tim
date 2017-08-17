@@ -841,7 +841,7 @@ var NewResourceMixin = {
                      {value || ''}
                    </Markdown>
                  </View>
-      title = translate(prop)
+      title = utils.translate(prop)
     }
     else
       title = utils.translate('Please click here to view/edit')
