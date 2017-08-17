@@ -2,7 +2,7 @@
 
 var utils = require('../utils/utils');
 var PageView = require('./PageView')
-var translate = utils.translate
+// var translate = utils.translate
 // var t = require('tcomb-form-native');
 var extend = require('extend');
 import Icon from 'react-native-vector-icons/Ionicons';
