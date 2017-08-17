@@ -2,14 +2,12 @@
 
 var utils = require('../utils/utils');
 var PageView = require('./PageView')
-var translate = utils.translate
-// var t = require('tcomb-form-native');
 var extend = require('extend');
 import Icon from 'react-native-vector-icons/Ionicons';
 
-// var constants = require('@tradle/constants');
 var StyleSheet = require('../StyleSheet')
 import platformStyles from '../styles/platform'
+var Markdown = require('./Markdown')
 
 import {
   Platform,
@@ -56,7 +54,7 @@ class MarkdownPropertyEdit extends Component {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let {bankStyle, Markdown} = this.props
+    let {bankStyle} = this.props
     const markdownStyles = {
       heading1: {
         fontSize: 24,
@@ -85,7 +83,7 @@ class MarkdownPropertyEdit extends Component {
     return (
       <PageView style={platformStyles.container}>
         <TextInput
-          style={{borderBottomColor: '#eeeeee', borderBottomWidth: 1, height: 300, fontSize: 16 }}
+          style={{borderBottomColor: '#eeeeee', borderBottomWidth: 1, height: 300, fontSize: 16, paddingHorizontal: 10 }}
           ref='textInput'
           onChangeText={this.onChangeText.bind(this)}
           value={value}
@@ -105,7 +103,7 @@ class MarkdownPropertyEdit extends Component {
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 10,
+    paddingHorizontal: 10,
   },
 })
 

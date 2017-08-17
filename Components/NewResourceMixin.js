@@ -33,11 +33,8 @@ import BlinkID from './BlinkID'
 // import { parse as parseUSDL } from 'parse-usdl'
 
 // import Anyline from './Anyline'
-import createMarkdownRenderer from 'rn-markdown'
-
-const Markdown = createMarkdownRenderer()
 var MarkdownPropertyEdit = require('./MarkdownPropertyEdit')
-
+var Markdown = require('./Markdown')
 
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
@@ -102,31 +99,6 @@ var NewResourceMixin = {
   },
   getScrollOffset() {
     return { ...this._contentOffset }
-  },
-  createMarkdownLink() {
-    Markdown.renderer.link = props => {
-      const { markdown } = props
-      const { href } = markdown
-      return (
-        <TouchableOpacity onPress={() => {
-          this.props.navigator.push({
-            id: 7,
-            component: ArticleView,
-            backButtonTitle: 'Back',
-            title: translate(markdown.children[0].children[0].text),
-            passProps: {
-              bankStyle: this.props.bankStyle,
-              href: href
-            }
-          })
-
-        }}>
-          <View>
-            {props.children}
-          </View>
-        </TouchableOpacity>
-      )
-    }
   },
   getFormFields(params) {
     CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol ||  this.props.currency : DEFAULT_CURRENCY_SYMBOL
@@ -222,7 +194,6 @@ var NewResourceMixin = {
        requestedProperties = this.state.requestedProperties
     if (!requestedProperties)
       requestedProperties = this.getRequestedProperties(data)
-
     if (requestedProperties) {
       for (let p in requestedProperties) {
         if (!eCols[p]) {
@@ -563,7 +534,6 @@ var NewResourceMixin = {
           required: !maybe
         })
     }
-    this.createMarkdownLink()
     return options;
   },
   getNextKey() {
@@ -864,26 +834,32 @@ var NewResourceMixin = {
       label += ' *'
 
     let {bankStyle} = this.props
-    let lcolor = bankStyle.linkColor
-    let lStyle = [styles.labelStyle, {color: lcolor, fontSize: 20, margin: 5}]
-    let vStyle = { padding: 10, flexDirection: 'row', justifyContent: 'space-between', marginRight: 10}
+    let hasValue = value  &&  value.length
+    let lcolor = hasValue ? '#555555' : this.getLabelAndBorderColor(prop.name)
+
+    let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
+    let vStyle = { height: 45, marginTop: 10, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10}
     let multiline = prop.maxLength > 100
     let help = prop.ref !== MONEY  && this.getHelp(prop)
-    let st = {paddingBottom: 10, marginHorizontal: -10}
+    let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
-    let markdown
-    if (value  &&  value.length)
-      markdown = <View style={{padding: 20, backgroundColor: '#f7f7f7', }}>
-                   <Markdown contentContainerStyle={{ margin:20 }} markdownStyles={this.getMarkdownStyles()}>
+    let markdown, title
+    if (hasValue) {
+      markdown = <View style={styles.markdown}>
+                   <Markdown markdownStyles={this.getMarkdownStyles()}>
                      {value || ''}
                    </Markdown>
                  </View>
+      title = utils.translate(prop)
+    }
+    else
+      title = utils.translate('Please click here to view/edit')
 
     return <View style={st}>
              <TouchableOpacity onPress={this.showMarkdownEditView.bind(this, prop)}>
                <View style={vStyle}>
-                 <Text style={lStyle}>{utils.translate('Please click here to view/edit')}</Text>
+                 <Text style={lStyle}>{title}</Text>
                  <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
                </View>
              </TouchableOpacity>
@@ -903,16 +879,9 @@ var NewResourceMixin = {
         prop:           prop,
         resource:       this.state.resource,
         bankStyle:      this.props.bankStyle,
-        Markdown:       Markdown,
-        // returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       this.onChangeText.bind(this)
       }
     })
-
-    // resource[prop.name] = date.getTime()
-    // if (!this.floatingProps)
-    //   this.floatingProps = {}
-    // this.floatingProps[prop.name] = date.getTime()
   },
 
   myTextInputTemplate(params) {
@@ -2062,7 +2031,13 @@ var styles= StyleSheet.create({
     color: '#AAAAAA',
     // alignSelf: 'center',
     // paddingLeft: 10
-  }
+  },
+  markdown: {
+    backgroundColor: '#f7f7f7',
+    paddingVertical: 10,
+    marginHorizontal: -10,
+    paddingHorizontal: 20
+  },
 })
 
 function formatDate (date) {

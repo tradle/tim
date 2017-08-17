@@ -36,6 +36,24 @@ import {
   Navigator
 } from 'react-native'
 
+var markdownStyles = {
+  heading1: {
+    fontSize: 24,
+    color: 'purple',
+  },
+  link: {
+    textDecorationLine: 'none'
+  },
+  mailTo: {
+    color: 'orange',
+  },
+  text: {
+    color: '#757575',
+    fontStyle: 'italic'
+  },
+}
+
+var Markdown = require('./Markdown')
 import React, { Component } from 'react'
 
 var ResourceMixin = {
@@ -262,6 +280,14 @@ var ResourceMixin = {
         val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
       else if (modelName === TERMS_AND_CONDITIONS)
         val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
+      else if (pMeta.markdown) {
+        markdownStyles.color = this.props.bankStyle.linkColor,
+        val = <View style={styles.container}>
+                <Markdown markdownStyles={markdownStyles}>
+                  {val}
+                </Markdown>
+              </View>
+      }
       else
         val = <Text style={[styles.description]}>{val}</Text>;
     }
@@ -443,6 +469,9 @@ var ResourceMixin = {
 }
 
 var styles = StyleSheet.create({
+  container: {
+    margin: 10
+  },
   thumb: {
     width:  25,
     height: 25,
