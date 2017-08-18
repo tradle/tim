@@ -2036,8 +2036,11 @@ var styles= StyleSheet.create({
     backgroundColor: '#f7f7f7',
     paddingVertical: 10,
     marginHorizontal: -10,
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
+  container: {
+    flex: 1
+  }
 })
 
 function formatDate (date) {

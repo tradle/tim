@@ -470,7 +470,8 @@ var ResourceMixin = {
 
 var styles = StyleSheet.create({
   container: {
-    margin: 10
+    margin: 10,
+    flex: 1
   },
   thumb: {
     width:  25,

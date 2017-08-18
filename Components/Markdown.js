@@ -12,6 +12,7 @@ import {
 } from 'react-native'
 
 const Markdown = createMarkdownRenderer()
+Markdown.renderer.container = View
 
 Markdown.renderer.link = props => {
   const { markdown } = props
