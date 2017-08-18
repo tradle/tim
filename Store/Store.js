@@ -2171,7 +2171,7 @@ var Store = Reflux.createStore({
         return c.code === org._currency || c.id === org._currency
       })
       delete org._currency
-      if (currency) {
+      if (currency  &&  currency.length) {
         org.currency = utils.clone(currency[0])
         let code = currency[0].id
         if (currency[0].symbol)
