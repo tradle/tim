@@ -32,6 +32,9 @@ class ChatContext extends Component {
     let context = this.props.context
     if (!context  ||  context.product === REMEDIATION)
       return <View/>
+    let m = utils.getModel(context.product)
+    if (!m)
+      return <View/>
     let me = utils.getMe()
     let chat = this.props.chat
     let isChattingWithPerson = chat[constants.TYPE] === PROFILE
@@ -48,7 +51,7 @@ class ChatContext extends Component {
     let bankStyle = this.props.bankStyle
     let isShareContext = chat[constants.TYPE] === PRODUCT_APPLICATION && isReadOnlyChat
 
-    let content = <Text style={[{color: this.props.allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(context.product).value)}</Text>
+    let content = <Text style={[{color: this.props.allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(m.value)}</Text>
     let chooser = context  &&  isShareContext
                 ? <View style={styles.contextBar}>{content}</View>
                 : <TouchableOpacity onPress={this.props.contextChooser} style={styles.contextBar}>

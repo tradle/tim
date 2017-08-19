@@ -362,6 +362,9 @@ class ResourceRow extends Component {
     }
     // HACK
     else if (model.id === PRODUCT_APPLICATION) {
+      let m = utils.getModel(resource.product)
+      if (!m)
+        return <View/>
       if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
         let status, color
         if (resource._approved) {
@@ -405,7 +408,7 @@ class ResourceRow extends Component {
           // approved = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
         return  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   <View style={{padding: 5}}>
-                    <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>
+                    <Text style={styles.resourceTitle}>{translate(m.value)}</Text>
                     <Text style={styles.contextOwners}>{resource.from.organization || resource.from.title} -> {resource.to.organization.title}</Text>
                   </View>
                   {status}
