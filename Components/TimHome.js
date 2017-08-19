@@ -439,7 +439,7 @@ class TimHome extends Component {
     }
   }
 
-  showContacts(doReplace) {
+  showContacts() {
     let passProps = {
         filter: '',
         modelName: this.props.modelName,
@@ -466,7 +466,7 @@ class TimHome extends Component {
 
     Actions.getAllSharedContexts()
     Actions.hasPartials()
-    this.props.navigator[doReplace ? 'replace' : 'push']({
+    this.props.navigator.push({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
       title: translate('officialAccounts'),
@@ -554,7 +554,7 @@ class TimHome extends Component {
 // /chat?url=https://ubs.tradle.io&permalink=72d63e70bd75e65cf94e2d1f7f04c59816ad183801b981428a8a0d1abbf00190
     let me = utils.getMe()
     if (me  &&  me.isEmployee) {
-      this.showContacts(doReplace)
+      this.showContacts()
       return
     }
     if (firstPage) {
