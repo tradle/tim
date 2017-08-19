@@ -87,7 +87,7 @@ const merged = extend({
   requireSoftPIN: Platform.OS === 'web',
   canUseWebcam: !!getUserMedia,
   locale: locale,
-  autoRegister: false,
+  autoRegister: true,
   // timeout after partial scan results have been processed
   blinkIDScanTimeoutInternal: 10000,
   // timeout from beginning to end of scan operation
