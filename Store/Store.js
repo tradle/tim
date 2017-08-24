@@ -2017,7 +2017,13 @@ var Store = Reflux.createStore({
     // promises.push(self.addInfo(sp, originalUrl, newServer))
   },
   addInfo(sp, url, newServer) {
-    var okey = sp.org ? utils.getId(sp.org) : null
+    var okey
+    if (sp.org) {
+      if (!sp.org[ROOT_HASH])
+        sp.org[ROOT_HASH] = protocol.linkString(sp.org)
+      okey = utils.getId(sp.org)
+    }
+
     var hash = protocol.linkString(sp.bot.pub)
     var ikey = IDENTITY + '_' + hash
     var batch = []
