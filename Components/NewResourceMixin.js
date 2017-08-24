@@ -192,7 +192,7 @@ var NewResourceMixin = {
     let { errs, requestedProperties } = this.props
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
-    if (!requestedProperties)
+    if (!requestedProperties  &&  data)
       requestedProperties = this.getRequestedProperties(data)
     if (requestedProperties) {
       for (let p in requestedProperties) {
@@ -991,16 +991,31 @@ var NewResourceMixin = {
     var error
     if (params.noError)
       return
-    var err = this.state.missedRequiredOrErrorValue
-            ? this.state.missedRequiredOrErrorValue[params.prop.name]
+    let {missedRequiredOrErrorValue, isRegistration} = this.state
+    let {prop} = params
+
+    var err = missedRequiredOrErrorValue
+            ? missedRequiredOrErrorValue[prop.name]
             : null
-    if (!err  &&  params.errors  &&  params.errors[params.prop.name])
+    if (!err  &&  params.errors  &&  params.errors[prop.name])
       err = params.errors[params.prop.name]
 
-    if (err)
+    if (!err)
+      return
+    if (isRegistration)
       return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
-               <Text style={styles.font14, {color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+               <Text style={styles.font14, {color: '#eeeeee'}}>{err}</Text>
              </View>
+
+    let addStyle = {paddingVertical: 3, marginTop: prop.type === 'object' ||  prop.type === 'date' ? 0 : 2, backgroundColor: '#990000'}
+    return <View style={[styles.err, {paddingHorizontal: 10}]} key={this.getNextKey()}>
+             <View style={addStyle}>
+               <Text style={styles.font14, {paddingLeft: 5, color: '#eeeeee'}}>{err}</Text>
+             </View>
+           </View>
+      // return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
+      //          <Text style={styles.font14, {color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+      //        </View>
   },
 
   myBooleanTemplate(params) {
@@ -1062,7 +1077,7 @@ var NewResourceMixin = {
     let lcolor = this.getLabelAndBorderColor(prop.name)
     if (resource && resource[prop.name]) {
       label = resource[prop.name].title
-      propLabel = <Text style={[styles.dateLabel, {color: lcolor}]}>{params.label}</Text>
+      propLabel = <Text style={[styles.dateLabel, {paddingLeft: 10, color: lcolor}]}>{params.label}</Text>
     }
     else {
       label = params.label
@@ -1089,7 +1104,8 @@ var NewResourceMixin = {
     if (!value)
       value = translate(params.prop)  + (required  &&  ' *')
 
-    let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+    // let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+    let st = utils.isWeb() ? { } : {marginHorizontal: 10}
 
     // convert from UTC date to local, so DatePicker displays it correctly
     // e.g. 1999-04-13 UTC -> 1999-04-13 EDT
@@ -1100,7 +1116,7 @@ var NewResourceMixin = {
     let help = this.getHelp(prop, true)
     return (
       <View key={this.getNextKey()} ref={prop.name}>
-        <View style={[st, { marginHorizontal: 10, paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, height: 60, justifyContent: 'flex-end'}]}>
+        <View style={[st, { paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, height: 60, justifyContent: 'flex-end'}]}>
           {propLabel}
           <DatePicker
             style={[styles.datePicker, {width: utils.dimensions(component).width - 30, paddingBottom: 3}]}
@@ -1122,7 +1138,7 @@ var NewResourceMixin = {
               dateText: styles.dateText,
               placeholderText: [styles.font20, {
                 color: params.value ? '#555555' : '#aaaaaa',
-                paddingLeft: 0
+                paddingLeft: 10
               }],
               dateIconColor: {color: LINK_COLOR},
               dateIcon: styles.dateIcon
