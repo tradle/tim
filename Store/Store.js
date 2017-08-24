@@ -4506,8 +4506,10 @@ var Store = Reflux.createStore({
           let meProfileId = utils.getId(utils.getMe())
           let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
           let rm = assignedRM && assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
-          if (rm && rm.length)
-            result = result.filter((r) => r[TYPE] === FORM_ERROR || utils.getId(r.from) !== meProfileId)
+          if (rm && rm.length) {
+            result = result.filter((r) => return !rm[utils.getId(r)])
+            result = result.filter((r) => return !(r[TYPE] === FORM_ERROR && utils.getId(r.from) !== meProfileId))
+          }
           retParams.list = result
         }
         else {
