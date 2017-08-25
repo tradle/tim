@@ -336,11 +336,26 @@ var utils = {
     let label = model.id.split('.')[1]
     if (isPlural)
       label += 's'
-    return label
-          // insert a space before all caps
-          .replace(/([A-Z])/g, ' $1')
-          // uppercase the first character
-          .replace(/^./, function(str){ return str.toUpperCase(); }).trim()
+    let len = label.length
+    let newLabel = ''
+
+    for (let i=0; i<len; i++)  {
+      let ch = label.charAt(i)
+      if (ch === ch.toLowerCase())
+        newLabel += ch
+      else {
+        let ch1 = i ? label.charAt(i - 1) : ''
+        if (ch1  &&  ch1 === ch1.toLowerCase())
+          newLabel += ' '
+        newLabel += ch
+      }
+    }
+    return newLabel
+    // return label
+    //       // insert a space before all caps
+    //       .replace(/([A-Z])/g, ' $1')
+    //       // uppercase the first character
+    //       .replace(/^./, function(str){ return str.toUpperCase(); }).trim()
   },
   makeLabel(label) {
     return label
