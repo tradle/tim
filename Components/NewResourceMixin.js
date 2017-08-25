@@ -845,7 +845,6 @@ var NewResourceMixin = {
     let lStyle = styles.labelStyle
 
     let maxChars = (utils.dimensions(component).width - 40)/utils.getFontSize(9)
-    // if (prop.ref  &&  prop.ref === MONEY  &&  !required) {
       // let some space for wrapping
       if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
         lStyle = [lStyle, {marginTop: 0}]

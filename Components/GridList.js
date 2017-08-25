@@ -1044,7 +1044,7 @@ class GridList extends Component {
       if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
           !mm.isInterface                &&
            mm.subClassOf !== ENUM        &&
-           mm.subClassOf !== METHOD      &&
+         mm.subClassOf !== METHOD      &&
           mm.subClassOf !== constants.TYPES.FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
         if (filter) {
           if (utils.makeModelTitle(mm).toLowerCase().indexOf(filterLower) !== -1)
@@ -1313,10 +1313,13 @@ class GridList extends Component {
                     title: utils.getDisplayName(resource),
                     id: isMessage ? 5 : 3,
                     component: isMessage ?  MessageView : ResourceView,
-                    bankStyle: this.props.bankStyle,
                     // titleTextColor: '#7AAAC3',
                     backButtonTitle: 'Back',
-                    passProps: {resource: resource}
+                    passProps: {
+                      bankStyle: this.props.bankStyle,
+                      search: this.props.search,
+                      resource: resource[v]
+                    }
                   });
                   }}>
                   {row}
@@ -1698,7 +1701,7 @@ class GridList extends Component {
       initialListSize={10}
       pageSize={20}
       canLoadMore={true}
-      renderScrollComponent={props => <InfiniteScrollView {...props}  onScroll={this.onScroll.bind(this)} pagingEnabled={true} />}
+      renderScrollComponent={props => <InfiniteScrollView {...props}  onScroll={this.onScroll.bind(this)} />}
       onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
       scrollRenderAhead={10}
       showsVerticalScrollIndicator={false} />;

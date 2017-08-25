@@ -475,7 +475,6 @@ var Store = Reflux.createStore({
 
     await this.addYuki()
     await this._yuki.welcome()
-
     // this.postHistory()
   },
 
@@ -3410,20 +3409,32 @@ var Store = Reflux.createStore({
     var {resource, action, noTrigger, search} = params
     // await this._loadedResourcesDefer.promise
     if (search) {
-      let modelName = resource[TYPE]
+      let modelName = utils.getType(resource)
+
       let table = `r_${modelName.replace('.', '_')}`
-      let query = `query {\n${table} (_link: "${resource[CUR_HASH]}")\n`
+
+      let _link = resource[CUR_HASH]
+      if (!_link) {
+        let parts = resource.id.split('_')
+        _link = parts[parts.length - 1]
+      }
+      let query = `query {\n${table} (_link: "${_link}")\n`
 
       let m = this.getModel(modelName)
       let arr = this.getAllPropertiesForServerSearch(m)
 
       query += `\n{${arr.join('   \n')}\n}\n}`
+      try {
+        let r = await client.query({query: gql(`${query}`)})
+        let result = this.convertToResource(r.data[table])
 
-      let r = await client.query({query: gql(`${query}`)})
-      let result = this.convertToResource(r.data[table])
-
-      let retParams = { resource: r, action: 'getItem' }
-      this.trigger(retParams)
+        let retParams = { resource: r, action: 'getItem' }
+        this.trigger(retParams)
+      }
+      catch(err) {
+        console.log('onGetItem: ' + err)
+        debugger
+      }
       return
     }
     let r = this._getItem(utils.getId(resource))
@@ -5100,7 +5111,7 @@ var Store = Reflux.createStore({
     return contexts[0]
   },
 
-  searchServer(params) {
+  async searchServer(params) {
     let {modelName, filterResource, sortProperty, asc, limit, direction} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
@@ -5311,37 +5322,34 @@ var Store = Reflux.createStore({
 // #     # }
 // #   }
 // # }
-    return client.query({
-        query: gql(`${query}`),
-      })
-      .then((data) => {
-        let result = data.data[table]
-        let endCursor = result.pageInfo.endCursor
-        if (endCursor) {
-          // if (!params.direction  ||  params.direction === 'down') {
-            let hasThisCursor = cursor.endCursor.some((c) => c === endCursor)
-            if (!hasThisCursor)
-              cursor.endCursor.push(endCursor)
-          // }
-        }
+    try {
+      let data = await client.query({
+          query: gql(`${query}`),
+        })
+      let result = data.data[table]
+      let endCursor = result.pageInfo.endCursor
+      if (endCursor) {
+        // if (!params.direction  ||  params.direction === 'down') {
+          let hasThisCursor = cursor.endCursor.some((c) => c === endCursor)
+          if (!hasThisCursor)
+            cursor.endCursor.push(endCursor)
+        // }
+      }
 
-        if (result.edges.length) {
-          // if (result.edges.length < limit)
-          //   cursor.endCursor = null
-          let to = this.getRepresentative(utils.getId(me.organization))
-          let toId = utils.getId(to)
-          let list = result.edges.map((r) => this.convertToResource(r))
-          this.trigger({action: 'list', list: list, resource: filterResource, direction: direction})
-        }
-        else
-          this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction})
-
-        console.log(prettify(data))
-      })
-      .catch((error) => {
-        // debugger
-        console.error(error)
-      });
+      if (!result.edges.length) {
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction})
+        return
+      }
+        // if (result.edges.length < limit)
+        //   cursor.endCursor = null
+      let to = this.getRepresentative(utils.getId(me.organization))
+      let toId = utils.getId(to)
+      let list = result.edges.map((r) => this.convertToResource(r))
+      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction})
+    } catch(error) {
+      // debugger
+      console.error(error)
+    }
 
     function prettify (obj) {
       return JSON.stringify(obj, null, 2)
@@ -5435,7 +5443,7 @@ var Store = Reflux.createStore({
 
     let rr = {}
     for (let p in r) {
-      if (props[p])
+      if (r[p]  &&  props[p])
         rr[p] = r[p]
     }
     let fromId = [PROFILE, r._author].join('_')
