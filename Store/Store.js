@@ -14,7 +14,9 @@ import ReactNative, {
 
 const gql = require('graphql-tag')
 const { ApolloClient, createNetworkInterface } = require('apollo-client')
-const graphqlEndpoint = process.argv[2] || 'http://localhost:4000'
+
+const graphqlEndpoint = process.argv[2]  ||  'https://uhaylip7rh.execute-api.us-east-1.amazonaws.com/dev/tradle/graphql'
+// const graphqlEndpoint = process.argv[2] || 'http://localhost:4000'
 const client = new ApolloClient({
   networkInterface: createNetworkInterface({
     uri: graphqlEndpoint
@@ -270,6 +272,7 @@ var language
 var dictionary = {}
 var isAuthenticated
 var meDriver
+var cursor = {}
 // var publishedIdentity
 var ready;
 var networkName = 'testnet'
@@ -2325,7 +2328,13 @@ var Store = Reflux.createStore({
     // promises.push(self.addInfo(sp, originalUrl, newServer))
   },
   addInfo(sp, url, newServer) {
-    var okey = sp.org ? utils.getId(sp.org) : null
+    var okey
+    if (sp.org) {
+      if (!sp.org[ROOT_HASH])
+        sp.org[ROOT_HASH] = protocol.linkString(sp.org)
+      okey = utils.getId(sp.org)
+    }
+
     var hash = protocol.linkString(sp.bot.pub)
     var ikey = IDENTITY + '_' + hash
     var batch = []
@@ -4191,6 +4200,7 @@ var Store = Reflux.createStore({
           let toR = self._getItem(utils.getId(returnVal.to))
           let id = toR.organization ? utils.getId(toR.organization) : utils.getId(toR)
           self.addMessagesToChat(id, returnVal)
+          org = toR.organization
         }
         var params;
 
@@ -4860,8 +4870,10 @@ var Store = Reflux.createStore({
 
         let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
         let rm = assignedRM && assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
-        if (rm && rm.length)
-          result = result.filter((r) => utils.getId(r.from) !== meProfileId)
+        if (rm && rm.length) {
+          result = result.filter((r) => !rm[utils.getId(r)])
+          result = result.filter((r) => !(r[TYPE] === FORM_ERROR && utils.getId(r.from) !== meProfileId))
+        }
         retParams.list = result
       }
       else {
@@ -5089,7 +5101,11 @@ var Store = Reflux.createStore({
   },
 
   searchServer(params) {
-    let {modelName, filterResource, sortProperty, asc, limit} = params
+    let {modelName, filterResource, sortProperty, asc, limit, direction} = params
+
+    if (filterResource  &&  !Object.keys(filterResource).length)
+      filterResource = null
+
     let table = `rl_${modelName.replace('.', '_')}`
     let query = `query {\n${table}\n`
     let model = this.getModel(modelName)
@@ -5156,14 +5172,12 @@ var Store = Reflux.createStore({
             inClause.push(s)
           }
           else {
-            if (props[p].ref === MONEY)
-              continue
-            // {
-            //   eq += `\n   ${p}: {
-            //                   currency: "${val.currency}",
-            //                   value: "${val.value}"
-            //                 },`
-            // }
+            if (props[p].ref === MONEY) {
+              eq += `\n   ${p}: {
+                              currency: "${val.currency}",
+                              value: "${val.value}"
+                            },`
+            }
             else {
               op.EQ += `\n   ${p}: {
                             id: "${val.id}"
@@ -5184,10 +5198,45 @@ var Store = Reflux.createStore({
            ${op[o]}\n},`
       }
     }
-    let hasFilter = qq.length
     query += '('
+    let hasFilter = qq.length
+    if (!cursor  ||  cursor.modelName !== modelName)
+      cursor = {}
+    if (limit) {
+      if (cursor) {
+        if (cursor.filter) {
+          if (!filterResource  ||  deepEqual(filterResource,  cursor.filter))
+            cursor = {}
+        }
+      }
+      cursor.endCursor = cursor.endCursor || []
+      cursor.modelName = modelName
+      cursor.filter = filterResource || null
+
+      let endCursor
+      let len = cursor.endCursor.length
+      if (len) {
+        if (direction === 'down')
+          endCursor = cursor.endCursor[len - 1]
+        else {
+          if (len > 2) {
+            cursor.endCursor.splice(len - 2, 1)
+            cursor.endCursor.splice(len - 1, 1)
+            len -= 2
+          }
+          else
+            cursor.endCursor = []
+          endCursor = (len - 1) ? cursor.endCursor[len - 2] : null
+        }
+      }
+      else
+        endCursor = null
+      if (endCursor)
+        query += `after: "${endCursor}"\n`
+      query += `first: ${limit}\n`
+    }
     if (hasFilter)
-      query += `filter: { ${qq} },`
+      query += `filter: { ${qq} },\n`
     if (sortProperty) {
       query += `\norderBy: {
         property: ${sortProperty},
@@ -5199,12 +5248,20 @@ var Store = Reflux.createStore({
         property: _time,
         desc: true
       }`
-    if (limit)
-      query += `, limit: ${limit}`
+    // if (limit)
+    //   query += `, limit: ${limit}`
     query += ')'
+    query += `\n{\n`
+    query += `pageInfo {\n endCursor\n}\n`
+    query += `edges {\n node {\n`
 
     let arr = this.getAllPropertiesForServerSearch(model)
-    query += `\n{\n${arr.join('   \n')}\n}\n}`
+
+    query += `${arr.join('   \n')}`
+    query += `\n}`   // close 'node'
+    query += `\n}`   // close 'edges'
+    query += `\n}`   // close properties block
+    query += `\n}`   // close query
 
 // # {
 // #   rl_tradle_FormRequest(filter: {
@@ -5259,14 +5316,25 @@ var Store = Reflux.createStore({
       })
       .then((data) => {
         let result = data.data[table]
-        if (result.length) {
+        let endCursor = result.pageInfo.endCursor
+        if (endCursor) {
+          // if (!params.direction  ||  params.direction === 'down') {
+            let hasThisCursor = cursor.endCursor.some((c) => c === endCursor)
+            if (!hasThisCursor)
+              cursor.endCursor.push(endCursor)
+          // }
+        }
+
+        if (result.edges.length) {
+          // if (result.edges.length < limit)
+          //   cursor.endCursor = null
           let to = this.getRepresentative(utils.getId(me.organization))
           let toId = utils.getId(to)
-          let list = result.map((r) => this.convertToResource(r))
-          this.trigger({action: 'list', list: list, resource: filterResource})
+          let list = result.edges.map((r) => this.convertToResource(r))
+          this.trigger({action: 'list', list: list, resource: filterResource, direction: direction})
         }
         else
-          this.trigger({action: 'list', resource: filterResource})
+          this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction})
 
         console.log(prettify(data))
       })
@@ -5281,7 +5349,7 @@ var Store = Reflux.createStore({
   },
   getAllPropertiesForServerSearch(model) {
     let props = model.properties
-    let arr = model.inlined ? [] : ['_permalink', '_link', '_time', '_author', '_t']
+    let arr = model.inlined ? [] : ['_permalink', '_link', '_time', '_author', '_authorTitle', '_t']
 
     for (let p in props) {
       if (p.charAt(0) === '_')
@@ -5290,54 +5358,79 @@ var Store = Reflux.createStore({
         continue
       if (props[p].displayAs)
         continue
-      if (props[p].type === 'array'  ||
-          props[p].type === 'date')
+      let ptype = props[p].type
+      if (ptype === 'array' || ptype === 'date')
         continue
-      if (props[p].type === 'object') {
-        let ref = props[p].ref
-        if (!ref) {
-          if (props[p].range === 'json')
-            arr.push(p)
-          continue
-        }
-        if (ref === MONEY) {
-          arr.push(
-            `${p} {
-              value
-              currency
-            }`
-          )
-          continue
-        }
-        if (ref === COUNTRY  ||  ref === CURRENCY)
-          arr.push(p)
-        else {
-          let m = utils.getModel(ref).value
-          if (m.subClassOf === ENUM) {
-            if (m.enum)
-              arr.push(
-                `${p} {
-                  id
-                  title
-                }`
-              )
-            else
-              arr.push(p)
-          }
-          else if (m.id === PHOTO) {
-            let mprops = m.properties
-            arr.push(
-              `${p} {${this.getAllPropertiesForServerSearch(m)}}`
-            )
-          }
-        }
+      if (ptype !== 'object') {
+        arr.push(p)
         continue
       }
-      arr.push(p)
+      let ref = props[p].ref
+      if (!ref) {
+        if (props[p].range === 'json')
+          arr.push(p)
+        continue
+      }
+      if (ref === ORGANIZATION) {
+        continue
+      }
+      if (props[p].inlined) {
+        let allProps = this.getAllPropertiesForServerSearch(this.getModel(ref))
+        arr.push(
+          `${p} {
+            ${allProps.toString().replace(/,/g, '\n')}
+          }`
+        )
+
+        continue
+      }
+      if (ref === MONEY) {
+        arr.push(
+          `${p} {
+            value
+            currency
+          }`
+        )
+        continue
+      }
+
+      // if (ref === COUNTRY  ||  ref === CURRENCY)
+      //   arr.push(p)
+
+      else {
+        let m = utils.getModel(ref).value
+        if (m.subClassOf === ENUM) {
+          if (m.enum)
+            arr.push(
+              `${p} {
+                id
+                title
+              }`
+            )
+          else
+            arr.push(p)
+        }
+        else if (m.id === PHOTO) {
+          let mprops = m.properties
+          arr.push(
+            `${p} {${this.getAllPropertiesForServerSearch(m)}}`
+          )
+        }
+        else {
+          arr.push(
+            `${p} {
+              id
+              title
+            }`
+          )
+        }
+      }
+      continue
     }
     return arr
   },
-  convertToResource(r) {
+  convertToResource(elm) {
+    let r = elm.node
     let props = this.getModel(r[TYPE]).properties
 
     let rr = {}
@@ -5354,7 +5447,7 @@ var Store = Reflux.createStore({
       [CUR_HASH]: r._link,
       from: {
         id: fromId,
-        title: from ? utils.getDisplayName(from) : null
+        title: from ? utils.getDisplayName(from) : r._authorTitle
       },
       to: {
         id: toId,
