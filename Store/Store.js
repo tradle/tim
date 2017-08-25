@@ -5173,7 +5173,7 @@ var Store = Reflux.createStore({
           }
           else {
             if (props[p].ref === MONEY) {
-              eq += `\n   ${p}: {
+              op.EQ += `\n   ${p}: {
                               currency: "${val.currency}",
                               value: "${val.value}"
                             },`
