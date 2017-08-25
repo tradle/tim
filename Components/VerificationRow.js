@@ -81,7 +81,7 @@ class VerificationRow extends Component {
     if (r  &&  isMyProduct)
       photo = resource.from.photo
     else {
-      let docModel = utils.getModel(r[TYPE]).value
+      let docModel = utils.getModel(utils.getType(r)).value
       let mainPhotoProp = utils.getMainPhotoProperty(docModel)
       if (mainPhotoProp)
         photo = r[mainPhotoProp]
@@ -105,7 +105,7 @@ class VerificationRow extends Component {
       photo = <View style={{width: 70}} />
 
     var verificationRequest = resource.document
-                            ? utils.getModel(resource.document[TYPE]).value
+                            ? utils.getModel(utils.getType(resource.document)).value
                             : utils.getModel(resource[TYPE]).value;
 
     var rows = [];
@@ -124,7 +124,7 @@ class VerificationRow extends Component {
     // }
 
     var verifiedBy, org
-    if (!isChooser  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
+    if (!isChooser  && !this.props.search  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
       var contentRows = [];
 
       if (isMyProduct)
@@ -159,6 +159,9 @@ class VerificationRow extends Component {
       if (listModel.id === FORM_REQUEST)
         title = utils.makeModelTitle(resource.form)
       if (this.props.search) {
+        if (isVerification)
+          title = verificationRequest.title
+        else
         // if (listModel.id === PRODUCT_APPLICATION)
           title = 'Submited by ' + resource.from.title
       }

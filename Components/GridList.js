@@ -990,7 +990,7 @@ class GridList extends Component {
     // let {model} = this.props
     this.props.navigator.push({
       id: 30,
-      title: translate('Search ' + utils.makeModelTitle(model)),
+      title: translate('searchSomething', utils.makeModelTitle(model)),
       backButtonTitle: 'Back',
       component: GridList,
       passProps: {
@@ -1003,7 +1003,7 @@ class GridList extends Component {
       },
       rightButtonTitle: 'Search',
       onRightButtonPress: {
-        title: 'Search ' + utils.makeModelTitle(model),
+        title: translate('searchSomething', utils.makeModelTitle(model)),
         id: 4,
         component: NewResource,
         titleTextColor: '#7AAAC3',
