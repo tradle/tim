@@ -325,10 +325,6 @@ const ANALYTICS_KEY = 'analyticskey'
 // const ENCRYPTION_SALT = 'accountsalt'
 const TLS_ENABLED = false
 const POLITE_TASK_TIMEOUT = __DEV__ ? 60000 : 6000
-const isInAWS = provider => {
-  const url = getProviderUrl(provider)
-  return /\.amazonaws.com$/.test(parseURL(url).host)
-}
 
 const {
   newAPIBasedVerification,
@@ -883,6 +879,11 @@ var Store = Reflux.createStore({
             message: msg
           })
         } catch (err) {
+          debugger
+          if (/timetravel/i.test(err.type)) {
+            self.abortUnsent({ to: identifier })
+          }
+
           return cb(err)
         }
 
@@ -985,6 +986,13 @@ var Store = Reflux.createStore({
   },
   promiseEngine() {
     return this._enginePromise
+  },
+  async abortUnsent({ to }) {
+    const links = await meDriver.abortUnsent({ to })
+    debug(`aborted unsent messages to ${to}: ${links}`)
+    debugger
+    // TODO: mark messages as undelivered
+    // offer user to resend them
   },
   initChats() {
     let meId = utils.getId(me)
@@ -1392,26 +1400,26 @@ var Store = Reflux.createStore({
       clientId: `${node.permalink}${node.permalink}`
     })
 
+    client.onmessage = co(function* (msg) {
+      debug(`receiving msg ${msg._n} from ${counterparty}`)
+      yield self.queueReceive({ msg, from: counterparty })
+    })
+
     wsClients.add({
       client,
       url,
       identifier: counterparty,
       path: provider.id
     })
-
-    client.onmessage = co(function* (msg) {
-      debug(`receiving msg ${msg._n} from ${counterparty}`)
-      yield self.queueReceive({ msg, from: counterparty })
-    })
   }),
 
   addProvider(provider) {
     let self = this
-    const url = getProviderUrl(provider)
-    if (isInAWS(provider)) {
+    if (provider.aws) {
       return this.addAWSProvider(provider)
     }
 
+    const url = getProviderUrl(provider)
     // let httpClient = driverInfo.httpClient
     // httpClient.addRecipient(
     //   provider.hash,
@@ -2064,7 +2072,8 @@ var Store = Reflux.createStore({
       url: originalUrl,
       style: sp.style,
       permalink: sp.bot.permalink,
-      publicConfig: sp.publicConfig
+      publicConfig: sp.publicConfig,
+      aws: sp.aws
     }
     // Check is this is an update SP info
     let oldSp
@@ -2189,10 +2198,12 @@ var Store = Reflux.createStore({
 
     return Q.allSettled(promises)
     .then(function() {
+      const common = { hash, txId: sp.bot.txId, aws: sp.aws }
       if (!sp.isEmployee)
-        return {hash: hash, txId: sp.bot.txId, id: sp.id, url: url}
+        return { ...common, id: sp.id, url }
+
       let orgSp = SERVICE_PROVIDERS.filter((r) => utils.getId(r.org) === okey)[0]
-      return {hash: hash, txId: sp.bot.txId, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
+      return { ...common, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
     })
     .catch(err => {
       debugger
@@ -7664,10 +7675,15 @@ var Store = Reflux.createStore({
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
-        if (isModelsPack  &&  /^tradle\.[^.]+$/.test(m.id)) {
-          console.log('ModelsPack: the tradle.* namespace is reserved. Please rename and resend the model')
-          return
-        }
+        // if (isModelsPack  &&  /^tradle\.[^.]+$/.test(m.id)) {
+        //   Alert.alert(
+        //     'Service Provider namespacing error',
+        //     'This service provider is using data models in a reserved namespace. Please notify them.'
+        //   )
+
+        //   // console.log('ModelsPack: the tradle.* namespace is reserved. Please rename and resend the model')
+        //   return
+        // }
 
         if (!this.getModel(m.id))
           this._emitter.emit('model:' + m.id)
