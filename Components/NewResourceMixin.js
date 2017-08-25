@@ -35,6 +35,8 @@ import BlinkID from './BlinkID'
 var MarkdownPropertyEdit = require('./MarkdownPropertyEdit')
 var Markdown = require('./Markdown')
 
+var format = require('string-template')
+
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
@@ -183,7 +185,7 @@ var NewResourceMixin = {
     let { errs, requestedProperties } = this.props
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
-    if (!requestedProperties)
+    if (!requestedProperties  &&  data)
       requestedProperties = this.getRequestedProperties(data)
     if (requestedProperties) {
       for (let p in requestedProperties) {
@@ -526,12 +528,13 @@ var NewResourceMixin = {
     }
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[prop.name]
-    this.setState({resource: r})
     if (!this.props.search  &&  r[constants.TYPE] !== SETTINGS)
       Actions.saveTemporary(r)
 
-    state.requestedProperties = this.getRequestedProperties(r)
-    this.setState(state)
+    this.setState({
+      resource: r,
+      requestedProperties: this.getRequestedProperties(r)
+    })
   },
   getRequestedProperties(r) {
     let rtype = r[TYPE]
@@ -769,6 +772,10 @@ var NewResourceMixin = {
 
     let {bankStyle} = this.props
     let hasValue = value  &&  value.length
+    if (hasValue) {
+      value = format(value, this.state.resource).trim()
+      hasValue = value  &&  value.length
+    }
     let lcolor = hasValue ? '#555555' : this.getLabelAndBorderColor(prop.name)
 
     let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
@@ -782,7 +789,7 @@ var NewResourceMixin = {
     if (hasValue) {
       markdown = <View style={styles.markdown}>
                    <Markdown markdownStyles={this.getMarkdownStyles()}>
-                     {value || ''}
+                     {value}
                    </Markdown>
                  </View>
       title = utils.translate(prop)
@@ -919,16 +926,31 @@ var NewResourceMixin = {
     var error
     if (params.noError)
       return
-    var err = this.state.missedRequiredOrErrorValue
-            ? this.state.missedRequiredOrErrorValue[params.prop.name]
-            : null
-    if (!err  &&  params.errors  &&  params.errors[params.prop.name])
-      err = params.errors[params.prop.name]
-
-    if (err)
+    let {missedRequiredOrErrorValue, isRegistration} = this.state
+    let {prop} = params
+    var err = missedRequiredOrErrorValue
+            ? missedRequiredOrErrorValue[prop.name]
+             : null
+    if (!err) {
+      if (params.errors  &&  params.errors[prop.name])
+        err = params.errors[params.prop.name]
+      else
+        return
+    }
+    if (isRegistration)
       return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
-               <Text style={styles.font14, {color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+               <Text style={styles.font14, {color: '#eeeeee'}}>{err}</Text>
              </View>
+
+    let addStyle = {paddingVertical: 3, marginTop: prop.type === 'object' ||  prop.type === 'date' ? 0 : 2, backgroundColor: '#990000'}
+    return <View style={[styles.err, {paddingHorizontal: 10}]} key={this.getNextKey()}>
+             <View style={addStyle}>
+               <Text style={styles.font14, {paddingLeft: 5, color: '#eeeeee'}}>{err}</Text>
+             </View>
+           </View>
+    // return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
+    //          <Text style={styles.font14, {color: isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+    //        </View>
   },
 
   myBooleanTemplate(params) {
