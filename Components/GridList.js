@@ -23,6 +23,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
+var debounce = require('debounce')
 
 var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
@@ -140,7 +141,7 @@ class GridList extends Component {
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
     this.isSmallScreen = utils.dimensions(GridList).width < 736
-    LIMIT = 20 //this.isSmallScreen ? 20 : 40
+    LIMIT = 10 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
       isLoading: true,
@@ -179,6 +180,9 @@ class GridList extends Component {
       this.state.sharedWith = {}
       routes[routes.length - 1].onRightButtonPress = this.props.onDone.bind(this, this.state.chosen)
     }
+    this.numberOfPages = 0
+    this.offset = 0
+    this.contentHeight = 0
   }
   done() {
     let orgs = []
@@ -250,7 +254,18 @@ class GridList extends Component {
     if (this.props.navigator.getCurrentRoutes().length === 1)
       StatusBar.setHidden(true)
   }
+  onScroll(event) {
+    if (this.state.refreshing)
+      return
+
+    var currentOffset = event.nativeEvent.contentOffset.y
+    this.contentHeight = event.nativeEvent.contentSize.height
+    let delta = currentOffset - (this.offset || 0)
+    this.direction = delta > 0 || Math.abs(delta) < 3 ? 'down' : 'up'
+    this.offset = currentOffset
+  }
   componentWillMount() {
+    debounce(this._loadMoreContentAsync.bind(this), 1000)
     let {chat, resource, search, modelName} = this.props
     if (chat) {
       utils.onNextTransitionEnd(this.props.navigator, () => {
@@ -270,7 +285,7 @@ class GridList extends Component {
           modelName: modelName,
           filterResource: resource,
           search: true,
-          limit: LIMIT
+          limit: LIMIT * 2
         })
         return
       }
@@ -445,8 +460,11 @@ class GridList extends Component {
       if (!params.list) {
         if (params.alert)
           Alert.alert(params.alert)
-        else if (this.props.search  &&  !this.props.isModel)
-          this.setState({list: [], dataSource: this.state.dataSource.cloneWithRows([])})
+        else if (this.props.search)
+          this.state.refreshing = false
+
+        // else if (this.props.search  &&  !this.props.isModel)
+        //   this.setState({list: [], dataSource: this.state.dataSource.cloneWithRows([])})
         return
       }
       if (params.isTest  !== this.props.isTest)
@@ -456,7 +474,7 @@ class GridList extends Component {
         if (m.id !== this.props.modelName)  {
           let model = utils.getModel(this.props.modelName).value
           if (model.isInterface) {
-            if (m.interfaces  &&  m.interfaces.indexOf(this.props.modelName) === -1)
+            if (!m.interfaces  ||  m.interfaces.indexOf(this.props.modelName) === -1)
               return
           }
           else if (m.subClassOf !== this.props.modelName)
@@ -484,12 +502,36 @@ class GridList extends Component {
           return utils.getId(r) !== sharingChatId
         })
       }
-      if (params.start) {
-        let l = []
-        this.state.list.forEach((r) => l.push(r))
-        list.forEach((r) => l.push(r))
-        list = l
+
+      if (this.props.search) {
+        if (params.direction === 'up')
+          --this.numberOfPages
+        else
+          ++this.numberOfPages
       }
+
+      let l = this.state.list
+      if (l) { //  &&  l.length === LIMIT * 2) {
+        let newList = []
+        if (this.direction === 'down') {
+          // for (let i=LIMIT; i<l.length; i++)
+          for (let i=0; i<l.length; i++)
+            newList.push(l[i])
+          list.forEach((r) => newList.push(r))
+          list = newList
+        }
+        else {
+          for (let i=0; i<l.length; i++)
+          // for (let i=0; i<LIMIT; i++)
+            list.push(l[i])
+        }
+      }
+      // if (params.start) {
+      //   let l = []
+      //   this.state.list.forEach((r) => l.push(r))
+      //   list.forEach((r) => l.push(r))
+      //   list = l
+      // }
     }
 
     list = this.addTestProvidersRow(list)
@@ -947,7 +989,7 @@ class GridList extends Component {
     // });
     // let {model} = this.props
     this.props.navigator.push({
-      id: 31,
+      id: 30,
       title: translate('Search ' + utils.makeModelTitle(model)),
       backButtonTitle: 'Back',
       component: GridList,
@@ -1381,23 +1423,44 @@ class GridList extends Component {
   }
   async _loadMoreContentAsync() {
     // debugger
-    if (this.state.refreshing) {
+    if (this.state.refreshing)
       return
+    // if (this.direction === 'up' &&  this.numberOfPages < 2)
+    //   return
+    if (this.direction === 'down') {
+      if (this.offset < this.contentHeight / 2)
+        return
     }
+    else
+      return
     debugger
-    this.state.refreshing = true
     let list = this.state.list
+    this.state.refreshing = true
     Actions.list({
       modelName: this.props.modelName,
       sortProperty: this.props.sortProp,
       asc: this.props.order,
       limit: LIMIT,
+      direction: this.direction,
       search: this.props.search,
-      // limit: this.props.limit || 10,
       start: list.length,
-      gridView: this.state.isGrid,
       startRec: list[this.state.list.length - 1]
     })
+    // if (list.length < LIMIT)
+    //   return
+    // this.setTimeout(() => {
+    //   this.state.refreshing = true
+    //   Actions.list({
+    //     modelName: this.props.modelName,
+    //     sortProperty: this.props.sortProp,
+    //     asc: this.props.order,
+    //     limit: LIMIT,
+    //     direction: this.direction,
+    //     search: this.props.search,
+    //     start: list.length,
+    //     startRec: list[this.state.list.length - 1]
+    //   })
+    // }, 300)
 
     // In this example, we're assuming cursor-based pagination, where any
     // additional data can be accessed at this.props.listData.nextUrl.
@@ -1635,7 +1698,7 @@ class GridList extends Component {
       initialListSize={10}
       pageSize={20}
       canLoadMore={true}
-      renderScrollComponent={props => <InfiniteScrollView {...props} />}
+      renderScrollComponent={props => <InfiniteScrollView {...props}  onScroll={this.onScroll.bind(this)} pagingEnabled={true} />}
       onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
       scrollRenderAhead={10}
       showsVerticalScrollIndicator={false} />;
@@ -1857,7 +1920,7 @@ class GridList extends Component {
   showSearch() {
     this.props.navigator.push({
       title: 'Explore data',
-      id: 31,
+      id: 30,
       component: GridList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
