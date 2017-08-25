@@ -17,7 +17,7 @@
 #import "CodePush.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
-// #import "QTouchposeApplication.h"
+ #import "QTouchposeApplication.h"
 #import "Orientation.h"
 #import <asl.h>
 #import "SplashScreen.h"
@@ -45,14 +45,14 @@
    * on the same Wi-Fi network.
    */
 
-  // QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
-  // touchposeApplication.alwaysShowTouches = YES;
+  QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
+  touchposeApplication.alwaysShowTouches = YES;
 
   [RNBranch initSessionWithLaunchOptions:launchOptions isReferrable:YES];
 #ifdef DEBUG
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
   if (jsCodeLocation == nil) {
-    jsCodeLocation = [NSURL URLWithString:@"http://192.168.0.111:8081/index.ios.bundle?platform=ios&dev=true"];
+    jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.201:8081/index.ios.bundle?platform=ios&dev=true"];
   }
 #else
   jsCodeLocation = [CodePush bundleURL];
