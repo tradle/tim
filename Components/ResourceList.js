@@ -208,7 +208,8 @@ class ResourceList extends Component {
     else
       params.to = this.props.resource
     params.listView = this.props.listView
-    params.limit = 10
+    if (!this.props.isOfficialAccounts)
+      params.limit = 10
     // this.state.isLoading = true;
 
     // if (this.props.tabLabel) {
@@ -1377,7 +1378,7 @@ class ResourceList extends Component {
   showSearch() {
     this.props.navigator.push({
       title: 'Explore data',
-      id: 31,
+      id: 30,
       component: GridList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
