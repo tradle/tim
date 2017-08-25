@@ -149,6 +149,7 @@
     "stable-sha1": "~1.0.1",
     "stream-browserify": "^1.0.0",
     "stream-collector": "^1.0.1",
+    "string-template": "^1.0.0",
     "string_decoder": "^0.10.31",
     "tcomb": "^3.2.13",
     "tcomb-form-native": "^0.6.1",
