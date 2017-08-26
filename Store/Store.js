@@ -3425,14 +3425,14 @@ var Store = Reflux.createStore({
 
       query += `\n{${arr.join('   \n')}\n}\n}`
       try {
-        let r = await client.query({query: gql(`${query}`)})
-        let result = this.convertToResource(r.data[table])
+        let result = await client.query({query: gql(`${query}`)})
+        let r = this.convertToResource(result.data[table])
 
         let retParams = { resource: r, action: 'getItem' }
         this.trigger(retParams)
       }
       catch(err) {
-        console.log('onGetItem: ' + err)
+        console.log('onGetItem', err)
         debugger
       }
       return
@@ -5112,7 +5112,7 @@ var Store = Reflux.createStore({
   },
 
   async searchServer(params) {
-    let {modelName, filterResource, sortProperty, asc, limit, direction} = params
+    let {modelName, filterResource, sortProperty, asc, limit, direction, first} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -5211,7 +5211,7 @@ var Store = Reflux.createStore({
     }
     query += '('
     let hasFilter = qq.length
-    if (!cursor  ||  cursor.modelName !== modelName)
+    if (first  ||  !cursor  ||  cursor.modelName !== modelName)
       cursor = {}
     if (limit) {
       if (cursor) {
@@ -5344,7 +5344,7 @@ var Store = Reflux.createStore({
         //   cursor.endCursor = null
       let to = this.getRepresentative(utils.getId(me.organization))
       let toId = utils.getId(to)
-      let list = result.edges.map((r) => this.convertToResource(r))
+      let list = result.edges.map((r) => this.convertToResource(r.node))
       this.trigger({action: 'list', list: list, resource: filterResource, direction: direction})
     } catch(error) {
       // debugger
@@ -5358,7 +5358,6 @@ var Store = Reflux.createStore({
   getAllPropertiesForServerSearch(model) {
     let props = model.properties
     let arr = model.inlined ? [] : ['_permalink', '_link', '_time', '_author', '_authorTitle', '_t']
-
     for (let p in props) {
       if (p.charAt(0) === '_')
         continue
@@ -5379,17 +5378,26 @@ var Store = Reflux.createStore({
           arr.push(p)
         continue
       }
-      if (ref === ORGANIZATION) {
+      if (ref === ORGANIZATION)
         continue
-      }
-      if (props[p].inlined) {
-        let allProps = this.getAllPropertiesForServerSearch(this.getModel(ref))
-        arr.push(
-          `${p} {
-            ${allProps.toString().replace(/,/g, '\n')}
-          }`
-        )
 
+      if (props[p].inlined) {
+        if (ref === FORM  ||  this.getModel(ref).isInterface) {
+          arr.push(
+            `${p} {
+              id
+              title
+            }`
+          )
+        }
+        else {
+          let allProps = this.getAllPropertiesForServerSearch(this.getModel(ref))
+          arr.push(
+            `${p} {
+              ${allProps.toString().replace(/,/g, '\n')}
+            }`
+          )
+        }
         continue
       }
       if (ref === MONEY) {
@@ -5437,30 +5445,35 @@ var Store = Reflux.createStore({
     }
     return arr
   },
-  convertToResource(elm) {
-    let r = elm.node
-    let props = this.getModel(r[TYPE]).properties
+  convertToResource(r) {
+    // let r = elm.node
+    let m = this.getModel(r[TYPE])
+    let props = m.properties
 
     let rr = {}
     for (let p in r) {
       if (r[p]  &&  props[p])
         rr[p] = r[p]
     }
-    let fromId = [PROFILE, r._author].join('_')
-    let to = this.getRepresentative(utils.getId(me.organization))
-    let toId = utils.getId(to)
-    let from = this._getItem(fromId)
+    let authorId = [PROFILE, r._author].join('_')
+    let author = this._getItem(authorId)
+    let myOrgRep = this.getRepresentative(utils.getId(me.organization))
+    let myOrgRepId = utils.getId(myOrgRep)
+    let from, to
+    if (m.id === FORM_ERROR  ||  m.id === FORM_REQUEST) {
+      from = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
+      to = {id: authorId, title: r._authorTitle}
+    }
+    else {
+      from = {id: authorId, title: r._authorTitle}
+      to = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
+    }
+
     extend(rr, {
       [ROOT_HASH]: r._permalink,
       [CUR_HASH]: r._link,
-      from: {
-        id: fromId,
-        title: from ? utils.getDisplayName(from) : r._authorTitle
-      },
-      to: {
-        id: toId,
-        title: utils.getDisplayName(to)
-      }
+      from: from,
+      to: to
     })
     this.addVisualProps(rr)
     return rr

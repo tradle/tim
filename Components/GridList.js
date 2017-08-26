@@ -265,7 +265,7 @@ class GridList extends Component {
     this.offset = currentOffset
   }
   componentWillMount() {
-    debounce(this._loadMoreContentAsync.bind(this), 1000)
+    // debounce(this._loadMoreContentAsync.bind(this), 1000)
     let {chat, resource, search, modelName} = this.props
     if (chat) {
       utils.onNextTransitionEnd(this.props.navigator, () => {
@@ -285,6 +285,7 @@ class GridList extends Component {
           modelName: modelName,
           filterResource: resource,
           search: true,
+          first: true,
           limit: LIMIT * 2
         })
         return
@@ -513,18 +514,18 @@ class GridList extends Component {
       let l = this.state.list
       if (l) { //  &&  l.length === LIMIT * 2) {
         let newList = []
-        if (this.direction === 'down') {
+        // if (this.direction === 'down') {
           // for (let i=LIMIT; i<l.length; i++)
           for (let i=0; i<l.length; i++)
             newList.push(l[i])
           list.forEach((r) => newList.push(r))
           list = newList
-        }
-        else {
-          for (let i=0; i<l.length; i++)
-          // for (let i=0; i<LIMIT; i++)
-            list.push(l[i])
-        }
+        // }
+        // else {
+        //   for (let i=0; i<l.length; i++)
+        //   // for (let i=0; i<LIMIT; i++)
+        //     list.push(l[i])
+        // }
       }
       // if (params.start) {
       //   let l = []
@@ -1044,8 +1045,8 @@ class GridList extends Component {
       if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
           !mm.isInterface                &&
            mm.subClassOf !== ENUM        &&
-         mm.subClassOf !== METHOD      &&
-          mm.subClassOf !== constants.TYPES.FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
+           mm.subClassOf !== METHOD      &&
+           mm.subClassOf !== constants.TYPES.FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
         if (filter) {
           if (utils.makeModelTitle(mm).toLowerCase().indexOf(filterLower) !== -1)
             mArr.push(mm)
@@ -1430,13 +1431,11 @@ class GridList extends Component {
       return
     // if (this.direction === 'up' &&  this.numberOfPages < 2)
     //   return
-    if (this.direction === 'down') {
-      if (this.offset < this.contentHeight / 2)
-        return
-    }
-    else
+    if (this.direction !== 'down')
       return
-    debugger
+    if (this.offset < this.contentHeight / 2)
+      return
+    // debugger
     let list = this.state.list
     this.state.refreshing = true
     Actions.list({
@@ -1689,7 +1688,7 @@ class GridList extends Component {
                   model={model}
                   isLoading={isLoading}/>
     }
-    content = <ListView
+    content = <ListView  onScroll={this.onScroll.bind(this)}
       dataSource={dataSource}
       renderHeader={this.renderHeader.bind(this)}
       enableEmptySections={true}
@@ -1701,7 +1700,7 @@ class GridList extends Component {
       initialListSize={10}
       pageSize={20}
       canLoadMore={true}
-      renderScrollComponent={props => <InfiniteScrollView {...props}  onScroll={this.onScroll.bind(this)} />}
+      renderScrollComponent={props => <InfiniteScrollView {...props} />}
       onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
       scrollRenderAhead={10}
       showsVerticalScrollIndicator={false} />;
