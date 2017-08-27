@@ -41,7 +41,7 @@ import { makeStylish } from './makeStylish'
 var LINK_COLOR
 var LIMIT = 10
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
-const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM } = TYPES
+const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM, FINANCIAL_PRODUCT } = TYPES
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
