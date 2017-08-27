@@ -2,6 +2,7 @@
 
 // import { makeResponsive } from 'react-native-orient'
 import Gallery from 'react-native-gallery'
+import utils from '../utils/utils'
 
 import React, { Component } from 'react'
 
