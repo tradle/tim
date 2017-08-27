@@ -512,7 +512,7 @@ class GridList extends Component {
       }
 
       let l = this.state.list
-      if (l) { //  &&  l.length === LIMIT * 2) {
+      if (l  &&  !this.props.isBacklink) { //  &&  l.length === LIMIT * 2) {
         let newList = []
         // if (this.direction === 'down') {
           // for (let i=LIMIT; i<l.length; i++)
