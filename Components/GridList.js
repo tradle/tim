@@ -1060,7 +1060,7 @@ class GridList extends Component {
   onSearchChange(filter) {
     this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     if (this.props.search  &&  this.props.isModel) {
-      let mArr = this.filterModels(filter)
+      let mArr = this.filterModels(this.state.filter)
       this.setState({dataSource: this.state.dataSource.cloneWithRows(mArr)})
       return
     }
@@ -1436,7 +1436,7 @@ class GridList extends Component {
     if (this.offset < this.contentHeight / 2)
       return
     // debugger
-    let list = this.state.list
+    let { list=[] } = this.state
     this.state.refreshing = true
     Actions.list({
       modelName: this.props.modelName,
@@ -1446,7 +1446,7 @@ class GridList extends Component {
       direction: this.direction,
       search: this.props.search,
       start: list.length,
-      startRec: list[this.state.list.length - 1]
+      startRec: list[list.length - 1]
     })
     // if (list.length < LIMIT)
     //   return

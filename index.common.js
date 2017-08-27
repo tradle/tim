@@ -19,7 +19,6 @@ import 'stream'
 import debounce from 'debounce'
 // require('./timmy')
 var ResourceList = require('./Components/ResourceList');
-var Datagrid = require('./Components/Datagrid')
 var VerifierChooser = require('./Components/VerifierChooser')
 
 // var VideoPlayer = require('./Components/VideoPlayer')
