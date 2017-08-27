@@ -5153,8 +5153,8 @@
     },
     "react-native-infinite-scroll-view": {
       "version": "0.4.3",
-      "from": "react-native-infinite-scroll-view@>=0.4.3 <0.5.0",
-      "resolved": "https://registry.npmjs.org/react-native-infinite-scroll-view/-/react-native-infinite-scroll-view-0.4.3.tgz"
+      "from": "mvayngrib/react-native-infinite-scroll-view",
+      "resolved": "git://github.com/mvayngrib/react-native-infinite-scroll-view.git#dd31d8353e60dc57c2f6c7e6a72e7d754e454ee1"
     },
     "react-native-keychain": {
       "version": "0.3.1",
