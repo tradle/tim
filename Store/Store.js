@@ -4772,7 +4772,7 @@ var Store = Reflux.createStore({
         }
       }
       else if (modelName === PROFILE  &&  !search) {
-        // result = result.filter((r) => !r._inactive)
+        result = result.filter((r) => !r._inactive)
       }
 
       if (isAggregation)
@@ -4856,9 +4856,9 @@ var Store = Reflux.createStore({
         // entering the chat should clear customer's unread indicator
         shareableResources = await this.getShareableResources(result, to)
       }
+      let toId = utils.getId(to)
       if (me.isEmployee  && to[TYPE] === PROFILE) {
-        debugger
-        let toId = utils.getId(to)
+        // debugger
         let to = this._getItem(toId)
         if (!to.bot) {
           to._unread = 0
@@ -5460,13 +5460,19 @@ var Store = Reflux.createStore({
     let myOrgRep = this.getRepresentative(utils.getId(me.organization))
     let myOrgRepId = utils.getId(myOrgRep)
     let from, to
-    if (m.id === FORM_ERROR  ||  m.id === FORM_REQUEST) {
+    switch (m.id) {
+    case FORM_ERROR:
+    case FORM_REQUEST:
+    case APPLICATION_SUBMITTED:
+    case APPLICATION_DENIAL:
+    case CONFIRMATION:
       from = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
       to = {id: authorId, title: r._authorTitle}
-    }
-    else {
+      break
+    default:
       from = {id: authorId, title: r._authorTitle}
       to = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
+      break
     }
 
     extend(rr, {
@@ -6059,6 +6065,9 @@ var Store = Reflux.createStore({
       }
       else
         return result
+    })
+    .catch((err) => {
+      debugger
     })
 
     function addReferenceLink(stub) {
@@ -8402,18 +8411,16 @@ var Store = Reflux.createStore({
         })
         return
       }
-      if (val[TYPE] !== SIMPLE_MESSAGE) {
-        if (val[TYPE] === FORM_REQUEST) {
-          var fid = this._getItem(val.from)
-          let productToForms = await this.gatherForms(fid)
-          if (val._context)
-            val._context = this._getItem(val._context)
-          let shareables = await this.getShareableResources([val], val.to)
-          this.trigger({action: 'addItem', resource: val, shareableResources: shareables})
-        }
-        else
-          this.trigger({action: 'addItem', resource: val})
+      if (val[TYPE] === FORM_REQUEST) {
+        var fid = this._getItem(val.from)
+        let productToForms = await this.gatherForms(fid)
+        if (val._context)
+          val._context = this._getItem(val._context)
+        let shareables = await this.getShareableResources([val], val.to)
+        this.trigger({action: 'addItem', resource: val, shareableResources: shareables})
       }
+      else
+        this.trigger({action: 'addItem', resource: val})
     }
     else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
       var orgList = this.searchNotMessages({modelName: ORGANIZATION})
