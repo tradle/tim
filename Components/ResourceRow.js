@@ -38,6 +38,7 @@ import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
+const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
 const ROOT_HASH = constants.ROOT_HASH
 const TYPE = constants.TYPE
@@ -133,6 +134,19 @@ class ResourceRow extends Component {
     var isOrg = rType === ORGANIZATION
     var noImage;
     let isOfficialAccounts = this.props.isOfficialAccounts
+    let isModel = resource.type === MODEL
+    if (isModel) {
+      return  <View style={styles.content} key={this.getNextKey()}>
+                <TouchableOpacity onPress={() => this.props.selectModel(resource)} underlayColor='transparent'>
+                  <View style={[styles.row, { width: utils.dimensions(ResourceRow).width - 10}]}>
+                    <View style={[styles.textContainer, {margin: 7}]}>
+                      <Text style={styles.resourceTitle}>{utils.makeModelTitle(resource)}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+                <View style={styles.cellBorder}  key={this.getNextKey()} />
+              </View>
+    }
     if (resource.photos &&  resource.photos.length  &&  resource.photos[0].url) {
       var uri = utils.getImageUri(resource.photos[0].url);
       var params = {
@@ -217,7 +231,7 @@ class ResourceRow extends Component {
                          <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
                        </TouchableHighlight>
                      </View>
-    var textStyle = /*noImage ? [styles.textContainer, {marginVertical: 7}] :*/ styles.textContainer;
+    var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
 
     dateProp = resource[TYPE] === PRODUCT_APPLICATION ? 'time' : dateProp
     let dateRow
@@ -365,6 +379,7 @@ class ResourceRow extends Component {
       let m = utils.getModel(resource.product)
       if (!m)
         return <View/>
+
       if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
         let status, color
         if (resource._approved) {
@@ -404,7 +419,6 @@ class ResourceRow extends Component {
                      {status}
                    </View>
         }
-
           // approved = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
         return  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   <View style={{padding: 5}}>
@@ -414,7 +428,7 @@ class ResourceRow extends Component {
                   {status}
                 </View>
       }
-      return <Text style={styles.resourceTitle}>{translate(utils.getModel(resource.product).value)}</Text>;
+      return <Text style={styles.resourceTitle}>{translate(m.value)}</Text>;
     }
     else if (this.props.isChooser)
       return <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>

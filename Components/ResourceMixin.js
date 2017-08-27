@@ -64,17 +64,19 @@ var ResourceMixin = {
     var type = resource[constants.TYPE] || id.split('_')[0]
     var model = utils.getModel(type).value;
     var title = utils.getDisplayName(resource, model.properties);
-    if (utils.isMessage(resource)) {
+    if (utils.isMessage(type)) {
+      let {bankStyle, search, currency, country} = this.props
       this.props.navigator.push({
         id: 5,
         component: require('./MessageView'),
         backButtonTitle: translate('back'),
         title: model.title,
         passProps: {
-          bankStyle: this.props.bankStyle,
+          bankStyle: bankStyle,
           resource: resource,
-          currency: this.props.currency,
-          country: this.props.country,
+          search: search,
+          currency: currency,
+          country: country,
         }
       })
     }

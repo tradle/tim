@@ -1,6 +1,7 @@
 
 import Q from 'q'
 import Debug from './debug'
+import { Alert } from 'react-native'
 var timerDebug = Debug('TIMER')
 
 global.timeFunctions = exports.timeFunctions = function timeFunctions (obj, overwrite) {
@@ -41,9 +42,9 @@ global.timeFunctions = exports.timeFunctions = function timeFunctions (obj, over
         var ms = stopTimer(false)
         total.time += ms
         total.calls++
-        // if (k === 'send' || k === 'receive' || ms > 200) {
-        //   Alert.alert(`${k} took`, '' + ms)
-        // }
+        if (k === 'send' || k === 'receive' || ms > 200) {
+          Alert.alert(`${k} took`, '' + ms)
+        }
 
         if (ms < 5) return
 

@@ -91,6 +91,7 @@ const MAX_WIDTH = 800
 
 const ENUM = 'tradle.Enum'
 const STYLES_PACK = 'tradle.StylesPack'
+const MSG_LINK = '_msg'
 // var dictionaries = require('@tradle/models').dict
 var dictionary //= dictionaries[Strings.language]
 
@@ -100,7 +101,7 @@ var propTypesMap = {
   'date': t.Dat,
   'number': t.Num
 };
-var models, me;
+var models, me, modelsForStub;
 var BACKOFF_DEFAULTS = {
   randomisationFactor: 0,
   initialDelay: 1000,
@@ -143,9 +144,15 @@ var utils = {
   },
   setModels(modelsRL) {
     models = modelsRL;
+    modelsForStub = {}
+    for (let m in models)
+      modelsForStub[m] = models[m].value
   },
   getModels() {
     return models;
+  },
+  getModelsForStub() {
+    return modelsForStub
   },
   normalizeGetInfoResponse(json) {
     json.providers.forEach(provider => {
@@ -220,8 +227,9 @@ var utils = {
     if (!dictionary)
       return property.title || utils.makeLabel(property.name)
     // HACK for property that changes title in case it is upload or scan
-    if (property.title  &&  this.isWeb()  &&  model.id === PHOTO_ID  &&  property.name === 'scan')
+    if (this.isWeb()  &&  property.title  &&  model.id === PHOTO_ID  &&  property.name === 'scan')
       return property.title
+
     let translations = dictionary.properties[property.name]
     let val
     if (translations)
@@ -314,6 +322,8 @@ var utils = {
     return strMap[str]
   },
   createAndTranslate(s, isEnumValue) {
+    if (!s.length)
+      return null
     let stringName = s.replace(/\w\S*/g, function(txt) {
       return  isEnumValue
             ? txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
@@ -336,11 +346,26 @@ var utils = {
     let label = model.id.split('.')[1]
     if (isPlural)
       label += 's'
-    return label
-          // insert a space before all caps
-          .replace(/([A-Z])/g, ' $1')
-          // uppercase the first character
-          .replace(/^./, function(str){ return str.toUpperCase(); }).trim()
+    let len = label.length
+    let newLabel = ''
+
+    for (let i=0; i<len; i++)  {
+      let ch = label.charAt(i)
+      if (ch === ch.toLowerCase())
+        newLabel += ch
+      else {
+        let ch1 = i ? label.charAt(i - 1) : ''
+        if (ch1  &&  ch1 === ch1.toLowerCase())
+          newLabel += ' '
+        newLabel += ch
+      }
+    }
+    return newLabel
+    // return label
+    //       // insert a space before all caps
+    //       .replace(/([A-Z])/g, ' $1')
+    //       // uppercase the first character
+    //       .replace(/^./, function(str){ return str.toUpperCase(); }).trim()
   },
   makeLabel(label) {
     return label
@@ -475,11 +500,15 @@ var utils = {
     return props
   },
   getDisplayName(resource, meta) {
+    if (Array.isArray(resource))
+      return
     if (!meta) {
-      if (resource.title)
-        return resource.title
-      if (resource.id)
-        return ""
+      if (!resource[TYPE]) {
+        if (resource.id   &&   resource.title)
+          return resource.title
+        if (resource.id)
+          return ""
+      }
       meta = this.getModel(resource[TYPE]).value.properties
     }
     let m = resource[TYPE] ? this.getModel(resource[TYPE]) : null
@@ -539,6 +568,15 @@ var utils = {
         return dn
     }
     return displayName
+  },
+  getPropByTitle(props, propTitle) {
+    let propTitleLC = propTitle.toLowerCase()
+    for (let p in props) {
+      let prop = props[p]
+      let pTitle = prop.title || this.makeLabel(p)
+      if (pTitle.toLowerCase() === propTitleLC)
+        return p
+    }
   },
   getDateValue(value) {
     let valueMoment = moment.utc(value)
@@ -836,8 +874,58 @@ var utils = {
   },
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? utils.clone(resource) : resource
+    let m = this.getModel(res[TYPE]).value
+    if (!m.interfaces)
+      res = this.optimizeResource1(resource, doNotChangeOriginal)
+    else {
+      var properties = m.properties
+      var exclude = ['from', 'to', 'time']
+      let isVerification = m.id === VERIFICATION
+      let isProductApplication = m.id === PRODUCT_APPLICATION
+      let isFormRequest = m.id === FORM_REQUEST
+      let isFormError = m.id === FORM_ERROR
+      Object.keys(res).forEach(p => {
+        if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
+          return
+        if (isProductApplication  &&  p === 'product')
+          return
+        if (isFormRequest  &&  (p === 'product'  ||  p === 'form'))
+          return
+        if (isVerification  &&  p === 'document')
+          res[p] = this.buildRef(res[p])
+        else if (isFormError  &&  p === 'prefill') {
+          if (res[ROOT_HASH])
+            res[p] = this.buildRef(res[p])
+        }
+        else
+          delete res[p]
+      })
+    }
+    delete res._cached
+    if (!this.isMessage(m))
+      return res
 
-    var properties = this.getModel(res[TYPE]).value.properties
+    if (res._sharedWith) {
+      res._sharedWith.forEach((r) => {
+        if (r.shareBatchId  &&  (typeof r.shareBatchId === 'object'))
+          r.shareBatchId = utils.buildRef(r.shareBatchId)
+      })
+    }
+
+    delete res.to.organization
+    delete res.to.photo
+    delete res.from.organization
+    delete res.from.photo
+    if (res._context)
+      res._context = this.buildRef(res._context)
+
+    return res
+  },
+
+  optimizeResource1(resource, doNotChangeOriginal) {
+    let res = doNotChangeOriginal ? utils.clone(resource) : resource
+    let m = this.getModel(res[TYPE]).value
+    var properties = m.properties
     Object.keys(res).forEach(p => {
       if (p.charAt(0) === '_'  ||  !properties[p])
         return
@@ -887,7 +975,6 @@ var utils = {
       })
       res[p] = arr
     })
-
     return res
   },
 
@@ -1082,6 +1169,8 @@ var utils = {
     })
   },
 
+  rebuf,
+
   joinURL(...parts) {
     var first = parts.shift()
     var rest = parts.join('/')
@@ -1170,7 +1259,7 @@ var utils = {
       wrapper[ROOT_HASH] = wrapper.permalink
       wrapper[TYPE] = wrapper.type
     }
-
+    wrapper[MSG_LINK] = wrapper.link
     return wrapper
   },
   setupSHACaching: function setupSHACaching (protocol) {
@@ -1871,7 +1960,7 @@ var utils = {
     }
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
-    return <Text key={key} style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
+    return <Text key={key} style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
              <Text style={{color: linkColor}}>{formType}</Text>
              <Text>{utils.parseMessage(resource, message2, bankStyle, idx)}</Text>
            </Text>

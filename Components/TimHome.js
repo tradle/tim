@@ -1278,3 +1278,4 @@ function getIconSize (dimensions) {
 }
 
 module.exports = TimHome;
+

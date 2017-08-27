@@ -68,8 +68,8 @@
     "_t": "tradle.CustomerEntity",
     "entityRole": "CFO",
     "entityType": "Person",
-    "lastName": "Ellen",
-    "firstName": "Katsnelson",
+    "lastName": "Smith",
+    "firstName": "Jane",
     "dateOfBirth": "1986-09-20",
     "citizenshipCountry": {
       "id": "tradle.Country_b424fcc35801022868a5285956805e8e9e0bb31a",
@@ -81,7 +81,7 @@
     },
     "ownershipNature": "F",
     "ownershipPercentage": 2,
-    "email": "ellen@tradle.io",
+    "email": "jane@a.com",
     "phone": "2121212121"
   },
   "tradle.PersonalInfo": {

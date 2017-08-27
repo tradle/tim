@@ -69,6 +69,7 @@ import {
   Text,
   Platform,
   TextInput,
+  ListView,
   Dimensions,
   Modal,
   Alert,
@@ -100,12 +101,18 @@ class ResourceView extends Component {
 
     let me = utils.getMe()
     let resource = props.resource
+    // const dataSource = new ListView.DataSource({
+    //   rowHasChanged: function(row1, row2) {
+    //     return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
+    //   }
+    // })
     this.state = {
       resource: resource,
       isLoading:  resource[TYPE] && resource[TYPE] !== PROFILE ? false : true, //props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
       useGesturePassword: me && me.useGesturePassword,
+      // dataSource: dataSource.cloneWithRows([resource])
     }
     let currentRoutes = this.props.navigator.getCurrentRoutes()
     let len = currentRoutes.length
@@ -116,33 +123,46 @@ class ResourceView extends Component {
     let resource = this.props.resource
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     if (resource.id || resource[constants.ROOT_HASH])
-      Actions.getItem(resource)
+      Actions.getItem({resource: resource})
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
+    let {resource, action, error, pairingData, to, backlink} = params
+
     let isMe = utils.isMe(this.props.resource)
-    if (params.resource  &&  utils.getId(params.resource) !== utils.getId(this.props.resource)) {
-      if (isMe) {
-        if (params.action === 'addItem') {
-          let m = utils.getModel(params.resource[TYPE]).value
-          if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
-            Actions.getItem(utils.getMe())
+    if (resource) {
+      if (utils.getId(resource) !== utils.getId(this.props.resource)) {
+        if (isMe) {
+          let me = utils.getMe()
+          if (action === 'addItem') {
+            let m = utils.getModel(resource[TYPE]).value
+            if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
+              Actions.getItem({resource: me})
+          }
+          else if (action === 'addMessage'  &&  resource[TYPE] === 'tradle.ConfirmPackageRequest')
+            Actions.getItem({resource: me})
         }
-        else if (params.actions === 'addMessage'  &&  params.resource[TYPE] === 'tradle.ConfirmPackageRequest')
-          Actions.getItem(utils.getMe())
+        return
       }
-      return
+      // if (isMe  &&  action === 'addItem') {
+      //   this.setState({resource: resource})
+      //   return
+      // }
     }
 
-    switch (params.action) {
+    switch (action) {
+    case 'addItem':
+      if (resource  &&  isMe)
+        this.setState({resource: resource})
+      break
     case 'showIdentityList':
       this.onShowIdentityList(params)
       break
     case 'getItem':
       this.setState({
-        resource: params.resource,
+        resource: resource,
         isLoading: false
       })
       break
@@ -150,21 +170,21 @@ class ResourceView extends Component {
       this.showChat(params)
       break
     case 'genPairingData':
-      if (params.error)
-        Alert.alert(params.error)
+      if (error)
+        Alert.alert(error)
       else
-        this.setState({pairingData: params.pairingData, isModalOpen: true})
+        this.setState({pairingData: pairingData, isModalOpen: true})
       break
     case 'invalidPairingRequest':
       this.props.navigator.pop()
-      Alert.alert(translate(params.error))
+      Alert.alert(translate(error))
       break
     case 'acceptingPairingRequest':
       this.closeModal()
       // check signature
       signIn(this.props.navigator, utils.getMe())
         .then(() => {
-          Actions.pairingRequestAccepted(params.resource)
+          Actions.pairingRequestAccepted(resource)
         })
       break
     case 'pairingRequestAccepted':
@@ -178,15 +198,15 @@ class ResourceView extends Component {
       // this.props.navigator.jumpTo(routes[1])
       let style = {}
       extend(style, defaultBankStyle)
-      if (params.to.style)
-        style = extend(style, params.to.style)
+      if (to.style)
+        style = extend(style, to.style)
       this.props.navigator.replace({
         component: MessageList,
-        title: utils.getDisplayName(params.to),
+        title: utils.getDisplayName(to),
         id: 11,
         backButtonTitle: 'Back',
         passProps: {
-          resource: params.to,
+          resource: to,
           filter: '',
           modelName: constants.TYPES.MESSAGE,
           // currency: params.organization.currency,
@@ -197,14 +217,14 @@ class ResourceView extends Component {
       // this.props.navigator.jumpTo(routes[2])
       break
     case 'exploreBacklink':
-      if (params.backlink !== this.state.backlink)
-        this.setState({backlink: params.backlink, backlinkList: params.list})
+      if (backlink !== this.state.backlink)
+        this.setState({backlink: backlink})
       break
-    default:
-      if (params.resource)
-        Actions.getItem(params.resource)
-        // this.onResourceUpdate(params)
-      break
+    // default:
+    //   if (resource  &&  action !== 'onlineStatus')
+    //     Actions.getItem(resource)
+    //     // this.onResourceUpdate(params)
+    //   break
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -245,6 +265,15 @@ class ResourceView extends Component {
       }
     });
   }
+  // renderRow(resource) {
+  //      return <ShowRefList lazy={this._lazyId}
+  //               resource={this.state.resource}
+  //               navigator={this.props.navigator}
+  //               currency={this.props.currency}
+  //               bankStyle={this.props.bankStyle}
+  //               backlink={this.state.backlink}
+  //               backlinkList={this.state.backlinkList}/>
+  // }
 
   render() {
     if (this.state.isLoading)
@@ -298,16 +327,6 @@ class ResourceView extends Component {
 
     let footer
     let conversations
-/*
-                  <TouchableOpacity onPress={this.showBanks.bind(this)}>
-                    <View style={styles.conversationsRow}>
-                      <ConversationsIcon size={35} style={{marginTop: 2, marginRight: 10}} />
-                      <View style={{justifyContent: 'center'}}>
-                        <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-*/
     let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
     let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
     let paddingRight = Platform.OS === 'android' ? 0 : 10
@@ -344,29 +363,76 @@ class ResourceView extends Component {
     let photoView
     if (!isOrg)
       photoView = <PhotoView resource={resource} navigator={this.props.navigator}/>
+    // return (
+    //   <PageView style={platformStyles.container}>
+    //     <View style={styles.photoBG}>
+    //       {photoView}
+    //       {identityPhotoList}
+    //     </View>
+    //     {actionPanel}
+    //   </PageView>
+    //  );
+
+
+
     return (
       <PageView style={platformStyles.container}>
-      <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center'}} name={this._lazyId}>
-        <View style={styles.photoBG}>
-          {photoView}
-          {identityPhotoList}
-        </View>
-        {actionPanel}
-        <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-          <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
-            <View style={styles.modalBackgroundStyle}>
-              {qrcode}
-            </View>
-          </TouchableOpacity>
-        </Modal>
-        {otherPhotoList}
-        {propertySheet}
-        {menu}
-      </ScrollView>
-      {footer}
-
+        <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center'}} name={this._lazyId}>
+          <View style={styles.photoBG}>
+            {photoView}
+            {identityPhotoList}
+          </View>
+          {actionPanel}
+          <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+            <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
+              <View style={styles.modalBackgroundStyle}>
+                {qrcode}
+              </View>
+            </TouchableOpacity>
+          </Modal>
+          {otherPhotoList}
+          {propertySheet}
+          {menu}
+        </ScrollView>
+        {footer}
       </PageView>
-    );
+     );
+
+
+    // return (
+    //   <PageView style={platformStyles.container}>
+    //   <ListView  ref='this' name={this._lazyId}
+    //     automaticallyAdjustContentInsets={false}
+    //     removeClippedSubviews={false}
+    //     keyboardDismissMode='on-drag'
+    //     keyboardShouldPersistTaps="always"
+    //     initialListSize={10}
+    //     renderHeader={() => (
+    //       <View style={styles.photoBG}>
+    //         {photoView}
+    //         {identityPhotoList}
+    //       </View>
+    //     )}
+    //     dataSource={this.state.dataSource}
+    //     renderRow={this.renderRow.bind(this)}
+    //     renderFooter={() => {
+    //       return (
+    //         <View>
+    //       <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+    //         <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
+    //           <View style={styles.modalBackgroundStyle}>
+    //             {qrcode}
+    //           </View>
+    //         </TouchableOpacity>
+    //       </Modal>
+    //       {otherPhotoList}
+    //       {propertySheet}
+    //       {menu}
+    //       </View>
+    //     )}} />
+    //   {footer}
+    //   </PageView>
+    // );
   }
 
   // renderActionSheet() {
@@ -487,7 +553,7 @@ class ResourceView extends Component {
 
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);
-    Actions.getItem(resource.id);
+    Actions.getItem({resource: resource});
   }
 
   changePreferences(action) {
@@ -583,17 +649,10 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
       color: '#757575',
     },
     footer: {
-      // flexDirection: 'row',
-      // flexWrap: 'nowrap',
-      // alignItems: Platform.OS === 'android' ? 'center' : 'flex-start',
-      // justifyContent: 'space-between',
-      // alignSelf: 'stretch',
       height: 45,
-      width: dimensions.width,
       backgroundColor: '#efefef',
       borderColor: '#eeeeee',
       borderWidth: 1,
-      // borderTopColor: '#cccccc',
       alignItems: 'flex-end',
       paddingRight: 10,
     }

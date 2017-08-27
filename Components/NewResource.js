@@ -5,6 +5,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var NewItem = require('./NewItem');
 var ResourceList = require('./ResourceList')
+var GridList = require('./GridList')
 var GridItemsList = require('./GridItemsList')
 var PhotoView = require('./PhotoView');
 var ResourceView = require('./ResourceView');
@@ -106,7 +107,9 @@ class NewResource extends Component {
     }
     var currentRoutes = this.props.navigator.getCurrentRoutes()
     var currentRoutesLength = currentRoutes.length
-    currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.onSavePressed.bind(this)
+    currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.props.search
+            ? this.getSearchResult.bind(this)
+            : this.onSavePressed.bind(this)
 
     this.scrollviewProps = {
       automaticallyAdjustContentInsets:true,
@@ -137,10 +140,14 @@ class NewResource extends Component {
            // this.state.modalVisible != nextState.modalVisible ||
   }
   componentWillMount() {
-    if (this.state.resource[constants.ROOT_HASH]  &&  Object.keys(this.state.resource).length === 2)
-      Actions.getItem(utils.getId(this.state.resource))
+    let { resource } = this.state
+    // Profile gets changed every time there is a new photo added through for ex. Selfie
+    if (utils.getId(utils.getMe()) === utils.getId(resource))
+      Actions.getItem({resource: resource})
+    if (resource[constants.ROOT_HASH]  &&  Object.keys(resource).length === 2)
+      Actions.getItem({resource: resource})
     else if (this.state.isUploading)
-      Actions.getTemporary(this.state.resource[constants.TYPE])
+      Actions.getTemporary(resource[constants.TYPE])
   }
 
   componentDidMount() {
@@ -270,7 +277,7 @@ class NewResource extends Component {
     if (isMessage) {
       if (this.props.originatingMessage  &&  resource[constants.ROOT_HASH] !== this.props.originatingMessage[constants.ROOT_HASH]) {
         var params = {
-          value: {documentCreated: true, document: resource[constants.NONCE]},
+          value: {_documentCreated: true, _document: utils.getId(resource)},
           resource: this.props.originatingMessage,
           meta: utils.getModel(this.props.originatingMessage[constants.TYPE]).value
         }
@@ -574,6 +581,39 @@ class NewResource extends Component {
       }
     });
   }
+  getSearchResult() {
+    var value = this.refs.form.getValue();
+    if (!value) {
+      value = this.refs.form.refs.input.state.value;
+      if (!value)
+        value = {}
+    }
+    this.checkEnums(value, this.state.resource)
+    var currentRoutes = this.props.navigator.getCurrentRoutes()
+    var currentRoutesLength = currentRoutes.length
+
+    // HACK: set filtering resource for right button on RL so that next
+    // time filter shows in the form
+    currentRoutes[currentRoutesLength - 2].onRightButtonPress.passProps.resource = value
+    this.props.navigator.pop()
+    Actions.list({filterResource: value, search: true, modelName: this.props.model.id, limit: 20})
+
+    // let {model} = this.props
+    // this.props.navigator.replace({
+    //   id: 31,
+    //   title: translate('Search ' + utils.makeModelTitle(model)),
+    //   backButtonTitle: 'Back',
+    //   component: GridList,
+    //   passProps: {
+    //     modelName: model.id,
+    //     resource: value,
+    //     bankStyle: this.props.bankStyle,
+    //     currency: this.props.currency,
+    //     limit: 20,
+    //     search: true
+    //   }
+    // })
+  }
 
   render() {
     if (this.state.isUploading)
@@ -637,35 +677,32 @@ class NewResource extends Component {
     var self = this;
     var arrayItems = [];
     var itemsArray
-    for (var p in itemsMeta) {
-      var bl = itemsMeta[p]
-      if (bl.icon === 'ios-telephone-outline') {
-        bl.icon = 'ios-call-outline'
-      }
+    if (!this.props.search) {
+      for (var p in itemsMeta) {
+        var bl = itemsMeta[p]
+        if (bl.icon === 'ios-telephone-outline') {
+          bl.icon = 'ios-call-outline'
+        }
 
-      if (bl.readOnly  ||  bl.items.backlink) {
-        arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
-        continue
+        if (bl.readOnly  ||  bl.items.backlink) {
+          arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
+          continue
+        }
+        let blmodel = meta
+        var counter, count = 0
+        itemsArray = null
+        var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+        if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO))
+          arrayItems.push(this.getPhotoItem(bl, styles))
+        else
+          arrayItems.push(this.getItem(bl, styles))
       }
-      let blmodel = meta
-      var counter, count = 0
-      itemsArray = null
-      var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-      if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO))
-        arrayItems.push(this.getPhotoItem(bl, styles))
-      else
-        arrayItems.push(this.getItem(bl, styles))
     }
     if (isRegistration)
       Form.stylesheet = rStyles
     else
       Form.stylesheet = stylesheet
 
-    // var style = isRegistration
-    //           ? DeviceHeight < 600 ? {marginTop: 100} : {marginTop: DeviceHeight / 4}
-    //           : platformStyles.container
-    // var style = [platformStyles.container, {backgroundColor: 'transparent', height: DeviceHeight}]
-    // var style = [platformStyles.container, {backgroundColor: 'transparent'}, utils.isWeb() &&  !this.state.isRegistration ?  {borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderTopColor: '#7AAAC3'} : {borderWidth: 0}]
     var style = {backgroundColor: 'transparent'}
     if (!options)
       options = {}
@@ -878,8 +915,8 @@ class NewResource extends Component {
       id: 3,
       component: ResourceView,
       title: translate('termsAndConditions'),
-      backButtonTitle: 'Back',
-      rightButtonTitle: translate('Accept'),
+      backButtonTitle: translate('back'),
+      rightButtonTitle: 'Accept',
       passProps: {
         resource: termsAndConditions,
         action: this.acceptTsAndCs.bind(this)

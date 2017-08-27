@@ -28,7 +28,7 @@ var VerifierChooser = require('./Components/VerifierChooser')
 
 // var VideoPlayer = require('./Components/VideoPlayer')
 var EnumList = require('./Components/EnumList')
-// var GridList = require('./Components/GridList');
+var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
 var MarkdownPropertyEdit = require('./Components/MarkdownPropertyEdit')
 
@@ -510,16 +510,6 @@ class TiMApp extends Component {
 
     case 14:
       return <PhotoCarousel {...props} />
-    // case 15:
-    //   return <GridList navigator={nav}
-    //               filter={props.filter}
-    //               resource={props.resource}
-    //               prop={props.prop}
-    //               returnRoute={props.returnRoute}
-    //               callback={props.callback}
-    //               isAggregation={props.isAggregation}
-    //               sortProperty={props.sortProperty}
-    //               modelName={props.modelName} />;
     case 15:
       return <ProductChooser navigator={nav} {...props} />
     case 16:
@@ -558,6 +548,8 @@ class TiMApp extends Component {
     //   return <HomePage navigator={nav} {...props} />
     case AVIVA_INTRO_VIEW:
       return <AvivaIntroView navigator={nav} {...props} />
+    case 30:
+      return <GridList navigator={nav} {...props} />
     case 31:
       return <MarkdownPropertyEdit navigator={nav} {...props} />
     case 10:
@@ -607,8 +599,8 @@ var NavigationBarRouteMapper = {
               : <Text style={style}>
                   {lbTitle}
                 </Text>
-    if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
-      Actions.cleanup()
+    // if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
+    //   Actions.cleanup()
 
     let status = <View/>
     return (
@@ -653,6 +645,9 @@ var NavigationBarRouteMapper = {
       break
     case 'Download':
       icon = 'md-download'
+      break
+    case 'Search':
+      icon = 'md-search'
       break
     case 'Profile':
       icon = 'md-person'
@@ -728,8 +723,8 @@ var NavigationBarRouteMapper = {
     var org;
     if (route.passProps.modelName                       &&
         route.passProps.modelName === 'tradle.Message'  &&
-        route.passProps.resource.organization           &&
         route.passProps.resource                        &&
+        route.passProps.resource.organization           &&
         route.passProps.resource[constants.TYPE] === constants.TYPES.PROFILE)
           // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />

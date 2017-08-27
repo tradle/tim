@@ -40,19 +40,13 @@ import { makeStylish } from './makeStylish'
 
 var LINK_COLOR
 var LIMIT = 500
-var NEXT_HASH = '_n'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
-const ROOT_HASH = constants.ROOT_HASH
-const CUR_HASH = constants.ROOT_CUR
-const TYPE = constants.TYPE
-const TYPES = constants.TYPES
-const PROFILE = TYPES.PROFILE
+const { TYPE, TYPES, PROFILE, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
 
 var StyleSheet = require('../StyleSheet')
 
@@ -134,6 +128,7 @@ class MessageList extends Component {
       to: this.props.resource,
       prop: this.props.prop,
       context: this.props.context,
+      gatherForms: true,
       limit: LIMIT
     }
     if (this.props.isAggregation)
@@ -167,103 +162,164 @@ class MessageList extends Component {
     })
   }
   onAction(params) {
-    if (params.error)
+    let {action, error, to, isConnected} = params
+    if (error)
+      return
+    if (action === 'connectivity') {
+      this.setState({isConnected: isConnected})
+      return
+    }
+    let chatWith = this.props.resource
+    if (to  &&  to[ROOT_HASH] !== chatWith[ROOT_HASH])
       return
 
-    let resource = this.props.resource
-    if (params.action === 'connectivity') {
-      this.setState({isConnected: params.isConnected})
+    let { resource, online, productToForms, shareableResources } = params
+    if (action === 'onlineStatus') {
+      if (resource  &&  utils.getId(resource) == utils.getId(chatWith))
+      // if (resource  &&  resource[constants.ROOT_HASH] === this.props.resource[ROOT_HASH])
+      //   state.resource = chatWith
+      if (online !== this.state.onlineStatus)
+        this.setState({onlineStatus: online})
       return
     }
-    if (params.action === 'onlineStatus') {
-      if (params.resource  &&  utils.getId(params.resource) == utils.getId(this.props.resource))
-      // if (params.resource  &&  params.resource[constants.ROOT_HASH] === this.props.resource[ROOT_HASH])
-      //   state.resource = resource
-        this.setState({onlineStatus: params.online})
+    if (action === 'getItem'  &&  utils.getId(resource) === utils.getId(chatWith)) {
+      this.setState({hasProducts: this.hasProducts(resource) })
+      if (productToForms)
+        this.setState({productToForms: productToForms})
       return
     }
-    if (params.to  &&  params.to[ROOT_HASH] !== resource[ROOT_HASH])
-      return
-    if (params.action === 'getItem'  &&  utils.getId(params.resource) === utils.getId(this.props.resource)) {
-      this.setState({hasProducts: this.hasProducts(params.resource) })
-      return
-    }
-    if (params.action === 'addItem'  ||  params.action === 'addVerification') {
+
+    if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
+      if (!utils.isMessage(resource))
+        return
+      let rid = utils.getId(chatWith)
+      let fid = resource.from.organization &&  utils.getId(resource.from.organization)
+      let tid = resource.to.organization && utils.getId(resource.to.organization)
+      if (rid !== fid  &&  rid !== tid  &&  !to)
+        return
+
       var actionParams = {
         query: this.state.filter,
         modelName: this.props.modelName,
-        to: resource,
+        to: chatWith,
         context: this.state.allContexts ? null : this.state.context,
         limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
       }
-      let rtype = params.resource[TYPE]
-      if (params.resource._sendStatus) {
-        this.state.sendStatus = params.resource._sendStatus
-        this.state.sendResource = params.resource
+      let rtype = resource[TYPE]
+      // if (resource._sendStatus) {
+      //   this.state.sendStatus = resource._sendStatus
+      //   this.state.sendResource = resource
+      // }
+      // let addedItem
+      let replace
+      if (rtype === FORM_REQUEST            ||
+          rtype === CONFIRM_PACKAGE_REQUEST ||
+          rtype === FORM_ERROR              ||
+          resource._denied                  ||
+          resource._approved) {
+        // addedItem = resource
+        if (resource._documentCreated  ||  resource._denied  ||  resource._approved)
+          replace = true
       }
-      else if (rtype === FORM_REQUEST  || rtype === FORM_REQUEST ||  rtype === CONFIRM_PACKAGE_REQUEST || rtype === FORM_ERROR)
-        this.setState({addedItem: params.resource})
-        // this.state.addedItem = params.resource
-      else if (params.resource._denied || params.resource._approved)
-        this.setState({addedItem: params.resource})
-        // this.state.addedItem = params.resource
-      else
-        this.state.addedItem = null
-      if (params.action === 'addVerification') {
+      // else
+      //   addedItem = null
+
+      let list
+      list = this.state.list || []
+      if (replace) {
+        let resourceId = utils.getId(resource)
+        list = list.map((r) => utils.getId(r) === resourceId ? resource : r)
+      }
+      else {
+        list = list.map((r) => r)
+        list.push(resource)
+      }
+
+      let state = {
+        // addedItem: addedItem,
+        list: list
+      }
+      if (productToForms)
+        state.productToForms = productToForms
+      if (shareableResources)
+        state.shareableResources = shareableResources
+      this.setState(state)
+
+      if (action === 'addVerification') {
         if (this.props.originatingMessage  &&  this.props.originatingMessage.verifiers)  {
-          let docType = utils.getId(params.resource.document).split('_')[0]
+          let docType = utils.getId(resource.document).split('_')[0]
           this.state.verifiedByTrustedProvider = this.props.originatingMessage.form === docType
-                                               ? params.resource
+                                               ? resource
                                                : null
         }
         else
           this.state.verifiedByTrustedProvider = null
       }
-
-      Actions.list(actionParams);
+      // Actions.list(actionParams)
       return;
     }
+    let {sendStatus} = params
+
     this.state.newItem = false
-    if (params.action === 'updateItem') {
+    if (action === 'updateItem') {
+      let resourceId = utils.getId(resource)
+      let replaced
+      let list = this.state.list.map((r) => {
+        if (utils.getId(r) === resourceId) {
+          replaced = true
+          return resource
+        }
+        else
+          return r
+      })
+      if (!replaced  &&  to)
+        list.push(resource)
+
       this.setState({
-        sendStatus: params.sendStatus,
-        sendResource: params.resource
+        // sendStatus: sendStatus,
+        // sendResource: resource,
+        list: list
       })
       return
     }
-    if (params.action === 'addMessage') {
-      this.state.sendStatus = params.resource._sendStatus
-      this.state.sendResource = params.resource
-      Actions.list({
-        modelName: this.props.modelName,
-        to: resource,
-        limit: this.state.list ? this.state.list.length + 1 : LIMIT,
-        context: this.state.allContexts ? null : this.state.context
-      });
+    // if (action === 'addMessage') {
+    //   this.state.sendStatus = resource._sendStatus
+    //   this.state.sendResource = resource
+    //   Actions.list({
+    //     modelName: this.props.modelName,
+    //     to: chatWith,
+    //     limit: this.state.list ? this.state.list.length + 1 : LIMIT,
+    //     context: this.state.allContexts ? null : this.state.context
+    //   });
+    //   return
+    // }
+    let { isAggregation } = params
+    if (isAggregation !== this.props.isAggregation)
       return
-    }
-    if ( params.action !== 'messageList'                   ||
-        (!params.list  &&  !params.forgetMeFromCustomer)   ||
-        params.isAggregation !== this.props.isAggregation)
-      return;
-    if (params.forgetMeFromCustomer) {
-      Actions.list({modelName: PROFILE})
+    if (action !== 'messageList')
+      return
+
+    let { forgetMeFromCustomer} = params
+
+    if (forgetMeFromCustomer) {
+      Actions.list({modelName: TYPES.PROFILE})
       let routes = this.props.navigator.getCurrentRoutes()
       if (routes[routes.length - 1].component )
       this.props.navigator.popToRoute(routes[1])
       return
     }
-    if (params.resource  &&  params.resource[ROOT_HASH] != resource[ROOT_HASH]) {
+    let { context, list, loadEarlierMessages } = params
+
+    if (resource  &&  resource[ROOT_HASH] != chatWith[ROOT_HASH]) {
       var doUpdate
-      if (resource[TYPE] === TYPES.ORGANIZATION  &&  params.resource.organization) {
-        if (resource[TYPE] + '_' + resource[ROOT_HASH] === utils.getId(params.resource.organization))
+      if (chatWith[TYPE] === TYPES.ORGANIZATION  &&  resource.organization) {
+        if (utils.getId(chatWith) === utils.getId(resource.organization))
           doUpdate = true
       }
       if (!doUpdate)
         return;
     }
-    var list = params.list;
-    if (params.loadEarlierMessages  &&  this.state.postLoad) {
+    if (loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
         this.state = {
@@ -277,23 +333,23 @@ class MessageList extends Component {
         this.state.list.forEach((r) => {
           list.push(r)
         })
-        let productToForms = this.gatherForms(list)
         this.setState({
           list: list,
           noScroll: true,
           allLoaded: allLoaded,
-          context: params.context,
-          productToForms: productToForms,
+          context: context,
+          productToForms: this.state.productToForms,
           loadEarlierMessages: !allLoaded
         })
       }
       return
     }
-    LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.linkColor
-    let isEmployee = utils.isEmployee(resource)
-    if (list.length || (this.state.filter  &&  this.state.filter.length)) {
-      let productToForms = this.gatherForms(list)
+    if (!list  &&  !forgetMeFromCustomer)
+      return
 
+    LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.linkColor
+    let isEmployee = utils.isEmployee(chatWith)
+    if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       var type = list[0][TYPE];
       if (type  !== this.props.modelName) {
         var model = utils.getModel(this.props.modelName).value;
@@ -309,13 +365,13 @@ class MessageList extends Component {
         // dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: false,
         list: list,
-        shareableResources: params.shareableResources,
+        shareableResources: shareableResources,
         allLoaded: false,
-        addedItem: this.state.addedItem,
-        context: params.context,
+        // addedItem: this.state.addedItem,
+        context: context,
         isEmployee: isEmployee,
-        loadEarlierMessages: params.loadEarlierMessages,
-        productToForms: productToForms
+        loadEarlierMessages: loadEarlierMessages,
+        productToForms: productToForms || this.state.productToForms
       });
     }
     else
@@ -324,66 +380,71 @@ class MessageList extends Component {
   hasProducts(resource) {
     return resource.products && resource.products.length
   }
-  gatherForms(list) {
-    let productToForms = {}
-    list.forEach((r) => {
-      if (r[TYPE] === FORM_REQUEST  &&  r.documentCreated  &&  r.document) {
-        var l = productToForms[r.product]
-        if (!l) {
-          l = {}
-          productToForms[r.product] = l
-        }
-        let forms = l[r.form]
-        if (!forms) {
-          forms = []
-          l[r.form] = forms
-        }
-        forms.push(r.document)
-      }
-    })
-    return productToForms
-  }
   shouldComponentUpdate(nextProps, nextState) {
     // Eliminating repeated alerts when connection returns after ForgetMe action
-    if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
+    if (!this.state.list  &&  !nextState.list)
       return false
+    if (!this.state.list || !nextState.list)
+      return true
+    if (this.state.list.length !== nextState.list.length)
+      return true
     if (utils.resized(this.props, nextProps))
       return true
-    if (nextState.isConnected !== this.state.isConnected)
+    if (nextState.isConnected !== this.state.isConnected  &&  this.state.isLoading === nextState.isLoading)
       return true
+    // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
+    //   return false
     // undefined - is not yet checked
     if (typeof this.state.onlineStatus !== 'undefined') {
       if (nextState.onlineStatus !== this.state.onlineStatus)
         return true
     }
-    if (this.state.context !== nextState.context || this.state.allContexts !== nextState.allContexts)
+    if (this.state.context !== nextState.context) {
+      if (!this.state.context  ||  !nextState.context)
+        return true
+      if (utils.getId(this.state.context)  !==  utils.getId(nextState.context))
+        return true
+    }
+    if (this.state.allContexts !== nextState.allContexts)
       return true
     if (this.state.hasProducts !== nextState.hasProducts)
       return true
+
+    if (nextState.productToForms) {
+      if (!this.state.productToForms)
+        return true
+      let thisKeys = Object.keys(this.state.productToForms)
+      let nextKeys = Object.keys(nextState.productToForms)
+      if (thisKeys.length !== nextKeys.length)
+        return true
+
+      let keys = thisKeys.filter((key) => nextKeys.indexOf(key) === -1)
+      if (keys && keys.length)
+        return true
+
+    }
+
+
     if (this.props.bankStyle !== nextProps.bankStyle)
       return true
-    if (this.state.addedItem !== nextState.addedItem)
-      return true
-    // if (this.state.show !== nextState.show)
+    // if (nextState.addedItem  &&  this.state.addedItem !== nextState.addedItem)
     //   return true
-    if (!this.state.list                                  ||
-        !nextState.list                                   ||
-         this.props.orientation !== nextProps.orientation ||
-         this.state.allLoaded !== nextState.allLoaded     ||
-         // this.state.sendStatus !== nextState.sendStatus   ||
-         this.state.list.length !== nextState.list.length)
+    if (this.props.orientation !== nextProps.orientation ||
+        this.state.allLoaded !== nextState.allLoaded)
+      return true
+         // this.state.sendStatus !== nextState.sendStatus   ||)
          // this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]))
-      return true
 
-    if (this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]  &&
-        this.state.sendStatus !== nextState.sendStatus)
-      return true
+    // if (this.state.sendResource  &&  this.state.sendResource[ROOT_HASH] === nextState.sendResource[ROOT_HASH]  &&
+    //     this.state.sendStatus !== nextState.sendStatus)
+    //   return true
     for (var i=0; i<this.state.list.length; i++) {
       let r = this.state.list[i]
       let nr = nextState.list[i]
       if (r[TYPE] !== nr[TYPE]            ||
           r[ROOT_HASH] !== nr[ROOT_HASH]  ||
-          r[CUR_HASH] !== nr[CUR_HASH])
+          r[CUR_HASH] !== nr[CUR_HASH]    ||
+          r._sendStatus !== nr._sendStatus)
         return true
     }
     return false
@@ -429,7 +490,7 @@ class MessageList extends Component {
       }
     }
     // Allow to edit resource that was not previously changed
-    if (!verification  &&  !isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable) {
+    if (!verification  &&  !isEmployee  &&  !resource[PREV_HASH]  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable) {
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
         title: newTitle, //utils.getDisplayName(resource),
@@ -489,11 +550,11 @@ class MessageList extends Component {
       return  <MyProductMessageRow {...props} />
 
       // messageNumber: rowId,
-    let sendStatus = this.state.sendStatus &&  this.state.sendResource[ROOT_HASH] === resource[ROOT_HASH]
-                   ? this.state.sendStatus : (resource._sendStatus === 'Sent' ? null : resource._sendStatus)
+    // let sendStatus = this.state.sendStatus &&  this.state.sendResource[ROOT_HASH] === resource[ROOT_HASH]
+    //                ? this.state.sendStatus : (resource._sendStatus === 'Sent' ? null : resource._sendStatus)
     var moreProps = {
       share: this.share.bind(this),
-      sendStatus: sendStatus,
+      // sendStatus: sendStatus,
       currency: this.props.resource.currency || this.props.currency,
       country: this.props.resource.country,
       defaultPropertyValues: this.props.resource._defaultPropertyValues,
@@ -516,7 +577,7 @@ class MessageList extends Component {
     props.productToForms = this.state.productToForms
     props.shareableResources = this.state.shareableResources
     props.isAggregation = isAggregation
-    props.addedItem = this.state.addedItem
+    // props.addedItem = this.state.addedItem
     props.chooseTrustedProvider = this.chooseTrustedProvider
 
     if (model.id === FORM_ERROR)
@@ -583,17 +644,6 @@ class MessageList extends Component {
                     </View>
         }
       }
-      else {
-        // if (!this.state.isLoading  &&  !this.props.navigator.isConnected) {
-        //   alert = (resource[TYPE] === TYPES.ORGANIZATION)
-        //         ? Alert.alert(translate('noConnectionForPL', resource.name))
-        //         : Alert.alert(translate('noConnection'))
-        // }
-        // content =  <NoResources
-        //             filter={this.state.filter}
-        //             model={model}
-        //             isLoading={this.state.isLoading}/>
-      }
     }
 
     let isProductApplication = resource[TYPE] === PRODUCT_APPLICATION
@@ -631,9 +681,9 @@ class MessageList extends Component {
         loadEarlierMessagesButton={this.state.loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
         messages={this.state.list}
-        messageSent={this.state.sendResource}
-        messageSentStatus={this.state.sendStatus}
-        addedItem={this.state.addedItem}
+        // messageSent={this.state.sendResource}
+        // messageSentStatus={this.state.sendStatus}
+        // addedItem={this.state.addedItem}
         customStyle={this.state.customStyle}
         enableEmptySections={true}
         autoFocus={false}
@@ -649,21 +699,8 @@ class MessageList extends Component {
         hideTextInput={hideTextInput}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
       />
-        // returnKeyType={false}
-        // keyboardShouldPersistTaps={false}
-        // keyboardDismissMode='none'
     }
 
-    // var addNew = (model.isInterface)
-    //        ? <AddNewMessage navigator={this.props.navigator}
-    //                         resource={resource}
-    //                         modelName={this.props.modelName}
-    //                         onAddNewPressed={this.onAddNewPressed.bind(this)}
-    //                         onMenu={this.showMenu.bind(this)}
-    //                         onPhotoSelect={this.onPhotoSelect.bind(this)}
-    //                         callback={this.addedMessage.bind(this)} />
-    //        : <View/>;
-                            // onTakePicPressed={this.onTakePicPressed.bind(this)}
     var isOrg = !this.props.isAggregation  &&  resource  &&  resource[TYPE] === TYPES.ORGANIZATION
     var chooser
     if (isOrg)
@@ -679,20 +716,6 @@ class MessageList extends Component {
     var sepStyle = { height: 1,backgroundColor: 'transparent' }
     if (!this.state.allLoaded  && !this.props.navigator.isConnected  &&  this.state.isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
-          // <View style={{flex: 10}}>
-          //   <SearchBar
-          //     onChangeText={this.onSearchChange.bind(this)}
-          //     placeholder='Search'
-          //     showsCancelButton={false}
-          //     hideBackground={true} />
-          // </View>
-    // if (this.state.isEmployee) {
-      // let buttons = {[
-      //   {
-      //     onPress: this.chooseFormForCustomer.bind(this)
-      //     title: translate('formChooser')
-      //   }
-      // ]}
     let me = utils.getMe()
     let actionSheet = !hideTextInput  && this.renderActionSheet()
     let context = this.state.context
@@ -910,13 +933,6 @@ class MessageList extends Component {
   generateMenu(show) {
     if (!show || !this.ActionSheet)
       return <View/>
-    // {
-    //   return <TouchableHighlight underlayColor='transparent' onPress={this.onSubmitEditing.bind(this)}>
-    //            <View style={[platformStyles.menuButton, {backgroundColor: LINK_COLOR,}]}>
-    //              <Icon name='ios-send'  size={33}  color='#ffffff' />
-    //            </View>
-    //         </TouchableHighlight>
-    // }
     return  <TouchableOpacity underlayColor='transparent' onPress={() => this.ActionSheet.show()}>
               {this.paintMenuButton()}
             </TouchableOpacity>
@@ -944,16 +960,8 @@ class MessageList extends Component {
       modelName: this.props.modelName,
       to: this.props.resource,
     })
-    // var list = this.state.list
     var earlierMessages = []
-    //   list[list.length - 1],
-    //   list[list.length - 2],
-    //   list[list.length - 3]
-    // ];
     this.state.postLoad = callback
-    // setTimeout(() => {
-    //   callback(earlierMessages, false); // when second parameter is true, the "Load earlier messages" button will be hidden
-    // }, 1000);
   }
   checkStart(evt) {
     evt = evt

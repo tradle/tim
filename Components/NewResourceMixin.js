@@ -36,6 +36,8 @@ import BlinkID from './BlinkID'
 var MarkdownPropertyEdit = require('./MarkdownPropertyEdit')
 var Markdown = require('./Markdown')
 
+var format = require('string-template')
+
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
@@ -48,6 +50,7 @@ const MONEY = constants.TYPES.MONEY
 
 const SETTINGS = 'tradle.Settings'
 const COUNTRY = 'tradle.Country'
+const PHOTO = 'tradle.Photo'
 const YEAR = 3600 * 1000 * 24 * 365
 const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
@@ -101,13 +104,11 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol ||  this.props.currency : DEFAULT_CURRENCY_SYMBOL
+    let {currency, bankStyle} = this.props
+    CURRENCY_SYMBOL = currency ? currency.symbol ||  currency : DEFAULT_CURRENCY_SYMBOL
     component = params.component
 
-    if (this.props.bankStyle)
-      LINK_COLOR = this.props.bankStyle.linkColor || DEFAULT_LINK_COLOR
-    else
-      LINK_COLOR = DEFAULT_LINK_COLOR
+    LINK_COLOR = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
     var meta = this.props.model  ||  this.props.metadata;
     var model = params.model;  // For the form
@@ -148,7 +149,7 @@ var NewResourceMixin = {
       }
     }
 
-    var editCols;
+    var editCols
     if (this.props.editCols) {
       editCols = {};
       this.props.editCols.forEach(function(r) {
@@ -213,17 +214,8 @@ var NewResourceMixin = {
     var required = utils.ungroup(meta, meta.required)
     required = utils.arrayToObject(required);
 
-// var TcombType = transform({
-//   "type": "string",
-//   "enum": ["Street", "Avenue", "Boulevard"]
-// });
-
-// model['test'] = TcombType
-// options.fields['test'] = {
-//   placeholder: 'Test'
-// }
-    // var d = data ? data[i] : null;
     let resource = this.state.resource
+    let { search } = this.props
     for (var p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
@@ -237,7 +229,7 @@ var NewResourceMixin = {
       var formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
       let isReadOnly = props[p].readOnly
-      if (isReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
+      if (isReadOnly  &&  !search) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
       this.setDefaultValue(p, data, true)
       if (utils.isHidden(p, resource)) {
@@ -249,8 +241,8 @@ var NewResourceMixin = {
       var label = translate(props[p], meta) //props[p].title;
       if (!label)
         label = utils.makeLabel(p);
-      let errMessage = (this.props.errs  &&  this.props.errs[p])
-                     ? this.props.errs[p]
+      let errMessage = (errs  &&  errs[p])
+                     ? errs[p]
                      : translate('thisFieldIsRequired')
       options.fields[p] = {
         error: errMessage, //'This field is required',
@@ -279,23 +271,15 @@ var NewResourceMixin = {
         else
           options.fields[p].placeholder = label + ' (' + props[p].units + ')'
       }
-      // HACK for registration screen
-      // if (this.state.isRegistration  &&  params.editCols.length === 1)
-      //   options.fields[p].placeholder = translate('enterYourName')
-
       if (props[p].description)
         options.fields[p].help = props[p].description;
       if (props[p].readOnly  ||  (props[p].immutable  &&  data  &&  data[p]))
         options.fields[p] = {'editable':  false };
-      // if (formType  &&   (formType === t.Num  ||  formType === t.Str))
-      //   formType = null
 
       if (formType) {
         if (props[p].keyboard)
           options.fields[p].keyboardType = props[p].keyboard
 
-        // if (this.onChange)
-        //   options.fields[p].onChange = this.onChange.bind(this);
         model[p] = !model[p]  &&  (maybe ? t.maybe(formType) : formType);
         if (data  &&  (type == 'date')) {
           model[p] = t.Str
@@ -308,8 +292,6 @@ var NewResourceMixin = {
                     errors: params.errors,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
-          // if (!this.state.modal || typeof this.state.modal[p] === 'undefined')
-          //   this.state.modal[p] = false
 
           if (data[p])
             data[p] = new Date(data[p]);
@@ -340,13 +322,6 @@ var NewResourceMixin = {
             options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           if (props[p].maxLength)
             options.fields[p].maxLength = props[p].maxLength;
-          if (type === 'number') {
-            if (!props[p].keyboard)
-              options.fields[p].keyboardType = 'numeric'
-            if (data  &&  data[p]  &&  (typeof data[p] != 'number'))
-              data[p] = parseFloat(data[p])
-          }
-
         }
         else if (type === 'string') {
           if (props[p].maxLength > 300)
@@ -357,6 +332,15 @@ var NewResourceMixin = {
             options.fields[p].auto = 'labels';
           }
         }
+        else if (type === 'number') {
+          if (!search) {
+            if (!props[p].keyboard)
+              options.fields[p].keyboardType = 'numeric'
+            if (data  &&  data[p]  &&  (typeof data[p] != 'number'))
+              data[p] = parseFloat(data[p])
+          }
+        }
+
         if (type === 'string'  &&  p.length > 7  &&  p.indexOf('_group') === p.length - 6) {
           options.fields[p].template = this.myTextTemplate.bind(this, {
                     label: label,
@@ -385,7 +369,7 @@ var NewResourceMixin = {
                     onSubmitEditing: onSubmitEditing.bind(this),
                     errors: params.errors,
                     editable: params.editable,
-                    keyboard: props[p].keyboard ||  (type === 'number' ? 'numeric' : 'default'),
+                    keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -393,12 +377,6 @@ var NewResourceMixin = {
             options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           if (props[p].maxLength)
             options.fields[p].maxLength = props[p].maxLength;
-          if (type === 'number') {
-            if (!props[p].keyboard)
-              options.fields[p].keyboardType = 'numeric'
-            if (data  &&  data[p]  &&  (typeof data[p] != 'number'))
-              data[p] = parseFloat(data[p])
-          }
         }
       }
       // else if (type === 'enum') {
@@ -420,6 +398,8 @@ var NewResourceMixin = {
         if (!ref) {
           if (type === 'number'  ||  type === 'string')
             ref = MONEY
+          else if (props[p].range === 'json')
+            continue
           else {
             ref = props[p].items.ref
             if (!ref  ||  utils.getModel(ref).value.subClassOf !== ENUM)
@@ -458,21 +438,13 @@ var NewResourceMixin = {
                     errors: params.errors,
                   })
 
-
-          // options.fields[p].template = textTemplate.bind(this, {
-          //           label: label,
-          //           prop:  props[p],
-          //           value: data[p] ? data[p] + '' : null,
-          //           keyboard: units  &&  units.charAt(0) === '[' ? 'numbers-and-punctuation' : 'numeric',
-          //           required: !maybe,
-          //         })
-
-          // options.fields[p].template = moneyTemplate.bind({}, props[p])
-
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
           options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           continue;
         }
+        else if (search  &&  ref === PHOTO)
+          continue
+
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
         var subModel = models[ref];
@@ -543,7 +515,7 @@ var NewResourceMixin = {
     var r = {}
     let {resource} = this.state
     extend(true, r, resource)
-    if(prop.type === 'number') {
+    if(prop.type === 'number'  &&  !this.props.search) {
       let val = Number(value)
       if (value.charAt(value.length - 1) === '.')
         value = val + '.00'
@@ -566,12 +538,13 @@ var NewResourceMixin = {
     }
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[prop.name]
-    let state = {resource: r}
-    if (r[TYPE] !== SETTINGS)
+    if (!this.props.search  &&  r[constants.TYPE] !== SETTINGS)
       Actions.saveTemporary(r)
 
-    state.requestedProperties = this.getRequestedProperties(r)
-    this.setState(state)
+    this.setState({
+      resource: r,
+      requestedProperties: this.getRequestedProperties(r)
+    })
   },
   getRequestedProperties(r) {
     let rtype = r[TYPE]
@@ -615,7 +588,8 @@ var NewResourceMixin = {
     extend(r, this.state.resource)
     for (var p in this.floatingProps)
       r[p] = this.floatingProps[p]
-    Actions.saveTemporary(r)
+    if (!this.props.search)
+      Actions.saveTemporary(r)
   },
 
   async showBlinkIDScanner(prop) {
@@ -749,35 +723,6 @@ var NewResourceMixin = {
     this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
     this.setState({ resource })
   },
-  // showVideo(params) {
-  //   let onEnd = (err) => {
-  //     Alert.alert(
-  //       'Ready to scan?',
-  //       null,
-  //       [
-  //         {
-  //           text: 'OK',
-  //           onPress: () => {
-  //             this.props.navigator.pop()
-  //             this.showCamera(params)
-  //           }
-  //         }
-  //       ]
-  //     )
-  //   }
-
-  //   this.props.navigator.push({
-  //     id: 18,
-  //     component: VideoPlayer,
-  //     passProps: {
-  //       source: focusUri,
-  //       onEnd: onEnd,
-  //       onError: onEnd,
-  //       muted: true,
-  //       navigator: this.props.navigator
-  //     },
-  //   })
-  // },
 
   showCamera(params) {
     // if (utils.isAndroid()) {
@@ -835,6 +780,10 @@ var NewResourceMixin = {
 
     let {bankStyle} = this.props
     let hasValue = value  &&  value.length
+    if (hasValue) {
+      value = format(value, this.state.resource).trim()
+      hasValue = value  &&  value.length
+    }
     let lcolor = hasValue ? '#555555' : this.getLabelAndBorderColor(prop.name)
 
     let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
@@ -848,7 +797,7 @@ var NewResourceMixin = {
     if (hasValue) {
       markdown = <View style={styles.markdown}>
                    <Markdown markdownStyles={this.getMarkdownStyles()}>
-                     {value || ''}
+                     {value}
                    </Markdown>
                  </View>
       title = utils.translate(prop)
@@ -899,16 +848,15 @@ var NewResourceMixin = {
              ? ' ' + prop.units
              : ' (' + prop.units + ')'
     }
-    else if (required)
+    else if (!this.props.search  &&  required)
       label += ' *'
     let lStyle = styles.labelStyle
 
-    if (prop.ref  &&  prop.ref === MONEY  &&  !required) {
-      let maxChars = (utils.dimensions(component).width - 60)/utils.getFontSize(9)
+    let maxChars = (utils.dimensions(component).width - 40)/utils.getFontSize(9)
       // let some space for wrapping
       if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
         lStyle = [lStyle, {marginTop: 0}]
-    }
+    // }
     let lcolor = this.getLabelAndBorderColor(prop.name)
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
@@ -928,12 +876,14 @@ var NewResourceMixin = {
           autoCorrect={false}
           multiline={multiline}
           editable={editable}
-          autoCapitalize={this.state.isRegistration  ||  (prop.name !== 'url' &&  (!prop.keyboard || prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
+          autoCapitalize={this.state.isRegistration  ||  (prop.name !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  (!prop.keyboard || prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
           onFocus={this.inputFocused.bind(this, prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
-          value={params.value}
+          value={value}
           onKeyPress={this.onKeyPress.bind(this, params.onSubmitEditing)}
+          keyboardShouldPersistTaps='always'
+          keyboardType={keyboard || 'default'}
           onChangeText={this.onChangeText.bind(this, prop)}
           underlineColorAndroid='transparent'
         >{label}
@@ -993,15 +943,15 @@ var NewResourceMixin = {
       return
     let {missedRequiredOrErrorValue, isRegistration} = this.state
     let {prop} = params
-
     var err = missedRequiredOrErrorValue
             ? missedRequiredOrErrorValue[prop.name]
-            : null
-    if (!err  &&  params.errors  &&  params.errors[prop.name])
-      err = params.errors[params.prop.name]
-
-    if (!err)
-      return
+             : null
+    if (!err) {
+      if (params.errors  &&  params.errors[prop.name])
+        err = params.errors[params.prop.name]
+      else
+        return
+    }
     if (isRegistration)
       return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
                <Text style={styles.font14, {color: '#eeeeee'}}>{err}</Text>
@@ -1013,9 +963,9 @@ var NewResourceMixin = {
                <Text style={styles.font14, {paddingLeft: 5, color: '#eeeeee'}}>{err}</Text>
              </View>
            </View>
-      // return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
-      //          <Text style={styles.font14, {color: this.state.isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
-      //        </View>
+    // return <View style={[styles.err, typeof params.paddingLeft !== 'undefined' ? {paddingLeft: params.paddingLeft} : {paddingLeft: 10}]} key={this.getNextKey()}>
+    //          <Text style={styles.font14, {color: isRegistration ? '#eeeeee' : '#a94442'}}>{err}</Text>
+    //        </View>
   },
 
   myBooleanTemplate(params) {
@@ -1038,7 +988,7 @@ var NewResourceMixin = {
              ? ' ' + prop.units
              : ' (' + prop.units + ')'
     }
-    if (required)
+    if (!this.props.search  &&  required)
       label += ' *'
 
     var doWrap = label.length > 30
@@ -1048,6 +998,7 @@ var NewResourceMixin = {
     }
 
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
+    let msgWidth = utils.dimensions(component).width - 90 // 90 - 40 margins + 50 switch
     let help = this.getHelp(prop)
     return (
       <View style={{paddingBottom: 10}} key={this.getNextKey()} ref={prop.name}>
@@ -1056,10 +1007,10 @@ var NewResourceMixin = {
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-              <View style={{justifyContent: 'center'}}>
+              <View style={{justifyContent: 'center', width: msgWidth}}>
                 <Text style={style}>{label}</Text>
               </View>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} />
+              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} style={{justifyContent: 'flex-end'}}/>
             </View>
           </View>
         </TouchableHighlight>
@@ -1102,7 +1053,7 @@ var NewResourceMixin = {
       dateProps.format = prop.format
 
     if (!value)
-      value = translate(params.prop)  + (required  &&  ' *')
+      value = translate(params.prop)  + (!this.props.search  &&  required  ?  ' *' : '')
 
     // let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
     let st = utils.isWeb() ? { } : {marginHorizontal: 10}
@@ -1270,7 +1221,7 @@ var NewResourceMixin = {
 
     let color = {color: lcolor}
     let isVideo = prop.name === 'video'
-    let isPhoto = prop.name === 'photos'  ||  prop.ref === 'tradle.Photo'
+    let isPhoto = prop.name === 'photos'  ||  prop.ref === PHOTO
     let noChooser
     let required = model  &&  utils.ungroup(model.required)
     if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(prop.name)) {
@@ -1294,7 +1245,10 @@ var NewResourceMixin = {
     //     }
     //   }
     // }
-    if (resource && resource[params.prop]) {
+    let val = resource && resource[params.prop]
+    if (this.props.search  && Array.isArray(val)  &&  !val.length)
+      val = null
+    if (val) {
       if (isPhoto) {
         label = prop.title
         if (!this.floatingProps)
@@ -1307,7 +1261,8 @@ var NewResourceMixin = {
         rModel = utils.getModel(prop.ref  ||  prop.items.ref).value
         label = utils.getDisplayName(resource[params.prop], rModel.properties)
         if (!label) {
-          if (prop.items  &&  rModel.subClassOf === ENUM) {
+          if ((prop.items || this.props.search)  &&  rModel.subClassOf === ENUM) {
+            label = ''
             resource[params.prop].forEach((r) => {
               let title = utils.getDisplayName(r)
               label += label ? ', ' + title : title
@@ -1327,13 +1282,13 @@ var NewResourceMixin = {
     }
     else {
       label = params.label
-      if (params.required)
+      if (!this.props.search  &&  params.required)
         label += ' *'
       style = [labelStyle, color]
       propLabel = <View/>
     }
     let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
-    color = {color: this.state.isRegistration ? '#eeeeee' : resource && resource[params.prop] ? '#555555' :  '#AAAAAA'}
+    color = {color: this.state.isRegistration ? '#eeeeee' : val ? '#555555' :  '#AAAAAA'}
     let propView
     if (photoR) {
       if (utils.isImageDataURL(photoR.url)) {
@@ -1485,7 +1440,7 @@ var NewResourceMixin = {
         callback:       this.setChosenValue.bind(this)
       }
     }
-    if (prop.type === 'array'  && m.subClassOf === ENUM) {
+    if ((this.props.search  ||  prop.type === 'array')  && m.subClassOf === ENUM) {
       route.passProps.multiChooser = true
       route.rightButtonTitle = 'Done'
       route.passProps.onDone = this.multiChooser.bind(this, prop)
@@ -1508,6 +1463,8 @@ var NewResourceMixin = {
       propName = propName.name
 
     let setItemCount
+    let prop = this.props.model.properties[propName]
+    let isArray = prop.type === 'array' || (this.props.search  &&  prop.ref  &&  utils.getModel(prop.ref).value.subClassOf === ENUM)
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
       if (!this.floatingProps)
@@ -1515,8 +1472,7 @@ var NewResourceMixin = {
       this.floatingProps[propName] = value
       resource[propName] = value
     }
-    else if (this.props.model.properties[propName].type === 'array') {
-      let prop = this.props.model.properties[propName]
+    else if (isArray) {
       if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !utils.getModel(prop.items.ref).value.inlined) {
         if (!Array.isArray(value))
           value = [value]
@@ -1574,7 +1530,7 @@ var NewResourceMixin = {
 
     if (value.photos)
       state[propName + '_photo'] = value.photos[0]
-    else if (this.props.model  && this.props.model.properties[propName].ref === 'tradle.Photo')
+    else if (this.props.model  && this.props.model.properties[propName].ref === PHOTO)
       state[propName + '_photo'] = value
     state.inFocus = propName
 
@@ -1587,13 +1543,14 @@ var NewResourceMixin = {
     state.requestedProperties = this.getRequestedProperties(r)
 
     this.setState(state);
-    Actions.saveTemporary(r)
+    if (!this.props.search)
+      Actions.saveTemporary(r)
   },
 
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
     var label = params.label
-    if (params.required)
+    if (!this.props.search  &&  params.required)
       label += ' *'
     label += (params.prop.ref  &&  params.prop.ref === MONEY)
            ?  ' (' + CURRENCY_SYMBOL + ')'
@@ -1932,8 +1889,8 @@ var styles= StyleSheet.create({
     borderWidth: 0,
     paddingLeft: 0,
     color: '#555555',
-    height: 45,
-    fontSize: 20,
+    // minHeight: 45,
+    fontSize: 20
   },
   thumb: {
     width: 40,
@@ -2004,9 +1961,9 @@ var styles= StyleSheet.create({
     fontSize: 20,
   },
   dateIcon: {
-    position: 'absolute',
-    right: 0,
-    top: 5
+    // position: 'absolute',
+    // right: 0,
+    // top: 5
   },
   divider: {
     // justifyContent: 'center',
@@ -2454,3 +2411,32 @@ module.exports = NewResourceMixin
   //   this.afterScan(r, prop)
   // },
 
+  // showVideo(params) {
+  //   let onEnd = (err) => {
+  //     Alert.alert(
+  //       'Ready to scan?',
+  //       null,
+  //       [
+  //         {
+  //           text: 'OK',
+  //           onPress: () => {
+  //             this.props.navigator.pop()
+  //             this.showCamera(params)
+  //           }
+  //         }
+  //       ]
+  //     )
+  //   }
+
+  //   this.props.navigator.push({
+  //     id: 18,
+  //     component: VideoPlayer,
+  //     passProps: {
+  //       source: focusUri,
+  //       onEnd: onEnd,
+  //       onError: onEnd,
+  //       muted: true,
+  //       navigator: this.props.navigator
+  //     },
+  //   })
+  // },

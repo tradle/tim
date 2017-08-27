@@ -159,13 +159,14 @@ class ShowRefList extends Component {
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
       if (!icon)
         icon = 'ios-checkmark';
-      let count = resource[p]  &&  resource[p].length
-      if (count) {
+      let cnt = resource['_' + p + 'Count'] // &&  resource[p].length
+      let count
+      if (cnt) {
         hasBacklinks = true
         if (!currentBacklink  &&  !showDetails &&  !showDocuments)
           currentBacklink = props[p]
         count = <View style={styles.count}>
-                  <Text style={styles.countText}>{count}</Text>
+                  <Text style={styles.countText}>{cnt}</Text>
                 </View>
       }
 
@@ -207,28 +208,18 @@ class ShowRefList extends Component {
     // explore current backlink
     let backlinkRL, details, separator
     if (!showDetails  && (currentBacklink  ||  (this.props.backlinkList  &&  this.props.showDocuments))) {
-      var ResourceList = require('./ResourceList')
       let modelName = showDocuments ? FORM : currentBacklink.items.ref
-      let backlinkList
-      if (currentBacklink) {
-        backlinkList = resource[currentBacklink.name]
-      }
-
-      if (!backlinkList) {
-        backlinkList = this.props.backlinkList
-      }
-      if (!backlinkList)
-        backlinkRL = <View/>
-      else
-        backlinkRL = <ResourceList
+        var GridList = require('./GridList')
+        backlinkRL = <GridList
                       lazy={this.props.lazy}
                       modelName={modelName}
                       prop={currentBacklink}
                       sortProperty={utils.getModel(modelName).value.sortProperty}
                       resource={resource}
                       isBacklink={true}
-                      backlinkList={backlinkList}
+                      listView={true}
                       navigator={this.props.navigator} />
+      // }
     }
     else if (resource.photos)
       separator = <View style={{height: 2, backgroundColor: bg}} />
@@ -268,6 +259,7 @@ class ShowRefList extends Component {
                 </View>
               </View>
     }
+
     return this.props.children || <View/>
   }
   getDocs(varr, rId, docs) {

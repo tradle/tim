@@ -12,6 +12,7 @@ var constants = require('@tradle/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 import { makeResponsive } from 'react-native-orient'
+
 var StyleSheet = require('../StyleSheet')
 var chatStyles = require('../styles/chatStyles')
 var reactMixin = require('react-mixin');
@@ -21,6 +22,7 @@ const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PHOTO = 'tradle.Photo'
 const IDENTITY = 'tradle.Identity'
 const ENUM = 'tradle.Enum'
+const SENT = 'Sent'
 
 import {
   // StyleSheet,
@@ -35,14 +37,15 @@ import React, { Component } from 'react'
 class FormMessageRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    var me = utils.getMe();
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return !equal(this.props.resource, nextProps.resource) ||
-           !equal(this.props.to, nextProps.to)             ||
-           this.props.orientation != nextProps.orientation ||
-           this.props.sendStatus !== nextProps.sendStatus
+    let {resource, to, orientation} = this.props
+    return utils.getId(resource) !== utils.getId(nextProps.resource) ||
+           !equal(to, nextProps.to)             ||
+           // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
+           orientation != nextProps.orientation ||
+           resource._sendStatus !== nextProps.resource._sendStatus
+           // (this.props.sendStatus !== SENT  &&  this.props.sendStatus !== nextProps.sendStatus)
   }
 
   onPress(event) {
@@ -108,7 +111,7 @@ class FormMessageRow extends Component {
       // photos.forEach((p) => {
       //   photoUrls.push({url: utils.getImageUri(p.url)});
       // })
-      let isSharedContext = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
+      let isSharedContext = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.resource._context)
       photoListStyle = {
         flexDirection: 'row',
         alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
@@ -138,9 +141,7 @@ class FormMessageRow extends Component {
       else
         photoStyle = chatStyles.image;
     }
-    var sendStatus = <View />
-    if (this.props.sendStatus  &&  this.props.sendStatus !== null)
-      sendStatus = this.getSendStatus()
+    let sendStatus = this.getSendStatus()
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
@@ -171,7 +172,7 @@ class FormMessageRow extends Component {
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let isMyMessage = this.isMyMessage()
-    let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
+    let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.resource._context)
     let width = Math.floor(utils.getMessageWidth(FormMessageRow)) // - (isSharedContext  ? 45 : 0))
     let viewStyle = {
       width: Math.min(width, 600),
@@ -215,10 +216,12 @@ class FormMessageRow extends Component {
       <View style={st, viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
         <View style={[{flex:1}, chatStyles.verificationBody]}>
-          <View style={headerStyle}>
-            {sealedStatus}
-            <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
-            <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'} style={{marginTop: 2, position: 'absolute', right: 10}}/>
+          <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}]}>
+            <View>
+              {sealedStatus}
+              <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
+            </View>
+            <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
           </View>
           {row}
         </View>

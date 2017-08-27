@@ -18,9 +18,9 @@ var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults.json')
 var TradleW = require('../img/TradleW.png')
 var Actions = require('../Actions/Actions');
-import { makeResponsive } from 'react-native-orient'
 var StyleSheet = require('../StyleSheet')
 var reactMixin = require('react-mixin');
+
 var chatStyles = require('../styles/chatStyles')
 
 const TYPE = constants.TYPE
@@ -58,17 +58,29 @@ import ENV from '../utils/env'
 class FormRequestRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[TYPE] || resource.id).value;
-    var me = utils.getMe();
+    this.state = {}
     LINK_COLOR = this.props.bankStyle.linkColor
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return !equal(this.props.resource, nextProps.resource)   ||
-           !equal(this.props.to, nextProps.to)               ||
-           this.props.addedItem !== nextProps.addedItem      ||
-           this.props.orientation !== nextProps.orientation  ||
-           this.props.sendStatus !== nextProps.sendStatus
+    let {resource, to, orientation} = this.props
+    if (this.props.sendStatus !== nextProps.sendStatus)
+      return true
+    let rid = utils.getId(resource)
+    if (resource._documentCreated !== nextProps.resource._documentCreated ||
+        resource._sendStatus !== nextProps.resource._sendStatus)
+      return true
+    // if (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === rid) {
+    //   // HACK for when the form status that is fulfilling this request changes the rendering uses
+    //   // the old list for that
+    //   if (nextProps.addedItem._documentCreated  &&  !nextProps.resource._documentCreated)
+    //     return false
+    //   return true
+    // }
+    if (rid !== utils.getId(nextProps.resource) ||  //!equal(resource, nextProps.resource)    ||
+        !equal(to, nextProps.to)                ||
+        orientation !== nextProps.orientation)
+      return true
+    return false
   }
   render() {
     let resource = this.props.resource;
@@ -93,7 +105,7 @@ class FormRequestRow extends Component {
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow, prop)
     else {
-      onPressCall = resource.documentCreated ? null : this.reviewFormsInContext.bind(this)
+      onPressCall = resource._documentCreated ? null : this.reviewFormsInContext.bind(this)
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR}} size={20} name={'ios-arrow-forward'} />
       let msg = utils.parseMessage(resource, message, bankStyle)
       if (typeof msg === 'string') {
@@ -103,10 +115,10 @@ class FormRequestRow extends Component {
         else
           idx = 0
         msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message.substring(0, idx)}</Text>
+                  <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message.substring(0, idx)}</Text>
                   <View style={chatStyles.rowContainer}>
-                    <Text style={[chatStyles.resourceTitle, {width: msgWidth - 25}, resource.documentCreated || !idx ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
-                    {resource.documentCreated  ? null : icon}
+                    <Text style={[chatStyles.resourceTitle, {width: msgWidth - 25}, resource._documentCreated || !idx ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
+                    {resource._documentCreated  ? null : icon}
                   </View>
                 </View>
       }
@@ -115,7 +127,7 @@ class FormRequestRow extends Component {
                 <View style={{flex: 1}}>
                   {msg}
                 </View>
-                {resource.documentCreated  ? null : icon}
+                {resource._documentCreated  ? null : icon}
               </View>
       renderedRow.push(msg)
     }
@@ -156,8 +168,7 @@ class FormRequestRow extends Component {
     }
     viewStyle.width =  Math.min(msgWidth, message.length * utils.getFontSize(18) + 40)
 
-
-    if (this.props.sendStatus  &&  this.props.sendStatus !== null)
+    if (this.state  &&  this.state.sendStatus  &&  this.state.sendStatus !== null)
       sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
                      ? <View style={chatStyles.sealedStatus}>
@@ -179,18 +190,18 @@ class FormRequestRow extends Component {
       cellStyle = [chatStyles.textContainer, addStyle]
     else
       cellStyle = chatStyles.textContainer
+    let share
+    if (this.isShared())
+      share = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
+                <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
+              </View>
     let msgContent =  <View style={[rowStyle, viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
                         <View style={{marginTop: 2}}>
                         {ownerPhoto}
                         </View>
                         <View style={[cellStyle, {backgroundColor: this.props.bankStyle.incomingMessageBgColor}, shareables ? styles.shareables : {}]}>
                           <View style={[styles.container, {minHeight: 45, justifyContent: 'center'}]}>
-                          {this.isShared()
-                            ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
-                                <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
-                              </View>
-                            : <View />
-                          }
+                          {share}
                           {renderedRow}
                          </View>
                          {sealedStatus}
@@ -258,7 +269,7 @@ class FormRequestRow extends Component {
         returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       (prop, val) => {
           resource[prop.name] = utils.buildRef(val)
-          Actions.addItem({resource: resource})
+          Actions.addItem({resource: resource, disableFormRequest: oResource})
         },
       }
     });
@@ -377,9 +388,10 @@ class FormRequestRow extends Component {
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
     else
       msg = <View/>
-    var headerStyle = {paddingTop: 5, paddingLeft: 10, flex: 1}
+    var headerStyle = {paddingTop: 5, paddingLeft: 10}
     var isShared = this.isShared(verification)
 
+    let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16, width: msgWidth - 100}]
     let bankStyle = this.props.bankStyle
     let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 5}}/>
@@ -387,7 +399,6 @@ class FormRequestRow extends Component {
                           <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
                         </View>
 
-    let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
     let header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
                    <View style={styles.header}>
                      {headerContent}
@@ -402,7 +413,7 @@ class FormRequestRow extends Component {
       var orgPhoto = !isItem  &&  verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
                    : <View />
-      var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: this.props.resource.documentCreated ? 0.3 : 1}]}>
+      var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: this.props.resource._documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
@@ -449,7 +460,7 @@ class FormRequestRow extends Component {
                       </View>
       if (onPress) {
       }
-      else if (this.props.resource.documentCreated) {
+      else if (this.props.resource._documentCreated) {
         orgRow =  <View style={chatStyles.shareView}>
                     {shareView}
                     <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
@@ -492,13 +503,14 @@ class FormRequestRow extends Component {
 
   createNewResource(model, isMyMessage) {
     var resource = {
-      'from': this.props.resource.to,
-      'to': this.props.resource.from,
-      _context: this.props.context
+      from: this.props.resource.to,
+      to: this.props.resource.from,
+      _context: this.props.resource._context,
+      [TYPE]: model.id
     }
     // if (this.props.resource[TYPE] !== FORM_REQUEST)
     //   resource.message = this.props.resource.message;
-    resource[TYPE] = model.id;
+    // resource[TYPE] = model.id;
     var isPrefilled = this.props.resource.prefill
     // Prefill for testing and demoing
     if (isPrefilled)
@@ -534,7 +546,7 @@ class FormRequestRow extends Component {
     const { bankStyle } = this.props
     let message = resource.message
     let messagePart
-    if (resource.documentCreated)
+    if (resource._documentCreated)
       message = resource.message.replace(/\*/g, '')
     else
       messagePart = utils.parseMessage(resource, message, bankStyle)
@@ -549,7 +561,7 @@ class FormRequestRow extends Component {
     //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
     let sameFormRequestForm
     let isMyProduct = form.subClassOf === MY_PRODUCT
-    if (!resource.documentCreated  &&  resource.product  &&  !isMyProduct) {
+    if (!resource._documentCreated  &&  resource.product  &&  !isMyProduct) {
       let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
         let productToForms = this.props.productToForms
@@ -572,7 +584,7 @@ class FormRequestRow extends Component {
               ? {color: '#AFBBA8'}
               : {color: '#2892C6'}
     let link, icon
-    let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
     let self = this
     // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
@@ -581,7 +593,7 @@ class FormRequestRow extends Component {
     messagePart = null
     let msg
 
-    if (sameFormRequestForm  &&  !resource.documentCreated) {
+    if (sameFormRequestForm  &&  !resource._documentCreated) {
       link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
                <View style={[chatStyles.textContainer, {justifyContent: 'center'}]}>
                  <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
@@ -613,7 +625,7 @@ class FormRequestRow extends Component {
     // else if (isMyMessage)
     //   link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
-      let notLink = resource.documentCreated  ||  isReadOnly  ||  isMyProduct
+      let notLink = resource._documentCreated  ||  isReadOnly  ||  isMyProduct
       if (!isMyProduct)
         icon = <Icon  name={'ios-arrow-forward'} style={{justifyContent: 'flex-end', alignSelf: 'flex-end', color: isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR}} size={20} />
       if (!notLink) {
@@ -642,6 +654,7 @@ class FormRequestRow extends Component {
                        </ImageInput>
                        {resource.documentCreated ? null : icon}
                      </View>
+
                    </View>
             }
           }
@@ -649,8 +662,8 @@ class FormRequestRow extends Component {
             msg = <View key={this.getNextKey()}>
                   <TouchableHighlight onPress={() => this.showIproovScanner(prop, prop.name)} underlayColor='transparent'>
                     <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                      <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.incomingMessageTextColor}, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
-                      {resource.documentCreated ? null : icon}
+                      <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
+                      {resource._documentCreated ? null : icon}
                     </View>
                   </TouchableHighlight>
                </View>
@@ -659,8 +672,8 @@ class FormRequestRow extends Component {
             msg = <View key={this.getNextKey()}>
                   <TouchableHighlight onPress={() => this.chooser(prop)} underlayColor='transparent'>
                     <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                      <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.incomingMessageTextColor}, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
-                      {resource.documentCreated ? null : icon}
+                      <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
+                      {resource._documentCreated ? null : icon}
                     </View>
                   </TouchableHighlight>
                </View>
@@ -670,11 +683,11 @@ class FormRequestRow extends Component {
     }
 
     if (!msg) {
-      messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.incomingMessageTextColor}, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
+      messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
       msg = <View key={this.getNextKey()}>
                <View style={{flexDirection: 'row'}}>
                  {messagePart}
-                 {resource.documentCreated ? null : icon}
+                 {resource._documentCreated ? null : icon}
                </View>
                {link}
              </View>
@@ -690,7 +703,7 @@ class FormRequestRow extends Component {
         after: form.id
       }})
       var params = {
-        value: {documentCreated: true},
+        value: {_documentCreated: true, _document: utils.getId(resource)},
         doneWithMultiEntry: true,
         resource: resource,
         meta: utils.getModel(resource[TYPE]).value
@@ -824,6 +837,5 @@ var styles = StyleSheet.create({
   }
 });
 reactMixin(FormRequestRow.prototype, RowMixin)
-FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;

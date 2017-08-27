@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 var StyleSheet = require('../StyleSheet')
 import platformStyles from '../styles/platform'
 var Markdown = require('./Markdown')
+var format = require('string-template')
 
 import {
   Platform,
@@ -54,7 +55,7 @@ class MarkdownPropertyEdit extends Component {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let {bankStyle} = this.props
+    let {bankStyle, resource} = this.props
     const markdownStyles = {
       heading1: {
         fontSize: 24,
@@ -77,14 +78,15 @@ class MarkdownPropertyEdit extends Component {
     if (value && value.length)
       markdown = <View style={[styles.container, {backgroundColor: value.length ? '#f7f7f7' : 'transparent', paddingBottom: 5 }]}>
                   <Markdown markdownStyles={markdownStyles}>
-                    {value}
+                    {format(value, this.props.resource)}
                   </Markdown>
                 </View>
+    let width = utils.dimensions(MarkdownPropertyEdit).width
     return (
       <PageView style={platformStyles.container}>
         <ScrollView  ref='this' style={{alignSelf: 'center'}}>
           <TextInput
-            style={{borderBottomColor: '#eeeeee', borderBottomWidth: 1, height: 300, fontSize: 16, paddingHorizontal: 10 }}
+            style={{borderBottomColor: '#eeeeee', width: width,  borderBottomWidth: 1, height: 300, fontSize: 16, paddingHorizontal: 10 }}
             ref='textInput'
             onChangeText={this.onChangeText.bind(this)}
             value={value}
@@ -98,6 +100,7 @@ class MarkdownPropertyEdit extends Component {
     )
   }
   onChangeText(value) {
+    // let val = format(value, this.props.resource)
     this.setState({value: value})
   }
 }

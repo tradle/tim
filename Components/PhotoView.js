@@ -58,18 +58,9 @@ class PhotoView extends Component {
 
     var hasPhoto = resource.photos && resource.photos.length;
     var currentPhoto = this.state.currentPhoto || this.props.mainPhoto || (hasPhoto  &&  resource.photos[0]);
-    if (!currentPhoto) {
-      if (model.id === constants.TYPES.PROFILE) {
-        return <View/>
-        return (
-          <View style={styles.photoBG}>
-            <Icon name='ios-leaf' size={200}  color='goldenrod' />
-          </View>
-        )
-      }
-      else
-        return <View />
-    }
+    if (!currentPhoto)
+      return <View />
+
     let coverPhoto = utils.getPropertiesWithAnnotation(model.properties, 'coverPhoto')
     coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
 
@@ -121,12 +112,13 @@ class PhotoView extends Component {
       var coverPhotoSource = coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0
                ? {uri: coverPhotoUri, isStatic: true}
                : {uri: coverPhotoUri}
-
+      var title = utils.getDisplayName(this.props.resource)
+      let fontSize = title.length < 15 ? 30 : 24
       photoView = (
         <Image resizeMode='cover' source={coverPhotoSource} style={image}>
           <View style={{height: 50, backgroundColor: '#000000', alignSelf: 'stretch', opacity: 0.2, position: 'absolute', left: 0, bottom: 0, width: width}} />
           <Image source={source} style={{width: 80, height: 80, /*borderWidth: 2, borderColor: '#ffffff',*/ position: 'absolute', left: 10, bottom: 10}} />
-          <Text style={{fontSize: 30, fontWeight: '600', color: '#ffffff', position: 'absolute', left: 100, bottom: 10}}>{utils.getDisplayName(this.props.resource)}</Text>
+          <Text style={{fontSize: fontSize, fontWeight: '600', color: '#ffffff', position: 'absolute', left: 100, bottom: 10}}>{title}</Text>
         </Image>
       )
     }

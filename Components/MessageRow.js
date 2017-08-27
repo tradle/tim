@@ -55,18 +55,16 @@ import ENV from '../utils/env'
 class MessageRow extends Component {
   constructor(props) {
     super(props);
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    var me = utils.getMe();
     LINK_COLOR = this.props.bankStyle.linkColor
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return utils.resized(this.props, nextProps)              ||
-           !equal(this.props.resource, nextProps.resource)   ||
-           !equal(this.props.to, nextProps.to)               ||
-           this.props.addedItem !== nextProps.addedItem      ||
-           this.props.orientation !== nextProps.orientation  ||
-           this.props.sendStatus !== nextProps.sendStatus
+    let {to, resource, orientation} = this.props
+    return !equal(resource, nextProps.resource)   ||
+           !equal(to, nextProps.to)               ||
+           // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
+           // this.props.addedItem !== nextProps.addedItem      ||
+           // sendStatus !== nextProps.sendStatus               ||
+           orientation !== nextProps.orientation
   }
   render() {
     var resource = this.props.resource;
@@ -148,7 +146,7 @@ class MessageRow extends Component {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
 
-        let isReadOnlyChat = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context) //this.props.context  &&  this.props.context._readOnly
+        let isReadOnlyChat = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
         photoListStyle = {
           flexDirection: 'row',
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
@@ -177,7 +175,6 @@ class MessageRow extends Component {
     else
       showMessageBody = true;
     var messageBody;
-    var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
     if (message  &&  !isProductApplication) {
@@ -199,7 +196,7 @@ class MessageRow extends Component {
     var w = utils.dimensions().width
     let msgWidth = utils.getMessageWidth(MessageRow)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
-
+    let sendStatus
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
       var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
@@ -214,8 +211,7 @@ class MessageRow extends Component {
       }
 
 
-      if (this.props.sendStatus  &&  this.props.sendStatus !== null)
-        sendStatus = this.getSendStatus()
+      sendStatus = this.getSendStatus()
       var sealedStatus = (resource.txId)
                        ? <View style={chatStyles.sealedStatus}>
                            <Icon name={'ios-ribbon-outline'} size={30} color='#316A99' style={{opacity: 0.5}} />
@@ -418,7 +414,7 @@ class MessageRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
-    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(resource, this.props.context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
 
     if (model.id === PRODUCT_APPLICATION) {
       let msgModel = utils.getModel(resource.product).value
@@ -647,7 +643,7 @@ class MessageRow extends Component {
                 msgParts[0] = 'I just sent you a request for '; // + msgModel.title;
               if (s.length === 2)
                 onPressCall = self.editForm.bind(self, msgParts[1], msgParts[0])
-              else if (!isMyMessage  &&  !resource.documentCreated)
+              else if (!isMyMessage  &&  !resource._documentCreated)
                 onPressCall = self.createNewResource.bind(self, msgModel, isMyMessage);
 
               color = isMyMessage
@@ -657,8 +653,8 @@ class MessageRow extends Component {
                 link = <Text style={[style, color]}>{translate(msgModel)}</Text>
               else
                 link = <View style={chatStyles.rowContainer}>
-                           <Text style={[style, {color: resource.documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={[{marginTop: 2}, resource.documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.myMessageLinkColor : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                           <Text style={[style, {color: resource._documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
+                           <Icon style={[{marginTop: 2}, resource._documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? self.props.bankStyle.myMessageLinkColor : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
