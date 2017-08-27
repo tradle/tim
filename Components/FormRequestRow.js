@@ -78,7 +78,7 @@ class FormRequestRow extends Component {
     // }
     if (rid !== utils.getId(nextProps.resource) ||  //!equal(resource, nextProps.resource)    ||
         !equal(to, nextProps.to)                ||
-        orientation !== nextProps.orientation)
+        utils.resized(this.props, nextProps))
       return true
     return false
   }

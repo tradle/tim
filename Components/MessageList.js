@@ -40,13 +40,13 @@ import { makeStylish } from './makeStylish'
 
 var LINK_COLOR
 var LIMIT = 500
+const { TYPE, TYPES, PROFILE, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
-const { TYPE, TYPES, PROFILE, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
 
 var StyleSheet = require('../StyleSheet')
 
@@ -429,7 +429,7 @@ class MessageList extends Component {
       return true
     // if (nextState.addedItem  &&  this.state.addedItem !== nextState.addedItem)
     //   return true
-    if (this.props.orientation !== nextProps.orientation ||
+    if (utils.resized(this.props, nextProps)           ||
         this.state.allLoaded !== nextState.allLoaded)
       return true
          // this.state.sendStatus !== nextState.sendStatus   ||)

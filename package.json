@@ -80,7 +80,7 @@
     "https-browserify": "0.0.1",
     "inherits": "^2.0.1",
     "json-stringify-safe": "^5.0.1",
-    "level-change-processor": "github:mvayngrib/level-change-processor",
+    "level-change-processor": "github:mvayngrib/level-change-processor#7100404",
     "level-js": "github:mvayngrib/level.js#ie11",
     "levelup": "^0.18.6",
     "localstorage-down": "github:mvayngrib/localstorage-down#b9e3ab5",

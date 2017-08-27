@@ -64,7 +64,7 @@ class MessageRow extends Component {
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
            // this.props.addedItem !== nextProps.addedItem      ||
            // sendStatus !== nextProps.sendStatus               ||
-           orientation !== nextProps.orientation
+           utils.resized(this.props, nextProps)
   }
   render() {
     var resource = this.props.resource;

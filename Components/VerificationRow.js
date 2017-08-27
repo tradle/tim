@@ -24,7 +24,9 @@ const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PROFILE = constants.TYPES.PROFILE
 
 const TYPE = constants.TYPE
-const VERIFICATION = constants.VERIFICATION
+const VERIFICATION = constants.TYPES.VERIFICATION
+const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
+const CONFIRMATION = 'tradle.Confirmation'
 const IMAGE_PLACEHOLDER = utils.whitePixel
 
 import {
@@ -161,6 +163,10 @@ class VerificationRow extends Component {
       if (this.props.search) {
         if (isVerification)
           title = verificationRequest.title
+        else if (model.id === APPLICATION_SUBMITTED)
+          title = resource.application.title
+        else if (model.id === CONFIRMATION)
+          title = resource.confirmationFor.title
         else
         // if (listModel.id === PRODUCT_APPLICATION)
           title = 'Submited by ' + resource.from.title
