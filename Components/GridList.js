@@ -1674,7 +1674,7 @@ class GridList extends Component {
   render() {
     var content;
     var {isGrid, filter, dataSource, isLoading, refreshing} = this.state
-    var {isChooser, modelName} = this.props
+    var {isChooser, modelName, isModel} = this.props
     var model = utils.getModel(modelName).value;
     if (dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
@@ -1688,7 +1688,7 @@ class GridList extends Component {
                   model={model}
                   isLoading={isLoading}/>
     }
-    content = <ListView  onScroll={this.onScroll.bind(this)}
+    content = <ListView  onScroll={isModel ? () => {} : this.onScroll.bind(this)}
       dataSource={dataSource}
       renderHeader={this.renderHeader.bind(this)}
       enableEmptySections={true}
