@@ -1144,8 +1144,7 @@ var Store = Reflux.createStore({
       const recipientHash = recipientInfo.permalink
       if (self._yuki && recipientHash === self._yuki.permalink) {
         return self._yuki.receive({ message: msg.unserialized.object })
-          .then(() => cb())
-          .catch(cb)
+          .then(() => cb(), cb)
       }
 
       let messenger = wsClients.byIdentifier[recipientHash]
