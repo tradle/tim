@@ -40,7 +40,8 @@ import { makeStylish } from './makeStylish'
 
 var LINK_COLOR
 var LIMIT = 10
-const { TYPE, TYPES, PROFILE, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
+const { TYPE, TYPES, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
+const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM } = TYPES
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
@@ -95,6 +96,7 @@ class MessageList extends Component {
       isEmployee:  utils.isEmployee(props.resource),
       filter: props.filter,
       userInput: '',
+      list: [],
       hasProducts: this.hasProducts(props.resource),
       allLoaded: false
     }
@@ -105,7 +107,7 @@ class MessageList extends Component {
       return false
     let me = utils.getMe()
     let chat = this.props.resource
-    let isChattingWithPerson = chat[constants.TYPE] === TYPES.PROFILE
+    let isChattingWithPerson = chat[constants.TYPE] === PROFILE
     if (me.isEmployee) {
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return false
@@ -172,10 +174,12 @@ class MessageList extends Component {
       if (!utils.isMessage(resource))
         return
       let rid = utils.getId(chatWith)
-      let fid = resource.from.organization &&  utils.getId(resource.from.organization)
-      let tid = resource.to.organization && utils.getId(resource.to.organization)
-      if (rid !== fid  &&  rid !== tid  &&  !to)
-        return
+      if (chatWith[TYPE] !== PROFILE) {
+        let fid = resource.from.organization &&  utils.getId(resource.from.organization)
+        let tid = resource.to.organization && utils.getId(resource.to.organization)
+        if (rid !== fid  &&  rid !== tid  &&  !to)
+          return
+      }
 
       var actionParams = {
         query: this.state.filter,
@@ -281,7 +285,7 @@ class MessageList extends Component {
     let { forgetMeFromCustomer} = params
 
     if (forgetMeFromCustomer) {
-      Actions.list({modelName: TYPES.PROFILE})
+      Actions.list({modelName: PROFILE})
       let routes = this.props.navigator.getCurrentRoutes()
       if (routes[routes.length - 1].component )
       this.props.navigator.popToRoute(routes[1])
@@ -291,7 +295,7 @@ class MessageList extends Component {
 
     if (resource  &&  resource[ROOT_HASH] != chatWith[ROOT_HASH]) {
       var doUpdate
-      if (chatWith[TYPE] === TYPES.ORGANIZATION  &&  resource.organization) {
+      if (chatWith[TYPE] === ORGANIZATION  &&  resource.organization) {
         if (utils.getId(chatWith) === utils.getId(resource.organization))
           doUpdate = true
       }
@@ -437,7 +441,7 @@ class MessageList extends Component {
     var model = utils.getModel(resource[TYPE]).value;
     var title //utils.getDisplayName(resource, model.properties);
 
-    if (resource[TYPE] === constants.TYPES.VERIFICATION) {
+    if (resource[TYPE] === constants.VERIFICATION) {
       let type = utils.getType(resource.document)
       if (type)
         title = translate(utils.getModel(type).value)
@@ -539,7 +543,7 @@ class MessageList extends Component {
     }
 
     props = extend(props, moreProps)
-    if (model.id === TYPES.VERIFICATION) {
+    if (model.id === VERIFICATION) {
       if (this.state.verifiedByTrustedProvider  &&  this.state.verifiedByTrustedProvider[ROOT_HASH] === resource[ROOT_HASH]) {
         props.shareWithRequestedParty = this.props.originatingMessage.from
         props.originatingMessage = this.props.originatingMessage
@@ -547,7 +551,7 @@ class MessageList extends Component {
       return  <VerificationMessageRow {...props} />
     }
 
-    if (model.subClassOf === TYPES.FORM)
+    if (model.subClassOf === FORM)
       return <FormMessageRow {...props} />
 
     props.isLast = rowId === this.state.list.length - 1
@@ -601,7 +605,7 @@ class MessageList extends Component {
     let hideTextInput = !utils.hasSupportLine(resource)  // &&  !ENV.allowForgetMe
 
     if (!this.state.list || !this.state.list.length) {
-      if (this.props.navigator.isConnected  &&  resource[TYPE] === TYPES.ORGANIZATION) {
+      if (this.props.navigator.isConnected  &&  resource[TYPE] === ORGANIZATION) {
         if (this.state.isLoading) {
           var menuBtn = !hideTextInput /*this.hasMenuButton() */ && (
             <View style={styles.footer}>
@@ -622,7 +626,7 @@ class MessageList extends Component {
 
     let isProductApplication = resource[TYPE] === PRODUCT_APPLICATION
     if (!content) {
-      var isAllMessages = model.isInterface  &&  model.id === TYPES.MESSAGE;
+      var isAllMessages = model.isInterface  &&  model.id === MESSAGE;
 
       let h = utils.dimensions(MessageList).height
       var maxHeight = h - NAV_BAR_HEIGHT
@@ -633,7 +637,7 @@ class MessageList extends Component {
 
       if (this.hasChatContext())
         maxHeight -= 45
-      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  this.state.onlineStatus === false))) //  || (resource[TYPE] === TYPES.ORGANIZATION  &&  !resource._online)))
+      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  this.state.onlineStatus === false))) //  || (resource[TYPE] === ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
       // if (notRemediation  &&  !hideTextInput) //  &&  this.props.resource.products) //  &&  this.props.resource.products.length > 1))
       //   maxHeight -= 45
@@ -668,7 +672,7 @@ class MessageList extends Component {
       />
     }
 
-    var isOrg = !this.props.isAggregation  &&  resource  &&  resource[TYPE] === TYPES.ORGANIZATION
+    var isOrg = !this.props.isAggregation  &&  resource  &&  resource[TYPE] === ORGANIZATION
     var chooser
     if (isOrg)
       chooser =  <View style={{flex:1, marginTop: 8}}>
@@ -734,7 +738,7 @@ class MessageList extends Component {
     let cancelIndex = 1
 
     if (hasSupportLine) {
-      let isOrg = this.props.resource[TYPE] === TYPES.ORGANIZATION
+      let isOrg = this.props.resource[TYPE] === ORGANIZATION
       if (this.state.isEmployee  &&  !isOrg) {
         cancelIndex++
         buttons.push({
@@ -814,7 +818,7 @@ class MessageList extends Component {
   // Context chooser shows all the context of the particular chat.
   // When choosing the context chat will show only the messages in linked to this context.
   contextChooser(context) {
-    let name = this.props.resource[TYPE] === TYPES.PROFILE ? this.props.resource.formatted : this.props.resource.name
+    let name = this.props.resource[TYPE] === PROFILE ? this.props.resource.formatted : this.props.resource.name
     this.props.navigator.push({
       title: translate('contextsFor') + ' ' + name,
       id: 23,
@@ -856,7 +860,7 @@ class MessageList extends Component {
       backButtonTitle: 'Back',
       rightButtonTitle: 'Share',
       passProps: {
-        modelName: TYPES.ORGANIZATION,
+        modelName: ORGANIZATION,
         multiChooser: true,
         sharingChat: sharingChat,
         onDone: this.shareContext.bind(this)
@@ -889,7 +893,7 @@ class MessageList extends Component {
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       // titleTextColor: '#7AAAC3',
       passProps:  {
-        modelName: TYPES.ORGANIZATION,
+        modelName: ORGANIZATION,
         provider: this.props.to,
         bankStyle: this.props.bankStyle,
         originatingMessage: r,
@@ -918,7 +922,7 @@ class MessageList extends Component {
 
     // newest messages have to be at the begining of the array
     var list = this.state.list;
-    var id = utils.getId(list[0])
+    var id = list.length  &&  utils.getId(list[0])
     Actions.list({
       lastId: id,
       limit: LIMIT,
@@ -943,7 +947,7 @@ class MessageList extends Component {
     var resource = this.props.resource
     this.setState({show: false})
     this.props.navigator.push({
-      title: translate(utils.getModel(TYPES.FORM).value),
+      title: translate(utils.getModel(FORM).value),
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
@@ -952,7 +956,7 @@ class MessageList extends Component {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback: this.props.callback,
-        type: TYPES.FORM,
+        type: FORM,
         context: this.state.context
       },
       // rightButtonTitle: 'ion|plus',
@@ -974,7 +978,7 @@ class MessageList extends Component {
   onChooseProduct() {
     if (this.props.isAggregation)
       return
-    var modelName = TYPES.MESSAGE
+    var modelName = MESSAGE
     var model = utils.getModel(modelName).value;
     var isInterface = model.isInterface;
     if (!isInterface)
@@ -1026,7 +1030,7 @@ class MessageList extends Component {
     var resource = this.props.resource
     var currentRoutes = self.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
-      title: translate(utils.getModel(TYPES.FINANCIAL_PRODUCT).value),
+      title: translate(utils.getModel(FINANCIAL_PRODUCT).value),
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
@@ -1062,7 +1066,7 @@ class MessageList extends Component {
     var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[TYPE]).value.properties);
     var meta = utils.getModel(me[TYPE]).value.properties;
     var meName = utils.getDisplayName(me, meta);
-    var modelName = TYPES.SIMPLE_MESSAGE;
+    var modelName = SIMPLE_MESSAGE;
     var value = {
       message: msg
               ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.modelName + ')'
@@ -1086,7 +1090,7 @@ class MessageList extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: to,
-        modelName: TYPES.MESSAGE,
+        modelName: MESSAGE,
         currency: this.props.currency,
         bankStyle:  this.props.bankStyle
       }
