@@ -38,7 +38,7 @@ class VerificationMessageRow extends Component {
     super(props);
   }
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.props.orientation !== nextProps.orientation  &&  this.props.orientation !== 'UNKNOWN'  &&  nextProps.orientation !== 'UNKNOWN')
+    if (utils.resized(this.props, nextProps)  &&  this.props.orientation !== 'UNKNOWN'  &&  nextProps.orientation !== 'UNKNOWN')
       return true
     return !equal(this.props.resource, nextProps.resource) ||
            !equal(this.props.to, nextProps.to)             ||

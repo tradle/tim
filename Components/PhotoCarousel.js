@@ -11,7 +11,7 @@ class PhotoCarousel extends Component {
     super(props);
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return this.props.orientation !== nextProps.orientation
+    return utils.resized(this.props, nextProps)
   }
   render() {
     var photoUrls = [];

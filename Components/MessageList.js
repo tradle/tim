@@ -40,17 +40,13 @@ import { makeStylish } from './makeStylish'
 
 var LINK_COLOR
 var LIMIT = 10
-var NEXT_HASH = '_n'
+const { TYPE, TYPES, PROFILE, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
-const ROOT_HASH = constants.ROOT_HASH
-const CUR_HASH = constants.ROOT_CUR
-const TYPE = constants.TYPE
-const TYPES = constants.TYPES
 
 var StyleSheet = require('../StyleSheet')
 
@@ -410,7 +406,7 @@ class MessageList extends Component {
       return true
     // if (nextState.addedItem  &&  this.state.addedItem !== nextState.addedItem)
     //   return true
-    if (this.props.orientation !== nextProps.orientation ||
+    if (utils.resized(this.props, nextProps)           ||
         this.state.allLoaded !== nextState.allLoaded)
       return true
          // this.state.sendStatus !== nextState.sendStatus   ||)
@@ -471,7 +467,7 @@ class MessageList extends Component {
       }
     }
     // Allow to edit resource that was not previously changed
-    if (!verification  &&  !isEmployee  &&  !resource[NEXT_HASH]  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable) {
+    if (!verification  &&  !isEmployee  &&  !resource[PREV_HASH]  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable) {
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
         title: newTitle, //utils.getDisplayName(resource),
