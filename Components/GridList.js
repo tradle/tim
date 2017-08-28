@@ -140,7 +140,7 @@ class GridList extends Component {
 
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
-    this.isSmallScreen = utils.dimensions(GridList).width < 736
+    this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     LIMIT = 10 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
@@ -1151,11 +1151,11 @@ class GridList extends Component {
     let curOrder = order[prop]
 
     order[prop] = curOrder ? false : true
-    this.setState({order: order, sortProperty: prop})
+    this.setState({order: order, sortProperty: prop, list: []})
 
     let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
     if (this.props.search)
-      extend(params, {search: true, filterResource: this.state.resource, limit: LIMIT})
+      extend(params, {search: true, filterResource: this.state.resource, limit: LIMIT * 2, first: true})
     Actions.list(params)
   }
   getGridCols() {
