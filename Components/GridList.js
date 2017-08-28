@@ -258,8 +258,9 @@ class GridList extends Component {
     if (this.state.refreshing)
       return
 
-    var currentOffset = event.nativeEvent.contentOffset.y
-    this.contentHeight = event.nativeEvent.contentSize.height
+    const { target } = event.nativeEvent
+    const currentOffset = target.scrollTop
+    this.contentHeight = target.scrollHeight
     let delta = currentOffset - (this.offset || 0)
     this.direction = delta > 0 || Math.abs(delta) < 3 ? 'down' : 'up'
     this.offset = currentOffset
