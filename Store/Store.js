@@ -5195,7 +5195,7 @@ var Store = Reflux.createStore({
         }
       }
       else if (modelName === PROFILE  &&  !search) {
-        // result = result.filter((r) => !r._inactive)
+        result = result.filter((r) => !r._inactive)
       }
 
       if (isAggregation)
