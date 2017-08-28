@@ -258,12 +258,9 @@ class GridList extends Component {
     if (this.state.refreshing || this.props.isModel)
       return
 
-    var currentOffset = utils.isWeb()
-                      ? event.nativeEvent.target.offsetHeight
-                      : event.nativeEvent.contentOffset.y
-    this.contentHeight = utils.isWeb()
-                       ? event.nativeEvent.target.scrollHeight
-                       : event.nativeEvent.contentSize.height
+    const { target } = event.nativeEvent
+    const currentOffset = target.scrollTop
+    this.contentHeight = target.scrollHeight
     let delta = currentOffset - (this.offset || 0)
     this.direction = delta > 0 || Math.abs(delta) < 3 ? 'down' : 'up'
     this.offset = currentOffset
@@ -1437,8 +1434,8 @@ class GridList extends Component {
     //   return
     if (this.direction !== 'down')
       return
-    if (this.offset < this.contentHeight / 2)
-      return
+    // if (this.offset < this.contentHeight / 2)
+    //   return
     // debugger
     let { list=[] } = this.state
     this.state.refreshing = true
@@ -1701,7 +1698,7 @@ class GridList extends Component {
       removeClippedSubviews={false}
       keyboardDismissMode='on-drag'
       keyboardShouldPersistTaps="always"
-      initialListSize={10}
+      initialListSize={isModel ? 300 : 20}
       pageSize={20}
       canLoadMore={true}
       renderScrollComponent={props => <InfiniteScrollView {...props} />}
