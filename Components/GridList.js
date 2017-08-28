@@ -1427,7 +1427,6 @@ class GridList extends Component {
 
   }
   async _loadMoreContentAsync() {
-    debugger
     if (this.state.refreshing)
       return
     // if (this.direction === 'up' &&  this.numberOfPages < 2)
