@@ -5540,7 +5540,7 @@ var Store = Reflux.createStore({
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
 
-    let table = `rl_${modelName.replace('.', '_')}`
+    let table = `rl_${modelName.replace(/\./g, '_')}`
     let query = `query {\n${table}\n`
     let model = this.getModel(modelName)
     let props = model.properties
