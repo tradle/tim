@@ -255,11 +255,15 @@ class GridList extends Component {
       StatusBar.setHidden(true)
   }
   onScroll(event) {
-    if (this.state.refreshing)
+    if (this.state.refreshing || this.props.isModel)
       return
 
-    var currentOffset = event.nativeEvent.contentOffset.y
-    this.contentHeight = event.nativeEvent.contentSize.height
+    var currentOffset = utils.isWeb()
+                      ? event.nativeEvent.target.offsetHeight
+                      : event.nativeEvent.contentOffset.y
+    this.contentHeight = utils.isWeb()
+                       ? event.nativeEvent.target.scrollHeight
+                       : event.nativeEvent.contentSize.height
     let delta = currentOffset - (this.offset || 0)
     this.direction = delta > 0 || Math.abs(delta) < 3 ? 'down' : 'up'
     this.offset = currentOffset
@@ -1426,7 +1430,7 @@ class GridList extends Component {
 
   }
   async _loadMoreContentAsync() {
-    // debugger
+    debugger
     if (this.state.refreshing)
       return
     // if (this.direction === 'up' &&  this.numberOfPages < 2)
@@ -1688,7 +1692,7 @@ class GridList extends Component {
                   model={model}
                   isLoading={isLoading}/>
     }
-    content = <ListView  onScroll={isModel ? () => {} : this.onScroll.bind(this)}
+    content = <ListView  onScroll={this.onScroll.bind(this)}
       dataSource={dataSource}
       renderHeader={this.renderHeader.bind(this)}
       enableEmptySections={true}
@@ -1928,6 +1932,7 @@ class GridList extends Component {
       titleTextColor: '#7AAAC3',
       passProps: {
         modelName: constants.TYPES.MESSAGE,
+        isModel: true,
         search: true
       },
     })
