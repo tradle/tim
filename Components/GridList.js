@@ -140,7 +140,7 @@ class GridList extends Component {
 
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
-    this.isSmallScreen = utils.dimensions(GridList).width < 736
+    this.isSmallScreen = !utils.isWeb()  &&  utils.dimensions(GridList).width < 736
     LIMIT = 10 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
@@ -511,29 +511,30 @@ class GridList extends Component {
         else
           ++this.numberOfPages
       }
-
-      let l = this.state.list
-      if (l  &&  !this.props.isBacklink) { //  &&  l.length === LIMIT * 2) {
-        let newList = []
-        // if (this.direction === 'down') {
-          // for (let i=LIMIT; i<l.length; i++)
-          for (let i=0; i<l.length; i++)
-            newList.push(l[i])
-          list.forEach((r) => newList.push(r))
-          list = newList
-        // }
-        // else {
-        //   for (let i=0; i<l.length; i++)
-        //   // for (let i=0; i<LIMIT; i++)
-        //     list.push(l[i])
+      if (!params.first) {
+        let l = this.state.list
+        if (l  &&  !this.props.isBacklink) { //  &&  l.length === LIMIT * 2) {
+          let newList = []
+          // if (this.direction === 'down') {
+            // for (let i=LIMIT; i<l.length; i++)
+            for (let i=0; i<l.length; i++)
+              newList.push(l[i])
+            list.forEach((r) => newList.push(r))
+            list = newList
+          // }
+          // else {
+          //   for (let i=0; i<l.length; i++)
+          //   // for (let i=0; i<LIMIT; i++)
+          //     list.push(l[i])
+          // }
+        }
+        // if (params.start) {
+        //   let l = []
+        //   this.state.list.forEach((r) => l.push(r))
+        //   list.forEach((r) => l.push(r))
+        //   list = l
         // }
       }
-      // if (params.start) {
-      //   let l = []
-      //   this.state.list.forEach((r) => l.push(r))
-      //   list.forEach((r) => l.push(r))
-      //   list = l
-      // }
     }
 
     list = this.addTestProvidersRow(list)
@@ -1014,6 +1015,7 @@ class GridList extends Component {
         passProps: {
           model: model,
           resource: this.state.resource,
+          searchWithFilter: this.searchWithFilter.bind(this),
           search: true,
           bankStyle: this.props.bankStyle || defaultBankStyle,
         }
@@ -1152,12 +1154,16 @@ class GridList extends Component {
     let curOrder = order[prop]
 
     order[prop] = curOrder ? false : true
-    this.setState({order: order, sortProperty: prop})
+    this.setState({order: order, sortProperty: prop, list: []})
 
     let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
     if (this.props.search)
-      extend(params, {search: true, filterResource: this.state.resource, limit: LIMIT})
+      extend(params, {search: true, filterResource: this.state.resource, limit: LIMIT * 2, first: true})
     Actions.list(params)
+  }
+  searchWithFilter(filterResource) {
+    this.setState({resource: filterResource})
+    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: LIMIT * 2, first: true})
   }
   getGridCols() {
     let model = utils.getModel(this.props.modelName).value
@@ -1427,7 +1433,7 @@ class GridList extends Component {
 
   }
   async _loadMoreContentAsync() {
-    debugger
+    // debugger
     if (this.state.refreshing)
       return
     // if (this.direction === 'up' &&  this.numberOfPages < 2)
@@ -1441,14 +1447,16 @@ class GridList extends Component {
     this.state.refreshing = true
     Actions.list({
       modelName: this.props.modelName,
-      sortProperty: this.props.sortProp,
-      asc: this.props.order,
+      sortProperty: this.state.sortProperty,
+      asc: this.state.order,
       limit: LIMIT,
       direction: this.direction,
       search: this.props.search,
+      filterResource: this.state.resource,
       start: list.length,
       startRec: list[list.length - 1]
     })
+
     // if (list.length < LIMIT)
     //   return
     // this.setTimeout(() => {

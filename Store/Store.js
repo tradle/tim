@@ -5760,7 +5760,7 @@ var Store = Reflux.createStore({
       }
 
       if (!result.edges.length) {
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction})
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
         return
       }
         // if (result.edges.length < limit)
@@ -5768,7 +5768,7 @@ var Store = Reflux.createStore({
       let to = this.getRepresentative(utils.getId(me.organization))
       let toId = utils.getId(to)
       let list = result.edges.map((r) => this.convertToResource(r.node))
-      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction})
+      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
     } catch(error) {
       // debugger
       console.error(error)

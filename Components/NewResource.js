@@ -596,7 +596,7 @@ class NewResource extends Component {
     // time filter shows in the form
     currentRoutes[currentRoutesLength - 2].onRightButtonPress.passProps.resource = value
     this.props.navigator.pop()
-    Actions.list({filterResource: value, search: true, modelName: this.props.model.id, limit: 20})
+    this.props.searchWithFilter(value)
 
     // let {model} = this.props
     // this.props.navigator.replace({
