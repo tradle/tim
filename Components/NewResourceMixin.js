@@ -133,7 +133,7 @@ var NewResourceMixin = {
 
     var dModel = data  &&  models[data[TYPE]]
     if (!utils.isEmpty(data)) {
-      if (!meta.items && data[TYPE] !== meta.id) {
+      if (!this.props.search  &&  !meta.items && data[TYPE] !== meta.id) {
         var interfaces = meta.interfaces;
         if (!interfaces  ||  interfaces.indexOf(data[TYPE]) == -1)
            return;
