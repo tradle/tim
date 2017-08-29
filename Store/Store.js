@@ -5598,12 +5598,22 @@ var Store = Reflux.createStore({
           }
         }
         else if (props[p].type === 'object') {
+          // if (Array.isArray(val)) {
+          //   let s = `${p}: [`
+          //   val.forEach((r, i) => {
+          //     if (i)
+          //       s += ', '
+          //     s += `{id: "${utils.getId(r)}", title: "${utils.getDisplayName(r)}"}`
+          //   })
+          //   s += ']'
+          //   inClause.push(s)
+          // }
           if (Array.isArray(val)) {
-            let s = `${p}: [`
+            let s = `${p}__id: [`
             val.forEach((r, i) => {
               if (i)
                 s += ', '
-              s += `{id: "${utils.getId(r)}", title: "${utils.getDisplayName(r)}"}`
+              s += `"${utils.getId(r)}"`
             })
             s += ']'
             inClause.push(s)
