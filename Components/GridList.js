@@ -463,8 +463,10 @@ class GridList extends Component {
       if (!params.list) {
         if (params.alert)
           Alert.alert(params.alert)
-        else if (this.props.search)
+        else if (this.props.search) {
           this.state.refreshing = false
+          Alert.alert('No resources were found for this criteria')
+        }
 
         // else if (this.props.search  &&  !this.props.isModel)
         //   this.setState({list: [], dataSource: this.state.dataSource.cloneWithRows([])})
@@ -1751,6 +1753,7 @@ class GridList extends Component {
                       placeholder={translate('search')}
                       showsCancelButton={false}
                       hideBackground={true}
+                      bankStyle={this.props.bankStyle}
                       />
       }
     }
