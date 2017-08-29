@@ -1549,7 +1549,8 @@ var NewResourceMixin = {
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
     var label = params.label
-    if (!this.props.search  &&  params.required)
+    var { search } = this.props
+    if (!search  &&  params.required)
       label += ' *'
     label += (params.prop.ref  &&  params.prop.ref === MONEY)
            ?  ' (' + CURRENCY_SYMBOL + ')'
@@ -1566,7 +1567,7 @@ var NewResourceMixin = {
                     model: params.model,
                     errors: params.errors,
                     editable: params.editable,
-                    keyboard: 'numeric',
+                    keyboard: search ? null : 'numeric',
                   })
           }
           {
