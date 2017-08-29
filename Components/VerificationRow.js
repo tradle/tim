@@ -9,6 +9,7 @@ var RowMixin = require('./RowMixin');
 // var Accordion = require('react-native-accordion')
 var Swipeout = require('react-native-swipeout')
 var StyleSheet = require('../StyleSheet')
+var ArticleView = require('./ArticleView')
 var dateformat = require('dateformat')
 var appStyle = require('../styles/appStyle.json')
 
@@ -35,7 +36,6 @@ import {
   Platform,
   Text,
   TouchableHighlight,
-  ArticleView,
   Alert,
   // View
 } from 'react-native';
@@ -290,14 +290,6 @@ class VerificationRow extends Component {
   }
   _allowScroll(scrollEnabled) {
     this.setState({scrollEnabled: scrollEnabled})
-  }
-  onPress(url) {
-    this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
-      backButtonTitle: 'Back',
-      passProps: {url: url}
-    });
   }
 
   formatFilteredResource(model, resource, renderedRows) {
@@ -644,4 +636,12 @@ module.exports = VerificationRow;
   //       renderedRow.push(v);
   //     });
   //   }
+  // }
+  // onPress(url) {
+  //   this.props.navigator.push({
+  //     id: 7,
+  //     component: ArticleView,
+  //     backButtonTitle: 'Back',
+  //     passProps: {url: url}
+  //   });
   // }
