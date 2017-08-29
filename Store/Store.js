@@ -5538,6 +5538,7 @@ var Store = Reflux.createStore({
   },
 
   async searchServer(params) {
+    let self = this
     let {modelName, filterResource, sortProperty, asc, limit, direction, first} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
@@ -5571,32 +5572,16 @@ var Store = Reflux.createStore({
             op.EQ += `\n   ${p}: "${val}",`
           else if (len > 1) {
             if (val.charAt(0) !== '*')
-              op.STARTS_WITH = `\n   ${p}: "${val.substring(0, len - 1)}",`
+              op.STARTS_WITH = `\n   ${p}: "${val.substring(1)}",`
             else if (val.charAt(len - 1) === '*')
-              op.CONTAINS = `\n   ${p}: "${val.substring(0, len - 2)}",`
+              op.CONTAINS = `\n   ${p}: "${val.substring(1, len - 1)}",`
           }
         }
         else if (props[p].type === 'boolean')
           op.EQ += `\n   ${p}: ${val},`
-        else if (props[p].type === 'number') {
-          let ch = val.toString().charAt(0)
-          switch (ch) {
-          case '>':
-            if (val.charAt(1) === '=')
-              op.GTE += `\n   ${p}: ${val.substring(2)},`
-            else
-              op.GT += `\n   ${p}: ${val.substring(1)},`
-            break
-          case '<':
-            if (val.charAt(1) === '=')
-              op.LTE += `\n   ${p}: ${val.substring(2)},`
-            else
-              op.LT += `\n   ${p}: ${val.substring(1)},`
-            break
-          default:
-            op.EQ += `\n   ${p}: ${val},`
-          }
-        }
+        else if (props[p].type === 'number')
+          self.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
+
         else if (props[p].type === 'object') {
           // if (Array.isArray(val)) {
           //   let s = `${p}: [`
@@ -5609,6 +5594,8 @@ var Store = Reflux.createStore({
           //   inClause.push(s)
           // }
           if (Array.isArray(val)) {
+            if (!val.length)
+              continue
             let s = `${p}__id: [`
             val.forEach((r, i) => {
               if (i)
@@ -5620,9 +5607,9 @@ var Store = Reflux.createStore({
           }
           else {
             if (props[p].ref === MONEY) {
-              op.EQ += `\n  ${p}__currency: "${val.currency}",
-                        \n  ${p}__value: ${val.value}
-                       `
+              let {value, currency} = val
+              op.EQ += `\n  ${p}__currency: "${currency}",`
+              addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
             else {
               op.EQ += `\n   ${p}: {
@@ -5719,54 +5706,6 @@ var Store = Reflux.createStore({
     query += `\n}`   // close properties block
     query += `\n}`   // close query
 
-// # {
-// #   rl_tradle_FormRequest(filter: {
-// #     # EQ:{
-// #     #   form: "tradle.Selfie"
-// #     #   # _link:"2f97214118ab001134aa1c21c407d881e81522cb8905d3303fe3434b7b7bd6f0"
-// #     #   # _link:"c989e44d64f3aea3e1d2f4f54f74147a89b3ac5a8a53c8d50519af2ba5d1e41a"
-// #     #   # _author:"6a636c53aa36e6afb0740293fa89afdd187386227a5048283e178125b52a4152"
-// #     # }
-// #     # IN:{
-// #     #   _author:["56ae8d65c42e3647b82db586447e9d3f3596bc16a2b38586969ee06b5d61d308"]
-// #     # }
-// #     # IN: {
-// #     # form:["tradle.Selfie", "tradle.ProfessionalIndemnity"]
-// #     # },
-// #     EQ:{
-// #       binary: "hex:1234"
-// #       # form:"tradle.Selfie"
-// #     }
-// #     # BETWEEN:{
-// #     # _t: ["tradle.Form", "tradle.FormRequest"]
-// #     #   # form:["tradle.A", "tradle.T"]
-// #     # }
-// #     # STARTS_WITH: {
-// #     #   form: "tradle.C"
-// #     # }
-
-// #   }, orderBy: {
-// #     property: _author,
-// #     desc: false
-// #   }, limit: 2) {
-// #     _permalink,
-// #     _time,
-// #     _link,
-// #     _author,
-// #     form,
-// #     binary
-
-// #     # scanJson,
-// #     # scan {
-// #       # url
-// #     # },
-// #     # verifications {
-// #     #   _link,
-// #     #   _author,
-// #     #   document
-// #     # }
-// #   }
-// # }
     try {
       let data = await client.query({
           query: gql(`${query}`),
@@ -5798,6 +5737,30 @@ var Store = Reflux.createStore({
 
     function prettify (obj) {
       return JSON.stringify(obj, null, 2)
+    }
+    function addEqualsOrGreaterOrLesserNumber(val, op, prop) {
+      let isMoney = prop.ref === MONEY
+      let p = prop.name
+      if (isMoney)
+        p += '__value'
+      let ch = val.toString().charAt(0)
+      switch (ch) {
+      case '>':
+        if (val.charAt(1) === '=')
+          op.GTE += `\n   ${p}: ${val.substring(2)},`
+        else
+          op.GT += `\n   ${p}: ${val.substring(1)},`
+        break
+      case '<':
+        if (val.charAt(1) === '=')
+          op.LTE += `\n   ${p}: ${val.substring(2)},`
+        else
+          op.LT += `\n   ${p}: ${val.substring(1)},`
+        break
+      default:
+        op.EQ += `\n   ${p}: ${val},`
+      }
+
     }
   },
   getAllPropertiesForServerSearch(model) {
