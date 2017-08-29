@@ -992,6 +992,7 @@ class GridList extends Component {
     //   search: true
     // });
     // let {model} = this.props
+    this.state.resource = {[TYPE]: model.id}
     this.props.navigator.push({
       id: 30,
       title: translate('searchSomething', utils.makeModelTitle(model)),
