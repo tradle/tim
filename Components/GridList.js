@@ -14,6 +14,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var reactMixin = require('react-mixin');
 var HomePageMixin = require('./HomePageMixin')
+var ArticleView = require('./ArticleView')
 var extend = require('extend')
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
@@ -1049,6 +1050,7 @@ class GridList extends Component {
           !mm.isInterface                &&
            mm.subClassOf !== ENUM        &&
            mm.subClassOf !== METHOD      &&
+           // (mm.viewCols || mm.gridCols)  &&
            mm.subClassOf !== constants.TYPES.FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
         if (filter) {
           if (utils.makeModelTitle(mm).toLowerCase().indexOf(filterLower) !== -1)
@@ -1078,12 +1080,13 @@ class GridList extends Component {
 
   renderRow(resource, sectionId, rowId)  {
     if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION) {
-      // let viewCols = this.getGridCols()
+      let viewCols = this.getGridCols()
       // let size = viewCols ? viewCols.length : 1
       // let isSmallScreen = utils.dimensions(GridList).width < 736
       // let showList = this.props.search  &&  isSmallScreen  &&  size > 2
       // if (!showList)
-      return this.renderGridRow(resource, sectionId, rowId)
+      if (viewCols)
+        return this.renderGridRow(resource, sectionId, rowId)
     }
 
     var model
@@ -1199,7 +1202,18 @@ class GridList extends Component {
 
   renderGridRow(resource, sectionId, rowId)  {
     let viewCols = this.getGridCols()
-    let size = viewCols ? viewCols.length : 1
+    let size
+    if (viewCols) {
+      var model = utils.getModel(this.props.modelName).value
+      let props = model.properties
+
+      let vCols = viewCols.filter((c) => props[c].type !== 'array')
+      viewCols = vCols
+      size = Math.min(viewCols.length, 12)
+      if (size < viewCols.length)
+        viewCols.splice(size, viewCols.length - size)
+    }
+    // let size = viewCols ? viewCols.length : 1
     let widthCols = utils.dimensions(GridList).width / 100
     size = Math.min(size, Math.floor(widthCols * 100/100))
     let colSize =  this.isSmallScreen ? size / 2 : 1
@@ -1242,26 +1256,9 @@ class GridList extends Component {
     else
       return row
   }
-  formatCol(resource, prop, style) {
-    var self = this;
+  formatCol(resource, prop) {
     var model = utils.getModel(resource[TYPE] || resource.id).value;
-
-    // if (!prop) {
-    //   let m = utils.getModel(this.props.modelName).value
-    //   let row = <Text style={styles.description} key={this.getNextKey(resource)}>{utils.getDisplayName(resource)}</Text>
-    //   if (m.isInterface || m.id === FORM) {
-    //     row = <View key={this.getNextKey(resource)}>
-    //             <Text style={styles.type}>{utils.makeModelTitle(model)}</Text>
-    //             {row}
-    //           </View>
-    //   }
-    //   return <View style={cellStyle}>{row}</View>
-
-    // }
     var properties = model.properties;
-
-    var isOfficialAccounts = this.props.isOfficialAccounts
-    var color = isOfficialAccounts && style ? {color: style.listColor} : {}
     var isContact = resource[TYPE] === PROFILE;
     let v = prop
     let backlink
@@ -1276,7 +1273,7 @@ class GridList extends Component {
     if (!resource[v]  &&  !properties[v].displayAs)
       return
 
-    var style = [styles.description, color]
+    var style = [styles.description]
     if (isContact  &&  v === 'organization') {
       style.push({alignSelf: 'flex-end', marginTop: 20})
       style.push(styles.verySmallLetters);
@@ -1342,10 +1339,10 @@ class GridList extends Component {
     if (resource[v]  &&  (typeof resource[v] != 'string')) {
       if (criteria)
         style.push({fontWeight: '600'})
-      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
+      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[v] + ''}</Text></View>
     }
     if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') === 0  ||  resource[v].indexOf('https://') === 0))
-      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(self)} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
+      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(this, resource)} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
 
     var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
     let msgParts = utils.splitMessage(val);
@@ -1376,6 +1373,17 @@ class GridList extends Component {
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
     }
   }
+  onPress(resource) {
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
+    var title = utils.makeTitle(utils.getDisplayName(resource, model.properties));
+    this.props.navigator.push({
+      id: 7,
+      title: title,
+      component: ArticleView,
+      passProps: {url: resource.url}
+    });
+  }
+
   highlightCriteria(resource,val, criteria, style) {
     criteria = criteria.replace('*', '')
     let idx = val.indexOf(criteria)
@@ -1397,17 +1405,27 @@ class GridList extends Component {
     // if (this.state.isLoading)
     //   return <View/>
     var model = utils.getModel(this.props.modelName).value
+    let props = model.properties
     var viewCols = this.getGridCols() // model.gridCols || model.viewCols;
     if (!viewCols)
       return <View />
 
-    let size = viewCols ? viewCols.length : 1
+    let size
+    if (viewCols) {
+      let vCols = viewCols.filter((c) => props[c].type !== 'array')
+      viewCols = vCols
+      size = Math.min(viewCols.length, 12)
+      if (size < viewCols.length)
+        viewCols.splice(size, viewCols.length - size)
+    }
+    else
+      size = 1
+
     let widthCols = utils.dimensions(GridList).width / 100
     size = Math.min(size, Math.floor(widthCols * 100/100))
 
     let smCol = this.isSmallScreen ? size/2 : 1
     let {sortProperty, order} = this.state
-    var props = model.properties
     let cols = viewCols.map((p) => {
       let colStyle
       if (sortProperty  &&  sortProperty === p) {
@@ -1740,9 +1758,17 @@ class GridList extends Component {
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(this.props.bankStyle)
+    let style
+    if (this.props.isBacklink)
+      style = {}
+    else {
+      style = [platformStyles.container]
+      if (isModel)
+        style.push({width: utils.getContentWidth(GridList), alignSelf: 'center'})
+    }
 
     return (
-      <PageView style={this.props.isBacklink ? {} : platformStyles.container} separator={contentSeparator}>
+      <PageView style={style} separator={contentSeparator}>
         {network}
         {searchBar}
         <View style={styles.separator} />
