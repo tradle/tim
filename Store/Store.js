@@ -15,8 +15,8 @@ import ReactNative, {
 const gql = require('graphql-tag')
 const { ApolloClient, createNetworkInterface } = require('apollo-client')
 
-const graphqlEndpoint = process.argv[2]  ||  'https://uhaylip7rh.execute-api.us-east-1.amazonaws.com/dev/tradle/graphql'
-// const graphqlEndpoint = process.argv[2] || 'http://localhost:4000'
+// const graphqlEndpoint = process.argv[2]  ||  'https://uhaylip7rh.execute-api.us-east-1.amazonaws.com/dev/tradle/graphql'
+const graphqlEndpoint = process.argv[2] || 'http://localhost:4000'
 const client = new ApolloClient({
   networkInterface: createNetworkInterface({
     uri: graphqlEndpoint
@@ -2468,10 +2468,13 @@ var Store = Reflux.createStore({
       org['_' + p] = config[p]
 
     if (org._country) {
-      let countries = this.searchNotMessages({modelName: COUNTRY})
-      let country = countries.filter((c) => {
-        return c.code === org._country ||  c.country === org._country
+      // let countries = this.searchNotMessages({modelName: COUNTRY})
+      let country = this.getModel(COUNTRY).enum.filter((c) => {
+        return c.id === org._country ||  c.title === org._country
       })
+      // let country = countries.filter((c) => {
+      //   return c.code === org._country ||  c.country === org._country
+      // })
       if (country)
         org.country = this.buildRef(country[0])
       delete org._country
@@ -5789,7 +5792,7 @@ var Store = Reflux.createStore({
       if (props[p].displayAs)
         continue
       let ptype = props[p].type
-      if (ptype === 'array' || ptype === 'date')
+      if (ptype === 'array') // || ptype === 'date')
         continue
       if (ptype !== 'object') {
         arr.push(p)
@@ -5832,10 +5835,16 @@ var Store = Reflux.createStore({
         )
         continue
       }
-
-      // if (ref === COUNTRY  ||  ref === CURRENCY)
-      //   arr.push(p)
-
+      // HACK
+      if (ref === COUNTRY) {//   ||  ref === CURRENCY)
+        arr.push(
+          `${p} {
+            id
+            title
+          }`
+        )
+        // arr.push(p)
+      }
       else {
         let m = utils.getModel(ref).value
         if (m.subClassOf === ENUM) {
