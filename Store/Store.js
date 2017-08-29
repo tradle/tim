@@ -5675,8 +5675,18 @@ var Store = Reflux.createStore({
     if (hasFilter)
       query += `filter: { ${qq} },\n`
     if (sortProperty) {
+      let sortBy
+      let ref = props[sortProperty].ref
+      if (ref) {
+        if (ref === MONEY)
+          sortBy = sortProperty + '__value'
+        else
+          sortBy = sortProperty + '__title'
+      }
+      else
+        sortBy = sortProperty
       query += `\norderBy: {
-        property: ${sortProperty},
+        property: ${sortBy},
         desc: ${asc ? false : true}
       }`
     }
