@@ -1264,7 +1264,7 @@ var Store = Reflux.createStore({
   promiseEngine() {
     return this._enginePromise
   },
-  initChats() {
+  async initChats() {
     let meId = utils.getId(me)
     let meOrgId = me.organization ? utils.getId(me.organization) : null
 
@@ -1274,6 +1274,13 @@ var Store = Reflux.createStore({
         let c = this._getItem(r._context)
         // context could be empty if ForgetMe was requested for the provider where form was originally created
         // if (c  &&  c._readOnly) {
+        if (!c  &&  r[TYPE] === ASSIGN_RM) {
+          let cId = utils.getId(r._context)
+          c = await this._getItemFromServer(cId)
+          this.dbPut(cId, c)
+          this._setItem(cId, c)
+        }
+
         let cId = utils.getId(c)
         if (utils.isReadOnlyChat(r)  ||  r[TYPE] === APPLICATION_DENIAL  ||  (r[TYPE] === CONFIRMATION  &&  utils.getId(r.from) === meId)) {
           this.addMessagesToChat(cId, r, true)
@@ -2755,15 +2762,13 @@ var Store = Reflux.createStore({
     rr._sendStatus = self.isConnected ? SENDING : QUEUED
     var noCustomerWaiting
     // let firstTime
-    let promise
     let isProductApplication = r[TYPE] === PRODUCT_APPLICATION
 
     return this._loadedResourcesDefer.promise
     .then(() => {
-      if (isProductApplication)
-        promise = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
-      if (!promise)
-        promise = Q()
+      let promise = isProductApplication
+                  ? this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+                  : Q()
       return promise
     })
     .then((result) => {
@@ -2982,393 +2987,6 @@ var Store = Reflux.createStore({
         cb(rr)
     })
   },
-
-//   onAddMessage (params) {
-//     let r = params.msg
-//     let isWelcome = params.isWelcome
-//     let requestForForm = params.requestForForm
-//     let cb = params.cb
-//     let disableAutoResponse = params.disableAutoResponse
-//     let rr = {};
-//     let context
-//     let toOrg
-//     let toId
-//     let to
-//     let props
-//     let isReadOnlyContext
-//     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
-//     let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
-//     let toChain
-//     let orgRep
-//     let orgId
-//     let noCustomerWaiting
-//     var batch
-//     var error
-//     var welcomeMessage
-
-//     var self = this
-
-//     return this._loadedResourcesDefer.promise
-//     .then(() => {
-//       let m = this.getModel(r[TYPE])
-//       props = m.properties;
-//       if (!r.time)
-//         r.time = new Date().getTime();
-//       // r.to could be a reference to a resource
-//       to = this._getItem(r.to)
-//       // if (!r.to[TYPE])
-//       //   r.to = this._getItem(r.to)
-//       if (to[TYPE] === ORGANIZATION) {
-//         orgId = utils.getId(r.to)
-//         orgRep = this.getRepresentative(orgId)
-//         // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
-//         //   return
-//         if (!orgRep) {
-//           var params = {
-//             action: 'addMessage',
-//             error: 'No ' + r.to.name + ' representative was found'
-//           }
-//           this.trigger(params);
-//           return
-//         }
-//         toOrg = r.to
-//         r.to = orgRep
-//       }
-//       else
-// <<<<<<< HEAD
-//         isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
-
-//       if (r._context) {
-//         rr._context = r._context
-//         context = this._getItem(r._context)
-//       }
-//       for (var p in r) {
-//         if (!props[p])
-//           continue
-//         if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
-//           rr[p] = this.buildRef(r[p])
-//         else
-//           rr[p] = r[p];
-//       }
-//       // let firstTime
-//       if (r[TYPE] === PRODUCT_APPLICATION) {
-//         let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
-//         if (result) {
-//           result = result.filter((r) => {
-//             return (r.message === r.message  &&  !r.documentCreated) ? true : false
-//           })
-//           if (result.length) {
-//             result.forEach((r) => {
-//               const rid = utils.getId(r)
-//               self._mergeItem(rid, { documentCreated: true })
-//             })
-//           }
-//         }
-//       }
-//       //   if (!this.isConnected) {
-//       //     let result = this.searchMessages({modelName: PRODUCT_LIST, to: toOrg})
-//       //     firstTime = !result  ||  !result.length
-//       //   }
-//       // }
-//       rr[NONCE] = this.getNonce()
-//       toChain = {
-//         [TYPE]: rr[TYPE],
-//         [NONCE]: rr[NONCE],
-//         time: r.time
-//       }
-//       if (rr.message)
-//         toChain.message = rr.message
-//       if (rr.photos)
-//         toChain.photos = rr.photos
-//       if (isSelfIntroduction)
-//         toChain.profile = { firstName: me.firstName }
-//       if (r.list)
-//         rr.list = r.list
-//       let required = m.required
-//       if (required) {
-//         required.forEach((p) => {
-//           toChain[p] = rr[p]
-//         })
-//         // HACK
-//         delete toChain.from
-//         delete toChain.to
-//       }
-//       batch = []
-//       // var promise = Q(protocol.linkString(toChain))
-//       let hash = r.to[ROOT_HASH]
-//       if (!hash)
-//         hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-//       toId = IDENTITY + '_' + hash
-//       rr._sendStatus = self.isConnected ? SENDING : QUEUED
-// =======
-//         rr[p] = r[p];
-//     }
-
-//     let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
-//     // rr[NONCE] = this.getNonce()
-//     let toChain = {
-//       [TYPE]: rr[TYPE],
-//       // [NONCE]: rr[NONCE],
-//       time: r.time
-//     }
-//     if (rr.message)
-//       toChain.message = rr.message
-//     if (rr.photos)
-//       toChain.photos = rr.photos
-//     if (isSelfIntroduction)
-//       toChain.profile = { firstName: me.firstName }
-//     if (r.list)
-//       rr.list = r.list
-//     let required = m.required
-//     if (required) {
-//       required.forEach((p) => {
-//         toChain[p] = rr[p]
-//       })
-//       // HACK
-//       delete toChain.from
-//       delete toChain.to
-//     }
-//     var batch = []
-//     var error
-//     var welcomeMessage
-//     // var promise = Q(protocol.linkString(toChain))
-//     let hash = r.to[ROOT_HASH]
-//     if (!hash)
-//       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-//     var toId = IDENTITY + '_' + hash
-//     rr._sendStatus = self.isConnected ? SENDING : QUEUED
-//     var noCustomerWaiting
-//     // let firstTime
-//     let promise
-//     let isProductApplication = r[TYPE] === PRODUCT_APPLICATION
-
-//     if (isProductApplication)
-//       promise = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
-//     if (!promise)
-//       promise = Q()
-//     return promise
-//     .then((result) => {
-//     // if (r[TYPE] === PRODUCT_APPLICATION) {
-//     //   let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
-//       if (result) {
-//         result = result.filter((r) => {
-//           return (r.message === r.message  &&  !r._documentCreated) ? true : false
-//         })
-//         if (result.length) {
-//           result.forEach((r) => {
-//             const rid = utils.getId(r)
-//             self._mergeItem(rid, { _documentCreated: true })
-//           })
-//         }
-//       }
-//     // }
-// >>>>>>> origin/refactordb
-//       return this.maybeWaitForIdentity({ permalink: hash })
-//     })
-//     .then(() => meDriver.sign({ object: toChain }))
-//     .then((result) => {
-//       toChain = result.object
-//       let hash = protocol.linkString(result.object)
-
-//       rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
-//       if (isProductApplication) {
-//         rr._context = r._context = {id: utils.getId(r), title: r.product}
-//         // let params = {
-//         //   action: 'addItem',
-//         //   resource: rr,
-//         //   // sendStatus: sendStatus
-//         // }
-//         // self.trigger(params)
-//         self.addLastMessage(r, batch)
-//       }
-//       else if (!isWelcome)
-//         self.addLastMessage(r, batch)
-
-//       if (!isWelcome) //  ||  utils.isEmployee(r.to))
-//         return
-//       if (!orgRep)
-//         return
-//       if (orgRep.lastMessageTime) {
-//         isWelcome = orgRep.lastMessage === r.message
-//         if (!isWelcome)
-//           return;
-//       }
-//       // var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
-//       // Create welcome message without saving it in DB
-//       // welcomeMessage = {}
-//       if (me.txId)
-//         return
-
-//       // ProductApplication was requested as a part of verification process from different provider
-//       if (isProductApplication)
-//         isWelcome = false
-//       // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
-//       // prevent the not needed duplicate expensive operations for obtaining ProductList
-//       return self.getDriver(me)
-//       .then(() => {
-//         if (/*!self.isConnected  || */ publishRequestSent[orgId])
-//           return
-//         // TODO:
-//         // do we need identity publish status anymore
-//         return meDriver.identityPublishStatus()
-//       })
-//       .then((status) => {
-//         if (!status/* || !self.isConnected*/)
-//           return
-//         publishRequestSent[orgId] = true
-//         if (!status.watches.link  &&  !status.link) {
-//           if (isCustomerWaiting)
-//             noCustomerWaiting = true
-//           return self.publishMyIdentity(orgRep)
-//         }
-//         else {
-//           // self.updateMe()
-//           var allMyIdentities = self._getItem(MY_IDENTITIES)
-//           var all = allMyIdentities.allIdentities
-//           var curId = allMyIdentities.currentIdentity
-
-//           let identity = all.filter((id) => id.id === curId)
-//           console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
-//           var msg = {
-//             message: me.firstName + ' is waiting for the response',
-//             [TYPE]: SELF_INTRODUCTION,
-//             identity: identity[0].publishedIdentity,
-//             profile: {
-//               firstName: me.firstName
-//             },
-//             from: me,
-//             to: r.to
-//           }
-//           if (isCustomerWaiting)
-//             noCustomerWaiting = true
-//           return self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
-//         }
-//       })
-//     })
-//     .then(() => {
-//       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
-//         return;
-
-//       // Temporary untill the real hash is known
-//       var key = utils.getId(rr)
-
-//       rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
-//       if (r[TYPE] === PRODUCT_APPLICATION)
-//         rr.to.organization = self.buildRef(to)
-
-//       self._setItem(key, rr)
-
-//       if (!toOrg)
-//         toOrg = to.organization ? to.organization : to
-
-//       if (!rr._context)
-//         self.addMessagesToChat(utils.getId(toOrg), rr)
-//       else {
-//         let context = self._getItem(rr._context)
-//         if  (utils.isReadOnlyChat(context)) {
-//           let cId = utils.getId(rr._context)
-//           self.addMessagesToChat(cId, rr)
-//           if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
-//             if (rr[TYPE] === APPLICATION_DENIAL)
-//               context._denied = true
-//             else
-//               context._approved = true
-//             self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-//             self.dbPut(cId, context)
-//           }
-//         }
-//         else
-//           self.addMessagesToChat(utils.getId(toOrg), rr)
-//       }
-
-//       this.addVisualProps(rr)
-
-//       var params = {
-//         action: 'addMessage',
-//         resource: isWelcome ? welcomeMessage : rr
-//       }
-//       if (error)
-//         params.error = error
-//       if (r[TYPE]  !== SELF_INTRODUCTION)
-//         self.trigger(params)
-//       if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
-//         return self.getDriver(me)
-//     })
-//     .then(() => {
-//       // SelfIntroduction or IdentityPublishRequest were just sent
-//       if (noCustomerWaiting)
-//         return
-//       if (isReadOnlyContext)
-//         return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
-
-//       if (self._getItem(toId).pubkeys) {
-//         // let sendParams = self.packMessage(r, toChain)
-//         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
-//         if (disableAutoResponse) {
-//           if (!sendParams.other)
-//             sendParams.other = {}
-//           sendParams.other.disableAutoResponse = true
-//         }
-//         const method = toChain[SIG] ? 'send' : 'signAndSend'
-//         return self.meDriverExec(method, sendParams)
-//         .catch(function (err) {
-//           debugger
-//         })
-//       }
-//     })
-//     .then((result) => {
-//       if (!requestForForm  &&  isWelcome)
-//         return
-//       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
-//         return
-//       if (isReadOnlyContext)
-//         return
-//       // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
-//       if (!toOrg)
-//         toOrg = to.organization ? to.organization : to
-
-//       let orgId = utils.getId(toOrg)
-//       // self.deleteMessageFromChat(orgId, rr)
-//       // delete list[rr[TYPE] + '_' + tmpKey]
-
-//       // saving the new message
-//       const data = utils.toOldStyleWrapper(result.message)
-//       if (data)  {
-//         rr[ROOT_HASH] = data[ROOT_HASH]
-//         rr[CUR_HASH] = data[CUR_HASH]
-//       }
-//       var key = utils.getId(rr)
-
-//       self.dbBatchPut(key, rr, batch)
-//       // rr._sendStatus = self.isConnected ? SENDING : QUEUED
-
-//       self._setItem(key, rr)
-//       if (isProductApplication)
-//         return this.searchMessages({modelName: FORM_REQUEST, to: to})
-//     })
-//     .then((result) => {
-//       if (result) {
-//         result.forEach((r) => {
-//           if (r._documentCreated  &&  !r._document) {
-//             let rId = utils.getId(r)
-//             batch.push({type: 'del', key: rId})
-//             this.deleteMessageFromChat(orgId, r)
-//             this._deleteItem(rId)
-//           }
-//         })
-//       }
-//       // self.addMessagesToChat(orgId, rr)
-//       return db.batch(batch)
-//     })
-//     .catch(function(err) {
-//       debugger
-//     })
-//     .finally(() => {
-//       if (cb)
-//         cb(rr)
-//     })
-//   },
-
   packMessage(toChain, from, to, context) {
     var sendParams = {
       object: toChain
@@ -3799,36 +3417,41 @@ var Store = Reflux.createStore({
   async onGetItem(params) {
     var {resource, action, noTrigger, search} = params
     // await this._loadedResourcesDefer.promise
+    let rId = utils.getId(resource)
     if (search) {
-      let modelName = utils.getType(resource)
+      let r = await this._getItemFromServer(rId)
+      let retParams = { resource: r, action: 'getItem' }
+      this.trigger(retParams)
 
-      let table = `r_${modelName.replace('.', '_')}`
+      // let modelName = utils.getType(resource)
 
-      let _link = resource[CUR_HASH]
-      if (!_link) {
-        let parts = resource.id.split('_')
-        _link = parts[parts.length - 1]
-      }
-      let query = `query {\n${table} (_link: "${_link}")\n`
+      // let table = `r_${modelName.replace('.', '_')}`
 
-      let m = this.getModel(modelName)
-      let arr = this.getAllPropertiesForServerSearch(m)
+      // let _link = resource[CUR_HASH]
+      // if (!_link) {
+      //   let parts = resource.id.split('_')
+      //   _link = parts[parts.length - 1]
+      // }
+      // let query = `query {\n${table} (_link: "${_link}")\n`
 
-      query += `\n{${arr.join('   \n')}\n}\n}`
-      try {
-        let result = await client.query({query: gql(`${query}`)})
-        let r = this.convertToResource(result.data[table])
+      // let m = this.getModel(modelName)
+      // let arr = this.getAllPropertiesForServerSearch(m)
 
-        let retParams = { resource: r, action: 'getItem' }
-        this.trigger(retParams)
-      }
-      catch(err) {
-        console.log('onGetItem', err)
-        debugger
-      }
+      // query += `\n{${arr.join('   \n')}\n}\n}`
+      // try {
+      //   let result = await client.query({query: gql(`${query}`)})
+      //   let r = this.convertToResource(result.data[table])
+
+      //   let retParams = { resource: r, action: 'getItem' }
+      //   this.trigger(retParams)
+      // }
+      // catch(err) {
+      //   console.log('onGetItem', err)
+      //   debugger
+      // }
       return
     }
-    let r = this._getItem(utils.getId(resource))
+    let r = this._getItem(rId)
     var res = {};
 
     if (utils.isMessage(this.getModel(r[TYPE]))) {
@@ -4183,7 +3806,9 @@ var Store = Reflux.createStore({
     let context = resource._context || value._context
     let isRemediation
     if (context) {
-      context = this._getItem(context)
+      let savedContext = this._getItem(context)
+      if (savedContext  &&  me.isEmployee)
+        context = savedContext
       isRemediation = context.product === REMEDIATION
       let toId = utils.getId(resource.to)
       if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
@@ -4271,15 +3896,35 @@ var Store = Reflux.createStore({
       // else
       //   results.push(await db.get(rValue))
       let elm = this._getItem(rValue)
-      if (!utils.isMessage(elm))
-        foundRefs.push({value: elm, state: 'fulfilled'})
+      let elmFromServer
+      if (!elm  &&  me.isEmployee) {
+        elm = await this._getItemFromServer(rValue)
+        results.push(elm)
+        elmFromServer = true
+        // debugger
+      }
       else {
-        let kres = await this._keeper.get(elm[CUR_HASH])
-        results.push(utils.clone(kres))
-        if (results.length) {
-          let r = results[0]
-          extend(r, elm)
-          foundRefs.push({value: r, state: 'fulfilled'})
+        if (!utils.isMessage(elm))
+          foundRefs.push({value: elm, state: 'fulfilled'})
+        else {
+          try {
+            if (me.isEmployee  &&  utils.isReadOnlyChat(elm)) {
+              let kres = await this._getItemFromServer(utils.getId(elm))
+              elmFromServer = true
+              results.push(kres)
+            }
+            else {
+              let kres = await this._keeper.get(elm[CUR_HASH])
+              results.push(utils.clone(kres))
+            }
+          } catch (err) {
+            debugger
+          }
+          if (results.length) {
+            let r = results[0]
+            extend(r, elm)
+            foundRefs.push({value: r, state: 'fulfilled'})
+          }
         }
       }
     }
@@ -4393,8 +4038,10 @@ var Store = Reflux.createStore({
 
     if (isRegistration)
       await handleRegistration()
-    else if (isMessage)
+    else if (isMessage) {
+      debugger
       await handleMessage(noTrigger, returnVal)
+    }
     else
       await save(returnVal, isBecomingEmployee)
     if (disableFormRequest) {
@@ -4659,6 +4306,10 @@ var Store = Reflux.createStore({
 
         if (returnVal[TYPE] === ASSIGN_RM) {
           let app = self._getItem(returnVal.application)
+          if (!app) {
+            app = returnVal.application
+            self._setItem(app)
+          }
           app._relationshipManager = true
           self.dbPut(utils.getId(app), app)
         }
@@ -4679,7 +4330,7 @@ var Store = Reflux.createStore({
           return await save(req, true)
         }
       } catch (err) {
-        debugger
+        debug('Store._putResourceInDB:', err.stack)
       }
 
     }
@@ -5895,6 +5546,14 @@ var Store = Reflux.createStore({
       from: from,
       to: to
     })
+    let lr = this._getItem(utils.getId(rr))
+    if (lr) {
+      let mr = {}
+      extend(mr, lr)
+      extend(mr, rr)
+      rr = mr
+    }
+
     this.addVisualProps(rr)
     return rr
   },
@@ -9452,7 +9111,7 @@ var Store = Reflux.createStore({
     let myId
     // console.time('dbStream')
     var orgContacts = {}
-    return this.myResourcesLoaded = utils.dangerousReadDB(db)
+    return utils.dangerousReadDB(db)
     .then((results) => {
       if (!results.length)
         return self.loadModels();
@@ -9559,7 +9218,7 @@ var Store = Reflux.createStore({
         }
       }
       if (me  &&  utils.isEmpty(chatMessages)) {
-        this.initChats()
+        return this.initChats()
         // if (me) {
         //   // db resource do not have properties needed for rendering
         //   let allMessages = self.searchMessages({modelName: MESSAGE, to: me})
@@ -10495,6 +10154,33 @@ var Store = Reflux.createStore({
       if (rr)
         return rr.value
     }
+  },
+  async _getItemFromServer(id) {
+    let parts = id.split('_')
+
+    let modelName = parts[0]
+    let m = this.getModel(modelName)
+    if (!m)
+      return
+
+    let table = `r_${modelName.replace('.', '_')}`
+
+    let _link = parts[parts.length - 1]
+    let query = `query {\n${table} (_link: "${_link}")\n`
+
+    let arr = this.getAllPropertiesForServerSearch(m)
+
+    query += `\n{${arr.join('   \n')}\n}\n}`
+    try {
+      let result = await client.query({query: gql(`${query}`)})
+    // debugger
+      return this.convertToResource(result.data[table])
+    }
+    catch(err) {
+      console.log('onGetItem', err)
+      debugger
+    }
+
   },
   _mergeItem(key, value) {
     const current = list[key] || {}
@@ -12149,7 +11835,392 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 
   // transformResult(msgInfo) {
   //   let r = msgInfo.object
-  //   r[ROOT_HASH] = msgInfo.permalnk || msgInfo.link
+  //   r[ROOT_HASH] = msgInfo.permalnk || msgInfo.//   onAddMessage (params) {
+//     let r = params.msg
+//     let isWelcome = params.isWelcome
+//     let requestForForm = params.requestForForm
+//     let cb = params.cb
+//     let disableAutoResponse = params.disableAutoResponse
+//     let rr = {};
+//     let context
+//     let toOrg
+//     let toId
+//     let to
+//     let props
+//     let isReadOnlyContext
+//     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
+//     let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
+//     let toChain
+//     let orgRep
+//     let orgId
+//     let noCustomerWaiting
+//     var batch
+//     var error
+//     var welcomeMessage
+
+//     var self = this
+
+//     return this._loadedResourcesDefer.promise
+//     .then(() => {
+//       let m = this.getModel(r[TYPE])
+//       props = m.properties;
+//       if (!r.time)
+//         r.time = new Date().getTime();
+//       // r.to could be a reference to a resource
+//       to = this._getItem(r.to)
+//       // if (!r.to[TYPE])
+//       //   r.to = this._getItem(r.to)
+//       if (to[TYPE] === ORGANIZATION) {
+//         orgId = utils.getId(r.to)
+//         orgRep = this.getRepresentative(orgId)
+//         // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
+//         //   return
+//         if (!orgRep) {
+//           var params = {
+//             action: 'addMessage',
+//             error: 'No ' + r.to.name + ' representative was found'
+//           }
+//           this.trigger(params);
+//           return
+//         }
+//         toOrg = r.to
+//         r.to = orgRep
+//       }
+//       else
+// <<<<<<< HEAD
+//         isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
+
+//       if (r._context) {
+//         rr._context = r._context
+//         context = this._getItem(r._context)
+//       }
+//       for (var p in r) {
+//         if (!props[p])
+//           continue
+//         if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
+//           rr[p] = this.buildRef(r[p])
+//         else
+//           rr[p] = r[p];
+//       }
+//       // let firstTime
+//       if (r[TYPE] === PRODUCT_APPLICATION) {
+//         let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+//         if (result) {
+//           result = result.filter((r) => {
+//             return (r.message === r.message  &&  !r.documentCreated) ? true : false
+//           })
+//           if (result.length) {
+//             result.forEach((r) => {
+//               const rid = utils.getId(r)
+//               self._mergeItem(rid, { documentCreated: true })
+//             })
+//           }
+//         }
+//       }
+//       //   if (!this.isConnected) {
+//       //     let result = this.searchMessages({modelName: PRODUCT_LIST, to: toOrg})
+//       //     firstTime = !result  ||  !result.length
+//       //   }
+//       // }
+//       rr[NONCE] = this.getNonce()
+//       toChain = {
+//         [TYPE]: rr[TYPE],
+//         [NONCE]: rr[NONCE],
+//         time: r.time
+//       }
+//       if (rr.message)
+//         toChain.message = rr.message
+//       if (rr.photos)
+//         toChain.photos = rr.photos
+//       if (isSelfIntroduction)
+//         toChain.profile = { firstName: me.firstName }
+//       if (r.list)
+//         rr.list = r.list
+//       let required = m.required
+//       if (required) {
+//         required.forEach((p) => {
+//           toChain[p] = rr[p]
+//         })
+//         // HACK
+//         delete toChain.from
+//         delete toChain.to
+//       }
+//       batch = []
+//       // var promise = Q(protocol.linkString(toChain))
+//       let hash = r.to[ROOT_HASH]
+//       if (!hash)
+//         hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
+//       toId = IDENTITY + '_' + hash
+//       rr._sendStatus = self.isConnected ? SENDING : QUEUED
+// =======
+//         rr[p] = r[p];
+//     }
+
+//     let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
+//     // rr[NONCE] = this.getNonce()
+//     let toChain = {
+//       [TYPE]: rr[TYPE],
+//       // [NONCE]: rr[NONCE],
+//       time: r.time
+//     }
+//     if (rr.message)
+//       toChain.message = rr.message
+//     if (rr.photos)
+//       toChain.photos = rr.photos
+//     if (isSelfIntroduction)
+//       toChain.profile = { firstName: me.firstName }
+//     if (r.list)
+//       rr.list = r.list
+//     let required = m.required
+//     if (required) {
+//       required.forEach((p) => {
+//         toChain[p] = rr[p]
+//       })
+//       // HACK
+//       delete toChain.from
+//       delete toChain.to
+//     }
+//     var batch = []
+//     var error
+//     var welcomeMessage
+//     // var promise = Q(protocol.linkString(toChain))
+//     let hash = r.to[ROOT_HASH]
+//     if (!hash)
+//       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
+//     var toId = IDENTITY + '_' + hash
+//     rr._sendStatus = self.isConnected ? SENDING : QUEUED
+//     var noCustomerWaiting
+//     // let firstTime
+//     let promise
+//     let isProductApplication = r[TYPE] === PRODUCT_APPLICATION
+
+//     if (isProductApplication)
+//       promise = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+//     if (!promise)
+//       promise = Q()
+//     return promise
+//     .then((result) => {
+//     // if (r[TYPE] === PRODUCT_APPLICATION) {
+//     //   let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+//       if (result) {
+//         result = result.filter((r) => {
+//           return (r.message === r.message  &&  !r._documentCreated) ? true : false
+//         })
+//         if (result.length) {
+//           result.forEach((r) => {
+//             const rid = utils.getId(r)
+//             self._mergeItem(rid, { _documentCreated: true })
+//           })
+//         }
+//       }
+//     // }
+// >>>>>>> origin/refactordb
+//       return this.maybeWaitForIdentity({ permalink: hash })
+//     })
+//     .then(() => meDriver.sign({ object: toChain }))
+//     .then((result) => {
+//       toChain = result.object
+//       let hash = protocol.linkString(result.object)
+
+//       rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
+//       if (isProductApplication) {
+//         rr._context = r._context = {id: utils.getId(r), title: r.product}
+//         // let params = {
+//         //   action: 'addItem',
+//         //   resource: rr,
+//         //   // sendStatus: sendStatus
+//         // }
+//         // self.trigger(params)
+//         self.addLastMessage(r, batch)
+//       }
+//       else if (!isWelcome)
+//         self.addLastMessage(r, batch)
+
+//       if (!isWelcome) //  ||  utils.isEmployee(r.to))
+//         return
+//       if (!orgRep)
+//         return
+//       if (orgRep.lastMessageTime) {
+//         isWelcome = orgRep.lastMessage === r.message
+//         if (!isWelcome)
+//           return;
+//       }
+//       // var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
+//       // Create welcome message without saving it in DB
+//       // welcomeMessage = {}
+//       if (me.txId)
+//         return
+
+//       // ProductApplication was requested as a part of verification process from different provider
+//       if (isProductApplication)
+//         isWelcome = false
+//       // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
+//       // prevent the not needed duplicate expensive operations for obtaining ProductList
+//       return self.getDriver(me)
+//       .then(() => {
+//         if (/*!self.isConnected  || */ publishRequestSent[orgId])
+//           return
+//         // TODO:
+//         // do we need identity publish status anymore
+//         return meDriver.identityPublishStatus()
+//       })
+//       .then((status) => {
+//         if (!status/* || !self.isConnected*/)
+//           return
+//         publishRequestSent[orgId] = true
+//         if (!status.watches.link  &&  !status.link) {
+//           if (isCustomerWaiting)
+//             noCustomerWaiting = true
+//           return self.publishMyIdentity(orgRep)
+//         }
+//         else {
+//           // self.updateMe()
+//           var allMyIdentities = self._getItem(MY_IDENTITIES)
+//           var all = allMyIdentities.allIdentities
+//           var curId = allMyIdentities.currentIdentity
+
+//           let identity = all.filter((id) => id.id === curId)
+//           console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
+//           var msg = {
+//             message: me.firstName + ' is waiting for the response',
+//             [TYPE]: SELF_INTRODUCTION,
+//             identity: identity[0].publishedIdentity,
+//             profile: {
+//               firstName: me.firstName
+//             },
+//             from: me,
+//             to: r.to
+//           }
+//           if (isCustomerWaiting)
+//             noCustomerWaiting = true
+//           return self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
+//         }
+//       })
+//     })
+//     .then(() => {
+//       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+//         return;
+
+//       // Temporary untill the real hash is known
+//       var key = utils.getId(rr)
+
+//       rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
+//       if (r[TYPE] === PRODUCT_APPLICATION)
+//         rr.to.organization = self.buildRef(to)
+
+//       self._setItem(key, rr)
+
+//       if (!toOrg)
+//         toOrg = to.organization ? to.organization : to
+
+//       if (!rr._context)
+//         self.addMessagesToChat(utils.getId(toOrg), rr)
+//       else {
+//         let context = self._getItem(rr._context)
+//         if  (utils.isReadOnlyChat(context)) {
+//           let cId = utils.getId(rr._context)
+//           self.addMessagesToChat(cId, rr)
+//           if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
+//             if (rr[TYPE] === APPLICATION_DENIAL)
+//               context._denied = true
+//             else
+//               context._approved = true
+//             self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+//             self.dbPut(cId, context)
+//           }
+//         }
+//         else
+//           self.addMessagesToChat(utils.getId(toOrg), rr)
+//       }
+
+//       this.addVisualProps(rr)
+
+//       var params = {
+//         action: 'addMessage',
+//         resource: isWelcome ? welcomeMessage : rr
+//       }
+//       if (error)
+//         params.error = error
+//       if (r[TYPE]  !== SELF_INTRODUCTION)
+//         self.trigger(params)
+//       if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
+//         return self.getDriver(me)
+//     })
+//     .then(() => {
+//       // SelfIntroduction or IdentityPublishRequest were just sent
+//       if (noCustomerWaiting)
+//         return
+//       if (isReadOnlyContext)
+//         return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
+
+//       if (self._getItem(toId).pubkeys) {
+//         // let sendParams = self.packMessage(r, toChain)
+//         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
+//         if (disableAutoResponse) {
+//           if (!sendParams.other)
+//             sendParams.other = {}
+//           sendParams.other.disableAutoResponse = true
+//         }
+//         const method = toChain[SIG] ? 'send' : 'signAndSend'
+//         return self.meDriverExec(method, sendParams)
+//         .catch(function (err) {
+//           debugger
+//         })
+//       }
+//     })
+//     .then((result) => {
+//       if (!requestForForm  &&  isWelcome)
+//         return
+//       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+//         return
+//       if (isReadOnlyContext)
+//         return
+//       // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
+//       if (!toOrg)
+//         toOrg = to.organization ? to.organization : to
+
+//       let orgId = utils.getId(toOrg)
+//       // self.deleteMessageFromChat(orgId, rr)
+//       // delete list[rr[TYPE] + '_' + tmpKey]
+
+//       // saving the new message
+//       const data = utils.toOldStyleWrapper(result.message)
+//       if (data)  {
+//         rr[ROOT_HASH] = data[ROOT_HASH]
+//         rr[CUR_HASH] = data[CUR_HASH]
+//       }
+//       var key = utils.getId(rr)
+
+//       self.dbBatchPut(key, rr, batch)
+//       // rr._sendStatus = self.isConnected ? SENDING : QUEUED
+
+//       self._setItem(key, rr)
+//       if (isProductApplication)
+//         return this.searchMessages({modelName: FORM_REQUEST, to: to})
+//     })
+//     .then((result) => {
+//       if (result) {
+//         result.forEach((r) => {
+//           if (r._documentCreated  &&  !r._document) {
+//             let rId = utils.getId(r)
+//             batch.push({type: 'del', key: rId})
+//             this.deleteMessageFromChat(orgId, r)
+//             this._deleteItem(rId)
+//           }
+//         })
+//       }
+//       // self.addMessagesToChat(orgId, rr)
+//       return db.batch(batch)
+//     })
+//     .catch(function(err) {
+//       debugger
+//     })
+//     .finally(() => {
+//       if (cb)
+//         cb(rr)
+//     })
+//   },
+link
   //   r[CUR_HASH] = msgInfo.link
   //   r.time = r.time || msgInfo.timestamp
   //   let c = msgInfo.object.context
@@ -12174,4 +12245,389 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   })
   // },
 
+//   onAddMessage (params) {
+//     let r = params.msg
+//     let isWelcome = params.isWelcome
+//     let requestForForm = params.requestForForm
+//     let cb = params.cb
+//     let disableAutoResponse = params.disableAutoResponse
+//     let rr = {};
+//     let context
+//     let toOrg
+//     let toId
+//     let to
+//     let props
+//     let isReadOnlyContext
+//     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
+//     let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
+//     let toChain
+//     let orgRep
+//     let orgId
+//     let noCustomerWaiting
+//     var batch
+//     var error
+//     var welcomeMessage
+
+//     var self = this
+
+//     return this._loadedResourcesDefer.promise
+//     .then(() => {
+//       let m = this.getModel(r[TYPE])
+//       props = m.properties;
+//       if (!r.time)
+//         r.time = new Date().getTime();
+//       // r.to could be a reference to a resource
+//       to = this._getItem(r.to)
+//       // if (!r.to[TYPE])
+//       //   r.to = this._getItem(r.to)
+//       if (to[TYPE] === ORGANIZATION) {
+//         orgId = utils.getId(r.to)
+//         orgRep = this.getRepresentative(orgId)
+//         // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
+//         //   return
+//         if (!orgRep) {
+//           var params = {
+//             action: 'addMessage',
+//             error: 'No ' + r.to.name + ' representative was found'
+//           }
+//           this.trigger(params);
+//           return
+//         }
+//         toOrg = r.to
+//         r.to = orgRep
+//       }
+//       else
+// <<<<<<< HEAD
+//         isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
+
+//       if (r._context) {
+//         rr._context = r._context
+//         context = this._getItem(r._context)
+//       }
+//       for (var p in r) {
+//         if (!props[p])
+//           continue
+//         if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
+//           rr[p] = this.buildRef(r[p])
+//         else
+//           rr[p] = r[p];
+//       }
+//       // let firstTime
+//       if (r[TYPE] === PRODUCT_APPLICATION) {
+//         let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+//         if (result) {
+//           result = result.filter((r) => {
+//             return (r.message === r.message  &&  !r.documentCreated) ? true : false
+//           })
+//           if (result.length) {
+//             result.forEach((r) => {
+//               const rid = utils.getId(r)
+//               self._mergeItem(rid, { documentCreated: true })
+//             })
+//           }
+//         }
+//       }
+//       //   if (!this.isConnected) {
+//       //     let result = this.searchMessages({modelName: PRODUCT_LIST, to: toOrg})
+//       //     firstTime = !result  ||  !result.length
+//       //   }
+//       // }
+//       rr[NONCE] = this.getNonce()
+//       toChain = {
+//         [TYPE]: rr[TYPE],
+//         [NONCE]: rr[NONCE],
+//         time: r.time
+//       }
+//       if (rr.message)
+//         toChain.message = rr.message
+//       if (rr.photos)
+//         toChain.photos = rr.photos
+//       if (isSelfIntroduction)
+//         toChain.profile = { firstName: me.firstName }
+//       if (r.list)
+//         rr.list = r.list
+//       let required = m.required
+//       if (required) {
+//         required.forEach((p) => {
+//           toChain[p] = rr[p]
+//         })
+//         // HACK
+//         delete toChain.from
+//         delete toChain.to
+//       }
+//       batch = []
+//       // var promise = Q(protocol.linkString(toChain))
+//       let hash = r.to[ROOT_HASH]
+//       if (!hash)
+//         hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
+//       toId = IDENTITY + '_' + hash
+//       rr._sendStatus = self.isConnected ? SENDING : QUEUED
+// =======
+//         rr[p] = r[p];
+//     }
+
+//     let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
+//     // rr[NONCE] = this.getNonce()
+//     let toChain = {
+//       [TYPE]: rr[TYPE],
+//       // [NONCE]: rr[NONCE],
+//       time: r.time
+//     }
+//     if (rr.message)
+//       toChain.message = rr.message
+//     if (rr.photos)
+//       toChain.photos = rr.photos
+//     if (isSelfIntroduction)
+//       toChain.profile = { firstName: me.firstName }
+//     if (r.list)
+//       rr.list = r.list
+//     let required = m.required
+//     if (required) {
+//       required.forEach((p) => {
+//         toChain[p] = rr[p]
+//       })
+//       // HACK
+//       delete toChain.from
+//       delete toChain.to
+//     }
+//     var batch = []
+//     var error
+//     var welcomeMessage
+//     // var promise = Q(protocol.linkString(toChain))
+//     let hash = r.to[ROOT_HASH]
+//     if (!hash)
+//       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
+//     var toId = IDENTITY + '_' + hash
+//     rr._sendStatus = self.isConnected ? SENDING : QUEUED
+//     var noCustomerWaiting
+//     // let firstTime
+//     let promise
+//     let isProductApplication = r[TYPE] === PRODUCT_APPLICATION
+
+//     if (isProductApplication)
+//       promise = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+//     if (!promise)
+//       promise = Q()
+//     return promise
+//     .then((result) => {
+//     // if (r[TYPE] === PRODUCT_APPLICATION) {
+//     //   let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+//       if (result) {
+//         result = result.filter((r) => {
+//           return (r.message === r.message  &&  !r._documentCreated) ? true : false
+//         })
+//         if (result.length) {
+//           result.forEach((r) => {
+//             const rid = utils.getId(r)
+//             self._mergeItem(rid, { _documentCreated: true })
+//           })
+//         }
+//       }
+//     // }
+// >>>>>>> origin/refactordb
+//       return this.maybeWaitForIdentity({ permalink: hash })
+//     })
+//     .then(() => meDriver.sign({ object: toChain }))
+//     .then((result) => {
+//       toChain = result.object
+//       let hash = protocol.linkString(result.object)
+
+//       rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
+//       if (isProductApplication) {
+//         rr._context = r._context = {id: utils.getId(r), title: r.product}
+//         // let params = {
+//         //   action: 'addItem',
+//         //   resource: rr,
+//         //   // sendStatus: sendStatus
+//         // }
+//         // self.trigger(params)
+//         self.addLastMessage(r, batch)
+//       }
+//       else if (!isWelcome)
+//         self.addLastMessage(r, batch)
+
+//       if (!isWelcome) //  ||  utils.isEmployee(r.to))
+//         return
+//       if (!orgRep)
+//         return
+//       if (orgRep.lastMessageTime) {
+//         isWelcome = orgRep.lastMessage === r.message
+//         if (!isWelcome)
+//           return;
+//       }
+//       // var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
+//       // Create welcome message without saving it in DB
+//       // welcomeMessage = {}
+//       if (me.txId)
+//         return
+
+//       // ProductApplication was requested as a part of verification process from different provider
+//       if (isProductApplication)
+//         isWelcome = false
+//       // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
+//       // prevent the not needed duplicate expensive operations for obtaining ProductList
+//       return self.getDriver(me)
+//       .then(() => {
+//         if (/*!self.isConnected  || */ publishRequestSent[orgId])
+//           return
+//         // TODO:
+//         // do we need identity publish status anymore
+//         return meDriver.identityPublishStatus()
+//       })
+//       .then((status) => {
+//         if (!status/* || !self.isConnected*/)
+//           return
+//         publishRequestSent[orgId] = true
+//         if (!status.watches.link  &&  !status.link) {
+//           if (isCustomerWaiting)
+//             noCustomerWaiting = true
+//           return self.publishMyIdentity(orgRep)
+//         }
+//         else {
+//           // self.updateMe()
+//           var allMyIdentities = self._getItem(MY_IDENTITIES)
+//           var all = allMyIdentities.allIdentities
+//           var curId = allMyIdentities.currentIdentity
+
+//           let identity = all.filter((id) => id.id === curId)
+//           console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
+//           var msg = {
+//             message: me.firstName + ' is waiting for the response',
+//             [TYPE]: SELF_INTRODUCTION,
+//             identity: identity[0].publishedIdentity,
+//             profile: {
+//               firstName: me.firstName
+//             },
+//             from: me,
+//             to: r.to
+//           }
+//           if (isCustomerWaiting)
+//             noCustomerWaiting = true
+//           return self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
+//         }
+//       })
+//     })
+//     .then(() => {
+//       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+//         return;
+
+//       // Temporary untill the real hash is known
+//       var key = utils.getId(rr)
+
+//       rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
+//       if (r[TYPE] === PRODUCT_APPLICATION)
+//         rr.to.organization = self.buildRef(to)
+
+//       self._setItem(key, rr)
+
+//       if (!toOrg)
+//         toOrg = to.organization ? to.organization : to
+
+//       if (!rr._context)
+//         self.addMessagesToChat(utils.getId(toOrg), rr)
+//       else {
+//         let context = self._getItem(rr._context)
+//         if  (utils.isReadOnlyChat(context)) {
+//           let cId = utils.getId(rr._context)
+//           self.addMessagesToChat(cId, rr)
+//           if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
+//             if (rr[TYPE] === APPLICATION_DENIAL)
+//               context._denied = true
+//             else
+//               context._approved = true
+//             self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+//             self.dbPut(cId, context)
+//           }
+//         }
+//         else
+//           self.addMessagesToChat(utils.getId(toOrg), rr)
+//       }
+
+//       this.addVisualProps(rr)
+
+//       var params = {
+//         action: 'addMessage',
+//         resource: isWelcome ? welcomeMessage : rr
+//       }
+//       if (error)
+//         params.error = error
+//       if (r[TYPE]  !== SELF_INTRODUCTION)
+//         self.trigger(params)
+//       if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
+//         return self.getDriver(me)
+//     })
+//     .then(() => {
+//       // SelfIntroduction or IdentityPublishRequest were just sent
+//       if (noCustomerWaiting)
+//         return
+//       if (isReadOnlyContext)
+//         return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
+
+//       if (self._getItem(toId).pubkeys) {
+//         // let sendParams = self.packMessage(r, toChain)
+//         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
+//         if (disableAutoResponse) {
+//           if (!sendParams.other)
+//             sendParams.other = {}
+//           sendParams.other.disableAutoResponse = true
+//         }
+//         const method = toChain[SIG] ? 'send' : 'signAndSend'
+//         return self.meDriverExec(method, sendParams)
+//         .catch(function (err) {
+//           debugger
+//         })
+//       }
+//     })
+//     .then((result) => {
+//       if (!requestForForm  &&  isWelcome)
+//         return
+//       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
+//         return
+//       if (isReadOnlyContext)
+//         return
+//       // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
+//       if (!toOrg)
+//         toOrg = to.organization ? to.organization : to
+
+//       let orgId = utils.getId(toOrg)
+//       // self.deleteMessageFromChat(orgId, rr)
+//       // delete list[rr[TYPE] + '_' + tmpKey]
+
+//       // saving the new message
+//       const data = utils.toOldStyleWrapper(result.message)
+//       if (data)  {
+//         rr[ROOT_HASH] = data[ROOT_HASH]
+//         rr[CUR_HASH] = data[CUR_HASH]
+//       }
+//       var key = utils.getId(rr)
+
+//       self.dbBatchPut(key, rr, batch)
+//       // rr._sendStatus = self.isConnected ? SENDING : QUEUED
+
+//       self._setItem(key, rr)
+//       if (isProductApplication)
+//         return this.searchMessages({modelName: FORM_REQUEST, to: to})
+//     })
+//     .then((result) => {
+//       if (result) {
+//         result.forEach((r) => {
+//           if (r._documentCreated  &&  !r._document) {
+//             let rId = utils.getId(r)
+//             batch.push({type: 'del', key: rId})
+//             this.deleteMessageFromChat(orgId, r)
+//             this._deleteItem(rId)
+//           }
+//         })
+//       }
+//       // self.addMessagesToChat(orgId, rr)
+//       return db.batch(batch)
+//     })
+//     .catch(function(err) {
+//       debugger
+//     })
+//     .finally(() => {
+//       if (cb)
+//         cb(rr)
+//     })
+//   },
 
