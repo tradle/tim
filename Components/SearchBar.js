@@ -12,8 +12,9 @@ import ActivityIndicator from './ActivityIndicator'
 
 class SearchBar extends Component {
   render() {
+    let {bankStyle, filter} = this.props
     return (
-      <View style={{padding: 7}}>
+      <View style={{padding: 7, borderBottomWidth: 2, borderBottomColor: bankStyle ? bankStyle.linkColor : '#7AAAC3'}}>
         <TextInput
           style={styles.searchBarInput}
           autoCapitalize='none'
@@ -21,7 +22,7 @@ class SearchBar extends Component {
           placeholder='Search'
           placeholderTextColor='#bbbbbb'
           underlineColorAndroid='transparent'
-          value={this.props.filter}
+          value={filter}
         />
       </View>
     );
@@ -33,15 +34,16 @@ var styles = StyleSheet.create({
     height: Platform.OS === 'android' ? 32 : 32,
     alignSelf: 'stretch',
     justifyContent: 'center',
-    paddingVertical: 5,
-    fontSize: 18,
-    paddingLeft: 10,
-    fontWeight: '600',
+    paddingVertical: 7,
+    // marginHorizontal: -5,
+    fontSize: 20,
+    paddingLeft: 5,
+    // fontWeight: '600',
     backgroundColor: '#ffffff',
-    borderRadius: 5,
-    borderWidth: 1,
+    // borderRadius: 5,
+    // borderBottomWidth: 2,
     color: '#757575',
-    borderColor: '#eeeeee',
+    // borderBottomColor: '#7AAAC3',
   }
 });
 

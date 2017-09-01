@@ -35,7 +35,6 @@ import {
   Platform,
   Text,
   TouchableHighlight,
-  ArticleView,
   Alert,
   // View
 } from 'react-native';
@@ -291,14 +290,14 @@ class VerificationRow extends Component {
   _allowScroll(scrollEnabled) {
     this.setState({scrollEnabled: scrollEnabled})
   }
-  onPress(url) {
-    this.props.navigator.push({
-      id: 7,
-      component: ArticleView,
-      backButtonTitle: 'Back',
-      passProps: {url: url}
-    });
-  }
+  // onPress(url) {
+  //   this.props.navigator.push({
+  //     id: 7,
+  //     component: ArticleView,
+  //     backButtonTitle: 'Back',
+  //     passProps: {url: url}
+  //   });
+  // }
 
   formatFilteredResource(model, resource, renderedRows) {
     var props = (utils.getModel(resource[TYPE] || resource.id).value).properties

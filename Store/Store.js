@@ -1261,7 +1261,7 @@ var Store = Reflux.createStore({
   promiseEngine() {
     return this._enginePromise
   },
-  initChats() {
+  async initChats() {
     let meId = utils.getId(me)
     let meOrgId = me.organization ? utils.getId(me.organization) : null
 
@@ -1271,7 +1271,12 @@ var Store = Reflux.createStore({
         let c = this._getItem(r._context)
         // context could be empty if ForgetMe was requested for the provider where form was originally created
         // if (c  &&  c._readOnly) {
-        let cId = utils.getId(c)
+        let cId = utils.getId(r._context)
+        if (!c  &&  r[TYPE] === ASSIGN_RM) {
+          c = await this._getItemFromServer(cId)
+          this.dbPut(cId, c)
+          this._setItem(cId, c)
+        }
         if (utils.isReadOnlyChat(r)  ||  r[TYPE] === APPLICATION_DENIAL  ||  (r[TYPE] === CONFIRMATION  &&  utils.getId(r.from) === meId)) {
           this.addMessagesToChat(cId, r, true)
           continue
@@ -1311,7 +1316,7 @@ var Store = Reflux.createStore({
           //   this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
           // else  {
             let rep = this._getItem(shareInfo.bankRepresentative)
-            let orgId = utils.getId(rep.organization)
+            let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
             if (meOrgId !== orgId) {
               this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
               addedToProviders.push(orgId)
@@ -2465,10 +2470,13 @@ var Store = Reflux.createStore({
       org['_' + p] = config[p]
 
     if (org._country) {
-      let countries = this.searchNotMessages({modelName: COUNTRY})
-      let country = countries.filter((c) => {
-        return c.code === org._country ||  c.country === org._country
+      // let countries = this.searchNotMessages({modelName: COUNTRY})
+      let country = this.getModel(COUNTRY).enum.filter((c) => {
+        return c.id === org._country ||  c.title === org._country
       })
+      // let country = countries.filter((c) => {
+      //   return c.code === org._country ||  c.country === org._country
+      // })
       if (country)
         org.country = this.buildRef(country[0])
       delete org._country
@@ -2481,8 +2489,8 @@ var Store = Reflux.createStore({
       })
       delete org._currency
       if (currency  &&  currency.length) {
-        org.currency = this.buildRef(currency[0])
-        let code = currency[0].code
+        org.currency = utils.clone(currency[0])
+        let code = currency[0].id
         if (currency[0].symbol)
           org.currency.symbol = currency[0].symbol
         else {
@@ -2754,11 +2762,13 @@ var Store = Reflux.createStore({
     let promise
     let isProductApplication = r[TYPE] === PRODUCT_APPLICATION
 
-    if (isProductApplication)
-      promise = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
-    if (!promise)
-      promise = Q()
-    return promise
+    return this._loadedResourcesDefer.promise
+    .then(() => {
+      let promise = isProductApplication
+                  ? this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
+                  : Q()
+      return promise
+    })
     .then((result) => {
     // if (r[TYPE] === PRODUCT_APPLICATION) {
     //   let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
@@ -3407,36 +3417,40 @@ var Store = Reflux.createStore({
   async onGetItem(params) {
     var {resource, action, noTrigger, search} = params
     // await this._loadedResourcesDefer.promise
+    let rId = utils.getId(resource)
     if (search) {
-      let modelName = utils.getType(resource)
+      let r = await this._getItemFromServer(rId)
+      let retParams = { resource: r, action: 'getItem' }
+      this.trigger(retParams)
+      // let modelName = utils.getType(resource)
 
-      let table = `r_${modelName.replace('.', '_')}`
+      // let table = `r_${modelName.replace('.', '_')}`
 
-      let _link = resource[CUR_HASH]
-      if (!_link) {
-        let parts = resource.id.split('_')
-        _link = parts[parts.length - 1]
-      }
-      let query = `query {\n${table} (_link: "${_link}")\n`
+      // let _link = resource[CUR_HASH]
+      // if (!_link) {
+      //   let parts = resource.id.split('_')
+      //   _link = parts[parts.length - 1]
+      // }
+      // let query = `query {\n${table} (_link: "${_link}")\n`
 
-      let m = this.getModel(modelName)
-      let arr = this.getAllPropertiesForServerSearch(m)
+      // let m = this.getModel(modelName)
+      // let arr = this.getAllPropertiesForServerSearch(m)
 
-      query += `\n{${arr.join('   \n')}\n}\n}`
-      try {
-        let result = await client.query({query: gql(`${query}`)})
-        let r = this.convertToResource(result.data[table])
+      // query += `\n{${arr.join('   \n')}\n}\n}`
+      // try {
+      //   let result = await client.query({query: gql(`${query}`)})
+      //   let r = this.convertToResource(result.data[table])
 
-        let retParams = { resource: r, action: 'getItem' }
-        this.trigger(retParams)
-      }
-      catch(err) {
-        console.log('onGetItem', err)
-        debugger
-      }
+      //   let retParams = { resource: r, action: 'getItem' }
+      //   this.trigger(retParams)
+      // }
+      // catch(err) {
+      //   console.log('onGetItem', err)
+      //   debugger
+      // }
       return
     }
-    let r = this._getItem(utils.getId(resource))
+    let r = this._getItem(rId)
     var res = {};
 
     if (utils.isMessage(this.getModel(r[TYPE]))) {
@@ -3791,7 +3805,9 @@ var Store = Reflux.createStore({
     let context = resource._context || value._context
     let isRemediation
     if (context) {
-      context = this._getItem(context)
+      let savedContext = this._getItem(context)
+      if (savedContext  &&  me.isEmployee)
+        context = savedContext
       isRemediation = context.product === REMEDIATION
       let toId = utils.getId(resource.to)
       if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
@@ -3879,15 +3895,35 @@ var Store = Reflux.createStore({
       // else
       //   results.push(await db.get(rValue))
       let elm = this._getItem(rValue)
-      if (!utils.isMessage(elm))
-        foundRefs.push({value: elm, state: 'fulfilled'})
+      let elmFromServer
+      if (!elm  &&  me.isEmployee) {
+        elm = await this._getItemFromServer(rValue)
+        results.push(elm)
+        elmFromServer = true
+        // debugger
+      }
       else {
-        let kres = await this._keeper.get(elm[CUR_HASH])
-        results.push(utils.clone(kres))
-        if (results.length) {
-          let r = results[0]
-          extend(r, elm)
-          foundRefs.push({value: r, state: 'fulfilled'})
+        if (!utils.isMessage(elm))
+          foundRefs.push({value: elm, state: 'fulfilled'})
+        else {
+          try {
+            if (me.isEmployee  &&  utils.isReadOnlyChat(elm)) {
+              let kres = await this._getItemFromServer(utils.getId(elm))
+              elmFromServer = true
+              results.push(kres)
+            }
+            else {
+              let kres = await this._keeper.get(elm[CUR_HASH])
+              results.push(utils.clone(kres))
+            }
+          } catch (err) {
+            debugger
+          }
+          if (results.length) {
+            let r = results[0]
+            extend(r, elm)
+            foundRefs.push({value: r, state: 'fulfilled'})
+          }
         }
       }
     }
@@ -4267,6 +4303,10 @@ var Store = Reflux.createStore({
 
         if (returnVal[TYPE] === ASSIGN_RM) {
           let app = self._getItem(returnVal.application)
+          if (!app) {
+            app = returnVal.application
+            self._setItem(app)
+          }
           app._relationshipManager = true
           self.dbPut(utils.getId(app), app)
         }
@@ -5111,12 +5151,13 @@ var Store = Reflux.createStore({
   },
 
   async searchServer(params) {
+    let self = this
     let {modelName, filterResource, sortProperty, asc, limit, direction, first} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
 
-    let table = `rl_${modelName.replace('.', '_')}`
+    let table = `rl_${modelName.replace(/\./g, '_')}`
     let query = `query {\n${table}\n`
     let model = this.getModel(modelName)
     let props = model.properties
@@ -5144,49 +5185,44 @@ var Store = Reflux.createStore({
             op.EQ += `\n   ${p}: "${val}",`
           else if (len > 1) {
             if (val.charAt(0) !== '*')
-              op.STARTS_WITH = `\n   ${p}: "${val.substring(0, len - 1)}",`
+              op.STARTS_WITH = `\n   ${p}: "${val.substring(1)}",`
             else if (val.charAt(len - 1) === '*')
-              op.CONTAINS = `\n   ${p}: "${val.substring(0, len - 2)}",`
+              op.CONTAINS = `\n   ${p}: "${val.substring(1, len - 1)}",`
           }
         }
         else if (props[p].type === 'boolean')
           op.EQ += `\n   ${p}: ${val},`
-        else if (props[p].type === 'number') {
-          let ch = val.toString().charAt(0)
-          switch (ch) {
-          case '>':
-            if (val.charAt(1) === '=')
-              op.GTE += `\n   ${p}: ${val.substring(2)},`
-            else
-              op.GT += `\n   ${p}: ${val.substring(1)},`
-            break
-          case '<':
-            if (val.charAt(1) === '=')
-              op.LTE += `\n   ${p}: ${val.substring(2)},`
-            else
-              op.LT += `\n   ${p}: ${val.substring(1)},`
-            break
-          default:
-            op.EQ += `\n   ${p}: ${val},`
-          }
-        }
+        else if (props[p].type === 'number')
+          self.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
+
         else if (props[p].type === 'object') {
+          // if (Array.isArray(val)) {
+          //   let s = `${p}: [`
+          //   val.forEach((r, i) => {
+          //     if (i)
+          //       s += ', '
+          //     s += `{id: "${utils.getId(r)}", title: "${utils.getDisplayName(r)}"}`
+          //   })
+          //   s += ']'
+          //   inClause.push(s)
+          // }
           if (Array.isArray(val)) {
-            let s = `${p}: [`
+            if (!val.length)
+              continue
+            let s = `${p}__id: [`
             val.forEach((r, i) => {
               if (i)
                 s += ', '
-              s += `{id: "${utils.getId(r)}", title: "${utils.getDisplayName(r)}"}`
+              s += `"${utils.getId(r)}"`
             })
             s += ']'
             inClause.push(s)
           }
           else {
             if (props[p].ref === MONEY) {
-              op.EQ += `\n   ${p}: {
-                              currency: "${val.currency}",
-                              value: "${val.value}"
-                            },`
+              let {value, currency} = val
+              op.EQ += `\n  ${p}__currency: "${currency}",`
+              addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
             else {
               op.EQ += `\n   ${p}: {
@@ -5248,8 +5284,18 @@ var Store = Reflux.createStore({
     if (hasFilter)
       query += `filter: { ${qq} },\n`
     if (sortProperty) {
+      let sortBy
+      let ref = props[sortProperty].ref
+      if (ref) {
+        if (ref === MONEY)
+          sortBy = sortProperty + '__value'
+        else
+          sortBy = sortProperty + '__title'
+      }
+      else
+        sortBy = sortProperty
       query += `\norderBy: {
-        property: ${sortProperty},
+        property: ${sortBy},
         desc: ${asc ? false : true}
       }`
     }
@@ -5273,54 +5319,6 @@ var Store = Reflux.createStore({
     query += `\n}`   // close properties block
     query += `\n}`   // close query
 
-// # {
-// #   rl_tradle_FormRequest(filter: {
-// #     # EQ:{
-// #     #   form: "tradle.Selfie"
-// #     #   # _link:"2f97214118ab001134aa1c21c407d881e81522cb8905d3303fe3434b7b7bd6f0"
-// #     #   # _link:"c989e44d64f3aea3e1d2f4f54f74147a89b3ac5a8a53c8d50519af2ba5d1e41a"
-// #     #   # _author:"6a636c53aa36e6afb0740293fa89afdd187386227a5048283e178125b52a4152"
-// #     # }
-// #     # IN:{
-// #     #   _author:["56ae8d65c42e3647b82db586447e9d3f3596bc16a2b38586969ee06b5d61d308"]
-// #     # }
-// #     # IN: {
-// #     # form:["tradle.Selfie", "tradle.ProfessionalIndemnity"]
-// #     # },
-// #     EQ:{
-// #       binary: "hex:1234"
-// #       # form:"tradle.Selfie"
-// #     }
-// #     # BETWEEN:{
-// #     # _t: ["tradle.Form", "tradle.FormRequest"]
-// #     #   # form:["tradle.A", "tradle.T"]
-// #     # }
-// #     # STARTS_WITH: {
-// #     #   form: "tradle.C"
-// #     # }
-
-// #   }, orderBy: {
-// #     property: _author,
-// #     desc: false
-// #   }, limit: 2) {
-// #     _permalink,
-// #     _time,
-// #     _link,
-// #     _author,
-// #     form,
-// #     binary
-
-// #     # scanJson,
-// #     # scan {
-// #       # url
-// #     # },
-// #     # verifications {
-// #     #   _link,
-// #     #   _author,
-// #     #   document
-// #     # }
-// #   }
-// # }
     try {
       let data = await client.query({
           query: gql(`${query}`),
@@ -5336,7 +5334,7 @@ var Store = Reflux.createStore({
       }
 
       if (!result.edges.length) {
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction})
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
         return
       }
         // if (result.edges.length < limit)
@@ -5344,7 +5342,7 @@ var Store = Reflux.createStore({
       let to = this.getRepresentative(utils.getId(me.organization))
       let toId = utils.getId(to)
       let list = result.edges.map((r) => this.convertToResource(r.node))
-      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction})
+      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
     } catch(error) {
       // debugger
       console.error(error)
@@ -5352,6 +5350,30 @@ var Store = Reflux.createStore({
 
     function prettify (obj) {
       return JSON.stringify(obj, null, 2)
+    }
+    function addEqualsOrGreaterOrLesserNumber(val, op, prop) {
+      let isMoney = prop.ref === MONEY
+      let p = prop.name
+      if (isMoney)
+        p += '__value'
+      let ch = val.toString().charAt(0)
+      switch (ch) {
+      case '>':
+        if (val.charAt(1) === '=')
+          op.GTE += `\n   ${p}: ${val.substring(2)},`
+        else
+          op.GT += `\n   ${p}: ${val.substring(1)},`
+        break
+      case '<':
+        if (val.charAt(1) === '=')
+          op.LTE += `\n   ${p}: ${val.substring(2)},`
+        else
+          op.LT += `\n   ${p}: ${val.substring(1)},`
+        break
+      default:
+        op.EQ += `\n   ${p}: ${val},`
+      }
+
     }
   },
   getAllPropertiesForServerSearch(model) {
@@ -5365,7 +5387,7 @@ var Store = Reflux.createStore({
       if (props[p].displayAs)
         continue
       let ptype = props[p].type
-      if (ptype === 'array' || ptype === 'date')
+      if (ptype === 'array') // || ptype === 'date')
         continue
       if (ptype !== 'object') {
         arr.push(p)
@@ -5409,9 +5431,15 @@ var Store = Reflux.createStore({
         continue
       }
 
-      // if (ref === COUNTRY  ||  ref === CURRENCY)
-      //   arr.push(p)
-
+      if (ref === COUNTRY) {//   ||  ref === CURRENCY)
+        arr.push(
+          `${p} {
+            id
+            title
+          }`
+        )
+        // arr.push(p)
+      }
       else {
         let m = utils.getModel(ref).value
         if (m.subClassOf === ENUM) {
@@ -5480,6 +5508,13 @@ var Store = Reflux.createStore({
       from: from,
       to: to
     })
+    let lr = this._getItem(utils.getId(rr))
+    if (lr) {
+      let mr = {}
+      extend(mr, lr)
+      extend(mr, rr)
+      rr = mr
+    }
     this.addVisualProps(rr)
     return rr
   },
@@ -9117,7 +9152,7 @@ var Store = Reflux.createStore({
         }
       }
       if (me  &&  utils.isEmpty(chatMessages)) {
-        this.initChats()
+        return this.initChats()
         // if (me) {
         //   // db resource do not have properties needed for rendering
         //   let allMessages = self.searchMessages({modelName: MESSAGE, to: me})
@@ -10052,6 +10087,32 @@ var Store = Reflux.createStore({
       let rr = list[utils.getId(r)]
       if (rr)
         return rr.value
+    }
+  },
+  async _getItemFromServer(id) {
+    let parts = id.split('_')
+
+    let modelName = parts[0]
+    let m = this.getModel(modelName)
+    if (!m)
+      return
+
+    let table = `r_${modelName.replace('.', '_')}`
+
+    let _link = parts[parts.length - 1]
+    let query = `query {\n${table} (_link: "${_link}")\n`
+
+    let arr = this.getAllPropertiesForServerSearch(m)
+
+    query += `\n{${arr.join('   \n')}\n}\n}`
+    try {
+      let result = await client.query({query: gql(`${query}`)})
+    // debugger
+      return this.convertToResource(result.data[table])
+    }
+    catch(err) {
+      console.log('onGetItem', err)
+      debugger
     }
   },
   _mergeItem(key, value) {

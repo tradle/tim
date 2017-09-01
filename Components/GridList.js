@@ -461,8 +461,10 @@ class GridList extends Component {
       if (!params.list) {
         if (params.alert)
           Alert.alert(params.alert)
-        else if (this.props.search)
+        else if (this.props.search) {
           this.state.refreshing = false
+          Alert.alert('No resources were found for this criteria')
+        }
 
         // else if (this.props.search  &&  !this.props.isModel)
         //   this.setState({list: [], dataSource: this.state.dataSource.cloneWithRows([])})
@@ -511,28 +513,30 @@ class GridList extends Component {
           ++this.numberOfPages
       }
 
-      let l = this.state.list
-      if (l  &&  !this.props.isBacklink) { //  &&  l.length === LIMIT * 2) {
-        let newList = []
-        // if (this.direction === 'down') {
-          // for (let i=LIMIT; i<l.length; i++)
-          for (let i=0; i<l.length; i++)
-            newList.push(l[i])
-          list.forEach((r) => newList.push(r))
-          list = newList
-        // }
-        // else {
-        //   for (let i=0; i<l.length; i++)
-        //   // for (let i=0; i<LIMIT; i++)
-        //     list.push(l[i])
+      if (!params.first) {
+        let l = this.state.list
+        if (l  &&  !this.props.isBacklink) { //  &&  l.length === LIMIT * 2) {
+          let newList = []
+          // if (this.direction === 'down') {
+            // for (let i=LIMIT; i<l.length; i++)
+            for (let i=0; i<l.length; i++)
+              newList.push(l[i])
+            list.forEach((r) => newList.push(r))
+            list = newList
+          // }
+          // else {
+          //   for (let i=0; i<l.length; i++)
+          //   // for (let i=0; i<LIMIT; i++)
+          //     list.push(l[i])
+          // }
+        }
+        // if (params.start) {
+        //   let l = []
+        //   this.state.list.forEach((r) => l.push(r))
+        //   list.forEach((r) => l.push(r))
+        //   list = l
         // }
       }
-      // if (params.start) {
-      //   let l = []
-      //   this.state.list.forEach((r) => l.push(r))
-      //   list.forEach((r) => l.push(r))
-      //   list = l
-      // }
     }
 
     list = this.addTestProvidersRow(list)
@@ -1075,12 +1079,13 @@ class GridList extends Component {
 
   renderRow(resource, sectionId, rowId)  {
     if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION) {
-      // let viewCols = this.getGridCols()
+      let viewCols = this.getGridCols()
       // let size = viewCols ? viewCols.length : 1
       // let isSmallScreen = utils.dimensions(GridList).width < 736
       // let showList = this.props.search  &&  isSmallScreen  &&  size > 2
       // if (!showList)
-      return this.renderGridRow(resource, sectionId, rowId)
+      if (viewCols)
+        return this.renderGridRow(resource, sectionId, rowId)
     }
 
     var model
@@ -1158,6 +1163,10 @@ class GridList extends Component {
       extend(params, {search: true, filterResource: this.state.resource, limit: LIMIT * 2, first: true})
     Actions.list(params)
   }
+  searchWithFilter(filterResource) {
+    this.setState({resource: filterResource})
+    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: LIMIT * 2, first: true})
+  }
   getGridCols() {
     let model = utils.getModel(this.props.modelName).value
     let props = model.properties
@@ -1192,7 +1201,18 @@ class GridList extends Component {
 
   renderGridRow(resource, sectionId, rowId)  {
     let viewCols = this.getGridCols()
-    let size = viewCols ? viewCols.length : 1
+    let size
+    if (viewCols) {
+      var model = utils.getModel(this.props.modelName).value
+      let props = model.properties
+
+      let vCols = viewCols.filter((c) => props[c].type !== 'array')
+      viewCols = vCols
+      size = Math.min(viewCols.length, 12)
+      if (size < viewCols.length)
+        viewCols.splice(size, viewCols.length - size)
+    }
+    // let size = viewCols ? viewCols.length : 1
     let widthCols = utils.dimensions(GridList).width / 100
     size = Math.min(size, Math.floor(widthCols * 100/100))
     let colSize =  this.isSmallScreen ? size / 2 : 1
@@ -1235,26 +1255,9 @@ class GridList extends Component {
     else
       return row
   }
-  formatCol(resource, prop, style) {
-    var self = this;
+  formatCol(resource, prop) {
     var model = utils.getModel(resource[TYPE] || resource.id).value;
-
-    // if (!prop) {
-    //   let m = utils.getModel(this.props.modelName).value
-    //   let row = <Text style={styles.description} key={this.getNextKey(resource)}>{utils.getDisplayName(resource)}</Text>
-    //   if (m.isInterface || m.id === FORM) {
-    //     row = <View key={this.getNextKey(resource)}>
-    //             <Text style={styles.type}>{utils.makeModelTitle(model)}</Text>
-    //             {row}
-    //           </View>
-    //   }
-    //   return <View style={cellStyle}>{row}</View>
-
-    // }
     var properties = model.properties;
-
-    var isOfficialAccounts = this.props.isOfficialAccounts
-    var color = isOfficialAccounts && style ? {color: style.listColor} : {}
     var isContact = resource[TYPE] === PROFILE;
     let v = prop
     let backlink
@@ -1269,7 +1272,7 @@ class GridList extends Component {
     if (!resource[v]  &&  !properties[v].displayAs)
       return
 
-    var style = [styles.description, color]
+    var style = [styles.description]
     if (isContact  &&  v === 'organization') {
       style.push({alignSelf: 'flex-end', marginTop: 20})
       style.push(styles.verySmallLetters);
@@ -1335,10 +1338,10 @@ class GridList extends Component {
     if (resource[v]  &&  (typeof resource[v] != 'string')) {
       if (criteria)
         style.push({fontWeight: '600'})
-      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
+      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[v] + ''}</Text></View>
     }
     if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') === 0  ||  resource[v].indexOf('https://') === 0))
-      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(self)} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
+      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(this, resource)} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
 
     var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
     let msgParts = utils.splitMessage(val);
@@ -1369,6 +1372,17 @@ class GridList extends Component {
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
     }
   }
+  onPress(resource) {
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
+    var title = utils.makeTitle(utils.getDisplayName(resource, model.properties));
+    this.props.navigator.push({
+      id: 7,
+      title: title,
+      component: ArticleView,
+      passProps: {url: resource.url}
+    });
+  }
+
   highlightCriteria(resource,val, criteria, style) {
     criteria = criteria.replace('*', '')
     let idx = val.indexOf(criteria)
@@ -1390,6 +1404,7 @@ class GridList extends Component {
     // if (this.state.isLoading)
     //   return <View/>
     var model = utils.getModel(this.props.modelName).value
+    let props = model.properties
     var viewCols = this.getGridCols() // model.gridCols || model.viewCols;
     if (!viewCols)
       return <View />
@@ -1400,7 +1415,6 @@ class GridList extends Component {
 
     let smCol = this.isSmallScreen ? size/2 : 1
     let {sortProperty, order} = this.state
-    var props = model.properties
     let cols = viewCols.map((p) => {
       let colStyle
       if (sortProperty  &&  sortProperty === p) {
@@ -1440,11 +1454,12 @@ class GridList extends Component {
     this.state.refreshing = true
     Actions.list({
       modelName: this.props.modelName,
-      sortProperty: this.props.sortProp,
-      asc: this.props.order,
+      sortProperty: this.state.sortProperty,
+      asc: this.state.order,
       limit: LIMIT,
       direction: this.direction,
       search: this.props.search,
+      filterResource: this.state.resource,
       start: list.length,
       startRec: list[list.length - 1]
     })
@@ -1724,6 +1739,7 @@ class GridList extends Component {
                       placeholder={translate('search')}
                       showsCancelButton={false}
                       hideBackground={true}
+                      bankStyle={this.props.bankStyle}
                       />
       }
     }

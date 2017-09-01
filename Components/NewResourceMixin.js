@@ -14,7 +14,7 @@ var StyleSheet = require('../StyleSheet')
 var QRCodeScanner = require('./QRCodeScanner')
 var driverLicenseParser = require('../utils/driverLicenseParser')
 const debug = require('debug')('tradle:app:blinkid')
-var ArticleView = require('./ArticleView')
+// var ArticleView = require('./ArticleView')
 var focusUri = require('../video/Focus1.mp4')
 
 var plugins = require('@tradle/biz-plugins')
@@ -1521,7 +1521,8 @@ var NewResourceMixin = {
   // MONEY value and curency template
   myMoneyInputTemplate(params) {
     var label = params.label
-    if (!this.props.search  &&  params.required)
+    var { search } = this.props
+    if (!search  &&  params.required)
       label += ' *'
     label += (params.prop.ref  &&  params.prop.ref === MONEY)
            ?  ' (' + CURRENCY_SYMBOL + ')'
@@ -1538,7 +1539,7 @@ var NewResourceMixin = {
                     model: params.model,
                     errors: params.errors,
                     editable: params.editable,
-                    keyboard: 'numeric',
+                    keyboard: search ? null : 'numeric',
                   })
           }
           {

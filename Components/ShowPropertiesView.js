@@ -1,6 +1,6 @@
 'use strict';
 
-var ArticleView = require('./ArticleView');
+// var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
 var translate = utils.translate
 var constants = require('@tradle/constants');
