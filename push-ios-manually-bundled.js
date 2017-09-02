@@ -6,15 +6,17 @@ const proc = require('child_process')
 const fs = require('fs')
 const build = fs.readFileSync('./iOS/Tradle/Info.plist', { encoding: 'utf8' })
 const match = build.match(/CFBundleVersion<\/key>\n\s+<string>([\d\.]+)/)
-const version = match && match[1].split('.').slice(0, 3).join('.')
-if (!version) throw new Error('unable to parse version from Dev.plist')
+const fourPartVersion = match[1]
+const threePartVersion = fourPartVersion.split('.').slice(0, 3).join('.')
+if (!threePartVersion) throw new Error('unable to parse version from Dev.plist')
 
 const gitHash = require('./version').commit.slice(0, 6)
-const releases = fs.readdirSync('./release/ios')
-const releaseDir = releases.find(r => r.indexOf(gitHash) === 0)
-if (!releaseDir) throw new Error('release dir not found, run bundle.sh first')
+const releases = fs.readdirSync(`./release/ios/${fourPartVersion}`)
+const releaseDirname = releases.find(r => r.indexOf(gitHash) === 0)
+if (!releaseDirname) throw new Error('release dir not found, run bundle.sh first')
 
-const pushLine = `code-push release tim-ios ./release/ios/${releaseDir}/ ${version} -d Staging`
+const releaseDir = `./release/ios/${fourPartVersion}/${releaseDirname}/`
+const pushLine = `code-push release tim-ios ${releaseDir} ${threePartVersion} -d Staging`
 console.log(`running: ${pushLine}`)
 
 if (process.argv.indexOf('--dry-run') === -1) {
