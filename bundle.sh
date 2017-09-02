@@ -7,10 +7,11 @@ fi
 
 PLATFORM="$1"
 DEST="$2"
+VERSION="$(./get-version.js $PLATFORM)"
 
 if [ -z "$2" ]; then
   COMMIT_HASH=$(git rev-parse HEAD)
-  DEST="release/$PLATFORM/${COMMIT_HASH:0:7}"
+  DEST="release/$PLATFORM/$VERSION/${COMMIT_HASH:0:7}"
 fi
 
 ./hooks/update_version.sh # update version.json
