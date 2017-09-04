@@ -1315,7 +1315,7 @@ class ResourceList extends Component {
       search = <View style={{padding: 5, backgroundColor: '#f7f7f7'}}>
           <TouchableOpacity onPress={this.showSearch.bind(this)}>
             <View style={styles.row}>
-              <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5, marginRight: 0}]} />
+              <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingHorizontal: 5, marginRight: 5}]} />
               <View style={styles.textContainer}>
                 <Text style={styles.resourceTitle}>{translate('Explore data')}</Text>
               </View>
@@ -1326,7 +1326,7 @@ class ResourceList extends Component {
       conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
           <TouchableOpacity onPress={this.showBanks.bind(this)}>
             <View style={styles.row}>
-              <ConversationsIcon />
+              <ConversationsIcon style={{paddingHorizontal: 5}}/>
               <View style={styles.textContainer}>
                 <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
               </View>
