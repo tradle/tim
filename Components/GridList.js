@@ -14,6 +14,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var reactMixin = require('react-mixin');
 var HomePageMixin = require('./HomePageMixin')
+var ArticleView = require('./ArticleView')
 var extend = require('extend')
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
