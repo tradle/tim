@@ -1017,6 +1017,7 @@ class GridList extends Component {
         passProps: {
           model: model,
           resource: this.state.resource,
+          searchWithFilter: this.searchWithFilter.bind(this),
           search: true,
           bankStyle: this.props.bankStyle || defaultBankStyle,
         }
@@ -1181,6 +1182,10 @@ class GridList extends Component {
     // if (vCols.length === 7)
     //   vCols.splice(6, 1)
     return vCols
+  }
+  searchWithFilter(filterResource) {
+    this.setState({resource: filterResource})
+    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: LIMIT * 2, first: true})
   }
   getNextKey(resource) {
     return resource[constants.ROOT_HASH] + '_' + cnt++
