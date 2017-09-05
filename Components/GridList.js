@@ -1389,7 +1389,7 @@ class GridList extends Component {
   }
 
   highlightCriteria(resource,val, criteria, style) {
-    criteria = criteria.replace('*', '')
+    criteria = criteria.replace(/\*/g, '')
     let idx = val.indexOf(criteria)
     let part
     let parts = []

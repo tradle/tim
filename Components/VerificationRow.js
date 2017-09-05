@@ -366,14 +366,14 @@ class VerificationRow extends Component {
         let row
         if (criteria === val || properties[v].type !== 'string')
           row = <Text style={[style, {fontWeight: '600'}]} key={this.getNextKey()}>{val}</Text>
-        else {
-          criteria = criteria.replace('*', '')
+        else if (criteria  &&  criteria.length) {
+          criteria = criteria.replace(/\*/g, '')
           let idx = val.indexOf(criteria)
           let part
           let parts = []
           if (idx > 0) {
             parts.push(<Text style={style} key={this.getNextKey()}>{val.substring(0, idx)}</Text>)
-            idx++
+            // idx++
           }
           parts.push(<Text style={[style, {fontWeight: '800'}]} key={this.getNextKey()}>{val.substring(idx, idx + criteria.length)}</Text>)
           idx += criteria.length
