@@ -14,10 +14,15 @@ if (stage !== 'Staging' && stage !== 'Production') {
   throw new Error('expected --stage "Staging" or "Production"')
 }
 
-const releaseDir = require('./build-utils').getReleaseDir({ platform })
+const { getReleaseDir, getVersion } = require('./build-utils')
+const releaseDir = getReleaseDir({ platform })
 if (!fs.existsSync(releaseDir)) {
   throw new Error(`expected to find release dir: ${releaseDir}`)
 }
+
+const fourPartVersion = getVersion({ platform })
+const threePartVersion = fourPartVersion.split('.').slice(0, 3).join('.')
+if (!threePartVersion) throw new Error('unable to parse version from Dev.plist')
 
 const pushLine = `code-push release tim-${platform} ${releaseDir} ${threePartVersion} -d ${stage}`
 console.log(`running: ${pushLine}`)
