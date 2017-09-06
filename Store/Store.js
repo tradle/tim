@@ -1065,6 +1065,11 @@ var Store = Reflux.createStore({
       // }
     })
 
+    // blockr.io has been shut down
+    meDriver.sealwatch.sync = function () {
+      // hang
+    }
+
     meDriver.setMaxListeners(0)
 
     debug('me: ' + meDriver.permalink)
