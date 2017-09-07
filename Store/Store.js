@@ -15,8 +15,8 @@ import ReactNative, {
 const gql = require('graphql-tag')
 const { ApolloClient, createNetworkInterface } = require('apollo-client')
 
-const graphqlEndpoint = process.argv[2]  ||  'https://uhaylip7rh.execute-api.us-east-1.amazonaws.com/dev/tradle/graphql'
-// const graphqlEndpoint = process.argv[2] || 'http://localhost:4000'
+// const graphqlEndpoint = process.argv[2]  ||  'https://uhaylip7rh.execute-api.us-east-1.amazonaws.com/dev/tradle/graphql'
+const graphqlEndpoint = process.argv[2] || 'http://localhost:4000'
 const client = new ApolloClient({
   networkInterface: createNetworkInterface({
     uri: graphqlEndpoint
@@ -195,6 +195,7 @@ const APPLICATION_DENIAL  = 'tradle.ApplicationDenial'
 const COUNTRY             = 'tradle.Country'
 const PHOTO               = 'tradle.Photo'
 const SELFIE              = 'tradle.Selfie'
+const BOOKMARK            = 'tradle.Bookmark'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -3804,6 +3805,8 @@ var Store = Reflux.createStore({
       debugger
       return this.onAddVerification({r: resource, notOneClickVerification: true});
     }
+    else if (meta.id === BOOKMARK)
+      resource.to = resource.from
     let isGuestSessionProof = meta.id === GUEST_SESSION_PROOF
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
@@ -4278,7 +4281,8 @@ var Store = Reflux.createStore({
           debugger
         }
 
-        if (!isSavedItem) {
+        let isBookmark = returnVal[TYPE] === BOOKMARK
+        if (!isSavedItem  &&  !isBookmark) {
           let sendParams = {
             to: {permalink: permalink},
             link: hash,
@@ -4290,6 +4294,19 @@ var Store = Reflux.createStore({
           }
 
           await self.meDriverSend(sendParams)
+        }
+        if (isBookmark) {
+          let bookmark = returnVal.bookmark
+          let bm = self.getModel(bookmark[TYPE])
+          let bmProps = bm.properties
+          for (let p in bookmark) {
+            if (!Array.isArray(bookmark[p]))
+              continue
+            let prop = bmProps[p]
+            if (!prop.ref)
+              continue
+            bookmark[p] = bookmark[p].map((r) => utils.buildRef(r))
+          }
         }
         if (readOnlyBacklinks.length) {
           readOnlyBacklinks.forEach((prop) => {
@@ -4876,7 +4893,7 @@ var Store = Reflux.createStore({
         }
     }
     retParams = {
-      action: !listView  &&  !prop && !_readOnly ? 'messageList' : 'list',
+      action: !listView  &&  !prop && !_readOnly && modelName !== BOOKMARK ? 'messageList' : 'list',
       list: result,
       spinner: spinner,
       to: to,
@@ -6188,6 +6205,11 @@ var Store = Reflux.createStore({
       // var r = self._getItem(key)
       if (r.canceled)
         return
+      if (r[TYPE] === BOOKMARK) {
+        foundResources.push(self.fillMessage(r))
+        return
+      }
+
       if (!meta.isInterface) {
         let rModel = self.getModel(r[TYPE])
         if (r[TYPE] !== modelName) {
@@ -6396,6 +6418,11 @@ var Store = Reflux.createStore({
     let list = this.searchNotMessages({modelName: PARTIAL})
     if (list  &&  list.length)
       this.trigger({action: 'hasPartials', count: list.length})
+  },
+  async onHasBookmarks() {
+    let list = await this.searchMessages({modelName: BOOKMARK, to: me })
+    if (list  &&  list.length)
+      this.trigger({action: 'hasBookmarks', count: list.length})
   },
   onHasTestProviders() {
     const list = this.searchNotMessages({modelName: ORGANIZATION, isTest: true}) || []

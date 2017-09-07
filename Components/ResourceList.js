@@ -38,6 +38,8 @@ const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
+const BOOKMARK = 'tradle.Bookmark'
+
 const LIMIT = 10
 
 const ENUM = 'tradle.Enum'
@@ -109,6 +111,7 @@ class ResourceList extends Component {
       sharedContextCount: 0,
       refreshing: false,
       hasPartials: false,
+      hasBookmarks: false,
       hasTestProviders: false
     };
     // if (props.isBacklink  &&  props.backlinkList) {
@@ -353,6 +356,10 @@ class ResourceList extends Component {
       this.setState({hasPartials: true})
       return
     }
+    if (action === 'hasBookmarks') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
+      this.setState({hasBookmarks: true})
+      return
+    }
     if (action === 'hasTestProviders'  &&  this.props.officialAccounts) {
       if (!params.list  ||  !params.list.length)
         return
@@ -481,6 +488,8 @@ class ResourceList extends Component {
     if (this.state.sharedContextCount !== nextState.sharedContextCount)
       return true
     if (this.state.hasPartials !== nextState.hasPartials)
+      return true
+    if (this.state.hasBookmarks !== nextState.hasBookmarks)
       return true
     if (this.state.hasTestProviders !== nextState.hasTestProviders)
       return true
@@ -991,8 +1000,10 @@ class ResourceList extends Component {
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
     var model = utils.getModel(this.props.modelName).value;
-    if (!this.props.prop  &&  model.id !== ORGANIZATION)
-      return <View />
+    if (!this.props.prop  &&  model.id !== ORGANIZATION) {
+      if (!this.props.search ||  !this.state.resource || !Object.keys(this.state.resource).length)
+        return <View />
+    }
 
     // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
     //   return <View />
@@ -1273,6 +1284,7 @@ class ResourceList extends Component {
       return
     let sharedContext
     let partial
+    let bookmarks
     let conversations
     let testProviders
     let isOrg = this.props.modelName === ORGANIZATION
@@ -1348,6 +1360,20 @@ class ResourceList extends Component {
             </View>
           </View>
       )
+      if (this.state.hasBookmarks) {
+        bookmarks = (
+            <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+              <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
+                <View style={styles.row}>
+                  <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.resourceTitle}>{translate('Bookmarks')}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )
+      }
       if (this.state.sharedContextCount)
         sharedContext = (
           <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
@@ -1369,6 +1395,7 @@ class ResourceList extends Component {
       <View>
         {search}
         {conversations}
+        {bookmarks}
         {sharedContext}
         {partial}
         {testProviders}
@@ -1397,6 +1424,18 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       title: translate('overviewOfApplications'),
       passProps: {}
+    })
+  }
+  showBookmarks() {
+    this.props.navigator.push({
+      title: 'Bookmarks',
+      id: 30,
+      component: GridList,
+      backButtonTitle: 'Back',
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        modelName: BOOKMARK
+      },
     })
   }
   showAllPartials() {

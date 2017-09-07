@@ -50,11 +50,13 @@ const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 
 const METHOD = 'tradle.Method'
+const BOOKMARK = 'tradle.Bookmark'
 
 let excludeFromBrowsing = [
   FORM,
   PRODUCT_LIST,
   ENUM,
+  BOOKMARK,
   constants.TYPES.INTRODUCTION,
   constants.TYPES.SELF_INTRODUCTION,
   constants.TYPES.CUSTOMER_WAITING,
@@ -157,6 +159,7 @@ class GridList extends Component {
       sharedContextCount: 0,
       refreshing: false,
       hasPartials: false,
+      hasBookmarks: false,
       hasTestProviders: false,
       resource: search  &&  resource,
       isGrid:  !this.isSmallScreen  &&  !officialAccounts  && modelName !== FORM  &&  !model.isInterface//this.props.modelName === constants.TYPES.VERIFICATION
@@ -436,6 +439,10 @@ class GridList extends Component {
       this.setState({hasPartials: true})
       return
     }
+    if (action === 'hasBookmarks') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
+      this.setState({hasBookmarks: true})
+      return
+    }
     if (action === 'hasTestProviders'  &&  this.props.officialAccounts) {
       if (!params.list  ||  !params.list.length)
         return
@@ -621,6 +628,8 @@ class GridList extends Component {
       return true
     if (this.state.hasPartials !== nextState.hasPartials)
       return true
+    if (this.state.hasBookmarks !== nextState.hasBookmarks)
+      return true
     if (this.state.hasTestProviders !== nextState.hasTestProviders)
       return true
     if (nextState.isConnected !== this.state.isConnected)
@@ -648,20 +657,56 @@ class GridList extends Component {
   selectResource(resource) {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = utils.getModel(this.props.modelName);
-    var isContact = this.props.modelName === PROFILE;
+    let {modelName, search, callback, bankStyle} = this.props
+    var model = utils.getModel(modelName);
+    var isContact = modelName === PROFILE;
     let rType = resource[TYPE]
     var isVerification = model.value.id === constants.TYPES.VERIFICATION
     var isVerificationR  = rType === constants.TYPES.VERIFICATION
     var isMessage = utils.isMessage(resource)
 
-    var isOrganization = this.props.modelName === ORGANIZATION;
+    var isOrganization = modelName === ORGANIZATION;
     var m = utils.getModel(resource[TYPE]).value;
-    let isView = this.props.search  ||
-                 (!isContact  &&  !isOrganization  &&  !this.props.callback)
+    let isView = search  ||  (!isContact  &&  !isOrganization  &&  !callback)
 
     if (isView) {
       if (isMessage) {
+        if (modelName === BOOKMARK) {
+          let btype = resource.bookmark[TYPE]
+          let bm = utils.getModel(btype).value
+          this.props.navigator.push({
+            id: 30,
+            title: translate('searchSomething', utils.makeModelTitle(bm)),
+            backButtonTitle: 'Back',
+            component: GridList,
+            passProps: {
+              modelName: btype,
+              resource: resource.bookmark,
+              bankStyle: this.props.bankStyle,
+              currency: this.props.currency,
+              limit: 20,
+              search: true
+            },
+            rightButtonTitle: 'Search',
+            onRightButtonPress: {
+              title: translate('searchSomething', utils.makeModelTitle(bm)),
+              id: 4,
+              component: NewResource,
+              titleTextColor: '#7AAAC3',
+              backButtonTitle: 'Back',
+              rightButtonTitle: 'Done',
+              passProps: {
+                model: model,
+                resource: resource.bookmark,
+                searchWithFilter: this.searchWithFilter.bind(this),
+                search: true,
+                bankStyle: this.props.bankStyle || defaultBankStyle,
+              }
+            }
+          })
+          Actions.list({filterResource: resource.bookmark, search: true, modelName: btype, limit: LIMIT * 2, first: true})
+          return
+        }
         let title
         if (isVerificationR) {
           let type = utils.getType(resource.document)
@@ -677,8 +722,8 @@ class GridList extends Component {
           backButtonTitle: 'Back',
           passProps: {
             resource: resource,
-            search: this.props.search,
-            bankStyle: this.props.bankStyle || defaultBankStyle
+            search: search,
+            bankStyle: bankStyle || defaultBankStyle
           }
         });
       }
@@ -713,7 +758,7 @@ class GridList extends Component {
     }
     if (this.props.prop) {
       if (me) {
-        if  (this.props.modelName != PROFILE) {
+        if  (modelName != PROFILE) {
           this._selectResource(resource);
           return
         }
@@ -731,7 +776,6 @@ class GridList extends Component {
       }
     }
     var title = isContact ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
-    var modelName = constants.TYPES.MESSAGE;
     var self = this;
     let style = this.mergeStyle(resource.style)
 
@@ -742,7 +786,7 @@ class GridList extends Component {
       passProps: {
         resource: resource,
         filter: '',
-        modelName: modelName,
+        modelName: constants.TYPES.MESSAGE,
         currency: resource.currency,
         bankStyle: style,
       }
@@ -1184,10 +1228,6 @@ class GridList extends Component {
     //   vCols.splice(6, 1)
     return vCols
   }
-  searchWithFilter(filterResource) {
-    this.setState({resource: filterResource})
-    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: LIMIT * 2, first: true})
-  }
   getNextKey(resource) {
     return resource[constants.ROOT_HASH] + '_' + cnt++
   }
@@ -1546,12 +1586,14 @@ class GridList extends Component {
     )
   }
   renderFooter() {
-    var me = utils.getMe();
+    // var me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
     var model = utils.getModel(this.props.modelName).value;
-    if (!this.props.prop  &&  model.id !== ORGANIZATION)
-      return <View />
+    if (!this.props.prop  &&  model.id !== ORGANIZATION) {
+      if (!this.props.search ||  !this.state.resource || !Object.keys(this.state.resource).length)
+        return <View />
+    }
 
     // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
     //   return <View />
@@ -1774,7 +1816,15 @@ class GridList extends Component {
   }
   renderActionSheet() {
     let buttons
-    if (this.state.allowToAdd) {
+    if (this.props.search) {
+      buttons = [
+        {
+          text: translate('Bookmark'),
+          onPress: () => this.bookmark()
+        }
+      ]
+    }
+    else if (this.state.allowToAdd) {
       if (this.props.isBacklink)
         return
       buttons = [
@@ -1830,12 +1880,20 @@ class GridList extends Component {
       ]
     )
   }
-
+  bookmark() {
+    let resource = {
+      [TYPE]: BOOKMARK,
+      bookmark: this.state.resource,
+      from: utils.getMe()
+    }
+    Actions.addItem({resource: resource})
+  }
   renderHeader() {
     if (!this.props.officialAccounts  &&  !this.props.search)
       return
     let sharedContext
     let partial
+    let bookmarks
     let conversations
     let search
     let testProviders
@@ -1911,6 +1969,20 @@ class GridList extends Component {
             </View>
           </View>
       )
+      if (this.state.hasBookmarks) {
+        bookmarks = (
+            <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+              <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
+                <View style={styles.row}>
+                  <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <View style={styles.textContainer}>
+                    <Text style={styles.resourceTitle}>{translate('Bookmarks')}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )
+      }
       if (this.state.sharedContextCount)
         sharedContext = (
           <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
@@ -1935,6 +2007,7 @@ class GridList extends Component {
     return  (
       <View>
         {conversations}
+        {bookmarks}
         {sharedContext}
         {partial}
         {testProviders}
@@ -1963,6 +2036,19 @@ class GridList extends Component {
       backButtonTitle: 'Back',
       title: translate('overviewOfApplications'),
       passProps: {}
+    })
+  }
+  showBookmarks() {
+    Actions.list({modelName: BOOKMARK})
+    this.props.navigator.push({
+      title: 'Bookmarks',
+      id: 30,
+      component: GridList,
+      backButtonTitle: 'Back',
+      titleTextColor: '#7AAAC3',
+      passProps: {
+        modelName: BOOKMARK
+      },
     })
   }
   showAllPartials() {
