@@ -56,6 +56,8 @@ import BackgroundImage from './BackgroundImage'
 import Navs from '../utils/navs'
 import ENV from '../utils/env'
 
+const BOOKMARK = 'tradle.Bookmark'
+
 const BG_IMAGE = ENV.splashBackground
 const PASSWORD_ITEM_KEY = 'app-password'
 const SUBMIT_LOG_TEXT = {
@@ -438,6 +440,7 @@ class TimHome extends Component {
 
     Actions.getAllSharedContexts()
     Actions.hasPartials()
+    Actions.hasBookmarks()
     // return
     this.props.navigator.push({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
