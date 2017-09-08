@@ -357,7 +357,7 @@ class ResourceList extends Component {
       return
     }
     if (action === 'hasBookmarks') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
-      this.setState({hasBookmarks: true})
+      this.setState({bookmarksCount: params.count})
       return
     }
     if (action === 'hasTestProviders'  &&  this.props.officialAccounts) {
@@ -489,7 +489,7 @@ class ResourceList extends Component {
       return true
     if (this.state.hasPartials !== nextState.hasPartials)
       return true
-    if (this.state.hasBookmarks !== nextState.hasBookmarks)
+    if (this.state.bookmarksCount !== nextState.bookmarksCount)
       return true
     if (this.state.hasTestProviders !== nextState.hasTestProviders)
       return true
@@ -1360,14 +1360,17 @@ class ResourceList extends Component {
             </View>
           </View>
       )
-      if (this.state.hasBookmarks) {
+      if (this.state.bookmarksCount) {
         bookmarks = (
-            <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+            <View style={{padding: 5, backgroundColor: '#F0E8FF'}}>
               <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
                 <View style={styles.row}>
                   <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('Bookmarks')}</Text>
+                  </View>
+                  <View style={styles.sharedContext}>
+                    <Text style={styles.sharedContextText}>{this.state.bookmarksCount}</Text>
                   </View>
                 </View>
               </TouchableOpacity>

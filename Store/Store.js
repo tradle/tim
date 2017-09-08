@@ -4806,20 +4806,21 @@ var Store = Reflux.createStore({
     }
   },
   async getList(params) {
-    var meta = this.getModel(params.modelName)
+    var {modelName, first, prop, isAggregation, from} = params
+    var meta = this.getModel(modelName)
     var isMessage = utils.isMessage(meta)
     if (params.search && me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION) {
       let result = await this.searchServer(params)
       return result
     }
     if (!isMessage) {
-      let {modelName, isTest, spinner, sponsorName, list, prop, start, search, isAggregation} = params
+      let {isTest, spinner, sponsorName, list, search} = params
       let result = await this._searchNotMessages(params)
       let isOrg = modelName === ORGANIZATION
       if (!result) {
         // First time. No connection no providers yet loaded
         if (!this.isConnected  &&  isOrg)
-          this.trigger({action: 'list', alert: translate('noConnection')})
+          this.trigger({action: 'list', alert: translate('noConnection'), first: first})
         return
       }
       if (!SERVICE_PROVIDERS)
@@ -4852,15 +4853,15 @@ var Store = Reflux.createStore({
       if (prop)
         retParams.prop = prop;
       retParams.start = start
-
+      retParams.first = first
       this.trigger(retParams);
       return
     }
     if (!this.readAllOnce) {
       this.readAllOnce = true
     }
-    let {modelName, prop, to, context, loadEarlierMessages, allLoaded, spinner,
-        isAggregation, isForgetting, start, limit, listView, _readOnly, gatherForms} = params
+    let {to, context, loadEarlierMessages, allLoaded, spinner,
+         isForgetting, limit, listView, _readOnly, gatherForms} = params
     let shareableResources;
     let retParams
     let result = await this._searchMessages(params)
@@ -4870,6 +4871,7 @@ var Store = Reflux.createStore({
             action: !listView  &&  !prop && !_readOnly ? 'messageList' : 'list',
             to: to,
             loadEarlierMessages: true,
+            first: first,
             isAggregation: isAggregation
           })
       return
@@ -5050,6 +5052,7 @@ var Store = Reflux.createStore({
       if (!context  &&  modelName !== PRODUCT_APPLICATION)
         context = await this.getCurrentContext(to, orgId)
     }
+    retParams.first = first
     if (context)
       retParams.context = context
     if (shareableResources)
@@ -5563,78 +5566,6 @@ var Store = Reflux.createStore({
       return this.searchNotMessages(params)
     })
   },
-  async searchInDB(params) {
-    await this.ready
-    await this._loadedResourcesDefer.promise
-    let {modelName, limit, startRec, sortProperty, asc, to, prop} = params
-    let criteria = startRec || modelName + '_'
-    let time = startRec ? startRec.time : new Date(0).getTime()
-
-    // return await collect(db.createReadStream({ [prop]: criteria, end: modelName + '_\xff', limit: 10, keys: false }))
-
-    // let result = await collect(myCustomIndexes.timeAndFromAndSubClassOf({
-    //   start: time + '!' + me[ROOT_HASH] + '!tradle.Form',
-    //   end: new Date().getTime() + '!' + me[ROOT_HASH] + '!tradle.Form\xff',
-    //   limit: limit || 10,
-    //   keys: false,
-    //   // get the actual object, not just metadata
-    //   body: true
-    // }))
-    let result
-    if (to) {
-      let toId = utils.getId(to)
-      result = await collect(myCustomIndexes.typeAndToAndTime({
-        gt: modelName + '!' + toId + '!' + time,
-        lte: modelName + '!' + toId + '!' + new Date().getTime(),
-        limit: limit || 10,
-        keys: false,
-        // get the actual object, not just metadata
-        body: true
-      }))
-    }
-    else
-      result = await collect(myCustomIndexes.typeAndTime({
-        gt: modelName + '!' + time,
-        lte: modelName + '!' + new Date().getTime(),
-        limit: limit || 10,
-        keys: false,
-        // get the actual object, not just metadata
-        body: true
-      }))
-
-    let returnList = result.map((msgInfo) => {
-      let r = msgInfo.object.object
-      let author = [PROFILE, msgInfo.author].join('_')
-      let recipient = [PROFILE, msgInfo.recipient].join('_')
-      r[ROOT_HASH] = msgInfo.permalnk || msgInfo.link
-      r[CUR_HASH] = msgInfo.link
-      r.time = r.time || msgInfo.timestamp
-      r._context = [PRODUCT_APPLICATION, msgInfo.object.context].join('_')
-      r.from = { id:  author,  title: utils.getDisplayName(this._getItem(author))}
-      r.to = { id: recipient, title: utils.getDisplayName(this._getItem(recipient)) }
-      return r
-    })
-    return returnList
-  },
-
-
-
-// // search index
-// await collect(myCustomIndexes.subClassOf({
-//   eq: 'tradle.Form',
-//   keys: false,
-//   // get the actual object, not just metadata
-//   body: true
-// }))
-
-// // search index
-// await collect(myCustomIndexes.fromAndSubClassOf({
-//   eq: swissre.permalnk + '!' + 'tradle.Form',
-//   keys: false,
-//   // get the actual object, not just metadata
-//   body: true
-// }))
-
   searchNotMessages(params) {
     if (params.list)
       return params.list.map((r) => this._getItem(r))
@@ -5877,7 +5808,8 @@ var Store = Reflux.createStore({
   checkCriteria(r, query, prop) {
     if (!query)
       return r
-    let props = this.getModel(r[TYPE]).properties
+    let rtype = r[TYPE]
+    let props = this.getModel(rtype).properties
     if (prop  &&  rr[prop]) {
       let val = utils.getStringPropertyValue(r, prop, props)
       return (val.toLowerCase().indexOf(query.toLowerCase()) === -1) ? null : r
@@ -5902,8 +5834,11 @@ var Store = Reflux.createStore({
 
       combinedValue += combinedValue ? ' ' + r[rr] : r[rr];
     }
+    if (rtype === BOOKMARK)
+      combinedValue += utils.makeModelTitle(rtype)
     if (!combinedValue)
-      return r
+      return
+      // return r
 
     if (combinedValue.toLowerCase().indexOf(query.toLowerCase()) !== -1)
       return r
@@ -6046,6 +5981,8 @@ var Store = Reflux.createStore({
     let j
     if (lastId) {
       j = thisChatMessages.findIndex(({ id }) => id === lastId)
+      if (j === thisChatMessages.length - 1)
+        return
       j = isBacklinkProp ? j + 1 : j - 1
     }
     else
@@ -6206,7 +6143,10 @@ var Store = Reflux.createStore({
       if (r.canceled)
         return
       if (r[TYPE] === BOOKMARK) {
-        foundResources.push(self.fillMessage(r))
+        if (query)
+          checkAndFilter(r)
+        else
+          foundResources.push(self.fillMessage(r))
         return
       }
 
@@ -6359,8 +6299,9 @@ var Store = Reflux.createStore({
         }
       }
       let isVerificationR = r[TYPE] === VERIFICATION
+      let isBookmark = r[TYPE] === BOOKMARK
       let checkVal = isVerificationR ? self._getItem(r.document) : r
-      let fr = self.checkCriteria(r, query)
+      let fr = self.checkCriteria(isBookmark ? r.bookmark : r, query)
 
       if (fr) {
         // foundResources[key] = self.fillMessage(r);
@@ -11824,5 +11765,77 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //     return r
   //   })
   // },
+  // async searchInDB(params) {
+  //   await this.ready
+  //   await this._loadedResourcesDefer.promise
+  //   let {modelName, limit, startRec, sortProperty, asc, to, prop} = params
+  //   let criteria = startRec || modelName + '_'
+  //   let time = startRec ? startRec.time : new Date(0).getTime()
+
+  //   // return await collect(db.createReadStream({ [prop]: criteria, end: modelName + '_\xff', limit: 10, keys: false }))
+
+  //   // let result = await collect(myCustomIndexes.timeAndFromAndSubClassOf({
+  //   //   start: time + '!' + me[ROOT_HASH] + '!tradle.Form',
+  //   //   end: new Date().getTime() + '!' + me[ROOT_HASH] + '!tradle.Form\xff',
+  //   //   limit: limit || 10,
+  //   //   keys: false,
+  //   //   // get the actual object, not just metadata
+  //   //   body: true
+  //   // }))
+  //   let result
+  //   if (to) {
+  //     let toId = utils.getId(to)
+  //     result = await collect(myCustomIndexes.typeAndToAndTime({
+  //       gt: modelName + '!' + toId + '!' + time,
+  //       lte: modelName + '!' + toId + '!' + new Date().getTime(),
+  //       limit: limit || 10,
+  //       keys: false,
+  //       // get the actual object, not just metadata
+  //       body: true
+  //     }))
+  //   }
+  //   else
+  //     result = await collect(myCustomIndexes.typeAndTime({
+  //       gt: modelName + '!' + time,
+  //       lte: modelName + '!' + new Date().getTime(),
+  //       limit: limit || 10,
+  //       keys: false,
+  //       // get the actual object, not just metadata
+  //       body: true
+  //     }))
+
+  //   let returnList = result.map((msgInfo) => {
+  //     let r = msgInfo.object.object
+  //     let author = [PROFILE, msgInfo.author].join('_')
+  //     let recipient = [PROFILE, msgInfo.recipient].join('_')
+  //     r[ROOT_HASH] = msgInfo.permalnk || msgInfo.link
+  //     r[CUR_HASH] = msgInfo.link
+  //     r.time = r.time || msgInfo.timestamp
+  //     r._context = [PRODUCT_APPLICATION, msgInfo.object.context].join('_')
+  //     r.from = { id:  author,  title: utils.getDisplayName(this._getItem(author))}
+  //     r.to = { id: recipient, title: utils.getDisplayName(this._getItem(recipient)) }
+  //     return r
+  //   })
+  //   return returnList
+  // },
+
+
+
+// // search index
+// await collect(myCustomIndexes.subClassOf({
+//   eq: 'tradle.Form',
+//   keys: false,
+//   // get the actual object, not just metadata
+//   body: true
+// }))
+
+// // search index
+// await collect(myCustomIndexes.fromAndSubClassOf({
+//   eq: swissre.permalnk + '!' + 'tradle.Form',
+//   keys: false,
+//   // get the actual object, not just metadata
+//   body: true
+// }))
+
 
 
