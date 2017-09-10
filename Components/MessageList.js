@@ -29,6 +29,7 @@ var ProgressInfo = require('./ProgressInfo')
 var PageView = require('./PageView')
 var extend = require('extend');
 var TimerMixin = require('react-timer-mixin')
+const clone = require('clone')
 
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
