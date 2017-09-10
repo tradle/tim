@@ -262,8 +262,10 @@ class MessageList extends Component {
         state.productToForms = productToForms
       else if (utils.getModel(rtype).value.subClassOf === FORM) {
         let product = resource._context.product
-
-        let productToForms = clone(this.state.productToForms)
+        if (this.state.productToForms)
+          productToForms = clone(this.state.productToForms)
+        else
+          productToForms = []
 
         var l = productToForms[product]
         if (!l) {
