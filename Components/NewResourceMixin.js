@@ -1066,7 +1066,7 @@ var NewResourceMixin = {
     let help = this.getHelp(prop, true)
     return (
       <View key={this.getNextKey()} ref={prop.name}>
-        <View style={[st, { paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, height: 60, justifyContent: 'flex-end'}]}>
+        <View style={[st, { paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, justifyContent: 'flex-end'}]}>
           {propLabel}
           <DatePicker
             style={[styles.datePicker, {width: utils.dimensions(component).width - 30, paddingBottom: 3}]}
