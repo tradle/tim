@@ -48,6 +48,7 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
+const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 
 var StyleSheet = require('../StyleSheet')
 
@@ -171,8 +172,23 @@ class MessageList extends Component {
     }
 
     if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
+      let rtype = resource[TYPE]
       if (!utils.isMessage(resource))
         return
+      if (rtype === NEXT_FORM_REQUEST) {
+        let list = this.state.list
+        let r = list[list.length - 1]
+        if (r[TYPE] === FORM_REQUEST  &&  r.form === resource.after) {
+          // not fulfilled form request for multi-entry form will have it's own ID set
+          // as fulfilled document
+          if (!r._document || utils.getId(r) === r._document) {
+            let l = clone(list)
+            l.splice(l.length - 2 , 1)
+            this.setState({list: l})
+          }
+        }
+        return
+      }
       let rid = utils.getId(chatWith)
       if (chatWith[TYPE] !== PROFILE) {
         let fid = resource.from.organization &&  utils.getId(resource.from.organization)
@@ -224,6 +240,26 @@ class MessageList extends Component {
       }
       if (productToForms)
         state.productToForms = productToForms
+      else if (utils.getModel(rtype).value.subClassOf === FORM) {
+        let product = resource._context.product
+
+        productToForms = clone(this.state.productToForms)
+
+        var l = productToForms[product]
+        if (!l) {
+          l = {}
+          productToForms[product] = {}
+        }
+        let forms = l[rtype]
+
+        if (!forms) {
+          forms = []
+          l[rtype] = forms
+        }
+        forms.push(utils.getId(resource))
+
+        state.productToForms = productToForms
+      }
       if (shareableResources)
         state.shareableResources = shareableResources
       this.setState(state)

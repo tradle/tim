@@ -3814,7 +3814,7 @@ var Store = Reflux.createStore({
     let isRemediation
     if (context) {
       let savedContext = this._getItem(context)
-      if (savedContext  &&  me.isEmployee)
+      if (savedContext) //  &&  me.isEmployee)
         context = savedContext
       isRemediation = context.product === REMEDIATION
       let toId = utils.getId(resource.to)
