@@ -195,8 +195,22 @@ class MessageList extends Component {
 
     if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
       let rtype = resource[TYPE]
-      if (!utils.isMessage(resource) || rtype === NEXT_FORM_REQUEST)
+      if (!utils.isMessage(resource))
         return
+      if (rtype === NEXT_FORM_REQUEST) {
+        let list = this.state.list
+        let r = list[list.length - 1]
+        if (r[TYPE] === FORM_REQUEST  &&  r.form === resource.after) {
+          // not fulfilled form request for multi-entry form will have it's own ID set
+          // as fulfilled document
+          if (!r._document || utils.getId(r) === r._document) {
+            let l = clone(list)
+            l.splice(l.length - 2 , 1)
+            this.setState({list: l})
+          }
+        }
+        return
+      }
       let rid = utils.getId(chatWith)
       if (chatWith[TYPE] !== PROFILE) {
         let fid = resource.from.organization &&  utils.getId(resource.from.organization)
