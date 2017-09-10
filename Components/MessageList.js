@@ -29,6 +29,7 @@ var ProgressInfo = require('./ProgressInfo')
 var PageView = require('./PageView')
 var extend = require('extend');
 var TimerMixin = require('react-timer-mixin')
+const clone = require('clone')
 
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
@@ -48,6 +49,7 @@ const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
+const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 
 var StyleSheet = require('../StyleSheet')
 
@@ -192,7 +194,8 @@ class MessageList extends Component {
     }
 
     if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
-      if (!utils.isMessage(resource))
+      let rtype = resource[TYPE]
+      if (!utils.isMessage(resource) || rtype === NEXT_FORM_REQUEST)
         return
       let rid = utils.getId(chatWith)
       if (chatWith[TYPE] !== PROFILE) {
@@ -209,7 +212,6 @@ class MessageList extends Component {
         context: this.state.allContexts ? null : this.state.context,
         limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
       }
-      let rtype = resource[TYPE]
       // if (resource._sendStatus) {
       //   this.state.sendStatus = resource._sendStatus
       //   this.state.sendResource = resource
@@ -238,13 +240,33 @@ class MessageList extends Component {
         list = list.map((r) => r)
         list.push(resource)
       }
-
       let state = {
         // addedItem: addedItem,
         list: list
       }
       if (productToForms)
         state.productToForms = productToForms
+      else if (utils.getModel(rtype).value.subClassOf === FORM) {
+        let product = resource._context.product
+
+        let productToForms = clone(this.state.productToForms)
+
+        var l = productToForms[product]
+        if (!l) {
+          l = {}
+          productToForms[product] = {}
+        }
+        let forms = l[rtype]
+
+        if (!forms) {
+          forms = []
+          l[rtype] = forms
+        }
+        forms.push(utils.getId(resource))
+
+        state.productToForms = productToForms
+      }
+
       if (shareableResources)
         state.shareableResources = shareableResources
       this.setState(state)
