@@ -709,7 +709,7 @@ var Store = Reflux.createStore({
         this.onGetAllPartials(payload)
       this.trigger({ action: 'receivedMessage', msg: msg })
     } catch (err) {
-      debugger
+      // debugger
       console.error('2. failed to process received message', err)
     }
   },
@@ -3807,7 +3807,7 @@ var Store = Reflux.createStore({
     let isRemediation
     if (context) {
       let savedContext = this._getItem(context)
-      if (savedContext  &&  me.isEmployee)
+      if (savedContext) //  &&  me.isEmployee)
         context = savedContext
       isRemediation = context.product === REMEDIATION
       let toId = utils.getId(resource.to)
@@ -4039,7 +4039,7 @@ var Store = Reflux.createStore({
     if (isRegistration)
       await handleRegistration()
     else if (isMessage) {
-      debugger
+      // debugger
       await handleMessage(noTrigger, returnVal)
     }
     else
