@@ -24,6 +24,7 @@ try {
 }
 
 process.browser = false
+process.title = 'browser' // for MQTT's benefit
 process.env['NODE_ENV'] = __DEV__ ? 'development' : 'production'
 if (typeof localStorage !== 'undefined') {
   localStorage.debug = __DEV__ ? '*' : ''

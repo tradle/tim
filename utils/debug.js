@@ -25,7 +25,8 @@ const enabled = [
   'tradle:*',
   'sendy:ws:client',
   'tradle:channel',
-  'multiqueue:*'
+  'multiqueue:*',
+  '@tradle/aws-client'
 ].concat(consoleMethods.map(method => 'console.' + method))
 
 if (__DEV__) {

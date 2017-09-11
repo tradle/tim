@@ -211,6 +211,7 @@ const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 const Sendy = require('sendy')
 const SendyWS = require('sendy-ws')
 const TLSClient = require('sendy-axolotl')
+const AWSClient = require('@tradle/aws-client')
 // const DSA = require('@tradle/otr').DSA
 // const BigInt = require('@tradle/otr/vendor/bigint')
 // const BigIntTimes = {}
@@ -1148,39 +1149,57 @@ var Store = Reflux.createStore({
       })
     }
 
-    function trySend (msg, recipientInfo, cb) {
+    const trySend = co(function* (msg, recipientInfo, cb) {
       const recipientHash = recipientInfo.permalink
       if (self._yuki && recipientHash === self._yuki.permalink) {
         return self._yuki.receive({ message: msg.unserialized.object })
           .then(() => cb(), cb)
       }
 
-      let messenger = wsClients.byIdentifier[recipientHash]
-      if (!messenger) {
+      let transport = wsClients.byIdentifier[recipientHash]
+      if (!transport) {
         let hashToUrl = self._getItem(SETTINGS + '_1').hashToUrl
         const url = hashToUrl  &&  hashToUrl[recipientHash]
-        messenger = url && wsClients.byUrl[url]
+        transport = url && wsClients.byUrl[url]
       }
 
       const identifier = self.getIdentifier(recipientInfo)
-      if (!messenger) {
+      if (!transport) {
         meDriver.sender.pause(identifier)
         // Alert.alert('meDriver._send recipient not found ' + recipientHash)
         return cb(new Error('recipient not found'))
       }
 
       debug(`pushing msg to ${identifier} into network stack`)
-      // this timeout is not for sending the entire message
-      // but rather an idle connection timeout
-      messenger.send(identifier, msg, function (err) {
+      if (transport instanceof AWSClient) {
+        try {
+          yield transport.ready()
+          yield transport.send({
+            link: msg.unserialized.link,
+            message: msg
+          })
+        } catch (err) {
+          debugger
+          if (/timetravel/i.test(err.type)) {
+            self.abortUnsent({ to: identifier })
+          }
+
+          return cb(err)
+        }
+
+        cb()
+        return
+      }
+
+      transport.send(identifier, msg, function (err) {
         if (err) debug(`failed to deliver message to ${identifier}: ${err.message}`)
         else debug(`delivered message to ${identifier}`)
 
         cb(err)
       })
 
-      // messenger.setTimeout(60000)
-    }
+      // transport.setTimeout(60000)
+    })
 
     // receive flow:
     // 1. transport
@@ -1268,6 +1287,13 @@ var Store = Reflux.createStore({
   },
   promiseEngine() {
     return this._enginePromise
+  },
+  async abortUnsent({ to }) {
+    const links = await meDriver.abortUnsent({ to })
+    debug(`aborted unsent messages to ${to}: ${links}`)
+    debugger
+    // TODO: mark messages as undelivered
+    // offer user to resend them
   },
   async initChats() {
     let meId = utils.getId(me)
@@ -1672,7 +1698,50 @@ var Store = Reflux.createStore({
     return this.dbPut(SETTINGS + '_1', r)
     // }
   },
+
+  addAWSProvider: co(function* (provider) {
+    const self = this
+    const node = yield this._enginePromise
+    const counterparty = provider.hash
+    const url = getProviderUrl(provider)
+    const { wsClients } = driverInfo
+    let client = wsClients.byUrl[url] || wsClients.byIdentifier[counterparty]
+    if (client) return
+
+    // const position = {
+    //   sent: yield monitorMissing.getTip({ node, counterparty, sent: true }),
+    //   received: yield monitorMissing.getTip({ node, counterparty })
+    // }
+
+    client = new AWSClient({
+      endpoint: url,
+      node,
+      counterparty,
+      // position,
+      // TODO: generate long-lived clientId: `${node.permalink}${nonce}`
+      clientId: `${node.permalink}${node.permalink}`
+    })
+
+    client.onmessage = co(function* (msg) {
+      debug(`receiving msg ${msg._n} from ${counterparty}`)
+      yield self.queueReceive({ msg, from: counterparty })
+    })
+
+    wsClients.add({
+      client,
+      url,
+      identifier: counterparty,
+      path: provider.id
+    })
+  }),
+
   addProvider(provider) {
+    let self = this
+    if (provider.aws) {
+      return this.addAWSProvider(provider)
+    }
+
+    const url = getProviderUrl(provider)
     // let httpClient = driverInfo.httpClient
     // httpClient.addRecipient(
     //   provider.hash,
@@ -1682,13 +1751,10 @@ var Store = Reflux.createStore({
     // let whitelist = driverInfo.whitelist
     // if (provider.txId)
     //   whitelist.push(provider.txId)
-    let self = this
-    let tlsKey = driverInfo.tlsKey
-    const { wsClients, restoreMonitors } = driverInfo
+    const { tlsKey, wsClients, restoreMonitors } = driverInfo
     // const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
 
     // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
-    const url = getProviderUrl(provider)
     debug('adding provider', provider.hash, url)
 
     let transport = wsClients.byUrl[url] || wsClients.byIdentifier[provider.hash]
@@ -1915,6 +1981,14 @@ var Store = Reflux.createStore({
     )
   },
 
+  triggerProgress(update) {
+    debug(`progress receiving from ${update.recipient[ROOT_HASH]}: ${update.progress}`)
+    this.trigger({
+      action: 'progressUpdate',
+      ...update
+    })
+  },
+
   async receive(opts) {
     const self = this
     let { msg, from, isRetry, length } = opts
@@ -1934,7 +2008,6 @@ var Store = Reflux.createStore({
       let pid = utils.makeId(PROFILE, from)
       let org = this._getItem(pid).organization
       progressUpdate = willAnnounceProgress && {
-        action: 'progressUpdate',
         recipient: this._getItem(org)
       }
 
@@ -1956,7 +2029,7 @@ var Store = Reflux.createStore({
     } catch (err) {
       debug('experienced error receiving message: ' + (err.stack || err.message))
       if (progressUpdate) {
-        this.trigger({ ...progressUpdate, progress: 1 })
+        this.triggerProgress({ ...progressUpdate, progress: 1 })
       }
 
       let payload
@@ -1997,7 +2070,7 @@ var Store = Reflux.createStore({
     // }
 
     if (progressUpdate) {
-      this.trigger({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
+      this.triggerProgress({ ...progressUpdate, progress: ON_RECEIVED_PROGRESS })
     }
 
     meDriver.sender.resume(identifier)
@@ -2027,7 +2100,7 @@ var Store = Reflux.createStore({
       console.warn('failed to receive msg:', err, msg)
     } finally {
       if (progressUpdate) {
-        this.trigger({ ...progressUpdate, progress: 1 })
+        this.triggerProgress({ ...progressUpdate, progress: 1 })
       }
 
       Analytics.sendEvent({
@@ -2131,7 +2204,7 @@ var Store = Reflux.createStore({
 
         //   prevPercent = percent
         //   const org = self._getItem(PROFILE + '_' + recipient).organization
-        //   self.trigger({action: 'progressUpdate', progress: percent / 100, recipient: self._getItem(org)})
+        //   self.triggerProgress({ progress: percent / 100, recipient: self._getItem(org)})
         //   debug(`${percent}% of message downloaded from ${recipient}`)
         // })
 
@@ -2276,7 +2349,8 @@ var Store = Reflux.createStore({
       url: originalUrl,
       style: sp.style,
       permalink: sp.bot.permalink,
-      publicConfig: sp.publicConfig
+      publicConfig: sp.publicConfig,
+      aws: sp.aws
     }
     // Check is this is an update SP info
     let oldSp
@@ -2401,10 +2475,12 @@ var Store = Reflux.createStore({
 
     return Q.allSettled(promises)
     .then(function() {
+      const common = { hash, txId: sp.bot.txId, aws: sp.aws }
       if (!sp.isEmployee)
-        return {hash: hash, txId: sp.bot.txId, id: sp.id, url: url}
+        return { ...common, id: sp.id, url }
+
       let orgSp = SERVICE_PROVIDERS.filter((r) => utils.getId(r.org) === okey)[0]
-      return {hash: hash, txId: sp.bot.txId, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
+      return { ...common, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
     })
     .catch(err => {
       debugger
@@ -8662,10 +8738,15 @@ var Store = Reflux.createStore({
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
-        if (isModelsPack  &&  /^tradle\.[^.]+$/.test(m.id)) {
-          console.log('ModelsPack: the tradle.* namespace is reserved. Please rename and resend the model')
-          return
-        }
+        // if (isModelsPack  &&  /^tradle\.[^.]+$/.test(m.id)) {
+        //   Alert.alert(
+        //     'Service Provider namespacing error',
+        //     'This service provider is using data models in a reserved namespace. Please notify them.'
+        //   )
+
+        //   // console.log('ModelsPack: the tradle.* namespace is reserved. Please rename and resend the model')
+        //   return
+        // }
 
         if (!this.getModel(m.id))
           this._emitter.emit('model:' + m.id)

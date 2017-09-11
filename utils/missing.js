@@ -8,7 +8,7 @@ const MAX_BACKOFF = 60000
 const INITIAL_BACKOFF = 1000
 const { SEQ, TYPE, TYPES } = constants
 
-module.exports = function restoreMissingMessages ({ node, counterparty, url, receive }) {
+exports = module.exports = function restoreMissingMessages ({ node, counterparty, url, receive }) {
   const monitor = Restore.conversation.monitorMissing({ node, counterparty })
   Restore.batchifyMonitor({ monitor, debounce: 100 })
   // monitorMissing({ node: meDriver, debounce: 1000 }).on('batch', function (seq) {
@@ -82,6 +82,28 @@ module.exports = function restoreMissingMessages ({ node, counterparty, url, rec
   monitor.on('batch', reqSeqs)
   monitor.request = reqSeqs
   return monitor
+}
+
+exports.getTip = function getTip ({ node, counterparty, sent }) {
+  const from = sent ? node.permalink : counterparty
+  const to = sent ? counterparty : node.permalink
+  const seqOpts = {}
+  const base = from + '!' + to
+  seqOpts.gte = base + '!'
+  seqOpts.lte = base + '\xff'
+  seqOpts.reverse = true
+  seqOpts.limit = 1
+  // console.log(seqOpts)
+  const source = node.objects.bySeq(seqOpts)
+  return new Promise((resolve, reject) => {
+    source.on('error', reject)
+    source.on('data', data => resolve({
+      time: data.timestamp,
+      link: data.link
+    }))
+
+    source.on('end', () => resolve(null))
+  })
 }
 
 function bufferizePubKey (key) {

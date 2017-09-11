@@ -150,6 +150,12 @@ var utils = {
     return modelsForStub
   },
   normalizeGetInfoResponse(json) {
+    if (!json.providers) {
+      json = {
+        providers: [json]
+      }
+    }
+
     json.providers.forEach(provider => {
       if (provider.style) {
         provider.style = utils.toStylesPack(provider.style)

@@ -17,7 +17,7 @@
 #import "CodePush.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
-// #import "QTouchposeApplication.h"
+ #import "QTouchposeApplication.h"
 #import "Orientation.h"
 #import <asl.h>
 #import "SplashScreen.h"
@@ -45,8 +45,8 @@
    * on the same Wi-Fi network.
    */
 
-  // QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
-  // touchposeApplication.alwaysShowTouches = YES;
+  QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
+  touchposeApplication.alwaysShowTouches = YES;
 
   [RNBranch initSessionWithLaunchOptions:launchOptions isReferrable:YES];
 #ifdef DEBUG
