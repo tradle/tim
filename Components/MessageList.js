@@ -172,8 +172,8 @@ class MessageList extends Component {
       return
     }
 
+    let rtype = resource  &&  resource[TYPE]
     if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
-      let rtype = resource[TYPE]
       if (!utils.isMessage(resource))
         return
       if (rtype === NEXT_FORM_REQUEST) {
@@ -205,7 +205,6 @@ class MessageList extends Component {
         context: this.state.allContexts ? null : this.state.context,
         limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
       }
-      let rtype = resource[TYPE]
       // if (resource._sendStatus) {
       //   this.state.sendStatus = resource._sendStatus
       //   this.state.sendResource = resource
@@ -243,8 +242,10 @@ class MessageList extends Component {
         state.productToForms = productToForms
       else if (utils.getModel(rtype).value.subClassOf === FORM) {
         let product = resource._context.product
-
-        productToForms = clone(this.state.productToForms)
+        if (this.state.productToForms)
+          productToForms = clone(this.state.productToForms)
+        else
+          productToForms = {}
 
         var l = productToForms[product]
         if (!l) {
