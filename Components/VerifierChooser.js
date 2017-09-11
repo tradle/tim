@@ -57,7 +57,7 @@ class VerifierChooser extends Component {
         name: rr.name,
         url: rr.url,
         photos: [{url: rr.photo}],
-        botId: PROFILE + '_' + rr.permalink
+        botId: utils.makeId(PROFILE, rr.permalink)
       }
     })
 
@@ -152,7 +152,7 @@ class VerifierChooser extends Component {
         [constants.TYPE]: SETTINGS,
         url: resource.url,
         id: verifier.id,
-        botId: PROFILE + '_' + verifier.permalink
+        botId: utils.makeId(PROFILE, verifier.permalink)
       },
       cb: (r) => this.verifyByTrustedProvider(r, verifier.product)
     })
