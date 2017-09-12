@@ -470,8 +470,8 @@ var utils = {
   },
   makeId(type, permalink, link) {
     let model = this.getModel(type).value
+    link = link || permalink
     return id({model, permalink, link})
-    // return [type, permalink, link || permalink].join('_')
   },
   getType(r) {
     if (typeof r === 'string')
