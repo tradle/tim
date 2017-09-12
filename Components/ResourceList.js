@@ -1361,15 +1361,16 @@ class ResourceList extends Component {
           </View>
       )
       if (this.state.bookmarksCount) {
+        let color = '#6C4EA3'
         bookmarks = (
             <View style={{padding: 5, backgroundColor: '#F0E8FF'}}>
               <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
                 <View style={styles.row}>
-                  <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('Bookmarks')}</Text>
                   </View>
-                  <View style={styles.sharedContext}>
+                  <View style={[styles.sharedContext, {backgroundColor: color}]}>
                     <Text style={styles.sharedContextText}>{this.state.bookmarksCount}</Text>
                   </View>
                 </View>
