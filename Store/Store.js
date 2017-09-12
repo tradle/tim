@@ -503,7 +503,7 @@ var Store = Reflux.createStore({
     return this.dbPut(utils.getId(me), me)
     .then(() =>  {
       this.setMe(me)
-      let bot = this._getItem(utils.getId(PROFILE + '_' + params.bot))
+      let bot = this._getItem(utils.makeId(PROFILE, params.bot))
       let provider = this._getItem(bot.organization)
       this.trigger({action: 'getProvider', provider: provider, termsAccepted: true})
     })
@@ -629,7 +629,7 @@ var Store = Reflux.createStore({
         else
           rtype = t
 
-        let bot = this._getItem(PROFILE + '_' + obj.from[ROOT_HASH])
+        let bot = this._getItem(utils.makeId(PROFILE, obj.from[ROOT_HASH]))
         // let debugStr = 'SharedContext: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + rtype + '; hasModel = ' + this.getModel(rtype)
         // debug(debugStr)
         if (utils.isEmployee(bot)  &&  !this.getModel(rtype)) {
@@ -658,7 +658,7 @@ var Store = Reflux.createStore({
 // console.log(pubKeys)
       const sourceToAuthor = await lookupSourceAuthors(meDriver, payload.sources)
       for (var [verification, author] of sourceToAuthor) {
-        let a = this._getItem(PROFILE + '_' + author.permalink)
+        let a = this._getItem(utils.makeId(PROFILE, author.permalink))
         verification.from = this.buildRef(a)
         verification.from.organization = utils.clone(a.organization)
       }
@@ -676,7 +676,7 @@ var Store = Reflux.createStore({
       else
         msg.partialinfo.permalink = msg.partialinfo.link
 
-      let from = PROFILE + '_' + msg.partialinfo.author
+      let from = utils.makeId(PROFILE, msg.partialinfo.author)
       let fromR = this._getItem(from)
       payload.from = fromR ? this.buildRef(fromR) : {id: from}
 
@@ -688,7 +688,8 @@ var Store = Reflux.createStore({
         [CUR_HASH]: msg.partialinfo.link
       }
       payload.resource = {id: utils.getId(r)}
-      payload.providerInfo = utils.clone(this._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
+      let pid = utils.makeId(PROFILE, msg.objectinfo.author)
+      payload.providerInfo = utils.clone(this._getItem(pid).organization)
       // debugger
     }
     // else if (payload[TYPE] === CONFIRM_PACKAGE_REQUEST)
@@ -696,13 +697,14 @@ var Store = Reflux.createStore({
 
     const old = utils.toOldStyleWrapper(msg)
 
-    let toId = [PROFILE, msg.recipient].join('_')
+    let toId = utils.makeId(PROFILE, msg.recipient)
     let to = this._getItem(toId)
     old.to = utils.buildRef(to)
     // old.to = { [ROOT_HASH]: meDriver.permalink }
     let rtype = old.parsed.data[TYPE]
     if (rtype === PRODUCT_APPLICATION  &&  me.isEmployee) {
-      let bot = this._getItem(PROFILE + '_' + old.from[ROOT_HASH])
+      let pid = utils.makeId(PROFILE, old.from[ROOT_HASH])
+      let bot = this._getItem(pid)
       // debug('monitorTim: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + old.parsed.data.product + '; hasModel = ' + (this.getModel(old.parsed.data.product)!== null))
       if (utils.isEmployee(bot)  &&  !this.getModel(old.parsed.data.product)) {
         debug('request for models')
@@ -744,8 +746,8 @@ var Store = Reflux.createStore({
           // wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
           wrapper = utils.toOldStyleWrapper(wrapper)
 
-          let from = self._getItem([PROFILE, msgInfo.author].join('_'))
-          let to = self._getItem([PROFILE, msgInfo.recipient].join('_'))
+          let from = self._getItem(utils.makeId(PROFILE, msgInfo.author))
+          let to = self._getItem(utils.makeId(PROFILE, msgInfo.recipient))
 
           wrapper.from = self.buildRef(from)
           wrapper.to = self.buildRef(to)
@@ -863,7 +865,7 @@ var Store = Reflux.createStore({
         this.dbPut(utils.getId(me), me)
 
       this.setMe(me)
-      var key = me[TYPE] + '_' + me[ROOT_HASH]
+      var key = utils.getId(me)
       this._setItem(key, me)
       return me
     })
@@ -1534,7 +1536,7 @@ var Store = Reflux.createStore({
     var self = this
     let parts = code.split(';')
 
-    let orgId = ORGANIZATION + '_' + parts[1]
+    let orgId = utils.makeId(ORGANIZATION, parts[1])
     let serviceProvider =  SERVICE_PROVIDERS  ? SERVICE_PROVIDERS.filter((json) => json.org === orgId) : null
 
     serviceProvider = (serviceProvider  &&  serviceProvider.length) ? serviceProvider[0] : null
@@ -1577,7 +1579,7 @@ var Store = Reflux.createStore({
 
       self.addContactIdentity({ identity: provider.identity })
 
-      let employee = this._getItem(PROFILE + '_' + provider.hash)
+      let employee = this._getItem(utils.makeId(PROFILE, provider.hash))
       currentEmployees[utils.getId(org)] = employee
       let myIdentities = this._getItem(MY_IDENTITIES)
       let currentIdentity = myIdentities.currentIdentity
@@ -1929,15 +1931,15 @@ var Store = Reflux.createStore({
       const payload = msg.object
       const type = payload[TYPE]
       debug(`receiving ${type}`)
-
-      let org = this._getItem(PROFILE + '_' + from).organization
+      let pid = utils.makeId(PROFILE, from)
+      let org = this._getItem(pid).organization
       progressUpdate = willAnnounceProgress && {
         action: 'progressUpdate',
         recipient: this._getItem(org)
       }
 
       if (payload.context) {
-        let s = PRODUCT_APPLICATION + '_' + payload.context
+        let s = utils.makeId(PRODUCT_APPLICATION, payload.context)
         let r = list[s]
       }
 
@@ -2154,7 +2156,6 @@ var Store = Reflux.createStore({
     let id = params.id
     let hash = params.hash
     let newServer = params.newServer
-    var self = this
     // return Q.race([
     //   fetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }),
     //   Q.Promise(function (resolve, reject) {
@@ -2216,50 +2217,6 @@ var Store = Reflux.createStore({
 
       var promises = []
       json.providers.forEach(sp => {
-        // if (id)  {
-        //   if (sp.id !== id)
-        //     return
-        // }
-        // if (sp.org.name.indexOf('[TEST]') === 0)
-        //   return
-        // if (hash) {
-        //   if (sp.bot[ROOT_HASH] !== hash)
-        //     return
-        // }
-        // else if (providerIds  &&  providerIds.indexOf(sp.id) === -1)
-        //   return
-        // // else if (sp.id !== 'eres'  &&  !list[PROFILE + '_' + sp.bot[ROOT_HASH]])
-        // //   return
-        // if (!sp.org[ROOT_HASH]) {
-        //   sp.org[ROOT_HASH] = protocol.linkString(sp.org)
-        // }
-
-        // let isDuplicate = SERVICE_PROVIDERS.some((r) => r.org === utils.getId(sp.org)
-        // if (isDuplicate)
-        //   return
-
-        // sp.bot.permalink = sp.bot.pub[ROOT_HASH] || protocol.linkString(sp.bot.pub)
-
-        // let newSp = {
-        //   id: sp.id,
-        //   org: utils.getId(sp.org),
-        //   url: originalUrl,
-        //   style: sp.style,
-        //   permalink: sp.bot.permalink,
-        //   publicConfig: sp.publicConfig
-        // }
-        // // Check is this is an update SP info
-        // let oldSp
-        // for (let i=0; !newProviders  &&  i<SERVICE_PROVIDERS.length; i++) {
-        //   let r = SERVICE_PROVIDERS[i]
-        //   if (r.id === sp.id  &&  r.url === originalUrl) {
-        //     oldSp = SERVICE_PROVIDERS[i]
-        //     SERVICE_PROVIDERS[i] = newSp
-        //     break
-        //   }
-        // }
-        // if (!oldSp)
-        //   SERVICE_PROVIDERS.push(newSp)
         this.parseProvider(sp, params, providerIds, newProviders)
         promises.push(this.addInfo(sp, originalUrl, newServer))
       })
@@ -2345,7 +2302,7 @@ var Store = Reflux.createStore({
     }
 
     var hash = protocol.linkString(sp.bot.pub)
-    var ikey = IDENTITY + '_' + hash
+    var ikey = utils.makeId(IDENTITY, hash)
     var batch = []
     var org = this._getItem(okey)
     if (org) {
@@ -2418,7 +2375,7 @@ var Store = Reflux.createStore({
       // list[okey].value.contacts = []
     }
 
-    var pkey = PROFILE + '_' + hash
+    var pkey = utils.makeId(PROFILE, hash)
 
     var curOkeyVal = this._getItem(okey)
     var newContact = {
@@ -2541,8 +2498,8 @@ var Store = Reflux.createStore({
   addContact(data, hash, noMessage) {
     data = utils.clone(data)
 
-    var ikey = IDENTITY + '_' + hash
-    var pkey = PROFILE + '_' + hash
+    var ikey = utils.makeId(IDENTITY, hash)
+    var pkey = utils.makeId(PROFILE, hash)
 
     var profile = list[pkey] && this._getItem(pkey)
     var identity = list[ikey]  &&  this._getItem(ikey)
@@ -2761,7 +2718,7 @@ var Store = Reflux.createStore({
     let hash = r.to[ROOT_HASH]
     if (!hash)
       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-    var toId = IDENTITY + '_' + hash
+    var toId = utils.makeId(IDENTITY, hash)
     rr._sendStatus = self.isConnected ? SENDING : QUEUED
     var noCustomerWaiting
     // let firstTime
@@ -3061,7 +3018,7 @@ var Store = Reflux.createStore({
       }
     }
     if (!sendParams.to) {
-      var toId = IDENTITY + '_' + hash
+      var toId = utils.makeId(IDENTITY, hash)
       sendParams.to = { permalink: hash }
     }
     return sendParams
@@ -4235,7 +4192,7 @@ var Store = Reflux.createStore({
 
       // toChain.time = returnVal.time
 
-      var key = IDENTITY + '_' + to[ROOT_HASH]
+      var key = utils.makeId(IDENTITY, to[ROOT_HASH])
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       try {
@@ -4307,6 +4264,7 @@ var Store = Reflux.createStore({
               continue
             bookmark[p] = bookmark[p].map((r) => utils.buildRef(r))
           }
+          self.onHasBookmarks()
         }
         if (readOnlyBacklinks.length) {
           readOnlyBacklinks.forEach((prop) => {
@@ -4553,14 +4511,15 @@ var Store = Reflux.createStore({
     var toOrgId
     if (to[TYPE] === ORGANIZATION) {
       toOrgId = utils.getId(to)
-      to = this.getRepresentative(ORGANIZATION + '_' + to[ROOT_HASH])
+      let oid = utils.makeId(ORGANIZATION, to[ROOT_HASH])
+      to = this.getRepresentative(oid)
     }
     else
       toOrgId = utils.getId(to.organization)
     if (!to)
       return
 
-    var ikey = IDENTITY + '_' + to[ROOT_HASH]
+    var ikey = utils.makeId(IDENTITY, to[ROOT_HASH])
     var opts = {
       to: {fingerprint: this.getFingerprint(this._getItem(ikey))},
       // share seal if it exists
@@ -4684,7 +4643,7 @@ var Store = Reflux.createStore({
   checkRequired(resource, meta) {
     var type = resource[TYPE];
     var rootHash = resource[ROOT_HASH];
-    var oldResource = (rootHash) ? list[type + '_' + rootHash] : null;
+    var oldResource = (rootHash) ? list[utils.makeId(type, rootHash)] : null;
     var required = meta.required;
     if (!required)
       return;
@@ -4766,13 +4725,13 @@ var Store = Reflux.createStore({
     await this._loadedResourcesDefer.promise
     let permalink = params.permalink
     let serverUrl = params.url
-    let providerBot = this._getItem(PROFILE + '_' + permalink)
+    let providerBot = this._getItem(utils.makeId(PROFILE, permalink))
     if (!providerBot  &&  serverUrl) {
       await this.onAddItem({
         resource: {[constants.TYPE]: constants.TYPES.SETTINGS, url: serverUrl},
         maxAttempts: 5
       })
-      providerBot = this._getItem(PROFILE + '_' + permalink)
+      providerBot = this._getItem(utils.makeId(PROFILE, permalink))
     }
     if (providerBot) {
       let provider = this._getItem(utils.getId(providerBot.organization))
@@ -4938,7 +4897,7 @@ var Store = Reflux.createStore({
         // Filter out the resource submitted by employee in the shared context chat.
         // Otherwise there are duplicates messages submitted by employee and its bot
         let cId = utils.getId(context)
-        let meId = IDENTITY + '_' + me[ROOT_HASH]
+        let meId = utils.makeId(IDENTITY, me[ROOT_HASH])
         let meProfileId = utils.getId(utils.getMe())
 
         let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
@@ -5128,7 +5087,7 @@ var Store = Reflux.createStore({
             if (refM.enum) {
               refM.enum.forEach((r) => {
                 if (r.title === rr.title)
-                  rr.id = refM.id + '_' + r.id
+                  rr.id = utils.makeId(refM.id, r.id)
               })
             }
           }
@@ -5506,7 +5465,7 @@ var Store = Reflux.createStore({
       if (r[p]  &&  props[p])
         rr[p] = r[p]
     }
-    let authorId = [PROFILE, r._author].join('_')
+    let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
     let myOrgRep = this.getRepresentative(utils.getId(me.organization))
     let myOrgRepId = utils.getId(myOrgRep)
@@ -5960,7 +5919,7 @@ var Store = Reflux.createStore({
       }
 
       isTest = true;
-      var meId = constants.TYPES.PROFILE + '_' + testMe;
+      var meId = utils.makeId(PROFILE, testMe)
       me = this._getItem(meId);
       this.setMe(me);
       var myIdentities = this._getItem(MY_IDENTITIES);
@@ -6411,7 +6370,7 @@ var Store = Reflux.createStore({
         owner = r.from
       }
       else {
-        let pa = allContexts[PRODUCT_APPLICATION + '_' + r.context]
+        let pa = allContexts[utils.makeId(PRODUCT_APPLICATION, r.context)]
         owner = pa ? pa.from : r.from
         ownerId = owner.id
       }
@@ -7043,7 +7002,7 @@ var Store = Reflux.createStore({
       // if (isNew)
       //   this.addVisualProps(value)
       if (!isNew  &&  !isForm) {
-        let prevRes = list[value[TYPE] + '_' + value[ROOT_HASH] + '_' + value[PREV_HASH]]
+        let prevRes = list[utils.makeId(value[TYPE], value[ROOT_HASH], value[PREV_HASH])]
         if (prevRes) {
           prevRes = prevRes.value
           prevRes[NEXT_HASH] = value[CUR_HASH]
@@ -7377,10 +7336,12 @@ var Store = Reflux.createStore({
 
     batch.push({type: 'put', key: pKey, value: me});
     batch.push({type: 'put', key: MY_IDENTITIES, value: mid});///
-    var identity = {}
-    identity[ROOT_HASH] = me[ROOT_HASH]
+    var identity = {
+      [ROOT_HASH]: me[ROOT_HASH],
+      [TYPE]: IDENTITY
+    }
     extend(true, identity, publishedIdentity)
-    var iKey = IDENTITY + '_' + identity[ROOT_HASH]
+    var iKey = utils.getId(identity)
     if (me.language) {
       me.language = this._getItem(utils.getId(me.language))
       me.languageCode = me.language.code
@@ -7476,7 +7437,7 @@ var Store = Reflux.createStore({
         if (settings.hashToUrl) {
           let hasAllProvidersFromThisServer = true
           for (let h in settings.hashToUrl) {
-            let provider = self._getItem(PROFILE + '_' + h)
+            let provider = self._getItem(utils.makeId(PROFILE, h))
             let org = self._getItem(provider.organization)
             if (org.url === v)
               hasAllProvidersFromThisServer = false
@@ -7559,7 +7520,7 @@ var Store = Reflux.createStore({
         var employees = this.searchNotMessages({modelName: PROFILE, prop: 'organization', to: r})
 
         if (employees)
-          pubkeys = list[IDENTITY + '_' + employees[0][ROOT_HASH]].pubkeys
+          pubkeys = list[utils.makeId(IDENTITY, employees[0][ROOT_HASH])].pubkeys
       }
     }
     if (pubkeys) {
@@ -7573,7 +7534,7 @@ var Store = Reflux.createStore({
 
   // TODO: simplify getDriver to use this
   loadIdentityAndKeys(me) {
-    var mePub = me[ROOT_HASH] ? this._getItem(IDENTITY + '_' + me[ROOT_HASH]).pubkeys : me.pubkeys
+    var mePub = me[ROOT_HASH] ? this._getItem(utils.makeId(IDENTITY, me[ROOT_HASH])).pubkeys : me.pubkeys
     var mePriv
     var identity
     var allMyIdentities = this._getItem(MY_IDENTITIES)
@@ -7892,7 +7853,7 @@ var Store = Reflux.createStore({
           });
         newIdentity[ROOT_HASH] = sha(newIdentity);
         newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
-        var key = PROFILE + '_' + newIdentity[ROOT_HASH];
+        var key = utils.getId(newIdentity)
         if (!list[key])
           batch.push({type: 'put', key: key, value: newIdentity});
       });
@@ -8269,7 +8230,7 @@ var Store = Reflux.createStore({
                ? obj.objectinfo.author
                : obj.from[ROOT_HASH]
                // : obj.txId ? obj.from[ROOT_HASH] : null
-    fromId = PROFILE + '_' + fromId
+    fromId = utils.makeId(PROFILE, fromId)
 
     var from = this._getItem(fromId)
     var me = utils.getMe()
@@ -8336,8 +8297,8 @@ var Store = Reflux.createStore({
 
     let isMyMessage
     if (isMessage) {
-      var toId = obj.to.id ||  PROFILE + '_' + obj.to[ROOT_HASH]
-      var meId = PROFILE + '_' + me[ROOT_HASH]
+      var toId = obj.to.id ||  utils.makeId(PROFILE, obj.to[ROOT_HASH])
+      var meId = utils.getId(me)
       isMyMessage = isMessage ? (toId !== meId  &&  fromId !== meId) : false
     }
 
@@ -8529,9 +8490,9 @@ var Store = Reflux.createStore({
     // var fromProfile = PROFILE + '_' + (obj.objectinfo ? obj.objectinfo.author : obj.from[ROOT_HASH])
     var fromProfile = PROFILE + '_'
     if (obj.objectinfo && obj.objectinfo.author)
-      fromProfile += obj.objectinfo.author
+      fromProfile = utils.makeId(PROFILE, obj.objectinfo.author)
     else
-      fromProfile += obj.from[ROOT_HASH]
+      fromProfile = utils.makeId(PROFILE, obj.from[ROOT_HASH])
 
     var from = this._getItem(fromProfile)
 
@@ -8545,11 +8506,10 @@ var Store = Reflux.createStore({
         firstName: name ?  name.charAt(0).toUpperCase() + name.slice(1) : 'NewCustomer' + Object.keys(list).length
       }
     }
-
     let key = utils.getId(val)
 
     // var toId = [PROFILE, obj.to[ROOT_HASH]].join('_')
-    var toId = obj.to.id || [PROFILE, obj.to[ROOT_HASH]].join('_')
+    var toId = obj.to.id || utils.makeId(PROFILE, obj.to[ROOT_HASH])
     var to = this._getItem(toId)
     var meId = utils.getId(me)
     // HACK for showing verification in employee's chat
@@ -8565,7 +8525,8 @@ var Store = Reflux.createStore({
 
       let context
       if (obj.object.context) {
-        let pa = this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context)
+        let paId = utils.makeId(PRODUCT_APPLICATION, obj.object.context)
+        let pa = this._getItem(paId)
         if (pa)
           context = this._getItem(pa)
       }
@@ -8619,7 +8580,7 @@ var Store = Reflux.createStore({
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
     let isNew = val[ROOT_HASH] === val[CUR_HASH]
     if (obj.object  &&  val[TYPE] !== PRODUCT_APPLICATION) {
-      let contextId = PRODUCT_APPLICATION + '_' + obj.object.context
+      let contextId = utils.makeId(PRODUCT_APPLICATION, obj.object.context)
       let context = this._getItem(contextId)
 
       // Avoid doubling the number of forms
@@ -8945,8 +8906,10 @@ var Store = Reflux.createStore({
   // if the last message showing was PRODUCT_LIST. No need to re-render
   fillFromAndTo(obj, val) {
     var whoAmI = obj.parsed.data._i.split(':')[0]
-    var from = this._getItem(PROFILE + '_' + obj.objectinfo.author)
-    var to = this._getItem(PROFILE + '_' + obj.to[ROOT_HASH])
+    let fromId = utils.makeId(PROFILE, obj.objectinfo.author)
+    let toId = utils.makeId(PROFILE, obj.to[ROOT_HASH])
+    var from = this._getItem(fromId)
+    var to = this._getItem(toId)
 
     if (whoAmI !== from[ROOT_HASH]) {
       // swap from and to
@@ -9075,7 +9038,7 @@ var Store = Reflux.createStore({
           var i = 0
           for (; i<org.contacts.length; i++) {
             var id = utils.getId(org.contacts[i])
-            if (c[constants.TYPE] + '_' + c[constants.ROOT_HASH] === id)
+            if (utils.getId(c) === id)
               break
           }
           if (i !== org.contacts.length)
@@ -9099,7 +9062,7 @@ var Store = Reflux.createStore({
       var noModels = utils.isEmpty(models);
       if (noModels)
         return self.loadModels();
-      if (me  &&  (!list[me[TYPE] + '_' + me[ROOT_HASH]] || !list[IDENTITY + '_' + me[ROOT_HASH]]))
+      if (me  &&  (!list[utils.getId(me)] || !list[utils.makeId(IDENTITY, me[ROOT_HASH])]))
         me = null
       console.log('Stream closed');
       utils.setModels(models);
@@ -9246,7 +9209,7 @@ var Store = Reflux.createStore({
             if (!m  ||  m.subClassOf !== FINANCIAL_PRODUCT)
               return
             // This is confirmation for getting the product
-            rId = SIMPLE_MESSAGE + '_' +  r[ROOT_HASH]
+            rId = utils.makeId(SIMPLE_MESSAGE, r[ROOT_HASH])
             res = list[rId]
             if (!res)
               return
@@ -9470,9 +9433,11 @@ var Store = Reflux.createStore({
     let promises = []
 
     for (let rep of orgReps) {
+      let id = utils.makeId(IDENTITY, rep[ROOT_HASH])
+      let r = this._getItem(id)
       promises.push(this.meDriverSignAndSend({
         object: msg,
-        to: { fingerprint: this.getFingerprint(this._getItem(IDENTITY + '_' + rep[ROOT_HASH])) }
+        to: { fingerprint: this.getFingerprint(r) }
       })
     )}
 
@@ -9484,7 +9449,8 @@ var Store = Reflux.createStore({
       msg[ROOT_HASH] = results[0].object.permalink
       msg.message = translate('inProgress')
       // reverse to and from to display as from assistent
-      msg.from = this.buildRef(list[PROFILE + '_' + results[0].message.recipient].value)
+      let pid = utils.makeId(PROFILE, results[0].message.recipient)
+      msg.from = this.buildRef(list[pid].value)
       msg.to = this.buildRef(me)
 
       let mId = utils.getId(msg)
@@ -9541,7 +9507,7 @@ var Store = Reflux.createStore({
     let myIdentities = this._getItem(MY_IDENTITIES)
     if (myIdentities) {
       publishedIdentity = myIdentities.allIdentities[0].publishedIdentity
-      deviceId = this._getItem(IDENTITY + '_' + pairingData.identity).deviceId
+      deviceId = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).deviceId
     }
 
     let promise = myIdentities
@@ -9558,7 +9524,7 @@ var Store = Reflux.createStore({
       publishedIdentity = identityInfo.identity
       let mePub = publishedIdentity.pubkeys
       let mePriv = identityInfo.keys
-      let currentIdentity = PROFILE + '_' + pairingData.identity
+      let currentIdentity = utils.makeId(PROFILE, pairingData.identity)
       var myIdentities = {
         [TYPE]: MY_IDENTITIES_TYPE,
         currentIdentity: currentIdentity,
@@ -9779,7 +9745,7 @@ var Store = Reflux.createStore({
     if (tradleUtils.hexLink(pairingRes.prev) !== pairingData.identity)
       return Promise.reject(new Error('prev identity does not match expected'))
 
-    let pubkeys = this._getItem(IDENTITY + '_' + pairingData.identity).pubkeys
+    let pubkeys = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).pubkeys
     const hasMyKeys = pubkeys.every(myKey => {
       return pairingRes.identity.pubkeys.some(theirKey => {
         return deepEqual(theirKey, myKey)
@@ -9813,7 +9779,7 @@ var Store = Reflux.createStore({
     // batch.push({type: 'put', key: id, value: list[id].value})
     // db.batch(batch)
 
-    let me = this._getItem(PROFILE + '_' + pairingData.identity)
+    let me = this._getItem(utils.makeId(PROFILE, pairingData.identity))
     return this.getDriver(me)
     .then(() =>  this.addContactIdentity({ identity: pairingRes.prev }))
     .then(() => {

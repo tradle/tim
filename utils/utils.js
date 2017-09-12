@@ -28,6 +28,7 @@ import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import clone from 'clone'
 import Strings from './strings'
+import { id } from '@tradle/build-resource'
 
 // import Orientation from 'react-native-orientation'
 
@@ -451,12 +452,20 @@ var utils = {
       // return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
     }
     else {
+      let id = r[TYPE] + '_' + r[ROOT_HASH] // +  '_' + (r[CUR_HASH] || r[ROOT_HASH])
       let m = this.getModel(r[TYPE])
-      let id = r[TYPE] + '_' + r[ROOT_HASH]
-      return  m  &&  (m.value.subClassOf === FORM  ||  m.value.id === VERIFICATION  ||  m.value.id === MY_PRODUCT)
-            ? id + '_' + (r[CUR_HASH] || r[ROOT_HASH])
-            : id
+      if (m  &&  m.value.subClassOf !== ENUM)
+        id +=  '_' + (r[CUR_HASH] || r[ROOT_HASH])
+      // return  m  &&  (m.value.subClassOf === FORM  ||  m.value.id === VERIFICATION  ||  m.value.id === MY_PRODUCT)
+      //       ? id + '_' + (r[CUR_HASH] || r[ROOT_HASH])
+      //       : id
+      return id
     }
+  },
+  makeId(type, permalink, link) {
+    let model = this.getModel(type).value
+    return id({model, permalink, link})
+    // return [type, permalink, link || permalink].join('_')
   },
   getType(r) {
     if (typeof r === 'string')
