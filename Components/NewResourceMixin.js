@@ -15,10 +15,6 @@ var StyleSheet = require('../StyleSheet')
 // var QRCodeScanner = require('./QRCodeScanner')
 // var driverLicenseParser = require('../utils/driverLicenseParser')
 const debug = require('debug')('tradle:app:blinkid')
-<<<<<<< HEAD
-=======
-// var ArticleView = require('./ArticleView')
->>>>>>> origin/refactordb
 var focusUri = require('../video/Focus1.mp4')
 
 var plugins = require('@tradle/biz-plugins')
