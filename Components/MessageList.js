@@ -240,7 +240,7 @@ class MessageList extends Component {
       }
       if (productToForms)
         state.productToForms = productToForms
-      else if (utils.getModel(rtype).value.subClassOf === FORM) {
+      else if (utils.getModel(rtype).value.subClassOf === FORM  &&  resource._context) {
         let product = resource._context.product
         if (this.state.productToForms)
           productToForms = clone(this.state.productToForms)
