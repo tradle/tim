@@ -603,7 +603,7 @@ class ResourceRow extends Component {
           let msg = {
             [TYPE]: ASSIGN_RM,
             employee: {
-              id: `tradle.Identity_${me[ROOT_HASH]}`
+              id: utils.makeId('tradle.Identity', me[ROOT_HASH])
             },
             application: this.props.resource,
             _context: this.props.resource,
