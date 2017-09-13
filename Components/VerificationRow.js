@@ -22,6 +22,8 @@ const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
 const ORGANIZATION = 'tradle.Organization'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const BOOKMARK = 'tradle.Bookmark'
+const ENUM = 'tradle.Enum'
 const PROFILE = constants.TYPES.PROFILE
 
 const TYPE = constants.TYPE
@@ -73,6 +75,7 @@ class VerificationRow extends Component {
     var model = utils.getModel(resource[TYPE]).value;
     var isMyProduct = model.subClassOf === MY_PRODUCT
     var isForm = model.subClassOf === FORM
+    var isBookmark = model.id === BOOKMARK
     var isVerification = resource.document != null
     var r = isVerification ? resource.document : resource
 
@@ -160,7 +163,9 @@ class VerificationRow extends Component {
     if (!title || !title.length) {
       if (listModel.id === FORM_REQUEST)
         title = utils.makeModelTitle(resource.form)
-      if (this.props.search) {
+      else if (isBookmark)
+        title = utils.makeModelTitle(resource.bookmark[TYPE])
+      else if (this.props.search) {
         if (isVerification)
           title = verificationRequest.title
         else if (model.id === APPLICATION_SUBMITTED)
@@ -209,6 +214,8 @@ class VerificationRow extends Component {
     let renderedRows = []
     if (this.props.search  &&  this.props.searchCriteria)
       this.formatFilteredResource(model, resource, renderedRows)
+    else if (isBookmark)
+      this.formatBookmark(utils.getModel(resource.bookmark[TYPE]).value, resource.bookmark, renderedRows)
 
     var header =  <View style={[styles.header, {flex: 1}]} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10}}>
@@ -359,14 +366,14 @@ class VerificationRow extends Component {
         let row
         if (criteria === val || properties[v].type !== 'string')
           row = <Text style={[style, {fontWeight: '600'}]} key={this.getNextKey()}>{val}</Text>
-        else {
-          criteria = criteria.replace('*', '')
+        else if (criteria  &&  criteria.length) {
+          criteria = criteria.replace(/\*/g, '')
           let idx = val.indexOf(criteria)
           let part
           let parts = []
           if (idx > 0) {
             parts.push(<Text style={style} key={this.getNextKey()}>{val.substring(0, idx)}</Text>)
-            idx++
+            // idx++
           }
           parts.push(<Text style={[style, {fontWeight: '800'}]} key={this.getNextKey()}>{val.substring(idx, idx + criteria.length)}</Text>)
           idx += criteria.length
@@ -414,6 +421,107 @@ class VerificationRow extends Component {
     if (vCols  &&  vCols.length) {
       vCols.forEach((v) => {
         renderedRows.push(v);
+      });
+    }
+  }
+  formatBookmark(model, resource, renderedRow) {
+    let properties = model.properties;
+    let viewCols = [];
+    for (let p in resource) {
+      if (properties[p]  &&  p.charAt(0) !== '_')
+        viewCols.push(p)
+    }
+
+    let onPressCall;
+    let style = styles.resourceTitle
+    let labelStyle = styles.resourceTitleL
+    let vCols = []
+    viewCols.forEach((v) => {
+      if (properties[v].type === 'array'  ||  properties[v].type === 'date')
+        return;
+      if (!resource[v]  &&  !properties[v].displayAs)
+        return
+
+      let units = properties[v].units && properties[v].units.charAt(0) !== '['
+                ? ' (' + properties[v].units + ')'
+                : ''
+      let ref = properties[v].ref
+      if (ref) {
+        if (resource[v]) {
+          let val
+          if (ref === constants.TYPES.MONEY)
+            val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+          else if (resource[v].title)
+            val = resource[v].title
+          else if (utils.getModel(ref).value.subClassOf === ENUM) {
+            val = ''
+            resource[v].forEach((r, i) => {
+              if (i)
+                val += ', '
+              val += r.title
+            })
+          }
+          else
+            return
+
+          vCols.push(
+            <View style={styles.refPropertyRow} key={this.getNextKey()}>
+              <Text style={labelStyle}>{properties[v].title + units}</Text>
+              <Text style={style}>{val}</Text>
+            </View>
+          );
+        }
+
+        return;
+      }
+      let row
+      if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
+        row = <Text style={style} key={this.getNextKey()}>{resource[v]}</Text>;
+      else if (!model.autoCreate) {
+        let val = (properties[v].displayAs)
+                ? utils.templateIt(properties[v], resource)
+                : properties[v].type === 'object' ? null : resource[v];
+        if (!val)
+          return
+        let row = <Text style={style} key={this.getNextKey()}>{val}</Text>
+        vCols.push(
+          <View style={styles.refPropertyRow} key={this.getNextKey()}>
+            <Text style={labelStyle}>{properties[v].title + units}</Text>
+            {row}
+          </View>
+        )
+        return
+      }
+      else {
+        if (!resource[v]  ||  !resource[v].length)
+          return;
+        let msgParts = utils.splitMessage(resource[v]);
+        // Case when the needed form was sent along with the message
+        if (msgParts.length === 2) {
+          let msgModel = utils.getModel(msgParts[1]);
+          if (msgModel) {
+            vCols.push(<View key={this.getNextKey()} style={styles.msgParts}>
+                         <Text style={style}>{msgParts[0]}</Text>
+                         <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                       </View>);
+            return;
+          }
+        }
+        row = <Text style={style} key={this.getNextKey()}>{resource[v]}</Text>;
+      }
+      vCols.push(
+        <View style={styles.refPropertyRow} key={this.getNextKey()}>
+          <Text style={labelStyle}>{properties[v].title + units}</Text>
+          {row}
+        </View>
+      );
+    });
+    // if (model.style)
+    //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
+
+    if (vCols  &&  vCols.length) {
+      vCols.forEach(function(v) {
+        renderedRow.push(v);
       });
     }
   }

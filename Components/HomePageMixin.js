@@ -86,7 +86,7 @@ var HomePageMixin = {
           title: utils.getDisplayName(me)
         },
         to: {
-          id: PROFILE + '_' + result.provider
+          id: utils.makeId(PROFILE, result.provider)
         }
       }
       Actions.addItem({

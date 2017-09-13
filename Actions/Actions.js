@@ -52,6 +52,7 @@ var asyncActions = [
 
   'getAllPartials',
   'hasPartials',
+  'hasBookmarks',
   'viewChat',
 
   'exploreBacklink',

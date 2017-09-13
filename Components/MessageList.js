@@ -193,6 +193,7 @@ class MessageList extends Component {
       return
     }
 
+    let rtype = resource  &&  resource[TYPE]
     if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
       let rtype = resource[TYPE]
       if (!utils.isMessage(resource))
@@ -265,7 +266,7 @@ class MessageList extends Component {
         if (this.state.productToForms)
           productToForms = clone(this.state.productToForms)
         else
-          productToForms = []
+          productToForms = {}
 
         var l = productToForms[product]
         if (!l) {
@@ -282,7 +283,6 @@ class MessageList extends Component {
 
         state.productToForms = productToForms
       }
-
       if (shareableResources)
         state.shareableResources = shareableResources
       this.setState(state)

@@ -53,7 +53,7 @@ const merged = extend({
   serviceID: 'tradle',
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
-  LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
+  LOCAL_TRADLE_SERVER: 'https://gi7iw2nsah.execute-api.us-east-1.amazonaws.com/dev/tradle/',
   pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   isAndroid: function () {
     return Platform.OS === 'android'

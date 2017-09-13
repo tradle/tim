@@ -50,11 +50,13 @@ const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 
 const METHOD = 'tradle.Method'
+const BOOKMARK = 'tradle.Bookmark'
 
 let excludeFromBrowsing = [
   FORM,
   PRODUCT_LIST,
   ENUM,
+  BOOKMARK,
   constants.TYPES.INTRODUCTION,
   constants.TYPES.SELF_INTRODUCTION,
   constants.TYPES.CUSTOMER_WAITING,
@@ -141,7 +143,7 @@ class GridList extends Component {
 
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
-    this.isSmallScreen = !utils.isWeb()  &&  utils.dimensions(GridList).width < 736
+    this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     LIMIT = 10 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
@@ -154,10 +156,11 @@ class GridList extends Component {
       serverOffline: serverOffline,
       isConnected: this.props.navigator.isConnected,
       userInput: '',
-      sharedContextCount: 0,
+      // sharedContextCount: 0,
       refreshing: false,
-      hasPartials: false,
-      hasTestProviders: false,
+      // hasPartials: false,
+      // bookmarksCount: 0,
+      // hasTestProviders: false,
       resource: search  &&  resource,
       isGrid:  !this.isSmallScreen  &&  !officialAccounts  && modelName !== FORM  &&  !model.isInterface//this.props.modelName === constants.TYPES.VERIFICATION
     };
@@ -367,8 +370,14 @@ class GridList extends Component {
       var model = action === 'addMessage'
                 ? utils.getModel(this.props.modelName).value
                 : utils.getModel(params.resource[TYPE]).value;
-      if (action === 'addItem'  &&  model.id !== this.props.modelName)
+      if (action === 'addItem'  &&  model.id !== this.props.modelName) {
+        if (model.id === BOOKMARK  &&  !this.props.isModel) {
+          if (this.state.resource  &&  this.state.resource[TYPE] === params.resource.bookmark[TYPE]) {
+            Alert.alert('Bookmark was created')
+          }
+        }
         return
+      }
       if (action === 'addMessage'  &&  this.props.modelName !== PROFILE)
         return
       // this.state.isLoading = true;
@@ -417,39 +426,43 @@ class GridList extends Component {
         this.props.navigator.push(route)
       return
     }
-    if (action === 'allSharedContexts') {
-      let state = {
-        sharedContextCount: params.count,
-      }
-      if (this.props.officialAccounts)
-        this.setState(state)
-      else if (this.props._readOnly  &&  this.props.modelName === PRODUCT_APPLICATION) {
-        let list = params.list
-        if (list &&  list.length) {
-          state.list = list
-          state.dataSource = this.state.dataSource.cloneWithRows(list)
-        }
-        this.setState(state)
-      }
-      return
-    }
-    if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
-      this.setState({hasPartials: true})
-      return
-    }
-    if (action === 'hasTestProviders'  &&  this.props.officialAccounts) {
-      if (!params.list  ||  !params.list.length)
-        return
+    // if (action === 'allSharedContexts') {
+    //   let state = {
+    //     sharedContextCount: params.count,
+    //   }
+    //   if (this.props.officialAccounts)
+    //     this.setState(state)
+    //   else if (this.props._readOnly  &&  this.props.modelName === PRODUCT_APPLICATION) {
+    //     let list = params.list
+    //     if (list &&  list.length) {
+    //       state.list = list
+    //       state.dataSource = this.state.dataSource.cloneWithRows(list)
+    //     }
+    //     this.setState(state)
+    //   }
+    //   return
+    // }
+    // if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
+    //   this.setState({hasPartials: true})
+    //   return
+    // }
+    // if (action === 'hasBookmarks') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
+    //   this.setState({bookmarksCount: params.list && params.list.length})
+    //   return
+    // }
+    // if (action === 'hasTestProviders'  &&  this.props.officialAccounts) {
+    //   if (!params.list  ||  !params.list.length)
+    //     return
 
-      let l = this.addTestProvidersRow(this.state.list  ||  [])
-      this.setState({
-        hasTestProviders: true,
-        testProviders: params.list,
-        list: l,
-        dataSource: this.state.dataSource.cloneWithRows(l),
-      })
-      return
-    }
+    //   let l = this.addTestProvidersRow(this.state.list  ||  [])
+    //   this.setState({
+    //     hasTestProviders: true,
+    //     testProviders: params.list,
+    //     list: l,
+    //     dataSource: this.state.dataSource.cloneWithRows(l),
+    //   })
+    //   return
+    // }
     // if (action === 'exploreBacklink'  &&  this.props.isBacklink  &&  this.props.resource[ROOT_HASH] === params.resource[ROOT_HASH]) {
     //   this.setState({
     //     prop: params.backlink,
@@ -463,9 +476,10 @@ class GridList extends Component {
       if (!params.list) {
         if (params.alert)
           Alert.alert(params.alert)
-        else if (this.props.search) {
+        else if (this.props.search  && !this.props.isModel) {
           this.state.refreshing = false
-          Alert.alert('No resources were found for this criteria')
+          if (params.isSearch  &&   params.resource)
+            Alert.alert('No resources were found for this criteria')
         }
 
         // else if (this.props.search  &&  !this.props.isModel)
@@ -617,12 +631,14 @@ class GridList extends Component {
       return true
     if (this.state.serverOffline !== nextState.serverOffline)
       return true
-    if (this.state.sharedContextCount !== nextState.sharedContextCount)
-      return true
-    if (this.state.hasPartials !== nextState.hasPartials)
-      return true
-    if (this.state.hasTestProviders !== nextState.hasTestProviders)
-      return true
+    // if (this.state.sharedContextCount !== nextState.sharedContextCount)
+    //   return true
+    // if (this.state.hasPartials !== nextState.hasPartials)
+    //   return true
+    // if (this.state.bookmarksCount !== nextState.bookmarksCount)
+    //   return true
+    // if (this.state.hasTestProviders !== nextState.hasTestProviders)
+    //   return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
     if (this.state.newStyles !== nextState.newStyles)
@@ -648,20 +664,56 @@ class GridList extends Component {
   selectResource(resource) {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = utils.getModel(this.props.modelName);
-    var isContact = this.props.modelName === PROFILE;
+    let {modelName, search, callback, bankStyle} = this.props
+    var model = utils.getModel(modelName);
+    var isContact = modelName === PROFILE;
     let rType = resource[TYPE]
     var isVerification = model.value.id === constants.TYPES.VERIFICATION
     var isVerificationR  = rType === constants.TYPES.VERIFICATION
     var isMessage = utils.isMessage(resource)
 
-    var isOrganization = this.props.modelName === ORGANIZATION;
+    var isOrganization = modelName === ORGANIZATION;
     var m = utils.getModel(resource[TYPE]).value;
-    let isView = this.props.search  ||
-                 (!isContact  &&  !isOrganization  &&  !this.props.callback)
+    let isView = search  ||  (!isContact  &&  !isOrganization  &&  !callback)
 
     if (isView) {
       if (isMessage) {
+        if (modelName === BOOKMARK) {
+          let btype = resource.bookmark[TYPE]
+          let bm = utils.getModel(btype).value
+          this.props.navigator.push({
+            id: 30,
+            title: translate('searchSomething', utils.makeModelTitle(bm)),
+            backButtonTitle: 'Back',
+            component: GridList,
+            passProps: {
+              modelName: btype,
+              resource: resource.bookmark,
+              bankStyle: this.props.bankStyle,
+              currency: this.props.currency,
+              limit: 20,
+              search: true
+            },
+            rightButtonTitle: 'Search',
+            onRightButtonPress: {
+              title: translate('searchSomething', utils.makeModelTitle(bm)),
+              id: 4,
+              component: NewResource,
+              titleTextColor: '#7AAAC3',
+              backButtonTitle: 'Back',
+              rightButtonTitle: 'Done',
+              passProps: {
+                model: model,
+                resource: resource.bookmark,
+                searchWithFilter: this.searchWithFilter.bind(this),
+                search: true,
+                bankStyle: this.props.bankStyle || defaultBankStyle,
+              }
+            }
+          })
+          Actions.list({filterResource: resource.bookmark, search: true, modelName: btype, limit: LIMIT * 2, first: true})
+          return
+        }
         let title
         if (isVerificationR) {
           let type = utils.getType(resource.document)
@@ -677,8 +729,8 @@ class GridList extends Component {
           backButtonTitle: 'Back',
           passProps: {
             resource: resource,
-            search: this.props.search,
-            bankStyle: this.props.bankStyle || defaultBankStyle
+            search: search,
+            bankStyle: bankStyle || defaultBankStyle
           }
         });
       }
@@ -713,7 +765,7 @@ class GridList extends Component {
     }
     if (this.props.prop) {
       if (me) {
-        if  (this.props.modelName != PROFILE) {
+        if  (modelName != PROFILE) {
           this._selectResource(resource);
           return
         }
@@ -731,7 +783,6 @@ class GridList extends Component {
       }
     }
     var title = isContact ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
-    var modelName = constants.TYPES.MESSAGE;
     var self = this;
     let style = this.mergeStyle(resource.style)
 
@@ -742,7 +793,7 @@ class GridList extends Component {
       passProps: {
         resource: resource,
         filter: '',
-        modelName: modelName,
+        modelName: constants.TYPES.MESSAGE,
         currency: resource.currency,
         bankStyle: style,
       }
@@ -1077,6 +1128,7 @@ class GridList extends Component {
       modelName: this.props.modelName,
       to: this.props.resource,
       prop: this.props.prop,
+      first: true,
       listView: this.props.listView
     });
   }
@@ -1388,7 +1440,7 @@ class GridList extends Component {
   }
 
   highlightCriteria(resource,val, criteria, style) {
-    criteria = criteria.replace('*', '')
+    criteria = criteria.replace(/\*/g, '')
     let idx = val.indexOf(criteria)
     let part
     let parts = []
@@ -1463,18 +1515,20 @@ class GridList extends Component {
     // if (this.offset < this.contentHeight / 2)
     //   return
     // debugger
-    let { list=[] } = this.state
+    let { list=[], order, sortProperty } = this.state
+    let { modelName, search, resource } = this.props
     this.state.refreshing = true
     Actions.list({
-      modelName: this.props.modelName,
-      sortProperty: this.state.sortProperty,
+      modelName: modelName,
+      sortProperty: sortProperty,
       asc: this.state.order,
       limit: LIMIT,
       direction: this.direction,
-      search: this.props.search,
-      filterResource: this.state.resource,
-      start: list.length,
-      startRec: list[list.length - 1]
+      search: search,
+      to: modelName === BOOKMARK ? utils.getMe() : null,
+      filterResource: resource,
+      // from: list.length,
+      lastId: utils.getId(list[list.length - 1])
     })
 
     // if (list.length < LIMIT)
@@ -1488,7 +1542,7 @@ class GridList extends Component {
     //     limit: LIMIT,
     //     direction: this.direction,
     //     search: this.props.search,
-    //     start: list.length,
+    //     from: list.length,
     //     startRec: list[this.state.list.length - 1]
     //   })
     // }, 300)
@@ -1554,12 +1608,14 @@ class GridList extends Component {
     )
   }
   renderFooter() {
-    var me = utils.getMe();
+    // var me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
     var model = utils.getModel(this.props.modelName).value;
-    if (!this.props.prop  &&  model.id !== ORGANIZATION)
-      return <View />
+    if (!this.props.prop  &&  model.id !== ORGANIZATION) {
+      if (!this.props.search ||  !this.state.resource || !Object.keys(this.state.resource).length)
+        return <View />
+    }
 
     // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
     //   return <View />
@@ -1618,21 +1674,6 @@ class GridList extends Component {
 
     this.props.navigator.push(route)
   }
-  showContexts() {
-    this.props.navigator.push({
-      title: translate('sharedContext'),
-      id: 10,
-      component: GridList,
-      backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
-      passProps: {
-        bankStyle: this.props.style,
-        modelName: PRODUCT_APPLICATION,
-        _readOnly: true
-      }
-    });
-  }
-
   addNew() {
     var model = utils.getModel(this.props.modelName).value;
     var r;
@@ -1743,9 +1784,9 @@ class GridList extends Component {
     if (SearchBar) {
       let hasSearch = isModel
       if (!hasSearch  && !search) {
-        let hasSearch = !_readOnly  ||  modelName !== PRODUCT_APPLICATION
+        hasSearch = !_readOnly  ||  modelName !== PRODUCT_APPLICATION
         if (hasSearch)
-          hasSearch = (dataSource && dataSource.getRowCount() > 10) || (filter  &&  filter.length)
+          hasSearch = (dataSource && dataSource.getRowCount() > LIMIT) || (filter  &&  filter.length)
       }
       if (hasSearch) {
         searchBar = <SearchBar
@@ -1790,7 +1831,15 @@ class GridList extends Component {
   }
   renderActionSheet() {
     let buttons
-    if (this.state.allowToAdd) {
+    if (this.props.search) {
+      buttons = [
+        {
+          text: translate('Bookmark'),
+          onPress: () => this.bookmark()
+        }
+      ]
+    }
+    else if (this.state.allowToAdd) {
       if (this.props.isBacklink)
         return
       buttons = [
@@ -1846,170 +1895,205 @@ class GridList extends Component {
       ]
     )
   }
-
+  bookmark() {
+    let resource = {
+      [TYPE]: BOOKMARK,
+      bookmark: this.state.resource,
+      from: utils.getMe()
+    }
+    Actions.addItem({resource: resource})
+  }
   renderHeader() {
-    if (!this.props.officialAccounts  &&  !this.props.search)
-      return
-    let sharedContext
-    let partial
-    let conversations
-    let search
-    let testProviders
-    let isSearch = this.props.search
-    let isOrg = !isSearch  &&  this.props.modelName === ORGANIZATION
-    let isProfile = !isSearch  &&  this.props.modelName === PROFILE
-    if (!isOrg  &&  !isProfile  &&  !isSearch)
-      return
-    if (isOrg) {
-      if (!this.state.hasTestProviders  ||  this.props.isTest)
-        return <View/>
-      // testProviders = (
-      //   <View style={styles.testProvidersRow}>
-      //     <TouchableOpacity onPress={this.showTestProviders.bind(this)}>
-      //       <View style={styles.row}>
-      //         <Icon name='ios-pulse-outline' size={utils.getFontSize(45)} color={appStyle.TEST_PROVIDERS_ROW_FG_COLOR} style={[styles.cellImage, {paddingLeft: 5}]} />
-      //         <View style={styles.textContainer}>
-      //           <Text style={[styles.resourceTitle, styles.testProvidersText]}>{translate('testProviders')}</Text>
-      //         </View>
-      //         <View style={styles.testProviders}>
-      //           <Text style={styles.testProvidersCounter}>{this.state.testProviders.length}</Text>
-      //         </View>
-      //       </View>
-      //     </TouchableOpacity>
-      //   </View>
-      // )
-    }
-    if (isProfile) {
-      search = <View style={{padding: 5, backgroundColor: '#f7f7f7'}}>
-          <TouchableOpacity onPress={this.showSearch.bind(this)}>
-            <View style={styles.row}>
-              <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-              <View style={styles.textContainer}>
-                <Text style={styles.resourceTitle}>{translate('Explore data')}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
-      // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
-      conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-          <TouchableOpacity onPress={this.showBanks.bind(this)}>
-            <View style={styles.row}>
-              <ConversationsIcon />
-              <View style={styles.textContainer}>
-                <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        </View>
+    return
+    // if (!this.props.officialAccounts  &&  !this.props.search)
+    //   return
+    // let sharedContext
+    // let partial
+    // let bookmarks
+    // let conversations
+    // let search
+    // let testProviders
+    // let isSearch = this.props.search
+    // let isOrg = !isSearch  &&  this.props.modelName === ORGANIZATION
+    // let isProfile = !isSearch  &&  this.props.modelName === PROFILE
+    // if (!isOrg  &&  !isProfile  &&  !isSearch)
+    //   return
+    // if (isOrg) {
+    //   if (!this.state.hasTestProviders  ||  this.props.isTest)
+    //     return <View/>
+    // }
+    // if (isProfile) {
+    //   search = <View style={{padding: 5, backgroundColor: '#f7f7f7'}}>
+    //       <TouchableOpacity onPress={this.showSearch.bind(this)}>
+    //         <View style={styles.row}>
+    //           <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+    //           <View style={styles.textContainer}>
+    //             <Text style={styles.resourceTitle}>{translate('Explore data')}</Text>
+    //           </View>
+    //         </View>
+    //       </TouchableOpacity>
+    //     </View>
+    //   // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+    //   conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+    //       <TouchableOpacity onPress={this.showBanks.bind(this)}>
+    //         <View style={styles.row}>
+    //           <ConversationsIcon />
+    //           <View style={styles.textContainer}>
+    //             <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
+    //           </View>
+    //         </View>
+    //       </TouchableOpacity>
+    //     </View>
 
-      if (this.state.hasPartials)
-        partial = (
-          <View>
-            <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
-              <TouchableOpacity onPress={this.showPartials.bind(this)}>
-                <View style={styles.row}>
-                  <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
-              <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
-                <View style={styles.row}>
-                  <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-      )
-      if (this.state.sharedContextCount)
-        sharedContext = (
-          <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
-            <TouchableOpacity onPress={this.showContexts.bind(this)}>
-              <View style={styles.row}>
-                <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                <View style={styles.textContainer}>
-                  <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
-                </View>
-                <View style={styles.sharedContext}>
-                  <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          </View>
-        )
-    }
-    else {
-      if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION)
-        return this.renderGridHeader()
-    }
-    return  (
-      <View>
-        {conversations}
-        {sharedContext}
-        {partial}
-        {testProviders}
-      </View>
-    )
+    //   if (this.state.hasPartials)
+    //     partial = (
+    //       <View>
+    //         <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
+    //           <TouchableOpacity onPress={this.showPartials.bind(this)}>
+    //             <View style={styles.row}>
+    //               <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+    //               <View style={styles.textContainer}>
+    //                 <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
+    //               </View>
+    //             </View>
+    //           </TouchableOpacity>
+    //         </View>
+    //         <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+    //           <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
+    //             <View style={styles.row}>
+    //               <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+    //               <View style={styles.textContainer}>
+    //                 <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
+    //               </View>
+    //             </View>
+    //           </TouchableOpacity>
+    //         </View>
+    //       </View>
+    //   )
+    //   if (this.state.hasBookmarks) {
+    //     bookmarks = (
+    //         <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+    //           <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
+    //             <View style={styles.row}>
+    //               <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+    //               <View style={styles.textContainer}>
+    //                 <Text style={styles.resourceTitle}>{translate('Bookmarks')}</Text>
+    //               </View>
+    //             </View>
+    //           </TouchableOpacity>
+    //         </View>
+    //       )
+    //   }
+    //   if (this.state.sharedContextCount)
+    //     sharedContext = (
+    //       <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+    //         <TouchableOpacity onPress={this.showContexts.bind(this)}>
+    //           <View style={styles.row}>
+    //             <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+    //             <View style={styles.textContainer}>
+    //               <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
+    //             </View>
+    //             <View style={styles.sharedContext}>
+    //               <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+    //             </View>
+    //           </View>
+    //         </TouchableOpacity>
+    //       </View>
+    //     )
+    // }
+    // else {
+    //   if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION)
+    //     return this.renderGridHeader()
+    // }
+    // return  (
+    //   <View>
+    //     {conversations}
+    //     {bookmarks}
+    //     {sharedContext}
+    //     {partial}
+    //     {testProviders}
+    //   </View>
+    // )
   }
-  showSearch() {
-    this.props.navigator.push({
-      title: 'Explore data',
-      id: 30,
-      component: GridList,
-      backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
-      passProps: {
-        modelName: constants.TYPES.MESSAGE,
-        isModel: true,
-        search: true
-      },
-    })
-  }
+  // showSearch() {
+  //   this.props.navigator.push({
+  //     title: 'Explore data',
+  //     id: 30,
+  //     component: GridList,
+  //     backButtonTitle: 'Back',
+  //     titleTextColor: '#7AAAC3',
+  //     passProps: {
+  //       modelName: constants.TYPES.MESSAGE,
+  //       search: true
+  //     },
+  //   })
+  // }
 
-  showPartials() {
-    Actions.getAllPartials()
-    this.props.navigator.push({
-      id: 27,
-      component: SupervisoryView,
-      backButtonTitle: 'Back',
-      title: translate('overviewOfApplications'),
-      passProps: {}
-    })
-  }
-  showAllPartials() {
-    Actions.list({modelName: PARTIAL})
-    this.props.navigator.push({
-      title: 'Partials',
-      id: 10,
-      component: GridList,
-      backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
-      passProps: {
-        modelName: PARTIAL
-      },
-    })
-  }
-  showTestProviders() {
-    Actions.list({modelName: ORGANIZATION, isTest: true})
-    this.props.navigator.push({
-      title: translate('testProviders'),
-      id: 10,
-      component: GridList,
-      backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
-      passProps: {
-        modelName: ORGANIZATION,
-        isTest: true,
-        officialAccounts: true
-      },
-    })
-  }
+  // showPartials() {
+  //   Actions.getAllPartials()
+  //   this.props.navigator.push({
+  //     id: 27,
+  //     component: SupervisoryView,
+  //     backButtonTitle: 'Back',
+  //     title: translate('overviewOfApplications'),
+  //     passProps: {}
+  //   })
+  // }
+  // showBookmarks() {
+  //   Actions.list({modelName: BOOKMARK})
+  //   this.props.navigator.push({
+  //     title: 'Bookmarks',
+  //     id: 30,
+  //     component: GridList,
+  //     backButtonTitle: 'Back',
+  //     titleTextColor: '#7AAAC3',
+  //     passProps: {
+  //       modelName: BOOKMARK
+  //     },
+  //   })
+  // }
+  // showAllPartials() {
+  //   Actions.list({modelName: PARTIAL})
+  //   this.props.navigator.push({
+  //     title: 'Partials',
+  //     id: 10,
+  //     component: GridList,
+  //     backButtonTitle: 'Back',
+  //     titleTextColor: '#7AAAC3',
+  //     passProps: {
+  //       modelName: PARTIAL
+  //     },
+  //   })
+  // }
+  // showContexts() {
+  //   this.props.navigator.push({
+  //     title: translate('sharedContext'),
+  //     id: 10,
+  //     component: GridList,
+  //     backButtonTitle: 'Back',
+  //     titleTextColor: '#7AAAC3',
+  //     passProps: {
+  //       bankStyle: this.props.style,
+  //       modelName: PRODUCT_APPLICATION,
+  //       _readOnly: true
+  //     }
+  //   });
+  // }
+  // showTestProviders() {
+  //   Actions.list({modelName: ORGANIZATION, isTest: true})
+  //   this.props.navigator.push({
+  //     title: translate('testProviders'),
+  //     id: 10,
+  //     component: GridList,
+  //     backButtonTitle: 'Back',
+  //     titleTextColor: '#7AAAC3',
+  //     passProps: {
+  //       modelName: ORGANIZATION,
+  //       isTest: true,
+  //       officialAccounts: true
+  //     },
+  //   })
+  // }
 }
 reactMixin(GridList.prototype, Reflux.ListenerMixin);
 reactMixin(GridList.prototype, HomePageMixin)
