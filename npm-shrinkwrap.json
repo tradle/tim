@@ -22,8 +22,13 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#b6d881c5e199f50c947d237708ae8badd5cc9609",
+      "resolved": "git://github.com/tradle/aws-client.git#d75bd95d36fc81179c52777d682c86adf4766e6c",
       "dependencies": {
+        "@tradle/constants": {
+          "version": "2.1.0",
+          "from": "@tradle/constants@>=2.1.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-2.1.0.tgz"
+        },
         "pify": {
           "version": "3.0.0",
           "from": "pify@>=3.0.0 <4.0.0",
@@ -47,9 +52,9 @@
       "resolved": "git://github.com/tradle/biz-plugins.git#fdfa5a63798a92facf7d0912b5c451cb08aa807e"
     },
     "@tradle/build-resource": {
-      "version": "2.2.0",
-      "from": "@tradle/build-resource@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-2.2.0.tgz",
+      "version": "2.9.0",
+      "from": "@tradle/build-resource@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-2.9.0.tgz",
       "dependencies": {
         "@tradle/constants": {
           "version": "2.1.0",
@@ -60,7 +65,7 @@
     },
     "@tradle/cb-blockr": {
       "version": "3.2.1",
-      "from": "@tradle/cb-blockr@latest",
+      "from": "https://registry.npmjs.org/@tradle/cb-blockr/-/cb-blockr-3.2.1.tgz",
       "resolved": "https://registry.npmjs.org/@tradle/cb-blockr/-/cb-blockr-3.2.1.tgz"
     },
     "@tradle/constants": {
@@ -642,6 +647,11 @@
       "version": "1.0.14",
       "from": "mvayngrib/aws-iot-device-sdk-js",
       "resolved": "git://github.com/mvayngrib/aws-iot-device-sdk-js.git#044378984a64be959a61a4f4234ec623b6c58dbc"
+    },
+    "aws-sign-web": {
+      "version": "1.2.1",
+      "from": "mvayngrib/aws-sign-web",
+      "resolved": "git://github.com/mvayngrib/aws-sign-web.git#feb6e35c26ae4b8a01b98fd98742f49718f038ea"
     },
     "aws-sign2": {
       "version": "0.6.0",
@@ -2544,6 +2554,11 @@
       "version": "1.0.1",
       "from": "deep-equal@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/deep-equal/-/deep-equal-1.0.1.tgz"
+    },
+    "deep-extend": {
+      "version": "0.5.0",
+      "from": "deep-extend@>=0.5.0 <0.6.0",
+      "resolved": "https://registry.npmjs.org/deep-extend/-/deep-extend-0.5.0.tgz"
     },
     "deferred-leveldown": {
       "version": "1.2.1",
@@ -5469,11 +5484,6 @@
       "from": "reduce-component@1.0.1",
       "resolved": "https://registry.npmjs.org/reduce-component/-/reduce-component-1.0.1.tgz"
     },
-    "redux": {
-      "version": "3.7.2",
-      "from": "redux@>=3.4.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/redux/-/redux-3.7.2.tgz"
-    },
     "reduplexer": {
       "version": "1.1.0",
       "from": "reduplexer@>=1.1.0 <2.0.0",
@@ -5485,6 +5495,11 @@
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz"
         }
       }
+    },
+    "redux": {
+      "version": "3.7.2",
+      "from": "redux@>=3.4.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/redux/-/redux-3.7.2.tgz"
     },
     "reflux": {
       "version": "0.4.1",
@@ -6298,6 +6313,11 @@
       "from": "strip-indent@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/strip-indent/-/strip-indent-1.0.1.tgz"
     },
+    "strong-data-uri": {
+      "version": "1.0.4",
+      "from": "strong-data-uri@>=1.0.4 <2.0.0",
+      "resolved": "https://registry.npmjs.org/strong-data-uri/-/strong-data-uri-1.0.4.tgz"
+    },
     "sublevel-prefixer": {
       "version": "1.0.0",
       "from": "sublevel-prefixer@>=1.0.0 <2.0.0",
@@ -6470,6 +6490,11 @@
       "version": "1.0.1",
       "from": "trim-right@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/trim-right/-/trim-right-1.0.1.tgz"
+    },
+    "truncate": {
+      "version": "1.0.5",
+      "from": "truncate@>=1.0.2 <1.1.0",
+      "resolved": "https://registry.npmjs.org/truncate/-/truncate-1.0.5.tgz"
     },
     "tryor": {
       "version": "0.1.2",
