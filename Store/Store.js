@@ -614,6 +614,11 @@ var Store = Reflux.createStore({
 
     const payload = msg.object.object
     if (payload[TYPE] === MESSAGE) {
+      try {
+        const { link, permalink } = await meDriver.saveObject({ object: payload.object })
+      } catch (err) {
+        if (err.type !== 'exists') throw err
+      }
       let obj = msg.object
       obj.from = {[ROOT_HASH]: msg.objectinfo.author}
       obj.objectinfo = msg.objectinfo
