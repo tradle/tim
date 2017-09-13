@@ -28,7 +28,7 @@
   "dependencies": {
     "@tradle/aws-client": "github:tradle/aws-client",
     "@tradle/biz-plugins": "github:tradle/biz-plugins",
-    "@tradle/build-resource": "^2.2.0",
+    "@tradle/build-resource": "^2.9.0",
     "@tradle/cb-blockr": "^3.2.1",
     "@tradle/constants": "^1.3.0",
     "@tradle/custom-models": "github:tradle/custom-models",
