@@ -15,8 +15,10 @@ import ReactNative, {
 const gql = require('graphql-tag')
 const { ApolloClient, createNetworkInterface } = require('apollo-client')
 
-// const graphqlEndpoint = process.argv[2]  ||  'https://uhaylip7rh.execute-api.us-east-1.amazonaws.com/dev/tradle/graphql'
-const graphqlEndpoint = process.argv[2] || 'http://localhost:4000'
+const graphqlEndpoint = __DEV__
+  ? 'http://localhost:4000'
+  :'https://uhaylip7rh.execute-api.us-east-1.amazonaws.com/dev/tradle/graphql'
+
 const client = new ApolloClient({
   networkInterface: createNetworkInterface({
     uri: graphqlEndpoint
