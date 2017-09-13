@@ -1462,7 +1462,13 @@ var NewResourceMixin = {
       propName = propName.name
 
     let setItemCount
-    let prop = this.props.model.properties[propName]
+
+    var isItem = this.props.metadata != null
+    let model = this.props.model
+    if (!model  &&  isItem)
+      model = utils.getModel(this.props.metadata.items.ref).value
+
+    let prop = model.properties[propName]
     let isArray = prop.type === 'array' || (this.props.search  &&  prop.ref  &&  utils.getModel(prop.ref).value.subClassOf === ENUM)
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
