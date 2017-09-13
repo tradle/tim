@@ -43,6 +43,7 @@ const navBarHeight = Platform.select({
   android: 85,
   ios: 64
 })
+// LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
 
 const merged = extend({
   GCM_SENDER_ID: '633104277721',
