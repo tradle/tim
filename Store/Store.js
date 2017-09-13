@@ -163,6 +163,7 @@ const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const INTRODUCTION        = 'tradle.Introduction'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const CONTEXT             = 'tradle.Context'
 const PARTIAL             = 'tradle.Partial'
 const MY_PRODUCT          = 'tradle.MyProduct'
 const ENUM                = 'tradle.Enum'
@@ -244,7 +245,7 @@ const loadYuki = require('./yuki').loadOrCreate
 const Aviva = require('../utils/aviva')
 const monitorMissing = require('../utils/missing')
 const identityUtils = require('../utils/identity')
-import mcbuilder, { buildResourceStub } from '@tradle/build-resource'
+import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
 console.log(mcbuilder.buildResourceStub)
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
@@ -3843,6 +3844,7 @@ var Store = Reflux.createStore({
     let isGuestSessionProof = meta.id === GUEST_SESSION_PROOF
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
+    let isMessage = utils.isMessage(resource)
     let context = resource._context || value._context
     let isRemediation
     if (context) {
@@ -3854,6 +3856,7 @@ var Store = Reflux.createStore({
       if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
         resource.to = utils.clone(utils.getId(context.to) === utils.getId(me) ? context.from : context.to)
     }
+
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
     if (isGuestSessionProof) {
       resource[TYPE] = PRODUCT_APPLICATION
@@ -3914,7 +3917,6 @@ var Store = Reflux.createStore({
     }
     let results = []
     // let exclude = ['to', 'from']
-    let isMessage = utils.isMessage(resource)
     for (var p in resource) {
       if (!props[p] ||  props[p].type !== 'object')
         continue
@@ -4218,7 +4220,8 @@ var Store = Reflux.createStore({
       // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
       // and reset it after the real root hash will be known
       let isNew = returnVal[ROOT_HASH] == null
-      let isForm = self.getModel(returnVal[TYPE]).subClassOf === FORM
+      let rModel = self.getModel(returnVal[TYPE])
+      let isForm = rModel.subClassOf === FORM
       if (!isNew  &&  isForm) {
         let formId = utils.getId(returnVal)
         let prevRes = await self._keeper.get(returnVal[CUR_HASH])
@@ -4279,6 +4282,10 @@ var Store = Reflux.createStore({
         returnVal[CUR_HASH] = hash
 
         var returnValKey = utils.getId(returnVal)
+        if (!returnVal._context  &&  rModel.interfaces.indexOf(CONTEXT) !== -1) {
+          let {requestFor, product} = returnVal
+          returnVal._context = {id: returnValKey, title: product ? product : requestFor.id.split('_')[1]}
+        }
 
         self._setItem(returnValKey, returnVal)
         let org
@@ -5152,18 +5159,18 @@ var Store = Reflux.createStore({
           obj = obj.object
         if (obj.message  &&  !obj.message.length)
           delete obj.message
-        let props = utils.getModel(obj[TYPE]).value.properties
+        let props = this.getModel(obj[TYPE]).properties
         for (let p in obj) {
           if (!props[p])
             continue
           let ref = props[p].ref
           let refM
-          if (ref  &&  (refM = utils.getModel(ref).value).subClassOf === ENUM) {
+          if (ref  &&  (refM = this.getModel(ref)).subClassOf === ENUM) {
             let rr = obj[p]
             if (refM.enum) {
               refM.enum.forEach((r) => {
                 if (r.title === rr.title)
-                  rr.id = utils.makeId(refM.id, r.id)
+                  rr.id = enumValue({model: refM, value: r})
               })
             }
           }
@@ -5180,7 +5187,8 @@ var Store = Reflux.createStore({
       })
   },
   async getCurrentContext(to, orgId) {
-    let c = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
+    // let c = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
+    let c = await this.searchMessages({modelName: CONTEXT, to: to})
     if (!c  ||  !c.length)
       return
 
@@ -5189,8 +5197,14 @@ var Store = Reflux.createStore({
     if (talkingToCustomer) {
       // Use the context that was already started if such exists
       let contexts = c.filter((r) => !r._readOnly && r._formsCount)
-      let currentProduct = c[c.length - 1].product
-      contexts = c.filter((r) => !r._readOnly && r.product === currentProduct)
+
+      let lastContext = c[c.length - 1]
+      let currentProduct = utils.getProduct(lastContext)
+      contexts = c.filter((r) => {
+        if (r._readOnly)
+          return false
+        return (utils.getProduct(r) === currentProduct)
+      })
       return contexts.length ? contexts[0] : c[c.length - 1]
     }
     if (c.length === 1)
@@ -5208,7 +5222,6 @@ var Store = Reflux.createStore({
     })
     return contexts[0]
   },
-
   async searchServer(params) {
     let self = this
     let {modelName, filterResource, sortProperty, asc, limit, direction, first} = params
@@ -5500,7 +5513,7 @@ var Store = Reflux.createStore({
         // arr.push(p)
       }
       else {
-        let m = utils.getModel(ref).value
+        let m = this.getModel(ref)
         if (m.subClassOf === ENUM) {
           if (m.enum)
             arr.push(
@@ -6034,6 +6047,10 @@ var Store = Reflux.createStore({
     }
     else if (typeof lastId === 'undefined' || j) {
       for (let i=j; i>=0; i--) {
+        if (isAllMessages  &&  modelName !== MESSAGE) {
+          if (implementors.indexOf(this.getModel(utils.getType(thisChatMessages[i].id))) === -1)
+            continue
+        }
         addReferenceLink(thisChatMessages[i])
         if (limit  &&  links.length === limit)
           break
@@ -6348,7 +6365,7 @@ var Store = Reflux.createStore({
     }
     async function doFilterOut(r, toId, idx) {
       let m = self.getModel(r[TYPE])
-      if (m.id === PRODUCT_APPLICATION  &&  (r.product === REMEDIATION || !utils.getModel(r.product)))
+      if (m.id === PRODUCT_APPLICATION  &&  (r.product === REMEDIATION || !self.getModel(r.product)))
         return true
       // if (r._notSent)
       //   return true
@@ -8571,9 +8588,11 @@ var Store = Reflux.createStore({
       fromProfile = utils.makeId(PROFILE, obj.from[ROOT_HASH])
 
     var from = this._getItem(fromProfile)
+    let type = val[TYPE]
+    var model = this.getModel(type)
 
     if (!from) {
-      if (val[TYPE] !== SELF_INTRODUCTION)
+      if (type !== SELF_INTRODUCTION)
         return
       let name = val.name || (val.identity.name && val.identity.name.formatted)
       from = {
@@ -8588,11 +8607,15 @@ var Store = Reflux.createStore({
     var toId = obj.to.id || utils.makeId(PROFILE, obj.to[ROOT_HASH])
     var to = this._getItem(toId)
     var meId = utils.getId(me)
+    let contextId
+    if (obj.object  &&  obj.object.context) {
+      let r = await meDriver.objects.get({link: obj.object.context, body: false})
+      contextId = utils.makeId(r.type, obj.object.context)
+    }
     // HACK for showing verification in employee's chat
-
     let isThirdPartySentRequest
     // HACK for showing verification in employee's chat
-    if (val[TYPE] === VERIFICATION) {
+    if (type === VERIFICATION) {
       let document = this._getItem(utils.getId(val.document))
       if (!document) {
         // debugger
@@ -8600,12 +8623,8 @@ var Store = Reflux.createStore({
       }
 
       let context
-      if (obj.object.context) {
-        let paId = utils.makeId(PRODUCT_APPLICATION, obj.object.context)
-        let pa = this._getItem(paId)
-        if (pa)
-          context = this._getItem(pa)
-      }
+      if (contextId)
+        context = this._getItem(contextId)
       else if (document._context)
         context = this._getItem(document._context)
       // let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
@@ -8655,10 +8674,8 @@ var Store = Reflux.createStore({
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
     let isNew = val[ROOT_HASH] === val[CUR_HASH]
-    if (obj.object  &&  val[TYPE] !== PRODUCT_APPLICATION) {
-      let contextId = utils.makeId(PRODUCT_APPLICATION, obj.object.context)
+    if (contextId  &&  model.interfaces.indexOf(CONTEXT) === -1) {
       let context = this._getItem(contextId)
-
       // Avoid doubling the number of forms
       if (context) {
         isThirdPartySentRequest = utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
@@ -8669,9 +8686,10 @@ var Store = Reflux.createStore({
         val._context = this.buildRef(context)
       }
     }
-    else if (val[TYPE] === FORM_REQUEST  &&  isNew) {
+    else if (type === FORM_REQUEST  &&  isNew) {
       let product = val.product
-      let contexts = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: org})
+      // let contexts = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: org})
+      let contexts = await this.searchMessages({modelName: CONTEXT, to: org})
       if (contexts) {
         let i = contexts.length - 1
         for (; i>=0; i--)
@@ -8681,7 +8699,7 @@ var Store = Reflux.createStore({
           }
       }
     }
-    if (val[TYPE] === FORM_REQUEST) {
+    if (type === FORM_REQUEST) {
       let self = this
       ///=============== TEST VERIFIERS
       if (isNew) {
@@ -8729,8 +8747,8 @@ var Store = Reflux.createStore({
           }
         })
     }
-    var isProductList = val[TYPE] === PRODUCT_LIST
-    var isModelsPack = val[TYPE] === MODELS_PACK
+    var isProductList = type === PRODUCT_LIST
+    var isModelsPack = type === MODELS_PACK
     var pList = isProductList ? val.list : val.models
 
     var noTrigger
@@ -8819,7 +8837,7 @@ var Store = Reflux.createStore({
     }
     else
       noTrigger = val.from.id === meId
-    var isStylesPack = val[TYPE] === STYLES_PACK
+    var isStylesPack = type === STYLES_PACK
     if (isStylesPack) {
       org.style = utils.interpretStylesPack(val)
       this.dbBatchPut(utils.getId(org), org, batch)
@@ -8829,8 +8847,6 @@ var Store = Reflux.createStore({
     if (!val.time)
       val.time = obj.timestamp
 
-    let type = val[TYPE]
-    var model = this.getModel(type)
     let isVerification = type === VERIFICATION  || (model  && model.subClassOf === VERIFICATION)
     if (isVerification) {
       // debugger
@@ -8839,7 +8855,7 @@ var Store = Reflux.createStore({
     }
     if (!isProductList  &&  !isReadOnly) {
       let meId = utils.getId(to)
-      if (val[TYPE] === MY_EMPLOYEE_PASS) {
+      if (type === MY_EMPLOYEE_PASS) {
         to.isEmployee = true
         to.organization = this.buildRef(org)
         this.resetForEmployee(to, org)
@@ -8879,7 +8895,7 @@ var Store = Reflux.createStore({
     if (!noTrigger) {
       let context = val._context ? this._getItem(utils.getId(val._context)) : null
       if (isReadOnly) {
-        if (val[TYPE] === PRODUCT_APPLICATION)
+        if (type === PRODUCT_APPLICATION)
           this.addMessagesToChat(utils.getId(val), val)
         else if (val._context) {
           let cId = utils.getId(context)
@@ -8887,13 +8903,13 @@ var Store = Reflux.createStore({
             this.addMessagesToChat(cId, val)
 
           let changed = true
-          if (val[TYPE] === ASSIGN_RM)
+          if (type === ASSIGN_RM)
             context._assignedRM = val.employee
-          else if (val[TYPE] === APPLICATION_DENIAL)
+          else if (type === APPLICATION_DENIAL)
             context._denied = true
-          else if (val[TYPE] === APPLICATION_SUBMITTED)
+          else if (type === APPLICATION_SUBMITTED)
             context._appSubmitted = true
-          else if (val[TYPE] === CONFIRMATION)
+          else if (type === CONFIRMATION)
             context._approved = true
           else
             changed = false
