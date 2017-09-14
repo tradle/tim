@@ -1378,6 +1378,8 @@ var Store = Reflux.createStore({
       }
     }
     for (let id in chatMessages) {
+      if (id === ALL_MESSAGES)
+        continue
       var arr = chatMessages[id]
       arr.sort((a, b) => a.time - b.time)
       chatMessages[id] = this.filterChatMessages(arr, id)
@@ -1390,6 +1392,7 @@ var Store = Reflux.createStore({
     let productApp = {}
     let removeMsg = []
     let pl
+    let allMessages = chatMessages[ALL_MESSAGES]
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
       let r = this._getItem(messages[i].id)
@@ -1432,7 +1435,12 @@ var Store = Reflux.createStore({
         // let rid = messages[idx].id
         // batch.push({type: 'del', key: rid})
         // this._deleteItem(rid)
+        let msg = messages[idx]
         messages.splice(idx, 1)
+        for (let ii=0; ii<allMessages.length; ii++) {
+          if (allMessages[ii].id === msg.id)
+            allMessages.splice(ii, 1)
+        }
       }
       // db.batch(batch)
     }
@@ -1510,10 +1518,16 @@ var Store = Reflux.createStore({
     })
     if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
       let i=newResult.length - 1
-      for (; i>=0; i--)
+      for (; i>=0; i--) {
         if (newResult[i][TYPE] !== PRODUCT_LIST)
           break
-        newResult.splice(i, 1)
+      }
+      let msg = newResult[i]
+      newResult.splice(i, 1)
+      for (let ii=0; ii<allMessages.length; ii++) {
+        if (allMessages[ii].id === msg.id)
+          allMessages.splice(ii, 1)
+      }
     }
     return newResult
     // return newResult.reverse()
