@@ -19,7 +19,6 @@ import {
 } from 'react-native';
 
 import React, { Component, PropTypes } from 'react'
-import { makeResponsive } from 'react-native-orient'
 
 class MarkdownPropertyEdit extends Component {
   props: {
