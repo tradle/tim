@@ -26,7 +26,7 @@ var EnumList = require('./Components/EnumList')
 var GridList = require('./Components/GridList');
 var TimHome = require('./Components/TimHome');
 var MarkdownPropertyEdit = require('./Components/MarkdownPropertyEdit')
-
+var SignatureView = require('./Components/SignatureView')
 var AvivaIntroView = require('./Components/AvivaIntroView')
 
 // var HomePage = require('./Components/HomePage')
@@ -358,6 +358,12 @@ class TiMApp extends Component {
       Orientation.lockToPortrait()
     }
   }
+  _lockToLandscape() {
+    if (!this._lockedOrientation) {
+      this._lockedOrientation = true
+      Orientation.lockToLandscape()
+    }
+  }
 
   _unlockOrientation() {
     if (this._lockedOrientation) {
@@ -426,7 +432,10 @@ class TiMApp extends Component {
   renderScene(route, nav) {
     if (isPortraitOnlyRoute(route)) {
       this._lockToPortrait()
-    } else {
+    }
+    else if (isLandscapeOnlyRoute(route))
+      this._lockToLandscape()
+    else {
       this._unlockOrientation()
     }
 
@@ -536,6 +545,8 @@ class TiMApp extends Component {
       return <GridList navigator={nav} {...props} />
     case 31:
       return <MarkdownPropertyEdit navigator={nav} {...props} />
+    case 32:
+      return <SignatureView navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -849,6 +860,12 @@ AppRegistry.registerComponent('Tradle', function() { return TiMApp });
 function isPortraitOnlyRoute (route) {
   const orientation = route.component.orientation
   if (orientation && orientation.toLowerCase() === 'portrait') return true
+
+  return !utils.getMe() && route.id === NEW_RESOURCE
+}
+function isLandscapeOnlyRoute (route) {
+  const orientation = route.component.orientation
+  if (orientation && orientation.toLowerCase() === 'landscape') return true
 
   return !utils.getMe() && route.id === NEW_RESOURCE
 }

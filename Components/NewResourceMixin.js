@@ -8,6 +8,7 @@ var FloatLabel = require('react-native-floating-labels')
 import Icon from 'react-native-vector-icons/Ionicons';
 var utils = require('../utils/utils');
 var CameraView = require('./CameraView')
+var SignatureView = require('./SignatureView')
 var translate = utils.translate
 var moment = require('moment')
 var StyleSheet = require('../StyleSheet')
@@ -340,6 +341,17 @@ var NewResourceMixin = {
         }
         else if (type === 'string'  &&  props[p].markdown) {
           options.fields[p].template = this.myMarkdownTextInputTemplate.bind(this, {
+                    label: label,
+                    prop:  props[p],
+                    model: meta,
+                    value: data  &&  data[p] ? data[p] + '' : null,
+                    required: !maybe,
+                    errors: params.errors,
+                    editable: params.editable,
+                  })
+        }
+        else if (type === 'string'  &&  props[p].signature) {
+          options.fields[p].template = this.mySignatureTemplate.bind(this, {
                     label: label,
                     prop:  props[p],
                     model: meta,
@@ -813,6 +825,75 @@ var NewResourceMixin = {
       // titleTextColor: '#7AAAC3',
       id: 31,
       component: MarkdownPropertyEdit,
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        prop:           prop,
+        resource:       this.state.resource,
+        bankStyle:      this.props.bankStyle,
+        callback:       this.onChangeText.bind(this)
+      }
+    })
+  },
+
+  mySignatureTemplate(params) {
+    let {prop, required, model, editable, value} = params
+    var label = translate(prop, model)
+    if (required)
+      label += ' *'
+
+    let {bankStyle} = this.props
+    let hasValue = value  &&  value.length
+    if (hasValue) {
+      value = format(value, this.state.resource).trim()
+      hasValue = value  &&  value.length
+    }
+    let lcolor = hasValue ? '#555555' : this.getLabelAndBorderColor(prop.name)
+
+    let help = this.getHelp(prop)
+    let st = {paddingBottom: 10}
+    if (!help)
+      st.flex = 5
+    let title, sig
+    if (hasValue) {
+      let vStyle = { height: 100, justifyContent: 'space-between', margin: 10, borderBottomColor: '#cccccc', borderBottomWidth: 1}
+      let lStyle = [styles.labelStyle, { paddingBottom: 10, color: lcolor, fontSize: 12}]
+      title = utils.translate('Please click here to change signature')
+      let {width, height} = utils.dimensions(component)
+      let h = 70
+      let w
+      if (width > height)
+        w = (width * 70)/(height - 100)
+      else
+        w = (height * 70)/(width - 100)
+      sig = <View style={vStyle}>
+              <Text style={lStyle}>{translate(prop)}</Text>
+              <Image source={{uri: value}} style={{width: w, height: h}} />
+            </View>
+    }
+    else {
+      let vStyle = { height: 55, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10, borderBottomColor: '#cccccc', borderBottomWidth: 1}
+      let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
+      title = utils.translate('Please click here to sign')
+      sig = <View style={vStyle}>
+              <Text style={lStyle}>{title}</Text>
+              <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
+            </View>
+    }
+
+    return <View style={st}>
+             <TouchableOpacity onPress={this.showSignatureView.bind(this, prop)}>
+               {sig}
+             </TouchableOpacity>
+          </View>
+  },
+
+  showSignatureView(prop) {
+    this.props.navigator.push({
+      title: translate(prop), //m.title,
+      // titleTextColor: '#7AAAC3',
+      id: 32,
+      component: SignatureView,
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {

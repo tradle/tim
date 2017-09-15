@@ -229,7 +229,7 @@ var ResourceMixin = {
       )
     });
   },
-  renderSimpleProp(val, pMeta, modelName) {
+  renderSimpleProp(val, pMeta, modelName, component) {
     if (Array.isArray(val)) {
       if (pMeta.items.backlink)
         return <View  key={this.getNextKey()} />
@@ -287,6 +287,19 @@ var ResourceMixin = {
                 <Markdown markdownStyles={markdownStyles}>
                   {val}
                 </Markdown>
+              </View>
+      }
+      else if (pMeta.signature) {
+        let {width, height} = utils.dimensions(component)
+        let h = 70
+        let w
+        if (width > height)
+          w = (width * 70)/(height - 100)
+        else
+          w = (height * 70)/(width - 100)
+        w = Math.round(w)
+        val = <View style={styles.container}>
+                <Image style={{width: w, height: h}} source={{uri: val}}/>
               </View>
       }
       else
