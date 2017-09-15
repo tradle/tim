@@ -41,7 +41,7 @@
     "@tradle/protocol": "^3.0.0",
     "@tradle/qr-schema": "^1.1.0",
     "@tradle/restore": "github:tradle/restore",
-    "@tradle/validate-model": "github:tradle/validate-model",
+    "@tradle/validate-model": "^2.1.1",
     "@tradle/validate-resource": "^2.5.0",
     "@tradle/yuki": "^1.1.0",
     "any-promise": "1.3.0",
@@ -112,6 +112,7 @@
     "react-native-datepicker": "github:pgmemk/react-native-datepicker#ce456393",
     "react-native-device-info": "0.9.9",
     "react-native-ecc": "^1.4.0",
+    "react-native-exception-handler": "^2.2.0",
     "react-native-fabric": "^0.4.1",
     "react-native-fabric-crashlytics": "0.1.8",
     "react-native-firebase-analytics": "^2.0.0",
@@ -199,7 +200,6 @@
     "tls": false
   },
   "devDependencies": {
-    "@tradle/validate-model": "github:tradle/validate-model",
     "babel-eslint": "7.1.1",
     "babel-plugin-transform-async-functions": "^6.3.13",
     "babel-plugin-transform-object-rest-spread": "^6.3.13",
