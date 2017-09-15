@@ -245,6 +245,7 @@ const loadYuki = require('./yuki').loadOrCreate
 const Aviva = require('../utils/aviva')
 const monitorMissing = require('../utils/missing')
 const identityUtils = require('../utils/identity')
+const createNetworkAdapters = require('../utils/network-adapters')
 import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
 console.log(mcbuilder.buildResourceStub)
 // var tutils = require('@tradle/utils')
@@ -278,7 +279,6 @@ var meDriver
 var cursor = {}
 // var publishedIdentity
 var ready;
-var networkName = 'testnet'
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
 var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? [ENV.LOCAL_TRADLE_SERVER] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
@@ -456,11 +456,7 @@ var Store = Reflux.createStore({
     this.loadStaticData()
     // if (true) {
     if (false) {
-      await this.wipe()
-      Alert.alert('please refresh')
-      return Q.Promise(function (resolve) {
-        // hang
-      })
+      return await this.wipe()
     }
 
     await this.getReady()
@@ -729,6 +725,7 @@ var Store = Reflux.createStore({
     }
   },
   readseal(seal) {
+    debugger
     let self = this
     const link = seal.link
     meDriver.objects.get(link)
@@ -1042,7 +1039,7 @@ var Store = Reflux.createStore({
       max: 100
     })
 
-    var blockchain = new Blockchain(networkName)
+    const networkAdapters = createNetworkAdapters(ENV)
     const { wsClients, restoreMonitors, identifierProp } = driverInfo
 
     // var whitelist = driverInfo.whitelist
@@ -1053,13 +1050,12 @@ var Store = Reflux.createStore({
     //     console.log('tradle is at', addrs)
 
     meDriver = new tradle.node({
+      ...networkAdapters,
       name: 'me',
       dir: TIM_PATH_PREFIX,
       identity: identity,
       keys: keys,
       keeper: keeper,
-      networkName: networkName,
-      blockchain: blockchain,
       leveldown: leveldown,
       // dht: dht,
       // port: port,
@@ -1076,9 +1072,9 @@ var Store = Reflux.createStore({
     })
 
     // blockr.io has been shut down
-    meDriver.sealwatch.sync = function () {
-      // hang
-    }
+    // meDriver.sealwatch.sync = function () {
+    //   // hang
+    // }
 
     meDriver.setMaxListeners(0)
 
@@ -4778,6 +4774,7 @@ var Store = Reflux.createStore({
         )
       })
     })
+    .then(() => utils.restartApp())
   },
   onReloadDB() {
     var self = this
@@ -4785,11 +4782,6 @@ var Store = Reflux.createStore({
     var destroyTim = meDriver ? meDriver.destroy() : Q()
     return destroyTim
       .then(() => this.wipe())
-      .then(() => {
-        return utils.restartApp()
-        // Alert.alert('please refresh')
-        // return Q.Promise(function (resolve) {})
-      })
       // .then(function() {
       //   list = {};
       //   models = {};
@@ -7855,7 +7847,8 @@ var Store = Reflux.createStore({
   createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')
     // const globalSalt = crypto.randomBytes(32).toString('hex')
-    const genIdentity = identityUtils.generateIdentity({ networkName })
+    const genIdentity = identityUtils.generateIdentity()
+
     return Q.all([
       utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
       genIdentity
@@ -8307,7 +8300,11 @@ var Store = Reflux.createStore({
     let otherGuy = msg.author === meDriver.permalink ? msg.recipient : msg.author
     return meDriver.addressBook.lookupIdentity({ permalink: otherGuy })
       .then(identityInfo => {
-        const chainPubKey = tradleUtils.chainPubKey(identityInfo.object)
+        const chainPubKey = tradleUtils.chainPubKey(
+          identityInfo.object,
+          meDriver.network.blockchain
+        )
+
         return meDriver.watchSeal({
           link: link,
           basePubKey: chainPubKey

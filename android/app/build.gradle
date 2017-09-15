@@ -216,6 +216,9 @@ repositories {
 }
 
 dependencies {
+    compile project(':react-native-tcp')
+    compile project(':react-native-os')
+    compile project(':react-native-exception-handler')
     compile project(':react-native-branch')
     compile project(':react-native-firebase-analytics')
     compile 'com.google.android.gms:play-services-analytics:10.0.1'

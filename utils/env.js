@@ -51,6 +51,7 @@ const merged = extend({
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
   LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
+  // LOCAL_TRADLE_SERVER: 'https://7hixz15a6k.execute-api.us-east-1.amazonaws.com/dev/tradle/',
   pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   isAndroid: function () {
     return Platform.OS === 'android'
@@ -99,6 +100,10 @@ const merged = extend({
   splashContrastColor: 'tradle',
   brandBackground: 'tradle',
   delayBetweenExpensiveTasks: 100,
+  // blockchain start
+  blockchainName: 'ethereum',
+  networkName: 'ropsten',
+  // blockchain end
   appName: 'Tradle',
   navBarHeight: navBarHeight,
   timeZoneOffset: new Date().getTimezoneOffset() * 60 * 1000,

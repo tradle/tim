@@ -7,6 +7,9 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.peel.react.TcpSocketsModule;
+import com.peel.react.rnos.RNOSModule;
+import com.masteratul.exceptionhandler.ReactNativeExceptionHandlerPackage;
 import io.branch.rnbranch.RNBranchPackage;
 import io.branch.referral.Branch;
 import com.evollu.react.fa.FIRAnalyticsPackage;
@@ -54,6 +57,9 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+            new TcpSocketsModule(),
+            new RNOSModule(),
+            new ReactNativeExceptionHandlerPackage(),
             new RNBranchPackage(),
             new FIRAnalyticsPackage(),
             new SplashScreenReactPackage(),
