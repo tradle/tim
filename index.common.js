@@ -1,5 +1,6 @@
 'use strict'
 
+import './utils/errors'
 import SplashScreen from 'react-native-splash-screen'
 
 // import './utils/logAll'
