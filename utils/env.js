@@ -25,7 +25,7 @@ const DEV_PUSH_SERVER = 'https://push1.tradle.io' //`http://${LOCAL_IP}:48284`
 const PROD_PUSH_SERVER = 'https://push1-prod.tradle.io'
 
 const splash = {
-  tradle: require('../img/splash1536x2048.png'),
+  tradle: require('../img/splash-no-logo-1536x2048.png'),
   aviva: require('../img/Aviva.png')
 }
 

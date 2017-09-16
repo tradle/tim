@@ -29,6 +29,7 @@
 		736290B11EDE4614007E4DE1 /* CoreSpotlight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */; };
 		736290B31EDE4619007E4DE1 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 736290B21EDE4619007E4DE1 /* MobileCoreServices.framework */; };
 		736290B51EDE461F007E4DE1 /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 736290B41EDE461F007E4DE1 /* iAd.framework */; };
+		737669B11F6D625800B15C2A /* splash-no-logo-1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 737669B01F6D625800B15C2A /* splash-no-logo-1536x2048.png */; };
 		7379F7CF1EDA14030093535C /* splash1536x2048.png in Resources */ = {isa = PBXBuildFile; fileRef = 7379F7CE1EDA14030093535C /* splash1536x2048.png */; };
 		7379F8281EDA17E10093535C /* libRCTPushNotification.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7379F8061EDA17D90093535C /* libRCTPushNotification.a */; };
 		7379F84E1EDA19630093535C /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7379F84B1EDA19630093535C /* Launch Screen.storyboard */; };
@@ -455,6 +456,7 @@
 		736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreSpotlight.framework; path = System/Library/Frameworks/CoreSpotlight.framework; sourceTree = SDKROOT; };
 		736290B21EDE4619007E4DE1 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		736290B41EDE461F007E4DE1 /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
+		737669B01F6D625800B15C2A /* splash-no-logo-1536x2048.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "splash-no-logo-1536x2048.png"; path = "../img/splash-no-logo-1536x2048.png"; sourceTree = "<group>"; };
 		7379F7CE1EDA14030093535C /* splash1536x2048.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = splash1536x2048.png; path = ../img/splash1536x2048.png; sourceTree = "<group>"; };
 		7379F7F11EDA17D80093535C /* RCTPushNotification.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTPushNotification.xcodeproj; path = "../node_modules/react-native/Libraries/PushNotificationIOS/RCTPushNotification.xcodeproj"; sourceTree = "<group>"; };
 		7379F84B1EDA19630093535C /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Tradle/Launch Screen.storyboard"; sourceTree = "<group>"; };
@@ -621,6 +623,7 @@
 			children = (
 				73EC81B51EDA994A0051FA02 /* Firebase.h */,
 				7379F84B1EDA19630093535C /* Launch Screen.storyboard */,
+				737669B01F6D625800B15C2A /* splash-no-logo-1536x2048.png */,
 				7379F7CE1EDA14030093535C /* splash1536x2048.png */,
 				73F1D0901EDA10EE00D4AB5B /* debug.xcconfig */,
 				73F1D0911EDA10EE00D4AB5B /* GoogleService-Info.plist */,
@@ -1511,6 +1514,7 @@
 				73F1D0981EDA10EE00D4AB5B /* tradle.ttf in Resources */,
 				73F1D0961EDA10EE00D4AB5B /* GoogleService-Info.plist in Resources */,
 				8C736C6F8FA64018866A2A0C /* Ionicons.ttf in Resources */,
+				737669B11F6D625800B15C2A /* splash-no-logo-1536x2048.png in Resources */,
 				7379F7CF1EDA14030093535C /* splash1536x2048.png in Resources */,
 				73F1D0951EDA10EE00D4AB5B /* debug.xcconfig in Resources */,
 			);
