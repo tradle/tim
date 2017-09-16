@@ -277,7 +277,7 @@ class ShowPropertiesView extends Component {
                   </View>
           }
         }
-        val = this.renderSimpleProp(val, pMeta, modelName)
+        val = this.renderSimpleProp(val, pMeta, modelName, ShowPropertiesView)
       }
       var title
       if (!pMeta.skipLabel  &&  !isItems)

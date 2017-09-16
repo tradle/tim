@@ -27,7 +27,11 @@ async function load ({ node, db }) {
 
 async function create({ node, db }) {
   const { networkName } = node
-  const yukiInfo = await generateIdentity({ networkName })
+  const yukiInfo = await generateIdentity({
+    // yuki doesn't need blockchain keys
+    networks: {}
+  })
+
   AsyncStorage.setItem(YUKI_KEY, JSON.stringify({
     identity: yukiInfo.identity,
     keys: Keychain ? null : yukiInfo.keys.map(key => key.toJSON(true))

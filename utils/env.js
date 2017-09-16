@@ -47,6 +47,7 @@ const navBarHeight = Platform.select({
   ios: 64,
   web: browser.navBarHeight
 })
+// LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
 
 const merged = extend({
   GCM_SENDER_ID: '633104277721',
@@ -54,6 +55,7 @@ const merged = extend({
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
   LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
+  // LOCAL_TRADLE_SERVER: 'https://7hixz15a6k.execute-api.us-east-1.amazonaws.com/dev/tradle/',
   pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   isAndroid: function () {
     return Platform.OS === 'android'
@@ -101,6 +103,10 @@ const merged = extend({
   splashContrastColor: 'tradle',
   brandBackground: 'tradle',
   delayBetweenExpensiveTasks: 100,
+  // blockchain start
+  blockchainName: 'ethereum',
+  networkName: 'ropsten',
+  // blockchain end
   appName: 'Tradle',
   ie: {
     min: 11

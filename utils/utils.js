@@ -92,6 +92,7 @@ const MAX_WIDTH = 800
 
 const ENUM = 'tradle.Enum'
 const STYLES_PACK = 'tradle.StylesPack'
+const CONTEXT = 'tradle.Context'
 const MSG_LINK = '_msg'
 // var dictionaries = require('@tradle/models').dict
 var dictionary //= dictionaries[Strings.language]
@@ -487,6 +488,11 @@ var utils = {
     if (typeof r === 'string')
       return r.split('_')[0]
     return r[TYPE] || this.getId(r).split('_')[0]
+  },
+  getProduct(r) {
+    return r[TYPE] === PRODUCT_APPLICATION
+           ? r.product
+           : r.requestFor.id.split('_')[1]
   },
   getItemsMeta(metadata) {
     var props = metadata.properties;
@@ -897,12 +903,15 @@ var utils = {
       var exclude = ['from', 'to', 'time']
       let isVerification = m.id === VERIFICATION
       let isProductApplication = m.id === PRODUCT_APPLICATION
+      let isContext = m.subClassOf === CONTEXT
       let isFormRequest = m.id === FORM_REQUEST
       let isFormError = m.id === FORM_ERROR
       Object.keys(res).forEach(p => {
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
           return
         if (isProductApplication  &&  p === 'product')
+          return
+        if (isContext  &&  p === 'requestFor')
           return
         if (isFormRequest  &&  (p === 'product'  ||  p === 'form'))
           return

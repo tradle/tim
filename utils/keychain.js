@@ -21,7 +21,6 @@ if (!utils.isWeb()) {
 
 const debug = require('debug')('tradle:app:keychain')
 const ellipticCurves = {}
-const DEFAULT_KEY_SET = tradleUtils.defaultKeySet()
 
 if (__DEV__) {
   createKeychainNativeKey = utils.addCatchLogger('createKeychainNativeKey', createKeychainNativeKey)
@@ -31,16 +30,18 @@ if (__DEV__) {
 
 export const PASSWORD_ITEM_KEY = 'app-password'
 
-export function generateNewSet (opts = {}) {
+export function generateNewSet (opts={}) {
   typeforce({
-    networkName: 'String'
+    networks: 'Object'
   }, opts)
 
-  return Promise.all(DEFAULT_KEY_SET.map(function (keyProps) {
+  const { networks } = opts
+  const defaultKeySet = tradleUtils.defaultKeySet(networks)
+  return Promise.all(defaultKeySet.map(function (keyProps) {
     keyProps = { ...keyProps } // defensive copy
     const gen = isKeychainNative(keyProps)
       ? createKeychainNativeKey(keyProps)
-      : createKeychainResidentKey(keyProps, opts.networkName)
+      : createKeychainResidentKey(keyProps, networks)
 
     return gen.then(key => {
       key.set('purpose', keyProps.purpose)
@@ -117,10 +118,11 @@ async function lookupKeychainNativeKey (pubKey) {
   return nkeySE.fromJSON({ ...pubKey, ...key })
 }
 
-function createKeychainResidentKey (keyProps, networkName) {
+function createKeychainResidentKey (keyProps, networks) {
   keyProps = { ...keyProps }
-  if (keyProps.type === 'bitcoin') {
-    keyProps.networkName = networkName
+  const { type } = keyProps
+  if (type in networks) {
+    keyProps.networkName = networks[type]
   }
 
   const key = tradleUtils.genKey(keyProps)
