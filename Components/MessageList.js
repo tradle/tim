@@ -50,6 +50,7 @@ const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
+const CONTEXT = 'tradle.Context'
 
 var StyleSheet = require('../StyleSheet')
 
@@ -191,7 +192,13 @@ class MessageList extends Component {
         return
       }
       let rid = utils.getId(chatWith)
-      if (chatWith[TYPE] !== PROFILE) {
+      let rm = utils.getModel(chatWith[TYPE]).value
+      let isContext = rm.interfaces  &&  rm.interfaces.indexOf(CONTEXT) !== -1
+      if (isContext) {
+        if (!resource._context  ||  utils.getId(resource._context) !== utils.getId(chatWith))
+          return
+      }
+      else if (chatWith[TYPE] !== PROFILE) {
         let fid = resource.from.organization &&  utils.getId(resource.from.organization)
         let tid = resource.to.organization && utils.getId(resource.to.organization)
         if (rid !== fid  &&  rid !== tid  &&  !to)
