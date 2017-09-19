@@ -18,6 +18,7 @@ import ImageInput from './ImageInput'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 const DEFAULT_LINK_COLOR = '#2892C6'
 const TYPE = constants.TYPE
@@ -238,7 +239,8 @@ class FormErrorRow extends Component {
     var resource = this.props.resource;
     var model = utils.getModel(resource[TYPE] || resource.id).value;
 
-    let isReadOnlyChat = this.props.to[TYPE]  &&  utils.isReadOnlyChat(resource, this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
+    let context = to[TYPE]  &&  to[TYPE] === PRODUCT_APPLICATION ? to : resource._context
+    let isReadOnlyChat = context  &&  utils.isReadOnlyChat(resource, context) //this.props.context  &&  this.props.context._readOnly
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
