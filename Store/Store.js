@@ -3514,7 +3514,7 @@ var Store = Reflux.createStore({
 
     if (utils.isMessage(this.getModel(r[TYPE]))) {
       let kres = await this._keeper.get(r[CUR_HASH])
-      extend(res, kres.object)
+      extend(res, kres)
     }
 
     extend(res, r)
@@ -3548,8 +3548,10 @@ var Store = Reflux.createStore({
         resource[p] = result;
     }
     */
+// if (res[TYPE] === FORM_ERROR)
+//   debugger
     if (noTrigger)
-      return res
+      return
     let retParams = { resource: res, action: action || 'getItem'}
     if (utils.isMessage(resModel)) {
       let meId = utils.getId(me)
@@ -3969,15 +3971,15 @@ var Store = Reflux.createStore({
           foundRefs.push({value: elm, state: 'fulfilled'})
         else {
           try {
-            if (me.isEmployee  &&  utils.isReadOnlyChat(elm)) {
-              let kres = await this._getItemFromServer(utils.getId(elm))
-              elmFromServer = true
-              results.push(kres)
-            }
-            else {
+            // if (me.isEmployee  &&  utils.isReadOnlyChat(elm)) {
+            //   let kres = await this._getItemFromServer(utils.getId(elm))
+            //   elmFromServer = true
+            //   results.push(kres)
+            // }
+            // else {
               let kres = await this._keeper.get(elm[CUR_HASH])
               results.push(utils.clone(kres))
-            }
+            // }
           } catch (err) {
             debugger
           }
@@ -5002,12 +5004,13 @@ var Store = Reflux.createStore({
         let meId = utils.makeId(IDENTITY, me[ROOT_HASH])
         let meProfileId = utils.getId(utils.getMe())
 
-        let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
+        let assignedRM = await this.searchMessages({modelName: ASSIGN_RM})
         let rm = assignedRM && assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
         if (rm && rm.length) {
           result = result.filter((r) => !rm[utils.getId(r)])
           result = result.filter((r) => !(r[TYPE] === FORM_ERROR && utils.getId(r.from) !== meProfileId))
         }
+        result.forEach(r => this.addVisualProps(r))
         retParams.list = result
       }
       else {
@@ -8498,8 +8501,17 @@ var Store = Reflux.createStore({
         let shareables = await this.getShareableResources([val], val.to)
         this.trigger({action: 'addItem', resource: val, shareableResources: shareables})
       }
-      else
+      else {
+        if (val[TYPE] === FORM_ERROR  &&  val.prefill.id) {
+          let memPrefill = this._getItem(val.prefill)
+          let prefill = await this._keeper.get(memPrefill[CUR_HASH])
+          let p = {}
+          extend(p, memPrefill)
+          extend(p, prefill)
+          val.prefill = p
+        }
         this.trigger({action: 'addItem', resource: val})
+      }
     }
     else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
       var orgList = this.searchNotMessages({modelName: ORGANIZATION})
@@ -8736,6 +8748,8 @@ var Store = Reflux.createStore({
 
           val.verifiers.forEach((v) => {
             let serviceProvider = SERVICE_PROVIDERS.find((sp) => {
+              if (!sp.url)
+                return
               if (!utils.urlsEqual(sp.url, v.url)) return
               if (v.id) return v.id === sp.id
 
