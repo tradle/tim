@@ -154,7 +154,7 @@
     "@tradle/ethereum-adapter-etherscan": {
       "version": "1.0.0",
       "from": "tradle/ethereum-adapter-etherscan",
-      "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#96eaac78fe78948c1bf40ef7d6b1cb3cfd891aab"
+      "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#7f6b10539b53379b9ddc2671c65df329b1a8b587"
     },
     "@tradle/keeper": {
       "version": "3.1.0",

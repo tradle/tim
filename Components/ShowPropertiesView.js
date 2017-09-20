@@ -16,6 +16,10 @@ var CURRENCY_SYMBOL
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
+const BLOCKCHAIN_EXPLORERS = [
+  'https://rinkeby.etherscan.io/tx/0x$TXID',
+  'https://etherchain.org/tx/0x$TXID'
+]
 
 import ActionSheet from 'react-native-actionsheet'
 import Prompt from 'react-native-prompt'
@@ -347,12 +351,12 @@ class ShowPropertiesView extends Component {
       let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
       let txs = (
         <View>
-          <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
-            <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
-            <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
-          </TouchableOpacity>
+          {
+            BLOCKCHAIN_EXPLORERS.map((url, i) => {
+              url = url.replace('$TXID', resource.txId)
+              return this.getBlockchainExplorerRow(url, i)
+            })
+          }
         </View>
       )
 
@@ -395,6 +399,14 @@ class ShowPropertiesView extends Component {
       //               </View>)
     }
     return viewCols;
+  }
+  getBlockchainExplorerRow(url, i) {
+    const { bankStyle } = this.props
+    return (
+      <TouchableOpacity onPress={this.onPress.bind(this, url)} key={`url${i}`}>
+        <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' ' + (i+1)}</Text>
+      </TouchableOpacity>
+    )
   }
   onPress(url, event) {
     Linking.openURL(url)
