@@ -741,7 +741,9 @@ class NewResource extends Component {
     if (resource[constants.TYPE] === HAND_SIGNATURE) {
       let formList = resource.signatureFor.map((r) => (
           <TouchableOpacity onPress={() => this.showResource(r)} style={{padding: 10, borderBottomColor: '#eeeeee', borderBottomWidth: 1}} key={this.getNextKey()}>
-            <Text style={styles.forms}>{r.title ||  utils.makeModelTitle(r.id.split('_')[0])}</Text>
+          <View>
+            <Text style={styles.forms}>{utils.makeModelTitle(r.id.split('_')[0])}</Text>
+          </View>
           </TouchableOpacity>))
 
       formsToSign = <View>
