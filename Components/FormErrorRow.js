@@ -236,7 +236,7 @@ class FormErrorRow extends Component {
 
   }
   formatRow(isMyMessage, renderedRow) {
-    var resource = this.props.resource;
+    let {resource, to} = this.props
     var model = utils.getModel(resource[TYPE] || resource.id).value;
 
     let context = to[TYPE]  &&  to[TYPE] === PRODUCT_APPLICATION ? to : resource._context
