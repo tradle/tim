@@ -9,6 +9,7 @@ var GridList = require('./GridList')
 var GridItemsList = require('./GridItemsList')
 var PhotoView = require('./PhotoView');
 var ResourceView = require('./ResourceView');
+var MessageView = require('./MessageView')
 var ResourceMixin = require('./ResourceMixin');
 var PageView = require('./PageView')
 var t = require('tcomb-form-native');
@@ -37,6 +38,7 @@ const DEFAULT_LINK_COLOR = '#a94442'
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
 const SETTINGS = 'tradle.Settings'
+const HAND_SIGNATURE = 'tradle.HandSignature'
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -735,6 +737,18 @@ class NewResource extends Component {
                        <ActivityIndicator animating={true} size='large' color='#ffffff'/>
                     </View>
 
+    let formsToSign
+    if (resource[constants.TYPE] === HAND_SIGNATURE) {
+      let formList = resource.signatureFor.map((r) => (
+          <TouchableOpacity onPress={() => this.showResource(r)} style={{padding: 10, borderBottomColor: '#eeeeee', borderBottomWidth: 1}} key={this.getNextKey()}>
+            <Text style={styles.forms}>{r.title ||  utils.makeModelTitle(r.id.split('_')[0])}</Text>
+          </TouchableOpacity>))
+
+      formsToSign = <View>
+                      <Text style={{fontSize: 22, alignSelf: 'center', color: this.props.bankStyle.linkColor}}>Forms you are signing</Text>
+                      {formList}
+                    </View>
+    }
     var content =
       <ScrollView style={{backgroundColor: 'transparent', paddingTop:10}}
                   ref='scrollView' {...this.scrollviewProps}
@@ -751,6 +765,7 @@ class NewResource extends Component {
           }}>
           <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
+            {formsToSign}
             {button}
             <View style={{marginTop: isRegistration ? 0 : -10, paddingBottom: 20}}>
               {arrayItems}
@@ -815,6 +830,21 @@ class NewResource extends Component {
         </View>
       </View>
     )
+  }
+  showResource(r) {
+    this.props.navigator.push({
+      title: r.title,
+      id: 5,
+      backButtonTitle: 'Back',
+      component: MessageView,
+      passProps: {
+        bankStyle: this.props.bankStyle,
+        resource: r,
+        currency: this.props.resource.currency || this.props.currency,
+        country: this.props.resource.country,
+      }
+    })
+
   }
   showTermsAndConditions() {
     this.props.navigator.push({
@@ -1112,6 +1142,11 @@ var styles = StyleSheet.create({
     color: '#AAAAAA',
     // alignSelf: 'center',
     // paddingLeft: 10
+  },
+  forms: {
+    fontSize: 18,
+    color: '#757575',
+    padding: 10
   },
   itemsText: {
     fontSize: 20,
