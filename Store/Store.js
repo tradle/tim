@@ -4233,6 +4233,7 @@ var Store = Reflux.createStore({
           self.trigger(params);
           await self.onIdle()
           save(returnVal, true)
+          return
         } catch(err) {
           debugger
         }
