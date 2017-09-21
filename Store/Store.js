@@ -8963,10 +8963,10 @@ var Store = Reflux.createStore({
       }
       else
         this.addMessagesToChat(utils.getId(org ? org : from), val)
-
-      this.dbBatchPut(key, val, batch)
-      this.addVisualProps(val)
     }
+    this.dbBatchPut(key, val, batch)
+    this.addVisualProps(val)
+    // }
     return noTrigger
     function hasNoTrigger(orgId) {
       let messages = chatMessages[orgId]
