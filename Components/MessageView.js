@@ -27,6 +27,7 @@ const TYPE = constants.TYPE
 const ITEM = 'tradle.Item'
 // import Prompt from 'react-native-prompt'
 const VERIFICATION = constants.TYPES.VERIFICATION
+const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 
 import ActionSheet from './ActionSheet'
 
@@ -351,6 +352,7 @@ class MessageView extends Component {
                                  showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
                                  bankStyle={bankStyle}
+                                 onPageLayout={this.onPageLayout.bind(this)}
                                  showRefResource={this.getRefResource.bind(this)}
                                  defaultPropertyValues={this.props.defaultPropertyValues}
                                  checkProperties={checkProps} >
@@ -367,10 +369,6 @@ class MessageView extends Component {
             <Text style={styles.verification} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + this.props.verification.txId)}>{this.props.verification.txId}</Text>
           </View>
       separator = <View style={styles.separator}></View>
-    }
-    else {
-      verificationTxID = <View />
-      separator = <View />
     }
 
     let msg
@@ -391,14 +389,15 @@ class MessageView extends Component {
     let contentSeparator = utils.getContentSeparator(bankStyle)
     let bigPhoto
     if (mainPhoto)
-      bigPhoto = <View style={styles.photoBG}>
+      bigPhoto = <View style={styles.photoBG} ref='bigPhoto'>
                   <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
-                </View>
-
+                 </View>
 
     return (
       <PageView style={[platformStyles.container, {height: utils.dimensions().height - 80}]} separator={contentSeparator}>
-      <ScrollView  ref='this' keyboardShouldPersistTaps="always">
+      <ScrollView
+        ref='messageView'
+        keyboardShouldPersistTaps="always">
         {dateView}
         {bigPhoto}
         {actionPanel}
@@ -408,6 +407,16 @@ class MessageView extends Component {
         {actionSheet}
       </PageView>
     );
+  }
+  onPageLayout(height, scrollDistance) {
+    let scrollTo = height + scrollDistance - NAV_BAR_CONST
+    if (this.refs.bigPhoto) {
+      this.refs.bigPhoto.measure((x,y,w,h,pX,pY) => {
+        this.refs.messageView.scrollTo({y: scrollTo - h})
+      })
+    }
+    else
+      this.refs.messageView.scrollTo({y: scrollTo})
   }
   makeViewTitle(model) {
     let rTitle
