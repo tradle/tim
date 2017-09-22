@@ -8,10 +8,12 @@ import ReactNative, {
   Alert,
   NetInfo,
   Platform,
-  AppState
+  AppState,
+  InteractionManager
 } from 'react-native'
 
-
+const noop = () => {}
+const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 const gql = require('graphql-tag')
 const { ApolloClient, createNetworkInterface } = require('apollo-client')
 
@@ -23,12 +25,10 @@ const client = new ApolloClient({
   })
 })
 
-
 import Analytics from '../utils/analytics'
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
-import createPoliteQueue from '../utils/polite-queue.js'
 import createSemaphore from 'psem'
 var EventEmitter = require('events')
 const co = require('bluebird').coroutine
@@ -422,15 +422,6 @@ var Store = Reflux.createStore({
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
-    this._politeQueue = createPoliteQueue({
-      wait: async function () {
-        await self.onIdle()
-        // give UI a chance to stutter a bit
-        await utils.promiseDelay(ENV.delayBetweenExpensiveTasks || 0)
-      },
-      timeout: POLITE_TASK_TIMEOUT
-    })
-
     this._identityPromises = {}
 
     NetInfo.isConnected.addEventListener(
@@ -943,40 +934,6 @@ var Store = Reflux.createStore({
     this.trigger({ action: 'busy', activity: this.busyWith })
   },
 
-  idlifyExpensiveCalls() {
-    if (this._idlifiedExpensiveCalls) return
-
-    this._idlifiedExpensiveCalls = true
-    this.idlify({
-      overwrite: true,
-      context: meDriver,
-      methods: [
-        'createObject'
-      ]
-    })
-  },
-
-  idlify({ context, methods, overwrite, delay }) {
-    const idlified = overwrite ? context : {}
-    methods.forEach(method => {
-      idlified[method] = this.idlifyFunction({
-        fn: context[method].bind(context),
-        delay
-      })
-    })
-
-    return idlified
-  },
-
-  idlifyFunction({ fn, context, delay }) {
-    const self = this
-    return async function idlifiedFunction (...args) {
-      return self._politeQueue.push(() => {
-        return fn(...args)
-      })
-    }
-  },
-
   async buildDriver (...args) {
     this.setBusyWith('initializingEngine')
     const ret = await this._buildDriver(...args)
@@ -1080,7 +1037,6 @@ var Store = Reflux.createStore({
 
     debug('me: ' + meDriver.permalink)
     meDriver = tradleUtils.promisifyNode(meDriver)
-    this.idlifyExpensiveCalls()
 
     // TODO: figure out of we need to publish identities
     meDriver.identityPublishStatus = meDriver.identitySealStatus
@@ -1668,7 +1624,14 @@ var Store = Reflux.createStore({
     return await this.meDriverExec('signAndSend', sendParams)
   },
 
+  async meDriverReceive(...args) {
+    return await this.meDriverExec('receive', ...args)
+  },
+
   async meDriverExec(method, ...args) {
+    // give animations a chance to animate
+    await this.onIdle()
+
     const ret = await meDriver[method](...args)
     if (method === 'send' || method === 'signAndSend') {
       Analytics.sendEvent({
@@ -1780,12 +1743,6 @@ var Store = Reflux.createStore({
       wsClient = this.getWsClient(url)
       transport = this.getTransport(wsClient)
     }
-
-    // const receive = this.idlifyFunction({
-    //   fn: opts => this.receive({ ...opts, transport })
-    // })
-
-    // const receive = opts => this.receive({ ...opts, transport })
 
     wsClients.add({
       client: transport,
@@ -2091,7 +2048,7 @@ var Store = Reflux.createStore({
 
     meDriver.sender.resume(identifier)
     try {
-      await meDriver.receive(msg, { [identifierProp]: identifier })
+      await this.meDriverReceive(msg, { [identifierProp]: identifier })
     } catch (err) {
       if (err.type === 'unknownidentity') {
         if (isRetry) {
@@ -4295,7 +4252,18 @@ var Store = Reflux.createStore({
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       try {
-        let data = await meDriver.createObject({object: toChain})
+        let data
+        try {
+          if (toChain[SIG]) {
+            data = await meDriver.saveObject({object: toChain})
+          } else {
+            data = await meDriver.createObject({object: toChain})
+          }
+        } catch (err) {
+          debugger
+          if (err.type !== 'exists') throw err
+        }
+
         let hash = data.link
         if (isNew)
           returnVal[ROOT_HASH] = hash
@@ -8305,6 +8273,11 @@ var Store = Reflux.createStore({
           meDriver.network.blockchain
         )
 
+        if (!chainPubKey) {
+          debug(`chain key not found in identity, can't add watch for seal`)
+          return
+        }
+
         return meDriver.watchSeal({
           link: link,
           basePubKey: chainPubKey
@@ -10048,52 +10021,10 @@ var Store = Reflux.createStore({
           });
   },
 
-  onStartTransition() {
-    debug('transition start')
-    this._transitioning = true
-    if (ENV.pauseOnTransition) {
-      if (meDriver) meDriver.pause(2000)
-    }
-
-    // clearTimeout(this._transitionTimeout)
-    // this._transitionTimeout = setTimeout(() => {
-    //   this.onEndTransition()
-    // }, 2000)
-  },
-  onEndTransition() {
-    debug('transition end')
-    // clearTimeout(this._transitionTimeout)
-    // if (!this._transitioning) return
-
-    this._transitioning = false
-    if (ENV.pauseOnTransition) {
-      if (meDriver && me && me.isAuthenticated) {
-        meDriver.resume()
-      }
-    }
-
-    if (this._transitionCallbacks) {
-      // defensive copy
-      var cbs = this._transitionCallbacks.slice()
-      this._transitionCallbacks.length = 0
-      cbs.forEach((fn) => fn())
-    }
-  },
   async onIdle() {
-    if (utils.isWeb() || !this._transitioning) return
-
-    debug('deferring job till transition finishes')
-    if (!this._transitionCallbacks) {
-      this._transitionCallbacks = []
-    }
-
     const start = Date.now()
-    const waitForTransitionToEnd = new Promise(resolve => {
-      this._transitionCallbacks.push(resolve)
-    })
-
     await Q.race([
-      waitForTransitionToEnd,
+      promiseIdle(),
       // after 2 seconds, give up waiting
       utils.promiseDelay(2000)
     ])
