@@ -143,7 +143,7 @@ class GridList extends Component {
 
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
-    this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
+    this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 300//736
     LIMIT = 10 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
@@ -1248,8 +1248,12 @@ class GridList extends Component {
     // return !properties[dateProp]  ||  properties[dateProp].skipLabel || style
     //     ? <Text style={style} key={this.getNextKey()}>{val}</Text>
     //     : <View style={{flexDirection: 'row'}} key={this.getNextKey()}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
+    if (!style)
+      style = []
+    style.push({alignSelf: 'flex-end', paddingRight: 10})
     if (this.props.search  &&  this.state.resource  &&  this.state.resource[dateProp])
       style = [style, {fontWeight: '600'}]
+
     return <Text style={style} key={this.getNextKey(resource)}>{val}</Text>
   }
 
@@ -1346,10 +1350,12 @@ class GridList extends Component {
         style.push({fontWeight: '600'})
 
       let refM = utils.getModel(ref).value
-      if (ref === MONEY)
+      if (ref === MONEY) {
+        style.push({alignSelf: 'flex-end', paddingRight: 10})
         row = <Text style={style} key={this.getNextKey(resource)}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
+      }
       else if (ref === PHOTO)
-        row = <Image source={{uri: resource[v].url}} style={{width: 40, height: 40}} />
+        row = <Image source={{uri: resource[v].url}} style={styles.thumb} />
       else {
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{utils.getDisplayName(resource[v])}</Text>
         if (refM.isInterface || refM.id === FORM) {
@@ -1392,6 +1398,8 @@ class GridList extends Component {
     if (resource[v]  &&  (typeof resource[v] != 'string')) {
       if (criteria)
         style.push({fontWeight: '600'})
+      if (properties[v].type === 'number')
+        style.push({alignSelf: 'flex-end', paddingRight: 10})
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[v] + ''}</Text></View>
     }
     if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') === 0  ||  resource[v].indexOf('https://') === 0))
@@ -1473,20 +1481,26 @@ class GridList extends Component {
       let colStyle
       if (sortProperty  &&  sortProperty === p) {
         let asc = order[sortProperty]
-        colStyle = [styles.col, asc ? {borderTopWidth: 4, borderTopColor: '#7AAAC3'} : {borderBottomWidth: 4, borderBottomColor: '#7AAAC3'}]
+        colStyle = [styles.col, asc ? styles.sortAscending : styles.sortDescending]
       }
       else
         colStyle = styles.col
+      let prop = props[p]
+      let textStyle
+      if (prop.type === 'number' || prop.type === 'date' || prop.ref === MONEY)
+        textStyle = {alignSelf: 'flex-end', paddingRight: 10}
+      else
+        textStyle = {}
       return <Col sm={smCol} md={1} lg={1} style={colStyle} key={p + cnt}>
         <TouchableOpacity onPress={() => this.sort(p)}>
-          <Text style={styles.cell}>
+          <Text style={[styles.cell, textStyle]}>
             {props[p].title.toUpperCase()}
           </Text>
         </TouchableOpacity>
       </Col>
     })
 
-    return <View style={{backgroundColor: '#f7f7f7'}} key='Datagrid_h1'>
+    return <View style={styles.gridHeader} key='Datagrid_h1'>
             <Row size={size} style={styles.headerRow} key='Datagrid_h2' nowrap>
               {cols}
             </Row>
@@ -1589,7 +1603,7 @@ class GridList extends Component {
             </View>
           </TouchableOpacity>
         </View>
-        <View style={{padding: 10, backgroundColor: 'transparent'}}>
+        <View style={styles.testProvidersContainer}>
           <Text style={styles.testProvidersDescription}>{sandboxDesc}</Text>
         </View>
       </View>
@@ -1884,116 +1898,115 @@ class GridList extends Component {
     Actions.addItem({resource: resource})
   }
   renderHeader() {
-    return
-    // if (!this.props.officialAccounts  &&  !this.props.search)
-    //   return
-    // let sharedContext
-    // let partial
-    // let bookmarks
-    // let conversations
-    // let search
-    // let testProviders
-    // let isSearch = this.props.search
-    // let isOrg = !isSearch  &&  this.props.modelName === ORGANIZATION
-    // let isProfile = !isSearch  &&  this.props.modelName === PROFILE
-    // if (!isOrg  &&  !isProfile  &&  !isSearch)
-    //   return
-    // if (isOrg) {
-    //   if (!this.state.hasTestProviders  ||  this.props.isTest)
-    //     return <View/>
-    // }
-    // if (isProfile) {
-    //   search = <View style={{padding: 5, backgroundColor: '#f7f7f7'}}>
-    //       <TouchableOpacity onPress={this.showSearch.bind(this)}>
-    //         <View style={styles.row}>
-    //           <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-    //           <View style={styles.textContainer}>
-    //             <Text style={styles.resourceTitle}>{translate('Explore data')}</Text>
-    //           </View>
-    //         </View>
-    //       </TouchableOpacity>
-    //     </View>
-    //   // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
-    //   conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
-    //       <TouchableOpacity onPress={this.showBanks.bind(this)}>
-    //         <View style={styles.row}>
-    //           <ConversationsIcon />
-    //           <View style={styles.textContainer}>
-    //             <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
-    //           </View>
-    //         </View>
-    //       </TouchableOpacity>
-    //     </View>
+    if (/*!this.props.officialAccounts  && */ !this.props.search)
+      return
+    let sharedContext
+    let partial
+    let bookmarks
+    let conversations
+    let search
+    let testProviders
+    let isSearch = this.props.search
+    let isOrg = !isSearch  &&  this.props.modelName === ORGANIZATION
+    let isProfile = !isSearch  &&  this.props.modelName === PROFILE
+    if (!isOrg  &&  !isProfile  &&  !isSearch)
+      return
+    if (isOrg) {
+      if (!this.state.hasTestProviders  ||  this.props.isTest)
+        return <View/>
+    }
+    if (isProfile) {
+      // search = <View style={{padding: 5, backgroundColor: '#f7f7f7'}}>
+      //     <TouchableOpacity onPress={this.showSearch.bind(this)}>
+      //       <View style={styles.row}>
+      //         <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+      //         <View style={styles.textContainer}>
+      //           <Text style={styles.resourceTitle}>{translate('Explore data')}</Text>
+      //         </View>
+      //       </View>
+      //     </TouchableOpacity>
+      //   </View>
+      // // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+      // conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+      //     <TouchableOpacity onPress={this.showBanks.bind(this)}>
+      //       <View style={styles.row}>
+      //         <ConversationsIcon />
+      //         <View style={styles.textContainer}>
+      //           <Text style={styles.resourceTitle}>{translate('officialAccounts')}</Text>
+      //         </View>
+      //       </View>
+      //     </TouchableOpacity>
+      //   </View>
 
-    //   if (this.state.hasPartials)
-    //     partial = (
-    //       <View>
-    //         <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
-    //           <TouchableOpacity onPress={this.showPartials.bind(this)}>
-    //             <View style={styles.row}>
-    //               <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-    //               <View style={styles.textContainer}>
-    //                 <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
-    //               </View>
-    //             </View>
-    //           </TouchableOpacity>
-    //         </View>
-    //         <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
-    //           <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
-    //             <View style={styles.row}>
-    //               <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-    //               <View style={styles.textContainer}>
-    //                 <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
-    //               </View>
-    //             </View>
-    //           </TouchableOpacity>
-    //         </View>
-    //       </View>
-    //   )
-    //   if (this.state.hasBookmarks) {
-    //     bookmarks = (
-    //         <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
-    //           <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
-    //             <View style={styles.row}>
-    //               <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-    //               <View style={styles.textContainer}>
-    //                 <Text style={styles.resourceTitle}>{translate('Bookmarks')}</Text>
-    //               </View>
-    //             </View>
-    //           </TouchableOpacity>
-    //         </View>
-    //       )
-    //   }
-    //   if (this.state.sharedContextCount)
-    //     sharedContext = (
-    //       <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
-    //         <TouchableOpacity onPress={this.showContexts.bind(this)}>
-    //           <View style={styles.row}>
-    //             <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-    //             <View style={styles.textContainer}>
-    //               <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
-    //             </View>
-    //             <View style={styles.sharedContext}>
-    //               <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
-    //             </View>
-    //           </View>
-    //         </TouchableOpacity>
-    //       </View>
-    //     )
-    // }
-    // else {
-    //   if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION)
-    //     return this.renderGridHeader()
-    // }
-    // return  (
-    //   <View>
-    //     {conversations}
-    //     {bookmarks}
-    //     {sharedContext}
-    //     {partial}
-    //     {testProviders}
-    //   </View>
-    // )
+      // if (this.state.hasPartials)
+      //   partial = (
+      //     <View>
+      //       <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
+      //         <TouchableOpacity onPress={this.showPartials.bind(this)}>
+      //           <View style={styles.row}>
+      //             <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+      //             <View style={styles.textContainer}>
+      //               <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
+      //             </View>
+      //           </View>
+      //         </TouchableOpacity>
+      //       </View>
+      //       <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+      //         <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
+      //           <View style={styles.row}>
+      //             <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+      //             <View style={styles.textContainer}>
+      //               <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
+      //             </View>
+      //           </View>
+      //         </TouchableOpacity>
+      //       </View>
+      //     </View>
+      // )
+      // if (this.state.hasBookmarks) {
+      //   bookmarks = (
+      //       <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+      //         <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
+      //           <View style={styles.row}>
+      //             <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+      //             <View style={styles.textContainer}>
+      //               <Text style={styles.resourceTitle}>{translate('Bookmarks')}</Text>
+      //             </View>
+      //           </View>
+      //         </TouchableOpacity>
+      //       </View>
+      //     )
+      // }
+      // if (this.state.sharedContextCount)
+      //   sharedContext = (
+      //     <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+      //       <TouchableOpacity onPress={this.showContexts.bind(this)}>
+      //         <View style={styles.row}>
+      //           <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+      //           <View style={styles.textContainer}>
+      //             <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
+      //           </View>
+      //           <View style={styles.sharedContext}>
+      //             <Text style={styles.sharedContextText}>{this.state.sharedContextCount}</Text>
+      //           </View>
+      //         </View>
+      //       </TouchableOpacity>
+      //     </View>
+      //   )
+    }
+    else {
+      if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION)
+        return this.renderGridHeader()
+    }
+    return  (
+      <View>
+        {conversations}
+        {bookmarks}
+        {sharedContext}
+        {partial}
+        {testProviders}
+      </View>
+    )
   }
   // showSearch() {
   //   this.props.navigator.push({
@@ -2175,6 +2188,10 @@ var styles = StyleSheet.create({
     fontSize: 16,
     color: '#757575'
   },
+  testProvidersContainer: {
+    padding: 10,
+    backgroundColor: 'transparent'
+  },
   col: {
     paddingVertical: 5,
     // paddingLeft: 7
@@ -2207,6 +2224,21 @@ var styles = StyleSheet.create({
     paddingVertical: 5,
     paddingRight: 7,
     borderBottomWidth: 1
+  },
+  sortAscending:  {
+    borderTopWidth: 4,
+    borderTopColor: '#7AAAC3'
+  },
+  sortDescending: {
+    borderBottomWidth: 4,
+    borderBottomColor: '#7AAAC3'
+  },
+  thumb: {
+    width: 40,
+    height: 40
+  },
+  gridHeader: {
+    backgroundColor: '#f7f7f7'
   }
 });
 
