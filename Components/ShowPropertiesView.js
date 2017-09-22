@@ -332,7 +332,7 @@ class ShowPropertiesView extends Component {
              </View>
              );
     });
-    // resource.txId = 'oqiuroiuouodifugidfgodigu'
+    resource.txId = 'oqiuroiuouodifugidfgodigu'
     if (resource.txId) { // || utils.isSealableModel(model)) {
       let bankStyle = this.props.bankStyle
 
@@ -367,8 +367,8 @@ class ShowPropertiesView extends Component {
       let row = <Accordion
                   sections={['txId']}
                   onPress={() => {
-                    let width = self.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
-                      if (h)
+                    self.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
+                      if (h  &&  y > pY)
                         this.props.onPageLayout(pY, h)
                     })
                   }}
