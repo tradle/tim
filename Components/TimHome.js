@@ -895,7 +895,7 @@ class TimHome extends Component {
 
     var version = !__DEV__ && this.renderVersion()
     var dev = __DEV__
-            ? <View style={styles.dev}>
+            ? <View style={styles.dev} testID='welcome'>
                 <TouchableOpacity
                     underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
                   <Text style={styles.text}>

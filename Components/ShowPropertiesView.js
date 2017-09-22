@@ -332,7 +332,8 @@ class ShowPropertiesView extends Component {
              </View>
              );
     });
-    resource.txId = 'oqiuroiuouodifugidfgodigu'
+    // if (!resource.txId)
+    //   resource.txId = 'oqiuroiuouodifugidfgodigu'
     if (resource.txId) { // || utils.isSealableModel(model)) {
       let bankStyle = this.props.bankStyle
 
