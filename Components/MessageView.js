@@ -412,7 +412,7 @@ class MessageView extends Component {
     let scrollTo = height + scrollDistance - NAV_BAR_CONST
     if (this.refs.bigPhoto) {
       this.refs.bigPhoto.measure((x,y,w,h,pX,pY) => {
-        this.refs.messageView.scrollTo({y: scrollTo - h})
+        this.refs.messageView.scrollTo({y: scrollTo - h, animated: true})
       })
     }
     else
