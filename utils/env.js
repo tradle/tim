@@ -73,7 +73,6 @@ const merged = extend({
   showMyQRCode: false,
   homePage: true,
   useKeychain: true,
-  pauseOnTransition: true,
   profileTitle: 'profile',
   homePageScanQRCodePrompt: false,
   // auth settings
@@ -102,7 +101,7 @@ const merged = extend({
   delayBetweenExpensiveTasks: 100,
   // blockchain start
   blockchainName: 'ethereum',
-  networkName: 'ropsten',
+  networkName: 'rinkeby',
   // blockchain end
   appName: 'Tradle',
   navBarHeight: navBarHeight,
