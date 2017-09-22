@@ -3872,6 +3872,8 @@ var Store = Reflux.createStore({
       let savedContext = this._getItem(context)
       if (savedContext) //  &&  me.isEmployee)
         context = savedContext
+      if (!context)
+        debugger
       isRemediation = context.product === REMEDIATION
       let toId = utils.getId(resource.to)
       if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
@@ -5279,7 +5281,7 @@ var Store = Reflux.createStore({
           if (val.indexOf('*') === -1)
             op.EQ += `\n   ${p}: "${val}",`
           else if (len > 1) {
-            if (val.charAt(0) !== '*')
+            if (val.charAt(0) === '*')
               op.STARTS_WITH = `\n   ${p}: "${val.substring(1)}",`
             else if (val.charAt(len - 1) === '*')
               op.CONTAINS = `\n   ${p}: "${val.substring(1, len - 1)}",`
@@ -5317,7 +5319,8 @@ var Store = Reflux.createStore({
             if (props[p].ref === MONEY) {
               let {value, currency} = val
               op.EQ += `\n  ${p}__currency: "${currency}",`
-              addEqualsOrGreaterOrLesserNumber(value, op, props[p])
+              if (val.value)
+                addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
             else {
               op.EQ += `\n   ${p}: {
