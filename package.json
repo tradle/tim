@@ -226,8 +226,7 @@
     "webpack-merge": "^0.14.1",
     "webpack-split-by-path": "^0.1.0",
     "webpack-validator": "^2.2.8",
-    "webpack-visualizer-plugin": "0.1.11",
-    "whatwg-fetch": "^1.0.0"
+    "webpack-visualizer-plugin": "0.1.11"
   },
   "browser": {
     "@tradle/qr-schema": false,

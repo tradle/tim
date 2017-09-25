@@ -104,11 +104,7 @@ const merged = extend({
   delayBetweenExpensiveTasks: 100,
   // blockchain start
   blockchainName: 'ethereum',
-<<<<<<< HEAD
-  networkName: 'ropsten',
-=======
   networkName: 'rinkeby',
->>>>>>> origin/eth
   // blockchain end
   appName: 'Tradle',
   ie: {
