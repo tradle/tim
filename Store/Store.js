@@ -608,6 +608,12 @@ var Store = Reflux.createStore({
 
     const payload = msg.object.object
     if (payload[TYPE] === MESSAGE) {
+      try {
+        const { link, permalink } = await meDriver.saveObject({ object: payload.object })
+      } catch (err) {
+        if (err.type !== 'exists') throw err
+      }
+
       let obj = msg.object
       obj.from = {[ROOT_HASH]: msg.objectinfo.author}
       obj.objectinfo = msg.objectinfo
@@ -618,8 +624,10 @@ var Store = Reflux.createStore({
 
         let rtype
         let t = obj.parsed.data[TYPE]
-        if (t === PRODUCT_APPLICATION)
+        if (t === PRODUCT_APPLICATION) {
+          debug('received', t, protocol.linkString(obj.parsed.data))
           rtype = obj.parsed.data.product
+        }
         else if (t === FORM_REQUEST)
           rtype = obj.parsed.data.form
         else
@@ -1375,6 +1383,8 @@ var Store = Reflux.createStore({
       }
     }
     for (let id in chatMessages) {
+      if (id === ALL_MESSAGES)
+        continue
       var arr = chatMessages[id]
       arr.sort((a, b) => a.time - b.time)
       chatMessages[id] = this.filterChatMessages(arr, id)
@@ -1387,6 +1397,7 @@ var Store = Reflux.createStore({
     let productApp = {}
     let removeMsg = []
     let pl
+    let allMessages = chatMessages[ALL_MESSAGES]
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
       let r = this._getItem(messages[i].id)
@@ -1429,7 +1440,12 @@ var Store = Reflux.createStore({
         // let rid = messages[idx].id
         // batch.push({type: 'del', key: rid})
         // this._deleteItem(rid)
+        let msg = messages[idx]
         messages.splice(idx, 1)
+        for (let ii=0; ii<allMessages.length; ii++) {
+          if (allMessages[ii].id === msg.id)
+            allMessages.splice(ii, 1)
+        }
       }
       // db.batch(batch)
     }
@@ -1507,10 +1523,16 @@ var Store = Reflux.createStore({
     })
     if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
       let i=newResult.length - 1
-      for (; i>=0; i--)
+      for (; i>=0; i--) {
         if (newResult[i][TYPE] !== PRODUCT_LIST)
           break
-        newResult.splice(i, 1)
+      }
+      let msg = newResult[i]
+      newResult.splice(i, 1)
+      for (let ii=0; ii<allMessages.length; ii++) {
+        if (allMessages[ii].id === msg.id)
+          allMessages.splice(ii, 1)
+      }
     }
     return newResult
     // return newResult.reverse()
@@ -3508,7 +3530,8 @@ var Store = Reflux.createStore({
     }
     */
     if (noTrigger)
-      return res
+      return
+
     let retParams = { resource: res, action: action || 'getItem'}
     if (utils.isMessage(resModel)) {
       let meId = utils.getId(me)
@@ -3927,15 +3950,15 @@ var Store = Reflux.createStore({
           foundRefs.push({value: elm, state: 'fulfilled'})
         else {
           try {
-            if (me.isEmployee  &&  utils.isReadOnlyChat(elm)) {
-              let kres = await this._getItemFromServer(utils.getId(elm))
-              elmFromServer = true
-              results.push(kres)
-            }
-            else {
+            // if (me.isEmployee  &&  utils.isReadOnlyChat(elm)) {
+            //   let kres = await this._getItemFromServer(utils.getId(elm))
+            //   elmFromServer = true
+            //   results.push(kres)
+            // }
+            // else {
               let kres = await this._keeper.get(elm[CUR_HASH])
               results.push(utils.clone(kres))
-            }
+            // }
           } catch (err) {
             debugger
           }
@@ -4992,12 +5015,13 @@ var Store = Reflux.createStore({
         let meId = utils.makeId(IDENTITY, me[ROOT_HASH])
         let meProfileId = utils.getId(utils.getMe())
 
-        let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
+        let assignedRM = await this.searchMessages({modelName: ASSIGN_RM})
         let rm = assignedRM && assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
         if (rm && rm.length) {
           result = result.filter((r) => !rm[utils.getId(r)])
           result = result.filter((r) => !(r[TYPE] === FORM_ERROR && utils.getId(r.from) !== meProfileId))
         }
+        result.forEach(r => this.addVisualProps(r))
         retParams.list = result
       }
       else {
@@ -6091,6 +6115,7 @@ var Store = Reflux.createStore({
           r.document = refsObj[utils.getId(r.document)]
         else if (r[TYPE] === FORM_ERROR)
           r.prefill = refsObj[utils.getId(r.prefill)]
+        this.addVisualProps(r)
       })
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a.time - b.time)
@@ -6724,14 +6749,12 @@ var Store = Reflux.createStore({
     })
     download(JSON.stringify(result, null, 2), 'datadump.json', 'application/json')
   },
-  onGetAllSharedContexts() {
-    Q.all([this._loadedResourcesDefer])
-    .then(() => {
-      let list = this.getAllSharedContexts()
-      if (!list)
-        return
-      this.trigger({action: 'allSharedContexts', count: list.length, list: list})
-    })
+  async onGetAllSharedContexts() {
+    await Q.all([this._loadedResourcesDefer])
+    let list = await this.getAllSharedContexts()
+    if (!list)
+      return
+    this.trigger({action: 'allSharedContexts', count: list.length, list: list})
   },
 
   inContext(r, context) {
@@ -8691,7 +8714,7 @@ var Store = Reflux.createStore({
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
     let isNew = val[ROOT_HASH] === val[CUR_HASH]
-    if (obj.object  &&  val[TYPE] !== PRODUCT_APPLICATION) {
+    if (obj.object.context  &&  val[TYPE] !== PRODUCT_APPLICATION) {
       let contextId = utils.makeId(PRODUCT_APPLICATION, obj.object.context)
       let context = this._getItem(contextId)
 
@@ -9499,13 +9522,22 @@ var Store = Reflux.createStore({
     if (!list  ||  !list.length)
       return
     let l = list.filter((r) => {
-      return utils.isReadOnlyChat(r)
+      let isReadOnly = utils.isReadOnlyChat(r)
+      if (isReadOnly)
+        this.addVisualProps(r)
+      return isReadOnly
     })
+    let promises = []
     for (let i=0; i<l.length; i++) {
       let r = l[i]
-      let forms = await this.searchMessages({modelName: MESSAGE, to: r})
+      promises.push(this.searchMessages({modelName: MESSAGE, to: r}))
+      // let forms = await this.searchMessages({modelName: MESSAGE, to: r})
+    }
+    let pa = await Q.all(promises)
+    pa.forEach((forms, i) => {
+      let r = l[i]
       if (!forms  ||  r._approved)
-        continue
+        return
       let result = forms.map((rr) => {
         if (rr[TYPE] === APPLICATION_SUBMITTED) {
           r._appSubmitted = true
@@ -9516,7 +9548,7 @@ var Store = Reflux.createStore({
           this.dbPut(utils.getId(r), r)
         }
       })
-    }
+    })
     l.sort((a, b) => b._sentTime - a._sentTime)
     return l
   },
