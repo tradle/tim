@@ -248,7 +248,7 @@ var RowMixin = {
       return
     let ftype = isFormRequest
               ? resource.form
-              : resource.prefill[constants.TYPE]
+              : utils.getType(resource.prefill)
     const model = utils.getModel(ftype).value
     const props = model.properties
     let eCols = []

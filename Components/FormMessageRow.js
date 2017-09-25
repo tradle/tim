@@ -29,7 +29,8 @@ import {
   Text,
   TouchableHighlight,
   Navigator,
-  View
+  View,
+  Image
 } from 'react-native'
 
 import React, { Component } from 'react'
@@ -281,6 +282,24 @@ class FormMessageRow extends Component {
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         onPressCall = self.onPress.bind(self);
         vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
+      }
+      if (resource[v]  &&  properties[v].signature) {
+        let {width, height} = utils.dimensions(FormMessageRow)
+        let h = 70
+        let w
+        if (width > height)
+          w = (width * 70)/(height - 100)
+        else
+          w = (height * 70)/(width - 100)
+        w = Math.round(w)
+        vCols.push(<View style={{flexDirection: 'row'}} key={self.getNextKey()}>
+                      <View style={[styles.column, {flex: 1}]}>
+                        <Text style={[styles.descriptionG]}>{properties[v].title}</Text>
+                      </View>
+                      <View style={[styles.column, {paddingLeft: 3, flex: 3}]}>
+                       <Image style={{width: w, height: h}} source={{uri: resource[v]}}/>
+                     </View>
+                   </View>)
       }
       else if (!model.autoCreate) {
         let val

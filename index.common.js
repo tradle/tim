@@ -20,7 +20,7 @@ var perfDebug = Debug('perf')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
 import './utils/shim'
-import './utils/crypto'
+// import './utils/crypto'
 import 'stream'
 import debounce from 'debounce'
 // require('./timmy')

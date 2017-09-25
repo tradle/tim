@@ -8,10 +8,12 @@ import ReactNative, {
   Alert,
   NetInfo,
   Platform,
-  AppState
+  AppState,
+  InteractionManager
 } from 'react-native'
 
-
+const noop = () => {}
+const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 const gql = require('graphql-tag')
 const { ApolloClient, createNetworkInterface } = require('apollo-client')
 
@@ -25,12 +27,10 @@ const client = new ApolloClient({
   })
 })
 
-
 import Analytics from '../utils/analytics'
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
-import createPoliteQueue from '../utils/polite-queue.js'
 import createSemaphore from 'psem'
 var EventEmitter = require('events')
 const co = require('bluebird').coroutine
@@ -411,15 +411,6 @@ var Store = Reflux.createStore({
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
-    this._politeQueue = createPoliteQueue({
-      wait: async function () {
-        await self.onIdle()
-        // give UI a chance to stutter a bit
-        await utils.promiseDelay(ENV.delayBetweenExpensiveTasks || 0)
-      },
-      timeout: POLITE_TASK_TIMEOUT
-    })
-
     this._identityPromises = {}
 
     NetInfo.isConnected.addEventListener(
@@ -940,40 +931,6 @@ var Store = Reflux.createStore({
     this.trigger({ action: 'busy', activity: this.busyWith })
   },
 
-  idlifyExpensiveCalls() {
-    if (this._idlifiedExpensiveCalls) return
-
-    this._idlifiedExpensiveCalls = true
-    this.idlify({
-      overwrite: true,
-      context: meDriver,
-      methods: [
-        'createObject'
-      ]
-    })
-  },
-
-  idlify({ context, methods, overwrite, delay }) {
-    const idlified = overwrite ? context : {}
-    methods.forEach(method => {
-      idlified[method] = this.idlifyFunction({
-        fn: context[method].bind(context),
-        delay
-      })
-    })
-
-    return idlified
-  },
-
-  idlifyFunction({ fn, context, delay }) {
-    const self = this
-    return async function idlifiedFunction (...args) {
-      return self._politeQueue.push(() => {
-        return fn(...args)
-      })
-    }
-  },
-
   async buildDriver (...args) {
     this.setBusyWith('initializingEngine')
     const ret = await this._buildDriver(...args)
@@ -1078,9 +1035,6 @@ var Store = Reflux.createStore({
     console.log('me: ' + meDriver.permalink)
     utils.setGlobal('TRADLE_USER_PERMALINK', meDriver.permalink)
     meDriver = tradleUtils.promisifyNode(meDriver)
-    if (Platform.OS !== 'web') {
-      this.idlifyExpensiveCalls()
-    }
 
     // TODO: figure out of we need to publish identities
     meDriver.identityPublishStatus = meDriver.identitySealStatus
@@ -1673,7 +1627,14 @@ var Store = Reflux.createStore({
     return await this.meDriverExec('signAndSend', sendParams)
   },
 
+  async meDriverReceive(...args) {
+    return await this.meDriverExec('receive', ...args)
+  },
+
   async meDriverExec(method, ...args) {
+    // give animations a chance to animate
+    await this.onIdle()
+
     const ret = await meDriver[method](...args)
     if (method === 'send' || method === 'signAndSend') {
       Analytics.sendEvent({
@@ -1785,12 +1746,6 @@ var Store = Reflux.createStore({
       wsClient = this.getWsClient(url)
       transport = this.getTransport(wsClient)
     }
-
-    // const receive = this.idlifyFunction({
-    //   fn: opts => this.receive({ ...opts, transport })
-    // })
-
-    // const receive = opts => this.receive({ ...opts, transport })
 
     wsClients.add({
       client: transport,
@@ -2096,7 +2051,7 @@ var Store = Reflux.createStore({
 
     meDriver.sender.resume(identifier)
     try {
-      await meDriver.receive(msg, { [identifierProp]: identifier })
+      await this.meDriverReceive(msg, { [identifierProp]: identifier })
     } catch (err) {
       if (err.type === 'unknownidentity') {
         if (isRetry) {
@@ -3491,7 +3446,7 @@ var Store = Reflux.createStore({
 
     if (utils.isMessage(this.getModel(r[TYPE]))) {
       let kres = await this._keeper.get(r[CUR_HASH])
-      extend(res, kres.object)
+      extend(res, kres)
     }
 
     extend(res, r)
@@ -3525,8 +3480,10 @@ var Store = Reflux.createStore({
         resource[p] = result;
     }
     */
+// if (res[TYPE] === FORM_ERROR)
+//   debugger
     if (noTrigger)
-      return res
+      return
     let retParams = { resource: res, action: action || 'getItem'}
     if (utils.isMessage(resModel)) {
       let meId = utils.getId(me)
@@ -3847,6 +3804,8 @@ var Store = Reflux.createStore({
       let savedContext = this._getItem(context)
       if (savedContext) //  &&  me.isEmployee)
         context = savedContext
+      if (!context)
+        debugger
       isRemediation = context.product === REMEDIATION
       let toId = utils.getId(resource.to)
       if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
@@ -3946,15 +3905,15 @@ var Store = Reflux.createStore({
           foundRefs.push({value: elm, state: 'fulfilled'})
         else {
           try {
-            if (me.isEmployee  &&  utils.isReadOnlyChat(elm)) {
-              let kres = await this._getItemFromServer(utils.getId(elm))
-              elmFromServer = true
-              results.push(kres)
-            }
-            else {
+            // if (me.isEmployee  &&  utils.isReadOnlyChat(elm)) {
+            //   let kres = await this._getItemFromServer(utils.getId(elm))
+            //   elmFromServer = true
+            //   results.push(kres)
+            // }
+            // else {
               let kres = await this._keeper.get(elm[CUR_HASH])
               results.push(utils.clone(kres))
-            }
+            // }
           } catch (err) {
             debugger
           }
@@ -4210,6 +4169,7 @@ var Store = Reflux.createStore({
           self.trigger(params);
           await self.onIdle()
           save(returnVal, true)
+          return
         } catch(err) {
           debugger
         }
@@ -4273,7 +4233,18 @@ var Store = Reflux.createStore({
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       try {
-        let data = await meDriver.createObject({object: toChain})
+        let data
+        try {
+          if (toChain[SIG]) {
+            data = await meDriver.saveObject({object: toChain})
+          } else {
+            data = await meDriver.createObject({object: toChain})
+          }
+        } catch (err) {
+          debugger
+          if (err.type !== 'exists') throw err
+        }
+
         let hash = data.link
         if (isNew)
           returnVal[ROOT_HASH] = hash
@@ -5022,12 +4993,13 @@ var Store = Reflux.createStore({
         let meId = utils.makeId(IDENTITY, me[ROOT_HASH])
         let meProfileId = utils.getId(utils.getMe())
 
-        let assignedRM = this.searchNotMessages({modelName: ASSIGN_RM})
+        let assignedRM = await this.searchMessages({modelName: ASSIGN_RM})
         let rm = assignedRM && assignedRM.filter((r) => utils.getId(r.application) === cId  &&  meId === utils.getId(r.employee))
         if (rm && rm.length) {
           result = result.filter((r) => !rm[utils.getId(r)])
           result = result.filter((r) => !(r[TYPE] === FORM_ERROR && utils.getId(r.from) !== meProfileId))
         }
+        result.forEach(r => this.addVisualProps(r))
         retParams.list = result
       }
       else {
@@ -5295,7 +5267,7 @@ var Store = Reflux.createStore({
           if (val.indexOf('*') === -1)
             op.EQ += `\n   ${p}: "${val}",`
           else if (len > 1) {
-            if (val.charAt(0) !== '*')
+            if (val.charAt(0) === '*')
               op.STARTS_WITH = `\n   ${p}: "${val.substring(1)}",`
             else if (val.charAt(len - 1) === '*')
               op.CONTAINS = `\n   ${p}: "${val.substring(1, len - 1)}",`
@@ -5333,7 +5305,8 @@ var Store = Reflux.createStore({
             if (props[p].ref === MONEY) {
               let {value, currency} = val
               op.EQ += `\n  ${p}__currency: "${currency}",`
-              addEqualsOrGreaterOrLesserNumber(value, op, props[p])
+              if (val.value)
+                addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
             else {
               op.EQ += `\n   ${p}: {
@@ -8344,6 +8317,11 @@ var Store = Reflux.createStore({
           meDriver.network.blockchain
         )
 
+        if (!chainPubKey) {
+          debug(`chain key not found in identity, can't add watch for seal`)
+          return
+        }
+
         return meDriver.watchSeal({
           link: link,
           basePubKey: chainPubKey
@@ -8541,8 +8519,17 @@ var Store = Reflux.createStore({
         let shareables = await this.getShareableResources([val], val.to)
         this.trigger({action: 'addItem', resource: val, shareableResources: shareables})
       }
-      else
+      else {
+        if (val[TYPE] === FORM_ERROR  &&  val.prefill.id) {
+          let memPrefill = this._getItem(val.prefill)
+          let prefill = await this._keeper.get(memPrefill[CUR_HASH])
+          let p = {}
+          extend(p, memPrefill)
+          extend(p, prefill)
+          val.prefill = p
+        }
         this.trigger({action: 'addItem', resource: val})
+      }
     }
     else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
       var orgList = this.searchNotMessages({modelName: ORGANIZATION})
@@ -8781,6 +8768,8 @@ var Store = Reflux.createStore({
 
           val.verifiers.forEach((v) => {
             let serviceProvider = SERVICE_PROVIDERS.find((sp) => {
+              if (!sp.url)
+                return
               if (!utils.urlsEqual(sp.url, v.url)) return
               if (v.id) return v.id === sp.id
 
@@ -9000,10 +8989,10 @@ var Store = Reflux.createStore({
       }
       else
         this.addMessagesToChat(utils.getId(org ? org : from), val)
-
-      this.dbBatchPut(key, val, batch)
-      this.addVisualProps(val)
     }
+    this.dbBatchPut(key, val, batch)
+    this.addVisualProps(val)
+    // }
     return noTrigger
     function hasNoTrigger(orgId) {
       let messages = chatMessages[orgId]
@@ -10084,52 +10073,10 @@ var Store = Reflux.createStore({
           });
   },
 
-  onStartTransition() {
-    debug('transition start')
-    this._transitioning = true
-    if (ENV.pauseOnTransition) {
-      if (meDriver) meDriver.pause(2000)
-    }
-
-    // clearTimeout(this._transitionTimeout)
-    // this._transitionTimeout = setTimeout(() => {
-    //   this.onEndTransition()
-    // }, 2000)
-  },
-  onEndTransition() {
-    debug('transition end')
-    // clearTimeout(this._transitionTimeout)
-    // if (!this._transitioning) return
-
-    this._transitioning = false
-    if (ENV.pauseOnTransition) {
-      if (meDriver && me && me.isAuthenticated) {
-        meDriver.resume()
-      }
-    }
-
-    if (this._transitionCallbacks) {
-      // defensive copy
-      var cbs = this._transitionCallbacks.slice()
-      this._transitionCallbacks.length = 0
-      cbs.forEach((fn) => fn())
-    }
-  },
   async onIdle() {
-    if (utils.isWeb() || !this._transitioning) return
-
-    debug('deferring job till transition finishes')
-    if (!this._transitionCallbacks) {
-      this._transitionCallbacks = []
-    }
-
     const start = Date.now()
-    const waitForTransitionToEnd = new Promise(resolve => {
-      this._transitionCallbacks.push(resolve)
-    })
-
     await Q.race([
-      waitForTransitionToEnd,
+      promiseIdle(),
       // after 2 seconds, give up waiting
       utils.promiseDelay(2000)
     ])
