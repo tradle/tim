@@ -91,7 +91,7 @@ class PhotoView extends Component {
     //             }
 
     let image = {
-      width: width,
+      width: utils.getContentWidth(PhotoView) + 2,
       height: height/ 4,
       // alignSelf: 'stretch'
     }
@@ -108,11 +108,15 @@ class PhotoView extends Component {
  //          }}
     let photoView
     if (coverPhoto) {
+      // let cpHeight = coverPhoto.height * width / coverPhoto.width
+
       let coverPhotoUri = coverPhoto.url
       var coverPhotoSource = coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0
                ? {uri: coverPhotoUri, isStatic: true}
                : {uri: coverPhotoUri}
       var title = utils.getDisplayName(this.props.resource)
+              // <Image resizeMode='cover' source={coverPhotoSource} style={{width: width, height: cpHeight}}>
+
       let fontSize = title.length < 15 ? 30 : 24
       photoView = (
         <Image resizeMode='cover' source={coverPhotoSource} style={image}>
@@ -122,8 +126,9 @@ class PhotoView extends Component {
         </Image>
       )
     }
-    else
+    else {
       photoView = <Image resizeMode='cover' source={source} style={image} />
+    }
 
     return (
           <View>
