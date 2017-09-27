@@ -186,7 +186,7 @@
   },
   "tradle.OtherCollaterals": {
     "_t": "tradle.OtherCollaterals",
-    "insuranceCompany": "Achmea",
+    "insuranceCompany": "Insurer X",
     "statusOfInsurance": {
       "id": "tradle.StatusOfInsurance_a17cfd28e656a0a02713122409134ac32a5bf8d9",
       "title": "Existing Insurance"
@@ -276,7 +276,7 @@
     "startMortgageDate": "4/12/2016",
     "commercialProduct": {
       "id": "tradle.CommercialProduct_10989b6af5f7317fd251384714b904f74a8f0e26",
-      "title": "Obvion"
+      "title": "Mortgage"
     },
     "mortgageGuarantee": {
       "id": "tradle.MortgageGuarantee_0a351c343e0bf74ba4c21c18e79d8e6f7a6e6b1b",
