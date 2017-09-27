@@ -68,8 +68,6 @@ const client = new ApolloClient({
   })
 })
 
-var AddressBook = require('NativeModules').AddressBook;
-
 const tradle = require('@tradle/engine')
 var myCustomIndexes
 // build indexes to enable searching by subClassOf
@@ -7921,6 +7919,7 @@ var Store = Reflux.createStore({
   loadAddressBook() {
     return // method not used currently
 
+    // var AddressBook = require('NativeModules').AddressBook
     var self = this;
     return Q.ninvoke(AddressBook, 'checkPermission')
     .then(function(permission) {
