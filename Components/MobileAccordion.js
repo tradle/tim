@@ -9,7 +9,7 @@ class MobileAccordion extends Component {
   //   super(props)
   // }
   render() {
-    return <Accordion sections={this.props.sections} renderHeader={() => this.props.header} renderContent={() => this.props.content} easing={this.props.easing} underlayColor={this.props.underlayColor} />
+    return <Accordion onChange={this.props.onPress} sections={this.props.sections} renderHeader={() => this.props.header} renderContent={() => this.props.content} easing={this.props.easing} underlayColor={this.props.underlayColor} />
   }
 }
 module.exports = MobileAccordion;

@@ -7,20 +7,19 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 var StyleSheet = require('../StyleSheet')
 import platformStyles from '../styles/platform'
-var Markdown = require('./Markdown')
-var format = require('string-template')
 
 import {
   Platform,
   View,
   Text,
-  TextInput,
   ScrollView,
 } from 'react-native';
 
 import React, { Component, PropTypes } from 'react'
+// import { makeResponsive } from 'react-native-orient'
+var SignaturePad = require('react-native-signature-pad')
 
-class MarkdownPropertyEdit extends Component {
+class SignatureView extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
@@ -55,52 +54,22 @@ class MarkdownPropertyEdit extends Component {
   }
   render() {
     let {bankStyle, resource} = this.props
-    const markdownStyles = {
-      heading1: {
-        fontSize: 24,
-        color: 'purple',
-      },
-      link: {
-        color: this.props.bankStyle.linkColor,
-        textDecorationLine: 'none'
-      },
-      mailTo: {
-        color: 'orange',
-      },
-      text: {
-        color: '#757575',
-        fontStyle: 'italic'
-      },
-    }
-    let {value} = this.state
-    let markdown
-    if (value && value.length)
-      markdown = <View style={[styles.container, {backgroundColor: value.length ? '#f7f7f7' : 'transparent', paddingBottom: 5 }]}>
-                  <Markdown markdownStyles={markdownStyles}>
-                    {format(value, this.props.resource)}
-                  </Markdown>
-                </View>
-    let width = utils.dimensions(MarkdownPropertyEdit).width
+    let {width, height} = utils.dimensions(SignatureView)
     return (
       <PageView style={platformStyles.container}>
-        <ScrollView  ref='this' style={{alignSelf: 'center'}}>
-          <TextInput
-            style={{borderBottomColor: '#eeeeee', width: width,  borderBottomWidth: 1, height: 300, fontSize: 16, paddingHorizontal: 10 }}
-            ref='textInput'
-            onChangeText={this.onChangeText.bind(this)}
-            value={value}
-            underlineColorAndroid={this.props.underlineColorAndroid}
-            multiline={true}
-            numberOfLines={10}
-          />
-          {markdown}
-        </ScrollView>
+        <View style={{flex: 1}}>
+        <Text style={{fontSize: 24, padding: 10, alignSelf: 'center', color: '#aaaaaa'}}>Please sign here</Text>
+          <SignaturePad onError={this._signaturePadError}
+                        lockToLandscape={true}
+                        onChange={this.onChangeText.bind(this)}
+                        style={{flex: 1, backgroundColor: 'white'}}/>
+        </View>
       </PageView>
     )
   }
-  onChangeText(value) {
+  onChangeText({base64DataUrl}) {
     // let val = format(value, this.props.resource)
-    this.setState({value: value})
+    this.setState({value: base64DataUrl})
   }
 }
 
@@ -110,5 +79,5 @@ var styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
 })
-
-module.exports = MarkdownPropertyEdit;
+SignatureView.orientation = 'LANDSCAPE'
+module.exports = SignatureView;

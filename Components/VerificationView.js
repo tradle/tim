@@ -230,7 +230,7 @@ class VerificationView extends Component {
       if (!isRef) {
         // isItems = Array.isArray(val)
         if (pMeta.range !== 'json')
-          val = this.renderSimpleProp(val, pMeta, modelName)
+          val = this.renderSimpleProp(val, pMeta, modelName, VerificationView)
       }
       var title = pMeta.skipLabel  ||  isItems
                 ? <View />

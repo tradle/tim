@@ -50,8 +50,8 @@ class ChatContext extends Component {
     let isReadOnlyChat = utils.isReadOnlyChat(context)
     let bankStyle = this.props.bankStyle
     let isShareContext = chat[constants.TYPE] === PRODUCT_APPLICATION && isReadOnlyChat
-
-    let content = <Text style={[{color: this.props.allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(m.value)}</Text>
+    let product = utils.getProduct(context)
+    let content = <Text style={[{color: this.props.allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product).value)}</Text>
     let chooser = context  &&  isShareContext
                 ? <View style={styles.contextBar}>{content}</View>
                 : <TouchableOpacity onPress={this.props.contextChooser} style={styles.contextBar}>
