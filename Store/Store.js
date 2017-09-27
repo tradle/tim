@@ -17,16 +17,6 @@ const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 const gql = require('graphql-tag')
 const { ApolloClient, createNetworkInterface } = require('apollo-client')
 
-const graphqlEndpoint = __DEV__
-  ? 'http://localhost:4000'
-  :'https://uhaylip7rh.execute-api.us-east-1.amazonaws.com/dev/tradle/graphql'
-
-const client = new ApolloClient({
-  networkInterface: createNetworkInterface({
-    uri: graphqlEndpoint
-  })
-})
-
 import Analytics from '../utils/analytics'
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
@@ -70,7 +60,15 @@ Q.onerror = function (err) {
   throw err
 }
 
-var ENV = require('../utils/env')
+const ENV = require('../utils/env')
+const graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+const client = new ApolloClient({
+  networkInterface: createNetworkInterface({
+    uri: graphqlEndpoint
+  })
+})
+
+var AddressBook = require('NativeModules').AddressBook;
 
 const tradle = require('@tradle/engine')
 var myCustomIndexes
@@ -716,7 +714,6 @@ var Store = Reflux.createStore({
     }
   },
   readseal(seal) {
-    debugger
     let self = this
     const link = seal.link
     meDriver.objects.get(link)
@@ -1110,6 +1107,10 @@ var Store = Reflux.createStore({
       trySend(msg, recipientInfo, function (err, result) {
         clearInterval(monitor)
         cb(err, result)
+      })
+      .catch(function (err) {
+        console.log('developer error', err.stack)
+        cb(err)
       })
     }
 
@@ -1718,6 +1719,8 @@ var Store = Reflux.createStore({
       identifier: counterparty,
       path: provider.id
     })
+
+    meDriver.sender.resume(counterparty)
   }),
 
   addProvider(provider) {
@@ -2287,9 +2290,9 @@ var Store = Reflux.createStore({
         .filter(r => r.state === 'fulfilled')
         .map(r => r.value)
     })
-    .catch((err) => {
-      debugger
-    })
+    // .catch((err) => {
+    //   debugger
+    // })
   },
   parseProvider(sp, params, providerIds, newProviders) {
     if (!params)

@@ -907,6 +907,8 @@ var utils = {
       let isFormRequest = m.id === FORM_REQUEST
       let isFormError = m.id === FORM_ERROR
       Object.keys(res).forEach(p => {
+        if (p === 'txId')
+          return
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
           return
         if (isProductApplication  &&  p === 'product')
