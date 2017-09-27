@@ -203,13 +203,13 @@ class MessageRow extends Component {
       if (message) {
         if (/*message.charAt(0) === '['  || */ longMessage)
           viewStyle.maxWidth = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
-      }
-      if (!isSimpleMessage  &&  model.id !== PRODUCT_LIST) {
-        let msgW = message.length * utils.getFontSize(18) + 40
-        // if (msgW > msgWidth)
-          viewStyle.maxWidth =  msgW > msgWidth ? msgWidth : msgW
-      }
 
+        if (!isSimpleMessage  &&  model.id !== PRODUCT_LIST) {
+          let msgW = message.length * utils.getFontSize(18) + 40
+          // if (msgW > msgWidth)
+            viewStyle.maxWidth =  msgW > msgWidth ? msgWidth : msgW
+        }
+      }
 
       sendStatus = this.getSendStatus()
       var sealedStatus = (resource.txId)
