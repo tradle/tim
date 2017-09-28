@@ -23,10 +23,10 @@ var NetworkInfoProvider = require('./NetworkInfoProvider')
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
 const PHOTO = 'tradle.Photo'
-const TYPE = constants.TYPE
+const { TYPE } = constants
 const ITEM = 'tradle.Item'
 // import Prompt from 'react-native-prompt'
-const VERIFICATION = constants.TYPES.VERIFICATION
+const { VERIFICATION, ENUM, MONEY } = constants.TYPES
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 
 import ActionSheet from './ActionSheet'
@@ -73,8 +73,30 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    if (!this.props.isReview  &&  this.props.resource.id)
-      Actions.getItem({resource: this.props.resource, search: this.props.search})
+    let {resource, isReview, search} = this.props
+    if (isReview)
+      return
+    if (resource.id) {
+      Actions.getItem({resource: resource, search: search})
+      return
+    }
+    let m = utils.getModel(resource[TYPE]).value
+    let vCols = m.viewCols
+    if (!vCols)
+      return
+    let props = m.properties
+    let runGetItem
+    vCols.forEach((col) => {
+      if (!resource[col])
+        return
+      let ref = props[col].ref
+      if (ref  &&  ref !== MONEY  &&  utils.getModel(ref).value.subClassOf !== ENUM) {
+        if (resource[col].id)
+          runGetItem = true
+      }
+    })
+    if (runGetItem)
+      Actions.getItem({resource: resource, search: search})
   }
 
   componentDidMount() {
