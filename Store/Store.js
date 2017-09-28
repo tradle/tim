@@ -1374,12 +1374,21 @@ var Store = Reflux.createStore({
         }
       }
       // leave only the last PL
-      if (r[TYPE] === PRODUCT_LIST) {
-        if (!pl)
-          pl = i
-        else
-          removeMsg.push(i)
+      if (r[TYPE] === FORM_REQUEST) {
+        let m = this.getModel(r.form)
+        if (m.interfaces.indexOf(CONTEXT) !== -1) {
+          if (!pl)
+            pl = i
+          else
+            removeMsg.push(i)
+        }
       }
+      // if (r[TYPE] === PRODUCT_LIST) {
+      //   if (!pl)
+      //     pl = i
+      //   else
+      //     removeMsg.push(i)
+      // }
     }
     if (removeMsg.length) {
       // let batch = []
@@ -3132,16 +3141,26 @@ var Store = Reflux.createStore({
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
       if (!isInit) {
-        if (r[TYPE] === PRODUCT_LIST) {
+        if (r[TYPE] === FORM_REQUEST  &&  this.getModel(r.form).interfaces.indexOf(CONTEXT) !== -1) {
+          // This is request for productList
           let msgId = messages[messages.length - 1].id
-          if (msgId.split('_')[0] === PRODUCT_LIST) {
+          if (this._getItem(msgId).form === r.form) {
             messages.splice(messages.length - 1, 1)
             let allIdx = allMessages.findIndex(({ id }) => id === msgId)
             if (allIdx !== -1)
               allMessages.splice(allIdx, 1)
           }
         }
-  //       return false
+        // if (r[TYPE] === PRODUCT_LIST) {
+        //   let msgId = messages[messages.length - 1].id
+        //   if (msgId.split('_')[0] === PRODUCT_LIST) {
+        //     messages.splice(messages.length - 1, 1)
+        //     let allIdx = allMessages.findIndex(({ id }) => id === msgId)
+        //     if (allIdx !== -1)
+        //       allMessages.splice(allIdx, 1)
+        //   }
+        // }
+  ////       return false
         let idx = -1
         for (let i=0; i<messages.length  &&  idx === -1; i++)
           if (messages[i].id === rid)
@@ -3468,7 +3487,8 @@ var Store = Reflux.createStore({
     }
     let r = this._getItem(rId)
     var res = {};
-
+    if (!r)
+      debugger
     if (utils.isMessage(this.getModel(r[TYPE]))) {
       let kres = await this._keeper.get(r[CUR_HASH])
       extend(res, kres)
@@ -6727,10 +6747,12 @@ var Store = Reflux.createStore({
     }
     return resource;
   },
-
   // Gathers resources that were created on this official account to figure out if the
   // customer has some other official accounts where he already submitted this information
   async getShareableResources(foundResources, to) {
+    // if (me.isEmployee)
+    //   return this.getShareableResourcesFromServer(to)
+
     if (!foundResources)
       return
     var verTypes = [];
