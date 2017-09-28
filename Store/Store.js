@@ -5616,6 +5616,8 @@ var Store = Reflux.createStore({
       if (r[p]  &&  props[p]) {
         if (props[p].type === 'object')
           rr[p] = utils.clone(r[p])
+        else
+          rr[p] = r[p]
       }
     }
     let authorId = utils.makeId(PROFILE, r._author)
