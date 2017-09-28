@@ -61,12 +61,15 @@ Q.onerror = function (err) {
 }
 
 const ENV = require('../utils/env')
-const graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
-const client = new ApolloClient({
-  networkInterface: createNetworkInterface({
-    uri: graphqlEndpoint
-  })
-})
+// const graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+// const client = new ApolloClient({
+//   networkInterface: createNetworkInterface({
+//     uri: graphqlEndpoint
+//   })
+// })
+
+var graphqlEndpoint
+var client
 
 var AddressBook = require('NativeModules').AddressBook;
 
@@ -1233,11 +1236,12 @@ var Store = Reflux.createStore({
     // meDriver.objects = timeFunctions(meDriver.objects)
     // meDriver = timeFunctions(meDriver)
     this.getInfo({serverUrls: SERVICE_PROVIDERS_BASE_URLS, retry: true})
+
     // .then(() => {
     //   if (me && utils.isEmpty(chatMessages))
     //     this.initChats()
     // })
-    .catch(function(err) {
+    .catch((err) => {
       debug('initial getInfo failed:', err)
       throw err
     })
@@ -1522,11 +1526,26 @@ var Store = Reflux.createStore({
           //   })
           // }
           if (utils.getMe())
-          results.forEach(provider => {
-            this.addProvider(provider)
-            Push.subscribe(provider.hash)
-              .catch(err => console.log('failed to register for push notifications'))
-          })
+            results.forEach(provider => {
+              this.addProvider(provider)
+              Push.subscribe(provider.hash)
+                .catch(err => console.log('failed to register for push notifications'))
+            })
+          if (SERVICE_PROVIDERS) {
+            if (me.isEmployee) {
+              let myOrgId = me.organization.id
+              let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
+              graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
+            }
+            else
+              graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+
+            client = new ApolloClient({
+              networkInterface: createNetworkInterface({
+                uri: graphqlEndpoint
+              })
+            })
+          }
         })
         .catch(err => {
           if (err instanceof TypeError || err instanceof ReferenceError) {
