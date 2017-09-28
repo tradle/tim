@@ -1535,16 +1535,17 @@ var Store = Reflux.createStore({
             if (me.isEmployee) {
               let myOrgId = me.organization.id
               let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
-              graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
+              if (myEmployer)
+                graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
             }
             else
               graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
-
-            client = new ApolloClient({
-              networkInterface: createNetworkInterface({
-                uri: graphqlEndpoint
+            if (graphqlEndpoint)
+              client = new ApolloClient({
+                networkInterface: createNetworkInterface({
+                  uri: graphqlEndpoint
+                })
               })
-            })
           }
         })
         .catch(err => {
@@ -4759,6 +4760,48 @@ var Store = Reflux.createStore({
   onReloadModels() {
     this.loadModels()
   },
+  async onGetModels(providerId) {
+    let provider = this._getItem(providerId)
+    let modelPacks = await this.searchMessages({modelName: MODELS_PACK})
+    let otherProviderModels = []
+    let requestedModelsPack = modelPacks.filter((mp) => {
+      let org = this._getItem(utils.getId(mp.from)).organization
+      if (utils.getId(org) === providerId)
+        return true
+      mp.models.forEach((m) => {
+        otherProviderModels.push(m.id)
+      })
+    })
+    let requestedModels = requestedModelsPack[0].models.slice(0)
+    let retModels = []
+    for (let m in models) {
+      if (otherProviderModels.indexOf(m) === -1)
+        retModels.push(models[m].value)
+    }
+    requestedModels.forEach((m) => {
+      if (!retModels.some((mm) => mm.id === m.id))
+        retModels.push(m)
+    })
+    retModels.sort((a, b) => {
+      let aTitle
+      if (a.title)
+        aTitle = a.title
+      else {
+        let arr = a.id.split('.')
+        aTitle = utils.makeLabel(arr[arr.length - 1])
+      }
+      let bTitle
+      if (b.title)
+        bTitle = b.title
+      else {
+        let arr = b.id.split('.')
+        bTitle = utils.makeLabel(arr[arr.length - 1])
+      }
+      return aTitle > bTitle ? -1 : 1
+    })
+    this.trigger({action: 'models', list: retModels})
+  },
+
   wipe() {
     return Q.all([
       AsyncStorage.clear(),
@@ -5493,7 +5536,8 @@ var Store = Reflux.createStore({
         continue
 
       if (props[p].inlined) {
-        if (ref === FORM  ||  this.getModel(ref).isInterface) {
+        let pm
+        if (ref === FORM  ||  (pm = this.getModel(ref)).isInterface  ||  pm.subClassOf === ENUM) {
           arr.push(
             `${p} {
               id
@@ -5569,8 +5613,10 @@ var Store = Reflux.createStore({
 
     let rr = {}
     for (let p in r) {
-      if (r[p]  &&  props[p])
-        rr[p] = r[p]
+      if (r[p]  &&  props[p]) {
+        if (props[p].type === 'object')
+          rr[p] = utils.clone(r[p])
+      }
     }
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
@@ -5595,6 +5641,7 @@ var Store = Reflux.createStore({
     extend(rr, {
       [ROOT_HASH]: r._permalink,
       [CUR_HASH]: r._link,
+      [TYPE]: r[TYPE],
       from: from,
       to: to
     })
@@ -6769,9 +6816,6 @@ var Store = Reflux.createStore({
   // Gathers resources that were created on this official account to figure out if the
   // customer has some other official accounts where he already submitted this information
   async getShareableResources(foundResources, to) {
-    // if (me.isEmployee)
-    //   return this.getShareableResourcesFromServer(to)
-
     if (!foundResources)
       return
     var verTypes = [];
@@ -6821,7 +6865,7 @@ var Store = Reflux.createStore({
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
     var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
     var self = this
-    var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true})
+    var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
     if (productsToShare  &&  productsToShare.length) {
       productsToShare.forEach((r) => {
         let fromId = utils.getId(r.from)
@@ -6863,7 +6907,7 @@ var Store = Reflux.createStore({
       return {verifications: shareableResources}
 
     let toId = utils.getId(to)
-    let l = await this.searchMessages({modelName: VERIFICATION})
+    let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
     if (!l)
       return
     l.forEach((val) => {
@@ -6943,7 +6987,7 @@ var Store = Reflux.createStore({
       let verType = verTypes[i]
       if (hasVerifiers  &&  hasVerifiers[verType])
         return
-      var ll = await this.searchMessages({modelName: verType})
+      var ll = await this.searchMessages({modelName: verType, search: me.isEmployee})
       // var l = this.searchNotMessages({modelName: verType, notVerified: true})
       if (!ll)
         return
