@@ -5562,12 +5562,15 @@ var Store = Reflux.createStore({
       if (props[p].inlined) {
         let pm
         if (ref === FORM  ||  (pm = this.getModel(ref)).isInterface  ||  pm.subClassOf === ENUM) {
-          arr.push(
-            `${p} {
-              id
-              title
-            }`
-          )
+          if (props[p].range === 'json')
+            arr.push(p)
+          else
+            arr.push(
+              `${p} {
+                id
+                title
+              }`
+            )
         }
         else {
           let allProps = this.getAllPropertiesForServerSearch(this.getModel(ref))
