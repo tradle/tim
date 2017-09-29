@@ -2965,7 +2965,7 @@ var Store = Reflux.createStore({
 
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
-        let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
+        let sendParams = self.packMessage(r) //toChain, r.from, r.to, r._context)
         if (disableAutoResponse) {
           if (!sendParams.other)
             sendParams.other = {}
@@ -3032,9 +3032,16 @@ var Store = Reflux.createStore({
   },
 
   packMessage(toChain, from, to, context) {
-    var sendParams = {
-      object: toChain
+    var sendParams = {}
+    if (toChain[CUR_HASH]) {
+      sendParams.link = toChain[CUR_HASH]
+      from = toChain.from
+      to = toChain.to
+      context = toChain._context
     }
+    else
+      sendParams.object = toChain
+
     to = this._getItem(utils.getId(to))
     let provider, hash
     if (to[ROOT_HASH] === me[ROOT_HASH]) {
@@ -3054,6 +3061,12 @@ var Store = Reflux.createStore({
       // See if the sender is in a process of verifying some form in shared context chat
       if (!isEmployee  &&  context)
         isEmployee = utils.isReadOnlyChat(this._getItem(context))
+      if (!isEmployee  &&  to) {
+        if (utils.getId(from) === utils.getId(me)) {
+          let rep = this.getRepresentative(utils.getId(me.organization))
+          isEmployee = utils.getId(rep) !== utils.getId(to)
+        }
+      }
     }
     // if (me.isEmployee)
     //   isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
@@ -4344,16 +4357,27 @@ var Store = Reflux.createStore({
 
         let isBookmark = returnVal[TYPE] === BOOKMARK
         if (!isSavedItem  &&  !isBookmark) {
-          let sendParams = {
-            to: {permalink: permalink},
-            link: hash,
-          }
-          if (returnVal._context) {
-            sendParams.other = {
-              context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
-            }
-          }
+          // let sendParams = {link: hash }
+          // if (me.isEmployee) {
+          //   let rep = self.getRepresentative(utils.getId(me.organization))
+          //   let toRootHash = self._getItem(utils.getId(returnVal.to))[ROOT_HASH]
 
+          //   if (rep[ROOT_HASH] !== toRootHash)
+          //     sendParams.other = {
+          //       forward: toRootHash
+          //     }
+          //   sendParams.to = { permalink: rep[ROOT_HASH] }
+          // }
+          // else
+          //   sendParams.to = { permalink: permalink }
+
+          // if (returnVal._context) {
+          //   sendParams.other = {
+          //     context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
+          //   }
+          // }
+          let sendParams = self.packMessage(returnVal)
+          debugger
           await self.meDriverSend(sendParams)
         }
         if (isBookmark) {
