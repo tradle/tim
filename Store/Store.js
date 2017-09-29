@@ -2965,7 +2965,7 @@ var Store = Reflux.createStore({
 
       if (self._getItem(toId).pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
-        let sendParams = self.packMessage(r) //toChain, r.from, r.to, r._context)
+        let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
         if (disableAutoResponse) {
           if (!sendParams.other)
             sendParams.other = {}
