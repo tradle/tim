@@ -2848,7 +2848,7 @@ var Store = Reflux.createStore({
       rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
       if (isContext) {
         rr._context = r._context = {id: utils.getId(r), title: r.product}
-        contextIdToResourceId[contextId] = utils.getId(rr)
+        contextIdToResourceId[r.contextId] = utils.getId(rr)
 
         // let params = {
         //   action: 'addItem',
