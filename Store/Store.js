@@ -8792,10 +8792,17 @@ var Store = Reflux.createStore({
         id: fromId,
         title: from.formatted || from.firstName
       }
-      val.to = {
-        id: toId,
-        title: to.formatted || to.firstName
+      if (obj.object.forward  &&  obj.object.forward === me[ROOT_HASH]) {
+        val.to = {
+          id: utils.getId(me),
+          title: me.formatted || me.firstName
+        }
       }
+      else
+        val.to = {
+          id: toId,
+          title: to.formatted || to.firstName
+        }
     }
     else {
       let inDB = this._getItem(key)
