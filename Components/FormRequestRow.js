@@ -48,6 +48,8 @@ import {
   Navigator,
   View,
   Platform,
+  // Animated,
+  // Easing,
   processColor
 } from 'react-native'
 
@@ -61,6 +63,16 @@ class FormRequestRow extends Component {
     this.state = {}
     LINK_COLOR = this.props.bankStyle.linkColor
   }
+  // componentWillMount() {
+  //   this.animatedValue = new Animated.Value(60)
+  // }
+  // componentDidMount() {
+  //   Animated.timing(this.animatedValue, {
+  //     toValue: 35,
+  //     duration: 500,
+  //     easing: Easing.in(Easing.easy)
+  //   }).start()
+  // }
   shouldComponentUpdate(nextProps, nextState) {
     let {resource, to, orientation} = this.props
     if (this.props.sendStatus !== nextProps.sendStatus)
@@ -166,7 +178,7 @@ class FormRequestRow extends Component {
       if (message.charAt(0) === '[')
         viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
     }
-    viewStyle.width =  Math.min(msgWidth, message.length * utils.getFontSize(18) + 40)
+    viewStyle.width =  Math.min(msgWidth, message.length * utils.getFontSize(18) + 35)
 
     if (this.state  &&  this.state.sendStatus  &&  this.state.sendStatus !== null)
       sendStatus = this.getSendStatus()
@@ -191,6 +203,10 @@ class FormRequestRow extends Component {
     else
       cellStyle = chatStyles.textContainer
     let share
+    let msgStyle = {justifyContent: 'center'}
+    // Check if it is needed
+    if (!isFormRequest || resource._documentCreated)
+      msgStyle.minHeight = 35
     if (this.isShared())
       share = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
@@ -200,7 +216,7 @@ class FormRequestRow extends Component {
                         {ownerPhoto}
                         </View>
                         <View style={[cellStyle, {backgroundColor: this.props.bankStyle.incomingMessageBgColor}, shareables ? styles.shareables : {}]}>
-                          <View style={[styles.container, {minHeight: 45, justifyContent: 'center'}]}>
+                          <View style={[styles.container, msgStyle]}>
                           {share}
                           {renderedRow}
                          </View>
@@ -618,7 +634,7 @@ class FormRequestRow extends Component {
     else {
       let notLink = resource._documentCreated  ||  isReadOnly  ||  isMyProduct
       if (!isMyProduct)
-        icon = <Icon  name={'ios-arrow-forward'} style={{justifyContent: 'flex-end', alignSelf: 'flex-end', color: isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR}} size={20} />
+        icon = <Icon  name={'ios-arrow-forward'} style={{color: isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR}} size={20} />
       if (!notLink) {
         if (resource.verifiers)
           onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
@@ -627,7 +643,7 @@ class FormRequestRow extends Component {
         else  {
           if (prop.ref == PHOTO) {
             msg = <View key={this.getNextKey()}>
-                   <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                   <View style={{flexDirection: 'row', minHeight: 35, alignItems: 'center', justifyContent: 'space-between'}}>
                      <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                        <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
                      </ImageInput>
@@ -646,14 +662,23 @@ class FormRequestRow extends Component {
                </View>
           }
           else {
-            msg = <View key={this.getNextKey()}>
+            msg = <View key={this.getNextKey()} style={{justifyContent: 'center'}}>
                   <TouchableHighlight onPress={() => this.chooser(prop)} underlayColor='transparent'>
-                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                      <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
+                    <View style={{flexDirection: 'row', minHeight: 35, justifyContent: 'space-between', alignItems: 'center'}}>
+                      <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
                       {resource._documentCreated ? null : icon}
                     </View>
                   </TouchableHighlight>
                </View>
+            // const animatedStyle = {minHeight: this.animatedValue}
+            // msg = <View key={this.getNextKey()} style={{justifyContent: 'center'}}>
+            //       <TouchableHighlight onPress={() => this.chooser(prop)} underlayColor='transparent'>
+            //         <Animated.View style={[{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}, animatedStyle]}>
+            //           <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
+            //           {resource._documentCreated ? null : icon}
+            //         </Animated.View>
+            //       </TouchableHighlight>
+            //    </View>
           }
         }
       }
@@ -662,7 +687,7 @@ class FormRequestRow extends Component {
     if (!msg) {
       messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
       msg = <View key={this.getNextKey()}>
-               <View style={{flexDirection: 'row'}}>
+               <View style={{flexDirection: 'row', minHeight: 35, alignItems: 'center'}}>
                  {messagePart}
                  {resource._documentCreated ? null : icon}
                </View>
