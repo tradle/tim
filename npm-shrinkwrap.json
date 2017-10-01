@@ -146,7 +146,7 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "tradle/models",
+      "from": "tradle/models#4a3a532",
       "resolved": "git://github.com/tradle/models.git#4a3a532230fe892e45930bdc42e3797296c10c49",
       "dependencies": {
         "typeforce": {
@@ -307,14 +307,14 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "2.1.1",
-      "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-2.1.1.tgz",
+      "version": "2.2.0",
+      "from": "@tradle/validate-model@>=2.2.0 <2.3.0",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-2.2.0.tgz",
       "dependencies": {
         "typeforce": {
-          "version": "1.11.4",
-          "from": "typeforce@https://registry.npmjs.org/typeforce/-/typeforce-1.11.4.tgz",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.4.tgz"
+          "version": "1.11.5",
+          "from": "typeforce@>=1.10.6 <2.0.0",
+          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.5.tgz"
         }
       }
     },
@@ -4762,7 +4762,29 @@
     "merkle-tree-stream": {
       "version": "3.0.3",
       "from": "mvayngrib/merkle-tree-stream#finalize",
-      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
+      "resolved": "git://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290",
+      "dependencies": {
+        "isarray": {
+          "version": "1.0.0",
+          "from": "isarray@>=1.0.0 <1.1.0",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
+        },
+        "readable-stream": {
+          "version": "2.3.3",
+          "from": "readable-stream@>=2.0.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.3.tgz"
+        },
+        "safe-buffer": {
+          "version": "5.1.1",
+          "from": "safe-buffer@>=5.1.1 <5.2.0",
+          "resolved": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.1.1.tgz"
+        },
+        "string_decoder": {
+          "version": "1.0.3",
+          "from": "string_decoder@>=1.0.3 <1.1.0",
+          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.3.tgz"
+        }
+      }
     },
     "method-override": {
       "version": "2.3.9",
