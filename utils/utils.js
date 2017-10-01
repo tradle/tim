@@ -844,7 +844,7 @@ var utils = {
     let toId = this.getId(to)
     let isReadOnly
     if (toId !== meId  &&  fromId !== meId) {
-      if (!me.isEmployee  ||  !to.organization  ||  utils.getId(me.organization) === utils.getId(to.organization))
+      if (!me.isEmployee  ||  !to.organization  ||  utils.getId(me.organization) !== utils.getId(to.organization))
         isReadOnly = true
     }
 
