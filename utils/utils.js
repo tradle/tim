@@ -836,12 +836,18 @@ var utils = {
     let me = this.getMe()
     if (!me)
       return false
-    if (!resource.to || !resource.from)
+    let {to, from} = resource
+    if (!to || !from)
       return false
     let meId = this.getId(me)
-    let fromId = this.getId(resource.from)
-    let toId = this.getId(resource.to)
-    let isReadOnly = toId !== meId  &&  fromId !== meId
+    let fromId = this.getId(from)
+    let toId = this.getId(to)
+    let isReadOnly
+    if (toId !== meId  &&  fromId !== meId) {
+      if (!me.isEmployee  ||  !to.organization  ||  utils.getId(me.organization) === utils.getId(to.organization))
+        isReadOnly = true
+    }
+
     if (isReadOnly || !context  || (resource[constants.TYPE] !== FORM_ERROR  &&   resource[constants.TYPE] !== FORM_REQUEST))
       return isReadOnly
     // Form error can be used only by context originating contact
@@ -893,7 +899,7 @@ var utils = {
       var exclude = ['from', 'to', 'time']
       let isVerification = m.id === VERIFICATION
       let isProductApplication = m.id === PRODUCT_APPLICATION
-      let isContext = m.subClassOf === CONTEXT
+      let isContext = this.isContext(m)
       let isFormRequest = m.id === FORM_REQUEST
       let isFormError = m.id === FORM_ERROR
       Object.keys(res).forEach(p => {
@@ -903,7 +909,7 @@ var utils = {
           return
         if (isProductApplication  &&  p === 'product')
           return
-        if (isContext  &&  p === 'requestFor')
+        if (isContext  &&  (p === 'requestFor' || p === 'contextId'))
           return
         if (isFormRequest  &&  (p === 'product'  ||  p === 'form'))
           return
@@ -937,61 +943,14 @@ var utils = {
 
     return res
   },
-
-  optimizeResource1(resource, doNotChangeOriginal) {
-    let res = doNotChangeOriginal ? utils.clone(resource) : resource
-    let m = this.getModel(res[TYPE]).value
-    var properties = m.properties
-    Object.keys(res).forEach(p => {
-      if (p.charAt(0) === '_'  ||  !properties[p])
+  isContext(typeOrModel) {
+    let m = typeOrModel
+    if (typeof typeOrModel === 'string') {
+      m = this.getModel(typeOrModel)
+      if (!m)
         return
-      if (properties[p].type === 'object') {
-        if (res[p]  &&  res[p].id  &&  res[p].title) {
-          res[p] = this.buildRef(res[p])
-          return
-        }
-        if (properties[p].ref  &&  !this.getModel(properties[p].ref).value.inlined) {
-
-          // if (properties[p].ref !== MONEY  &&  properties[p].ref !== PHOTO) {
-
-          // TODO: remove this after we add resource validation
-          // on the server side
-          //
-          // currently there are some bad prefill values floating around (empty objects)
-          if (p === 'prefill') {
-            if (!Object.keys(res[p]).length)
-              delete res[p]
-            return
-          }
-
-          res[p] = this.buildRef(res[p])
-        }
-        return
-      }
-      if (properties[p].type !== 'array'  ||
-         !properties[p].items.ref         ||
-          properties[p].inlined)
-        return
-      var arr = []
-      res[p].forEach(function(r) {
-        if (typeof r === 'string')
-          return
-        if (r.id) {
-          if (r.photo)
-            delete r.photo
-          arr.push(r)
-          return
-        }
-        var rr = {}
-        rr.id = utils.getId(r)
-        const type = utils.getType(r)
-        var m = this.getModel(type)
-        rr.title = utils.getDisplayName(r, m.properties)
-        arr.push(rr)
-      })
-      res[p] = arr
-    })
-    return res
+    }
+    return m.interfaces  &&  m.interfaces.indexOf(CONTEXT) !== -1
   },
 
   /**
