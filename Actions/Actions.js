@@ -25,7 +25,10 @@ var asyncActions = [
   'changeIdentity',
 
   'reloadDB',
+
   'reloadModels',
+  'getModels',
+
   'list',
   'listSharedWith',
   'messageList',

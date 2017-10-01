@@ -61,12 +61,15 @@ Q.onerror = function (err) {
 }
 
 const ENV = require('../utils/env')
-const graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
-const client = new ApolloClient({
-  networkInterface: createNetworkInterface({
-    uri: graphqlEndpoint
-  })
-})
+// const graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+// const client = new ApolloClient({
+//   networkInterface: createNetworkInterface({
+//     uri: graphqlEndpoint
+//   })
+// })
+
+var graphqlEndpoint
+var client
 
 const tradle = require('@tradle/engine')
 var myCustomIndexes
@@ -1236,11 +1239,12 @@ var Store = Reflux.createStore({
     // meDriver.objects = timeFunctions(meDriver.objects)
     // meDriver = timeFunctions(meDriver)
     this.getInfo({serverUrls: SERVICE_PROVIDERS_BASE_URLS, retry: true})
+
     // .then(() => {
     //   if (me && utils.isEmpty(chatMessages))
     //     this.initChats()
     // })
-    .catch(function(err) {
+    .catch((err) => {
       debug('initial getInfo failed:', err)
       throw err
     })
@@ -1377,12 +1381,21 @@ var Store = Reflux.createStore({
         }
       }
       // leave only the last PL
-      if (r[TYPE] === PRODUCT_LIST) {
-        if (!pl)
-          pl = i
-        else
-          removeMsg.push(i)
+      if (r[TYPE] === FORM_REQUEST) {
+        let m = this.getModel(r.form)
+        if (m.interfaces.indexOf(CONTEXT) !== -1) {
+          if (!pl)
+            pl = i
+          else
+            removeMsg.push(i)
+        }
       }
+      // if (r[TYPE] === PRODUCT_LIST) {
+      //   if (!pl)
+      //     pl = i
+      //   else
+      //     removeMsg.push(i)
+      // }
     }
     if (removeMsg.length) {
       // let batch = []
@@ -1516,11 +1529,27 @@ var Store = Reflux.createStore({
           //   })
           // }
           if (utils.getMe())
-          results.forEach(provider => {
-            this.addProvider(provider)
-            Push.subscribe(provider.hash)
-              .catch(err => console.log('failed to register for push notifications'))
-          })
+            results.forEach(provider => {
+              this.addProvider(provider)
+              Push.subscribe(provider.hash)
+                .catch(err => console.log('failed to register for push notifications'))
+            })
+          if (SERVICE_PROVIDERS) {
+            if (me.isEmployee) {
+              let myOrgId = me.organization.id
+              let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
+              if (myEmployer)
+                graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
+            }
+            else
+              graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+            if (graphqlEndpoint)
+              client = new ApolloClient({
+                networkInterface: createNetworkInterface({
+                  uri: graphqlEndpoint
+                })
+              })
+          }
         })
         .catch(err => {
           if (err instanceof TypeError || err instanceof ReferenceError) {
@@ -3002,9 +3031,16 @@ var Store = Reflux.createStore({
     })
   },
   packMessage(toChain, from, to, context) {
-    var sendParams = {
-      object: toChain
+    var sendParams = {}
+    if (toChain[CUR_HASH]) {
+      sendParams.link = toChain[CUR_HASH]
+      from = toChain.from
+      to = toChain.to
+      context = toChain._context
     }
+    else
+      sendParams.object = toChain
+
     to = this._getItem(utils.getId(to))
     let provider, hash
     if (to[ROOT_HASH] === me[ROOT_HASH]) {
@@ -3024,6 +3060,12 @@ var Store = Reflux.createStore({
       // See if the sender is in a process of verifying some form in shared context chat
       if (!isEmployee  &&  context)
         isEmployee = utils.isReadOnlyChat(this._getItem(context))
+      if (!isEmployee  &&  to) {
+        if (utils.getId(from) === utils.getId(me)) {
+          let rep = this.getRepresentative(utils.getId(me.organization))
+          isEmployee = utils.getId(rep) !== utils.getId(to)
+        }
+      }
     }
     // if (me.isEmployee)
     //   isEmployee = (!to.organization ||  utils.getId(to.organization) === utils.getId(me.organization))
@@ -3131,16 +3173,26 @@ var Store = Reflux.createStore({
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
       if (!isInit) {
-        if (r[TYPE] === PRODUCT_LIST) {
+        if (r[TYPE] === FORM_REQUEST  &&  this.getModel(r.form).interfaces.indexOf(CONTEXT) !== -1) {
+          // This is request for productList
           let msgId = messages[messages.length - 1].id
-          if (msgId.split('_')[0] === PRODUCT_LIST) {
+          if (this._getItem(msgId).form === r.form) {
             messages.splice(messages.length - 1, 1)
             let allIdx = allMessages.findIndex(({ id }) => id === msgId)
             if (allIdx !== -1)
               allMessages.splice(allIdx, 1)
           }
         }
-  //       return false
+        // if (r[TYPE] === PRODUCT_LIST) {
+        //   let msgId = messages[messages.length - 1].id
+        //   if (msgId.split('_')[0] === PRODUCT_LIST) {
+        //     messages.splice(messages.length - 1, 1)
+        //     let allIdx = allMessages.findIndex(({ id }) => id === msgId)
+        //     if (allIdx !== -1)
+        //       allMessages.splice(allIdx, 1)
+        //   }
+        // }
+  ////       return false
         let idx = -1
         for (let i=0; i<messages.length  &&  idx === -1; i++)
           if (messages[i].id === rid)
@@ -3447,7 +3499,8 @@ var Store = Reflux.createStore({
     }
     let r = this._getItem(rId)
     var res = {};
-
+    if (!r)
+      debugger
     if (utils.isMessage(this.getModel(r[TYPE]))) {
       let kres = await this._keeper.get(r[CUR_HASH])
       extend(res, kres)
@@ -4297,16 +4350,27 @@ var Store = Reflux.createStore({
 
         let isBookmark = returnVal[TYPE] === BOOKMARK
         if (!isSavedItem  &&  !isBookmark) {
-          let sendParams = {
-            to: {permalink: permalink},
-            link: hash,
-          }
-          if (returnVal._context) {
-            sendParams.other = {
-              context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
-            }
-          }
+          // let sendParams = {link: hash }
+          // if (me.isEmployee) {
+          //   let rep = self.getRepresentative(utils.getId(me.organization))
+          //   let toRootHash = self._getItem(utils.getId(returnVal.to))[ROOT_HASH]
 
+          //   if (rep[ROOT_HASH] !== toRootHash)
+          //     sendParams.other = {
+          //       forward: toRootHash
+          //     }
+          //   sendParams.to = { permalink: rep[ROOT_HASH] }
+          // }
+          // else
+          //   sendParams.to = { permalink: permalink }
+
+          // if (returnVal._context) {
+          //   sendParams.other = {
+          //     context: self._getItem(utils.getId(returnVal._context))[ROOT_HASH]
+          //   }
+          // }
+          let sendParams = self.packMessage(returnVal)
+          debugger
           await self.meDriverSend(sendParams)
         }
         if (isBookmark) {
@@ -4730,6 +4794,48 @@ var Store = Reflux.createStore({
       }
     ])
   },
+  async onGetModels(providerId) {
+    let provider = this._getItem(providerId)
+    let modelPacks = await this.searchMessages({modelName: MODELS_PACK})
+    let otherProviderModels = []
+    let requestedModelsPack = modelPacks.filter((mp) => {
+      let org = this._getItem(utils.getId(mp.from)).organization
+      if (utils.getId(org) === providerId)
+        return true
+      mp.models.forEach((m) => {
+        otherProviderModels.push(m.id)
+      })
+    })
+    let requestedModels = requestedModelsPack[0].models.slice(0)
+    let retModels = []
+    for (let m in models) {
+      if (otherProviderModels.indexOf(m) === -1)
+        retModels.push(models[m].value)
+    }
+    requestedModels.forEach((m) => {
+      if (!retModels.some((mm) => mm.id === m.id))
+        retModels.push(m)
+    })
+    retModels.sort((a, b) => {
+      let aTitle
+      if (a.title)
+        aTitle = a.title
+      else {
+        let arr = a.id.split('.')
+        aTitle = utils.makeLabel(arr[arr.length - 1])
+      }
+      let bTitle
+      if (b.title)
+        bTitle = b.title
+      else {
+        let arr = b.id.split('.')
+        bTitle = utils.makeLabel(arr[arr.length - 1])
+      }
+      return aTitle > bTitle ? -1 : 1
+    })
+    this.trigger({action: 'models', list: retModels})
+  },
+
   wipe() {
     if (utils.isWeb()) {
       return this.wipeWeb()
@@ -5492,13 +5598,17 @@ var Store = Reflux.createStore({
         continue
 
       if (props[p].inlined) {
-        if (ref === FORM  ||  this.getModel(ref).isInterface) {
-          arr.push(
-            `${p} {
-              id
-              title
-            }`
-          )
+        let pm
+        if (ref === FORM  ||  (pm = this.getModel(ref)).isInterface  ||  pm.subClassOf === ENUM) {
+          if (props[p].range === 'json')
+            arr.push(p)
+          else
+            arr.push(
+              `${p} {
+                id
+                title
+              }`
+            )
         }
         else {
           let allProps = this.getAllPropertiesForServerSearch(this.getModel(ref))
@@ -5567,8 +5677,12 @@ var Store = Reflux.createStore({
 
     let rr = {}
     for (let p in r) {
-      if (r[p]  &&  props[p])
-        rr[p] = r[p]
+      if (r[p]  &&  props[p]) {
+        if (props[p].type === 'object')
+          rr[p] = utils.clone(r[p])
+        else
+          rr[p] = r[p]
+      }
     }
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
@@ -5593,6 +5707,7 @@ var Store = Reflux.createStore({
     extend(rr, {
       [ROOT_HASH]: r._permalink,
       [CUR_HASH]: r._link,
+      [TYPE]: r[TYPE],
       from: from,
       to: to
     })
@@ -6782,7 +6897,6 @@ var Store = Reflux.createStore({
     }
     return resource;
   },
-
   // Gathers resources that were created on this official account to figure out if the
   // customer has some other official accounts where he already submitted this information
   async getShareableResources(foundResources, to) {
@@ -6835,7 +6949,7 @@ var Store = Reflux.createStore({
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
     var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
     var self = this
-    var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true})
+    var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
     if (productsToShare  &&  productsToShare.length) {
       productsToShare.forEach((r) => {
         let fromId = utils.getId(r.from)
@@ -6877,7 +6991,7 @@ var Store = Reflux.createStore({
       return {verifications: shareableResources}
 
     let toId = utils.getId(to)
-    let l = await this.searchMessages({modelName: VERIFICATION})
+    let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
     if (!l)
       return
     l.forEach((val) => {
@@ -6957,7 +7071,7 @@ var Store = Reflux.createStore({
       let verType = verTypes[i]
       if (hasVerifiers  &&  hasVerifiers[verType])
         return
-      var ll = await this.searchMessages({modelName: verType})
+      var ll = await this.searchMessages({modelName: verType, search: me.isEmployee})
       // var l = this.searchNotMessages({modelName: verType, notVerified: true})
       if (!ll)
         return

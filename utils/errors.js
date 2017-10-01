@@ -30,7 +30,7 @@ async function reporter (error, isFatal) {
 
 async function errorHandler (e, isFatal) {
   await reporter(e, isFatal)
-  if (isFatal) {
+  if (!__DEV__  &&  isFatal) {
     Alert.alert(
       'Unexpected error occurred',
       'We have reported this to our team! Click Restart App to restart the app!',

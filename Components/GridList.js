@@ -57,7 +57,7 @@ let excludeFromBrowsing = [
   PRODUCT_LIST,
   ENUM,
   BOOKMARK,
-  constants.TYPES.INTRODUCTION,
+  // constants.TYPES.INTRODUCTION,
   constants.TYPES.SELF_INTRODUCTION,
   constants.TYPES.CUSTOMER_WAITING,
   constants.TYPES.FINANCIAL_PRODUCT,
@@ -280,8 +280,13 @@ class GridList extends Component {
     }
     if (this.props.search) {
       if (this.props.isModel) {
-        let modelsArr = this.filterModels()
-        this.state.dataSource = this.state.dataSource.cloneWithRows(modelsArr)
+        let me = utils.getMe()
+        if (me.isEmployee)
+          Actions.getModels(utils.getId(me.organization))
+        else {
+          let modelsArr = this.filterModels()
+          this.state.dataSource = this.state.dataSource.cloneWithRows(modelsArr)
+        }
         return
         // Actions.listModels({modelName})
       }
@@ -364,6 +369,13 @@ class GridList extends Component {
     }
     if (action == 'newStyles'  &&  this.props.modelName === ORGANIZATION) {
       this.setState({newStyles: params.resource})
+      return
+    }
+    if (action === 'models') {
+      this.setState({
+        dataSource: this.state.dataSource.cloneWithRows(params.list),
+        list: params.list
+      })
       return
     }
     if (action === 'addItem'  ||  action === 'addMessage') {
@@ -1095,11 +1107,10 @@ class GridList extends Component {
   //   })
   // }
   filterModels(filter) {
-    let models = utils.getModels()
+    let models = this.state.list
     let mArr = []
     let filterLower = filter && filter.toLowerCase()
-    for (let m in models) {
-      let mm = models[m].value
+    models.forEach((mm) => {
       if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
           !mm.isInterface                &&
            mm.subClassOf !== ENUM        &&
@@ -1113,7 +1124,7 @@ class GridList extends Component {
         else
           mArr.push(mm)
       }
-    }
+    })
     return mArr
   }
   onSearchChange(filter) {
@@ -1341,7 +1352,7 @@ class GridList extends Component {
       style.push(properties[v].style);
     let ref = properties[v].ref;
     let row
-    let cellStyle = {paddingVertical: 3, paddingLeft: 7}
+    let cellStyle = {paddingVertical: 5, paddingLeft: 7}
 
     let criteria = this.props.search  &&  this.state.resource  &&  this.state.resource[v]
 

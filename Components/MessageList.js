@@ -110,7 +110,7 @@ class MessageList extends Component {
       return false
     let me = utils.getMe()
     let chat = this.props.resource
-    let isChattingWithPerson = chat[constants.TYPE] === PROFILE
+    let isChattingWithPerson = chat[TYPE] === PROFILE
     if (me.isEmployee) {
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return false
@@ -181,7 +181,7 @@ class MessageList extends Component {
     let { resource, online, productToForms, shareableResources } = params
     if (action === 'onlineStatus') {
       if (resource  &&  utils.getId(resource) == utils.getId(chatWith))
-      // if (resource  &&  resource[constants.ROOT_HASH] === this.props.resource[ROOT_HASH])
+      // if (resource  &&  resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
       //   state.resource = chatWith
       if (online !== this.state.onlineStatus)
         this.setState({onlineStatus: online})
@@ -509,7 +509,7 @@ class MessageList extends Component {
     var model = utils.getModel(resource[TYPE]).value;
     var title //utils.getDisplayName(resource, model.properties);
 
-    if (resource[TYPE] === constants.VERIFICATION) {
+    if (resource[TYPE] === VERIFICATION) {
       let type = utils.getType(resource.document)
       if (type)
         title = translate(utils.getModel(type).value)
@@ -584,7 +584,7 @@ class MessageList extends Component {
     var me = utils.getMe();
     // var MessageRow = require('./MessageRow');
     var previousMessageTime = currentMessageTime;
-    var isProductApplication = this.props.resource[TYPE] === PRODUCT_APPLICATION
+    var isProductApplication = model.interfaces.indexOf(CONTEXT) !== -1
     currentMessageTime = resource.time;
     var props = {
       onSelect: this.selectResource.bind(this),
@@ -694,8 +694,8 @@ class MessageList extends Component {
         }
       }
     }
-
-    let isProductApplication = resource[TYPE] === PRODUCT_APPLICATION
+    let interfaces = utils.getModel(resource[TYPE]).interfaces
+    let isProductApplication = interfaces  &&  interfaces.indexOf(CONTEXT) !== -1
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === MESSAGE;
 
