@@ -121,8 +121,8 @@ android {
 
     defaultConfig {
         applicationId "io.tradle.dev"
-        minSdkVersion 17
-        targetSdkVersion 22
+        minSdkVersion 23
+        targetSdkVersion 23
         versionCode vbuild
         versionName vmajor + "." + vminor + "." + vpatch
         ndk {
