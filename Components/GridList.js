@@ -1112,6 +1112,7 @@ class GridList extends Component {
     models.forEach((mm) => {
       if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
           !mm.isInterface                &&
+          !mm.inlined                    &&
            mm.subClassOf !== ENUM        &&
            mm.subClassOf !== METHOD      &&
            mm.subClassOf !== constants.TYPES.FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
