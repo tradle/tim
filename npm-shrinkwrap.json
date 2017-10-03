@@ -170,13 +170,13 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#4a3a532230fe892e45930bdc42e3797296c10c49",
+      "from": "tradle/models#8c86a1f",
+      "resolved": "git://github.com/tradle/models.git#8c86a1fc0adde701c7e61a5df3477ca70ff007ca",
       "dependencies": {
         "typeforce": {
-          "version": "1.11.4",
-          "from": "typeforce@^1.10.6",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.4.tgz"
+          "version": "1.11.5",
+          "from": "typeforce@>=1.10.6 <2.0.0",
+          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.5.tgz"
         }
       }
     },
@@ -331,14 +331,14 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "2.1.1",
-      "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-2.1.1.tgz",
+      "version": "2.2.0",
+      "from": "@tradle/validate-model@>=2.0.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-2.2.0.tgz",
       "dependencies": {
         "typeforce": {
-          "version": "1.11.4",
+          "version": "1.11.5",
           "from": "typeforce@>=1.10.6 <2.0.0",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.4.tgz"
+          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.5.tgz"
         }
       }
     },
