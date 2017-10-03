@@ -23,7 +23,7 @@ var verificationStyles = Object.freeze({
     paddingLeft: 3
   },
   verificationBody: {
-    paddingTop: 5,
+    paddingVertical: 5,
     paddingHorizontal: 7,
     borderRadius: 10,
     borderColor: '#7AAAC3',

@@ -15,6 +15,7 @@ var StyleSheet = require('../StyleSheet')
 
 import ActivityIndicator from './ActivityIndicator'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const CONTEXT = 'tradle.Context'
 
 import {
   ListView,
@@ -41,7 +42,7 @@ class ContextChooser extends Component {
   componentWillMount() {
     let r = this.props.resource
     let id = r[constants.TYPE] === constants.TYPES.PROFILE ? utils.getId(utils.getMe().organization) : utils.getId(r)
-    Actions.getAllContexts({to: this.props.resource, modelName: PRODUCT_APPLICATION})
+    Actions.getAllContexts({to: this.props.resource, modelName: CONTEXT})
   }
   componentDidMount() {
     this.listenTo(Store, 'onContexts');

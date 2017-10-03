@@ -1113,6 +1113,7 @@ class GridList extends Component {
     models.forEach((mm) => {
       if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
           !mm.isInterface                &&
+          !mm.inlined                    &&
            mm.subClassOf !== ENUM        &&
            mm.subClassOf !== METHOD      &&
            // (mm.viewCols || mm.gridCols)  &&

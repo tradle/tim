@@ -1326,7 +1326,7 @@ var NewResourceMixin = {
     //   }
     // }
     let val = resource && resource[params.prop]
-    if (this.props.search  && Array.isArray(val)  &&  !val.length)
+    if (Array.isArray(val)  &&  !val.length)
       val = null
     if (val) {
       if (isPhoto) {
