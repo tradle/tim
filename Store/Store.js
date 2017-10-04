@@ -3286,7 +3286,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let { r, dontSend, notOneClickVerification } = params
 
     let to = params.to || [r.to]
-    let document = params.document || r.document
+    let docId = utils.getId(params.document || r.document)
+    let document = this._getItem(docId)
+    if (!document  &&  me.isEmployee)
+      document = await this._getItemFromServer(docId)
 
     // if (__DEV__) {
     //   let newV = newVerificationTree(r, 4)
@@ -3322,7 +3325,6 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     newVerification = this.buildRef(r, dontSend)
     let context = r._context
     if (!context) {
-      document = this._getItem(utils.getId(document))
       context = document._context
       if (context)
         r._context = context
@@ -3353,8 +3355,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
         let c = this._getItem(utils.getId(r._context));
         isReadOnly = utils.isReadOnlyChat(c) //c  &&  c._readOnly
       }
-      let docId = utils.getId(r.document)
-      let doc = this._getItem(r.document)
+      // let docId = utils.getId(r.document)
+      let doc = document // this._getItem(r.document)
       if (!isReadOnly) {
         doc._verificationsCount = !doc._verificationsCount ? 1 : ++doc._verificationsCount
         this.dbBatchPut(docId, doc, batch);
@@ -3503,32 +3505,6 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       let r = await this._getItemFromServer(rId)
       let retParams = { resource: r, action: 'getItem' }
       this.trigger(retParams)
-      // let modelName = utils.getType(resource)
-
-      // let table = `r_${modelName.replace('.', '_')}`
-
-      // let _link = resource[CUR_HASH]
-      // if (!_link) {
-      //   let parts = resource.id.split('_')
-      //   _link = parts[parts.length - 1]
-      // }
-      // let query = `query {\n${table} (_link: "${_link}")\n`
-
-      // let m = this.getModel(modelName)
-      // let arr = this.getAllPropertiesForServerSearch(m)
-
-      // query += `\n{${arr.join('   \n')}\n}\n}`
-      // try {
-      //   let result = await client.query({query: gql(`${query}`)})
-      //   let r = this.convertToResource(result.data[table])
-
-      //   let retParams = { resource: r, action: 'getItem' }
-      //   this.trigger(retParams)
-      // }
-      // catch(err) {
-      //   console.log('onGetItem', err)
-      //   debugger
-      // }
       return
     }
     let r = this._getItem(rId)
@@ -3546,31 +3522,6 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     if (!resModel) {
       throw new Error(`missing model for ${res[TYPE]}`)
     }
-/*
-    var props = resModel.properties;
-    for (var p in props) {
-      if (p.charAt(0) === '_'  ||  props[p].hidden)
-        continue;
-      var items = props[p].items;
-      if (!items  ||  !items.backlink)
-        continue;
-      var backlink = items.backlink;
-      var itemsModel = this.getModel(items.ref);
-      var params = {
-        modelName: items.ref,
-        to: resource,
-        meta: itemsModel,
-        prop: props[p],
-        props: itemsModel.properties
-      }
-      var meta = this.getModel(items.ref)
-      var isMessage = utils.isMessage(meta)
-
-      var result = isMessage ? await this.searchMessages(params) : this.searchNotMessages(params)
-      if (result  &&  result.length)
-        resource[p] = result;
-    }
-    */
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
     if (noTrigger)
@@ -4681,7 +4632,9 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
     let batch = []
     // Get the whole resource
-    document = this._getItem(utils.getId(document))
+    if (!document[ROOT_HASH])
+      document = this._getItem(utils.getId(document))
+
     // let verifications
     // if (document.verifications)
     //   verifications = document.verifications
@@ -4733,7 +4686,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   },
   shareForm(document, to, opts, shareBatchId) {
     var time = new Date().getTime()
-    return this.meDriverSend({...opts, link: this._getItem(document)[CUR_HASH]})
+    let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
+    return this.meDriverSend({...opts, link: hash})
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
@@ -5358,8 +5312,23 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
         // if (!props[p]  ||  p.charAt(0) === '_')
         //   continue
         let val = filterResource[p]
-        if (p.charAt(0) === '_')
-          debugger
+        // if (p === TYPE) {
+        //   if (!Array.isArray(val))
+        //     continue
+        //   else {
+        //     let s = `${p}: [`
+        //     val.forEach((r, i) => {
+        //       if (i)
+        //         s += ', '
+        //       s += `"${r}"`
+        //     })
+        //     s += ']'
+        //     inClause.push(s)
+        //   }
+        // }
+
+        // if (p.charAt(0) === '_')
+        //   debugger
         if (!props[p]  &&  p.charAt(0) === '_'  &&  val) {
           op.EQ += `\n   ${p}: "${val}",`
           continue
@@ -6882,6 +6851,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   async getShareableResources(foundResources, to) {
     if (!foundResources)
       return
+    if (me.isEmployee)
+      return this.getShareableResourcesForEmployee(foundResources, to)
     var verTypes = [];
     var meId = utils.getId(me)
     var simpleLinkMessages = {}
@@ -6972,14 +6943,18 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       return {verifications: shareableResources}
     let toId = utils.getId(to)
     // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
-    let l = await this.searchSharables({modelName: VERIFICATION, search: me.isEmployee})
+    let l = await this.searchSharables({modelName: VERIFICATION, search: me.isEmployee, filterResource: {[TYPE]: verTypes}})
     if (!l) //  &&  !me.isEmployee)
       return
-    if (l)
+    let rep = me.isEmployee ? this.getRepresentative(utils.getId(me.organization)) : null
+    if (rep)
+      rep = utils.getId(rep)
     l.forEach((val) => {
       var id = utils.getId(val.to.id);
-      if (id !== meId)
-        return
+      if (id !== meId) {
+        if (me.isEmployee  &&  id !== rep)
+          return
+      }
 
       var doc = val.document
       var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
@@ -7119,6 +7094,355 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       if (!isMyProduct  &&  utils.getId(r.from) !== utils.getId(me))
         return
 
+      if (to[TYPE] === ORGANIZATION  &&  !to._isTest) {
+        let rToOrg = r.to.organization
+        if (rToOrg) {
+          if (self._getItem(rToOrg)._isTest)
+            return
+        }
+      }
+
+      var v = shareableResources[docType];
+      if (!v)
+        shareableResources[docType] = [];
+      else if (verification.from  &&   shareableResourcesRootToR[r[ROOT_HASH]]) {
+        let arr = shareableResources[r[TYPE]]
+        let vFromId = utils.getId(verification.from)
+        for (let i=0; i<arr.length; i++) {
+          let rr = arr[i].document
+          if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+            // if (utils.getId(arr[i].from) === vFromId) {
+              if (r.time < rr.time) {
+                addSharedWithProvider(verification)
+                return
+              }
+              else
+                arr.splice(i, 1)
+            // }
+          }
+        }
+      }
+      // Check that this is not the resource that was send to me as to an employee
+      if (utils.getId(r.to) !== meId  ||  isMyProduct  ||  isItem) {
+        // Don't add this verification if it's for a previous copy of the document
+        // If the this is the newer copy remove the older and push this one
+        if (shareableResources[docType].length) {
+          let sr = shareableResources[docType]
+          for (let i=0; i<sr.length; i++) {
+            let d = sr[i].document
+            if (d[ROOT_HASH] !== r[ROOT_HASH])
+              continue
+            // Don't add the verification for teh previous copy of the document
+            if (!r[PREV_HASH] || d[PREV_HASH] === r[CUR_HASH])
+              return
+            if (r[PREV_HASH] === d[CUR_HASH]) {
+              sr.splice(i, 1)
+              break
+            }
+          }
+        }
+        shareableResources[docType].push(verification)
+        shareableResourcesRootToR[r[ROOT_HASH]] = r
+        addSharedWithProvider(verification)
+      }
+    }
+    function addSharedWithProvider(verification) {
+      let hash = verification.document[ROOT_HASH]
+      let o = shareableResourcesRootToOrgs[hash]
+      if (!o) {
+        o = []
+        shareableResourcesRootToOrgs[hash] = o
+      }
+      else {
+        let org = verification.organization
+        if (!org) {
+          if (verification._verifiedBy)
+            org = verification._verifiedBy
+          else {
+            let rep = self._getItem(verification.from)
+            org = rep && rep.organization
+          }
+        }
+
+        let oId = utils.getId(org)
+        let oo = o.filter((r) => utils.getId(r) === oId)
+        if (oo.length)
+          return
+      }
+      o.push(verification.organization)
+    }
+  },
+  async getShareableResourcesForEmployee(foundResources, to) {
+    if (!foundResources)
+      return
+    var verTypes = [];
+    var meId = utils.getId(me)
+    var simpleLinkMessages = {}
+    var meId = utils.getId(utils.getMe())
+
+    var hasVerifiers = []
+    for (var i=0; i<foundResources.length; i++) {
+      var r = foundResources[i]
+      if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
+        continue;
+      if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated)
+        continue;
+      if (utils.getId(r.to)  !==  meId)
+        continue
+      let rr = simpleLinkMessages[r.form]
+      if (rr) {
+        rr._documentCreated = true
+        this._getItem(utils.getId(rr))._documentCreated = true
+        continue
+      }
+      simpleLinkMessages[r.form] = r
+      var msgModel = this.getModel(r.form);
+
+      if (msgModel  &&  msgModel.subClassOf !== MY_PRODUCT  &&  !msgModel.notShareable) {
+        verTypes.push(msgModel.id);
+        if (r.verifiers)
+          hasVerifiers[msgModel.id] = r.verifiers
+      }
+    }
+    var shareableResources = {};
+    var shareableResourcesRootToR = {}
+    var shareableResourcesRootToOrgs = {}
+
+    var isOrg = to  &&  to[TYPE] === ORGANIZATION
+    var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
+    var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
+    var self = this
+    // var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
+    var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
+    if (productsToShare  &&  productsToShare.length) {
+      productsToShare.forEach((r) => {
+        let fromId = utils.getId(r.from)
+        if (r._sharedWith) {
+          let sw = r._sharedWith.filter((r) => {
+            if (reps.filter((rep) => {
+                    if (utils.getId(rep) === r.bankRepresentative)
+                      return true
+                  }).length)
+              return true
+          })
+          if (sw.length)
+            return
+        }
+        if (shareableResourcesRootToR[r[ROOT_HASH]]) {
+          let arr = shareableResources[r[TYPE]]
+          let skip
+          for (let i=0; i<arr.length  &&  !skip; i++) {
+            if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+              if (r.time < rr.time)
+                skip = true
+              else
+                arr.splice(i, 1)
+            }
+          }
+          if (skip)
+            return
+        }
+        let rr = {
+          [TYPE]: VERIFICATION,
+          document: r,
+          organization: this._getItem(utils.getId(r.from)).organization
+        }
+
+        addAndCheckShareable(rr)
+      })
+    }
+    if (!verTypes.length)
+      return {verifications: shareableResources}
+
+    // Allow sharing non-verified forms
+    let context = await this.getCurrentContext(to)
+    let repId
+    if (me.isEmployee) {
+      let rep = this.getRepresentative(utils.getId(me.organization))
+      repId = rep[ROOT_HASH]
+    }
+    let typeToDocs = {}
+    let docs = []
+    for (let i=0; i<verTypes.length; i++) {
+      let verType = verTypes[i]
+      if (hasVerifiers  &&  hasVerifiers[verType])
+        continue
+      var ll = await this.searchSharables({
+        modelName: verType,
+        search: me.isEmployee,
+        filterResource: {_author: repId}
+      })
+      if (!ll)
+        continue
+
+      typeToDocs[verType] = ll
+      ll.forEach((r) => docs.push(utils.getId(r)))
+      // ll.forEach((r) => {
+      //   if (r.verificationsCount)
+      //     return
+      //   if (checkIfWasShared(r))
+      //     return
+      //   if (me.isEmployee) {
+      //     if (!r._context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+      //       let rr = {
+      //         [TYPE]: VERIFICATION,
+      //         document: r,
+      //         organization: this._getItem(utils.getId(r.to)).organization
+      //       }
+      //       if (!shareableResources[verType])
+      //         shareableResources[verType] = []
+      //       shareableResources[verType].push(rr)
+      //       // addAndCheckShareable(rr)
+      //     }
+      //   }
+      //   if (!context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+      //     let rr = {
+      //       [TYPE]: VERIFICATION,
+      //       document: r,
+      //       organization: this._getItem(utils.getId(r.to)).organization
+      //     }
+      //     addAndCheckShareable(rr)
+      //   }
+      // })
+    }
+    if (!docs.length)
+      return
+    let toId = utils.getId(to)
+    // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
+    let l = await this.searchSharables({modelName: VERIFICATION, search: me.isEmployee, filterResource: {document: docs}})
+    if (l) { //  &&  !me.isEmployee)
+      let rep = me.isEmployee ? this.getRepresentative(utils.getId(me.organization)) : null
+      if (rep)
+        rep = utils.getId(rep)
+      l.forEach((val) => {
+        var id = utils.getId(val.to.id);
+        if (id !== meId) {
+          if (me.isEmployee  &&  id !== rep)
+            return
+        }
+
+        var doc = val.document
+        var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
+        if (verTypes.indexOf(docType) === -1)
+          return;
+        // Filter out the verification from the same company
+        // var fromId = utils.getId(val.from)
+        // var fromOrgId = utils.getId(this._getItem(fromId).organization)
+        // if (fromOrgId === toId)
+        //   return
+        let document = typeToDocs[docType].filter((d) => utils.getId(d) === doc.id)[0]
+
+        // var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
+        // if (!document  ||  document._inactive)
+        //   return;
+
+        if (checkIfWasShared(document))
+          return
+        // Check if there is at least one verification by the listed in FormRequest verifiers
+        if (hasVerifiers  &&  hasVerifiers[docType]) {
+          let verifiers = hasVerifiers[docType]
+          let foundVerifiedForm
+          verifiers.forEach((v) => {
+            let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
+            if (!provider.length)
+              return
+            let spReps = this.getRepresentatives(utils.getId(provider[0].org))
+            let sw = val._sharedWith.filter((r) => {
+              return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
+            })
+            if (sw.length)
+              foundVerifiedForm = true
+          })
+          if (!foundVerifiedForm)
+            return
+        }
+        var value = {};
+        extend(value, val);
+        value.document = document;
+
+        this.addVisualProps(value)
+        addAndCheckShareable(value)
+      })
+    }
+    // // Allow sharing non-verified forms
+    // let context = await this.getCurrentContext(to)
+    // let repId
+    // if (me.isEmployee) {
+    //   let rep = this.getRepresentative(utils.getId(me.organization))
+    //   repId = rep[ROOT_HASH]
+    // }
+    // for (let i=0; i<verTypes.length; i++) {
+    //   let verType = verTypes[i]
+    //   if (hasVerifiers  &&  hasVerifiers[verType])
+    //     continue
+    //   var ll = await this.searchSharables({
+    //     modelName: verType,
+    //     search: me.isEmployee,
+    //     filterResource: {_author: repId}
+    //   })
+    //   if (!ll)
+    //     continue
+
+    //   ll.forEach((r) => {
+    //     if (r.verificationsCount)
+    //       return
+    //     if (checkIfWasShared(r))
+    //       return
+    //     if (me.isEmployee) {
+    //       if (!r._context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+    //         let rr = {
+    //           [TYPE]: VERIFICATION,
+    //           document: r,
+    //           organization: this._getItem(utils.getId(r.to)).organization
+    //         }
+    //         if (!shareableResources[verType])
+    //           shareableResources[verType] = []
+    //         shareableResources[verType].push(rr)
+    //         // addAndCheckShareable(rr)
+    //       }
+    //     }
+    //     if (!context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+    //       let rr = {
+    //         [TYPE]: VERIFICATION,
+    //         document: r,
+    //         organization: this._getItem(utils.getId(r.to)).organization
+    //       }
+    //       addAndCheckShareable(rr)
+    //     }
+    //   })
+    // }
+    return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
+
+    function checkIfWasShared(document) {
+      if (document._sharedWith) {
+        if (document._sharedWith.some((r) => {
+          let org = self._getItem(r.bankRepresentative).organization
+          return org  &&  utils.getId(org) === toId
+        }))
+          return true
+      }
+    }
+    // Allow sharing only the last version of the resource
+    function addAndCheckShareable(verification) {
+      let r = verification.document
+
+      let docType = r[TYPE]
+      let docModel = self.getModel(docType)
+      let isMyProduct = docModel.subClassOf === MY_PRODUCT
+      let isItem = utils.isSavedItem(r)
+      // Allow sharing only of resources that were filled out by me
+      if (!isMyProduct) {
+        let fromId = utils.getId(r.from)
+        if (fromId !== utils.getId(me)) {
+          if (!me.isEmployee)
+            return
+          else {
+            let rep = self.getRepresentative(utils.getId(me.organization))
+            if (rep  &&  utils.getId(rep) !== fromId)
+              return
+          }
+        }
+      }
       if (to[TYPE] === ORGANIZATION  &&  !to._isTest) {
         let rToOrg = r.to.organization
         if (rToOrg) {
