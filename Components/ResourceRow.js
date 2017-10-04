@@ -4,7 +4,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 import LinearGradient from 'react-native-linear-gradient';
 var ArticleView = require('./ArticleView');
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 import Icon from 'react-native-vector-icons/Ionicons';
 var RowMixin = require('./RowMixin');
 var ResourceView = require('./ResourceView')

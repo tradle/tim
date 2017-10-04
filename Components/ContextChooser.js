@@ -2,7 +2,7 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var MessageList = require('./MessageList')
 var PageView = require('./PageView')
 import platformStyles from '../styles/platform'

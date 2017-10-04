@@ -9,7 +9,7 @@ var NewResource = require('./NewResource');
 var ProductChooser = require('./ProductChooser');
 var PhotoList = require('./PhotoList');
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 import uiUtils from './uiUtils'
 const {
   TYPE,

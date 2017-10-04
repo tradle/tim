@@ -2,7 +2,7 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var ArticleView = require('./ArticleView');
 var PhotoList = require('./PhotoList');
 var PhotoView = require('./PhotoView');

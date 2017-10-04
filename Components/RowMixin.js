@@ -4,7 +4,7 @@ const debug = require('debug')('tradle:app:RowMixin')
 var React = require('react');
 var utils = require('../utils/utils');
 var translate = utils.translate
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var Actions = require('../Actions/Actions');
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomIcon from '../styles/customicons'

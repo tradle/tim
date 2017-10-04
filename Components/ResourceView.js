@@ -21,7 +21,7 @@ var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var ENV = require('../utils/env')
 var StyleSheet = require('../StyleSheet')
 var extend = require('extend');
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 
 var HomePageMixin = require('./HomePageMixin')
 

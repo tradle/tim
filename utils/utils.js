@@ -60,7 +60,7 @@ var strMap = {
 const tradle = require('@tradle/engine')
 const protocol = tradle.protocol
 const tradleUtils = tradle.utils
-var constants = require('@tradle/constants');
+import constants from './constants'
 
 var {
   TYPE,
@@ -71,19 +71,20 @@ var {
   PREV_HASH,
   SIG
 } = constants
+
 var {
   VERIFICATION,
   MONEY,
   FORM,
   ORGANIZATION,
-  CUSTOMER_WAITING
+  CUSTOMER_WAITING,
+  MESSAGE,
+  ENVELOPE
 } = constants.TYPES
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 const MY_PRODUCT = 'tradle.MyProduct'
-const MESSAGE = constants.TYPES.MESSAGE
-const ENVELOPE = 'tradle.Message'
 const ITEM = 'tradle.Item'
 const DOCUMENT = 'tradle.Document'
 

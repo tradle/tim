@@ -22,7 +22,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 var rStyles = require('../styles/registrationStyles');
 var NewResourceMixin = require('./NewResourceMixin');
 var equal = require('deep-equal')
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var termsAndConditions = require('../termsAndConditions.json')
 var StyleSheet = require('../StyleSheet')
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'

@@ -2,7 +2,7 @@
 
 var utils = require('../utils/utils');
 var groupByEveryN = require('groupByEveryN');
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var reactMixin = require('react-mixin');
 var PhotoCarouselMixin = require('./PhotoCarouselMixin');
 var RowMixin = require('./RowMixin')

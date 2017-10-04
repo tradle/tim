@@ -4,7 +4,7 @@ var utils = require('../utils/utils');
 var translate = utils.translate
 var NewResource = require('./NewResource');
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin')
 var extend = require('extend')

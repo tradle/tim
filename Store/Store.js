@@ -137,26 +137,26 @@ const Cache = require('lru-cache')
 const NEXT_HASH = '_n'
 const LAST_MESSAGE_TIME = 'lastMessageTime'
 
-const constants = require('@tradle/constants')
+const constants = require('../utils/constants')
 const {
- ORGANIZATION,
- IDENTITY,
- IDENTITY_PUBLISHING_REQUEST,
- MESSAGE,
- SIMPLE_MESSAGE,
- FINANCIAL_PRODUCT,
- PROFILE,
- VERIFICATION,
- FORM,
- MODEL,
- CUSTOMER_WAITING ,
- SELF_INTRODUCTION,
- FORGET_ME,
- FORGOT_YOU,
- SETTINGS,
+  ORGANIZATION,
+  IDENTITY,
+  IDENTITY_PUBLISHING_REQUEST,
+  MESSAGE,
+  ENVELOPE,
+  SIMPLE_MESSAGE,
+  FINANCIAL_PRODUCT,
+  PROFILE,
+  VERIFICATION,
+  FORM,
+  MODEL,
+  CUSTOMER_WAITING,
+  SELF_INTRODUCTION,
+  FORGET_ME,
+  FORGOT_YOU,
+  SETTINGS,
 } = constants.TYPES
 
-const ENVELOPE = 'tradle.Message'
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
 // const SHARED_RESOURCE     = 'tradle.SharedResource'

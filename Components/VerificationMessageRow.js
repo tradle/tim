@@ -6,7 +6,7 @@ var MessageView = require('./MessageView');
 var NewResource = require('./NewResource');
 import CustomIcon from '../styles/customicons'
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 // var BG_IMAGE = require('../img/verificationBg.jpg')

@@ -12,7 +12,7 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var reactMixin = require('react-mixin');
 var extend = require('extend');
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 
 import {
   ListView,

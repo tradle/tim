@@ -10,17 +10,19 @@ var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin');
 var ShowPropertiesView = require('./ShowPropertiesView')
 var Actions = require('../Actions/Actions');
-var constants = require('@tradle/constants')
-const {
+import constants, {
+  TYPES,
   TYPE,
   ROOT_HASH
-} = constants
+} from '../utils/constants'
+
 const {
   VERIFICATION,
+  PRODUCT_APPLICATION,
   ORGANIZATION,
   PROFILE,
   FORM
-} = constants.TYPES
+} = TYPES
 
 import { makeResponsive } from 'react-native-orient'
 

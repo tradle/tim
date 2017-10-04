@@ -11,7 +11,7 @@ import utils from '../utils/utils'
 var translate = utils.translate
 import Icon from 'react-native-vector-icons/Ionicons'
 const REMEDIATION = 'tradle.Remediation'
-var constants = require('@tradle/constants');
+const constants = require('../utils/constants');
 const PROFILE = constants.TYPES.PROFILE
 
 class ChatContext extends Component {

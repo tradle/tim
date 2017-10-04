@@ -8,7 +8,7 @@ var reactMixin = require('react-mixin');
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var MessageList = require('./MessageList')
 var PageView = require('./PageView')
 import platformStyles from '../styles/platform'

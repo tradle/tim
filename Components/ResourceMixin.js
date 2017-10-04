@@ -7,7 +7,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 var equal = require('deep-equal')
 var StyleSheet = require('../StyleSheet')
 var PhotoList = require('./PhotoList')
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var Accordion = require('./Accordion')
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
 

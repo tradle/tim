@@ -8,7 +8,7 @@ var NewResource = require('./NewResource');
 var dateformat = require('dateformat')
 var PhotoList = require('./PhotoList');
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 import { makeResponsive } from 'react-native-orient'

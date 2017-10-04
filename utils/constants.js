@@ -1,4 +1,10 @@
 import constants from '@tradle/constants'
-constants.TYPES.MESSAGE = 'tradle.ChatItem'
 
-module.exports = constants
+module.exports = {
+  ...constants,
+  TYPES: {
+    ...constants.TYPES,
+    MESSAGE: 'tradle.ChatItem',
+    ENVELOPE: 'tradle.Message'
+  }
+}

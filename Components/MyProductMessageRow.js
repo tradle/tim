@@ -5,7 +5,7 @@ var translate = utils.translate
 var ArticleView = require('./ArticleView');
 var NewResource = require('./NewResource');
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var RowMixin = require('./RowMixin');
 var equal = require('deep-equal')
 var chatStyles = require('../styles/chatStyles')

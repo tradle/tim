@@ -12,7 +12,7 @@ import {
 import React, { Component } from 'react'
 import utils from '../utils/utils'
 var translate = utils.translate
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 const TYPE = constants.TYPE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 

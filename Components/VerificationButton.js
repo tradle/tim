@@ -3,7 +3,7 @@
 var utils = require('../utils/utils');
 import Icon from 'react-native-vector-icons/Ionicons';
 var reactMixin = require('react-mixin');
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var buttonStyles = require('../styles/buttonStyles');
 
 import {

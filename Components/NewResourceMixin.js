@@ -37,7 +37,7 @@ var Markdown = require('./Markdown')
 
 var format = require('string-template')
 
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
 var extend = require('extend');

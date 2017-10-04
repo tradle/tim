@@ -6,7 +6,7 @@ var translate = utils.translate
 var NewResource = require('./NewResource');
 var RemediationItemsList = require('./RemediationItemsList')
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var ResourceList = require('./ResourceList')
 var RowMixin = require('./RowMixin');
 var CameraView = require('./CameraView')

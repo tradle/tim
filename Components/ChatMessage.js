@@ -1,7 +1,7 @@
 'use strict'
 
 var utils = require('../utils/utils');
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var TimerMixin = require('react-timer-mixin')
 var reactMixin = require('react-mixin');
 

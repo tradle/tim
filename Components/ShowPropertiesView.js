@@ -3,7 +3,7 @@
 // var ArticleView = require('./ArticleView');
 var utils = require('../utils/utils');
 var translate = utils.translate
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 var RowMixin = require('./RowMixin')
 var ResourceMixin = require('./ResourceMixin')
 var reactMixin = require('react-mixin')

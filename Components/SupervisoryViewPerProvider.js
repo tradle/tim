@@ -9,7 +9,7 @@ var extend = require('extend')
 var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 import Icon from 'react-native-vector-icons/Ionicons';
 var buttonStyles = require('../styles/buttonStyles');
 var NetworkInfoProvider = require('./NetworkInfoProvider')

@@ -8,7 +8,7 @@ import ImagePicker from 'react-native-image-picker';
 var extend = require('extend')
 var equal = require('deep-equal')
 import Icon from 'react-native-vector-icons/Ionicons'
-var constants = require('@tradle/constants');
+var constants = require('../utils/constants');
 // import ActionSheet from 'react-native-actionsheet'
 
 import {
