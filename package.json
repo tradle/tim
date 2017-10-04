@@ -44,12 +44,20 @@
     "@tradle/engine": "^5.1.1",
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.1.0",
+<<<<<<< Updated upstream
     "@tradle/models": "github:tradle/models#3718480",
+=======
+    "@tradle/models": "github:tradle/models#8c86a1f",
+>>>>>>> Stashed changes
     "@tradle/multiqueue": "2.1.0",
     "@tradle/protocol": "^3.0.0",
     "@tradle/qr-schema": "^1.1.0",
     "@tradle/restore": "github:tradle/restore",
+<<<<<<< Updated upstream
     "@tradle/validate-model": "^2.3.0",
+=======
+    "@tradle/validate-model": "^2.2.0",
+>>>>>>> Stashed changes
     "@tradle/validate-resource": "^2.5.0",
     "@tradle/yuki": "^1.1.0",
     "any-promise": "1.3.0",

@@ -5370,21 +5370,6 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
         // if (!props[p]  ||  p.charAt(0) === '_')
         //   continue
         let val = filterResource[p]
-        // if (p === TYPE) {
-        //   if (!Array.isArray(val))
-        //     continue
-        //   else {
-        //     let s = `${p}: [`
-        //     val.forEach((r, i) => {
-        //       if (i)
-        //         s += ', '
-        //       s += `"${r}"`
-        //     })
-        //     s += ']'
-        //     inClause.push(s)
-        //   }
-        // }
-
         // if (p.charAt(0) === '_')
         //   debugger
         if (!props[p]  &&  p.charAt(0) === '_'  &&  val) {
