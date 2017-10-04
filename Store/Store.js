@@ -582,7 +582,6 @@ var Store = Reflux.createStore({
   },
   async newObject (msg) {
     let {objectinfo, link} = msg
-
     let objId = utils.getId({
       [TYPE]: objectinfo.type,
       [ROOT_HASH]: objectinfo.permalink,
@@ -593,11 +592,16 @@ var Store = Reflux.createStore({
       return
 
     let obj = await this._keeper.get(link)
+
+    // debugger
+
     msg.object = utils.clone(obj)
 
     this.maybeWatchSeal(msg)
 
     const payload = msg.object.object
+debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[TYPE])
+
     if (payload[TYPE] === MESSAGE) {
       try {
         const { link, permalink } = await meDriver.saveObject({ object: payload.object })
@@ -1388,7 +1392,7 @@ var Store = Reflux.createStore({
       // leave only the last PL
       if (r[TYPE] === FORM_REQUEST) {
         let m = this.getModel(r.form)
-        if (utils.isContext(m)) {
+        if (m  &&  utils.isContext(m)) {
           if (!pl)
             pl = i
           else
@@ -2815,8 +2819,6 @@ var Store = Reflux.createStore({
     rr._sendStatus = self.isConnected ? SENDING : QUEUED
     var noCustomerWaiting
     // let firstTime
-    let promise
-
     return this._loadedResourcesDefer.promise
     .then(() => {
       let promise = isContext
@@ -2849,7 +2851,7 @@ var Store = Reflux.createStore({
       rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
       if (isContext) {
         rr._context = r._context = {id: utils.getId(r), title: r.product}
-        contextIdToResourceId[r.contextId] = utils.getId(rr)
+        contextIdToResourceId[rr.contextId] = utils.getId(rr)
 
         // let params = {
         //   action: 'addItem',
@@ -3283,7 +3285,10 @@ var Store = Reflux.createStore({
     let { r, dontSend, notOneClickVerification } = params
 
     let to = params.to || [r.to]
-    let document = params.document || r.document
+    let docId = utils.getId(params.document || r.document)
+    let document = this._getItem(docId)
+    if (!document  &&  me.isEmployee)
+      document = await this._getItemFromServer(docId)
 
     // if (__DEV__) {
     //   let newV = newVerificationTree(r, 4)
@@ -3319,7 +3324,6 @@ var Store = Reflux.createStore({
     newVerification = this.buildRef(r, dontSend)
     let context = r._context
     if (!context) {
-      document = this._getItem(utils.getId(document))
       context = document._context
       if (context)
         r._context = context
@@ -3350,10 +3354,11 @@ var Store = Reflux.createStore({
         let c = this._getItem(utils.getId(r._context));
         isReadOnly = utils.isReadOnlyChat(c) //c  &&  c._readOnly
       }
+      // let docId = utils.getId(r.document)
+      let doc = document // this._getItem(r.document)
       if (!isReadOnly) {
-        let vr = this._getItem(r.document)
-        vr._verificationsCount = !vr._verificationsCount ? 1 : ++vr._verificationsCount
-        this.dbBatchPut(utils.getId(vr), vr, batch);
+        doc._verificationsCount = !doc._verificationsCount ? 1 : ++doc._verificationsCount
+        this.dbBatchPut(docId, doc, batch);
 
         this.addBacklinksTo(ADD, me, r, batch)
         this.setMe(me)
@@ -3361,14 +3366,12 @@ var Store = Reflux.createStore({
         this.addBacklinksTo(ADD, this._getItem(r.from), r, batch)
       }
       if (r.sources) {
-        let docId = utils.getId(r.document)
         let docs = []
         getDocs(r.sources, docId, docs)
         let supportingDocs = docs.map((r) => this.buildRef(r, dontSend))
-        let d = this._getItem(docId)
-        d._supportingDocuments = supportingDocs
-        this.dbPut(docId, d)
-        this._setItem(docId, d)
+        doc._supportingDocuments = supportingDocs
+        this.dbPut(docId, doc)
+        this._setItem(docId, doc)
       }
       await db.batch(batch)
 
@@ -3404,31 +3407,29 @@ var Store = Reflux.createStore({
         this.trigger({action: 'addItem', resource: r});
       else
         this.trigger({action: 'addVerification', resource: r});
-      if (!this._getItem(document))
+      if (!doc)
         return
 
-      var verificationRequestId = utils.getId(r.document);
-      var verificationRequest = this._getItem(verificationRequestId)
       if (!r.txId) {
-        if (!verificationRequest.verifications)
-          verificationRequest.verifications = [];
-        verificationRequest.verifications.push(newVerification);
+        if (!doc.verifications)
+          doc.verifications = [];
+        doc.verifications.push(newVerification);
       }
       else {
-        for (var i=0; i<verificationRequest.verifications.length; i++) {
-          if (utils.getId(verificationRequest.verifications).split('_')[1] === r[ROOT_HASH])
-            verificationRequest.verifications.push(newVerification)
+        for (var i=0; i<doc.verifications.length; i++) {
+          if (utils.getId(doc.verifications).split('_')[1] === r[ROOT_HASH])
+            doc.verifications.push(newVerification)
         }
       }
-      this.trigger({action: 'getItem', resource: verificationRequest})
+      this.trigger({action: 'getItem', resource: doc})
       // if (!verificationRequest._sharedWith)
       //   verificationRequest._sharedWith = []
       // verificationRequest._sharedWith.push(fromId)
-      await this.dbPut(verificationRequestId, verificationRequest);
+      await this.dbPut(docId, doc);
     }
     catch(err) {
       debugger
-      err = err
+      console.log('onAddVerification', err)
     }
     function getDocs(varr, rId, docs) {
       if (!varr)
@@ -3503,13 +3504,6 @@ var Store = Reflux.createStore({
       let r = await this._getItemFromServer(rId)
       let retParams = { resource: r, action: 'getItem' }
       this.trigger(retParams)
-      //   let retParams = { resource: r, action: 'getItem' }
-      //   this.trigger(retParams)
-      // }
-      // catch(err) {
-      //   console.log('onGetItem', err)
-      //   debugger
-      // }
       return
     }
     let r = this._getItem(rId)
@@ -3527,31 +3521,6 @@ var Store = Reflux.createStore({
     if (!resModel) {
       throw new Error(`missing model for ${res[TYPE]}`)
     }
-/*
-    var props = resModel.properties;
-    for (var p in props) {
-      if (p.charAt(0) === '_'  ||  props[p].hidden)
-        continue;
-      var items = props[p].items;
-      if (!items  ||  !items.backlink)
-        continue;
-      var backlink = items.backlink;
-      var itemsModel = this.getModel(items.ref);
-      var params = {
-        modelName: items.ref,
-        to: resource,
-        meta: itemsModel,
-        prop: props[p],
-        props: itemsModel.properties
-      }
-      var meta = this.getModel(items.ref)
-      var isMessage = utils.isMessage(meta)
-
-      var result = isMessage ? await this.searchMessages(params) : this.searchNotMessages(params)
-      if (result  &&  result.length)
-        resource[p] = result;
-    }
-    */
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
     if (noTrigger)
@@ -4676,7 +4645,9 @@ var Store = Reflux.createStore({
 
     let batch = []
     // Get the whole resource
-    document = this._getItem(utils.getId(document))
+    if (!document[ROOT_HASH])
+      document = this._getItem(utils.getId(document))
+
     // let verifications
     // if (document.verifications)
     //   verifications = document.verifications
@@ -4728,7 +4699,8 @@ var Store = Reflux.createStore({
   },
   shareForm(document, to, opts, shareBatchId) {
     var time = new Date().getTime()
-    return this.meDriverSend({...opts, link: this._getItem(document)[CUR_HASH]})
+    let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
+    return this.meDriverSend({...opts, link: hash})
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
@@ -5371,7 +5343,7 @@ var Store = Reflux.createStore({
   },
   async searchServer(params) {
     let self = this
-    let {modelName, filterResource, sortProperty, asc, limit, direction, first} = params
+    let {modelName, filterResource, sortProperty, asc, limit, direction, first, noTrigger} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -5390,13 +5362,36 @@ var Store = Reflux.createStore({
       LT: '',
       LTE: '',
     }
-
+    let exclude = [ROOT_HASH, CUR_HASH, TYPE]
     if (filterResource) {
       for (let p in filterResource) {
-        if (!props[p]  ||  p.charAt(0) === '_')
+        if (exclude.indexOf(p) !== -1)
           continue
+        // if (!props[p]  ||  p.charAt(0) === '_')
+        //   continue
         let val = filterResource[p]
-        if (props[p].type === 'string'  &&  (!val  ||  !val.trim().length))
+        // if (p === TYPE) {
+        //   if (!Array.isArray(val))
+        //     continue
+        //   else {
+        //     let s = `${p}: [`
+        //     val.forEach((r, i) => {
+        //       if (i)
+        //         s += ', '
+        //       s += `"${r}"`
+        //     })
+        //     s += ']'
+        //     inClause.push(s)
+        //   }
+        // }
+
+        // if (p.charAt(0) === '_')
+        //   debugger
+        if (!props[p]  &&  p.charAt(0) === '_'  &&  val) {
+          op.EQ += `\n   ${p}: "${val}",`
+          continue
+        }
+        else if (props[p].type === 'string'  &&  (!val  ||  !val.trim().length))
           continue
         if (props[p].type === 'string') {
           let len = val.length
@@ -5466,13 +5461,14 @@ var Store = Reflux.createStore({
     }
     query += '('
     let hasFilter = qq.length
-    if (first  ||  !cursor  ||  cursor.modelName !== modelName)
-      cursor = {}
+    if (first  ||  cursor.modelName !== modelName) {
+      cursor = {endCursor: []}
+    }
     if (limit) {
       if (cursor) {
         if (cursor.filter) {
           if (!filterResource  ||  deepEqual(filterResource,  cursor.filter))
-            cursor = {}
+            cursor = {endCursor: []}
         }
       }
       cursor.endCursor = cursor.endCursor || []
@@ -5562,7 +5558,9 @@ var Store = Reflux.createStore({
       let to = this.getRepresentative(utils.getId(me.organization))
       let toId = utils.getId(to)
       let list = result.edges.map((r) => this.convertToResource(r.node))
-      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
+      if (!noTrigger)
+        this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
+      return list
     } catch(error) {
       // debugger
       console.error(error)
@@ -6060,6 +6058,7 @@ var Store = Reflux.createStore({
     var {resource, query, modelName, prop, context, _readOnly, to, listView, isForgetting, lastId, limit} = params
 
     var meta = this.getModel(modelName)
+
     var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
     if (_readOnly  &&  modelName === PRODUCT_APPLICATION)
       return this.getAllSharedContexts()
@@ -6927,6 +6926,8 @@ var Store = Reflux.createStore({
   async getShareableResources(foundResources, to) {
     if (!foundResources)
       return
+    if (me.isEmployee)
+      return this.getShareableResourcesForEmployee(foundResources, to)
     var verTypes = [];
     var meId = utils.getId(me)
     var simpleLinkMessages = {}
@@ -6974,7 +6975,8 @@ var Store = Reflux.createStore({
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
     var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
     var self = this
-    var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
+    // var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
+    var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
     if (productsToShare  &&  productsToShare.length) {
       productsToShare.forEach((r) => {
         let fromId = utils.getId(r.from)
@@ -7014,15 +7016,20 @@ var Store = Reflux.createStore({
     }
     if (!verTypes.length)
       return {verifications: shareableResources}
-
     let toId = utils.getId(to)
-    let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
-    if (!l)
+    // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
+    let l = await this.searchSharables({modelName: VERIFICATION, search: me.isEmployee, filterResource: {[TYPE]: verTypes}})
+    if (!l) //  &&  !me.isEmployee)
       return
+    let rep = me.isEmployee ? this.getRepresentative(utils.getId(me.organization)) : null
+    if (rep)
+      rep = utils.getId(rep)
     l.forEach((val) => {
       var id = utils.getId(val.to.id);
-      if (id !== meId)
-        return
+      if (id !== meId) {
+        if (me.isEmployee  &&  id !== rep)
+          return
+      }
 
       var doc = val.document
       var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
@@ -7092,11 +7099,21 @@ var Store = Reflux.createStore({
     })
     // Allow sharing non-verified forms
     let context = await this.getCurrentContext(to)
+    let repId
+    if (me.isEmployee) {
+      let rep = this.getRepresentative(utils.getId(me.organization))
+      repId = rep[ROOT_HASH]
+    }
     for (let i=0; i<verTypes.length; i++) {
       let verType = verTypes[i]
       if (hasVerifiers  &&  hasVerifiers[verType])
         return
-      var ll = await this.searchMessages({modelName: verType, search: me.isEmployee})
+      var ll = await this.searchSharables({
+        modelName: verType,
+        search: me.isEmployee,
+        filterResource: {_author: repId}
+      })
+      // var ll = await this.searchMessages({modelName: verType, search: me.isEmployee})
       // var l = this.searchNotMessages({modelName: verType, notVerified: true})
       if (!ll)
         return
@@ -7106,6 +7123,19 @@ var Store = Reflux.createStore({
           return
         if (checkIfWasShared(r))
           return
+        if (me.isEmployee) {
+          if (!r._context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+            let rr = {
+              [TYPE]: VERIFICATION,
+              document: r,
+              organization: this._getItem(utils.getId(r.to)).organization
+            }
+            if (!shareableResources[verType])
+              shareableResources[verType] = []
+            shareableResources[verType].push(rr)
+            // addAndCheckShareable(rr)
+          }
+        }
         if (!context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
           let rr = {
             [TYPE]: VERIFICATION,
@@ -7217,6 +7247,365 @@ var Store = Reflux.createStore({
       o.push(verification.organization)
     }
   },
+  async getShareableResourcesForEmployee(foundResources, to) {
+    if (!foundResources)
+      return
+    var verTypes = [];
+    var meId = utils.getId(me)
+    var simpleLinkMessages = {}
+    var meId = utils.getId(utils.getMe())
+
+    var hasVerifiers = []
+    for (var i=0; i<foundResources.length; i++) {
+      var r = foundResources[i]
+      if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
+        continue;
+      if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated)
+        continue;
+      if (utils.getId(r.to)  !==  meId)
+        continue
+      let rr = simpleLinkMessages[r.form]
+      if (rr) {
+        rr._documentCreated = true
+        this._getItem(utils.getId(rr))._documentCreated = true
+        continue
+      }
+      simpleLinkMessages[r.form] = r
+      var msgModel = this.getModel(r.form);
+
+      if (msgModel  &&  msgModel.subClassOf !== MY_PRODUCT  &&  !msgModel.notShareable) {
+        verTypes.push(msgModel.id);
+        if (r.verifiers)
+          hasVerifiers[msgModel.id] = r.verifiers
+      }
+    }
+    var shareableResources = {};
+    var shareableResourcesRootToR = {}
+    var shareableResourcesRootToOrgs = {}
+
+    var isOrg = to  &&  to[TYPE] === ORGANIZATION
+    var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
+    var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
+    var self = this
+    // var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
+    var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
+    if (productsToShare  &&  productsToShare.length) {
+      productsToShare.forEach((r) => {
+        let fromId = utils.getId(r.from)
+        if (r._sharedWith) {
+          let sw = r._sharedWith.filter((r) => {
+            if (reps.filter((rep) => {
+                    if (utils.getId(rep) === r.bankRepresentative)
+                      return true
+                  }).length)
+              return true
+          })
+          if (sw.length)
+            return
+        }
+        if (shareableResourcesRootToR[r[ROOT_HASH]]) {
+          let arr = shareableResources[r[TYPE]]
+          let skip
+          for (let i=0; i<arr.length  &&  !skip; i++) {
+            if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+              if (r.time < rr.time)
+                skip = true
+              else
+                arr.splice(i, 1)
+            }
+          }
+          if (skip)
+            return
+        }
+        let rr = {
+          [TYPE]: VERIFICATION,
+          document: r,
+          organization: this._getItem(utils.getId(r.from)).organization
+        }
+
+        addAndCheckShareable(rr)
+      })
+    }
+    if (!verTypes.length)
+      return {verifications: shareableResources}
+
+    // Allow sharing non-verified forms
+    let context = await this.getCurrentContext(to)
+    let repId
+    if (me.isEmployee) {
+      let rep = this.getRepresentative(utils.getId(me.organization))
+      repId = rep[ROOT_HASH]
+    }
+    let typeToDocs = {}
+    let docs = []
+    for (let i=0; i<verTypes.length; i++) {
+      let verType = verTypes[i]
+      if (hasVerifiers  &&  hasVerifiers[verType])
+        continue
+      var ll = await this.searchSharables({
+        modelName: verType,
+        search: me.isEmployee,
+        filterResource: {_author: repId}
+      })
+      if (!ll)
+        continue
+
+      typeToDocs[verType] = ll
+      ll.forEach((r) => docs.push(utils.getId(r)))
+      // ll.forEach((r) => {
+      //   if (r.verificationsCount)
+      //     return
+      //   if (checkIfWasShared(r))
+      //     return
+      //   if (me.isEmployee) {
+      //     if (!r._context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+      //       let rr = {
+      //         [TYPE]: VERIFICATION,
+      //         document: r,
+      //         organization: this._getItem(utils.getId(r.to)).organization
+      //       }
+      //       if (!shareableResources[verType])
+      //         shareableResources[verType] = []
+      //       shareableResources[verType].push(rr)
+      //       // addAndCheckShareable(rr)
+      //     }
+      //   }
+      //   if (!context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+      //     let rr = {
+      //       [TYPE]: VERIFICATION,
+      //       document: r,
+      //       organization: this._getItem(utils.getId(r.to)).organization
+      //     }
+      //     addAndCheckShareable(rr)
+      //   }
+      // })
+    }
+    if (!docs.length)
+      return
+    let toId = utils.getId(to)
+    // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
+    let l = await this.searchSharables({modelName: VERIFICATION, search: me.isEmployee, filterResource: {document: docs}})
+    if (l) { //  &&  !me.isEmployee)
+      let rep = me.isEmployee ? this.getRepresentative(utils.getId(me.organization)) : null
+      if (rep)
+        rep = utils.getId(rep)
+      l.forEach((val) => {
+        var id = utils.getId(val.to.id);
+        if (id !== meId) {
+          if (me.isEmployee  &&  id !== rep)
+            return
+        }
+
+        var doc = val.document
+        var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
+        if (verTypes.indexOf(docType) === -1)
+          return;
+        // Filter out the verification from the same company
+        // var fromId = utils.getId(val.from)
+        // var fromOrgId = utils.getId(this._getItem(fromId).organization)
+        // if (fromOrgId === toId)
+        //   return
+        let document = typeToDocs[docType].filter((d) => utils.getId(d) === doc.id)[0]
+
+        // var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
+        // if (!document  ||  document._inactive)
+        //   return;
+
+        if (checkIfWasShared(document))
+          return
+        // Check if there is at least one verification by the listed in FormRequest verifiers
+        if (hasVerifiers  &&  hasVerifiers[docType]) {
+          let verifiers = hasVerifiers[docType]
+          let foundVerifiedForm
+          verifiers.forEach((v) => {
+            let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
+            if (!provider.length)
+              return
+            let spReps = this.getRepresentatives(utils.getId(provider[0].org))
+            let sw = val._sharedWith.filter((r) => {
+              return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
+            })
+            if (sw.length)
+              foundVerifiedForm = true
+          })
+          if (!foundVerifiedForm)
+            return
+        }
+        var value = {};
+        extend(value, val);
+        value.document = document;
+
+        this.addVisualProps(value)
+        addAndCheckShareable(value)
+      })
+    }
+    // // Allow sharing non-verified forms
+    // let context = await this.getCurrentContext(to)
+    // let repId
+    // if (me.isEmployee) {
+    //   let rep = this.getRepresentative(utils.getId(me.organization))
+    //   repId = rep[ROOT_HASH]
+    // }
+    // for (let i=0; i<verTypes.length; i++) {
+    //   let verType = verTypes[i]
+    //   if (hasVerifiers  &&  hasVerifiers[verType])
+    //     continue
+    //   var ll = await this.searchSharables({
+    //     modelName: verType,
+    //     search: me.isEmployee,
+    //     filterResource: {_author: repId}
+    //   })
+    //   if (!ll)
+    //     continue
+
+    //   ll.forEach((r) => {
+    //     if (r.verificationsCount)
+    //       return
+    //     if (checkIfWasShared(r))
+    //       return
+    //     if (me.isEmployee) {
+    //       if (!r._context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+    //         let rr = {
+    //           [TYPE]: VERIFICATION,
+    //           document: r,
+    //           organization: this._getItem(utils.getId(r.to)).organization
+    //         }
+    //         if (!shareableResources[verType])
+    //           shareableResources[verType] = []
+    //         shareableResources[verType].push(rr)
+    //         // addAndCheckShareable(rr)
+    //       }
+    //     }
+    //     if (!context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
+    //       let rr = {
+    //         [TYPE]: VERIFICATION,
+    //         document: r,
+    //         organization: this._getItem(utils.getId(r.to)).organization
+    //       }
+    //       addAndCheckShareable(rr)
+    //     }
+    //   })
+    // }
+    return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
+
+    function checkIfWasShared(document) {
+      if (document._sharedWith) {
+        if (document._sharedWith.some((r) => {
+          let org = self._getItem(r.bankRepresentative).organization
+          return org  &&  utils.getId(org) === toId
+        }))
+          return true
+      }
+    }
+    // Allow sharing only the last version of the resource
+    function addAndCheckShareable(verification) {
+      let r = verification.document
+
+      let docType = r[TYPE]
+      let docModel = self.getModel(docType)
+      let isMyProduct = docModel.subClassOf === MY_PRODUCT
+      let isItem = utils.isSavedItem(r)
+      // Allow sharing only of resources that were filled out by me
+      if (!isMyProduct) {
+        let fromId = utils.getId(r.from)
+        if (fromId !== utils.getId(me)) {
+          if (!me.isEmployee)
+            return
+          else {
+            let rep = self.getRepresentative(utils.getId(me.organization))
+            if (rep  &&  utils.getId(rep) !== fromId)
+              return
+          }
+        }
+      }
+      if (to[TYPE] === ORGANIZATION  &&  !to._isTest) {
+        let rToOrg = r.to.organization
+        if (rToOrg) {
+          if (self._getItem(rToOrg)._isTest)
+            return
+        }
+      }
+
+      var v = shareableResources[docType];
+      if (!v)
+        shareableResources[docType] = [];
+      else if (verification.from  &&   shareableResourcesRootToR[r[ROOT_HASH]]) {
+        let arr = shareableResources[r[TYPE]]
+        let vFromId = utils.getId(verification.from)
+        for (let i=0; i<arr.length; i++) {
+          let rr = arr[i].document
+          if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+            // if (utils.getId(arr[i].from) === vFromId) {
+              if (r.time < rr.time) {
+                addSharedWithProvider(verification)
+                return
+              }
+              else
+                arr.splice(i, 1)
+            // }
+          }
+        }
+      }
+      // Check that this is not the resource that was send to me as to an employee
+      if (utils.getId(r.to) !== meId  ||  isMyProduct  ||  isItem) {
+        // Don't add this verification if it's for a previous copy of the document
+        // If the this is the newer copy remove the older and push this one
+        if (shareableResources[docType].length) {
+          let sr = shareableResources[docType]
+          for (let i=0; i<sr.length; i++) {
+            let d = sr[i].document
+            if (d[ROOT_HASH] !== r[ROOT_HASH])
+              continue
+            // Don't add the verification for teh previous copy of the document
+            if (!r[PREV_HASH] || d[PREV_HASH] === r[CUR_HASH])
+              return
+            if (r[PREV_HASH] === d[CUR_HASH]) {
+              sr.splice(i, 1)
+              break
+            }
+          }
+        }
+        shareableResources[docType].push(verification)
+        shareableResourcesRootToR[r[ROOT_HASH]] = r
+        addSharedWithProvider(verification)
+      }
+    }
+    function addSharedWithProvider(verification) {
+      let hash = verification.document[ROOT_HASH]
+      let o = shareableResourcesRootToOrgs[hash]
+      if (!o) {
+        o = []
+        shareableResourcesRootToOrgs[hash] = o
+      }
+      else {
+        let org = verification.organization
+        if (!org) {
+          if (verification._verifiedBy)
+            org = verification._verifiedBy
+          else {
+            let rep = self._getItem(verification.from)
+            org = rep && rep.organization
+          }
+        }
+
+        let oId = utils.getId(org)
+        let oo = o.filter((r) => utils.getId(r) === oId)
+        if (oo.length)
+          return
+      }
+      o.push(verification.organization)
+    }
+  },
+  async searchSharables(params) {
+    let { modelName, search } = params
+    if (!search)
+      return await this.searchMessages(params)
+    extend(params, {noTrigger: true})
+    let meta = this.getModel(modelName)
+    if (me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION)
+      return await this.searchServer(params)
+  },
+
   getNonce() {
     return crypto.randomBytes(32).toString('hex')
   },
@@ -8558,6 +8947,8 @@ var Store = Reflux.createStore({
       if (isMessage) {
         // if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
         //   return
+        if (this._getItem(utils.getId(val)))
+          return
         noTrigger = await this.putMessageInDB(val, obj, batch, onMessage)
         if (type === VERIFICATION)
           return
@@ -8805,7 +9196,10 @@ var Store = Reflux.createStore({
     let contextId
     if (obj.object  &&  obj.object.context) {
       contextId = contextIdToResourceId[obj.object.context]
-      let context = this._getItem(contextId)
+// HACK
+      if (!contextId)
+        contextId = utils.makeId(PRODUCT_APPLICATION, obj.object.context)
+      // let context = this._getItem(contextId)
       // let r = await meDriver.objects.get({link: context[CUR_HASH], body: false})
       // contextId = utils.makeId(context)
     }
@@ -8856,6 +9250,8 @@ var Store = Reflux.createStore({
           id: utils.getId(me),
           title: me.formatted || me.firstName
         }
+        to = me
+        toId = meId
       }
       else
         val.to = {

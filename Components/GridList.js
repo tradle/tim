@@ -765,6 +765,7 @@ class GridList extends Component {
             passProps: {
               model: m,
               resource: resource,
+              search: search,
               serverOffline: this.props.serverOffline,
               bankStyle: this.props.bankStyle || defaultBankStyle
             }

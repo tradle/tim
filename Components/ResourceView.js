@@ -120,10 +120,10 @@ class ResourceView extends Component {
       currentRoutes[len - 1].onRightButtonPress = this.props.action.bind(this)
   }
   componentWillMount() {
-    let resource = this.props.resource
+    let { resource, search } = this.props
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
-    if (resource.id || resource[constants.ROOT_HASH])
-      Actions.getItem({resource: resource})
+    if (resource.id || !resource[constants.ROOT_HASH])
+      Actions.getItem( {resource: resource, search: search} )
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
