@@ -1797,11 +1797,11 @@ var NewResourceMixin = {
       }
       if (prop.type === 'number') {
         coerceNumber(value, p)
-        checkNumber(value[p], prop, err)
+        this.checkNumber(value[p], prop, err)
       }
       else if (prop.ref === constants.TYPES.MONEY) {
         coerceNumber(value[p], 'value')
-        let error = checkNumber(value[p].value, prop, err)
+        let error = this.checkNumber(value[p].value, prop, err)
         if (error  &&  m.required.indexOf(p) === -1)
           deleteProps.push(p)
         else if (!value[p].currency)
@@ -1810,12 +1810,12 @@ var NewResourceMixin = {
       else if (prop.units && prop.units === '[min - max]') {
         let v = value[p].split('-').map(coerceNumber)
         if (v.length === 1)
-          checkNumber(v[0], prop, err)
+          this.checkNumber(v[0], prop, err)
         else if (v.length === 2) {
-          checkNumber(v[0], prop, err)
+          this.checkNumber(v[0], prop, err)
           if (err[p])
             continue
-          checkNumber(v[1], prop, err)
+          this.checkNumber(v[1], prop, err)
           if (!err[p])
             continue
           if (v[1] < v[0])
