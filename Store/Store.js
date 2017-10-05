@@ -1180,6 +1180,11 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       autoincrement: false
     })
 
+    collect(multiqueue.createReadStream({
+      queue: 'eaeeaff0851cf2e1d3e266b0553484c91e7949ebcfc912584666fef631b737a8'
+    }))
+    .then(results => console.log('multiqueue', results))
+
     Multiqueue.monitorMissing({ multiqueue, debounce: 1000 })
       .on('batch', function ({ queue, lane, missing }) {
         if (!queue) queue = lane // compat with v1
@@ -3509,10 +3514,22 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     }
     let r = this._getItem(rId)
     var res = {};
-    if (!r)
+    if (!r) {
       debugger
+      if (me.isEmployee) {
+        res = await this._getItemFromServer(rId)
+        r = {}
+      }
+    }
     if (utils.isMessage(this.getModel(r[TYPE]))) {
-      let kres = await this._keeper.get(r[CUR_HASH])
+      let kres
+      try {
+        kres = await this._keeper.get(r[CUR_HASH])
+      }
+      catch (err) {
+        if (me.isEmployee)
+        kres = await this._getItemFromServer(rId)
+      }
       extend(res, kres)
     }
 
@@ -3526,6 +3543,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 //   debugger
     if (noTrigger)
       return
+
     let retParams = { resource: res, action: action || 'getItem'}
     if (utils.isMessage(resModel)) {
       let meId = utils.getId(me)
@@ -6188,7 +6206,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
       foundResources.forEach((r) => {
         if (r[TYPE] === VERIFICATION)
-          r.document = refsObj[utils.getId(r.document)]
+          r.document = refsObj[utils.getId(r.document)] || r.document
         else if (r[TYPE] === FORM_ERROR)
           r.prefill = refsObj[utils.getId(r.prefill)]
       })
