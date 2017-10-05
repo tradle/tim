@@ -37,7 +37,7 @@
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.1.0",
     "@tradle/models": "github:tradle/models#3718480",
-    "@tradle/multiqueue": "2.1.0",
+    "@tradle/multiqueue": "^2.3.0",
     "@tradle/protocol": "^3.0.0",
     "@tradle/qr-schema": "^1.1.0",
     "@tradle/restore": "github:tradle/restore",
