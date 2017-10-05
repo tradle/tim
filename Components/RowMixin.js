@@ -192,6 +192,8 @@ var RowMixin = {
       if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
         return true
     }
+    if (me.isEmployee  &&  r.from.organization)
+      return utils.getId(me.organization) === utils.getId(r.from.organization)
   },
   isShared() {
     let resource = this.props.resource
