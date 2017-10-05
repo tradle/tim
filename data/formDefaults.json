@@ -117,7 +117,7 @@
       {
         "number": "12123334444",
         "phoneType": {
-          "id": "tradle.PhoneType_mobile",
+          "id": "tradle.PhoneTypes_mobile",
           "title": "Mobile"
         }
       }
