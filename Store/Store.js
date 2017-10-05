@@ -3508,10 +3508,22 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     }
     let r = this._getItem(rId)
     var res = {};
-    if (!r)
+    if (!r) {
       debugger
+      if (me.isEmployee) {
+        res = await this._getItemFromServer(rId)
+        r = {}
+      }
+    }
     if (utils.isMessage(this.getModel(r[TYPE]))) {
-      let kres = await this._keeper.get(r[CUR_HASH])
+      let kres
+      try {
+        kres = await this._keeper.get(r[CUR_HASH])
+      }
+      catch (err) {
+        if (me.isEmployee)
+        kres = await this._getItemFromServer(rId)
+      }
       extend(res, kres)
     }
 
@@ -6230,7 +6242,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
       foundResources.forEach((r) => {
         if (r[TYPE] === VERIFICATION)
-          r.document = refsObj[utils.getId(r.document)]
+          r.document = refsObj[utils.getId(r.document)] || r.document
         else if (r[TYPE] === FORM_ERROR)
           r.prefill = refsObj[utils.getId(r.prefill)]
         this.addVisualProps(r)
@@ -6259,8 +6271,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       let r = self._getItem(stub)
       if (r[TYPE] === VERIFICATION) {
         let doc = self._getItem(r.document.id)
-        refs.push(doc[CUR_HASH])
-        all[doc[CUR_HASH]] = utils.getId(r.document)
+        // if (doc) {
+          refs.push(doc[CUR_HASH])
+          all[doc[CUR_HASH]] = utils.getId(r.document)
+        // }
       }
       else if (r[TYPE] === FORM_ERROR) {
         let prefill = self._getItem(r.prefill.id)
@@ -6310,6 +6324,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       .catch((err) => {
         // debugger
         err = err
+        // if (me.isEmployee)
+        //   return self._getItemFromServer(rId)
       })
 
     }
