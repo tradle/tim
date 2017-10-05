@@ -121,6 +121,7 @@ class ResourceView extends Component {
   }
   componentWillMount() {
     let { resource, search } = this.props
+
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     // if (resource.id || !resource[constants.ROOT_HASH])
       Actions.getItem( {resource: resource, search: search} )

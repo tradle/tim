@@ -1183,6 +1183,11 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       autoincrement: false
     })
 
+    collect(multiqueue.createReadStream({
+      queue: 'eaeeaff0851cf2e1d3e266b0553484c91e7949ebcfc912584666fef631b737a8'
+    }))
+    .then(results => console.log('multiqueue', results))
+
     Multiqueue.monitorMissing({ multiqueue, debounce: 1000 })
       .on('batch', function ({ queue, lane, missing }) {
         if (!queue) queue = lane // compat with v1
