@@ -44,20 +44,12 @@
     "@tradle/engine": "^5.1.1",
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.1.0",
-<<<<<<< Updated upstream
     "@tradle/models": "github:tradle/models#3718480",
-=======
-    "@tradle/models": "github:tradle/models#8c86a1f",
->>>>>>> Stashed changes
     "@tradle/multiqueue": "2.1.0",
     "@tradle/protocol": "^3.0.0",
     "@tradle/qr-schema": "^1.1.0",
     "@tradle/restore": "github:tradle/restore",
-<<<<<<< Updated upstream
     "@tradle/validate-model": "^2.3.0",
-=======
-    "@tradle/validate-model": "^2.2.0",
->>>>>>> Stashed changes
     "@tradle/validate-resource": "^2.5.0",
     "@tradle/yuki": "^1.1.0",
     "any-promise": "1.3.0",
@@ -192,7 +184,6 @@
     "babel-plugin-transform-flow-strip-types": "^6.14.0",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
     "babel-plugin-transform-regenerator": "^6.3.13",
-<<<<<<< HEAD
     "babel-polyfill": "^6.9.1",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.5.0",
@@ -200,10 +191,6 @@
     "babel-preset-stage-1": "^6.5.0",
     "css-loader": "^0.24.0",
     "eslint": "^2.12.0",
-=======
-    "detox": "^5.8.1",
-    "eslint": "2.13.1",
->>>>>>> origin/master
     "eslint-config-standard": "^5.3.1",
     "eslint-plugin-promise": "^1.3.2",
     "eslint-plugin-react": "6.9.0",
@@ -217,7 +204,6 @@
     "html-loader": "0.4.5",
     "html-webpack-plugin": "^2.22.0",
     "husky": "^0.13.2",
-<<<<<<< HEAD
     "imports-loader": "0.7.1",
     "json-loader": "^0.5.4",
     "memdown": "^1.1.0",
@@ -282,48 +268,5 @@
     "./utils/push.js": "./web/shims/push.js",
     "./img/bg.png": "./web/shims/bg.js",
     "./video/Focus1.mp4": false
-=======
-    "mocha": "^3.5.3",
-    "rn-nodeify": "github:mvayngrib/rn-nodeify#dev",
-    "source-map": "^0.5.3"
-  },
-  "react-native": {
-    "q": "bluebird-q",
-    "zlib": "browserify-zlib",
-    "crypto": "react-native-crypto",
-    "dns": "dns.js",
-    "http": "react-native-http",
-    "https": "https-browserify",
-    "path": "path-browserify",
-    "querystring": "querystring-es3",
-    "fs": "react-native-level-fs",
-    "_stream_transform": "readable-stream/transform",
-    "_stream_readable": "readable-stream/readable",
-    "_stream_writable": "readable-stream/writable",
-    "_stream_duplex": "readable-stream/duplex",
-    "_stream_passthrough": "readable-stream/passthrough",
-    "dgram": "react-native-udp",
-    "stream": "stream-browserify",
-    "tty": "tty-browserify",
-    "vm": "vm-browserify",
-    "console": "console-browserify",
-    "constants": "constants-browserify",
-    "domain": "domain-browser",
-    "source-map": "^0.5.3",
-    "timers": "timers-browserify",
-    "os": "react-native-os",
-    "net": "react-native-tcp",
-    "tls": false
-  },
-  "detox": {
-    "configurations": {
-      "ios.sim.debug": {
-        "binaryPath": "iOS/build/Build/Products/Debug-iphonesimulator/Tradle.app",
-        "build": "xcodebuild -workspace iOS/Tradle.xcworkspace -scheme Debug -configuration Debug -sdk iphonesimulator -derivedDataPath iOS/build",
-        "type": "ios.simulator",
-        "name": "iPhone 6"
-      }
-    }
->>>>>>> origin/master
   }
 }
