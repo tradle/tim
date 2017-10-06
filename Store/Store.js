@@ -4020,7 +4020,11 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       });
       return;
     }
-
+    // fix dates
+    for (let pp in json) {
+      if (props[pp]  &&  props[pp].type === 'date')
+        json[pp] = new Date(json[pp]).getTime()
+    }
     // if (!isSelfIntroduction  &&  !doneWithMultiEntry)
     //   resource = utils.optimizeResource(resource, true)
 
@@ -4654,8 +4658,13 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
     let shareBatchId = new Date().getTime()
     let doShareDocument = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
-    if (doShareDocument)
-      await this.shareForm(document, to, opts, formResource, shareBatchId)
+    if (doShareDocument) {
+      let errorMsg = await this.shareForm(document, to, opts, formResource, shareBatchId)
+      if (errorMsg) {
+        this.trigger({action: 'addItem', errorMsg: 'Sharing failed: ' + errorMsg, resource: document, to: this._getItem(toOrgId)})
+        return
+      }
+    }
 
     var documentId = utils.getId(document)
     if (r[TYPE] === FORM_REQUEST)
@@ -4700,7 +4709,9 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   shareForm(document, to, opts, shareBatchId) {
     var time = new Date().getTime()
     let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
-    return this.meDriverSend({...opts, link: hash})
+    let d = this.getResourceToSend(document)
+    return this.meDriverSend({...opts, object: d})
+    // return this.meDriverSend({...opts, link: hash})
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
@@ -4721,8 +4732,24 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       this.addMessagesToChat(utils.getId(to.organization), document, false, time)
     })
     .catch(function(err) {
-      debugger
+      return err.message
     })
+  },
+  getResourceToSend(document) {
+    let d = utils.clone(document)
+    let props = this.getModel(d[TYPE]).properties
+
+    for (let p in d) {
+      if (p === TYPE)
+        continue
+      if (d[PREV_HASH]  &&  (p === ROOT_HASH || p === PREV_HASH))
+        continue
+      if (!props[p])
+        delete d[p]
+      if (p === 'from'  ||  p === 'to')
+        delete d[p]
+    }
+    return d
   },
 
   shareVerification(ver, to, opts, shareBatchId) {
@@ -4740,8 +4767,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let toOrg = this._getItem(orgId)
     this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
 
-    return this.meDriverSend({...opts, link: ver[CUR_HASH]})
-    .then(() => {
+    // return this.meDriverSend({...opts, link: ver[CUR_HASH]})
+    let v = getResourceToSend(ver)
+    return this.meDriverSend({...opts, object: v})
+     .then(() => {
       if (ver) {
         this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver, to: toOrg})
         ver._sendStatus = SENT
@@ -5657,8 +5686,16 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let rr = {}
     for (let p in r) {
       if (r[p]  &&  props[p]) {
-        if (props[p].type === 'object')
-          rr[p] = utils.clone(r[p])
+        if (props[p].type === 'object') {
+          if (r[p].id) {
+            rr[p] = {
+              id: r[p].id,
+              title: r[p].title
+            }
+          }
+          else
+            rr[p] = utils.clone(r[p])
+        }
         else
           rr[p] = r[p]
       }
