@@ -163,8 +163,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "tradle/models#3718480",
-      "resolved": "git://github.com/tradle/models.git#37184800b0b956a23afb464552d7285d2a388148",
+      "from": "tradle/models",
+      "resolved": "git://github.com/tradle/models.git#5f41d44e9276b6ecb445bbb67f11b1483812ab37",
       "dependencies": {
         "typeforce": {
           "version": "1.11.5",
@@ -314,14 +314,14 @@
       }
     },
     "@tradle/validate-resource": {
-      "version": "2.5.0",
-      "from": "@tradle/validate-resource@>=2.5.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-2.5.0.tgz",
+      "version": "2.10.0",
+      "from": "@tradle/validate-resource@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-2.10.0.tgz",
       "dependencies": {
         "debug": {
-          "version": "3.0.1",
+          "version": "3.1.0",
           "from": "debug@>=3.0.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/debug/-/debug-3.0.1.tgz"
+          "resolved": "https://registry.npmjs.org/debug/-/debug-3.1.0.tgz"
         },
         "ms": {
           "version": "2.0.0",

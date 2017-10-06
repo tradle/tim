@@ -284,7 +284,7 @@ var cursor = {}
 // var publishedIdentity
 var ready;
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
-var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? [ENV.LOCAL_TRADLE_SERVER] : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
+var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? [].concat(ENV.LOCAL_TRADLE_SERVERS) : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
@@ -1175,7 +1175,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     // 2. multiqueue (persists messages until processed, enforces order of processing)
     // 3. meDriver.receive
 
-    const multiqueue = Multiqueue.create({
+    const multiqueue = this.multiqueue = Multiqueue.create({
       db: level('receive-queue.db', { valueEncoding: 'json' }),
       autoincrement: false
     })
@@ -1227,9 +1227,11 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       //   return
       // }
 
+      const link = tradleUtils.hexLink(msg)
       return multiqueue.enqueue({
         seq: msg[SEQ],
         value: {
+          link,
           message: msg,
           length
         },
@@ -1265,6 +1267,28 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     // TODO: mark messages as undelivered
     // offer user to resend them
   },
+  // async getReceivePosition ({ counterparty }) {
+  //   const queue = this.multiqueue.queue(counterparty)
+  //   try {
+  //     const seq = await queue.tip()
+  //     if (seq < 0) return null
+
+  //     const val = await monitorMissing.getBySeq({
+  //       node: meDriver,
+  //       counterparty,
+  //       seq
+  //     })
+
+  //     return {
+  //       time: val.time,
+  //       link: val.link
+  //     }
+  //   } catch (err) {
+  //     if (!err.notFound) throw err
+
+  //     return null
+  //   }
+  // },
   async initChats() {
     let meId = utils.getId(me)
     let meOrgId = me.organization ? utils.getId(me.organization) : null
@@ -1547,14 +1571,41 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
               if (myEmployer)
                 graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
             }
-            else
-              graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
-            if (graphqlEndpoint)
-              client = new ApolloClient({
-                networkInterface: createNetworkInterface({
-                  uri: graphqlEndpoint
-                })
+            // else
+            //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+            if (graphqlEndpoint) {
+              // graphqlEndpoint = `http://localhost:21012/graphql`
+              const networkInterface = createNetworkInterface({
+                uri: graphqlEndpoint
               })
+
+              networkInterface.use([{
+                applyMiddleware: async (req, next) => {
+                  const printer = require('graphql/language/printer')
+                  const body = tradleUtils.stringify({
+                    ...req.request,
+                    query: printer.print(req.request.query)
+                  })
+
+                  const { sig } = await meDriver.sign({
+                    object: {
+                      [TYPE]: 'tradle.GraphQLQuery',
+                      body,
+                      // time: Date.now()
+                    }
+                  })
+
+                  if (!req.options.headers) {
+                    req.options.headers = {}
+                  }
+
+                  req.options.headers['x-tradle-sig'] = sig
+                  next()
+                }
+              }])
+
+              client = new ApolloClient({ networkInterface })
+            }
           }
         })
         .catch(err => {
@@ -1736,6 +1787,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       endpoint: url,
       node,
       counterparty,
+      // getSendPosition: monitorMissing.getTip,
+      // getReceivePosition: this.getReceivePosition.bind(this),
       // position,
       // TODO: generate long-lived clientId: `${node.permalink}${nonce}`
       clientId: `${node.permalink}${node.permalink}`
@@ -3510,10 +3563,9 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let r = this._getItem(rId)
     var res = {};
     if (!r) {
-      debugger
       if (me.isEmployee) {
         res = await this._getItemFromServer(rId)
-        r = {}
+        r = pick(res, TYPE)
       }
     }
     if (utils.isMessage(this.getModel(r[TYPE]))) {
@@ -4365,7 +4417,6 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           //   }
           // }
           let sendParams = self.packMessage(returnVal)
-          // debugger
           await self.meDriverSend(sendParams)
         }
         if (isBookmark) {

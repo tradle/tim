@@ -51,9 +51,17 @@ const merged = extend({
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
   // LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
-  LOCAL_TRADLE_SERVER: 'https://y8fo4pp0fj.execute-api.us-east-1.amazonaws.com/dev/',
-  // LOCAL_TRADLE_SERVER: 'https://1sfzra0ybe.execute-api.us-east-1.amazonaws.com/dev/',
-  // LOCAL_TRADLE_SERVER: 'https://7hixz15a6k.execute-api.us-east-1.amazonaws.com/dev/',
+  // silly
+  // LOCAL_TRADLE_SERVER: 'https://uqs8mggyej.execute-api.us-east-1.amazonaws.com/dev/',
+  // tradle
+  LOCAL_TRADLE_SERVER: 'https://4n1y06avx2.execute-api.us-east-1.amazonaws.com/dev/',
+  // goofy
+  // LOCAL_TRADLE_SERVER: 'https://7f6uvheawf.execute-api.us-east-1.amazonaws.com/dev/',
+  LOCAL_TRADLE_SERVERS: [
+    'https://uqs8mggyej.execute-api.us-east-1.amazonaws.com/dev/',
+    'https://4n1y06avx2.execute-api.us-east-1.amazonaws.com/dev/',
+    'https://7f6uvheawf.execute-api.us-east-1.amazonaws.com/dev/'
+  ],
   pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   isAndroid: function () {
     return Platform.OS === 'android'
