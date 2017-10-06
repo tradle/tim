@@ -199,6 +199,10 @@ class MessageList extends Component {
       let rtype = resource[TYPE]
       if (!utils.isMessage(resource))
         return
+      if (params.errorMsg) {
+        Alert.alert(params.errorMsg)
+        return
+      }
       if (rtype === NEXT_FORM_REQUEST) {
         let list = this.state.list
         let r = list[list.length - 1]
@@ -705,8 +709,9 @@ class MessageList extends Component {
       let isChooser = this.props.originatingMessage && this.props.originatingMessage.verifiers
       let notRemediation = (this.state.context   &&  this.state.context.product !== REMEDIATION) ||
                            (isProductApplication && resource.product !== REMEDIATION)
-
-      if (this.hasChatContext())
+      let me = utils.getMe()
+      if (me.isEmployee  &&  utils.getId(me.organization) !== utils.getId(resource));
+      else if (this.hasChatContext())
         maxHeight -= 45
       else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  this.state.onlineStatus === false))) //  || (resource[TYPE] === ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
