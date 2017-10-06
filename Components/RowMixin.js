@@ -40,6 +40,7 @@ const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PHOTO = 'tradle.Photo'
 const ENUM = 'tradle.Enum'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
 
 var BORDER_WIDTH = StyleSheet.hairlineWidth
 
@@ -265,6 +266,8 @@ var RowMixin = {
     if (eCols.length === 1) {
       let p = eCols[0]
       if (ftype === IPROOV_SELFIE)
+        return p
+      if (ftype === PRODUCT_REQUEST)
         return p
       if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
         return p

@@ -492,7 +492,7 @@ var utils = {
   getProduct(r) {
     return r[TYPE] === PRODUCT_APPLICATION
            ? r.product
-           : r.requestFor.id.split('_')[1]
+           : r.requestFor
   },
   getItemsMeta(metadata) {
     var props = metadata.properties;

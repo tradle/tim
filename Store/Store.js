@@ -4371,7 +4371,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
         if (!returnVal._context  &&  rModel.interfaces.indexOf(CONTEXT) !== -1) {
           let {requestFor, product} = returnVal
-          returnVal._context = {id: returnValKey, title: product ? product : requestFor.id.split('_')[1]}
+          returnVal._context = {id: returnValKey, title: product ? product : requestFor}
         }
 
         self._setItem(returnValKey, returnVal)
@@ -5060,6 +5060,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     var {modelName, first, prop, isAggregation, from} = params
     var meta = this.getModel(modelName)
     var isMessage = utils.isMessage(meta)
+    if (params.prop)
+      debugger
     if (params.search && me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION) {
       let result = await this.searchServer(params)
       return result
@@ -5862,6 +5864,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       all = true
     var meta = this.getModel(modelName)
     let ids = myCustomIndexes
+    // Product chooser for example
     if (meta.subClassOf === ENUM)
       return this.getEnum(params)
     var props = meta.properties;
