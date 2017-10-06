@@ -12,6 +12,7 @@ import ReactNative, {
   InteractionManager
 } from 'react-native'
 
+import pick from 'object.pick'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 const gql = require('graphql-tag')
@@ -4819,7 +4820,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
 
     // return this.meDriverSend({...opts, link: ver[CUR_HASH]})
-    let v = getResourceToSend(ver)
+    let v = this.getResourceToSend(ver)
     return this.meDriverSend({...opts, object: v})
      .then(() => {
       if (ver) {
