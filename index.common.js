@@ -49,6 +49,7 @@ var SupervisoryViewPerProvider = require('./Components/SupervisoryViewPerProvide
 var SupervisoryView = require('./Components/SupervisoryView')
 // var SelectPhotoList = require('./Components/SelectPhotoList');
 var ProductChooser = require('./Components/ProductChooser')
+var StringChooser = require('./Components/StringChooser')
 var ContextChooser = require('./Components/ContextChooser')
 var CameraView = require('./Components/CameraView');
 var PhotoCarousel = require('./Components/PhotoCarousel');
@@ -548,6 +549,8 @@ class TiMApp extends Component {
       return <MarkdownPropertyEdit navigator={nav} {...props} />
     case 32:
       return <SignatureView navigator={nav} {...props} />
+    case 33:
+      return <StringChooser navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />

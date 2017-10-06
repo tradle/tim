@@ -10,6 +10,7 @@ var constants = require('@tradle/constants');
 var ResourceList = require('./ResourceList')
 var RowMixin = require('./RowMixin');
 var CameraView = require('./CameraView')
+var StringChooser = require('./StringChooser')
 import ImageInput from './ImageInput'
 
 import CustomIcon from '../styles/customicons'
@@ -256,25 +257,18 @@ class FormRequestRow extends Component {
     }
     if (oResource._context)
       resource._context = oResource._context
-
-    var propRef = prop.ref
-    var m = utils.getModel(propRef).value;
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    let self = this
     this.props.navigator.push({
-      title: translate(prop), //m.title,
-      // titleTextColor: '#7AAAC3',
-      id: 10,
-      component: ResourceList,
+      title: translate(prop),
+      id: 33,
+      component: StringChooser,
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
-        isChooser:      true,
-        prop:           prop,
-        modelName:      propRef,
-        resource:       resource,
-        returnRoute:    currentRoutes[currentRoutes.length - 1],
-        callback:       (prop, val) => {
-          resource[prop.name] = utils.buildRef(val)
+        strings:   oResource.chooser.oneOf,
+        bankStyle: this.props.bankStyle,
+        callback:  (val) => {
+          resource[prop.name] = val
           Actions.addItem({resource: resource, disableFormRequest: oResource})
         },
       }
@@ -567,8 +561,7 @@ class FormRequestRow extends Component {
     // if (s.length === 2)
     //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
     let sameFormRequestForm
-    let isMyProduct = form.subClassOf === MY_PRODUCT
-    if (!resource._documentCreated  &&  resource.product  &&  !isMyProduct) {
+    if (!resource._documentCreated  &&  resource.product) {
       let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
         let productToForms = this.props.productToForms
@@ -632,9 +625,8 @@ class FormRequestRow extends Component {
     // else if (isMyMessage)
     //   link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
-      let notLink = resource._documentCreated  ||  isReadOnly  ||  isMyProduct
-      if (!isMyProduct)
-        icon = <Icon  name={'ios-arrow-forward'} style={{color: isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR}} size={20} />
+      let notLink = resource._documentCreated  ||  isReadOnly
+      icon = <Icon  name={'ios-arrow-forward'} style={{color: isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR}} size={20} />
       if (!notLink) {
         if (resource.verifiers)
           onPressCall = this.props.chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
