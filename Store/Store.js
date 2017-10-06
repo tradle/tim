@@ -4019,7 +4019,11 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       });
       return;
     }
-
+    // fix dates
+    for (let pp in json) {
+      if (props[pp]  &&  props[pp].type === 'date')
+        json[pp] = new Date(json[pp]).getTime()
+    }
     // if (!isSelfIntroduction  &&  !doneWithMultiEntry)
     //   resource = utils.optimizeResource(resource, true)
 
@@ -4773,9 +4777,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let toOrg = this._getItem(orgId)
     this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
 
+    // return this.meDriverSend({...opts, link: ver[CUR_HASH]})
     let v = getResourceToSend(ver)
     return this.meDriverSend({...opts, object: v})
-    .then(() => {
+     .then(() => {
       if (ver) {
         this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver, to: toOrg})
         ver._sendStatus = SENT
@@ -5719,14 +5724,16 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
     let rr = {}
     for (let p in r) {
-      if (!r[p]  ||  !props[p])
-        continue
-      if (props[p].type === 'object') {
-        if (r[p].id) {
-          rr[p] = {
-            id: r[p].id,
-            title: r[p].title
+      if (r[p]  &&  props[p]) {
+        if (props[p].type === 'object') {
+          if (r[p].id) {
+            rr[p] = {
+              id: r[p].id,
+              title: r[p].title
+            }
           }
+          else
+            rr[p] = utils.clone(r[p])
         }
         else
           rr[p] = utils.clone(r[p])
