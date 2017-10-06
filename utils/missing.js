@@ -1,4 +1,5 @@
 import Promise from 'bluebird'
+import lexint from 'lexicographic-integer'
 import Restore from '@tradle/restore'
 import { constants } from '@tradle/engine'
 const { parseMessageFromDB } = require('./utils')
@@ -84,6 +85,25 @@ exports = module.exports = function restoreMissingMessages ({ node, counterparty
   return monitor
 }
 
+exports.getBySeq = function getBySeq ({ node, counterparty, seq, sent }) {
+  const from = sent ? node.permalink : counterparty
+  const to = sent ? counterparty : node.permalink
+  const seqOpts = {}
+  const base = from + '!' + to
+  seqOpts.eq = base + '!' + hexint(seq)
+  seqOpts.limit = 1
+  const source = node.objects.bySeq(seqOpts)
+  return new Promise((resolve, reject) => {
+    source.on('error', reject)
+    source.on('data', data => resolve({
+      time: data.timestamp,
+      link: data.link
+    }))
+
+    source.on('end', () => resolve(null))
+  })
+}
+
 exports.getTip = function getTip ({ node, counterparty, sent }) {
   const from = sent ? node.permalink : counterparty
   const to = sent ? counterparty : node.permalink
@@ -108,4 +128,8 @@ exports.getTip = function getTip ({ node, counterparty, sent }) {
 
 function bufferizePubKey (key) {
   key.pub = new Buffer(key.pub.data)
+}
+
+function hexint (n) {
+  return lexint.pack(n, 'hex')
 }
