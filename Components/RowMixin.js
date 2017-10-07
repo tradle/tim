@@ -177,11 +177,10 @@ var RowMixin = {
     if (showTime)
       return utils.formatDate(resource.time);
   },
-  isMyMessage() {
+  isMyMessage(to) {
     if (this.props.isAggregation)
       return
     var r = this.props.resource
-    // return utils.isMyMessage(r)
     var fromHash = utils.getId(r.from);
     var me = utils.getMe()
     if (fromHash === utils.getId(me))
@@ -192,8 +191,16 @@ var RowMixin = {
       if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
         return true
     }
-    if (me.isEmployee  &&  r.from.organization)
-      return utils.getId(me.organization) === utils.getId(r.from.organization)
+    if (me.isEmployee  &&  r.from.organization) {
+      let meId = utils.getId(me.organization)
+      if (meId === utils.getId(r.from.organization)) {
+        if (to  &&  utils.getId(to) === meId)
+          return false
+        else
+          return true
+      }
+
+    }
   },
   isShared() {
     let resource = this.props.resource
