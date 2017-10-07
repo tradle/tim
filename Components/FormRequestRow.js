@@ -35,6 +35,7 @@ const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const ITEM = 'tradle.Item'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const ORGANIZATION = 'tradle.Organization'
 
 var LINK_COLOR
 
@@ -96,13 +97,12 @@ class FormRequestRow extends Component {
     return false
   }
   render() {
-    let resource = this.props.resource;
+    let { resource, to, bankStyle } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id).value;
 
     let me = utils.getMe();
 
-    let isMyMessage = this.isMyMessage();
-    let to = this.props.to;
+    var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
@@ -112,7 +112,6 @@ class FormRequestRow extends Component {
     let onPressCall
     let isFormRequest = resource[TYPE] === FORM_REQUEST
     let prop =  this.isOnePropForm()
-    let bankStyle = this.props.bankStyle
     var w = utils.dimensions(FormRequestRow).width
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     if (isFormRequest)
@@ -216,7 +215,7 @@ class FormRequestRow extends Component {
                         <View style={{marginTop: 2}}>
                         {ownerPhoto}
                         </View>
-                        <View style={[cellStyle, {backgroundColor: this.props.bankStyle.incomingMessageBgColor}, shareables ? styles.shareables : {}]}>
+                        <View style={[cellStyle, {backgroundColor: bankStyle.incomingMessageBgColor}, shareables ? styles.shareables : {}]}>
                           <View style={[styles.container, msgStyle]}>
                           {share}
                           {renderedRow}
@@ -531,6 +530,12 @@ class FormRequestRow extends Component {
         extend(true, resource, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
     }
+    let rightButtonTitle = 'Done'
+    if (isMyMessage) {
+      let me = utils.getMe()
+      if (!me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(resource.to.organization))
+        rightButtonTitle = null
+    }
     this.props.navigator.push({
       id: 4,
       title: translate(model),
@@ -552,7 +557,7 @@ class FormRequestRow extends Component {
   }
 
   formRequest(resource, vCols, prop) {
-    const { bankStyle } = this.props
+    const { bankStyle, to } = this.props
     let message = resource.message
     let messagePart
     if (resource._documentCreated)
@@ -569,6 +574,8 @@ class FormRequestRow extends Component {
     // if (s.length === 2)
     //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
     let sameFormRequestForm
+    var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
+
     if (!resource._documentCreated  &&  resource.product) {
       let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
@@ -586,7 +593,6 @@ class FormRequestRow extends Component {
       if (!sameFormRequestForm)
         onPressCall = this.createNewResource.bind(this, form, isMyMessage);
     }
-    var isMyMessage = this.isMyMessage();
 
     let color = isMyMessage
               ? {color: '#AFBBA8'}
