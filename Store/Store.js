@@ -4803,7 +4803,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let props = this.getModel(d[TYPE]).properties
 
     for (let p in d) {
-      if (p === TYPE)
+      if (p === TYPE  ||  p === SIG)
         continue
       if (d[PREV_HASH]  &&  (p === ROOT_HASH || p === PREV_HASH))
         continue
@@ -5060,8 +5060,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     var {modelName, first, prop, isAggregation, from} = params
     var meta = this.getModel(modelName)
     var isMessage = utils.isMessage(meta)
-    if (params.prop)
-      debugger
+    // if (params.prop)
+    //   debugger
     if (params.search && me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION) {
       let result = await this.searchServer(params)
       return result

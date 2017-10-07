@@ -267,7 +267,6 @@ class FormRequestRow extends Component {
     }
     if (oResource._context)
       resource._context = oResource._context
-    let self = this
     this.props.navigator.push({
       title: translate(prop),
       id: 33,
