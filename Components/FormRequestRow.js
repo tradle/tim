@@ -523,6 +523,7 @@ class FormRequestRow extends Component {
     }
     let rightButtonTitle = 'Done'
     if (isMyMessage) {
+      let me = utils.getMe()
       if (!me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(resource.to.organization))
         rightButtonTitle = null
     }
