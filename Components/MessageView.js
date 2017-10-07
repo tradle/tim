@@ -313,7 +313,6 @@ class MessageView extends Component {
         resource: resource,
         currency: this.props.currency,
         document: document,
-        // createFormError: isVerifier && !utils.isMyMessage(resource),
         isVerifier: isVerifier
       }
     }

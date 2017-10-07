@@ -511,7 +511,6 @@ class MessageList extends Component {
         currency: this.props.resource.currency || this.props.currency,
         country: this.props.resource.country,
         verification: verification,
-        // createFormError: isVerifier && !utils.isMyMessage(resource),
         isVerifier: isVerifier
       }
     }
