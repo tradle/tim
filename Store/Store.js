@@ -144,22 +144,25 @@ const NEXT_HASH = '_n'
 const LAST_MESSAGE_TIME = 'lastMessageTime'
 
 const constants = require('@tradle/constants')
-const ORGANIZATION = constants.TYPES.ORGANIZATION
-const IDENTITY = constants.TYPES.IDENTITY
-const IDENTITY_PUBLISHING_REQUEST = constants.TYPES.IDENTITY_PUBLISHING_REQUEST
-const MESSAGE = constants.TYPES.MESSAGE
-const SIMPLE_MESSAGE = constants.TYPES.SIMPLE_MESSAGE
-const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
-const PRODUCT_LIST = constants.TYPES.PRODUCT_LIST
-const PROFILE = constants.TYPES.PROFILE;
-const VERIFICATION = constants.TYPES.VERIFICATION;
-const FORM = constants.TYPES.FORM;
-const MODEL = constants.TYPES.MODEL;
-const CUSTOMER_WAITING  = constants.TYPES.CUSTOMER_WAITING
-const SELF_INTRODUCTION = constants.TYPES.SELF_INTRODUCTION
-const FORGET_ME         = constants.TYPES.FORGET_ME
-const FORGOT_YOU        = constants.TYPES.FORGOT_YOU
-const SETTINGS          = constants.TYPES.SETTINGS
+const {
+ ORGANIZATION,
+ IDENTITY,
+ IDENTITY_PUBLISHING_REQUEST,
+ MESSAGE,
+ SIMPLE_MESSAGE,
+ FINANCIAL_PRODUCT,
+ PRODUCT_LIST,
+ PROFILE,
+ VERIFICATION,
+ FORM,
+ MODEL,
+ CUSTOMER_WAITING ,
+ SELF_INTRODUCTION,
+ FORGET_ME,
+ FORGOT_YOU,
+ SETTINGS,
+} = constants.TYPES
+
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
 // const SHARED_RESOURCE     = 'tradle.SharedResource'
@@ -200,6 +203,7 @@ const COUNTRY             = 'tradle.Country'
 const PHOTO               = 'tradle.Photo'
 const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
+const PRODUCT_REQUEST     = 'tradle.ProductRequest'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -4728,6 +4732,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       this.addLastMessage(document, batch, to)
       this.dbBatchPut(documentId, document, batch)
       document._sendStatus = SENT
+      this._setItem(documentId, document)
+
       this.trigger({action: 'addItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
     }
     // let m = this.getModel(VERIFICATION)
@@ -4740,10 +4746,16 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       // props: m.properties
     }
 
-    let verifications  = await this.searchMessages(params)
+    let verifications
+    if (me.isEmployee) {
+      params.search = me.isEmployee,
+      params.filterResource = {document: {id: documentId}}
+      verifications  = await this.searchServer(params)
+    }
+    else
+      verifications  = await this.searchMessages(params)
     if (!verifications)
       return
-
 
     let all = verifications.length
     for (let i=0; i<all; i++) {
@@ -10719,7 +10731,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     if (!m)
       return
 
-    let table = `r_${modelName.replace('.', '_')}`
+    let table = `r_${modelName.replace(/\./g, '_')}`
 
     let _link = parts[parts.length - 1]
     let query = `query {\n${table} (_link: "${_link}")\n`
