@@ -5674,7 +5674,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   },
   getAllPropertiesForServerSearch(model) {
     let props = model.properties
-    let arr = model.inlined ? [] : ['_permalink', '_link', '_time', '_author', '_authorTitle', '_t']
+    let arr = model.inlined ? [] : ['_permalink', '_link', '_time', '_author', '_authorTitle', TYPE, SIG]
     for (let p in props) {
       if (p.charAt(0) === '_')
         continue
