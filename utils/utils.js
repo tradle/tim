@@ -799,17 +799,6 @@ var utils = {
     }
   },
 
-  isMyMessage(r) {
-    var fromHash = utils.getId(r.from);
-    var me = utils.getMe()
-    if (fromHash == this.getId(me))
-      return true;
-    if (this.getModel(r[TYPE]).value.subClassOf == MY_PRODUCT) {
-      let org = r.from.organization
-      if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
-        return true
-    }
-  },
   isVerifiedByMe(resource) {
     if (!resource.verifications)
       return false
