@@ -1863,8 +1863,10 @@ var NewResourceMixin = {
   checkNumber(v, prop, err) {
     var p = prop.name
     var error
-    if (prop.ref === MONEY)
-      v = v.value
+    if (typeof v !== 'number') {
+      if (prop.ref === MONEY)
+        v = v.value
+    }
     if (isNaN(v))
       error = 'Please enter a valid number'
     else {
