@@ -9446,9 +9446,11 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
     let isNew = val[ROOT_HASH] === val[CUR_HASH]
     if (contextId  &&  !isContext) {
-      let context = this._getItem(contextId)
-      if (!context)
-        context = await this.getContext(obj.object.context)
+      if (!context) {
+        context = this._getItem(contextId)
+        if (!context)
+          context = await this.getContext(obj.object.context)
+      }
 
       // Avoid doubling the number of forms
       if (context) {
@@ -9676,7 +9678,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       this._setItem(key, v)
     }
     if (!noTrigger) {
-      let context = val._context ? this._getItem(utils.getId(val._context)) : null
+      if (!context)
+        context = val._context ? this._getItem(utils.getId(val._context)) : null
       if (isReadOnly) {
         if (isContext)
           this.addMessagesToChat(utils.getId(val), val)
@@ -9706,6 +9709,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       // Check that the message was send to the party that is not anyone who created the context it was send from
       // That is possible if the message was sent from shared context
       else if (isThirdPartySentRequest) {
+        if (!context)
+          debugger
         let chat = utils.getId(context.to) === meId ? context.from : context.to
         chat = this._getItem(chat)
         let id  = chat.organization ? utils.getId(chat.organization) : utils.getId(chat)
