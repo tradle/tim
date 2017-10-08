@@ -9298,7 +9298,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
         context = await this.getContext(obj.object.context)
         if (context) {
           contextId = utils.getId(context)
-          this.addMessagesToChat(utils.getId(fOrg), msg)
+          this.addMessagesToChat(utils.getId(fOrg), context)
           val._context = this.buildRef(context)
         }
       }
