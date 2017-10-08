@@ -1044,8 +1044,9 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
     meDriver.setMaxListeners(0)
 
-    console.log('me: ' + meDriver.permalink)
     utils.setGlobal('TRADLE_USER_PERMALINK', meDriver.permalink)
+    debug('me: ' + meDriver.permalink, 'isEmployee:', me && me.isEmployee)
+
     meDriver = tradleUtils.promisifyNode(meDriver)
 
     // TODO: figure out of we need to publish identities
@@ -1713,7 +1714,23 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     return this.addInfo(sp)
   },
 
+  getMyEmployerBotPermalink() {
+    if (me && me.isEmployee) {
+      const rep = this.getRepresentative(utils.getId(me.organization))
+      return rep[ROOT_HASH]
+    }
+  },
+
   async meDriverSend(sendParams) {
+    const botPermalink = this.getMyEmployerBotPermalink()
+    if (botPermalink && sendParams.to !== botPermalink) {
+      // should not happen
+      if (__DEV__) {
+        debugger
+        Alert.alert('SENDING TO THE WRONG BOT')
+      }
+    }
+
     await this.maybeWaitForIdentity(sendParams.to)
     return await this.meDriverExec('send', sendParams)
   },
@@ -1790,6 +1807,14 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     //   sent: yield monitorMissing.getTip({ node, counterparty, sent: true }),
     //   received: yield monitorMissing.getTip({ node, counterparty })
     // }
+
+    const myBotPermalink = this.getMyEmployerBotPermalink()
+    if (myBotPermalink && myBotPermalink !== counterparty) {
+      // we don't need this client as all comm will go through
+      // our own provider's bot
+      debug(`not creating aws client for ${counterparty}. All comm will go through my employer`)
+      return
+    }
 
     client = new AWSClient({
       endpoint: url,
