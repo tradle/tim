@@ -840,9 +840,16 @@ var utils = {
     if (isReadOnly || !context  || (resource[constants.TYPE] !== FORM_ERROR  &&   resource[constants.TYPE] !== FORM_REQUEST))
       return isReadOnly
     // Form error can be used only by context originating contact
-    return !isReadOnly  &&  context
-           ? meId  !== this.getId(context.from)
-           : isReadOnly
+    // return !isReadOnly  &&  context
+    //        ? meId  !== this.getId(context.from)
+    //        : isReadOnly
+    if (isReadOnly  ||  !context)
+      return isReadOnly
+    if (meId  === this.getId(context.from))
+      return isReadOnly
+    if (me.isEmployee  &&  to.organization.id  &&  to.organization.id === me.organization.id)
+      return isReadOnly
+    return true
   },
   buildRef(resource) {
     if (!resource[TYPE] && resource.id)
