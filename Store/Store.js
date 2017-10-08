@@ -69,9 +69,6 @@ const ENV = require('../utils/env')
 //   })
 // })
 
-var graphqlEndpoint
-var client
-
 var AddressBook = require('NativeModules').AddressBook;
 
 const tradle = require('@tradle/engine')
@@ -2520,6 +2517,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       var profile = {
         [TYPE]: PROFILE,
         [ROOT_HASH]: hash,
+        [CUR_HASH]: hash,
         firstName: sp.bot.profile.name.firstName || sp.id + 'Bot',
         organization: this.buildRef(sp.org)
         // organization: {
@@ -4817,11 +4815,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   shareForm(document, to, opts, shareBatchId) {
     var time = new Date().getTime()
     let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
-    let msg = this.packMessage(document)
+    let d = this.getResourceToSend(document)
+    let msg = this.packMessage(d, me, to)
     msg.seal =  true
-
-    // let d = this.getResourceToSend(document)
-    // return this.meDriverSend({...opts, object: msg})
+    // return this.meDriverSend({...opts, object: d})
     return this.meDriverSend(msg)
     .then(() => {
       if (!document._sharedWith) {
@@ -4877,14 +4874,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     this.addVisualProps(ver)
     let toOrg = this._getItem(orgId)
     this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
-
     // return this.meDriverSend({...opts, link: ver[CUR_HASH]})
-    // let v = this.getResourceToSend(ver)
-    let msg = this.packMessage(ver)
+    let v = this.getResourceToSend(ver)
+    let msg = this.packMessage(v, me, to)
     msg.seal =  true
-
-    // return this.meDriverSend({...opts, object: v})
-    return this.meDriverSend(msg)
      .then(() => {
       if (ver) {
         ver._sentTime = new Date().getTime()
@@ -6361,6 +6354,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           r.document = refsObj[utils.getId(r.document)] || r.document
         else if (r[TYPE] === FORM_ERROR)
           r.prefill = refsObj[utils.getId(r.prefill)]
+        this.addVisualProps(r)
       })
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a.time - b.time)
@@ -9317,16 +9311,18 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     // HACK for showing verification in employee's chat
     if (type === VERIFICATION) {
       let document = this._getItem(utils.getId(val.document))
-      if (!document) {
-        // debugger
-        // return
-      }
+      // if (!document) {
+      //   debugger
+      //   if (me.isEmployee)
+      //     document = await this._getItemFromServer(utils.getId(val.document))
+      //   // return
+      // }
 
       // let context
       // if (contextId)
       //   context = this._getItem(contextId)
       // else
-      if (!context  &&  document._context)
+      if (!context  && document && document._context)
         context = this._getItem(document._context)
       // let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
       // context = context ? this._getItem(context) : null
@@ -9384,6 +9380,9 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let isNew = val[ROOT_HASH] === val[CUR_HASH]
     if (contextId  &&  !isContext) {
       let context = this._getItem(contextId)
+      if (!context)
+        context = await this.getContext(obj.object.context)
+
       // Avoid doubling the number of forms
       if (context) {
         isThirdPartySentRequest = utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
@@ -9587,6 +9586,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
             this.dbPut(meId, to)
           }
         }
+        this.initClient(meDriver)
       }
       else {
         let fromId = utils.getId(val.from)
@@ -9664,7 +9664,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let context, contexts
     if (me.isEmployee) {
       let myOrgRep = this.getRepresentative(utils.getId(me.organization))
-      contexts = await this.searchServer({modelName: PRODUCT_REQUEST, filterResource: {contextId: contextId, _author: myOrgRep[CUR_HASH]}})
+      contexts = await this.searchServer({modelName: PRODUCT_REQUEST, filterResource: {contextId: contextId, _author: myOrgRep[ROOT_HASH]}})
     }
     else {
       contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
@@ -10200,13 +10200,22 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     if (!list  ||  !list.length)
       return
     let l = list.filter((r) => {
-      return utils.isReadOnlyChat(r)
+      let isReadOnly = utils.isReadOnlyChat(r)
+      if (isReadOnly)
+        this.addVisualProps(r)
+      return isReadOnly
     })
+    let promises = []
     for (let i=0; i<l.length; i++) {
       let r = l[i]
-      let forms = await this.searchMessages({modelName: MESSAGE, to: r})
+      promises.push(this.searchMessages({modelName: MESSAGE, to: r}))
+      // let forms = await this.searchMessages({modelName: MESSAGE, to: r})
+    }
+    let pa = await Q.all(promises)
+    pa.forEach((forms, i) => {
+      let r = l[i]
       if (!forms  ||  r._approved)
-        continue
+        return
       let result = forms.map((rr) => {
         if (rr[TYPE] === APPLICATION_SUBMITTED) {
           r._appSubmitted = true
@@ -10217,7 +10226,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           this.dbPut(utils.getId(r), r)
         }
       })
-    }
+    })
     l.sort((a, b) => b._sentTime - a._sentTime)
     return l
   },
@@ -12590,3 +12599,32 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 
 
 
+  // async getAllSharedContexts() {
+  //   let list = await this.searchMessages({modelName: PRODUCT_APPLICATION})
+  //   if (!list  ||  !list.length)
+  //     return
+  //   let l = list.filter((r) => {
+  //     let isReadOnly = utils.isReadOnlyChat(r)
+  //     if (isReadOnly)
+  //       this.addVisualProps(r)
+  //     return isReadOnly
+  //   })
+  //   for (let i=0; i<l.length; i++) {
+  //     let r = l[i]
+  //     let forms = await this.searchMessages({modelName: MESSAGE, to: r})
+  //     if (!forms  ||  r._approved)
+  //       continue
+  //     let result = forms.map((rr) => {
+  //       if (rr[TYPE] === APPLICATION_SUBMITTED) {
+  //         r._appSubmitted = true
+  //         this.dbPut(utils.getId(r), r)
+  //       }
+  //       else if (this.getModel(rr[TYPE]).subClassOf === MY_PRODUCT) {
+  //         r._approved = true
+  //         this.dbPut(utils.getId(r), r)
+  //       }
+  //     })
+  //   }
+  //   l.sort((a, b) => b._sentTime - a._sentTime)
+  //   return l
+  // },
