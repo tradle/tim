@@ -10173,10 +10173,14 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     for (let rep of orgReps) {
       let id = utils.makeId(IDENTITY, rep[ROOT_HASH])
       let r = this._getItem(id)
-      promises.push(this.meDriverSignAndSend({
-        object: msg,
-        to: { fingerprint: this.getFingerprint(r) }
-      })
+
+      let sendParams = this.packMessage(msg, me, r)
+      promises.push(this.meDriverSignAndSend(sendParams)
+
+      // promises.push(this.meDriverSignAndSend({
+      //   object: msg,
+      //   to: { fingerprint: this.getFingerprint(r) }
+      // })
     )}
 
     return Q.all(promises)
