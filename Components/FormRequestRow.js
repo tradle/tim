@@ -234,7 +234,7 @@ class FormRequestRow extends Component {
                       {msgContent}
                     </TouchableHighlight>
 
-    var bg = bankStyle.backgroundImagae ? 'transparent' : bankStyle.backgroundColor
+    var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     return (
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: bg}]}>
         {date}
