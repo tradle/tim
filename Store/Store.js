@@ -240,7 +240,6 @@ const monitorMissing = require('../utils/missing')
 const identityUtils = require('../utils/identity')
 const createNetworkAdapters = require('../utils/network-adapters')
 import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
-console.log(mcbuilder.buildResourceStub)
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
 var currentEmployees = {}
@@ -1722,12 +1721,24 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   },
 
   async meDriverSend(sendParams) {
-    const botPermalink = this.getMyEmployerBotPermalink()
-    if (botPermalink && sendParams.to !== botPermalink) {
-      // should not happen
+    if (!sendParams.to.permalink) {
       if (__DEV__) {
         debugger
-        Alert.alert('SENDING TO THE WRONG BOT')
+        Alert.alert(`STOP USING FINGERPRINT!`)
+      }
+    } else {
+      const botPermalink = this.getMyEmployerBotPermalink()
+      if (botPermalink && sendParams.to.permalink !== botPermalink) {
+        // should not happen
+        if (__DEV__) {
+          debugger
+          Alert.alert('PREVENTING SEND TO THE WRONG BOT')
+          sendParams.other.forward = sendParams.to.permalink
+          sendParams.to.permalink = botPermalink
+        }
+
+
+        // sendParams.to = botPermalink
       }
     }
 
