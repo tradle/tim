@@ -3449,8 +3449,12 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       let len = batch.length
 
       if (r._context) {
-        let c = this._getItem(utils.getId(r._context));
-        isReadOnly = utils.isReadOnlyChat(c) //c  &&  c._readOnly
+        let cId = utils.getId(r._context)
+        let c = this._getItem(cId);
+        if (!c  &&  me.isEmployee)
+          c = await this._getItemFromServer(cId)
+        if (c)
+          isReadOnly = utils.isReadOnlyChat(c) //c  &&  c._readOnly
       }
       // let docId = utils.getId(r.document)
       let doc = document // this._getItem(r.document)
