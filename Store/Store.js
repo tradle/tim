@@ -6423,10 +6423,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       let r = self._getItem(stub)
       if (r[TYPE] === VERIFICATION) {
         let doc = self._getItem(r.document.id)
-        // if (doc) {
-          refs.push(doc[CUR_HASH])
-          all[doc[CUR_HASH]] = utils.getId(r.document)
-        // }
+        if (!doc)
+          return
+        refs.push(doc[CUR_HASH])
+        all[doc[CUR_HASH]] = utils.getId(r.document)
       }
       else if (r[TYPE] === FORM_ERROR) {
         let prefill = self._getItem(r.prefill.id)
