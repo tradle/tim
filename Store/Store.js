@@ -254,7 +254,6 @@ const monitorMissing = require('../utils/missing')
 const identityUtils = require('../utils/identity')
 const createNetworkAdapters = require('../utils/network-adapters')
 import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
-console.log(mcbuilder.buildResourceStub)
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
 var currentEmployees = {}
@@ -1047,7 +1046,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
     meDriver.setMaxListeners(0)
 
-    debug('me: ' + meDriver.permalink)
+    debug('me: ' + meDriver.permalink, 'isEmployee:', me && me.isEmployee)
     meDriver = tradleUtils.promisifyNode(meDriver)
 
     // TODO: figure out of we need to publish identities
@@ -1716,7 +1715,35 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     return this.addInfo(sp)
   },
 
+  getMyEmployerBotPermalink() {
+    if (me && me.isEmployee) {
+      const rep = this.getRepresentative(utils.getId(me.organization))
+      return rep[ROOT_HASH]
+    }
+  },
+
   async meDriverSend(sendParams) {
+    if (!sendParams.to.permalink) {
+      if (__DEV__) {
+        debugger
+        Alert.alert(`STOP USING FINGERPRINT!`)
+      }
+    } else {
+      const botPermalink = this.getMyEmployerBotPermalink()
+      if (botPermalink && sendParams.to.permalink !== botPermalink) {
+        // should not happen
+        if (__DEV__) {
+          debugger
+          Alert.alert('PREVENTING SEND TO THE WRONG BOT')
+          sendParams.other.forward = sendParams.to.permalink
+          sendParams.to.permalink = botPermalink
+        }
+
+
+        // sendParams.to = botPermalink
+      }
+    }
+
     await this.maybeWaitForIdentity(sendParams.to)
     return await this.meDriverExec('send', sendParams)
   },
@@ -1793,6 +1820,14 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     //   sent: yield monitorMissing.getTip({ node, counterparty, sent: true }),
     //   received: yield monitorMissing.getTip({ node, counterparty })
     // }
+
+    const myBotPermalink = this.getMyEmployerBotPermalink()
+    if (myBotPermalink && myBotPermalink !== counterparty) {
+      // we don't need this client as all comm will go through
+      // our own provider's bot
+      debug(`not creating aws client for ${counterparty}. All comm will go through my employer`)
+      return
+    }
 
     client = new AWSClient({
       endpoint: url,
