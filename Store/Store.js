@@ -1723,33 +1723,45 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     }
   },
 
-  async meDriverSend(sendParams) {
-    if (!sendParams.to.permalink) {
-      if (__DEV__) {
-        debugger
-        Alert.alert(`STOP USING FINGERPRINT!`)
-      }
+  async _preSendCheck(opts) {
+    if (!__DEV__) return
+
+    if (!opts.to.permalink) {
+      debugger
+      Alert.alert(`STOP USING FINGERPRINT!`)
     } else {
       const botPermalink = this.getMyEmployerBotPermalink()
-      if (botPermalink && sendParams.to.permalink !== botPermalink) {
+      if (botPermalink && opts.to.permalink !== botPermalink) {
         // should not happen
-        if (__DEV__) {
-          debugger
-          Alert.alert('PREVENTING SEND TO THE WRONG BOT')
-          sendParams.other.forward = sendParams.to.permalink
-          sendParams.to.permalink = botPermalink
-        }
-
-
-        // sendParams.to = botPermalink
+        debugger
+        Alert.alert('PREVENTING SEND TO THE WRONG BOT')
+        throw new Error('invalid recipient, expected my own bot')
+        // opts.other.forward = opts.to.permalink
+        // opts.to.permalink = botPermalink
       }
+
+        // opts.to = botPermalink
     }
 
+    if (opts.object && opts.object[SIG]) {
+      try {
+        await promisify(tradleUtils.extractSigPubKey)(opts.object)
+      } catch (err) {
+        debugger
+        Alert.alert('ABOUT TO SEND AN OBJECT WITH AN INVALID SIG')
+        throw err
+      }
+    }
+  },
+
+  async meDriverSend(sendParams) {
+    await this._preSendCheck(sendParams)
     await this.maybeWaitForIdentity(sendParams.to)
     return await this.meDriverExec('send', sendParams)
   },
 
   async meDriverSignAndSend(sendParams) {
+    await this._preSendCheck(sendParams)
     await this.maybeWaitForIdentity(sendParams.to)
     return await this.meDriverExec('signAndSend', sendParams)
   },
@@ -1759,6 +1771,11 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   },
 
   async meDriverExec(method, ...args) {
+    // give animations a chance to animate
+    if (method === 'send' || method === 'signAndSend') {
+      await this._preSendCheck(...args)
+    }
+
     // give animations a chance to animate
     await this.onIdle()
 
