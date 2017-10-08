@@ -69,9 +69,6 @@ const ENV = require('../utils/env')
 //   })
 // })
 
-var graphqlEndpoint
-var client
-
 const tradle = require('@tradle/engine')
 var myCustomIndexes
 // build indexes to enable searching by subClassOf
@@ -155,6 +152,7 @@ const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const INTRODUCTION        = 'tradle.Introduction'
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PRODUCT_REQUEST     = 'tradle.ProductRequest'
 const CONTEXT             = 'tradle.Context'
 const PARTIAL             = 'tradle.Partial'
 const MY_PRODUCT          = 'tradle.MyProduct'
@@ -189,7 +187,6 @@ const COUNTRY             = 'tradle.Country'
 const PHOTO               = 'tradle.Photo'
 const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
-const PRODUCT_REQUEST     = 'tradle.ProductRequest'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -1308,7 +1305,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
         // context could be empty if ForgetMe was requested for the provider where form was originally created
         // if (c  &&  c._readOnly) {
         let cId = utils.getId(r._context)
-        if (!c  &&  r[TYPE] === ASSIGN_RM) {
+        if (!c  &&  r[TYPE] === ASSIGN_RM  &&  this.client) {
           c = await this._getItemFromServer(cId)
           this.dbPut(cId, c)
           this._setItem(cId, c)
@@ -1572,49 +1569,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
               Push.subscribe(provider.hash)
                 .catch(err => console.log('failed to register for push notifications'))
             })
-          if (SERVICE_PROVIDERS) {
-            if (me.isEmployee) {
-              let myOrgId = me.organization.id
-              let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
-              if (myEmployer)
-                graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
-            }
-            // else
-            //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
-            if (graphqlEndpoint) {
-              // graphqlEndpoint = `http://localhost:21012/graphql`
-              const networkInterface = createNetworkInterface({
-                uri: graphqlEndpoint
-              })
-
-              networkInterface.use([{
-                applyMiddleware: async (req, next) => {
-                  const printer = require('graphql/language/printer')
-                  const body = tradleUtils.stringify({
-                    ...req.request,
-                    query: printer.print(req.request.query)
-                  })
-
-                  const { sig } = await meDriver.sign({
-                    object: {
-                      [TYPE]: 'tradle.GraphQLQuery',
-                      body,
-                      // time: Date.now()
-                    }
-                  })
-
-                  if (!req.options.headers) {
-                    req.options.headers = {}
-                  }
-
-                  req.options.headers['x-tradle-sig'] = sig
-                  next()
-                }
-              }])
-
-              client = new ApolloClient({ networkInterface })
-            }
-          }
+          if (SERVICE_PROVIDERS)
+            this.initClient(meDriver)
         })
         .catch(err => {
           if (err instanceof TypeError || err instanceof ReferenceError) {
@@ -1627,6 +1583,53 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
         .then(() => meDriver)
     }))
     // Not the best way to
+  },
+  initClient(meDriver) {
+    let me = utils.getMe()
+    if (!me.isEmployee)
+      return
+
+    let graphqlEndpoint
+    let myOrgId = me.organization.id
+    let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
+    if (myEmployer)
+      graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
+    // else
+    //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+    if (!graphqlEndpoint)
+      return
+
+    // graphqlEndpoint = `http://localhost:21012/graphql`
+    const networkInterface = createNetworkInterface({
+      uri: graphqlEndpoint
+    })
+
+    networkInterface.use([{
+      applyMiddleware: async (req, next) => {
+        const printer = require('graphql/language/printer')
+        const body = tradleUtils.stringify({
+          ...req.request,
+          query: printer.print(req.request.query)
+        })
+
+        const { sig } = await meDriver.sign({
+          object: {
+            [TYPE]: 'tradle.GraphQLQuery',
+            body,
+            // time: Date.now()
+          }
+        })
+
+        if (!req.options.headers) {
+          req.options.headers = {}
+        }
+
+        req.options.headers['x-tradle-sig'] = sig
+        next()
+      }
+    }])
+
+    this.client = new ApolloClient({ networkInterface })
   },
 
   onGetEmployeeInfo(code) {
@@ -2518,6 +2521,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       var profile = {
         [TYPE]: PROFILE,
         [ROOT_HASH]: hash,
+        [CUR_HASH]: hash,
         firstName: sp.bot.profile.name.firstName || sp.id + 'Bot',
         organization: this.buildRef(sp.org)
         // organization: {
@@ -4781,7 +4785,6 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       this.dbBatchPut(documentId, document, batch)
       document._sendStatus = SENT
       this._setItem(documentId, document)
-
       this.trigger({action: 'addItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
     }
     // let m = this.getModel(VERIFICATION)
@@ -4807,11 +4810,15 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
     let all = verifications.length
     for (let i=0; i<all; i++) {
-      let ver = this._getItem(verifications[i])
+      // let ver = this._getItem(verifications[i])
+      let ver = verifications[i]
       await this.shareVerification(ver, to, opts, shareBatchId)
       let vId = utils.getId(ver)
       let v = this._getItem(vId)
-      this.dbBatchPut(vId, v, batch)
+      // Check if Verification was created by different employee
+      if (!v)
+        this._setItem(vId, ver)
+      this.dbBatchPut(vId, ver, batch)
     }
     if (!doShareDocument)
       this.addLastMessage(verifications[all - 1], batch, to)
@@ -4822,7 +4829,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     var time = new Date().getTime()
     let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
     let d = this.getResourceToSend(document)
-    return this.meDriverSend({...opts, object: d})
+    let msg = this.packMessage(d, me, to)
+    msg.seal =  true
+    // return this.meDriverSend({...opts, object: d})
+    return this.meDriverSend(msg)
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
@@ -4831,7 +4841,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       }
       if (utils.isSavedItem(document)) {
         document._creationTime = document.time
-        document.time = new Date().getTime()
+        document._sentTime = new Date().getTime()
         let docId = utils.getId(document)
         document.to = to
         this._setItem(docId, document)
@@ -4876,12 +4886,13 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     this.addVisualProps(ver)
     let toOrg = this._getItem(orgId)
     this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
-
     // return this.meDriverSend({...opts, link: ver[CUR_HASH]})
     let v = this.getResourceToSend(ver)
-    return this.meDriverSend({...opts, object: v})
+    let msg = this.packMessage(v, me, to)
+    msg.seal =  true
      .then(() => {
       if (ver) {
+        ver._sentTime = new Date().getTime()
         this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver, to: toOrg})
         ver._sendStatus = SENT
       }
@@ -5566,9 +5577,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
                 addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
             else {
-              op.EQ += `\n   ${p}: {
-                            id: "${val.id}"
-                          },`
+              op.EQ += `\n   ${p}__id: "${val.id}",`
             }
           }
         }
@@ -5662,7 +5671,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     query += `\n}`   // close query
 
     try {
-      let data = await client.query({
+      let data = await this.client.query({
           query: gql(`${query}`),
         })
       let result = data.data[table]
@@ -5825,6 +5834,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let props = m.properties
 
     let rr = {}
+    let toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH]
     for (let p in r) {
       if (r[p]  &&  props[p]) {
         if (props[p].type === 'object') {
@@ -5837,8 +5847,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           else
             rr[p] = utils.clone(r[p])
         }
-        else
-          rr[p] = utils.clone(r[p])
+        else if (p === '_time'  &&  !props[p]  &&  !r.time)
+          rr.time = r._time
+        else if (toKeep.indexOf(p) !== -1)
+          rr[p] = r[p]
       }
       else
         rr[p] = r[p]
@@ -7163,7 +7175,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     if (!l) //  &&  !me.isEmployee)
       return
     let rep = me.isEmployee ? this.getRepresentative(utils.getId(me.organization)) : null
-    if (rep)
+    if (me.isEmployee)
       rep = utils.getId(rep)
     l.forEach((val) => {
       var id = utils.getId(val.to.id);
@@ -7413,8 +7425,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       }
       simpleLinkMessages[r.form] = r
       var msgModel = this.getModel(r.form);
-
-      if (msgModel  &&  msgModel.subClassOf !== MY_PRODUCT  &&  !msgModel.notShareable) {
+      if (msgModel                                     &&
+          !msgModel.notShareable                       &&
+          msgModel.interfaces.indexOf(CONTEXT) === -1  &&
+          msgModel.subClassOf !== MY_PRODUCT) {
         verTypes.push(msgModel.id);
         if (r.verifiers)
           hasVerifiers[msgModel.id] = r.verifiers
@@ -7527,15 +7541,21 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
     let l = await this.searchSharables({modelName: VERIFICATION, search: me.isEmployee, filterResource: {document: docs}})
     if (l) { //  &&  !me.isEmployee)
-      let rep = me.isEmployee ? this.getRepresentative(utils.getId(me.organization)) : null
-      if (rep)
-        rep = utils.getId(rep)
+      let rep
+      if (me.isEmployee) {
+        let representative = this.getRepresentative(utils.getId(me.organization))
+        rep = utils.getId(representative)
+      }
       l.forEach((val) => {
         var id = utils.getId(val.to.id);
         if (id !== meId) {
           if (me.isEmployee  &&  id !== rep)
             return
         }
+        let frId = utils.getId(val.from.id)
+        let fr = this._getItem(frId)
+        if (!fr)
+          return
 
         var doc = val.document
         var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
@@ -9187,7 +9207,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
         })
         return
       }
-      if (val[TYPE] === FORM_REQUEST) {
+      if (val[TYPE] === FORM_REQUEST  &&  this.getModel(val.form).interfaces.indexOf(CONTEXT) === -1) {
         var fid = this._getItem(val.from)
         let productToForms = await this.gatherForms(fid)
         if (val._context)
@@ -9334,12 +9354,21 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     var toId = obj.to.id || utils.makeId(PROFILE, obj.to[ROOT_HASH])
     var to = this._getItem(toId)
     var meId = utils.getId(me)
-    let contextId
+    var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
+    var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
+    let contextId, context
     if (obj.object  &&  obj.object.context) {
       contextId = contextIdToResourceId[obj.object.context]
-// HACK
-      if (!contextId)
-        contextId = utils.makeId(PRODUCT_APPLICATION, obj.object.context)
+      if (!contextId) {
+        // Original request was made by another employee
+        // if (me.isEmployee) {
+        context = await this.getContext(obj.object.context)
+        if (context) {
+          contextId = utils.getId(context)
+          this.addMessagesToChat(utils.getId(fOrg), context)
+          val._context = this.buildRef(context)
+        }
+      }
       // let context = this._getItem(contextId)
       // let r = await meDriver.objects.get({link: context[CUR_HASH], body: false})
       // contextId = utils.makeId(context)
@@ -9349,18 +9378,21 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     // HACK for showing verification in employee's chat
     if (type === VERIFICATION) {
       let document = this._getItem(utils.getId(val.document))
-      if (!document) {
-        // debugger
-        // return
-      }
+      // if (!document) {
+      //   debugger
+      //   if (me.isEmployee)
+      //     document = await this._getItemFromServer(utils.getId(val.document))
+      //   // return
+      // }
 
-      let context
-      if (contextId)
-        context = this._getItem(contextId)
-      else if (document._context)
+      // let context
+      // if (contextId)
+      //   context = this._getItem(contextId)
+      // else
+      if (!context  && document && document._context)
         context = this._getItem(document._context)
       // let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
-      context = context ? this._getItem(context) : null
+      // context = context ? this._getItem(context) : null
       if (context  &&  document) {
         let toBot = this._getItem(utils.getId(context.to))
         let originalTo = toBot.organization // this._getItem(document.to).organization
@@ -9376,8 +9408,6 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       }
     }
 
-    var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
-    var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
     var inDB
     if (onMessage) {
       let fromId = utils.getId(from)
@@ -9415,9 +9445,11 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
     let isNew = val[ROOT_HASH] === val[CUR_HASH]
-    if (obj.object.context  &&  val[TYPE] !== PRODUCT_APPLICATION) {
-      let contextId = utils.makeId(PRODUCT_APPLICATION, obj.object.context)
+    if (contextId  &&  !isContext) {
       let context = this._getItem(contextId)
+      if (!context)
+        context = await this.getContext(obj.object.context)
+
       // Avoid doubling the number of forms
       if (context) {
         isThirdPartySentRequest = utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
@@ -9627,6 +9659,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
             this.dbPut(meId, to)
           }
         }
+        this.initClient(meDriver)
       }
       else {
         let fromId = utils.getId(val.from)
@@ -9699,6 +9732,23 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       // Don't trigger re-rendering the list if the current and previous messages were of PRODUCT_LIST type
       return false
     }
+  },
+  async getContext(contextId) {
+    let context, contexts
+    if (me.isEmployee) {
+      let myOrgRep = this.getRepresentative(utils.getId(me.organization))
+      contexts = await this.searchServer({modelName: PRODUCT_REQUEST, filterResource: {contextId: contextId, _author: myOrgRep[ROOT_HASH]}})
+    }
+    else {
+      contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
+      if (contexts)
+        contexts = contexts.filter((c) => c.contextId === contextId)
+    }
+    if (contexts) {
+      context = contexts[0]
+      contextIdToResourceId[contextId] = utils.getId(context)
+    }
+    return context
   },
   async changeName(val, fr) {
     let fromId = utils.getId(fr)
@@ -10862,7 +10912,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
-      let result = await client.query({query: gql(`${query}`)})
+      let result = await this.client.query({query: gql(`${query}`)})
     // debugger
       return this.convertToResource(result.data[table])
     }
@@ -13136,3 +13186,32 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 //     })
 //   },
 
+  // async getAllSharedContexts() {
+  //   let list = await this.searchMessages({modelName: PRODUCT_APPLICATION})
+  //   if (!list  ||  !list.length)
+  //     return
+  //   let l = list.filter((r) => {
+  //     let isReadOnly = utils.isReadOnlyChat(r)
+  //     if (isReadOnly)
+  //       this.addVisualProps(r)
+  //     return isReadOnly
+  //   })
+  //   for (let i=0; i<l.length; i++) {
+  //     let r = l[i]
+  //     let forms = await this.searchMessages({modelName: MESSAGE, to: r})
+  //     if (!forms  ||  r._approved)
+  //       continue
+  //     let result = forms.map((rr) => {
+  //       if (rr[TYPE] === APPLICATION_SUBMITTED) {
+  //         r._appSubmitted = true
+  //         this.dbPut(utils.getId(r), r)
+  //       }
+  //       else if (this.getModel(rr[TYPE]).subClassOf === MY_PRODUCT) {
+  //         r._approved = true
+  //         this.dbPut(utils.getId(r), r)
+  //       }
+  //     })
+  //   }
+  //   l.sort((a, b) => b._sentTime - a._sentTime)
+  //   return l
+  // },
