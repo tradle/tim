@@ -4911,6 +4911,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let v = this.getResourceToSend(ver)
     let msg = this.packMessage(v, me, to)
     msg.seal =  true
+    return this.meDriverSend(msg)
      .then(() => {
       if (ver) {
         ver._sentTime = new Date().getTime()
@@ -4919,6 +4920,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       }
     })
     .catch(function(err) {
+      console.log(err)
       debugger
     })
   },
@@ -5827,6 +5829,9 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
     let rr = {}
     let toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, 'time']
+
+    // let rr = pick(r, Object.keys(props).concat(toKeep))
+    // let p = pick(r, Object.keys(props))
     for (let p in r) {
       if (r[p]  &&  props[p]) {
         if (props[p].type === 'object') {
@@ -5839,11 +5844,11 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           else
             rr[p] = utils.clone(r[p])
         }
-        // else if (p === '_time'  &&  !props[p]  &&  !r.time)
-        //   rr.time = r._time
-        else if (toKeep.indexOf(p) !== -1)
+        if (props[p])
           rr[p] = r[p]
       }
+      else if (toKeep.indexOf(p) !== -1)
+        rr[p] = r[p]
     }
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
