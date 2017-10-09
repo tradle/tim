@@ -1292,10 +1292,14 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   // },
   async initChats() {
     let meId = utils.getId(me)
-    let meOrgId = me.organization ? utils.getId(me.organization) : null
+    let myOrgId = me.organization ? utils.getId(me.organization) : null
 
     for (var p in list) {
-      let r = this._getItem(p)
+      let rr = this._getItem(p)
+      let r = utils.clone(rr)
+      let m = this.getModel(r[TYPE])
+      if (utils.isMessage(m))
+        this.addVisualProps(r)
       if (r._context) {
         let c = this._getItem(r._context)
         // context could be empty if ForgetMe was requested for the provider where form was originally created
@@ -1318,9 +1322,20 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
 
           let chkId = (toId === meId) ? fromId : toId
 
+          this.addVisualProps(c)
           let cTo = utils.getId(c.to)
           let cFrom = utils.getId(c.from)
           if (chkId !== cTo  &&  chkId !== cFrom) {
+            if (me.isEmployee) {
+              if (r.to.organization && r.from.organization) {
+                let orgId = myOrgId === r.to.organization.id
+                          ? r.from.organization.id
+                          : r.to.organization.id
+                this.addMessagesToChat(orgId, r, true)
+                continue
+              }
+            }
+
             let chatId = utils.getId(cTo === meId ? cFrom : cTo)
             let chat = this._getItem(chatId)
             if (chat.organization  &&  cFrom === meId)
@@ -1334,7 +1349,6 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           this.addMessagesToChat(cId, r, true)
       }
 
-      let m = this.getModel(r[TYPE])
       if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
         continue
 
@@ -1359,7 +1373,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       else if (utils.isContext(m)) {
         if (utils.isReadOnlyChat(r))   //  &&  r._readOnly)
           this.addMessagesToChat(utils.getId(r.from), r, true)
-        contextIdToResourceId[r.contextId] = utils.getId(r)
+        if (r.contextId)
+          contextIdToResourceId[r.contextId] = utils.getId(r)
       }
       else  if (r.to) { // remove
         let fromId = utils.getId(r.from)
@@ -3230,9 +3245,13 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       // let cId = utils.getId(context)
       // sendParams.other.context = cId.split('_')[1]
 
-      sendParams.other.context = this._getItem(context).contextId
-
-      if (!utils.isContext(toChain[TYPE])) {
+      let contextId = this._getItem(context).contextId
+      if (!contextId) {
+        findContextId(utils.getId(context))
+      }
+      if (contextId)
+        sendParams.other.context = contextId
+       if (!utils.isContext(toChain[TYPE])) {
         let c = this._getItem(context)
         // will be null for PRODUCT_APPLICATION itself
         if (c) {
@@ -3247,7 +3266,13 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       sendParams.to = { permalink: hash }
     }
     return sendParams
-  },
+    function findContextId(resourceId) {
+      for (let id in contextIdToResourceId) {
+        if (contextIdToResourceId[id] === resourceId)
+          return id
+      }
+    }
+   },
   // disableOtherFormRequestsLikeThis(rr) {
   //   let fromRep = utils.getId(rr.from)
   //   let orgId = utils.getId(this._getItem(fromRep).organization)
@@ -3400,10 +3425,14 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let { r, dontSend, notOneClickVerification } = params
 
     let to = params.to || [r.to]
-    let docId = utils.getId(params.document || r.document)
+    let docStub = params.document || r.document
+    let docId = utils.getId(docStub)
     let document = this._getItem(docId)
-    if (!document  &&  me.isEmployee)
+    if (!document  &&  me.isEmployee) {
       document = await this._getItemFromServer(docId)
+      if (!document)
+        document = docStub
+    }
 
     // if (__DEV__) {
     //   let newV = newVerificationTree(r, 4)
@@ -3475,22 +3504,24 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       }
       // let docId = utils.getId(r.document)
       let doc = document // this._getItem(r.document)
-      if (!isReadOnly) {
-        doc._verificationsCount = !doc._verificationsCount ? 1 : ++doc._verificationsCount
-        this.dbBatchPut(docId, doc, batch);
+      if (!me.isEmployee) {
+        if (!isReadOnly) {
+          doc._verificationsCount = !doc._verificationsCount ? 1 : ++doc._verificationsCount
+          this.dbBatchPut(docId, doc, batch);
 
-        this.addBacklinksTo(ADD, me, r, batch)
-        this.setMe(me)
-        this.trigger({action: 'addItem', resource: utils.clone(me)})
-        this.addBacklinksTo(ADD, this._getItem(r.from), r, batch)
-      }
-      if (r.sources) {
-        let docs = []
-        getDocs(r.sources, docId, docs)
-        let supportingDocs = docs.map((r) => this.buildRef(r, dontSend))
-        doc._supportingDocuments = supportingDocs
-        this.dbPut(docId, doc)
-        this._setItem(docId, doc)
+          this.addBacklinksTo(ADD, me, r, batch)
+          this.setMe(me)
+          this.trigger({action: 'addItem', resource: utils.clone(me)})
+          this.addBacklinksTo(ADD, this._getItem(r.from), r, batch)
+        }
+        if (r.sources) {
+          let docs = []
+          getDocs(r.sources, docId, docs)
+          let supportingDocs = docs.map((r) => this.buildRef(r, dontSend))
+          doc._supportingDocuments = supportingDocs
+          this.dbPut(docId, doc)
+          this._setItem(docId, doc)
+        }
       }
       await db.batch(batch)
 
@@ -6418,12 +6449,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       let r = self._getItem(stub)
       if (r[TYPE] === VERIFICATION) {
         let doc = self._getItem(r.document.id)
-        if (!doc)
-          return
-        refs.push(doc[CUR_HASH])
-        all[doc[CUR_HASH]] = utils.getId(r.document)
-        refs.push(doc[CUR_HASH])
-        all[doc[CUR_HASH]] = utils.getId(r.document)
+        if (doc) {
+          refs.push(doc[CUR_HASH])
+          all[doc[CUR_HASH]] = utils.getId(r.document)
+        }
       }
       else if (r[TYPE] === FORM_ERROR) {
         let prefill = self._getItem(r.prefill.id)
@@ -9340,6 +9369,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
         context = await this.getContext(obj.object.context)
         if (context) {
           contextId = utils.getId(context)
+          contextIdToResourceId[obj.object.context] = utils.getId(context)
           // this.addMessagesToChat(utils.getId(fOrg), context)
           val._context = this.buildRef(context)
         }
