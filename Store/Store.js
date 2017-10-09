@@ -4868,15 +4868,27 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let d = utils.clone(document)
     let props = this.getModel(d[TYPE]).properties
 
+    let exclude = ['__typename']
     for (let p in d) {
-      if (p === TYPE  ||  p === SIG)
+      if (p === TYPE  ||  p === SIG  ||  p === 'time')
         continue
       if (d[PREV_HASH]  &&  (p === ROOT_HASH || p === PREV_HASH))
         continue
       if (!props[p])
         delete d[p]
-      if (p === 'from'  ||  p === 'to')
+      else if (p === 'from'  ||  p === 'to')
         delete d[p]
+      else if (!d[p])
+        continue
+      else if (props[p].type === 'object') {
+        let stub = d[p]
+        let newStub = {}
+        for (let op in stub) {
+          if (exclude.indexOf(op) === -1)
+            newStub[op] = stub[op]
+        }
+        d[p] = newStub
+      }
     }
     return d
   },
@@ -5710,7 +5722,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   },
   getAllPropertiesForServerSearch(model) {
     let props = model.properties
-    let arr = model.inlined ? [] : ['_permalink', '_link', '_time', '_author', '_authorTitle', TYPE, SIG]
+    let arr = model.inlined ? [] : ['_permalink', '_link', '_time', '_author', '_authorTitle', TYPE, SIG, '_virtual', 'time']
     for (let p in props) {
       if (p.charAt(0) === '_')
         continue
@@ -5814,7 +5826,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let props = m.properties
 
     let rr = {}
-    let toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH]
+    let toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, 'time']
     for (let p in r) {
       if (r[p]  &&  props[p]) {
         if (props[p].type === 'object') {
@@ -5827,8 +5839,8 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           else
             rr[p] = utils.clone(r[p])
         }
-        else if (p === '_time'  &&  !props[p]  &&  !r.time)
-          rr.time = r._time
+        // else if (p === '_time'  &&  !props[p]  &&  !r.time)
+        //   rr.time = r._time
         else if (toKeep.indexOf(p) !== -1)
           rr[p] = r[p]
       }
@@ -9323,7 +9335,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
         context = await this.getContext(obj.object.context)
         if (context) {
           contextId = utils.getId(context)
-          this.addMessagesToChat(utils.getId(fOrg), context)
+          // this.addMessagesToChat(utils.getId(fOrg), context)
           val._context = this.buildRef(context)
         }
       }
