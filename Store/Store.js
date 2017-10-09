@@ -9606,9 +9606,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
             r._documentCreated = true
             let rId = utils.getId(r)
             this._getItem(rId)._documentCreated = true
-            batch.push({type: 'put', key: rId, value: r})
-            // this.addVisualProps(r)
-            // this.trigger({action: 'addItem', resource: r})
+            this.dbBatchPut(rId, r, batch)
+            // batch.push({type: 'put', key: rId, value: r})
+            // // this.addVisualProps(r)
+            // // this.trigger({action: 'addItem', resource: r})
           }
         })
     }
