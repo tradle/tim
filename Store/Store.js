@@ -4923,6 +4923,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let v = this.getResourceToSend(ver)
     let msg = this.packMessage(v, me, to)
     msg.seal =  true
+    return this.meDriverSend(msg)
      .then(() => {
       if (ver) {
         ver._sentTime = new Date().getTime()
@@ -4931,6 +4932,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       }
     })
     .catch(function(err) {
+      console.log(err)
       debugger
     })
   },
@@ -5880,12 +5882,10 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           else
             rr[p] = utils.clone(r[p])
         }
-        // else if (p === '_time'  &&  !props[p]  &&  !r.time)
-        //   rr.time = r._time
-        else if (toKeep.indexOf(p) !== -1)
+        if (props[p])
           rr[p] = r[p]
       }
-      else
+      else if (toKeep.indexOf(p) !== -1)
         rr[p] = r[p]
     }
     let authorId = utils.makeId(PROFILE, r._author)
