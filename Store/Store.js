@@ -187,6 +187,7 @@ const COUNTRY             = 'tradle.Country'
 const PHOTO               = 'tradle.Photo'
 const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
+const SHARE_REQUEST       = 'tradle.ShareRequest'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -4882,11 +4883,20 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
   shareForm(document, to, opts, shareBatchId) {
     var time = new Date().getTime()
     let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
-    let d = this.getResourceToSend(document)
-    let msg = this.packMessage(d, me, to)
+    // let d = this.getResourceToSend(document)
+    // let msg = this.packMessage(d, me, to)
+
+    let sr = {
+      [TYPE]: SHARE_REQUEST,
+      links: [hash],
+      with:  [{
+        id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
+      }]
+    }
+    let msg = this.packMessage(sr, me, to)
     msg.seal =  true
     // return this.meDriverSend({...opts, object: d})
-    return this.meDriverSend(msg)
+    return this.meDriverSignAndSend(msg)
     .then(() => {
       if (!document._sharedWith) {
         document._sharedWith = []
@@ -4953,10 +4963,18 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     let toOrg = this._getItem(orgId)
     this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
     // return this.meDriverSend({...opts, link: ver[CUR_HASH]})
-    let v = this.getResourceToSend(ver)
-    let msg = this.packMessage(v, me, to)
+    // let v = this.getResourceToSend(ver)
+    // let msg = this.packMessage(v, me, to)
+    let sr = {
+      [TYPE]: SHARE_REQUEST,
+      links: [ver[CUR_HASH]],
+      with:  [{
+        id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
+      }]
+    }
+    let msg = this.packMessage(sr, me, to)
     msg.seal =  true
-    return this.meDriverSend(msg)
+    return this.meDriverSignAndSend(msg)
      .then(() => {
       if (ver) {
         ver._sentTime = new Date().getTime()
@@ -7511,44 +7529,44 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
     var self = this
     // var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
-    var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
-    if (productsToShare  &&  productsToShare.length) {
-      productsToShare.forEach((r) => {
-        let fromId = utils.getId(r.from)
-        if (r._sharedWith) {
-          let sw = r._sharedWith.filter((r) => {
-            if (reps.filter((rep) => {
-                    if (utils.getId(rep) === r.bankRepresentative)
-                      return true
-                  }).length)
-              return true
-          })
-          if (sw.length)
-            return
-        }
-        if (shareableResourcesRootToR[r[ROOT_HASH]]) {
-          let arr = shareableResources[r[TYPE]]
-          let skip
-          for (let i=0; i<arr.length  &&  !skip; i++) {
-            if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-              if (r.time < rr.time)
-                skip = true
-              else
-                arr.splice(i, 1)
-            }
-          }
-          if (skip)
-            return
-        }
-        let rr = {
-          [TYPE]: VERIFICATION,
-          document: r,
-          organization: this._getItem(utils.getId(r.from)).organization
-        }
+    // var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
+    // if (productsToShare  &&  productsToShare.length) {
+    //   productsToShare.forEach((r) => {
+    //     let fromId = utils.getId(r.from)
+    //     if (r._sharedWith) {
+    //       let sw = r._sharedWith.filter((r) => {
+    //         if (reps.filter((rep) => {
+    //                 if (utils.getId(rep) === r.bankRepresentative)
+    //                   return true
+    //               }).length)
+    //           return true
+    //       })
+    //       if (sw.length)
+    //         return
+    //     }
+    //     if (shareableResourcesRootToR[r[ROOT_HASH]]) {
+    //       let arr = shareableResources[r[TYPE]]
+    //       let skip
+    //       for (let i=0; i<arr.length  &&  !skip; i++) {
+    //         if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+    //           if (r.time < rr.time)
+    //             skip = true
+    //           else
+    //             arr.splice(i, 1)
+    //         }
+    //       }
+    //       if (skip)
+    //         return
+    //     }
+    //     let rr = {
+    //       [TYPE]: VERIFICATION,
+    //       document: r,
+    //       organization: this._getItem(utils.getId(r.from)).organization
+    //     }
 
-        addAndCheckShareable(rr)
-      })
-    }
+    //     addAndCheckShareable(rr)
+    //   })
+    // }
     if (!verTypes.length)
       return {verifications: shareableResources}
 
