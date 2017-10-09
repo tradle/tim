@@ -1360,7 +1360,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           // else  {
             let rep = this._getItem(shareInfo.bankRepresentative)
             let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
-            if (meOrgId !== orgId) {
+            if (myOrgId !== orgId) {
               this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
               addedToProviders.push(orgId)
             }
