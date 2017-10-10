@@ -16,6 +16,7 @@ import {
 
 import Camera from 'react-native-camera'
 import querystring from 'querystring'
+import traverse from 'traverse'
 import AsyncStorage from '../Store/Storage'
 import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
@@ -1921,6 +1922,14 @@ var utils = {
       await prerequisite
       return fn(...args)
     }
+  },
+
+  deepRemoveProperties(obj, test) {
+    traverse(obj).forEach(function (value) {
+      if (test(({ key: this.key, value }))) {
+        this.remove()
+      }
+    })
   }
 
   // isResourceInMyData(r) {
