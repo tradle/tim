@@ -42,7 +42,6 @@ environment_preprocess.h
 #iOS/Tradle/*.plist
 release/
 release-*/
-Dockerfile*
 *.sublime*
 run-fabric.sh
 config/
