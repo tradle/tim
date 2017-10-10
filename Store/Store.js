@@ -117,7 +117,7 @@ var level = require('./level')
 var debounce = require('debounce')
 var mutexify = require('mutexify')
 const download = require('downloadjs')
-const collect = require('stream-collector')
+const collect = promisify(require('stream-collector'))
 
 // const enforceOrder = require('@tradle/receive-in-order')
 const Multiqueue = require('@tradle/multiqueue')
