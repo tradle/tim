@@ -111,7 +111,7 @@
     "idCardNumber": "K1234 22333 55566",
     "maritalStatus": {
       "title": "Married",
-      "id": "tradle.MaritalStatus_123"
+      "id": "tradle.MaritalStatus_married"
     },
     "phones": [
       {
@@ -270,16 +270,16 @@
   "tradle.MortgageDetail": {
     "_t": "tradle.MortgageDetail",
     "loanType": {
-      "id": "tradle.LoanTypes_c1dc0d95e7ca43ccc6fe74a5ec2c92d139876b39",
+      "id": "tradle.LoanTypes_new",
       "title": "New Mortgage"
     },
     "startMortgageDate": 1397174400000,
     "commercialProduct": {
-      "id": "tradle.CommercialProduct_10989b6af5f7317fd251384714b904f74a8f0e26",
-      "title": "Mortgage"
+      "id": "tradle.CommercialProduct_obvion",
+      "title": "Obvion"
     },
     "mortgageGuarantee": {
-      "id": "tradle.MortgageGuarantee_0a351c343e0bf74ba4c21c18e79d8e6f7a6e6b1b",
+      "id": "tradle.MortgageGuarantee_no",
       "title": "No"
     },
     "totalAmount": {
@@ -298,7 +298,7 @@
       "value": "1000000"
     },
     "typeOfCoverage": {
-      "id": "tradle.TypeOfCoverage_f26194465e83e4affbf081457ed00e28e8bda4e8",
+      "id": "tradle.TypeOfCoverage_yearly",
       "title": "Yearly Decreasing"
     },
     "beneficiary": "Eunice van der Linden",
@@ -309,11 +309,11 @@
     "dependants": 1,
     "residentialStatus": {
       "title": "Living with parents",
-      "id": "tradle.ResidentialStatus_2e980aba65b66702cb2f7fa92f9575b4f3d4f6eb_2e980aba65b66702cb2f7fa92f9575b4f3d4f6eb"
+      "id": "tradle.ResidentialStatus_livingWithParents"
     },
     "maritalStatus": {
       "title": "Married \/ civil partnership",
-      "id": "tradle.MaritalStatus_36dc78aac69ade995b595079c57cdd5d954f16ac_36dc78aac69ade995b595079c57cdd5d954f16ac"
+      "id": "tradle.MaritalStatus_civil"
     },
     "nationality": {
       "title": "American",
@@ -432,13 +432,13 @@
     "confirmEmail": "a@a.com",
     "telephone": "212-222-3333",
     "pickupLocation": {
-      "id": "tradle.Location_f8bef5eeb1ed75d9edf69f93a9f4aa3121e85d21",
+      "id": "tradle.Location_NY",
       "title": "USA, New York"
     }
   },
  "tradle.IdentificationDetail": {
     "typeOfIdentityDocument": {
-      "id": "tradle.IdentityDocumentType_ee443d15603d7e12b7dd2c2a5c804973733d4c41",
+      "id": "tradle.IdentityDocumentType_otherId",
       "title": "Other ID document/ID card"
     },
     "documentNumber": 123234,
@@ -488,7 +488,7 @@
     "startDateOfCover": 1443398400000,
     "expiryDateOfCover": 1475020800000,
     "currency": {
-      "id": "tradle.Currency_efb585b2d312810c60a9d3b75d80be980b2b9ff9",
+      "id": "tradle.Currency_USD",
       "title": "US Dollar"
     },
     "limitIL": {
@@ -529,7 +529,7 @@
     "accountingPeriodTo": 1475020800000,
     "theseAccountsAre": "Management Accounts",
     "currency": {
-      "id": "tradle.Currency_efb585b2d312810c60a9d3b75d80be980b2b9ff9",
+      "id": "tradle.Currency_USD",
       "title": "US Dollar"
     },
     "companyLegalStatus": "Inc"
@@ -549,13 +549,13 @@
     "_t": "tradle.Residence",
     "residenceType": {
       "title": "Primary Residence",
-      "id": "tradle.ResidenceType_123"
+      "id": "tradle.ResidenceType_primary"
     },
     "streetAddress": "30 Lincoln Center Plaza",
     "city": "New York",
     "postalCode": "10023",
     "country": {
-      "id": "tradle.Country_123",
+      "id": "tradle.Country_US",
       "title": "United States"
     },
     "region": "NY"
@@ -567,11 +567,11 @@
   },
   "tradle.PhotoID": {
     "documentType": {
-      "id": "tradle.IDCardType_e098292ca93efb1611bd94d8ef5d2516489c0e2c",
+      "id": "tradle.IDCardType_license",
       "title": "Valid Driver Licence"
     },
     "country": {
-      "id": "tradle.Country_123",
+      "id": "tradle.Country_GB",
       "title": "United Kingdom"
     },
     "scan": {
@@ -615,7 +615,7 @@
     },
     "date": 1421625600000,
     "itemType": {
-      "id": "tradle.WealthItemType_f1a3f30dd8397b92c7ae3172779288e6be244115",
+      "id": "tradle.WealthItemType_SecuritiesSale",
       "title": "Securities purchase"
     },
     "narrative": "Bought shares of Tradle"
@@ -623,7 +623,7 @@
   "tradle.Passport": {
     "_t": "tradle.Passport",
     "issuingCountry": {
-      "id": "tradle.Country_8645e28a0956255427696d0eb912f545388ecadc",
+      "id": "tradle.Country_US",
       "title": "United States"
     },
     "passportNumber": 1234567890,
@@ -635,7 +635,7 @@
     },
     "dateOfBirth": 317088000000,
     "sex": {
-      "id": "tradle.Sex_cebcb4db2796c1906d67793d6f00d977fce9f8ca",
+      "id": "tradle.Sex_Male",
       "title": "Male"
     },
     "placeOfBirth": "Canary Islands",
