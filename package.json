@@ -166,6 +166,7 @@
     "tcomb-form-native": "^0.6.1",
     "tcomb-validation": "^3.2.1",
     "thunky": "^0.1.0",
+    "traverse": "0.6.6",
     "typeforce": "^1.5.5",
     "url": "^0.10.3",
     "util": "^0.10.3",
