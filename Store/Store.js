@@ -602,7 +602,8 @@ var Store = Reflux.createStore({
     this.maybeWatchSeal(msg)
 
     const payload = msg.object.object
-debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[TYPE])
+    const originalPayload = payload[TYPE] === MESSAGE ? payload.object : payload
+    debug('newObject:', originalPayload[TYPE])
 
     if (payload[TYPE] === MESSAGE) {
       try {
@@ -1273,28 +1274,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     // TODO: mark messages as undelivered
     // offer user to resend them
   },
-  // async getReceivePosition ({ counterparty }) {
-  //   const queue = this.multiqueue.queue(counterparty)
-  //   try {
-  //     const seq = await queue.tip()
-  //     if (seq < 0) return null
 
-  //     const val = await monitorMissing.getBySeq({
-  //       node: meDriver,
-  //       counterparty,
-  //       seq
-  //     })
-
-  //     return {
-  //       time: val.time,
-  //       link: val.link
-  //     }
-  //   } catch (err) {
-  //     if (!err.notFound) throw err
-
-  //     return null
-  //   }
-  // },
   async initChats() {
     let meId = utils.getId(me)
     let myOrgId = me.organization ? utils.getId(me.organization) : null
@@ -1326,6 +1306,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           let toId = utils.getId(r.to)
 
           let chkId = (toId === meId) ? fromId : toId
+
           this.addVisualProps(c)
           let cTo = utils.getId(c.to)
           let cFrom = utils.getId(c.from)
@@ -1840,19 +1821,14 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     // }
   },
 
-  addAWSProvider: co(function* (provider) {
+  async addAWSProvider(provider) {
     const self = this
-    const node = yield this._enginePromise
+    const node = await this._enginePromise
     const counterparty = provider.hash
     const url = getProviderUrl(provider)
     const { wsClients } = driverInfo
     let client = wsClients.byUrl[url] || wsClients.byIdentifier[counterparty]
     if (client) return
-
-    // const position = {
-    //   sent: yield monitorMissing.getTip({ node, counterparty, sent: true }),
-    //   received: yield monitorMissing.getTip({ node, counterparty })
-    // }
 
     const myBotPermalink = this.getMyEmployerBotPermalink()
     if (myBotPermalink && myBotPermalink !== counterparty) {
@@ -1866,17 +1842,29 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       endpoint: url,
       node,
       counterparty,
-      // getSendPosition: monitorMissing.getTip,
-      // getReceivePosition: this.getReceivePosition.bind(this),
+      getSendPosition: () => {
+        return monitorMissing.getTip({
+          node,
+          counterparty,
+          sent: true
+        })
+      },
+      getReceivePosition: () => {
+        return monitorMissing.getReceivePosition({
+          node,
+          counterparty,
+          queue: this.multiqueue.queue(counterparty)
+        })
+      },
       // position,
       // TODO: generate long-lived clientId: `${node.permalink}${nonce}`
       clientId: `${node.permalink}${node.permalink}`
     })
 
-    client.onmessage = co(function* (msg) {
+    client.onmessage = async (msg) => {
       debug(`receiving msg ${msg._n} from ${counterparty}`)
-      yield self.queueReceive({ msg, from: counterparty })
-    })
+      await this.queueReceive({ msg, from: counterparty })
+    }
 
     wsClients.add({
       client,
@@ -1886,7 +1874,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     })
 
     meDriver.sender.resume(counterparty)
-  }),
+  },
 
   addProvider(provider) {
     let self = this
@@ -3252,7 +3240,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       }
       if (contextId)
         sendParams.other.context = contextId
-      if (!utils.isContext(toChain[TYPE])) {
+       if (!utils.isContext(toChain[TYPE])) {
         let c = this._getItem(context)
         // will be null for PRODUCT_APPLICATION itself
         if (c) {
@@ -3273,7 +3261,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
           return id
       }
     }
-  },
+   },
   // disableOtherFormRequestsLikeThis(rr) {
   //   let fromRep = utils.getId(rr.from)
   //   let orgId = utils.getId(this._getItem(fromRep).organization)
@@ -4935,7 +4923,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
       else if (p === 'from'  ||  p === 'to')
         delete d[p]
       else if (!d[p])
-        delete d[p] //continue
+        continue
       else if (props[p].type === 'object') {
         let stub = d[p]
         let newStub = {}
@@ -4974,7 +4962,7 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     }
     let msg = this.packMessage(sr, me, to)
     msg.seal =  true
-    return this.meDriverSignAndSend(msg)
+    return this.meDriverSend(msg)
      .then(() => {
       if (ver) {
         ver._sentTime = new Date().getTime()
@@ -5915,30 +5903,14 @@ debug('newObject:', payload[TYPE] === MESSAGE ? payload.object[TYPE] : payload[T
     return arr
   },
   convertToResource(r) {
-    // let r = elm.node
-    let m = this.getModel(r[TYPE])
-    let props = m.properties
+    r = utils.clone(r)
+    utils.deepRemoveProperties(r, ({ key, value }) => key === '__typename' || value == null)
 
-    let rr = {}
-    let toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, 'time']
-    for (let p in r) {
-      if (r[p]  &&  props[p]) {
-        if (props[p].type === 'object') {
-          if (r[p].id) {
-            rr[p] = {
-              id: r[p].id,
-              title: r[p].title
-            }
-          }
-          else
-            rr[p] = utils.clone(r[p])
-        }
-        if (props[p])
-          rr[p] = r[p]
-      }
-      else if (toKeep.indexOf(p) !== -1)
-        rr[p] = r[p]
-    }
+    const m = this.getModel(r[TYPE])
+    const props = m.properties
+    const toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, 'time']
+    let rr = pick(r, Object.keys(props).concat(toKeep))
+
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
     let myOrgRep = this.getRepresentative(utils.getId(me.organization))

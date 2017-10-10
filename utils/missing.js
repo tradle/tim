@@ -9,7 +9,11 @@ const MAX_BACKOFF = 60000
 const INITIAL_BACKOFF = 1000
 const { SEQ, TYPE, TYPES } = constants
 
-exports = module.exports = function restoreMissingMessages ({ node, counterparty, url, receive }) {
+exports = module.exports = restoreMissingMessages
+exports.getTip = getTip
+exports.getReceivePosition = getReceivePosition
+
+function restoreMissingMessages ({ node, counterparty, url, receive }) {
   const monitor = Restore.conversation.monitorMissing({ node, counterparty })
   Restore.batchifyMonitor({ monitor, debounce: 100 })
   // monitorMissing({ node: meDriver, debounce: 1000 }).on('batch', function (seq) {
@@ -85,26 +89,7 @@ exports = module.exports = function restoreMissingMessages ({ node, counterparty
   return monitor
 }
 
-exports.getBySeq = function getBySeq ({ node, counterparty, seq, sent }) {
-  const from = sent ? node.permalink : counterparty
-  const to = sent ? counterparty : node.permalink
-  const seqOpts = {}
-  const base = from + '!' + to
-  seqOpts.eq = base + '!' + hexint(seq)
-  seqOpts.limit = 1
-  const source = node.objects.bySeq(seqOpts)
-  return new Promise((resolve, reject) => {
-    source.on('error', reject)
-    source.on('data', data => resolve({
-      time: data.timestamp,
-      link: data.link
-    }))
-
-    source.on('end', () => resolve(null))
-  })
-}
-
-exports.getTip = function getTip ({ node, counterparty, sent }) {
+function getTip ({ node, counterparty, sent }) {
   const from = sent ? node.permalink : counterparty
   const to = sent ? counterparty : node.permalink
   const seqOpts = {}
@@ -124,6 +109,32 @@ exports.getTip = function getTip ({ node, counterparty, sent }) {
 
     source.on('end', () => resolve(null))
   })
+}
+
+async function getReceivePosition ({ node, queue, counterparty }) {
+  try {
+    const seq = await queue.tip()
+    if (seq < 0) return null
+
+    const { timestamp, link } = await node.objects.getBySeq({
+      from: counterparty,
+      to: node.permalink,
+      seq,
+      body: false
+    })
+
+    return {
+      time: timestamp,
+      link
+    }
+  } catch (err) {
+    if (!err.notFound) {
+      debugger
+      throw err
+    }
+
+    return null
+  }
 }
 
 function bufferizePubKey (key) {

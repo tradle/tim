@@ -41,7 +41,7 @@
     "@tradle/cb-blockr": "^3.2.1",
     "@tradle/constants": "^2.1.0",
     "@tradle/custom-models": "github:tradle/custom-models#dd0220e",
-    "@tradle/engine": "^5.1.1",
+    "@tradle/engine": "^5.3.0",
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.1.0",
     "@tradle/models": "github:tradle/models",
