@@ -22,7 +22,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#06a17f8e046560c52cfb82b35865e61db939516b",
+      "resolved": "git://github.com/tradle/aws-client.git#9f589a5e1aa5dd34ee916747dec5abe31475a73a",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -103,9 +103,9 @@
       "resolved": "git://github.com/tradle/embed.git#e19d8047d38eef19036cc8732117803b386ca9b3"
     },
     "@tradle/engine": {
-      "version": "5.1.1",
-      "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-5.1.1.tgz",
+      "version": "5.3.0",
+      "from": "@tradle/engine@>=5.3.0 <6.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-5.3.0.tgz",
       "dependencies": {
         "async": {
           "version": "2.5.0",
@@ -128,9 +128,9 @@
           "resolved": "https://registry.npmjs.org/protocol-buffers/-/protocol-buffers-3.2.1.tgz"
         },
         "protocol-buffers-schema": {
-          "version": "3.3.1",
+          "version": "3.3.2",
           "from": "protocol-buffers-schema@>=3.1.1 <4.0.0",
-          "resolved": "https://registry.npmjs.org/protocol-buffers-schema/-/protocol-buffers-schema-3.3.1.tgz"
+          "resolved": "https://registry.npmjs.org/protocol-buffers-schema/-/protocol-buffers-schema-3.3.2.tgz"
         },
         "varint": {
           "version": "5.0.0",
