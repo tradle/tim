@@ -3421,6 +3421,7 @@ var Store = Reflux.createStore({
       if (!document)
         document = docStub
     }
+    r.document = document
 
     // if (__DEV__) {
     //   let newV = newVerificationTree(r, 4)
@@ -4923,7 +4924,7 @@ var Store = Reflux.createStore({
       else if (p === 'from'  ||  p === 'to')
         delete d[p]
       else if (!d[p])
-        continue
+        delete d[p] // continue
       else if (props[p].type === 'object') {
         let stub = d[p]
         let newStub = {}
@@ -4962,7 +4963,7 @@ var Store = Reflux.createStore({
     }
     let msg = this.packMessage(sr, me, to)
     msg.seal =  true
-    return this.meDriverSend(msg)
+    return this.meDriverSignAndSend(msg)
      .then(() => {
       if (ver) {
         ver._sentTime = new Date().getTime()
@@ -6481,7 +6482,7 @@ var Store = Reflux.createStore({
         return
       if (r[TYPE] === VERIFICATION) {
         let doc = self._getItem(r.document.id)
-        if (doc) {
+        if (doc  &&  doc.from.id !== r.to.id) {
           refs.push(doc[CUR_HASH])
           all[doc[CUR_HASH]] = utils.getId(r.document)
         }
@@ -6495,21 +6496,35 @@ var Store = Reflux.createStore({
       if (link)
         all[link] = stub.id
     }
-    function handleOne(link) {
+    async function handleOne(link) {
       let rId = all[link]
       let r = self._getItem(rId)
-      return self._keeper.get(link)
-      .then((result) => {
-        let obj = utils.clone(result)
-        extend(r, obj)
-        self._setItem(rId, r)
-        if (r._context  &&  r[TYPE] !== PRODUCT_APPLICATION)
-          r._context = self._getItem(r._context)
-        // list = self.transformResult(result)
+      let result
+      try {
+        result = await self._keeper.get(link)
+      } catch(err) {
+        // debugger
+        console.log(err)
+        if (me.isEmployee)
+          result = self._getItemFromServer(rId)
+        // if (me.isEmployee)
+        //   return self._getItemFromServer(rId)
+      }
+      if (!result)
+        return
 
-        if (refs.indexOf(r[CUR_HASH]) !== -1)
-          refsObj[utils.getId(r)] = r
+      let obj = utils.clone(result)
+      extend(r, obj)
+      self._setItem(rId, r)
+      if (r._context  &&  r[TYPE] !== PRODUCT_APPLICATION)
+        r._context = self._getItem(r._context)
+      // list = self.transformResult(result)
 
+      if (refs.indexOf(r[CUR_HASH]) !== -1)
+        refsObj[utils.getId(r)] = r
+
+      let checked
+      try {
         if (isBacklinkProp) {
           let container = resource  ||  to
           if (container[TYPE] === ORGANIZATION  && ['to', 'from'].indexOf(backlink) !== -1)
@@ -6519,25 +6534,17 @@ var Store = Reflux.createStore({
           if (r[backlink]  &&  utils.getId(r[backlink]) === rId)
             list.push(r)
           if (query)
-            return checkAndFilter(r)
+            checked = await checkAndFilter(r)
         }
         else
-          return checkResource(r)
-      })
-      .then((checked) => {
-        if (isBacklinkProp) {
+          checked = await checkResource(r)
+        if (checked   &&  isBacklinkProp) {
           if (query)
             list.push(r)
           return r
         }
-      })
-      .catch((err) => {
-        // debugger
-        err = err
-        // if (me.isEmployee)
-        //   return self._getItemFromServer(rId)
-      })
-
+      } catch (err) {
+      }
     }
     function addLink(modelName, links, r) {
       let item = self._getItem(r.id)
