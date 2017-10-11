@@ -10,6 +10,4 @@ fi
 #git rev-parse HEAD > commithash
 #source ~/.bash_profile
 echo 'building new docker image...'
-cp ~/.npmrc .npmrc
 docker build -t "tradle/web-app:$1" .
-rm -f .npmrc
