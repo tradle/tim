@@ -3512,13 +3512,13 @@ var Store = Reflux.createStore({
           this._setItem(docId, doc)
         }
       }
+      this._setItem(key, r)
       await db.batch(batch)
 
       this.addVisualProps(r)
       // var rr = {};
       // extend(rr, from);
       // rr.verifiedByMe = r;
-      this._setItem(key, r)
 
       let context = r._context ? this._getItem(r._context) : null
       if (isReadOnly)
@@ -3737,7 +3737,7 @@ var Store = Reflux.createStore({
          newResource[prop] = val.value;
          newResource[prop].id = propValue
          if (!newResource[prop].title)
-            newResource[prop].title = utils.getDisplayName(newResource, meta);
+            newResource[prop].title = utils.getDisplayName(newResource);
        }
      }
      return newResource;
@@ -4000,9 +4000,13 @@ var Store = Reflux.createStore({
       if (!context)
         debugger
       isRemediation = context.product === REMEDIATION
-      let toId = utils.getId(resource.to)
-      if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
-        resource.to = utils.clone(utils.getId(context.to) === utils.getId(me) ? context.from : context.to)
+
+      // with employee it could be context that was started by different employee
+      if (!me.isEmployee) {
+        let toId = utils.getId(resource.to)
+        if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from))
+          resource.to = utils.clone(utils.getId(context.to) === utils.getId(me) ? context.from : context.to)
+      }
     }
 
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
@@ -4078,7 +4082,9 @@ var Store = Reflux.createStore({
         continue;
 
       var rValue = utils.getId(resource[p])
-      refProps[rValue] = p;
+      if (!refProps[rValue])
+        refProps[rValue] = []
+      refProps[rValue].push(p)
       // if (list[rValue]) {
       //   var elm = {value: this._getItem(rValue), state: 'fulfilled'};
       //   foundRefs.push(elm);
@@ -4146,8 +4152,8 @@ var Store = Reflux.createStore({
     if (error) {
       foundRefs.forEach(function(val) {
         var propValue = utils.getId(val.value)
-        var prop = refProps[propValue];
-        json[prop] = val.value;
+        var propsToSet = refProps[propValue];
+        propsToSet.forEach((p) => json[prop] = val.value)
       });
 
       this.trigger({
@@ -4172,10 +4178,8 @@ var Store = Reflux.createStore({
         return
       var value = val.value;
       var propValue = utils.getId(value)
-      var prop = refProps[propValue];
-
-      var title = utils.getDisplayName(value, this.getModel(value[TYPE]).properties);
-      json[prop] = this.buildRef(value, true)
+      var propsToSet = refProps[propValue];
+      propsToSet.forEach((p) => json[p] = this.buildRef(value, true))
     })
 
     // var isMessage = utils.isMessage(meta)
@@ -6173,7 +6177,8 @@ var Store = Reflux.createStore({
     if (!query)
       return r
     let rtype = r[TYPE]
-    let props = this.getModel(rtype).properties
+    let rModel = this.getModel(rtype)
+    let props = rModel.properties
     if (prop  &&  rr[prop]) {
       let val = utils.getStringPropertyValue(r, prop, props)
       return (val.toLowerCase().indexOf(query.toLowerCase()) === -1) ? null : r
@@ -6183,7 +6188,7 @@ var Store = Reflux.createStore({
       if (!r[rr]  ||  rr.charAt(0) === '_'  ||   Array.isArray(r[rr]))
         continue;
       if (props[rr].type === 'object') {
-        let title = utils.getDisplayName(r[rr], props)
+        let title = utils.getDisplayName(r[rr], rModel)
         combinedValue += combinedValue ? ' ' + title : title
         continue
       }
@@ -6473,7 +6478,7 @@ var Store = Reflux.createStore({
       let obj = utils.clone(result)
       extend(r, obj)
       self._setItem(rId, r)
-      if (r._context  &&  r[TYPE] !== PRODUCT_APPLICATION)
+      if (r._context  &&  self.getModel(r[TYPE]).interfaces.indexOf(CONTEXT) === -1)
         r._context = self._getItem(r._context)
       // list = self.transformResult(result)
 
@@ -8061,7 +8066,7 @@ var Store = Reflux.createStore({
         dn = translate('submittingModifiedForm', translate(model))
     }
     else {
-      dn = value.message || utils.getDisplayName(value, model.properties);
+      dn = value.message || utils.getDisplayName(value);
       if (!dn)
         return
     }
@@ -8149,7 +8154,7 @@ var Store = Reflux.createStore({
       currentIdentity: pKey,
       allIdentities: [{
         id: pKey,
-        title: utils.getDisplayName(value, this.getModel(me[TYPE]).properties),
+        title: utils.getDisplayName(value),
         privkeys: me.privkeys,
         publishedIdentity: publishedIdentity
       }]};
@@ -8635,7 +8640,8 @@ var Store = Reflux.createStore({
     var self = this;
     var dfd = Q.defer();
     var batch = [];
-    var props = this.getModel(PROFILE).properties;
+    let pModel = this.getModel(PROFILE)
+    var props = pModel.properties;
     AddressBook.getContacts(function(err, contacts) {
       contacts.forEach(function(contact) {
         var contactInfo = [];
@@ -8651,7 +8657,7 @@ var Store = Reflux.createStore({
           var currentIdentity = myIdentities.currentIdentity;
           newIdentity[constants.OWNER] = {
             id: currentIdentity,
-            title: utils.getDisplayName(currentIdentity, props)
+            title: utils.getDisplayName(currentIdentity, pModel)
           };
           // if (me.organization) {
           //   var photos = list[utils.getId(me.organization.id)].value.photos;
@@ -9055,6 +9061,10 @@ var Store = Reflux.createStore({
       return
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
+
+    if (this._getItem(utils.getId(val)))
+      return
+
     val[MSG_LINK] = obj[MSG_LINK]
 
     var fromId = obj.objectinfo  &&  obj.objectinfo.author
@@ -9112,8 +9122,6 @@ var Store = Reflux.createStore({
       if (isMessage) {
         // if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
         //   return
-        if (this._getItem(utils.getId(val)))
-          return
         noTrigger = await this.putMessageInDB(val, obj, batch, onMessage)
         if (type === VERIFICATION)
           return
