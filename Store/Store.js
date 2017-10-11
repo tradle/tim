@@ -4002,7 +4002,7 @@ var Store = Reflux.createStore({
 
       let toId = utils.getId(resource.to)
       if (toId !== utils.getId(context.to)  &&  toId !== utils.getId(context.from)) {
-        if (!me.isEmployee)
+        // if (!me.isEmployee)
           resource.to = utils.clone(utils.getId(context.to) === utils.getId(me) ? context.from : context.to)
       }
     }
@@ -4436,18 +4436,7 @@ var Store = Reflux.createStore({
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       try {
-        let data
-        try {
-          if (toChain[SIG]) {
-            data = await meDriver.saveObject({object: toChain})
-          } else {
-            data = await meDriver.createObject({object: toChain})
-          }
-        } catch (err) {
-          debugger
-          if (err.type !== 'exists') throw err
-        }
-
+        let data = await meDriver.createObject({object: toChain})
         let hash = data.link
         if (isNew)
           returnVal[ROOT_HASH] = hash
@@ -4809,6 +4798,7 @@ var Store = Reflux.createStore({
     //   verifications = document.verifications
 
     let shareBatchId = new Date().getTime()
+    debugger
     let doShareDocument = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
     if (doShareDocument) {
       let errorMsg = await this.shareForm(document, to, opts, formResource, shareBatchId)
@@ -9816,7 +9806,7 @@ var Store = Reflux.createStore({
       if (contexts)
         contexts = contexts.filter((c) => c.contextId === contextId)
     }
-    if (contexts) {
+    if (contexts  &&  contexts.length) {
       context = contexts[0]
       contextIdToResourceId[contextId] = utils.getId(context)
     }
