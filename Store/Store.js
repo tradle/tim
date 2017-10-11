@@ -6214,7 +6214,7 @@ var Store = Reflux.createStore({
       return this.searchMessages(params)
     })
   },
-  searchMessages(params) {
+  async searchMessages(params) {
     // await this._loadedResourcesDefer.promise
     var self = this
 
