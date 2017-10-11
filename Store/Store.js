@@ -3607,8 +3607,9 @@ var Store = Reflux.createStore({
       if (verifiedBy.photos)
         r._verifiedBy.photo = verifiedBy.photos[0]
     }
-    if (r._context)
+    if (r._context  &&  this.getModel(r[TYPE]).interfaces.indexOf(CONTEXT) === -1) {
       r._context = this._getItem(r._context)
+    }
     return r
   },
   sendMessageToContextOwners(v, recipients, context) {
@@ -6462,7 +6463,7 @@ var Store = Reflux.createStore({
         // debugger
         console.log(err)
         if (me.isEmployee)
-          result = self._getItemFromServer(rId)
+          result = await self._getItemFromServer(rId)
         // if (me.isEmployee)
         //   return self._getItemFromServer(rId)
       }
@@ -9746,7 +9747,7 @@ var Store = Reflux.createStore({
       if (contexts)
         contexts = contexts.filter((c) => c.contextId === contextId)
     }
-    if (contexts) {
+    if (contexts  &&  contexts.length) {
       context = contexts[0]
       contextIdToResourceId[contextId] = utils.getId(context)
     }
