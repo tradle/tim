@@ -580,8 +580,11 @@ var utils = {
           let c = this.normalizeCurrencySymbol(resource[p].currency)
           return (c || '') + resource[p].value
         }
-        else
-          return this.getDisplayName(resource[p], this.getModel(meta[p].ref).value.properties);
+        else {
+          let rm = this.getModel(resource[p][TYPE])
+          if (rm)
+            return this.getDisplayName(resource[p], rm.value.properties);
+        }
       }
     }
     else if (meta[p].displayAs) {
@@ -720,7 +723,7 @@ var utils = {
     switch (dayDiff) {
     case 0:
       noTime = false
-      val = dateformat(date, 'h:MM TT')
+      val = 'today, ' + dateformat(date, 'h:MM TT')
       // val = moment(date).format('h:mA') //moment(date).fromNow();
       break;
     case 1:
