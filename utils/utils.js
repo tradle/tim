@@ -275,6 +275,8 @@ var utils = {
     return s ? s : args[0]
   },
   clone(resource) {
+    if (resource._context  &&  resource._context._context)
+      debugger
     return clone(resource)
     // return JSON.parse(JSON.stringify(resource))
   },
@@ -570,8 +572,11 @@ var utils = {
           let c = this.normalizeCurrencySymbol(resource[p].currency)
           return (c || '') + resource[p].value
         }
-        else
-          return this.getDisplayName(resource[p], this.getModel(meta[p].ref).value.properties);
+        else {
+          let rm = this.getModel(resource[p][TYPE])
+          if (rm)
+            return this.getDisplayName(resource[p], rm.value.properties);
+        }
       }
     }
     else if (meta[p].displayAs) {
