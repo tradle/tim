@@ -62,7 +62,7 @@ var ResourceMixin = {
     //   return;
     var type = resource[constants.TYPE] || id.split('_')[0]
     var model = utils.getModel(type).value;
-    var title = utils.getDisplayName(resource, model.properties);
+    var title = utils.getDisplayName(resource, model);
     if (utils.isMessage(type)) {
       let {bankStyle, search, currency, country} = this.props
       this.props.navigator.push({
@@ -162,7 +162,7 @@ var ResourceMixin = {
             value = v[p];
         }
         else if (itemMeta.ref)
-          value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref).value.properties);
+          value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref).value);
         else
           value = v[p].title;
 

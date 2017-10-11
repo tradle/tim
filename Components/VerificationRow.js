@@ -20,7 +20,6 @@ const MY_PRODUCT = 'tradle.MyProduct'
 const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
 const ORGANIZATION = 'tradle.Organization'
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const BOOKMARK = 'tradle.Bookmark'
 const ENUM = 'tradle.Enum'
 const PROFILE = constants.TYPES.PROFILE
@@ -155,7 +154,7 @@ class VerificationRow extends Component {
     var date = r  &&  <View style={{alignItems: 'flex-end'}}>
                         <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy')}</Text>
                       </View>
-    let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource, model.properties)
+    let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
     let title
     if (isChooser  ||  model.interfaces.indexOf(ITEM) !== -1)
       title = dn //utils.getDisplayName(resource, model.properties)
@@ -172,7 +171,6 @@ class VerificationRow extends Component {
         else if (model.id === CONFIRMATION)
           title = resource.confirmationFor.title
         else
-        // if (listModel.id === PRODUCT_APPLICATION)
           title = 'Submited by ' + resource.from.title
       }
       else

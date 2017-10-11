@@ -33,7 +33,6 @@ import InfiniteScrollView from 'react-native-infinite-scroll-view';
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 import { makeStylish } from './makeStylish'
 
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
 const TYPE = constants.TYPE
@@ -443,7 +442,7 @@ class GridList extends Component {
     //   }
     //   if (this.props.officialAccounts)
     //     this.setState(state)
-    //   else if (this.props._readOnly  &&  this.props.modelName === PRODUCT_APPLICATION) {
+    //   else if (this.props._readOnly  &&  utils.isContext(this.props.modelName)) {
     //     let list = params.list
     //     if (list &&  list.length) {
     //       state.list = list
@@ -747,7 +746,7 @@ class GridList extends Component {
         });
       }
       else {
-        var title = utils.makeTitle(utils.getDisplayName(resource, m.properties))
+        var title = utils.makeTitle(utils.getDisplayName(resource))
         this.props.navigator.push({
           title: title,
           id: 3,
@@ -934,8 +933,9 @@ class GridList extends Component {
 
   }
   _selectResource(resource) {
-    var model = utils.getModel(this.props.modelName);
-    var title = utils.getDisplayName(resource, model.value.properties);
+    let { modelName, style, currency, prop, navigator, returnRoute, callback } = this.props
+    var model = utils.getModel(modelName);
+    var title = utils.getDisplayName(resource);
     var newTitle = title;
     if (title.length > 20) {
       var t = title.split(' ');
@@ -955,18 +955,18 @@ class GridList extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: resource,
-        bankStyle: this.props.style,
-        currency: this.props.currency
+        bankStyle: style,
+        currency: currency
       },
     }
     // Edit resource
     var me = utils.getMe();
-    if ((me || this.state.isRegistration) &&  this.props.prop) {
-      this.props.callback(this.props.prop, resource); // HACK for now
-      if (this.props.returnRoute)
-        this.props.navigator.popToRoute(this.props.returnRoute);
+    if ((me || this.state.isRegistration) &&  prop) {
+      callback(prop, resource); // HACK for now
+      if (returnRoute)
+        navigator.popToRoute(returnRoute);
       else
-        this.props.navigator.pop()
+        navigator.pop()
       return;
     }
     if (me                       &&
@@ -982,17 +982,17 @@ class GridList extends Component {
         titleTextColor: '#7AAAC3',
         passProps: {
           model: utils.getModel(resource[TYPE]).value,
-          bankStyle: this.props.style,
+          bankStyle: style,
           resource: me
         }
       };
     }
-    this.props.navigator.push(route);
+    navigator.push(route);
   }
   showRefResources(resource, prop) {
     var props = utils.getModel(resource[TYPE]).value.properties;
     var propJson = props[prop];
-    var resourceTitle = utils.getDisplayName(resource, props);
+    var resourceTitle = utils.getDisplayName(resource);
     resourceTitle = utils.makeTitle(resourceTitle);
 
     var backlinksTitle = propJson.title + ' - ' + resourceTitle;
@@ -1145,7 +1145,7 @@ class GridList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION) {
+    if (this.state.isGrid  &&  !utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       // let size = viewCols ? viewCols.length : 1
       // let isSmallScreen = utils.dimensions(GridList).width < 736
@@ -1168,7 +1168,8 @@ class GridList extends Component {
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
     var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
-    var isSharedContext = model.id === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
+    let isContext = utils.isContext(model)
+    var isSharedContext = isContext  &&  utils.isReadOnlyChat(resource)
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
 
@@ -1183,7 +1184,7 @@ class GridList extends Component {
     if (model.id === ORGANIZATION  &&  resource.name === 'Sandbox'  &&  resource._isTest)
       return this.renderTestProviders()
     let isMessage = utils.isMessage(resource)
-    if (isMessage  &&  resource !== model  && model.id !== PRODUCT_APPLICATION) //isVerification  || isForm || isMyProduct)
+    if (isMessage  &&  resource !== model  &&  !isContext) //isVerification  || isForm || isMyProduct)
       return (<VerificationRow
                 lazy={this.props.lazy}
                 onSelect={() => this.selectResource(selectedResource)}
@@ -1448,8 +1449,7 @@ class GridList extends Component {
     }
   }
   onPress(resource) {
-    var model = utils.getModel(resource[TYPE] || resource.id).value;
-    var title = utils.makeTitle(utils.getDisplayName(resource, model.properties));
+    var title = utils.makeTitle(utils.getDisplayName(resource));
     this.props.navigator.push({
       id: 7,
       title: title,
@@ -1587,7 +1587,7 @@ class GridList extends Component {
       }
     }
     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
-    var isSharedContext = resource[TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
+    var isSharedContext = utils.isContext(resource[TYPE])  &&  utils.isReadOnlyChat(resource)
     if (isSharedContext  &&  resource._relationshipManager  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
       route.rightButtonTitle = 'Approve/Deny'
       route.onRightButtonPress = () => this.approveDeny(resource)
@@ -1799,7 +1799,7 @@ class GridList extends Component {
     if (SearchBar) {
       let hasSearch = isModel
       if (!hasSearch  && !search) {
-        hasSearch = !_readOnly  ||  modelName !== PRODUCT_APPLICATION
+        hasSearch = !_readOnly  ||  !utils.isContext(modelName)
         if (hasSearch)
           hasSearch = (dataSource && dataSource.getRowCount() > LIMIT) || (filter  &&  filter.length)
       }
@@ -2008,7 +2008,7 @@ class GridList extends Component {
       //   )
     }
     else {
-      if (this.state.isGrid  &&  this.props.modelName !== PRODUCT_APPLICATION)
+      if (this.state.isGrid  &&  !utils.isContext(this.props.modelName))
         return this.renderGridHeader()
     }
     return  (
@@ -2080,7 +2080,7 @@ class GridList extends Component {
   //     titleTextColor: '#7AAAC3',
   //     passProps: {
   //       bankStyle: this.props.style,
-  //       modelName: PRODUCT_APPLICATION,
+  //       modelName: 'tradle.Context',
   //       _readOnly: true
   //     }
   //   });
@@ -2342,7 +2342,7 @@ module.exports = GridList;
 
   //   var searchBar
   //   if (SearchBar) {
-  //     if (!this.props._readOnly  ||  this.props.modelName !== PRODUCT_APPLICATION) {
+  //     if (!this.props._readOnly  ||  !utils.isContext(this.props.modelName)) {
   //       if (this.state.dataSource.getRowCount() > 10 || (this.state.filter  &&  this.state.filter.length)) {
   //         searchBar = (
   //           <SearchBar ref='searchBar'

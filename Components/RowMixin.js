@@ -33,7 +33,6 @@ const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PHOTO = 'tradle.Photo'
 const ENUM = 'tradle.Enum'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
@@ -115,13 +114,13 @@ var RowMixin = {
 
   },
   getOwnerPhoto(isMyMessage) {
-    let isSharedContext = this.props.to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.context)
+    var to = this.props.to;
+    let isSharedContext = utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(this.props.context)
     if (/*Platform.OS !== 'android'  &&*/  !isSharedContext)
       return <View/>
 
-    var to = this.props.to;
-    let isProductApplication = to[constants.TYPE]  === PRODUCT_APPLICATION
-    if (!isProductApplication && (isMyMessage  || !to /* ||  !to.photos*/))
+    let isContext = utils.isContext(to[constants.TYPE])
+    if (!isContext && (isMyMessage  || !to /* ||  !to.photos*/))
       return <View style={{marginVertical: 0}}/>
 
     let resource = this.props.resource
@@ -137,7 +136,7 @@ var RowMixin = {
                 </View>
         return photo
       }
-      // return isProductApplication
+      // return isContext
       //      ? <TouchableHighlight underlayColor='transparent' onPress={this.props.switchChat.bind(this)}>
       //          {photo}
       //        </TouchableHighlight>
@@ -203,15 +202,14 @@ var RowMixin = {
     }
   },
   isShared() {
-    let resource = this.props.resource
+    let { resource, to } = this.props
     // Is resource was originally created in this chat or shared from a different chat
     // if (!resource.organization  ||  (this.props.context  &&  this.props.context._readOnly))
-    if (!resource.organization  ||  utils.isReadOnlyChat(this.props.resource))
+    if (!resource.organization  ||  utils.isReadOnlyChat(resource))
       return false
-    let to = this.props.to
     if (to[constants.TYPE] === constants.TYPES.PROFILE)
       return false
-    if (to[constants.TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)) {
+    if (utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(to)) {
       if (utils.getId(resource.from) === utils.getId(utils.getMe()))
         return false
     }

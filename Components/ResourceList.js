@@ -30,7 +30,7 @@ var StyleSheet = require('../StyleSheet')
 
 import { makeStylish } from './makeStylish'
 
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PARTIAL = 'tradle.Partial'
 const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
@@ -342,7 +342,7 @@ class ResourceList extends Component {
       }
       if (this.props.officialAccounts)
         this.setState(state)
-      else if (this.props._readOnly  &&  this.props.modelName === PRODUCT_APPLICATION) {
+      else if (this.props._readOnly  &&  utils.isContext(this.props.modelName)) {
         let list = params.list
         if (list &&  list.length) {
           state.list = list
@@ -551,7 +551,7 @@ class ResourceList extends Component {
         });
       }
       else {
-        var title = utils.makeTitle(utils.getDisplayName(resource, m.properties))
+        var title = utils.makeTitle(utils.getDisplayName(resource))
         this.props.navigator.push({
           title: title,
           id: 3,
@@ -740,7 +740,7 @@ class ResourceList extends Component {
   }
   _selectResource(resource) {
     var model = utils.getModel(this.props.modelName);
-    var title = utils.getDisplayName(resource, model.value.properties);
+    var title = utils.getDisplayName(resource);
     var newTitle = title;
     if (title.length > 20) {
       var t = title.split(' ');
@@ -797,7 +797,7 @@ class ResourceList extends Component {
   showRefResources(resource, prop) {
     var props = utils.getModel(resource[TYPE]).value.properties;
     var propJson = props[prop];
-    var resourceTitle = utils.getDisplayName(resource, props);
+    var resourceTitle = utils.getDisplayName(resource);
     resourceTitle = utils.makeTitle(resourceTitle);
 
     var backlinksTitle = propJson.title + ' - ' + resourceTitle;
@@ -899,7 +899,7 @@ class ResourceList extends Component {
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
     var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
-    var isSharedContext = model.id === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
+    var isSharedContext = utils.isContext(model)  &&  utils.isReadOnlyChat(resource)
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
 
@@ -960,7 +960,7 @@ class ResourceList extends Component {
       }
     }
     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
-    var isSharedContext = resource[TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
+    var isSharedContext = utils.isContext(resource[TYPE])  &&  utils.isReadOnlyChat(resource)
     if (isSharedContext  &&  resource._relationshipManager  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
       route.rightButtonTitle = 'Approve/Deny'
       route.onRightButtonPress = () => this.approveDeny(resource)
@@ -1071,7 +1071,7 @@ class ResourceList extends Component {
       titleTextColor: '#7AAAC3',
       passProps: {
         bankStyle: this.props.style,
-        modelName: PRODUCT_APPLICATION,
+        modelName: PRODUCT_REQUEST,
         _readOnly: true
       }
     });
@@ -1185,7 +1185,7 @@ class ResourceList extends Component {
     let footer = actionSheet && this.renderFooter()
     var searchBar
     if (SearchBar) {
-      if (!this.props._readOnly  ||  this.props.modelName !== PRODUCT_APPLICATION) {
+      if (!this.props._readOnly  ||  !utils.isContext(this.props.modelName)) {
         if ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length)) {
           searchBar = (
             <SearchBar

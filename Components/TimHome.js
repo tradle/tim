@@ -452,7 +452,7 @@ class TimHome extends Component {
       rightButtonTitle: 'Profile',
       passProps: passProps,
       onRightButtonPress: {
-        title: utils.getDisplayName(me, utils.getModel(me[constants.TYPE]).value.properties),
+        title: utils.getDisplayName(me),
         id: 3,
         component: ResourceView,
         backButtonTitle: 'Back',

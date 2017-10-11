@@ -16,7 +16,7 @@ var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var StyleSheet = require('../StyleSheet')
 var TimerMixin = require('react-timer-mixin')
 
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PROFILE = 'tradle.Profile'
 
 import React, { Component, PropTypes } from 'react'
@@ -160,7 +160,7 @@ class VerifierChooser extends Component {
   verifyByTrustedProvider(resource, product) {
     let provider = this.props.provider
     let msg = {
-      [constants.TYPE]: PRODUCT_APPLICATION,
+      [constants.TYPE]: PRODUCT_REQUEST,
       product: product,
       from: utils.getMe(),
       to:   resource

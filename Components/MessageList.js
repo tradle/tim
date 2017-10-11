@@ -43,7 +43,6 @@ var LINK_COLOR
 var LIMIT = 10
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
 const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM, FINANCIAL_PRODUCT } = TYPES
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
@@ -51,7 +50,7 @@ const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const CONTEXT = 'tradle.Context'
-
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
 var StyleSheet = require('../StyleSheet')
 
 import React, { Component } from 'react'
@@ -192,8 +191,7 @@ class MessageList extends Component {
         return
       }
       let rid = utils.getId(chatWith)
-      let rm = utils.getModel(chatWith[TYPE]).value
-      let isContext = rm.interfaces  &&  rm.interfaces.indexOf(CONTEXT) !== -1
+      let isContext = utils.isContext(chatWith[TYPE])
       if (isContext) {
         if (!resource._context  ||  utils.getId(resource._context) !== utils.getId(chatWith))
           return
@@ -560,7 +558,7 @@ class MessageList extends Component {
     var me = utils.getMe();
     // var MessageRow = require('./MessageRow');
     var previousMessageTime = currentMessageTime;
-    var isProductApplication = model.interfaces.indexOf(CONTEXT) !== -1
+    var isProductApplication = utils.isContext(model)
     currentMessageTime = resource.time;
     var props = {
       onSelect: this.selectResource.bind(this),
@@ -667,8 +665,7 @@ class MessageList extends Component {
         }
       }
     }
-    let interfaces = utils.getModel(resource[TYPE]).interfaces
-    let isProductApplication = interfaces  &&  interfaces.indexOf(CONTEXT) !== -1
+    let isProductApplication = utils.isContext(resource[TYPE])
     if (!content) {
       var isAllMessages = model.isInterface  &&  model.id === MESSAGE;
 
@@ -1052,7 +1049,7 @@ class MessageList extends Component {
     var resource = this.props.resource
     this.setState({show: false})
     Alert.alert(
-      translate('confirmForgetMe', utils.getDisplayName(resource, utils.getModel(resource[TYPE]).value.properties)), //Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[TYPE]).value.properties) + '\' to forget you',
+      translate('confirmForgetMe', utils.getDisplayName(resource)),
       translate('testForgetMe'), //'This is a test mechanism to reset all communications with this provider',
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},
@@ -1085,7 +1082,7 @@ class MessageList extends Component {
         resource: resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
         callback: this.props.callback,
-        type: PRODUCT_APPLICATION
+        type: PRODUCT_REQUEST
       },
       rightButtonTitle: 'ion|plus',
       onRightButtonPress: {
@@ -1109,9 +1106,8 @@ class MessageList extends Component {
     var resource = {from: utils.getMe(), to: this.props.resource};
     var model = utils.getModel(this.props.modelName).value;
 
-    var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[TYPE]).value.properties);
-    var meta = utils.getModel(me[TYPE]).value.properties;
-    var meName = utils.getDisplayName(me, meta);
+    var toName = utils.getDisplayName(resource.to);
+    var meName = utils.getDisplayName(me);
     var modelName = SIMPLE_MESSAGE;
     var value = {
       message: msg

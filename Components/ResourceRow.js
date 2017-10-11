@@ -35,7 +35,6 @@ import {
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
@@ -231,7 +230,7 @@ class ResourceRow extends Component {
                      </View>
     var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
 
-    dateProp = resource[TYPE] === PRODUCT_APPLICATION ? 'time' : dateProp
+    dateProp = utils.isContext(resource[TYPE]) ? 'time' : dateProp
     let dateRow
     if (!this.props.isChooser  &&  dateProp  &&  resource[dateProp]) {
       var val = utils.formatDate(new Date(resource[dateProp]), true)
@@ -365,7 +364,7 @@ class ResourceRow extends Component {
                 <Text style={[styles.resourceTitle, {fontSize: 18, paddingLeft: 7, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
               </View>
       }
-      var vCols = utils.getDisplayName(resource, model.properties);
+      var vCols = utils.getDisplayName(resource);
       if (vCols && vCols.length) {
         if (model.subClassOf  &&  model.subClassOf === 'tradle.Enum')
           vCols = utils.createAndTranslate(vCols, true)
@@ -376,7 +375,7 @@ class ResourceRow extends Component {
         return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title}</Text>;
     }
     // HACK
-    else if (model.id === PRODUCT_APPLICATION) {
+    else if (utils.isContext(model.id)) {
       let m = utils.getModel(resource.product)
       if (!m)
         return <View/>
@@ -578,7 +577,7 @@ class ResourceRow extends Component {
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
-      var vCols = utils.getDisplayName(resource, model.properties);
+      var vCols = utils.getDisplayName(resource, model);
       return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
 
     }
@@ -621,7 +620,7 @@ class ResourceRow extends Component {
   onPress(event) {
     let resource = this.props.resource
     var model = utils.getModel(resource[TYPE] || resource.id).value;
-    var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model.properties));
+    var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model));
     this.props.navigator.push({
       id: 7,
       title: title,

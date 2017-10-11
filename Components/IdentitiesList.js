@@ -71,7 +71,7 @@ class IdentitiesList extends Component {
     var me = params.me;
     var modelName = me[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var meName = utils.getDisplayName(me, model.properties);
+    var meName = utils.getDisplayName(me);
     var self = this;
     var route = {
       title: model.title,
