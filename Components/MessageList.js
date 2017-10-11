@@ -709,9 +709,8 @@ class MessageList extends Component {
       let notRemediation = (this.state.context   &&  this.state.context.product !== REMEDIATION) ||
                            (isProductApplication && resource.product !== REMEDIATION)
       let me = utils.getMe()
-      // if (me.isEmployee  &&  utils.getId(me.organization) !== utils.getId(resource));
-      // else
-      if (this.hasChatContext())
+      if (me.isEmployee);
+      else if (this.hasChatContext())
         maxHeight -= 45
       else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  this.state.onlineStatus === false))) //  || (resource[TYPE] === ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35

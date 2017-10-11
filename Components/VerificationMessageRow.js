@@ -232,7 +232,7 @@ class VerificationMessageRow extends Component {
     //   bg = 'transparent'
     // else
     //   bg = bankStyle.BACKGROUND_COLOR
-    var viewStyle = { margin: 1, paddingRight: 10 }
+    var viewStyle = { margin: 1 } //, paddingRight: 10 }
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}

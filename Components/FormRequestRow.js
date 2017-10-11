@@ -238,7 +238,7 @@ class FormRequestRow extends Component {
     return (
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: bg}]}>
         {date}
-        <View style={shareables ? {borderWidth: 1, width: viewStyle.width + 2, borderColor: '#dddddd', backgroundColor: bankStyle.incomingMessageBgColor, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
+        <View style={shareables ? {borderWidth: 1, width: viewStyle.width + 5, borderColor: '#dddddd', backgroundColor: bankStyle.incomingMessageBgColor, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
           {messageBody}
           {sendStatus}
           {shareables}
