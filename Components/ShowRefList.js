@@ -18,7 +18,6 @@ const {
 
 const constants = require('@tradle/constants') // tradle.constants
 const VERIFICATION = constants.TYPES.VERIFICATION;
-const PRODUCT_APPLICATION = constants.TYPES.PRODUCT_APPLICATION;
 
 import { makeResponsive } from 'react-native-orient'
 
@@ -154,7 +153,7 @@ class ShowRefList extends Component {
       let ref = props[p].items.ref
       if (ENV.hideVerificationsInChat  && ref === VERIFICATION)
         return
-      if (ENV.hideProductApplicationInChat  &&  ref === PRODUCT_APPLICATION)
+      if (ENV.hideProductApplicationInChat  &&  utils.isContext(ref))
         return
       let propTitle = translate(props[p], model)
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;

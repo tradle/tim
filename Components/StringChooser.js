@@ -9,7 +9,6 @@ var constants = require('@tradle/constants');
 var PageView = require('./PageView')
 import platformStyles from '../styles/platform'
 
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const FORM_REQUEST = 'tradle.FormRequest'
 const REMEDIATION = 'tradle.Remediation'
 import {
