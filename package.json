@@ -206,7 +206,6 @@
     "babel-plugin-transform-async-to-module-method": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.3.13",
     "babel-plugin-transform-regenerator": "^6.3.13",
-    "babel-preset-env": "^1.6.0",
     "detox": "^5.8.1",
     "eslint": "2.13.1",
     "eslint-config-standard": "^5.3.1",
