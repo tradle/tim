@@ -302,13 +302,14 @@ function getBabelLoader () {
       /xtend/
     ],
     query: {
+      compact: false,
       cacheDirectory: true,
-      presets: ['es2015', 'react', 'stage-1'],
+      // presets: ['es2015', 'react', 'stage-1'],
       plugins: [
-        'transform-object-rest-spread',
-        'transform-class-properties',
-        'transform-async-functions',
-        'transform-flow-strip-types'
+        // 'transform-object-rest-spread',
+        // 'transform-class-properties',
+        // 'transform-async-functions',
+        // 'transform-flow-strip-types'
       ]
     }
   }

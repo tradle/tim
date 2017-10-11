@@ -285,6 +285,8 @@ var utils = {
     return s ? s : args[0]
   },
   clone(resource) {
+    if (resource._context  &&  resource._context._context)
+      debugger
     return clone(resource)
     // return JSON.parse(JSON.stringify(resource))
   },
