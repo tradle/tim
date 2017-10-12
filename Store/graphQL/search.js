@@ -2,6 +2,7 @@
 
 import utils from '../../utils/utils'
 const gql = require('graphql-tag')
+var deepEqual = require('deep-equal')
 
 var constants = require('@tradle/constants');
 const {
