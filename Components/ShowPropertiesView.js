@@ -164,7 +164,8 @@ class ShowPropertiesView extends Component {
       var isItems
       var isDirectionRow;
       // var isEmail
-      if (!val) {
+      let isUndefined = !val  &&  (typeof val === 'undefined')
+      if (isUndefined) {
         if (pMeta.displayAs)
           val = utils.templateIt(pMeta, resource);
         else if (this.props.checkProperties) {
@@ -227,7 +228,7 @@ class ShowPropertiesView extends Component {
 
       // }
 
-      if (!val)
+      if (isUndefined)
         return //<View key={this.getNextKey()}></View>;
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
