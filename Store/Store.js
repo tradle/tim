@@ -3329,7 +3329,7 @@ var Store = Reflux.createStore({
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
       if (!isInit) {
-        if (r[TYPE] === FORM_REQUEST  &&  this.getModel(r.form).interfaces.indexOf(CONTEXT) !== -1) {
+        if (r[TYPE] === FORM_REQUEST  &&  utils.isContext(r.form)) {
           // This is request for productList
           let msgId = messages[messages.length - 1].id
           if (this._getItem(msgId).form === r.form) {
@@ -3619,7 +3619,7 @@ var Store = Reflux.createStore({
       if (verifiedBy.photos)
         r._verifiedBy.photo = verifiedBy.photos[0]
     }
-    if (r._context  &&  this.getModel(r[TYPE]).interfaces.indexOf(CONTEXT) === -1) {
+    if (r._context  &&  !utils.isContext(r[TYPE])) {
       r._context = this._getItem(r._context)
     }
     return r
@@ -4458,7 +4458,7 @@ var Store = Reflux.createStore({
         if (isContext)
           contextIdToResourceId[returnVal.contextId] = returnValKey
 
-        if (!returnVal._context  &&  rModel.interfaces.indexOf(CONTEXT) !== -1) {
+        if (!returnVal._context  &&  utils.isContext(rModel)) {
           let {requestFor, product} = returnVal
           returnVal._context = {id: returnValKey, title: product ? product : requestFor}
         }
@@ -6159,7 +6159,7 @@ var Store = Reflux.createStore({
       let obj = utils.clone(resource)
       extend(r, obj)
       self._setItem(rId, r)
-      if (r._context  &&  self.getModel(r[TYPE]).interfaces.indexOf(CONTEXT) === -1)
+      if (r._context  &&  !utils.isContext(r[TYPE]))
         r._context = self._getItem(r._context)
       // list = self.transformResult(result)
 
@@ -6805,7 +6805,10 @@ var Store = Reflux.createStore({
       simpleLinkMessages[r.form] = r
       var msgModel = this.getModel(r.form);
 
-      if (msgModel  &&  msgModel.subClassOf !== MY_PRODUCT  &&  !msgModel.notShareable) {
+      if (msgModel  &&
+          msgModel.subClassOf !== MY_PRODUCT  &&
+          !msgModel.notShareable              &&
+          !utils.isContext(msgModel)) {
         verTypes.push(msgModel.id);
         if (r.verifiers)
           hasVerifiers[msgModel.id] = r.verifiers
@@ -7017,10 +7020,10 @@ var Store = Reflux.createStore({
       }
       simpleLinkMessages[r.form] = r
       var msgModel = this.getModel(r.form);
-      if (msgModel                                     &&
-          !msgModel.notShareable                       &&
-          msgModel.interfaces.indexOf(CONTEXT) === -1  &&
-          msgModel.subClassOf !== MY_PRODUCT) {
+      if (msgModel  &&
+          msgModel.subClassOf !== MY_PRODUCT  &&
+          !msgModel.notShareable              &&
+          !utils.isContext(msgModel)) {
         verTypes.push(msgModel.id);
         if (r.verifiers)
           hasVerifiers[msgModel.id] = r.verifiers
@@ -8333,7 +8336,7 @@ var Store = Reflux.createStore({
         })
         return
       }
-      if (val[TYPE] === FORM_REQUEST  &&  this.getModel(val.form).interfaces.indexOf(CONTEXT) === -1) {
+      if (val[TYPE] === FORM_REQUEST  &&  !utils.isContext(val.form)) {
         var fid = this._getItem(val.from)
         let productToForms = await this.gatherForms(fid)
         if (val._context)
