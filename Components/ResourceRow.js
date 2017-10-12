@@ -376,7 +376,7 @@ class ResourceRow extends Component {
     }
     // HACK
     else if (utils.isContext(model.id)) {
-      let m = utils.getModel(resource.product)
+      let m = utils.getModel(resource.requestFor)
       if (!m)
         return <View/>
 
@@ -618,14 +618,14 @@ class ResourceRow extends Component {
 
   }
   onPress(event) {
-    let resource = this.props.resource
+    let { resource, navigator } = this.props
     var model = utils.getModel(resource[TYPE] || resource.id).value;
-    var title = utils.makeTitle(utils.getDisplayName(this.props.resource, model));
-    this.props.navigator.push({
+    var title = utils.makeTitle(utils.getDisplayName(resource, model));
+    navigator.push({
       id: 7,
       title: title,
       component: ArticleView,
-      passProps: {url: this.props.resource.url}
+      passProps: {url: resource.url}
     });
   }
 }
