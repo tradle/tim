@@ -1158,6 +1158,8 @@ var Store = Reflux.createStore({
           debugger
           if (/timetravel/i.test(err.type)) {
             self.abortUnsent({ to: identifier })
+            debug('aborting time traveler message', err.stack)
+            err = new tradle.errors.WillNotSend('aborted')
           }
 
           return cb(err)

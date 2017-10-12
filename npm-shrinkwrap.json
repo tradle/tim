@@ -86,9 +86,9 @@
       "resolved": "git://github.com/tradle/embed.git#e19d8047d38eef19036cc8732117803b386ca9b3"
     },
     "@tradle/engine": {
-      "version": "5.3.0",
-      "from": "@tradle/engine@>=5.3.0 <6.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-5.3.0.tgz",
+      "version": "5.3.3",
+      "from": "@tradle/engine@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-5.3.3.tgz",
       "dependencies": {
         "async": {
           "version": "2.5.0",
@@ -971,7 +971,6 @@
         },
         "esutils": {
           "version": "2.0.2",
-          "from": "esutils@>=2.0.2 <3.0.0",
           "resolved": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz",
           "dev": true
         },
@@ -989,7 +988,7 @@
         },
         "js-tokens": {
           "version": "3.0.2",
-          "from": "js-tokens@>=3.0.2 <4.0.0",
+          "from": "js-tokens@^3.0.2",
           "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-3.0.2.tgz",
           "dev": true
         },
@@ -3522,7 +3521,7 @@
         },
         "globals": {
           "version": "9.18.0",
-          "from": "globals@>=9.2.0 <10.0.0",
+          "from": "globals@^9.2.0",
           "resolved": "https://registry.npmjs.org/globals/-/globals-9.18.0.tgz",
           "dev": true
         },

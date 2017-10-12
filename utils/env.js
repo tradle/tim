@@ -58,12 +58,12 @@ const merged = extend({
   // easy
   // LOCAL_TRADLE_SERVER: 'https://zdpksydivf.execute-api.us-east-1.amazonaws.com/dev/',
   // safe-re
-  // LOCAL_TRADLE_SERVER: 'https://we3hvcnpmf.execute-api.us-east-1.amazonaws.com/dev/',
+  // LOCAL_TRADLE_SERVER: 'https://ie3sibl8l5.execute-api.us-east-1.amazonaws.com/dev/',
   // friendly
   // LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/',
   LOCAL_TRADLE_SERVERS: [
     'https://zdpksydivf.execute-api.us-east-1.amazonaws.com/dev/',
-    'https://we3hvcnpmf.execute-api.us-east-1.amazonaws.com/dev/',
+    'https://ie3sibl8l5.execute-api.us-east-1.amazonaws.com/dev/',
     'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/'
   ],
   // LOCAL_TRADLE_SERVER: 'https://uqs8mggyej.execute-api.us-east-1.amazonaws.com/dev/', // Silly
