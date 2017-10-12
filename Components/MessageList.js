@@ -61,6 +61,7 @@ import {
   Image,
   Navigator,
   Platform,
+  PixelRatio,
   View,
   Text,
   StatusBar,
@@ -712,6 +713,11 @@ class MessageList extends Component {
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
         hideTextInput={hideTextInput}
+        styles={
+          {
+            textInputContainer: styles.textInputContainer
+          }
+        }
       />
     }
 
@@ -1166,6 +1172,15 @@ var styles = StyleSheet.create({
     borderTopColor: '#cccccc',
     paddingRight: 10
   },
+  textInputContainer: {
+    backgroundColor: '#ffffff',
+    height: 45,
+    borderTopWidth: Platform.OS === 'android' ? 1 : 1 / PixelRatio.get(),
+    borderColor: '#b2b2b2',
+    flexDirection: 'row',
+    paddingLeft: 10,
+    paddingRight: 10,
+  }
 });
 module.exports = MessageList;
 
