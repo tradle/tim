@@ -579,7 +579,7 @@ var utils = {
         else {
           let rm = this.getModel(resource[p][TYPE])
           if (rm)
-            return this.getDisplayName(resource[p], rm.value.properties);
+            return this.getDisplayName(resource[p], rm.value);
         }
       }
     }
