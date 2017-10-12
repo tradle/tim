@@ -15,7 +15,6 @@ import ReactNative, {
 import pick from 'object.pick'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
-const gql = require('graphql-tag')
 const { ApolloClient, createNetworkInterface } = require('apollo-client')
 
 import Analytics from '../utils/analytics'
@@ -92,6 +91,7 @@ const MSG_LINK = '_msg'
 
 const sampleData = require('@tradle/models').data
 const utils = require('../utils/utils');
+const graphQL = require('./graphQL/search')
 const voc = (function () {
   const models = require('@tradle/models').concat(require('@tradle/custom-models'))
   models.forEach(model => {
@@ -102,11 +102,6 @@ const voc = (function () {
 }())
 
 var sampleProfile = require('../data/sampleProfile.json')
-// var currencies = voc.currencies
-// var nationalities = voc.nationalities
-// var countries = voc.countries
-
-// var myIdentity = __DEV__ ? require('../data/myIdentity.json') : []
 var welcome = require('../data/welcome.json');
 
 var sha = require('stable-sha1');
@@ -282,7 +277,7 @@ var language
 var dictionary = {}
 var isAuthenticated
 var meDriver
-var cursor = {}
+// var cursor = {}
 // var publishedIdentity
 var ready;
 var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
@@ -1290,8 +1285,11 @@ var Store = Reflux.createStore({
       let rr = this._getItem(p)
       let r = utils.clone(rr)
       let m = this.getModel(r[TYPE])
-      if (utils.isMessage(m))
-        this.addVisualProps(r)
+      if (!utils.isMessage(m))
+        continue
+
+      this.addVisualProps(r)
+
       if (r._context) {
         let c = this._getItem(r._context)
         // context could be empty if ForgetMe was requested for the provider where form was originally created
@@ -1341,21 +1339,18 @@ var Store = Reflux.createStore({
           this.addMessagesToChat(cId, r, true)
       }
 
-      if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
-        continue
-
       let addedToProviders = []
       if (r._sharedWith) {
         r._sharedWith.forEach((shareInfo) => {
           // if (shareInfo.bankRepresentative === meId)
           //   this.addMessagesToChat(utils.getId(r.to), r, true, shareInfo.timeShared)
           // else  {
-            let rep = this._getItem(shareInfo.bankRepresentative)
-            let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
-            if (myOrgId !== orgId) {
-              this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
-              addedToProviders.push(orgId)
-            }
+          let rep = this._getItem(shareInfo.bankRepresentative)
+          let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
+          if (myOrgId !== orgId) {
+            this.addMessagesToChat(orgId, r, true, shareInfo.timeShared)
+            addedToProviders.push(orgId)
+          }
           // }
         })
       }
@@ -1395,7 +1390,13 @@ var Store = Reflux.createStore({
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
       let r = this._getItem(messages[i].id)
-      let product = r.product || (r._context && this._getItem(r._context).product)
+
+      let product
+      if (utils.isContext(r[TYPE]))
+        product = r.requestFor
+      else if (r._context)
+        product = this._getItem(r._context).requestFor
+
       if (product) {
         if (r[TYPE] === FORM_REQUEST  &&  !r._document) {// && r._documentCreated)
         // delete list[id]
@@ -1415,7 +1416,7 @@ var Store = Reflux.createStore({
             removeMsg.push(productIdx)
             // messages.splice(productIdx, 1)
           // else
-            productApp[product] = i
+          productApp[product] = i
         }
       }
       // leave only the last PL
@@ -5012,7 +5013,7 @@ var Store = Reflux.createStore({
         otherProviderModels.push(m.id)
       })
     })
-    let requestedModels = requestedModelsPack[0].models.slice(0)
+    let requestedModels = requestedModelsPack.length && requestedModelsPack[0].models.slice(0) || []
     let retModels = []
     for (let m in models) {
       if (otherProviderModels.indexOf(m) === -1)
@@ -5525,355 +5526,23 @@ var Store = Reflux.createStore({
     return contexts[0]
   },
   async searchServer(params) {
-    let self = this
-    let {modelName, filterResource, sortProperty, asc, limit, direction, first, noTrigger} = params
+    // let self = this
+    let {filterResource, direction, first, noTrigger} = params
 
-    if (filterResource  &&  !Object.keys(filterResource).length)
-      filterResource = null
-
-    let table = `rl_${modelName.replace(/\./g, '_')}`
-    let query = `query {\n${table}\n`
-    let model = this.getModel(modelName)
-    let props = model.properties
-    let inClause = []
-    let op = {
-      CONTAINS: '',
-      EQ: '',
-      STARTS_WITH: '',
-      GT: '',
-      GTE: '',
-      LT: '',
-      LTE: '',
+    extend(params, {client: this.client})
+    let result = await graphQL.searchServer(params)
+    if (!result) {
+      this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
+      return
     }
-    let exclude = [ROOT_HASH, CUR_HASH, TYPE]
-    if (filterResource) {
-      for (let p in filterResource) {
-        if (exclude.indexOf(p) !== -1)
-          continue
-        // if (!props[p]  ||  p.charAt(0) === '_')
-        //   continue
-        let val = filterResource[p]
-        // if (p === TYPE) {
-        //   if (!Array.isArray(val))
-        //     continue
-        //   else {
-        //     let s = `${p}: [`
-        //     val.forEach((r, i) => {
-        //       if (i)
-        //         s += ', '
-        //       s += `"${r}"`
-        //     })
-        //     s += ']'
-        //     inClause.push(s)
-        //   }
-        // }
-
-        // if (p.charAt(0) === '_')
-        //   debugger
-        if (!props[p]  &&  p.charAt(0) === '_'  &&  val) {
-          op.EQ += `\n   ${p}: "${val}",`
-          continue
-        }
-        else if (props[p].type === 'string'  &&  (!val  ||  !val.trim().length))
-          continue
-        if (props[p].type === 'string') {
-          let len = val.length
-          if (val.indexOf('*') === -1)
-            op.EQ += `\n   ${p}: "${val}",`
-          else if (len > 1) {
-            if (val.charAt(0) === '*')
-              op.STARTS_WITH = `\n   ${p}: "${val.substring(1)}",`
-            else if (val.charAt(len - 1) === '*')
-              op.CONTAINS = `\n   ${p}: "${val.substring(1, len - 1)}",`
-          }
-        }
-        else if (props[p].type === 'boolean')
-          op.EQ += `\n   ${p}: ${val},`
-        else if (props[p].type === 'number')
-          self.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
-
-        else if (props[p].type === 'object') {
-          // if (Array.isArray(val)) {
-          //   let s = `${p}: [`
-          //   val.forEach((r, i) => {
-          //     if (i)
-          //       s += ', '
-          //     s += `{id: "${utils.getId(r)}", title: "${utils.getDisplayName(r)}"}`
-          //   })
-          //   s += ']'
-          //   inClause.push(s)
-          // }
-          if (Array.isArray(val)) {
-            if (!val.length)
-              continue
-            let s = `${p}__id: [`
-            val.forEach((r, i) => {
-              if (i)
-                s += ', '
-              s += `"${utils.getId(r)}"`
-            })
-            s += ']'
-            inClause.push(s)
-          }
-          else {
-            if (props[p].ref === MONEY) {
-              let {value, currency} = val
-              op.EQ += `\n  ${p}__currency: "${currency}",`
-              if (val.value)
-                addEqualsOrGreaterOrLesserNumber(value, op, props[p])
-            }
-            else {
-              op.EQ += `\n   ${p}__id: "${val.id}",`
-            }
-          }
-        }
-      }
-    }
-    op.IN = inClause ? inClause.join(',') : ''
-
-    let qq = ''
-    for (let o in op) {
-      let q = op[o]
-      if (q.length) {
-        qq +=
-         `\n  ${o}: {
-           ${op[o]}\n},`
-      }
-    }
-    query += '('
-    let hasFilter = qq.length
-    if (first  ||  cursor.modelName !== modelName) {
-      cursor = {endCursor: []}
-    }
-    if (limit) {
-      if (cursor) {
-        if (cursor.filter) {
-          if (!filterResource  ||  deepEqual(filterResource,  cursor.filter))
-            cursor = {endCursor: []}
-        }
-      }
-      cursor.endCursor = cursor.endCursor || []
-      cursor.modelName = modelName
-      cursor.filter = filterResource || null
-
-      let endCursor
-      let len = cursor.endCursor.length
-      if (len) {
-        if (direction === 'down')
-          endCursor = cursor.endCursor[len - 1]
-        else {
-          if (len > 2) {
-            cursor.endCursor.splice(len - 2, 1)
-            cursor.endCursor.splice(len - 1, 1)
-            len -= 2
-          }
-          else
-            cursor.endCursor = []
-          endCursor = (len - 1) ? cursor.endCursor[len - 2] : null
-        }
-      }
-      else
-        endCursor = null
-      if (endCursor)
-        query += `after: "${endCursor}"\n`
-      query += `first: ${limit}\n`
-    }
-    if (hasFilter)
-      query += `filter: { ${qq} },\n`
-    if (sortProperty) {
-      let sortBy
-      let ref = props[sortProperty].ref
-      if (ref) {
-        if (ref === MONEY)
-          sortBy = sortProperty + '__value'
-        else
-          sortBy = sortProperty + '__title'
-      }
-      else
-        sortBy = sortProperty
-      query += `\norderBy: {
-        property: ${sortBy},
-        desc: ${asc ? false : true}
-      }`
-    }
-    else
-      query += `\norderBy: {
-        property: _time,
-        desc: true
-      }`
-    // if (limit)
-    //   query += `, limit: ${limit}`
-    query += ')'
-    query += `\n{\n`
-    query += `pageInfo {\n endCursor\n}\n`
-    query += `edges {\n node {\n`
-
-    let arr = this.getAllPropertiesForServerSearch(model)
-
-    query += `${arr.join('   \n')}`
-    query += `\n}`   // close 'node'
-    query += `\n}`   // close 'edges'
-    query += `\n}`   // close properties block
-    query += `\n}`   // close query
-
-    try {
-      let data = await this.client.query({
-          query: gql(`${query}`),
-        })
-      let result = data.data[table]
-      let endCursor = result.pageInfo.endCursor
-      if (endCursor) {
-        // if (!params.direction  ||  params.direction === 'down') {
-          let hasThisCursor = cursor.endCursor.some((c) => c === endCursor)
-          if (!hasThisCursor)
-            cursor.endCursor.push(endCursor)
-        // }
-      }
-
-      if (!result.edges.length) {
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
-        return
-      }
         // if (result.edges.length < limit)
         //   cursor.endCursor = null
-      let to = this.getRepresentative(utils.getId(me.organization))
-      let toId = utils.getId(to)
-      let list = result.edges.map((r) => this.convertToResource(r.node))
-      if (!noTrigger)
-        this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
-      return list
-    } catch(error) {
-      // debugger
-      console.error(error)
-    }
-
-    function prettify (obj) {
-      return JSON.stringify(obj, null, 2)
-    }
-    function addEqualsOrGreaterOrLesserNumber(val, op, prop) {
-      let isMoney = prop.ref === MONEY
-      let p = prop.name
-      if (isMoney)
-        p += '__value'
-      let ch = val.toString().charAt(0)
-      switch (ch) {
-      case '>':
-        if (val.charAt(1) === '=')
-          op.GTE += `\n   ${p}: ${val.substring(2)},`
-        else
-          op.GT += `\n   ${p}: ${val.substring(1)},`
-        break
-      case '<':
-        if (val.charAt(1) === '=')
-          op.LTE += `\n   ${p}: ${val.substring(2)},`
-        else
-          op.LT += `\n   ${p}: ${val.substring(1)},`
-        break
-      default:
-        op.EQ += `\n   ${p}: ${val},`
-      }
-
-    }
-  },
-  getAllPropertiesForServerSearch(model) {
-    let props = model.properties
-    let arr = model.inlined ? [] : ['_permalink', '_link', '_time', '_author', '_authorTitle', TYPE, SIG, '_virtual', 'time']
-    for (let p in props) {
-      if (p.charAt(0) === '_')
-        continue
-      if (p === 'from' || p === 'to' || p === 'time'  ||  p.indexOf('_group') !== -1)
-        continue
-      if (props[p].displayAs)
-        continue
-      let ptype = props[p].type
-      if (ptype === 'array') // || ptype === 'date')
-        continue
-      if (ptype !== 'object') {
-        arr.push(p)
-        continue
-      }
-      let ref = props[p].ref
-      if (!ref) {
-        if (props[p].range === 'json')
-          arr.push(p)
-        continue
-      }
-      if (ref === ORGANIZATION)
-        continue
-
-      if (props[p].inlined) {
-        let pm
-        if (ref === FORM  ||  (pm = this.getModel(ref)).isInterface  ||  pm.subClassOf === ENUM) {
-          if (props[p].range === 'json')
-            arr.push(p)
-          else
-            arr.push(
-              `${p} {
-                id
-                title
-              }`
-            )
-        }
-        else {
-          let allProps = this.getAllPropertiesForServerSearch(this.getModel(ref))
-          arr.push(
-            `${p} {
-              ${allProps.toString().replace(/,/g, '\n')}
-            }`
-          )
-        }
-        continue
-      }
-      if (ref === MONEY) {
-        arr.push(
-          `${p} {
-            value
-            currency
-          }`
-        )
-        continue
-      }
-
-      if (ref === COUNTRY) {//   ||  ref === CURRENCY)
-        arr.push(
-          `${p} {
-            id
-            title
-          }`
-        )
-        // arr.push(p)
-      }
-      else {
-        let m = this.getModel(ref)
-        if (m.subClassOf === ENUM) {
-          if (m.enum)
-            arr.push(
-              `${p} {
-                id
-                title
-              }`
-            )
-          else
-            arr.push(p)
-        }
-        else if (m.id === PHOTO) {
-          let mprops = m.properties
-          arr.push(
-            `${p} {${this.getAllPropertiesForServerSearch(m)}}`
-          )
-        }
-        else {
-          arr.push(
-            `${p} {
-              id
-              title
-            }`
-          )
-        }
-      }
-      continue
-    }
-    return arr
+    let to = this.getRepresentative(utils.getId(me.organization))
+    let toId = utils.getId(to)
+    let list = result.map((r) => this.convertToResource(r.node))
+    if (!noTrigger)
+      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
+    return list
   },
   convertToResource(r) {
     r = utils.clone(r)
@@ -8213,84 +7882,6 @@ var Store = Reflux.createStore({
 
     this._loadingEngine = true
 
-    // var loadIdentityAndKeys
-    // var allMyIdentities = list[MY_IDENTITIES]
-    // var currentIdentity
-
-    // var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]].value.pubkeys : me.pubkeys
-    // var mePriv
-    // var publishedIdentity
-    // if (allMyIdentities) {
-    //   var all = allMyIdentities.value.allIdentities
-    //   var curId = allMyIdentities.value.currentIdentity
-    //   all.forEach(function(id) {
-    //     if (id.id === curId) {
-    //       currentIdentity = id
-    //       mePriv = id.privkeys
-    //       publishedIdentity = id.publishedIdentity
-    //       mePub = mePub || publishedIdentity.pubkeys
-    //     }
-    //   })
-    // }
-    // // debugger
-    // if (!mePub  &&  !mePriv) {
-    //   // if (__DEV__  &&  !me.securityCode) {
-    //   //   var profiles = {}
-    //   //   var identities = {}
-    //   //   myIdentity.forEach(function(r) {
-    //   //     if (r[TYPE] == IDENTITY)
-    //   //       identities[r[ROOT_HASH]] = r
-    //   //     else
-    //   //       profiles[r[ROOT_HASH]] = r
-    //   //   })
-    //   //   for (var hash in profiles) {
-    //   //     if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
-    //   //       var identity = identities[hash]
-    //   //       mePub = identity.pubkeys  // hardcoded on device
-    //   //       mePriv = identity.privkeys
-    //   //       me[NONCE] = identity[NONCE]
-    //   //       break
-    //   //     }
-    //   //   }
-    //   // }
-    //   let encryptionKey
-    //   loadIdentityAndKeys = this.createNewIdentity()
-    //   .spread((eKey, identityInfo) => {
-    //     encryptionKey = eKey
-    //     publishedIdentity = identityInfo.identity
-    //     mePub = publishedIdentity.pubkeys
-    //     mePriv = identityInfo.keys
-    //     return encryptionKey
-    //   })
-    //   // const encryptionKey = crypto.randomBytes(32).toString('hex')
-    //   // const globalSalt = crypto.randomBytes(32).toString('hex')
-    //   // const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
-    //   //     networkName,
-    //   //     keys: KEY_SET
-    //   //   })
-    //   //   .then(identityInfo => {
-    //   //     publishedIdentity = identityInfo.identity
-    //   //     mePub = publishedIdentity.pubkeys
-    //   //     mePriv = identityInfo.keys
-    //   //   })
-
-    //   // loadIdentityAndKeys = Q.all([
-    //   //   utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
-    //   //   genIdentity
-    //   // ])
-    //   // .spread(encryptionKey => encryptionKey)
-
-    //     // bringing it back!
-    //     // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
-    //     // if (!keys.some((k) => k.type() === 'dsa')) {
-    //     //   keys.push(Keys.DSA.gen({
-    //     //     purpose: 'sign'
-    //     //   }))
-    //     // }
-    // }
-    // else
-    //   loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
-
     if (me.language)
       language = list[utils.getId(me.language)] && this._getItem(utils.getId(me.language))
 
@@ -8330,16 +7921,6 @@ var Store = Reflux.createStore({
       debugger
       throw err
     })
-    // .then(node => {
-    //   if (!me.registeredForPushNotifications) {
-    //     return utils.setupPushNotifications({ node })
-    //       .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
-    //   } else {
-    //     return utils.setupPushNotifications({ requestPermissions: false })
-    //   }
-
-    //   return node
-    // })
   },
   async setupPushNotifications() {
     const node = await this._enginePromise
@@ -8516,280 +8097,6 @@ var Store = Reflux.createStore({
     })
 
     this.monitorLog()
-    var self = this
-    // meDriver.ready()
-    // .then(function() {
-    //   console.log(meDriver.name(), 'is ready')
-      // d.publishMyIdentity()
-
-      // meDriver.identities().createReadStream()
-      // .on('data', function (data) {
-      //   console.log(data)
-      // })
-      //   var key = PROFILE + '_' + data.key
-      //   var v;
-      //   if (me  &&  data.key == me[ROOT_HASH])
-      //     v = me
-      //   else {
-      //     if (list[key])
-      //       v = list[key].value
-      //     else
-      //       v = {}
-      //   }
-      //   var val = data.value.identity
-      //   val[ROOT_HASH] = data.value[ROOT_HASH]
-      //   val[CUR_HASH] = data.value[CUR_HASH]
-
-      //   var name = val.name;
-      //   delete val.name
-      //   for (var p in name)
-      //     val[p] = name[p]
-
-      //   extend(v, val)
-
-      //   db.put(key, v)
-      //   .then(function() {
-      //     list[key] = {
-      //       key: key,
-      //       value: v
-      //     }
-      //     if (v.securityCode)
-      //       employees[data.value.securityCode] = data.value
-      //   })
-      // })
-
-      // var ellens = 0
-      // meDriver.messages().createValueStream()
-      // .on('data', function (data) {
-      //   meDriver.lookupObject(data)
-      //   .then(function (obj) {
-      //     // return
-      //     console.log('from msgs.db', obj)
-      //     // self.putInDb(obj)
-      //     // console.log('msg', obj)
-      //   })
-      // })
-
-      // Object was successfully read off chain
-      // meDriver.on('readseal', function (seal) {
-      //   const link = seal.link
-      //   meDriver.objects.get(link)
-      //     .then(function(obj) {
-      //       if (obj.object[TYPE] === IDENTITY && obj.link === meDriver.link) {
-      //         return
-      //       }
-
-      //       const wrapper = { ...seal, ...obj }
-      //       save(wrapper)
-      //     })
-
-      //   function save (wrapper) {
-      //       // return
-      //     const getFromTo = wrapper.type === 'tradle.Message'
-      //       ? Q(wrapper)
-      //       : getAuthorForObject(wrapper)
-
-      //     return getFromTo
-      //       .then(msgInfo => {
-      //         wrapper.from = { [ROOT_HASH]: msgInfo.author }
-      //         wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
-      //         wrapper = utils.toOldStyleWrapper(wrapper)
-      //         if (!wrapper.objectinfo) {
-      //           wrapper.objectinfo = tradleUtils.pick(wrapper, 'author', 'type', 'link', 'permalink', 'prevlink')
-      //         }
-
-      //         return self.putInDb(wrapper)
-      //       })
-      //       .catch(function (err) {
-      //         console.error('unable to get message for object', wrapper)
-      //         debugger
-      //       })
-      //   }
-
-      //   function getAuthorForObject (wrapper) {
-      //     // objects don't really have a from/to
-      //     // so this will need to be redesigned
-      //     const msgStream = meDriver.objects.messagesWithObject({
-      //       permalink: wrapper.permalink,
-      //       link: link
-      //     })
-
-      //     return Q.all([
-      //       meDriver.addressBook.lookupIdentity({ permalink: wrapper.author }),
-      //       collect(msgStream)
-      //     ])
-      //     .spread(function (authorInfo, messages) {
-      //       const match = messages.filter(m => m.author === authorInfo.permalink)[0]
-      //       // if (!match) throw new Error('unable to get message for object')
-      //       if (!match) {
-      //         console.error('unable to get message for object', wrapper)
-      //         throw new Error('unable to get message for object')
-      //       }
-      //       return match
-      //     })
-      //   }
-      // })
-
-      // meDriver.on('unchained-self', function (info) {
-      //   console.log('unchained self!')
-      //   // meDriver.lookupObject(info)
-      //   // .then(function(obj) {
-      //   //   // return
-      //     return self.updateMe()
-      //   // })
-      //   // .catch(function (err) {
-      //   //   debugger
-      //   // })
-      // })
-
-      // meDriver.on('error', function (err) {
-      //   debugger
-      //   console.log(err)
-      // })
-
-      // meDriver.on('sent', function (msg) {
-      //   const obj = utils.toOldStyleWrapper(msg)
-      //   var model = self.getModel(obj[TYPE])
-      //   var addCurHash = model.subClassOf === FORM || model.subClassOf === MY_PRODUCT
-      //   // if (isForm  ||  model.id === PRODUCT_APPLICATION) {
-      //   let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (addCurHash ? '_' +  obj[CUR_HASH] : '')
-      //   var r = list[key]
-      //   if (r) {
-      //     r = r.value
-      //     if (r._sendStatus !== SENT) {
-      //       self.trigger({action: 'updateItem', sendStatus: SENT, resource: r})
-      //       r._sendStatus = SENT
-      //       self.dbPut(key, r)
-      //     }
-      //   }
-      //     // var o = {}
-      //     // extend(o, obj)
-      //     // var from = o.from
-      //     // o.from = o.to
-      //     // o.to = from
-      //     // o.txId = Math.random() + '';
-      //     // setTimeout(() => {
-      //     //   self.putInDb(o)
-      //     // }, 5000);
-      //   // }
-
-      //   self.maybeWatchSeal(msg)
-      // })
-
-//       meDriver.on('message', async function (msg) {
-//         self.maybeWatchSeal(msg)
-//         const payload = msg.object.object
-//         if (payload[TYPE] === MESSAGE) {
-//           let obj = msg.object
-//           obj.from = {[ROOT_HASH]: msg.objectinfo.author}
-//           obj.objectinfo = msg.objectinfo
-//           try {
-//             const originalRecipient = await meDriver.addressBook.byPubKey(msg.object.object.recipientPubKey)
-//             obj.to = {[ROOT_HASH]: originalRecipient.permalink}
-//             obj.parsed = {data: payload.object}
-
-//             let rtype
-//             let t = obj.parsed.data[TYPE]
-//             if (t === PRODUCT_APPLICATION)
-//               rtype = obj.parsed.data.product
-//             else if (t === FORM_REQUEST)
-//               rtype = obj.parsed.data.form
-//             else
-//               rtype = t
-
-//             let bot = self._getItem(PROFILE + '_' + obj.from[ROOT_HASH])
-//             // let debugStr = 'SharedContext: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + rtype + '; hasModel = ' + self.getModel(rtype)
-//             // debug(debugStr)
-//             if (utils.isEmployee(bot)  &&  !self.getModel(rtype)) {
-//               // debug('SharedContext: request for models')
-//               await self.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
-//             }
-
-//             obj[ROOT_HASH] = protocol.linkString(obj.parsed.data)
-//             if (!obj.parsed.data[CUR_HASH])
-//               obj[CUR_HASH] = obj[ROOT_HASH]
-
-//             obj[MSG_LINK] = msg.link
-//             await self.putInDb(obj, true)
-//             self.trigger({ action: 'receivedMessage', msg: msg })
-//           } catch (err) {
-//             console.error('1. failed to process received message', err)
-//           }
-
-//           return
-//         }
-//         else if (payload[TYPE] === VERIFICATION && payload.sources) {
-// // const pubKeys = []
-// // forEachSource(payload.sources, function (source) {
-// //   pubKeys.push(tradleUtils.claimedSigPubKey(source).pub.toString('hex'))
-// // })
-
-// // console.log(pubKeys)
-//           const sourceToAuthor = await lookupSourceAuthors(meDriver, payload.sources)
-//           for (var [verification, author] of sourceToAuthor) {
-//             let a = self._getItem(PROFILE + '_' + author.permalink)
-//             verification.from = self.buildRef(a)
-//             verification.from.organization = utils.clone(a.organization)
-//           }
-//           // debugger
-//         }
-//         else if (payload[TYPE] === PARTIAL) {
-//           msg.object[ROOT_HASH] = msg.objectinfo.permalink
-
-//           payload.context = msg.object.forContext || msg.object.context
-//           payload.leaves = tradle.partial.interpretLeaves(payload.leaves)
-
-//           let partialPermalink = payload.leaves.find(l => l.key === ROOT_HASH && l.value)
-//           if (partialPermalink)
-//             msg.partialinfo.permalink = partialPermalink.value
-//           else
-//             msg.partialinfo.permalink = msg.partialinfo.link
-
-//           let from = PROFILE + '_' + msg.partialinfo.author
-//           let fromR = self._getItem(from)
-//           payload.from = fromR ? self.buildRef(fromR) : {id: from}
-
-//           let type = payload.leaves.find(l => l.key === TYPE && l.value).value
-//           payload.type = type
-//           var r = {
-//             [TYPE]: type,
-//             [ROOT_HASH]: msg.partialinfo.permalink,
-//             [CUR_HASH]: msg.partialinfo.link,
-//             [MSG_LINK]: msg.link
-
-//           }
-//           payload.resource = {id: utils.getId(r)}
-//           payload.providerInfo = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
-//           // debugger
-//         }
-//         // else if (payload[TYPE] === CONFIRM_PACKAGE_REQUEST)
-//         //   debugger
-
-//         const old = utils.toOldStyleWrapper(msg)
-
-//         old.to = { [ROOT_HASH]: meDriver.permalink }
-//         let rtype = old.parsed.data[TYPE]
-//         if (rtype === PRODUCT_APPLICATION  &&  me.isEmployee) {
-//           let bot = self._getItem(PROFILE + '_' + old.from[ROOT_HASH])
-//           // debug('monitorTim: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + old.parsed.data.product + '; hasModel = ' + (self.getModel(old.parsed.data.product)!== null))
-//           if (utils.isEmployee(bot)  &&  !self.getModel(old.parsed.data.product)) {
-//             debug('request for models')
-//             await self.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
-//           }
-//         }
-//         try {
-//           await self.putInDb(old, true)
-//           if (payload[TYPE] === PARTIAL)
-//             self.onGetAllPartials(payload)
-//           self.trigger({ action: 'receivedMessage', msg: msg })
-//         } catch (err) {
-//           debugger
-//           console.error('2. failed to process received message', err)
-//         }
-//       })
-
-    // })
-    // return meDriver.ready()
   },
   dbPut(key, value) {
     let v = utils.isMessage(value)  &&  value[TYPE] !== CONFIRM_PACKAGE_REQUEST ? utils.optimizeResource(value, true) : value
@@ -9619,28 +8926,6 @@ var Store = Reflux.createStore({
     return fr
   },
   // if the last message showing was PRODUCT_LIST. No need to re-render
-  fillFromAndTo(obj, val) {
-    var whoAmI = obj.parsed.data._i.split(':')[0]
-    let fromId = utils.makeId(PROFILE, obj.objectinfo.author)
-    let toId = utils.makeId(PROFILE, obj.to[ROOT_HASH])
-    var from = this._getItem(fromId)
-    var to = this._getItem(toId)
-
-    if (whoAmI !== from[ROOT_HASH]) {
-      // swap from and to
-      [from, to] = [to, from]
-    }
-
-    val.to = {
-      id: utils.getId(to),
-      title: to.formatted || to.firstName
-    }
-
-    val.from = {
-      id: utils.getId(from),
-      title: from.formatted || from.firstName
-    }
-  },
   addNameAndTitleProps(m, aprops) {
     var mprops = aprops  ||  m.properties
     for (var p in mprops) {
@@ -10586,16 +9871,6 @@ var Store = Reflux.createStore({
       this.loadStaticItem(r)
     });
   },
-  // loadStaticDbData(saveInDB) {
-  //   let batch = []
-  //   let sData = [currencies, nationalities, countries]
-  //   sData.forEach((arr) => {
-  //     arr.forEach((r) => {
-  //       this.loadStaticItem(r, saveInDB, batch)
-  //     })
-  //   })
-  //   return batch.length ? db.batch(batch) : Q()
-  // },
   loadStaticItem(r, saveInDB, batch) {
     if (!r[ROOT_HASH])
       r[ROOT_HASH] = sha(r)
@@ -10618,16 +9893,6 @@ var Store = Reflux.createStore({
 
   loadModels() {
     var batch = [];
-
-
-    // voc.forEach(function(m) {
-    //   if (!m[ROOT_HASH]) {
-    //     m[ROOT_HASH] = sha(m);
-    //     self.addNameAndTitleProps(m)
-    //   }
-
-    //    batch.push({type: 'put', key: m.id, value: m});
-    // });
 
     for (var m in models)
       batch.push({type: 'put', key: m, value: models[m].value});
@@ -10714,28 +9979,13 @@ var Store = Reflux.createStore({
     }
   },
   async _getItemFromServer(id) {
-    let parts = id.split('_')
-
-    let modelName = parts[0]
-    let m = this.getModel(modelName)
-    if (!m)
-      return
-
-    let table = `r_${modelName.replace(/\./g, '_')}`
-
-    let _link = parts[parts.length - 1]
-    let query = `query {\n${table} (_link: "${_link}")\n`
-
-    let arr = this.getAllPropertiesForServerSearch(m)
-
-    query += `\n{${arr.join('   \n')}\n}\n}`
     try {
-      let result = await this.client.query({query: gql(`${query}`)})
-    // debugger
-      return this.convertToResource(result.data[table])
+      let result = await graphQL._getItem(id, this.client)
+      if (result)
+        return this.convertToResource(result)
     }
     catch(err) {
-      console.log('onGetItem', err)
+      console.log('_getItemFromServer', err)
       debugger
     }
   },
@@ -12518,4 +11768,454 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   }
   //   l.sort((a, b) => b._sentTime - a._sentTime)
   //   return l
+  // },
+  // fillFromAndTo(obj, val) {
+  //   var whoAmI = obj.parsed.data._i.split(':')[0]
+  //   let fromId = utils.makeId(PROFILE, obj.objectinfo.author)
+  //   let toId = utils.makeId(PROFILE, obj.to[ROOT_HASH])
+  //   var from = this._getItem(fromId)
+  //   var to = this._getItem(toId)
+
+  //   if (whoAmI !== from[ROOT_HASH]) {
+  //     // swap from and to
+  //     [from, to] = [to, from]
+  //   }
+
+  //   val.to = {
+  //     id: utils.getId(to),
+  //     title: to.formatted || to.firstName
+  //   }
+
+  //   val.from = {
+  //     id: utils.getId(from),
+  //     title: from.formatted || from.firstName
+  //   }
+  // },
+/*
+  monitorTim() {
+    this._keeper = {}
+    ;['get', 'put', 'batch', 'del'].forEach(method => {
+      this._keeper[method] = promisify(meDriver.keeper[method].bind(meDriver.keeper))
+    })
+
+    this.monitorLog()
+    var self = this
+    // meDriver.ready()
+    // .then(function() {
+    //   console.log(meDriver.name(), 'is ready')
+      // d.publishMyIdentity()
+
+      // meDriver.identities().createReadStream()
+      // .on('data', function (data) {
+      //   console.log(data)
+      // })
+      //   var key = PROFILE + '_' + data.key
+      //   var v;
+      //   if (me  &&  data.key == me[ROOT_HASH])
+      //     v = me
+      //   else {
+      //     if (list[key])
+      //       v = list[key].value
+      //     else
+      //       v = {}
+      //   }
+      //   var val = data.value.identity
+      //   val[ROOT_HASH] = data.value[ROOT_HASH]
+      //   val[CUR_HASH] = data.value[CUR_HASH]
+
+      //   var name = val.name;
+      //   delete val.name
+      //   for (var p in name)
+      //     val[p] = name[p]
+
+      //   extend(v, val)
+
+      //   db.put(key, v)
+      //   .then(function() {
+      //     list[key] = {
+      //       key: key,
+      //       value: v
+      //     }
+      //     if (v.securityCode)
+      //       employees[data.value.securityCode] = data.value
+      //   })
+      // })
+
+      // var ellens = 0
+      // meDriver.messages().createValueStream()
+      // .on('data', function (data) {
+      //   meDriver.lookupObject(data)
+      //   .then(function (obj) {
+      //     // return
+      //     console.log('from msgs.db', obj)
+      //     // self.putInDb(obj)
+      //     // console.log('msg', obj)
+      //   })
+      // })
+
+      // Object was successfully read off chain
+      // meDriver.on('readseal', function (seal) {
+      //   const link = seal.link
+      //   meDriver.objects.get(link)
+      //     .then(function(obj) {
+      //       if (obj.object[TYPE] === IDENTITY && obj.link === meDriver.link) {
+      //         return
+      //       }
+
+      //       const wrapper = { ...seal, ...obj }
+      //       save(wrapper)
+      //     })
+
+      //   function save (wrapper) {
+      //       // return
+      //     const getFromTo = wrapper.type === 'tradle.Message'
+      //       ? Q(wrapper)
+      //       : getAuthorForObject(wrapper)
+
+      //     return getFromTo
+      //       .then(msgInfo => {
+      //         wrapper.from = { [ROOT_HASH]: msgInfo.author }
+      //         wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
+      //         wrapper = utils.toOldStyleWrapper(wrapper)
+      //         if (!wrapper.objectinfo) {
+      //           wrapper.objectinfo = tradleUtils.pick(wrapper, 'author', 'type', 'link', 'permalink', 'prevlink')
+      //         }
+
+      //         return self.putInDb(wrapper)
+      //       })
+      //       .catch(function (err) {
+      //         console.error('unable to get message for object', wrapper)
+      //         debugger
+      //       })
+      //   }
+
+      //   function getAuthorForObject (wrapper) {
+      //     // objects don't really have a from/to
+      //     // so this will need to be redesigned
+      //     const msgStream = meDriver.objects.messagesWithObject({
+      //       permalink: wrapper.permalink,
+      //       link: link
+      //     })
+
+      //     return Q.all([
+      //       meDriver.addressBook.lookupIdentity({ permalink: wrapper.author }),
+      //       collect(msgStream)
+      //     ])
+      //     .spread(function (authorInfo, messages) {
+      //       const match = messages.filter(m => m.author === authorInfo.permalink)[0]
+      //       // if (!match) throw new Error('unable to get message for object')
+      //       if (!match) {
+      //         console.error('unable to get message for object', wrapper)
+      //         throw new Error('unable to get message for object')
+      //       }
+      //       return match
+      //     })
+      //   }
+      // })
+
+      // meDriver.on('unchained-self', function (info) {
+      //   console.log('unchained self!')
+      //   // meDriver.lookupObject(info)
+      //   // .then(function(obj) {
+      //   //   // return
+      //     return self.updateMe()
+      //   // })
+      //   // .catch(function (err) {
+      //   //   debugger
+      //   // })
+      // })
+
+      // meDriver.on('error', function (err) {
+      //   debugger
+      //   console.log(err)
+      // })
+
+      // meDriver.on('sent', function (msg) {
+      //   const obj = utils.toOldStyleWrapper(msg)
+      //   var model = self.getModel(obj[TYPE])
+      //   var addCurHash = model.subClassOf === FORM || model.subClassOf === MY_PRODUCT
+      //   // if (isForm  ||  model.id === PRODUCT_APPLICATION) {
+      //   let key = obj[TYPE] + '_' + obj[ROOT_HASH] + (addCurHash ? '_' +  obj[CUR_HASH] : '')
+      //   var r = list[key]
+      //   if (r) {
+      //     r = r.value
+      //     if (r._sendStatus !== SENT) {
+      //       self.trigger({action: 'updateItem', sendStatus: SENT, resource: r})
+      //       r._sendStatus = SENT
+      //       self.dbPut(key, r)
+      //     }
+      //   }
+      //     // var o = {}
+      //     // extend(o, obj)
+      //     // var from = o.from
+      //     // o.from = o.to
+      //     // o.to = from
+      //     // o.txId = Math.random() + '';
+      //     // setTimeout(() => {
+      //     //   self.putInDb(o)
+      //     // }, 5000);
+      //   // }
+
+      //   self.maybeWatchSeal(msg)
+      // })
+
+//       meDriver.on('message', async function (msg) {
+//         self.maybeWatchSeal(msg)
+//         const payload = msg.object.object
+//         if (payload[TYPE] === MESSAGE) {
+//           let obj = msg.object
+//           obj.from = {[ROOT_HASH]: msg.objectinfo.author}
+//           obj.objectinfo = msg.objectinfo
+//           try {
+//             const originalRecipient = await meDriver.addressBook.byPubKey(msg.object.object.recipientPubKey)
+//             obj.to = {[ROOT_HASH]: originalRecipient.permalink}
+//             obj.parsed = {data: payload.object}
+
+//             let rtype
+//             let t = obj.parsed.data[TYPE]
+//             if (t === PRODUCT_APPLICATION)
+//               rtype = obj.parsed.data.product
+//             else if (t === FORM_REQUEST)
+//               rtype = obj.parsed.data.form
+//             else
+//               rtype = t
+
+//             let bot = self._getItem(PROFILE + '_' + obj.from[ROOT_HASH])
+//             // let debugStr = 'SharedContext: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + rtype + '; hasModel = ' + self.getModel(rtype)
+//             // debug(debugStr)
+//             if (utils.isEmployee(bot)  &&  !self.getModel(rtype)) {
+//               // debug('SharedContext: request for models')
+//               await self.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
+//             }
+
+//             obj[ROOT_HASH] = protocol.linkString(obj.parsed.data)
+//             if (!obj.parsed.data[CUR_HASH])
+//               obj[CUR_HASH] = obj[ROOT_HASH]
+
+//             obj[MSG_LINK] = msg.link
+//             await self.putInDb(obj, true)
+//             self.trigger({ action: 'receivedMessage', msg: msg })
+//           } catch (err) {
+//             console.error('1. failed to process received message', err)
+//           }
+
+//           return
+//         }
+//         else if (payload[TYPE] === VERIFICATION && payload.sources) {
+// // const pubKeys = []
+// // forEachSource(payload.sources, function (source) {
+// //   pubKeys.push(tradleUtils.claimedSigPubKey(source).pub.toString('hex'))
+// // })
+
+// // console.log(pubKeys)
+//           const sourceToAuthor = await lookupSourceAuthors(meDriver, payload.sources)
+//           for (var [verification, author] of sourceToAuthor) {
+//             let a = self._getItem(PROFILE + '_' + author.permalink)
+//             verification.from = self.buildRef(a)
+//             verification.from.organization = utils.clone(a.organization)
+//           }
+//           // debugger
+//         }
+//         else if (payload[TYPE] === PARTIAL) {
+//           msg.object[ROOT_HASH] = msg.objectinfo.permalink
+
+//           payload.context = msg.object.forContext || msg.object.context
+//           payload.leaves = tradle.partial.interpretLeaves(payload.leaves)
+
+//           let partialPermalink = payload.leaves.find(l => l.key === ROOT_HASH && l.value)
+//           if (partialPermalink)
+//             msg.partialinfo.permalink = partialPermalink.value
+//           else
+//             msg.partialinfo.permalink = msg.partialinfo.link
+
+//           let from = PROFILE + '_' + msg.partialinfo.author
+//           let fromR = self._getItem(from)
+//           payload.from = fromR ? self.buildRef(fromR) : {id: from}
+
+//           let type = payload.leaves.find(l => l.key === TYPE && l.value).value
+//           payload.type = type
+//           var r = {
+//             [TYPE]: type,
+//             [ROOT_HASH]: msg.partialinfo.permalink,
+//             [CUR_HASH]: msg.partialinfo.link,
+//             [MSG_LINK]: msg.link
+
+//           }
+//           payload.resource = {id: utils.getId(r)}
+//           payload.providerInfo = utils.clone(self._getItem(PROFILE + '_' + msg.objectinfo.author).organization)
+//           // debugger
+//         }
+//         // else if (payload[TYPE] === CONFIRM_PACKAGE_REQUEST)
+//         //   debugger
+
+//         const old = utils.toOldStyleWrapper(msg)
+
+//         old.to = { [ROOT_HASH]: meDriver.permalink }
+//         let rtype = old.parsed.data[TYPE]
+//         if (rtype === PRODUCT_APPLICATION  &&  me.isEmployee) {
+//           let bot = self._getItem(PROFILE + '_' + old.from[ROOT_HASH])
+//           // debug('monitorTim: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + old.parsed.data.product + '; hasModel = ' + (self.getModel(old.parsed.data.product)!== null))
+//           if (utils.isEmployee(bot)  &&  !self.getModel(old.parsed.data.product)) {
+//             debug('request for models')
+//             await self.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
+//           }
+//         }
+//         try {
+//           await self.putInDb(old, true)
+//           if (payload[TYPE] === PARTIAL)
+//             self.onGetAllPartials(payload)
+//           self.trigger({ action: 'receivedMessage', msg: msg })
+//         } catch (err) {
+//           debugger
+//           console.error('2. failed to process received message', err)
+//         }
+//       })
+
+    // })
+    // return meDriver.ready()
+  },
+
+  getDriver(me) {
+    if (this._loadingEngine) return this._enginePromise
+
+    this._loadingEngine = true
+
+    // var loadIdentityAndKeys
+    // var allMyIdentities = list[MY_IDENTITIES]
+    // var currentIdentity
+
+    // var mePub = me[ROOT_HASH] ? list[IDENTITY + '_' + me[ROOT_HASH]].value.pubkeys : me.pubkeys
+    // var mePriv
+    // var publishedIdentity
+    // if (allMyIdentities) {
+    //   var all = allMyIdentities.value.allIdentities
+    //   var curId = allMyIdentities.value.currentIdentity
+    //   all.forEach(function(id) {
+    //     if (id.id === curId) {
+    //       currentIdentity = id
+    //       mePriv = id.privkeys
+    //       publishedIdentity = id.publishedIdentity
+    //       mePub = mePub || publishedIdentity.pubkeys
+    //     }
+    //   })
+    // }
+    // // debugger
+    // if (!mePub  &&  !mePriv) {
+    //   // if (__DEV__  &&  !me.securityCode) {
+    //   //   var profiles = {}
+    //   //   var identities = {}
+    //   //   myIdentity.forEach(function(r) {
+    //   //     if (r[TYPE] == IDENTITY)
+    //   //       identities[r[ROOT_HASH]] = r
+    //   //     else
+    //   //       profiles[r[ROOT_HASH]] = r
+    //   //   })
+    //   //   for (var hash in profiles) {
+    //   //     if (!profiles[hash].securityCode  &&  me.firstName === profiles[hash].firstName) {
+    //   //       var identity = identities[hash]
+    //   //       mePub = identity.pubkeys  // hardcoded on device
+    //   //       mePriv = identity.privkeys
+    //   //       me[NONCE] = identity[NONCE]
+    //   //       break
+    //   //     }
+    //   //   }
+    //   // }
+    //   let encryptionKey
+    //   loadIdentityAndKeys = this.createNewIdentity()
+    //   .spread((eKey, identityInfo) => {
+    //     encryptionKey = eKey
+    //     publishedIdentity = identityInfo.identity
+    //     mePub = publishedIdentity.pubkeys
+    //     mePriv = identityInfo.keys
+    //     return encryptionKey
+    //   })
+    //   // const encryptionKey = crypto.randomBytes(32).toString('hex')
+    //   // const globalSalt = crypto.randomBytes(32).toString('hex')
+    //   // const genIdentity = Q.ninvoke(tradleUtils, 'newIdentity', {
+    //   //     networkName,
+    //   //     keys: KEY_SET
+    //   //   })
+    //   //   .then(identityInfo => {
+    //   //     publishedIdentity = identityInfo.identity
+    //   //     mePub = publishedIdentity.pubkeys
+    //   //     mePriv = identityInfo.keys
+    //   //   })
+
+    //   // loadIdentityAndKeys = Q.all([
+    //   //   utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
+    //   //   genIdentity
+    //   // ])
+    //   // .spread(encryptionKey => encryptionKey)
+
+    //     // bringing it back!
+    //     // if (__DEV__  &&  !keys.some((k) => k.type() === 'dsa')) {
+    //     // if (!keys.some((k) => k.type() === 'dsa')) {
+    //     //   keys.push(Keys.DSA.gen({
+    //     //     purpose: 'sign'
+    //     //   }))
+    //     // }
+    // }
+    // else
+    //   loadIdentityAndKeys = utils.getPassword(ENCRYPTION_KEY)
+
+    if (me.language)
+      language = list[utils.getId(me.language)] && this._getItem(utils.getId(me.language))
+
+    return this.loadIdentityAndKeys(me)
+    .then(result => {
+      if (!Keychain) {
+        let privkeys = result.keys.map(k => {
+          return k.toJSON ? k.toJSON(true) : k
+        })
+        let myIdentities = this._getItem(MY_IDENTITIES)
+        if (myIdentities) {
+          let currentIdentity = myIdentities.currentIdentity
+          myIdentities.allIdentities.forEach((r) => {
+             if (r.id === currentIdentity)
+               r.privkeys = privkeys
+          })
+          this.dbPut(MY_IDENTITIES, myIdentities)
+        }
+        else
+          me.privkeys = privkeys
+        // me['privkeys'] = result.keys.map(k => {
+        //   return k.toJSON ? k.toJSON(true) : k
+        // })
+      }
+
+      // if (!Keychain) me['privkeys'] = result.keys.map(k => k.toJSON(true))
+      // me[NONCE] = me[NONCE] || this.getNonce()
+      // driverInfo.deviceID = result.deviceID
+      return this.buildDriver({
+        identity: result.identity,
+        keys: result.keys,
+        encryption: {
+          key: new Buffer(result.encryptionKey, 'hex')
+        }
+      })
+    }, err => {
+      debugger
+      throw err
+    })
+    // .then(node => {
+    //   if (!me.registeredForPushNotifications) {
+    //     return utils.setupPushNotifications({ node })
+    //       .then(() => Actions.updateMe({ registeredForPushNotifications: true }))
+    //   } else {
+    //     return utils.setupPushNotifications({ requestPermissions: false })
+    //   }
+
+    //   return node
+    // })
+  },
+*/
+  // loadStaticDbData(saveInDB) {
+  //   let batch = []
+  //   let sData = [currencies, nationalities, countries]
+  //   sData.forEach((arr) => {
+  //     arr.forEach((r) => {
+  //       this.loadStaticItem(r, saveInDB, batch)
+  //     })
+  //   })
+  //   return batch.length ? db.batch(batch) : Q()
   // },
