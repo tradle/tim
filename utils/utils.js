@@ -952,7 +952,7 @@ var utils = {
   isContext(typeOrModel) {
     let m = typeOrModel
     if (typeof typeOrModel === 'string') {
-      m = this.getModel(typeOrModel)
+      m = this.getModel(typeOrModel).value
       if (!m)
         return
     }
