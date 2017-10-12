@@ -3,6 +3,10 @@
 import utils from '../../utils/utils'
 const gql = require('graphql-tag')
 var deepEqual = require('deep-equal')
+const tradle = require('@tradle/engine')
+const tradleUtils = tradle.utils
+
+const { ApolloClient, createNetworkInterface } = require('apollo-client')
 
 var constants = require('@tradle/constants');
 const {
@@ -19,6 +23,54 @@ const COUNTRY = 'tradle.Country'
 var cursor = {}
 
 var search = {
+  initClient(meDriver, SERVICE_PROVIDERS) {
+    let me = utils.getMe()
+    if (!me.isEmployee  ||  !SERVICE_PROVIDERS)
+      return
+
+    let graphqlEndpoint
+    let myOrgId = me.organization.id
+    let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
+    if (myEmployer)
+      graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
+    // else
+    //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+    if (!graphqlEndpoint)
+      return
+
+    // graphqlEndpoint = `http://localhost:21012/graphql`
+    const networkInterface = createNetworkInterface({
+      uri: graphqlEndpoint
+    })
+
+    networkInterface.use([{
+      applyMiddleware: async (req, next) => {
+        const printer = require('graphql/language/printer')
+        const body = tradleUtils.stringify({
+          ...req.request,
+          query: printer.print(req.request.query)
+        })
+
+        const { sig } = await meDriver.sign({
+          object: {
+            [TYPE]: 'tradle.GraphQLQuery',
+            body,
+            // time: Date.now()
+          }
+        })
+
+        if (!req.options.headers) {
+          req.options.headers = {}
+        }
+
+        req.options.headers['x-tradle-sig'] = sig
+        next()
+      }
+    }])
+
+    return new ApolloClient({ networkInterface })
+  },
+
   async searchServer(params) {
     let self = this
     let {client, modelName, filterResource, sortProperty, asc, limit, direction, first} = params

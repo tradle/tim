@@ -15,7 +15,7 @@ import ReactNative, {
 import pick from 'object.pick'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
-const { ApolloClient, createNetworkInterface } = require('apollo-client')
+// const { ApolloClient, createNetworkInterface } = require('apollo-client')
 
 import Analytics from '../utils/analytics'
 import AsyncStorage from './Storage'
@@ -89,7 +89,7 @@ const MSG_LINK = '_msg'
 
 const sampleData = require('@tradle/models').data
 const utils = require('../utils/utils');
-const graphQL = require('./graphQL/search')
+const graphQL = require('./graphql/graphql-client')
 const voc = (function () {
   const models = require('@tradle/models').concat(require('@tradle/custom-models'))
   models.forEach(model => {
@@ -1577,7 +1577,7 @@ var Store = Reflux.createStore({
                 .catch(err => console.log('failed to register for push notifications'))
             })
           if (SERVICE_PROVIDERS)
-            this.initClient(meDriver)
+            this.client = graphQL.initClient(meDriver, SERVICE_PROVIDERS)
         })
         .catch(err => {
           if (err instanceof TypeError || err instanceof ReferenceError) {
@@ -1591,53 +1591,53 @@ var Store = Reflux.createStore({
     }))
     // Not the best way to
   },
-  initClient(meDriver) {
-    let me = utils.getMe()
-    if (!me.isEmployee)
-      return
+  // initClient(meDriver) {
+  //   let me = utils.getMe()
+  //   if (!me.isEmployee)
+  //     return
 
-    let graphqlEndpoint
-    let myOrgId = me.organization.id
-    let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
-    if (myEmployer)
-      graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
-    // else
-    //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
-    if (!graphqlEndpoint)
-      return
+  //   let graphqlEndpoint
+  //   let myOrgId = me.organization.id
+  //   let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
+  //   if (myEmployer)
+  //     graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
+  //   // else
+  //   //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+  //   if (!graphqlEndpoint)
+  //     return
 
-    // graphqlEndpoint = `http://localhost:21012/graphql`
-    const networkInterface = createNetworkInterface({
-      uri: graphqlEndpoint
-    })
+  //   // graphqlEndpoint = `http://localhost:21012/graphql`
+  //   const networkInterface = createNetworkInterface({
+  //     uri: graphqlEndpoint
+  //   })
 
-    networkInterface.use([{
-      applyMiddleware: async (req, next) => {
-        const printer = require('graphql/language/printer')
-        const body = tradleUtils.stringify({
-          ...req.request,
-          query: printer.print(req.request.query)
-        })
+  //   networkInterface.use([{
+  //     applyMiddleware: async (req, next) => {
+  //       const printer = require('graphql/language/printer')
+  //       const body = tradleUtils.stringify({
+  //         ...req.request,
+  //         query: printer.print(req.request.query)
+  //       })
 
-        const { sig } = await meDriver.sign({
-          object: {
-            [TYPE]: 'tradle.GraphQLQuery',
-            body,
-            // time: Date.now()
-          }
-        })
+  //       const { sig } = await meDriver.sign({
+  //         object: {
+  //           [TYPE]: 'tradle.GraphQLQuery',
+  //           body,
+  //           // time: Date.now()
+  //         }
+  //       })
 
-        if (!req.options.headers) {
-          req.options.headers = {}
-        }
+  //       if (!req.options.headers) {
+  //         req.options.headers = {}
+  //       }
 
-        req.options.headers['x-tradle-sig'] = sig
-        next()
-      }
-    }])
+  //       req.options.headers['x-tradle-sig'] = sig
+  //       next()
+  //     }
+  //   }])
 
-    this.client = new ApolloClient({ networkInterface })
-  },
+  //   this.client = new ApolloClient({ networkInterface })
+  // },
 
   onGetEmployeeInfo(code) {
     var self = this
@@ -8853,7 +8853,7 @@ var Store = Reflux.createStore({
             this.dbPut(meId, to)
           }
         }
-        this.initClient(meDriver)
+        this.client = graphQL.initClient(meDriver)
       }
       else {
         let fromId = utils.getId(val.from)
@@ -10016,10 +10016,9 @@ var Store = Reflux.createStore({
     return ref
   },
   _setItem(key, value) {
-    if (value[TYPE] === SELF_INTRODUCTION)
+    if (!value[TYPE]  ||  value[TYPE] === SELF_INTRODUCTION)
       return
-    let interfaces = this.getModel(value[TYPE]).interfaces
-    let isMessage = interfaces  &&  interfaces.indexOf(MESSAGE) !== -1
+    let isMessage = utils.isMessage(value)
 
     // list[key] = { key, value}
     list[key] = { key, value: isMessage ? utils.optimizeResource(value, true)  : value}

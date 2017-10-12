@@ -375,7 +375,7 @@ class ResourceRow extends Component {
     }
     // HACK
     else if (utils.isContext(model.id)) {
-      let m = utils.getModel(resource.product)
+      let m = utils.getModel(resource.requestFor)
       if (!m)
         return <View/>
 
