@@ -13,8 +13,8 @@ var MessageList = require('./MessageList')
 var PageView = require('./PageView')
 import platformStyles from '../styles/platform'
 
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const FORM_REQUEST = 'tradle.FormRequest'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const REMEDIATION = 'tradle.Remediation'
 import {
   ListView,
@@ -56,7 +56,7 @@ class ProductChooser extends Component {
   }
   componentWillMount() {
     let r = this.props.resource
-    if (r[constants.TYPE] === constants.TYPES.PROFILE  ||  r[constants.TYPE] === PRODUCT_APPLICATION)
+    if (r[constants.TYPE] === constants.TYPES.PROFILE  ||  utils.isContext(r[constants.TYPE]))
       r = utils.getMe().organization
 
     Actions.getItem({resource: r})
@@ -70,20 +70,19 @@ class ProductChooser extends Component {
   onNewProductAdded(params) {
     let products = []
     if (params.action === 'getItem') {
-      if (this.props.resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH]) {
+      let { resource, context, products } = this.props
+      if (resource[constants.ROOT_HASH] === params.resource[constants.ROOT_HASH]) {
         if (params.resource.products  &&  params.resource.products.length) {
-          if (equal(params.resource.products, this.props.resource.products))
+          if (equal(params.resource.products, resource.products))
             return
 
           products = params.resource.products.map(getModel)
         }
-        else
-          products = this.props.products
       }
-      else if (this.props.resource[constants.TYPE] === constants.TYPES.PROFILE   ||
-               this.props.resource[constants.TYPE] === PRODUCT_APPLICATION) {
-        if (this.props.context  &&  this.props.context.product !== REMEDIATION) {
-          const productModel = utils.getModel(this.props.context.product).value
+      else if (resource[constants.TYPE] === constants.TYPES.PROFILE   ||
+               utils.isContext(resource[constants.TYPE])) {
+        if (context  &&  context.product !== REMEDIATION) {
+          const productModel = utils.getModel(context.product).value
           products = getForms(productModel)
         }
         else if (params.resource.products  &&  params.resource.products.length) {
@@ -146,8 +145,8 @@ class ProductChooser extends Component {
     if (this.props.context)
       msg._context = this.props.context
     if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT) {
-      msg[constants.TYPE] = PRODUCT_APPLICATION
-      msg.product = model.id // '[application for](' + model.id + ')',
+      msg[constants.TYPE] = PRODUCT_REQUEST
+      msg.requestFor = model.id // '[application for](' + model.id + ')',
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, requestForForm: true}))
     }
     else {
@@ -162,14 +161,6 @@ class ProductChooser extends Component {
       // msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
       utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg}))
     }
-
-    // var msg = {
-    //   product: model.id, // '[application for](' + model.id + ')',
-    //   _t:      PRODUCT_APPLICATION, // constants.TYPES.SIMPLE_MESSAGE,
-    //   from:    utils.getMe(),
-    //   to:      this.props.resource,
-    //   time:    new Date().getTime()
-    // }
 
     this.props.navigator.pop();
   }

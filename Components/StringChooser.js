@@ -9,7 +9,6 @@ var constants = require('@tradle/constants');
 var PageView = require('./PageView')
 import platformStyles from '../styles/platform'
 
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const FORM_REQUEST = 'tradle.FormRequest'
 const REMEDIATION = 'tradle.Remediation'
 import {
@@ -40,7 +39,10 @@ class StringChooser extends Component {
     this.props.callback(modelId)
   }
   renderRow(modelId)  {
-    var model = utils.getModel(modelId).value;
+    let model = utils.getModel(modelId)
+    if (!model)
+      return null
+    model = model.value;
     var StringRow = require('./StringRow');
 
     return (

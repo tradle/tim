@@ -463,7 +463,7 @@ var NewResourceMixin = {
           options.fields[p].value = data[p][TYPE]
                                   ? utils.getId(data[p])
                                   : data[p].id;
-          data[p] = utils.getDisplayName(data[p], subModel.value.properties) || data[p].title;
+          data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
         }
 
         options.fields[p].onFocus = chooser.bind(this, props[p], p)
@@ -1339,7 +1339,7 @@ var NewResourceMixin = {
         let rModel
         // var m = utils.getId(resource[params.prop]).split('_')[0]
         rModel = utils.getModel(prop.ref  ||  prop.items.ref).value
-        label = utils.getDisplayName(resource[params.prop], rModel.properties)
+        label = utils.getDisplayName(resource[params.prop], rModel)
         if (!label) {
           if ((prop.items || this.props.search)  &&  rModel.subClassOf === ENUM) {
             label = ''

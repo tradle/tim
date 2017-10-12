@@ -18,12 +18,13 @@ var chatStyles = require('../styles/chatStyles')
 var reactMixin = require('react-mixin');
 
 const MAX_PROPS_IN_FORM = 1
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PHOTO = 'tradle.Photo'
 const IDENTITY = 'tradle.Identity'
 const ENUM = 'tradle.Enum'
 const SENT = 'Sent'
 
+var { TYPE } = constants
+var { VERIFICATION } = constants.TYPES
 import {
   // StyleSheet,
   Text,
@@ -58,7 +59,7 @@ class FormMessageRow extends Component {
   }
   verify(event) {
     var resource = this.props.resource;
-    var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
+    var isVerification = resource[TYPE] === VERIFICATION;
     var r = isVerification ? resource.document : resource
     var bankStyle = this.props.bankStyle
     var passProps = {
@@ -71,7 +72,7 @@ class FormMessageRow extends Component {
     else
       passProps.verification = resource
 
-    var model = utils.getModel(r[constants.TYPE]).value;
+    var model = utils.getModel(r[TYPE]).value;
     var route = {
       id: 5,
       component: MessageView,
@@ -99,20 +100,18 @@ class FormMessageRow extends Component {
     this.props.navigator.push(route);
   }
   render() {
-    var resource = this.props.resource;
-    var to = this.props.to;
-    var model = utils.getModel(resource[constants.TYPE]).value
+    let { resource, to, bankStyle } = this.props
+    var model = utils.getModel(resource[TYPE]).value
     let photos = utils.getResourcePhotos(model, resource)
     var photoListStyle = {height: 3};
     var photoUrls = []
     var isMyMessage = this.isMyMessage()
-    let bankStyle = this.props.bankStyle
     if (photos) {
       photoUrls = photos
       // photos.forEach((p) => {
       //   photoUrls.push({url: utils.getImageUri(p.url)});
       // })
-      let isSharedContext = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.resource._context)
+      let isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
       photoListStyle = {
         flexDirection: 'row',
         alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
@@ -155,13 +154,25 @@ class FormMessageRow extends Component {
                 {this.formStub(resource, to)}
               </TouchableHighlight>
               <View style={photoListStyle}>
-                <PhotoList photos={photoUrls} resource={this.props.resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={this.props.to} />
+                <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
               </View>
               {sendStatus}
             </View>
   }
-  formStub(resource, to) {
-    let hasSentTo = !to || (resource.to.organization  && utils.getId(to) !== utils.getId(resource.to.organization))
+  formStub(resource, toChat) {
+    let hasSentTo
+    if (!toChat)
+      hasSentTo = true
+    else {
+      hasSentTo = (resource.to.organization  && utils.getId(toChat) !== utils.getId(resource.to.organization))
+      if (hasSentTo) {
+        let me = utils.getMe()
+        if (me.isEmployee) {
+          if (utils.getId(me.organization) === utils.getId(resource.to.organization))
+            hasSentTo = false
+        }
+      }
+    }
     let sentTo = hasSentTo
                ? <View style={{padding: 5}}>
                    <Text style={{color: '#7AAAC3', fontSize: 14, alignSelf: 'flex-end'}}>{translate('asSentTo', resource.to.organization.title)}</Text>
@@ -173,7 +184,7 @@ class FormMessageRow extends Component {
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let isMyMessage = this.isMyMessage()
-    let isSharedContext = to  &&  to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.resource._context)
+    let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && utils.isReadOnlyChat(this.props.resource._context)
     let width = Math.floor(utils.getMessageWidth(FormMessageRow)) // - (isSharedContext  ? 45 : 0))
     let viewStyle = {
       width: Math.min(width, 600),
@@ -220,7 +231,7 @@ class FormMessageRow extends Component {
           <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}]}>
             <View>
               {sealedStatus}
-              <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
+              <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[TYPE]).value)}</Text>
             </View>
             <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
           </View>
@@ -232,7 +243,7 @@ class FormMessageRow extends Component {
 
   formatRow(isMyMessage, renderedRow) {
     var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols) {

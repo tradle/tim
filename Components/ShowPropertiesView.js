@@ -167,7 +167,8 @@ class ShowPropertiesView extends Component {
       var isItems
       var isDirectionRow;
       // var isEmail
-      if (!val) {
+      let isUndefined = !val  &&  (typeof val === 'undefined')
+      if (isUndefined) {
         if (pMeta.displayAs)
           val = utils.templateIt(pMeta, resource);
         else if (this.props.checkProperties) {
@@ -212,8 +213,9 @@ class ShowPropertiesView extends Component {
           val = val.title
         else if (this.props.showRefResource) {
           // ex. property that is referencing to the Organization for the contact
-          var value = val[constants.TYPE] ? utils.getDisplayName(val, utils.getModel(val[constants.TYPE]).value.properties) : val.title;
-
+          var value = val[constants.TYPE] ? utils.getDisplayName(val) : val.title;
+          if (!value)
+            value = utils.makeModelTitle(utils.getType(val))
           val = <TouchableOpacity onPress={this.props.showRefResource.bind(this, val, pMeta)}>
                  <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
                </TouchableOpacity>
@@ -230,7 +232,7 @@ class ShowPropertiesView extends Component {
 
       // }
 
-      if (!val)
+      if (isUndefined)
         return //<View key={this.getNextKey()}></View>;
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {

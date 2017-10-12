@@ -32,7 +32,6 @@ var StyleSheet = require('../StyleSheet')
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
 const APP_QR_CODE = '5'
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PARTIAL = 'tradle.Partial'
 const TYPE = constants.TYPE
 const ROOT_HASH = constants.ROOT_HASH
@@ -167,7 +166,7 @@ class HomePage extends Component {
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
     var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
-    var isSharedContext = model.id === PRODUCT_APPLICATION && utils.isReadOnlyChat(resource)
+    var isSharedContext = utils.isContext(model)  &&  utils.isReadOnlyChat(resource)
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
     return (

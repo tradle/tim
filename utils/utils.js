@@ -65,25 +65,30 @@ const protocol = tradle.protocol
 const tradleUtils = tradle.utils
 var constants = require('@tradle/constants');
 
-const TYPE = constants.TYPE
-const TYPES = constants.TYPES
+var {
+  TYPE,
+  TYPES,
+  CUR_HASH,
+  NONCE,
+  ROOT_HASH,
+  PREV_HASH,
+  SIG
+} = constants
+var {
+  VERIFICATION,
+  MONEY,
+  FORM,
+  ORGANIZATION,
+  CUSTOMER_WAITING
+} = constants.TYPES
 
-const VERIFICATION = TYPES.VERIFICATION
-const MONEY = TYPES.MONEY
-const FORM = TYPES.FORM
-const ORGANIZATION = TYPES.ORGANIZATION
+const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const MESSAGE = 'tradle.Message'
 const ITEM = 'tradle.Item'
 const DOCUMENT = 'tradle.Document'
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-const CUSTOMER_WAITING = constants.TYPES.CUSTOMER_WAITING
-const CUR_HASH = constants.CUR_HASH
-const NONCE = constants.NONCE
-const ROOT_HASH = constants.ROOT_HASH
-const PREV_HASH = constants.PREV_HASH
-const SIG = constants.SIG
+
 const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
@@ -285,10 +290,7 @@ var utils = {
     return s ? s : args[0]
   },
   clone(resource) {
-    if (resource._context  &&  resource._context._context)
-      debugger
     return clone(resource)
-    // return JSON.parse(JSON.stringify(resource))
   },
   compare(r1, r2, isInlined) {
     if (!r1 || !r2)
@@ -523,46 +525,48 @@ var utils = {
 
     return props
   },
-  getDisplayName(resource, meta) {
+
+  getDisplayName(resource, model) {
     if (Array.isArray(resource))
       return
-    if (!meta) {
+    if (!model) {
       if (!resource[TYPE]) {
         if (resource.id   &&   resource.title)
           return resource.title
         if (resource.id)
           return ""
       }
-      meta = this.getModel(resource[TYPE]).value.properties
+      model = this.getModel(resource[TYPE]).value
     }
-    let m = resource[TYPE] ? this.getModel(resource[TYPE]) : null
+    let props = model.properties
+    let resourceModel = resource[TYPE] ? this.getModel(resource[TYPE]).value : null
     var displayName = '';
-    for (var p in meta) {
+    for (var p in props) {
       if (p.charAt(0) === '_')
         continue
-      if (!meta[p].displayName) {
-        if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === ENUM)
+      if (!props[p].displayName) {
+        if (!displayName  &&  resourceModel  &&  resource[p]  &&  resourceModel.subClassOf === ENUM)
           return resource[p];
         continue
       }
-      let dn = this.getStringValueForProperty(resource, p, meta)
+      let dn = this.getStringValueForProperty(resource, p, props)
       if (dn)
         displayName += displayName.length ? ' ' + dn : dn;
     }
-    if (!displayName.length  &&  m) {
-      let vCols = m.value.viewCols
+    if (!displayName.length  &&  resourceModel) {
+      let vCols = resourceModel.viewCols
       if (!vCols)
         return displayName
       let excludeProps = []
-      if (this.isMessage(m))
+      if (this.isMessage(resourceModel))
         excludeProps = ['from', 'to']
       for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
         let prop =  vCols[i]
-        if (meta[prop].type === 'array')
+        if (props[prop].type === 'array')
           continue
-        if (!resource[prop]  ||  excludeProps.indexOf[prop])
+        if ((!resource[prop]  &&  !props[prop].displayAs)  ||  excludeProps.indexOf[prop])
           continue
-        displayName = this.getStringValueForProperty(resource, prop, m.value.properties)
+        displayName = this.getStringValueForProperty(resource, prop, resourceModel.properties)
       }
     }
     return displayName;
@@ -578,14 +582,14 @@ var utils = {
       if (resource[p].title)
         return resource[p].title;
       if (meta[p].ref) {
-        if (meta[p].ref == constants.TYPES.MONEY)  {
+        if (meta[p].ref == MONEY)  {
           let c = this.normalizeCurrencySymbol(resource[p].currency)
           return (c || '') + resource[p].value
         }
         else {
           let rm = this.getModel(resource[p][TYPE])
           if (rm)
-            return this.getDisplayName(resource[p], rm.value.properties);
+            return this.getDisplayName(resource[p], rm.value);
         }
       }
     }
@@ -853,7 +857,7 @@ var utils = {
         isReadOnly = true
     }
 
-    if (isReadOnly || !context  || (resource[constants.TYPE] !== FORM_ERROR  &&   resource[constants.TYPE] !== FORM_REQUEST))
+    if (isReadOnly || !context  || (resource[TYPE] !== FORM_ERROR  &&   resource[TYPE] !== FORM_REQUEST))
       return isReadOnly
     // Form error can be used only by context originating contact
     // return !isReadOnly  &&  context
@@ -893,7 +897,7 @@ var utils = {
     if (me.organization._hasSupportLine) {
       if (resource[TYPE] === TYPES.PROFILE)
         return true
-      if (resource[TYPE] === PRODUCT_APPLICATION) {
+      if (this.isContext(resource[TYPE])) {
         if (resource._relationshipManager)
           return true
       }
@@ -958,7 +962,7 @@ var utils = {
   isContext(typeOrModel) {
     let m = typeOrModel
     if (typeof typeOrModel === 'string') {
-      m = this.getModel(typeOrModel)
+      m = this.getModel(typeOrModel).value
       if (!m)
         return
     }
@@ -1523,7 +1527,7 @@ var utils = {
     }
   },
   getPhotoProperty(resource) {
-    let props = this.getModel(resource[constants.TYPE]).value.properties
+    let props = this.getModel(resource[TYPE]).value.properties
     let photoProp
     for (let p in resource) {
       if (props[p].ref === PHOTO  &&  props[p].mainPhoto)
@@ -2193,4 +2197,48 @@ module.exports = utils;
     }
     return displayName;
   },
+  // getDisplayName(resource, meta) {
+  //   if (Array.isArray(resource))
+  //     return
+  //   if (!meta) {
+  //     if (!resource[TYPE]) {
+  //       if (resource.id   &&   resource.title)
+  //         return resource.title
+  //       if (resource.id)
+  //         return ""
+  //     }
+  //     meta = this.getModel(resource[TYPE]).value.properties
+  //   }
+  //   let m = resource[TYPE] ? this.getModel(resource[TYPE]) : null
+  //   var displayName = '';
+  //   for (var p in meta) {
+  //     if (p.charAt(0) === '_')
+  //       continue
+  //     if (!meta[p].displayName) {
+  //       if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === ENUM)
+  //         return resource[p];
+  //       continue
+  //     }
+  //     let dn = this.getStringValueForProperty(resource, p, meta)
+  //     if (dn)
+  //       displayName += displayName.length ? ' ' + dn : dn;
+  //   }
+  //   if (!displayName.length  &&  m) {
+  //     let vCols = m.value.viewCols
+  //     if (!vCols)
+  //       return displayName
+  //     let excludeProps = []
+  //     if (this.isMessage(m))
+  //       excludeProps = ['from', 'to']
+  //     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
+  //       let prop =  vCols[i]
+  //       if (meta[prop].type === 'array')
+  //         continue
+  //       if (!resource[prop]  ||  excludeProps.indexOf[prop])
+  //         continue
+  //       displayName = this.getStringValueForProperty(resource, prop, m.value.properties)
+  //     }
+  //   }
+  //   return displayName;
+  // },
 */

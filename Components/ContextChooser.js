@@ -14,9 +14,8 @@ var MessageTypeRow = require('./MessageTypeRow');
 var StyleSheet = require('../StyleSheet')
 
 import ActivityIndicator from './ActivityIndicator'
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-const CONTEXT = 'tradle.Context'
-
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
+const { TYPE } = constants
 import {
   ListView,
   Text,
@@ -75,7 +74,7 @@ class ContextChooser extends Component {
     return (
       <MessageTypeRow
         onSelect={() => this.props.selectContext()}
-        resource={{[constants.TYPE]: PRODUCT_APPLICATION, product: 'All'}}
+        resource={{[TYPE]: PRODUCT_REQUEST, product: 'All'}}
         bankStyle={this.props.bankStyle}
         navigator={this.props.navigator}
         to={this.props.resource} />

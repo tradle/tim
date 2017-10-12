@@ -32,19 +32,20 @@ class NetworkInfoProvider extends Component {
   }
 
   render() {
-    let isOrg = this.props.resource  &&  this.props.resource[TYPE] === ORGANIZATION
-    let isOnline = this.props.online || (typeof this.props.online === 'undefined')
-    let providerOffline = this.props.resource  &&  isOrg  &&  !isOnline
-    let dn = this.props.resource
-           ? this.props.isConnected
-               ? translate('learnMoreDescriptionTo', utils.getDisplayName(this.props.resource))
-               : translate('learnMoreServerIsDown', utils.getDisplayName(this.props.resource))
+    let { resource, online, isConnected, connected, serverOffline } = this.props
+    let isOrg = resource  &&  resource[TYPE] === ORGANIZATION
+    let isOnline = online || (typeof online === 'undefined')
+    let providerOffline = resource  &&  isOrg  &&  !isOnline
+    let dn = resource
+           ? isConnected
+               ? translate('learnMoreDescriptionTo', utils.getDisplayName(resource))
+               : translate('learnMoreServerIsDown', utils.getDisplayName(resource))
            : translate('learnMoreDescription')
-    if (this.props.connected  &&  !providerOffline && !this.props.serverOffline)
+    if (connected  &&  !providerOffline && !serverOffline)
       return <View/>
 
-    let msg = this.props.connected
-            ? (providerOffline ? translate('providerIsOffline', utils.getDisplayName(this.props.resource)) : translate('serverIsUnreachable'))
+    let msg = connected
+            ? (providerOffline ? translate('providerIsOffline', utils.getDisplayName(resource)) : translate('serverIsUnreachable'))
             : translate('noNetwork')
 
     return  <Animated.View style={{opacity: this.state.fadeAnim}}>

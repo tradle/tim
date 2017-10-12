@@ -25,8 +25,6 @@ const MY_PRODUCT = 'tradle.MyProduct'
 const FORM = 'tradle.Form'
 const SHARE_CONTEXT = 'tradle.ShareContext'
 const ENUM = 'tradle.Enum'
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-const PRODUCT_LIST = 'tradle.ProductList'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 const CONFIRMATION = 'tradle.Confirmation'
@@ -68,7 +66,6 @@ class MessageRow extends Component {
   }
   render() {
     var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
 
     var me = utils.getMe();
 
@@ -87,15 +84,17 @@ class MessageRow extends Component {
     var photoListStyle = {height: 3};
     var addStyle, inRow;
 
-    var isProductApplication = model.id === PRODUCT_APPLICATION
-    let message = isProductApplication ? ret.message : resource.message
+    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+
+    var isContext = utils.isContext(model)
+    let message = isContext ? ret.message : resource.message
 
     var noMessage = !message  ||  !message.length;
     var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
     var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
     const bankStyle = this.props.bankStyle
     if (!renderedRow.length) {
-      var vCols = noMessage ? null : utils.getDisplayName(resource, model.properties);
+      var vCols = noMessage ? null : utils.getDisplayName(resource);
       if (vCols)
         renderedRow = <Text style={chatStyles.resourceTitle}>{vCols}</Text>;
     }
@@ -146,7 +145,7 @@ class MessageRow extends Component {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
 
-        let isReadOnlyChat = to[constants.TYPE] === PRODUCT_APPLICATION && utils.isReadOnlyChat(this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
+        let isReadOnlyChat = utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
         photoListStyle = {
           flexDirection: 'row',
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
@@ -177,7 +176,7 @@ class MessageRow extends Component {
     var messageBody;
     // HACK that solves the case when the message is short and we don't want it to be displayed
     // in a bigger than needed bubble
-    if (message  &&  !isProductApplication) {
+    if (message  &&  !isContext) {
       let parts = utils.splitMessage(message)
       if (parts.length == 2)
         message = parts[0].length > parts[1].length ? parts[0] : parts[1]
@@ -250,7 +249,7 @@ class MessageRow extends Component {
                           </View>
                         </View>
 
-      messageBody = isSimpleMessage || isProductApplication || isConfirmation
+      messageBody = isSimpleMessage || isContext || isConfirmation
                   ? msgContent
                   : <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
                       {msgContent}
@@ -309,8 +308,7 @@ class MessageRow extends Component {
 
   editVerificationRequest() {
     var resource = this.props.resource.document;
-    var rmodel = utils.getModel(resource[constants.TYPE]).value;
-    var title = utils.getDisplayName(resource, rmodel.properties);
+    var title = utils.getDisplayName(resource);
     this.props.navigator.push({
       title: title,
       id: 4,
@@ -319,7 +317,7 @@ class MessageRow extends Component {
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
-        model: rmodel,
+        model: utils.getModel(resource[constants.TYPE]).value,
         resource: resource,
         additionalInfo: this.props.resource,
         editCols: ['photos']
@@ -416,7 +414,7 @@ class MessageRow extends Component {
 
     let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
 
-    if (model.id === PRODUCT_APPLICATION) {
+    if (utils.isContext(model)) {
       let msgModel = utils.getModel(resource.product).value
       let str = !this.props.navigator.isConnected  &&  this.props.isLast
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))

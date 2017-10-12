@@ -18,7 +18,6 @@ import ImageInput from './ImageInput'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 const DEFAULT_LINK_COLOR = '#2892C6'
 const TYPE = constants.TYPE
@@ -84,7 +83,7 @@ class FormErrorRow extends Component {
     const bankStyle = this.props.bankStyle
 
     if (!renderedRow.length) {
-      var vCols = utils.getDisplayName(resource, model.properties);
+      var vCols = utils.getDisplayName(resource);
       if (vCols)
         renderedRow = <Text style={chatStyles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
     }
@@ -247,7 +246,8 @@ class FormErrorRow extends Component {
     let {resource, to} = this.props
     var model = utils.getModel(resource[TYPE] || resource.id).value;
 
-    let context = to[TYPE]  &&  to[TYPE] === PRODUCT_APPLICATION ? to : resource._context
+    let isContext = to[TYPE]  &&  utils.isContext(to[TYPE])
+    let context = isContext ? to : resource._context
     let isReadOnlyChat = context  &&  utils.isReadOnlyChat(resource, context) //this.props.context  &&  this.props.context._readOnly
 
     var viewCols = model.gridCols || model.viewCols;

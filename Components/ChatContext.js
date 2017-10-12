@@ -12,7 +12,6 @@ var translate = utils.translate
 import Icon from 'react-native-vector-icons/Ionicons'
 const REMEDIATION = 'tradle.Remediation'
 var constants = require('@tradle/constants');
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PROFILE = constants.TYPES.PROFILE
 
 class ChatContext extends Component {
@@ -49,7 +48,7 @@ class ChatContext extends Component {
     //   return <View/>
     let isReadOnlyChat = utils.isReadOnlyChat(context)
     let bankStyle = this.props.bankStyle
-    let isShareContext = chat[constants.TYPE] === PRODUCT_APPLICATION && isReadOnlyChat
+    let isShareContext = utils.isContext(chat[constants.TYPE]) && isReadOnlyChat
     let product = utils.getProduct(context)
     let content = <Text style={[{color: this.props.allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product).value)}</Text>
     let chooser = context  &&  isShareContext

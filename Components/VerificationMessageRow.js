@@ -347,7 +347,7 @@ class VerificationMessageRow extends Component {
       docName = <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
 
     var headerContent = <View style={headerStyle}>
-                          <Text style={[hs, {fontSize: isThirdParty ? 16 : 12}]}>{translate(model)}</Text>
+                          <Text style={[hs, {fontSize: isThirdParty || onPress ? 16 : 12}]}>{translate(model)}</Text>
                           {docName}
                         </View>
 

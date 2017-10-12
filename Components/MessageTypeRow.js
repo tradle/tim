@@ -8,7 +8,7 @@ var StyleSheet = require('../StyleSheet')
 var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
 var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 var PRODUCT_ROW_BG_COLOR, PRODUCT_ROW_TEXT_COLOR
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+const CONTEXT = 'tradle.Context'
 import {
   Image,
   // StyleSheet,
@@ -48,10 +48,10 @@ class MessageTypeRow extends Component {
     var title
     if (resource.id)
       title = translate(resource)
-    else if (resource[constants.TYPE] === PRODUCT_APPLICATION)
+    else if (resource[constants.TYPE] === CONTEXT)
       title = utils.getModel(resource.product) ? utils.getModel(resource.product).value.title : resource.product
     else
-      title = utils.getDisplayName(resource, utils.getModel(resource[constants.TYPE]).value.properties)
+      title = utils.getDisplayName(resource)
     let renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]}>{title}</Text>;
 
     var verPhoto;

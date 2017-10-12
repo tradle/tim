@@ -19,8 +19,6 @@ import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
-
 import React, { Component, PropTypes } from 'react'
 import {
   ListView,

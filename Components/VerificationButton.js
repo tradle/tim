@@ -22,15 +22,13 @@ class VerificationButton extends Component {
     if (utils.isVerifiedByMe(resource))
       return <View />;
 
-    var model = utils.getModel(resource[constants.TYPE]).value;
-
     let self = this
     return (
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <View style={[buttonStyles.container1, {paddingVertical: 3}]}>
           <TouchableHighlight underlayColor='transparent' onPress={() =>
             Alert.alert(
-              'Verify ' + utils.getDisplayName(resource, model.properties),
+              'Verify ' + utils.getDisplayName(resource),
               null,
               [
                 {text: 'Cancel', onPress: () => console.log('Canceled!')},

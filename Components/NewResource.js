@@ -272,7 +272,7 @@ class NewResource extends Component {
     }
 
     var self = this;
-    var title = utils.getDisplayName(resource, this.props.model.properties);
+    var title = utils.getDisplayName(resource);
     var isMessage = utils.isMessage(this.props.model)
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
@@ -1228,9 +1228,8 @@ class NewResource extends Component {
     var resource = {from: utils.getMe(), to: this.props.resource.to};
     var model = this.props.model;
 
-    var toName = utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties);
-    var meta = utils.getModel(me[constants.TYPE]).value.properties;
-    var meName = utils.getDisplayName(me, meta);
+    var toName = utils.getDisplayName(resource.to);
+    var meName = utils.getDisplayName(me);
     var modelName = constants.TYPES.SIMPLE_MESSAGE;
     var value = {
       message: msg
