@@ -726,10 +726,19 @@ var Store = Reflux.createStore({
       console.error('2. failed to process received message', err)
     }
   },
+  async getObject(link, noBody) {
+    try {
+      let obj = await meDriver.objects.get(link)
+      // let kobj = await this._keeper.get(link)
+      return obj.object
+    } catch (err) {
+      console.log('getObject: ', err)
+    }
+  },
   readseal(seal) {
     let self = this
     const link = seal.link
-    meDriver.objects.get(link)
+    return meDriver.objects.get(link)
       .then((obj) => {
         if (obj.object[TYPE] === IDENTITY && obj.link === meDriver.link) {
           return
@@ -4155,7 +4164,7 @@ var Store = Reflux.createStore({
       foundRefs.forEach(function(val) {
         var propValue = utils.getId(val.value)
         var propsToSet = refProps[propValue];
-        propsToSet.forEach((p) => json[prop] = val.value)
+        propsToSet.forEach((p) => json[p] = val.value)
       });
 
       this.trigger({
@@ -4570,7 +4579,7 @@ var Store = Reflux.createStore({
       }
 
     }
-    function save (returnVal, noTrigger) {
+    async function save (returnVal, noTrigger) {
       let r = {
         modelName: returnVal[TYPE],
         resource: returnVal,
@@ -6463,21 +6472,22 @@ var Store = Reflux.createStore({
     async function handleOne(link) {
       let rId = all[link]
       let r = self._getItem(rId)
-      let result
+      let resource
       try {
-        result = await self._keeper.get(link)
+        resource = await self.getObject(link)
+        // result = await self._keeper.get(link)
       } catch(err) {
         // debugger
         console.log(err)
         if (me.isEmployee)
-          result = await self._getItemFromServer(rId)
+          resource = await self._getItemFromServer(rId)
         // if (me.isEmployee)
         //   return self._getItemFromServer(rId)
       }
-      if (!result)
+      if (!resource)
         return
 
-      let obj = utils.clone(result)
+      let obj = utils.clone(resource)
       extend(r, obj)
       self._setItem(rId, r)
       if (r._context  &&  self.getModel(r[TYPE]).interfaces.indexOf(CONTEXT) === -1)
@@ -7176,7 +7186,7 @@ var Store = Reflux.createStore({
           organization: this._getItem(utils.getId(r.from)).organization
         }
 
-        addAndCheckShareable(rr)
+        this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
       })
     }
     if (!verTypes.length)
@@ -7209,7 +7219,7 @@ var Store = Reflux.createStore({
       if (!document  ||  document._inactive)
         return;
 
-      if (checkIfWasShared(document))
+      if (this.checkIfWasShared(document, to))
         return
       // Check if there is at least one verification by the listed in FormRequest verifiers
       if (hasVerifiers  &&  hasVerifiers[docType]) {
@@ -7260,7 +7270,7 @@ var Store = Reflux.createStore({
       value.document = document;
 
       this.addVisualProps(value)
-      addAndCheckShareable(value)
+      this.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
     })
     // Allow sharing non-verified forms
     let context = await this.getCurrentContext(to)
@@ -7286,7 +7296,7 @@ var Store = Reflux.createStore({
       ll.forEach((r) => {
         if (r.verificationsCount)
           return
-        if (checkIfWasShared(r))
+        if (this.checkIfWasShared(r, to))
           return
         if (me.isEmployee) {
           if (!r._context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
@@ -7307,110 +7317,11 @@ var Store = Reflux.createStore({
             document: r,
             organization: this._getItem(utils.getId(r.to)).organization
           }
-          addAndCheckShareable(rr)
+          this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
         }
       })
     }
     return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
-
-    function checkIfWasShared(document) {
-      if (document._sharedWith) {
-        if (document._sharedWith.some((r) => {
-          let org = self._getItem(r.bankRepresentative).organization
-          return org  &&  utils.getId(org) === toId
-        }))
-          return true
-      }
-    }
-    // Allow sharing only the last version of the resource
-    function addAndCheckShareable(verification) {
-      let r = verification.document
-
-      let docType = r[TYPE]
-      let docModel = self.getModel(docType)
-      let isMyProduct = docModel.subClassOf === MY_PRODUCT
-      let isItem = utils.isSavedItem(r)
-      // Allow sharing only of resources that were filled out by me
-      if (!isMyProduct  &&  utils.getId(r.from) !== utils.getId(me))
-        return
-
-      if (to[TYPE] === ORGANIZATION  &&  !to._isTest) {
-        let rToOrg = r.to.organization
-        if (rToOrg) {
-          if (self._getItem(rToOrg)._isTest)
-            return
-        }
-      }
-
-      var v = shareableResources[docType];
-      if (!v)
-        shareableResources[docType] = [];
-      else if (verification.from  &&   shareableResourcesRootToR[r[ROOT_HASH]]) {
-        let arr = shareableResources[r[TYPE]]
-        let vFromId = utils.getId(verification.from)
-        for (let i=0; i<arr.length; i++) {
-          let rr = arr[i].document
-          if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-            // if (utils.getId(arr[i].from) === vFromId) {
-              if (r.time < rr.time) {
-                addSharedWithProvider(verification)
-                return
-              }
-              else
-                arr.splice(i, 1)
-            // }
-          }
-        }
-      }
-      // Check that this is not the resource that was send to me as to an employee
-      if (utils.getId(r.to) !== meId  ||  isMyProduct  ||  isItem) {
-        // Don't add this verification if it's for a previous copy of the document
-        // If the this is the newer copy remove the older and push this one
-        if (shareableResources[docType].length) {
-          let sr = shareableResources[docType]
-          for (let i=0; i<sr.length; i++) {
-            let d = sr[i].document
-            if (d[ROOT_HASH] !== r[ROOT_HASH])
-              continue
-            // Don't add the verification for teh previous copy of the document
-            if (!r[PREV_HASH] || d[PREV_HASH] === r[CUR_HASH])
-              return
-            if (r[PREV_HASH] === d[CUR_HASH]) {
-              sr.splice(i, 1)
-              break
-            }
-          }
-        }
-        shareableResources[docType].push(verification)
-        shareableResourcesRootToR[r[ROOT_HASH]] = r
-        addSharedWithProvider(verification)
-      }
-    }
-    function addSharedWithProvider(verification) {
-      let hash = verification.document[ROOT_HASH]
-      let o = shareableResourcesRootToOrgs[hash]
-      if (!o) {
-        o = []
-        shareableResourcesRootToOrgs[hash] = o
-      }
-      else {
-        let org = verification.organization
-        if (!org) {
-          if (verification._verifiedBy)
-            org = verification._verifiedBy
-          else {
-            let rep = self._getItem(verification.from)
-            org = rep && rep.organization
-          }
-        }
-
-        let oId = utils.getId(org)
-        let oo = o.filter((r) => utils.getId(r) === oId)
-        if (oo.length)
-          return
-      }
-      o.push(verification.organization)
-    }
   },
   async getShareableResourcesForEmployee(foundResources, to) {
     if (!foundResources)
@@ -7454,45 +7365,6 @@ var Store = Reflux.createStore({
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
     var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
     var self = this
-    // var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
-    // var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
-    // if (productsToShare  &&  productsToShare.length) {
-    //   productsToShare.forEach((r) => {
-    //     let fromId = utils.getId(r.from)
-    //     if (r._sharedWith) {
-    //       let sw = r._sharedWith.filter((r) => {
-    //         if (reps.filter((rep) => {
-    //                 if (utils.getId(rep) === r.bankRepresentative)
-    //                   return true
-    //               }).length)
-    //           return true
-    //       })
-    //       if (sw.length)
-    //         return
-    //     }
-    //     if (shareableResourcesRootToR[r[ROOT_HASH]]) {
-    //       let arr = shareableResources[r[TYPE]]
-    //       let skip
-    //       for (let i=0; i<arr.length  &&  !skip; i++) {
-    //         if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-    //           if (r.time < rr.time)
-    //             skip = true
-    //           else
-    //             arr.splice(i, 1)
-    //         }
-    //       }
-    //       if (skip)
-    //         return
-    //     }
-    //     let rr = {
-    //       [TYPE]: VERIFICATION,
-    //       document: r,
-    //       organization: this._getItem(utils.getId(r.from)).organization
-    //     }
-
-    //     addAndCheckShareable(rr)
-    //   })
-    // }
     if (!verTypes.length)
       return {verifications: shareableResources}
 
@@ -7519,33 +7391,6 @@ var Store = Reflux.createStore({
 
       typeToDocs[verType] = ll
       ll.forEach((r) => docs.push(utils.getId(r)))
-      // ll.forEach((r) => {
-      //   if (r.verificationsCount)
-      //     return
-      //   if (checkIfWasShared(r))
-      //     return
-      //   if (me.isEmployee) {
-      //     if (!r._context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
-      //       let rr = {
-      //         [TYPE]: VERIFICATION,
-      //         document: r,
-      //         organization: this._getItem(utils.getId(r.to)).organization
-      //       }
-      //       if (!shareableResources[verType])
-      //         shareableResources[verType] = []
-      //       shareableResources[verType].push(rr)
-      //       // addAndCheckShareable(rr)
-      //     }
-      //   }
-      //   if (!context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
-      //     let rr = {
-      //       [TYPE]: VERIFICATION,
-      //       document: r,
-      //       organization: this._getItem(utils.getId(r.to)).organization
-      //     }
-      //     addAndCheckShareable(rr)
-      //   }
-      // })
     }
     if (!docs.length)
       return
@@ -7584,7 +7429,7 @@ var Store = Reflux.createStore({
         // if (!document  ||  document._inactive)
         //   return;
 
-        if (checkIfWasShared(document))
+        if (this.checkIfWasShared(document, to))
           return
         // Check if there is at least one verification by the listed in FormRequest verifiers
         if (hasVerifiers  &&  hasVerifiers[docType]) {
@@ -7609,165 +7454,125 @@ var Store = Reflux.createStore({
         value.document = document;
 
         this.addVisualProps(value)
-        addAndCheckShareable(value)
+        this.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
       })
     }
-    // // Allow sharing non-verified forms
-    // let context = await this.getCurrentContext(to)
-    // let repId
-    // if (me.isEmployee) {
-    //   let rep = this.getRepresentative(utils.getId(me.organization))
-    //   repId = rep[ROOT_HASH]
-    // }
-    // for (let i=0; i<verTypes.length; i++) {
-    //   let verType = verTypes[i]
-    //   if (hasVerifiers  &&  hasVerifiers[verType])
-    //     continue
-    //   var ll = await this.searchSharables({
-    //     modelName: verType,
-    //     search: me.isEmployee,
-    //     filterResource: {_author: repId}
-    //   })
-    //   if (!ll)
-    //     continue
-
-    //   ll.forEach((r) => {
-    //     if (r.verificationsCount)
-    //       return
-    //     if (checkIfWasShared(r))
-    //       return
-    //     if (me.isEmployee) {
-    //       if (!r._context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
-    //         let rr = {
-    //           [TYPE]: VERIFICATION,
-    //           document: r,
-    //           organization: this._getItem(utils.getId(r.to)).organization
-    //         }
-    //         if (!shareableResources[verType])
-    //           shareableResources[verType] = []
-    //         shareableResources[verType].push(rr)
-    //         // addAndCheckShareable(rr)
-    //       }
-    //     }
-    //     if (!context  ||  (r._context  &&  utils.getId(context) !== utils.getId(r._context))) {
-    //       let rr = {
-    //         [TYPE]: VERIFICATION,
-    //         document: r,
-    //         organization: this._getItem(utils.getId(r.to)).organization
-    //       }
-    //       addAndCheckShareable(rr)
-    //     }
-    //   })
-    // }
     return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
-
-    function checkIfWasShared(document) {
-      if (document._sharedWith) {
-        if (document._sharedWith.some((r) => {
-          let org = self._getItem(r.bankRepresentative).organization
-          return org  &&  utils.getId(org) === toId
-        }))
-          return true
-      }
+  },
+  checkIfWasShared(document, to) {
+    let toId = utils.getId(to)
+    if (document._sharedWith) {
+      if (document._sharedWith.some((r) => {
+        let org = this._getItem(r.bankRepresentative).organization
+        return org  &&  utils.getId(org) === toId
+      }))
+        return true
     }
-    // Allow sharing only the last version of the resource
-    function addAndCheckShareable(verification) {
-      let r = verification.document
+  },
+  // Allow sharing only the last version of the resource
+  addAndCheckShareable(verification, to, shareables) {
+    let { shareableResources, shareableResourcesRootToR } = shareables
+    let r = verification.document
 
-      let docType = r[TYPE]
-      let docModel = self.getModel(docType)
-      let isMyProduct = docModel.subClassOf === MY_PRODUCT
-      let isItem = utils.isSavedItem(r)
-      // Allow sharing only of resources that were filled out by me
-      if (!isMyProduct) {
-        let fromId = utils.getId(r.from)
-        if (fromId !== utils.getId(me)) {
-          if (!me.isEmployee)
-            return
-          else {
-            let rep = self.getRepresentative(utils.getId(me.organization))
-            if (rep  &&  utils.getId(rep) !== fromId)
-              return
-          }
-        }
-      }
-      if (to[TYPE] === ORGANIZATION  &&  !to._isTest) {
-        let rToOrg = r.to.organization
-        if (rToOrg) {
-          if (self._getItem(rToOrg)._isTest)
+    let docType = r[TYPE]
+    let docModel = this.getModel(docType)
+    let isMyProduct = docModel.subClassOf === MY_PRODUCT
+    let isItem = utils.isSavedItem(r)
+    // Allow sharing only of resources that were filled out by me
+    if (!isMyProduct) {
+      let fromId = utils.getId(r.from)
+      if (fromId !== utils.getId(me)) {
+        if (!me.isEmployee)
+          return
+        else {
+          let rep = this.getRepresentative(utils.getId(me.organization))
+          if (rep  &&  utils.getId(rep) !== fromId)
             return
         }
       }
-
-      var v = shareableResources[docType];
-      if (!v)
-        shareableResources[docType] = [];
-      else if (verification.from  &&   shareableResourcesRootToR[r[ROOT_HASH]]) {
-        let arr = shareableResources[r[TYPE]]
-        let vFromId = utils.getId(verification.from)
-        for (let i=0; i<arr.length; i++) {
-          let rr = arr[i].document
-          if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-            // if (utils.getId(arr[i].from) === vFromId) {
-              if (r.time < rr.time) {
-                addSharedWithProvider(verification)
-                return
-              }
-              else
-                arr.splice(i, 1)
-            // }
-          }
-        }
-      }
-      // Check that this is not the resource that was send to me as to an employee
-      if (utils.getId(r.to) !== meId  ||  isMyProduct  ||  isItem) {
-        // Don't add this verification if it's for a previous copy of the document
-        // If the this is the newer copy remove the older and push this one
-        if (shareableResources[docType].length) {
-          let sr = shareableResources[docType]
-          for (let i=0; i<sr.length; i++) {
-            let d = sr[i].document
-            if (d[ROOT_HASH] !== r[ROOT_HASH])
-              continue
-            // Don't add the verification for teh previous copy of the document
-            if (!r[PREV_HASH] || d[PREV_HASH] === r[CUR_HASH])
-              return
-            if (r[PREV_HASH] === d[CUR_HASH]) {
-              sr.splice(i, 1)
-              break
-            }
-          }
-        }
-        shareableResources[docType].push(verification)
-        shareableResourcesRootToR[r[ROOT_HASH]] = r
-        addSharedWithProvider(verification)
-      }
     }
-    function addSharedWithProvider(verification) {
-      let hash = verification.document[ROOT_HASH]
-      let o = shareableResourcesRootToOrgs[hash]
-      if (!o) {
-        o = []
-        shareableResourcesRootToOrgs[hash] = o
-      }
-      else {
-        let org = verification.organization
-        if (!org) {
-          if (verification._verifiedBy)
-            org = verification._verifiedBy
-          else {
-            let rep = self._getItem(verification.from)
-            org = rep && rep.organization
-          }
-        }
-
-        let oId = utils.getId(org)
-        let oo = o.filter((r) => utils.getId(r) === oId)
-        if (oo.length)
+    if (to[TYPE] === ORGANIZATION  &&  !to._isTest) {
+      let rToOrg = r.to.organization
+      if (rToOrg) {
+        if (this._getItem(rToOrg)._isTest)
           return
       }
-      o.push(verification.organization)
     }
+
+    var v = shareableResources[docType];
+    if (!v)
+      shareableResources[docType] = [];
+    else if (verification.from  &&   shareableResourcesRootToR[r[ROOT_HASH]]) {
+      let arr = shareableResources[r[TYPE]]
+      let vFromId = utils.getId(verification.from)
+      for (let i=0; i<arr.length; i++) {
+        let rr = arr[i].document
+        if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+          // if (utils.getId(arr[i].from) === vFromId) {
+            if (r.time < rr.time) {
+              this.addSharedWithProvider(verification, shareables)
+              return
+            }
+            else
+              arr.splice(i, 1)
+          // }
+        }
+      }
+    }
+    // Check that this is not the resource that was send to me as to an employee
+    let meId = utils.getId(me)
+    if (utils.getId(r.to) !== meId  ||  isMyProduct  ||  isItem) {
+      // Don't add this verification if it's for a previous copy of the document
+      // If the this is the newer copy remove the older and push this one
+      if (shareableResources[docType].length) {
+        let sr = shareableResources[docType]
+        for (let i=0; i<sr.length; i++) {
+          let d = sr[i].document
+          if (d[ROOT_HASH] !== r[ROOT_HASH])
+            continue
+          // Don't add the verification for teh previous copy of the document
+          if (!r[PREV_HASH] || d[PREV_HASH] === r[CUR_HASH])
+            return
+          if (r[PREV_HASH] === d[CUR_HASH]) {
+            sr.splice(i, 1)
+            break
+          }
+        }
+      }
+      shareableResources[docType].push(verification)
+      shareableResourcesRootToR[r[ROOT_HASH]] = r
+      this.addSharedWithProvider(verification, shareables)
+    }
+  },
+  addSharedWithProvider(verification, shareables) {
+    let {
+      shareableResources,
+      shareableResourcesRootToR,
+      shareableResourcesRootToOrgs
+    } = shareables
+    let hash = verification.document[ROOT_HASH]
+    let o = shareableResourcesRootToOrgs[hash]
+    if (!o) {
+      o = []
+      shareableResourcesRootToOrgs[hash] = o
+    }
+    else {
+      let org = verification.organization
+      if (!org) {
+        if (verification._verifiedBy)
+          org = verification._verifiedBy
+        else {
+          let rep = this._getItem(verification.from)
+          org = rep && rep.organization
+        }
+      }
+
+      let oId = utils.getId(org)
+      let oo = o.filter((r) => utils.getId(r) === oId)
+      if (oo.length)
+        return
+    }
+    o.push(verification.organization)
   },
   async searchSharables(params) {
     let { modelName, search } = params
