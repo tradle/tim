@@ -103,9 +103,9 @@
       "resolved": "git://github.com/tradle/embed.git#e19d8047d38eef19036cc8732117803b386ca9b3"
     },
     "@tradle/engine": {
-      "version": "5.3.0",
-      "from": "@tradle/engine@>=5.3.0 <6.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-5.3.0.tgz",
+      "version": "5.3.3",
+      "from": "@tradle/engine@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-5.3.3.tgz",
       "dependencies": {
         "async": {
           "version": "2.5.0",
@@ -1062,7 +1062,7 @@
       "dependencies": {
         "babel-code-frame": {
           "version": "6.26.0",
-          "from": "babel-code-frame@>=6.26.0 <7.0.0",
+          "from": "babel-code-frame@^6.26.0",
           "resolved": "https://registry.npmjs.org/babel-code-frame/-/babel-code-frame-6.26.0.tgz",
           "dev": true
         },
@@ -1092,19 +1092,19 @@
         },
         "babel-types": {
           "version": "6.26.0",
-          "from": "babel-types@>=6.24.1 <7.0.0",
+          "from": "babel-types@^6.24.1",
           "resolved": "https://registry.npmjs.org/babel-types/-/babel-types-6.26.0.tgz",
           "dev": true
         },
         "babylon": {
           "version": "6.18.0",
-          "from": "babylon@>=6.18.0 <7.0.0",
+          "from": "babylon@^6.18.0",
           "resolved": "https://registry.npmjs.org/babylon/-/babylon-6.18.0.tgz",
           "dev": true
         },
         "esutils": {
           "version": "2.0.2",
-          "from": "esutils@>=2.0.2 <3.0.0",
+          "from": "esutils@^2.0.2",
           "resolved": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz",
           "dev": true
         },
@@ -1116,13 +1116,13 @@
         },
         "invariant": {
           "version": "2.2.2",
-          "from": "invariant@^2.2.2",
+          "from": "invariant@>=2.2.2 <3.0.0",
           "resolved": "https://registry.npmjs.org/invariant/-/invariant-2.2.2.tgz",
           "dev": true
         },
         "js-tokens": {
           "version": "3.0.2",
-          "from": "js-tokens@>=3.0.2 <4.0.0",
+          "from": "js-tokens@^3.0.2",
           "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-3.0.2.tgz",
           "dev": true
         },
@@ -1134,7 +1134,7 @@
         },
         "regenerator-runtime": {
           "version": "0.11.0",
-          "from": "regenerator-runtime@>=0.11.0 <0.12.0",
+          "from": "regenerator-runtime@^0.11.0",
           "resolved": "https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.11.0.tgz",
           "dev": true
         },
@@ -1315,7 +1315,7 @@
       "dependencies": {
         "babel-runtime": {
           "version": "6.26.0",
-          "from": "babel-runtime@>=6.22.0 <7.0.0",
+          "from": "babel-runtime@^6.22.0",
           "resolved": "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.26.0.tgz",
           "dev": true
         },
@@ -1327,25 +1327,25 @@
         },
         "esutils": {
           "version": "2.0.2",
-          "from": "esutils@>=2.0.2 <3.0.0",
+          "from": "esutils@^2.0.2",
           "resolved": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz",
           "dev": true
         },
         "lodash": {
           "version": "4.17.4",
-          "from": "lodash@>=4.17.4 <5.0.0",
+          "from": "lodash@^4.17.4",
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
           "dev": true
         },
         "regenerator-runtime": {
           "version": "0.11.0",
-          "from": "regenerator-runtime@>=0.11.0 <0.12.0",
+          "from": "regenerator-runtime@^0.11.0",
           "resolved": "https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.11.0.tgz",
           "dev": true
         },
         "to-fast-properties": {
           "version": "1.0.3",
-          "from": "to-fast-properties@>=1.0.3 <2.0.0",
+          "from": "to-fast-properties@^1.0.3",
           "resolved": "https://registry.npmjs.org/to-fast-properties/-/to-fast-properties-1.0.3.tgz",
           "dev": true
         }
@@ -3369,7 +3369,7 @@
         },
         "globals": {
           "version": "9.18.0",
-          "from": "globals@>=9.2.0 <10.0.0",
+          "from": "globals@^9.2.0",
           "resolved": "https://registry.npmjs.org/globals/-/globals-9.18.0.tgz",
           "dev": true
         },
@@ -4690,7 +4690,7 @@
     "level-change-processor": {
       "version": "1.0.0",
       "from": "mvayngrib/level-change-processor#7100404",
-      "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
+      "resolved": "git://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b"
     },
     "level-codec": {
       "version": "6.1.0",
