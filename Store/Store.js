@@ -2754,7 +2754,7 @@ var Store = Reflux.createStore({
           ...data.profile
         }
 
-        if (!profile.firstName  &&  date.name) {
+        if (!profile.firstName  &&  data.name) {
           profile.firstName = data.name || data.message.split(' ')[0]
 
           if (!profile.formatted)
@@ -4461,7 +4461,7 @@ var Store = Reflux.createStore({
       let properties = rModel.properties
       if (isNew) {
         for (let p in toChain) {
-          if (properties[p]  &&  properties[p].type === 'object'  &&  !returnVal.id)
+          if (prop  &&  prop.type === 'object' && prop.ref &&  !returnVal.id  &&  !self.getModel(prop.ref).inlined)
             toChain[p] = self.buildRef(returnVal[p])
         }
       }
@@ -4470,7 +4470,7 @@ var Store = Reflux.createStore({
         for (let p in toChain) {
           if (!properties[p]  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH)
             delete toChain[p]
-          else if (properties[p].type === 'object'  &&  !returnVal.id)
+          else if (prop  &&  prop.type === 'object' && prop.ref &&  !returnVal.id  &&  !self.getModel(prop.ref).inlined)
             toChain[p] = self.buildRef(returnVal[p])
         }
       }
