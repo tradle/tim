@@ -39,14 +39,18 @@ import Geometry from './Geometry'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
-const ROOT_HASH = constants.ROOT_HASH
-const TYPE = constants.TYPE
-const FORM = constants.TYPES.FORM
-const PROFILE = constants.TYPES.PROFILE
-const ORGANIZATION = constants.TYPES.ORGANIZATION
-const FINANCIAL_PRODUCT = constants.TYPES.FINANCIAL_PRODUCT
-const MONEY = constants.TYPES.MONEY
-// const CHAR_WIDTH = 7
+const APPLICATION = 'tradle.Application'
+
+var {
+  ROOT_HASH,
+  TYPE,
+  FORM,
+  PROFILE,
+  ORGANIZATION,
+  FINANCIAL_PRODUCT,
+  MONEY,
+} = constants
+
 const DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
 const MAX_LENGTH = 70
@@ -354,7 +358,7 @@ class ResourceRow extends Component {
     var model = utils.getModel(resource[TYPE] || resource.id).value;
     var viewCols = model.gridCols || model.viewCols;
     var renderedViewCols;
-    if (!viewCols) {
+    if (!viewCols  &&  model.id !== APPLICATION) {
       if (model.id === 'tradle.Partial') {
         let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
         let productTitle = utils.makeModelTitle(p)
@@ -374,31 +378,44 @@ class ResourceRow extends Component {
         return <Text style={styles.resourceTitle}>{model.title}</Text>;
     }
     // HACK
-    else if (utils.isContext(model.id)) {
+    else if (model.id === APPLICATION) { // utils.isContext(model.id)) {
       let m = utils.getModel(resource.requestFor)
       if (!m)
         return <View/>
+      let props = model.properties
+      // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
+        let status, color, dateCompleted, dateEvaluated, dateStarted
 
-      if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
-        let status, color
-        if (resource._approved) {
+        dateStarted = <View style={{flexDirection: 'row'}}>
+                          <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
+                          <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
+                        </View>
+        if (resource.certificate) {
           status = 'Approved'
           color = 'green'
         }
-        else  if (resource._denied) {
+        else  if (resource.dateEvaluated) {
           status = 'Denied'
           color = 'red'
+          dateEvaluated = <View style={{flexDirection: 'row'}}>
+                            <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateEvaluated)}</Text>
+                            <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateEvaluated)}</Text>
+                          </View>
         }
-        else if (resource._appSubmitted) {
+        else if (resource.dateCompleted) {
           status = 'Submitted'
           color = '#7AAAc3'
+          dateCompleted = <View style={{flexDirection: 'row'}}>
+                            <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateCompleted)}</Text>
+                            <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateCompleted)}</Text>
+                          </View>
         }
         if (status)
           status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}><Text style={{fontSize: 14, color: color}}>{translate(status)}</Text></View>
-        if (!resource._approved  &&  !resource._denied) {
+        if (status !== 'Approved'  &&  status !== 'Denied') {
           let icolor
           let iname
-          if (this.state.hasRM || resource._relationshipManager) {
+          if (this.state.hasRM || resource.relationshipManager) {
             iname = 'md-log-out'
             icolor = 'blue'
           }
@@ -407,7 +424,7 @@ class ResourceRow extends Component {
             icolor = resource._assignedRM ? 'red' : 'green'
           }
           let icon = <Icon name={iname} size={25} color={icolor} style={{alignSelf: 'flex-end'}}/>
-          if (!resource._relationshipManager  &&  !resource._assignedRM) {
+          if (!resource.relationshipManager  &&  !resource._assignedRM) {
             icon = <TouchableOpacity onPress={() => this.assignRM()}>
                      {icon}
                    </TouchableOpacity>
@@ -422,12 +439,16 @@ class ResourceRow extends Component {
         return  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                   <View style={{padding: 5}}>
                     <Text style={styles.resourceTitle}>{translate(m.value)}</Text>
-                    <Text style={styles.contextOwners}>{resource.from.organization || resource.from.title} -> {resource.to.organization.title}</Text>
+                    {dateStarted}
+                    {dateCompleted}
+                    {dateEvaluated}
                   </View>
-                  {status}
+                  <View style={{justifyContent: 'center'}}>
+                    {status}
+                  </View>
                 </View>
-      }
-      return <Text style={styles.resourceTitle}>{translate(m.value)}</Text>;
+      // // }
+      // return <Text style={styles.resourceTitle}>{translate(m.value)}</Text>;
     }
     else if (this.props.isChooser)
       return <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>
@@ -593,7 +614,7 @@ class ResourceRow extends Component {
               id: utils.makeId('tradle.Identity', me[ROOT_HASH])
             },
             application: this.props.resource,
-            _context: this.props.resource,
+            _context: this.props.resource._context,
             from: me,
             to: this.props.resource.to
           }

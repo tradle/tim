@@ -224,7 +224,7 @@ class MessageView extends Component {
   }
 
   verifyOrCreateError() {
-    let resource = this.props.resource
+    let { resource, application } = this.props
     let model = utils.getModel(resource[TYPE]).value
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
@@ -242,9 +242,9 @@ class MessageView extends Component {
       for (var p in this.state.errorProps)
         msg += msg ? ', ' + properties[p].title : properties[p].title
       msg = translate('pleaseCorrectFields', msg)
-
+      let from = (application ? application.applicant : resource.from).title || 'Applicant'
       Alert.alert(
-        translate('sendEditRequestPrompt', resource.from.title),
+        translate('sendEditRequestPrompt', from),
         null,
         // msg,
         [
@@ -259,19 +259,28 @@ class MessageView extends Component {
     for (let p in this.state.errorProps) {
       errors.push({name: p, error: this.state.errorProps[p] || 'Please correct this property'})
     }
-    let resource = this.props.resource
+    let { resource, application, navigator } = this.props
     let isReadOnlyChat = utils.isReadOnlyChat(resource)
+    let context, to
+    if (application) {
+      to = application.applicant
+      context = application._context
+    }
+    else {
+      to = isReadOnlyChat ? resource._context : resource.from
+      context = resource._context
+    }
     let formError = {
       _t: 'tradle.FormError',
       errors: errors,
       prefill: resource,
       from: utils.getMe(),// resource.to,
-      to: isReadOnlyChat ? resource._context : resource.from,
-      _context: resource._context,
+      to: to,
+      _context: context,
       message: text || translate('pleaseCorrectTheErrors')
     }
-    Actions.addMessage({msg: formError})
-    this.props.navigator.pop()
+    Actions.addMessage({msg: formError, application: application})
+    navigator.pop()
   }
   onCheck(prop, message) {
     let errorProps = {}

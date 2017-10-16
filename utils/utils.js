@@ -867,7 +867,7 @@ var utils = {
       return isReadOnly
     if (meId  === this.getId(context.from))
       return isReadOnly
-    if (me.isEmployee  &&  to.organization.id  &&  to.organization.id === me.organization.id)
+    if (me.isEmployee  &&  to.organization  &&  to.organization.id  &&  to.organization.id === me.organization.id)
       return isReadOnly
     return true
   },
@@ -1025,20 +1025,39 @@ var utils = {
     if (utils.getId(resource.organization) === utils.getId(me.organization))
       return true
   },
-  isVerifier(resource, verification) {
-    let me = this.getMe()
+  isVerifier(resource, application) {
+    return true
     if (!this.isEmployee(resource))
       return false
-    let model = this.getModel(resource[TYPE]).value
-    if (!me.organization)
+    let me = this.getMe()
+    if (!me.isEmployee)
       return false
-    if (model.subClassOf === FORM) {
-      return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
-             !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-    }
-    if (model.id === TYPES.VERIFICATION)
-      return  utils.getId(me) === utils.getId(resource.from)
+    if (!application  ||  !application.relationshipManager)
+      return false
+    if (utils.getId(application.relationshipManager) === utils.getId(me))
+      return true
+    // let model = this.getModel(resource[TYPE]).value
+    // if (model.subClassOf === FORM) {
+    //   return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
+    //          !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
+    // }
+    // if (model.id === TYPES.VERIFICATION)
+    //   return  utils.getId(me) === utils.getId(resource.from)
   },
+  // isVerifier(resource, application) {
+  //   if (!this.isEmployee(resource))
+  //     return false
+  //   let me = this.getMe()
+  //   if (!me.isEmployee)
+  //     return false
+  //   let model = this.getModel(resource[TYPE]).value
+  //   if (model.subClassOf === FORM) {
+  //     return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
+  //            !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
+  //   }
+  //   if (model.id === TYPES.VERIFICATION)
+  //     return  utils.getId(me) === utils.getId(resource.from)
+  // },
   // measure(component, cb) {
   //   let handle = typeof component === 'number'
   //     ? component

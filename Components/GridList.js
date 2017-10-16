@@ -35,12 +35,30 @@ import { makeStylish } from './makeStylish'
 
 const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
-const TYPE = constants.TYPE
-const ROOT_HASH = constants.ROOT_HASH
-const PROFILE = constants.TYPES.PROFILE
-const ORGANIZATION = constants.TYPES.ORGANIZATION
+
+var {
+  TYPE,
+  ROOT_HASH,
+} = constants
+
+var {
+  PROFILE,
+  ORGANIZATION,
+  SELF_INTRODUCTION,
+  CUSTOMER_WAITING,
+  FINANCIAL_PRODUCT,
+  VERIFICATION,
+  MESSAGE,
+  CUSTOMER_WAITING,
+  SELF_INTRODUCTION,
+  FORM,
+  SETTINGS,
+  INTRODUCTION
+} = constants.TYPES
+
 const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
+const APPLICATION = 'tradle.Application'
 const MODEL = 'tradle.Model'
 
 const MONEY = 'tradle.Money'
@@ -56,10 +74,10 @@ let excludeFromBrowsing = [
   PRODUCT_LIST,
   ENUM,
   BOOKMARK,
-  // constants.TYPES.INTRODUCTION,
-  constants.TYPES.SELF_INTRODUCTION,
-  constants.TYPES.CUSTOMER_WAITING,
-  constants.TYPES.FINANCIAL_PRODUCT,
+  // INTRODUCTION,
+  SELF_INTRODUCTION,
+  CUSTOMER_WAITING,
+  FINANCIAL_PRODUCT,
   'tradle.ForgetMe',
   'tradle.ForgotYou',
   'tradle.GuestSessionProof',
@@ -161,7 +179,7 @@ class GridList extends Component {
       // bookmarksCount: 0,
       // hasTestProviders: false,
       resource: search  &&  resource,
-      isGrid:  !this.isSmallScreen  &&  !officialAccounts  && modelName !== FORM  &&  !model.isInterface//this.props.modelName === constants.TYPES.VERIFICATION
+      isGrid:  !this.isSmallScreen  &&  !officialAccounts  && modelName !== FORM  &&  !model.isInterface
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
@@ -353,7 +371,7 @@ class GridList extends Component {
       //   passProps: {
       //     resource: params.newContact,
       //     filter: '',
-      //     modelName: constants.TYPES.MESSAGE,
+      //     modelName: MESSAGE,
       //     // currency: params.organization.currency,
       //     bankStyle: style,
       //     // dictionary: params.dictionary,
@@ -413,7 +431,7 @@ class GridList extends Component {
         passProps: {
           resource: params.to,
           filter: '',
-          modelName: constants.TYPES.MESSAGE,
+          modelName: MESSAGE,
           currency: params.to.currency,
           bankStyle: style,
           dictionary: params.dictionary
@@ -423,7 +441,7 @@ class GridList extends Component {
 
       var msg = {
         message: translate('customerWaiting', me.firstName),
-        _t: constants.TYPES.SELF_INTRODUCTION,
+        _t: SELF_INTRODUCTION,
         identity: params.myIdentity,
         from: me,
         to: params.to
@@ -520,7 +538,7 @@ class GridList extends Component {
       return
     var list = params.list;
     if (list.length) {
-      var type = list[0][constants.TYPE];
+      var type = list[0][TYPE];
       if (type  !== this.props.modelName  &&  !this.props.isBacklink) {
         var m = utils.getModel(type).value;
         if (m.subClassOf != this.props.modelName)
@@ -679,13 +697,14 @@ class GridList extends Component {
     var model = utils.getModel(modelName);
     var isContact = modelName === PROFILE;
     let rType = resource[TYPE]
-    var isVerification = model.value.id === constants.TYPES.VERIFICATION
-    var isVerificationR  = rType === constants.TYPES.VERIFICATION
+    var isVerification = model.value.id === VERIFICATION
+    var isVerificationR  = rType === VERIFICATION
     var isMessage = utils.isMessage(resource)
 
     var isOrganization = modelName === ORGANIZATION;
+    var isApplication = modelName === APPLICATION
     var m = utils.getModel(resource[TYPE]).value;
-    let isView = search  ||  (!isContact  &&  !isOrganization  &&  !callback)
+    let isView = !isApplication  &&  (search ||  (!isContact  &&  !isOrganization  &&  !callback))
 
     if (isView) {
       if (isMessage) {
@@ -803,9 +822,11 @@ class GridList extends Component {
       id: 11,
       backButtonTitle: 'Back',
       passProps: {
-        resource: resource,
+        resource: search ? resource._context : resource,
         filter: '',
-        modelName: constants.TYPES.MESSAGE,
+        search: search,
+        modelName: MESSAGE,
+        application: search  ? resource : null,
         currency: resource.currency,
         bankStyle: style,
       }
@@ -836,7 +857,7 @@ class GridList extends Component {
         route.title = resource.name
       var msg = {
         message: translate('customerWaiting', me.firstName),
-        _t: constants.TYPES.CUSTOMER_WAITING,
+        _t: CUSTOMER_WAITING,
         from: me,
         to: utils.isEmployee(resource) ? me.organization : resource,
         time: new Date().getTime()
@@ -1117,8 +1138,7 @@ class GridList extends Component {
           !mm.inlined                    &&
            mm.subClassOf !== ENUM        &&
            mm.subClassOf !== METHOD      &&
-           // (mm.viewCols || mm.gridCols)  &&
-           mm.subClassOf !== constants.TYPES.FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
+           mm.subClassOf !== FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
         if (filter) {
           if (utils.makeModelTitle(mm).toLowerCase().indexOf(filterLower) !== -1)
             mArr.push(mm)
@@ -1147,7 +1167,7 @@ class GridList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    if (this.state.isGrid  &&  !utils.isContext(this.props.modelName)) {
+    if (this.state.isGrid  &&  this.props.modelName !== APPLICATION) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       // let size = viewCols ? viewCols.length : 1
       // let isSmallScreen = utils.dimensions(GridList).width < 736
@@ -1166,9 +1186,9 @@ class GridList extends Component {
       model = utils.getModel(this.props.modelName).value;
     if (model.isInterface)
       model = utils.getModel(utils.getType(resource)).value
- // || (model.id === constants.TYPES.FORM)
-    var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
-    var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
+ // || (model.id === FORM)
+    var isVerification = model.id === VERIFICATION  ||  model.subClassOf === VERIFICATION
+    var isForm = model.id === FORM || model.subClassOf === FORM
     var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
     let isContext = utils.isContext(model)
     var isSharedContext = isContext  &&  utils.isReadOnlyChat(resource)
@@ -1253,10 +1273,10 @@ class GridList extends Component {
     return vCols
   }
   getNextKey(resource) {
-    return resource[constants.ROOT_HASH] + '_' + cnt++
+    return resource[ROOT_HASH] + '_' + cnt++
   }
   addDateProp(resource, dateProp, style) {
-    var properties = utils.getModel(resource[constants.TYPE] || resource.id).value.properties;
+    var properties = utils.getModel(resource[TYPE] || resource.id).value.properties;
     if (properties[dateProp]  &&  properties[dateProp].style)
       style = [style, properties[dateProp].style];
     var val = utils.formatDate(new Date(resource[dateProp]));
@@ -1593,7 +1613,7 @@ class GridList extends Component {
         resource: resource,
         context: resource,
         filter: '',
-        modelName: constants.TYPES.MESSAGE,
+        modelName: MESSAGE,
         // currency: params.to.currency,
         bankStyle: this.props.bankStyle || defaultBankStyle
       }
@@ -1644,7 +1664,7 @@ class GridList extends Component {
         return <View />
     }
 
-    // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
+    // if (model.subClassOf === FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
     //   return <View />
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
       return <View />
@@ -1679,7 +1699,7 @@ class GridList extends Component {
     //   )
   }
   onSettingsPressed() {
-    var model = utils.getModel(constants.TYPES.SETTINGS).value
+    var model = utils.getModel(SETTINGS).value
     this.setState({hideMode: false})
     var route = {
       component: NewResource,
@@ -1727,7 +1747,7 @@ class GridList extends Component {
     }
     // Setting some property like insured person. The value for it will be another form
     //
-    if (this.props.prop  &&  model.subClassOf === constants.TYPES.FORM) {
+    if (this.props.prop  &&  model.subClassOf === FORM) {
       if (!r)
         r = {}
       r[TYPE] = this.props.prop.ref || this.props.prop.items.ref;
@@ -2049,7 +2069,7 @@ class GridList extends Component {
   //     backButtonTitle: 'Back',
   //     titleTextColor: '#7AAAC3',
   //     passProps: {
-  //       modelName: constants.TYPES.MESSAGE,
+  //       modelName: MESSAGE,
   //       search: true
   //     },
   //   })

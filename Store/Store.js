@@ -182,6 +182,7 @@ const PHOTO               = 'tradle.Photo'
 const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
 const SHARE_REQUEST       = 'tradle.ShareRequest'
+const APPLICATION         = 'tradle.Application'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -1298,10 +1299,16 @@ var Store = Reflux.createStore({
         // context could be empty if ForgetMe was requested for the provider where form was originally created
         // if (c  &&  c._readOnly) {
         let cId = utils.getId(r._context)
-        if (!c  &&  r[TYPE] === ASSIGN_RM  &&  this.client) {
-          c = await this._getItemFromServer(cId)
-          this.dbPut(cId, c)
-          this._setItem(cId, c)
+        if (!c) {
+          if (this.client) {
+            c = await this._getItemFromServer(cId)
+            if (r[TYPE] === ASSIGN_RM) {
+              this.dbPut(cId, c)
+              this._setItem(cId, c)
+            }
+          }
+          else
+            continue
         }
         if (utils.isReadOnlyChat(r)  ||  r[TYPE] === APPLICATION_DENIAL  ||  (r[TYPE] === CONFIRMATION  &&  utils.getId(r.from) === meId)) {
           this.addMessagesToChat(cId, r, true)
@@ -1369,9 +1376,11 @@ var Store = Reflux.createStore({
       else  if (r.to) { // remove
         let fromId = utils.getId(r.from)
         let rep = this._getItem(meId === fromId ? utils.getId(r.to) : fromId)
-        let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
-        if (addedToProviders.indexOf(orgId) === -1)
-          this.addMessagesToChat(orgId, r, true)
+        if (rep) {
+          let orgId = rep.organization ? utils.getId(rep.organization) : utils.getId(rep)
+          if (addedToProviders.indexOf(orgId) === -1)
+            this.addMessagesToChat(orgId, r, true)
+        }
       }
     }
     for (let id in chatMessages) {
@@ -2747,12 +2756,11 @@ var Store = Reflux.createStore({
           ...data.profile
         }
 
-        if (!profile.firstName) {
+        if (!profile.firstName  &&  date.name) {
           profile.firstName = data.name || data.message.split(' ')[0]
-        }
 
-        if (!profile.formatted) {
-          profile.formatted = profile.firstName
+          if (!profile.formatted)
+            profile.formatted = profile.firstName
         }
         profile._unread = 1
         if (noMessage)
@@ -2855,10 +2863,7 @@ var Store = Reflux.createStore({
   },
   onAddMessage (params) {
     let r = params.msg
-    let isWelcome = params.isWelcome
-    let requestForForm = params.requestForForm
-    let cb = params.cb
-    var disableAutoResponse = params.disableAutoResponse
+    let { isWelcome, requestForForm, disableAutoResponse, cb, application } = params
 
     var self = this
     let m = this.getModel(r[TYPE])
@@ -2869,10 +2874,27 @@ var Store = Reflux.createStore({
     var toOrg
     // r.to could be a reference to a resource
     var to = this._getItem(r.to)
+    let toType
+    if (to)
+      toType = to[TYPE]
+    else if (application) {
+      // App works with PROFILE not IDENTITY to keep name for the customer
+      let parts = r.to.id.split('_')
+      toType = parts[0]
+      if (toType === IDENTITY) {
+        toType = PROFILE
+        r.to = {
+          [TYPE]: toType,
+          [ROOT_HASH]: parts[1],
+          [CUR_HASH]: parts[2],
+        }
+      }
+      to = r.to
+    }
     // if (!r.to[TYPE])
     //   r.to = this._getItem(r.to)
     let isReadOnlyContext
-    if (to[TYPE] === ORGANIZATION) {
+    if (toType === ORGANIZATION) {
       var orgId = utils.getId(r.to)
       var orgRep = this.getRepresentative(orgId)
       // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
@@ -2889,7 +2911,7 @@ var Store = Reflux.createStore({
       r.to = orgRep
     }
     else {
-      let toM = this.getModel(to[TYPE])
+      let toM = this.getModel(toType)
       isReadOnlyContext = utils.isContext(toM)  &&  utils.isReadOnlyChat(to)
     }
 
@@ -2900,7 +2922,7 @@ var Store = Reflux.createStore({
     var context
     if (r._context) {
       rr._context = r._context
-      context = this._getItem(r._context)
+      context = this._getItem(r._context) || r._context
     }
     if (isContext)
       rr.contextId = this.getNonce()
@@ -2990,7 +3012,7 @@ var Store = Reflux.createStore({
         // self.trigger(params)
         self.addLastMessage(r, batch)
       }
-      else if (!isWelcome)
+      else if (!isWelcome  &&  !application)
         self.addLastMessage(r, batch)
 
       if (!isWelcome) //  ||  utils.isEmployee(r.to))
@@ -3015,7 +3037,7 @@ var Store = Reflux.createStore({
       // prevent the not needed duplicate expensive operations for obtaining ProductList
       return self.getDriver(me)
       .then(() => {
-        if (/*!self.isConnected  || */ publishRequestSent[orgId])
+        if (!self.isConnected  ||  publishRequestSent[orgId])
           return
         // TODO:
         // do we need identity publish status anymore
@@ -3065,27 +3087,28 @@ var Store = Reflux.createStore({
       if (isContext)
         rr.to.organization = self.buildRef(to)
 
-      self._setItem(key, rr)
+      if (!application) {
+        self._setItem(key, rr)
 
-      if (!toOrg)
-        toOrg = to.organization ? to.organization : to
+        if (!toOrg)
+            toOrg = to.organization ? to.organization : to
 
-      if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
-        let cId = utils.getId(rr._context)
-        self.addMessagesToChat(cId, rr)
-        let context = self._getItem(rr._context)
-        if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
-          if (rr[TYPE] === APPLICATION_DENIAL)
-            context._denied = true
-          else
-            context._approved = true
-          self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-          self.dbPut(cId, context)
+        if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
+          let cId = utils.getId(rr._context)
+          self.addMessagesToChat(cId, rr)
+          let context = self._getItem(rr._context)
+          if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
+            if (rr[TYPE] === APPLICATION_DENIAL)
+              context._denied = true
+            else
+              context._approved = true
+            self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+            self.dbPut(cId, context)
+          }
         }
+        else
+          self.addMessagesToChat(utils.getId(toOrg), rr)
       }
-      else
-        self.addMessagesToChat(utils.getId(toOrg), rr)
-
       this.addVisualProps(rr)
 
       var params = {
@@ -3105,8 +3128,16 @@ var Store = Reflux.createStore({
         return
       if (isReadOnlyContext)
         return self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
-
-      if (self._getItem(toId).pubkeys) {
+      let toRes = self._getItem(toId)
+      if (toRes)
+        return toRes.pubkeys
+      else if (me.isEmployee) {
+        let rep = this.getRepresentative(utils.getId(me.organization))
+        return this._getItem(utils.makeId(IDENTITY, rep[ROOT_HASH])).pubkeys
+      }
+    })
+    .then((pubkeys) => {
+      if (pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
         let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
         if (disableAutoResponse) {
@@ -3184,7 +3215,7 @@ var Store = Reflux.createStore({
     else
       sendParams.object = toChain
 
-    to = this._getItem(utils.getId(to))
+    to = to[ROOT_HASH] ? to : this._getItem(utils.getId(to))
     let provider, hash
     if (to[ROOT_HASH] === me[ROOT_HASH]) {
       provider = this._getItem(from)
@@ -3245,7 +3276,8 @@ var Store = Reflux.createStore({
       // let cId = utils.getId(context)
       // sendParams.other.context = cId.split('_')[1]
 
-      let contextId = this._getItem(context).contextId
+      let contextId = context.contextId  || this._getItem(context).contextId
+      // let contextId = this._getItem(context).contextId
       if (!contextId) {
         findContextId(utils.getId(context))
       }
@@ -3619,7 +3651,9 @@ var Store = Reflux.createStore({
         r._verifiedBy.photo = verifiedBy.photos[0]
     }
     if (r._context  &&  !utils.isContext(r[TYPE])) {
-      r._context = this._getItem(r._context)
+      let c = this._getItem(r._context)
+      if (c)
+        r._context = c
     }
     return r
   },
@@ -4103,11 +4137,9 @@ var Store = Reflux.createStore({
       // else
       //   results.push(await db.get(rValue))
       let elm = this._getItem(rValue)
-      let elmFromServer
       if (!elm  &&  me.isEmployee) {
         elm = await this._getItemFromServer(rValue)
-        results.push(elm)
-        elmFromServer = true
+        foundRefs.push({value: elm, state: 'fulfilled'})
         // debugger
       }
       else {
@@ -4115,15 +4147,8 @@ var Store = Reflux.createStore({
           foundRefs.push({value: elm, state: 'fulfilled'})
         else {
           try {
-            // if (me.isEmployee  &&  utils.isReadOnlyChat(elm)) {
-            //   let kres = await this._getItemFromServer(utils.getId(elm))
-            //   elmFromServer = true
-            //   results.push(kres)
-            // }
-            // else {
-              let kres = await this._keeper.get(elm[CUR_HASH])
-              results.push(utils.clone(kres))
-            // }
+            let kres = await this._keeper.get(elm[CUR_HASH])
+            results.push(utils.clone(kres))
           } catch (err) {
             debugger
           }
@@ -4435,12 +4460,21 @@ var Store = Reflux.createStore({
       for (let p of exclude)
         delete toChain[p]
 
-      if (!isNew) {
+      let properties = rModel.properties
+      if (isNew) {
+        for (let p in toChain) {
+          if (properties[p]  &&  properties[p].type === 'object'  &&  !returnVal.id)
+            toChain[p] = self.buildRef(returnVal[p])
+        }
+      }
+      else {
         toChain[PREV_HASH] = returnVal[CUR_HASH]
-        let properties = self.getModel(returnVal[TYPE]).properties
-        for (let p in toChain)
+        for (let p in toChain) {
           if (!properties[p]  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH)
             delete toChain[p]
+          else if (properties[p].type === 'object'  &&  !returnVal.id)
+            toChain[p] = self.buildRef(returnVal[p])
+        }
       }
 
       // toChain.time = returnVal.time
@@ -4551,15 +4585,16 @@ var Store = Reflux.createStore({
         delete returnVal.verifications
         await save(returnVal, true)
 
-        if (returnVal[TYPE] === ASSIGN_RM) {
-          let app = self._getItem(returnVal.application)
-          if (!app) {
-            app = returnVal.application
-            self._setItem(app)
-          }
-          app._relationshipManager = true
-          self.dbPut(utils.getId(app), app)
-        }
+        // if (returnVal[TYPE] === ASSIGN_RM) {
+        //   let app = self._getItem(returnVal.application)
+        //   if (!app) {
+        //     app = returnVal.application
+        //     if (!app.id)
+        //       self._setItem(app)
+        //   }
+        //   app.relationshipManager = true
+        //   self.dbPut(utils.getId(app), app)
+        // }
         let rId = utils.getId(returnVal.to)
         let to = self._getItem(rId)
 
@@ -5322,7 +5357,7 @@ var Store = Reflux.createStore({
       }
       let orgId
 
-      if (to[TYPE] === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)) {
+      if (to[TYPE] === PRODUCT_REQUEST  &&  utils.isReadOnlyChat(to)) {
         if (!context)
           context = to
         // Filter out the resource submitted by employee in the shared context chat.
@@ -5360,13 +5395,13 @@ var Store = Reflux.createStore({
               let r = result[i]
               let m = this.getModel(r[TYPE])
               // So not show remediation PA in chat
-              if (m.id === PRODUCT_APPLICATION  &&  r.product === REMEDIATION) {
+              if (m.id === PRODUCT_REQUEST  &&  r.requestFor === REMEDIATION) {
                 rmIdx.push(i)
                 continue
               }
               // Product created in Remediation show only from profile view
               if (m.subClassOf === MY_PRODUCT  &&  r._context) {
-                if (this._getItem(utils.getId(r._context)).product === REMEDIATION) {
+                if (this._getItem(utils.getId(r._context)).requestFor === REMEDIATION) {
                   rmIdx.push(i)
                   continue
                 }
@@ -5439,7 +5474,7 @@ var Store = Reflux.createStore({
         }
       }
 
-      if (!context  &&  modelName !== PRODUCT_APPLICATION)
+      if (!context  &&  modelName !== PRODUCT_REQUEST)
         context = await this.getCurrentContext(to, orgId)
     }
     retParams.first = first
@@ -5573,7 +5608,55 @@ var Store = Reflux.createStore({
   },
   async searchServer(params) {
     // let self = this
-    let {filterResource, direction, first, noTrigger} = params
+    let {filterResource, direction, first, noTrigger, modelName, application} = params
+
+    if (modelName === MESSAGE) {
+      let oforms = application  &&  application.forms
+      if (!oforms)
+        return
+
+      let promises = oforms.map((f) => this._getItemFromServer(f.id))
+      let forms = await Q.all(promises)
+
+      if (!forms) {
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
+        return
+      }
+      let formIds = []
+      forms.forEach((r) => {
+        formIds.push(utils.getId(r))
+        r._context = application._context
+      })
+
+      result = await graphQL.searchServer({
+        modelName: VERIFICATION,
+        sortProperty: 'time',
+        asc: true,
+        client: this.client,
+        filterResource: {
+          [TYPE]: VERIFICATION,
+          document: formIds
+        }
+      })
+      if (result) {
+        let verifications = result.map((r) => this.convertToResource(r.node))
+        verifications.forEach((v) => {
+          v._context = application._context
+          forms.push(v)
+        })
+      }
+      forms.sort((a, b) => {
+        if (a.time  &&  b.time)
+          return a.time - b.time
+        if (a.time)
+          return a.time - b.dateVerified
+        else
+          return a.dateVerified - b.time
+      })
+      if (!noTrigger)
+        this.trigger({action: 'messageList', modelName: MESSAGE, to: params.to, list: forms})
+      return forms
+    }
 
     extend(params, {client: this.client})
     let result = await graphQL.searchServer(params)
@@ -5586,6 +5669,27 @@ var Store = Reflux.createStore({
     let to = this.getRepresentative(utils.getId(me.organization))
     let toId = utils.getId(to)
     let list = result.map((r) => this.convertToResource(r.node))
+    if (modelName === APPLICATION) {
+      let contexts
+      let contextIds = []
+      list.forEach((r) => {
+        let c = r.context
+        if (typeof c === 'string'  &&  contextIds.indexOf(c) === -1)
+          contextIds.push(c)
+      })
+      let appFilter = { [TYPE]: APPLICATION, contextId: contextIds }
+      let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client })
+      if (contextsResult) {
+        contexts = contextsResult.map((r) => this.convertToResource(r.node))
+        list.forEach((r) => {
+          let contextId = r.context
+          if (typeof contextId === 'object')
+            return
+          let context = contexts.filter((c) => c.contextId === contextId)
+          r._context = context[0]
+        })
+      }
+    }
     if (!noTrigger)
       this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
     return list
@@ -5593,7 +5697,8 @@ var Store = Reflux.createStore({
   convertToResource(r) {
     r = utils.clone(r)
     utils.deepRemoveProperties(r, ({ key, value }) => key === '__typename' || value == null)
-
+    if (!r[TYPE])
+      return r
     const m = this.getModel(r[TYPE])
     const props = m.properties
     const toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, 'time']
@@ -6187,22 +6292,22 @@ var Store = Reflux.createStore({
     async function handleOne(link) {
       let rId = all[link]
       let r = self._getItem(rId)
-      let resource
+      let object
       try {
-        resource = await self.getObject(link)
+        object = await self.getObject(link)
         // result = await self._keeper.get(link)
       } catch(err) {
         // debugger
         console.log(err)
         if (me.isEmployee)
-          resource = await self._getItemFromServer(rId)
+          object = await self._getItemFromServer(rId)
         // if (me.isEmployee)
         //   return self._getItemFromServer(rId)
       }
-      if (!resource)
+      if (!object)
         return
 
-      let obj = utils.clone(resource)
+      let obj = utils.clone(object)
       extend(r, obj)
       self._setItem(rId, r)
       if (r._context  &&  !utils.isContext(r[TYPE]))
@@ -7585,16 +7690,9 @@ var Store = Reflux.createStore({
       let docType = utils.getId(value.document).split('_')[0]
       dn = translate('receivedVerification', translate(this.getModel(docType)))
     }
-    else if (model.id === PRODUCT_APPLICATION) {
-      let m = this.getModel(value.product)
-      dn = m  &&  m.title
-      if (!dn) {
-        let s = value.product.split('.')
-          // insert a space before all caps
-        dn  = s[s.length - 1].replace(/([A-Z])/g, ' $1')
-          // uppercase the first character
-          .replace(/^./, function(str){ return str.toUpperCase(); }).trim()
-      }
+    else if (model.id === PRODUCT_APPLICATION  ||  model.id === PRODUCT_REQUEST) {
+      let m = this.getModel(value.product || value.requestFor)
+      dn = utils.makeModelTitle(m)
     }
     else if (model.subClassOf === MY_PRODUCT)
       dn = translate('receivedProduct', translate(model))
@@ -11262,291 +11360,6 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 //     return i === 0
 //   }
 // }())
-  // async onAddMessage(params) {
-  //   let r = params.msg
-  //   let isWelcome = params.isWelcome
-  //   let requestForForm = params.requestForForm
-  //   let cb = params.cb
-  //   var disableAutoResponse = params.disableAutoResponse
-
-  //   var self = this
-  //   let m = this.getModel(r[TYPE])
-  //   var props = m.properties;
-  //   if (!r.time)
-  //     r.time = new Date().getTime();
-  //   var toOrg
-  //   // r.to could be a reference to a resource
-  //   var to = this._getItem(r.to)
-  //   // if (!r.to[TYPE])
-  //   //   r.to = this._getItem(r.to)
-  //   let isReadOnlyContext
-  //   if (to[TYPE] === ORGANIZATION) {
-  //     var orgId = utils.getId(r.to)
-  //     var orgRep = this.getRepresentative(orgId)
-  //     // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
-  //     //   return
-  //     if (!orgRep) {
-  //       var params = {
-  //         action: 'addMessage',
-  //         error: 'No ' + r.to.name + ' representative was found'
-  //       }
-  //       this.trigger(params);
-  //       return
-  //     }
-  //     toOrg = r.to
-  //     r.to = orgRep
-  //   }
-  //   else
-  //     isReadOnlyContext = to[TYPE]  === PRODUCT_APPLICATION  &&  utils.isReadOnlyChat(to)
-
-
-  //   let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
-
-  //   var rr = {};
-  //   var context
-  //   if (r._context) {
-  //     rr._context = r._context
-  //     context = this._getItem(r._context)
-  //   }
-  //   for (var p in r) {
-  //     if (!props[p])
-  //       continue
-  //     if (!isSelfIntroduction  &&  props[p].ref  &&  !props[p].id)
-  //       rr[p] = this.buildRef(r[p])
-  //     else
-  //       rr[p] = r[p];
-  //   }
-  //   // let firstTime
-  //   if (r[TYPE] === PRODUCT_APPLICATION) {
-  //     let result = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
-  //     if (result) {
-  //       result = result.filter((r) => {
-  //         return (r.message === r.message  &&  !r._documentCreated) ? true : false
-  //       })
-  //       if (result.length) {
-  //         result.forEach((r) => {
-  //           const rid = utils.getId(r)
-  //           self._mergeItem(rid, { _documentCreated: true })
-  //         })
-  //       }
-  //     }
-  //   }
-  //   let isCustomerWaiting = r[TYPE] === CUSTOMER_WAITING
-  //   rr[NONCE] = this.getNonce()
-  //   var toChain = {
-  //     [TYPE]: rr[TYPE],
-  //     [NONCE]: rr[NONCE],
-  //     time: r.time
-  //   }
-  //   if (rr.message)
-  //     toChain.message = rr.message
-  //   if (rr.photos)
-  //     toChain.photos = rr.photos
-  //   if (isSelfIntroduction)
-  //     toChain.profile = { firstName: me.firstName }
-  //   if (r.list)
-  //     rr.list = r.list
-  //   let required = m.required
-  //   if (required) {
-  //     required.forEach((p) => {
-  //       toChain[p] = rr[p]
-  //     })
-  //     // HACK
-  //     delete toChain.from
-  //     delete toChain.to
-  //   }
-  //   var batch = []
-  //   var error
-  //   var welcomeMessage
-  //   // var promise = Q(protocol.linkString(toChain))
-  //   let hash = r.to[ROOT_HASH]
-  //   if (!hash)
-  //     hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
-  //   var toId = IDENTITY + '_' + hash
-  //   rr._sendStatus = self.isConnected ? SENDING : QUEUED
-  //   var noCustomerWaiting
-  //   await this.maybeWaitForIdentity({ permalink: hash })
-  //   let obj = await meDriver.sign({ object: toChain })
-
-  //   toChain = obj.object
-  //   let hash = protocol.linkString(toChain)
-
-  //   rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
-  //   let isProductApplication = r[TYPE] === PRODUCT_APPLICATION
-  //   if (isProductApplication) {
-  //     rr._context = r._context = {id: utils.getId(r), title: r.product}
-  //     let params = {
-  //       action: 'addItem',
-  //       resource: rr,
-  //       // sendStatus: sendStatus
-  //     }
-  //     self.trigger(params)
-  //     self.addLastMessage(r, batch)
-  //   }
-  //   else if (!isWelcome)
-  //     self.addLastMessage(r, batch)
-
-  //   if (isWelcome  &&  orgRep) {
-  //     // if (!isWelcome) //  ||  utils.isEmployee(r.to))
-  //     //   return
-  //     // if (!orgRep)
-  //     //   return
-  //     if (orgRep.lastMessageTime) {
-  //       isWelcome = orgRep.lastMessage === r.message
-  //       // if (!isWelcome)
-  //       //   return;
-  //     }
-  //     // var wmKey = SIMPLE_MESSAGE + '_Welcome' + toOrg.name.replace(' ', '_')// + '_' + new Date().getTime()
-  //     // Create welcome message without saving it in DB
-  //     // welcomeMessage = {}
-  //     if (isWelcome  &&  !me.txId) {
-  //     // if (me.txId)
-  //     //   return
-
-  //     // ProductApplication was requested as a part of verification process from different provider
-  //     if (isProductApplication)
-  //       isWelcome = false
-  //     // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
-  //     // prevent the not needed duplicate expensive operations for obtaining ProductList
-  //     await self.getDriver(me)
-  //     // .then(function () {
-  //     if (/*!self.isConnected  || */ !publishRequestSent[orgId])
-  //         // return
-  //       // TODO:
-  //       // do we need identity publish status anymore
-  //       let status = await meDriver.identityPublishStatus()
-  //     // })
-  //     // .then(function(status) {
-  //     if (status/* || !self.isConnected*/) {
-  //       publishRequestSent[orgId] = true
-  //       if (!status.watches.link  &&  !status.link) {
-  //         if (isCustomerWaiting)
-  //           noCustomerWaiting = true
-  //         await self.publishMyIdentity(orgRep)
-  //       }
-  //       else {
-  //         // self.updateMe()
-  //         var allMyIdentities = self._getItem(MY_IDENTITIES)
-  //         var all = allMyIdentities.allIdentities
-  //         var curId = allMyIdentities.currentIdentity
-
-  //         let identity = all.filter((id) => id.id === curId)
-  //         console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
-  //         var msg = {
-  //           message: me.firstName + ' is waiting for the response',
-  //           [TYPE]: SELF_INTRODUCTION,
-  //           identity: identity[0].publishedIdentity,
-  //           profile: {
-  //             firstName: me.firstName
-  //           },
-  //           from: me,
-  //           to: r.to
-  //         }
-  //         if (isCustomerWaiting)
-  //           noCustomerWaiting = true
-  //         await self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
-  //       }
-  //     }
-  //     }
-  //   // if (isWelcome  &&  utils.isEmpty(welcomeMessage))
-  //   //   return;
-  //   if (!isWelcome  ||  !utils.isEmpty(welcomeMessage) {
-
-  //     // Temporary untill the real hash is known
-  //     var key = utils.getId(rr)
-
-  //     rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
-  //     if (r[TYPE] === PRODUCT_APPLICATION)
-  //       rr.to.organization = self.buildRef(to)
-
-  //     self._setItem(key, rr)
-
-  //     if (!toOrg)
-  //       toOrg = to.organization ? to.organization : to
-
-  //     if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
-  //       let cId = utils.getId(rr._context)
-  //       self.addMessagesToChat(cId, rr)
-  //       let context = self._getItem(rr._context)
-  //       if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
-  //         if (rr[TYPE] === APPLICATION_DENIAL)
-  //           context._denied = true
-  //         else
-  //           context._approved = true
-  //         self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-  //         self.dbPut(cId, context)
-  //       }
-  //     }
-  //     else
-  //       self.addMessagesToChat(utils.getId(toOrg), rr)
-
-  //     var params = {
-  //       action: 'addMessage',
-  //       resource: isWelcome ? welcomeMessage : rr
-  //     }
-  //     if (error)
-  //       params.error = error
-  //     self.trigger(params)
-  //     if (batch.length  &&  !error  &&  (isReadOnlyContext || self._getItem(toId).pubkeys))
-  //       await self.getDriver(me)
-  //   }
-  //   // SelfIntroduction or IdentityPublishRequest were just sent
-  //   let result
-  //   if (!noCustomerWaiting) {
-  //     if (isReadOnlyContext)
-  //       result = await self.sendMessageToContextOwners(toChain, [context.from, context.to], context)
-
-  //     else if (self._getItem(toId).pubkeys) {
-  //       // let sendParams = self.packMessage(r, toChain)
-  //       let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
-  //       if (disableAutoResponse) {
-  //         if (!sendParams.other)
-  //           sendParams.other = {}
-  //         sendParams.other.disableAutoResponse = true
-  //       }
-  //       const method = toChain[SIG] ? 'send' : 'signAndSend'
-  //       result = await self.meDriverExec(method, sendParams)
-  //       // .catch(function (err) {
-  //       //   debugger
-  //       // })
-  //     }
-  //   }
-  //   if (!requestForForm  &&  isWelcome)
-  //     return
-  //   if (isWelcome  &&  utils.isEmpty(welcomeMessage))
-  //     return
-  //   if (isReadOnlyContext)
-  //     return
-  //   // cleanup temporary resources from the chat message references and from the in-memory storage - 'list'
-  //   if (!toOrg)
-  //     toOrg = to.organization ? to.organization : to
-
-  //   let orgId = utils.getId(toOrg)
-  //   // self.deleteMessageFromChat(orgId, rr)
-  //   // delete list[rr[TYPE] + '_' + tmpKey]
-
-  //   // saving the new message
-  //   const data = utils.toOldStyleWrapper(result.message)
-  //   if (data)  {
-  //     rr[ROOT_HASH] = data[ROOT_HASH]
-  //     rr[CUR_HASH] = data[CUR_HASH]
-  //   }
-  //   var key = utils.getId(rr)
-
-  //   self.dbBatchPut(key, rr, batch)
-  //   // rr._sendStatus = self.isConnected ? SENDING : QUEUED
-
-  //   self._setItem(key, rr)
-  //   // self.addMessagesToChat(orgId, rr)
-  //   await db.batch(batch)
-  // // })
-  //   // .catch(function(err) {
-  //   //   debugger
-  //   // })
-  //   // .finally(() => {
-  //  if (cb)
-  //    cb(rr)
-  // },
   // searchResources(params) {
   //   var meta = this.getModel(params.modelName)
   //   var isMessage = utils.isMessage(meta)
