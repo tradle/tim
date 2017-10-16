@@ -4463,6 +4463,7 @@ var Store = Reflux.createStore({
       let properties = rModel.properties
       if (isNew) {
         for (let p in toChain) {
+          let prop = properties[p]
           if (prop  &&  prop.type === 'object' && prop.ref &&  !returnVal.id  &&  !self.getModel(prop.ref).inlined)
             toChain[p] = self.buildRef(returnVal[p])
         }
