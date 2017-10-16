@@ -15,6 +15,8 @@ var StyleSheet = require('../StyleSheet')
 
 import ActivityIndicator from './ActivityIndicator'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
+const CONTEXT = 'tradle.Context'
+
 const { TYPE } = constants
 import {
   ListView,
