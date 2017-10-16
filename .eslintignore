@@ -1,0 +1,8 @@
+ios/
+iOS/
+android/
+vendor/
+e2e/
+node_modules/
+release*
+.*
