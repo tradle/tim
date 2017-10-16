@@ -31,7 +31,7 @@
     "deploy:bots": "npm run build:bots && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=bots GIT_DEPLOY_REPO=mv ./deploy.sh",
     "docker:build": "npm run build:serverinenv && ./buildimage.sh env",
     "docker:push": "docker push tradle/web-app",
-    "lint": "eslint --quiet --ignore-path .gitignore ."
+    "lint": "eslint --quiet ."
   },
   "dependencies": {
     "@tradle/aws-client": "github:tradle/aws-client",
