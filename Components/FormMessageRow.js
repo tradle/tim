@@ -19,12 +19,11 @@ var reactMixin = require('react-mixin');
 
 const MAX_PROPS_IN_FORM = 1
 const PHOTO = 'tradle.Photo'
-const IDENTITY = 'tradle.Identity'
-const ENUM = 'tradle.Enum'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const SENT = 'Sent'
 
+const { IDENTITY, ENUM, VERIFICATION } = constants.TYPES
 var { TYPE } = constants
-var { VERIFICATION } = constants.TYPES
 import {
   // StyleSheet,
   Text,
@@ -316,13 +315,13 @@ class FormMessageRow extends Component {
         let val
         if (properties[v].type === 'date')
           // val = dateformat(new Date(resource[v]), 'mmm d, yyyy')
-
           val = resource[v] ? dateformat(new Date(resource[v]), 'mmm d, yyyy') : null
-
+        else if (properties[v].displayAs)
+          val = utils.templateIt(properties[v], resource)
+        else if (model.id === PRODUCT_REQUEST  &&  v === 'requestFor')
+          val = utils.makeModelTitle(utils.getModel(resource[v]).value)
         else
-           val = (properties[v].displayAs)
-                ? utils.templateIt(properties[v], resource)
-                : properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
+          val = properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
 
         if (!val)
           return
