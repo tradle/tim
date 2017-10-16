@@ -20,6 +20,7 @@ const {
 const { MONEY, ENUM, ORGANIZATION, FORM } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
+const PUB_KEY = 'tradle.PubKey'
 var cursor = {}
 
 var search = {
@@ -118,11 +119,35 @@ var search = {
         // if (p.charAt(0) === '_')
         //   debugger
         if (!props[p]  &&  p.charAt(0) === '_'  &&  val) {
-          op.EQ += `\n   ${p}: "${val}",`
+          if (Array.isArray(val)) {
+            let s = `${p}: [`
+            val.forEach((r, i) => {
+              if (i)
+                s += ', '
+              s += `"${r}"`
+            })
+            s += ']'
+            inClause.push(s)
+          }
+          else
+            op.EQ += `\n   ${p}: "${val}",`
           continue
         }
-        else if (props[p].type === 'string'  &&  (!val  ||  !val.trim().length))
-          continue
+        else if (props[p].type === 'string') {
+          if (Array.isArray(val)) {
+            let s = `${p}: [`
+            val.forEach((r, i) => {
+              if (i)
+                s += ', '
+              s += `"${r}"`
+            })
+            s += ']'
+            inClause.push(s)
+            continue
+          }
+          else if (!val  ||  !val.trim().length)
+            continue
+        }
         if (props[p].type === 'string') {
           let len = val.length
           if (val.indexOf('*') === -1)
@@ -324,7 +349,17 @@ var search = {
   },
   getAllPropertiesForServerSearch(model) {
     let props = model.properties
-    let arr = model.inlined ? [] : ['_permalink', '_link', '_time', '_author', '_authorTitle', TYPE, SIG, '_virtual', 'time']
+    let arr
+    if (model.inlined)
+      arr = []
+    else {
+      arr = ['_permalink', '_link', '_time', '_author', '_authorTitle', '_virtual', 'time']
+      if (model.id !== PUB_KEY) {
+        let newarr = arr.concat(TYPE, SIG)
+        arr = newarr
+      }
+    }
+
     for (let p in props) {
       if (p.charAt(0) === '_')
         continue
@@ -333,8 +368,28 @@ var search = {
       if (props[p].displayAs)
         continue
       let ptype = props[p].type
-      if (ptype === 'array') // || ptype === 'date')
+      if (ptype === 'array') {
+        // HACK
+        if (p === 'verifications')
+          continue
+        let iref = props[p].items.ref
+        if (iref) {
+          if (iref === model.id)
+            arr.push(
+              `${p} {
+                id
+              }`
+            )
+          else
+            arr.push(
+              `${p} {
+                id
+                title
+              }`
+            )
+        }
         continue
+      }
       if (ptype !== 'object') {
         arr.push(p)
         continue
