@@ -44,12 +44,15 @@ const APPLICATION = 'tradle.Application'
 var {
   ROOT_HASH,
   TYPE,
+} = constants
+
+var {
   FORM,
   PROFILE,
   ORGANIZATION,
   FINANCIAL_PRODUCT,
   MONEY,
-} = constants
+} = constants.TYPES
 
 const DEFAULT_CURRENCY_SYMBOL = '£'
 var CURRENCY_SYMBOL
@@ -131,7 +134,7 @@ class ResourceRow extends Component {
 
   render() {
     var resource = this.props.resource;
-    var photo;
+    let photo;
     let rType = resource[TYPE]
     var isContact = rType === PROFILE;
     var isOrg = rType === ORGANIZATION
