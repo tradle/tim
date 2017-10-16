@@ -182,7 +182,7 @@ class FormMessageRow extends Component {
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let isMyMessage = this.isMyMessage()
-    let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && utils.isReadOnlyChat(this.props.resource._context)
+    let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
 
     var viewStyle = {
       width: Math.floor(utils.dimensions().width * 0.8), // - (isSharedContext  ? 45 : 0),
