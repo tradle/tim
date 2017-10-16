@@ -56,14 +56,14 @@ const merged = extend({
   LOCAL_IP: LOCAL_IP,
   // LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
   // easy
-  // LOCAL_TRADLE_SERVER: 'https://zdpksydivf.execute-api.us-east-1.amazonaws.com/dev/',
+  // LOCAL_TRADLE_SERVER: 'https://n7lnep4jo7.execute-api.us-east-1.amazonaws.com/dev/',
   // safe-re
-  // LOCAL_TRADLE_SERVER: 'https://ie3sibl8l5.execute-api.us-east-1.amazonaws.com/dev/',
+  // LOCAL_TRADLE_SERVER: 'https://lm55971u7f.execute-api.us-east-1.amazonaws.com/dev/',
   // friendly
   // LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/',
   LOCAL_TRADLE_SERVERS: [
-    'https://zdpksydivf.execute-api.us-east-1.amazonaws.com/dev/',
-    'https://ie3sibl8l5.execute-api.us-east-1.amazonaws.com/dev/',
+    'https://n7lnep4jo7.execute-api.us-east-1.amazonaws.com/dev/',
+    'https://lm55971u7f.execute-api.us-east-1.amazonaws.com/dev/',
     'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/'
   ],
   LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/', // Goofy

@@ -288,7 +288,6 @@ var NewResourceMixin = {
                     prop:  props[p],
                     required: !maybe,
                     model: meta,
-                    required: !maybe,
                     errors: params.errors,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })

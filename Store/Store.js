@@ -2756,7 +2756,7 @@ var Store = Reflux.createStore({
           ...data.profile
         }
 
-        if (!profile.firstName  &&  date.name) {
+        if (!profile.firstName  &&  data.name) {
           profile.firstName = data.name || data.message.split(' ')[0]
 
           if (!profile.formatted)

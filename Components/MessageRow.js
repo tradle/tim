@@ -203,7 +203,7 @@ class MessageRow extends Component {
         if (/*message.charAt(0) === '['  || */ longMessage)
           viewStyle.maxWidth = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
 
-        if (!isSimpleMessage  &&  model.id !== PRODUCT_LIST) {
+        if (!isSimpleMessage  &&  model.id !== constants.TYPES.PRODUCT_LIST) {
           let msgW = message.length * utils.getFontSize(18) + 40
           // if (msgW > msgWidth)
             viewStyle.maxWidth =  msgW > msgWidth ? msgWidth : msgW
