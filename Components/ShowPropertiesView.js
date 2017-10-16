@@ -54,6 +54,7 @@ class ShowPropertiesView extends Component {
     }
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
+
   render() {
     return (
       <View key={this.getNextKey()}>
@@ -79,15 +80,19 @@ class ShowPropertiesView extends Component {
 
     var props = model.properties;
     if (this.props.checkProperties) {
-      if (!vCols) {
+      let exclude = ['from', 'to']
+      if (vCols)
+        vCols = utils.clone(vCols)
+      // if (!vCols) {
         vCols = []
         for (var p in resource) {
           if (p.charAt(0) === '_'  ||  !props[p])
             continue
-          vCols.push(p)
+          if (exclude.indexOf(p) === -1  && vCols.indexOf(p) === -1)
+            vCols.push(p)
         }
-      }
-      else
+      // }
+      // else
         vCols = utils.ungroup(model, vCols)
       let v = []
       vCols.forEach((p) => {
