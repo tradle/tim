@@ -4461,6 +4461,7 @@ var Store = Reflux.createStore({
       let properties = rModel.properties
       if (isNew) {
         for (let p in toChain) {
+          let prop = properties[p]
           if (prop  &&  prop.type === 'object' && prop.ref &&  !returnVal.id  &&  !self.getModel(prop.ref).inlined)
             toChain[p] = self.buildRef(returnVal[p])
         }
@@ -4468,7 +4469,8 @@ var Store = Reflux.createStore({
       else {
         toChain[PREV_HASH] = returnVal[CUR_HASH]
         for (let p in toChain) {
-          if (!properties[p]  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH)
+          let prop = properties[p]
+          if (!prop  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH)
             delete toChain[p]
           else if (prop  &&  prop.type === 'object' && prop.ref &&  !returnVal.id  &&  !self.getModel(prop.ref).inlined)
             toChain[p] = self.buildRef(returnVal[p])
