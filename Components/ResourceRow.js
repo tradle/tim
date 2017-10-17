@@ -40,6 +40,7 @@ const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
 const APPLICATION = 'tradle.Application'
+const PARTIAL = 'tradle.Partial'
 
 var {
   ROOT_HASH,
@@ -52,6 +53,7 @@ var {
   ORGANIZATION,
   FINANCIAL_PRODUCT,
   MONEY,
+  ENUM
 } = constants.TYPES
 
 const DEFAULT_CURRENCY_SYMBOL = '£'
@@ -133,7 +135,7 @@ class ResourceRow extends Component {
   }
 
   render() {
-    var resource = this.props.resource;
+    let resource = this.props.resource;
     let photo;
     let rType = resource[TYPE]
     var isContact = rType === PROFILE;
@@ -362,7 +364,7 @@ class ResourceRow extends Component {
     var viewCols = model.gridCols || model.viewCols;
     var renderedViewCols;
     if (!viewCols  &&  model.id !== APPLICATION) {
-      if (model.id === 'tradle.Partial') {
+      if (model.id === PARTIAL) {
         let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
         let productTitle = utils.makeModelTitle(p)
         return <View style={{flexDirection: 'row'}}>
@@ -372,7 +374,7 @@ class ResourceRow extends Component {
       }
       var vCols = utils.getDisplayName(resource);
       if (vCols && vCols.length) {
-        if (model.subClassOf  &&  model.subClassOf === 'tradle.Enum')
+        if (model.subClassOf  &&  model.subClassOf === ENUM)
           vCols = utils.createAndTranslate(vCols, true)
 
         return <Text style={styles.resourceTitle}>{vCols}</Text>;
