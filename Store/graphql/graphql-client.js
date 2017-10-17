@@ -26,14 +26,16 @@ var cursor = {}
 var search = {
   initClient(meDriver, SERVICE_PROVIDERS) {
     let me = utils.getMe()
-    if (!me.isEmployee  ||  !SERVICE_PROVIDERS)
+    if (!me.isEmployee  ||  (!SERVICE_PROVIDERS  &&  !me.organization.url))
       return
 
     let graphqlEndpoint
     let myOrgId = me.organization.id
-    let myEmployer = SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0]
-    if (myEmployer)
-      graphqlEndpoint = `${myEmployer.url.replace(/[/]+$/, '')}/graphql`
+    let myEmployerUrl = me.organization.url
+    if (!myEmployerUrl)
+      myEmployerUrl =  SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0].url
+    if (myEmployerUrl)
+      graphqlEndpoint = `${myEmployerUrl.replace(/[/]+$/, '')}/graphql`
     // else
     //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
     if (!graphqlEndpoint)
@@ -290,6 +292,7 @@ var search = {
 
     try {
       let data = await client.query({
+          ferchFirst: 'network-only',
           query: gql(`${query}`),
         })
       let result = data.data[table]
@@ -365,21 +368,25 @@ var search = {
         continue
       if (p === 'from' || p === 'to' || p === 'time'  ||  p.indexOf('_group') !== -1)
         continue
-      if (props[p].displayAs)
+      let prop = props[p]
+      if (prop.displayAs)
         continue
-      let ptype = props[p].type
+      let ptype = prop.type
       if (ptype === 'array') {
         // HACK
         if (p === 'verifications')
           continue
-        let iref = props[p].items.ref
+        let iref = prop.items.ref
         if (iref) {
-          if (iref === model.id)
+          if (iref === model.id) {
             arr.push(
               `${p} {
                 id
               }`
             )
+          }
+          else if (prop.inlined)
+            arr.push(this.addInlined(prop))
           else
             arr.push(
               `${p} {
@@ -388,94 +395,97 @@ var search = {
               }`
             )
         }
+
         continue
       }
       if (ptype !== 'object') {
         arr.push(p)
         continue
       }
-      let ref = props[p].ref
+      let ref = prop.ref
       if (!ref) {
-        if (props[p].range === 'json')
+        if (prop.range === 'json')
           arr.push(p)
         continue
       }
       if (ref === ORGANIZATION)
         continue
 
-      if (props[p].inlined) {
-        let refM = utils.getModel(ref).value
-        if (ref === FORM  ||  refM.isInterface  ||  refM.subClassOf === ENUM) {
-          if (props[p].range === 'json')
-            arr.push(p)
-          else
-            arr.push(
-              `${p} {
-                id
-                title
-              }`
-            )
-        }
-        else {
-          let allProps = this.getAllPropertiesForServerSearch(refM)
-          arr.push(
-            `${p} {
-              ${allProps.toString().replace(/,/g, '\n')}
-            }`
-          )
-        }
-        continue
-      }
-      if (ref === MONEY) {
-        arr.push(
-          `${p} {
-            value
-            currency
-          }`
-        )
-        continue
-      }
+      if (prop.inlined)
+        arr.push(this.addInlined(prop))
+      else
+        arr.push(this.addRef(prop))
+    }
+    return arr
+  },
+  addRef(prop) {
+    let ref = prop.type === 'array' ? prop.items.ref : prop.ref
+    let p = prop.name
+    if (ref === MONEY) {
+      return (
+        `${p} {
+          value
+          currency
+        }`
+      )
+    }
 
-      if (ref === COUNTRY) {//   ||  ref === CURRENCY)
-        arr.push(
+    if (ref === COUNTRY) {//   ||  ref === CURRENCY)
+      return (
+        `${p} {
+          id
+          title
+        }`
+      )
+    }
+    let m = utils.getModel(ref).value
+    if (m.subClassOf === ENUM) {
+      if (m.enum)
+        return (
           `${p} {
             id
             title
           }`
         )
-        // arr.push(p)
-      }
-      else {
-        let m = utils.getModel(ref).value
-        if (m.subClassOf === ENUM) {
-          if (m.enum)
-            arr.push(
-              `${p} {
-                id
-                title
-              }`
-            )
-          else
-            arr.push(p)
-        }
-        else if (m.id === PHOTO) {
-          let mprops = m.properties
-          arr.push(
-            `${p} {${this.getAllPropertiesForServerSearch(m)}}`
-          )
-        }
-        else {
-          arr.push(
-            `${p} {
-              id
-              title
-            }`
-          )
-        }
-      }
-      continue
+      else
+        return p
     }
-    return arr
+    if (m.id === PHOTO) {
+      let mprops = m.properties
+      return (
+        `${p} {${this.getAllPropertiesForServerSearch(m)}}`
+      )
+    }
+    return (
+      `${p} {
+        id
+        title
+      }`
+    )
+  },
+  addInlined(prop) {
+    let ref = prop.type === 'array' ? prop.items.ref : prop.ref
+    let p = prop.name
+    let refM = utils.getModel(ref).value
+    if (ref === FORM  ||  refM.isInterface  ||  refM.subClassOf === ENUM) {
+      if (prop.range === 'json')
+        return p
+      else
+        return (
+          `${p} {
+            id
+            title
+          }`
+        )
+    }
+    else {
+      let allProps = this.getAllPropertiesForServerSearch(refM)
+      return (
+        `${p} {
+          ${allProps.toString().replace(/,/g, '\n')}
+        }`
+      )
+    }
   },
   async _getItem(id, client) {
     let parts = id.split('_')

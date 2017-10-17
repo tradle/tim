@@ -1297,6 +1297,10 @@ var Store = Reflux.createStore({
         // if (c  &&  c._readOnly) {
         let cId = utils.getId(r._context)
         if (!c) {
+          // if (!this.client  &&  me  &&  me.isEmployee) {
+          //   meDriver = await this.getDriver(me)
+          //   this.client = await graphQL.initClient(meDriver)
+          // }
           if (this.client) {
             c = await this._getItemFromServer(cId)
             if (r[TYPE] === ASSIGN_RM) {
@@ -1304,8 +1308,8 @@ var Store = Reflux.createStore({
               this._setItem(cId, c)
             }
           }
-          else
-            continue
+          // else
+          //   continue
         }
         if (utils.isReadOnlyChat(r)  ||  r[TYPE] === APPLICATION_DENIAL  ||  (r[TYPE] === CONFIRMATION  &&  utils.getId(r.from) === meId)) {
           this.addMessagesToChat(cId, r, true)
@@ -1319,27 +1323,32 @@ var Store = Reflux.createStore({
 
           let chkId = (toId === meId) ? fromId : toId
 
+          if (!c  &&  me.isEmployee) {
+            this.addMessagesToChat(chkId, r, true)
+            continue
+          }
           this.addVisualProps(c)
           let cTo = utils.getId(c.to)
           let cFrom = utils.getId(c.from)
           if (chkId !== cTo  &&  chkId !== cFrom) {
-            if (me.isEmployee) {
-              if (r.to.organization && r.from.organization) {
-                let orgId = myOrgId === r.to.organization.id
-                          ? r.from.organization.id
-                          : r.to.organization.id
-                this.addMessagesToChat(orgId, r, true)
-                continue
-              }
+            if (!me.isEmployee) {
+            //   if (r.to.organization && r.from.organization) {
+            //     let orgId = myOrgId === r.to.organization.id
+            //               ? r.from.organization.id
+            //               : r.to.organization.id
+            //     this.addMessagesToChat(orgId, r, true)
+            //     continue
+            //   }
+            // }
+            // else {
+              let chatId = utils.getId(cTo === meId ? cFrom : cTo)
+              let chat = this._getItem(chatId)
+              if (chat.organization  &&  cFrom === meId)
+                this.addMessagesToChat(utils.getId(chat.organization), r, true)
+              else
+                this.addMessagesToChat(chatId, r, true)
+              continue
             }
-
-            let chatId = utils.getId(cTo === meId ? cFrom : cTo)
-            let chat = this._getItem(chatId)
-            if (chat.organization  &&  cFrom === meId)
-              this.addMessagesToChat(utils.getId(chat.organization), r, true)
-            else
-              this.addMessagesToChat(chatId, r, true)
-            continue
           }
         }
         if (chatMessages[cId])
@@ -1403,8 +1412,10 @@ var Store = Reflux.createStore({
       let product
       if (utils.isContext(r[TYPE]))
         product = r.requestFor
-      else if (r._context)
-        product = this._getItem(r._context).requestFor
+      else if (r._context) {
+        let c = this._getItem(r._context)
+        product = c  &&  c.requestFor
+      }
 
       if (product) {
         if (r[TYPE] === FORM_REQUEST  &&  !r._document) {// && r._documentCreated)
@@ -1582,7 +1593,7 @@ var Store = Reflux.createStore({
               Push.subscribe(provider.hash)
                 .catch(err => console.log('failed to register for push notifications'))
             })
-          if (SERVICE_PROVIDERS)
+          if (!this.client  &&  SERVICE_PROVIDERS)
             this.client = graphQL.initClient(meDriver, SERVICE_PROVIDERS)
         })
         .catch(err => {
@@ -5579,9 +5590,12 @@ var Store = Reflux.createStore({
       }
       let formIds = []
       forms.forEach((r) => {
+        if (!r)
+          return
         formIds.push(utils.getId(r))
         r._context = application._context
       })
+      forms = forms.filter((r) => r)
 
       result = await graphQL.searchServer({
         modelName: VERIFICATION,
@@ -6249,8 +6263,8 @@ var Store = Reflux.createStore({
       let r = self._getItem(rId)
       let object
       try {
-        object = await self.getObject(link)
-        // result = await self._keeper.get(link)
+        // object = await self.getObject(link)
+        object = await self._keeper.get(link)
       } catch(err) {
         // debugger
         console.log(err)
