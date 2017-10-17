@@ -498,8 +498,9 @@ var search = {
 
     let table = `r_${modelName.replace(/\./g, '_')}`
 
-    let _link = parts[parts.length - 1]
-    let query = `query {\n${table} (_link: "${_link}")\n`
+    // let _link = parts[parts.length - 1]
+    let _permalink = parts[1]
+    let query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
     let arr = this.getAllPropertiesForServerSearch(m)
 
