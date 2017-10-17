@@ -5636,13 +5636,11 @@ var Store = Reflux.createStore({
         return
       }
       let formIds = []
+      forms = forms.filter((r) => r)
       forms.forEach((r) => {
-        if (!r)
-          return
         formIds.push(utils.getId(r))
         r._context = application._context
       })
-      forms = forms.filter((r) => r)
 
       result = await graphQL.searchServer({
         modelName: VERIFICATION,
