@@ -29,9 +29,9 @@ class ChatContext extends Component {
 
   render() {
     let context = this.props.context
-    if (!context  ||  context.product === REMEDIATION)
+    if (!context  ||  context.requestFor === REMEDIATION)
       return <View/>
-    let m = utils.getModel(context.product)
+    let m = utils.getModel(context.requestFor)
     if (!m)
       return <View/>
     let me = utils.getMe()
