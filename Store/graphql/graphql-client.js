@@ -120,19 +120,21 @@ var search = {
 
         // if (p.charAt(0) === '_')
         //   debugger
-        if (!props[p]  &&  p.charAt(0) === '_'  &&  val) {
-          if (Array.isArray(val)) {
-            let s = `${p}: [`
-            val.forEach((r, i) => {
-              if (i)
-                s += ', '
-              s += `"${r}"`
-            })
-            s += ']'
-            inClause.push(s)
+        if (!props[p]  &&  val) {
+          if (p.charAt(0) === '_') {
+            if (Array.isArray(val)) {
+              let s = `${p}: [`
+              val.forEach((r, i) => {
+                if (i)
+                  s += ', '
+                s += `"${r}"`
+              })
+              s += ']'
+              inClause.push(s)
+            }
+            else
+              op.EQ += `\n   ${p}: "${val}",`
           }
-          else
-            op.EQ += `\n   ${p}: "${val}",`
           continue
         }
         else if (props[p].type === 'string') {
@@ -292,7 +294,7 @@ var search = {
 
     try {
       let data = await client.query({
-          fetchFirst: 'network-only',
+          fetchPolicy: 'network-only',
           query: gql(`${query}`),
         })
       let result = data.data[table]
@@ -507,7 +509,7 @@ var search = {
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
       let result = await client.query({
-        fetchFirst: 'network-only',
+        fetchPolicy: 'network-only',
         query: gql(`${query}`)
       })
       return result.data[table]
