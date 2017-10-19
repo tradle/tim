@@ -177,61 +177,65 @@ class ResourceList extends Component {
       StatusBar.setHidden(true)
   }
   componentWillMount() {
-    if (this.props.chat) {
-      utils.onNextTransitionEnd(this.props.navigator, () => {
-        Actions.listSharedWith(this.props.resource, this.props.chat)
+    let { officialAccounts, modelName, chat, navigator, resource } = this.props
+    if (officialAccounts  &&  modelName === PROFILE)
+      return
+    if (chat) {
+      utils.onNextTransitionEnd(navigator, () => {
+        Actions.listSharedWith(resource, chat)
       });
       return
     }
     let me = utils.getMe()
-    if (me  &&  me.isEmployee && this.props.officialAccounts) {
-      utils.onNextTransitionEnd(this.props.navigator, () => {
-        Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
-      });
-    }
+    // if (me  &&  me.isEmployee && officialAccounts) {
+    //   utils.onNextTransitionEnd(navigator, () => {
+    //     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
+    //   });
+    // }
     var params = {
-      modelName: this.props.modelName,
+      modelName: modelName,
       // limit: 10
     };
-    if (this.props._readOnly)
+    let { _readOnly, isAggregation, sortProperty, prop, listView, isBacklink } = this.props
+    if (_readOnly)
       params._readOnly = true
 
-    if (this.props.isAggregation)
+    if (isAggregation)
       params.isAggregation = true;
-    if (this.props.sortProperty)
-      params.sortProperty = this.props.sortProperty;
-    if (this.props.prop)
-      params.prop = utils.getModel(this.props.resource[TYPE]).value.properties[this.props.prop.name];
+    if (sortProperty)
+      params.sortProperty = sortProperty;
+    if (prop)
+      params.prop = utils.getModel(resource[TYPE]).value.properties[prop.name];
     if (params.prop) {
-      let m = utils.getModel(this.props.resource[TYPE]).value
+      let m = utils.getModel(resource[TYPE]).value
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
-        // if (utils.getModel(this.props.modelName).value.interfaces)
-        //   params.to = this.props.resource.to
-        params.resource = this.props.resource
+        // if (utils.getModel(modelName).value.interfaces)
+        //   params.to = resource.to
+        params.resource = resource
       else if (params.prop.items  &&  params.prop.items.backlink)
-        params.to = this.props.resource
+        params.to = resource
 
-//       params.resource = this.props.resource
+//       params.resource = resource
     }
     else
-      params.to = this.props.resource
-    params.listView = this.props.listView
-    if (!this.props.isOfficialAccounts)
+      params.to = resource
+    params.listView = listView
+    if (!officialAccounts)
       params.limit = 10
     // this.state.isLoading = true;
 
-    // if (this.props.tabLabel) {
+    // if (tabLabel) {
     //   Actions.list(params)
     StatusBar.setHidden(false);
     // }
     // else
-    if (this.props.isBacklink)
+    if (isBacklink)
       Actions.list(params)
     else
-      utils.onNextTransitionEnd(this.props.navigator, () => {
+      utils.onNextTransitionEnd(navigator, () => {
         Actions.list(params)
-        if (this.props.officialAccounts  &&  this.props.modelName === ORGANIZATION)
+        if (officialAccounts  &&  modelName === ORGANIZATION)
           Actions.hasTestProviders()
         // StatusBar.setHidden(false);
       });

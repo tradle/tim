@@ -105,24 +105,29 @@ class MessageList extends Component {
     }
   }
   hasChatContext() {
-    let context = this.state.context || this.props.context  ||  this.props.application
+    let { application, resource, allContexts } = this.props
+    let context = this.state.context || this.props.context  ||  (application && application._context)
     if (!context  ||  context.product === REMEDIATION)
       return false
+
+    // HACK - needs rewrite
     let me = utils.getMe()
-    let chat = this.props.resource
-    let isChattingWithPerson = chat[TYPE] === PROFILE
-    if (me.isEmployee) {
+    if (me.isEmployee)  {
+      if (application  &&  utils.isRM(application))
+        return true
+      let isChattingWithPerson = resource[TYPE] === PROFILE
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return false
     }
+    // end HACK
     // No need to show context if provider has only one product and no share context
-    else if ((!chat.products  ||  chat.products.length === 1)  &&  !chat._canShareContext)
+    if ((!resource.products  ||  resource.products.length === 1)  &&  !resource._canShareContext)
       return false
 
     let isReadOnlyChat = utils.isReadOnlyChat(context)
-    if (isReadOnlyChat  &&  chat._relationshipManager)
+    if (isReadOnlyChat  &&  resource._relationshipManager)
       return true
-    if (this.props.allContexts || isReadOnlyChat) //  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
+    if (allContexts || isReadOnlyChat)
       return false
 
     return true
@@ -511,6 +516,15 @@ class MessageList extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     if (!r[TYPE])
       return;
+    let { application } = this.props
+    let me = utils.getMe()
+    if (application) {
+      if (!application.relationshipManager)
+        return
+      let relHash = utils.getId(application.relationshipManager).split('_')[1]
+      if (relHash !== me[ROOT_HASH])
+        return
+    }
     let model = utils.getModel(r[TYPE]).value;
     let title //utils.getDisplayName(resource, model.properties);
 
@@ -523,12 +537,9 @@ class MessageList extends Component {
       title = translate(model) //translate(utils.makeModelTitle(model))
 
     let newTitle = title;
-    let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
-    let isVerifier = !verification && utils.isVerifier(r)
-    let { resource, bankStyle, currency, application, country } = this.props
-    if (!isVerifier  &&  application)
-      isVerifier = !verification && utils.isVerifier(application)
+    let isVerifier = application ? utils.isRM(application) : !verification && utils.isVerifier(r)
+    let { resource, bankStyle, currency, country } = this.props
     let isEmployee = utils.isEmployee(resource)
     let route = {
       title: newTitle,
@@ -609,6 +620,7 @@ class MessageList extends Component {
       resource: resource,
       bankStyle: this.props.bankStyle,
       context: this.state.context ||  (isProductApplication && this.props.resource),
+      application: this.props.application,
       to: isAggregation ? resource.to : this.props.resource,
       navigator: this.props.navigator,
       switchChat: isProductApplication ? this.switchChat.bind(this, resource) : null
@@ -692,8 +704,10 @@ class MessageList extends Component {
     if (modelName === ORGANIZATION)
       hideTextInput = !utils.hasSupportLine(resource)
     else if (application)
-      hideTextInput = !application.relationshipManager  ||  utils.getId(application.relationshipManager) !== utils.getId(utils.getMe())
-    hideTextInput = false
+      hideTextInput = !utils.isRM(application)
+      // hideTextInput = !application.relationshipManager  ||  utils.getId(application.relationshipManager) !== utils.getId(utils.getMe())
+    // HACK for RM
+    // hideTextInput = false
     let content
     if (!this.state.list || !this.state.list.length) {
       if (navigator.isConnected  &&  resource[TYPE] === ORGANIZATION) {
@@ -1160,25 +1174,25 @@ class MessageList extends Component {
   }
   onSubmitEditing(msg) {
     let me = utils.getMe();
-    let resource = {from: utils.getMe(), to: this.props.resource};
-    let model = utils.getModel(this.props.modelName).value;
+    let { resource, application, modelName } = this.props
 
-    let toName = utils.getDisplayName(resource.to);
+    let model = utils.getModel(modelName).value;
+
+    let toName = utils.getDisplayName(resource);
     let meName = utils.getDisplayName(me);
-    let modelName = SIMPLE_MESSAGE;
     let value = {
+      [TYPE]: SIMPLE_MESSAGE,
       message: msg
-              ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + this.props.modelName + ')'
+              ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + modelName + ')'
               : '',
       from: me,
-      to: resource.to,
+      to: resource,
       _context: this.state.context
     }
-    value[TYPE] = modelName;
     this.setState({userInput: ''}) //, selectedAssets: {}});
     if (this.state.clearCallback)
       this.state.clearCallback();
-    Actions.addMessage({msg: value});
+    Actions.addMessage({msg: value, application: application});
   }
   switchChat(resource) {
     let to = resource.from.organization  ||  resource.from

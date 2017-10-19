@@ -100,6 +100,8 @@ const ENUM = 'tradle.Enum'
 const STYLES_PACK = 'tradle.StylesPack'
 const CONTEXT = 'tradle.Context'
 const MSG_LINK = '_msg'
+const APPLICATION = 'tradle.Application'
+
 // var dictionaries = require('@tradle/models').dict
 var dictionary //= dictionaries[Strings.language]
 
@@ -845,6 +847,8 @@ var utils = {
     let me = this.getMe()
     if (!me)
       return false
+    if (resource[TYPE] === APPLICATION)
+      return this.isRM(resource)
     let {to, from} = resource
     if (!to || !from)
       return false
@@ -968,6 +972,15 @@ var utils = {
     }
     return m.interfaces  &&  m.interfaces.indexOf(CONTEXT) !== -1
   },
+  isEnum(typeOrModel) {
+    let m = typeOrModel
+    if (typeof typeOrModel === 'string') {
+      m = this.getModel(typeOrModel).value
+      if (!m)
+        return
+    }
+    return m.subClassOf === ENUM
+  },
 
   /**
    * fast but dangerous way to read a levelup
@@ -1025,17 +1038,13 @@ var utils = {
     if (utils.getId(resource.organization) === utils.getId(me.organization))
       return true
   },
-  isVerifier(resource, application) {
-    return true
+  isVerifier(resource) {
+    // return true
     if (!this.isEmployee(resource))
       return false
     let me = this.getMe()
     if (!me.isEmployee)
       return false
-    if (!application  ||  !application.relationshipManager)
-      return false
-    if (utils.getId(application.relationshipManager) === utils.getId(me))
-      return true
     // let model = this.getModel(resource[TYPE]).value
     // if (model.subClassOf === FORM) {
     //   return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
@@ -1043,6 +1052,13 @@ var utils = {
     // }
     // if (model.id === TYPES.VERIFICATION)
     //   return  utils.getId(me) === utils.getId(resource.from)
+  },
+  isRM(application) {
+    if (!application || !application.relationshipManager)
+      return
+    let rmHash = utils.getId(application.relationshipManager).split('_')[1]
+    let me = this.getMe()
+    return rmHash === me[ROOT_HASH]
   },
   // isVerifier(resource, application) {
   //   if (!this.isEmployee(resource))

@@ -233,6 +233,8 @@ const monitorMissing = require('../utils/missing')
 const identityUtils = require('../utils/identity')
 const createNetworkAdapters = require('../utils/network-adapters')
 import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
+var validateResource = require('@tradle/validate-resource')
+
 // var tutils = require('@tradle/utils')
 var isTest, originalMe;
 var currentEmployees = {}
@@ -696,7 +698,7 @@ var Store = Reflux.createStore({
 
     let toId = utils.makeId(PROFILE, msg.recipient)
     let to = this._getItem(toId)
-    old.to = utils.buildRef(to)
+    old.to = this.buildRef(to)
     // old.to = { [ROOT_HASH]: meDriver.permalink }
     let rtype = old.parsed.data[TYPE]
     if (rtype === PRODUCT_APPLICATION  &&  me.isEmployee) {
@@ -2876,6 +2878,10 @@ var Store = Reflux.createStore({
     let r = params.msg
     let { isWelcome, requestForForm, disableAutoResponse, cb, application } = params
 
+    if (application) {
+      r.to = application._context.from
+      r._context = application._context
+    }
     var self = this
     let m = this.getModel(r[TYPE])
     let isContext = utils.isContext(m) // r[TYPE] === PRODUCT_APPLICATION
@@ -2888,20 +2894,20 @@ var Store = Reflux.createStore({
     let toType
     if (to)
       toType = to[TYPE]
-    else if (application) {
-      // App works with PROFILE not IDENTITY to keep name for the customer
-      let parts = r.to.id.split('_')
-      toType = parts[0]
-      if (toType === IDENTITY) {
-        toType = PROFILE
-        r.to = {
-          [TYPE]: toType,
-          [ROOT_HASH]: parts[1],
-          [CUR_HASH]: parts[2],
-        }
-      }
-      to = r.to
-    }
+    // else if (application) {
+    //   // App works with PROFILE not IDENTITY to keep name for the customer
+    //   let parts = r.to.id.split('_')
+    //   toType = parts[0]
+    //   if (toType === IDENTITY) {
+    //     toType = PROFILE
+    //     r.to = {
+    //       [TYPE]: toType,
+    //       [ROOT_HASH]: parts[1],
+    //       [CUR_HASH]: parts[2],
+    //     }
+    //   }
+    //   to = r.to
+    // }
     // if (!r.to[TYPE])
     //   r.to = this._getItem(r.to)
     let isReadOnlyContext
@@ -2935,6 +2941,11 @@ var Store = Reflux.createStore({
       rr._context = r._context
       context = this._getItem(r._context) || r._context
     }
+    // else if (application) {
+    //   rr._context = application._context
+    //   context = application._context
+    // }
+
     if (isContext)
       rr.contextId = this.getNonce()
     for (var p in r) {
@@ -2974,7 +2985,12 @@ var Store = Reflux.createStore({
     var error
     var welcomeMessage
     // var promise = Q(protocol.linkString(toChain))
-    let hash = r.to[ROOT_HASH]
+    let applicant
+    if (application  &&  utils.isRM(application))
+      applicant = this._getItem(utils.getId(application.applicant))
+    else
+      applicant = r.to
+    let hash = applicant[ROOT_HASH]
     if (!hash)
       hash = this._getItem(utils.getId(r.to))[ROOT_HASH]
     var toId = utils.makeId(IDENTITY, hash)
@@ -3150,7 +3166,7 @@ var Store = Reflux.createStore({
     .then((pubkeys) => {
       if (pubkeys) {
         // let sendParams = self.packMessage(r, toChain)
-        let sendParams = self.packMessage(toChain, r.from, r.to, r._context)
+        let sendParams = self.packMessage(toChain, r.from, r.to, context)
         if (disableAutoResponse) {
           if (!sendParams.other)
             sendParams.other = {}
@@ -4496,6 +4512,8 @@ var Store = Reflux.createStore({
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       try {
+        validateResource({resource: toChain, models: self.getModels()})
+
         let data = await meDriver.createObject({object: toChain})
         let hash = data.link
         if (isNew)
@@ -4579,7 +4597,7 @@ var Store = Reflux.createStore({
             let prop = bmProps[p]
             if (!prop.ref)
               continue
-            bookmark[p] = bookmark[p].map((r) => utils.buildRef(r))
+            bookmark[p] = bookmark[p].map((r) => self.buildRef(r))
           }
           self.onHasBookmarks()
         }
@@ -5635,13 +5653,26 @@ var Store = Reflux.createStore({
         this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
         return
       }
-      let formIds = []
+      // HACK
       forms = forms.filter((r) => r)
+      let formIds = []
       forms.forEach((r) => {
         formIds.push(utils.getId(r))
         r._context = application._context
       })
 
+      let context = await this._getItemFromServer(utils.getId(application._context))
+
+      // let formRequests = await graphQL.searchServer({
+      //   modelName: FORM_REQUEST,
+      //   sortProperty: 'time',
+      //   asc: true,
+      //   client: this.client,
+      //   filterResource: {
+      //     [TYPE]: FORM_REQUEST,
+      //     context: context.contextId
+      //   }
+      // })
       result = await graphQL.searchServer({
         modelName: VERIFICATION,
         sortProperty: 'time',
@@ -8659,7 +8690,15 @@ var Store = Reflux.createStore({
     var toId = obj.to.id || utils.makeId(PROFILE, obj.to[ROOT_HASH])
     var to = this._getItem(toId)
     var meId = utils.getId(me)
-    var fOrg = (me  &&  from[ROOT_HASH] === me[ROOT_HASH]) ? to.organization : from.organization
+    var fOrg
+    if (me  &&  from[ROOT_HASH] === me[ROOT_HASH])
+      fOrg = to.organization
+    else if (me.isEmployee) {
+      if (from.organization  && utils.getId(from.organization) === utils.getId(me.organization))
+        fOrg = to.organization
+    }
+    if (!fOrg)
+      fOrg = from.organization
     var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
     let contextId, context
     if (obj.object  &&  obj.object.context) {
@@ -8667,11 +8706,15 @@ var Store = Reflux.createStore({
       if (!contextId) {
         // Original request was made by another employee
         // if (me.isEmployee) {
-        context = await this.getContext(obj.object.context)
+        context = await this.getContext(obj.object.context, val)
         if (context) {
           contextId = utils.getId(context)
           contextIdToResourceId[obj.object.context] = utils.getId(context)
-          // this.addMessagesToChat(utils.getId(fOrg), context)
+          ///
+          this._setItem(contextId, context)
+          this.dbBatchPut(contextId, context, batch)
+          this.addMessagesToChat(utils.getId(fOrg), context)
+          ///
           val._context = this.buildRef(context)
         }
       }
@@ -8755,7 +8798,7 @@ var Store = Reflux.createStore({
       if (!context) {
         context = this._getItem(contextId)
         if (!context)
-          context = await this.getContext(obj.object.context)
+          context = await this.getContext(obj.object.context, val)
       }
 
       // Avoid doubling the number of forms
@@ -9045,11 +9088,11 @@ var Store = Reflux.createStore({
       return false
     }
   },
-  async getContext(contextId) {
+  async getContext(contextId, val) {
     let context, contexts
     if (me.isEmployee) {
       let myOrgRep = this.getRepresentative(utils.getId(me.organization))
-      contexts = await this.searchServer({modelName: PRODUCT_REQUEST, filterResource: {contextId: contextId, _author: myOrgRep[ROOT_HASH]}})
+      contexts = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contextId}})
     }
     else {
       contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
@@ -10033,7 +10076,7 @@ var Store = Reflux.createStore({
   getModels() {
     let mm = {}
     for (let m in models)
-      mm[m] = models.value
+      mm[m] = models[m].value
     return mm
   },
   getModel(modelName) {
@@ -10124,8 +10167,10 @@ var Store = Reflux.createStore({
     //   id += '_' + resource[CUR_HASH]
     let ref = {
       id: utils.getId(resource),
-      title: resource.id ? resource.title : utils.getDisplayName(resource)
     }
+    let title = resource.id ? resource.title : utils.getDisplayName(resource)
+    if (title)
+      ref.title = title
     if (resource.time)
       ref.time = resource.time
     return ref

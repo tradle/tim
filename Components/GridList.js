@@ -1167,7 +1167,8 @@ class GridList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    if (this.state.isGrid  &&  this.props.modelName !== APPLICATION) { //!utils.isContext(this.props.modelName)) {
+    let { modelName } = this.props
+    if (this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       // let size = viewCols ? viewCols.length : 1
       // let isSmallScreen = utils.dimensions(GridList).width < 736
@@ -1313,7 +1314,7 @@ class GridList extends Component {
 
     let key = this.getNextKey(resource)
     let cols
-    if (viewCols) {
+    if (viewCols  &&  viewCols.length) {
       cols = viewCols.map((v) => (
         <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent: 'center'}]} key={key + v}>
           {this.formatCol(resource, v) || <View />}
@@ -1660,7 +1661,7 @@ class GridList extends Component {
     //   return <View />;
     var model = utils.getModel(this.props.modelName).value;
     if (!this.props.prop  &&  model.id !== ORGANIZATION) {
-      if (!this.props.search ||  !this.state.resource || !Object.keys(this.state.resource).length)
+      if (!this.props.search &&  !this.state.isModel  &&  (!this.state.resource || !Object.keys(this.state.resource).length))
         return <View />
     }
 
@@ -1943,9 +1944,10 @@ class GridList extends Component {
     )
   }
   bookmark() {
+
     let resource = {
       [TYPE]: BOOKMARK,
-      bookmark: this.state.resource,
+      bookmark: Object.keys(this.state.resource).length ? this.state.resource : {[TYPE]: this.props.modelName},
       from: utils.getMe()
     }
     Actions.addItem({resource: resource})

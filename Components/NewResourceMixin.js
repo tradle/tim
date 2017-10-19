@@ -409,11 +409,9 @@ var NewResourceMixin = {
             ref = MONEY
           else if (props[p].range === 'json')
             continue
-          else {
-            ref = props[p].items.ref
-            if (!ref  ||  !utils.isEnum(ref))
-              continue;
-          }
+          ref = props[p].items.ref
+          if (!ref  ||  !utils.isEnum(ref))
+            continue;
         }
         if (ref === MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
@@ -1334,8 +1332,8 @@ var NewResourceMixin = {
         this.floatingProps[prop.name] = resource[params.prop]
       }
       else {
-        // var m = utils.getId(resource[params.prop]).split('_')[0]
         let rModel = utils.getModel(prop.ref  ||  prop.items.ref).value
+        // var m = utils.getId(resource[params.prop]).split('_')[0]
         label = utils.getDisplayName(resource[params.prop], rModel)
         if (!label) {
           if ((prop.items || this.props.search)  &&  utils.isEnum(rModel)) {
