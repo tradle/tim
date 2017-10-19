@@ -1649,7 +1649,7 @@ class GridList extends Component {
     //   return <View />;
     var model = utils.getModel(this.props.modelName).value;
     if (!this.props.prop  &&  model.id !== ORGANIZATION) {
-      if (!this.props.search ||  !this.state.resource || !Object.keys(this.state.resource).length)
+      if (!this.props.search &&  !this.state.isModel  &&  (!this.state.resource || !Object.keys(this.state.resource).length))
         return <View />
     }
 
