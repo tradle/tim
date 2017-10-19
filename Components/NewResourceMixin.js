@@ -401,11 +401,9 @@ var NewResourceMixin = {
             ref = MONEY
           else if (props[p].range === 'json')
             continue
-          else {
-            ref = props[p].items.ref
-            if (!ref  ||  utils.getModel(ref).value.subClassOf !== ENUM)
-              continue;
-          }
+          ref = props[p].items.ref
+          if (!ref  ||  !utils.isEnum(ref))
+            continue;
         }
         if (ref === MONEY) {
           model[p] = maybe ? t.maybe(t.Num) : t.Num;
@@ -1314,12 +1312,11 @@ var NewResourceMixin = {
         this.floatingProps[prop.name] = resource[params.prop]
       }
       else {
-        let rModel
+        let rModel = utils.getModel(prop.ref  ||  prop.items.ref).value
         // var m = utils.getId(resource[params.prop]).split('_')[0]
-        rModel = utils.getModel(prop.ref  ||  prop.items.ref).value
         label = utils.getDisplayName(resource[params.prop], rModel)
         if (!label) {
-          if ((prop.items || this.props.search)  &&  rModel.subClassOf === ENUM) {
+          if ((prop.items || this.props.search)  &&  utils.isEnum(rModel)) {
             label = ''
             resource[params.prop].forEach((r) => {
               let title = utils.getDisplayName(r)
@@ -1329,7 +1326,7 @@ var NewResourceMixin = {
           else
             label = resource[params.prop].title
         }
-        if (rModel.subClassOf  &&  rModel.subClassOf === ENUM) {
+        if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
           if (!label)
             label = resource[params.prop]
           label = utils.createAndTranslate(label, true)
@@ -1491,7 +1488,7 @@ var NewResourceMixin = {
         callback:       this.setChosenValue.bind(this)
       }
     }
-    if ((this.props.search  ||  prop.type === 'array')  && m.subClassOf === ENUM) {
+    if ((this.props.search  ||  prop.type === 'array')  && utils.isEnum(m)) {
       route.passProps.multiChooser = true
       route.rightButtonTitle = 'Done'
       route.passProps.onDone = this.multiChooser.bind(this, prop)
@@ -1520,7 +1517,7 @@ var NewResourceMixin = {
       model = utils.getModel(this.props.metadata.items.ref).value
 
     let prop = model.properties[propName]
-    let isArray = prop.type === 'array' || (this.props.search  &&  prop.ref  &&  utils.getModel(prop.ref).value.subClassOf === ENUM)
+    let isArray = prop.type === 'array' || (this.props.search  &&  prop.ref  &&  utils.isEnum(prop.ref))
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
       if (!this.floatingProps)
@@ -1529,7 +1526,8 @@ var NewResourceMixin = {
       resource[propName] = value
     }
     else if (isArray) {
-      if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !utils.getModel(prop.items.ref).value.inlined) {
+      let isEnum  = utils.isEnum(prop.items.ref)
+      if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !isEnum) {
         if (!Array.isArray(value))
           value = [value]
 
@@ -1554,7 +1552,12 @@ var NewResourceMixin = {
         setItemCount = true
       }
       else {
-        resource[propName] = value
+        let val
+        if (prop.items.ref  &&  isEnum)
+          val = value.map((v) => utils.buildRef(v))
+        else
+          val = value
+        resource[propName] =  val
         if (!this.floatingProps)
           this.floatingProps = {}
         this.floatingProps[propName] = resource[propName]
