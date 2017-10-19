@@ -292,7 +292,7 @@ var search = {
 
     try {
       let data = await client.query({
-          ferchFirst: 'network-only',
+          fetchFirst: 'network-only',
           query: gql(`${query}`),
         })
       let result = data.data[table]
@@ -506,7 +506,10 @@ var search = {
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
-      let result = await client.query({query: gql(`${query}`)})
+      let result = await client.query({
+        fetchFirst: 'network-only',
+        query: gql(`${query}`)
+      })
       return result.data[table]
     }
     catch(err) {
