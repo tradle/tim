@@ -235,12 +235,13 @@ class FormErrorRow extends Component {
 
   }
   formatRow(isMyMessage, renderedRow) {
-    let {resource, to} = this.props
+    let {resource, to, application } = this.props
     var model = utils.getModel(resource[TYPE] || resource.id).value;
 
     let isContext = to[TYPE]  &&  utils.isContext(to[TYPE])
     let context = isContext ? to : resource._context
-    let isReadOnlyChat = context  &&  utils.isReadOnlyChat(resource, context) //this.props.context  &&  this.props.context._readOnly
+
+    let isReadOnlyChat = application ? !utils.isRM(application) : context  &&  utils.isReadOnlyChat(resource, context) //this.props.context  &&  this.props.context._readOnly
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
