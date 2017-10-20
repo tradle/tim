@@ -224,6 +224,7 @@ class MessageList extends Component {
         }
         return
       }
+
       let rid = utils.getId(chatWith)
       let isContext = utils.isContext(chatWith[TYPE])
       if (isContext) {
@@ -276,6 +277,13 @@ class MessageList extends Component {
         // addedItem: addedItem,
         list: list
       }
+      let currentContext
+      if (utils.isContext(resource))
+        currentContext = resource
+      else if(rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
+        currentContext = resource._context
+      if (currentContext)
+        state.currentContext = currentContext
       if (productToForms)
         state.productToForms = productToForms
       else if (utils.getModel(rtype).value.subClassOf === FORM  &&  resource._context) {
@@ -458,6 +466,8 @@ class MessageList extends Component {
       if (nextState.onlineStatus !== this.state.onlineStatus)
         return true
     }
+    if (this.state.currentContext !== nextState.currentContext)
+      return true
     if (this.state.context !== nextState.context) {
       if (!this.state.context  ||  !nextState.context)
         return true
@@ -1187,7 +1197,7 @@ class MessageList extends Component {
               : '',
       from: me,
       to: resource,
-      _context: this.state.context
+      _context: this.state.context || this.state.currentContext
     }
     this.setState({userInput: ''}) //, selectedAssets: {}});
     if (this.state.clearCallback)

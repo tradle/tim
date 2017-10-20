@@ -7,7 +7,6 @@ var constants = require('@tradle/constants');
 import Icon from 'react-native-vector-icons/Ionicons';
 var RowMixin = require('./RowMixin');
 var ResourceView = require('./ResourceView')
-// var Swipeout = require('react-native-swipeout')
 
 var equal = require('deep-equal')
 var extend = require('extend')
@@ -15,14 +14,12 @@ var Store = require('../Store/Store');
 var Actions = require('../Actions/Actions');
 var Reflux = require('reflux');
 var reactMixin = require('react-mixin');
-// const PRIORITY_HEIGHT = 100
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 
 import {
   Image,
-  // StyleSheet,
   Alert,
   Platform,
   Text,
@@ -383,78 +380,8 @@ class ResourceRow extends Component {
         return <Text style={styles.resourceTitle}>{model.title}</Text>;
     }
     // HACK
-    else if (model.id === APPLICATION) { // utils.isContext(model.id)) {
-      let m = utils.getModel(resource.requestFor)
-      if (!m)
-        return <View/>
-      let props = model.properties
-      // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
-        let status, color, dateCompleted, dateEvaluated, dateStarted
-
-        dateStarted = <View style={{flexDirection: 'row'}}>
-                          <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
-                          <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
-                        </View>
-        if (resource.certificate) {
-          status = 'Approved'
-          color = 'green'
-        }
-        else  if (resource.dateEvaluated) {
-          status = 'Denied'
-          color = 'red'
-          dateEvaluated = <View style={{flexDirection: 'row'}}>
-                            <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateEvaluated)}</Text>
-                            <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateEvaluated)}</Text>
-                          </View>
-        }
-        else if (resource.dateCompleted) {
-          status = 'Submitted'
-          color = '#7AAAc3'
-          dateCompleted = <View style={{flexDirection: 'row'}}>
-                            <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateCompleted)}</Text>
-                            <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateCompleted)}</Text>
-                          </View>
-        }
-        if (status)
-          status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}><Text style={{fontSize: 14, color: color}}>{translate(status)}</Text></View>
-        if (status !== 'Approved'  &&  status !== 'Denied') {
-          let icolor
-          let iname
-          if (this.state.hasRM || resource.relationshipManager) {
-            iname = 'md-log-out'
-            icolor = 'blue'
-          }
-          else {
-            iname = 'md-log-in'
-            icolor = resource._assignedRM ? 'red' : 'green'
-          }
-          let icon = <Icon name={iname} size={25} color={icolor} style={{alignSelf: 'flex-end'}}/>
-          if (!resource.relationshipManager  &&  !resource._assignedRM) {
-            icon = <TouchableOpacity onPress={() => this.assignRM()}>
-                     {icon}
-                   </TouchableOpacity>
-          }
-
-          status = <View style={{flexDirection: 'column', justifyContent: 'center'}}>
-                     {icon}
-                     {status}
-                   </View>
-        }
-          // approved = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
-        return  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                  <View style={{padding: 5}}>
-                    <Text style={styles.resourceTitle}>{translate(m.value)}</Text>
-                    {dateStarted}
-                    {dateCompleted}
-                    {dateEvaluated}
-                  </View>
-                  <View style={{justifyContent: 'center'}}>
-                    {status}
-                  </View>
-                </View>
-      // // }
-      // return <Text style={styles.resourceTitle}>{translate(m.value)}</Text>;
-    }
+    else if (model.id === APPLICATION)
+      return this.applicationRow(resource, style)
     else if (this.props.isChooser)
       return <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>
 
@@ -604,6 +531,82 @@ class ResourceRow extends Component {
         </View>
       </TouchableOpacity>
     ];
+  }
+  applicationRow(resource, style) {
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
+    let m = utils.getModel(resource.requestFor)
+    if (!m)
+      return <View/>
+    let props = model.properties
+    // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
+    let status, color, dateCompleted, dateEvaluated, dateStarted
+
+    dateStarted = <View style={{flexDirection: 'row'}}>
+                      <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
+                      <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
+                    </View>
+    if (resource.certificate) {
+      status = 'Approved'
+      color = 'green'
+    }
+    else  if (resource.dateEvaluated) {
+      status = 'Denied'
+      color = 'red'
+      dateEvaluated = <View style={{flexDirection: 'row'}}>
+                        <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateEvaluated)}</Text>
+                        <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateEvaluated)}</Text>
+                      </View>
+    }
+    else if (resource.dateCompleted) {
+      status = 'Submitted'
+      color = '#7AAAc3'
+      dateCompleted = <View style={{flexDirection: 'row'}}>
+                        <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateCompleted)}</Text>
+                        <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateCompleted)}</Text>
+                      </View>
+    }
+    if (status)
+      status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}><Text style={{fontSize: 14, color: color}}>{translate(status)}</Text></View>
+    if (status !== 'Approved'  &&  status !== 'Denied') {
+      let icolor
+      let iname
+      if (this.state.hasRM || resource.relationshipManager) {
+        iname = 'md-log-out'
+        icolor = 'blue'
+      }
+      else {
+        iname = 'md-log-in'
+        icolor = resource._assignedRM ? 'red' : 'green'
+      }
+      let icon = <Icon name={iname} size={25} color={icolor} style={{alignSelf: 'flex-end'}}/>
+      if (!resource.relationshipManager  &&  !resource._assignedRM) {
+        icon = <TouchableOpacity onPress={() => this.assignRM()}>
+                 {icon}
+               </TouchableOpacity>
+      }
+
+      status = <View style={{flexDirection: 'column', justifyContent: 'center'}}>
+                 {icon}
+                 {status}
+               </View>
+    }
+      // approved = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
+    let aTitle = resource.applicant.title
+    let applicant
+    if (aTitle)
+      applicant = <Text style={styles.description}>{aTitle}</Text>
+    return  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <View style={{padding: 5}}>
+                <Text style={styles.resourceTitle}>{translate(m.value)}</Text>
+                {applicant}
+                {dateStarted}
+                {dateCompleted}
+                {dateEvaluated}
+              </View>
+              <View style={{justifyContent: 'center'}}>
+                {status}
+              </View>
+            </View>
   }
   assignRM() {
     Alert.alert(
@@ -827,46 +830,3 @@ var styles = StyleSheet.create({
 
 ResourceRow = makeResponsive(ResourceRow)
 module.exports = ResourceRow;
-      // return (
-      // <Swipeout right={[{text: 'Hide', backgroundColor: 'red', onPress: this.hideResource.bind(this, resource)}]} autoClose={true} scroll={(event) => this._allowScroll(event)} >
-      //   <View key={this.getNextKey()} style={{opacity: 1, flex: 1, justifyContent: 'center'}}>
-      //     <TouchableHighlight onPress={this.state ? this.action.bind(this) : this.props.onSelect} underlayColor='transparent' key={this.getNextKey()}>
-    //       <View style={[styles.row]} key={this.getNextKey()}>
-      //         {photo}
-      //         {orgPhoto}
-      //         {onlineStatus}
-      //         <View style={textStyle} key={this.getNextKey()}>
-      //           {this.formatRow(resource)}
-      //         </View>
-      //         {cancelResource}
-      //       </View>
-      //     </TouchableHighlight>
-      //     {this.props.isOfficialAccounts
-      //     ? <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 20, top: 25, backgroundColor: 'white'}} onPress={() => {
-      //         this.props.navigator.push({
-      //           component: ResourceList,
-      //           title: translate("myDocuments"),
-      //           backButtonTitle: translate('back'),
-      //           passProps: {
-      //             modelName: FORM,
-      //             resource: this.props.resource
-      //           }
-      //         })
-      //       }}>
-      //         <View style={textStyle}>
-      //            {resource.numberOfForms
-      //               ? <View style={{flexDirection: 'row'}}>
-      //                    <Icon name='ios-paper-outline' color='#cccccc' size={35} style={{marginTop: Platform.OS === 'ios' ? -5 : 0}}/>
-      //                    <Text style={{fontWeight: '600', marginLeft: 0, marginTop: Platform.OS === 'ios' ? -10 : -6, color: '#cccccc'}}>{resource.numberOfForms}</Text>
-      //                 </View>
-      //               : <View />
-      //            }
-      //         </View>
-      //       </TouchableHighlight>
-      //       : <View />}
-      //     {dateRow}
-      //     {cancelResource}
-      //     <View style={styles.cellBorder}  key={this.getNextKey()} />
-      //   </View>
-      // </Swipeout>
-      // );

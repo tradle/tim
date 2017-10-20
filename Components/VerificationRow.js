@@ -152,7 +152,7 @@ class VerificationRow extends Component {
     }
 
     let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
-    var date = r  &&  <View style={{alignItems: 'flex-end'}}>
+    var date = !isBookmark &&  r  &&  <View style={{alignItems: 'flex-end'}}>
                         <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy')}</Text>
                       </View>
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
@@ -163,7 +163,7 @@ class VerificationRow extends Component {
       if (listModel.id === FORM_REQUEST)
         title = utils.makeModelTitle(resource.form)
       else if (isBookmark)
-        title = utils.makeModelTitle(resource.bookmark[TYPE])
+        title = resource.message  ||  utils.makeModelTitle(resource.bookmark[TYPE])
       else if (this.props.search) {
         if (isVerification)
           title = verificationRequest.title
@@ -185,6 +185,9 @@ class VerificationRow extends Component {
       titleComponent = <Text style={[styles.rTitle, {fontWeight: '600'}]}>{'Verification: '}
                           <Text style={[styles.rTitle, {fontWeight: '400'}]}>{title}</Text>
                         </Text>
+    else if (isBookmark  &&  resource.message) {
+      titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
+    }
     else
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
     let supportingDocuments
@@ -212,7 +215,7 @@ class VerificationRow extends Component {
     let renderedRows = []
     if (this.props.search  &&  this.props.searchCriteria)
       this.formatFilteredResource(model, resource, renderedRows)
-    else if (isBookmark)
+    else if (isBookmark  &&  !resource.message)
       this.formatBookmark(utils.getModel(resource.bookmark[TYPE]).value, resource.bookmark, renderedRows)
 
     var header =  <View style={[styles.header, {flex: 1}]} key={this.getNextKey()}>

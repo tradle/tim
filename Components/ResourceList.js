@@ -45,7 +45,6 @@ const BOOKMARK = 'tradle.Bookmark'
 
 const LIMIT = 10
 
-const ENUM = 'tradle.Enum'
 const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
 
 import React, { Component, PropTypes } from 'react'
@@ -1018,8 +1017,6 @@ class ResourceList extends Component {
         return <View />
     }
 
-    // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
-    //   return <View />
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
       return <View />
 
@@ -1034,24 +1031,6 @@ class ResourceList extends Component {
           </TouchableOpacity>
         </View>
      )
-    // if (Platform.OS === 'ios')
-    //   return (
-    //     <View style={[platformStyles.menuButtonNarrow, {width: 47, position: 'absolute', right: 10, bottom: 20, borderRadius: 24, justifyContent: 'center', alignItems: 'center'}]}>
-    //        <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-    //           <Icon name='md-more'  size={33}  color='#ffffff'/>
-    //        </TouchableOpacity>
-    //     </View>
-    //   )
-    // else
-    //   return (
-    //      <View style={styles.footer}>
-    //        <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-    //          <View style={platformStyles.menuButtonNarrow}>
-    //            <Icon name='md-menu'  size={33}  color='red' />
-    //          </View>
-    //        </TouchableOpacity>
-    //      </View>
-    //   )
   }
   onSettingsPressed() {
     var model = utils.getModel(constants.TYPES.SETTINGS).value
@@ -1165,10 +1144,9 @@ class ResourceList extends Component {
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
         !utils.getMe().organization                 &&
-        model.subClassOf !== ENUM                   &&
+        !utils.isEnum(model)                        &&
         !this.props.isChooser                       &&
-        this.props.modelName !== ORGANIZATION  &&
-        (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
+        this.props.modelName !== ORGANIZATION) {
       content = <NoResources
                   filter={this.state.filter}
                   model={model}

@@ -150,7 +150,6 @@ const PRODUCT_REQUEST     = 'tradle.ProductRequest'
 const CONTEXT             = 'tradle.Context'
 const PARTIAL             = 'tradle.Partial'
 const MY_PRODUCT          = 'tradle.MyProduct'
-const ENUM                = 'tradle.Enum'
 const GUEST_SESSION_PROOF = 'tradle.GuestSessionProof'
 const FORM_ERROR          = 'tradle.FormError'
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
@@ -816,7 +815,7 @@ var Store = Reflux.createStore({
           readOnly: true
         }
       }
-      if (m.subClassOf === ENUM)
+      if (utils.isEnum(m))
         this.createEnumResources(m)
 
       this.addNameAndTitleProps(m)
@@ -3091,6 +3090,7 @@ var Store = Reflux.createStore({
             message: me.firstName + ' is waiting for the response',
             [TYPE]: SELF_INTRODUCTION,
             identity: identity[0].publishedIdentity,
+            name: me.firstName,
             profile: {
               firstName: me.firstName
             },
@@ -4150,7 +4150,7 @@ var Store = Reflux.createStore({
       // if (isMessage  &&  exclude.indexOf(p) !== -1)
       //   continue
       let refModel = this.getModel(ref)
-      if (refModel.inlined  ||  refModel.subClassOf === ENUM)
+      if (refModel.inlined  ||  utils.isEnum(refModel))
         continue;
 
       var rValue = utils.getId(resource[p])
@@ -4196,7 +4196,7 @@ var Store = Reflux.createStore({
         json[p] = resource[p];
       let ref = props[p].ref
       // Chaeck if valid enum value
-      if (ref  &&  this.getModel(ref).subClassOf === ENUM) {
+      if (ref  &&  utils.isEnum(ref)) {
         if ((typeof json[p] === 'string')  ||  !this._getItem(utils.getId(json[p]))) {
           let enumList = this.searchNotMessages({modelName: ref})
           let eprop = utils.getEnumProperty(this.getModel(ref))
@@ -4616,16 +4616,17 @@ var Store = Reflux.createStore({
         delete returnVal.verifications
         await save(returnVal, true)
 
-        // if (returnVal[TYPE] === ASSIGN_RM) {
-        //   let app = self._getItem(returnVal.application)
-        //   if (!app) {
-        //     app = returnVal.application
-        //     if (!app.id)
-        //       self._setItem(app)
-        //   }
-        //   app.relationshipManager = true
+        if (returnVal[TYPE] === ASSIGN_RM) {
+          let app = self._getItem(returnVal.application)
+          if (!app) {
+            app = returnVal.application
+            if (!app.id)
+              self._setItem(app)
+          }
+          app.relationshipManager = this._makeIdentityStub(me)
+          this.trigger({action: 'updateRow', resource: app })
         //   self.dbPut(utils.getId(app), app)
-        // }
+        }
         let rId = utils.getId(returnVal.to)
         let to = self._getItem(rId)
 
@@ -4695,7 +4696,12 @@ var Store = Reflux.createStore({
       return {isBecomingEmployee: !(result.some((r) => meId === utils.getId(r.to)))}
     }
   },
-
+  _makeIdentityStub(r) {
+    return {
+      id: utils.getId(r).replace(PROFILE, IDENTITY),
+      title: utils.getDisplayName(r)
+    }
+  },
   onAddApp(serverUrl) {
     const parts = serverUrl.split(';')
     const [url, id] = parts
@@ -5579,8 +5585,8 @@ var Store = Reflux.createStore({
           if (!props[p])
             continue
           let ref = props[p].ref
-          let refM
-          if (ref  &&  (refM = this.getModel(ref)).subClassOf === ENUM) {
+          let refM = ref  &&  this.getModel(ref)
+          if (utils.isEnum(refM)) {
             let rr = obj[p]
             if (refM.enum) {
               refM.enum.forEach((r) => {
@@ -5732,8 +5738,17 @@ var Store = Reflux.createStore({
             return
           let context = contexts.filter((c) => c.contextId === contextId)
           r._context = context[0]
+          let id = utils.makeId(PROFILE, r.applicant.id.split('_')[1])
+          let applicant = this._getItem(id)
+          if (applicant) {
+            if (applicant.organization)
+              r.applicant.title = applicant.organization.title
+            else
+              r.applicant.title = utils.getDisplayName(applicant)
+          }
         })
       }
+
     }
     if (!noTrigger)
       this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
@@ -5819,7 +5834,7 @@ var Store = Reflux.createStore({
     var meta = this.getModel(modelName)
     let ids = myCustomIndexes
     // Product chooser for example
-    if (meta.subClassOf === ENUM)
+    if (utils.isEnum(meta))
       return this.getEnum(params)
     var props = meta.properties;
     var containerProp, resourceId;
@@ -8663,6 +8678,8 @@ var Store = Reflux.createStore({
   },
 
   async putMessageInDB(val, obj, batch, onMessage) {
+    let self = this
+
     // var fromProfile = PROFILE + '_' + (obj.objectinfo ? obj.objectinfo.author : obj.from[ROOT_HASH])
     var fromProfile = PROFILE + '_'
     if (obj.objectinfo && obj.objectinfo.author)
@@ -8713,7 +8730,7 @@ var Store = Reflux.createStore({
           ///
           this._setItem(contextId, context)
           this.dbBatchPut(contextId, context, batch)
-          this.addMessagesToChat(utils.getId(fOrg), context)
+          this.addMessagesToChat(utils.getId(fOrg || utils.getId(from)), context)
           ///
           val._context = this.buildRef(context)
         }
@@ -8825,7 +8842,6 @@ var Store = Reflux.createStore({
       }
     }
     if (type === FORM_REQUEST) {
-      let self = this
       ///=============== TEST VERIFIERS
       if (isNew) {
         // Prefill for testing and demoing
@@ -8906,7 +8922,7 @@ var Store = Reflux.createStore({
         if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
           org.products.push(m.id)
 
-        if (m.subClassOf === ENUM)
+        if (utils.isEnum(m))
           this.createEnumResources(m)
 
         if (utils.isMessage(m)) {
@@ -8990,27 +9006,7 @@ var Store = Reflux.createStore({
     if (!isProductList  &&  !isReadOnly) {
       let meId = utils.getId(to)
       if (type === MY_EMPLOYEE_PASS) {
-        to.isEmployee = true
-        to.organization = this.buildRef(org)
-        this.resetForEmployee(to, org)
-        if (to.firstName === FRIEND) {
-          let toRep = this.getRepresentative(utils.getId(org))
-          toRep = this._getItem(toRep)
-          let result = []
-          let arr = [NAME, PERSONAL_INFO, APPLICANT]
-          for (let j=0; j<arr.length; j++) {
-            let sr = await this.searchMessages({modelName: arr[j], to: org})
-            if (sr)
-              result = result.concat(sr)
-          }
-
-          if (result.length) {
-            let fRes = result.find((r) => utils.getId(r.from) === meId)
-            to.firstName = fRes.firstName || fRes.givenName
-            this._setItem(meId, to)
-            this.dbPut(meId, to)
-          }
-        }
+        setupEmployee()
         this.client = graphQL.initClient(meDriver)
       }
       else {
@@ -9086,6 +9082,40 @@ var Store = Reflux.createStore({
       }
       // Don't trigger re-rendering the list if the current and previous messages were of PRODUCT_LIST type
       return false
+    }
+    async function setupEmployee() {
+      me.isEmployee = true
+      me.organization = self.buildRef(org)
+      self.resetForEmployee(me, org)
+      let bookmark = {
+        [TYPE]: BOOKMARK,
+        message: 'My Applications',
+        bookmark: {
+          [TYPE]: APPLICATION,
+          relationshipManager: self._makeIdentityStub(me)
+        },
+        from: me
+      }
+      self.onAddItem({resource: bookmark, noTrigger: true})
+
+      if (me.firstName !== FRIEND)
+        return
+      let toRep = self.getRepresentative(utils.getId(org))
+      toRep = self._getItem(toRep)
+      let result = []
+      let arr = [NAME, PERSONAL_INFO, APPLICANT]
+      for (let j=0; j<arr.length; j++) {
+        let sr = await self.searchMessages({modelName: arr[j], to: org})
+        if (sr)
+          result = result.concat(sr)
+      }
+
+      if (result.length) {
+        let fRes = result.find((r) => utils.getId(r.from) === meId)
+        me.firstName = fRes.firstName || fRes.givenName
+        self._setItem(meId, me)
+        self.dbPut(meId, me)
+      }
     }
   },
   async getContext(contextId, val) {
@@ -9222,7 +9252,7 @@ var Store = Reflux.createStore({
           let m = data.value
           models[data.key] = data;
           self.setPropertyNames(m.properties)
-          if (m.subClassOf === ENUM)
+          if (utils.isEnum(m))
             self.createEnumResources(m)
           return
         }
@@ -9382,7 +9412,7 @@ var Store = Reflux.createStore({
   },
   // Creates resources from subClassOf tradle.Enum models that have 'enum' model property
   createEnumResources(model) {
-    if (model.subClassOf !== ENUM  ||  !model.enum)
+    if (!utils.isEnum(model)  ||  !model.enum)
       return
     let eProp
     for (let p in model.properties) {
@@ -10194,7 +10224,7 @@ var Store = Reflux.createStore({
       let m = this.getModel(rtype)
       if (!m)
         return
-      if (m.subClassOf === ENUM) {
+      if (utils.isEnum(m)) {
         let eValues = enums[rtype]
         let eVal = eValues.filter((ev) => utils.getId(ev) === r)
         if (eVal.length)

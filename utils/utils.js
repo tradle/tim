@@ -101,6 +101,7 @@ const STYLES_PACK = 'tradle.StylesPack'
 const CONTEXT = 'tradle.Context'
 const MSG_LINK = '_msg'
 const APPLICATION = 'tradle.Application'
+const BOOKMARK = 'tradle.Bookmark'
 
 // var dictionaries = require('@tradle/models').dict
 var dictionary //= dictionaries[Strings.language]
@@ -922,6 +923,7 @@ var utils = {
       let isContext = this.isContext(m)
       let isFormRequest = m.id === FORM_REQUEST
       let isFormError = m.id === FORM_ERROR
+      let isBookmark = m.id === BOOKMARK
       Object.keys(res).forEach(p => {
         if (p === 'txId')
           return
@@ -939,6 +941,8 @@ var utils = {
           if (res[ROOT_HASH])
             res[p] = this.buildRef(res[p])
         }
+        else if (isBookmark  &&  p === 'bookmark')
+          return
         else
           delete res[p]
       })
