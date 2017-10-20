@@ -68,7 +68,7 @@ const ENV = require('../utils/env')
 //   })
 // })
 
-var AddressBook = require('NativeModules').AddressBook;
+// var AddressBook = require('NativeModules').AddressBook;
 
 const tradle = require('@tradle/engine')
 var myCustomIndexes
@@ -143,7 +143,6 @@ const {
  MESSAGE,
  SIMPLE_MESSAGE,
  FINANCIAL_PRODUCT,
- PRODUCT_LIST,
  PROFILE,
  VERIFICATION,
  FORM,
@@ -160,7 +159,7 @@ const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 // const SHARED_RESOURCE     = 'tradle.SharedResource'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const INTRODUCTION        = 'tradle.Introduction'
-const PRODUCT_APPLICATION = 'tradle.ProductApplication'
+// const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PRODUCT_REQUEST     = 'tradle.ProductRequest'
 const CONTEXT             = 'tradle.Context'
 const PARTIAL             = 'tradle.Partial'
@@ -443,7 +442,6 @@ var Store = Reflux.createStore({
         }
       );
     }
-
     this.addModels()
     this.loadModels()
     utils.setModels(models);
@@ -624,8 +622,8 @@ var Store = Reflux.createStore({
 
         let rtype
         let t = obj.parsed.data[TYPE]
-        if (t === PRODUCT_APPLICATION)
-          rtype = obj.parsed.data.product
+        if (t === PRODUCT_REQUEST)
+          rtype = obj.parsed.data.requestFor
         else if (t === FORM_REQUEST)
           rtype = obj.parsed.data.form
         else
@@ -704,11 +702,11 @@ var Store = Reflux.createStore({
     old.to = this.buildRef(to)
     // old.to = { [ROOT_HASH]: meDriver.permalink }
     let rtype = old.parsed.data[TYPE]
-    if (rtype === PRODUCT_APPLICATION  &&  me.isEmployee) {
+    if (utils.isContext(rtype)  &&  me.isEmployee) {
       let pid = utils.makeId(PROFILE, old.from[ROOT_HASH])
       let bot = this._getItem(pid)
       // debug('monitorTim: org = ' + (bot.organization && bot.organization.title) + '; isEmployee = ' + utils.isEmployee(bot) + '; type = ' + old.parsed.data.product + '; hasModel = ' + (this.getModel(old.parsed.data.product)!== null))
-      if (utils.isEmployee(bot)  &&  !this.getModel(old.parsed.data.product)) {
+      if (utils.isEmployee(bot)  &&  !this.getModel(old.parsed.data.requestFor)) {
         debug('request for models')
         await this.onAddMessage({msg: utils.requestForModels(), isWelcome: true})
       }
@@ -1431,7 +1429,7 @@ var Store = Reflux.createStore({
 
           productToForms[product][r.form] = i
         }
-        if (r[TYPE] === PRODUCT_APPLICATION) {
+        if (utils.isContext(r)) {
           let productIdx = productApp[product]
           if (productIdx)
             removeMsg.push(productIdx)
@@ -1485,14 +1483,14 @@ var Store = Reflux.createStore({
       let id = rr.id
       let type = id.split('_')[0]
       // Compact ProductList resources that go one after another
-      if (type === PRODUCT_LIST  &&  i !== messages.length - 1) {
-        var next = messages[i + 1]
+      // if (type === PRODUCT_LIST  &&  i !== messages.length - 1) {
+      //   var next = messages[i + 1]
 
-        if (next && next.id.split('_')[0] === PRODUCT_LIST) {
-          // delete list[id]
-          return false
-        }
-      }
+      //   if (next && next.id.split('_')[0] === PRODUCT_LIST) {
+      //     // delete list[id]
+      //     return false
+      //   }
+      // }
       // if (r[TYPE] === CUSTOMER_WAITING) {
       //   let f = list[utils.getId(r.from)].value.organization
       //   let t = list[utils.getId(r.to)].value.organization
@@ -1546,19 +1544,19 @@ var Store = Reflux.createStore({
       }
       return true
     })
-    if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
-      let i=newResult.length - 1
-      for (; i>=0; i--) {
-        if (newResult[i][TYPE] !== PRODUCT_LIST)
-          break
-      }
-      let msg = newResult[i]
-      newResult.splice(i, 1)
-      for (let ii=0; ii<allMessages.length; ii++) {
-        if (allMessages[ii].id === msg.id)
-          allMessages.splice(ii, 1)
-      }
-    }
+    // if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
+    //   let i=newResult.length - 1
+    //   for (; i>=0; i--) {
+    //     if (newResult[i][TYPE] !== PRODUCT_LIST)
+    //       break
+    //   }
+    //   let msg = newResult[i]
+    //   newResult.splice(i, 1)
+    //   for (let ii=0; ii<allMessages.length; ii++) {
+    //     if (allMessages[ii].id === msg.id)
+    //       allMessages.splice(ii, 1)
+    //   }
+    // }
     return newResult
     // return newResult.reverse()
   },
@@ -2176,7 +2174,7 @@ var Store = Reflux.createStore({
       }
 
       if (payload.context) {
-        let s = utils.makeId(PRODUCT_APPLICATION, payload.context)
+        let s = utils.makeId(PRODUCT_REQUEST, payload.context)
         let r = list[s]
       }
 
@@ -4083,8 +4081,8 @@ var Store = Reflux.createStore({
 
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
     if (isGuestSessionProof) {
-      resource[TYPE] = PRODUCT_APPLICATION
-      resource.product = REMEDIATION
+      resource[TYPE] = PRODUCT_REQUEST
+      resource.requestFor = REMEDIATION
     }
 
     var isNew = !resource[ROOT_HASH];
@@ -4332,8 +4330,8 @@ var Store = Reflux.createStore({
       let orgRep = self.getRepresentative(orgId)
       let contextId = this.getNonce()
       let msg = {
-        [TYPE]: PRODUCT_APPLICATION,
-        product: EMPLOYEE_ONBOARDING,
+        [TYPE]: PRODUCT_REQUEST,
+        requestFor: EMPLOYEE_ONBOARDING,
         time: new Date().getTime(),
         contextId: contextId
       }
@@ -4750,11 +4748,11 @@ var Store = Reflux.createStore({
     if (result.length)
       delete result[result.length - 1]
     await this.cleanup(result)
-    result = await this.searchMessages({to: me, modelName: PRODUCT_LIST, isForgetting: true});
-    if (result  &&  result.length) {
-      delete result[result.length - 1]
-      return this.cleanup(result)
-    }
+    // result = await this.searchMessages({to: me, modelName: PRODUCT_LIST, isForgetting: true});
+    // if (result  &&  result.length) {
+    //   delete result[result.length - 1]
+    //   return this.cleanup(result)
+    // }
   },
 
   onShare(resource, shareWithList, originatingResource) {
@@ -5303,7 +5301,7 @@ var Store = Reflux.createStore({
           if (ENV.hideVerificationsInChat)
             result.splice(i, 1)
         }
-        else if (result[i][TYPE] === PRODUCT_APPLICATION) {
+        else if (utils.isContext(result)) {
           if (ENV.hideProductApplicationInChat)
             result.splice(i, 1)
         }
@@ -5519,7 +5517,7 @@ var Store = Reflux.createStore({
          if (rtype === MESSAGE)
            rtype = payload.object[TYPE]
          return r.type === MESSAGE           &&
-                rtype !== PRODUCT_LIST       &&
+                // rtype !== PRODUCT_LIST       &&
                 rtype !== SELF_INTRODUCTION  &&
                 rtype !== INTRODUCTION       &&
                 rtype !== CUSTOMER_WAITING
@@ -6072,7 +6070,7 @@ var Store = Reflux.createStore({
     var meta = this.getModel(modelName)
 
     var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
-    if (_readOnly  &&  modelName === PRODUCT_APPLICATION)
+    if (_readOnly  &&  utils.isContext(modelName))
       return this.getAllSharedContexts()
     if (typeof prop === 'string')
       prop = meta[prop];
@@ -6264,7 +6262,7 @@ var Store = Reflux.createStore({
       })
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a.time - b.time)
-      let result = params._readOnly  &&  modelName === PRODUCT_APPLICATION
+      let result = params._readOnly  &&  utils.isContext(modelName)
                  ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
                  : foundResources
 
@@ -6546,7 +6544,7 @@ var Store = Reflux.createStore({
     }
     async function doFilterOut(r, toId, idx) {
       let m = self.getModel(r[TYPE])
-      if (m.id === PRODUCT_APPLICATION  &&  (r.product === REMEDIATION || !self.getModel(r.product)))
+      if (utils.isContext(m)  &&  (r.requestFor === REMEDIATION || !self.getModel(r.requestFor)))
         return true
       // if (r._notSent)
       //   return true
@@ -6609,7 +6607,7 @@ var Store = Reflux.createStore({
     if (!plist  ||  !plist.length)
       return
 
-    let allContextsArr = plist.filter((r) => r.type === PRODUCT_APPLICATION)
+    let allContextsArr = plist.filter((r) => utils.isContext(r))
     let allContexts ={}
     allContextsArr.forEach((a) => allContexts[a.resource.id] = a)
 
@@ -6644,7 +6642,7 @@ var Store = Reflux.createStore({
         owner = r.from
       }
       else {
-        let pa = allContexts[utils.makeId(PRODUCT_APPLICATION, r.context)]
+        let pa = allContexts[utils.makeId(PRODUCT_REQUEST, r.context)]
         owner = pa ? pa.from : r.from
         ownerId = owner.id
       }
@@ -6685,8 +6683,8 @@ var Store = Reflux.createStore({
         stats.verifications.push(r)
         providerCustomerStats.verifications.push(r)
         break
-      case PRODUCT_APPLICATION:
-        let product = l.filter((prop) => prop.key === 'product')[0].value
+      case PRODUCT_REQUEST:
+        let product = l.filter((prop) => prop.key === 'requestFor')[0].value
         if (this.getModel(product)) {
           stats.applications.push({productType: product, product: r})
           providerCustomerStats.applications.push({productType: product, product: r})
@@ -6875,7 +6873,7 @@ var Store = Reflux.createStore({
                 })
               }
               break
-            case PRODUCT_APPLICATION:
+            case PRODUCT_REQUEST:
               appStats.changed = 'productApplications'
               break
             default:
@@ -7687,8 +7685,8 @@ var Store = Reflux.createStore({
       let docType = utils.getId(value.document).split('_')[0]
       dn = translate('receivedVerification', translate(this.getModel(docType)))
     }
-    else if (model.id === PRODUCT_APPLICATION  ||  model.id === PRODUCT_REQUEST) {
-      let m = this.getModel(value.product || value.requestFor)
+    else if (model.id === PRODUCT_REQUEST) {
+      let m = this.getModel(value.requestFor)
       dn = utils.makeModelTitle(m)
     }
     else if (model.subClassOf === MY_PRODUCT)
@@ -8163,93 +8161,93 @@ var Store = Reflux.createStore({
       debugger
     })
   },
-  loadAddressBook() {
-    return // method not used currently
+  // loadAddressBook() {
+  //   return // method not used currently
 
-    var self = this;
-    return Q.ninvoke(AddressBook, 'checkPermission')
-    .then(function(permission) {
-      // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
-      if(permission === AddressBook.PERMISSION_UNDEFINED)
-        return Q.ninvoke(AddressBook, 'requestPermission')
-               .then(function(permission) {
-                 if (permission === AddressBook.PERMISSION_AUTHORIZED)
-                   return self.storeContacts.bind(self);
-               });
-      else if (permission === AddressBook.PERMISSION_AUTHORIZED)
-        return self.storeContacts()
-      else if (permission === AddressBook.PERMISSION_DENIED) {
-        //handle permission denied
-        return
-      }
-    })
-  },
-  storeContacts() {
-    var self = this;
-    var dfd = Q.defer();
-    var batch = [];
-    let pModel = this.getModel(PROFILE)
-    var props = pModel.properties;
-    AddressBook.getContacts(function(err, contacts) {
-      contacts.forEach(function(contact) {
-        var contactInfo = [];
-        var newIdentity = {
-          firstName: contact.firstName,
-          lastName: contact.lastName,
-          // formatted: contact.firstName + ' ' + contact.lastName,
-          contactInfo: contactInfo
-        };
-        newIdentity[TYPE] = PROFILE;
-        var myIdentities = self._getItem(MY_IDENTITIES)
-        if (myIdentities)  {
-          var currentIdentity = myIdentities.currentIdentity;
-          newIdentity[constants.OWNER] = {
-            id: currentIdentity,
-            title: utils.getDisplayName(currentIdentity, pModel)
-          };
-          // if (me.organization) {
-          //   var photos = list[utils.getId(me.organization.id)].value.photos;
-          //   if (photos)
-          //     me.organization.photo = photos[0].url;
-          // }
-        }
+  //   var self = this;
+  //   return Q.ninvoke(AddressBook, 'checkPermission')
+  //   .then(function(permission) {
+  //     // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
+  //     if(permission === AddressBook.PERMISSION_UNDEFINED)
+  //       return Q.ninvoke(AddressBook, 'requestPermission')
+  //              .then(function(permission) {
+  //                if (permission === AddressBook.PERMISSION_AUTHORIZED)
+  //                  return self.storeContacts.bind(self);
+  //              });
+  //     else if (permission === AddressBook.PERMISSION_AUTHORIZED)
+  //       return self.storeContacts()
+  //     else if (permission === AddressBook.PERMISSION_DENIED) {
+  //       //handle permission denied
+  //       return
+  //     }
+  //   })
+  // },
+  // storeContacts() {
+  //   var self = this;
+  //   var dfd = Q.defer();
+  //   var batch = [];
+  //   let pModel = this.getModel(PROFILE)
+  //   var props = pModel.properties;
+  //   AddressBook.getContacts(function(err, contacts) {
+  //     contacts.forEach(function(contact) {
+  //       var contactInfo = [];
+  //       var newIdentity = {
+  //         firstName: contact.firstName,
+  //         lastName: contact.lastName,
+  //         // formatted: contact.firstName + ' ' + contact.lastName,
+  //         contactInfo: contactInfo
+  //       };
+  //       newIdentity[TYPE] = PROFILE;
+  //       var myIdentities = self._getItem(MY_IDENTITIES)
+  //       if (myIdentities)  {
+  //         var currentIdentity = myIdentities.currentIdentity;
+  //         newIdentity[constants.OWNER] = {
+  //           id: currentIdentity,
+  //           title: utils.getDisplayName(currentIdentity, pModel)
+  //         };
+  //         // if (me.organization) {
+  //         //   var photos = list[utils.getId(me.organization.id)].value.photos;
+  //         //   if (photos)
+  //         //     me.organization.photo = photos[0].url;
+  //         // }
+  //       }
 
-        if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
-          newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
-        var phoneNumbers = contact.phoneNumbers;
-        if (phoneNumbers) {
-          phoneNumbers.forEach(function(phone) {
-            contactInfo.push({identifier: phone.number, type: phone.label + ' phone'})
-          })
-        }
-        var emailAddresses = contact.emailAddresses;
-        if (emailAddresses)
-          emailAddresses.forEach(function(email) {
-            contactInfo.push({identifier: email.email, type: email.label + ' email'})
-          });
-        newIdentity[ROOT_HASH] = sha(newIdentity);
-        newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
-        var key = utils.getId(newIdentity)
-        if (!list[key])
-          batch.push({type: 'put', key: key, value: newIdentity});
-      });
-      if (batch.length)
-        // identityDb.batch(batch, function(err, value) {
-        db.batch(batch, function(err, value) {
-          if (err)
-            dfd.reject(err);
-          else {
-            self.loadMyResources()
-            .then(function() {
-              dfd.resolve();
-            })
-          }
-        });
-      else
-        dfd.resolve();
-    })
-    return dfd.promise;
-  },
+  //       if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
+  //         newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
+  //       var phoneNumbers = contact.phoneNumbers;
+  //       if (phoneNumbers) {
+  //         phoneNumbers.forEach(function(phone) {
+  //           contactInfo.push({identifier: phone.number, type: phone.label + ' phone'})
+  //         })
+  //       }
+  //       var emailAddresses = contact.emailAddresses;
+  //       if (emailAddresses)
+  //         emailAddresses.forEach(function(email) {
+  //           contactInfo.push({identifier: email.email, type: email.label + ' email'})
+  //         });
+  //       newIdentity[ROOT_HASH] = sha(newIdentity);
+  //       newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
+  //       var key = utils.getId(newIdentity)
+  //       if (!list[key])
+  //         batch.push({type: 'put', key: key, value: newIdentity});
+  //     });
+  //     if (batch.length)
+  //       // identityDb.batch(batch, function(err, value) {
+  //       db.batch(batch, function(err, value) {
+  //         if (err)
+  //           dfd.reject(err);
+  //         else {
+  //           self.loadMyResources()
+  //           .then(function() {
+  //             dfd.resolve();
+  //           })
+  //         }
+  //       });
+  //     else
+  //       dfd.resolve();
+  //   })
+  //   return dfd.promise;
+  // },
   monitorTim() {
     this._keeper = {}
     ;['get', 'put', 'batch', 'del'].forEach(method => {
@@ -8418,11 +8416,11 @@ var Store = Reflux.createStore({
     }
 
     await db.batch(batch)
-    if (model.id === PRODUCT_LIST  &&  isMyMessage) {
-      // var orgList = this.searchNotMessages({modelName: ORGANIZATION})
-      // this.trigger({action: 'list', list: orgList, forceUpdate: true})
-      this.trigger({action: 'getItem', resource: this._getItem(utils.getId(from.organization))})
-    }
+    // if (model.id === PRODUCT_LIST  &&  isMyMessage) {
+    //   // var orgList = this.searchNotMessages({modelName: ORGANIZATION})
+    //   // this.trigger({action: 'list', list: orgList, forceUpdate: true})
+    //   this.trigger({action: 'getItem', resource: this._getItem(utils.getId(from.organization))})
+    // }
     let triggerForModel
     if (isConfirmation  &&  isMyMessage) {
       var fOrg = from.organization
@@ -8470,9 +8468,9 @@ var Store = Reflux.createStore({
               }
             }
           }
-          if (val[TYPE] === PRODUCT_APPLICATION)  {
-            if (!this.getModel([val.product]))
-              triggerForModel = val.product
+          if (val[TYPE] === PRODUCT_REQUEST)  {
+            if (!this.getModel([val.requestFor]))
+              triggerForModel = val.requestFor
           }
           else if (val[TYPE] === FORM_REQUEST) {
             if (!this.getModel([val.form]))
@@ -8480,13 +8478,13 @@ var Store = Reflux.createStore({
           }
           else if (!this.getModel(val[TYPE]))
              triggerForModel = val[TYPE]
-          if (isReadOnlyChat  &&  val[TYPE] === PRODUCT_APPLICATION  &&  !triggerForModel)
+          if (isReadOnlyChat  &&  utils.isContext(val)  &&  !triggerForModel)
             this.onGetAllSharedContexts()
         }
       }
       if (triggerForModel) {
         this._emitter.once('model:' + triggerForModel, () => {
-          if (val[TYPE] === PRODUCT_APPLICATION)
+          if (utils.isContext(val))
             this.onGetAllSharedContexts()
           else
             this.trigger({action: 'addItem', resource: val})
@@ -8824,9 +8822,10 @@ var Store = Reflux.createStore({
           }
         })
     }
-    var isProductList = type === PRODUCT_LIST
     var isModelsPack = type === MODELS_PACK
-    var pList = isProductList ? val.list : val.models
+    let pList = val.models
+    // var isProductList = type === PRODUCT_LIST
+    // var pList = isProductList ? val.list : val.models
 
     var noTrigger
     if (pList) {
@@ -8851,8 +8850,8 @@ var Store = Reflux.createStore({
           key: m.id,
           value: m
         }
-        if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
-          org.products.push(m.id)
+        // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
+        //   org.products.push(m.id)
 
         if (utils.isEnum(m))
           this.createEnumResources(m)
@@ -8871,14 +8870,14 @@ var Store = Reflux.createStore({
       list[orgId].value = org
       this.dbBatchPut(utils.getId(org), org, batch)
       this.trigger({action: 'getItem', resource: org})
-      noTrigger = hasNoTrigger(orgId)
+      // noTrigger = hasNoTrigger(orgId)
     }
-    if (isProductList  &&  this.preferences) {
+    if (isModelsPack  &&  this.preferences) {
       if (this.preferences.firstPage === 'chat' && ENV.autoRegister) {
           // ENV.autoRegister                &&
           // org.products.length === 1) {
         let meRef = this.buildRef(utils.getMe())
-        let pa = await this.searchMessages({modelName: PRODUCT_APPLICATION})
+        let pa = await this.searchMessages({modelName: PRODUCT_REQUEST})
         let product = org.products[0]
         let hasThisProductApp
         if (pa) {
@@ -8903,8 +8902,8 @@ var Store = Reflux.createStore({
         }
         this.onAddMessage({
           msg: {
-            [TYPE]: PRODUCT_APPLICATION,
-            product: product,
+            [TYPE]: PRODUCT_REQUEST,
+            requestFor: product,
             from: meRef,
             to: val.from
           }
@@ -8930,7 +8929,7 @@ var Store = Reflux.createStore({
       this.onAddVerification({r: val, notOneClickVerification: false, dontSend: true, isThirdPartySentRequest: isThirdPartySentRequest})
       return
     }
-    if (!isProductList  &&  !isReadOnly) {
+    if (!isReadOnly) {
       let meId = utils.getId(to)
       if (type === MY_EMPLOYEE_PASS) {
         setupEmployee()
@@ -8996,20 +8995,20 @@ var Store = Reflux.createStore({
     this.addVisualProps(val)
     // }
     return noTrigger
-    function hasNoTrigger(orgId) {
-      let messages = chatMessages[orgId]
-      if (!messages)
-        return false
-      let type
-      // Skip all SELF_INTRODUCTION messages since they are not showing anyways on customer screen
-      for (let i=0; i<messages.length; i++) {
-        type = messages[i].id.split('_')[0]
-        if (type  === PRODUCT_LIST)
-          return true
-      }
-      // Don't trigger re-rendering the list if the current and previous messages were of PRODUCT_LIST type
-      return false
-    }
+    // function hasNoTrigger(orgId) {
+    //   let messages = chatMessages[orgId]
+    //   if (!messages)
+    //     return false
+    //   let type
+    //   // Skip all SELF_INTRODUCTION messages since they are not showing anyways on customer screen
+    //   for (let i=0; i<messages.length; i++) {
+    //     type = messages[i].id.split('_')[0]
+    //     if (type  === PRODUCT_LIST)
+    //       return true
+    //   }
+    //   // Don't trigger re-rendering the list if the current and previous messages were of PRODUCT_LIST type
+    //   return false
+    // }
     async function setupEmployee() {
       me.isEmployee = true
       me.organization = self.buildRef(org)
@@ -9559,7 +9558,7 @@ var Store = Reflux.createStore({
   },
 
   async getAllSharedContexts() {
-    let list = await this.searchMessages({modelName: PRODUCT_APPLICATION})
+    let list = await this.searchMessages({modelName: PRODUCT_REQUEST})
     if (!list  ||  !list.length)
       return
     let l = list.filter((r) => {
