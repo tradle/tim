@@ -92,6 +92,7 @@ const MSG_LINK = '_msg'
 const sampleData = require('@tradle/models').data
 const utils = require('../utils/utils');
 const graphQL = require('./graphql/graphql-client')
+// const storeUtils = require('./utils/utils')
 const voc = (function () {
   const models = require('@tradle/models').concat(require('@tradle/custom-models'))
   models.forEach(model => {
@@ -442,8 +443,10 @@ var Store = Reflux.createStore({
         }
       );
     }
+    // storeUtils.init({db, list, contextIdToResourceId, models})
     this.addModels()
     this.loadModels()
+    // await storeUtils.loadModels()
     utils.setModels(models);
     this.loadStaticData()
     // if (true) {
@@ -1126,6 +1129,11 @@ var Store = Reflux.createStore({
     }
 
     const trySend = co(function* (msg, recipientInfo, cb) {
+      try {
+        yield promisify(tradleUtils.extractSigPubKey)(msg.unserialized.object)
+      } catch (err) {
+        debugger
+      }
       const recipientHash = recipientInfo.permalink
       if (self._yuki && recipientHash === self._yuki.permalink) {
         return self._yuki.receive({ message: msg.unserialized.object })
@@ -4619,8 +4627,9 @@ var Store = Reflux.createStore({
             if (!app.id)
               self._setItem(app)
           }
-          app.relationshipManager = this._makeIdentityStub(me)
-          this.trigger({action: 'updateRow', resource: app })
+          let appToUpdate = utils.clone(app)
+          appToUpdate.relationshipManager = self._makeIdentityStub(me)
+          self.trigger({action: 'updateRow', resource: appToUpdate })
         //   self.dbPut(utils.getId(app), app)
         }
         let rId = utils.getId(returnVal.to)
@@ -4695,7 +4704,7 @@ var Store = Reflux.createStore({
   _makeIdentityStub(r) {
     return {
       id: utils.getId(r).replace(PROFILE, IDENTITY),
-      title: utils.getDisplayName(r)
+      // title: utils.getDisplayName(r)
     }
   },
   onAddApp(serverUrl) {
