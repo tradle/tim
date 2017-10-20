@@ -741,7 +741,7 @@ class GridList extends Component {
               }
             }
           })
-          Actions.list({filterResource: resource.bookmark, search: true, modelName: btype, limit: LIMIT * 2, first: true})
+          // Actions.list({filterResource: resource.bookmark, search: true, modelName: btype, limit: LIMIT * 2, first: true})
           return
         }
         let title
