@@ -8294,7 +8294,6 @@ var Store = Reflux.createStore({
   //         //     me.organization.photo = photos[0].url;
   //         // }
   //       }
->>>>>>> origin/master
 
   //       if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
   //         newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
