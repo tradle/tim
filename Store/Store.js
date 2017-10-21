@@ -3268,7 +3268,7 @@ var Store = Reflux.createStore({
       isEmployee = utils.isEmployee(to)
       // See if the sender is in a process of verifying some form in shared context chat
       if (!isEmployee  &&  context)
-        isEmployee = utils.isReadOnlyChat(this._getItem(context))
+        isEmployee = context.contextId ? context : utils.isReadOnlyChat(this._getItem(context))
       if (!isEmployee  &&  to) {
         if (utils.getId(from) === utils.getId(me)) {
           let rep = this.getRepresentative(utils.getId(me.organization))
@@ -4181,12 +4181,15 @@ var Store = Reflux.createStore({
         if (!utils.isMessage(elm))
           foundRefs.push({value: elm, state: 'fulfilled'})
         else {
+          let kres
           try {
-            let kres = await this._keeper.get(elm[CUR_HASH])
-            results.push(utils.clone(kres))
+            kres = await this._keeper.get(elm[CUR_HASH])
           } catch (err) {
+            if (me.isEmployee)
+              kres = await this._getItemFromServer(utils.getId(elm))
             debugger
           }
+          results.push(utils.clone(kres))
           if (results.length) {
             let r = results[0]
             extend(r, elm)
@@ -4456,7 +4459,12 @@ var Store = Reflux.createStore({
       let isForm = rModel.subClassOf === FORM
       if (!isNew  &&  isForm) {
         let formId = utils.getId(returnVal)
-        let prevRes = await self._keeper.get(returnVal[CUR_HASH])
+        let prevRes
+        try {
+          prevRes = await self._keeper.get(returnVal[CUR_HASH])
+        } catch(err) {
+          prevRes = await self._getItemFromServer(utils.getId(returnVal))
+        }
         let prevResCached = self._getItem(formId)
         extend(prevResCached, prevRes)
         if (utils.compare(returnVal, prevResCached)) {
@@ -5738,7 +5746,7 @@ var Store = Reflux.createStore({
           contextIds.push(c)
       })
       let appFilter = { [TYPE]: APPLICATION, contextId: contextIds }
-      let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client })
+      let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true })
       if (contextsResult) {
         contexts = contextsResult.map((r) => this.convertToResource(r.node))
         list.forEach((r) => {
@@ -8578,9 +8586,16 @@ var Store = Reflux.createStore({
       else {
         if (val[TYPE] === FORM_ERROR  &&  val.prefill.id) {
           let memPrefill = this._getItem(val.prefill)
-          let prefill = await this._keeper.get(memPrefill[CUR_HASH])
+          let phash = memPrefill ? memPrefill[CUR_HASH] : val.prefill.id.split('_')[2]
+          let prefill
+          try {
+            prefill = await this._keeper.get(phash)
+          } catch (err) {
+            prefill = await this._getItemFromServer(val.prefill.id)
+          }
           let p = {}
-          extend(p, memPrefill)
+          if (memPrefill)
+            extend(p, memPrefill)
           extend(p, prefill)
           val.prefill = p
         }

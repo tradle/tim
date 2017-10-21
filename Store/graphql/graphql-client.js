@@ -76,7 +76,7 @@ var search = {
 
   async searchServer(params) {
     let self = this
-    let {client, modelName, filterResource, sortProperty, asc, limit, direction, first} = params
+    let {client, modelName, filterResource, sortProperty, asc, limit, direction, first, noCursorChange} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -218,41 +218,43 @@ var search = {
     }
     query += '('
     let hasFilter = qq.length
-    if (first  ||  cursor.modelName !== modelName) {
-      cursor = {endCursor: []}
-    }
-    if (limit) {
-      if (cursor) {
-        if (cursor.filter) {
-          if (!filterResource  ||  deepEqual(filterResource,  cursor.filter))
-            cursor = {endCursor: []}
-        }
+    if (!noCursorChange) {
+      if (first  ||  cursor.modelName !== modelName) {
+        cursor = {endCursor: []}
       }
-      cursor.endCursor = cursor.endCursor || []
-      cursor.modelName = modelName
-      cursor.filter = filterResource || null
-
-      let endCursor
-      let len = cursor.endCursor.length
-      if (len) {
-        if (direction === 'down')
-          endCursor = cursor.endCursor[len - 1]
-        else {
-          if (len > 2) {
-            cursor.endCursor.splice(len - 2, 1)
-            cursor.endCursor.splice(len - 1, 1)
-            len -= 2
+      if (limit) {
+        if (cursor) {
+          if (cursor.filter) {
+            if (!filterResource  ||  deepEqual(filterResource,  cursor.filter))
+              cursor = {endCursor: []}
           }
-          else
-            cursor.endCursor = []
-          endCursor = (len - 1) ? cursor.endCursor[len - 2] : null
         }
+        cursor.endCursor = cursor.endCursor || []
+        cursor.modelName = modelName
+        cursor.filter = filterResource || null
+
+        let endCursor
+        let len = cursor.endCursor.length
+        if (len) {
+          if (direction === 'down')
+            endCursor = cursor.endCursor[len - 1]
+          else {
+            if (len > 2) {
+              cursor.endCursor.splice(len - 2, 1)
+              cursor.endCursor.splice(len - 1, 1)
+              len -= 2
+            }
+            else
+              cursor.endCursor = []
+            endCursor = (len - 1) ? cursor.endCursor[len - 2] : null
+          }
+        }
+        else
+          endCursor = null
+        if (endCursor)
+          query += `after: "${endCursor}"\n`
+        query += `first: ${limit}\n`
       }
-      else
-        endCursor = null
-      if (endCursor)
-        query += `after: "${endCursor}"\n`
-      query += `first: ${limit}\n`
     }
     if (hasFilter)
       query += `filter: { ${qq} },\n`
@@ -298,15 +300,16 @@ var search = {
           query: gql(`${query}`),
         })
       let result = data.data[table]
-      let endCursor = result.pageInfo.endCursor
-      if (endCursor) {
-        // if (!params.direction  ||  params.direction === 'down') {
-          let hasThisCursor = cursor.endCursor.some((c) => c === endCursor)
-          if (!hasThisCursor)
-            cursor.endCursor.push(endCursor)
-        // }
+      if (!noCursorChange) {
+        let endCursor = result.pageInfo.endCursor
+        if (endCursor) {
+          // if (!params.direction  ||  params.direction === 'down') {
+            let hasThisCursor = cursor.endCursor.some((c) => c === endCursor)
+            if (!hasThisCursor)
+              cursor.endCursor.push(endCursor)
+          // }
+        }
       }
-
       if (!result.edges.length) {
         // this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
         return
