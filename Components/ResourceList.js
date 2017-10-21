@@ -245,9 +245,10 @@ class ResourceList extends Component {
   }
 
   onListUpdate(params) {
+    let { navigator } = this.props
     var action = params.action;
     if (action === 'addApp') {
-      this.props.navigator.pop()
+      navigator.pop()
       if (params.error)
         Alert.alert(params.error)
       // Actions.list(ORGANIZATION)
@@ -260,44 +261,29 @@ class ResourceList extends Component {
     //   return
     // }
     if (action === 'newContact') {
-      let routes = this.props.navigator.getCurrentRoutes()
+      let routes = navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
       if (curRoute.id === 11  &&  curRoute.passProps.resource[ROOT_HASH] === params.newContact[ROOT_HASH])
         return
       this.setState({newContact: params.newContact})
-      // let style = this.mergeStyle(params.newContact.style)
-      // this.props.navigator[curRoute.id === 3 ? 'replace' : 'push']({
-      //   title: params.newContact.firstName,
-      //   component: MessageList,
-      //   id: 11,
-      //   backButtonTitle: 'Back',
-      //   passProps: {
-      //     resource: params.newContact,
-      //     filter: '',
-      //     modelName: constants.TYPES.MESSAGE,
-      //     // currency: params.organization.currency,
-      //     bankStyle: style,
-      //     // dictionary: params.dictionary,
-      //   }
-      // })
-
       return
     }
     if (action === 'connectivity') {
       this.setState({isConnected: params.isConnected})
       return
     }
-    if (action == 'newStyles'  &&  this.props.modelName === ORGANIZATION) {
+    let { modelName, officialAccounts } = this.props
+    if (action == 'newStyles'  &&  modelName === ORGANIZATION) {
       this.setState({newStyles: params.resource})
       return
     }
     if (action === 'addItem'  ||  action === 'addMessage') {
       var model = action === 'addMessage'
-                ? utils.getModel(this.props.modelName).value
+                ? utils.getModel(modelName).value
                 : utils.getModel(params.resource[TYPE]).value;
-      if (action === 'addItem'  &&  model.id !== this.props.modelName)
+      if (action === 'addItem'  &&  model.id !== modelName)
         return
-      if (action === 'addMessage'  &&  this.props.modelName !== PROFILE)
+      if (action === 'addMessage'  &&  modelName !== PROFILE)
         return
       // this.state.isLoading = true;
       Actions.list({
@@ -338,20 +324,20 @@ class ResourceList extends Component {
       }
       // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
       // Actions.addMessage(msg, true, sendNotification)
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg})) //, true))
-      if (this.props.navigator.getCurrentRoutes().length === 3)
-        this.props.navigator.replace(route)
+      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg})) //, true))
+      if (navigator.getCurrentRoutes().length === 3)
+        navigator.replace(route)
       else
-        this.props.navigator.push(route)
+        navigator.push(route)
       return
     }
     if (action === 'allSharedContexts') {
       let state = {
         sharedContextCount: params.count,
       }
-      if (this.props.officialAccounts)
+      if (officialAccounts)
         this.setState(state)
-      else if (this.props._readOnly  &&  utils.isContext(this.props.modelName)) {
+      else if (this.props._readOnly  &&  utils.isContext(modelName)) {
         let list = params.list
         if (list &&  list.length) {
           state.list = list
@@ -361,15 +347,15 @@ class ResourceList extends Component {
       }
       return
     }
-    if (action === 'hasPartials') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
+    if (action === 'hasPartials') { //  &&  officialAccounts  &&  (modelName === PROFILE || modelName === ORGANIZATION)) {
       this.setState({hasPartials: true})
       return
     }
-    if (action === 'hasBookmarks') { //  &&  this.props.officialAccounts  &&  (this.props.modelName === PROFILE || this.props.modelName === ORGANIZATION)) {
+    if (action === 'hasBookmarks') { //  &&  officialAccounts  &&  (modelName === PROFILE || modelName === ORGANIZATION)) {
       this.setState({bookmarksCount: params.count})
       return
     }
-    if (action === 'hasTestProviders'  &&  this.props.officialAccounts) {
+    if (action === 'hasTestProviders'  &&  officialAccounts) {
       if (!params.list  ||  !params.list.length)
         return
 
@@ -396,11 +382,13 @@ class ResourceList extends Component {
         Alert.alert(params.alert)
         return
       }
+      if (officialAccounts  &&  modelName === PROFILE)
+        return
       if (params.isTest  !== this.props.isTest)
         return
       if (params.list  &&  params.list.length) {
         let m = utils.getModel(params.list[0][TYPE]).value
-        if (m.id !== this.props.modelName  &&  m.subClassOf !== this.props.modelName)
+        if (m.id !== modelName  &&  m.subClassOf !== modelName)
           return
       }
     }
@@ -413,9 +401,9 @@ class ResourceList extends Component {
     var list = params.list;
     if (list.length) {
       var type = list[0][constants.TYPE];
-      if (type  !== this.props.modelName) {
+      if (type  !== modelName) {
         var m = utils.getModel(type).value;
-        if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
+        if (!m.subClassOf  ||  m.subClassOf != modelName)
           return;
       }
       if (this.props.multiChooser  &&  !this.props.isChooser) {
@@ -441,9 +429,9 @@ class ResourceList extends Component {
       return;
     }
     var type = list[0][TYPE];
-    if (type  !== this.props.modelName  &&  this.props.modelName !== params.requestedModelName) {
+    if (type  !== modelName  &&  modelName !== params.requestedModelName) {
       var m = utils.getModel(type).value;
-      if (!m.subClassOf  ||  m.subClassOf != this.props.modelName)
+      if (!m.subClassOf  ||  m.subClassOf != modelName)
         return;
     }
     if (this.props.isBacklink  &&  params.prop !== this.props.prop)
@@ -484,11 +472,6 @@ class ResourceList extends Component {
         return true
       if (this.props.backlinkList  &&  this.props.backlinkList.length !== nextProps.backlinkList.length)
         return true
-      // let prop = this.props.prop.name
-      // if (this.props.resource[prop].length !== nextProps.resource[prop].length)
-      //   return true
-      // else if (this.state.prop !== nextState.prop)
-      //   return true
     }
     if (this.state.hideMode !== nextState.hideMode)
       return true
@@ -510,9 +493,6 @@ class ResourceList extends Component {
       return true
     if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== nextState.newContact))
       return true
-        // if (this.state.isConnected !== nextState.isConnected)
-    //   if (!this.state.list && !nextState.list)
-    //     return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
       return true
     for (var i=0; i<this.state.list.length; i++) {
@@ -532,7 +512,6 @@ class ResourceList extends Component {
     var model = utils.getModel(this.props.modelName);
     var isContact = this.props.modelName === PROFILE;
     let rType = resource[TYPE]
-    var isVerification = model.value.id === constants.TYPES.VERIFICATION
     var isVerificationR  = rType === constants.TYPES.VERIFICATION
     var isMessage = utils.isMessage(resource)
 
