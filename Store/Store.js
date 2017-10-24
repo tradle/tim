@@ -1423,7 +1423,7 @@ var Store = Reflux.createStore({
         let c = this._getItem(r._context)
         product = c  &&  c.requestFor
       }
-
+      let removed
       if (product) {
         if (r[TYPE] === FORM_REQUEST  &&  !r._document) {// && r._documentCreated)
         // delete list[id]
@@ -1431,16 +1431,20 @@ var Store = Reflux.createStore({
           if (!forms)
             productToForms[product] = {}
           let formIdx = productToForms[product][r.form]
-          if (typeof formIdx !== 'undefined'  &&  !r._documentCreated)
+          if (typeof formIdx !== 'undefined'  &&  !r._documentCreated) {
             removeMsg.push(formIdx)
+            removed = true
+          }
             // messages.splice(formIdx, 1)
 
           productToForms[product][r.form] = i
         }
         if (utils.isContext(r)) {
           let productIdx = productApp[product]
-          if (productIdx)
+          if (productIdx  &&  !removed) {
             removeMsg.push(productIdx)
+            removed = true
+          }
             // messages.splice(productIdx, 1)
           // else
           productApp[product] = i
@@ -1452,7 +1456,7 @@ var Store = Reflux.createStore({
         if (m  &&  utils.isContext(m)) {
           if (!pl)
             pl = i
-          else
+          else if (!removed)
             removeMsg.push(i)
         }
       }
@@ -1600,8 +1604,8 @@ var Store = Reflux.createStore({
               Push.subscribe(provider.hash)
                 .catch(err => console.log('failed to register for push notifications'))
             })
-          if (!this.client  &&  SERVICE_PROVIDERS)
-            this.client = graphQL.initClient(meDriver, SERVICE_PROVIDERS)
+          if (!this.client  &&  me.isEmployee  &&  SERVICE_PROVIDERS)
+            this.client = graphQL.initClient(meDriver, me.organization.url)
         })
         .catch(err => {
           if (err instanceof TypeError || err instanceof ReferenceError) {
@@ -1749,7 +1753,7 @@ var Store = Reflux.createStore({
 
   getMyEmployerBotPermalink() {
     if (me && me.isEmployee) {
-      const rep = this.getRepresentative(utils.getId(me.organization))
+      const rep = this.getRepresentative(me.organization)
       return rep[ROOT_HASH]
     }
   },
@@ -3164,7 +3168,7 @@ var Store = Reflux.createStore({
       if (toRes)
         return toRes.pubkeys
       else if (me.isEmployee) {
-        let rep = this.getRepresentative(utils.getId(me.organization))
+        let rep = this.getRepresentative(me.organization)
         return this._getItem(utils.makeId(IDENTITY, rep[ROOT_HASH])).pubkeys
       }
     })
@@ -3268,7 +3272,7 @@ var Store = Reflux.createStore({
         isEmployee = context.contextId ? context : utils.isReadOnlyChat(this._getItem(context))
       if (!isEmployee  &&  to) {
         if (utils.getId(from) === utils.getId(me)) {
-          let rep = this.getRepresentative(utils.getId(me.organization))
+          let rep = this.getRepresentative(me.organization)
           isEmployee = utils.getId(rep) !== utils.getId(to)
         }
       }
@@ -3294,7 +3298,7 @@ var Store = Reflux.createStore({
       if (!arr  ||  !arr.length) {
         var toRootHash = hash
 
-        let rep = this.getRepresentative(utils.getId(me.organization))
+        let rep = this.getRepresentative(me.organization)
         if (rep[ROOT_HASH] !== toRootHash)
           sendParams.other = {
             forward: toRootHash
@@ -3466,6 +3470,8 @@ var Store = Reflux.createStore({
   },
 
   getRepresentative(orgId) {
+    if (typeof orgId === 'object')
+      orgId = utils.getId(orgId)
     if (currentEmployees[orgId])
       return currentEmployees[orgId]
     let org = this._getItem(orgId)
@@ -3545,7 +3551,7 @@ var Store = Reflux.createStore({
         r._sharedWith = []
         // Case where employee verifies the form
         if (me &&  me.isEmployee) {
-          let rep = this.getRepresentative(utils.getId(me.organization))
+          let rep = this.getRepresentative(me.organization)
           if (utils.getId(rep.organization) === utils.getId(r.from))
             this.addSharedWith(r, rep, r.time)
           else
@@ -4116,18 +4122,16 @@ var Store = Reflux.createStore({
       let status = await meDriver.identityPublishStatus()
       if (!status.watches.link  &&  !status.link) {
         let rep = isBecomingEmployee
-                ? self.getRepresentative(utils.getId(resource.organization))
+                ? self.getRepresentative(resource.organization)
                 : self._getItem(utils.getId(resource.to))
         await self.publishMyIdentity(rep, disableAutoResponse)
       }
       else {
         let orgRep
-        if (isBecomingEmployee) {
-          let orgId = utils.getId(resource.organization)
-          orgRep = self.getRepresentative(orgId)
-        }
+        if (isBecomingEmployee)
+          orgRep = self.getRepresentative(resource.organization)
         else
-          orgRep = self._getItem(utils.getId(resource.to))
+          orgRep = self._getItem(resource.to)
 
         console.log('Store.onAddItem: type = ' + resource[TYPE] + (resource.to ? '; to = ' + resource.to.title : ''))
 
@@ -4313,7 +4317,7 @@ var Store = Reflux.createStore({
     else
       await save(returnVal, isBecomingEmployee)
     if (disableFormRequest) {
-        let fr =  this._getItem(utils.getId(disableFormRequest))
+        let fr =  this._getItem(disableFormRequest)
         if (!fr._documentCreated) {
           let addDocumentCreated
           if (fr[TYPE] === FORM_REQUEST) {
@@ -4790,13 +4794,11 @@ var Store = Reflux.createStore({
       }
 
       let permalink
-      if (me.isEmployee) {
-        let orgId = utils.getId(this._getItem(me.organization))
-        permalink = this.getRepresentative(orgId)[ROOT_HASH]
-      }
+      if (me.isEmployee)
+        permalink = this.getRepresentative(me.organization)[ROOT_HASH]
       else
         permalink = originatingResource[TYPE] === ORGANIZATION
-                  ?  this.getRepresentative(utils.getId(originatingResource))[ROOT_HASH]
+                  ?  this.getRepresentative(originatingResource)[ROOT_HASH]
                   :  originatingResource[ROOT_HASH]
 
       return meDriver.createObject({ object: msg })
@@ -5612,9 +5614,25 @@ var Store = Reflux.createStore({
     return contexts[0]
   },
   async searchServer(params) {
-    // let self = this
     let {filterResource, direction, first, noTrigger, modelName, application} = params
-
+    let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
+    if (me.isEmployee) {
+      if (application  &&  (!filterResource  ||  !filterResource._author)) {
+        let applicant = this._getItem(application.applicant.id.replace(IDENTITY, PROFILE))
+        if (applicant.organization) {
+          if (!filterResource)
+            filterResource = {[TYPE]: modelName}
+          filterResource._author = myBot[ROOT_HASH]
+        }
+      }
+      if (modelName === APPLICATION) {
+        if (!filterResource)
+          filterResource = {[TYPE]: modelName}
+        filterResource.archived = true
+      }
+    }
+    if (!filterResource)
+      filterResource = {}
     if (modelName === MESSAGE) {
       let oforms = application  &&  application.forms
       if (!oforms)
@@ -5623,12 +5641,12 @@ var Store = Reflux.createStore({
       let promises = oforms.map((f) => this._getItemFromServer(f.id))
       let forms = await Q.all(promises)
 
-      if (!forms) {
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
+      // HACK
+      forms = forms  &&  forms.filter((r) => r)
+      if (!forms  ||  !forms.length) {
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first, message: 'Forms were not found'})
         return
       }
-      // HACK
-      forms = forms.filter((r) => r)
       let formIds = []
       forms.forEach((r) => {
         formIds.push(utils.getId(r))
@@ -5647,15 +5665,14 @@ var Store = Reflux.createStore({
       //     context: context.contextId
       //   }
       // })
+      let fr = {[TYPE]: VERIFICATION, document: formIds}
+      extend(fr, filterResource)
       result = await graphQL.searchServer({
         modelName: VERIFICATION,
         sortProperty: 'time',
         asc: true,
         client: this.client,
-        filterResource: {
-          [TYPE]: VERIFICATION,
-          document: formIds
-        }
+        filterResource: fr
       })
       if (result) {
         let verifications = result.map((r) => this.convertToResource(r.node))
@@ -5676,7 +5693,6 @@ var Store = Reflux.createStore({
         this.trigger({action: 'messageList', modelName: MESSAGE, to: params.to, list: forms})
       return forms
     }
-
     extend(params, {client: this.client})
     let result = await graphQL.searchServer(params)
     if (!result) {
@@ -5685,7 +5701,7 @@ var Store = Reflux.createStore({
     }
         // if (result.edges.length < limit)
         //   cursor.endCursor = null
-    let to = this.getRepresentative(utils.getId(me.organization))
+    let to = this.getRepresentative(me.organization)
     let toId = utils.getId(to)
     let list = result.map((r) => this.convertToResource(r.node))
     if (modelName === APPLICATION) {
@@ -5697,6 +5713,8 @@ var Store = Reflux.createStore({
           contextIds.push(c)
       })
       let appFilter = { [TYPE]: APPLICATION, contextId: contextIds }
+      if (me.isEmployee)
+        extend(appFilter, filterResource)
       let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true })
       if (contextsResult) {
         contexts = contextsResult.map((r) => this.convertToResource(r.node))
@@ -5734,7 +5752,7 @@ var Store = Reflux.createStore({
 
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
-    let myOrgRep = this.getRepresentative(utils.getId(me.organization))
+    let myOrgRep = this.getRepresentative(me.organization)
     let myOrgRepId = utils.getId(myOrgRep)
     let from, to
     switch (m.id) {
@@ -6233,6 +6251,11 @@ var Store = Reflux.createStore({
           if (implementors.indexOf(this.getModel(utils.getType(thisChatMessages[i].id))) === -1)
             continue
         }
+        if (isChatWithOrg  &&  meOrgId === toOrgId) {
+          let item = this._getItem(thisChatMessages[i].id)
+          if (item._originalSender  ||  item._forward)
+            continue
+        }
         addReferenceLink(thisChatMessages[i])
         if (limit  &&  links.length === limit)
           break
@@ -6273,8 +6296,12 @@ var Store = Reflux.createStore({
       foundResources.forEach((r) => {
         if (r[TYPE] === VERIFICATION)
           r.document = refsObj[utils.getId(r.document)] || r.document
-        else if (r[TYPE] === FORM_ERROR)
-          r.prefill = refsObj[utils.getId(r.prefill)]
+        else if (r[TYPE] === FORM_ERROR) {
+          let prefill = refsObj[utils.getId(r.prefill)]
+          if (prefill)
+            r.prefill = prefill
+
+        }
         this.addVisualProps(r)
       })
       // Minor hack before we intro sort property here
@@ -6999,7 +7026,7 @@ var Store = Reflux.createStore({
 
     var isOrg = to  &&  to[TYPE] === ORGANIZATION
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
-    var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
+    var reps = isOrg ? this.getRepresentatives(org) : [utils.getId(to)]
     var self = this
     // var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
     var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
@@ -7047,7 +7074,7 @@ var Store = Reflux.createStore({
     let l = await this.searchSharables({modelName: VERIFICATION, search: me.isEmployee, filterResource: {[TYPE]: verTypes}})
     if (!l) //  &&  !me.isEmployee)
       return
-    let rep = me.isEmployee ? this.getRepresentative(utils.getId(me.organization)) : null
+    let rep = me.isEmployee ? this.getRepresentative(me.organization) : null
     if (me.isEmployee)
       rep = utils.getId(rep)
     l.forEach((val) => {
@@ -7080,7 +7107,7 @@ var Store = Reflux.createStore({
           let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
           if (!provider.length)
             return
-          let spReps = this.getRepresentatives(utils.getId(provider[0].org))
+          let spReps = this.getRepresentatives(provider[0].org)
           let sw = val._sharedWith.filter((r) => {
             return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
           })
@@ -7127,7 +7154,7 @@ var Store = Reflux.createStore({
     let context = await this.getCurrentContext(to)
     let repId
     if (me.isEmployee) {
-      let rep = this.getRepresentative(utils.getId(me.organization))
+      let rep = this.getRepresentative(me.organization)
       repId = rep[ROOT_HASH]
     }
     for (let i=0; i<verTypes.length; i++) {
@@ -7214,7 +7241,7 @@ var Store = Reflux.createStore({
 
     var isOrg = to  &&  to[TYPE] === ORGANIZATION
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
-    var reps = isOrg ? this.getRepresentatives(utils.getId(org)) : [utils.getId(to)]
+    var reps = isOrg ? this.getRepresentatives(org) : [utils.getId(to)]
     var self = this
     if (!verTypes.length)
       return {verifications: shareableResources}
@@ -7223,7 +7250,7 @@ var Store = Reflux.createStore({
     let context = await this.getCurrentContext(to)
     let repId
     if (me.isEmployee) {
-      let rep = this.getRepresentative(utils.getId(me.organization))
+      let rep = this.getRepresentative(me.organization)
       repId = rep[ROOT_HASH]
     }
     let typeToDocs = {}
@@ -7251,7 +7278,7 @@ var Store = Reflux.createStore({
     if (l) { //  &&  !me.isEmployee)
       let rep
       if (me.isEmployee) {
-        let representative = this.getRepresentative(utils.getId(me.organization))
+        let representative = this.getRepresentative(me.organization)
         rep = utils.getId(representative)
       }
       l.forEach((val) => {
@@ -7290,7 +7317,7 @@ var Store = Reflux.createStore({
             let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
             if (!provider.length)
               return
-            let spReps = this.getRepresentatives(utils.getId(provider[0].org))
+            let spReps = this.getRepresentatives(provider[0].org)
             let sw = val._sharedWith.filter((r) => {
               return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
             })
@@ -7336,7 +7363,7 @@ var Store = Reflux.createStore({
         if (!me.isEmployee)
           return
         else {
-          let rep = this.getRepresentative(utils.getId(me.organization))
+          let rep = this.getRepresentative(me.organization)
           if (rep  &&  utils.getId(rep) !== fromId)
             return
         }
@@ -8353,6 +8380,12 @@ var Store = Reflux.createStore({
 
     if (this._getItem(utils.getId(val)))
       return
+    let originalSender = obj.object.originalSender
+    if (originalSender)
+      val._originalSender = originalSender
+    let forward = obj.object.forward
+    if (forward)
+      val._forward = forward
 
     val[MSG_LINK] = obj[MSG_LINK]
 
@@ -8957,7 +8990,7 @@ var Store = Reflux.createStore({
       let meId = utils.getId(to)
       if (type === MY_EMPLOYEE_PASS) {
         setupEmployee()
-        this.client = graphQL.initClient(meDriver)
+        this.client = graphQL.initClient(meDriver, me.organization.url)
       }
       else {
         let fromId = utils.getId(val.from)
@@ -9039,7 +9072,7 @@ var Store = Reflux.createStore({
       self.resetForEmployee(me, org)
       let bookmark = {
         [TYPE]: BOOKMARK,
-        message: 'My Applications',
+        message: 'My Customers',
         bookmark: {
           [TYPE]: APPLICATION,
           relationshipManager: self._makeIdentityStub(me)
@@ -9047,6 +9080,18 @@ var Store = Reflux.createStore({
         from: me
       }
       self.onAddItem({resource: bookmark, noTrigger: true})
+
+      bookmark = {
+        [TYPE]: BOOKMARK,
+        message: 'All Applications',
+        bookmark: {
+          [TYPE]: APPLICATION,
+          _author: self.getRepresentative(me.organization)[ROOT_HASH]
+        },
+        from: me
+      }
+      self.onAddItem({resource: bookmark, noTrigger: true})
+
 
       if (me.firstName !== FRIEND)
         return
@@ -9071,7 +9116,7 @@ var Store = Reflux.createStore({
   async getContext(contextId, val) {
     let context, contexts
     if (me.isEmployee) {
-      let myOrgRep = this.getRepresentative(utils.getId(me.organization))
+      let myOrgRep = this.getRepresentative(me.organization)
       contexts = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contextId}})
     }
     else {
@@ -9394,7 +9439,7 @@ var Store = Reflux.createStore({
     }
     msg[ROOT_HASH] = sha(msg)
 
-    var reps = this.getRepresentatives(utils.getId(org))
+    var reps = this.getRepresentatives(org)
     var promises = []
     reps.forEach((r) =>
       promises.push(meDriver.forget(r[ROOT_HASH]))
