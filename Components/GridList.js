@@ -770,7 +770,7 @@ class GridList extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
-          model: m,
+          model: model,
           resource: resource,
           search: search,
           serverOffline: this.props.serverOffline,
