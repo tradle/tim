@@ -24,18 +24,14 @@ const PUB_KEY = 'tradle.PubKey'
 var cursor = {}
 
 var search = {
-  initClient(meDriver, SERVICE_PROVIDERS) {
-    let me = utils.getMe()
-    if (!me.isEmployee  ||  (!SERVICE_PROVIDERS  &&  !me.organization.url))
-      return
-
-    let graphqlEndpoint
-    let myOrgId = me.organization.id
-    let myEmployerUrl = me.organization.url
-    if (!myEmployerUrl)
-      myEmployerUrl =  SERVICE_PROVIDERS.filter((sp) => sp.org === myOrgId)[0].url
-    if (myEmployerUrl)
-      graphqlEndpoint = `${myEmployerUrl.replace(/[/]+$/, '')}/graphql`
+  initClient(meDriver, url) {
+    // let graphqlEndpoint
+    // let orgId = me.organization.id
+    // let url = me.organization.url
+    // if (!url)
+    //   url =  SERVICE_PROVIDERS.filter((sp) => sp.org === orgId)[0].url
+    // if (url)
+    let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
     // else
     //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
     if (!graphqlEndpoint)
@@ -76,7 +72,7 @@ var search = {
 
   async searchServer(params) {
     let self = this
-    let {client, modelName, filterResource, sortProperty, asc, limit, direction, first, noCursorChange} = params
+    let {client, modelName, filterResource, sortProperty, asc, limit, direction, first, notArchive, noCursorChange} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -89,6 +85,7 @@ var search = {
     let op = {
       CONTAINS: '',
       EQ: '',
+      NEQ: '',
       STARTS_WITH: '',
       GT: '',
       GTE: '',
@@ -206,6 +203,9 @@ var search = {
       }
     }
     op.IN = inClause ? inClause.join(',') : ''
+
+    if (notArchive)
+      op.NEQ += `\n   archived: true,`
 
     let qq = ''
     for (let o in op) {
