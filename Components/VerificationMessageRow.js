@@ -341,7 +341,7 @@ class VerificationMessageRow extends Component {
     let arrow = <Icon color={this.props.bankStyle.verifiedLinkColor} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
 
     let docName
-    if (!isThirdParty)
+    if (!isThirdParty || me.isEmployee)
       docName = <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
 
     var headerContent = <View style={headerStyle}>
