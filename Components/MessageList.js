@@ -96,7 +96,7 @@ class MessageList extends Component {
       isConnected: props.navigator.isConnected,
       // onlineStatus: props.resource._online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
-      isEmployee:  utils.isEmployee(props.resource),
+      isEmployee:  props.resource  &&  utils.isEmployee(props.resource),
       filter: props.filter,
       userInput: '',
       list: [],

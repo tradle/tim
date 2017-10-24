@@ -579,7 +579,7 @@ class ResourceRow extends Component {
         icolor = resource._assignedRM ? 'red' : 'green'
       }
       let icon = <Icon name={iname} size={25} color={icolor} style={{alignSelf: 'flex-end'}}/>
-      if (!resource.relationshipManager  &&  !resource._assignedRM) {
+      if (__DEV__  ||  (!resource.relationshipManager  &&  !resource._assignedRM)) {
         icon = <TouchableOpacity onPress={() => this.assignRM()}>
                  {icon}
                </TouchableOpacity>
