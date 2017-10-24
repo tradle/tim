@@ -10,6 +10,25 @@ var ProductChooser = require('./ProductChooser');
 var PhotoList = require('./PhotoList');
 import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
+import uiUtils from './uiUtils'
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+
+const {
+  MESSAGE,
+  SIMPLE_MESSAGE,
+  FORGET_ME,
+  FORGOT_YOU,
+  VERIFICATION,
+  FORM,
+  SELF_INTRODUCTION,
+  CUSTOMER_WAITING,
+  ENUM,
+  PRODUCT_LIST
+} = constants.TYPES
+const LIMIT = 20
 var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin')
 var extend = require('extend')
@@ -22,14 +41,13 @@ var reactMixin = require('react-mixin');
 var chatStyles = require('../styles/chatStyles')
 
 const MY_PRODUCT = 'tradle.MyProduct'
-const FORM = 'tradle.Form'
 const SHARE_CONTEXT = 'tradle.ShareContext'
-const ENUM = 'tradle.Enum'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const INTRODUCTION = 'tradle.Introduction'
+const BOOKMARK = 'tradle.Bookmark'
 
 var LINK_COLOR
 
@@ -69,7 +87,7 @@ class MessageRow extends Component {
 
     var me = utils.getMe();
 
-    let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
+    let isRemediationCompleted = resource[TYPE] === REMEDIATION_SIMPLE_MESSAGE
     var isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
     var to = this.props.to;
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
@@ -78,21 +96,21 @@ class MessageRow extends Component {
     var renderedRow = [];
     var ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
-    let isConfirmation = resource[constants.TYPE] === CONFIRMATION
+    let isConfirmation = resource[TYPE] === CONFIRMATION
 
     var photoUrls = [];
     var photoListStyle = {height: 3};
     var addStyle, inRow;
 
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
 
     var isContext = utils.isContext(model)
     let message = isContext ? ret.message : resource.message
 
     var noMessage = !message  ||  !message.length;
-    var isSimpleMessage = resource[constants.TYPE] === constants.TYPES.SIMPLE_MESSAGE
+    var isSimpleMessage = resource[TYPE] === SIMPLE_MESSAGE
 
-    var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
+    var isForgetting = model.id === FORGET_ME || model.id === FORGOT_YOU
     const bankStyle = this.props.bankStyle
     if (!renderedRow.length) {
       var vCols = noMessage ? null : utils.getDisplayName(resource);
@@ -123,7 +141,7 @@ class MessageRow extends Component {
         }
       }
 
-      let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
+      let isRemediationCompleted = resource[TYPE] === REMEDIATION_SIMPLE_MESSAGE
       if (isMyMessage  &&  !isSimpleMessage  &&  !isRemediationCompleted) {
         let st = {backgroundColor: bankStyle.contextBackgroundColor}
         addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
@@ -146,7 +164,7 @@ class MessageRow extends Component {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
 
-        let isReadOnlyChat = utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
+        let isReadOnlyChat = utils.isContext(to[TYPE])  &&  utils.isReadOnlyChat(this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
         photoListStyle = {
           flexDirection: 'row',
           alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
@@ -272,7 +290,7 @@ class MessageRow extends Component {
     }
 
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7' }
-    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
+    var model = utils.getModel(this.props.resource[TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
@@ -310,7 +328,7 @@ class MessageRow extends Component {
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
-        model: utils.getModel(resource[constants.TYPE]).value,
+        model: utils.getModel(resource[TYPE]).value,
         resource: resource,
         additionalInfo: this.props.resource,
         editCols: ['photos']
@@ -332,7 +350,7 @@ class MessageRow extends Component {
       'to': this.props.resource.from,
     }
     resource.message = this.props.resource.message;
-    resource[constants.TYPE] = model.id;
+    resource[TYPE] = model.id;
 
     // Prefill for testing and demoing
     var isPrefilled = ENV.prefillForms && model.id in formDefaults
@@ -361,7 +379,7 @@ class MessageRow extends Component {
 
   verify(event) {
     var resource = this.props.resource;
-    var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
+    var isVerification = resource[TYPE] === VERIFICATION;
     var r = isVerification ? resource.document : resource
 
     var passProps = {
@@ -374,7 +392,7 @@ class MessageRow extends Component {
     else
       passProps.verification = resource
 
-    var model = utils.getModel(r[constants.TYPE]).value;
+    var model = utils.getModel(r[TYPE]).value;
     var route = {
       id: 5,
       component: MessageView,
@@ -402,19 +420,19 @@ class MessageRow extends Component {
   }
 
   formatRow(isMyMessage, renderedRow) {
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    let { resource, bankStyle, navigator, to, isLast, currency } = this.props
+    var model = utils.getModel(resource[TYPE] || resource.id).value;
 
-    let isReadOnlyChat = this.props.to[constants.TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnlyChat = to[TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
 
     if (utils.isContext(model)) {
       let msgModel = utils.getModel(resource.product).value
-      let str = !this.props.navigator.isConnected  &&  this.props.isLast
+      let str = !navigator.isConnected  &&  isLast
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
               : translate('newProductMsg', translate(msgModel))
-      let color = isMyMessage ? this.props.bankStyle.contextTextColor : '#757575'
+      let color = isMyMessage ? bankStyle.contextTextColor : '#757575'
       let maxWidth = Math.floor(0.8 * utils.dimensions().width) - (isReadOnlyChat ? 90 : 40) // message width - icon size and all the paddings
-      let msg = !this.props.navigator.isConnected  &&  this.props.isLast
+      let msg = !navigator.isConnected  &&  isLast
               ? <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: color}]}>{str}</Text>
                 </View>
@@ -443,7 +461,7 @@ class MessageRow extends Component {
       return {onPressCall: null}
 
     }
-    let isRemediationCompleted = resource[constants.TYPE] === REMEDIATION_SIMPLE_MESSAGE
+    let isRemediationCompleted = resource[TYPE] === REMEDIATION_SIMPLE_MESSAGE
     if (isRemediationCompleted) {
       let msg = <View key={this.getNextKey()}>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -458,7 +476,7 @@ class MessageRow extends Component {
       return {onPressCall: isMyMessage ? this.showMyData.bind(this) : null}
     }
 
-    var isProductList = model.id === constants.TYPES.PRODUCT_LIST
+    var isProductList = model.id === PRODUCT_LIST
     if (isProductList) {
       // Case when the needed form was sent along with the message
       if (resource.welcome) {
@@ -473,8 +491,8 @@ class MessageRow extends Component {
         return {onPressCall: this.onChooseProduct.bind(this, true)}
       }
     }
-    let isSelfIntroduction = model.id === constants.TYPES.SELF_INTRODUCTION
-    let isCustomerWaiting = model.id === constants.TYPES.CUSTOMER_WAITING
+    let isSelfIntroduction = model.id === SELF_INTRODUCTION
+    let isCustomerWaiting = model.id === CUSTOMER_WAITING
     if (isSelfIntroduction || isCustomerWaiting) {
       let msg = <View key={this.getNextKey()}>
                   <View style={chatStyles.rowContainer}>
@@ -519,12 +537,21 @@ class MessageRow extends Component {
     }
     if (model.id === APPLICATION_SUBMITTED) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, {color: this.props.bankStyle.confirmationColor}]}>{resource.message}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: bankStyle.confirmationColor}]}>{resource.message}</Text>
                 </View>
       renderedRow.push(msg);
       return null
     }
-    var isForgetting = model.id === constants.TYPES.FORGET_ME || model.id === constants.TYPES.FORGOT_YOU
+    if (model.id === BOOKMARK) {
+      let params = {filterResource: resource, search: true, modelName: resource[TYPE], limit: LIMIT * 2, first: true}
+      let msg = <View key={this.getNextKey()}>
+                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate('Bookmark was created')}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message || utils.makeModelTitle(model)}</Text>
+                </View>
+      renderedRow.push(msg);
+      return {onPressCall: () => uiUtils.showBookmarks(this.props)}
+    }
+    var isForgetting = model.id === FORGET_ME || model.id === FORGOT_YOU
     if (isForgetting) {
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, styles.white18]} key={this.getNextKey()}>{resource.message}</Text>
@@ -544,7 +571,7 @@ class MessageRow extends Component {
     var onPressCall;
 
     let isMyProduct = model.subClassOf === MY_PRODUCT
-    var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE
+    var isSimpleMessage = model.id === SIMPLE_MESSAGE
     var isConfirmation = model.id === CONFIRMATION
     var cnt = 0;
     var self = this
@@ -569,7 +596,7 @@ class MessageRow extends Component {
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-        onPressCall = this.onPress.bind(self, this.props.resource.message);
+        onPressCall = this.onPress.bind(self, resource.message);
         vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
       }
       else if (isConfirmation) {
@@ -687,7 +714,7 @@ class MessageRow extends Component {
           // vCols.push(<Text key={self.getNextKey()}>
           //               <Text style={style}>{pVal.substring(0, linkIdx)}</Text>
           //               <TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
-          //                 <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{text || link}</Text>
+          //                 <Text style={[style, {color: bankStyle.LINK_COLOR}]}>{text || link}</Text>
           //               </TouchableHighlight>
           //               <Text style={style}>{pVal.substring(endLink + 1)}</Text>
           //             </Text>
@@ -695,7 +722,7 @@ class MessageRow extends Component {
           return null
         }
         else if (isSimpleMessage) {
-          let row = utils.parseMessage(resource, resource[v], this.props.bankStyle)
+          let row = utils.parseMessage(resource, resource[v], bankStyle)
           if (typeof row === 'string')
             vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>)
           else
@@ -712,7 +739,7 @@ class MessageRow extends Component {
       if (title.length > 30)
         title = title.substring(0, 27) + '...'
 
-      vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : this.props.bankStyle.contextBorderColor}]} key={this.getNextKey()}>{title}</Text>);
+      vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : bankStyle.contextBorderColor}]} key={this.getNextKey()}>{title}</Text>);
     }
     if (vCols  &&  vCols.length) {
       vCols.forEach(function(v) {
@@ -742,13 +769,13 @@ class MessageRow extends Component {
     })
     // let n = this.props.navigator.getCurrentRoutes().length
     // this.props.navigator.popN(n - 2)
-    // this.showResources(me, utils.getModel(me[constants.TYPE]).value.properties.myForms)
+    // this.showResources(me, utils.getModel(me[TYPE]).value.properties.myForms)
   }
 
   onChooseProduct() {
     if (this.props.isAggregation)
       return
-    var modelName = constants.TYPES.MESSAGE
+    var modelName = MESSAGE
     var model = utils.getModel(modelName).value;
     var isInterface = model.isInterface;
     if (!isInterface)
@@ -774,8 +801,8 @@ class MessageRow extends Component {
   editForm(rUri, message) {
     let s = rUri.split('_')
     let resource = {
-      [constants.TYPE]: s[0],
-      [constants.ROOT_HASH]: s[1]
+      [TYPE]: s[0],
+      [ROOT_HASH]: s[1]
     }
 
     let rmodel = utils.getModel(s[0]).value;
