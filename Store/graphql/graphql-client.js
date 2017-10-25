@@ -160,8 +160,12 @@ var search = {
               op.CONTAINS = `\n   ${p}: "${val.substring(1, len - 1)}",`
           }
         }
-        else if (props[p].type === 'boolean')
-          op.EQ += `\n   ${p}: ${val},`
+        else if (props[p].type === 'boolean') {
+          if (val)
+            op.EQ += `\n   ${p}: ${val},`
+          else
+            op.NEQ += `\n   ${p}: true,`
+        }
         else if (props[p].type === 'number')
           self.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
 
@@ -203,9 +207,6 @@ var search = {
       }
     }
     op.IN = inClause ? inClause.join(',') : ''
-
-    if (notArchive)
-      op.NEQ += `\n   archived: true,`
 
     let qq = ''
     for (let o in op) {
