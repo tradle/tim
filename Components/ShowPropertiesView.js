@@ -17,8 +17,7 @@ var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 const BLOCKCHAIN_EXPLORERS = [
-  'https://rinkeby.etherscan.io/tx/0x$TXID',
-  'https://etherchain.org/tx/0x$TXID'
+  'https://rinkeby.etherscan.io/tx/0x$TXID'
 ]
 
 import ActionSheet from 'react-native-actionsheet'
