@@ -570,16 +570,16 @@ class ResourceRow extends Component {
     if (status !== 'Approved'  &&  status !== 'Denied') {
       let icolor
       let iname
-      if (this.state.hasRM || resource.relationshipManager) {
+      if (resource.relationshipManager &&  utils.isRM(resource)) {
         iname = 'md-log-out'
         icolor = 'blue'
       }
       else {
         iname = 'md-log-in'
-        icolor = resource._assignedRM ? 'red' : 'green'
+        icolor = resource.relationshipManager ? 'red' : 'green'
       }
       let icon = <Icon name={iname} size={25} color={icolor} style={{alignSelf: 'flex-end'}}/>
-      if (__DEV__  ||  (!resource.relationshipManager  &&  !resource._assignedRM)) {
+      if (__DEV__  ||  !resource.relationshipManager) {
         icon = <TouchableOpacity onPress={() => this.assignRM()}>
                  {icon}
                </TouchableOpacity>

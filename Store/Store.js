@@ -3091,6 +3091,9 @@ var Store = Reflux.createStore({
           return self.publishMyIdentity(orgRep)
         }
         else {
+          let id = to.organization ? utils.getId(to.organization) : utils.getId(to)
+          if (chatMessages[id]  &&  chatMessages[id].length)
+            return
           // self.updateMe()
           var allMyIdentities = self._getItem(MY_IDENTITIES)
           var all = allMyIdentities.allIdentities
@@ -4108,31 +4111,32 @@ var Store = Reflux.createStore({
 
     var checkPublish
     try {
-    var isBecomingEmployee = isNew ? false : await becomingEmployee(resource)
-    if (isBecomingEmployee) {
-      if (isBecomingEmployee.error) {
-        this.trigger({action: 'addItem', error: isBecomingEmployee.error})
-        return
-      }
-      isBecomingEmployee = isBecomingEmployee.isBecomingEmployee
-    }
+    // var isBecomingEmployee = isNew ? false : await becomingEmployee(resource)
+    // if (isBecomingEmployee) {
+    //   if (isBecomingEmployee.error) {
+    //     this.trigger({action: 'addItem', error: isBecomingEmployee.error})
+    //     return
+    //   }
+    //   isBecomingEmployee = isBecomingEmployee.isBecomingEmployee
+    // }
     // Data were obtaipackmy scanning QR code of the forms that were entered on Web
-    if (isGuestSessionProof || isBecomingEmployee) {
+    if (isGuestSessionProof) { // || isBecomingEmployee) {
       await this.getDriver(me)
       if (provider)
         await this.addSettings(provider)
       let status = await meDriver.identityPublishStatus()
       if (!status.watches.link  &&  !status.link) {
-        let rep = isBecomingEmployee
-                ? self.getRepresentative(resource.organization)
-                : self._getItem(utils.getId(resource.to))
+        // let rep = isBecomingEmployee
+        //         ? self.getRepresentative(resource.organization)
+        //         : self._getItem(utils.getId(resource.to))
+        let rep = self._getItem(utils.getId(resource.to))
         await self.publishMyIdentity(rep, disableAutoResponse)
       }
       else {
         let orgRep
-        if (isBecomingEmployee)
-          orgRep = self.getRepresentative(resource.organization)
-        else
+        // if (isBecomingEmployee)
+        //   orgRep = self.getRepresentative(resource.organization)
+        // else
           orgRep = self._getItem(resource.to)
 
         console.log('Store.onAddItem: type = ' + resource[TYPE] + (resource.to ? '; to = ' + resource.to.title : ''))
@@ -4319,7 +4323,7 @@ var Store = Reflux.createStore({
       await handleMessage(noTrigger, returnVal)
     }
     else
-      await save(returnVal, isBecomingEmployee)
+      await save(returnVal) //, isBecomingEmployee)
     if (disableFormRequest) {
         let fr =  this._getItem(disableFormRequest)
         if (!fr._documentCreated) {
@@ -4344,43 +4348,44 @@ var Store = Reflux.createStore({
       //   })
       // }
     }
-    if (isBecomingEmployee) {
-      let orgId = utils.getId(resource.organization)
-      let orgRep = self.getRepresentative(orgId)
-      let contextId = this.getNonce()
-      let msg = {
-        [TYPE]: PRODUCT_REQUEST,
-        requestFor: EMPLOYEE_ONBOARDING,
-        time: new Date().getTime(),
-        contextId: contextId
-      }
-      self.trigger({action: 'employeeOnboarding', to: this._getItem(orgId)})
-      let data = await meDriver.createObject({object: msg})
+    // if (isBecomingEmployee) {
+    //   let orgId = utils.getId(resource.organization)
+    //   let orgRep = self.getRepresentative(orgId)
+    //   let contextId = this.getNonce()
+    //   let msg = {
+    //     [TYPE]: PRODUCT_REQUEST,
+    //     requestFor: EMPLOYEE_ONBOARDING,
+    //     time: new Date().getTime(),
+    //     contextId: contextId
+    //   }
+    //   self.trigger({action: 'employeeOnboarding', to: this._getItem(orgId)})
+    //   let data = await meDriver.createObject({object: msg})
 
-      let hash = data.link
-      msg = utils.clone(msg)
-      msg[CUR_HASH] = hash
-      msg[ROOT_HASH] = hash
-      msg._context = self.buildRef(msg)
-      msg.to = self.buildRef(orgRep)
-      msg.from = self.buildRef(me)
+    //   let hash = data.link
+    //   msg = utils.clone(msg)
+    //   msg[CUR_HASH] = hash
+    //   msg[ROOT_HASH] = hash
+    //   msg._context = self.buildRef(msg)
+    //   msg.to = self.buildRef(orgRep)
+    //   msg.from = self.buildRef(me)
 
-      let sendParams = {
-        link: hash,
-        to: { permalink: orgRep[ROOT_HASH] },
-        other: { context: contextId }
-      }
-      self._setItem(utils.getId(msg), msg)
-      self.addMessagesToChat(orgId, msg)
-      try {
-        await self.meDriverSend(sendParams)
-      }
-      catch(err) {
-        console.log('Store.onAddItem: ' + err.message)
-        debugger
-      }
-    }
-    else if (cb) {
+    //   let sendParams = {
+    //     link: hash,
+    //     to: { permalink: orgRep[ROOT_HASH] },
+    //     other: { context: contextId }
+    //   }
+    //   self._setItem(utils.getId(msg), msg)
+    //   self.addMessagesToChat(orgId, msg)
+    //   try {
+    //     await self.meDriverSend(sendParams)
+    //   }
+    //   catch(err) {
+    //     console.log('Store.onAddItem: ' + err.message)
+    //     debugger
+    //   }
+    // }
+    // else
+    if (cb) {
       if (returnVal[TYPE] !== SETTINGS)
         cb(returnVal)
       else {
@@ -4683,39 +4688,39 @@ var Store = Reflux.createStore({
     }
   // })
 
-    async function becomingEmployee(resource) {
-      if (resource[TYPE] !== PROFILE)
-        return
+    // async function becomingEmployee(resource) {
+    //   if (resource[TYPE] !== PROFILE)
+    //     return
 
-      if (!resource.organization  &&  !me.organization)
-        return
+    //   if (!resource.organization  &&  !me.organization)
+    //     return
 
-      let meOrgId = me.organization ? utils.getId(me.organization) : null
-      let newOrgId = utils.getId(resource.organization)
+    //   let meOrgId = me.organization ? utils.getId(me.organization) : null
+    //   let newOrgId = utils.getId(resource.organization)
 
-      if (!meOrgId) {
-        if (!SERVICE_PROVIDERS)
-          return {error: 'Can\'t verify if provider is active at this time. Try again later'}
-        let o = SERVICE_PROVIDERS.filter((r) => {
-          return r.org == newOrgId ? true : false
-        })
-        if (o  &&  o.length)
-          return {isBecomingEmployee: true}
-      }
-      else {
-        let isEmployee = await checkIfEmployeeAlready()
-        if (isEmployee.isBecomingEmployee  &&  meOrgId !== newOrgId)
-          return {error: 'Can\'t change employment'}
-        return isEmployee
-      }
-    }
-    async function checkIfEmployeeAlready() {
-      let result = await self.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
-      if (!result || result.every(r => r.revoked))
-        return {isBecomingEmployee: true}
-      let meId = utils.getId(me)
-      return {isBecomingEmployee: !(result.some((r) => meId === utils.getId(r.to)))}
-    }
+    //   if (!meOrgId) {
+    //     if (!SERVICE_PROVIDERS)
+    //       return {error: 'Can\'t verify if provider is active at this time. Try again later'}
+    //     let o = SERVICE_PROVIDERS.filter((r) => {
+    //       return r.org == newOrgId ? true : false
+    //     })
+    //     if (o  &&  o.length)
+    //       return {isBecomingEmployee: true}
+    //   }
+    //   else {
+    //     let isEmployee = await checkIfEmployeeAlready()
+    //     if (isEmployee.isBecomingEmployee  &&  meOrgId !== newOrgId)
+    //       return {error: 'Can\'t change employment'}
+    //     return isEmployee
+    //   }
+    // }
+    // async function checkIfEmployeeAlready() {
+    //   let result = await self.searchMessages({to: me, modelName: MY_EMPLOYEE_PASS})
+    //   if (!result || result.every(r => r.revoked))
+    //     return {isBecomingEmployee: true}
+    //   let meId = utils.getId(me)
+    //   return {isBecomingEmployee: !(result.some((r) => meId === utils.getId(r.to)))}
+    // }
   },
   _makeIdentityStub(r) {
     return {
@@ -5668,16 +5673,18 @@ var Store = Reflux.createStore({
     if (me.isEmployee) {
       if (application  &&  (!filterResource  ||  !filterResource._author)) {
         let applicant = this._getItem(application.applicant.id.replace(IDENTITY, PROFILE))
-        if (applicant.organization) {
+        if (applicant  &&  applicant.organization) {
           if (!filterResource)
             filterResource = {[TYPE]: modelName}
           filterResource._author = myBot[ROOT_HASH]
         }
       }
       if (modelName === APPLICATION) {
-        if (!filterResource)
+        if (!filterResource || !Object.keys(filterResource).length)
           filterResource = {[TYPE]: modelName}
-        filterResource.archived = true
+        filterResource.archived = false
+        if (!filterResource._author)
+          filterResource._author = myBot[ROOT_HASH]
       }
     }
     if (!filterResource)
@@ -5742,7 +5749,7 @@ var Store = Reflux.createStore({
         this.trigger({action: 'messageList', modelName: MESSAGE, to: params.to, list: forms})
       return forms
     }
-    extend(params, {client: this.client})
+    extend(params, {client: this.client, filterResource: filterResource})
     let result = await graphQL.searchServer(params)
     if (!result) {
       this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
@@ -5753,7 +5760,7 @@ var Store = Reflux.createStore({
     let to = this.getRepresentative(me.organization)
     let toId = utils.getId(to)
     let list = result.map((r) => this.convertToResource(r.node))
-    if (modelName === APPLICATION) {
+    if (me.isEmployee  &&  modelName === APPLICATION) {
       let contexts
       let contextIds = []
       list.forEach((r) => {
@@ -5761,9 +5768,10 @@ var Store = Reflux.createStore({
         if (typeof c === 'string'  &&  contextIds.indexOf(c) === -1)
           contextIds.push(c)
       })
-      let appFilter = { [TYPE]: APPLICATION, contextId: contextIds }
-      if (me.isEmployee)
-        extend(appFilter, filterResource)
+      let appFilter = { [TYPE]: PRODUCT_REQUEST, contextId: contextIds }
+      // if (me.isEmployee)
+      //   appFilter._author = myBot[ROOT_HASH]
+
       let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true })
       if (contextsResult) {
         contexts = contextsResult.map((r) => this.convertToResource(r.node))
