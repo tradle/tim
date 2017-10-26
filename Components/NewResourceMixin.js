@@ -195,13 +195,23 @@ var NewResourceMixin = {
     if (!requestedProperties  &&  data)
       requestedProperties = this.getRequestedProperties(data)
     if (requestedProperties) {
+      if (!params.errors)
+        params.errors = {}
       for (let p in requestedProperties) {
-        if (!eCols[p]) {
-          let idx = p.indexOf('_group')
-          eCols[p] = props[p]
-          if (idx !== -1  &&  props[p].list)
-            props[p].list.forEach((pp) => eCols[pp] = props[pp])
+        if (eCols[p])
+          this.addError(params)
+          continue
         }
+        let idx = p.indexOf('_group')
+        eCols[p] = props[p]
+        if (idx !== -1  &&  props[p].list) {
+          props[p].list.forEach((pp) => {
+            eCols[pp] = props[pp]
+            this.addError(params)
+          })
+        }
+        else
+          this.addError(params)
       }
     }
     else if (data) {
@@ -515,6 +525,14 @@ var NewResourceMixin = {
     }
     return options;
   },
+  addError(params) {
+    let { errs } = this.props
+    let { errors } = this.params
+    if (errs)
+      errs[p] = ''
+    if (!errors[p])
+      errors[p] = translate('thisFieldIsRequired')
+  }
   getNextKey() {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
