@@ -16,8 +16,7 @@ function restarter () {
 }
 
 function submitLog () {
-  const { submitLog } = require('./utils')
-  submitLog()
+  return require('./utils').submitLog()
 }
 
 async function reporter (error, isFatal) {
