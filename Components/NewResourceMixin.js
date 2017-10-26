@@ -192,7 +192,7 @@ var NewResourceMixin = {
         params.errors = {}
       for (let p in requestedProperties) {
         if (eCols[p]) {
-          this.addError(params)
+          this.addError(p, params)
           continue
         }
         let idx = p.indexOf('_group')
@@ -200,11 +200,11 @@ var NewResourceMixin = {
         if (idx !== -1  &&  props[p].list) {
           props[p].list.forEach((pp) => {
             eCols[pp] = props[pp]
-            this.addError(params)
+            this.addError(p, params)
           })
         }
         else
-          this.addError(params)
+          this.addError(p, params)
       }
     }
     else if (data) {
