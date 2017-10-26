@@ -532,7 +532,7 @@ var NewResourceMixin = {
       errs[p] = ''
     if (!errors[p])
       errors[p] = translate('thisFieldIsRequired')
-  }
+  },
   getNextKey() {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
