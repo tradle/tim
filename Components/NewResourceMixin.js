@@ -517,6 +517,14 @@ var NewResourceMixin = {
     }
     return options;
   },
+  addError(params) {
+    let { errs } = this.props
+    let { errors } = this.params
+    if (errs)
+      errs[p] = ''
+    if (!errors[p])
+      errors[p] = translate('thisFieldIsRequired')
+  },
   getNextKey() {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
