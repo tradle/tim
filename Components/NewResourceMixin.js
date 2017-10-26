@@ -519,7 +519,7 @@ var NewResourceMixin = {
   },
   addError(params) {
     let { errs } = this.props
-    let { errors } = this.params
+    let { errors } = params
     if (errs)
       errs[p] = ''
     if (!errors[p])
