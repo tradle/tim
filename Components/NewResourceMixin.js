@@ -517,7 +517,7 @@ var NewResourceMixin = {
     }
     return options;
   },
-  addError(params) {
+  addError(p, params) {
     let { errs } = this.props
     let { errors } = params
     if (errs)
