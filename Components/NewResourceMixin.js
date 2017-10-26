@@ -198,7 +198,7 @@ var NewResourceMixin = {
       if (!params.errors)
         params.errors = {}
       for (let p in requestedProperties) {
-        if (eCols[p])
+        if (eCols[p]) {
           this.addError(params)
           continue
         }
