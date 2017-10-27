@@ -210,8 +210,12 @@ var RowMixin = {
       return false
     if (to[constants.TYPE] === constants.TYPES.PROFILE)
       return false
-    if (utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(to)) {
-      if (utils.getId(resource.from) === utils.getId(utils.getMe()))
+    if (utils.isContext(to[constants.TYPE])) {
+      if (utils.isReadOnlyChat(to)) {
+        if (utils.getId(resource.from) === utils.getId(utils.getMe()))
+          return false
+      }
+      else
         return false
     }
     return utils.getId(resource.organization) !== utils.getId(to)

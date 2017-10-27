@@ -210,13 +210,8 @@ class MessageRow extends Component {
       }
     }
     // HACK
-<<<<<<< HEAD
     var w = utils.dimensions().width
     let msgWidth = utils.getMessageWidth(MessageRow)
-=======
-    let w = utils.dimensions(MessageRow).width
-    let msgWidth = w * 0.8
->>>>>>> origin/master
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
     let sendStatus
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
@@ -303,7 +298,6 @@ class MessageRow extends Component {
     photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
 
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7', whiteSpace: 'pre-wrap' }
-    var model = utils.getModel(this.props.resource[TYPE]).value;
     var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     let contextId = this.getContextId(resource)
