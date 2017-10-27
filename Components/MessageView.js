@@ -369,7 +369,7 @@ class MessageView extends Component {
                     </View>
                   </View>
 
-    var checkProps = this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
+    var checkProps = !isVerification && this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
     var actionPanel
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
@@ -482,22 +482,27 @@ class MessageView extends Component {
   }
 
   verify() {
-    this.props.navigator.pop();
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[TYPE]).value;
-    var me = utils.getMe();
-    var from = this.props.resource.from;
+    let { navigator, resource } = this.props
+    navigator.pop();
+    let model = utils.getModel(resource[TYPE]).value;
+    let me = utils.getMe();
+    let from = resource.from;
     let document = {
       id: utils.getId(resource),
       title: resource.message ? resource.message : model.title
     }
-    var to = [utils.getId(from)]
+    let to = [utils.getId(from)]
     if (utils.isReadOnlyChat(resource))
-      to.push(utils.getId(this.props.resource.to))
-
-    let params = {to: to, document: document}
-    if (this.props.resource._context)
-      params.context = this.props.resource._context
+      to.push(utils.getId(resource.to))
+    let r = {
+      [TYPE]: VERIFICATION,
+      document: document,
+      from: utils.getMe(),
+      to: resource.to
+    }
+    let params = {to: to, r: r}
+    if (resource._context)
+      params.context = resource._context
     Actions.addVerification(params)
   }
 }
