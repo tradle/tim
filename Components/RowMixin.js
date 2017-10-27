@@ -117,7 +117,7 @@ var RowMixin = {
   getOwnerPhoto(isMyMessage) {
     var to = this.props.to;
     let isSharedContext = utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(this.props.context)
-    if (/*Platform.OS !== 'android'  &&*/  !isSharedContext)
+    if (/*Platform.OS !== 'android'  &&*/  !isSharedContext  &&  !this.props.application)
       return <View/>
 
     let isContext = utils.isContext(to[constants.TYPE])

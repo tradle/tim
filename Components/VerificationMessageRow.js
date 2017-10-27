@@ -98,7 +98,7 @@ class VerificationMessageRow extends Component {
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
     var msgWidth = utils.getMessageWidth(VerificationMessageRow)
-    if (isReadOnlyChat)
+    if (isReadOnlyChat || this.props.application)
       msgWidth -= 50 // provider icon and padding
     let numberOfCharacters = msgWidth / 12
     if (verifiedBy.length > numberOfCharacters)
@@ -201,7 +201,7 @@ class VerificationMessageRow extends Component {
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={{position: 'absolute', right: isReadOnlyChat ? -50 : 0, top: -15}} />
+                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={{position: 'absolute', right: isReadOnlyChat ||  this.props.application ? -50 : 0, top: -15}} />
               </View>
               {this.getSendStatus()}
             </View>
