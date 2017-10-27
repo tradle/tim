@@ -234,6 +234,7 @@ class FormRequestRow extends Component {
                     </TouchableHighlight>
 
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
+    let contextId = this.getContextId(resource)
     return (
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: bg}]}>
         {date}
@@ -242,6 +243,7 @@ class FormRequestRow extends Component {
           {sendStatus}
           {shareables}
         </View>
+        {contextId}
       </View>
     )
     // return (

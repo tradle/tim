@@ -1711,8 +1711,9 @@ class GridList extends Component {
     // });
   }
   renderActionSheet() {
+    let { search, modelName, prop, isBacklink } = this.props
     let buttons
-    if (this.props.search) {
+    if (search) {
       buttons = [
         {
           text: translate('Bookmark'),
@@ -1721,11 +1722,11 @@ class GridList extends Component {
       ]
     }
     else if (this.state.allowToAdd) {
-      if (this.props.isBacklink)
+      if (isBacklink)
         return
       buttons = [
         {
-          text: translate('addNew', this.props.prop.title),
+          text: translate('addNew', prop.title),
           onPress: () => this.addNew()
         }
       ]
@@ -1738,7 +1739,7 @@ class GridList extends Component {
           onPress: () => this.onSettingsPressed()
         },
         {
-          text: translate('hideResource', translate(utils.getModel(this.props.modelName).value)),
+          text: translate('hideResource', translate(utils.getModel(modelName).value)),
           onPress: () => this.setState({hideMode: true})
         },
         {
