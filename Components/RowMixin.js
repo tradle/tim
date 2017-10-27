@@ -353,9 +353,10 @@ var RowMixin = {
     })
   }),
   getContextId(resource) {
-    return
-    if (__DEV__ && resource._context  &&  resource._context.contextId)
-      return <Text style={{fontSize: 16, color:'red'}}>{resource._context.contextId}</Text>
+    if (ENV.paintContextIds) {
+      if (resource._context  &&  resource._context.contextId)
+        return <Text style={{fontSize: 16, color:'red'}}>{resource._context.contextId}</Text>
+    }
   }
 }
 
