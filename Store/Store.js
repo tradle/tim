@@ -3504,10 +3504,13 @@ var Store = Reflux.createStore({
     let docStub = params.document || r.document
     let docId = utils.getId(docStub)
     let document = this._getItem(docId)
+    let docFromServer
     if (!document  &&  me.isEmployee) {
       document = await this._getItemFromServer(docId)
       if (!document)
         document = docStub
+      else
+        docFromServer = true
     }
     r.document = document
 
@@ -3634,7 +3637,7 @@ var Store = Reflux.createStore({
         this.trigger({action: 'addItem', resource: r});
       else
         this.trigger({action: 'addVerification', resource: r});
-      if (!doc)
+      if (!doc  ||  !docFromServer)
         return
 
       if (!r.txId) {
