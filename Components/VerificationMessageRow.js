@@ -231,10 +231,13 @@ class VerificationMessageRow extends Component {
     // else
     //   bg = bankStyle.BACKGROUND_COLOR
     var viewStyle = { margin: 1} //, backgroundColor: bg }
+    let contextId = this.getContextId(resource)
+
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}
         {messageBody}
+        {contextId}
       </View>
     );
   }
