@@ -581,6 +581,10 @@ class ResourceRow extends Component {
         iname = 'md-log-out'
         icolor = 'blue'
       }
+      else if (this.state.hasRM) {
+        iname = 'md-log-out'
+        icolor = 'blue'
+      }
       else {
         iname = 'md-log-in'
         icolor = resource.relationshipManager ? 'red' : 'green'
