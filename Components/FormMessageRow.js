@@ -219,6 +219,7 @@ class FormMessageRow extends Component {
               {renderedRow}
               {sentTo}
             </View>
+    let contextId = this.getContextId(resource)
 
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
     return (
@@ -233,6 +234,7 @@ class FormMessageRow extends Component {
             <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
           </View>
           {row}
+          {contextId}
         </View>
       </View>
     );
