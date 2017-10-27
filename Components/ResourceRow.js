@@ -570,7 +570,11 @@ class ResourceRow extends Component {
     if (status !== 'Approved'  &&  status !== 'Denied') {
       let icolor
       let iname
-      if (resource.relationshipManager &&  utils.isRM(resource)) {
+      if (resource.relationshipManager) {
+        iname = 'md-log-out'
+        icolor = utils.isRM(resource) ? 'blue' : 'red'
+      }
+      else if (this.state.hasRM) {
         iname = 'md-log-out'
         icolor = 'blue'
       }
