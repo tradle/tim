@@ -2918,10 +2918,10 @@ var Store = Reflux.createStore({
     // }
     // if (!r.to[TYPE])
     //   r.to = this._getItem(r.to)
-    let isReadOnlyContext
+    let isReadOnlyContext, orgId, orgRep
     if (toType === ORGANIZATION) {
-      var orgId = utils.getId(r.to)
-      var orgRep = this.getRepresentative(orgId)
+      orgId = utils.getId(r.to)
+      orgRep = this.getRepresentative(orgId)
       // if (me.isEmployee  &&  utils.getId(me.organization) === orgId)
       //   return
       if (!orgRep) {
@@ -3459,17 +3459,20 @@ var Store = Reflux.createStore({
         messages.splice(idx, 1)
     }
   },
-  getRepresentatives(orgId) {
-    var result = this.searchNotMessages({modelName: PROFILE, all: true})
-    var orgRep = [];
-    result.some((ir) =>  {
-      if (!ir.organization) return
+  getRepresentatives(org) {
+    let rep = this.getRepresentative(org)
+    return rep ? [rep] : []
+    // let orgId = typeof org === 'string' ? org : utils.getId(org)
+    // var result = this.searchNotMessages({modelName: PROFILE, all: true})
+    // var orgRep = [];
+    // result.some((ir) =>  {
+    //   if (!ir.organization) return
 
-      if (utils.getId(ir.organization) === orgId)
-        orgRep.push(ir)
-    })
+    //   if (utils.getId(ir.organization) === orgId)
+    //     orgRep.push(ir)
+    // })
 
-    return orgRep.length ? orgRep : null
+    // return orgRep.length ? orgRep : null
   },
 
   getRepresentative(orgId) {
@@ -4108,7 +4111,7 @@ var Store = Reflux.createStore({
       resource[CUR_HASH] = protocol.linkString(resource)
 
     var checkPublish
-    try {
+    // try {
     // var isBecomingEmployee = isNew ? false : await becomingEmployee(resource)
     // if (isBecomingEmployee) {
     //   if (isBecomingEmployee.error) {
@@ -4251,17 +4254,18 @@ var Store = Reflux.createStore({
     }
     // if (!isSelfIntroduction  &&  !doneWithMultiEntry)
     //   resource = utils.optimizeResource(resource, true)
-
-    let allFoundRefs = foundRefs.concat(results);
-    allFoundRefs.forEach((val) => {
-      if (val.state !== 'fulfilled')
-        return
-      var value = val.value;
-      var propValue = utils.getId(value)
-      var propsToSet = refProps[propValue];
-      propsToSet.forEach((p) => json[p] = this.buildRef(value, true))
-    })
-
+    if (refProps) {
+      let allFoundRefs = foundRefs.concat(results);
+      allFoundRefs.forEach((val) => {
+        if (val.state !== 'fulfilled')
+          return
+        var value = val.value;
+        var propValue = utils.getId(value)
+        var propsToSet = refProps[propValue];
+        if (propsToSet)
+          propsToSet.forEach((p) => json[p] = this.buildRef(value, true))
+      })
+    }
     // var isMessage = utils.isMessage(meta)
     if (isMessage  &&  !json._documentCreated  &&  (!isRemediation ||  !json.time))
       json.time = new Date().getTime();
@@ -4321,66 +4325,29 @@ var Store = Reflux.createStore({
     else
       await save(returnVal) //, isBecomingEmployee)
     if (disableFormRequest) {
-        let fr =  this._getItem(disableFormRequest)
-        if (!fr._documentCreated) {
-          let addDocumentCreated
-          if (fr[TYPE] === FORM_REQUEST) {
-            let form = fr.form || disableFormRequest.form
-            addDocumentCreated = form === resource[TYPE]
-          }
-          else if (fr[TYPE] === FORM_ERROR) {
-            let prefillForm = fr.prefill || disableFormRequest
-            addDocumentCreated = prefillForm.prefill[TYPE] === resource[TYPE]
-          }
-          if (addDocumentCreated) {
-            fr._documentCreated = true
-            fr._document = utils.getId(resource) /// NEW
-            let key = utils.getId(fr)
-            self._setItem(key, fr)
-            self.dbPut(key, fr)
-            self.trigger({action: 'addItem', resource: fr})
-          }
+      let fr =  this._getItem(disableFormRequest)
+      if (!fr._documentCreated) {
+        let addDocumentCreated
+        if (fr[TYPE] === FORM_REQUEST) {
+          let form = fr.form || disableFormRequest.form
+          addDocumentCreated = form === resource[TYPE]
         }
+        else if (fr[TYPE] === FORM_ERROR) {
+          let prefillForm = fr.prefill || disableFormRequest
+          addDocumentCreated = prefillForm.prefill[TYPE] === resource[TYPE]
+        }
+        if (addDocumentCreated) {
+          fr._documentCreated = true
+          fr._document = utils.getId(resource) /// NEW
+          let key = utils.getId(fr)
+          self._setItem(key, fr)
+          self.dbPut(key, fr)
+          self.trigger({action: 'addItem', resource: fr})
+        }
+      }
       //   })
       // }
     }
-    // if (isBecomingEmployee) {
-    //   let orgId = utils.getId(resource.organization)
-    //   let orgRep = self.getRepresentative(orgId)
-    //   let contextId = this.getNonce()
-    //   let msg = {
-    //     [TYPE]: PRODUCT_REQUEST,
-    //     requestFor: EMPLOYEE_ONBOARDING,
-    //     time: new Date().getTime(),
-    //     contextId: contextId
-    //   }
-    //   self.trigger({action: 'employeeOnboarding', to: this._getItem(orgId)})
-    //   let data = await meDriver.createObject({object: msg})
-
-    //   let hash = data.link
-    //   msg = utils.clone(msg)
-    //   msg[CUR_HASH] = hash
-    //   msg[ROOT_HASH] = hash
-    //   msg._context = self.buildRef(msg)
-    //   msg.to = self.buildRef(orgRep)
-    //   msg.from = self.buildRef(me)
-
-    //   let sendParams = {
-    //     link: hash,
-    //     to: { permalink: orgRep[ROOT_HASH] },
-    //     other: { context: contextId }
-    //   }
-    //   self._setItem(utils.getId(msg), msg)
-    //   self.addMessagesToChat(orgId, msg)
-    //   try {
-    //     await self.meDriverSend(sendParams)
-    //   }
-    //   catch(err) {
-    //     console.log('Store.onAddItem: ' + err.message)
-    //     debugger
-    //   }
-    // }
-    // else
     if (cb) {
       if (returnVal[TYPE] !== SETTINGS)
         cb(returnVal)
@@ -4392,26 +4359,27 @@ var Store = Reflux.createStore({
         })
       }
     }
-    } catch (err) {
-      debugger
-      debug('onAddItem', err.stack)
-    }
+    // }
+    // catch (err) {
+    //   debugger
+    //   debug('onAddItem', err.stack)
+    // }
     function handleRegistration () {
       self.trigger({action: 'runVideo'})
       return Q.all([
-          self.loadDB(),
-          utils.resetPasswords()
-        ])
-        .then(function () {
-          return self.getDriver(returnVal)
-        })
-        .then(function () {
-          if (!resource || isNew) {
-            returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
-          }
+        self.loadDB(),
+        utils.resetPasswords()
+      ])
+      .then(function () {
+        return self.getDriver(returnVal)
+      })
+      .then(function () {
+        if (!resource || isNew) {
+          returnVal[ROOT_HASH] = protocol.linkString(meDriver.identity)
+        }
 
-          return save(returnVal)
-        })
+        return save(returnVal)
+      })
     }
 
     async function handleMessage (noTrigger, returnVal) {
@@ -4639,12 +4607,18 @@ var Store = Reflux.createStore({
 
         if (returnVal[TYPE] === ASSIGN_RM) {
           let app = self._getItem(returnVal.application)
-          if (!app) {
-            app = returnVal.application
-            if (!app.id)
+          let appToUpdate
+          if (app)
+            appToUpdate = utils.clone(app)
+          else {
+            app = await self._getItemFromServer(returnVal.application)
+            if (!app)
+              appToUpdate = utils.clone(returnVal.applications)
+            else {
+              appToUpdate = app
               self._setItem(app)
+            }
           }
-          let appToUpdate = utils.clone(app)
           appToUpdate.relationshipManager = self._makeIdentityStub(me)
           self.trigger({action: 'updateRow', resource: appToUpdate })
         //   self.dbPut(utils.getId(app), app)
@@ -4902,10 +4876,12 @@ var Store = Reflux.createStore({
     // if (document.verifications)
     //   verifications = document.verifications
 
+    if (!document._context)
+      document._context = formResource._context
     let shareBatchId = new Date().getTime()
     let doShareDocument = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
     if (doShareDocument) {
-      let errorMsg = await this.shareForm(document, to, opts, formResource, shareBatchId)
+      let errorMsg = await this.shareForm(document, to, formResource, shareBatchId)
       if (errorMsg) {
         this.trigger({action: 'addItem', errorMsg: 'Sharing failed: ' + errorMsg, resource: document, to: this._getItem(toOrgId)})
         return
@@ -4950,12 +4926,15 @@ var Store = Reflux.createStore({
     for (let i=0; i<all; i++) {
       // let ver = this._getItem(verifications[i])
       let ver = verifications[i]
-      await this.shareVerification(ver, to, opts, shareBatchId)
       let vId = utils.getId(ver)
-      let v = this._getItem(vId)
+      if (!ver._context)
+        ver._context = formResource._context
+      await this.shareVerification(ver, to, formResource, shareBatchId)
       // Check if Verification was created by different employee
+      let v = this._getItem(vId)
       if (!v)
         this._setItem(vId, ver)
+
       this.dbBatchPut(vId, ver, batch)
     }
     if (!doShareDocument)
@@ -4963,7 +4942,7 @@ var Store = Reflux.createStore({
 
     db.batch(batch)
   },
-  shareForm(document, to, opts, shareBatchId) {
+  shareForm(document, to, formRequest, shareBatchId) {
     var time = new Date().getTime()
     let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
     // let d = this.getResourceToSend(document)
@@ -4977,8 +4956,10 @@ var Store = Reflux.createStore({
       }]
     }
     let msg = this.packMessage(sr, me, to)
+    if (!msg.other)
+      msg.other = {}
+    msg.other.context = formRequest._context.contextId
     msg.seal =  true
-    // return this.meDriverSend({...opts, object: d})
     return this.meDriverSignAndSend(msg)
     .then(() => {
       if (!document._sharedWith) {
@@ -5032,7 +5013,7 @@ var Store = Reflux.createStore({
     return d
   },
 
-  shareVerification(ver, to, opts, shareBatchId) {
+  shareVerification(ver, to, formRequest, shareBatchId) {
     var time = new Date().getTime()
     var toId = utils.getId(to)
     if (!ver._sharedWith)
@@ -5046,7 +5027,6 @@ var Store = Reflux.createStore({
     this.addVisualProps(ver)
     let toOrg = this._getItem(orgId)
     this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
-    // return this.meDriverSend({...opts, link: ver[CUR_HASH]})
     // let v = this.getResourceToSend(ver)
     // let msg = this.packMessage(v, me, to)
     let sr = {
@@ -5057,6 +5037,9 @@ var Store = Reflux.createStore({
       }]
     }
     let msg = this.packMessage(sr, me, to)
+    if (!msg.other)
+      msg.other = {}
+    msg.other.context = formRequest._context.contextId
     msg.seal =  true
     return this.meDriverSignAndSend(msg)
      .then(() => {
@@ -5792,6 +5775,15 @@ var Store = Reflux.createStore({
       extend(mr, rr)
       rr = mr
     }
+    // if (!rr._context  &&  rr[ROOT_HASH] !== rr[CUR_HASH]) {
+    //   let origRid = utils.makeId(rr[TYPE], rr[ROOT_HASH])
+    //   let origR = this._getItem(origRid)
+    //   if (origR  &&  origR._context) {
+    //     if (!origR._context.contextId)
+
+    //     rr._context = origR._context
+    //   }
+    // }
     this.addVisualProps(rr)
     return rr
   },
@@ -6373,8 +6365,18 @@ var Store = Reflux.createStore({
       let obj = utils.clone(object)
       extend(r, obj)
       self._setItem(rId, r)
-      if (r._context  &&  !utils.isContext(r[TYPE]))
-        r._context = self._getItem(r._context)
+      if (r._context  &&  !utils.isContext(r[TYPE])) {
+        let rcontext = self._getItem(r._context)
+        if (!rcontext) {
+          let rcontextId = utils.getId(r._context)
+          rcontext = refsObj[rcontextId]
+          if (!rcontextId) {
+            rcontext = self._getItemFromServer(rcontextId)
+            refsObj[rcontextId] = rcontext
+          }
+        }
+        r._context = rcontext
+      }
       // list = self.transformResult(result)
 
       if (refs.indexOf(r[CUR_HASH]) !== -1)
@@ -8662,16 +8664,16 @@ var Store = Reflux.createStore({
     }
     return representativeAddedTo
   },
-  isThirdPartyResource(r) {
-    if (!r._context)
-      return
-    let context = this._getItem(r._context)
-    let contextTo = this._getItem(context.to).organization // this._getItem(document.to).organization
-    let rFrom = this._getItem(r.from).organization
+  // isThirdPartyResource(r) {
+  //   if (!r._context)
+  //     return
+  //   let context = this._getItem(r._context)
+  //   let contextTo = this._getItem(context.to).organization // this._getItem(document.to).organization
+  //   let rFrom = this._getItem(r.from).organization
 
-    if (utils.getId(rFrom)  !==  utils.getId(contextTo))  //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
-      return true
-  },
+  //   if (utils.getId(rFrom)  !==  utils.getId(contextTo))  //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
+  //     return true
+  // },
 
   async putMessageInDB(val, obj, batch, onMessage) {
     let self = this
@@ -8740,12 +8742,11 @@ var Store = Reflux.createStore({
     // HACK for showing verification in employee's chat
     if (type === VERIFICATION) {
       let document = this._getItem(utils.getId(val.document))
-      // if (!document) {
-      //   debugger
-      //   if (me.isEmployee)
-      //     document = await this._getItemFromServer(utils.getId(val.document))
-      //   // return
-      // }
+      if (!document) {
+        debugger
+        if (me.isEmployee)
+          document = await this._getItemFromServer(utils.getId(val.document))
+      }
 
       // let context
       // if (contextId)
@@ -9447,7 +9448,7 @@ var Store = Reflux.createStore({
     }
     msg[ROOT_HASH] = sha(msg)
 
-    var reps = this.getRepresentatives(org)
+    var reps = this.getRepresentatives(orgId)
     var promises = []
     reps.forEach((r) =>
       promises.push(meDriver.forget(r[ROOT_HASH]))
@@ -10243,6 +10244,8 @@ var Store = Reflux.createStore({
     }
   },
   async _getItemFromServer(id) {
+    if (typeof id !== 'string')
+      id = utils.getId(id)
     try {
       let result = await graphQL._getItem(id, this.client)
       if (result)
