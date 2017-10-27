@@ -83,10 +83,15 @@ class ResourceRow extends Component {
     this.listenTo(Store, 'onRowUpdate');
   }
   onRowUpdate(params) {
-    if (params.action === 'connectivity')
+    if (params.action === 'connectivity') {
       this.setState({isConnected: params.isConnected})
-    else if (params.action === 'updateRow'  &&
-             params.resource[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
+      return
+    }
+    if (params.action !== 'updateRow')
+      return
+    //HACK
+    let hash = params.resource[ROOT_HASH] || params.resource.id.split('_')[1]
+    if (hash === this.props.resource[ROOT_HASH]) {
       if (params.forceUpdate)
         this.setState({forceUpdate: this.state.forceUpdate ? false : true})
       else
