@@ -114,16 +114,15 @@ var RowMixin = {
 
   },
   getOwnerPhoto(isMyMessage) {
-    var to = this.props.to;
-    let isSharedContext = utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(this.props.context)
-    if (/*Platform.OS !== 'android'  &&*/  !isSharedContext)
+    let { to, resource, application, context, bankStyle } = this.props
+    let isSharedContext = utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(context)
+    if (/*Platform.OS !== 'android'  &&*/  !isSharedContext  &&  !application)
       return <View/>
 
     let isContext = utils.isContext(to[constants.TYPE])
     if (!isContext && (isMyMessage  || !to /* ||  !to.photos*/))
       return <View style={{marginVertical: 0}}/>
 
-    let resource = this.props.resource
     let isVerification  = resource[constants.TYPE] === constants.TYPES.VERIFICATION
     if (!isMyMessage) {
       let photo = isVerification && resource._verifiedBy  &&  resource._verifiedBy.photo
@@ -152,7 +151,7 @@ var RowMixin = {
       }).join('');
 
       return <View style={{paddingRight: 3}}>
-               <View style={[{backgroundColor: this.props.bankStyle.linkColor}, styles.cellRoundImage]}>
+               <View style={[{backgroundColor: bankStyle.linkColor}, styles.cellRoundImage]}>
                  <Text style={styles.cellText}>{title}</Text>
                </View>
              </View>
