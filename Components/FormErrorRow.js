@@ -110,7 +110,7 @@ class FormErrorRow extends Component {
     let msgWidth = w * 0.8
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+    var viewStyle = {flexDirection: 'row'};
     if (message) {
       if (message.charAt(0) === '[')
         viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
@@ -175,7 +175,7 @@ class FormErrorRow extends Component {
     var model = utils.getModel(this.props.resource[TYPE]).value;
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     return (
-      <View style={[styles.viewStyle, {backgroundColor: bg, width: width}]}>
+      <View style={[styles.viewStyle, {backgroundColor: bg, width: width, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'}]}>
         {date}
         {messageBody}
         {sendStatus}
