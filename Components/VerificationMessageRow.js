@@ -45,9 +45,9 @@ class VerificationMessageRow extends Component {
            this.props.sendStatus !== nextProps.sendStatus
   }
   render() {
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE]).value;
-    var renderedRow = [];
+    let { resource, application, bankStyle } = this.props
+    let model = utils.getModel(resource[constants.TYPE]).value;
+    let renderedRow = [];
 
     var time = this.getTime(resource);
     var date = time
@@ -64,7 +64,7 @@ class VerificationMessageRow extends Component {
 
     let isThirdPartyVerification
     let isReadOnlyChat
-    if (this.props.resource._context) {
+    if (resource._context) {
       let context = this.props.context || this.props.resource._context
       let me = utils.getMe()
       if (me.isEmployee) {
@@ -82,7 +82,6 @@ class VerificationMessageRow extends Component {
     }
     let isShared = this.isShared()
     isMyMessage = isShared
-    let bankStyle = this.props.bankStyle
     let color
     let vHeaderTextColor
     if (isThirdPartyVerification) {
@@ -98,7 +97,7 @@ class VerificationMessageRow extends Component {
 
     var w = utils.dimensions(VerificationMessageRow).width
     let msgWidth = Math.min(Math.floor(w * 0.8), 600)
-    if (isReadOnlyChat)
+    if (isReadOnlyChat || application)
       msgWidth -= 50 // provider icon and padding
     let numberOfCharacters = msgWidth / 12
     if (verifiedBy.length > numberOfCharacters)
@@ -201,7 +200,7 @@ class VerificationMessageRow extends Component {
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={{position: 'absolute', right: isReadOnlyChat ? -50 : 0, top: -15}} />
+                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={{position: 'absolute', right: isReadOnlyChat || application ? -50 : 0, top: -15}} />
               </View>
               {this.getSendStatus()}
             </View>
