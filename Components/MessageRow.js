@@ -179,7 +179,7 @@ class MessageRow extends Component {
     let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
     let val = this.getTime(resource);
     let date = val
-             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
+             ? <Text style={chatStyles.date}>{val}</Text>
              : <View />;
 
     let showMessageBody;
