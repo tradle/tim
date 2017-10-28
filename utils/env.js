@@ -121,7 +121,8 @@ const merged = extend({
   analyticsEnabled: !__DEV__,
   deepLinkHost: 'link.tradle.io',
   appScheme: 'tradle',
-  yukiOn: true
+  yukiOn: true,
+  paintContextIds: false
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
