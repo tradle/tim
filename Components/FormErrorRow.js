@@ -111,7 +111,7 @@ class FormErrorRow extends Component {
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     var width = utils.getMessageWidth(FormErrorRow)
-    var viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start', width};
+    var viewStyle = {flexDirection: 'row', width};
     let sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
                      ? <View style={chatStyles.sealedStatus}>
@@ -183,7 +183,7 @@ class FormErrorRow extends Component {
     var model = utils.getModel(this.props.resource[TYPE]).value;
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     return (
-      <View style={[styles.viewStyle, {backgroundColor: bg, width: width}]}>
+      <View style={[styles.viewStyle, {backgroundColor: bg, width: width, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'}]}>
         {date}
         {messageBody}
         {sendStatus}
