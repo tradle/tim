@@ -176,9 +176,9 @@ class MessageRow extends Component {
         verPhoto = <View style={{height: 0, width:0}} />
     }
 
-    var rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
-    var val = this.getTime(resource);
-    var date = val
+    let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
+    let val = this.getTime(resource);
+    let date = val
              ? <Text style={chatStyles.date}>{val}</Text>
              : <View />;
 
