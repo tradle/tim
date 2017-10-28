@@ -3637,7 +3637,7 @@ var Store = Reflux.createStore({
         this.trigger({action: 'addItem', resource: r});
       else
         this.trigger({action: 'addVerification', resource: r});
-      if (!doc  ||  !docFromServer)
+      if (!doc  ||  docFromServer)
         return
 
       if (!r.txId) {
@@ -6170,6 +6170,8 @@ var Store = Reflux.createStore({
       //Object.keys(list).forEach(key => {
       allMessages.forEach((res, i) => {
         let r = self._getItem(res.id)
+        if (!r)
+          return
         let type = r[TYPE]
         let m = self.getModel(type)
         if (!m) return
