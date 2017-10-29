@@ -311,7 +311,7 @@ class ShowPropertiesView extends Component {
       let style = [styles.textContainer, {padding: 10}]
       if (isDirectionRow) {
         style.push({flexDirection: 'row'})
-        if (canReject)
+        if (checkForCorrection)
           style.push({justifyContent: 'space-between', flex: 10})
       }
       else
@@ -323,7 +323,7 @@ class ShowPropertiesView extends Component {
                    {title}
                    {val}
                  </View>
-                 {canReject}
+                 {checkForCorrection}
                </View>
              </View>
              );
