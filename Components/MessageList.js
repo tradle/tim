@@ -105,7 +105,8 @@ class MessageList extends Component {
     }
   }
   hasChatContext() {
-    let { application, resource, allContexts } = this.props
+    let { resource, allContexts } = this.props
+    let application = this.state.application || this.props.application
     let context = this.state.context || this.props.context  ||  (application && application._context)
     if (!context  ||  context.product === REMEDIATION)
       return false
@@ -200,7 +201,13 @@ class MessageList extends Component {
         this.setState({productToForms: productToForms})
       return
     }
+    let { application, modelName, bankStyle, navigator, originatingMessage } = this.props
 
+    if (action === 'assignRM_Confirmed') {
+      if (application  &&  !utils.getId(application) === utils.getId(params.application))
+        this.setState({application: params.application})
+      return
+    }
     let rtype = resource  &&  resource[TYPE]
     if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
       let rtype = resource[TYPE]
@@ -240,7 +247,7 @@ class MessageList extends Component {
 
       let actionParams = {
         query: this.state.filter,
-        modelName: this.props.modelName,
+        modelName: modelName,
         to: chatWith,
         context: this.state.allContexts ? null : this.state.context,
         limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
@@ -313,9 +320,9 @@ class MessageList extends Component {
       this.setState(state)
 
       if (action === 'addVerification') {
-        if (this.props.originatingMessage  &&  this.props.originatingMessage.verifiers)  {
+        if (originatingMessage  &&  originatingMessage.verifiers)  {
           let docType = utils.getId(resource.document).split('_')[0]
-          this.state.verifiedByTrustedProvider = this.props.originatingMessage.form === docType
+          this.state.verifiedByTrustedProvider = originatingMessage.form === docType
                                                ? resource
                                                : null
         }
@@ -325,8 +332,7 @@ class MessageList extends Component {
       // Actions.list(actionParams)
       return;
     }
-    let {sendStatus} = params
-
+    let { sendStatus, isAggregation, forgetMeFromCustomer, context, list, loadEarlierMessages } = params
     this.state.newItem = false
     if (action === 'updateItem') {
       let resourceId = utils.getId(resource)
@@ -343,40 +349,22 @@ class MessageList extends Component {
         list.push(resource)
 
       this.setState({
-        // sendStatus: sendStatus,
-        // sendResource: resource,
         list: list
       })
       return
     }
-    // if (action === 'addMessage') {
-    //   this.state.sendStatus = resource._sendStatus
-    //   this.state.sendResource = resource
-    //   Actions.list({
-    //     modelName: this.props.modelName,
-    //     to: chatWith,
-    //     limit: this.state.list ? this.state.list.length + 1 : LIMIT,
-    //     context: this.state.allContexts ? null : this.state.context
-    //   });
-    //   return
-    // }
-    let { isAggregation } = params
-    if (isAggregation !== this.props.isAggregation)
+    if (isAggregation !== isAggregation)
       return
     if (action !== 'messageList')
       return
 
-    let { forgetMeFromCustomer} = params
-
     if (forgetMeFromCustomer) {
       Actions.list({modelName: PROFILE})
-      let routes = this.props.navigator.getCurrentRoutes()
+      let routes = navigator.getCurrentRoutes()
       if (routes[routes.length - 1].component )
-      this.props.navigator.popToRoute(routes[1])
+      navigator.popToRoute(routes[1])
       return
     }
-    let { context, list, loadEarlierMessages } = params
-
     if (resource  &&  resource[ROOT_HASH] != chatWith[ROOT_HASH]) {
       let doUpdate
       if (chatWith[TYPE] === ORGANIZATION  &&  resource.organization) {
@@ -414,17 +402,17 @@ class MessageList extends Component {
     if (!list  &&  !forgetMeFromCustomer)
       return
 
-    LINK_COLOR = this.props.bankStyle  &&  this.props.bankStyle.linkColor
+    LINK_COLOR = bankStyle  &&  bankStyle.linkColor
     let isEmployee = utils.isEmployee(chatWith)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let type = list[0][TYPE];
-      if (type  !== this.props.modelName) {
-        let model = utils.getModel(this.props.modelName).value;
+      if (type  !== modelName) {
+        let model = utils.getModel(modelName).value;
         if (!model.isInterface)
           return;
 
         let rModel = utils.getModel(type).value;
-        if (!rModel.interfaces  ||  rModel.interfaces.indexOf(this.props.modelName) === -1)
+        if (!rModel.interfaces  ||  rModel.interfaces.indexOf(modelName) === -1)
           return;
       }
       let me = utils.getMe()
