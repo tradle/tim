@@ -2314,7 +2314,7 @@ var Store = Reflux.createStore({
 
   announcePresence() {
     let l = this.searchNotMessages({modelName: ORGANIZATION})
-    this.trigger({ action: 'list', list: l })
+    this.trigger({ action: 'list', list: l, modelName: ORGANIZATION })
   },
 
   onPairingRequestAccepted(payload) {
@@ -2474,6 +2474,7 @@ var Store = Reflux.createStore({
       this.trigger({
         action: 'list',
         list: list,
+        modelName: ORGANIZATION
       })
 
       return results
@@ -5256,7 +5257,7 @@ var Store = Reflux.createStore({
       if (!result) {
         // First time. No connection no providers yet loaded
         if (!this.isConnected  &&  isOrg)
-          this.trigger({action: 'list', alert: translate('noConnection'), first: first})
+          this.trigger({action: 'list', alert: translate('noConnection'), first: first, modelName: modelName})
         return
       }
       if (!SERVICE_PROVIDERS)
@@ -5283,6 +5284,7 @@ var Store = Reflux.createStore({
                     : { action: sponsorName ? 'sponsorsList' : 'list',
                         list: result,
                         isTest: isTest,
+                        modelName: modelName,
                         spinner: spinner,
                         isAggregation: isAggregation
                       }
@@ -5307,6 +5309,7 @@ var Store = Reflux.createStore({
             to: to,
             loadEarlierMessages: true,
             first: first,
+            modelName: modelName,
             isAggregation: isAggregation
           })
       return
@@ -5333,6 +5336,7 @@ var Store = Reflux.createStore({
       action: !listView  &&  !prop && !_readOnly && modelName !== BOOKMARK ? 'messageList' : 'list',
       list: result,
       spinner: spinner,
+      modelName: modelName,
       to: to,
       isAggregation: isAggregation
     }
@@ -5654,7 +5658,7 @@ var Store = Reflux.createStore({
       // HACK
       forms = forms  &&  forms.filter((r) => r)
       if (!forms  ||  !forms.length) {
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first, message: 'Forms were not found'})
+        this.trigger({action: 'list', modelName: modelName, resource: filterResource, isSearch: true, direction: direction, first: first, message: 'Forms were not found'})
         return
       }
       let formIds = []
@@ -5706,7 +5710,7 @@ var Store = Reflux.createStore({
     let result = await graphQL.searchServer(params)
     if (!result) {
       if (!noTrigger)
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
+        this.trigger({action: 'list', modelName, resource: filterResource, isSearch: true, direction: direction, first: first})
       return
     }
         // if (result.edges.length < limit)
@@ -5748,7 +5752,7 @@ var Store = Reflux.createStore({
 
     }
     if (!noTrigger)
-      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
+      this.trigger({action: 'list', modelName, list: list, resource: filterResource, direction: direction, first: first})
     return list
   },
   convertToResource(r) {
@@ -7736,7 +7740,7 @@ var Store = Reflux.createStore({
       sharedWithOrg.lastMessageTime = value.time
       sharedWithOrg.lastMessageType = messageType
       batch.push({type: 'put', key: utils.getId(sharedWithOrg), value: sharedWithOrg});
-      this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
+      this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
       return
     }
 
@@ -7790,7 +7794,7 @@ var Store = Reflux.createStore({
     r.lastMessageTime = value.time;
     r.lastMessageType = messageType
     batch.push({type: 'put', key: utils.getId(r), value: r});
-    this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
+    this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
   },
 
   addBacklinksTo(action, resource, msg, batch) {
@@ -8605,7 +8609,7 @@ var Store = Reflux.createStore({
     }
     else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
       var orgList = this.searchNotMessages({modelName: ORGANIZATION})
-      this.trigger({action: 'list', list: orgList, forceUpdate: true})
+      this.trigger({action: 'list', modelName: ORGANIZATION, list: orgList, forceUpdate: true})
     }
     else if (!isMessage  &&  val[TYPE] === PARTIAL)
       this.trigger({action: 'hasPartials'})
@@ -9343,8 +9347,8 @@ var Store = Reflux.createStore({
       for (var s in sameContactList)
         delete orgContacts[s]
       if (!utils.isEmpty(orgContacts)) {
-        var results = this.searchNotMessages({modelName: constants.TYPES.ORGANIZATION})
-        self.trigger({action: 'list', list: results})
+        var results = this.searchNotMessages({modelName: ORGANIZATION})
+        self.trigger({action: 'list', modelName: ORGANIZATION, list: results})
       }
 
       console.log('Stream ended');
@@ -9650,7 +9654,7 @@ var Store = Reflux.createStore({
       org.lastMessageTime = null
       org.lastMessageType = null
       org.numberOfForms = 0
-      self.trigger({action: 'list', list: self.searchNotMessages({modelName: ORGANIZATION, to: org})})
+      self.trigger({action: 'list', modelName: ORGANIZATION, list: self.searchNotMessages({modelName: ORGANIZATION/*, to: org*/})})
       batch.push({type: 'put', key: orgId, value: org})
       if (batch.length)
         return db.batch(batch)
@@ -9771,7 +9775,7 @@ var Store = Reflux.createStore({
       resource.lastMessage = translate('requestedForgetMe')
       resource.lastMessageTime = new Date().getTime()
       resource.lastMessageType = FORGET_ME
-      this.trigger({action: 'list', list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
+      this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
 
       batch.push({type: 'put', key: rId, value: resource})
       db.batch(batch)
