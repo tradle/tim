@@ -42,7 +42,6 @@ class ShowPropertiesView extends Component {
     resource: PropTypes.object.isRequired,
     checkProperties: PropTypes.func,
     currency: PropTypes.string,
-    showRefResources: PropTypes.func,
     bankStyle: PropTypes.object,
     errorProps: PropTypes.object,
     excludedProperties: PropTypes.array
@@ -83,17 +82,15 @@ class ShowPropertiesView extends Component {
       let exclude = ['from', 'to']
       if (vCols)
         vCols = utils.clone(vCols)
-      // if (!vCols) {
-        vCols = []
-        for (var p in resource) {
-          if (p.charAt(0) === '_'  ||  !props[p])
-            continue
-          if (exclude.indexOf(p) === -1  && vCols.indexOf(p) === -1)
-            vCols.push(p)
-        }
-      // }
-      // else
-        vCols = utils.ungroup(model, vCols)
+      vCols = []
+      for (var p in resource) {
+        if (p.charAt(0) === '_'  ||  !props[p])
+          continue
+        if (exclude.indexOf(p) === -1  && vCols.indexOf(p) === -1)
+          vCols.push(p)
+      }
+
+      vCols = utils.ungroup(model, vCols)
       let v = []
       vCols.forEach((p) => {
         if (p.charAt(0) === '_'  ||  props[p].hidden) //  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
@@ -104,6 +101,21 @@ class ShowPropertiesView extends Component {
         //   props[p].list.forEach((p) => v.push(p))
       })
       vCols = v
+    }
+    else if (vCols)
+      vCols = utils.ungroup(model, vCols)
+    else {
+      let v = []
+      vCols.forEach((p) => {
+        if (p.charAt(0) === '_'  ||  props[p].hidden) //  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
+          return
+        v.push(p)
+        // let idx = p.indexOf('_group')
+        // if (idx !== -1  &&  idx === p.length - 6)
+        //   props[p].list.forEach((p) => v.push(p))
+      })
+      vCols = v
+
     }
 
     var excludedProperties = this.props.excludedProperties;
@@ -226,16 +238,9 @@ class ShowPropertiesView extends Component {
         }
       }
 
-      // else if (pMeta[constants.SUB_TYPE] === 'email') {
-      //   isEmail = true
-      //   val = <TouchableOpacity onPress={() => Communications.email([val], null, null, 'My Subject','My body text')}>
-      //       <Text  style={[styles.title, styles.linkTitle]}>{val}</Text>
-      //   </TouchableOpacity>
-
-      // }
-
       if (isUndefined)
         return //<View key={this.getNextKey()}></View>;
+      let checkForCorrection = this.getCheckForCorrection(pMeta)
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
           let labels = []
@@ -279,10 +284,14 @@ class ShowPropertiesView extends Component {
             return
           if (utils.getModel(pMeta.items.ref).value.subClassOf === ENUM) {
             let values = val.map((v) => utils.getDisplayName(v)).join(', ')
-            return <View style={{paddingLeft: 10}} key={this.getNextKey()}>
-                     <Text style={[styles.title]}>{pMeta.title}</Text>
-                     <Text style={[styles.description]}>{values}</Text>
+            return <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                     <View style={{paddingLeft: 10}} key={this.getNextKey()}>
+                       <Text style={[styles.title]}>{pMeta.title}</Text>
+                       <Text style={[styles.description]}>{values}</Text>
+                     </View>
+                     {checkForCorrection}
                   </View>
+
           }
         }
         val = this.renderSimpleProp(val, pMeta, modelName, ShowPropertiesView)
@@ -290,34 +299,11 @@ class ShowPropertiesView extends Component {
       var title
       if (!pMeta.skipLabel  &&  !isItems)
         title = <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-      var separator = <View/>
-      // var separator = first
-      //               ? <View />
-      //               : <View style={styles.separator}></View>;
 
       first = false;
       let isPromptVisible = this.state.promptVisible !== null
       if (isPromptVisible)
         console.log(this.state.promptVisible)
-      let canReject
-      if (this.props.checkProperties) {
-        canReject = <View style={styles.checkProperties}>
-                      <TouchableOpacity underlayColor='transparent' onPress={() => {
-                        this.setState({promptVisible: pMeta})
-                      }}>
-                        <Icon key={p} name={this.props.errorProps && this.props.errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && this.props.errorProps[p] ? 'red' : this.props.bankStyle.linkColor} style={{marginTop: 10}}/>
-                      </TouchableOpacity>
-                      <Prompt
-                        title={translate('fieldErrorMessagePrompt')}
-                        placeholder={translate('thisValueIsInvalidPlaceholder')}
-                        visible={isPromptVisible}
-                        onCancel={() => this.setState({ promptVisible: null })}
-                        onSubmit={(value) => {
-                          this.setState({ promptVisible: null})
-                          this.props.checkProperties(this.state.promptVisible, value)
-                        }}/>
-                    </View>
-      }
       if (this.props.checkProperties)
         isDirectionRow = true
                // <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -332,7 +318,6 @@ class ShowPropertiesView extends Component {
         style.push({flexDirection: 'column'})
 
       return (<View key={this.getNextKey()}>
-               {separator}
                <View style={isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}}>
                  <View style={[style, {flexDirection: 'column'}]}>
                    {title}
@@ -343,8 +328,6 @@ class ShowPropertiesView extends Component {
              </View>
              );
     });
-    // if (!resource.txId)
-    //   resource.txId = 'oqiuroiuouodifugidfgodigu'
     if (resource.txId) { // || utils.isSealableModel(model)) {
       let bankStyle = this.props.bankStyle
 
@@ -393,19 +376,33 @@ class ShowPropertiesView extends Component {
             {row}
           </View>
         )
-      // viewCols.push(<View key={this.getNextKey()}>
-      //                 <View style={[styles.textContainer, {padding: 10}]}>
-      //                  <Text style={styles.title}>{translate('dataSecurity')}</Text>
-      //                  <TouchableOpacity onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>
-      //                    <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 1'}</Text>
-      //                  </TouchableOpacity>
-      //                  <TouchableOpacity onPress={this.onPress.bind(this, 'https://test-insight.bitpay.com/tx/' + resource.txId)}>
-      //                    <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate('independentBlockchainViewer') + ' 2'}</Text>
-      //                  </TouchableOpacity>
-      //                 </View>
-      //               </View>)
     }
     return viewCols;
+  }
+  getCheckForCorrection(pMeta) {
+    let { checkProperties, errorProps, bankStyle, width } = this.props
+    if (!checkProperties)
+      return
+    let p = pMeta.name
+    let isPromptVisible = this.state.promptVisible !== null
+
+    return <View style={styles.iconView}>
+              <TouchableOpacity underlayColor='transparent' onPress={() => {
+                this.setState({promptVisible: pMeta})
+              }}>
+                <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'red' : bankStyle.linkColor} style={{marginTop: 10}}/>
+              </TouchableOpacity>
+              <Prompt
+                promptStyle={{ width: width / 1.5 }}
+                title={translate('fieldErrorMessagePrompt')}
+                placeholder={translate('thisValueIsInvalidPlaceholder')}
+                visible={isPromptVisible}
+                onCancel={() => this.setState({ promptVisible: null })}
+                onSubmit={(value) => {
+                  this.setState({ promptVisible: null})
+                  this.props.checkProperties(this.state.promptVisible, value)
+                }}/>
+           </View>
   }
   getBlockchainExplorerRow(url, i) {
     const { bankStyle } = this.props
@@ -417,14 +414,6 @@ class ShowPropertiesView extends Component {
   }
   onPress(url, event) {
     Linking.openURL(url)
-    // var model = utils.getModel(this.props.resource[constants.TYPE]).value;
-    // this.props.navigator.push({
-    //   id: 7,
-    //   backButtonTitle: 'Back',
-    //   title: utils.getDisplayName(this.props.resource, model.properties),
-    //   component: ArticleView,
-    //   passProps: {url: url ? url : this.props.resource.url}
-    // });
   }
 }
 reactMixin(ShowPropertiesView.prototype, RowMixin);
@@ -442,11 +431,6 @@ var styles = StyleSheet.create({
     fontSize: 16,
     marginHorizontal: 7,
     paddingBottom: 10
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#eeeeee',
-    marginHorizontal: 15
   },
   title: {
     fontSize: 16,
@@ -466,20 +450,9 @@ var styles = StyleSheet.create({
     marginHorizontal: 7,
     color: '#2E3B4E',
   },
-  photo: {
-    width: 86,
-    height: 86,
-    marginLeft: 1,
-  },
   icon: {
     width: 40,
     height: 40
-  },
-  checkProperties: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignSelf: 'center',
-    marginRight: 10
   },
   bigTitle: {
     fontSize: 20,
@@ -493,61 +466,3 @@ var styles = StyleSheet.create({
 });
 
 module.exports = ShowPropertiesView;
-  // let buttons = {[translate('sendEmail'), translate('sendSMS'), translate('cancel')]}
-  // <ActionSheet
-  //   ref={(o) => {
-  //     this.ActionSheet = o
-  //   }}
-  //   options={buttons}
-  //   cancelButtonIndex={buttons.length - 1}
-  //   onPress={(index) => {
-  //     switch (index) {
-  //     case 0:
-  //       Communications.email([val], null, null, 'My Subject','My body text')
-  //       break
-  //     case 1:
-  //       Communications.text(val)
-  //       break;
-  //     default:
-  //       return
-  //     }
-  //   }}
-  // />
-  // npm i react-native-message-composer
-  // sendEmail(val) {
-  //   Communications.email([val], null, null, 'My Subject','My body text')
-  // }
-  // sendSMS(val) {
-  //   // Communications.text(val)
-  //   var Composer = require('NativeModules').RNMessageComposer
-  //   Composer.messagingSupported(supported => {
-  //     let s = 'may be show something'
-  //   });
-
-  //   // inside your code where you would like to send a message
-  //   Composer.composeMessageWithArgs({
-  //       'messageText':'My sample message body text',
-  //       // 'subject':'My Sample Subject',
-  //       'recipients':[val]
-  //     },
-  //     (result) => {
-  //       switch(result) {
-  //       case Composer.Sent:
-  //         console.log('the message has been sent');
-  //         break;
-  //       case Composer.Cancelled:
-  //         console.log('user cancelled sending the message');
-  //         break;
-  //       case Composer.Failed:
-  //         console.log('failed to send the message');
-  //         break;
-  //       case Composer.NotSupported:
-  //         console.log('this device does not support sending texts');
-  //         break;
-  //       default:
-  //         console.log('something unexpected happened');
-  //         break;
-  //       }
-  //     }
-  //   );
-  // }

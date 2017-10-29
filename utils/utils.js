@@ -1841,7 +1841,8 @@ var utils = {
     }
     return separator
   },
-  parseMessage(resource, message, bankStyle, idx) {
+  parseMessage(params) {
+    let { resource, message, bankStyle, noLink, idx } = params
     let i1 = message.indexOf('**')
     let formType, message1, message2
     let messagePart
@@ -1849,7 +1850,7 @@ var utils = {
       return message
     formType = message.substring(i1 + 2)
     let i2 = formType.indexOf('**')
-    let linkColor = bankStyle.linkColor
+    let linkColor = noLink ? '#757575' : bankStyle.linkColor
     if (i2 !== -1) {
       message1 = message.substring(0, i1)
       message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
@@ -1862,9 +1863,12 @@ var utils = {
     }
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
-    return <Text key={key} style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
+    let newParams = extend({}, params)
+    newParams.idx = idx
+    newParams.message = message2
+    return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
              <Text style={{color: linkColor}}>{formType}</Text>
-             <Text>{utils.parseMessage(resource, message2, bankStyle, idx)}</Text>
+             <Text>{utils.parseMessage(newParams)}</Text>
            </Text>
   },
   addDefaultPropertyValuesFor(provider) {

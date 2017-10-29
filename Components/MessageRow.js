@@ -720,7 +720,8 @@ class MessageRow extends Component {
           return null
         }
         else if (isSimpleMessage) {
-          let row = utils.parseMessage(resource, resource[v], bankStyle)
+          let params = { resource, message: resource[v], bankStyle, noLink: true }
+          let row = utils.parseMessage(params)
           if (typeof row === 'string')
             vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>)
           else
