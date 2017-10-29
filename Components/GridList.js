@@ -1507,19 +1507,16 @@ class GridList extends Component {
     // let me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
-    let { isModel, modelName, prop, search } = this.props
-    if (isModel)
-      return <View/>
+    let { isModel, modelName, prop, search, bookmark } = this.props
+    if (isModel || bookmark)
+      return
+    if (prop  &&  !prop.allowToAdd)
+      return
     let model = utils.getModel(modelName).value;
     if (!prop  &&  model.id !== ORGANIZATION) {
       if (!search &&  !isModel  &&  (!this.state.resource || !Object.keys(this.state.resource).length))
-        return <View />
+        return
     }
-
-    // if (model.subClassOf === FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
-    //   return <View />
-    if (prop  &&  !prop.allowToAdd)
-      return <View />
     let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
     return (
@@ -1711,7 +1708,9 @@ class GridList extends Component {
     // });
   }
   renderActionSheet() {
-    let { search, modelName, prop, isBacklink } = this.props
+    let { search, modelName, prop, isBacklink, bookmark } = this.props
+    if (bookmark)
+      return
     let buttons
     if (search) {
       buttons = [

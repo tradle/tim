@@ -22,6 +22,7 @@ var uiUtils = {
       component: GridList,
       passProps: {
         modelName: btype,
+        bookmark: resource,
         resource: resource.bookmark,
         bankStyle: bankStyle,
         currency: currency,

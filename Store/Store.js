@@ -605,14 +605,15 @@ var Store = Reflux.createStore({
     debug('newObject:', originalPayload[TYPE])
 
     if (payload[TYPE] === MESSAGE) {
+      let obj = msg.object
       try {
-        const { link, permalink } = await meDriver.saveObject({ object: payload.object })
+        const saved = await meDriver.saveObject({ object: payload.object })
+        obj.from = {[ROOT_HASH]: saved.author}
+        debug('newObject (unwrapped):', originalPayload[TYPE], saved)
       } catch (err) {
         if (err.type !== 'exists') throw err
+        obj.from = {[ROOT_HASH]: msg.objectinfo.author}
       }
-
-      let obj = msg.object
-      obj.from = {[ROOT_HASH]: msg.objectinfo.author}
       obj.objectinfo = msg.objectinfo
       try {
         const originalRecipient = await meDriver.addressBook.byPubKey(msg.object.object.recipientPubKey)
@@ -650,13 +651,9 @@ var Store = Reflux.createStore({
 
       return
     }
-    else if (payload[TYPE] === VERIFICATION && payload.sources) {
-// const pubKeys = []
-// forEachSource(payload.sources, function (source) {
-//   pubKeys.push(tradleUtils.claimedSigPubKey(source).pub.toString('hex'))
-// })
+    debug('newObject:', originalPayload[TYPE], msg)
 
-// console.log(pubKeys)
+    if (payload[TYPE] === VERIFICATION && payload.sources) {
       const sourceToAuthor = await lookupSourceAuthors(meDriver, payload.sources)
       for (var [verification, author] of sourceToAuthor) {
         let a = this._getItem(utils.makeId(PROFILE, author.permalink))
@@ -3516,6 +3513,11 @@ var Store = Reflux.createStore({
     }
     r.document = document
 
+    if (document[TYPE] === ASSIGN_RM) {
+      let appId = utils.getId(document.application)
+      let application = this._getItemFromServer(document.application.id)
+      this.trigger({action: 'assignRM_Confirmed', application: application})
+    }
     // if (__DEV__) {
     //   let newV = newVerificationTree(r, 4)
     //   if (newV) {
@@ -3577,12 +3579,21 @@ var Store = Reflux.createStore({
       let len = batch.length
 
       if (r._context) {
-        let cId = utils.getId(r._context)
-        let c = this._getItem(cId);
-        if (!c  &&  me.isEmployee)
-          c = await this._getItemFromServer(cId)
-        if (c)
-          isReadOnly = utils.isReadOnlyChat(c) //c  &&  c._readOnly
+        let notReadOnly
+        if (me.isEmployee)  {
+          if (utils.isReadOnlyChat(r))
+            isReadOnly = true
+          else
+            notReadOnly = true
+        }
+        if (!notReadOnly) {
+          let cId = utils.getId(r._context)
+          let c = this._getItem(cId);
+          if (!c  &&  me.isEmployee)
+            c = await this._getItemFromServer(cId)
+          if (c)
+            isReadOnly = utils.isReadOnlyChat(c) //c  &&  c._readOnly
+        }
       }
       // let docId = utils.getId(r.document)
       let doc = document // this._getItem(r.document)
@@ -3624,7 +3635,8 @@ var Store = Reflux.createStore({
       else if (context && params.isThirdPartySentRequest) {
         let id
         if (me.isEmployee) {
-          id = utils.getId(context.to) === utils.getId(me) ? context.from : context.to
+          let rep = this.getRepresentative(me.organization)
+          id = utils.getId(context.to) === utils.getId(rep) ? context.from : context.to
           this.addMessagesToChat(utils.getId(id), r)
         }
         else {
@@ -4018,7 +4030,7 @@ var Store = Reflux.createStore({
         message: messages.join('\n\n')
       })
 
-      let promiseAddItem = this.onAddItem({ resource: item, noTrigger: true })
+      let promiseAddItem = await this.onAddItem({ resource: item, noTrigger: true })
       let promiseSentEvent = new Promise(resolve => meDriver.once('sent', resolve))
       await Promise.all([
         promiseAddItem,
@@ -4078,7 +4090,7 @@ var Store = Reflux.createStore({
 
     if (meta.id == VERIFICATION  ||  meta.subClassOf === VERIFICATION) {
       debugger
-      return this.onAddVerification({r: resource, notOneClickVerification: true});
+      return await this.onAddVerification({r: resource, notOneClickVerification: true});
     }
     else if (meta.id === BOOKMARK)
       resource.to = resource.from
@@ -5654,7 +5666,13 @@ var Store = Reflux.createStore({
     return contexts[0]
   },
   async searchServer(params) {
-    let {filterResource, direction, first, noTrigger, modelName, application} = params
+    let {direction, first, noTrigger, modelName, application} = params
+    let originalFilter = params.filterResource
+    let filterResource
+    if (!originalFilter)
+      filterResource = {}
+    else
+      filterResource = utils.clone(originalFilter)
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
     if (me.isEmployee) {
       if (application  &&  (!filterResource  ||  !filterResource._author)) {
@@ -5673,8 +5691,6 @@ var Store = Reflux.createStore({
           filterResource._author = myBot[ROOT_HASH]
       }
     }
-    if (!filterResource)
-      filterResource = {}
     if (modelName === MESSAGE) {
       let oforms = application  &&  application.forms
       if (!oforms)
@@ -5708,7 +5724,6 @@ var Store = Reflux.createStore({
       //   }
       // })
       let fr = {[TYPE]: VERIFICATION, document: formIds}
-      extend(fr, filterResource)
       result = await graphQL.searchServer({
         modelName: VERIFICATION,
         sortProperty: 'time',
@@ -5738,7 +5753,8 @@ var Store = Reflux.createStore({
     extend(params, {client: this.client, filterResource: filterResource})
     let result = await graphQL.searchServer(params)
     if (!result) {
-      this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
+      if (!noTrigger)
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
       return
     }
         // if (result.edges.length < limit)
@@ -6219,8 +6235,6 @@ var Store = Reflux.createStore({
       //Object.keys(list).forEach(key => {
       allMessages.forEach((res, i) => {
         let r = self._getItem(res.id)
-        if (!r)
-          return
         let type = r[TYPE]
         let m = self.getModel(type)
         if (!m) return
@@ -8454,12 +8468,17 @@ var Store = Reflux.createStore({
     if (!val)
       return
 
+
     if (val[TYPE] === SIMPLE_MESSAGE  &&  val.message === ALREADY_PUBLISHED_MESSAGE)
       return
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
 
-    if (this._getItem(utils.getId(val)))
+    let valId = utils.getId(val)
+    if (val[TYPE] === VERIFICATION)
+      console.log('New Verification', valId)
+
+    if (this._getItem(valId))
       return
     let originalSender = obj.object.originalSender
     if (originalSender)
@@ -8816,7 +8835,7 @@ var Store = Reflux.createStore({
     if (type === VERIFICATION) {
       let document = this._getItem(utils.getId(val.document))
       if (!document) {
-        debugger
+        // debugger
         if (me.isEmployee)
           document = await this._getItemFromServer(utils.getId(val.document))
       }
@@ -8839,7 +8858,7 @@ var Store = Reflux.createStore({
           to = this._getItem(document.from)  // document from is not changing but to does depending on what party verifies or asks for corrections
           toId = utils.getId(to)
           from = this._getItem(utils.clone(context.to))
-          isThirdPartySentRequest = true
+          // isThirdPartySentRequest = true
         }
       }
     }
@@ -9070,8 +9089,8 @@ var Store = Reflux.createStore({
 
     let isVerification = type === VERIFICATION  || (model  && model.subClassOf === VERIFICATION)
     if (isVerification) {
-      debugger
-      this.onAddVerification({r: val, notOneClickVerification: false, dontSend: true, isThirdPartySentRequest: isThirdPartySentRequest})
+      // debugger
+      await this.onAddVerification({r: val, notOneClickVerification: false, dontSend: true, isThirdPartySentRequest: isThirdPartySentRequest})
       return
     }
     if (!isReadOnly) {
@@ -9167,7 +9186,7 @@ var Store = Reflux.createStore({
         },
         from: me
       }
-      self.onAddItem({resource: bookmark, noTrigger: true})
+      await self.onAddItem({resource: bookmark, noTrigger: true})
 
       bookmark = {
         [TYPE]: BOOKMARK,
@@ -9178,7 +9197,7 @@ var Store = Reflux.createStore({
         },
         from: me
       }
-      self.onAddItem({resource: bookmark, noTrigger: true})
+      await self.onAddItem({resource: bookmark, noTrigger: true})
 
 
       if (me.firstName !== FRIEND)
