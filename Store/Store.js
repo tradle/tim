@@ -3514,8 +3514,9 @@ var Store = Reflux.createStore({
     r.document = document
 
     if (document[TYPE] === ASSIGN_RM) {
-      let appId = utils.getId(document.application)
-      let application = this._getItemFromServer(document.application.id)
+      if (!docFromServer)
+        document = await this._getItemFromServer(document)
+      let application = await this._getItemFromServer(document.application)
       this.trigger({action: 'assignRM_Confirmed', application: application})
     }
     // if (__DEV__) {
@@ -4635,7 +4636,7 @@ var Store = Reflux.createStore({
               appToUpdate = utils.clone(returnVal.applications)
             else {
               appToUpdate = app
-              self._setItem(app)
+              self._setItem(utils.getId(app), app)
             }
           }
           appToUpdate.relationshipManager = self._makeIdentityStub(me)
@@ -5692,52 +5693,53 @@ var Store = Reflux.createStore({
       }
     }
     if (modelName === MESSAGE) {
+      if (application)
+        application = await this._getItemFromServer(application)
       let oforms = application  &&  application.forms
       if (!oforms)
         return
 
       let promises = oforms.map((f) => this._getItemFromServer(f.id))
-      let forms = await Q.all(promises)
-
-      // HACK
-      forms = forms  &&  forms.filter((r) => r)
-      if (!forms  ||  !forms.length) {
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first, message: 'Forms were not found'})
-        return
-      }
       let formIds = []
-      forms.forEach((r) => {
+      oforms.forEach((r) => {
         formIds.push(utils.getId(r))
         r._context = application._context
       })
+      // let context = await this._getItemFromServer(utils.getId(application._context))
 
-      let context = await this._getItemFromServer(utils.getId(application._context))
-
-      // let formRequests = await graphQL.searchServer({
-      //   modelName: FORM_REQUEST,
-      //   sortProperty: 'time',
-      //   asc: true,
-      //   client: this.client,
-      //   filterResource: {
-      //     [TYPE]: FORM_REQUEST,
-      //     context: context.contextId
-      //   }
-      // })
+      // // let formRequests = await graphQL.searchServer({
+      // //   modelName: FORM_REQUEST,
+      // //   sortProperty: 'time',
+      // //   asc: true,
+      // //   client: this.client,
+      // //   filterResource: {
+      // //     [TYPE]: FORM_REQUEST,
+      // //     context: context.contextId
+      // //   }
+      // // })
       let fr = {[TYPE]: VERIFICATION, document: formIds}
-      result = await graphQL.searchServer({
+      promises.push(graphQL.searchServer({
         modelName: VERIFICATION,
         sortProperty: 'time',
         asc: true,
         client: this.client,
         filterResource: fr
+      }))
+      let result = await Q.all(promises)
+      let forms = []
+      result.forEach((r) => {
+        if (Array.isArray(r)) {
+          r.forEach((f) => {
+            let rr = this.convertToResource(f.node)
+            rr._context = application._context
+            forms.push(rr)
+          })
+        }
+        else {
+          r._context = application._context
+          forms.push(r)
+        }
       })
-      if (result) {
-        let verifications = result.map((r) => this.convertToResource(r.node))
-        verifications.forEach((v) => {
-          v._context = application._context
-          forms.push(v)
-        })
-      }
       forms.sort((a, b) => {
         if (a.time  &&  b.time)
           return a.time - b.time
@@ -5799,6 +5801,7 @@ var Store = Reflux.createStore({
       this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
     return list
   },
+
   convertToResource(r) {
     r = utils.clone(r)
     utils.deepRemoveProperties(r, ({ key, value }) => key === '__typename' || value == null)
@@ -5809,40 +5812,44 @@ var Store = Reflux.createStore({
     const toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, 'time']
     let rr = pick(r, Object.keys(props).concat(toKeep))
 
+    extend(rr, {
+      [ROOT_HASH]: r._permalink,
+      [CUR_HASH]: r._link,
+      [TYPE]: r[TYPE],
+    })
+    let lr = this._getItem(utils.getId(rr))
+    if (lr) {
+      let rr = pick(r, Object.keys(props).concat(toKeep))
+      let mr = {}
+
+      extend(mr, lr)
+      delete mr._verifiedBy
+
+      extend(mr, rr)
+      rr = mr
+    }
+
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
+    let authorTitle = r._authorTitle || (author && author.organization &&  utils.getDisplayName(author.organization))
     let myOrgRep = this.getRepresentative(me.organization)
     let myOrgRepId = utils.getId(myOrgRep)
-    let from, to
+    // let from, to
     switch (m.id) {
     case FORM_ERROR:
     case FORM_REQUEST:
     case APPLICATION_SUBMITTED:
     case APPLICATION_DENIAL:
     case CONFIRMATION:
-      from = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
-      to = {id: authorId, title: r._authorTitle}
+      rr.from = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
+      rr.to = {id: authorId, title: authorTitle}
       break
     default:
-      from = {id: authorId, title: r._authorTitle}
-      to = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
+      rr.from = {id: authorId, title: authorTitle}
+      rr.to = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
       break
     }
 
-    extend(rr, {
-      [ROOT_HASH]: r._permalink,
-      [CUR_HASH]: r._link,
-      [TYPE]: r[TYPE],
-      from: from,
-      to: to
-    })
-    let lr = this._getItem(utils.getId(rr))
-    if (lr) {
-      let mr = {}
-      extend(mr, lr)
-      extend(mr, rr)
-      rr = mr
-    }
     // if (!rr._context  &&  rr[ROOT_HASH] !== rr[CUR_HASH]) {
     //   let origRid = utils.makeId(rr[TYPE], rr[ROOT_HASH])
     //   let origR = this._getItem(origRid)
@@ -8468,7 +8475,8 @@ var Store = Reflux.createStore({
     if (!val)
       return
 
-
+    if (val[TYPE] === INTRODUCTION)
+      return
     if (val[TYPE] === SIMPLE_MESSAGE  &&  val.message === ALREADY_PUBLISHED_MESSAGE)
       return
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
@@ -12813,3 +12821,139 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   })
   //   return batch.length ? db.batch(batch) : Q()
   // },
+/*
+  async searchServer1(params) {
+    let {direction, first, noTrigger, modelName, application} = params
+    let originalFilter = params.filterResource
+    let filterResource
+    if (!originalFilter)
+      filterResource = {}
+    else
+      filterResource = utils.clone(originalFilter)
+    let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
+    if (me.isEmployee) {
+      if (application  &&  (!filterResource  ||  !filterResource._author)) {
+        let applicant = this._getItem(application.applicant.id.replace(IDENTITY, PROFILE))
+        if (applicant  &&  applicant.organization) {
+          if (!filterResource)
+            filterResource = {[TYPE]: modelName}
+          filterResource._author = myBot[ROOT_HASH]
+        }
+      }
+      if (modelName === APPLICATION) {
+        if (!filterResource || !Object.keys(filterResource).length)
+          filterResource = {[TYPE]: modelName}
+        filterResource.archived = false
+        if (!filterResource._author)
+          filterResource._author = myBot[ROOT_HASH]
+      }
+    }
+    if (modelName === MESSAGE) {
+      let oforms = application  &&  application.forms
+      if (!oforms)
+        return
+
+      let promises = oforms.map((f) => this._getItemFromServer(f.id))
+      let forms = await Q.all(promises)
+
+      // HACK
+      forms = forms  &&  forms.filter((r) => r)
+      if (!forms  ||  !forms.length) {
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first, message: 'Forms were not found'})
+        return
+      }
+      let formIds = []
+      forms.forEach((r) => {
+        formIds.push(utils.getId(r))
+        r._context = application._context
+      })
+
+      let context = await this._getItemFromServer(utils.getId(application._context))
+
+      // let formRequests = await graphQL.searchServer({
+      //   modelName: FORM_REQUEST,
+      //   sortProperty: 'time',
+      //   asc: true,
+      //   client: this.client,
+      //   filterResource: {
+      //     [TYPE]: FORM_REQUEST,
+      //     context: context.contextId
+      //   }
+      // })
+      let fr = {[TYPE]: VERIFICATION, document: formIds}
+      result = await graphQL.searchServer({
+        modelName: VERIFICATION,
+        sortProperty: 'time',
+        asc: true,
+        client: this.client,
+        filterResource: fr
+      })
+      if (result) {
+        let verifications = result.map((r) => this.convertToResource(r.node))
+        verifications.forEach((v) => {
+          v._context = application._context
+          forms.push(v)
+        })
+      }
+      forms.sort((a, b) => {
+        if (a.time  &&  b.time)
+          return a.time - b.time
+        if (a.time)
+          return a.time - b.dateVerified
+        else
+          return a.dateVerified - b.time
+      })
+      if (!noTrigger)
+        this.trigger({action: 'messageList', modelName: MESSAGE, to: params.to, list: forms})
+      return forms
+    }
+    extend(params, {client: this.client, filterResource: filterResource})
+    let result = await graphQL.searchServer(params)
+    if (!result) {
+      if (!noTrigger)
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
+      return
+    }
+        // if (result.edges.length < limit)
+        //   cursor.endCursor = null
+    let to = this.getRepresentative(me.organization)
+    let toId = utils.getId(to)
+    let list = result.map((r) => this.convertToResource(r.node))
+    if (me.isEmployee  &&  modelName === APPLICATION) {
+      let contexts
+      let contextIds = []
+      list.forEach((r) => {
+        let c = r.context
+        if (typeof c === 'string'  &&  contextIds.indexOf(c) === -1)
+          contextIds.push(c)
+      })
+      let appFilter = { [TYPE]: PRODUCT_REQUEST, contextId: contextIds }
+      // if (me.isEmployee)
+      //   appFilter._author = myBot[ROOT_HASH]
+
+      let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true })
+      if (contextsResult) {
+        contexts = contextsResult.map((r) => this.convertToResource(r.node))
+        list.forEach((r) => {
+          let contextId = r.context
+          if (typeof contextId === 'object')
+            return
+          let context = contexts.filter((c) => c.contextId === contextId)
+          r._context = context[0]
+          let id = utils.makeId(PROFILE, r.applicant.id.split('_')[1])
+          let applicant = this._getItem(id)
+          if (applicant) {
+            if (applicant.organization)
+              r.applicant.title = applicant.organization.title
+            else
+              r.applicant.title = utils.getDisplayName(applicant)
+          }
+        })
+      }
+
+    }
+    if (!noTrigger)
+      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
+    return list
+  },
+*/
