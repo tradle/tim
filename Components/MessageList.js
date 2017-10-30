@@ -683,7 +683,7 @@ class MessageList extends Component {
     // hideTextInput = false
     let content
     if (!this.state.list || !this.state.list.length) {
-      if (navigator.isConnected  &&  resource[TYPE] === ORGANIZATION) {
+      if (navigator.isConnected  &&  resource[TYPE] === ORGANIZATION || application) {
         if (this.state.isLoading) {
           let menuBtn = !hideTextInput /*this.hasMenuButton() */ && (
             <View style={styles.footer}>
