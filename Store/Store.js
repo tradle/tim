@@ -3514,8 +3514,9 @@ var Store = Reflux.createStore({
     r.document = document
 
     if (document[TYPE] === ASSIGN_RM) {
-      let appId = utils.getId(document.application)
-      let application = this._getItemFromServer(document.application.id)
+      if (!docFromServer)
+        document = await this._getItemFromServer(document)
+      let application = await this._getItemFromServer(document.application)
       this.trigger({action: 'assignRM_Confirmed', application: application})
     }
     // if (__DEV__) {
@@ -4633,7 +4634,7 @@ var Store = Reflux.createStore({
               appToUpdate = utils.clone(returnVal.applications)
             else {
               appToUpdate = app
-              self._setItem(app)
+              self._setItem(utils.getId(app), app)
             }
           }
           appToUpdate.relationshipManager = self._makeIdentityStub(me)
@@ -5648,52 +5649,53 @@ var Store = Reflux.createStore({
       }
     }
     if (modelName === MESSAGE) {
+      if (application)
+        application = await this._getItemFromServer(application)
       let oforms = application  &&  application.forms
       if (!oforms)
         return
 
       let promises = oforms.map((f) => this._getItemFromServer(f.id))
-      let forms = await Q.all(promises)
-
-      // HACK
-      forms = forms  &&  forms.filter((r) => r)
-      if (!forms  ||  !forms.length) {
-        this.trigger({action: 'list', modelName: modelName, resource: filterResource, isSearch: true, direction: direction, first: first, message: 'Forms were not found'})
-        return
-      }
       let formIds = []
-      forms.forEach((r) => {
+      oforms.forEach((r) => {
         formIds.push(utils.getId(r))
         r._context = application._context
       })
+      // let context = await this._getItemFromServer(utils.getId(application._context))
 
-      let context = await this._getItemFromServer(utils.getId(application._context))
-
-      // let formRequests = await graphQL.searchServer({
-      //   modelName: FORM_REQUEST,
-      //   sortProperty: 'time',
-      //   asc: true,
-      //   client: this.client,
-      //   filterResource: {
-      //     [TYPE]: FORM_REQUEST,
-      //     context: context.contextId
-      //   }
-      // })
+      // // let formRequests = await graphQL.searchServer({
+      // //   modelName: FORM_REQUEST,
+      // //   sortProperty: 'time',
+      // //   asc: true,
+      // //   client: this.client,
+      // //   filterResource: {
+      // //     [TYPE]: FORM_REQUEST,
+      // //     context: context.contextId
+      // //   }
+      // // })
       let fr = {[TYPE]: VERIFICATION, document: formIds}
-      result = await graphQL.searchServer({
+      promises.push(graphQL.searchServer({
         modelName: VERIFICATION,
         sortProperty: 'time',
         asc: true,
         client: this.client,
         filterResource: fr
+      }))
+      let result = await Q.all(promises)
+      let forms = []
+      result.forEach((r) => {
+        if (Array.isArray(r)) {
+          r.forEach((f) => {
+            let rr = this.convertToResource(f.node)
+            rr._context = application._context
+            forms.push(rr)
+          })
+        }
+        else {
+          r._context = application._context
+          forms.push(r)
+        }
       })
-      if (result) {
-        let verifications = result.map((r) => this.convertToResource(r.node))
-        verifications.forEach((v) => {
-          v._context = application._context
-          forms.push(v)
-        })
-      }
       forms.sort((a, b) => {
         if (a.time  &&  b.time)
           return a.time - b.time
@@ -5710,7 +5712,7 @@ var Store = Reflux.createStore({
     let result = await graphQL.searchServer(params)
     if (!result) {
       if (!noTrigger)
-        this.trigger({action: 'list', modelName, resource: filterResource, isSearch: true, direction: direction, first: first})
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
       return
     }
         // if (result.edges.length < limit)
@@ -5752,7 +5754,7 @@ var Store = Reflux.createStore({
 
     }
     if (!noTrigger)
-      this.trigger({action: 'list', modelName, list: list, resource: filterResource, direction: direction, first: first})
+      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
     return list
   },
   convertToResource(r) {
@@ -5765,40 +5767,44 @@ var Store = Reflux.createStore({
     const toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, 'time']
     let rr = pick(r, Object.keys(props).concat(toKeep))
 
+    extend(rr, {
+      [ROOT_HASH]: r._permalink,
+      [CUR_HASH]: r._link,
+      [TYPE]: r[TYPE],
+    })
+    let lr = this._getItem(utils.getId(rr))
+    if (lr) {
+      let rr = pick(r, Object.keys(props).concat(toKeep))
+      let mr = {}
+
+      extend(mr, lr)
+      delete mr._verifiedBy
+
+      extend(mr, rr)
+      rr = mr
+    }
+
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
+    let authorTitle = r._authorTitle || (author && author.organization &&  utils.getDisplayName(author.organization))
     let myOrgRep = this.getRepresentative(me.organization)
     let myOrgRepId = utils.getId(myOrgRep)
-    let from, to
+    // let from, to
     switch (m.id) {
     case FORM_ERROR:
     case FORM_REQUEST:
     case APPLICATION_SUBMITTED:
     case APPLICATION_DENIAL:
     case CONFIRMATION:
-      from = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
-      to = {id: authorId, title: r._authorTitle}
+      rr.from = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
+      rr.to = {id: authorId, title: authorTitle}
       break
     default:
-      from = {id: authorId, title: r._authorTitle}
-      to = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
+      rr.from = {id: authorId, title: authorTitle}
+      rr.to = {id: myOrgRepId, title: utils.getDisplayName(myOrgRep)}
       break
     }
 
-    extend(rr, {
-      [ROOT_HASH]: r._permalink,
-      [CUR_HASH]: r._link,
-      [TYPE]: r[TYPE],
-      from: from,
-      to: to
-    })
-    let lr = this._getItem(utils.getId(rr))
-    if (lr) {
-      let mr = {}
-      extend(mr, lr)
-      extend(mr, rr)
-      rr = mr
-    }
     // if (!rr._context  &&  rr[ROOT_HASH] !== rr[CUR_HASH]) {
     //   let origRid = utils.makeId(rr[TYPE], rr[ROOT_HASH])
     //   let origR = this._getItem(origRid)
@@ -8407,6 +8413,8 @@ var Store = Reflux.createStore({
     if (!val)
       return
 
+    if (val[TYPE] === INTRODUCTION)
+      return
 
     if (val[TYPE] === SIMPLE_MESSAGE  &&  val.message === ALREADY_PUBLISHED_MESSAGE)
       return
