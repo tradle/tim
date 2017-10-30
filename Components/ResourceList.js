@@ -984,7 +984,8 @@ class ResourceList extends Component {
     var me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
-    var model = utils.getModel(this.props.modelName).value;
+    let { modelName, bankStyle } = this.props
+    var model = utils.getModel(modelName).value;
     if (!this.props.prop  &&  model.id !== ORGANIZATION) {
       if (!this.props.search ||  !this.state.resource || !Object.keys(this.state.resource).length)
         return <View />
@@ -994,8 +995,14 @@ class ResourceList extends Component {
       return <View />
     let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    let employee
+    if (me.isEmployee)
+      employee = <View style={{justifyContent: 'center'}}>
+                   <Text style={{fontSize: 18, paddingLeft: 20, color: bankStyle.linkColor}}>{me.firstName + '@' + me.organization.title}</Text>
+                 </View>
     return (
         <View style={styles.footer}>
+          {employee}
           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
             <View style={[platformStyles.menuButtonNarrow, {opacity: 0.4}]}>
               <Icon name={icon}  size={33}  color={color}/>
@@ -1466,7 +1473,7 @@ var styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between', // 'flex-end',
     height: 45,
     paddingHorizontal: 10,
     backgroundColor: 'transparent',

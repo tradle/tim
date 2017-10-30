@@ -1501,24 +1501,36 @@ class GridList extends Component {
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
     let { isModel, modelName, prop, search, bookmark } = this.props
-    if (isModel || bookmark)
+    if (isModel) // || bookmark)
       return
     if (prop  &&  !prop.allowToAdd)
       return
+    let me = utils.getMe()
     let model = utils.getModel(modelName).value;
+    let noMenuButton
     if (!prop  &&  model.id !== ORGANIZATION) {
-      if (!search &&  !isModel  &&  (!this.state.resource || !Object.keys(this.state.resource).length))
-        return
+      noMenuButton = (!search &&  !isModel  &&  (!this.state.resource || !Object.keys(this.state.resource).length))
     }
+    let employee
+    if (me.isEmployee)
+      employee = <View style={{justifyContent: 'center'}}>
+                   <Text style={{fontSize: 18, paddingLeft: 20, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
+                 </View>
+
     let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    let menuBtn
+    if (!bookmark  &&  !noMenuButton)
+      menuBtn = <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+                  <View style={[platformStyles.menuButtonNarrow, {opacity: 0.4}]}>
+                    <Icon name={icon}  size={33}  color={color}/>
+                  </View>
+                </TouchableOpacity>
+
     return (
         <View style={styles.footer}>
-          <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-            <View style={[platformStyles.menuButtonNarrow, {opacity: 0.4}]}>
-              <Icon name={icon}  size={33}  color={color}/>
-            </View>
-          </TouchableOpacity>
+          {employee}
+          {menuBtn}
         </View>
      )
   }
@@ -1675,7 +1687,7 @@ class GridList extends Component {
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(this.props.bankStyle)
     let loading
-    if (isLoading)
+    if (isLoading  &&  !isModel)
        loading = <View style={{flex: 1}}>
                    <View style={[platformStyles.container]}>
                      <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>

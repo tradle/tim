@@ -298,7 +298,7 @@ class ResourceRow extends Component {
 
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode) {
-        let title = utils.makeTitle(utils.getDisplayName(resource))
+      let title = utils.makeTitle(utils.getDisplayName(resource))
       action = <TouchableHighlight underlayColor='transparent' style={styles.actionView}
                   onPress={() => {
                     this.props.navigator.push({
@@ -536,7 +536,6 @@ class ResourceRow extends Component {
     else {
       let dn = utils.getDisplayName(resource, model);
       return <Text style={styles.resourceTitle}>{dn}</Text>;
-
     }
     if (!backlink)
       return renderedViewCols
