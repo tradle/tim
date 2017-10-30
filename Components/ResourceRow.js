@@ -294,7 +294,6 @@ class ResourceRow extends Component {
           <View style={styles.cellBorder}  key={this.getNextKey()} />
         </View>
       )
-    }
 
     let onPress = this.action.bind(this)
     let action
@@ -534,8 +533,8 @@ class ResourceRow extends Component {
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
-      var vCols = utils.getDisplayName(resource, model);
-      return <Text style={styles.resourceTitle}>{vCols}</Text>;
+      let dn = utils.getDisplayName(resource, model);
+      return <Text style={styles.resourceTitle}>{dn}</Text>;
     }
     if (!backlink)
       return renderedViewCols
