@@ -382,6 +382,9 @@ class ResourceList extends Component {
         Alert.alert(params.alert)
         return
       }
+      if (params.modelName !== modelName)
+        return
+
       if (officialAccounts  &&  modelName === PROFILE)
         return
       if (params.isTest  !== this.props.isTest)

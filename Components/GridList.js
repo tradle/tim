@@ -666,7 +666,7 @@ class GridList extends Component {
         }
       }
     }
-    let title = isContact ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
+    let title = isContact ? resource.firstName : isApplication ? resource.applicant.title : resource.name; //utils.getDisplayName(resource, model.value.properties);
     let self = this;
     let style = this.mergeStyle(resource.style)
 
@@ -674,6 +674,7 @@ class GridList extends Component {
       component: MessageList,
       id: 11,
       backButtonTitle: 'Back',
+      title: title,
       passProps: {
         resource: search ? resource._context : resource,
         filter: '',
@@ -1096,7 +1097,7 @@ class GridList extends Component {
     let ResourceRow = require('./ResourceRow')
     return (<ResourceRow
       lazy={lazy}
-      onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
+      onSelect={isSharedContext ? this.openSharedContextChat.bind(this) : this.selectResource.bind(this)}
       key={resource[ROOT_HASH]}
       hideResource={this.hideResource.bind(this)}
       hideMode={this.state.hideMode}
