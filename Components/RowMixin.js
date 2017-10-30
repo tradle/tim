@@ -146,7 +146,7 @@ var RowMixin = {
       return <Image source={{uri: uri}} style={styles.msgImage} />
     }
     if (!isMyMessage) {
-      var title = resource.from.title.split(' ').map(function(s) {
+      var title = resource.from.title  && resource.from.title.split(' ').map(function(s) {
         return s.charAt(0);
       }).join('');
 
