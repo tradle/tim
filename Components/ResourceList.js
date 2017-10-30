@@ -998,7 +998,7 @@ class ResourceList extends Component {
     let employee
     if (me.isEmployee)
       employee = <View style={{justifyContent: 'center'}}>
-                   <Text style={{fontSize: 18, paddingLeft: 20, color: bankStyle.linkColor}}>{me.firstName + '@' + me.organization.title}</Text>
+                   <Text style={{fontSize: 18, paddingLeft: 20, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
     return (
         <View style={styles.footer}>
@@ -1473,7 +1473,7 @@ var styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
-    justifyContent: 'space-between', // 'flex-end',
+    justifyContent: 'flex-end',
     height: 45,
     paddingHorizontal: 10,
     backgroundColor: 'transparent',

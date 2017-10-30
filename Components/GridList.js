@@ -1519,8 +1519,8 @@ class GridList extends Component {
     }
     let employee
     if (me.isEmployee)
-      employee = <View style={{justifyContent: 'center'}}>
-                   <Text style={{fontSize: 18, paddingLeft: 20, color: '#7AAAC3'}}>{me.firstName + ' @ ' + me.organization.title}</Text>
+      employee = <View style={{justifyContent: 'center', flexDirection: 'row'}}>
+                   <Text style={{fontSize: 18, paddingLeft: 20, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
 
     let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
