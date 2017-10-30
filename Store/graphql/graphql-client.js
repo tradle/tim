@@ -73,7 +73,6 @@ var search = {
   async searchServer(params) {
     let self = this
     let {client, modelName, filterResource, sortProperty, asc, limit, direction, first, notArchive, noCursorChange} = params
-    // limit = 200
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
 
