@@ -667,7 +667,13 @@ class GridList extends Component {
         }
       }
     }
-    let title = isContact ? resource.firstName : isApplication ? resource.applicant.title : resource.name; //utils.getDisplayName(resource, model.value.properties);
+    let title
+    if (isContact)
+      title = resource.firstName
+    else if (isApplication)
+      title = me.organization.title + '->' + resource.applicant.title
+    else
+      title = resource.name; //utils.getDisplayName(resource, model.value.properties);
     let self = this;
     let style = this.mergeStyle(resource.style)
 
