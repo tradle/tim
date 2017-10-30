@@ -183,8 +183,12 @@ class MessageList extends Component {
     let { application, modelName, bankStyle, navigator, originatingMessage } = this.props
 
     if (action === 'assignRM_Confirmed') {
-      if (application  &&  !utils.getId(application) === utils.getId(params.application))
-        this.setState({application: params.application})
+      if (application[ROOT_HASH] === params.application[ROOT_HASH]) {
+        Actions.list({modelName: MESSAGE, application: params.application, search: true})
+        let r = utils.clone(application)
+        r.relationshipManager = params.application.relationshipManager
+        this.setState({application: r})
+      }
       return
     }
     let rtype = resource  &&  resource[TYPE]
@@ -661,7 +665,8 @@ class MessageList extends Component {
   }
 
   render() {
-    let { modelName, resource, bankStyle, navigator, originatingMessage, application, isAggregation } = this.props
+    let { modelName, resource, bankStyle, navigator, originatingMessage, isAggregation } = this.props
+    let application = this.state.application ||  this.props.application
     let model = utils.getModel(modelName).value;
     let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
     let bgStyle = {}

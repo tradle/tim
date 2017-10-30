@@ -61,7 +61,7 @@ var dateProp
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
-    this.state = {isConnected: this.props.navigator.isConnected}
+    this.state = { isConnected: this.props.navigator.isConnected }
     CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
     if (props.changeSharedWithList)
       this.state.sharedWith = true
@@ -83,25 +83,34 @@ class ResourceRow extends Component {
     this.listenTo(Store, 'onRowUpdate');
   }
   onRowUpdate(params) {
-    if (params.action === 'connectivity') {
+    let { action, application } = params
+    switch (action) {
+    case 'connectivity':
       this.setState({isConnected: params.isConnected})
-      return
-    }
-    if (params.action !== 'updateRow')
-      return
-    //HACK
-    let hash = params.resource[ROOT_HASH] || params.resource.id.split('_')[1]
-    if (hash === this.props.resource[ROOT_HASH]) {
-      if (params.forceUpdate)
-        this.setState({forceUpdate: this.state.forceUpdate ? false : true})
-      else
-        this.setState({unread: params.resource._unread})
+      break
+    case 'assignRM_Confirmed':
+      if (application[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
+        let r = utils.clone(this.props.resource)
+        r.relationshipManager = application.relationshipManager
+        this.setState({application: r})
+      }
+      break
+    case 'updateRow':
+      let hash = params.resource[ROOT_HASH] || params.resource.id.split('_')[1]
+      if (hash === this.props.resource[ROOT_HASH]) {
+        if (params.forceUpdate)
+          this.setState({forceUpdate: this.state.forceUpdate ? false : true})
+        else
+          this.setState({unread: params.resource._unread})
+      }
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
       return true
     if (this.state.forceUpdate !== nextState.forceUpdate)
+      return true
+    if (this.state.application !== nextState.application)
       return true
     if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
       return true
@@ -114,8 +123,8 @@ class ResourceRow extends Component {
     if (Object.keys(this.state).length  !== Object.keys(nextState).length)
       return true
 
-    var opts = {strict: true}
-    for (var p in this.props) {
+    let opts = {strict: true}
+    for (let p in this.props) {
       if (typeof this.props[p] === 'function') {
         if ('' + this.props[p] !== '' + nextProps[p])
           return true
@@ -125,7 +134,7 @@ class ResourceRow extends Component {
           return true
       }
     }
-    for (var p in this.state) {
+    for (let p in this.state) {
       if (this.state[p] !== nextState[p]) {
         if (!equal(this.state[p], nextState[p], opts))
           return true
@@ -135,12 +144,12 @@ class ResourceRow extends Component {
   }
 
   render() {
-    let resource = this.props.resource;
+    let resource = this.state.application || this.props.resource;
     let photo;
     let rType = resource[TYPE]
-    var isContact = rType === PROFILE;
-    var isOrg = rType === ORGANIZATION
-    var noImage;
+    let isContact = rType === PROFILE;
+    let isOrg = rType === ORGANIZATION
+    let noImage;
     let isOfficialAccounts = this.props.isOfficialAccounts
     let isModel = resource.type === MODEL
     if (isModel) {
@@ -156,8 +165,8 @@ class ResourceRow extends Component {
               </View>
     }
     if (resource.photos &&  resource.photos.length  &&  resource.photos[0].url) {
-      var uri = utils.getImageUri(resource.photos[0].url);
-      var params = {
+      let uri = utils.getImageUri(resource.photos[0].url);
+      let params = {
         uri: utils.getImageUri(uri)
       }
       if (uri.indexOf('/var/mobile/') === 0)
@@ -168,15 +177,15 @@ class ResourceRow extends Component {
       if (isContact) {
         if (!resource.firstName  &&  !resource.lastName)
           return <View/>
-        var name = (resource.firstName ? resource.firstName.charAt(0) : '');
+        let name = (resource.firstName ? resource.firstName.charAt(0) : '');
         name += (resource.lastName ? resource.lastName.charAt(0) : '');
         photo = <LinearGradient colors={['#A4CCE0', '#7AAAc3', '#5E92AD']} style={styles.cellRoundImage}>
                    <Text style={styles.cellText}>{name}</Text>
                 </LinearGradient>
       }
       else  {
-        var model = utils.getModel(resource[TYPE]).value;
-        var icon = model.icon;
+        let model = utils.getModel(resource[TYPE]).value;
+        let icon = model.icon;
         if (icon)
           photo = <View style={styles.cell}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
         else if (model.properties.photos)
@@ -188,7 +197,7 @@ class ResourceRow extends Component {
       }
     }
     if (!this.props.isChooser  &&  photo  &&  rType === ORGANIZATION) {
-      var onlineStatus = (
+      let onlineStatus = (
         <Geometry.Circle size={20} style={styles.online}>
           <Geometry.Circle size={18} style={{ backgroundColor: !resource._online || !this.props.navigator.isConnected ? '#FAD70C' : '#62C457'}} />
         </Geometry.Circle>
@@ -202,8 +211,8 @@ class ResourceRow extends Component {
               </View>
     }
 
-    var rId = utils.getId(this.props.resource)
-    // var cancelResource = (this.props.onCancel ||  this.state)
+    let rId = utils.getId(this.props.resource)
+    // let cancelResource = (this.props.onCancel ||  this.state)
     //                    ? <TouchableHighlight onPress={this.action.bind(this)} underlayColor='transparent' style={{position: 'absolute', right: 0, top: 20}}>
     //                        <View>
     //                          <Icon name={this.state.sharedWith[rId] ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith[rId] ? '#B1010E' : '#dddddd'}  style={styles.cancelIcon} />
@@ -219,12 +228,12 @@ class ResourceRow extends Component {
     let bg = style ? {backgroundColor: style.listBg} : {}
     let color = style ? {color: style.listColor} : {}
 
-    var cancelResource
+    let cancelResource
     if (this.props.onCancel  ||  (this.state && this.state.sharedWith))
       cancelResource = <View style={styles.chooser}>
                          <Icon name={this.state.sharedWith ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={this.state.sharedWith ? '#B1010E' : style ? color.color : '#dddddd'} />
                        </View>
-    var hideMode
+    let hideMode
     if (this.props.hideMode)
       hideMode = <View style={styles.chooser}>
                   <TouchableHighlight underlayColor='transparent' onPress={() => this.props.hideResource(resource)}>
@@ -232,20 +241,20 @@ class ResourceRow extends Component {
                   </TouchableHighlight>
                  </View>
 
-    var multiChooser
+    let multiChooser
     if (this.props.multiChooser)
       multiChooser = <View style={styles.multiChooser}>
                        <TouchableHighlight underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
                          <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color='#7AAAc3' />
                        </TouchableHighlight>
                      </View>
-    var textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
+    let textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
 
     dateProp = utils.isContext(resource[TYPE]) ? 'time' : dateProp
     let dateRow
     if (!this.props.isChooser  &&  dateProp  &&  resource[dateProp]) {
-      var val = utils.formatDate(new Date(resource[dateProp]), true)
-      // var dateBlock = self.addDateProp(resource, dateProp, true);
+      let val = utils.formatDate(new Date(resource[dateProp]), true)
+      // let dateBlock = self.addDateProp(resource, dateProp, true);
       dateRow = <View style={{position: 'absolute', top: 2, backgroundColor: 'transparent', right: 10}}>
                   <Text style={styles.verySmallLetters}>{val}</Text>
                 </View>
@@ -262,7 +271,7 @@ class ResourceRow extends Component {
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
 
-    var isOpaque = resource[TYPE] === ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
+    let isOpaque = resource[TYPE] === ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
     if (isOpaque)
       return (
         <View key={this.getNextKey()} style={{opacity: 0.5}}>
@@ -289,7 +298,7 @@ class ResourceRow extends Component {
 
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode) {
-        var title = utils.makeTitle(utils.getDisplayName(resource))
+        let title = utils.makeTitle(utils.getDisplayName(resource))
       action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: '#ffffff'}}
                   onPress={() => {
                     this.props.navigator.push({
@@ -362,10 +371,10 @@ class ResourceRow extends Component {
       this.props.onSelect(this.props.resource)
   }
   formatRow(resource, style) {
-    var self = this;
-    var model = utils.getModel(resource[TYPE] || resource.id).value;
-    var viewCols = model.gridCols || model.viewCols;
-    var renderedViewCols;
+    let self = this;
+    let model = utils.getModel(resource[TYPE] || resource.id).value;
+    let viewCols = model.gridCols || model.viewCols;
+    let renderedViewCols;
     if (!viewCols  &&  model.id !== APPLICATION) {
       if (model.id === PARTIAL) {
         let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
@@ -375,7 +384,7 @@ class ResourceRow extends Component {
                 <Text style={[styles.resourceTitle, {fontSize: 18, paddingLeft: 7, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
               </View>
       }
-      var vCols = utils.getDisplayName(resource);
+      let vCols = utils.getDisplayName(resource);
       if (vCols && vCols.length) {
         if (model.subClassOf  &&  model.subClassOf === ENUM)
           vCols = utils.createAndTranslate(vCols, true)
@@ -391,15 +400,15 @@ class ResourceRow extends Component {
     else if (this.props.isChooser)
       return <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>
 
-    var vCols = [];
-    var properties = model.properties;
-    var first = true
-    var datePropIdx;
-    var datePropsCounter = 0;
-    var backlink;
-    var cnt = 10;
-    for (var i=0; i<viewCols.length; i++) {
-      var v = viewCols[i];
+    let vCols = [];
+    let properties = model.properties;
+    let first = true
+    let datePropIdx;
+    let datePropsCounter = 0;
+    let backlink;
+    let cnt = 10;
+    for (let i=0; i<viewCols.length; i++) {
+      let v = viewCols[i];
       if (properties[v].type === 'array') {
         if (properties[v].items.backlink)
           backlink = v;
@@ -419,9 +428,9 @@ class ResourceRow extends Component {
     if (datePropsCounter > 1)
       dateProp = null;
 
-    var isOfficialAccounts = this.props.isOfficialAccounts
-    var color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
-    var isContact = resource[TYPE] === PROFILE;
+    let isOfficialAccounts = this.props.isOfficialAccounts
+    let color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
+    let isContact = resource[TYPE] === PROFILE;
     viewCols.forEach((v) => {
       if (v === dateProp)
         return;
@@ -430,17 +439,17 @@ class ResourceRow extends Component {
 
       if (!resource[v]  &&  !properties[v].displayAs)
         return;
-      var style = first ? [styles.resourceTitle, color] : [styles.description, color]
+      let style = first ? [styles.resourceTitle, color] : [styles.description, color]
       if (isContact  &&  v === 'organization') {
         style.push({alignSelf: 'flex-end', marginTop: 20})
         style.push(styles.verySmallLetters);
       }
       if (properties[v].style)
         style.push(properties[v].style);
-      var ref = properties[v].ref;
+      let ref = properties[v].ref;
       if (ref) {
         if (resource[v]) {
-          var row;
+          let row;
           if (ref == MONEY)
             row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
           else
@@ -457,13 +466,13 @@ class ResourceRow extends Component {
           return;
       }
       else  {
-        var row;
+        let row;
         if (resource[v]  &&  (typeof resource[v] != 'string'))
           row = <Text style={style} numberOfLines={1} key={self.getNextKey()}>{resource[v]}</Text>;
         else if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
           row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1} key={self.getNextKey()}>{resource[v]}</Text>;
         else {
-          var val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
+          let val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
           let msgParts = utils.splitMessage(val);
           if (msgParts.length <= 2)
             val = msgParts[0];
@@ -525,7 +534,7 @@ class ResourceRow extends Component {
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
-      var vCols = utils.getDisplayName(resource, model);
+      let vCols = utils.getDisplayName(resource, model);
       return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
 
     }
@@ -540,7 +549,7 @@ class ResourceRow extends Component {
     ];
   }
   applicationRow(resource, style) {
-    var model = utils.getModel(resource[TYPE] || resource.id).value;
+    let model = utils.getModel(resource[TYPE] || resource.id).value;
     let m = utils.getModel(resource.requestFor)
     if (!m)
       return <View/>
@@ -647,8 +656,8 @@ class ResourceRow extends Component {
   }
   onPress(event) {
     let { resource, navigator } = this.props
-    var model = utils.getModel(resource[TYPE] || resource.id).value;
-    var title = utils.makeTitle(utils.getDisplayName(resource, model));
+    let model = utils.getModel(resource[TYPE] || resource.id).value;
+    let title = utils.makeTitle(utils.getDisplayName(resource, model));
     navigator.push({
       id: 7,
       title: title,
