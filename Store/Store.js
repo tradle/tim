@@ -467,25 +467,6 @@ var Store = Reflux.createStore({
     // this.postHistory()
   },
 
-  async postHistory() {
-    try {
-      const all = await this.getAllMessages()
-      const res = await fetch('http://localhost:5000', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(all)
-      })
-
-      await res.text()
-    } catch (err) {
-      debugger
-      console.error(err)
-    }
-  },
-
   onAcceptTermsAndChat(params) {
     me._termsAccepted = true;
     return this.dbPut(utils.getId(me), me)
@@ -1906,6 +1887,13 @@ var Store = Reflux.createStore({
       debug(`receiving msg ${msg._n} from ${counterparty}`)
       await this.queueReceive({ msg, from: counterparty })
     }
+    client.on('disconnect', function () {
+      self.setProviderOnlineStatus(provider.hash, false)
+    })
+
+    client.on('connect', function () {
+      self.setProviderOnlineStatus(provider.hash, true)
+    })
 
     wsClients.add({
       client,
@@ -5553,87 +5541,6 @@ var Store = Reflux.createStore({
     this.trigger(retParams)
   },
 
-  async getAllMessages() {
-    const stream = meDriver.objects.conversation({
-      with: '6a636c53aa36e6afb0740293fa89afdd187386227a5048283e178125b52a4152',
-      body: false,
-      limit: 1
-    })
-
-    // stream.on('data', function (data) {
-    //   console.log('STREAM DATA', data)
-    // })
-
-    // stream.on('end', function () {
-    //   debugger
-    //   console.log('STREAM ENDED')
-    // })
-
-    // stream.on('close', function () {
-    //   debugger
-    //   console.log('STREAM CLOSED')
-    // })
-
-    // stream.on('error', function (err) {
-    //   debugger
-    //   console.log('STREAM ERROR', err)
-    // })
-
-    const metadata = await collect(stream)
-    const data = await Promise.all(metadata.map(wrapper => this._keeper.get(wrapper.link)))
-    const full = metadata.map((m, i) => {
-      m.object = data[i]
-      return m
-    })
-
-    return full
-      .filter((r) => {
-         const payload = r.object.object
-         let rtype = payload[TYPE]
-         if (rtype === MESSAGE)
-           rtype = payload.object[TYPE]
-         return r.type === MESSAGE           &&
-                // rtype !== PRODUCT_LIST       &&
-                rtype !== SELF_INTRODUCTION  &&
-                rtype !== INTRODUCTION       &&
-                rtype !== CUSTOMER_WAITING
-       })
-      .map((r) => {
-        let obj = {}
-        let {object, objectinfo} = r
-
-        obj = object.object
-        if (obj[TYPE] === MESSAGE)
-          obj = obj.object
-        if (obj.message  &&  !obj.message.length)
-          delete obj.message
-        let props = this.getModel(obj[TYPE]).properties
-        for (let p in obj) {
-          if (!props[p])
-            continue
-          let ref = props[p].ref
-          let refM = ref  &&  this.getModel(ref)
-          if (utils.isEnum(refM)) {
-            let rr = obj[p]
-            if (refM.enum) {
-              refM.enum.forEach((r) => {
-                if (r.title === rr.title)
-                  rr.id = enumValue({model: refM, value: r})
-              })
-            }
-          }
-        }
-        // if (object.context)
-        //   obj._context = object.context
-        obj._author = objectinfo.author || r.author
-        obj._link = objectinfo.link
-        obj._permalink = objectinfo.permalink
-        // obj._time = r.timestamp
-        // if (obj.sentStatus)
-        //   obj._sendstatus = obj.sendstatus
-        return obj
-      })
-  },
   async getCurrentContext(to, orgId) {
     // let c = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
     let c = await this.searchMessages({modelName: CONTEXT, to: to})
@@ -5697,8 +5604,11 @@ var Store = Reflux.createStore({
       }
     }
     if (modelName === MESSAGE) {
-      if (application)
-        application = await this._getItemFromServer(application)
+      let context = application._context
+      application = await this._getItemFromServer(application)
+      if (!context)
+        context = await this.searchServer({modelName: PRODUCT_REQUEST, filterResource: {contextId: application.context}})
+
       let oforms = application  &&  application.forms
       if (!oforms)
         return
@@ -5707,7 +5617,7 @@ var Store = Reflux.createStore({
       let formIds = []
       oforms.forEach((r) => {
         formIds.push(utils.getId(r))
-        r._context = application._context
+        r._context = context
       })
       // let context = await this._getItemFromServer(utils.getId(application._context))
 
@@ -5730,17 +5640,18 @@ var Store = Reflux.createStore({
         filterResource: fr
       }))
       let result = await Q.all(promises)
+      result = result.filter((r) => r)
       let forms = []
       result.forEach((r) => {
         if (Array.isArray(r)) {
           r.forEach((f) => {
             let rr = this.convertToResource(f.node)
-            rr._context = application._context
+            rr._context = context
             forms.push(rr)
           })
         }
         else {
-          r._context = application._context
+          r._context = context
           forms.push(r)
         }
       })

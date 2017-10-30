@@ -111,6 +111,7 @@ import {
   Navigator,
   Alert,
   TouchableOpacity,
+  ActivityIndicator,
   Image,
   StatusBar,
   View,
@@ -1690,12 +1691,21 @@ class GridList extends Component {
       if (isModel)
         style.push({width: utils.getContentWidth(GridList), alignSelf: 'center'})
     }
+    let loading
+    if (isLoading)
+       loading = <View style={{flex: 1}}>
+                   <View style={[platformStyles.container]}>
+                     <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
+                     <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', marginTop: 20}} />
+                   </View>
+                 </View>
 
     return (
       <PageView style={style} separator={contentSeparator}>
         {network}
         {searchBar}
         <View style={styles.separator} />
+        {loading}
         {content}
         {footer}
         {actionSheet}

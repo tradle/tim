@@ -256,8 +256,8 @@ class ResourceRow extends Component {
     dateProp = utils.isContext(resource[TYPE]) ? 'time' : dateProp
     let dateRow
     if (!this.props.isChooser  &&  dateProp  &&  resource[dateProp]) {
-      var val = utils.formatDate(new Date(resource[dateProp]), true)
-      // var dateBlock = self.addDateProp(resource, dateProp, true);
+      let val = utils.formatDate(new Date(resource[dateProp]), true)
+      // let dateBlock = self.addDateProp(resource, dateProp, true);
       dateRow = <View style={styles.dateRow}>
                   <Text style={styles.verySmallLetters}>{val}</Text>
                 </View>
