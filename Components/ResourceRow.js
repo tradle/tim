@@ -255,7 +255,7 @@ class ResourceRow extends Component {
     if (!this.props.isChooser  &&  dateProp  &&  resource[dateProp]) {
       let val = utils.formatDate(new Date(resource[dateProp]), true)
       // let dateBlock = self.addDateProp(resource, dateProp, true);
-      dateRow = <View style={{position: 'absolute', top: 2, backgroundColor: 'transparent', right: 10}}>
+      dateRow = <View style={styles.dateRow}>
                   <Text style={styles.verySmallLetters}>{val}</Text>
                 </View>
     }
@@ -299,7 +299,7 @@ class ResourceRow extends Component {
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode) {
         let title = utils.makeTitle(utils.getDisplayName(resource))
-      action = <TouchableHighlight underlayColor='transparent' style={{position: 'absolute', right: 10, top: 25, backgroundColor: '#ffffff'}}
+      action = <TouchableHighlight underlayColor='transparent' style={styles.actionView}
                   onPress={() => {
                     this.props.navigator.push({
                       title: title,
@@ -468,9 +468,9 @@ class ResourceRow extends Component {
       else  {
         let row;
         if (resource[v]  &&  (typeof resource[v] != 'string'))
-          row = <Text style={style} numberOfLines={1} key={self.getNextKey()}>{resource[v]}</Text>;
+          row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
         else if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-          row = <Text style={style} onPress={self.onPress.bind(self)} numberOfLines={1} key={self.getNextKey()}>{resource[v]}</Text>;
+          row = <Text style={style} onPress={self.onPress.bind(self)} key={self.getNextKey()}>{resource[v]}</Text>;
         else {
           let val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
           let msgParts = utils.splitMessage(val);
@@ -534,8 +534,8 @@ class ResourceRow extends Component {
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
-      let vCols = utils.getDisplayName(resource, model);
-      return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+      let dn = utils.getDisplayName(resource, model);
+      return <Text style={styles.resourceTitle}>{dn}</Text>;
 
     }
     if (!backlink)
@@ -674,6 +674,13 @@ var styles = StyleSheet.create({
     flex: 1,
     alignSelf: 'center'
   },
+  dateRow: {
+    position: 'absolute',
+    top: 2,
+    backgroundColor:
+    'transparent',
+    right: 10
+  },
   // TODO: remove when you figure out v-centering
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
@@ -784,6 +791,12 @@ var styles = StyleSheet.create({
     fontSize: 12,
     alignSelf: 'flex-end',
     color: '#b4c3cb'
+  },
+  actionView: {
+    position: 'absolute',
+    right: 10,
+    top: 25,
+    backgroundColor: '#ffffff'
   },
   countView: {
     top: 25,
