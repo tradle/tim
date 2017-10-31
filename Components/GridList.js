@@ -671,10 +671,9 @@ class GridList extends Component {
     if (isContact)
       title = resource.firstName
     else if (isApplication)
-      title = me.organization.title + '->' + resource.applicant.title
+      title = me.organization.title + ' -> ' + resource.applicant.title
     else
       title = resource.name; //utils.getDisplayName(resource, model.value.properties);
-    let self = this;
     let style = this.mergeStyle(resource.style)
 
     let route = {
@@ -915,7 +914,6 @@ class GridList extends Component {
     if (me                       &&
        !model.value.isInterface  &&
        (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
-      let self = this ;
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
         title: 'Edit',
