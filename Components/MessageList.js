@@ -406,6 +406,8 @@ class MessageList extends Component {
     if (!list  &&  !forgetMeFromCustomer)
       return
 
+    if (bankStyle   &&  params.bankStyle)
+      extend(bankStyle, params.bankStyle)
     LINK_COLOR = bankStyle  &&  bankStyle.linkColor
     let isEmployee = utils.isEmployee(chatWith)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {

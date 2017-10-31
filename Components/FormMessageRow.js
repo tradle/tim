@@ -99,7 +99,7 @@ class FormMessageRow extends Component {
     this.props.navigator.push(route);
   }
   render() {
-    let { resource, to, bankStyle } = this.props
+    let { resource, to, bankStyle, application } = this.props
     var model = utils.getModel(resource[TYPE]).value
     let photos = utils.getResourcePhotos(model, resource)
     var photoListStyle = {height: 3};
@@ -124,7 +124,9 @@ class FormMessageRow extends Component {
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
-    var width = utils.dimensions(FormMessageRow).width
+    var width = utils.getMessageWidth(FormMessageRow)
+    if (application)
+      width -= 50 // provider icon and padding
     // let msgWidth =  Math.floor(width * 0.8)
     if (inRow > 0) {
       if (inRow === 1) {
@@ -187,12 +189,17 @@ class FormMessageRow extends Component {
     let width = Math.floor(utils.getMessageWidth(FormMessageRow)) // - (isSharedContext  ? 45 : 0))
     let viewStyle = {
       width: Math.min(width, 600),
+    let { bankStyle, application } = this.props
+    if (application)
+      width -= 50 // provider icon and padding
+
+    var viewStyle = {
+      width: width, // - (isSharedContext  ? 45 : 0),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       // marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
       backgroundColor: 'transparent', //this.props.bankStyle.BACKGROUND_COLOR,
       flexDirection: 'row',
     }
-    let bankStyle = this.props.bankStyle
 
     let headerStyle = [
       chatStyles.verifiedHeader,

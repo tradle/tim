@@ -671,10 +671,9 @@ class GridList extends Component {
     if (isContact)
       title = resource.firstName
     else if (isApplication)
-      title = me.organization.title + '->' + resource.applicant.title
+      title = me.organization.title + ' -> ' + resource.applicant.title
     else
       title = resource.name; //utils.getDisplayName(resource, model.value.properties);
-    let self = this;
     let style = this.mergeStyle(resource.style)
 
     let route = {
@@ -915,7 +914,6 @@ class GridList extends Component {
     if (me                       &&
        !model.value.isInterface  &&
        (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
-      let self = this ;
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
         title: 'Edit',
@@ -1528,8 +1526,8 @@ class GridList extends Component {
     }
     let employee
     if (me.isEmployee)
-      employee = <View style={{justifyContent: 'center'}}>
-                   <Text style={{fontSize: 18, paddingLeft: 20, color: '#7AAAC3'}}>{me.firstName + ' @ ' + me.organization.title}</Text>
+      employee = <View style={{justifyContent: 'center', flexDirection: 'row'}}>
+                   <Text style={{fontSize: 18, paddingLeft: 20, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
 
     let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
