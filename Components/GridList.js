@@ -1529,6 +1529,8 @@ class GridList extends Component {
       employee = <View style={{justifyContent: 'center'}}>
                    <Text style={{fontSize: 18, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
+    else
+      employee = <View/>
 
     let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
@@ -1643,7 +1645,7 @@ class GridList extends Component {
   render() {
     let content;
     let {isGrid, filter, dataSource, isLoading, refreshing} = this.state
-    let { isChooser, modelName, isModel } = this.props
+    let { isChooser, modelName, isModel, isBacklink } = this.props
     let model = utils.getModel(modelName).value;
     if (dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
@@ -1711,7 +1713,7 @@ class GridList extends Component {
         style.push({width: utils.getContentWidth(GridList), alignSelf: 'center'})
     }
     let loading
-    if (isLoading  &&  !isModel)
+    if (isLoading  &&  !isModel  &&  !isBacklink)
        loading = <View style={{flex: 1}}>
                    <View style={[platformStyles.container]}>
                      <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
