@@ -1010,8 +1010,11 @@ class ResourceList extends Component {
       employee = <View style={{justifyContent: 'center'}}>
                    <Text style={{fontSize: 18, paddingLeft: 20, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
+    else
+      employee = <View/>
     return (
-        <View style={styles.footer}>
+        <View style={[styles.footer, {justifyContent: 'space-between'}]}>
+          <View/>
           {employee}
           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
             <View style={[platformStyles.menuButtonNarrow, {opacity: 0.4}]}>
