@@ -186,15 +186,13 @@ class FormMessageRow extends Component {
 
     let isMyMessage = this.isMyMessage()
     let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
-    let width = Math.floor(utils.getMessageWidth(FormMessageRow)) // - (isSharedContext  ? 45 : 0))
-    let viewStyle = {
-      width: Math.min(width, 600),
     let { bankStyle, application } = this.props
+    var width = utils.getMessageWidth(FormMessageRow)
     if (application)
       width -= 50 // provider icon and padding
 
-    var viewStyle = {
-      width: width, // - (isSharedContext  ? 45 : 0),
+    let viewStyle = {
+      width: Math.min(width, 600),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       // marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
       backgroundColor: 'transparent', //this.props.bankStyle.BACKGROUND_COLOR,
