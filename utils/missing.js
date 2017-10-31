@@ -112,29 +112,25 @@ function getTip ({ node, counterparty, sent }) {
 }
 
 async function getReceivePosition ({ node, queue, counterparty }) {
-  try {
-    const seq = await queue.tip()
-    if (seq < 0) return null
-
-    const { timestamp, link } = await node.objects.getBySeq({
-      from: counterparty,
-      to: node.permalink,
-      seq,
-      body: false
-    })
-
-    return {
-      time: timestamp,
-      link
-    }
-  } catch (err) {
-    if (!err.notFound) {
-      debugger
-      throw err
-    }
-
+  let seq = await queue.tip()
+  if (seq < 0) {
+    debug(`client receive position not found for counterparty ${counterparty}`)
     return null
   }
+
+  while (seq >= 0) {
+    try {
+      const { link, message } = await queue.getItemAtSeq(seq)
+      const { time } = message
+      return { time, link }
+    } catch (err) {
+      debug(`failed to get item from queue at seq ${seq}`)
+      // shouldn't happen, but try previous
+      seq--
+    }
+  }
+
+  return null
 }
 
 function bufferizePubKey (key) {
