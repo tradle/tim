@@ -5538,9 +5538,10 @@ var Store = Reflux.createStore({
     else
       filterResource = utils.clone(originalFilter)
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
+    let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     if (me.isEmployee) {
       if (application  &&  (!filterResource  ||  !filterResource._author)) {
-        let applicant = this._getItem(application.applicant.id.replace(IDENTITY, PROFILE))
+        let applicant = this._getItem(applicantId)
         if (applicant  &&  applicant.organization) {
           if (!filterResource)
             filterResource = {[TYPE]: modelName}
@@ -5615,8 +5616,15 @@ var Store = Reflux.createStore({
         else
           return a.dateVerified - b.time
       })
-      if (!noTrigger)
-        this.trigger({action: 'messageList', modelName: MESSAGE, to: params.to, list: forms})
+      if (!noTrigger) {
+        let applicant = this._getItem(applicantId)
+        let style
+        if (applicant.organization) {
+          let applicantOrgId = utils.getId(applicant.organization)
+          style = SERVICE_PROVIDERS.filter((sp) => sp.org === applicantOrgId)[0].style
+        }
+        this.trigger({action: 'messageList', modelName: MESSAGE, to: params.to, list: forms, bankStyle: style})
+      }
       return forms
     }
     extend(params, {client: this.client, filterResource: filterResource})
