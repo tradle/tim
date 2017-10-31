@@ -671,7 +671,7 @@ class GridList extends Component {
     if (isContact)
       title = resource.firstName
     else if (isApplication)
-      title = me.organization.title + ' -> ' + resource.applicant.title
+      title = resource.applicant.title  + ' -> ' + me.organization.title
     else
       title = resource.name; //utils.getDisplayName(resource, model.value.properties);
     let style = this.mergeStyle(resource.style)
@@ -1517,9 +1517,11 @@ class GridList extends Component {
     }
     let employee
     if (me.isEmployee)
-      employee = <View style={{justifyContent: 'center', flexDirection: 'row'}}>
-                   <Text style={{fontSize: 18, paddingLeft: 20, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
+      employee = <View style={{justifyContent: 'center'}}>
+                   <Text style={{fontSize: 18, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
+    else
+      employee = <View/>
 
     let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
@@ -1530,9 +1532,12 @@ class GridList extends Component {
                     <Icon name={icon}  size={33}  color={color}/>
                   </View>
                 </TouchableOpacity>
+    else
+      menuBtn = <View/>
 
     return (
-        <View style={styles.footer}>
+        <View style={[styles.footer, {justifyContent: 'space-between'}]}>
+          <View/>
           {employee}
           {menuBtn}
         </View>
