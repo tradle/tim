@@ -122,7 +122,7 @@ class FormMessageRow extends Component {
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
-    var width = utils.getMessageWidth(FormMessageRow)
+    let width = Math.floor(utils.dimensions().width * 0.8)
     if (application)
       width -= 50 // provider icon and padding
     // let msgWidth =  Math.floor(width * 0.8)
@@ -185,7 +185,7 @@ class FormMessageRow extends Component {
     let isMyMessage = this.isMyMessage()
     let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
 
-    let width = Math.floor(utils.getMessageWidth(FormMessageRow)) // - (isSharedContext  ? 45 : 0))
+    let width = Math.floor(utils.dimensions().width * 0.8) // - (isSharedContext  ? 45 : 0))
     let { bankStyle, application } = this.props
     if (application)
       width -= 50 // provider icon and padding

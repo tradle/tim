@@ -1631,7 +1631,7 @@ class GridList extends Component {
   render() {
     let content;
     let {isGrid, filter, dataSource, isLoading, refreshing} = this.state
-    let { isChooser, modelName, isModel } = this.props
+    let { isChooser, modelName, isModel, isBacklink } = this.props
     let model = utils.getModel(modelName).value;
     if (dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
@@ -1691,7 +1691,7 @@ class GridList extends Component {
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(this.props.bankStyle)
     let loading
-    if (isLoading  &&  !isModel)
+    if (isLoading  &&  !isModel  &&  !isBacklink)
        loading = <View style={{flex: 1}}>
                    <View style={[platformStyles.container]}>
                      <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
