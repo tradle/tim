@@ -125,13 +125,29 @@ async function getReceivePosition ({ node, queue, counterparty }) {
       return { time, link }
     } catch (err) {
       debug(`failed to get item from queue at seq ${seq}`)
-      // shouldn't happen, but try previous
-      seq--
+      try {
+        const { timestamp, link } = await node.objects.getBySeq({
+          from: counterparty,
+          to: node.permalink,
+          seq,
+          body: false
+        })
+
+        return {
+          time: timestamp,
+          link
+        }
+      } catch (err) {
+        debug(`failed to get item from objectsdb at seq ${seq}`)
+        // shouldn't happen, but try previous
+        seq--
+      }
     }
   }
 
   return null
 }
+
 
 function bufferizePubKey (key) {
   key.pub = new Buffer(key.pub.data)
