@@ -188,7 +188,7 @@ class ShowPropertiesView extends Component {
         else if (this.props.checkProperties) {
           if (p.indexOf('_group') === p.length - 6) {
             return (<View style={{padding: 15}} key={this.getNextKey()}>
-                      <View key={this.getNextKey()}  style={{borderBottomColor: this.props.bankStyle.linkColor, borderBottomWidth: 1, paddingBottom: 5}}>
+                      <View style={{borderBottomColor: this.props.bankStyle.linkColor, borderBottomWidth: 1, paddingBottom: 5}}>
                         <Text style={{fontSize: 22, color: this.props.bankStyle.linkColor}}>{translate(pMeta)}</Text>
                       </View>
                     </View>
@@ -284,8 +284,8 @@ class ShowPropertiesView extends Component {
             return
           if (utils.getModel(pMeta.items.ref).value.subClassOf === ENUM) {
             let values = val.map((v) => utils.getDisplayName(v)).join(', ')
-            return <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                     <View style={{paddingLeft: 10}} key={this.getNextKey()}>
+            return <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
+                     <View style={{paddingLeft: 10}}>
                        <Text style={[styles.title]}>{pMeta.title}</Text>
                        <Text style={[styles.description]}>{values}</Text>
                      </View>
