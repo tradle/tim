@@ -8615,9 +8615,6 @@ var Store = Reflux.createStore({
   async putMessageInDB(val, obj, batch, onMessage) {
     let self = this
 
-    // var fromProfile = PROFILE + '_' + (obj.objectinfo ? obj.objectinfo.author : obj.from[ROOT_HASH])
-    var fromProfile = PROFILE + '_'
-
     let fromId = (obj.from  &&  obj.from[ROOT_HASH]) || (obj.objectinfo  &&  obj.objectinfo.author)
     let fromProfile = utils.makeId(PROFILE, fromId)
 
