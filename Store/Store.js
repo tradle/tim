@@ -2154,6 +2154,8 @@ var Store = Reflux.createStore({
   },
 
   async receive(opts) {
+    await this.ready
+
     const self = this
     let { msg, from, isRetry, length } = opts
     const { wsClients, identifierProp } = driverInfo
