@@ -991,6 +991,7 @@
 				E4A14BC02D91CCD20971F919 /* Pods */,
 				2677092A1F0C806BF108543A /* Frameworks */,
 				AB0700E270F64F0AB32A72E0 /* Resources */,
+				9BEAADF51FAA3D3A004D61E5 /* Recovered References */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -1002,6 +1003,16 @@
 				13B07F961A680F5B00A75B9A /* Tradle.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9BEAADF51FAA3D3A004D61E5 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				A4C66A6D1DDE4BC083E2095B /* libReactNativeExceptionHandler.a */,
+				220C4B3A55FF4F4EABEE94B9 /* libRNOS.a */,
+				5538811E99ED47279BA0FA88 /* libTcpSockets.a */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		AB0700E270F64F0AB32A72E0 /* Resources */ = {
