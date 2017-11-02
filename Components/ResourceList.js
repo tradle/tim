@@ -536,7 +536,7 @@ class ResourceList extends Component {
         });
       }
       else {
-        var title = utils.makeTitle(utils.getDisplayName(resource))
+        let title = utils.makeTitle(utils.getDisplayName(resource))
         this.props.navigator.push({
           title: title,
           id: 3,
@@ -583,7 +583,19 @@ class ResourceList extends Component {
         }
       }
     }
-    var title = isContact ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
+    let title
+    if (isContact)
+      title = resource.firstName
+    else if (me.isEmployee) {
+      let dn = utils.getDisplayName(resource)
+      let meOrgName = me.organization.title
+      if (dn === meOrgName)
+        title = meOrgName
+      else
+        title = meOrgName + '  →  ' + dn
+    }
+    else
+      title = resource.name //utils.getDisplayName(resource, model.value.properties);
     var modelName = constants.TYPES.MESSAGE;
     var self = this;
     let style = this.mergeStyle(resource.style)
@@ -592,6 +604,7 @@ class ResourceList extends Component {
       component: MessageList,
       id: 11,
       backButtonTitle: 'Back',
+      title: title,
       passProps: {
         resource: resource,
         limit: LIMIT,
@@ -602,7 +615,7 @@ class ResourceList extends Component {
       }
     }
     if (isContact) { //  ||  isOrganization) {
-      route.title = resource.firstName
+      // route.title = resource.firstName
       var isMe = isContact ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
       if (isMe) {
         route.onRightButtonPress.rightButtonTitle = 'Edit'
@@ -623,8 +636,8 @@ class ResourceList extends Component {
       }
     }
     if (this.props.officialAccounts) {
-      if (isOrganization)
-        route.title = resource.name
+      // if (isOrganization)
+      //   route.title = resource.name
       var msg = {
         message: translate('customerWaiting', me.firstName),
         _t: constants.TYPES.CUSTOMER_WAITING,
@@ -725,7 +738,7 @@ class ResourceList extends Component {
   }
   _selectResource(resource) {
     var model = utils.getModel(this.props.modelName);
-    var title = utils.getDisplayName(resource);
+    let title = utils.getDisplayName(resource);
     var newTitle = title;
     if (title.length > 20) {
       var t = title.split(' ');

@@ -671,7 +671,9 @@ class GridList extends Component {
     if (isContact)
       title = resource.firstName
     else if (isApplication)
-      title = resource.applicant.title  + ' -> ' + me.organization.title
+      title = resource.applicant.title  + '  →  ' + me.organization.title
+    else if (me.isEmployee)
+      title = me.organization.title + '  →  ' + utils.getDisplayName(resource)
     else
       title = resource.name; //utils.getDisplayName(resource, model.value.properties);
     let style = this.mergeStyle(resource.style)
