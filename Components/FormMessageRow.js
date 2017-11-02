@@ -124,10 +124,9 @@ class FormMessageRow extends Component {
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
-    let width = Math.floor(utils.dimensions().width * 0.8)
+    var width = utils.getMessageWidth(FormMessageRow)
     if (application)
       width -= 50 // provider icon and padding
-    // let msgWidth =  Math.floor(width * 0.8)
     if (inRow > 0) {
       if (inRow === 1) {
         var ww = Math.min(240, photoUrls[0].width)
@@ -190,9 +189,9 @@ class FormMessageRow extends Component {
     var width = utils.getMessageWidth(FormMessageRow)
     if (application)
       width -= 50 // provider icon and padding
-
+    width = Math.min(width, 600)
     let viewStyle = {
-      width: Math.min(width, 600),
+      // width: width,
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
       // marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
       backgroundColor: 'transparent', //this.props.bankStyle.BACKGROUND_COLOR,
@@ -232,7 +231,7 @@ class FormMessageRow extends Component {
     return (
       <View style={st, viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
-        <View style={[{flex:1}, chatStyles.verificationBody]}>
+        <View style={[{flex:1, width: width}, chatStyles.verificationBody]}>
           <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}]}>
             <View>
               {sealedStatus}
