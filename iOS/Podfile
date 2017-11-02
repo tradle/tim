@@ -4,5 +4,5 @@ target 'Tradle' do
 
   pod 'PPBlinkID', '~> 2.9.0'
 #  pod 'Firebase/Core'
-  pod 'iProov', :git => 'https://github.com/iProov/iproov-ios-pod.git'
+#  pod 'iProov', :git => 'https://github.com/iProov/iproov-ios-pod.git'
 end

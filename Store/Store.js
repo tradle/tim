@@ -584,11 +584,15 @@ var Store = Reflux.createStore({
     const payload = msg.object.object
     const originalPayload = payload[TYPE] === MESSAGE ? payload.object : payload
     debug('newObject:', originalPayload[TYPE])
+    if (!objectinfo.author) {
+      debug('ignoring double-wrapped object on first pass', originalPayload[TYPE])
+      return
+    }
 
     if (payload[TYPE] === MESSAGE) {
       let obj = msg.object
       try {
-        const saved = await meDriver.saveObject({ object: payload.object })
+        const saved = await meDriver.saveObject({ object: originalPayload })
         obj.from = {[ROOT_HASH]: saved.author}
         debug('newObject (unwrapped):', originalPayload[TYPE], saved)
       } catch (err) {
@@ -2154,6 +2158,8 @@ var Store = Reflux.createStore({
   },
 
   async receive(opts) {
+    await this.ready
+
     const self = this
     let { msg, from, isRetry, length } = opts
     const { wsClients, identifierProp } = driverInfo
@@ -2736,7 +2742,7 @@ var Store = Reflux.createStore({
     }
   },
 
-  addContact(data, hash, noMessage) {
+  async addContact(data, hash, noMessage) {
     data = utils.clone(data)
 
     var ikey = utils.makeId(IDENTITY, hash)
@@ -2799,44 +2805,20 @@ var Store = Reflux.createStore({
         this.trigger({action: 'newContact', newContact: profile})
     }
 
-    let promise
-    if (isDevicePairing)
-      promise = Q()
-    else {
+    if (!isDevicePairing) {
       let r = this._getItem(utils.getId(profile))
-      if ((r  &&  r.bot) || noMessage)
-        promise = Q()
-      else {
+      // if ((r  &&  r.bot) || noMessage);
+      if (r  &&  !r.bot && !noMessage) {
         if (profile._inactive) {
           profile._inactive = false
           batch.push({type: 'put', key: pkey, value: profile })
         }
 
-        promise = this.onAddMessage({msg: {
-                    [TYPE]: SIMPLE_MESSAGE,
-                    message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
-                    from: this.buildRef(utils.getMe()),
-                    to: this._getItem(pkey)
-                  }})
       }
     }
-    // return newContact ? db.batch(batch) : Q()
-    // .then(() => {
-    // return isDevicePairing ? Q() : this.onAddMessage({
-    //     [TYPE]: SIMPLE_MESSAGE,
-    //     message: translate('howCanIHelpYou', profile.formatted, utils.getMe().firstName),
-    //     from: this.buildRef(utils.getMe()),
-    //     to: this._getItem(pkey)
-    //   })
-    return promise
-    .then(() => {
-      if (batch.length)
-        return db.batch(batch)
-    })
-    // })
-    .catch((err) => {
-      debugger
-    })
+
+    if (batch.length)
+      return db.batch(batch)
   },
   findKey (keys, where) {
     var match
@@ -3528,7 +3510,7 @@ var Store = Reflux.createStore({
     if (!dontSend)
       result = await meDriver.createObject({object: {
                   [TYPE]: VERIFICATION,
-                  document: document,
+                  document: this.buildRef(document),
                   time: time
                 }})
 
@@ -6335,8 +6317,9 @@ var Store = Reflux.createStore({
       }
       else if (r[TYPE] === FORM_ERROR) {
         let prefill = self._getItem(r.prefill.id)
-        refs.push(prefill[CUR_HASH])
-        all[prefill[CUR_HASH]] = utils.getId(r.prefill)
+        let phash = prefill ? prefill[CUR_HASH] : r.prefill.id.split('_')[2]
+        refs.push(phash)
+        all[phash] = utils.getId(r.prefill)
       }
       let link = addLink(modelName, links, stub)
       if (link)
@@ -8702,12 +8685,13 @@ var Store = Reflux.createStore({
   async putMessageInDB(val, obj, batch, onMessage) {
     let self = this
 
-    // var fromProfile = PROFILE + '_' + (obj.objectinfo ? obj.objectinfo.author : obj.from[ROOT_HASH])
-    var fromProfile = PROFILE + '_'
-    if (obj.objectinfo && obj.objectinfo.author)
-      fromProfile = utils.makeId(PROFILE, obj.objectinfo.author)
-    else
-      fromProfile = utils.makeId(PROFILE, obj.from[ROOT_HASH])
+    let fromId = (obj.from  &&  obj.from[ROOT_HASH]) || (obj.objectinfo  &&  obj.objectinfo.author)
+    let fromProfile = utils.makeId(PROFILE, fromId)
+
+    // if (obj.objectinfo && obj.objectinfo.author)
+    //   fromProfile = utils.makeId(PROFILE, obj.objectinfo.author)
+    // else
+    //   fromProfile = utils.makeId(PROFILE, obj.from[ROOT_HASH])
 
     var from = this._getItem(fromProfile)
     let type = val[TYPE]
@@ -8762,9 +8746,8 @@ var Store = Reflux.createStore({
       // contextId = utils.makeId(context)
     }
     // HACK for showing verification in employee's chat
-    let isThirdPartySentRequest
-    // HACK for showing verification in employee's chat
-    if (type === VERIFICATION) {
+    let isVerification = type === VERIFICATION
+    if (isVerification) {
       let document = this._getItem(utils.getId(val.document))
       if (!document) {
         // debugger
@@ -8780,19 +8763,24 @@ var Store = Reflux.createStore({
         context = this._getItem(document._context)
       // let context = this._getItem(obj.object.context ? this._getItem(PRODUCT_APPLICATION + '_' + obj.object.context) : document._context)
       // context = context ? this._getItem(context) : null
-      if (context  &&  document) {
-        let toBot = this._getItem(utils.getId(context.to))
-        let originalTo = toBot.organization // this._getItem(document.to).organization
-        let verificationFrom = from.organization
-
-        if (verificationFrom  &&  utils.getId(verificationFrom)  !==  utils.getId(originalTo)) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
-          val._verifiedBy = from.organization
-          to = this._getItem(document.from)  // document from is not changing but to does depending on what party verifies or asks for corrections
-          toId = utils.getId(to)
-          from = this._getItem(utils.clone(context.to))
-          // isThirdPartySentRequest = true
-        }
+      if (obj.from  &&  obj.objectinfo.author  &&  obj.from[ROOT_HASH] !== obj.objectinfo.author) {
+        from = this._getItem(utils.makeId(PROFILE, obj.from[ROOT_HASH]))
+        val._verifiedBy = from.organization
+        // val.from = {id: utils.makeId(PROFILE, obj.objectinfo.author)}
       }
+      // else if (context  &&  document) {
+      //   let toBot = this._getItem(utils.getId(context.to))
+      //   let originalTo = toBot.organization // this._getItem(document.to).organization
+      //   let verificationFrom = from.organization
+
+      //   if (verificationFrom  &&  utils.getId(verificationFrom)  !==  utils.getId(originalTo)) { //}  &&  val._context  &&  utils.isReadOnlyChat(val._context)) {
+      //     val._verifiedBy = from.organization
+      //     to = this._getItem(document.from)  // document from is not changing but to does depending on what party verifies or asks for corrections
+      //     toId = utils.getId(to)
+      //     from = this._getItem(utils.clone(context.to))
+      //     // isThirdPartySentRequest = true
+      //   }
+      // }
     }
 
     var inDB
@@ -8832,6 +8820,8 @@ var Store = Reflux.createStore({
     }
     let isReadOnly = utils.getId(to) !== meId  &&  utils.getId(from) !== meId
     let isNew = val[ROOT_HASH] === val[CUR_HASH]
+    // HACK for showing verification in employee's chat
+    let isThirdPartySentRequest
     if (contextId  &&  !isContext) {
       if (!context) {
         context = this._getItem(contextId)
@@ -8842,6 +8832,9 @@ var Store = Reflux.createStore({
       // Avoid doubling the number of forms
       if (context) {
         isThirdPartySentRequest = utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
+
+        if (isThirdPartySentRequest  &&  isVerification)
+          isThirdPartySentRequest = utils.getId(to) !== utils.getId(context.from)  &&  utils.getId(to) !== utils.getId(context.to)
         if (!inDB)
           context._formsCount = context._formsCount ? ++context._formsCount : 1
         context.lastMessageTime = new Date().getTime()
@@ -9019,7 +9012,7 @@ var Store = Reflux.createStore({
     if (!val.time)
       val.time = obj.timestamp
 
-    let isVerification = type === VERIFICATION  || (model  && model.subClassOf === VERIFICATION)
+    // let isVerification = type === VERIFICATION  || (model  && model.subClassOf === VERIFICATION)
     if (isVerification) {
       // debugger
       await this.onAddVerification({r: val, notOneClickVerification: false, dontSend: true, isThirdPartySentRequest: isThirdPartySentRequest})
