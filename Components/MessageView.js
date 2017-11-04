@@ -95,7 +95,7 @@ class MessageView extends Component {
           runGetItem = true
       }
     })
-    if (runGetItem)
+    // if (runGetItem)
       Actions.getItem({resource: resource, search: search})
   }
 
@@ -146,7 +146,7 @@ class MessageView extends Component {
   renderActionSheet() {
     var resource = this.state.resource;
     let m = utils.getModel(resource[TYPE]).value
-    let bl = utils.getPropertiesWithAnnotation(m.properties, 'items')
+    let bl = utils.getPropertiesWithAnnotation(m, 'items')
     if (utils.isEmpty(bl))
       return
 

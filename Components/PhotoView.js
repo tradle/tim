@@ -62,7 +62,7 @@ class PhotoView extends Component {
     if (!currentPhoto)
       return <View />
 
-    let coverPhoto = utils.getPropertiesWithAnnotation(model.properties, 'coverPhoto')
+    let coverPhoto = utils.getPropertiesWithAnnotation(model, 'coverPhoto')
     coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
 
     var url = currentPhoto.url;
