@@ -510,8 +510,9 @@ var utils = {
   makeTitle(resourceTitle, prop) {
     return (resourceTitle.length > 28) ? resourceTitle.substring(0, 28) + '...' : resourceTitle;
   },
-  getPropertiesWithAnnotation(meta, annotation) {
+  getPropertiesWithAnnotation(model, annotation) {
     let props = {}
+    let meta = model.properties
     for (let p in meta)
       if (meta[p][annotation])
         props[p] = meta[p]
