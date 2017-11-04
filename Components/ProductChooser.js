@@ -165,49 +165,10 @@ class ProductChooser extends Component {
     this.props.navigator.pop();
   }
 
-  buildSimpleMsg(msg, type) {
-    var sMsg = {}
-    sMsg[constants.TYPE] = constants.TYPES.SIMPLE_MESSAGE
-    sMsg.message = type
-      ? '[' + msg + ']' + '(' + type + ')'
-      : msg
-
-    return sMsg
-  }
-
-  selectResource1(resource) {
-    // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = utils.getModel(this.state.modelName);
-
-    if (resource[constants.TYPE])
-      return;
-    var page = {
-      model: utils.getModel(resource.id).value,
-    }
-    if (this.props.returnRoute)
-      page.returnRoute = this.props.returnRoute;
-    if (this.props.callback)
-      page.callback = this.props.callback;
-    var me = utils.getMe()
-    page.resource = {
-      _t: resource.id,
-      from: me,
-      accountWith: this.props.resource,
-      productType: model.value.title
-    }
-    this.props.navigator.replace({
-      id: 4,
-      title: resource.title,
-      rightButtonTitle: 'Done',
-      backButtonTitle: 'Back',
-      component: NewResource,
-      titleTextColor: '#7AAAC3',
-      resource: resource,
-      passProps: page
-    });
-  }
   renderRow(resource)  {
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id)
+    if (!model)
+      return <View/>
     var MessageTypeRow = require('./MessageTypeRow');
 
     return (
