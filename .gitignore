@@ -83,3 +83,24 @@ buck-out/
 # For more information about the recommended setup visit:
 # https://github.com/fastlane/fastlane/blob/master/fastlane/docs/Gitignore.md
 android/keystores
+
+aenvironment.json
+avivaBankStyle.json
+avivaPrivateConf.json
+avivaPublicConf.json
+common-environment.json
+defaultPublicConf.json
+e2e/
+iOS/Tradle/Dev.plist
+iOS/Tradle/Tradle-Info.plist
+img/splash600x800.png
+package copy.json
+sandboxConf.json
+sandboxPublicConf.json
+styles/bankStyle-Tradle.json
+ubs-environment.json
+ubsBankStyle.json
+ubsPrivConf.json
+ubsPublicConf.json
+Additional components/
+Store/utils/
