@@ -10,14 +10,17 @@ var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin');
 var ShowPropertiesView = require('./ShowPropertiesView')
 var Actions = require('../Actions/Actions');
+var constants = require('@tradle/constants')
 const {
-  TYPES,
   TYPE,
   ROOT_HASH
-} = require('@tradle/constants');
-
-const constants = require('@tradle/constants') // tradle.constants
-const VERIFICATION = constants.TYPES.VERIFICATION;
+} = constants
+const {
+  VERIFICATION,
+  ORGANIZATION,
+  PROFILE,
+  FORM
+} = constants.TYPES
 
 import { makeResponsive } from 'react-native-orient'
 
@@ -33,7 +36,6 @@ import {
 import React, { Component } from 'react'
 
 import ENV from '../utils/env'
-const FORM = 'tradle.Form'
 
 class ShowRefList extends Component {
   constructor(props) {
@@ -41,41 +43,41 @@ class ShowRefList extends Component {
     this.state = {docs: null}
   }
   render() {
-    var resource = this.props.resource;
+    var { resource, backlink, backlinkList, showDocuments, showDetails, bankStyle, children, navigator, lazy, currency } = this.props
     var model = utils.getModel(resource[TYPE]).value;
     var props = model.properties;
     let self = this
     var refList = [];
-    var isIdentity = model.id === TYPES.PROFILE;
-    var isOrg = model.id === TYPES.ORGANIZATION;
+    var isIdentity = model.id === PROFILE;
+    var isOrg = model.id === ORGANIZATION;
     var me = utils.getMe()
     var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
     let propsToShow = []
 
+    let currentBacklink = backlink
+    let hasPropsToShow = this.hasPropsToShow(resource)
+    showDetails = !isIdentity  &&  !isOrg  &&  !showDocuments  &&  (showDetails || !backlink)  && hasPropsToShow
+    // showDetails = !isIdentity  &&  !showDocuments  &&  (showDetails || !backlink)
+    // if (showDetails  &&  isOrg)
+    //   showDetails = false
 
-    let currentBacklink = this.props.backlink
-    let showDetails = !isIdentity  &&  !this.props.showDocuments  &&  (this.props.showDetails || !this.props.backlink)
-    if (showDetails  &&  isOrg)
-      showDetails = false
-    let showDocuments = this.props.showDocuments
-
-    let bg = this.props.bankStyle ? this.props.bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
+    let bg = bankStyle ? bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
 
     let currentMarker = <View style={{backgroundColor: bg, height: 4, marginTop: -5}} />
 
-    for (var p in props) {
-      if (props[p].hidden)
-        continue
-      if (isIdentity) {
-        if (!isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
-          continue;
-        if (p === 'verifiedByMe'  &&  !me.organization)
-          continue;
+    let itemProps = utils.getPropertiesWithAnnotation(model, 'items')
+    if (itemProps) {
+      for (var p in itemProps) {
+        if (isIdentity) {
+          if (!isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
+            continue;
+          if (p === 'verifiedByMe'  &&  !me.organization)
+            continue
+        }
+        if (props[p].items.backlink)
+          propsToShow.push(p)
       }
-      if (p.charAt(0) === '_'  ||  !props[p].items  ||  !props[p].items.backlink)
-        continue;
-      propsToShow.push(p)
     }
     let isMessage = utils.isMessage(resource)
 
@@ -83,8 +85,8 @@ class ShowRefList extends Component {
     if (isMessage) {
       let rId = utils.getId(resource)
       let docs
-      if (this.props.showDocuments) {
-        docs = this.props.backlinkList
+      if (showDocuments) {
+        docs = backlinkList
         this.state.docs = docs
       }
       else if (this.state.docs)
@@ -117,7 +119,7 @@ class ShowRefList extends Component {
       if (!showDetails)
         return <View/>
     }
-    else if (!isOrg  &&  !isIdentity  &&  this.hasPropsToShow(resource)) {
+    else if (!isOrg  &&  !isIdentity  &&  hasPropsToShow) {
       let showCurrent = showDetails ? currentMarker : null
       let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
                          <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
@@ -136,7 +138,7 @@ class ShowRefList extends Component {
       else
         refList.push(detailsTab)
     }
-    if (model.viewCols) {
+    if (hasPropsToShow  &&  model.viewCols) {
       let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items  &&  props[p].items.backlink)
       if (vCols) {
         vCols.forEach((p) => {
@@ -207,18 +209,18 @@ class ShowRefList extends Component {
     }
     // explore current backlink
     let backlinkRL, details, separator
-    if (!showDetails  && (currentBacklink  ||  (this.props.backlinkList  &&  this.props.showDocuments))) {
+    if (!showDetails  && (currentBacklink  ||  (backlinkList  &&  showDocuments))) {
       let modelName = showDocuments ? FORM : currentBacklink.items.ref
         var GridList = require('./GridList')
         backlinkRL = <GridList
-                      lazy={this.props.lazy}
+                      lazy={lazy}
                       modelName={modelName}
                       prop={currentBacklink}
                       sortProperty={utils.getModel(modelName).value.sortProperty}
                       resource={resource}
                       isBacklink={true}
                       listView={true}
-                      navigator={this.props.navigator} />
+                      navigator={navigator} />
       // }
     }
     else if (resource.photos)
@@ -230,9 +232,9 @@ class ShowRefList extends Component {
       else
         details = <ShowPropertiesView resource={resource}
                                       showRefResource={this.getRefResource.bind(this)}
-                                      currency={this.props.currency}
+                                      currency={currency}
                                       excludedProperties={['photos']}
-                                      navigator={this.props.navigator} />
+                                      navigator={navigator} />
 
     }
     let comment
@@ -249,7 +251,7 @@ class ShowRefList extends Component {
                 <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
                   {refList}
                 </View>
-                {this.props.children}
+                {children}
                 {comment}
                 <View>
                   {backlinkRL}
@@ -257,7 +259,7 @@ class ShowRefList extends Component {
                 </View>
               </View>
 
-    return this.props.children || <View/>
+    return children || <View/>
   }
   getDocs(varr, rId, docs) {
     if (!varr)
@@ -272,11 +274,14 @@ class ShowRefList extends Component {
     })
   }
   hasPropsToShow(resource) {
-    let props = utils.getModel(resource[TYPE]).value.properties
+    let m = utils.getModel(resource[TYPE]).value
+    let props = m.properties
+    let viewCols = m.viewCols
     for (let p in resource) {
       if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
         continue
-      return true
+      if (viewCols  &&  viewCols.indexOf(p) !== -1)
+        return true
     }
   }
   exploreBacklink(resource, prop) {
