@@ -48,7 +48,7 @@ var HomePageMixin = {
     this.props.navigator.pop()
   },
 
-  onread(isView, result) {
+  async onread(isView, result) {
     // Pairing devices QRCode
     try {
       result = qrCodeDecoder.fromHex(result.data).data
