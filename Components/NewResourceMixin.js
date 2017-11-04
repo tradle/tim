@@ -1108,8 +1108,8 @@ var NewResourceMixin = {
             </View>
           </View>
         </TouchableHighlight>
-        {help}
         {this.getErrorView(params)}
+        {help}
       </View>
     )
   },
@@ -1448,8 +1448,8 @@ var NewResourceMixin = {
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
         {propLabel}
         {actionItem}
-        {help}
         {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
+        {help}
       </View>
     );
   },

@@ -88,6 +88,7 @@ import {
   Image,
   View,
   TouchableOpacity,
+  Dimensions,
   // StyleSheet,
   Alert,
   StatusBar,
@@ -785,11 +786,11 @@ var NavigationBarRouteMapper = {
     let tArr = t.length > 1 ? [] : <View />
 
     for (let i=1; i<t.length; i++)
-      tArr.push(<Text style={styles.arr} key={'index.common.js_' + i}>{t[i]}</Text>)
+      tArr.push(<Text style={styles.arr} key={'index.common.js_' + i}>{this.makeTitle(t[i])}</Text>)
     let text
     if (logoNeedsText  ||  !uri) {
       text = <Text style={style}>
-              {t[0]}
+              {this.makeTitle(t[0])}
              </Text>
     }
 
@@ -814,6 +815,24 @@ var NavigationBarRouteMapper = {
     // );
 
   },
+  makeTitle(title, component) {
+    if (Platform.OS === 'web')
+      return title
+    let { width } = utils.dimensions(component)
+
+    let tWidth = width * 0.8
+    let numberOfCharsInWidth = tWidth / utils.getFontSize(10)
+    if (title.length < numberOfCharsInWidth)
+      return title
+    title = title.substring(0, numberOfCharsInWidth)
+    let i = title.length - 1
+    for (; i>=0; i--) {
+      let ch  = title.charAt(i)
+      if (ch === ' '  ||  ch !== ','  ||  ch === ':'  ||  ch === ';')
+        break
+    }
+    return (i === 0 ? title : title.substring(0, i))  + '...'
+  }
 
 };
 
