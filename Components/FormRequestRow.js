@@ -157,7 +157,6 @@ class FormRequestRow extends Component {
       borderTopLeftRadius: 0
     }
 
-    var rowStyle = [chatStyles.row];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date}>{val}</Text>
@@ -202,7 +201,7 @@ class FormRequestRow extends Component {
     var mainStyle = { margin:1, backgroundColor: '#ffffff' }
     var shareables = !isFormRequest  || resource._documentCreated
                    ? null
-                   : this.showShareableResources(rowStyle, mainStyle);
+                   : this.showShareableResources(mainStyle);
 
     let cellStyle
     if (addStyle)
@@ -218,7 +217,7 @@ class FormRequestRow extends Component {
       share = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
               </View>
-    let msgContent =  <View style={[rowStyle, viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
+    let msgContent =  <View style={[viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
                         <View style={{marginTop: 2}}>
                         {ownerPhoto}
                         </View>
@@ -282,15 +281,16 @@ class FormRequestRow extends Component {
     });
   }
 
-  showShareableResources(rowStyle, viewStyle) {
+  showShareableResources(viewStyle) {
     if (!this.props.shareableResources) // || !this.props.resource.message)
       return null
 
     var resource = this.props.resource;
     let formModel = utils.getModel(resource.form).value
     let isMultientryForm = isMultientry(resource)
-    let entries = (isMultientryForm && this.props.productToForms[resource.product])
-                ? this.props.productToForms[resource.product][resource.form]
+    let { requestFor } = resource
+    let entries = (isMultientryForm && this.props.productToForms[requestFor])
+                ? this.props.productToForms[requestFor][resource.form]
                 : null
     var vtt = [];
     var cnt = 0;
@@ -367,7 +367,7 @@ class FormRequestRow extends Component {
 
 
     return (
-      <View style={[rowStyle, viewStyle, {marginTop: -15, width: w, backgroundColor: '#ffffff', borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
+      <View style={[viewStyle, {marginTop: -15, width: w, backgroundColor: '#ffffff', borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
         <View style={{flex: 1}}>
           {or}
           <View style={styles.shareablesList}>
@@ -461,7 +461,7 @@ class FormRequestRow extends Component {
                       </Text>
                         {verification.dateVerified
                           ? <View style={{flexDirection: 'row'}}>
-                              <Text style={{fontSize: 12, color: '#757575', fontStyle: 'italic'}}>{utils.formatDate(verification.dateVerified)}</Text>
+                              <Text style={styles.verifiedDate}>{utils.formatDate(verification.dateVerified)}</Text>
                             </View>
                           : <View/>
                         }
@@ -576,14 +576,14 @@ class FormRequestRow extends Component {
     // if (s.length === 2)
     //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
     let sameFormRequestForm
-    var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
-
-    if (!resource._documentCreated  &&  resource.product) {
-      let multiEntryForms = utils.getModel(resource.product).value.multiEntryForms
+    let isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
+    let { requestFor } = resource
+    if (!resource._documentCreated  &&  requestFor) {
+      let multiEntryForms = utils.getModel(requestFor).value.multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
         let productToForms = this.props.productToForms
         if (productToForms) {
-          let product = productToForms[resource.product]
+          let product = productToForms[requestFor]
           if (product) {
             let formsArray = product[resource.form]
             if (formsArray)
@@ -768,10 +768,10 @@ class FormRequestRow extends Component {
 }
 
 function isMultientry(resource) {
-  if (!resource.product)
+  if (!resource.requestFor)
     return false
   let form = utils.getModel(resource.form).value
-  let product = utils.getModel(resource.product).value
+  let product = utils.getModel(resource.requestFor).value
   let multiEntryForms = product.multiEntryForms
   return  multiEntryForms && multiEntryForms.indexOf(form.id) !== -1 ? true : false
 }
@@ -836,6 +836,11 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     color: '#ffffff',
     fontSize: 16,
+  },
+  verifiedDate: {
+    fontSize: 12,
+    color: '#757575',
+    fontStyle: 'italic'
   }
 });
 reactMixin(FormRequestRow.prototype, RowMixin)
