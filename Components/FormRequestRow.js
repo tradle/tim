@@ -288,9 +288,9 @@ class FormRequestRow extends Component {
     var resource = this.props.resource;
     let formModel = utils.getModel(resource.form).value
     let isMultientryForm = isMultientry(resource)
-    let { requestFor } = resource
-    let entries = (isMultientryForm && this.props.productToForms[requestFor])
-                ? this.props.productToForms[requestFor][resource.form]
+    let { product } = resource
+    let entries = (isMultientryForm && this.props.productToForms[product])
+                ? this.props.productToForms[product][resource.form]
                 : null
     var vtt = [];
     var cnt = 0;
@@ -577,13 +577,13 @@ class FormRequestRow extends Component {
     //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
     let sameFormRequestForm
     let isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
-    let { requestFor } = resource
-    if (!resource._documentCreated  &&  requestFor) {
-      let multiEntryForms = utils.getModel(requestFor).value.multiEntryForms
+    let { product } = resource
+    if (!resource._documentCreated  &&  product) {
+      let multiEntryForms = utils.getModel(product).value.multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
         let productToForms = this.props.productToForms
         if (productToForms) {
-          let product = productToForms[requestFor]
+          let product = productToForms[product]
           if (product) {
             let formsArray = product[resource.form]
             if (formsArray)
@@ -768,10 +768,10 @@ class FormRequestRow extends Component {
 }
 
 function isMultientry(resource) {
-  if (!resource.requestFor)
+  if (!resource.product)
     return false
   let form = utils.getModel(resource.form).value
-  let product = utils.getModel(resource.requestFor).value
+  let product = utils.getModel(resource.product).value
   let multiEntryForms = product.multiEntryForms
   return  multiEntryForms && multiEntryForms.indexOf(form.id) !== -1 ? true : false
 }
