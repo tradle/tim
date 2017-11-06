@@ -273,6 +273,8 @@ class TimHome extends Component {
   }
 
   async onStart(params) {
+    utils.updateEnv()
+
     // prior to registration
     // force install updates before first interaction
     const me = utils.getMe()

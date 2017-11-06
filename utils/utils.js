@@ -1956,6 +1956,30 @@ var utils = {
     uri: 'data:image/gif;base64,R0lGODlhAQABAIAAAP7//wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='
   },
 
+  async updateEnv() {
+    let env
+    try {
+      env = await this.fetchEnv()
+    } catch (err) {
+      debug('failed to update environment from tradle server', err.message)
+      return
+    }
+
+    require('../Actions/Actions').updateEnvironment(env)
+  },
+
+  async fetchEnv() {
+    if (!ENV.tradleAPIKey) return
+
+    const res = await fetch(`${ENV.tradleAPIEndpoint}/fs/environment.json`, {
+      headers: {
+        'x-api-key': ENV.tradleAPIKey
+      }
+    })
+
+    return await res.json()
+  },
+
   async isLatestVersion() {
     // no way to detect
     if (!utils.isIOS()) return true

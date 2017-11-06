@@ -218,6 +218,7 @@ class TiMApp extends Component {
       case 'inactive':
         return
       case 'active':
+        utils.updateEnv()
         AutomaticUpdates.hasUpdate().then(has => {
           if (has) return AutomaticUpdates.install()
 
