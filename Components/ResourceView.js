@@ -100,7 +100,7 @@ class ResourceView extends Component {
     this._lazyId = LAZY_ID + INSTANCE_ID++
 
     let me = utils.getMe()
-    let resource = props.resource
+    let { resource, backlink, action, navigator } = props
     // const dataSource = new ListView.DataSource({
     //   rowHasChanged: function(row1, row2) {
     //     return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
@@ -114,17 +114,19 @@ class ResourceView extends Component {
       useGesturePassword: me && me.useGesturePassword,
       // dataSource: dataSource.cloneWithRows([resource])
     }
-    let currentRoutes = this.props.navigator.getCurrentRoutes()
+    if (backlink)
+      this.state.backlink = backlink
+    let currentRoutes = navigator.getCurrentRoutes()
     let len = currentRoutes.length
     if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle)
-      currentRoutes[len - 1].onRightButtonPress = this.props.action.bind(this)
+      currentRoutes[len - 1].onRightButtonPress = action.bind(this)
   }
   componentWillMount() {
-    let { resource, search } = this.props
+    let { resource, search, backlink } = this.props
 
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     // if (resource.id || !resource[constants.ROOT_HASH])
-      Actions.getItem( {resource: resource, search: search} )
+      Actions.getItem( {resource: resource, search: search, backlink: backlink} )
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
