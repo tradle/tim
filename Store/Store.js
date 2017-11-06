@@ -3005,7 +3005,7 @@ var Store = Reflux.createStore({
 
       rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
       if (isContext) {
-        rr._context = r._context = {id: utils.getId(r), title: r.product}
+        rr._context = r._context = {id: utils.getId(r), title: r.requestFor}
         contextIdToResourceId[rr.contextId] = utils.getId(rr)
 
         // let params = {
@@ -10267,10 +10267,10 @@ var Store = Reflux.createStore({
     let productToForms = {}
     allFormRequests.forEach((r) => {
       if (r._documentCreated  &&  r._document) {
-        var l = productToForms[r.requestFor]
+        var l = productToForms[r.product]
         if (!l) {
           l = {}
-          productToForms[r.requestFor] = l
+          productToForms[r.product] = l
         }
         let forms = l[r.form]
         if (!forms) {
