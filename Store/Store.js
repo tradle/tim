@@ -3313,26 +3313,6 @@ var Store = Reflux.createStore({
       }
     }
    },
-  // disableOtherFormRequestsLikeThis(rr) {
-  //   let fromRep = utils.getId(rr.from)
-  //   let orgId = utils.getId(this._getItem(fromRep).organization)
-  //   let messages = chatMessages[orgId]
-  //   let batch = []
-  //   messages.forEach((r) => {
-  //     let m = this._getItem(r.id)
-  //     if (m[TYPE] === FORM_REQUEST  &&
-  //         m[ROOT_HASH] !== rr[ROOT_HASH] &&
-  //         m.product === rr.product  &&
-  //         m.form === rr.form        &&
-  //         !m.document               &&
-  //         !m._documentCreated) {
-  //       m._documentCreated = true
-  //       batch.push({type: 'put', key: utils.getId(m), value: m})
-  //     }
-  //   })
-  //   if (batch.length)
-  //     return db.batch(batch)
-  // },
 
   // Every chat has it's own messages array where
   // all the messages present in order they were received
@@ -3568,7 +3548,9 @@ var Store = Reflux.createStore({
     }
     // let docId = utils.getId(r.document)
     let doc = document // this._getItem(r.document)
-    if (!me.isEmployee) {
+    let meId = utils.getId(me)
+    let myBotId = me.isEmployee ? utils.getId(this.getRepresentative(me.organization)) : null
+    if (!me.isEmployee  ||  (r.to.id === meId  &&  r.from.id === myBotId)) {
       if (!isReadOnly) {
         doc._verificationsCount = !doc._verificationsCount ? 1 : ++doc._verificationsCount
         this.dbBatchPut(docId, doc, batch);
@@ -3712,7 +3694,7 @@ var Store = Reflux.createStore({
   },
 
   async onGetItem(params) {
-    var {resource, action, noTrigger, search} = params
+    var {resource, action, noTrigger, search, backlink} = params
     // await this._loadedResourcesDefer.promise
     let rId = utils.getId(resource)
     if (search) {
@@ -3750,7 +3732,7 @@ var Store = Reflux.createStore({
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
 
-    var props = resModel.properties;
+    var props = backlink ? [backlink] : resModel.properties;
     for (let p in props) {
       if (p.charAt(0) === '_'  ||  props[p].hidden)
         continue;
@@ -6082,6 +6064,7 @@ var Store = Reflux.createStore({
     // var required = meta.required;
     var meId = utils.getId(me)
     var meOrgId = me.isEmployee ? utils.getId(me.organization) : null;
+    var myBotId = me.isEmployee ?  utils.getId(this.getRepresentative(me.organization)) : null
 
     let filterOutForms = !listView  &&  !isForgetting  &&  to  &&  to[TYPE] === ORGANIZATION  //&&  !utils.isEmployee(params.to)
 
@@ -6251,8 +6234,11 @@ var Store = Reflux.createStore({
     .then((l) => {
       if (isBacklinkProp) {
         list.forEach((r) => {
-          if (r[TYPE] === VERIFICATION)
-            r.document = refsObj[utils.getId(r.document)]
+          if (r[TYPE] === VERIFICATION) {
+            let d = refsObj[utils.getId(r.document)]
+            if (d)
+              r.document = d
+          }
         })
         return list
       }
@@ -6294,6 +6280,15 @@ var Store = Reflux.createStore({
       let r = self._getItem(stub)
       if (!r)
         return
+      if (me.isEmployee  &&  isBacklinkProp) {
+        // don't show resources that were resigned by bot
+        if (r.from.id !== meId  &&  r.to.id !== meId)
+          return
+        if (r.from.id !== myBotId  &&  r.to.id !== myBotId)
+          return
+        // if (r.fromId !== myBotId  &&  r.to.id !== myBotId)
+        //   return
+      }
       if (r[TYPE] === VERIFICATION) {
         let doc = self._getItem(r.document.id)
         if (doc  &&  doc.from.id !== r.to.id) {
@@ -7754,6 +7749,7 @@ var Store = Reflux.createStore({
     let isProfile = resource[TYPE] === PROFILE
     var props = resModel.properties
     let changedCounts
+    let myBotId = me.isEmployee ? utils.getId(this.getRepresentative(me.organization)) : null
     for (let p in props) {
       if (p.charAt(0) === '_'  ||  props[p].hidden)
         continue;
@@ -7773,8 +7769,15 @@ var Store = Reflux.createStore({
         continue
 
       if (isProfile  &&  items.ref === FORM) {
-        if (msgModel.interfaces.indexOf(ITEM) !== -1  ||  msgModel.interfaces.indexOf(DOCUMENT) !== -1)
+        // For employee
+        if (msgModel.id === PRODUCT_REQUEST           ||
+            msgModel.interfaces.indexOf(ITEM) !== -1  ||
+            msgModel.interfaces.indexOf(DOCUMENT) !== -1)
           continue
+        if (me.isEmployee) {
+          if (msg.to.id !== myBotId)
+            continue
+        }
       }
       if (utils.getId(msg[backlink]) === rId) {
         let cntProp = '_' + p + 'Count'
@@ -8869,7 +8872,7 @@ var Store = Reflux.createStore({
             this.dbBatchPut(rId, r, batch)
             // batch.push({type: 'put', key: rId, value: r})
             // // this.addVisualProps(r)
-            // // this.trigger({action: 'addItem', resource: r})
+            this.trigger({action: 'updateItem', resource: r})
           }
         })
     }
@@ -9039,8 +9042,20 @@ var Store = Reflux.createStore({
         let id  = chat.organization ? utils.getId(chat.organization) : utils.getId(chat)
         this.addMessagesToChat(id, val)
       }
-      else
-        this.addMessagesToChat(utils.getId(org ? org : from), val)
+      else {
+        let oId = utils.getId(org ? org : from)
+        if (type === FORM_REQUEST  &&  val.form === PRODUCT_REQUEST) {
+          let messages = chatMessages[oId]
+          if (messages) {
+            let r = this._getItem(messages[messages.length - 1])
+            if (r[TYPE] === FORM_REQUEST  &&  r.form === PRODUCT_REQUEST  &&  !r._documentCreated) {
+              noTrigger = true
+              return
+            }
+          }
+        }
+        this.addMessagesToChat(oId, val)
+      }
     }
     this.dbBatchPut(key, val, batch)
     this.addVisualProps(val)
@@ -12185,4 +12200,24 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //     })
   //   })
   //   return batch.length ? db.batch(batch) : Q()
+  // },
+  // disableOtherFormRequestsLikeThis(rr) {
+  //   let fromRep = utils.getId(rr.from)
+  //   let orgId = utils.getId(this._getItem(fromRep).organization)
+  //   let messages = chatMessages[orgId]
+  //   let batch = []
+  //   messages.forEach((r) => {
+  //     let m = this._getItem(r.id)
+  //     if (m[TYPE] === FORM_REQUEST  &&
+  //         m[ROOT_HASH] !== rr[ROOT_HASH] &&
+  //         m.product === rr.product  &&
+  //         m.form === rr.form        &&
+  //         !m.document               &&
+  //         !m._documentCreated) {
+  //       m._documentCreated = true
+  //       batch.push({type: 'put', key: utils.getId(m), value: m})
+  //     }
+  //   })
+  //   if (batch.length)
+  //     return db.batch(batch)
   // },
