@@ -21,7 +21,7 @@
 #import "Orientation.h"
 #import <asl.h>
 #import "SplashScreen.h"
-#import "RNBranch.h"
+#import <react-native-branch/RNBranch.h>
 
 #import "Firebase.h"
 
@@ -48,16 +48,19 @@
   QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
   touchposeApplication.alwaysShowTouches = YES;
 
-  [RNBranch initSessionWithLaunchOptions:launchOptions isReferrable:YES];
 #ifdef DEBUG
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
   if (jsCodeLocation == nil) {
-    jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.201:8081/index.ios.bundle?platform=ios&dev=true"];
+    jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.156:8081/index.ios.bundle?platform=ios&dev=true"];
   }
+
+//  [RNBranch setDebug];
 #else
   jsCodeLocation = [CodePush bundleURL];
     // jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
+
+  [RNBranch initSessionWithLaunchOptions:launchOptions isReferrable:YES];
 
   /**
    * OPTION 2
@@ -91,7 +94,7 @@
 }
 
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation {
-  if (![RNBranch handleDeepLink:url]) {
+  if (![RNBranch.branch application:application openURL:url sourceApplication:sourceApplication annotation:annotation]) {
     // do other deep link routing for the Facebook SDK, Pinterest SDK, etc
     return [RCTLinkingManager application:application openURL:url sourceApplication:sourceApplication annotation:annotation];
   }

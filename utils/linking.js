@@ -21,19 +21,43 @@ const matchURI = uri => {
   }
 }
 
-async function getInitialURL() {
-  // const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
+async function getReferringURL () {
   const params = await Branch.getFirstReferringParams()
+  console.log('react-native-branch initial params', JSON.stringify(params))
   return getUrlFromBundle({ params }) || await Linking.getInitialURL()
 }
 
-function getUrlFromBundle ({ uri, params, error }) {
-  if (uri || error) {
-    return matchURI(uri)
+async function getInitialURL() {
+  // const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
+  // const params = await Branch.getFirstReferringParams()
+  // console.log('react-native-branch initial params', JSON.stringify(params))
+  // return getUrlFromBundle({ params }) || await Linking.getInitialURL()
+  return await Linking.getInitialURL()
+}
+
+function getUrlFromBundle ({ params, error }) {
+  if (error) {
+    console.error('react-native-branch error', error.stack)
+    return
   }
 
-  const branchLink = params && params['$deeplink_path']
-  const link = branchLink || uri
+  console.log('react-native-branch event', JSON.stringify(params))
+  if (params['+non_branch_link']) {
+    const nonBranchUrl = params['+non_branch_link']
+    return matchURI(nonBranchUrl)
+  }
+
+  if (!params['+clicked_branch_link']) {
+    // Indicates initialization success and some other conditions.
+    // No link was opened.
+    return
+  }
+
+  if (params['~referring_link']) {
+    return matchURI(params['~referring_link'])
+  }
+
+  const link = params['$deeplink_path']
   return link && stripProtocol(link)
 }
 
@@ -44,6 +68,7 @@ function stripProtocol (url) {
 
 const instance = new EventEmitter()
 instance.getInitialURL = getInitialURL
+instance.getReferringURL = getReferringURL
 instance.addEventListener = instance.addListener
 instance.removeEventListener = instance.removeListener
 

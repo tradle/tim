@@ -159,8 +159,11 @@ class TimHome extends Component {
   async componentDidMount() {
     this._checkConnectivity()
 
+    if (!utils.getMe()) return
+
+    Alert.alert('TRYING THE DEEP LINK')
     try {
-      const url = await Linking.getInitialURL() || ENV.initWithDeepLink
+      const url = await Linking.getReferringURL() || ENV.initWithDeepLink
       if (url)
         this._handleOpenURL({url})
       if (ENV.landingPage)

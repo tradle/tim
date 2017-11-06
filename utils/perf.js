@@ -42,8 +42,8 @@ global.timeFunctions = exports.timeFunctions = function timeFunctions (obj, over
         var ms = stopTimer(false)
         total.time += ms
         total.calls++
-        if (k === 'send' || k === 'receive' || ms > 200) {
-          Alert.alert(`${k} took`, '' + ms)
+        if (ms > 50) {
+          console.log(`TIMER: ${k} took`, '' + ms)
         }
 
         if (ms < 5) return
