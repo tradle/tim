@@ -39,7 +39,14 @@ try {
 } catch (err) {
   // no version info available
 }
-
+var {
+  TYPE
+} = constants
+var {
+  ORGANIZATION,
+  CUSTOMER_WAITING,
+  MESSAGE
+} = constants.TYPES
 // var Progress = require('react-native-progress')
 import {
   // authenticateUser,
@@ -431,7 +438,7 @@ class TimHome extends Component {
     //     bankStyle: defaultBankStyle,
     //     rlProps: passProps,
     //     profileProps: {
-    //       model: utils.getModel(me[constants.TYPE]).value,
+    //       model: utils.getModel(me[TYPE]).value,
     //       resource: me,
     //       bankStyle: defaultBankStyle
     //     }
@@ -466,13 +473,14 @@ class TimHome extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(me[constants.TYPE]).value,
+            model: utils.getModel(me[TYPE]).value,
             resource: me,
             bankStyle: defaultBankStyle
           }
         },
         passProps: {
           bankStyle: defaultBankStyle,
+          backlink: utils.getModel(me[TYPE]).value.properties.myForms,
           resource: me
         }
       }
@@ -494,13 +502,14 @@ class TimHome extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
-          model: utils.getModel(me[constants.TYPE]).value,
+          model: utils.getModel(me[TYPE]).value,
           resource: me,
           bankStyle: defaultBankStyle
         }
       },
       passProps: {
         resource: me,
+          backlink: utils.getModel(me[TYPE]).value.properties.myForms,
         bankStyle: defaultBankStyle
       }
     })
@@ -511,7 +520,7 @@ class TimHome extends Component {
     //   backButtonTitle: translate('back'),
     //   passProps: {
     //     sponsorName: 'UBS',
-    //     modelName: constants.TYPES.ORGANIZATION,
+    //     modelName: TYPES.ORGANIZATION,
     //     bankStyle: defaultBankStyle,
     //     officialAccounts: true,
     //   }
@@ -611,7 +620,7 @@ class TimHome extends Component {
     }
     var msg = {
       message: translate('customerWaiting', me.firstName),
-      _t: constants.TYPES.CUSTOMER_WAITING,
+      _t: CUSTOMER_WAITING,
       from: me,
       to: provider,
       time: new Date().getTime()
@@ -630,7 +639,7 @@ class TimHome extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: provider,
-        modelName: constants.TYPES.MESSAGE,
+        modelName: MESSAGE,
         currency: this.props.currency,
         bankStyle:  style
       }
@@ -664,7 +673,7 @@ class TimHome extends Component {
     const me = utils.getMe()
     let passProps = {
       filter: '',
-      modelName: constants.TYPES.ORGANIZATION,
+      modelName: ORGANIZATION,
       sortProperty: 'lastMessageTime',
       officialAccounts: true,
       bankStyle: defaultBankStyle
@@ -677,7 +686,7 @@ class TimHome extends Component {
       component: ResourceList,
       backButtonTitle: translate('back'),
       passProps: {
-        modelName: constants.TYPES.ORGANIZATION,
+        modelName: ORGANIZATION,
         isConnected: this.state.isConnected,
         officialAccounts: true,
         bankStyle: defaultBankStyle
@@ -696,8 +705,9 @@ class TimHome extends Component {
           backButtonTitle: translate('back'),
           rightButtonTitle: translate('done'),
           passProps: {
-            model: utils.getModel(me[constants.TYPE]).value,
+            model: utils.getModel(me[TYPE]).value,
             resource: me,
+            backlink: utils.getModel(me[TYPE]).value.properties.myForms,
             bankStyle: defaultBankStyle
           }
         },
@@ -1076,33 +1086,6 @@ class TimHome extends Component {
       }
     })
   }
-  // async onSettingsPressed() {
-  //   try {
-  //     await authenticateUser()
-  //   } catch (err) {
-  //     return
-  //   }
-
-  //   var model = utils.getModel(constants.TYPES.SETTINGS).value
-  //   var route = {
-  //     component: NewResource,
-  //     title: translate('settings'),
-  //     backButtonTitle: translate('back'),
-  //     rightButtonTitle: translate('done'),
-  //     id: 4,
-  //     titleTextColor: '#7AAAC3',
-  //     passProps: {
-  //       model: model,
-  //       isConnected: this.state.isConnected,
-  //       callback: this.props.navigator.pop,
-  //       bankStyle: defaultBankStyle
-
-  //       // callback: this.register.bind(this)
-  //     },
-  //   }
-
-  //   this.props.navigator.push(route)
-  // }
   restartTiM() {
     Alert.alert(
       'Please restart TiM'
@@ -1241,3 +1224,30 @@ function getIconSize (dimensions) {
 
 module.exports = TimHome;
 
+  // async onSettingsPressed() {
+  //   try {
+  //     await authenticateUser()
+  //   } catch (err) {
+  //     return
+  //   }
+
+  //   var model = utils.getModel(SETTINGS).value
+  //   var route = {
+  //     component: NewResource,
+  //     title: translate('settings'),
+  //     backButtonTitle: translate('back'),
+  //     rightButtonTitle: translate('done'),
+  //     id: 4,
+  //     titleTextColor: '#7AAAC3',
+  //     passProps: {
+  //       model: model,
+  //       isConnected: this.state.isConnected,
+  //       callback: this.props.navigator.pop,
+  //       bankStyle: defaultBankStyle
+
+  //       // callback: this.register.bind(this)
+  //     },
+  //   }
+
+  //   this.props.navigator.push(route)
+  // }
