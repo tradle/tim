@@ -10267,10 +10267,10 @@ var Store = Reflux.createStore({
     let productToForms = {}
     allFormRequests.forEach((r) => {
       if (r._documentCreated  &&  r._document) {
-        var l = productToForms[r.product]
+        var l = productToForms[r.requestFor]
         if (!l) {
           l = {}
-          productToForms[r.product] = l
+          productToForms[r.requestFor] = l
         }
         let forms = l[r.form]
         if (!forms) {
