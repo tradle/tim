@@ -213,6 +213,7 @@
     "loadingModels": "loading models",
     "loadingResources": "loading resources",
     "initializingEngine": "initializing engine",
+    "generatingKeys": "generating your private keys",
     "cameraAccess": "Camera Access",
     "enableCameraAccess": "{appName} currently does not have permission to use the camera. To grant access, choose Settings, and make sure Camera is enabled.",
     "noScanningOnAndroid": "Document scanning on Android is coming soon.",
