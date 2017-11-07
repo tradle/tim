@@ -2007,7 +2007,16 @@ var utils = {
         this.remove()
       }
     })
-  }
+  },
+
+  // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
+  //   if (utils.isWeb()) {
+  //     const { width=0, height=0 } = shadowOffset
+  //     const spreadRadius = 0
+  //     const color = shadowColor.startsWith('rgb') ? shadowColor : require('./hex-to-rgb')(shadowColor)
+  //     return `${width}px ${height}px ${shadowRadius}px ${spreadRadius}px rgba(0,0,0,0.12)`,
+  //   }
+  // }
 
   // isResourceInMyData(r) {
   //   let toId = utils.getId(r.to)

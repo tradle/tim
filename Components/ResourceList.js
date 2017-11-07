@@ -1296,7 +1296,7 @@ class ResourceList extends Component {
     }
     let search
     if (isProfile) {
-      search = <View style={{padding: 5, backgroundColor: '#f7f7f7'}}>
+      search = <View style={styles.searchRow}>
           <TouchableOpacity onPress={this.showSearch.bind(this)}>
             <View style={styles.row}>
               <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5, marginRight: 0}]} />
@@ -1307,7 +1307,7 @@ class ResourceList extends Component {
           </TouchableOpacity>
         </View>
       // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
-      conversations = <View style={{padding: 5, backgroundColor: '#CDE4F7'}}>
+      conversations = <View style={styles.conversationsRow}>
           <TouchableOpacity onPress={this.showBanks.bind(this)}>
             <View style={styles.row}>
               <ConversationsIcon />
@@ -1322,7 +1322,7 @@ class ResourceList extends Component {
       if (this.state.hasPartials)
         partial = (
           <View>
-            <View style={{padding: 5, backgroundColor: '#BADFCD'}}>
+            <View style={styles.statisticsRow}>
               <TouchableOpacity onPress={this.showPartials.bind(this)}>
                 <View style={styles.row}>
                   <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
@@ -1332,7 +1332,7 @@ class ResourceList extends Component {
                 </View>
               </TouchableOpacity>
             </View>
-            <View style={{padding: 5, backgroundColor: '#FBFFE5'}}>
+            <View style={styles.partialsRow}>
               <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
                 <View style={styles.row}>
                   <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
@@ -1347,7 +1347,7 @@ class ResourceList extends Component {
       if (this.state.bookmarksCount) {
         let color = '#6C4EA3'
         bookmarks = (
-            <View style={{padding: 5, backgroundColor: '#F0E8FF'}}>
+            <View style={styles.bookmarksRow}>
               <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
                 <View style={styles.row}>
                   <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
@@ -1364,7 +1364,7 @@ class ResourceList extends Component {
       }
       if (this.state.sharedContextCount)
         sharedContext = (
-          <View style={{padding: 5, backgroundColor: '#f1ffe7'}}>
+          <View style={styles.sharedContextRow}>
             <TouchableOpacity onPress={this.showContexts.bind(this)}>
               <View style={styles.row}>
                 <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
@@ -1380,7 +1380,7 @@ class ResourceList extends Component {
         )
     }
     return  (
-      <View>
+      <View style={styles.header}>
         {search}
         {conversations}
         {bookmarks}
@@ -1459,7 +1459,53 @@ reactMixin(ResourceList.prototype, Reflux.ListenerMixin);
 reactMixin(ResourceList.prototype, HomePageMixin)
 ResourceList = makeStylish(ResourceList)
 
+// TODO: use utils.normalizeBoxShadow
+var PRETTY_ROW_SHADOW = utils.isWeb()
+? {
+    boxShadow: '0 0px 10px 0 rgba(0,0,0,0.12)'
+  }
+: {
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 5
+  }
+
+var PRETTY_ROW_STYLE = {
+  ...PRETTY_ROW_SHADOW,
+  marginTop: 10,
+  padding: 15
+}
+
+var prettifyRow = style => {
+  return {
+    ...PRETTY_ROW_STYLE,
+    ...style
+  }
+}
+
 var styles = StyleSheet.create({
+  header: {
+    padding: 20
+  },
+  prettyRow: PRETTY_ROW_STYLE,
+  searchRow: prettifyRow({
+    backgroundColor: '#f7f7f7'
+  }),
+  bookmarksRow: prettifyRow({
+    backgroundColor: '#F0E8FF'
+  }),
+  sharedContextRow: prettifyRow({
+    backgroundColor: '#f1ffe7'
+  }),
+  conversationsRow: prettifyRow({
+    backgroundColor: '#CDE4F7'
+  }),
+  statisticsRow: prettifyRow({
+    backgroundColor: '#BADFCD'
+  }),
+  partialsRow: prettifyRow({
+    backgroundColor: '#FBFFE5'
+  }),
   // container: {
   //   flex: 1,
   //   backgroundColor: '#f7f7f7',
