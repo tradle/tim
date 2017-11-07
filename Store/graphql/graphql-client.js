@@ -356,14 +356,14 @@ var search = {
 
     }
   },
-  getAllPropertiesForServerSearch(model) {
+  getAllPropertiesForServerSearch(model, inlined) {
     let props = model.properties
     let arr
     if (model.inlined)
       arr = []
     else {
       arr = ['_permalink', '_link', '_time', '_author', '_authorTitle', '_virtual', 'time']
-      if (model.id !== PUB_KEY) {
+      if (model.id !== PUB_KEY  &&  !inlined) {
         let newarr = arr.concat(TYPE, SIG)
         arr = newarr
       }
@@ -485,7 +485,7 @@ var search = {
         )
     }
     else {
-      let allProps = this.getAllPropertiesForServerSearch(refM)
+      let allProps = this.getAllPropertiesForServerSearch(refM, true)
       return (
         `${p} {
           ${allProps.toString().replace(/,/g, '\n')}
