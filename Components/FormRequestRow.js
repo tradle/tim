@@ -143,7 +143,7 @@ class FormRequestRow extends Component {
       }
       else
         msg = <View style={chatStyles.rowContainer} key={this.getNextKey()}>
-                <View style={{flex: 1}}>
+                <View style={styles.container}>
                   {msg}
                 </View>
                 {resource._documentCreated  ? null : icon}
@@ -197,7 +197,7 @@ class FormRequestRow extends Component {
 
     let addStyle = message.length < 30
                  ? [chatStyles.verificationBody, mstyle]
-                 : [chatStyles.verificationBody, {flex: 1}, mstyle]
+                 : [chatStyles.verificationBody, styles.container, mstyle]
     var mainStyle = { margin:1, backgroundColor: '#ffffff' }
     var shareables = !isFormRequest  || resource._documentCreated
                    ? null
@@ -320,7 +320,7 @@ class FormRequestRow extends Component {
         })
         if (cnt) {
           doc = <View key={this.getNextKey()}>
-                  <View style={{height: 1, backgroundColor: '#dddddd'}} />
+                  <View style={styles.separator} />
                   {doc}
                 </View>
         }
@@ -354,21 +354,21 @@ class FormRequestRow extends Component {
       or = <View style={{paddingVertical: 5}}>
             <View style={{backgroundColor: bankStyle.verifiedBg, height: 1, flex: 1, alignSelf: 'stretch'}}/>
           </View>
-    else
-      or = <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <View style={{backgroundColor: bankStyle.verifiedBg, height: 1, flex: 5, alignSelf: 'center'}}/>
-            <View style={{width: 5}} />
-            <View style={[styles.assistentBox, {backgroundColor: bankStyle.verifiedBg}]}>
-              <Text style={styles.orText}>{'OR'}</Text>
+    else {
+      let abStyle = {backgroundColor: bankStyle.verifiedBg, height: 1, flex: 5, alignSelf: 'center'}
+      or = <View style={styles.row}>
+            <View style={abStyle}/>
+            <View style={styles.assistentBox}>
+              <Text style={[styles.orText, {color: bankStyle.verifiedBg}]}>{'or share'}</Text>
             </View>
-            <View style={{width: 5}} />
-            <View style={{backgroundColor: bankStyle.verifiedBg, height: 1, flex: 5, alignSelf: 'center'}}/>
+            <View style={abStyle}/>
           </View>
+    }
 
-
+    let shareStyle = {marginTop: -15, width: w, backgroundColor: '#ffffff', borderBottomLeftRadius: 10, borderBottomRightRadius: 10}
     return (
-      <View style={[viewStyle, {marginTop: -15, width: w, backgroundColor: '#ffffff', borderBottomLeftRadius: 10, borderBottomRightRadius: 10}]} key={this.getNextKey()}>
-        <View style={{flex: 1}}>
+      <View style={[viewStyle, shareStyle]} key={this.getNextKey()}>
+        <View style={styles.container}>
           {or}
           <View style={styles.shareablesList}>
             {vtt}
@@ -400,11 +400,11 @@ class FormRequestRow extends Component {
     var isShared = this.isShared(verification)
 
     let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
-    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16, width: msgWidth - 100}]
+    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16, width: msgWidth - 100, color: '#555555'}]
     let bankStyle = this.props.bankStyle
-    let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 5}}/>
+    let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
     var headerContent = <View style={headerStyle}>
-                          <Text style={[hs, {color: '#555555'}]}>{utils.getDisplayName(document)}</Text>
+                          <Text style={hs}>{utils.getDisplayName(document)}</Text>
                         </View>
 
     let header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
@@ -419,7 +419,7 @@ class FormRequestRow extends Component {
     let isItem = utils.isSavedItem(document)
     if (verification  && (verification.organization || isItem)) {
       var orgPhoto = !isItem  &&  verification.organization.photo
-                   ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
+                   ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={styles.orgImage} />
                    : <View />
       var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: this.props.resource._documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
@@ -503,7 +503,7 @@ class FormRequestRow extends Component {
                    </View>
 
     // var verifiedBy = verification && verification.organization ? verification.organization.title : ''
-    return <View style={{flex: 1}} key={this.getNextKey()}>
+    return <View style={styles.container} key={this.getNextKey()}>
              {header}
              {content}
            </View>
@@ -653,8 +653,8 @@ class FormRequestRow extends Component {
         else  {
           if (prop.ref == PHOTO) {
             msg = <View key={this.getNextKey()}>
-                   <View style={{flexDirection: 'row', minHeight: 35, alignItems: 'center', justifyContent: 'space-between'}}>
-                     <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+                   <View style={styles.thumbView}>
+                     <ImageInput prop={prop} style={styles.container} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                        <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
                      </ImageInput>
                      {resource._documentCreated ? null : icon}
@@ -670,7 +670,7 @@ class FormRequestRow extends Component {
 
              msg = <View key={this.getNextKey()}>
                      <TouchableHighlight onPress={() => this.showIproovScanner(prop, prop.name)} underlayColor='transparent'>
-                       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                       <View style={styles.row}>
                          <Text style={[chatStyles.resourceTitle, {flex: 1, color: mColor}]}>{str}</Text>
                          {resource._documentCreated ? null : icon}
                        </View>
@@ -780,6 +780,10 @@ var styles = StyleSheet.create({
   container: {
     flex: 1
   },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
   assistentText: {
     color: '#757575',
     fontStyle: 'italic',
@@ -789,11 +793,12 @@ var styles = StyleSheet.create({
     backgroundColor: 'transparent',
     // marginTop: -8,
     justifyContent: 'center',
-    width: 30,
+    // width: 30,
     height: 30,
     marginTop: 0,
     alignSelf: 'center',
-    borderRadius: 15
+    borderRadius: 15,
+    paddingHorizontal: 10
   },
   multiEntryButton:  {
     borderRadius: 10,
@@ -841,6 +846,26 @@ var styles = StyleSheet.create({
     fontSize: 12,
     color: '#757575',
     fontStyle: 'italic'
+  },
+  orgImage: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    marginTop: -5
+  },
+  thumbView: {
+    flexDirection: 'row',
+    minHeight: 35,
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#dddddd'
+  },
+  arrow: {
+    marginRight: 10,
+    marginTop: 5
   }
 });
 reactMixin(FormRequestRow.prototype, RowMixin)

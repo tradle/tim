@@ -235,19 +235,6 @@ class ResourceView extends Component {
            this.state.backlink  !== nextState.backlink                    ||
            this.state.pairingData !== nextState.pairingData
   }
-  // onResourceUpdate(params) {
-    // var resource = params.resource;
-    // let me = utils.getMe()
-    // if (resource[ROOT_HASH] === me[ROOT_HASH])
-    // Actions.getItem(me)
-    // else
-    // if (resource  &&  this.props.resource[ROOT_HASH] === resource[ROOT_HASH]) {
-    //   var me = utils.getMe();
-    //   if (resource[ROOT_HASH] === me[ROOT_HASH])
-    //     utils.setMe(resource);
-      // this.setState({resource: resource});
-    // }
-  // }
   changePhoto(photo) {
     this.setState({currentPhoto: photo});
   }
@@ -264,15 +251,6 @@ class ResourceView extends Component {
       }
     });
   }
-  // renderRow(resource) {
-  //      return <ShowRefList lazy={this._lazyId}
-  //               resource={this.state.resource}
-  //               navigator={this.props.navigator}
-  //               currency={this.props.currency}
-  //               bankStyle={this.props.bankStyle}
-  //               backlink={this.state.backlink}
-  //               backlinkList={this.state.backlinkList}/>
-  // }
 
   render() {
     if (this.state.isLoading)
@@ -311,13 +289,13 @@ class ResourceView extends Component {
     var {width, height} = utils.dimensions(ResourceView)
     if (this.state.pairingData) {
       w = Math.floor((width / 3) * 2)
-      qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
+      qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
                  <QRCode inline={true} content={this.state.pairingData} dimension={w} />
                </View>
     }
     else if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url) {
       w = Math.floor((width / 3) * 2)
-      qrcode = <View style={{alignSelf: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding:10}} onPress={()=> this.setState({isModalOpen: true})}>
+      qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
                  <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[ROOT_HASH]} dimension={w} />
                </View>
     }
@@ -334,7 +312,7 @@ class ResourceView extends Component {
                 <View style={styles.row}>
                   <TouchableOpacity onPress={this.showBanks.bind(this)} style={{paddingRight}}>
                     <View style={[platformStyles.conversationButton, {backgroundColor: bgcolor, borderColor: bgcolor, borderWidth: 1, opacity: 0.5}]}>
-                      <ConversationsIcon size={30} color={color} style={{marginLeft: 9, marginRight: 9}} />
+                      <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
                     </View>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => this.ActionSheet.show()}>
@@ -362,17 +340,6 @@ class ResourceView extends Component {
     let photoView
     if (!isOrg)
       photoView = <PhotoView resource={resource} navigator={this.props.navigator}/>
-    // return (
-    //   <PageView style={platformStyles.container}>
-    //     <View style={styles.photoBG}>
-    //       {photoView}
-    //       {identityPhotoList}
-    //     </View>
-    //     {actionPanel}
-    //   </PageView>
-    //  );
-
-
 
     return (
       <PageView style={platformStyles.container}>
@@ -396,91 +363,8 @@ class ResourceView extends Component {
        {footer}
       </PageView>
      );
-
-
-    // return (
-    //   <PageView style={platformStyles.container}>
-    //   <ListView  ref='this' name={this._lazyId}
-    //     automaticallyAdjustContentInsets={false}
-    //     removeClippedSubviews={false}
-    //     keyboardDismissMode='on-drag'
-    //     keyboardShouldPersistTaps="always"
-    //     initialListSize={10}
-    //     renderHeader={() => (
-    //       <View style={styles.photoBG}>
-    //         {photoView}
-    //         {identityPhotoList}
-    //       </View>
-    //     )}
-    //     dataSource={this.state.dataSource}
-    //     renderRow={this.renderRow.bind(this)}
-    //     renderFooter={() => {
-    //       return (
-    //         <View>
-    //       <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-    //         <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
-    //           <View style={styles.modalBackgroundStyle}>
-    //             {qrcode}
-    //           </View>
-    //         </TouchableOpacity>
-    //       </Modal>
-    //       {otherPhotoList}
-    //       {propertySheet}
-    //       {menu}
-    //       </View>
-    //     )}} />
-    //   {footer}
-    //   </PageView>
-    // );
   }
 
-  // renderActionSheet() {
-  //   let buttons = []
-
-  //   if (ENV.requireDeviceLocalAuth) {
-  //     if (utils.isIOS()) {
-  //       // when both auth methods are available, give the choice to disable one
-  //       buttons.push({
-  //         text: translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''),
-  //         onPress: this.changePreferences(USE_TOUCH_ID)
-  //       })
-  //       buttons.push({
-  //         text: translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''),
-  //         onPress: this.changePreferences(USE_GESTURE_PASSWORD)
-  //       })
-  //     }
-  //   }
-
-  //   if (this.state.useGesturePassword || !utils.isIOS()) {
-  //     buttons.push({
-  //       text: translate('changeGesturePassword'),
-  //       onPress: this.changePreferences(CHANGE_GESTURE_PASSWORD)
-  //     })
-  //   }
-  //   buttons.push({
-  //     text: translate('pairDevices'),
-  //     onPress: this.changePreferences(PAIR_DEVICES)
-  //   })
-  //   buttons.push({
-  //     text: translate('viewDebugLog'),
-  //     onPress: this.changePreferences(VIEW_DEBUG_LOG)
-  //   })
-  //   if (!ENV.homePageScanQRCodePrompt) {
-  //     buttons.push({
-  //       text: translate('scanQRcode'),
-  //       onPress: this.changePreferences(SCAN_QR_CODE)
-  //     })
-  //   }
-  //   buttons.push({ text: translate('cancel') })
-  //   return (
-  //     <ActionSheet
-  //       ref={(o) => {
-  //         this.ActionSheet = o
-  //       }}
-  //       options={buttons}
-  //     />
-  //   )
-  // }
   renderActionSheet() {
     let buttons = []
     let actions = []
@@ -645,8 +529,97 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
       borderWidth: 1,
       alignItems: 'flex-end',
       paddingRight: 10,
+    },
+    qrcode: {
+      alignSelf: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#ffffff',
+      padding:10
+    },
+    conversationsIcon: {
+      marginLeft: 9,
+      marginRight: 9
     }
   })
 })
 
 module.exports = ResourceView;
+  // renderActionSheet() {
+  //   let buttons = []
+
+  //   if (ENV.requireDeviceLocalAuth) {
+  //     if (utils.isIOS()) {
+  //       // when both auth methods are available, give the choice to disable one
+  //       buttons.push({
+  //         text: translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''),
+  //         onPress: this.changePreferences(USE_TOUCH_ID)
+  //       })
+  //       buttons.push({
+  //         text: translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''),
+  //         onPress: this.changePreferences(USE_GESTURE_PASSWORD)
+  //       })
+  //     }
+  //   }
+
+  //   if (this.state.useGesturePassword || !utils.isIOS()) {
+  //     buttons.push({
+  //       text: translate('changeGesturePassword'),
+  //       onPress: this.changePreferences(CHANGE_GESTURE_PASSWORD)
+  //     })
+  //   }
+  //   buttons.push({
+  //     text: translate('pairDevices'),
+  //     onPress: this.changePreferences(PAIR_DEVICES)
+  //   })
+  //   buttons.push({
+  //     text: translate('viewDebugLog'),
+  //     onPress: this.changePreferences(VIEW_DEBUG_LOG)
+  //   })
+  //   if (!ENV.homePageScanQRCodePrompt) {
+  //     buttons.push({
+  //       text: translate('scanQRcode'),
+  //       onPress: this.changePreferences(SCAN_QR_CODE)
+  //     })
+  //   }
+  //   buttons.push({ text: translate('cancel') })
+  //   return (
+  //     <ActionSheet
+  //       ref={(o) => {
+  //         this.ActionSheet = o
+  //       }}
+  //       options={buttons}
+  //     />
+  //   )
+  // }
+  // onResourceUpdate(params) {
+    // var resource = params.resource;
+    // let me = utils.getMe()
+    // if (resource[ROOT_HASH] === me[ROOT_HASH])
+    // Actions.getItem(me)
+    // else
+    // if (resource  &&  this.props.resource[ROOT_HASH] === resource[ROOT_HASH]) {
+    //   var me = utils.getMe();
+    //   if (resource[ROOT_HASH] === me[ROOT_HASH])
+    //     utils.setMe(resource);
+      // this.setState({resource: resource});
+    // }
+  // }
+  // renderRow(resource) {
+  //      return <ShowRefList lazy={this._lazyId}
+  //               resource={this.state.resource}
+  //               navigator={this.props.navigator}
+  //               currency={this.props.currency}
+  //               bankStyle={this.props.bankStyle}
+  //               backlink={this.state.backlink}
+  //               backlinkList={this.state.backlinkList}/>
+  // }
+    // return (
+    //   <PageView style={platformStyles.container}>
+    //     <View style={styles.photoBG}>
+    //       {photoView}
+    //       {identityPhotoList}
+    //     </View>
+    //     {actionPanel}
+    //   </PageView>
+    //  );
+
