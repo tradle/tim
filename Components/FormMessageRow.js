@@ -122,10 +122,6 @@ class FormMessageRow extends Component {
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle = {};
-    let width = Math.floor(utils.dimensions().width * 0.8)
-    if (application)
-      width -= 50 // provider icon and padding
-    // let msgWidth =  Math.floor(width * 0.8)
     if (inRow > 0) {
       if (inRow === 1) {
         var ww = Math.min(240, photoUrls[0].width)
@@ -187,8 +183,8 @@ class FormMessageRow extends Component {
 
     let width = Math.floor(utils.dimensions().width * 0.8) // - (isSharedContext  ? 45 : 0))
     let { bankStyle, application } = this.props
-    if (application)
-      width -= 50 // provider icon and padding
+    // if (application)
+    //   width -= 50 // provider icon and padding
 
     var viewStyle = {
       width: width, // - (isSharedContext  ? 45 : 0),

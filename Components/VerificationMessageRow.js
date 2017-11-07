@@ -97,8 +97,8 @@ class VerificationMessageRow extends Component {
 
     var w = utils.dimensions(VerificationMessageRow).width
     let msgWidth = Math.min(Math.floor(w * 0.8), 600)
-    if (isReadOnlyChat || application)
-      msgWidth -= 50 // provider icon and padding
+    // if (isReadOnlyChat || application)
+    //   msgWidth -= 50 // provider icon and padding
     let numberOfCharacters = msgWidth / 12
     if (verifiedBy.length > numberOfCharacters)
       verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
@@ -186,21 +186,22 @@ class VerificationMessageRow extends Component {
     }
     else
       shareWith = <View/>
-
+    let flowerStyle = {position: 'absolute', right: 0, top: -15}
+    // let flowerStyle = {position: 'absolute', right: isReadOnlyChat || application ? -50 : 0, top: -15}
     let messageBody =
           <TouchableOpacity onPress={this.verify.bind(this, resource)} style={{marginTop: 10}}>
             <View style={styles.messageBody}>
               <View style={[chatStyles.row, viewStyle]}>
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
-                  <View style={[{width: msgWidth}, styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.verifiedBorderColor}, isMyMessage ? styles.headerRight : styles.headerLeft]}>
-                    <View style={[{width: msgWidth-2}, styles.image, addStyle]}>
+                  <View style={[styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.verifiedBorderColor}, isMyMessage ? styles.headerRight : styles.headerLeft]}>
+                    <View style={[styles.image, addStyle]}>
                       {renderedRow}
                     </View>
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={{position: 'absolute', right: isReadOnlyChat || application ? -50 : 0, top: -15}} />
+                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={flowerStyle} />
               </View>
               {this.getSendStatus()}
             </View>
