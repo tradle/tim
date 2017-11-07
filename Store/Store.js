@@ -5618,7 +5618,7 @@ var Store = Reflux.createStore({
       if (!noTrigger) {
         let applicant = this._getItem(applicantId)
         let style
-        if (applicant.organization) {
+        if (applicant  &&  applicant.organization) {
           let applicantOrgId = utils.getId(applicant.organization)
           style = SERVICE_PROVIDERS.filter((sp) => sp.org === applicantOrgId)[0].style
         }
