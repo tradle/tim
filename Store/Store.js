@@ -13,6 +13,7 @@ import ReactNative, {
 } from 'react-native'
 
 import pick from 'object.pick'
+import dotProp from 'dot-prop'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 // const { ApolloClient, createNetworkInterface } = require('apollo-client')
@@ -184,6 +185,7 @@ const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
 const SHARE_REQUEST       = 'tradle.ShareRequest'
 const APPLICATION         = 'tradle.Application'
+const MY_ENVIRONMENT      = 'environment.json'
 
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -409,6 +411,15 @@ var Store = Reflux.createStore({
         category: 'init',
         action: 'app_open'
       }))
+
+    if (Platform.OS !== 'web') {
+      db.get(MY_ENVIRONMENT)
+        .then(env => {
+          this.updateEnvironmentInMemory(env)
+        }, err => {
+          // this is fine, environment is not stored initially
+        })
+    }
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
@@ -8118,7 +8129,7 @@ var Store = Reflux.createStore({
     }
 
     return this.createNewIdentity()
-      .spread((encryptionKey, identityInfo) => {
+      .then(({ encryptionKey, identityInfo }) => {
         return {
           ...identityInfo,
           encryptionKey
@@ -8196,16 +8207,21 @@ var Store = Reflux.createStore({
     await utils.promiseDelay(1000)
     Push.register()
   },
-  createNewIdentity() {
+  async createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')
     // const globalSalt = crypto.randomBytes(32).toString('hex')
-    const genIdentity = identityUtils.generateIdentity()
 
-    return Q.all([
-      utils.setPassword(ENCRYPTION_KEY, encryptionKey).then(() => encryptionKey),
-      genIdentity
-    ])
-    .catch(err => {
+    this.setBusyWith('generatingKeys')
+    try {
+      // don't run in parallel, keychain is touchy
+      const identityInfo = await identityUtils.generateIdentity()
+      await utils.setPassword(ENCRYPTION_KEY, encryptionKey)
+      this.setBusyWith(null)
+      return {
+        encryptionKey,
+        identityInfo
+      }
+    } catch (err) {
       if (!/authentication failed/.test(err.message)) {
         // Alert.alert(
         //   'Something went wrong...',
@@ -8216,7 +8232,7 @@ var Store = Reflux.createStore({
       }
 
       // user doesn't have passcode enabled
-      return new Promise(resolve => {
+      await new Promise(resolve => {
         Alert.alert(
           translate('youShallNotPass'),
           translate('enablePasscodeFirst'),
@@ -8225,9 +8241,10 @@ var Store = Reflux.createStore({
           ]
         )
       })
+
       // retry
-      .then(() => this.createNewIdentity())
-    })
+      return await this.createNewIdentity()
+    }
   },
 
   publishMyIdentity(orgRep, disableAutoResponse) {
@@ -9869,7 +9886,7 @@ var Store = Reflux.createStore({
                 //       keys: KEY_SET
                 //   })
     return promise
-    .spread((encryptionKey, identityInfo) => {
+    .then(({ encryptionKey, identityInfo }) => {
       if (!identityInfo)
         return
       publishedIdentity = identityInfo.identity
@@ -10368,6 +10385,27 @@ var Store = Reflux.createStore({
   },
   onHideModal() {
     this.trigger({ action: 'hideModal' })
+  },
+  async onUpdateEnvironment(env) {
+    env.dateModified = Date.now()
+    await db.put(MY_ENVIRONMENT, { ...ENV, ...env })
+    this.updateEnvironmentInMemory(env)
+  },
+  updateEnvironmentInMemory(env) {
+    debug('not updating ENV (disabled)')
+    return
+
+    if (env.dateModified < ENV.dateModified) {
+      debug('not updating ENV from storage, stored ENV is out of date')
+      return
+    }
+
+    const keyPath = `microblink.licenseKey.${Platform.OS}`
+    const key = dotProp.get(env, keyPath)
+    if (key && key !== dotProp.get(ENV, keyPath)) {
+      dotProp.set(ENV, keyPath, key)
+      require('../Components/BlinkID').setLicenseKey(key)
+    }
   }
 })
 // );

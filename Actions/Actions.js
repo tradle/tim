@@ -74,7 +74,8 @@ var syncActions = [
   'requestWipe',
   'showModal',
   'hideModal',
-  'setProviderStyle'
+  'setProviderStyle',
+  'updateEnvironment'
 ]
 
 asyncActions.forEach(name => actionProps[name] = {})
