@@ -81,7 +81,7 @@ class VerificationMessageRow extends Component {
         isThirdPartyVerification = resource._verifiedBy != null && utils.getId(resource._verifiedBy)  !== utils.getId(resource.organization)// &&  utils.getId(this.props.context.to.organization) !== utils.getId(resource._verifiedBy)
     }
     let isShared = this.isShared()
-    isMyMessage = isShared
+    // isMyMessage = isShared
     let color
     let vHeaderTextColor
     if (isThirdPartyVerification) {

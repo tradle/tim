@@ -149,7 +149,8 @@ var RowMixin = {
       var title = resource.from.title  && resource.from.title.split(' ').map(function(s) {
         return s.charAt(0);
       }).join('');
-
+      if (!title)
+        title = 'U'  // for UNKNOWN
       return <View style={{paddingRight: 3}}>
                <View style={[{backgroundColor: bankStyle.linkColor}, styles.cellRoundImage]}>
                  <Text style={styles.cellText}>{title}</Text>
@@ -189,15 +190,24 @@ var RowMixin = {
       if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
         return true
     }
-    if (me.isEmployee  &&  r.from.organization) {
-      let meId = utils.getId(me.organization)
-      if (meId === utils.getId(r.from.organization)) {
-        if (to  &&  utils.getId(to) === meId)
-          return false
-        else
-          return true
+    if (me.isEmployee) {
+      let myOrgId = utils.getId(me.organization)
+      // bot -> bot
+      if (r.from.organization  &&
+          r.to.organization    &&
+          r.from.organization.id === r.to.organization.id  &&
+          r.from.organization.id === myOrgId) {
+        return false
       }
 
+      if (r.from.organization) {
+        if (myOrgId === utils.getId(r.from.organization)) {
+          if (to  &&  utils.getId(to) === myOrgId)
+            return false
+          else
+            return true
+        }
+      }
     }
   },
   isShared() {
