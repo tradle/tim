@@ -1008,6 +1008,7 @@
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = 94V7783F74;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -1645,7 +1646,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)/Branch.framework/Headers",
 				);
@@ -1706,7 +1707,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)/Branch.framework/Headers",
 				);

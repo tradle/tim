@@ -124,9 +124,11 @@ platform :ios do
 
   lane :beta_fabric do |values|
     # build your iOS app
-    match(
-      force_for_new_devices: true
-    )
+    # match(
+    #   force_for_new_devices: true
+    # )
+
+    enable_automatic_code_signing(path: ENV['IOS_PROJECT'])
 
     gym(
       export_method: 'development'
