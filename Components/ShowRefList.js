@@ -103,7 +103,7 @@ class ShowRefList extends Component {
           <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={() => this.showDocs(docs)} underlayColor='transparent'>
              <View style={styles.item}>
-               <View style={{flexDirection: 'row'}}>
+               <View style={styles.row}>
                  <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
                  {count}
                </View>
@@ -123,7 +123,7 @@ class ShowRefList extends Component {
       let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
                          <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
                            <View style={styles.item}>
-                             <View style={{flexDirection: 'row'}}>
+                             <View style={styles.row}>
                                <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
                              </View>
                              <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
@@ -177,7 +177,7 @@ class ShowRefList extends Component {
         <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.exploreBacklink.bind(this, resource, props[p])} underlayColor='transparent'>
              <View style={styles.item}>
-               <View style={{flexDirection: 'row'}}>
+               <View style={styles.row}>
                  <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
                  {count}
                </View>
@@ -237,9 +237,9 @@ class ShowRefList extends Component {
     }
     let comment
     if (ENV.homePageScanQRCodePrompt && !hasBacklinks  &&  utils.getMe()[ROOT_HASH] === resource[ROOT_HASH]) {
-      comment = <View style={{justifyContent: 'center', alignSelf: 'center', width: 300, marginTop: 200}}>
-                  <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{translate('pleaseTapOnMenu')}</Text>
-                  <Text style={{fontSize: 20, alignSelf: 'center', color: '#555555'}}>{translate('scanQRcode')}</Text>
+      comment = <View style={styles.commandView}>
+                  <Text style={styles.command}>{translate('pleaseTapOnMenu')}</Text>
+                  <Text style={styles.command}>{translate('scanQRcode')}</Text>
                 </View>
     }
 
@@ -334,6 +334,20 @@ var styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 0
   },
+  row: {
+    flexDirection: 'row'
+  },
+  commandView: {
+    justifyContent: 'center',
+    alignSelf: 'center',
+    width: 300,
+    marginTop: 200
+  },
+  command: {
+    fontSize: 20,
+    alignSelf: 'center',
+    color: '#555555'
+  }
 })
 
 module.exports = ShowRefList;

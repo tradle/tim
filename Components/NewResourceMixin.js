@@ -1013,11 +1013,11 @@ var NewResourceMixin = {
   },
   getHelp(prop) {
     if (!prop.description)
-      return <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}/>
+      return <View style={styles.help}/>
 
     // borderBottomColor: '#cccccc',
     return (
-      <View style={{backgroundColor: '#f7f7f7', marginHorizontal: 10, paddingHorizontal: 10, paddingBottom: 5, borderBottomWidth: 1,  borderBottomColor: '#cccccc'}}>
+      <View style={styles.help}>
         <Markdown markdownStyles={this.getMarkdownStyles()}>
           {prop.description}
         </Markdown>
@@ -1095,7 +1095,7 @@ var NewResourceMixin = {
     let msgWidth = utils.dimensions(component).width - 90 // 90 - 40 margins + 50 switch
     let help = this.getHelp(prop)
     return (
-      <View style={{paddingBottom: 10}} key={this.getNextKey()} ref={prop.name}>
+      <View style={style.bottom10} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
           this.onChangeText.bind(this, prop, !value)
         }>
@@ -1104,7 +1104,7 @@ var NewResourceMixin = {
               <View style={{justifyContent: 'center', width: msgWidth}}>
                 <Text style={style}>{label}</Text>
               </View>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} style={{justifyContent: 'flex-end'}}/>
+              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={LINK_COLOR} style={styles.contentLeft}/>
             </View>
           </View>
         </TouchableHighlight>
@@ -1126,7 +1126,7 @@ var NewResourceMixin = {
     }
     else {
       label = params.label
-      propLabel = <View style={{marginTop: 20, marginHorizontal: -10}}/>
+      propLabel = <View style={styles.floatingLabel}/>
     }
 
     let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
@@ -1663,7 +1663,7 @@ var NewResourceMixin = {
            : ''
     return (
       <View>
-      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+      <View style={styles.moneyInput}>
           {
              this.myTextInputTemplate({
                     label: label,
@@ -2121,6 +2121,27 @@ var styles= StyleSheet.create({
   },
   container: {
     flex: 1
+  },
+  help: {
+    backgroundColor: '#f7f7f7',
+    marginHorizontal: 10,
+    paddingHorizontal: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: '#cccccc'
+  },
+  bottom10: {
+    paddingBottom: 10
+  },
+  contentLeft: {
+    justifyContent: 'flex-end'
+  },
+  floatingLabel: {
+    marginTop: 20,
+    marginHorizontal: -10
+  },
+  moneyInput: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   }
 })
 

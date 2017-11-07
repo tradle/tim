@@ -725,7 +725,7 @@ class NewResource extends Component {
                       </View>
                    </TouchableOpacity>
                  </View>
-               : <View style={{height: 0}} />
+               : <View style={styles.noRegistrationButton} />
     var width = isRegistration ? utils.dimensions(NewResource).width : utils.getContentWidth(NewResource)
     var height = utils.dimensions(NewResource).height
     var formStyle = isRegistration
@@ -769,7 +769,7 @@ class NewResource extends Component {
     // add server url sometimes takes a while
     let wait
     if (this.state.disableEditing)
-      wait = <View style={{alignItems: 'center', marginTop: 50}}>
+      wait = <View style={styles.indicator}>
                <ActivityIndicator animating={true} size='large' color='#7AAAC3'/>
              </View>
     let photoView
@@ -779,14 +779,14 @@ class NewResource extends Component {
                   </View>
     let loadingVideo
     if (this.state.isLoadingVideo)
-      loadingVideo = <View style={{alignItems: 'center', marginTop: 50}}>
+      loadingVideo = <View style={styles.indicator}>
                        <ActivityIndicator animating={true} size='large' color='#ffffff'/>
                     </View>
 
     let formsToSign
     if (resource[constants.TYPE] === HAND_SIGNATURE) {
       let formList = resource.signatureFor.map((r) => (
-          <TouchableOpacity onPress={() => this.showResource(r)} style={{padding: 10, borderBottomColor: '#eeeeee', borderBottomWidth: 1}} key={this.getNextKey()}>
+          <TouchableOpacity onPress={() => this.showResource(r)} style={styles.formListItem} key={this.getNextKey()}>
           <View>
             <Text style={styles.forms}>{utils.makeModelTitle(r.id.split('_')[0])}</Text>
           </View>
@@ -838,7 +838,7 @@ class NewResource extends Component {
       if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={this.onSavePressed.bind(this)} style={{width: '100%'}}>
                    <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
-                     <View style={{backgroundColor: 'transparent', paddingHorizontal: 10, justifyContent: 'center'}}>
+                     <View style={styles.bar}>
                        <Text style={{fontSize: 24,color: bankStyle.contextTextColor}}>{translate('next')}</Text>
                      </View>
                    </View>
@@ -1151,7 +1151,7 @@ class NewResource extends Component {
         </View>
       counter =
         <View>
-          <View style={{marginTop: 25, paddingHorizontal: 5}}>
+          <View style={styles.itemsCounter}>
             <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
           </View>
         </View>;
@@ -1173,13 +1173,13 @@ class NewResource extends Component {
                 </View>
               : <View/>
     var actionableItem = count
-                       ?  <TouchableOpacity style={{flex: 7, paddingTop: 15}}
+                       ?  <TouchableOpacity style={styles.itemsWithCount}
                            onPress={this.showItems.bind(this, bl, meta)}>
                             {itemsArray}
                           </TouchableOpacity>
                        : <ImageInput
                            prop={bl}
-                           style={[{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]}
+                           style={styles.itemsWithoutCount}
                            underlayColor='transparent'
                            onImage={item => this.onAddItem(bl.name, item)}>
                            {itemsArray}
@@ -1292,11 +1292,8 @@ var styles = StyleSheet.create({
     paddingHorizontal: 5
   },
   itemsCounter: {
-    borderColor: '#2E3B4E',
-    borderRadius: 10,
-    borderWidth: 1,
-    alignSelf: 'center',
-    paddingHorizontal: 5,
+    marginTop: 25,
+    paddingHorizontal: 5
   },
   itemButton: {
     height: 60,
@@ -1389,6 +1386,39 @@ var styles = StyleSheet.create({
     paddingBottom: 30,
     justifyContent: 'center',
     alignSelf: 'center'
+  },
+  noRegistration: {
+    justifyContent: 'flex-start'
+  },
+  noRegistrationButton: {
+    height: 0
+  },
+  indicator: {
+    alignItems: 'center',
+    marginTop: 50
+  },
+  formListItem: {
+    padding: 10,
+    borderBottomColor: '#eeeeee',
+    borderBottomWidth: 1
+  },
+  scroll: {
+    backgroundColor: 'transparent',
+    paddingTop:10
+  },
+  bar: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 10,
+    justifyContent: 'center'
+  },
+  itemsWithCount: {
+    flex: 7,
+    paddingTop: 15
+  },
+  itemsWithoutCount: {
+    flex: 7,
+    paddingTop: 15,
+    paddingBottom: 7
   }
 })
 

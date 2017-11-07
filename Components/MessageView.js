@@ -396,7 +396,7 @@ class MessageView extends Component {
     var verificationTxID, separator
     if (this.props.verification  &&  this.props.verification.txId) {
       verificationTxID =
-          <View style={{padding :10, flex: 1}}>
+          <View style={styles.txIdView}>
             <Text style={styles.title}>Verification Transaction Id</Text>
             <Text style={styles.verification} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + this.props.verification.txId)}>{this.props.verification.txId}</Text>
           </View>
@@ -593,6 +593,10 @@ var styles = StyleSheet.create({
     color: '#555555'
     // color: '#b4c3cb'
   },
+  txIdView: {
+    padding :10,
+    flex: 1
+  }
 });
 
 module.exports = MessageView;

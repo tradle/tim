@@ -1528,8 +1528,8 @@ class GridList extends Component {
     }
     let employee
     if (me.isEmployee)
-      employee = <View style={{justifyContent: 'center'}}>
-                   <Text style={{fontSize: 18, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
+      employee = <View style={styles.center}>
+                   <Text style={styles.employee}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
     else
       employee = <View/>
@@ -1684,7 +1684,7 @@ class GridList extends Component {
     let searchBar
     let { search, _readOnly, officialAccounts } = this.props
 
-    if (SearchBar) {
+    if (SearchBar  &&  !isBacklink) {
       let hasSearch = isModel
       if (!hasSearch  && !search) {
         hasSearch = !_readOnly  ||  !utils.isContext(modelName)
@@ -1716,10 +1716,10 @@ class GridList extends Component {
     }
     let loading
     if (isLoading  &&  !isModel  &&  !isBacklink)
-       loading = <View style={{flex: 1}}>
+       loading = <View style={styles.loadingView}>
                    <View style={[platformStyles.container]}>
-                     <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
-                     <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', marginTop: 20}} />
+                     <Text style={styles.loading}>{'Loading...'}</Text>
+                     <ActivityIndicator size='large' style={styles.indicator} />
                    </View>
                  </View>
 
@@ -1833,9 +1833,6 @@ reactMixin(GridList.prototype, HomePageMixin)
 GridList = makeStylish(GridList)
 
 var styles = StyleSheet.create({
-  centerText: {
-    alignItems: 'center',
-  },
   separator: {
     height: 1,
     backgroundColor: '#eeeeee',
@@ -1879,21 +1876,6 @@ var styles = StyleSheet.create({
     height: 50,
     marginRight: 10,
     width: 50,
-  },
-  sharedContext: {
-    position: 'absolute',
-    right: 5,
-    top: 20,
-    width: 20,
-    height:20,
-    justifyContent: 'center',
-    borderRadius: 10,
-    backgroundColor: '#246624'
-  },
-  sharedContextText: {
-    fontSize: 12,
-    alignSelf: 'center',
-    color: '#ffffff'
   },
   testProviders: {
     position: 'absolute',
@@ -1973,6 +1955,27 @@ var styles = StyleSheet.create({
   },
   gridHeader: {
     backgroundColor: '#f7f7f7'
+  },
+  center: {
+    justifyContent: 'center'
+  },
+  employee: {
+    fontSize: 18,
+    color: '#7AAAC3'
+  },
+  loading: {
+    fontSize: 17,
+    alignSelf: 'center',
+    marginTop: 80,
+    color: '#629BCA'
+  },
+  loadingView: {
+    flex: 1
+  },
+  indicator: {
+    alignSelf: 'center',
+    backgroundColor: 'transparent',
+    marginTop: 20
   }
 });
 
@@ -2205,3 +2208,18 @@ module.exports = GridList;
   //     },
   //   })
   // }
+  // sharedContext: {
+  //   position: 'absolute',
+  //   right: 5,
+  //   top: 20,
+  //   width: 20,
+  //   height:20,
+  //   justifyContent: 'center',
+  //   borderRadius: 10,
+  //   backgroundColor: '#246624'
+  // },
+  // sharedContextText: {
+  //   fontSize: 12,
+  //   alignSelf: 'center',
+  //   color: '#ffffff'
+  // },
