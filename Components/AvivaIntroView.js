@@ -21,7 +21,7 @@ import { makeResponsive } from 'react-native-orient'
 import ConversationsIcon from './ConversationsIcon'
 
 const CUSTOMER_WAITING = 'tradle.CustomerWaiting'
-const MESSAGE = 'tradle.Message'
+// const MESSAGE = 'tradle.Message'
 const LEARN_MORE_URL = 'https://www.fca.org.uk/news/press-releases/financial-conduct-authority-unveils-successful-sandbox-firms-second-anniversary'// 'https://www.aviva.com/tradle/learnmore'
 const CONTACT_US_URL = 'https://www.aviva.co.uk/contact-us/'
 

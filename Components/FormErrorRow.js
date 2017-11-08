@@ -19,7 +19,6 @@ const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 
-const DEFAULT_LINK_COLOR = '#2892C6'
 const TYPE = constants.TYPE
 
 import {
