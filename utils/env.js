@@ -130,5 +130,8 @@ const merged = extend({
 merged.splashBackground = splash[merged.splashBackground]
 merged.splashContrastColor = splashContrastColor[merged.splashContrastColor]
 merged.brandBackground = brandBG[merged.brandBackground]
+if (!__DEV__) {
+  merged.paintContextIds = false
+}
 
 exports = module.exports = merged
