@@ -393,7 +393,7 @@ class ShowPropertiesView extends Component {
               <TouchableOpacity underlayColor='transparent' onPress={() => {
                 this.setState({promptVisible: pMeta})
               }}>
-                <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'red' : bankStyle.linkColor} style={{marginTop: 10, paddingRight:10}}/>
+                <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'red' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
               </TouchableOpacity>
               <Prompt
                 promptStyle={{ width: width / 1.5 }}

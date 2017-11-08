@@ -81,7 +81,7 @@ class VerificationMessageRow extends Component {
         isThirdPartyVerification = resource._verifiedBy != null && utils.getId(resource._verifiedBy)  !== utils.getId(resource.organization)// &&  utils.getId(this.props.context.to.organization) !== utils.getId(resource._verifiedBy)
     }
     let isShared = this.isShared()
-    isMyMessage = isShared
+    // isMyMessage = isShared
     let color
     let vHeaderTextColor
     if (isThirdPartyVerification) {
@@ -185,21 +185,22 @@ class VerificationMessageRow extends Component {
     }
     else
       shareWith = <View/>
-
+    let flowerStyle = {position: 'absolute', right: 0, top: -15}
+    // let flowerStyle = {position: 'absolute', right: isReadOnlyChat || application ? -50 : 0, top: -15}
     let messageBody =
           <TouchableOpacity onPress={this.verify.bind(this, resource)} style={{marginTop: 10}}>
             <View style={styles.messageBody}>
               <View style={[chatStyles.row, viewStyle]}>
                 {this.getOwnerPhoto(isMyMessage)}
                 <View style={[chatStyles.textContainer, addStyle]}>
-                  <View style={[{width: msgWidth}, styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.verifiedBorderColor}, isMyMessage ? styles.headerRight : styles.headerLeft]}>
-                    <View style={[{width: msgWidth-2}, styles.image, addStyle]}>
+                  <View style={[styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.verifiedBorderColor}, isMyMessage ? styles.headerRight : styles.headerLeft]}>
+                    <View style={[styles.image, addStyle]}>
                       {renderedRow}
                     </View>
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={{position: 'absolute', right: isReadOnlyChat || application ? -50 : 0, top: -15}} />
+                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={flowerStyle} />
               </View>
               {this.getSendStatus()}
             </View>

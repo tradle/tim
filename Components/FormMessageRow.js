@@ -114,7 +114,6 @@ class FormMessageRow extends Component {
       photoListStyle = {
         flexDirection: 'row',
         alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-        // marginLeft: isMyMessage ? 30 : isSharedContext ? 45 : 0, //(hasOwnerPhoto ? 45 : 10),
         borderRadius: 10,
         marginBottom: 3,
       }

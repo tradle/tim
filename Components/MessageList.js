@@ -451,6 +451,10 @@ class MessageList extends Component {
       return true
     if (utils.resized(this.props, nextProps))
       return true
+    if (this.state.application !== nextState.application)
+      return true
+    // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
+    //   return false
     if (nextState.isConnected !== this.state.isConnected  &&  this.state.isLoading === nextState.isLoading)
       return true
     // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
@@ -522,13 +526,13 @@ class MessageList extends Component {
       return;
     let { application } = this.props
     let me = utils.getMe()
-    if (application) {
-      if (!application.relationshipManager)
-        return
-      let relHash = utils.getId(application.relationshipManager).split('_')[1]
-      if (relHash !== me[ROOT_HASH])
-        return
-    }
+    // if (application) {
+    //   if (!application.relationshipManager)
+    //     return
+    //   let relHash = utils.getId(application.relationshipManager).split('_')[1]
+    //   if (relHash !== me[ROOT_HASH])
+    //     return
+    // }
     let model = utils.getModel(r[TYPE]).value;
     let title //utils.getDisplayName(resource, model.properties);
 

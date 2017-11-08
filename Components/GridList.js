@@ -448,14 +448,11 @@ class GridList extends Component {
       if (!params.list) {
         if (params.alert)
           Alert.alert(params.alert)
-        else if (search  && !isModel) {
-          this.state.refreshing = false
+        else if (search  &&  !isModel) {
           if (params.isSearch  &&   params.resource)
             Alert.alert('No resources were found for this criteria')
+          this.setState({refreshing: false, isLoading: false})
         }
-
-        // else if (search  &&  !isModel)
-        //   this.setState({list: [], dataSource: this.state.dataSource.cloneWithRows([])})
         return
       }
       if (params.isTest  !== isTest)
@@ -670,8 +667,12 @@ class GridList extends Component {
     let title
     if (isContact)
       title = resource.firstName
-    else if (isApplication)
-      title = resource.applicant.title  + '  →  ' + me.organization.title
+    else if (isApplication) {
+      if (resource.applicant.title)
+        title = resource.applicant.title  + '  →  ' + me.organization.title
+      else
+        title = me.organization.title
+    }
     else if (me.isEmployee)
       title = me.organization.title + '  →  ' + utils.getDisplayName(resource)
     else

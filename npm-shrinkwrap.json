@@ -147,7 +147,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#0aba5cef9256eab92eb73cdb27d6981fae2dfa0e",
+      "resolved": "git://github.com/tradle/models.git#ae17de44448d6734b920f802cb64008d9dad5aa1",
       "dependencies": {
         "typeforce": {
           "version": "1.11.5",
@@ -3126,7 +3126,7 @@
     },
     "dot-prop": {
       "version": "4.2.0",
-      "from": "dot-prop@>=4.2.0 <5.0.0",
+      "from": "dot-prop@>=4.2.0 <4.3.0",
       "resolved": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz"
     },
     "download": {
