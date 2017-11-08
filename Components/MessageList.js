@@ -424,6 +424,8 @@ class MessageList extends Component {
       return true
     if (this.state.list.length !== nextState.list.length)
       return true
+    if (this.state.application !== nextState.application)
+      return true
     // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
     //   return false
     if (nextState.isConnected !== this.state.isConnected  &&  this.state.isLoading === nextState.isLoading)
