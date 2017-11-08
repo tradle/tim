@@ -12,7 +12,6 @@ var Accordion = require('./Accordion')
 import Icon from 'react-native-vector-icons/Ionicons'
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
-var CURRENCY_SYMBOL
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
@@ -51,7 +50,6 @@ class ShowPropertiesView extends Component {
     this.state = {
       promptVisible: null
     }
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
 
   render() {
@@ -212,6 +210,7 @@ class ShowPropertiesView extends Component {
           return
         }
         if (pMeta.ref == constants.TYPES.MONEY) {
+          let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }

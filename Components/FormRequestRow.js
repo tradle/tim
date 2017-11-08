@@ -36,10 +36,6 @@ const ITEM = 'tradle.Item'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const ORGANIZATION = 'tradle.Organization'
 
-var LINK_COLOR
-
-const DEFAULT_LINK_COLOR = '#2892C6'
-
 import {
   Image,
   // StyleSheet,
@@ -62,7 +58,6 @@ class FormRequestRow extends Component {
   constructor(props) {
     super(props);
     this.state = {}
-    LINK_COLOR = this.props.bankStyle.linkColor
   }
   // componentWillMount() {
   //   this.animatedValue = new Animated.Value(60)
@@ -117,7 +112,7 @@ class FormRequestRow extends Component {
     if (application)
       linkColor = '#757575'
     else
-      linkColor = isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR
+      linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
     let msgWidth = Math.floor(w * 0.8)
     if (isFormRequest)
@@ -136,7 +131,7 @@ class FormRequestRow extends Component {
         msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message.substring(0, idx)}</Text>
                   <View style={chatStyles.rowContainer}>
-                    <Text style={[chatStyles.resourceTitle, {width: msgWidth - 25}, resource._documentCreated || !idx ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
+                    <Text style={[chatStyles.resourceTitle, {width: msgWidth - 25}, resource._documentCreated || !idx ? {color: '#757575'} : {color: bankStyle.linkColor}]}>{message.substring(idx).trim()}</Text>
                     {resource._documentCreated  ? null : icon}
                   </View>
                 </View>
@@ -641,7 +636,7 @@ class FormRequestRow extends Component {
     // else if (isMyMessage)
     //   link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
-      let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR
+      let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
       let notLink = resource._documentCreated  ||  isReadOnly
       icon = <Icon  name={'ios-arrow-forward'} style={{color: linkColor}} size={20} />

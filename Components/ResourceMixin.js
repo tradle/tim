@@ -57,12 +57,12 @@ import React, { Component } from 'react'
 
 var ResourceMixin = {
   showRefResource(resource, prop) {
-    var id = utils.getId(resource)
+    let id = utils.getId(resource)
     // if (id !== this.state.propValue)
     //   return;
-    var type = resource[constants.TYPE] || id.split('_')[0]
-    var model = utils.getModel(type).value;
-    var title = utils.getDisplayName(resource, model);
+    let type = resource[constants.TYPE] || id.split('_')[0]
+    let model = utils.getModel(type).value;
+    let title = utils.getDisplayName(resource, model);
     if (utils.isMessage(type)) {
       let {bankStyle, search, currency, country} = this.props
       this.props.navigator.push({
@@ -113,37 +113,37 @@ var ResourceMixin = {
   },
 
   renderItems(val, pMeta, cancelItem) {
-    let LINK_COLOR = (this.props.bankStyle  &&  this.props.bankStyle.linkColor) || '#7AAAC3'
-    var itemsMeta = pMeta.items.properties;
-    var prop = pMeta
+    let { bankStyle, navigator, resource } = this.props
+    let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
+    let itemsMeta = pMeta.items.properties;
+    let prop = pMeta
     if (!itemsMeta) {
-      var ref = pMeta.items.ref;
+      let ref = pMeta.items.ref;
       if (ref) {
         pMeta = utils.getModel(ref).value;
         itemsMeta = pMeta.properties;
       }
     }
-    var counter = 0;
-    var vCols = pMeta.viewCols;
+    let counter = 0;
+    let vCols = pMeta.viewCols;
     if (!vCols) {
       vCols = [];
-      for (var p in itemsMeta) {
+      for (let p in itemsMeta) {
         if (p.charAt(0) !== '_'  &&  !itemsMeta[p].hidden)
           vCols.push(p);
       }
     }
-    var cnt = val.length;
-    var self = this;
+    let cnt = val.length;
     return val.map(function(v) {
-      var ret = [];
+      let ret = [];
       counter++;
       vCols.forEach((p) =>  {
-        var itemMeta = itemsMeta[p];
+        let itemMeta = itemsMeta[p];
         if (!v[p]  &&  !itemMeta.displayAs)
           return
         if (itemMeta.displayName)
           return
-        var value;
+        let value;
         if (itemMeta.displayAs)
           value = utils.templateIt(itemMeta, v, pMeta)
         else if (itemMeta.type === 'date')
@@ -152,9 +152,9 @@ var ResourceMixin = {
           value = v[p] ? 'Yes' : 'No'
         else if (itemMeta.type !== 'object') {
           if (p == 'photos') {
-            var photos = [];
+            let photos = [];
             ret.push(
-               <PhotoList photos={v.photos} navigator={self.props.navigator} numberInRow={4} resource={this.props.resource}/>
+               <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource}/>
             );
             return
           }
@@ -174,12 +174,12 @@ var ResourceMixin = {
                    </View>
 
         ret.push(
-            <View style={styles.item} key={self.getNextKey()}>
+            <View style={styles.item} key={this.getNextKey()}>
             {cancelItem
               ? <View style={styles.row}>
                   {item}
-                  <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
-                    <Icon name='ios-close-circle-outline' size={25} color={LINK_COLOR} />
+                  <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                    <Icon name='ios-close-circle-outline' size={25} color={linkColor} />
                   </TouchableHighlight>
                 </View>
               : item
@@ -193,20 +193,20 @@ var ResourceMixin = {
                       ? <Image source={{uri: v.photo}} style={styles.thumb} />
                       : <View />
                     }
-                    <Text style={[styles.itemText, {color: cancelItem ? '#000000' : LINK_COLOR}]}>{v.title}</Text>
+                    <Text style={[styles.itemText, {color: cancelItem ? '#000000' : linkColor}]}>{v.title}</Text>
                   </View>
 
         ret.push(
-          <View style={{paddingBottom: 5}} key={self.getNextKey()}>
+          <View style={{paddingBottom: 5}} key={this.getNextKey()}>
            {cancelItem
             ? <View style={styles.row}>
                {item}
-               <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(self, prop, v)}>
-                 <Icon name='ios-close' size={25} color={LINK_COLOR} />
+               <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                 <Icon name='ios-close' size={25} color={linkColor} />
                </TouchableHighlight>
               </View>
             : <TouchableHighlight underlayColor='transparent' onPress={() => {
-                self.props.navigator.push({
+                navigator.push({
                  title: v.title,
                  id: 3,
                  component: require('./ResourceView'),
@@ -222,7 +222,7 @@ var ResourceMixin = {
       }
 
       return (
-        <View key={self.getNextKey()}>
+        <View key={this.getNextKey()}>
            {ret}
            {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
         </View>
@@ -234,10 +234,10 @@ var ResourceMixin = {
       if (pMeta.items.backlink)
         return <View  key={this.getNextKey()} />
 
-      var vCols = pMeta.viewCols;
+      let vCols = pMeta.viewCols;
       if (!vCols)
         vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).value.viewCols
-      var cnt = val.length;
+      let cnt = val.length;
       val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
       let title = pMeta.title || utils.makeLabel(pMeta.name)
       const titleEl = <Text style={styles.title}>{title}</Text>
@@ -249,7 +249,7 @@ var ResourceMixin = {
                     }
                   </View>
 
-      var separator = <View style={styles.separator}></View>;
+      let separator = <View style={styles.separator}></View>;
       if (cnt > 3)
         val = <View key={this.getNextKey()}>
                 {separator}
@@ -327,7 +327,7 @@ var ResourceMixin = {
 
     let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
-    var backlinksBg = {backgroundColor: bg, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
+    let backlinksBg = {backgroundColor: bg, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
     if (prop) {
       let state
       if (isOnfido) {
@@ -343,7 +343,7 @@ var ResourceMixin = {
       indent = 0
     let textStyle = indent === 1 ||  !isBreakdown  ? styles.bigTitle : styles.title
 
-    let LINK_COLOR = bankStyle.linkColor
+    let linkColor = bankStyle.linkColor
     if (prop  ||  !isBreakdown) {
       for (let p in json) {
         if (typeof json[p] === 'object'  ||  p === 'result')
@@ -459,13 +459,13 @@ var ResourceMixin = {
 
     // if (!jsonRows.length)
     //   return <View/>
-    // var backlinksBg = {backgroundColor: '#96B9FA'}
+    // let backlinksBg = {backgroundColor: '#96B9FA'}
     // let title = <View style={backlinksBg} key={this.getNextKey()}>
     //               <Text  style={[styles.bigTitle, {color: '#ffffff', paddingVertical: 10}]}>{translate(prop)}</Text>
     //             </View>
     // return <View key={this.getNextKey()} >
     //           {title}
-    //           <View style={{height: 1, marginBottom: 10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.LINK_COLOR}} />
+    //           <View style={{height: 1, marginBottom: 10, alignSelf: 'stretch', backgroundColor: this.props.bankStyle.linkColor}} />
     //           {jsonRows}
     //         </View>
   },

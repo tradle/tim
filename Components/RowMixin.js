@@ -23,7 +23,6 @@ import { coroutine as co } from 'bluebird'
 import ENV from '../utils/env'
 
 const SHOW_TIME_INTERVAL = 60000
-var CURRENCY_SYMBOL
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const SENT = 'Sent'
 
@@ -53,10 +52,9 @@ var RowMixin = {
     return this.props.resource[constants.ROOT_HASH] + '_' + cnt++
   },
   getPropRow(prop, resource, val, isVerification) {
-    CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
-
     if (prop.ref) {
       if (prop.ref === constants.TYPES.MONEY) {
+        let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
         let c = utils.normalizeCurrencySymbol(val.currency)
         val = (c || CURRENCY_SYMBOL) + val.value
         // val = (val.currency || CURRENCY_SYMBOL) + val.value

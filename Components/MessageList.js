@@ -39,7 +39,6 @@ import { makeStylish } from './makeStylish'
 // var SearchBar = require('react-native-search-bar')
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
 
-var LINK_COLOR
 var LIMIT = 10
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
 const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM, FINANCIAL_PRODUCT } = TYPES
@@ -383,7 +382,6 @@ class MessageList extends Component {
 
     if (bankStyle   &&  params.bankStyle)
       extend(bankStyle, params.bankStyle)
-    LINK_COLOR = bankStyle  &&  bankStyle.linkColor
     let isEmployee = utils.isEmployee(chatWith)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let type = list[0][TYPE];
@@ -771,7 +769,6 @@ class MessageList extends Component {
     else
       chooser = <View/>
 
-    // let sepStyle = { height: 1,backgroundColor: LINK_COLOR }
     let sepStyle = { height: 1,backgroundColor: 'transparent' }
     if (!this.state.allLoaded  && !navigator.isConnected  &&  this.state.isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))

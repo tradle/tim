@@ -449,8 +449,10 @@ class VerificationRow extends Component {
       if (ref) {
         if (resource[v]) {
           let val
-          if (ref === constants.TYPES.MONEY)
+          if (ref === constants.TYPES.MONEY) {
+            let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
             val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+          }
           else if (resource[v].title)
             val = resource[v].title
           else if (utils.getModel(ref).value.subClassOf === ENUM) {

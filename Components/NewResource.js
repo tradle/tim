@@ -33,12 +33,12 @@ var TextInputState = require('TextInputState')
 
 import CustomIcon from '../styles/customicons'
 const ENUM = 'tradle.Enum'
-var LINK_COLOR
-const DEFAULT_LINK_COLOR = '#a94442'
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
 const SETTINGS = 'tradle.Settings'
 const HAND_SIGNATURE = 'tradle.HandSignature'
+
+const DEFAULT_LINK_COLOR = '#a94442'
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -83,10 +83,6 @@ class NewResource extends Component {
 
   constructor(props) {
     super(props);
-    if (this.props.bankStyle)
-      LINK_COLOR = this.props.bankStyle.linkColor || DEFAULT_LINK_COLOR
-    else
-      LINK_COLOR = DEFAULT_LINK_COLOR
     var r = {};
     if (props.resource)
       r = utils.clone(props.resource) //extend(true, r, props.resource)
@@ -920,6 +916,9 @@ class NewResource extends Component {
     var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     let lcolor = this.getLabelAndBorderColor(bl.name)
     let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
+    let { bankStyle } = this.props
+    let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
+
     if (count) {
       let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
 
@@ -931,15 +930,15 @@ class NewResource extends Component {
                    </View>
 
       counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
-                  <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color={LINK_COLOR} />
+                  <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color={linkColor} />
                 </View>
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>{
                   isPhoto
-                    ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
+                    ? <Icon name='ios-camera-outline'  size={25} color={linkColor} />
+                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={linkColor} />
                   }
                 </View>
     }
@@ -1003,6 +1002,10 @@ class NewResource extends Component {
     let itemsArray = null
     let lcolor = this.getLabelAndBorderColor(bl.name)
     var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+
+    let { bankStyle } = this.props
+
+    let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
     if (count) {
       var items = []
       var arr = resource[bl.name]
@@ -1020,14 +1023,14 @@ class NewResource extends Component {
       counter =
         <View>
           <View style={styles.itemsCounter}>
-            <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+            <Icon name='ios-camera-outline'  size={25} color={linkColor} />
           </View>
         </View>;
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>
-                  <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+                  <Icon name='ios-camera-outline'  size={25} color={linkColor} />
                 </View>
     }
     var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
