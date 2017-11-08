@@ -1965,7 +1965,9 @@ var utils = {
       return
     }
 
-    require('../Actions/Actions').updateEnvironment(env)
+    if (env) {
+      require('../Actions/Actions').updateEnvironment(env)
+    }
   },
 
   async fetchEnv() {
