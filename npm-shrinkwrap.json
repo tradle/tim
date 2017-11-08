@@ -5,7 +5,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#253ccf7c93740547c3bc2c4f57db4c10b25b0a73",
+      "resolved": "git://github.com/tradle/aws-client.git#719e845016cc6cff177266f57e81d6a76cfa9bcd",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -971,6 +971,7 @@
         },
         "esutils": {
           "version": "2.0.2",
+          "from": "esutils@https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz",
           "resolved": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz",
           "dev": true
         },
@@ -3722,7 +3723,7 @@
     "etherscan-api": {
       "version": "3.0.8",
       "from": "mvayngrib/etherscan-api",
-      "resolved": "git://github.com/mvayngrib/etherscan-api.git#245c6927253fe4f305eaa24a256a76a3fd6c7189"
+      "resolved": "git://github.com/mvayngrib/etherscan-api.git#3b2862e5e53fdff861b249bf11e3e05e3571dede"
     },
     "event-emitter": {
       "version": "0.3.5",
@@ -7129,6 +7130,11 @@
       "from": "pbkdf2@>=3.0.3 <4.0.0",
       "resolved": "https://registry.npmjs.org/pbkdf2/-/pbkdf2-3.0.8.tgz"
     },
+    "pbkdf2-compat": {
+      "version": "2.0.1",
+      "from": "pbkdf2-compat@2.0.1",
+      "resolved": "https://registry.npmjs.org/pbkdf2-compat/-/pbkdf2-compat-2.0.1.tgz"
+    },
     "pbkdf2-sha256": {
       "version": "1.1.1",
       "from": "pbkdf2-sha256@>=1.1.0 <2.0.0",
@@ -10352,10 +10358,40 @@
           "from": "clone@https://registry.npmjs.org/clone/-/clone-1.0.2.tgz",
           "resolved": "https://registry.npmjs.org/clone/-/clone-1.0.2.tgz"
         },
+        "constants-browserify": {
+          "version": "0.0.1",
+          "from": "constants-browserify@0.0.1",
+          "resolved": "https://registry.npmjs.org/constants-browserify/-/constants-browserify-0.0.1.tgz"
+        },
+        "crypto-browserify": {
+          "version": "3.2.8",
+          "from": "crypto-browserify@>=3.2.6 <3.3.0",
+          "resolved": "https://registry.npmjs.org/crypto-browserify/-/crypto-browserify-3.2.8.tgz"
+        },
+        "https-browserify": {
+          "version": "0.0.0",
+          "from": "https-browserify@0.0.0",
+          "resolved": "https://registry.npmjs.org/https-browserify/-/https-browserify-0.0.0.tgz"
+        },
         "interpret": {
           "version": "0.6.6",
           "from": "interpret@>=0.6.4 <0.7.0",
           "resolved": "https://registry.npmjs.org/interpret/-/interpret-0.6.6.tgz"
+        },
+        "node-libs-browser": {
+          "version": "0.6.0",
+          "from": "node-libs-browser@>=0.6.0 <0.7.0",
+          "resolved": "https://registry.npmjs.org/node-libs-browser/-/node-libs-browser-0.6.0.tgz"
+        },
+        "ripemd160": {
+          "version": "0.2.0",
+          "from": "ripemd160@0.2.0",
+          "resolved": "https://registry.npmjs.org/ripemd160/-/ripemd160-0.2.0.tgz"
+        },
+        "sha.js": {
+          "version": "2.2.6",
+          "from": "sha.js@2.2.6",
+          "resolved": "https://registry.npmjs.org/sha.js/-/sha.js-2.2.6.tgz"
         },
         "supports-color": {
           "version": "3.1.2",
