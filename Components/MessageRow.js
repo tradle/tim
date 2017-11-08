@@ -465,6 +465,20 @@ class MessageRow extends Component {
     var isProductList = model.id === constants.TYPES.PRODUCT_LIST
     if (isProductList) {
       // Case when the needed form was sent along with the message
+      if (resource.message) {
+        const message = utils.parseMessage(resource, resource.message, this.props.bankStyle)
+        if (typeof message !== 'string') {
+          renderedRow.push(
+            <View style={chatStyles.rowContainer} key={this.getNextKey()}>
+              {message}
+              <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
+            </View>
+          )
+
+          return {onPressCall: this.onChooseProduct.bind(this, true)}
+        }
+      }
+
       if (resource.welcome) {
         let msg = <View key={this.getNextKey()}>
                 <Text style={chatStyles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
