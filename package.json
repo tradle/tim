@@ -137,7 +137,7 @@
     "react-native-os": "^1.1.0",
     "react-native-passcode-status": "1.1.0",
     "react-native-progress": "3.2.0",
-    "react-native-prompt": "github:pgmemk/react-native-prompt#789e25c",
+    "react-native-prompt": "^1.0.0",
     "react-native-push-notification": "^3.0.0",
     "react-native-qrcode": "^0.2.2",
     "react-native-randombytes": "^2.1.0",
