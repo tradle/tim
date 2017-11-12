@@ -36,10 +36,6 @@ const ITEM = 'tradle.Item'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const ORGANIZATION = 'tradle.Organization'
 
-var LINK_COLOR
-
-const DEFAULT_LINK_COLOR = '#2892C6'
-
 import {
   Image,
   // StyleSheet,
@@ -62,7 +58,6 @@ class FormRequestRow extends Component {
   constructor(props) {
     super(props);
     this.state = {}
-    LINK_COLOR = this.props.bankStyle.linkColor
   }
   // componentWillMount() {
   //   this.animatedValue = new Animated.Value(60)
@@ -117,7 +112,7 @@ class FormRequestRow extends Component {
     if (application)
       linkColor = '#757575'
     else
-      linkColor = isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR
+      linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     if (isFormRequest)
@@ -136,7 +131,7 @@ class FormRequestRow extends Component {
         msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message.substring(0, idx)}</Text>
                   <View style={chatStyles.rowContainer}>
-                    <Text style={[chatStyles.resourceTitle, {width: msgWidth - 25}, resource._documentCreated || !idx ? {color: '#757575'} : {color: LINK_COLOR}]}>{message.substring(idx).trim()}</Text>
+                    <Text style={[chatStyles.resourceTitle, {width: msgWidth - 25}, resource._documentCreated || !idx ? {color: '#757575'} : {color: bankStyle.linkColor}]}>{message.substring(idx).trim()}</Text>
                     {resource._documentCreated  ? null : icon}
                   </View>
                 </View>
@@ -285,7 +280,7 @@ class FormRequestRow extends Component {
         bankStyle: this.props.bankStyle,
         callback:  (val) => {
           resource[prop.name] = val
-          Actions.addItem({resource: resource, disableFormRequest: oResource})
+          Actions.addChatItem({resource: resource, disableFormRequest: oResource})
         },
       }
     });
@@ -569,8 +564,12 @@ class FormRequestRow extends Component {
     const { bankStyle, to, application } = this.props
     let message = resource.message
     let messagePart
-    if (resource._documentCreated)
-      message = resource.message.replace(/\*/g, '')
+    if (resource._documentCreated) {
+      if (resource.message)
+        message = resource.message.replace(/\*/g, '')
+      else
+        message = ''
+    }
     else {
       let params = { resource, message, bankStyle, noLink: application != null  || resource._documentCreated }
       messagePart = utils.parseMessage(params)
@@ -609,7 +608,7 @@ class FormRequestRow extends Component {
               ? {color: '#AFBBA8'}
               : {color: '#2892C6'}
     let link, icon
-    let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnly = application || utils.isReadOnlyChat(this.props.resource, this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
     let self = this
     // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
@@ -650,7 +649,7 @@ class FormRequestRow extends Component {
     // else if (isMyMessage)
     //   link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
-      let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : LINK_COLOR
+      let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
       let notLink = resource._documentCreated  ||  isReadOnly
       icon = <Icon  name={'ios-arrow-forward'} style={{color: linkColor}} size={20} />
@@ -751,7 +750,7 @@ class FormRequestRow extends Component {
         resource: resource,
         meta: utils.getModel(resource[TYPE]).value
       }
-      Actions.addItem(params)
+      Actions.addChatItem(params)
     }
   }
 

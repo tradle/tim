@@ -19,7 +19,6 @@ const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 
-const DEFAULT_LINK_COLOR = '#2892C6'
 const TYPE = constants.TYPE
 
 import {
@@ -249,7 +248,7 @@ class FormErrorRow extends Component {
     let isContext = to[TYPE]  &&  utils.isContext(to[TYPE])
     let context = isContext ? to : resource._context
 
-    let isReadOnlyChat = application ? !utils.isRM(application) : context  &&  utils.isReadOnlyChat(resource, context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnlyChat = application ? true : context  &&  utils.isReadOnlyChat(resource, context) //this.props.context  &&  this.props.context._readOnly
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
@@ -291,7 +290,7 @@ class FormErrorRow extends Component {
       )
     });
     if (vCols  &&  vCols.length) {
-      vCols.forEach(function(v) {
+      vCols.forEach((v) => {
         renderedRow.push(v);
       })
     }

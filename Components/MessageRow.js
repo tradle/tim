@@ -49,10 +49,6 @@ const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const INTRODUCTION = 'tradle.Introduction'
 const BOOKMARK = 'tradle.Bookmark'
 
-var LINK_COLOR
-
-const DEFAULT_LINK_COLOR = '#2892C6'
-
 import {
   Image,
   // StyleSheet,
@@ -71,7 +67,6 @@ import ENV from '../utils/env'
 class MessageRow extends Component {
   constructor(props) {
     super(props);
-    LINK_COLOR = this.props.bankStyle.linkColor
   }
   shouldComponentUpdate(nextProps, nextState) {
     let {to, resource, orientation} = this.props
@@ -475,7 +470,7 @@ class MessageRow extends Component {
                     <View style={{flex: 1}}>
                       <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
                     </View>
-                    <Icon style={{color: LINK_COLOR, paddingLeft: 10}} size={20} name={'ios-arrow-forward'} />
+                    <Icon style={{color: bankStyle.linkColor, paddingLeft: 10}} size={20} name={'ios-arrow-forward'} />
                   </View>
                 </View>
 
@@ -490,8 +485,8 @@ class MessageRow extends Component {
         let msg = <View key={this.getNextKey()}>
                 <Text style={chatStyles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
                 <View style={chatStyles.rowContainer}>
-                  <Text style={[chatStyles.resourceTitle, {color: LINK_COLOR}]}>{translate('listOfProducts')} </Text>
-                  <Icon style={{color: LINK_COLOR, paddingLeft: 100}} size={20} name={'ios-arrow-forward'} />
+                  <Text style={[chatStyles.resourceTitle, {color: bankStyle.linkColor}]}>{translate('listOfProducts')} </Text>
+                  <Icon style={{color: bankStyle.linkColor, paddingLeft: 100}} size={20} name={'ios-arrow-forward'} />
                 </View>
               </View>
         renderedRow.push(msg);
@@ -504,7 +499,7 @@ class MessageRow extends Component {
       let msg = <View key={this.getNextKey()}>
                   <View style={chatStyles.rowContainer}>
                     <Text style={[chatStyles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.message}</Text>
-                    <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
+                    <Icon style={{color: bankStyle.linkColor, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
                 </View>
       renderedRow.push(msg);
@@ -520,7 +515,7 @@ class MessageRow extends Component {
                   <View style={chatStyles.rowContainer}>
                     <Text style={[chatStyles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.message}</Text>
                     {profile}
-                    <Icon style={{color: LINK_COLOR, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
+                    <Icon style={{color: bankStyle.linkColor, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
                 </View>
       renderedRow.push(msg);
@@ -637,12 +632,12 @@ class MessageRow extends Component {
             let bg  = isMyMessage
                       ? this.props.bankStyle.myMessageBackgroundColor
                       : '#ffffff'
-            let color = isMyMessage ? this.props.bankStyle.myMessageLinkColor : LINK_COLOR
+            let color = isMyMessage ? this.props.bankStyle.myMessageLinkColor : bankStyle.linkColor
             let msg = <View key={this.getNextKey()}>
                         <Text style={style}>{msgParts[0]}</Text>
                         <View style={chatStyles.rowContainer}>
                           <Text style={[style, {backgroundColor: bg, color: color}]}>{msgParts[1]} </Text>
-                          <Icon style={{color: LINK_COLOR, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
+                          <Icon style={{color: bankStyle.linkColor, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
                         </View>
                       </View>
             vCols.push(msg);
@@ -677,8 +672,8 @@ class MessageRow extends Component {
                 link = <Text style={[style, color]}>{translate(msgModel)}</Text>
               else
                 link = <View style={chatStyles.rowContainer}>
-                           <Text style={[style, {color: resource._documentCreated ?  '#757575' : LINK_COLOR}]}>{translate(msgModel)}</Text>
-                           <Icon style={[{marginTop: 2}, resource._documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.myMessageLinkColor : LINK_COLOR}]} size={20} name={'ios-arrow-forward'} />
+                           <Text style={[style, {color: resource._documentCreated ?  '#757575' : bankStyle.linkColor}]}>{translate(msgModel)}</Text>
+                           <Icon style={[{marginTop: 2}, resource._documentCreated || isReadOnlyChat ? chatStyles.linkIconGreyed : {color: isMyMessage ? this.props.bankStyle.myMessageLinkColor : bankStyle.linkColor}]} size={20} name={'ios-arrow-forward'} />
                        </View>
             }
             let strName = isMyProduct
@@ -711,14 +706,14 @@ class MessageRow extends Component {
           vCols.push(<TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}  key={this.getNextKey()}>
                       <Text style={style}>
                         {pVal.substring(0, linkIdx)}
-                        <Text style={[style, {color: LINK_COLOR}]}>{text || link} </Text>
+                        <Text style={[style, {color: bankStyle.linkColor}]}>{text || link} </Text>
                         {pVal.substring(endLink + 1)}
                       </Text>
                      </TouchableHighlight>
           // vCols.push(<Text key={this.getNextKey()}>
           //               <Text style={style}>{pVal.substring(0, linkIdx)}</Text>
           //               <TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
-          //                 <Text style={[style, {color: bankStyle.LINK_COLOR}]}>{text || link}</Text>
+          //                 <Text style={[style, {color: bankStyle.bankStyle.linkColor}]}>{text || link}</Text>
           //               </TouchableHighlight>
           //               <Text style={style}>{pVal.substring(endLink + 1)}</Text>
           //             </Text>
@@ -747,7 +742,7 @@ class MessageRow extends Component {
       vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : bankStyle.contextBorderColor}]} key={this.getNextKey()}>{title}</Text>);
     }
     if (vCols  &&  vCols.length) {
-      vCols.forEach(function(v) {
+      vCols.forEach((v) => {
         renderedRow.push(v);
       })
     }

@@ -54,7 +54,6 @@ var {
 } = constants.TYPES
 
 const DEFAULT_CURRENCY_SYMBOL = '£'
-var CURRENCY_SYMBOL
 const MAX_LENGTH = 70
 
 var dateProp
@@ -62,8 +61,7 @@ var dateProp
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
-    this.state = { isConnected: this.props.navigator.isConnected }
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
+    this.state = { isConnected: this.props.navigator.isConnected, resource: props.resource }
     if (props.changeSharedWithList)
       this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
@@ -74,11 +72,8 @@ class ResourceRow extends Component {
       else
         this.state.isChosen = false
     }
-    if (props.resource[TYPE] === PROFILE) {
-      this.state.resource = props.resource
+    if (props.resource[TYPE] === PROFILE)
       this.state.unread = props.resource._unread
-    }
-    dateProp = null
   }
   componentDidMount() {
     this.listenTo(Store, 'onRowUpdate');
@@ -93,7 +88,7 @@ class ResourceRow extends Component {
       if (application[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
         let r = utils.clone(this.props.resource)
         r.relationshipManager = application.relationshipManager
-        this.setState({application: r})
+        this.setState({application: r, resource: r})
       }
       break
     case 'updateRow':
@@ -253,10 +248,11 @@ class ResourceRow extends Component {
                      </View>
     let textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
 
-    dateProp = utils.isContext(resource[TYPE]) ? 'time' : dateProp
+    this.dateProp = utils.isContext(resource[TYPE]) ? 'time' : this.dateProp
+
     let dateRow
-    if (!this.props.isChooser  &&  dateProp  &&  resource[dateProp]) {
-      let val = utils.formatDate(new Date(resource[dateProp]), true)
+    if (!this.props.isChooser  &&  this.dateProp  &&  resource[this.dateProp]) {
+      let val = utils.formatDate(new Date(resource[this.dateProp]), true)
       // let dateBlock = self.addDateProp(resource, dateProp, true);
       dateRow = <View style={styles.dateRow}>
                   <Text style={styles.verySmallLetters}>{val}</Text>
@@ -367,7 +363,7 @@ class ResourceRow extends Component {
       this.props.changeSharedWithList(id, this.state.sharedWith ? false : true)
     }
     else
-      this.props.onSelect(this.props.resource)
+      this.props.onSelect(this.state.resource)
   }
   formatRow(resource, style) {
     let self = this;
@@ -417,7 +413,7 @@ class ResourceRow extends Component {
         continue;
       if (resource[v]) {
         if (v === 'dateSubmitted' || v === 'lastMessageTime') {
-          dateProp = v;
+          this.dateProp = v;
           if (!datePropsCounter)
             datePropIdx = i;
           datePropsCounter++;
@@ -425,7 +421,7 @@ class ResourceRow extends Component {
       }
     }
     if (datePropsCounter > 1)
-      dateProp = null;
+      this.dateProp = null;
 
     let isOfficialAccounts = this.props.isOfficialAccounts
     let color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
@@ -449,8 +445,11 @@ class ResourceRow extends Component {
       if (ref) {
         if (resource[v]) {
           let row;
-          if (ref == MONEY)
-            row = <Text style={style} key={self.getNextKey()}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
+          if (ref == MONEY) {
+            let { currency } = this.props
+            let currencySymbol = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
+            row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{(resource[v].currency || currencySymbol) + resource[v].value}</Text>
+          }
           else
             row = <Text style={style} key={self.getNextKey()}>{resource[v].title}</Text>
 
@@ -648,7 +647,7 @@ class ResourceRow extends Component {
             from: me,
             to: this.props.resource.to
           }
-          Actions.addItem({resource: msg})
+          Actions.addChatItem({resource: msg})
           this.setState({hasRM: true})
         }}
       ]

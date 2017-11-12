@@ -30,12 +30,12 @@ var chatStyles = require('../styles/chatStyles')
 
 import CustomIcon from '../styles/customicons'
 const ENUM = 'tradle.Enum'
-var LINK_COLOR
-const DEFAULT_LINK_COLOR = '#a94442'
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
 const SETTINGS = 'tradle.Settings'
 const HAND_SIGNATURE = 'tradle.HandSignature'
+
+const DEFAULT_LINK_COLOR = '#a94442'
 
 var Form = t.form.Form;
 var stylesheet = require('../styles/styles')
@@ -87,10 +87,6 @@ class NewResource extends Component {
 
   constructor(props) {
     super(props);
-    if (this.props.bankStyle)
-      LINK_COLOR = this.props.bankStyle.linkColor || DEFAULT_LINK_COLOR
-    else
-      LINK_COLOR = DEFAULT_LINK_COLOR
     var r = {};
     if (props.resource)
       r = utils.clone(props.resource) //extend(true, r, props.resource)
@@ -273,7 +269,7 @@ class NewResource extends Component {
 
     var self = this;
     var title = utils.getDisplayName(resource);
-    var isMessage = utils.isMessage(this.props.model)
+    var isMessage = utils.isMessage(resource)
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
     if (isMessage) {
@@ -283,7 +279,7 @@ class NewResource extends Component {
           resource: this.props.originatingMessage,
           meta: utils.getModel(this.props.originatingMessage[constants.TYPE]).value
         }
-        Actions.addItem(params)
+        Actions.addChatItem(params)
         this.props.navigator.pop();
         return;
       }
@@ -491,7 +487,11 @@ class NewResource extends Component {
     if (this.props.chat)
       params.chat = this.props.chat
     params.doNotSend = this.props.doNotSend
-    Actions.addItem(params)
+    // HACK
+    if (!resource.from  ||  !resource.to)
+      Actions.addItem(params)
+    else
+      Actions.addChatItem(params)
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field
@@ -632,7 +632,7 @@ class NewResource extends Component {
     var model = {};
     var arrays = [];
     extend(true, data, resource);
-    var isMessage = utils.isMessage(meta)
+    var isMessage = utils.isMessage(resource)
     var isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
     var showSendVerificationForm = false;
     var formToDisplay;
@@ -668,7 +668,7 @@ class NewResource extends Component {
     var itemsMeta
     if (this.props.editCols) {
       itemsMeta = []
-      this.props.editCols.forEach(function(p) {
+      this.props.editCols.forEach((p) => {
         if (meta.properties[p].type === 'array')
           itemsMeta.push(meta.properties[p])
       })
@@ -1013,6 +1013,9 @@ class NewResource extends Component {
     var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     let lcolor = this.getLabelAndBorderColor(bl.name)
     let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
+    let { bankStyle } = this.props
+    let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
+
     if (count) {
       let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
 
@@ -1024,15 +1027,15 @@ class NewResource extends Component {
                    </View>
 
       counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
-                  <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color={LINK_COLOR} />
+                  <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color={linkColor} />
                 </View>
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>{
                   isPhoto
-                    ? <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
-                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={LINK_COLOR} />
+                    ? <Icon name='ios-camera-outline'  size={25} color={linkColor} />
+                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={linkColor} />
                   }
                 </View>
     }
@@ -1135,6 +1138,10 @@ class NewResource extends Component {
     let itemsArray = null
     let lcolor = this.getLabelAndBorderColor(bl.name)
     var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+
+    let { bankStyle } = this.props
+
+    let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
     if (count) {
       var items = []
       var arr = resource[bl.name]
@@ -1152,14 +1159,14 @@ class NewResource extends Component {
       counter =
         <View>
           <View style={styles.itemsCounter}>
-            <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+            <Icon name='ios-camera-outline'  size={25} color={linkColor} />
           </View>
         </View>;
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>
-                  <Icon name='ios-camera-outline'  size={25} color={LINK_COLOR} />
+                  <Icon name='ios-camera-outline'  size={25} color={linkColor} />
                 </View>
     }
     var title = translate(bl, blmodel) //.title || utils.makeLabel(p)

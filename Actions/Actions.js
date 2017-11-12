@@ -7,6 +7,7 @@ var actionProps = {}
 var asyncActions = [
   'addApp',
   'addItem',
+  'addChatItem',
   'addMessage',
   'addModelFromUrl',
   'addNewIdentity',

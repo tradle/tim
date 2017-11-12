@@ -157,7 +157,7 @@ class MessageView extends Component {
       if (!l.items.ref  ||  !l.items.backlink)
         continue
       let pm = utils.getModel(l.items.ref).value
-      if (pm.interfaces  &&  pm.interfaces.indexOf(ITEM) !== -1) {
+      if (utils.isItem(pm)) {
         itemBl = l
         break
       }

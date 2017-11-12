@@ -101,8 +101,6 @@ var excludeFromBrowsing = [
 
 const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
 
-var CURRENCY_SYMBOL
-var LIMIT
 var cnt = 0
 import React, { Component, PropTypes } from 'react'
 import {
@@ -163,7 +161,7 @@ class GridList extends Component {
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 300//736
-    LIMIT = 10 //this.isSmallScreen ? 20 : 40
+    this.limit = 10 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
       isLoading: true,
@@ -260,16 +258,13 @@ class GridList extends Component {
       let m = utils.getModel(props.resource[TYPE]).value
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
-        // if (utils.getModel(props.modelName).value.interfaces)
-        //   params.to = props.resource.to
         params.resource = props.resource
       else if (params.prop.items  &&  params.prop.items.backlink)
         params.to = props.resource
-
-//       params.resource = props.resource
     }
     else
       params.to = props.resource
+    params.isChat = true
     params.listView = props.listView
     return params
   }
@@ -315,7 +310,7 @@ class GridList extends Component {
           filterResource: resource,
           search: true,
           first: true,
-          limit: LIMIT * 2
+          limit: this.limit * 2
         })
         return
       }
@@ -499,10 +494,10 @@ class GridList extends Component {
       }
       if (!params.first) {
         let l = this.state.list
-        if (l  &&  !isBacklink) { //  &&  l.length === LIMIT * 2) {
+        if (l  &&  !isBacklink) { //  &&  l.length === this.limit * 2) {
           let newList = []
           // if (this.direction === 'down') {
-            // for (let i=LIMIT; i<l.length; i++)
+            // for (let i=this.limit; i<l.length; i++)
             for (let i=0; i<l.length; i++)
               newList.push(l[i])
             list.forEach((r) => newList.push(r))
@@ -510,7 +505,7 @@ class GridList extends Component {
           // }
           // else {
           //   for (let i=0; i<l.length; i++)
-          //   // for (let i=0; i<LIMIT; i++)
+          //   // for (let i=0; i<this.limit; i++)
           //     list.push(l[i])
           // }
         }
@@ -885,7 +880,7 @@ class GridList extends Component {
     if (title.length > 20) {
       let t = title.split(' ');
       newTitle = '';
-      t.forEach(function(word) {
+      t.forEach((word) => {
         if (newTitle.length + word.length > 20)
           return;
         newTitle += newTitle.length ? ' ' + word : word;
@@ -1086,7 +1081,8 @@ class GridList extends Component {
 
     if (model.id === ORGANIZATION  &&  resource.name === 'Sandbox'  &&  resource._isTest)
       return this.renderTestProviders()
-    let isMessage = utils.isMessage(resource)
+    let isApplication = modelName === APPLICATION
+    let isMessage = utils.isMessage(resource)  &&  !isApplication
     if (isMessage  &&  resource !== model  &&  !isContext) //isVerification  || isForm || isMyProduct)
       return (<VerificationRow
                 lazy={lazy}
@@ -1131,12 +1127,12 @@ class GridList extends Component {
 
     let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
     if (this.props.search)
-      extend(params, {search: true, filterResource: this.state.resource, limit: LIMIT * 2, first: true})
+      extend(params, {search: true, filterResource: this.state.resource, limit: this.limit * 2, first: true})
     Actions.list(params)
   }
   searchWithFilter(filterResource) {
     this.setState({resource: filterResource})
-    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: LIMIT * 2, first: true})
+    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit * 2, first: true})
   }
   getGridCols() {
     let model = utils.getModel(this.props.modelName).value
@@ -1269,7 +1265,7 @@ class GridList extends Component {
       let refM = utils.getModel(ref).value
       if (ref === MONEY) {
         style.push({alignSelf: 'flex-end', paddingRight: 10})
-        row = <Text style={style} key={this.getNextKey(resource)}>{(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value}</Text>
+        row = <Text style={style} key={this.getNextKey(resource)}>{resource[v].currency + resource[v].value}</Text>
       }
       else if (ref === PHOTO)
         row = <Image source={{uri: resource[v].url}} style={styles.thumb} />
@@ -1278,10 +1274,6 @@ class GridList extends Component {
         if (refM.isInterface || refM.id === FORM) {
           let resType = utils.getType(resource[v])
           let resM = utils.getModel(resType).value
-          // row = <View key={this.getNextKey(resource)}>
-          //         <Text style={[style, {color: this.props.bankStyle.LINK_COLOR}]}>{utils.makeModelTitle(resM)}</Text>
-          //         {row}
-          //       </View>
           row = <View key={this.getNextKey(resource)}>
                   <Text style={styles.type}>{utils.makeModelTitle(resM)}</Text>
                   {row}
@@ -1379,8 +1371,8 @@ class GridList extends Component {
   }
 
   renderGridHeader() {
-    // if (this.state.isLoading)
-    //   return <View/>
+    if (this.state.isLoading)
+      return <View/>
     let model = utils.getModel(this.props.modelName).value
     let props = model.properties
     let viewCols = this.getGridCols() // model.gridCols || model.viewCols;
@@ -1450,7 +1442,7 @@ class GridList extends Component {
       modelName: modelName,
       sortProperty: sortProperty,
       asc: this.state.order,
-      limit: LIMIT,
+      limit: this.limit,
       direction: this.direction,
       search: search,
       to: modelName === BOOKMARK ? utils.getMe() : null,
@@ -1690,7 +1682,7 @@ class GridList extends Component {
       if (!hasSearch  && !search) {
         hasSearch = !_readOnly  ||  !utils.isContext(modelName)
         if (hasSearch)
-          hasSearch = (dataSource && dataSource.getRowCount() > LIMIT) || (filter  &&  filter.length)
+          hasSearch = (dataSource && dataSource.getRowCount() > this.limit) || (filter  &&  filter.length)
       }
       if (hasSearch) {
         searchBar = <SearchBar
@@ -1817,7 +1809,7 @@ class GridList extends Component {
       bookmark: Object.keys(this.state.resource).length ? this.state.resource : {[TYPE]: this.props.modelName},
       from: utils.getMe()
     }
-    Actions.addItem({resource: resource})
+    Actions.addChatItem({resource: resource})
   }
   renderHeader() {
     let { search, modelName } = this.props

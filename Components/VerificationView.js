@@ -15,7 +15,6 @@ import { makeResponsive } from 'react-native-orient'
 
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
-var CURRENCY_SYMBOL
 const ENUM = 'tradle.Enum'
 const VERIFICATION = 'tradle.Verification'
 const TYPE = constants.TYPE
@@ -41,7 +40,6 @@ class VerificationView extends Component {
       promptVisible: null,
       documentType: props.resource.document[TYPE]
     }
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
   render() {
     let resource = this.props.resource
@@ -64,8 +62,8 @@ class VerificationView extends Component {
   }
 
   renderVerification(resource, model, vTree, currentLayer) {
-    var resource = resource ? resource : this.props.resource;
-    var vModel = utils.getModel(constants.TYPES.VERIFICATION).value
+    resource = resource || this.props.resource;
+    let vModel = utils.getModel(constants.TYPES.VERIFICATION).value
     let bankStyle = this.props.bankStyle
     if (resource.method) {
       let displayName = utils.getDisplayName(resource.method)
@@ -101,7 +99,7 @@ class VerificationView extends Component {
     return vTree
   }
   showMethod(r) {
-    var m = utils.getModel(utils.getType(r.method)).value
+    let m = utils.getModel(utils.getType(r.method)).value
     this.props.navigator.push({
       title: utils.makeModelTitle(m),
       id: 3,
@@ -121,35 +119,35 @@ class VerificationView extends Component {
     });
   }
   renderResource(r, model) {
-    var resource = !r ? this.props.resource : r
-    var isVerification = resource[TYPE] === VERIFICATION
+    let resource = !r ? this.props.resource : r
+    let isVerification = resource[TYPE] === VERIFICATION
     if (isVerification)
       resource = r.method
-    var modelName = resource[TYPE];
+    let modelName = resource[TYPE];
     if (!model)
       model = utils.getModel(modelName)
-    // var model = utils.getModel(modelName).value;
-    var vCols = model.viewCols ? utils.clone(model.viewCols) : null
+    // let model = utils.getModel(modelName).value;
+    let vCols = model.viewCols ? utils.clone(model.viewCols) : null
     let props = model.properties
 
     if (!vCols) {
       vCols = [];
-      for (var p in props) {
+      for (let p in props) {
         if (p != TYPE)
           vCols.push(p)
       }
     }
-    var isMessage = utils.isMessage(model)
+    let isMessage = utils.isMessage(resource)
     if (!isMessage) {
-      var len = vCols.length;
-      for (var i=0; i<len; i++) {
+      let len = vCols.length;
+      for (let i=0; i<len; i++) {
         if (props[vCols[i]].displayName) {
           vCols.splice(i, 1);
           len--;
         }
       }
     }
-    var first = true;
+    let first = true;
     let self = this
     let style = [styles.textContainer, {padding: 10}]
     let retCols = []
@@ -172,13 +170,13 @@ class VerificationView extends Component {
         )
       }
     }
-    var viewCols = vCols.map((p) => {
-      var val = resource[p];
-      var pMeta = model.properties[p];
-      var isRef;
-      var isItems
-      var isDirectionRow;
-      // var isEmail
+    let viewCols = vCols.map((p) => {
+      let val = resource[p];
+      let pMeta = model.properties[p];
+      let isRef;
+      let isItems
+      let isDirectionRow;
+      // let isEmail
       if (!val) {
         if (pMeta.displayAs)
           val = utils.templateIt(pMeta, resource);
@@ -200,6 +198,7 @@ class VerificationView extends Component {
       else if (pMeta.ref) {
         if (pMeta.ref == constants.TYPES.MONEY) {
           let c = utils.normalizeCurrencySymbol(val.currency)
+          let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
           val = (c || CURRENCY_SYMBOL) + val.value
         }
         else if (pMeta.inlined ||  utils.getModel(pMeta.ref).value.inlined)
@@ -209,7 +208,7 @@ class VerificationView extends Component {
         else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
           val = val.title
         else if (this.props.showVerification) {
-          var value = val[TYPE] ? utils.getDisplayName(val) : val.title
+          let value = val[TYPE] ? utils.getDisplayName(val) : val.title
           val = <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
           isRef = true;
         }
@@ -229,10 +228,10 @@ class VerificationView extends Component {
         if (pMeta.range !== 'json')
           val = this.renderSimpleProp(val, pMeta, modelName, VerificationView)
       }
-      var title = pMeta.skipLabel  ||  isItems
+      let title = pMeta.skipLabel  ||  isItems
                 ? <View />
                 : <Text style={styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
-      var separator = first
+      let separator = first
                     ? <View />
                     : <View style={styles.separator}></View>;
 
@@ -277,7 +276,7 @@ class VerificationView extends Component {
     return retCols;
   }
   showResource(r, type) {
-    var route = {
+    let route = {
       title: translate(utils.getModel(type).value),
       id: 5,
       backButtonTitle: 'Back',

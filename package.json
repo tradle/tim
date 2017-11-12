@@ -142,7 +142,7 @@
     "react-native-orient": "1.3.3",
     "react-native-orientation": "github:yamill/react-native-orientation",
     "react-native-progress": "3.2.0",
-    "react-native-prompt": "github:pgmemk/react-native-prompt#789e25c",
+    "react-native-prompt": "^1.0.0",
     "react-native-push-notification": "^3.0.0",
     "react-native-qrcode": "^0.2.2",
     "react-native-signature-pad": "0.0.8",

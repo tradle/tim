@@ -147,11 +147,15 @@ class FormMessageRow extends Component {
              : <View />;
     let bg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
 
+    let stub = this.formStub(resource, to)
+    if (resource[TYPE] !== PRODUCT_REQUEST)
+      stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
+               {stub}
+             </TouchableHighlight>
+
     return  <View style={[{margin: 1}, bg]}>
               {date}
-              <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
-                {this.formStub(resource, to)}
-              </TouchableHighlight>
+              {stub}
               <View style={photoListStyle}>
                 <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
               </View>
@@ -227,6 +231,9 @@ class FormMessageRow extends Component {
     let contextId = this.getContextId(resource)
 
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
+    var arrowIcon
+    if (!utils.isContext(resource))
+      arrowIcon = <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
     return (
       <View style={st, viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
@@ -236,7 +243,7 @@ class FormMessageRow extends Component {
               {sealedStatus}
               <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[TYPE]).value)}</Text>
             </View>
-            <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
+            {arrowIcon}
           </View>
           {row}
           {contextId}

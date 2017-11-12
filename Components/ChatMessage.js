@@ -23,10 +23,10 @@ class ChatMessage extends Component {
   }
   render() {
     var model = this.props.model;
-    var isMessage = utils.isMessage(model)
+    var resource = this.props.resource;
+    var isMessage = utils.isMessage(resource)
     if (!isMessage)
       return <View/>
-    var resource = this.props.resource;
     var title = resource.to[constants.TYPE]
               ? utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties)
               : resource.to.title;

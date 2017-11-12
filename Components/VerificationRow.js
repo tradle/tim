@@ -14,7 +14,6 @@ var dateformat = require('dateformat')
 var appStyle = require('../styles/appStyle.json')
 
 var DEFAULT_CURRENCY_SYMBOL = '£'
-var CURRENCY_SYMBOL
 
 const ITEM = 'tradle.Item'
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -60,7 +59,6 @@ class VerificationRow extends Component {
   };
   constructor(props) {
     super(props);
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -71,17 +69,17 @@ class VerificationRow extends Component {
 
   render() {
     let {resource, isChooser, lazy, parentResource, onSelect, prop } = this.props
-    var model = utils.getModel(resource[TYPE]).value;
-    var isMyProduct = model.subClassOf === MY_PRODUCT
-    var isForm = model.subClassOf === FORM
-    var isBookmark = model.id === BOOKMARK
-    var isVerification = resource.document != null
-    var r = isVerification ? resource.document : resource
+    let model = utils.getModel(resource[TYPE]).value;
+    let isMyProduct = model.subClassOf === MY_PRODUCT
+    let isForm = model.subClassOf === FORM
+    let isBookmark = model.id === BOOKMARK
+    let isVerification = resource.document != null
+    let r = isVerification ? resource.document : resource
 
     let listModel = utils.getModel(this.props.modelName).value
     let ph = utils.getMainPhotoProperty(listModel)
 
-    var photo
+    let photo
     if (r  &&  isMyProduct)
       photo = resource.from.photo
     else {
@@ -108,16 +106,16 @@ class VerificationRow extends Component {
     else if (ph)
       photo = <View style={{width: 70}} />
 
-    var verificationRequest = resource.document
+    let verificationRequest = resource.document
                             ? utils.getModel(utils.getType(resource.document)).value
                             : utils.getModel(resource[TYPE]).value;
 
-    var rows = [];
+    let rows = [];
 
     let notAccordion = true //!isMyProduct  &&  !isVerification && !prop === null || resource.sources || resource.method || isForm
     // if (r  &&  !notAccordion) {
     //   this.formatDoc(verificationRequest, r, rows);
-    //   var backlink = prop &&  prop.items  &&  prop.items.backlink;
+    //   let backlink = prop &&  prop.items  &&  prop.items.backlink;
     //   if (resource.txId)
     //     rows.push(
     //         <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
@@ -127,9 +125,9 @@ class VerificationRow extends Component {
     //       )
     // }
 
-    var verifiedBy, org
+    let verifiedBy, org
     if (!isChooser  && !this.props.search  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
-      var contentRows = [];
+      let contentRows = [];
 
       if (isMyProduct)
         org = resource.from.organization
@@ -152,12 +150,12 @@ class VerificationRow extends Component {
     }
 
     let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
-    var date = !isBookmark &&  r  &&  <View style={{alignItems: 'flex-end'}}>
+    let date = !isBookmark &&  r  &&  <View style={{alignItems: 'flex-end'}}>
                         <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy')}</Text>
                       </View>
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
     let title
-    if (isChooser  ||  model.interfaces.indexOf(ITEM) !== -1)
+    if (isChooser  ||  utils.isItem(model))
       title = dn //utils.getDisplayName(resource, model.properties)
     if (!title || !title.length) {
       if (listModel.id === FORM_REQUEST)
@@ -218,7 +216,7 @@ class VerificationRow extends Component {
     else if (isBookmark  &&  !resource.message)
       this.formatBookmark(utils.getModel(resource.bookmark[TYPE]).value, resource.bookmark, renderedRows)
 
-    var header =  <View style={[styles.header, {flex: 1}]} key={this.getNextKey()}>
+    let header =  <View style={[styles.header, {flex: 1}]} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10}}>
                       {photo}
                       <View style={[styles.noImageBlock, {flex: 1,  justifyContent: 'center'}]}>
@@ -239,7 +237,7 @@ class VerificationRow extends Component {
                     </View>
                   </View>
 
-    var row
+    let row
     if (isChooser)
       row = <View>
               <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
@@ -264,7 +262,7 @@ class VerificationRow extends Component {
             </View>
     }
     // else {
-    //   var content = <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
+    //   let content = <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
     //                     <View style={styles.textContainer}>
     //                       {rows}
     //                     </View>
@@ -301,7 +299,7 @@ class VerificationRow extends Component {
   }
 
   formatFilteredResource(model, resource, renderedRows) {
-    var props = (utils.getModel(resource[TYPE] || resource.id).value).properties
+    let props = (utils.getModel(resource[TYPE] || resource.id).value).properties
     let searchCriteria = this.props.searchCriteria
     let viewCols = []
     for (let p in searchCriteria) {
@@ -310,34 +308,36 @@ class VerificationRow extends Component {
       viewCols.push(p)
     }
 
-    // var viewCols = model.gridCols || model.viewCols;
+    // let viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
       return
-    var verPhoto;
-    var vCols = [];
+    let verPhoto;
+    let vCols = [];
 
-    var properties = model.properties;
-    var noMessage = !resource.message  ||  !resource.message.length;
-    var onPressCall;
+    let properties = model.properties;
+    let noMessage = !resource.message  ||  !resource.message.length;
+    let onPressCall;
 
-    var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
-    var style = styles.resourceTitle
-    var labelStyle = styles.resourceTitleL
+    let isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
+    let style = styles.resourceTitle
+    let labelStyle = styles.resourceTitleL
     viewCols.forEach((v) => {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
         return;
       if (!resource[v]  &&  !properties[v].displayAs)
         return
 
-      var units = properties[v].units && properties[v].units.charAt(0) !== '['
+      let units = properties[v].units && properties[v].units.charAt(0) !== '['
                 ? ' (' + properties[v].units + ')'
                 : ''
 
       if (properties[v].ref) {
         if (resource[v]) {
           let val
-          if (properties[v].ref === constants.TYPES.MONEY)
+          if (properties[v].ref === constants.TYPES.MONEY) {
+            let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
             val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+          }
           else if (resource[v].title)
             val = resource[v].title
           else
@@ -357,7 +357,7 @@ class VerificationRow extends Component {
       if (resource[v]  &&  properties[v].type === 'string'  &&  (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
         row = <Text style={style} key={this.getNextKey()}>{resource[v]}</Text>;
       else if (!model.autoCreate) {
-        var val = (properties[v].displayAs)
+        let val = (properties[v].displayAs)
                 ? utils.templateIt(properties[v], resource)
                 : properties[v].type === 'object' ? null : resource[v];
         if (!val)
@@ -395,10 +395,10 @@ class VerificationRow extends Component {
       else {
         if (!resource[v]  ||  !resource[v].length)
           return;
-        var msgParts = utils.splitMessage(resource[v]);
+        let msgParts = utils.splitMessage(resource[v]);
         // Case when the needed form was sent along with the message
         if (msgParts.length === 2) {
-          var msgModel = utils.getModel(msgParts[1]);
+          let msgModel = utils.getModel(msgParts[1]);
           if (msgModel) {
             vCols.push(<View key={this.getNextKey()} style={styles.msgParts}>
                          <Text style={style}>{msgParts[0]}</Text>
@@ -450,8 +450,10 @@ class VerificationRow extends Component {
       if (ref) {
         if (resource[v]) {
           let val
-          if (ref === constants.TYPES.MONEY)
+          if (ref === constants.TYPES.MONEY) {
+            let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
             val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
+          }
           else if (resource[v].title)
             val = resource[v].title
           else if (utils.getModel(ref).value.subClassOf === ENUM) {
@@ -521,7 +523,7 @@ class VerificationRow extends Component {
     //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
 
     if (vCols  &&  vCols.length) {
-      vCols.forEach(function(v) {
+      vCols.forEach((v) => {
         renderedRow.push(v);
       });
     }

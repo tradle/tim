@@ -12,7 +12,6 @@ var Accordion = require('./Accordion')
 import Icon from 'react-native-vector-icons/Ionicons'
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
-var CURRENCY_SYMBOL
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
@@ -52,7 +51,6 @@ class ShowPropertiesView extends Component {
     this.state = {
       promptVisible: null
     }
-    CURRENCY_SYMBOL = props.currency ? props.currency.symbol || props.currency : DEFAULT_CURRENCY_SYMBOL
   }
 
   render() {
@@ -146,7 +144,7 @@ class ShowPropertiesView extends Component {
         excludedProperties.push('to')
       }
     }
-    var isMessage = utils.isMessage(model)
+    var isMessage = utils.isMessage(resource)
     if (!isMessage) {
       var len = vCols.length;
       for (var i=0; i<len; i++) {
@@ -215,6 +213,7 @@ class ShowPropertiesView extends Component {
           return
         }
         if (pMeta.ref == constants.TYPES.MONEY) {
+          let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }
@@ -389,14 +388,13 @@ class ShowPropertiesView extends Component {
     let p = pMeta.name
     let isPromptVisible = this.state.promptVisible !== null
 
-    return <View style={styles.iconView}>
+    return <View>
               <TouchableOpacity underlayColor='transparent' onPress={() => {
                 this.setState({promptVisible: pMeta})
               }}>
                 <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'red' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
               </TouchableOpacity>
               <Prompt
-                promptStyle={{ width: width / 1.5 }}
                 title={translate('fieldErrorMessagePrompt')}
                 placeholder={translate('thisValueIsInvalidPlaceholder')}
                 visible={isPromptVisible}

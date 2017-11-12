@@ -39,7 +39,6 @@ import { makeStylish } from './makeStylish'
 // var SearchBar = require('react-native-search-bar')
 // var ResourceTypesScreen = require('./ResourceTypesScreen')
 
-var LINK_COLOR
 var LIMIT = 500
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
 const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM, FINANCIAL_PRODUCT } = TYPES
@@ -143,6 +142,7 @@ class MessageList extends Component {
       gatherForms: true,
       limit: LIMIT,
       search: search,
+      isChat: true,
       isAggregation: isAggregation,
       application: application
     }
@@ -336,7 +336,7 @@ class MessageList extends Component {
       // Actions.list(actionParams)
       return;
     }
-    let { sendStatus, isAggregation, forgetMeFromCustomer, context, list, loadEarlierMessages } = params
+    let { sendStatus, isAggregation, forgetMeFromCustomer, context, list, loadEarlierMessages, isChat } = params
     this.state.newItem = false
     if (action === 'updateItem') {
       let resourceId = utils.getId(resource)
@@ -408,18 +408,20 @@ class MessageList extends Component {
 
     if (bankStyle   &&  params.bankStyle)
       extend(bankStyle, params.bankStyle)
-    LINK_COLOR = bankStyle  &&  bankStyle.linkColor
     let isEmployee = utils.isEmployee(chatWith)
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let type = list[0][TYPE];
       if (type  !== modelName) {
         let model = utils.getModel(modelName).value;
-        if (!model.isInterface)
-          return;
-
-        let rModel = utils.getModel(type).value;
-        if (!rModel.interfaces  ||  rModel.interfaces.indexOf(modelName) === -1)
-          return;
+        if (!isChat) {
+          if (!model.isInterface)
+            return;
+          else {
+            let rModel = utils.getModel(type).value;
+            if (!rModel.interfaces  ||  rModel.interfaces.indexOf(modelName) === -1)
+              return;
+          }
+        }
       }
       let me = utils.getMe()
       this.setState({
@@ -608,6 +610,7 @@ class MessageList extends Component {
       query: text,
       modelName: this.props.modelName,
       to: this.props.resource,
+      isChat: true,
       context: this.state.allContexts ? null : this.state.context,
       limit: this.state.list ? this.state.list.length + 1 : LIMIT
     }
@@ -621,17 +624,20 @@ class MessageList extends Component {
     let me = utils.getMe();
     // let MessageRow = require('./MessageRow');
     let previousMessageTime = currentMessageTime;
-    let isProductApplication = utils.isContext(model)
-    currentMessageTime = resource.time;
+    let isContext = utils.isContext(this.props.resource)
+    currentMessageTime = resource.time
+    let context = this.state.context
+    if (isContext)
+      context = this.props.resource
     let props = {
       onSelect: this.selectResource.bind(this),
       resource: resource,
       bankStyle: this.props.bankStyle,
-      context: this.state.context ||  (isProductApplication && this.props.resource),
+      context: context,
       application: this.props.application,
       to: isAggregation ? resource.to : this.props.resource,
       navigator: this.props.navigator,
-      switchChat: isProductApplication ? this.switchChat.bind(this, resource) : null
+      switchChat: isContext ? this.switchChat.bind(this, resource) : null
     }
     if (model.subClassOf === 'tradle.MyProduct')
       return  <MyProductMessageRow {...props} />
@@ -677,6 +683,7 @@ class MessageList extends Component {
     Actions.list({
       modelName: this.props.modelName,
       to: this.props.resource,
+      isChat: true,
       context: this.state.allContexts ? null : this.state.context,
       limit: this.state.list ? this.state.list.length + 1 : LIMIT
     });
@@ -737,7 +744,7 @@ class MessageList extends Component {
         }
       }
     }
-    let isProductApplication = utils.isContext(resource[TYPE])
+    let isContext = utils.isContext(resource[TYPE])
     if (!content) {
       let isAllMessages = model.isInterface  &&  model.id === MESSAGE;
 
@@ -746,12 +753,12 @@ class MessageList extends Component {
       // Chooser for trusted party verifier
       let isChooser = originatingMessage && originatingMessage.verifiers
       let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
-                           (isProductApplication && resource.product !== REMEDIATION)
+                           (isContext && resource.product !== REMEDIATION)
       let me = utils.getMe()
       if (me.isEmployee);
       else if (this.hasChatContext())
         maxHeight -= 45
-      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isProductApplication  &&  this.state.onlineStatus === false))) //  || (resource[TYPE] === ORGANIZATION  &&  !resource._online)))
+      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isContext  &&  this.state.onlineStatus === false))) //  || (resource[TYPE] === ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
       // if (notRemediation  &&  !hideTextInput) //  &&  resource.products) //  &&  resource.products.length > 1))
       //   maxHeight -= 45
@@ -809,7 +816,6 @@ class MessageList extends Component {
     else
       chooser = <View/>
 
-    // let sepStyle = { height: 1,backgroundColor: LINK_COLOR }
     let sepStyle = { height: 1,backgroundColor: 'transparent' }
     if (!this.state.allLoaded  && !navigator.isConnected  &&  this.state.isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
@@ -819,7 +825,7 @@ class MessageList extends Component {
     let network
     if (originatingMessage)
        network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
-    if (!context  &&  isProductApplication)
+    if (!context  &&  isContext)
       context = resource
     let separator = utils.getContentSeparator(bankStyle)
     if (!bgImage)

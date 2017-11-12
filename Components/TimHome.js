@@ -519,6 +519,7 @@ class TimHome extends Component {
   showHomePage() {
     let me = utils.getMe()
     let title = translate('profile')
+    let m = utils.getModel(me[TYPE]).value
     this.props.navigator.push({
       title: title,
       id: 3,
@@ -532,14 +533,14 @@ class TimHome extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
-          model: utils.getModel(me[TYPE]).value,
+          model: m,
           resource: me,
           bankStyle: defaultBankStyle
         }
       },
       passProps: {
         resource: me,
-          backlink: utils.getModel(me[TYPE]).value.properties.myForms,
+        backlink: m.properties.myForms,
         bankStyle: defaultBankStyle
       }
     })
@@ -955,7 +956,7 @@ class TimHome extends Component {
               </View>
 
     let regView = !ENV.autoRegister &&
-                  <View  style={{alignSelf: 'center'}}>
+                  <View  style={styles.center}>
                     <FadeInView>
                       <TouchableOpacity  onPress={() => {
                         this.register(this.showFirstPage.bind(this))
@@ -971,20 +972,18 @@ class TimHome extends Component {
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
         <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
-          <View style={{flexGrow: 1}}/>
-          <View>
+          <View style={styles.flexGrow} />
             { utils.getMe()
               ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
                     underlayColor='transparent' onPress={() => this._pressHandler()}>
                   <View style={styles.getStarted}>
-                     <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
+                     <Text style={styles.getStartedText}>Get started</Text>
                   </View>
                 </TouchableOpacity>
               : regView
             }
             <Text style={errStyle}>{err}</Text>
             {dev}
-          </View>
         </TouchableOpacity>
       </View>
     );
@@ -1098,8 +1097,8 @@ class TimHome extends Component {
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
         <Wrapper { ...wrapperProps }>
-          <View style={{flexGrow: 1}}/>
-          <View style={{marginBottom: 20}}>
+          <View style={styles.flexGrow}/>
+          <View style={styles.bottom}>
             {spinner}
             {busyReason}
             {updateIndicator}
@@ -1255,6 +1254,19 @@ var styles = (function () {
     layout: {
       justifyContent: 'space-between',
       height: height
+    },
+    shadow: {
+      shadowColor: '#245c8c',
+      backgroundColor: 'lightblue'
+    },
+    center: {
+      alignSelf: 'center'
+    },
+    flexGrow: {
+      flexGrow: 1
+    },
+    bottom: {
+      marginBottom: 20
     }
   });
 })()
