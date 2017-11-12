@@ -1937,7 +1937,7 @@ var utils = {
         resource: formRequest,
         meta: utils.getModel(formRequest[TYPE]).value
       }
-      Actions.addItem(params)
+      Actions.addChatItem(params)
     }
     let photo = {
       url: data.data,
@@ -1945,7 +1945,7 @@ var utils = {
       width: data.width
     }
     let propName = (typeof prop === 'string') ? prop : prop.name
-    Actions.addItem({
+    Actions.addChatItem({
       disableFormRequest: isFormRequest || isFormError ? formRequest : null,
       resource: {
         [TYPE]: isFormRequest ? formRequest.form : formRequest.prefill[TYPE],
