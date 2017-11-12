@@ -20,6 +20,7 @@
     "build:local": "PROVIDERS=local npm run build",
     "build:bots": "PROVIDERS=bots npm run build",
     "build:serverinenv": "PROVIDERS=serverinenv npm run build",
+    "build:cloud": "PROVIDERS=cloud npm run build",
     "deploy": "GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=gh-pages GIT_DEPLOY_REPO=origin ./deploy.sh",
     "deploy:pgmemk": "npm run build && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=gh-pages GIT_DEPLOY_REPO=origin ./deploy.sh",
     "deploy:dev": "npm run build:dev && GIT_DEPLOY_DIR=web/dist GIT_DEPLOY_BRANCH=gh-pages GIT_DEPLOY_REPO=mv ./deploy.sh",

@@ -1396,7 +1396,7 @@ class ResourceList extends Component {
 
     let width = utils.getContentWidth()
     return  (
-      <View style={{width}}>
+      <View style={[styles.header, { width }]}>
         {search}
         {conversations}
         {bookmarks}
