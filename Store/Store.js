@@ -4353,7 +4353,7 @@ var Store = Reflux.createStore({
     else
       await save(returnVal) //, isBecomingEmployee)
     if (disableFormRequest) {
-      let fr =  this._getItem(disableFormRequest)
+      let fr =  disableFormRequest // this._getItem(disableFormRequest)
       if (!fr._documentCreated) {
         let addDocumentCreated
         if (fr[TYPE] === FORM_REQUEST) {
@@ -4366,7 +4366,7 @@ var Store = Reflux.createStore({
         }
         if (addDocumentCreated) {
           fr._documentCreated = true
-          fr._document = utils.getId(resource) /// NEW
+          fr._document = utils.getId(returnVal)//resource) /// NEW
           let key = utils.getId(fr)
           self._setItem(key, fr)
           self.dbPut(key, fr)
