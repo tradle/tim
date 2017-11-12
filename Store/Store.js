@@ -5635,13 +5635,10 @@ var Store = Reflux.createStore({
         rr._context = context
         chatItems.push(rr)
       }
+      // Filter out resources like Introduction
+      chatItems = chatItems.filter((r) => r.time)
       chatItems.sort((a, b) => {
-        if (a.time  &&  b.time)
-          return a.time - b.time
-        if (a.time)
-          return a.time - b.dateVerified
-        else
-          return a.dateVerified - b.time
+        return a.time - b.time
       })
       if (!noTrigger) {
         let applicant = this._getItem(applicantId)
