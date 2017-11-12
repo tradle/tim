@@ -154,7 +154,7 @@ class VerificationRow extends Component {
                       </View>
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
     let title
-    if (isChooser  ||  model.interfaces.indexOf(ITEM) !== -1)
+    if (isChooser  ||  utils.isItem(model))
       title = dn //utils.getDisplayName(resource, model.properties)
     if (!title || !title.length) {
       if (listModel.id === FORM_REQUEST)
@@ -522,7 +522,7 @@ class VerificationRow extends Component {
     //   vCols.push(<Text style={styles.verySmallLetters}>{model.title}</Text>);
 
     if (vCols  &&  vCols.length) {
-      vCols.forEach(function(v) {
+      vCols.forEach((v) => {
         renderedRow.push(v);
       });
     }

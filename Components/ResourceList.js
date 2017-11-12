@@ -743,7 +743,7 @@ class ResourceList extends Component {
     if (title.length > 20) {
       var t = title.split(' ');
       newTitle = '';
-      t.forEach(function(word) {
+      t.forEach((word) => {
         if (newTitle.length + word.length > 20)
           return;
         newTitle += newTitle.length ? ' ' + word : word;

@@ -252,7 +252,7 @@ class NewResource extends Component {
 
     var self = this;
     var title = utils.getDisplayName(resource);
-    var isMessage = utils.isMessage(this.props.model)
+    var isMessage = utils.isMessage(resource)
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
     if (isMessage) {
@@ -262,7 +262,7 @@ class NewResource extends Component {
           resource: this.props.originatingMessage,
           meta: utils.getModel(this.props.originatingMessage[constants.TYPE]).value
         }
-        Actions.addItem(params)
+        Actions.addChatItem(params)
         this.props.navigator.pop();
         return;
       }
@@ -470,7 +470,11 @@ class NewResource extends Component {
     if (this.props.chat)
       params.chat = this.props.chat
     params.doNotSend = this.props.doNotSend
-    Actions.addItem(params)
+    // HACK
+    if (!resource.from  ||  !resource.to)
+      Actions.addItem(params)
+    else
+      Actions.addChatItem(params)
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field
@@ -611,7 +615,7 @@ class NewResource extends Component {
     var model = {};
     var arrays = [];
     extend(true, data, resource);
-    var isMessage = utils.isMessage(meta)
+    var isMessage = utils.isMessage(resource)
     var isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
     var showSendVerificationForm = false;
     var formToDisplay;
@@ -647,7 +651,7 @@ class NewResource extends Component {
     var itemsMeta
     if (this.props.editCols) {
       itemsMeta = []
-      this.props.editCols.forEach(function(p) {
+      this.props.editCols.forEach((p) => {
         if (meta.properties[p].type === 'array')
           itemsMeta.push(meta.properties[p])
       })

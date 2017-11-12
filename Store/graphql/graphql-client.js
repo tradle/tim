@@ -17,7 +17,7 @@ const {
   PREV_HASH
 } = constants
 
-const { MONEY, ENUM, ORGANIZATION, FORM } = constants.TYPES
+const { MONEY, ENUM, ORGANIZATION, FORM, MESSAGE } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
@@ -355,6 +355,88 @@ var search = {
       }
 
     }
+  },
+                // # _author: "3c67687a96fe59d8f98b1c90cc46f943b938d54cda852b12fb1d43396e28978a"
+                // # _inbound: false
+                // # _recipient: ${hash}
+  async getChat(params) {
+    let { author, recipient, client, context } = params
+    let table = `rl_${MESSAGE.replace(/\./g, '_')}`
+    let inbound = true
+    let query =
+        `query {
+            rl_tradle_Message(
+            first:20,
+            filter:{
+              EQ: {
+                _inbound: true
+                context: "${context}"
+                _author: "${author}"
+              }
+            },
+            orderBy:{
+              property: time
+              desc:true
+            }
+          ) {
+            edges {
+              node {
+                _author
+                _recipient
+                object
+              }
+            }
+          }
+        }`
+    let promisses = []
+    promisses.push(client.query({
+          fetchPolicy: 'network-only',
+          query: gql(`${query}`),
+        }))
+    let queryOutbound = query.replace('_inbound: true', '_inbound: false').replace('_author', '_recipient')
+        // `query {
+        //     rl_tradle_Message(
+        //     first:20,
+        //     filter:{
+        //       EQ: {
+        //         _inbound: false
+        //         context: "${context}"
+        //         _recipient: "${author}"
+        //       }
+        //     },
+        //     orderBy:{
+        //       property: time
+        //       desc:true
+        //     }
+        //   ) {
+        //     edges {
+        //       node {
+        //         _author
+        //         _recipient
+        //         object
+        //       }
+        //     }
+        //   }
+        // }`
+
+    promisses.push(client.query({
+          fetchPolicy: 'network-only',
+          query: gql(`${queryOutbound}`),
+        }))
+    try {
+      let all = await Promise.all(promisses)
+      let result = []
+      all.forEach((data) => {
+        let list = data.data[table]
+        if (list.edges  &&  list.edges.length)
+          list.edges.forEach(r => result.push(r.node))
+      })
+      // result.sort((a, b) => a.time - b.time)
+      return result
+    } catch (err) {
+      debugger
+    }
+
   },
   getAllPropertiesForServerSearch(model, inlined) {
     let props = model.properties

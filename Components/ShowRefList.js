@@ -211,17 +211,16 @@ class ShowRefList extends Component {
     let backlinkRL, details, separator
     if (!showDetails  && (currentBacklink  ||  (backlinkList  &&  showDocuments))) {
       let modelName = showDocuments ? FORM : currentBacklink.items.ref
-        var GridList = require('./GridList')
-        backlinkRL = <GridList
-                      lazy={lazy}
-                      modelName={modelName}
-                      prop={currentBacklink}
-                      sortProperty={utils.getModel(modelName).value.sortProperty}
-                      resource={resource}
-                      isBacklink={true}
-                      listView={true}
-                      navigator={navigator} />
-      // }
+      var GridList = require('./GridList')
+      backlinkRL = <GridList
+                    lazy={lazy}
+                    modelName={modelName}
+                    prop={currentBacklink}
+                    sortProperty={utils.getModel(modelName).value.sortProperty}
+                    resource={resource}
+                    isBacklink={true}
+                    listView={true}
+                    navigator={navigator} />
     }
     else if (resource.photos)
       separator = <View style={{height: 2, backgroundColor: bg}} />
@@ -277,10 +276,18 @@ class ShowRefList extends Component {
     let m = utils.getModel(resource[TYPE]).value
     let props = m.properties
     let viewCols = m.viewCols
+    let vCols = []
+    viewCols.forEach((pr) => {
+      if (props[pr].group)
+        props[pr].group.forEach((gp) => vCols.push(gp))
+      else
+        vCols.push(pr)
+    })
+
     for (let p in resource) {
       if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
         continue
-      if (viewCols  &&  viewCols.indexOf(p) !== -1)
+      if (vCols  &&  vCols.indexOf(p) !== -1)
         return true
     }
   }

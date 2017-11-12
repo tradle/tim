@@ -258,16 +258,13 @@ class GridList extends Component {
       let m = utils.getModel(props.resource[TYPE]).value
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
-        // if (utils.getModel(props.modelName).value.interfaces)
-        //   params.to = props.resource.to
         params.resource = props.resource
       else if (params.prop.items  &&  params.prop.items.backlink)
         params.to = props.resource
-
-//       params.resource = props.resource
     }
     else
       params.to = props.resource
+    params.isChat = true
     params.listView = props.listView
     return params
   }
@@ -883,7 +880,7 @@ class GridList extends Component {
     if (title.length > 20) {
       let t = title.split(' ');
       newTitle = '';
-      t.forEach(function(word) {
+      t.forEach((word) => {
         if (newTitle.length + word.length > 20)
           return;
         newTitle += newTitle.length ? ' ' + word : word;
@@ -1084,7 +1081,8 @@ class GridList extends Component {
 
     if (model.id === ORGANIZATION  &&  resource.name === 'Sandbox'  &&  resource._isTest)
       return this.renderTestProviders()
-    let isMessage = utils.isMessage(resource)
+    let isApplication = modelName === APPLICATION
+    let isMessage = utils.isMessage(resource)  &&  !isApplication
     if (isMessage  &&  resource !== model  &&  !isContext) //isVerification  || isForm || isMyProduct)
       return (<VerificationRow
                 lazy={lazy}
@@ -1373,8 +1371,8 @@ class GridList extends Component {
   }
 
   renderGridHeader() {
-    // if (this.state.isLoading)
-    //   return <View/>
+    if (this.state.isLoading)
+      return <View/>
     let model = utils.getModel(this.props.modelName).value
     let props = model.properties
     let viewCols = this.getGridCols() // model.gridCols || model.viewCols;
@@ -1794,7 +1792,7 @@ class GridList extends Component {
       bookmark: Object.keys(this.state.resource).length ? this.state.resource : {[TYPE]: this.props.modelName},
       from: utils.getMe()
     }
-    Actions.addItem({resource: resource})
+    Actions.addChatItem({resource: resource})
   }
   renderHeader() {
     let { search, modelName } = this.props

@@ -137,7 +137,7 @@ class VerificationView extends Component {
           vCols.push(p)
       }
     }
-    let isMessage = utils.isMessage(model)
+    let isMessage = utils.isMessage(resource)
     if (!isMessage) {
       let len = vCols.length;
       for (let i=0; i<len; i++) {

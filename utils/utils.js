@@ -48,6 +48,7 @@ var dateformat = require('dateformat')
 var Backoff = require('backoff')
 var extend = require('xtend')
 var levelErrors = require('levelup/lib/errors')
+const IS_MESSAGE = '_message'
 
 const Cache = require('lru-cache')
 const mutexify = require('mutexify')
@@ -904,9 +905,9 @@ var utils = {
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? utils.clone(resource) : resource
     let m = this.getModel(res[TYPE]).value
-    if (!m.interfaces)
-      res = this.optimizeResource1(resource, doNotChangeOriginal)
-    else {
+    // if (!m.interfaces)
+    //   res = this.optimizeResource1(resource, doNotChangeOriginal)
+    // else {
       var properties = m.properties
       var exclude = ['from', 'to', 'time']
       let isVerification = m.id === VERIFICATION
@@ -937,7 +938,7 @@ var utils = {
         else
           delete res[p]
       })
-    }
+    // }
     delete res._cached
     if (!this.isMessage(m))
       return res
@@ -1745,15 +1746,22 @@ var utils = {
     return trimTrailingSlashes(a) === trimTrailingSlashes(b)
   },
   isMessage(m) {
-    if (typeof m === 'string')
-      m = this.getModel(m).value
-    else if (m[TYPE])  // resource was passed
-      m = this.getModel(m[TYPE]).value
+    return m[IS_MESSAGE]
+    // if (typeof m === 'string')
+    //   m = this.getModel(m).value
+    // else if (m[TYPE])  // resource was passed
+    //   m = this.getModel(m[TYPE]).value
 
-    if (m.isInterface  &&  (m.id === MESSAGE || m.id === DOCUMENT || m.id === ITEM))
-      return true
-    if (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)
-      return true
+    // if (m.isInterface  &&  (m.id === MESSAGE || m.id === DOCUMENT || m.id === ITEM))
+    //   return true
+    // if (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)
+    //   return true
+  },
+  isItem(model) {
+    return model.interfaces  &&  model.interfaces.indexOf(ITEM) !== -1
+  },
+  isDocument(model) {
+    return model.interfaces  &&  model.interfaces.indexOf(DOCUMENT) !== -1
   },
   getEnumProperty(model) {
     let props = model.properties
@@ -1936,6 +1944,8 @@ var utils = {
           newArr.push(p)
         props[p].list.forEach((pr) => newArr.push(pr))
       }
+      else if (props[p].group)
+        props[p].group.forEach((pr) => newArr.push(pr))
       else
         newArr.push(p)
     })

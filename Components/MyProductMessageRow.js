@@ -192,7 +192,7 @@ class MyProductMessageRow extends Component {
     if (vCols  &&  vCols.length) {
       if (vCols.length > MAX_PROPS_IN_FORM)
         vCols.splice(MAX_PROPS_IN_FORM, 1)
-      vCols.forEach(function(v) {
+      vCols.forEach((v) => {
         renderedRow.push(v);
       })
     }

@@ -113,11 +113,11 @@ var RowMixin = {
   },
   getOwnerPhoto(isMyMessage) {
     let { to, resource, application, context, bankStyle } = this.props
-    let isSharedContext = utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(context)
+    let isContext = utils.isContext(to[constants.TYPE])
+    let isSharedContext = isContext  &&  utils.isReadOnlyChat(to)
     if (/*Platform.OS !== 'android'  &&*/  !isSharedContext  &&  !application)
       return <View/>
 
-    let isContext = utils.isContext(to[constants.TYPE])
     if (!isContext && (isMyMessage  || !to /* ||  !to.photos*/))
       return <View style={{marginVertical: 0}}/>
 
@@ -144,7 +144,7 @@ var RowMixin = {
       return <Image source={{uri: uri}} style={styles.msgImage} />
     }
     if (!isMyMessage) {
-      var title = resource.from.title  && resource.from.title.split(' ').map(function(s) {
+      var title = resource.from.title  && resource.from.title.split(' ').map((s) => {
         return s.charAt(0);
       }).join('');
       if (!title)
@@ -291,7 +291,7 @@ var RowMixin = {
 
     let r = this.props.resource
     let isFormError = r[constants.TYPE] === FORM_ERROR
-    Actions.addItem({
+    Actions.addChatItem({
       disableFormRequest: r,
       resource: {
         [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.form,
@@ -347,7 +347,7 @@ var RowMixin = {
     r.token = token
 
     let isFormError = r[constants.TYPE] === FORM_ERROR
-    Actions.addItem({
+    Actions.addChatItem({
       disableFormRequest: r,
       resource: {
         [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.form,

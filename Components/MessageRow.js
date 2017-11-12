@@ -736,7 +736,7 @@ class MessageRow extends Component {
       vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : bankStyle.contextBorderColor}]} key={this.getNextKey()}>{title}</Text>);
     }
     if (vCols  &&  vCols.length) {
-      vCols.forEach(function(v) {
+      vCols.forEach((v) => {
         renderedRow.push(v);
       })
     }

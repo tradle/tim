@@ -270,7 +270,7 @@ class FormRequestRow extends Component {
         bankStyle: this.props.bankStyle,
         callback:  (val) => {
           resource[prop.name] = val
-          Actions.addItem({resource: resource, disableFormRequest: oResource})
+          Actions.addChatItem({resource: resource, disableFormRequest: oResource})
         },
       }
     });
@@ -555,8 +555,12 @@ class FormRequestRow extends Component {
     const { bankStyle, to, application } = this.props
     let message = resource.message
     let messagePart
-    if (resource._documentCreated)
-      message = resource.message.replace(/\*/g, '')
+    if (resource._documentCreated) {
+      if (resource.message)
+        message = resource.message.replace(/\*/g, '')
+      else
+        message = ''
+    }
     else {
       let params = { resource, message, bankStyle, noLink: application != null  || resource._documentCreated }
       messagePart = utils.parseMessage(params)
@@ -595,7 +599,7 @@ class FormRequestRow extends Component {
               ? {color: '#AFBBA8'}
               : {color: '#2892C6'}
     let link, icon
-    let isReadOnly = utils.isReadOnlyChat(this.props.resource, this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnly = application || utils.isReadOnlyChat(this.props.resource, this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
     let self = this
     // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
@@ -724,7 +728,7 @@ class FormRequestRow extends Component {
         resource: resource,
         meta: utils.getModel(resource[TYPE]).value
       }
-      Actions.addItem(params)
+      Actions.addChatItem(params)
     }
   }
 

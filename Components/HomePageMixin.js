@@ -89,7 +89,7 @@ var HomePageMixin = {
           id: utils.makeId(PROFILE, result.provider)
         }
       }
-      Actions.addItem({
+      Actions.addChatItem({
         resource: r,
         value: r,
         provider: {

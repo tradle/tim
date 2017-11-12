@@ -63,7 +63,7 @@ var ResourceMixin = {
     let type = resource[constants.TYPE] || id.split('_')[0]
     let model = utils.getModel(type).value;
     let title = utils.getDisplayName(resource, model);
-    if (utils.isMessage(type)) {
+    if (utils.isMessage(resource)) {
       let {bankStyle, search, currency, country} = this.props
       this.props.navigator.push({
         id: 5,
@@ -134,7 +134,7 @@ var ResourceMixin = {
       }
     }
     let cnt = val.length;
-    return val.map(function(v) {
+    return val.map((v) => {
       let ret = [];
       counter++;
       vCols.forEach((p) =>  {

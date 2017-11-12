@@ -100,8 +100,7 @@ var NewResourceMixin = {
 
     let meta = this.props.model  ||  this.props.metadata;
     let model = params.model;  // For the form
-    let isMessage = utils.isMessage(meta)
-    let onSubmitEditing = this.onSavePressed // isMessage ? params.onSubmitEditing : this.onSavePressed
+    let onSubmitEditing = this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
     let chooser = this.chooser  ||  this.props.chooser
     let models = utils.getModels();

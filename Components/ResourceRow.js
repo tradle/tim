@@ -60,7 +60,7 @@ var dateProp
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
-    this.state = { isConnected: this.props.navigator.isConnected }
+    this.state = { isConnected: this.props.navigator.isConnected, resource: props.resource }
     if (props.changeSharedWithList)
       this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
@@ -71,10 +71,8 @@ class ResourceRow extends Component {
       else
         this.state.isChosen = false
     }
-    if (props.resource[TYPE] === PROFILE) {
-      this.state.resource = props.resource
+    if (props.resource[TYPE] === PROFILE)
       this.state.unread = props.resource._unread
-    }
   }
   componentDidMount() {
     this.listenTo(Store, 'onRowUpdate');
@@ -89,7 +87,7 @@ class ResourceRow extends Component {
       if (application[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
         let r = utils.clone(this.props.resource)
         r.relationshipManager = application.relationshipManager
-        this.setState({application: r})
+        this.setState({application: r, resource: r})
       }
       break
     case 'updateRow':
@@ -366,7 +364,7 @@ class ResourceRow extends Component {
       this.props.changeSharedWithList(id, this.state.sharedWith ? false : true)
     }
     else
-      this.props.onSelect(this.props.resource)
+      this.props.onSelect(this.state.resource)
   }
   formatRow(resource, style) {
     let self = this;
@@ -646,7 +644,7 @@ class ResourceRow extends Component {
             from: me,
             to: this.props.resource.to
           }
-          Actions.addItem({resource: msg})
+          Actions.addChatItem({resource: msg})
           this.setState({hasRM: true})
         }}
       ]

@@ -141,7 +141,7 @@ class ShowPropertiesView extends Component {
         excludedProperties.push('to')
       }
     }
-    var isMessage = utils.isMessage(model)
+    var isMessage = utils.isMessage(resource)
     if (!isMessage) {
       var len = vCols.length;
       for (var i=0; i<len; i++) {
@@ -385,14 +385,13 @@ class ShowPropertiesView extends Component {
     let p = pMeta.name
     let isPromptVisible = this.state.promptVisible !== null
 
-    return <View style={styles.iconView}>
+    return <View>
               <TouchableOpacity underlayColor='transparent' onPress={() => {
                 this.setState({promptVisible: pMeta})
               }}>
                 <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'red' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
               </TouchableOpacity>
               <Prompt
-                promptStyle={{ width: width / 1.5 }}
                 title={translate('fieldErrorMessagePrompt')}
                 placeholder={translate('thisValueIsInvalidPlaceholder')}
                 visible={isPromptVisible}
@@ -460,8 +459,7 @@ var styles = StyleSheet.create({
     marginBottom: 0,
     marginHorizontal: 7,
     color: '#7AAAC3'
-  },
-
+  }
 });
 
 module.exports = ShowPropertiesView;
