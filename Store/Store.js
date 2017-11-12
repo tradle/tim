@@ -3900,14 +3900,14 @@ var Store = Reflux.createStore({
       // model.interfaces.push(MESSAGE);
       var rootHash = sha(model);
       model[ROOT_HASH] = rootHash;
-      model[constants.OWNER] = self.buildRef(me)
+      model[constants.OWNER] = this.buildRef(me)
       // model[constants.OWNER] = {
       //   id: PROFILE + '_' + me[ROOT_HASH],
       //   title: utils.getDisplayName(me, self.getModel(PROFILE).properties),
         // photos: me.photos
       // }
       // Wil need to publish new model
-      return self.dbPut(key, model);
+      return this.dbPut(key, model);
     })
     .then(() => {
       if (!me.myModels)
