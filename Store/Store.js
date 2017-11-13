@@ -3759,9 +3759,9 @@ var Store = Reflux.createStore({
       }
       var meta = this.getModel(items.ref)
       var isMessage = utils.isMessage(meta)
-      var result = isMessage ? await this.searchMessages(params) : this.searchNotMessages(params)
-      if (result  &&  result.length)
-        res['_' + p + 'Count'] = result.length
+      // var result = isMessage ? await this.searchMessages(params) : this.searchNotMessages(params)
+      // if (result  &&  result.length)
+      //   res['_' + p + 'Count'] = result.length
     }
 
     if (noTrigger)
