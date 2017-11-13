@@ -929,6 +929,10 @@ var utils = {
       Object.keys(res).forEach(p => {
         if (p === 'txId')
           return
+        if (p === '_context') {
+          res._context = this.buildRef(res._context)
+          return
+        }
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
           return
         if (isProductApplication  &&  p === 'product')
@@ -950,7 +954,7 @@ var utils = {
       })
     // }
     delete res._cached
-    if (!this.isMessage(m))
+    if (!this.isMessage(res))
       return res
 
     if (res._sharedWith) {
@@ -964,8 +968,6 @@ var utils = {
     delete res.to.photo
     delete res.from.organization
     delete res.from.photo
-    if (res._context)
-      res._context = this.buildRef(res._context)
 
     return res
   },
