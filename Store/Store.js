@@ -4347,8 +4347,9 @@ var Store = Reflux.createStore({
     else
       await save(returnVal) //, isBecomingEmployee)
     if (disableFormRequest) {
-      let fr =  disableFormRequest // this._getItem(disableFormRequest)
-      if (!fr._documentCreated) {
+      // let fr =  disableFormRequest // this._getItem(disableFormRequest)
+      if (!disableFormRequest._documentCreated) {
+        let fr = utils.clone(disableFormRequest)
         let addDocumentCreated
         if (fr[TYPE] === FORM_REQUEST) {
           let form = fr.form || disableFormRequest.form
