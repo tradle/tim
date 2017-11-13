@@ -1295,7 +1295,7 @@ var Store = Reflux.createStore({
       this.addVisualProps(r)
 
       if (r._context) {
-        let c = this._getItem(r._context)
+        let c = r._context.id ? this._getItem(r._context) : r._context
         // context could be empty if ForgetMe was requested for the provider where form was originally created
         // if (c  &&  c._readOnly) {
         let cId = utils.getId(r._context)
@@ -2786,7 +2786,7 @@ var Store = Reflux.createStore({
           profile._inactive = true
       }
       if (!profile.firstName)
-        profile.firstName = '[unknown]'
+        profile.firstName = `[${translate('nameUnknown')}]`
 
       profile.formatted = profile.firstName + (data && data.lastName ? ' ' + data.lastName : '')
       var identity = data.identity

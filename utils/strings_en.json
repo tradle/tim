@@ -255,5 +255,6 @@
     "iproovFailedTitle": "Oops! Something went wrong",
     "iproovFailedMessage": "Please try again. For best results, keep your face centered in the oval during the color flashes.",
     "iproovErrorTitle": "Oops! Something went wrong",
-    "iproovErrorMessage": "Please wait a bit and try again"
+    "iproovErrorMessage": "Please wait a bit and try again",
+    "nameUnknown": "name unknown"
 }
