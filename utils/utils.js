@@ -1934,7 +1934,7 @@ var utils = {
 
     if (isFormRequest) {
       var params = {
-        value: {documentCreated: true},
+        value: {_documentCreated: true},
         doneWithMultiEntry: true,
         resource: formRequest,
         meta: utils.getModel(formRequest[TYPE]).value
