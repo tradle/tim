@@ -2188,12 +2188,6 @@ var Store = Reflux.createStore({
       progressUpdate = willAnnounceProgress && {
         recipient: this._getItem(org)
       }
-
-      if (payload.context) {
-        let s = utils.makeId(PRODUCT_REQUEST, payload.context)
-        let r = list[s]
-      }
-
       switch (type) {
       case INTRODUCTION:
         await this.receiveIntroduction({ msg, org, identifier })
@@ -9401,7 +9395,7 @@ var Store = Reflux.createStore({
         let oId = utils.getId(org ? org : from)
         if (type === FORM_REQUEST  &&  val.form === PRODUCT_REQUEST) {
           let messages = chatMessages[oId]
-          if (messages) {
+          if (messages  &&  messages.length) {
             let r = this._getItem(messages[messages.length - 1])
             if (r[TYPE] === FORM_REQUEST  &&  r.form === PRODUCT_REQUEST  &&  !r._documentCreated) {
               noTrigger = true
