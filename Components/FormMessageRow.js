@@ -117,7 +117,7 @@ class FormMessageRow extends Component {
         borderRadius: 10,
         marginBottom: 3,
       }
-      if (isSharedContext)
+      if (isSharedContext || application)
         photoListStyle.marginLeft = 40
     }
     var len = photoUrls.length;
