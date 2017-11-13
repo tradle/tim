@@ -3758,10 +3758,13 @@ var Store = Reflux.createStore({
         props: itemsModel.properties
       }
       var meta = this.getModel(items.ref)
-      var isMessage = utils.isMessage(meta)
+      var isMessage = true // utils.isMessage(meta)
       // var result = isMessage ? await this.searchMessages(params) : this.searchNotMessages(params)
-      // if (result  &&  result.length)
-      //   res['_' + p + 'Count'] = result.length
+      if (isMessage) {
+        let result = await this.searchMessages(params)
+        if (result  &&  result.length)
+          res['_' + p + 'Count'] = result.length
+      }
     }
 
     if (noTrigger)
@@ -8105,7 +8108,7 @@ var Store = Reflux.createStore({
 
       var itemsModel = this.getModel(items.ref)
       if (itemsModel.isInterface) {
-        if (msgModel.interfaces.indexOf(items.ref) === -1)
+        if (!msgModel.interfaces  ||  msgModel.interfaces.indexOf(items.ref) === -1)
           continue
       }
       else if (itemsModel.id !== msg[TYPE]  &&  msgModel.subClassOf !== itemsModel.id)
@@ -9260,7 +9263,8 @@ var Store = Reflux.createStore({
         if (utils.isEnum(m))
           this.createEnumResources(m)
 
-        if (utils.isMessage(m)) {
+        // if (utils.isMessage(m)) {
+        if (m.subClassOf === FORM) {
           this.addVerificationsToFormModel(m)
           this.addFromAndTo(m)
         }
