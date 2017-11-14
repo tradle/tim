@@ -311,7 +311,7 @@ class MessageList extends Component {
       // Actions.list(actionParams)
       return;
     }
-    let { sendStatus, isAggregation, forgetMeFromCustomer, context, list, loadEarlierMessages, isChat } = params
+    let { sendStatus, isAggregation, forgetMeFromCustomer, context, list, loadEarlierMessages } = params
     this.state.newItem = false
     if (action === 'updateItem') {
       let resourceId = utils.getId(resource)
@@ -388,7 +388,7 @@ class MessageList extends Component {
       let type = list[0][TYPE];
       if (type  !== modelName) {
         let model = utils.getModel(modelName).value;
-        if (!isChat) {
+        if (model.id !== MESSAGE) {
           if (!model.isInterface)
             return;
           else {
