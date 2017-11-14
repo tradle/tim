@@ -9759,7 +9759,7 @@ var Store = Reflux.createStore({
         this.deleteMessageFromChat(utils.getId(resource), this._getItem(id))
         delete list[id]
       })
-      this.trigger({action: 'messageList', modelName: MESSAGE, to: resource, forgetMeFromCustomer: true})
+      this.trigger({action: 'messageList', modelName: MESSAGE, to: resource, forgetMeFromCustomer: true, isChat: true})
       return this.meDriverSignAndSend({
         object: { [TYPE]: FORGOT_YOU },
         to: { permalink: resource[ROOT_HASH] }
@@ -9798,7 +9798,8 @@ var Store = Reflux.createStore({
       // [NONCE]: this.getNonce(),
       message: translate('youAreForgotten'),
       from: this.buildRef(org),
-      to: this.buildRef(me)
+      to: this.buildRef(me),
+      [IS_MESSAGE]: true
     }
     msg[ROOT_HASH] = sha(msg)
 
@@ -9935,7 +9936,7 @@ var Store = Reflux.createStore({
       if (hasDeleted)
         this.trigger({action: 'addItem', resource: utils.getMe()})
       // this.trigger({action: 'messageList', list: [msg], resource: org, to: resource})
-      this.trigger({action: 'messageList', list: [msg], to: org})
+      this.trigger({action: 'messageList', list: [msg], to: org, isChat: true})
       let messages = chatMessages[orgId]
       let allMessages = chatMessages[ALL_MESSAGES]
       messages.forEach((r) => {
@@ -10079,6 +10080,7 @@ var Store = Reflux.createStore({
       let pid = utils.makeId(PROFILE, results[0].message.recipient)
       msg.from = this.buildRef(list[pid].value)
       msg.to = this.buildRef(me)
+      msg[IS_MESSAGE] = true
 
       let mId = utils.getId(msg)
       list[mId] = {
@@ -10091,7 +10093,7 @@ var Store = Reflux.createStore({
 
       batch.push({type: 'put', key: mId, value: msg})
       // result.push(msg)
-      this.trigger({action: 'addMessage', to: resource, resource: msg})
+      this.trigger({action: 'addMessage', to: resource, resource: msg, isChat: true})
 
       resource.lastMessage = translate('requestedForgetMe')
       resource.lastMessageTime = new Date().getTime()
