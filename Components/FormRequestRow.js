@@ -582,9 +582,9 @@ class FormRequestRow extends Component {
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
         let productToForms = this.props.productToForms
         if (productToForms) {
-          let product = productToForms[product]
-          if (product) {
-            let formsArray = product[resource.form]
+          let forms = productToForms[product]
+          if (forms) {
+            let formsArray = forms[resource.form]
             if (formsArray)
               sameFormRequestForm = true
           }
