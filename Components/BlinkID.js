@@ -2,6 +2,9 @@ import { Platform } from 'react-native'
 import BlinkID from 'react-native-blinkid'
 import { microblink } from '../utils/env'
 import { isSimulator } from '../utils/utils'
+import validateResource from '@tradle/validate-resource'
+
+const { sanitize } = validateResource.utils
 
 module.exports = (function () {
   if (isSimulator()) return
@@ -14,5 +17,12 @@ module.exports = (function () {
   if (!licenseKey) return
 
   BlinkID.setLicenseKey(licenseKey)
-  return BlinkID
+  const { scan } = BlinkID
+  return {
+    ...BlinkID,
+    async scan (...args) {
+      const result = await scan.call(BlinkID, ...args)
+      return sanitize(result).sanitized
+    }
+  }
 }())
