@@ -314,9 +314,9 @@
       }
     },
     "@tradle/validate-resource": {
-      "version": "2.10.0",
+      "version": "2.13.0",
       "from": "@tradle/validate-resource@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-2.10.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-2.13.0.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
