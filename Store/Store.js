@@ -3101,6 +3101,7 @@ var Store = Reflux.createStore({
       var key = utils.getId(rr)
 
       rr.to = self.buildRef(isReadOnlyContext ? context.to : r.to)
+      rr.from = rr.from || r.from
       if (isContext)
         rr.to.organization = self.buildRef(to)
 
@@ -10690,7 +10691,7 @@ var Store = Reflux.createStore({
       return
     let productToForms = {}
     allFormRequests.forEach((r) => {
-      if (r._documentCreated  &&  r._document) {
+      if (r._documentCreated  &&  r._document  &&  r.product) {
         var l = productToForms[r.product]
         if (!l) {
           l = {}

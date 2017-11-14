@@ -6609,7 +6609,7 @@
     "nkey-ethereum": {
       "version": "1.0.0",
       "from": "tradle/nkey-ethereum",
-      "resolved": "git://github.com/tradle/nkey-ethereum.git#2512df82738792571b565cd83837f436f8251582"
+      "resolved": "git://github.com/tradle/nkey-ethereum.git#e6cc3dad9d6a8db3e0c80d1ecb5879e208650ed3"
     },
     "nkey-secp256k1": {
       "version": "1.1.1",
