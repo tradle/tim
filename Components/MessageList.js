@@ -1197,7 +1197,7 @@ class MessageList extends Component {
     let value = {
       [TYPE]: SIMPLE_MESSAGE,
       message: msg
-              ?  model.isInterface ? msg : '[' + this.state.userInput + '](' + modelName + ')'
+              ? modelName === MESSAGE  ||  model.isInterface? msg : '[' + this.state.userInput + '](' + modelName + ')'
               : '',
       from: me,
       to: resource,
