@@ -3112,7 +3112,7 @@ var Store = Reflux.createStore({
         if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
           let cId = utils.getId(rr._context)
           self.addMessagesToChat(cId, rr)
-          let context = self._getItem(rr._context)
+          // let context = self._getItem(rr._context)
           if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
             if (rr[TYPE] === APPLICATION_DENIAL)
               context._denied = true
