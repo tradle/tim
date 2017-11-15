@@ -744,7 +744,7 @@
     "aws-iot-device-sdk": {
       "version": "1.0.14",
       "from": "mvayngrib/aws-iot-device-sdk-js",
-      "resolved": "git://github.com/mvayngrib/aws-iot-device-sdk-js.git#044378984a64be959a61a4f4234ec623b6c58dbc"
+      "resolved": "git://github.com/mvayngrib/aws-iot-device-sdk-js.git#71d26f6a8c3fddb4e8a84e78874a43dc04fb56c8"
     },
     "aws-sign-web": {
       "version": "1.2.1",
