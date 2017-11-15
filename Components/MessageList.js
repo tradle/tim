@@ -99,7 +99,7 @@ class MessageList extends Component {
       filter: props.filter,
       userInput: '',
       list: [],
-      hasProducts: this.hasProducts(props.resource),
+      hasProducts: props.resource  &&  this.hasProducts(props.resource),
       allLoaded: false
     }
   }
@@ -714,7 +714,7 @@ class MessageList extends Component {
     }
     let isContext = utils.isContext(resource[TYPE])
     if (!content) {
-      let isAllMessages = model.isInterface  &&  model.id === MESSAGE;
+      let isAllMessages = model.id === MESSAGE
 
       let h = utils.dimensions(MessageList).height
       let maxHeight = h - NAV_BAR_HEIGHT
@@ -1072,11 +1072,11 @@ class MessageList extends Component {
   onChooseProduct() {
     if (this.props.isAggregation)
       return
-    let modelName = MESSAGE
-    let model = utils.getModel(modelName).value;
-    let isInterface = model.isInterface;
-    if (!isInterface)
-      return;
+    // let modelName = MESSAGE
+    // let model = utils.getModel(modelName).value;
+    // let isInterface = model.isInterface;
+    // if (!isInterface)
+    //   return;
 
     let resource = this.props.resource
     let currentRoutes = this.props.navigator.getCurrentRoutes();
@@ -1114,9 +1114,10 @@ class MessageList extends Component {
 
   onAddNewPressed(sendForm) {
     let { modelName, resource, navigator, callback } = this.props
+    if (modelName === MESSAGE)
+      return
     let model = utils.getModel(modelName).value;
-    let isInterface = model.isInterface;
-    if (!isInterface)
+    if (!model.isInterface)
       return;
 
     let currentRoutes = navigator.getCurrentRoutes();
