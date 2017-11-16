@@ -5,7 +5,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#8c708d7c7a85a2d84550cbfd427db16585e14ac5",
+      "resolved": "git://github.com/tradle/aws-client.git#152de4978860a3edec930fcef48908b88cb549b0",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
