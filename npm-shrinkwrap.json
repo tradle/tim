@@ -5,7 +5,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#719e845016cc6cff177266f57e81d6a76cfa9bcd",
+      "resolved": "git://github.com/tradle/aws-client.git#85bbb27fde71ec88b17232659f9680ee861b989e",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -70,13 +70,13 @@
     },
     "@tradle/custom-models": {
       "version": "4.10.10",
-      "from": "tradle/custom-models#dd0220e",
-      "resolved": "git://github.com/tradle/custom-models.git#dd0220ef35e17457d76470472f0f48101e91fd36",
+      "from": "tradle/custom-models#messagemodel",
+      "resolved": "git://github.com/tradle/custom-models.git#eea21f631b3c69a3a1ad690f844d72113b346479",
       "dependencies": {
         "typeforce": {
-          "version": "1.11.5",
+          "version": "1.12.0",
           "from": "typeforce@>=1.10.6 <2.0.0",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.5.tgz"
+          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.12.0.tgz"
         }
       }
     },
@@ -146,13 +146,13 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#ae17de44448d6734b920f802cb64008d9dad5aa1",
+      "from": "tradle/models#messagemodel",
+      "resolved": "git://github.com/tradle/models.git#272cec3acc71e37012d367115d5d5f79a7aed726",
       "dependencies": {
         "typeforce": {
-          "version": "1.11.5",
+          "version": "1.12.0",
           "from": "typeforce@^1.10.6",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.5.tgz"
+          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.12.0.tgz"
         }
       }
     },
@@ -744,7 +744,7 @@
     "aws-iot-device-sdk": {
       "version": "1.0.14",
       "from": "mvayngrib/aws-iot-device-sdk-js",
-      "resolved": "git://github.com/mvayngrib/aws-iot-device-sdk-js.git#044378984a64be959a61a4f4234ec623b6c58dbc"
+      "resolved": "git://github.com/mvayngrib/aws-iot-device-sdk-js.git#71d26f6a8c3fddb4e8a84e78874a43dc04fb56c8"
     },
     "aws-sign-web": {
       "version": "1.2.1",
@@ -7130,11 +7130,6 @@
       "from": "pbkdf2@>=3.0.3 <4.0.0",
       "resolved": "https://registry.npmjs.org/pbkdf2/-/pbkdf2-3.0.8.tgz"
     },
-    "pbkdf2-compat": {
-      "version": "2.0.1",
-      "from": "pbkdf2-compat@2.0.1",
-      "resolved": "https://registry.npmjs.org/pbkdf2-compat/-/pbkdf2-compat-2.0.1.tgz"
-    },
     "pbkdf2-sha256": {
       "version": "1.1.1",
       "from": "pbkdf2-sha256@>=1.1.0 <2.0.0",
@@ -8126,9 +8121,9 @@
       "resolved": "https://registry.npmjs.org/react-native-progress/-/react-native-progress-3.2.0.tgz"
     },
     "react-native-prompt": {
-      "version": "0.18.4",
-      "from": "pgmemk/react-native-prompt#789e25c",
-      "resolved": "git://github.com/pgmemk/react-native-prompt.git#789e25c45541180553f78567649a79a6a6aa98db"
+      "version": "1.0.0",
+      "from": "react-native-prompt@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-prompt/-/react-native-prompt-1.0.0.tgz"
     },
     "react-native-push-notification": {
       "version": "3.0.0",
@@ -10358,40 +10353,10 @@
           "from": "clone@https://registry.npmjs.org/clone/-/clone-1.0.2.tgz",
           "resolved": "https://registry.npmjs.org/clone/-/clone-1.0.2.tgz"
         },
-        "constants-browserify": {
-          "version": "0.0.1",
-          "from": "constants-browserify@0.0.1",
-          "resolved": "https://registry.npmjs.org/constants-browserify/-/constants-browserify-0.0.1.tgz"
-        },
-        "crypto-browserify": {
-          "version": "3.2.8",
-          "from": "crypto-browserify@>=3.2.6 <3.3.0",
-          "resolved": "https://registry.npmjs.org/crypto-browserify/-/crypto-browserify-3.2.8.tgz"
-        },
-        "https-browserify": {
-          "version": "0.0.0",
-          "from": "https-browserify@0.0.0",
-          "resolved": "https://registry.npmjs.org/https-browserify/-/https-browserify-0.0.0.tgz"
-        },
         "interpret": {
           "version": "0.6.6",
           "from": "interpret@>=0.6.4 <0.7.0",
           "resolved": "https://registry.npmjs.org/interpret/-/interpret-0.6.6.tgz"
-        },
-        "node-libs-browser": {
-          "version": "0.6.0",
-          "from": "node-libs-browser@>=0.6.0 <0.7.0",
-          "resolved": "https://registry.npmjs.org/node-libs-browser/-/node-libs-browser-0.6.0.tgz"
-        },
-        "ripemd160": {
-          "version": "0.2.0",
-          "from": "ripemd160@0.2.0",
-          "resolved": "https://registry.npmjs.org/ripemd160/-/ripemd160-0.2.0.tgz"
-        },
-        "sha.js": {
-          "version": "2.2.6",
-          "from": "sha.js@2.2.6",
-          "resolved": "https://registry.npmjs.org/sha.js/-/sha.js-2.2.6.tgz"
         },
         "supports-color": {
           "version": "3.1.2",
