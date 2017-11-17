@@ -22,7 +22,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#253ccf7c93740547c3bc2c4f57db4c10b25b0a73",
+      "resolved": "git://github.com/tradle/aws-client.git#85bbb27fde71ec88b17232659f9680ee861b989e",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -690,7 +690,7 @@
     "aws-iot-device-sdk": {
       "version": "1.0.14",
       "from": "mvayngrib/aws-iot-device-sdk-js",
-      "resolved": "git://github.com/mvayngrib/aws-iot-device-sdk-js.git#044378984a64be959a61a4f4234ec623b6c58dbc"
+      "resolved": "git://github.com/mvayngrib/aws-iot-device-sdk-js.git#71d26f6a8c3fddb4e8a84e78874a43dc04fb56c8"
     },
     "aws-sign-web": {
       "version": "1.2.1",
