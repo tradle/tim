@@ -108,8 +108,9 @@ class ContextChooser extends Component {
     var content =
       <ListView ref='listview' style={styles.listview}
         dataSource={this.state.dataSource}
-        removeClippedSubviews={true}
+        removeClippedSubviews={false}
         initialListSize={100}
+        pageSize={10}
         renderRow={this.renderRow.bind(this)}
         enableEmptySections={true}
         automaticallyAdjustContentInsets={false}
