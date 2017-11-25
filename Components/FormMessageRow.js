@@ -105,6 +105,8 @@ class FormMessageRow extends Component {
     var photoListStyle = {height: 3};
     var photoUrls = []
     var isMyMessage = this.isMyMessage()
+    let isShared = this.isShared()
+
     if (photos) {
       photoUrls = photos
       // photos.forEach((p) => {
@@ -113,8 +115,8 @@ class FormMessageRow extends Component {
       let isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
       photoListStyle = {
         flexDirection: 'row',
-        alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-        marginLeft: isMyMessage ? 30 : isSharedContext || application ? 43 : 0, //(hasOwnerPhoto ? 45 : 10),
+        alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
+        marginLeft: isMyMessage || isShared ? 30 : isSharedContext || application ? 43 : 0, //(hasOwnerPhoto ? 45 : 10),
         borderRadius: 10,
         marginBottom: 3,
       }
@@ -179,11 +181,12 @@ class FormMessageRow extends Component {
                : <View/>
 
     let renderedRow = []
-    let ret = this.formatRow(true, renderedRow)
+    let ret = this.formatRow(isMyMessage || isShared, renderedRow)
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let isMyMessage = this.isMyMessage()
-    let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
+    let isShared = this.isShared()
+    // let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
 
     let width = Math.floor(utils.dimensions().width * 0.8) // - (isSharedContext  ? 45 : 0))
     let { bankStyle, application } = this.props
@@ -192,8 +195,8 @@ class FormMessageRow extends Component {
 
     var viewStyle = {
       width: width, // - (isSharedContext  ? 45 : 0),
-      alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-      marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
+      alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
+      marginLeft: isMyMessage || isShared ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
       backgroundColor: 'transparent', //this.props.bankStyle.BACKGROUND_COLOR,
       flexDirection: 'row',
     }
@@ -202,7 +205,7 @@ class FormMessageRow extends Component {
       chatStyles.verifiedHeader,
       noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
       {backgroundColor: isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg}, // opacity: isShared ? 0.5 : 1},
-      isMyMessage ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
+      isMyMessage || isShared ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
     ]
 
     var st = {
@@ -265,10 +268,10 @@ class FormMessageRow extends Component {
     var properties = model.properties;
     var onPressCall;
 
-    var self = this
     var vCols = [];
+    let isShared = this.isShared()
 
-    viewCols.forEach(function(v) {
+    viewCols.forEach((v) => {
       if (vCols.length > MAX_PROPS_IN_FORM)
         return
       if (properties[v].type === 'array') {
@@ -278,7 +281,7 @@ class FormMessageRow extends Component {
             let title = utils.getDisplayName(r)
             val = val ? val + '\n' + title : title
           })
-          vCols.push(self.getPropRow(properties[v], resource, val))
+          vCols.push(this.getPropRow(properties[v], resource, val))
         }
         return;
       }
@@ -287,20 +290,20 @@ class FormMessageRow extends Component {
       let ref = properties[v].ref
       if (ref) {
         if (resource[v]  &&  ref !== PHOTO  &&  ref !== IDENTITY) {
-          vCols.push(self.getPropRow(properties[v], resource, resource[v].title || resource[v]))
+          vCols.push(this.getPropRow(properties[v], resource, resource[v].title || resource[v]))
           first = false;
         }
         return;
       }
       var style = chatStyles.resourceTitle
-      if (isMyMessage)
+      if (isMyMessage || isShared)
         style = [style, styles.myMsg];
 
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-        onPressCall = self.onPress.bind(self);
-        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{resource[v]}</Text>);
+        onPressCall = this.onPress.bind(self);
+        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={this.getNextKey()}>{resource[v]}</Text>);
       }
       if (resource[v]  &&  properties[v].signature) {
         let {width, height} = utils.dimensions(FormMessageRow)
@@ -311,7 +314,7 @@ class FormMessageRow extends Component {
         else
           w = (height * 70)/(width - 100)
         w = Math.round(w)
-        vCols.push(<View style={{flexDirection: 'row'}} key={self.getNextKey()}>
+        vCols.push(<View style={{flexDirection: 'row'}} key={this.getNextKey()}>
                       <View style={[styles.column, {flex: 1}]}>
                         <Text style={[styles.descriptionG]}>{properties[v].title}</Text>
                       </View>
@@ -335,15 +338,15 @@ class FormMessageRow extends Component {
         if (!val)
           return
         if (model.properties.verifications  &&  !isMyMessage && !utils.isVerifier(resource))
-          onPressCall = self.verify.bind(self);
-        if (!isMyMessage)
+          onPressCall = this.verify.bind(self);
+        if (!isMyMessage && !isShared)
           style = [style, {paddingBottom: 10, color: '#2892C6'}];
-        vCols.push(self.getPropRow(properties[v], resource, val))
+        vCols.push(this.getPropRow(properties[v], resource, val))
       }
       else {
         if (!resource[v]  ||  !resource[v].length)
           return
-        vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
+        vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>);
       }
       first = false;
 
