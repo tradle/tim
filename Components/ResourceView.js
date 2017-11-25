@@ -122,6 +122,11 @@ class ResourceView extends Component {
 
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     // if (resource.id || !resource[constants.ROOT_HASH])
+    let m  = utils.getModel(resource[TYPE]).value
+    if (m.inlined)
+      return
+    if (m.subClassOf  &&  utils.getModel(m.subClassOf).value.inlined)
+      return
       Actions.getItem( {resource: resource, search: search, backlink: backlink, isMessage: true} )
   }
   componentDidMount() {
