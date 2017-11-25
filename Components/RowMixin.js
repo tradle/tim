@@ -38,23 +38,34 @@ const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 
 var BORDER_WIDTH = StyleSheet.hairlineWidth
+var {
+  TYPE,
+  ROOT_HASH
+} = constants
+
+var {
+  MONEY,
+  VERIFICATION,
+  PROFILE
+} = constants.TYPES
 
 var RowMixin = {
   addDateProp(dateProp, style) {
-    var resource = this.props.resource;
-    var properties = utils.getModel(resource[constants.TYPE] || resource.id).value.properties;
+    let resource = this.props.resource;
+    let properties = utils.getModel(resource[TYPE] || resource.id).value.properties;
     if (properties[dateProp]  &&  properties[dateProp].style)
       style = [style, properties[dateProp].style];
-    var val = utils.formatDate(new Date(resource[dateProp]));
+    let val = utils.formatDate(new Date(resource[dateProp]));
     return <Text style={style} key={this.getNextKey()}>{val}</Text>;
   },
   getNextKey() {
-    return this.props.resource[constants.ROOT_HASH] + '_' + cnt++
+    return this.props.resource[ROOT_HASH] + '_' + cnt++
   },
   getPropRow(prop, resource, val, isVerification) {
+    let {currency, isAggregation, bankStyle} = this.props
     if (prop.ref) {
-      if (prop.ref === constants.TYPES.MONEY) {
-        let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
+      if (prop.ref === MONEY) {
+        let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
         let c = utils.normalizeCurrencySymbol(val.currency)
         val = (c || CURRENCY_SYMBOL) + val.value
         // val = (val.currency || CURRENCY_SYMBOL) + val.value
@@ -69,13 +80,13 @@ var RowMixin = {
         }
       }
     }
-    let model = utils.getModel(resource[constants.TYPE]).value
+    let model = utils.getModel(resource[TYPE]).value
 
-    var style = {flexDirection: 'row', justifyContent: 'center'}
+    let style = {flexDirection: 'row', justifyContent: 'center'}
     let propTitle = translate(prop, model)
     if (isVerification) {
-      if (!this.props.isAggregation)
-        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: this.props.bankStyle.verifiedBg, borderTopColor: '#eeeeee'}]
+      if (!isAggregation)
+        style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: bankStyle.verifiedBg, borderTopColor: '#eeeeee'}]
       return (
         <View style={style} key={this.getNextKey()}>
           <View style={styles.column}>
@@ -91,7 +102,7 @@ var RowMixin = {
       let isMyProduct = model.subClassOf === MY_PRODUCT
       let isForm = model.subClassOf === FORM
       let isMyMessage = this.isMyMessage()
-      if (!this.props.isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
+      if (!isAggregation  &&  (isMyMessage || isForm) &&  !isMyProduct)
         style = [style, { paddingVertical: 3}]
       let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
       let ratio = value.length / propTitle.length
@@ -113,7 +124,7 @@ var RowMixin = {
   },
   getOwnerPhoto(isMyMessage) {
     let { to, resource, application, context, bankStyle } = this.props
-    let isContext = utils.isContext(to[constants.TYPE])
+    let isContext = utils.isContext(to[TYPE])
     let isSharedContext = isContext  &&  utils.isReadOnlyChat(to)
     if (/*Platform.OS !== 'android'  &&*/  !isSharedContext  &&  !application)
       return <View/>
@@ -121,7 +132,7 @@ var RowMixin = {
     if (!isContext && (isMyMessage  || !to /* ||  !to.photos*/))
       return <View style={{marginVertical: 0}}/>
 
-    let isVerification  = resource[constants.TYPE] === constants.TYPES.VERIFICATION
+    let isVerification  = resource[TYPE] === VERIFICATION
     if (!isMyMessage) {
       let photo = isVerification && resource._verifiedBy  &&  resource._verifiedBy.photo
                 ? resource._verifiedBy.photo
@@ -140,11 +151,11 @@ var RowMixin = {
       //      : photo
     }
     if (to.photos) {
-      var uri = utils.getImageUri(to.photos[0].url);
+      let uri = utils.getImageUri(to.photos[0].url);
       return <Image source={{uri: uri}} style={styles.msgImage} />
     }
     if (!isMyMessage) {
-      var title = resource.from.title  && resource.from.title.split(' ').map((s) => {
+      let title = resource.from.title  && resource.from.title.split(' ').map((s) => {
         return s.charAt(0);
       }).join('');
       if (!title)
@@ -159,12 +170,12 @@ var RowMixin = {
   getTime(resource) {
     if (!resource.time)
       return
-    var previousMessageTime = this.props.previousMessageTime;
-    var showTime = !previousMessageTime  ||  this.props.isAggregation;
+    let previousMessageTime = this.props.previousMessageTime;
+    let showTime = !previousMessageTime  ||  this.props.isAggregation;
 
     if (!showTime)  {
-      var prevDate = new Date(previousMessageTime);
-      var curDate = new Date(resource.time);
+      let prevDate = new Date(previousMessageTime);
+      let curDate = new Date(resource.time);
       showTime = resource.time - previousMessageTime > SHOW_TIME_INTERVAL ||
                  prevDate.getDate()  !== curDate.getDate()    ||
                  prevDate.getMonth() !== curDate.getMonth()   ||
@@ -177,18 +188,34 @@ var RowMixin = {
   isMyMessage(to) {
     if (this.props.isAggregation)
       return
-    var r = this.props.resource
-    var fromHash = utils.getId(r.from);
-    var me = utils.getMe()
-    if (fromHash === utils.getId(me))
+    let r = this.props.resource
+    if (r._inbound)
+      return false
+    if (r._outbound)
+      return true
+    let fromId = utils.getId(r.from);
+    let toId = utils.getId(r.to);
+    let me = utils.getMe()
+    let meId = utils.getId(me)
+    if (fromId === meId)
       return true;
+    if (toId === meId)
+      return false
 
-    if (utils.getModel(r[constants.TYPE]).value.subClassOf == MY_PRODUCT) {
+    if (utils.getModel(r[TYPE]).value.subClassOf == MY_PRODUCT) {
       let org = r.from.organization
       if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
         return true
     }
     if (me.isEmployee) {
+      if (r._context) {
+        // check if the employee is the applicant
+        let cFrom = r._context.from
+        if (cFrom.organization) {
+          if (cFrom.organization.id === me.organization.id)
+            return r._context.to.id !== meId
+        }
+      }
       let myOrgId = utils.getId(me.organization)
       // bot -> bot
       if (r.from.organization  &&
@@ -206,21 +233,30 @@ var RowMixin = {
             return true
         }
       }
+      if (r._context) {
+        if (r._context.from) {
+          let fOrg = r._context.from.organization
+          let applier = fOrg  &&  utils.getId(fOrg) === utils.getId(me.organization)
+          if (applier  &&  fOrg === utils.getId(r.from.organization))
+            return true
+        }
+      }
     }
   },
   isShared() {
     let { resource, to } = this.props
     // Is resource was originally created in this chat or shared from a different chat
     // if (!resource.organization  ||  (this.props.context  &&  this.props.context._readOnly))
-    if (!resource.organization  ||  utils.isReadOnlyChat(resource))
+    if (/*!resource.organization  || */ utils.isReadOnlyChat(resource))
       return false
-    if (to[constants.TYPE] === constants.TYPES.PROFILE)
+    if (to[TYPE] === PROFILE)
       return false
-    if (utils.isContext(to[constants.TYPE])  &&  utils.isReadOnlyChat(to)) {
-      if (utils.getId(resource.from) === utils.getId(utils.getMe()))
+    let me = utils.getMe()
+    if (utils.isContext(to[TYPE])  &&  utils.isReadOnlyChat(to)) {
+      if (utils.getId(resource.from) === utils.getId(me))
         return false
     }
-    return utils.getId(resource.organization) !== utils.getId(to)
+    return resource.organization  &&  utils.getId(resource.organization) !== utils.getId(to)
   },
   getSendStatus() {
     let { resource } = this.props
@@ -237,10 +273,10 @@ var RowMixin = {
         msg = <Text style={styles.sentStatus}>{sendStatus}</Text>
 
     let routes = this.props.navigator.getCurrentRoutes()
-    var w = utils.dimensions(routes[routes.length - 1].component).width
+    let w = utils.dimensions(routes[routes.length - 1].component).width
     let msgWidth = Math.min(Math.floor(w * 0.8), 600)
 
-    var isMyMessage = this.isMyMessage();
+    let isMyMessage = this.isMyMessage();
 
     let view = <View style={styles.sendStatus}>
                  {msg}
@@ -255,7 +291,7 @@ var RowMixin = {
 
   isOnePropForm() {
     const resource = this.props.resource;
-    let type = resource[constants.TYPE]
+    let type = resource[TYPE]
     let isFormRequest = type === FORM_REQUEST
     let isFormError = type === FORM_ERROR
     if (!isFormRequest  &&  !isFormError)
@@ -290,11 +326,11 @@ var RowMixin = {
       return;
 
     let r = this.props.resource
-    let isFormError = r[constants.TYPE] === FORM_ERROR
+    let isFormError = r[TYPE] === FORM_ERROR
     Actions.addChatItem({
       disableFormRequest: r,
       resource: {
-        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.form,
+        [TYPE]: isFormError ? r.prefill[TYPE] : r.form,
         [propName]: item,
         _context: r._context,
         from: utils.getMe(),
@@ -312,7 +348,7 @@ var RowMixin = {
     const IProov = require('../utils/iproov')
     const me = utils.getMe()
     const opts = {
-      username: me[constants.ROOT_HASH],
+      username: me[ROOT_HASH],
       serviceProvider: apiKey,
       animated: true
     }
@@ -346,11 +382,11 @@ var RowMixin = {
     const r = this.props.resource
     r.token = token
 
-    let isFormError = r[constants.TYPE] === FORM_ERROR
+    let isFormError = r[TYPE] === FORM_ERROR
     Actions.addChatItem({
       disableFormRequest: r,
       resource: {
-        [constants.TYPE]: isFormError ? r.prefill[constants.TYPE] : r.form,
+        [TYPE]: isFormError ? r.prefill[TYPE] : r.form,
         token: token,
         enroll: enroll,
         from: r.to,
@@ -448,8 +484,8 @@ module.exports = RowMixin;
 
   //   var document = verification.document
 
-  //   let isThirdParty = !document[constants.TYPE]
-  //   let type = document[constants.TYPE] || utils.getType(document)
+  //   let isThirdParty = !document[TYPE]
+  //   let type = document[TYPE] || utils.getType(document)
   //   var docModel = utils.getModel(type).value;
   //   var isMyProduct = docModel.subClassOf === MY_PRODUCT
   //   var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
@@ -517,7 +553,7 @@ module.exports = RowMixin;
   //                       <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
   //                       <Text style={chatStyles.shareText}>{translate('Share')}</Text>
   //                     </View>
-  //     var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
+  //     var orgTitle = this.props.to[TYPE] === ORGANIZATION
   //                  ? this.props.to.name
   //                  : (this.props.to.organization ? this.props.to.organization.title : null);
   //     // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
@@ -525,7 +561,7 @@ module.exports = RowMixin;
   //     if (isMyProduct)
   //       verifiedBy = translate('issuedBy', verification.organization.title)
   //     // Not verified Form - still shareable
-  //     else if (verification[constants.ROOT_HASH]) {
+  //     else if (verification[ROOT_HASH]) {
   //       let orgs
   //       if (providers) {
   //         providers.forEach((p) => {
@@ -620,7 +656,7 @@ module.exports = RowMixin;
   //   var vCols = [];
   //   var self = this;
 
-  //   if (resource[constants.TYPE] != model.id)
+  //   if (resource[TYPE] != model.id)
   //     return;
 
   //   var properties = model.properties;
@@ -634,7 +670,7 @@ module.exports = RowMixin;
   //         var val
   //         if (properties[v].type === 'object') {
   //           if (properties[v].ref) {
-  //             if (properties[v].ref === constants.TYPES.MONEY) {
+  //             if (properties[v].ref === MONEY) {
   //               val = resource[v] //(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
   //               if (typeof val === 'string')
   //                 val = {value: val, currency: CURRENCY_SYMBOL}

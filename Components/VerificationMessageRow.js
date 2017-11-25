@@ -105,7 +105,7 @@ class VerificationMessageRow extends Component {
 
     let headerStyle = [
       styles.header,
-      isMyMessage ? styles.headerRight : styles.headerLeft,
+      isMyMessage  ||  isShared ? styles.headerRight : styles.headerLeft,
       {backgroundColor: bankStyle.verifiedHeaderColor, marginTop: 0, paddingVertical: 10}
     ]
     // let bulletStyle = {color: color, marginHorizontal: 7, alignSelf: 'center'}
@@ -114,7 +114,7 @@ class VerificationMessageRow extends Component {
                 verification: resource,
                 onPress: this.verify.bind(this),
                 // isAccordion: isThirdPartyVerification,
-                isMyMessage: isMyMessage
+                isMyMessage: isMyMessage || isShared
               })
 
     let state, confidence
@@ -159,14 +159,14 @@ class VerificationMessageRow extends Component {
     var viewStyle = {
       width: msgWidth,
       flexDirection: 'row',
-      alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
+      alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
       backgroundColor: 'transparent',
       marginBottom: 3,
     }
 
     let addStyle = [
       { borderWidth: 0, backgroundColor: 'transparent'}, /*, backgroundColor: isShared ? '#ffffff' : bankStyle.VERIFIED_BG,*/
-      isMyMessage ? styles.headerRight : styles.headerLeft
+      isMyMessage || isShared ? styles.headerRight : styles.headerLeft
     ];
 
     let shareWith
@@ -328,7 +328,7 @@ class VerificationMessageRow extends Component {
     //           ? <Image source={{uri: utils.getImageUri(document.photos[0].url)}}  style={styles.cellImage} />
     //           : <View />;
     var headerStyle = {flex: 1, paddingTop: verification.dateVerified ? 0 : 5, marginLeft: 10}
-    var isShared = this.isShared(verification)
+    // var isShared = this.isShared(verification)
 
                     // {verification.dateVerified
                     //   ? <View style={{flexDirection: 'row'}}>
@@ -339,7 +339,7 @@ class VerificationMessageRow extends Component {
                           // <Text style={{fontSize: 12, color: 'darkblue', fontStyle: 'italic'}}>{'Date '}</Text>
     let addStyle = onPress ? {} : {backgroundColor: this.props.bankStyle.verifiedBg, borderWidth: StyleSheet.hairlineWidth, borderColor: this.props.bankStyle.verifiedBg, borderBottomColor: this.props.bankStyle.verifiedHeaderColor}
 
-    let hs = /*isShared ? chatStyles.description :*/ [styles.vheader, {fontSize: 16}]
+    let hs = /*isShared ? chatStyles.description :*/ styles.vheader
     // let arrow = <Icon color={this.props.bankStyle.VERIFIED_HEADER_COLOR} size={20} name={'ios-arrow-forward'} style={{top: 10, position: 'absolute', right: 30}}/>
     let arrow = <Icon color={this.props.bankStyle.verifiedLinkColor} size={20} name={'ios-arrow-forward'} style={{marginRight: 10, marginTop: 3}}/>
 
@@ -534,7 +534,7 @@ var styles = StyleSheet.create({
     justifyContent: 'center'
   },
   vheader: {
-    fontSize: 18,
+    fontSize: 16,
     marginTop: 2,
     color: '#757575'
     // paddingRight: 10
