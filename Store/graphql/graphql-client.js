@@ -626,9 +626,8 @@ var search = {
         return p
     }
     if (m.id === PHOTO) {
-      let mprops = m.properties
       return (
-        `${p} {${this.getAllPropertiesForServerSearch({model: m, properties})}}`
+        `${p} {${this.getAllPropertiesForServerSearch({model: m})}}`
       )
     }
     return (

@@ -5558,6 +5558,8 @@ var Store = Reflux.createStore({
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
     let { application, context, to, noTrigger, filterResource, switchToContext } = params
     let contextId
+    let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
+    let applicant = applicantId  &&  this._getItem(applicantId)
     if (application) {
       context = application._context
       if (!application.context)
@@ -5576,6 +5578,7 @@ var Store = Reflux.createStore({
       })
 
     let author, recipient
+    let applicant = application.applicant
     if (application) {
       author = (applicant  &&  applicant[ROOT_HASH]) || applicantId.split('_')[1]
       recipient = myBot[ROOT_HASH]
@@ -6167,7 +6170,7 @@ var Store = Reflux.createStore({
     let refsObj = {}
 
     return Promise.all(allLinks.map(link => {
-      return this.handleOne({ link, all, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, prop, query })
+      return this.handleOne({ link, all, isForgetting, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query })
     }))
     .then((l) => {
       if (!foundResources.length)
@@ -6292,7 +6295,7 @@ var Store = Reflux.createStore({
     return link
   },
   async checkResource(params) {
-    let { r, foundResources, context, toOrgId, chatTo, prop, query } = params
+    let { r, foundResources, context, toOrgId, chatTo, chatId, prop, query, isForgetting } = params
     // var key = thisChatMessages[i].id
     // var r = this._getItem(key)
     if (r.canceled)
@@ -6311,6 +6314,7 @@ var Store = Reflux.createStore({
     }
     var isFormError = r[TYPE] === FORM_ERROR
     if (r.message  &&  r.message.length)  {
+      let meId = utils.getId(me)
       if (r[TYPE] === SELF_INTRODUCTION  &&  !isForgetting && (utils.getId(r.to) !== meId))
         return
       if (r.message === ALREADY_PUBLISHED_MESSAGE)
@@ -6650,7 +6654,7 @@ var Store = Reflux.createStore({
     let refsObj = {}
 
     return Promise.all(allLinks.map(link => {
-      return this.handleOne({ link, all, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, prop, query, resource, to })
+      return this.handleOne({ link, all, isForgetting, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to })
       // return handleOne(r)
     }))
     .then((l) => {
