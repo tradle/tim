@@ -99,9 +99,9 @@ var HomePageMixin = {
         meta: utils.getModel('tradle.GuestSessionProof').value,
         disableAutoResponse: true})
       break
-    case TALK_TO_EMPLOYEEE:
-      Actions.getEmployeeInfo(result.data.substring(code.length + 1))
-      break
+    // case TALK_TO_EMPLOYEEE:
+    //   Actions.getEmployeeInfo(result.data.substring(code.length + 1))
+    //   break
     case APP_QR_CODE:
       Actions.addApp(result.data.substring(code.length + 1))
       break

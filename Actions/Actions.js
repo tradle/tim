@@ -18,7 +18,7 @@ var asyncActions = [
   'getMe',
   'getTo',
   'getFrom',
-  'getEmployeeInfo',
+  // 'getEmployeeInfo',
   'getTemporary',
 
   'removeIdentity',
