@@ -208,7 +208,7 @@ class FormRequestRow extends Component {
     // Check if it is needed
     if (!isFormRequest || resource._documentCreated)
       msgStyle.minHeight = 35
-    if (this.isShared())
+    if (this.isShared() && !isFormRequest)
       share = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
               </View>
@@ -561,7 +561,7 @@ class FormRequestRow extends Component {
   }
 
   formRequest(resource, vCols, prop) {
-    const { bankStyle, to, application } = this.props
+    const { bankStyle, to, application, context } = this.props
     let message = resource.message
     let messagePart
     if (resource._documentCreated) {
@@ -608,7 +608,11 @@ class FormRequestRow extends Component {
               ? {color: '#AFBBA8'}
               : {color: '#2892C6'}
     let link, icon
-    let isReadOnly = application || utils.isReadOnlyChat(this.props.resource, this.props.resource._context) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnlyContext = context  &&  utils.isReadOnlyChat(context)
+    let me = utils.getMe()
+    let switchToContext = me.isEmployee  &&  context  &&  resource.product  && context.to.organization  &&  context.to.organization.id === me.organization.id
+
+    let isReadOnly = !switchToContext  && !context &&  (application || (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context))) //this.props.context  &&  this.props.context._readOnly
     let self = this
     // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
@@ -618,8 +622,8 @@ class FormRequestRow extends Component {
     let msg
 
     if (sameFormRequestForm  &&  !resource._documentCreated) {
-      link = <View style={[chatStyles.rowContainer, {paddingVertical: 10, alignSelf: 'center'}]}>
-               <View style={[chatStyles.textContainer, {justifyContent: 'center'}]}>
+      link = <View style={[chatStyles.rowContainer, styles.link]}>
+               <View style={[chatStyles.textContainer, styles.center]}>
                  <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
                    this.createNewResource(form, isMyMessage)
                  }}>
@@ -699,9 +703,9 @@ class FormRequestRow extends Component {
                    </View>
           }
           else {
-            msg = <View key={this.getNextKey()} style={{justifyContent: 'center'}}>
+            msg = <View key={this.getNextKey()} style={styles.center}>
                   <TouchableHighlight onPress={() => this.chooser(prop)} underlayColor='transparent'>
-                    <View style={{flexDirection: 'row', minHeight: 35, justifyContent: 'space-between', alignItems: 'center'}}>
+                    <View style={styles.message}>
                       <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
                       {resource._documentCreated ? null : icon}
                     </View>
@@ -727,7 +731,7 @@ class FormRequestRow extends Component {
                  : bankStyle.incomingMessageTextColor
       messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: mColor}]}>{str}</Text>
       msg = <View key={this.getNextKey()}>
-               <View style={{flexDirection: 'row', minHeight: 35, alignItems: 'center'}}>
+               <View style={styles.message}>
                  {messagePart}
                  {resource._documentCreated ? null : icon}
                </View>
@@ -906,6 +910,19 @@ var styles = StyleSheet.create({
   arrow: {
     marginRight: 10,
     marginTop: 5
+  },
+  link: {
+    paddingVertical: 10,
+    alignSelf: 'center'
+  },
+  center: {
+    justifyContent: 'center'
+  },
+  message: {
+    flexDirection: 'row',
+    minHeight: 35,
+    alignItems: 'center',
+    justifyContent: 'space-between',
   }
 });
 reactMixin(FormRequestRow.prototype, RowMixin)

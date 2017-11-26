@@ -72,7 +72,8 @@ var search = {
 
   async searchServer(params) {
     let self = this
-    let {client, modelName, filterResource, sortProperty, asc, limit, direction, first, notArchive, noCursorChange} = params
+    let {client, modelName, filterResource, sortProperty, asc, limit, direction, first, notArchive, noCursorChange, properties} = params
+
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
 
@@ -253,7 +254,7 @@ var search = {
           endCursor = null
         if (endCursor)
           query += `after: "${endCursor}"\n`
-        query += `first: ${limit}\n`
+        query += `limit:  ${limit}\n`
       }
     }
     if (hasFilter)
@@ -286,7 +287,7 @@ var search = {
     query += `pageInfo {\n endCursor\n}\n`
     query += `edges {\n node {\n`
 
-    let arr = this.getAllPropertiesForServerSearch(model)
+    let arr = this.getAllPropertiesForServerSearch({model, properties})
 
     query += `${arr.join('   \n')}`
     query += `\n}`   // close 'node'
@@ -311,7 +312,7 @@ var search = {
         }
       }
       if (!result.edges.length) {
-        // this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
+        // this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, limit:  first})
         return
       }
       //   // if (result.edges.length < limit)
@@ -320,7 +321,7 @@ var search = {
       // let toId = utils.getId(to)
       // let list = result.edges.map((r) => this.convertToResource(r.node))
       // if (!noTrigger)
-      //   this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
+      //   this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, limit:  first})
       return result.edges
     } catch(error) {
       // debugger
@@ -359,43 +360,114 @@ var search = {
                 // # _inbound: false
                 // # _recipient: ${hash}
   async getChat(params) {
-    let { author, recipient, client, context } = params
+    let { author, recipient, client, context, filterResource } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
-    let inbound = true
-    let query =
-        `query {
-            rl_tradle_Message(
-            first:20,
-            filter:{
-              EQ: {
-                _inbound: true
-                context: "${context}"
-                _author: "${author}"
-              }
-            },
-            orderBy:{
-              property: time
-              desc:true
-            }
-          ) {
-            edges {
-              node {
-                _author
-                _recipient
-                object
-              }
+    let contextVar = filterResource || context ? '' : '($context: String)'
+    let queryHeader =
+       `query ${contextVar} {
+          ${table} (
+          filter: {
+       `
+    let queryFooter = `
+          }
+          orderBy:{
+            property: time
+            desc:true
+          }
+        ) {
+          edges {
+            node {
+              _author
+              _recipient
+              object
+              context
             }
           }
-        }`
+        }
+      }`
+
+
+    let eq = `
+            EQ: {
+              _inbound: true
+            `
+    if (author)
+      eq += `              _author: "${author}"\n`
+
+    let filter = ''
+    if (filterResource) {
+      for (let p in filterResource) {
+        filter += '             ' + p + ': ' + `"${filterResource[p]}"\n`
+      }
+    }
+    eq += filter
+    if (context)
+      eq += `             context: "${context}"`
+    eq += `
+            },
+          `
+    let neq = ''
+    if (!context  &&  !filterResource) {
+      context = null
+      neq = `
+            NEQ: {
+              context: $context
+            }
+            `
+    }
+
+    let query = queryHeader + eq + neq + queryFooter
+
+    // let query =
+    //     `query {
+    //         rl_tradle_Message(
+    //         limit: 20,
+    //         filter:{
+    //           EQ: {
+    //             _inbound: true
+    //             context: "${context}"
+    //             _author: "${author}"
+    //           }
+    //         },
+    //         orderBy:{
+    //           property: time
+    //           desc:true
+    //         }
+    //       ) {
+    //         edges {
+    //           node {
+    //             _author
+    //             _recipient
+    //             object
+    //           }
+    //         }
+    //       }
+    //     }`
     let promisses = []
     promisses.push(client.query({
           fetchPolicy: 'network-only',
           query: gql(`${query}`),
         }))
-    let queryOutbound = query.replace('_inbound: true', '_inbound: false').replace('_author', '_recipient')
+
+    eq = `
+            EQ: {
+              _inbound: false
+          `
+    if (author)
+      eq += `              _recipient: "${author}"\n`
+    eq += filter
+    if (context)
+      eq += `             context: "${context}"`
+    eq += `
+            },
+          `
+
+    let queryOutbound = queryHeader + eq + neq + queryFooter
+
+    // let queryOutbound = query.replace('_inbound: true', '_inbound: false').replace('_author', '_recipient')
         // `query {
         //     rl_tradle_Message(
-        //     first:20,
+        //     limit: 20,
         //     filter:{
         //       EQ: {
         //         _inbound: false
@@ -421,23 +493,35 @@ var search = {
     promisses.push(client.query({
           fetchPolicy: 'network-only',
           query: gql(`${queryOutbound}`),
+          variables: filterResource || context ? null : {context: context}
         }))
     try {
       let all = await Promise.all(promisses)
-      let result = []
-      all.forEach((data) => {
-        let list = data.data[table]
-        if (list.edges  &&  list.edges.length)
-          list.edges.forEach(r => result.push(r.node))
-      })
-      // result.sort((a, b) => a.time - b.time)
-      return result
+      return all
+      // let result = []
+      // let inbound = true
+      // let outbound = false
+      // for (let i=0; i<2; i++) {
+      //   let list = all[i].data[table]
+      //   if (list.edges  &&  list.edges.length) {
+      //     list.edges.forEach(r => {
+      //       r.node.object._inbound = inbound
+      //       r.node.object._outbound = outbound
+      //       result.push(r.node)
+      //     })
+      //   }
+      //   inbound = false
+      //   outbound = true
+      // }
+      // // result.sort((a, b) => a.time - b.time)
+      // return result
     } catch (err) {
       debugger
     }
 
   },
-  getAllPropertiesForServerSearch(model, inlined) {
+  getAllPropertiesForServerSearch(params) {
+    let {model, inlined, properties} = params
     let props = model.properties
     let arr
     if (model.inlined)
@@ -449,7 +533,11 @@ var search = {
         arr = newarr
       }
     }
-
+    if (properties) {
+      let newProps = {}
+      properties.forEach((p) => newProps[p] = props[p])
+      props = newProps
+    }
     for (let p in props) {
       if (p.charAt(0) === '_')
         continue
@@ -538,9 +626,8 @@ var search = {
         return p
     }
     if (m.id === PHOTO) {
-      let mprops = m.properties
       return (
-        `${p} {${this.getAllPropertiesForServerSearch(m)}}`
+        `${p} {${this.getAllPropertiesForServerSearch({model: m})}}`
       )
     }
     return (
@@ -565,8 +652,10 @@ var search = {
           }`
         )
     }
+    else if (refM.abstract)
+      return p
     else {
-      let allProps = this.getAllPropertiesForServerSearch(refM, true)
+      let allProps = this.getAllPropertiesForServerSearch({model: refM, inlined: true})
       return (
         `${p} {
           ${allProps.toString().replace(/,/g, '\n')}
@@ -578,10 +667,10 @@ var search = {
     let parts = id.split('_')
 
     let modelName = parts[0]
-    let m = utils.getModel(modelName)
-    if (!m)
+    let model = utils.getModel(modelName)
+    if (!model)
       return
-    m = m.value
+    model = model.value
 
     let table = `r_${modelName.replace(/\./g, '_')}`
 
@@ -589,7 +678,7 @@ var search = {
     let _permalink = parts[1]
     let query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
-    let arr = this.getAllPropertiesForServerSearch(m)
+    let arr = this.getAllPropertiesForServerSearch({model})
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {

@@ -26,7 +26,7 @@ const {
   SELF_INTRODUCTION,
   CUSTOMER_WAITING,
   ENUM,
-  PRODUCT_LIST
+  // PRODUCT_LIST
 } = constants.TYPES
 const LIMIT = 20
 var RowMixin = require('./RowMixin');
@@ -478,21 +478,21 @@ class MessageRow extends Component {
       return {onPressCall: isMyMessage ? this.showMyData.bind(this) : null}
     }
 
-    let isProductList = model.id === PRODUCT_LIST
-    if (isProductList) {
-      // Case when the needed form was sent along with the message
-      if (resource.welcome) {
-        let msg = <View key={this.getNextKey()}>
-                <Text style={chatStyles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
-                <View style={chatStyles.rowContainer}>
-                  <Text style={[chatStyles.resourceTitle, {color: bankStyle.linkColor}]}>{translate('listOfProducts')} </Text>
-                  <Icon style={{color: bankStyle.linkColor, paddingLeft: 100}} size={20} name={'ios-arrow-forward'} />
-                </View>
-              </View>
-        renderedRow.push(msg);
-        return {onPressCall: this.onChooseProduct.bind(this, true)}
-      }
-    }
+    // let isProductList = model.id === PRODUCT_LIST
+    // if (isProductList) {
+    //   // Case when the needed form was sent along with the message
+    //   if (resource.welcome) {
+    //     let msg = <View key={this.getNextKey()}>
+    //             <Text style={chatStyles.resourceTitle}>{translate('hello', utils.getMe().firstName)}</Text>
+    //             <View style={chatStyles.rowContainer}>
+    //               <Text style={[chatStyles.resourceTitle, {color: bankStyle.linkColor}]}>{translate('listOfProducts')} </Text>
+    //               <Icon style={{color: bankStyle.linkColor, marginTop: 2}} size={20} name={'ios-arrow-forward'} />
+    //             </View>
+    //           </View>
+    //     renderedRow.push(msg);
+    //     return {onPressCall: this.onChooseProduct.bind(this, true)}
+    //   }
+    // }
     let isSelfIntroduction = model.id === SELF_INTRODUCTION
     let isCustomerWaiting = model.id === CUSTOMER_WAITING
     if (isSelfIntroduction || isCustomerWaiting) {
@@ -772,32 +772,32 @@ class MessageRow extends Component {
     // this.showResources(me, utils.getModel(me[TYPE]).value.properties.myForms)
   }
 
-  onChooseProduct() {
-    if (this.props.isAggregation)
-      return
-    let modelName = MESSAGE
-    let model = utils.getModel(modelName).value;
-    let isInterface = model.isInterface;
-    if (!isInterface)
-      return;
+  // onChooseProduct() {
+  //   if (this.props.isAggregation)
+  //     return
+  //   let modelName = MESSAGE
+  //   let model = utils.getModel(modelName).value;
+  //   let isInterface = model.isInterface;
+  //   if (!isInterface)
+  //     return;
 
-    let resource = this.props.to
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
-      title: translate('iNeed'), //I need...',
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        products: this.props.resource.list,
-        callback: this.props.callback,
-        bankStyle: this.props.bankStyle
-      },
-    });
-  }
+  //   let resource = this.props.to
+  //   let currentRoutes = this.props.navigator.getCurrentRoutes();
+  //   this.props.navigator.push({
+  //     title: translate('iNeed'), //I need...',
+  //     id: 15,
+  //     component: ProductChooser,
+  //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+  //     backButtonTitle: 'Back',
+  //     passProps: {
+  //       resource: resource,
+  //       returnRoute: currentRoutes[currentRoutes.length - 1],
+  //       products: this.props.resource.list,
+  //       callback: this.props.callback,
+  //       bankStyle: this.props.bankStyle
+  //     },
+  //   });
+  // }
   editForm(rUri, message) {
     let s = rUri.split('_')
     let resource = {

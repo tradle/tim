@@ -105,19 +105,19 @@ class ShowPropertiesView extends Component {
     }
     else if (vCols)
       vCols = utils.ungroup(model, vCols)
-    else {
-      let v = []
-      vCols.forEach((p) => {
-        if (p.charAt(0) === '_'  ||  props[p].hidden) //  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
-          return
-        v.push(p)
-        // let idx = p.indexOf('_group')
-        // if (idx !== -1  &&  idx === p.length - 6)
-        //   props[p].list.forEach((p) => v.push(p))
-      })
-      vCols = v
+    // else {
+    //   let v = []
+    //   vCols.forEach((p) => {
+    //     if (p.charAt(0) === '_'  ||  props[p].hidden) //  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
+    //       return
+    //     v.push(p)
+    //     // let idx = p.indexOf('_group')
+    //     // if (idx !== -1  &&  idx === p.length - 6)
+    //     //   props[p].list.forEach((p) => v.push(p))
+    //   })
+    //   vCols = v
 
-    }
+    // }
 
     var excludedProperties = this.props.excludedProperties;
     if (excludedProperties) {

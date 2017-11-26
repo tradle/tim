@@ -179,7 +179,7 @@ class GridList extends Component {
       // bookmarksCount: 0,
       // hasTestProviders: false,
       resource: search  &&  resource,
-      isGrid:  !this.isSmallScreen  &&  !officialAccounts  && modelName !== FORM  &&  !model.isInterface
+      isGrid:  !this.isSmallScreen  &&  !officialAccounts  && modelName !== FORM   && modelName !== MESSAGE  &&  !model.isInterface
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
@@ -456,7 +456,7 @@ class GridList extends Component {
         let m = utils.getModel(params.list[0][TYPE]).value
         if (m.id !== modelName)  {
           let model = utils.getModel(modelName).value
-          if (model.isInterface) {
+          if (model.isInterface  ||  modelName === MESSAGE) {
             if (!m.interfaces  ||  m.interfaces.indexOf(modelName) === -1)
               return
           }
@@ -1023,6 +1023,7 @@ class GridList extends Component {
       if (excludeFromBrowsing.indexOf(mm.id) === -1  &&
           !mm.isInterface                &&
           !mm.inlined                    &&
+           mm.id !== MESSAGE             &&
            mm.subClassOf !== ENUM        &&
            mm.subClassOf !== METHOD      &&
            mm.subClassOf !== FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {

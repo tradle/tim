@@ -17,7 +17,7 @@ import {
   Platform,
   View
 } from 'react-native'
-
+var { TYPE } = constants
 import React, { Component } from 'react'
 
 class MessageTypeRow extends Component {
@@ -46,13 +46,24 @@ class MessageTypeRow extends Component {
     var onPressCall = this.props.onSelect;
 
     var title
-    if (resource.id)
-      title = translate(resource)
-    else if (resource[constants.TYPE] === CONTEXT)
-      title = utils.getModel(resource.product) ? utils.getModel(resource.product).value.title : resource.product
-    else
+    let isContext = utils.isContext(resource[TYPE])
+    let renderedRow
+    if (isContext) {
+      let model = utils.getModel(resource.requestFor)
+      title = model ? utils.makeModelTitle(resource.requestFor) : resource.requestFor
+      let date
+      if (resource.time)
+         date = <Text style= {styles.date}>{utils.formatDate(resource.time)}</Text>
+
+      renderedRow = <View style={styles.context}>
+                      <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR, flex:4}]}>{title}</Text>
+                      {date}
+                    </View>
+    }
+    else {
       title = utils.getDisplayName(resource)
-    let renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]}>{title}</Text>;
+      renderedRow = <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR}]}>{title}</Text>;
+    }
 
     var verPhoto;
     if (resource.owner  &&  resource.owner.photos) {
@@ -75,8 +86,20 @@ var styles = StyleSheet.create({
     flexWrap: 'wrap',
     fontSize: 20,
     fontWeight: '400',
-    marginVertical: 15,
-    marginLeft: 15
+    marginLeft: 15,
+    alignSelf: 'center'
+  },
+  context: {
+    flexDirection: 'row',
+    paddingVertical: 20,
+    justifyContent: 'space-between'
+  },
+  date: {
+    flex: 1,
+    flexWrap: 'wrap',
+    fontSize: 15,
+    color: '#aaaaaa',
+    alignSelf: 'center'
   },
   cell: {
     paddingLeft: 20

@@ -43,7 +43,7 @@ class ContextChooser extends Component {
   componentWillMount() {
     let r = this.props.resource
     let id = r[constants.TYPE] === constants.TYPES.PROFILE ? utils.getId(utils.getMe().organization) : utils.getId(r)
-    Actions.getAllContexts({to: this.props.resource, modelName: CONTEXT})
+    Actions.getAllContexts({to: this.props.resource})
   }
   componentDidMount() {
     this.listenTo(Store, 'onContexts');
@@ -76,7 +76,7 @@ class ContextChooser extends Component {
     return (
       <MessageTypeRow
         onSelect={() => this.props.selectContext()}
-        resource={{[TYPE]: PRODUCT_REQUEST, product: 'All'}}
+        resource={{[TYPE]: PRODUCT_REQUEST, requestFor: 'All'}}
         bankStyle={this.props.bankStyle}
         navigator={this.props.navigator}
         to={this.props.resource} />
@@ -108,8 +108,9 @@ class ContextChooser extends Component {
     var content =
       <ListView ref='listview' style={styles.listview}
         dataSource={this.state.dataSource}
-        removeClippedSubviews={true}
+        removeClippedSubviews={false}
         initialListSize={100}
+        pageSize={10}
         renderRow={this.renderRow.bind(this)}
         enableEmptySections={true}
         automaticallyAdjustContentInsets={false}
