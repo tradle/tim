@@ -4848,6 +4848,7 @@ var Store = Reflux.createStore({
     var params = {
       modelName: VERIFICATION,
       to: document,
+      noTrigger: true,
       // meta: m,
       prop: docModel.properties['verifications'],
       // props: m.properties
@@ -5210,7 +5211,7 @@ var Store = Reflux.createStore({
     if (me.isEmployee  &&  meta.id === MESSAGE  &&  context) {
       let myBot = this.getRepresentative(me.organization)
       result = await this.searchServer({
-        // noTrigger: true,
+        noTrigger: true,
         modelName,
         context: context,
         to: to
@@ -7163,7 +7164,7 @@ var Store = Reflux.createStore({
     var reps = isOrg ? this.getRepresentatives(org) : [utils.getId(to)]
     var self = this
     // var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
-    var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
+    var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true })
     if (productsToShare  &&  productsToShare.length) {
       productsToShare.forEach((r) => {
         let fromId = utils.getId(r.from)
@@ -7205,7 +7206,7 @@ var Store = Reflux.createStore({
       return {verifications: shareableResources}
     let toId = utils.getId(to)
     // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
-    let l = await this.searchSharables({modelName: VERIFICATION, search: me.isEmployee, filterResource: {[TYPE]: verTypes}})
+    let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {[TYPE]: verTypes}})
     if (!l) //  &&  !me.isEmployee)
       return
     let rep = me.isEmployee ? this.getRepresentative(me.organization) : null
@@ -7297,7 +7298,6 @@ var Store = Reflux.createStore({
         return
       var ll = await this.searchSharables({
         modelName: verType,
-        search: me.isEmployee,
         filterResource: {_author: repId}
       })
       // var ll = await this.searchMessages({modelName: verType, search: me.isEmployee})
@@ -7365,7 +7365,7 @@ var Store = Reflux.createStore({
           msgModel.subClassOf !== MY_PRODUCT  &&
           !msgModel.notShareable              &&
           !utils.isContext(msgModel)) {
-        let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: msgModel.id}, to: to.organization || to, search: me.isEmployee, context: r._context })
+        let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: msgModel.id}, to: to.organization || to, search: me.isEmployee, context: r._context, noTrigger: true })
         if (res  &&  res.length) {
           this._getItem(utils.getId(r))._documentCreated = true
           r._documentCreated = true
@@ -7403,7 +7403,6 @@ var Store = Reflux.createStore({
       var ll = await this.searchSharables({
         modelName: verType,
         // modelName: MESSAGE,
-        search: me.isEmployee,
         // filterResource: {_author: repId}
         // to: to,
         // filterResource: {_payloadType: verType}
@@ -7418,7 +7417,7 @@ var Store = Reflux.createStore({
       return
     let toId = utils.getId(to)
     // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
-    let l = await this.searchSharables({modelName: VERIFICATION, search: me.isEmployee, filterResource: {document: docs}, properties: ['document']})
+    let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {document: docs}, properties: ['document']})
     if (!l)
       return
     let rep
@@ -7605,7 +7604,7 @@ var Store = Reflux.createStore({
     let { modelName, search } = params
     if (!search)
       return await this.searchMessages(params)
-    extend(params, {noTrigger: true})
+    extend(params, {noTrigger: true, search: me.isEmployee})
     let model = this.getModel(modelName)
     if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION)
       return await this.searchServer(params)
@@ -10489,7 +10488,7 @@ var Store = Reflux.createStore({
     if (!multiEntryForms)
       return
     if (me.isEmployee) {
-      let formRequests = await this.searchServer({modelName: FORM_REQUEST, limit: 10, context: context})
+      let formRequests = await this.searchServer({modelName: FORM_REQUEST, limit: 10, context: context, noTrigger: true})
       if (!formRequests  ||  !formRequests.length)
         return
       let lastFormRequest = formRequests.filter((r) => r.form !== PRODUCT_REQUEST)
@@ -10498,7 +10497,7 @@ var Store = Reflux.createStore({
       if (multiEntryForms.indexOf(form) === -1)
         return
       let m = this.getModel(form)
-      let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: form}, to: to.organization || to, search: me.isEmployee, context: context })
+      let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: form}, to: to.organization || to, search: me.isEmployee, context: context, noTrigger: true })
       if (!res  ||  !res.length)
         return
       let forms = []
