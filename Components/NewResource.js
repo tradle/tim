@@ -142,10 +142,19 @@ class NewResource extends Component {
     // Profile gets changed every time there is a new photo added through for ex. Selfie
     if (utils.getId(utils.getMe()) === utils.getId(resource))
       Actions.getItem({resource: resource})
-    if (resource[constants.ROOT_HASH]  &&  Object.keys(resource).length === 2)
-      Actions.getItem({resource: resource})
-    else if (this.state.isUploading)
-      Actions.getTemporary(resource[constants.TYPE])
+    if (resource[constants.ROOT_HASH]) {
+      if (Object.keys(resource).length === 2)
+        Actions.getItem({resource: resource})
+    }
+    else {
+     if (resource.id) {
+        let type = utils.getType(resource.id)
+        if (!utils.getModel(type).value.inlined)
+          Actions.getItem({resource: resource})
+      }
+      else if (this.state.isUploading)
+        Actions.getTemporary(resource[constants.TYPE])
+    }
   }
 
   componentDidMount() {

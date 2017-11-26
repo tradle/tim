@@ -52,8 +52,8 @@ class MessageTypeRow extends Component {
       let model = utils.getModel(resource.requestFor)
       title = model ? utils.makeModelTitle(resource.requestFor) : resource.requestFor
       let date
-      if (resource.time)
-         date = <Text style= {styles.date}>{utils.formatDate(resource.time)}</Text>
+      // if (resource.time)
+      //    date = <Text style= {styles.date}>{utils.formatDate(resource.time)}</Text>
 
       renderedRow = <View style={styles.context}>
                       <Text style={[styles.modelTitle, {color: PRODUCT_ROW_TEXT_COLOR, flex:4}]}>{title}</Text>
