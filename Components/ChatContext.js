@@ -8,7 +8,6 @@ import {
 } from 'react-native'
 import React, { Component, PropTypes } from 'react'
 import utils from '../utils/utils'
-var PageView = require('./PageView')
 var translate = utils.translate
 import Icon from 'react-native-vector-icons/Ionicons'
 const REMEDIATION = 'tradle.Remediation'
@@ -69,12 +68,10 @@ class ChatContext extends Component {
               </TouchableOpacity>
     let bar = {backgroundColor: this.props.allContexts ? bankStyle.currentContextBackgroundColor : bankStyle.shareContextBackgroundColor}
     return (
-            <PageView>
             <View style={[bar, styles.bar, {flexDirection: 'row'}]}>
               {chooser}
               {share}
             </View>
-            </PageView>
             )
   }
 
