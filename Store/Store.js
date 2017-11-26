@@ -5626,7 +5626,6 @@ var Store = Reflux.createStore({
       })
 
     let author, recipient
-    let applicant = application.applicant
     if (application) {
       author = (applicant  &&  applicant[ROOT_HASH]) || applicantId.split('_')[1]
       recipient = myBot[ROOT_HASH]
