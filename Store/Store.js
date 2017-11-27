@@ -2132,7 +2132,8 @@ var Store = Reflux.createStore({
 
       const payload = msg.object
       const type = payload[TYPE]
-      debug(`receiving ${type}`)
+      const nestedType = type === MESSAGE ? payload[TYPE] : type
+      debug(`receiving ${nestedType}`)
       let pid = utils.makeId(PROFILE, from)
       let org = this._getItem(pid).organization
       progressUpdate = willAnnounceProgress && {
