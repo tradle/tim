@@ -22,7 +22,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#85bbb27fde71ec88b17232659f9680ee861b989e",
+      "resolved": "git://github.com/tradle/aws-client.git#dbec6285d558a390c6387529b8615c64cfcbeb74",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -30,9 +30,9 @@
           "resolved": "https://registry.npmjs.org/pify/-/pify-3.0.0.tgz"
         },
         "ultron": {
-          "version": "1.1.0",
+          "version": "1.1.1",
           "from": "ultron@>=1.1.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/ultron/-/ultron-1.1.0.tgz"
+          "resolved": "https://registry.npmjs.org/ultron/-/ultron-1.1.1.tgz"
         }
       }
     },
@@ -100,7 +100,7 @@
     "@tradle/embed": {
       "version": "0.0.0",
       "from": "tradle/embed",
-      "resolved": "git://github.com/tradle/embed.git#e19d8047d38eef19036cc8732117803b386ca9b3"
+      "resolved": "git://github.com/tradle/embed.git#379be5aba8ac888e3e1bf780ee6d072a84b8dd63"
     },
     "@tradle/engine": {
       "version": "5.3.3",
@@ -6385,9 +6385,9 @@
       "resolved": "https://registry.npmjs.org/react-native-progress/-/react-native-progress-3.2.0.tgz"
     },
     "react-native-prompt": {
-      "version": "0.18.4",
-      "from": "pgmemk/react-native-prompt#789e25c",
-      "resolved": "git://github.com/pgmemk/react-native-prompt.git#789e25c45541180553f78567649a79a6a6aa98db"
+      "version": "1.0.0",
+      "from": "react-native-prompt@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-prompt/-/react-native-prompt-1.0.0.tgz"
     },
     "react-native-push-notification": {
       "version": "3.0.0",
