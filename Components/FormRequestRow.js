@@ -287,15 +287,15 @@ class FormRequestRow extends Component {
   }
 
   showShareableResources(viewStyle, width) {
+    let { resource, productToForms } = this.props
     if (!this.props.shareableResources) // || !this.props.resource.message)
       return null
 
-    var resource = this.props.resource;
     let formModel = utils.getModel(resource.form).value
     let isMultientryForm = isMultientry(resource)
     let { product } = resource
-    let entries = (isMultientryForm && this.props.productToForms[product])
-                ? this.props.productToForms[product][resource.form]
+    let entries = (isMultientryForm  &&  productToForms  &&  productToForms[product])
+                ? productToForms[product][resource.form]
                 : null
     var vtt = [];
     var cnt = 0;

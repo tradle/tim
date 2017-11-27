@@ -194,6 +194,8 @@ var RowMixin = {
       return false
     if (r._outbound)
       return true
+    if (this.props.application)
+      return false
     let fromId = utils.getId(r.from);
     let toId = utils.getId(r.to);
     let me = utils.getMe()
@@ -245,7 +247,9 @@ var RowMixin = {
     }
   },
   isShared() {
-    let { resource, to } = this.props
+    let { resource, to, application } = this.props
+    if (application)
+      return false
     // Is resource was originally created in this chat or shared from a different chat
     // if (!resource.organization  ||  (this.props.context  &&  this.props.context._readOnly))
     if (/*!resource.organization  || */ utils.isReadOnlyChat(resource))
