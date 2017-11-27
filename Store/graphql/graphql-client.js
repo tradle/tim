@@ -379,6 +379,7 @@ var search = {
             node {
               _author
               _recipient
+              originalSender
               object
               context
             }
