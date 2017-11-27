@@ -613,9 +613,19 @@ class ResourceRow extends Component {
     let applicant
     if (aTitle)
       applicant = <Text style={styles.description}>{aTitle}</Text>
+    let formsCount
+    if (resource.forms)
+      formsCount = <View style={styles.formsCount}>
+                     <Text style={styles.formsCountText}>{resource.forms.length}</Text>
+                   </View>
+    else
+      formsCount = <View/>
     return  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
               <View style={{padding: 5}}>
-                <Text style={styles.resourceTitle}>{translate(m.value)}</Text>
+                <View style={{flexDirection: 'row'}}>
+                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{translate(m.value)}</Text>
+                  {formsCount}
+                </View>
                 {applicant}
                 {dateStarted}
                 {dateCompleted}
@@ -706,6 +716,25 @@ var styles = StyleSheet.create({
     opacity: 1,
     justifyContent: 'center',
     backgroundColor: '#ffffff'
+  },
+  formsCount: {
+    // flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // backgroundColor: '#7AAAc3',
+    paddingVertical: 1,
+    borderColor: '#7AAAc3',
+    borderRadius: 3,
+    borderWidth: 1,
+    height: 20,
+    marginRight: 10,
+    width: 20,
+    alignSelf: 'center'
+  },
+  formsCountText: {
+    paddingVertical: 1,
+    fontSize: 14,
+    alignSelf: 'center'
   },
   cellRoundImage: {
     // flex: 1,
