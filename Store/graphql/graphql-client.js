@@ -553,7 +553,10 @@ var search = {
           continue
         let iref = prop.items.ref
         if (iref) {
-          if (iref === model.id) {
+          let iModel = utils.getModel(iref).value
+          if (iModel.abstract)
+            arr.push(p)
+          else if (iref === model.id) {
             arr.push(
               `${p} {
                 id
@@ -652,8 +655,6 @@ var search = {
           }`
         )
     }
-    else if (refM.abstract)
-      return p
     else {
       let allProps = this.getAllPropertiesForServerSearch({model: refM, inlined: true})
       return (
