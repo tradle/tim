@@ -47,16 +47,9 @@ var {
 var {
   MONEY,
   VERIFICATION,
-<<<<<<< HEAD
-  // SIMPLE_MESSAGE,
-  ENUM,
-  FORM,
-  PROFILE
-=======
   PROFILE,
   ENUM,
   FORM
->>>>>>> origin/master
 } = constants.TYPES
 
 var RowMixin = {
