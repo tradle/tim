@@ -1374,7 +1374,10 @@ class GridList extends Component {
   renderGridHeader() {
     if (this.state.isLoading)
       return <View/>
-    let model = utils.getModel(this.props.modelName).value
+    let { modelName } = this.props
+    if (modelName === APPLICATION)
+      return <View/>
+    let model = utils.getModel(modelName).value
     let props = model.properties
     let viewCols = this.getGridCols() // model.gridCols || model.viewCols;
     if (!viewCols)
