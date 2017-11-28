@@ -157,7 +157,7 @@ class VerificationMessageRow extends Component {
 
     var viewStyle = {
       width: msgWidth,
-      flexDirection: 'row',
+      // flexDirection: 'row',
       alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
       backgroundColor: 'transparent',
       marginBottom: 3,

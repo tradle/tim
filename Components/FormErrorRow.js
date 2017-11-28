@@ -103,9 +103,16 @@ class FormErrorRow extends Component {
 
     let prop =  this.isOnePropForm()
     // HACK
+<<<<<<< HEAD
 
     var width = utils.getMessageWidth(FormErrorRow)
     var viewStyle = {width};
+=======
+    let msgWidth = utils.dimensions(FormErrorRow).width * 0.8
+
+    let width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(18) + 40) : msgWidth
+    let viewStyle = { width }
+>>>>>>> origin/master
     let sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
                      ? <View style={chatStyles.sealedStatus}>
@@ -178,7 +185,10 @@ class FormErrorRow extends Component {
                         {messageBody}
                       </View>
       }
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
     }
     var model = utils.getModel(this.props.resource[TYPE]).value;
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor

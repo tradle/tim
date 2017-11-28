@@ -2136,7 +2136,8 @@ var Store = Reflux.createStore({
 
       const payload = msg.object
       const type = payload[TYPE]
-      debug(`receiving ${type}`)
+      const nestedType = type === MESSAGE ? payload[TYPE] : type
+      debug(`receiving ${nestedType}`)
       let pid = utils.makeId(PROFILE, from)
       let org = this._getItem(pid).organization
       progressUpdate = willAnnounceProgress && {
@@ -5206,7 +5207,7 @@ var Store = Reflux.createStore({
     let isMessage = modelName === MESSAGE || isChat // utils.isMessage(meta)
     // if (params.prop)
     //   debugger
-    if (params.search && me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION)
+    if (params.search && me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION)
       return await this.searchServer(params)
 
     if (!isMessage) {
@@ -5665,7 +5666,6 @@ var Store = Reflux.createStore({
             return
           if (!rr._context)
             rr._context = context
-
           if (li.node.originalSender === me[ROOT_HASH]) {
             rr._outbound = true
             rr._inbound = false
@@ -7444,7 +7444,6 @@ var Store = Reflux.createStore({
           msgModel.subClassOf !== MY_PRODUCT  &&
           !msgModel.notShareable              &&
           !utils.isContext(msgModel)) {
-
         let productModel = this.getModel(r.product)
         let isMultiEntry = productModel.multiEntryForms && productModel.multiEntryForms.indexOf(r.form) !== -1
 
@@ -7539,6 +7538,8 @@ var Store = Reflux.createStore({
       // if (fromOrgId === toId)
       //   return
       let document = typeToDocs[docType].filter((d) => utils.getId(d) === doc.id)[0]
+      if (!document)
+        return
       if (context  &&  document._context) {
         if (utils.getId(context) === contextId)
           return
@@ -9370,8 +9371,8 @@ var Store = Reflux.createStore({
     }
     this.dbBatchPut(key, val, batch)
     this.addVisualProps(val)
-    if (!switchToContext  &&  isFormRequest  &&  context  &&  context._startForm)
-      switchToContext = true
+    // if (!switchToContext  &&  isFormRequest  &&  context  &&  context._startForm)
+    //   switchToContext = true
     if (!noTrigger  &&  switchToContext) {
       Alert.alert(
         `The application for ${utils.makeModelTitle(val.product)} was started by another employee`,
@@ -10594,7 +10595,6 @@ var Store = Reflux.createStore({
       if (!formRequests  ||  !formRequests.length)
         return
       let lastFormRequest = formRequests.filter((r) => r.form !== PRODUCT_REQUEST)
-
       if (!lastFormRequest.length)
         return
       let form = lastFormRequest[0].form
@@ -10604,7 +10604,6 @@ var Store = Reflux.createStore({
       let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: form}, to: to.organization || to, search: me.isEmployee, context: context, noTrigger: true })
       if (!res  ||  !res.length)
         return
-
       let productToForms = {[product]: {[form]: res.map((r) => utils.getId(r))}}
       return productToForms
     }

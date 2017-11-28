@@ -5,7 +5,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#85bbb27fde71ec88b17232659f9680ee861b989e",
+      "resolved": "git://github.com/tradle/aws-client.git#dbec6285d558a390c6387529b8615c64cfcbeb74",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -13,9 +13,9 @@
           "resolved": "https://registry.npmjs.org/pify/-/pify-3.0.0.tgz"
         },
         "ultron": {
-          "version": "1.1.0",
-          "from": "ultron@https://registry.npmjs.org/ultron/-/ultron-1.1.0.tgz",
-          "resolved": "https://registry.npmjs.org/ultron/-/ultron-1.1.0.tgz"
+          "version": "1.1.1",
+          "from": "ultron@>=1.1.0 <2.0.0",
+          "resolved": "https://registry.npmjs.org/ultron/-/ultron-1.1.1.tgz"
         }
       }
     },
@@ -83,7 +83,7 @@
     "@tradle/embed": {
       "version": "0.0.0",
       "from": "tradle/embed",
-      "resolved": "git://github.com/tradle/embed.git#e19d8047d38eef19036cc8732117803b386ca9b3"
+      "resolved": "git://github.com/tradle/embed.git#379be5aba8ac888e3e1bf780ee6d072a84b8dd63"
     },
     "@tradle/engine": {
       "version": "5.3.3",

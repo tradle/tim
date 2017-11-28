@@ -307,8 +307,8 @@ class FormMessageRow extends Component {
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-        onPressCall = self.onPress.bind(self);
-        vCols.push(<Text style={style} key={self.getNextKey()}>{resource[v]}</Text>);
+        onPressCall = this.onPress.bind(self);
+        vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>);
       }
       if (resource[v]  &&  properties[v].signature) {
         let {width, height} = utils.dimensions(FormMessageRow)

@@ -43,6 +43,8 @@ class ChatContext extends Component {
     // No need to show context if provider has only one product and no share context
     else if ((!chat.products  ||  chat.products.length === 1)  &&  !chat._canShareContext)
       return <View/>
+    // if (!context  ||  context._readOnly)
+    //   return <View/>
     let isReadOnlyChat = utils.isReadOnlyChat(context)
     let isShareContext = utils.isContext(chat[constants.TYPE]) && isReadOnlyChat
     let product = utils.getProduct(context)
@@ -58,7 +60,7 @@ class ChatContext extends Component {
     let share
     if (allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
       share = <View/>
-    // else if (utils.getMe().isEmployee  &&  this.props.chat[constants.TYPE] === constants.TYPES.PROFILE)
+    // else if (utils.getMe().isEmployee  &&  chat[constants.TYPE] === constants.TYPES.PROFILE)
     //   share = <View/>
     else
       share = <TouchableOpacity onPress={shareWith} style={{position: 'absolute', right: 10, padding: 10}}>

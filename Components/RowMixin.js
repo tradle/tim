@@ -47,10 +47,16 @@ var {
 var {
   MONEY,
   VERIFICATION,
+<<<<<<< HEAD
   // SIMPLE_MESSAGE,
   ENUM,
   FORM,
   PROFILE
+=======
+  PROFILE,
+  ENUM,
+  FORM
+>>>>>>> origin/master
 } = constants.TYPES
 
 var RowMixin = {
@@ -191,7 +197,7 @@ var RowMixin = {
     if (this.props.isAggregation)
       return
     let r = this.props.resource
-    if (this.props.application) //  &&  r[TYPE] !== SIMPLE_MESSAGE  &&  r[TYPE] !== FORM_ERROR)
+    if (this.props.application)
       return false
     if (r._inbound)
       return false
@@ -215,6 +221,8 @@ var RowMixin = {
       if (r._context) {
         // check if the employee is the applicant
         let cFrom = r._context.from
+        if (utils.getId(cFrom) === meId)
+          return true
         if (cFrom.organization) {
           if (cFrom.organization.id === me.organization.id)
             return utils.getId(r._context.to) !== meId

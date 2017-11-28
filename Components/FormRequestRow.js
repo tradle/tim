@@ -106,7 +106,6 @@ class FormRequestRow extends Component {
     let onPressCall
     let isFormRequest = resource[TYPE] === FORM_REQUEST
     let prop =  this.isOnePropForm()
-    var w = utils.dimensions(FormRequestRow).width
 
     let linkColor
     if (application)
@@ -114,7 +113,11 @@ class FormRequestRow extends Component {
     else
       linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
+<<<<<<< HEAD
     let msgWidth = utils.getMessageWidth(FormRequestRow)
+=======
+    let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8)
+>>>>>>> origin/master
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow, prop)
     else {
@@ -175,8 +178,8 @@ class FormRequestRow extends Component {
     var viewStyle = {
       flexDirection: 'row',
       borderTopRightRadius: 10,
-      alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-      width:  Math.min(msgWidth, message.length * utils.getFontSize(18) + 35)
+      width:  Math.min(msgWidth, message.length * utils.getFontSize(18) + 35),
+      alignSelf: isMyMessage ? 'flex-end' : 'flex-start'
     }
 
     if (this.state  &&  this.state.sendStatus  &&  this.state.sendStatus !== null)
@@ -211,10 +214,16 @@ class FormRequestRow extends Component {
                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
               </View>
     let msgContent =  <View style={[viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
+<<<<<<< HEAD
+=======
+                        <View style={{marginTop: 2}}>
+                          {ownerPhoto}
+                        </View>
+>>>>>>> origin/master
                         <View style={[cellStyle, {backgroundColor: bankStyle.incomingMessageBgColor}, shareables ? styles.shareables : {}]}>
                           <View style={[styles.container, msgStyle]}>
-                          {share}
-                          {renderedRow}
+                            {share}
+                            {renderedRow}
                          </View>
                          {sealedStatus}
                         </View>
