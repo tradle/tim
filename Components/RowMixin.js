@@ -28,12 +28,10 @@ const SENT = 'Sent'
 
 
 const MY_PRODUCT = 'tradle.MyProduct'
-const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PHOTO = 'tradle.Photo'
-const ENUM = 'tradle.Enum'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 
@@ -46,7 +44,9 @@ var {
 var {
   MONEY,
   VERIFICATION,
-  PROFILE
+  PROFILE,
+  ENUM,
+  FORM
 } = constants.TYPES
 
 var RowMixin = {
@@ -189,6 +189,8 @@ var RowMixin = {
     if (this.props.isAggregation)
       return
     let r = this.props.resource
+    if (this.props.application)
+      return false
     if (r._inbound)
       return false
     if (r._outbound)
@@ -211,9 +213,11 @@ var RowMixin = {
       if (r._context) {
         // check if the employee is the applicant
         let cFrom = r._context.from
+        if (utils.getId(cFrom) === meId)
+          return true
         if (cFrom.organization) {
           if (cFrom.organization.id === me.organization.id)
-            return r._context.to.id !== meId
+            return utils.getId(r._context.to) !== meId
         }
       }
       let myOrgId = utils.getId(me.organization)
@@ -244,7 +248,9 @@ var RowMixin = {
     }
   },
   isShared() {
-    let { resource, to } = this.props
+    let { resource, to, application } = this.props
+    if (application)
+      return false
     // Is resource was originally created in this chat or shared from a different chat
     // if (!resource.organization  ||  (this.props.context  &&  this.props.context._readOnly))
     if (/*!resource.organization  || */ utils.isReadOnlyChat(resource))

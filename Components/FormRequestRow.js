@@ -97,8 +97,6 @@ class FormRequestRow extends Component {
     let me = utils.getMe();
 
     var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
-    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
-    let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
     let message = resource.message
     let renderedRow = [];
@@ -172,7 +170,6 @@ class FormRequestRow extends Component {
     if (formTitle.length > message.length)
       message = formTitle
     // HACK
-    let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     var viewStyle = {flexDirection: 'row', borderTopRightRadius: 10, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
     if (message) {
@@ -213,13 +210,10 @@ class FormRequestRow extends Component {
                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
               </View>
     let msgContent =  <View style={[viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
-                        <View style={{marginTop: 2}}>
-                        {ownerPhoto}
-                        </View>
                         <View style={[cellStyle, {backgroundColor: bankStyle.incomingMessageBgColor}, shareables ? styles.shareables : {}]}>
                           <View style={[styles.container, msgStyle]}>
-                          {share}
-                          {renderedRow}
+                            {share}
+                            {renderedRow}
                          </View>
                          {sealedStatus}
                         </View>
@@ -237,11 +231,18 @@ class FormRequestRow extends Component {
 
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     let contextId = this.getContextId(resource)
+    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
+    // let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
     return (
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: bg}]}>
         {date}
         <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: '#dddddd', backgroundColor: bankStyle.incomingMessageBgColor, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
-          {messageBody}
+          <View style={chatStyles.row}>
+            <View style={{marginTop: 2}}>
+              {ownerPhoto}
+            </View>
+            {messageBody}
+          </View>
           {sendStatus}
           {shareables}
         </View>
@@ -280,12 +281,12 @@ class FormRequestRow extends Component {
     if (!this.props.shareableResources) // || !this.props.resource.message)
       return null
 
-    var resource = this.props.resource;
+    let { resource, productToForms } = this.props
     let formModel = utils.getModel(resource.form).value
     let isMultientryForm = isMultientry(resource)
     let { product } = resource
-    let entries = (isMultientryForm && this.props.productToForms[product])
-                ? this.props.productToForms[product][resource.form]
+    let entries = (isMultientryForm  &&  productToForms  &&  productToForms[product])
+                ? productToForms[product][resource.form]
                 : null
     var vtt = [];
     var cnt = 0;
