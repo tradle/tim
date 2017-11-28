@@ -97,6 +97,8 @@ class FormRequestRow extends Component {
     let me = utils.getMe();
 
     var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
+    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
+    let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
     let message = resource.message
     let renderedRow = [];
@@ -104,7 +106,6 @@ class FormRequestRow extends Component {
     let onPressCall
     let isFormRequest = resource[TYPE] === FORM_REQUEST
     let prop =  this.isOnePropForm()
-    var w = utils.dimensions(FormRequestRow).width
 
     let linkColor
     if (application)
@@ -112,7 +113,7 @@ class FormRequestRow extends Component {
     else
       linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
-    let msgWidth = Math.floor(w * 0.8)
+    let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8)
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow, prop)
     else {
@@ -170,13 +171,14 @@ class FormRequestRow extends Component {
     if (formTitle.length > message.length)
       message = formTitle
     // HACK
+    let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    var viewStyle = {flexDirection: 'row', borderTopRightRadius: 10, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-    if (message) {
-      if (message.charAt(0) === '[')
-        viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
+    var viewStyle = {
+      flexDirection: 'row',
+      borderTopRightRadius: 10,
+      width:  Math.min(msgWidth, message.length * utils.getFontSize(18) + 35),
+      alignSelf: isMyMessage ? 'flex-end' : 'flex-start'
     }
-    viewStyle.width =  Math.min(msgWidth, message.length * utils.getFontSize(18) + 35)
 
     if (this.state  &&  this.state.sendStatus  &&  this.state.sendStatus !== null)
       sendStatus = this.getSendStatus()
@@ -210,6 +212,9 @@ class FormRequestRow extends Component {
                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
               </View>
     let msgContent =  <View style={[viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
+                        <View style={{marginTop: 2}}>
+                          {ownerPhoto}
+                        </View>
                         <View style={[cellStyle, {backgroundColor: bankStyle.incomingMessageBgColor}, shareables ? styles.shareables : {}]}>
                           <View style={[styles.container, msgStyle]}>
                             {share}
@@ -231,18 +236,11 @@ class FormRequestRow extends Component {
 
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     let contextId = this.getContextId(resource)
-    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
-    // let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
     return (
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: bg}]}>
         {date}
         <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: '#dddddd', backgroundColor: bankStyle.incomingMessageBgColor, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
-          <View style={chatStyles.row}>
-            <View style={{marginTop: 2}}>
-              {ownerPhoto}
-            </View>
-            {messageBody}
-          </View>
+          {messageBody}
           {sendStatus}
           {shareables}
         </View>
@@ -281,12 +279,12 @@ class FormRequestRow extends Component {
     if (!this.props.shareableResources) // || !this.props.resource.message)
       return null
 
-    let { resource, productToForms } = this.props
+    var resource = this.props.resource;
     let formModel = utils.getModel(resource.form).value
     let isMultientryForm = isMultientry(resource)
     let { product } = resource
-    let entries = (isMultientryForm  &&  productToForms  &&  productToForms[product])
-                ? productToForms[product][resource.form]
+    let entries = (isMultientryForm && this.props.productToForms[product])
+                ? this.props.productToForms[product][resource.form]
                 : null
     var vtt = [];
     var cnt = 0;
