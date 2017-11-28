@@ -3053,6 +3053,7 @@ var Store = Reflux.createStore({
       rr.from = rr.from || r.from
       if (isContext)
         rr.to.organization = self.buildRef(to)
+      rr._outbound = true
 
       if (!application) {
         self._setItem(key, rr)
@@ -3421,6 +3422,8 @@ var Store = Reflux.createStore({
         docFromServer = true
     }
     r.document = document
+    if (dontSend)
+      r._inbound = true
 
     let isAssignRM = document[TYPE] === ASSIGN_RM
     if (isAssignRM) {
@@ -5156,7 +5159,7 @@ var Store = Reflux.createStore({
     let isMessage = modelName === MESSAGE || isChat // utils.isMessage(meta)
     // if (params.prop)
     //   debugger
-    if (params.search && me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION)
+    if (params.search && me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION)
       return await this.searchServer(params)
 
     if (!isMessage) {
@@ -5608,21 +5611,29 @@ var Store = Reflux.createStore({
       if (list.edges  &&  list.edges.length) {
         list.edges.forEach(li => {
         // for (let i=0; i<result.length; i++) {
-          let rr = this.convertMessageToResource(li.node)
+          let rr = this.convertMessageToResource(li.node, application)
           if (rr[TYPE] === FORM_REQUEST  &&  rr.form === PRODUCT_REQUEST) //  &&  rr._documentCreated)
             return
           if (rr[TYPE] == NEXT_FORM_REQUEST)
             return
           if (!rr._context)
             rr._context = context
-          rr._inbound = inbound
-          rr._outbound = outbound
+          if (li.node.originalSender === me[ROOT_HASH]) {
+            rr._outbound = true
+            rr._inbound = false
+          }
+          else {
+            rr._inbound = inbound
+            rr._outbound = outbound
+          }
           rr._recipient = li._recipient
           chatItems.push(rr)
         })
       }
-      inbound = false
-      outbound = true
+      if (!application) {
+        inbound = false
+        outbound = true
+      }
     }
     // Filter out resources like Introduction
     chatItems = chatItems.filter((r) => r.time)
@@ -5681,7 +5692,7 @@ var Store = Reflux.createStore({
       id: authorId,
       title: utils.getDisplayName(author.organization || author)
     }
-
+    this.addVisualProps(r)
     return r
   },
   convertToResource(r) {
@@ -7366,11 +7377,23 @@ var Store = Reflux.createStore({
           msgModel.subClassOf !== MY_PRODUCT  &&
           !msgModel.notShareable              &&
           !utils.isContext(msgModel)) {
-        let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: msgModel.id}, to: to.organization || to, search: me.isEmployee, context: r._context, noTrigger: true })
+        let productModel = this.getModel(r.product)
+        let isMultiEntry = productModel.multiEntryForms && productModel.multiEntryForms.indexOf(r.form) !== -1
+
+        let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: r.form}, to: to.organization || to, search: me.isEmployee, context: r._context, noTrigger: true })
         if (res  &&  res.length) {
-          this._getItem(utils.getId(r))._documentCreated = true
-          r._documentCreated = true
-          continue
+          let showShare
+          // if (isMultiEntry) {
+          //   res.forEach((mr) => {
+          //     if (r.context !== mr._context.contextId)
+          //       showShare = true
+          //   })
+          // }
+          if (!showShare) {
+            // this._getItem(utils.getId(r))._documentCreated = true
+            // r._documentCreated = true
+            continue
+          }
         }
         verTypes.push(msgModel.id);
         if (r.verifiers)
@@ -7448,6 +7471,8 @@ var Store = Reflux.createStore({
       // if (fromOrgId === toId)
       //   return
       let document = typeToDocs[docType].filter((d) => utils.getId(d) === doc.id)[0]
+      if (!document)
+        return
       if (context  &&  document._context) {
         if (utils.getId(context) === contextId)
           return
@@ -7603,7 +7628,7 @@ var Store = Reflux.createStore({
   },
   async searchSharables(params) {
     let { modelName, search } = params
-    if (!search)
+    if (!me.isEmployee)
       return await this.searchMessages(params)
     extend(params, {noTrigger: true, search: me.isEmployee})
     let model = this.getModel(modelName)
@@ -8720,7 +8745,7 @@ var Store = Reflux.createStore({
         let productToForms = await this.gatherForms(fid, val._context)
         if (val._context)
           val._context = this._getItem(val._context)
-        let shareables = await this.getShareableResources({foundResources: [val], to: val.to})
+        let shareables = await this.getShareableResources({foundResources: [val], to: val.from})
         this.trigger({action: 'addItem', resource: val, shareableResources: shareables, productToForms: productToForms})
       }
       else {
@@ -9269,8 +9294,8 @@ var Store = Reflux.createStore({
     }
     this.dbBatchPut(key, val, batch)
     this.addVisualProps(val)
-    if (!switchToContext  &&  isFormRequest  &&  context  &&  context._startForm)
-      switchToContext = true
+    // if (!switchToContext  &&  isFormRequest  &&  context  &&  context._startForm)
+    //   switchToContext = true
     if (!noTrigger  &&  switchToContext) {
       Alert.alert(
         `The application for ${utils.makeModelTitle(val.product)} was started by another employee`,
@@ -10489,11 +10514,12 @@ var Store = Reflux.createStore({
     if (!multiEntryForms)
       return
     if (me.isEmployee) {
-      let formRequests = await this.searchServer({modelName: FORM_REQUEST, limit: 10, context: context, noTrigger: true})
+      let formRequests = await this.searchServer({modelName: FORM_REQUEST, limit: 100, context: context, noTrigger: true})
       if (!formRequests  ||  !formRequests.length)
         return
       let lastFormRequest = formRequests.filter((r) => r.form !== PRODUCT_REQUEST)
-
+      if (!lastFormRequest.length)
+        return
       let form = lastFormRequest[0].form
       if (multiEntryForms.indexOf(form) === -1)
         return
@@ -10501,17 +10527,7 @@ var Store = Reflux.createStore({
       let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: form}, to: to.organization || to, search: me.isEmployee, context: context, noTrigger: true })
       if (!res  ||  !res.length)
         return
-      let forms = []
-      let productToForms = {[form]: forms}
-      let formIds = {}
-      for (let i=0; i<res.length; i++) {
-        let rId = utils.getId(res[i])
-        // filter out the shared forms that will have the same id
-        if (!formIds[rId]) {
-          forms.push(rId)
-          formIds[rId] = ' '
-        }
-      }
+      let productToForms = {[product]: {[form]: res.map((r) => utils.getId(r))}}
       return productToForms
     }
     let allFormRequests = await this.searchMessages({modelName: FORM_REQUEST, to: to, context: context})
