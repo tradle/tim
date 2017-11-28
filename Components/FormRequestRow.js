@@ -171,15 +171,13 @@ class FormRequestRow extends Component {
     let formTitle = isFormRequest ? translate(resource.form) : 'Forms'
     if (formTitle.length > message.length)
       message = formTitle
-    var w = utils.dimensions(FormRequestRow).width
-    let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    var viewStyle = {flexDirection: 'row', borderTopRightRadius: 10, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-    if (message) {
-      if (message.charAt(0) === '[')
-        viewStyle.width = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
+    var viewStyle = {
+      flexDirection: 'row',
+      borderTopRightRadius: 10,
+      alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
+      width:  Math.min(msgWidth, message.length * utils.getFontSize(18) + 35)
     }
-    viewStyle.width =  Math.min(msgWidth, message.length * utils.getFontSize(18) + 35)
 
     if (this.state  &&  this.state.sendStatus  &&  this.state.sendStatus !== null)
       sendStatus = this.getSendStatus()
@@ -213,9 +211,6 @@ class FormRequestRow extends Component {
                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
               </View>
     let msgContent =  <View style={[viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
-                        <View style={{marginTop: 2}}>
-                        {ownerPhoto}
-                        </View>
                         <View style={[cellStyle, {backgroundColor: bankStyle.incomingMessageBgColor}, shareables ? styles.shareables : {}]}>
                           <View style={[styles.container, msgStyle]}>
                           {share}
@@ -241,7 +236,12 @@ class FormRequestRow extends Component {
       <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: bg}]}>
         {date}
         <View style={shareables ? {borderWidth: 1, width: viewStyle.width + 5, borderColor: '#dddddd', backgroundColor: bankStyle.incomingMessageBgColor, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
-          {messageBody}
+          <View style={chatStyles.row}>
+            <View style={{marginTop: 2}}>
+              {ownerPhoto}
+            </View>
+            {messageBody}
+          </View>
           {sendStatus}
           {shareables}
         </View>

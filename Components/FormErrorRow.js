@@ -68,8 +68,6 @@ class FormErrorRow extends Component {
 
     var isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
     var to = this.props.to;
-    var ownerPhoto = this.getOwnerPhoto(isMyMessage)
-    let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
     var renderedRow = [];
     var ret = this.formatRow(isMyMessage, renderedRow);
@@ -105,12 +103,9 @@ class FormErrorRow extends Component {
 
     let prop =  this.isOnePropForm()
     // HACK
-    var w = utils.dimensions(FormErrorRow).width
-    let msgWidth = w * 0.8
-    let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
     var width = utils.getMessageWidth(FormErrorRow)
-    var viewStyle = {flexDirection: 'row', width};
+    var viewStyle = {width};
     let sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
                      ? <View style={chatStyles.sealedStatus}>
@@ -151,13 +146,13 @@ class FormErrorRow extends Component {
         messageBody = <View style={[rowStyle, viewStyle]}>
                        <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                         <View style={cellStyle}>
-                        {renderedRow}
+                          {renderedRow}
                         </View>
                        </ImageInput>
                      </View>
       }
     }
-    if (!messageBody) {
+    else {
       let shared
       if (this.isShared())
         shared = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
@@ -165,19 +160,25 @@ class FormErrorRow extends Component {
                  </View>
 
       messageBody = <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
-                      <View style={[rowStyle, viewStyle]}>
-                        <View style={{marginTop: 2}}>
-                          {ownerPhoto}
-                        </View>
+                      <View style={viewStyle}>
                         <View style={cellStyle}>
                           <View style={styles.container}>
-                          {shared}
-                          {renderedRow}
+                            {shared}
+                            {renderedRow}
                          </View>
                          {sealedStatus}
                         </View>
                       </View>
                     </TouchableHighlight>
+      if (!isMyMessage) {
+        messageBody = <View style={chatStyles.row}>
+                        <View style={{marginTop: 2}}>
+                          {this.getOwnerPhoto(isMyMessage)}
+                        </View>
+                        {messageBody}
+                      </View>
+      }
+
     }
     var model = utils.getModel(this.props.resource[TYPE]).value;
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor

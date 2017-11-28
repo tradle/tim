@@ -96,11 +96,11 @@ class VerificationMessageRow extends Component {
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
     var msgWidth = utils.getMessageWidth(VerificationMessageRow)
-    if (isReadOnlyChat || application)
-      msgWidth -= 50 // provider icon and padding
-    let numberOfCharacters = msgWidth / 12
-    if (verifiedBy.length > numberOfCharacters)
-      verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
+    // if (isReadOnlyChat || application)
+    //   msgWidth -= 50 // provider icon and padding
+    // let numberOfCharacters = msgWidth / 12
+    // if (verifiedBy.length > numberOfCharacters)
+    //   verifiedBy = verifiedBy.substring(0, numberOfCharacters) + '..'
 
     let headerStyle = [
       styles.header,
@@ -190,8 +190,7 @@ class VerificationMessageRow extends Component {
     let messageBody =
           <TouchableOpacity onPress={this.verify.bind(this, resource)} style={{marginTop: 10}}>
             <View style={styles.messageBody}>
-              <View style={[chatStyles.row, viewStyle]}>
-                {this.getOwnerPhoto(isMyMessage)}
+              <View style={viewStyle}>
                 <View style={[chatStyles.textContainer, addStyle]}>
                   <View style={[styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.verifiedBorderColor}, isMyMessage ? styles.headerRight : styles.headerLeft]}>
                     <View style={[styles.image, addStyle]}>
@@ -235,9 +234,12 @@ class VerificationMessageRow extends Component {
     let contextId = this.getContextId(resource)
 
     return (
-      <View style={viewStyle} key={this.getNextKey()}>
+      <View key={this.getNextKey()}>
         {date}
-        {messageBody}
+        <View style={[chatStyles.row]}>
+          {this.getOwnerPhoto(isMyMessage)}
+          {messageBody}
+        </View>
         {contextId}
       </View>
     );
