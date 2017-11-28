@@ -29,14 +29,13 @@ class ChatContext extends Component {
   }
 
   render() {
-    let context = this.props.context
+    let { context, application, allContexts, bankStyle, chat, contextChooser, shareWith } = this.props
     if (!context  ||  context.requestFor === REMEDIATION)
       return <View/>
     let m = utils.getModel(context.requestFor)
     if (!m)
       return <View/>
     let me = utils.getMe()
-    let chat = this.props.chat
     let isChattingWithPerson = chat[constants.TYPE] === PROFILE
     if (me.isEmployee) {
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
@@ -45,29 +44,30 @@ class ChatContext extends Component {
     // No need to show context if provider has only one product and no share context
     else if ((!chat.products  ||  chat.products.length === 1)  &&  !chat._canShareContext)
       return <View/>
-    // if (!this.props.context  ||  this.props.context._readOnly)
+    // if (!context  ||  context._readOnly)
     //   return <View/>
     let isReadOnlyChat = utils.isReadOnlyChat(context)
-    let bankStyle = this.props.bankStyle
     let isShareContext = utils.isContext(chat[constants.TYPE]) && isReadOnlyChat
     let product = utils.getProduct(context)
-    let content = <Text style={[{color: this.props.allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product).value)}</Text>
-    let chooser = context  &&  isShareContext
-                ? <View style={styles.contextBar}>{content}</View>
-                : <TouchableOpacity onPress={this.props.contextChooser} style={styles.contextBar}>
-                    {content}
-                  </TouchableOpacity>
+    let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product).value)}</Text>
+    let chooser
+    if (context  &&  isShareContext || application)
+      chooser = <View style={styles.contextBar}>{content}</View>
+    else
+      chooser = <TouchableOpacity onPress={contextChooser} style={styles.contextBar}>
+                  {content}
+                </TouchableOpacity>
     // HACK: if me is employee no sharing for now
     let share
-    if (this.props.allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
+    if (allContexts || isReadOnlyChat  ||  (!chat._canShareContext  &&  !isChattingWithPerson))
       share = <View/>
-    // else if (utils.getMe().isEmployee  &&  this.props.chat[constants.TYPE] === constants.TYPES.PROFILE)
+    // else if (utils.getMe().isEmployee  &&  chat[constants.TYPE] === constants.TYPES.PROFILE)
     //   share = <View/>
     else
-      share = <TouchableOpacity onPress={this.props.shareWith} style={{position: 'absolute', right: 10, padding: 10}}>
+      share = <TouchableOpacity onPress={shareWith} style={{position: 'absolute', right: 10, padding: 10}}>
                 <Icon size={22} name='md-share' color={bankStyle.shareContextTextColor} style={{marginRight: 10, paddingLeft: 20}} />
               </TouchableOpacity>
-    let bar = {backgroundColor: this.props.allContexts ? bankStyle.currentContextBackgroundColor : bankStyle.shareContextBackgroundColor}
+    let bar = {backgroundColor: allContexts ? bankStyle.currentContextBackgroundColor : bankStyle.shareContextBackgroundColor}
     return (
             <PageView>
             <View style={[bar, styles.bar, {flexDirection: 'row'}]}>

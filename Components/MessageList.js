@@ -799,7 +799,7 @@ class MessageList extends Component {
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
           {network}
           <ProgressInfo recipient={resource[ROOT_HASH]} />
-          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={this.state.allContexts} />
+          <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={this.state.allContexts} />
           <View style={ sepStyle } />
           {content}
           {actionSheet}
