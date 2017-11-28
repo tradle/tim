@@ -379,6 +379,7 @@ var search = {
             node {
               _author
               _recipient
+              originalSender
               object
               context
             }
@@ -553,10 +554,7 @@ var search = {
           continue
         let iref = prop.items.ref
         if (iref) {
-          let iModel = utils.getModel(iref).value
-          if (iModel.abstract)
-            arr.push(p)
-          else if (iref === model.id) {
+          if (iref === model.id) {
             arr.push(
               `${p} {
                 id
@@ -655,6 +653,8 @@ var search = {
           }`
         )
     }
+    else if (refM.abstract)
+      return p
     else {
       let allProps = this.getAllPropertiesForServerSearch({model: refM, inlined: true})
       return (
