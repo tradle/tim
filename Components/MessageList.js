@@ -259,6 +259,8 @@ class MessageList extends Component {
         list.push(resource)
       }
 
+      utils.pinFormRequest(list)
+
       let state = {
         // addedItem: addedItem,
         list: list
