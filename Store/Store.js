@@ -4878,9 +4878,9 @@ var Store = Reflux.createStore({
         ver._context = formResource._context
       await this.shareVerification(ver, to, formResource, shareBatchId)
       // Check if Verification was created by different employee
-      let v = this._getItem(vId)
-      if (!v)
-        this._setItem(vId, ver)
+      // let v = this._getItem(vId)
+      // if (!v)
+      this._setItem(vId, ver)
 
       this.dbBatchPut(vId, ver, batch)
     }
@@ -4961,8 +4961,10 @@ var Store = Reflux.createStore({
   shareVerification(ver, to, formRequest, shareBatchId) {
     var time = new Date().getTime()
     var toId = utils.getId(to)
-    if (!ver._sharedWith)
+    if (!ver._sharedWith) {
       ver._sharedWith = []
+      this.addSharedWith(ver, ver.from, ver.time, shareBatchId)
+    }
     this.addSharedWith(ver, to, time, shareBatchId)
 
     ver._sendStatus = this.isConnected ? SENDING : QUEUED
@@ -6201,13 +6203,12 @@ var Store = Reflux.createStore({
       })
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a.time - b.time)
-      let result = foundResources
-      return result
+      utils.pinFormRequest(foundResources)
+      return foundResources
     })
     .catch((err) => {
       debugger
     })
-
   },
   addReferenceLink(stub, links, all, refs) {
     let r = this._getItem(stub)
