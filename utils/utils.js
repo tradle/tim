@@ -77,6 +77,7 @@ var {
   MONEY,
   FORM,
   ORGANIZATION,
+  SIMPLE_MESSAGE,
   CUSTOMER_WAITING
 } = constants.TYPES
 
@@ -97,7 +98,7 @@ const CONTEXT = 'tradle.Context'
 const MSG_LINK = '_msg'
 const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
-
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
 // var dictionaries = require('@tradle/models').dict
 var dictionary //= dictionaries[Strings.language]
 
@@ -2022,6 +2023,47 @@ var utils = {
       }
     })
   },
+  pinFormRequest(result) {
+    let len = result  &&  result.length
+    if (len < 3)
+      return
+    let startI, insertI
+
+    for (let i=len - 1; i>=0  &&  !startI; i--) {
+      let r = result[i]
+      let rtype = r[TYPE]
+      if (!insertI  &&  (rtype === SIMPLE_MESSAGE  ||  rtype === PRODUCT_REQUEST))
+        insertI = i
+      if (r._context) {
+        if (rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
+          return
+
+        startI = i
+        insertI = insertI || startI
+      }
+    }
+    if (!startI)
+      return
+    let lr = result[startI]
+    let rtype = lr[TYPE]
+    let pinFR = rtype === VERIFICATION // || utils.getModel(rtype).value.subClassOf === FORM
+    if (!pinFR)
+      return
+    let contextId = utils.getId(lr._context)
+    for (let i=startI; i>=0; i--) {
+      let r = result[i]
+      if (r[TYPE] !== FORM_REQUEST  ||  r.form === PRODUCT_REQUEST)
+        continue
+      if (r._documentCreated)
+        return
+      if (utils.getId(r._context) === contextId) {
+        result.splice(i, 1)
+        result.splice(insertI, 0, r)
+        return true
+      }
+    }
+  },
+
 
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
   //   if (utils.isWeb()) {
