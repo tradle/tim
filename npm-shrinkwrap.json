@@ -87,8 +87,8 @@
     },
     "@tradle/custom-models": {
       "version": "4.10.10",
-      "from": "tradle/custom-models#dd0220e",
-      "resolved": "git://github.com/tradle/custom-models.git#dd0220ef35e17457d76470472f0f48101e91fd36",
+      "from": "tradle/custom-models",
+      "resolved": "git://github.com/tradle/custom-models.git#eea21f631b3c69a3a1ad690f844d72113b346479",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
