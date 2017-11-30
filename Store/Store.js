@@ -10537,7 +10537,7 @@ var Store = Reflux.createStore({
     let productToForms = {}
     let hasMultiEntry
     allFormRequests.forEach((r) => {
-      if (multiEntryForms(r.form) === -1 || !r._documentCreated  ||  !r._document  ||  !r.product)
+      if (!multiEntryForms.includes(r.form) || !r._documentCreated  ||  !r._document  ||  !r.product)
         return
       hasMultiEntry = true
       var l = productToForms[r.product]
