@@ -203,7 +203,7 @@ class MessageList extends Component {
           // as fulfilled document
           if (!r._document || utils.getId(r) === r._document) {
             let l = clone(list)
-            l.splice(l.length - 2 , 1)
+            l.splice(l.length - 1 , 1)
             this.setState({list: l})
           }
         }
@@ -258,8 +258,8 @@ class MessageList extends Component {
         list = list.map((r) => r)
         list.push(resource)
       }
-
-      utils.pinFormRequest(list)
+      if (!replace)
+        utils.pinFormRequest(list)
 
       let state = {
         // addedItem: addedItem,
