@@ -3061,21 +3061,23 @@ var Store = Reflux.createStore({
         if (!toOrg)
             toOrg = to.organization ? to.organization : to
 
-        if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
-          let cId = utils.getId(rr._context)
-          self.addMessagesToChat(cId, rr)
-          // let context = self._getItem(rr._context)
-          if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
-            if (rr[TYPE] === APPLICATION_DENIAL)
-              context._denied = true
-            else
-              context._approved = true
-            self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-            self.dbPut(cId, context)
-          }
-        }
-        else
-          self.addMessagesToChat(utils.getId(toOrg), rr)
+        // if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
+        //   let cId = utils.getId(rr._context)
+        //   self.addMessagesToChat(cId, rr)
+        //   // let context = self._getItem(rr._context)
+        //   if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
+        //     if (rr[TYPE] === APPLICATION_DENIAL)
+        //       context._denied = true
+        //     else
+        //       context._approved = true
+        //     self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
+        //     self.dbPut(cId, context)
+        //   }
+        // }
+        // else
+        if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION)
+          self.trigger({action: 'updateRow', resource: rr._application, forceUpdate: true})
+        self.addMessagesToChat(utils.getId(toOrg), rr)
       }
       this.addVisualProps(rr)
 
@@ -5685,15 +5687,15 @@ var Store = Reflux.createStore({
     let recipient = this._getItem(recipientId)
     r.to = {
       id: recipientId,
-      title: utils.getDisplayName(recipient.organization || recipient)
+      title: recipient && utils.getDisplayName(recipient.organization || recipient)
     }
     let authorLink = msg._author
     let authorId = utils.makeId(PROFILE, authorLink)
     let author = this._getItem(authorId)
-    r.from = {
-      id: authorId,
-      title: utils.getDisplayName(author.organization || author)
-    }
+    r.from = { id: authorId }
+    if (author)
+      r.from.title = utils.getDisplayName(author.organization || author)
+
     this.addVisualProps(r)
     return r
   },
