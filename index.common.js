@@ -29,7 +29,7 @@ var TimHome = require('./Components/TimHome');
 var MarkdownPropertyEdit = require('./Components/MarkdownPropertyEdit')
 var SignatureView = require('./Components/SignatureView')
 var AvivaIntroView = require('./Components/AvivaIntroView')
-
+// var TsAndCs = require('./Components/TsAndCs')
 // var HomePage = require('./Components/HomePage')
 var PasswordCheck = require('./Components/PasswordCheck');
 var LockScreen = require('./Components/LockScreen')
@@ -76,6 +76,7 @@ const PASSWORD_CHECK = 20
 const REMEDIATION = 29
 const HEIGHT = 27
 const AVIVA_INTRO_VIEW = 50
+// const TERMS_AND_CONDITIONS = 51
 
 var reactMixin = require('react-mixin');
 import {
@@ -122,7 +123,11 @@ const landingPageMapping = {
   AvivaIntroView: {
     component: AvivaIntroView,
     id: AVIVA_INTRO_VIEW
-  }
+  },
+  // TsAndCs: {
+  //   component: ArticleView,
+  //   id: TERMS_AND_CONDITIONS
+  // }
 }
 
 class TiMApp extends Component {
@@ -545,6 +550,8 @@ class TiMApp extends Component {
     //   return <HomePage navigator={nav} {...props} />
     case AVIVA_INTRO_VIEW:
       return <AvivaIntroView navigator={nav} {...props} />
+    // case TERMS_AND_CONDITIONS:
+    //   return <TsAndCs navigator={nav} {...props}  />
     case 30:
       return <GridList navigator={nav} {...props} />
     case 31:
@@ -729,9 +736,8 @@ var NavigationBarRouteMapper = {
       org = <View />;
     let photo, uri
     let photoObj
-    if (route.passProps.bankStyle) {
-      photoObj = route.passProps.bankStyle.logo || route.passProps.bankStyle.logo
-    }
+    if (route.passProps.bankStyle)
+      photoObj = route.passProps.bankStyle.logo
 
     if (!photoObj)
       photoObj = route.id === MESSAGE_LIST        &&
@@ -759,11 +765,13 @@ var NavigationBarRouteMapper = {
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width: width}, utils.isAndroid() ? {marginTop: 23} : {}]} />
       }
     }
-    var style = [platformStyles.navBarText, styles.navBarTitleText, {color: '#555555'}]
+    let t = route.title.split(' -- ')
+    let st = t.length > 1 ? {marginTop: 2} : {}
+
+    var style = [platformStyles.navBarText, styles.navBarTitleText, st]
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
 
-    let t = route.title.split(' -- ')
     let tArr = t.length > 1 ? [] : <View />
 
     for (let i=1; i<t.length; i++)
@@ -771,7 +779,7 @@ var NavigationBarRouteMapper = {
     let text
     if (logoNeedsText  ||  !uri) {
       text = <Text style={style}>
-              {this.makeTitle(t[0])}
+               {this.makeTitle(t[0])}
              </Text>
     }
 
@@ -853,7 +861,7 @@ var styles = StyleSheet.create({
   },
 
   navBarTitleText: {
-    color: '#2E3B4E',
+    color: '#555555',
     fontWeight: '400',
     fontSize: 20,
   },
