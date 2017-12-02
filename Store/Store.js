@@ -6236,7 +6236,7 @@ var Store = Reflux.createStore({
     let refsObj = {}
 
     return Promise.all(allLinks.map(link => {
-      return this.handleOne({ link, all, isForgetting, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query })
+      return this.handleOne({ link, links, all, isForgetting, refsObj, refs, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query })
     }))
     .then((l) => {
       if (!foundResources.length)
@@ -6284,7 +6284,7 @@ var Store = Reflux.createStore({
       all[link] = stub.id
   },
   async handleOne(params) {
-    let { link, all, refsObj, refs, resource, to, prop, list, query } = params
+    let { link, links, all, refsObj, refs, resource, to, prop, list, query } = params
     let rId = all[link]
     let r = this._getItem(rId)
     if (!r)
@@ -6320,9 +6320,12 @@ var Store = Reflux.createStore({
       r._context = rcontext
     }
     // list = this.transformResult(result)
-
-    if (refs.indexOf(r[CUR_HASH]) !== -1)
+    let hash = r[CUR_HASH]
+    if (refs.indexOf(hash) !== -1) {
       refsObj[utils.getId(r)] = r
+      if (links.indexOf(hash) === -1)
+        return
+    }
 
     let checked
     try {
@@ -6719,7 +6722,7 @@ var Store = Reflux.createStore({
     let refsObj = {}
 
     return Promise.all(allLinks.map(link => {
-      return this.handleOne({ link, all, isForgetting, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to })
+      return this.handleOne({ link, links, all, isForgetting, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to })
       // return handleOne(r)
     }))
     .then((l) => {
