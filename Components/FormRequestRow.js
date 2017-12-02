@@ -356,7 +356,6 @@ class FormRequestRow extends Component {
               )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
-    let bankStyle = this.props.bankStyle
     let or
     if (formModel.subClassOf === MY_PRODUCT)
       or = <View style={{paddingVertical: 5}}>
