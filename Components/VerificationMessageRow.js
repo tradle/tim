@@ -232,7 +232,7 @@ class VerificationMessageRow extends Component {
     //   bg = bankStyle.BACKGROUND_COLOR
     var viewStyle = { margin: 1 } //, paddingRight: 10 }
     let contextId = this.getContextId(resource)
-    if (!isMyMessage) {
+    if (!isMyMessage  &&  !isShared) {
       messageBody = <View style={[chatStyles.row]}>
                       {this.getOwnerPhoto(isMyMessage)}
                       {messageBody}
