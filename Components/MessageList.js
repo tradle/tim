@@ -831,7 +831,9 @@ class MessageList extends Component {
   }
 
   getActionSheetItems() {
-    let resource = this.props.resource
+    let { resource, application } = this.props
+    if (application)
+      return
     let me = utils.getMe()
     let hasSupportLine = utils.hasSupportLine(resource)
     let buttons = []
