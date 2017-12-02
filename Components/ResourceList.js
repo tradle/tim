@@ -141,6 +141,9 @@ class ResourceList extends Component {
     else if (this.props.onDownload) {
       routes[routes.length - 1].onRightButtonPress = this.props.onDownload.bind(this)
     }
+    this.selectResource = this.selectResource.bind(this)
+    this.onSettingsPressed = this.onSettingsPressed.bind(this)
+    this.openSharedContextChat = this.openSharedContextChat.bind(this)
   }
   done() {
     let orgs = []
@@ -909,7 +912,7 @@ class ResourceList extends Component {
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
 
-    let selectedResource = resource
+    // let selectedResource = resource
     // if (!isVerification)
       // selectedResource = resource
     // else if (resource.sources || resource.method)
@@ -921,7 +924,7 @@ class ResourceList extends Component {
     if (isVerification  || isForm || isMyProduct)
       return (<VerificationRow
                 lazy={this.props.lazy}
-                onSelect={() => this.selectResource(selectedResource)}
+                onSelect={this.selectResource}
                 key={resource[ROOT_HASH]}
                 navigator={this.props.navigator}
                 prop={this.props.prop}
@@ -933,7 +936,7 @@ class ResourceList extends Component {
       )
     return (<ResourceRow
       lazy={this.props.lazy}
-      onSelect={() => isSharedContext ? this.openSharedContextChat(resource) : this.selectResource(resource)}
+      onSelect={isSharedContext ? this.openSharedContextChat : this.selectResource}
       key={resource[ROOT_HASH]}
       hideResource={this.hideResource.bind(this)}
       hideMode={this.state.hideMode}
@@ -1235,7 +1238,7 @@ class ResourceList extends Component {
       buttons = [
         {
           text: translate('addServerUrl'),
-          onPress: () => this.onSettingsPressed()
+          onPress: this.onSettingsPressed
         },
         {
           text: translate('hideResource', translate(utils.getModel(this.props.modelName).value)),

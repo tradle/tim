@@ -60,6 +60,7 @@ var {
 
 const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
+const APPROVAL = 'tradle.ApplicationApproval'
 const APPLICATION = 'tradle.Application'
 const MODEL = 'tradle.Model'
 
@@ -834,7 +835,6 @@ class GridList extends Component {
     })
   }
   approve(resource) {
-    // Actions.hideModal()
     let isApplication = resource[TYPE] === APPLICATION
     let applicant = isApplication ? resource.applicant : resource.from
     Alert.alert(
@@ -845,11 +845,12 @@ class GridList extends Component {
           console.log('Canceled!')
         }},
         {text: translate('Approve'), onPress: () => {
+          Actions.hideModal()
           let title = utils.makeModelTitle(utils.getModel(resource.product || resource.requestFor).value)
           let me = utils.getMe()
           let msg = {
-            [TYPE]: CONFIRMATION,
-            confirmationFor: resource,
+            [TYPE]: APPROVAL,
+            application: resource,
             message: 'Your application for \'' + title + '\' was approved',
             _context: isApplication ? resource._context : resource,
             from: me,
@@ -861,7 +862,6 @@ class GridList extends Component {
     )
   }
   deny(resource) {
-    // Actions.hideModal()
     let isApplication = resource[TYPE] === APPLICATION
     let applicantTitle = utils.getDisplayName(resource.applicant || resource.from)
     Alert.alert(
@@ -872,6 +872,7 @@ class GridList extends Component {
           console.log('Canceled!')
         }},
         {text: translate('Deny'), onPress: () => {
+          Actions.hideModal()
           let title = utils.makeModelTitle(utils.getModel(resource.product ||  resource.requestFor).value)
           let me = utils.getMe()
           let msg = {

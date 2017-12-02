@@ -181,6 +181,7 @@ const NAME                = 'tradle.Name'
 const APPLICANT           = 'tradle.OnfidoApplicant'
 const CONFIRMATION        = 'tradle.Confirmation'
 const APPLICATION_DENIAL  = 'tradle.ApplicationDenial'
+const APPLICATION_APPROVAL= 'tradle.ApplicationApproval'
 const COUNTRY             = 'tradle.Country'
 const PHOTO               = 'tradle.Photo'
 const SELFIE              = 'tradle.Selfie'
@@ -1324,7 +1325,10 @@ var Store = Reflux.createStore({
           // else
           //   continue
         }
-        if (utils.isReadOnlyChat(r)  ||  r[TYPE] === APPLICATION_DENIAL  ||  (r[TYPE] === CONFIRMATION  &&  utils.getId(r.from) === meId)) {
+        if (utils.isReadOnlyChat(r)           ||
+            r[TYPE] === APPLICATION_DENIAL    ||
+            r[TYPE] === APPLICATION_APPROVAL  ||
+            (r[TYPE] === CONFIRMATION  &&  utils.getId(r.from) === meId)) {
           this.addMessagesToChat(cId, r, true)
           continue
         }
@@ -3077,9 +3081,9 @@ var Store = Reflux.createStore({
         //   }
         // }
         // else
-        if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
+        if (rr[TYPE] === APPLICATION_DENIAL  || rr[TYPE] === APPLICATION_APPROVAL ||  rr[TYPE] === CONFIRMATION) {
           // let app = await this._getItemFromServer(utils.getId(rr.application))
-          self.trigger({action: 'updateRow', resource: rr.application, forceUpdate: true})
+          self.trigger({action: 'updateRow', resource: application || r.application, forceUpdate: true})
         }
         self.addMessagesToChat(utils.getId(toOrg), rr)
       }
@@ -5787,6 +5791,7 @@ var Store = Reflux.createStore({
     case FORM_REQUEST:
     case APPLICATION_SUBMITTED:
     case APPLICATION_DENIAL:
+    case APPLICATION_APPROVAL:
     case CONFIRMATION:
       rr.from = {id: myOrgRepId, title: utils.getDisplayName(me.organization)}
       rr.to = {id: authorId, title: authorTitle}
@@ -6746,7 +6751,6 @@ var Store = Reflux.createStore({
           let prefill = refsObj[utils.getId(r.prefill)]
           if (prefill)
             r.prefill = prefill
-
         }
         this.addVisualProps(r)
       })
@@ -9335,7 +9339,7 @@ var Store = Reflux.createStore({
             context._denied = true
           else if (type === APPLICATION_SUBMITTED)
             context._appSubmitted = true
-          else if (type === CONFIRMATION)
+          else if (type === APPLICATION_APPROVAL)
             context._approved = true
           else
             changed = false
