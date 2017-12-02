@@ -3077,8 +3077,10 @@ var Store = Reflux.createStore({
         //   }
         // }
         // else
-        if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION)
-          self.trigger({action: 'updateRow', resource: rr._application, forceUpdate: true})
+        if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
+          // let app = await this._getItemFromServer(utils.getId(rr.application))
+          self.trigger({action: 'updateRow', resource: rr.application, forceUpdate: true})
+        }
         self.addMessagesToChat(utils.getId(toOrg), rr)
       }
       this.addVisualProps(rr)
