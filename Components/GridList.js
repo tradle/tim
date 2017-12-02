@@ -44,6 +44,7 @@ var {
 
 var {
   PROFILE,
+  IDENTITY,
   ORGANIZATION,
   SELF_INTRODUCTION,
   CUSTOMER_WAITING,
@@ -689,6 +690,14 @@ class GridList extends Component {
         bankStyle: style,
       }
     }
+
+    if (isApplication  &&  resource.relationshipManager) {
+      if (utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE) === utils.getId(me)  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
+        route.rightButtonTitle = 'Approve/Deny'
+        route.onRightButtonPress = () => this.approveDeny(resource)
+      }
+    }
+
     if (isContact) { //  ||  isOrganization) {
       route.title = resource.firstName
       let isMe = isContact ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
@@ -796,8 +805,9 @@ class GridList extends Component {
       Alert.alert('Application was approved')
       return
     }
+    let applicant = resource[TYPE] === APPLICATION ? utils.getDisplayName(resource.applicant) : resource.from.title
     Actions.showModal({
-      title: translate('approveThisApplicationFor', translate(resource.from.title)),
+      title: translate('approveThisApplicationFor', translate(applicant)),
       buttons: [
         {
           text: translate('cancel'),
@@ -806,6 +816,7 @@ class GridList extends Component {
         {
           text: translate('Approve'),
           onPress: () => {
+            console.log('Approve was chosen!')
             if (!resource._appSubmitted)
               Alert.alert('Application is not yet submitted')
             else
@@ -815,6 +826,7 @@ class GridList extends Component {
         {
           text: translate('Deny'),
           onPress: () => {
+            console.log('Deny was chosen!')
             this.deny(resource)
           }
         },
@@ -822,24 +834,26 @@ class GridList extends Component {
     })
   }
   approve(resource) {
-    Actions.hideModal()
+    // Actions.hideModal()
+    let isApplication = resource[TYPE] === APPLICATION
+    let applicant = isApplication ? resource.applicant : resource.from
     Alert.alert(
-      translate('approveApplication', resource.from.title),
+      translate('approveApplication', applicant.title),
       null,
       [
         {text: translate('cancel'), onPress: () => {
           console.log('Canceled!')
         }},
         {text: translate('Approve'), onPress: () => {
-          let title = utils.makeModelTitle(utils.getModel(resource.product).value)
+          let title = utils.makeModelTitle(utils.getModel(resource.product || resource.requestFor).value)
           let me = utils.getMe()
           let msg = {
             [TYPE]: CONFIRMATION,
             confirmationFor: resource,
             message: 'Your application for \'' + title + '\' was approved',
-            _context: resource,
+            _context: isApplication ? resource._context : resource,
             from: me,
-            to: resource.from
+            to: applicant
           }
           Actions.addMessage({msg: msg})
         }}
@@ -847,24 +861,26 @@ class GridList extends Component {
     )
   }
   deny(resource) {
-    Actions.hideModal()
+    // Actions.hideModal()
+    let isApplication = resource[TYPE] === APPLICATION
+    let applicantTitle = utils.getDisplayName(resource.applicant || resource.from)
     Alert.alert(
-      translate('denyApplication', resource.from.title),
+      translate('denyApplication', applicantTitle),
       null,
       [
         {text: translate('cancel'), onPress: () => {
           console.log('Canceled!')
         }},
         {text: translate('Deny'), onPress: () => {
-          let title = utils.makeModelTitle(utils.getModel(resource.product).value)
+          let title = utils.makeModelTitle(utils.getModel(resource.product ||  resource.requestFor).value)
           let me = utils.getMe()
           let msg = {
             [TYPE]: DENIAL,
             application: resource,
             message: 'Your application for \'' + title + '\' was denied',
-            _context: resource,
+            _context: isApplication ? resource._context : resource,
             from: me,
-            to: resource.from
+            to: resource.applicant || resource.from
           }
           Actions.addMessage({msg: msg})
         }}

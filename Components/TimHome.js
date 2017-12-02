@@ -489,7 +489,7 @@ class TimHome extends Component {
       rightButtonTitle: 'Profile',
       passProps: passProps,
       onRightButtonPress: {
-        title: utils.getDisplayName(me),
+        title: utils.getDisplayName(me) + (me.organization ? ' -- ' + me.organization.title : ''),
         id: 3,
         component: ResourceView,
         backButtonTitle: 'Back',
@@ -910,7 +910,7 @@ class TimHome extends Component {
     Actions.reloadModels()
   }
   render() {
-    StatusBar.setHidden(true);
+    // StatusBar.setHidden(true);
     if (this.state.message) {
       this.restartTiM()
       return

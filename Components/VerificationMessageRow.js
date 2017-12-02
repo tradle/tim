@@ -192,7 +192,7 @@ class VerificationMessageRow extends Component {
             <View style={styles.messageBody}>
               <View style={viewStyle}>
                 <View style={[chatStyles.textContainer, addStyle]}>
-                  <View style={[styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.verifiedBorderColor}, isMyMessage ? styles.headerRight : styles.headerLeft]}>
+                  <View style={[styles.imageFrame, {backgroundColor: '#ffffff', borderWidth: 1, borderColor: bankStyle.verifiedBorderColor}, isMyMessage || isShared ? styles.headerRight : styles.headerLeft]}>
                     <View style={[styles.image, addStyle]}>
                       {renderedRow}
                     </View>
@@ -232,14 +232,17 @@ class VerificationMessageRow extends Component {
     //   bg = bankStyle.BACKGROUND_COLOR
     var viewStyle = { margin: 1 } //, paddingRight: 10 }
     let contextId = this.getContextId(resource)
+    if (!isMyMessage) {
+      messageBody = <View style={[chatStyles.row]}>
+                      {this.getOwnerPhoto(isMyMessage)}
+                      {messageBody}
+                    </View>
+    }
 
     return (
       <View key={this.getNextKey()}>
         {date}
-        <View style={[chatStyles.row]}>
-          {this.getOwnerPhoto(isMyMessage)}
-          {messageBody}
-        </View>
+        {messageBody}
         {contextId}
       </View>
     );
