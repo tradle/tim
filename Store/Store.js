@@ -96,12 +96,12 @@ const utils = require('../utils/utils');
 const graphQL = require('./graphql/graphql-client')
 // const storeUtils = require('./utils/utils')
 const voc = (function () {
-  const models = require('@tradle/models').concat(require('@tradle/custom-models'))
-  models.forEach(model => {
-    if (model.id) models[model.id] = model
+  const base = require('@tradle/models').models
+  const custom = require('@tradle/custom-models')
+  return utils.clone({
+    ...base,
+    ...custom
   })
-
-  return utils.clone(models)
 }())
 
 var sampleProfile = require('../data/sampleProfile.json')
