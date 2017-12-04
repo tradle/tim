@@ -630,6 +630,38 @@ var utils = {
       return resource[p] + '';
   },
 
+  getEditCols(model) {
+    let { editCols, viewCols, properties } = model
+    if (!editCols  &&  !viewCols)
+      return properties
+    let eCols = {}
+    if (editCols) {
+      editCols.forEach((p) => {
+        let idx = p.indexOf('_group')
+        if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
+          eCols[p] = properties[p]
+
+        if (idx !== -1  &&  properties[p].list)
+          properties[p].list.forEach((p) => eCols[p] = properties[p])
+      })
+      return eCols
+    }
+    viewCols.forEach((p) => {
+      let idx = p.indexOf('_group')
+      if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
+        eCols[p] = properties[p]
+
+      if (idx !== -1  &&  properties[p].list)
+        properties[p].list.forEach((p) => eCols[p] = properties[p])
+      // eCols[p] = props[p]
+    })
+    // ViewCols on top
+    for (let p in properties) {
+      if (!eCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden)
+        eCols[p] = properties[p]
+    }
+    return eCols
+  },
   template (t, o) {
     return t.replace(/{([^{}]*)}/g,
         function (a, b) {

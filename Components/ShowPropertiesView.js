@@ -76,35 +76,43 @@ class ShowPropertiesView extends Component {
       resource = this.props.resource
     var modelName = resource[constants.TYPE];
     var model = utils.getModel(modelName).value;
-    var vCols = model.viewCols
+    var vCols
+
+    let { checkProperties, excludedProperties, bankStyle, currency, showRefResource, onPageLayout } = this.props
 
     var props = model.properties;
-    if (this.props.checkProperties) {
-      let exclude = ['from', 'to']
+    if (checkProperties) {
+      vCols = utils.getEditCols(model)
       if (vCols)
-        vCols = utils.clone(vCols)
-      vCols = []
-      for (var p in resource) {
-        if (p.charAt(0) === '_'  ||  !props[p])
-          continue
-        if (exclude.indexOf(p) === -1  && vCols.indexOf(p) === -1)
-          vCols.push(p)
-      }
+        vCols = Object.keys(vCols)
+      // let exclude = ['from', 'to']
+      // if (vCols)
+      //   vCols = utils.clone(vCols)
+      // vCols = []
+      // for (var p in resource) {
+      //   if (p.charAt(0) === '_'  ||  !props[p])
+      //     continue
+      //   if (exclude.indexOf(p) === -1  && vCols.indexOf(p) === -1)
+      //     vCols.push(p)
+      // }
 
-      vCols = utils.ungroup(model, vCols)
-      let v = []
-      vCols.forEach((p) => {
-        if (p.charAt(0) === '_'  ||  props[p].hidden) //  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
-          return
-        v.push(p)
-        // let idx = p.indexOf('_group')
-        // if (idx !== -1  &&  idx === p.length - 6)
-        //   props[p].list.forEach((p) => v.push(p))
-      })
-      vCols = v
+      // vCols = utils.ungroup(model, vCols)
+      // let v = []
+      // vCols.forEach((p) => {
+      //   if (p.charAt(0) === '_'  ||  props[p].hidden) //  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
+      //     return
+      //   v.push(p)
+      //   // let idx = p.indexOf('_group')
+      //   // if (idx !== -1  &&  idx === p.length - 6)
+      //   //   props[p].list.forEach((p) => v.push(p))
+      // })
+      // vCols = v
     }
-    else if (vCols)
-      vCols = utils.ungroup(model, vCols)
+    else {
+      vCols = model.viewCols
+      if (vCols)
+        vCols = utils.ungroup(model, vCols)
+    }
     // else {
     //   let v = []
     //   vCols.forEach((p) => {
@@ -119,7 +127,6 @@ class ShowPropertiesView extends Component {
 
     // }
 
-    var excludedProperties = this.props.excludedProperties;
     if (excludedProperties) {
       var mapped = [];
       excludedProperties.forEach((p) =>  {
@@ -186,11 +193,11 @@ class ShowPropertiesView extends Component {
       if (isUndefined) {
         if (pMeta.displayAs)
           val = utils.templateIt(pMeta, resource);
-        else if (this.props.checkProperties) {
+        else if (checkProperties) {
           if (p.indexOf('_group') === p.length - 6) {
             return (<View style={{padding: 15}} key={this.getNextKey()}>
-                      <View style={{borderBottomColor: this.props.bankStyle.linkColor, borderBottomWidth: 1, paddingBottom: 5}}>
-                        <Text style={{fontSize: 22, color: this.props.bankStyle.linkColor}}>{translate(pMeta)}</Text>
+                      <View style={{borderBottomColor: bankStyle.linkColor, borderBottomWidth: 1, paddingBottom: 5}}>
+                        <Text style={{fontSize: 22, color: bankStyle.linkColor}}>{translate(pMeta)}</Text>
                       </View>
                     </View>
              );
@@ -213,7 +220,7 @@ class ShowPropertiesView extends Component {
           return
         }
         if (pMeta.ref == constants.TYPES.MONEY) {
-          let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
+          let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }
@@ -227,12 +234,12 @@ class ShowPropertiesView extends Component {
         // Could be enum like props
         else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
           val = val.title
-        else if (this.props.showRefResource) {
+        else if (showRefResource) {
           // ex. property that is referencing to the Organization for the contact
           var value = val[constants.TYPE] ? utils.getDisplayName(val) : val.title;
           if (!value)
             value = utils.makeModelTitle(utils.getType(val))
-          val = <TouchableOpacity onPress={this.props.showRefResource.bind(this, val, pMeta)}>
+          val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
                  <Text style={[styles.title, styles.linkTitle]}>{value}</Text>
                </TouchableOpacity>
 
@@ -240,8 +247,11 @@ class ShowPropertiesView extends Component {
         }
       }
 
-      if (isUndefined)
-        return //<View key={this.getNextKey()}></View>;
+      if (isUndefined) {
+        if (!checkProperties)
+          return
+        val = <Text style={styles.title}>{NOT_SPECIFIED}</Text>
+      }
       let checkForCorrection = this.getCheckForCorrection(pMeta)
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
@@ -306,7 +316,7 @@ class ShowPropertiesView extends Component {
       let isPromptVisible = this.state.promptVisible !== null
       if (isPromptVisible)
         console.log(this.state.promptVisible)
-      if (this.props.checkProperties)
+      if (checkProperties)
         isDirectionRow = true
                // <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
 
@@ -331,8 +341,6 @@ class ShowPropertiesView extends Component {
              );
     });
     if (resource.txId) { // || utils.isSealableModel(model)) {
-      let bankStyle = this.props.bankStyle
-
       let header = (<View style={{padding: 10 }} key={this.getNextKey()}>
                       <View style={[styles.textContainer, styles.row]}>
                         <Text style={styles.bigTitle}>{translate('dataSecurity')}</Text>
@@ -366,7 +374,7 @@ class ShowPropertiesView extends Component {
                   onPress={() => {
                     self.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
                       if (h  &&  y > pY)
-                        this.props.onPageLayout(pY, h)
+                        onPageLayout(pY, h)
                     })
                   }}
                   header={header}
