@@ -1650,7 +1650,7 @@ var NewResourceMixin = {
                     value: value.value ? value.value + '' : '',
                     required: required,
                     model: model,
-                    errors: formErrors,
+                    errors: errors,
                     editable: editable,
                     component: component,
                     keyboard: search ? null : 'numeric',
@@ -1662,7 +1662,7 @@ var NewResourceMixin = {
                     enumProp: utils.getModel(MONEY).value.properties.currency,
                     required: required,
                     value:    utils.normalizeCurrencySymbol(value.currency),
-                    errors:   formErrors,
+                    errors:   errors,
                     component: component,
                     // noError:  errors && errors[prop],
                     noError: true
