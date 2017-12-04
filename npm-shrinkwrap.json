@@ -71,7 +71,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#eea21f631b3c69a3a1ad690f844d72113b346479",
+      "resolved": "git://github.com/tradle/custom-models.git#dc9bf4d8be7be05a2292e1e4303fbb5cb998318b",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
@@ -147,7 +147,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#4494fab76599cd9354bf1de6cadd6330907d539b",
+      "resolved": "git://github.com/tradle/models.git#607f7719f7cd28b6f8affbd3da7982348e59fac9",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
@@ -353,9 +353,9 @@
       }
     },
     "@tradle/yuki": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "from": "@tradle/yuki@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.1.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.1.1.tgz",
       "dependencies": {
         "debug": {
           "version": "3.0.1",
@@ -8067,7 +8067,7 @@
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "pgmemk/react-native-gifted-messenger#72cd032",
+      "from": "pgmemk/react-native-gifted-messenger#e0e1295",
       "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#e0e12954392abe4cd1b0cc47e2ab3744113a9441"
     },
     "react-native-gifted-spinner": {
