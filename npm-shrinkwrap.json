@@ -307,14 +307,14 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "2.3.0",
-      "from": "@tradle/validate-model@>=2.3.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-2.3.0.tgz",
+      "version": "4.1.0",
+      "from": "@tradle/validate-model@>=4.1.0 <5.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-4.1.0.tgz",
       "dependencies": {
         "typeforce": {
-          "version": "1.11.5",
-          "from": "typeforce@>=1.10.6 <2.0.0",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.11.5.tgz"
+          "version": "1.12.0",
+          "from": "typeforce@^1.10.6",
+          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.12.0.tgz"
         }
       }
     },
@@ -358,9 +358,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.1.1.tgz",
       "dependencies": {
         "debug": {
-          "version": "3.0.1",
-          "from": "debug@https://registry.npmjs.org/debug/-/debug-3.0.1.tgz",
-          "resolved": "https://registry.npmjs.org/debug/-/debug-3.0.1.tgz"
+          "version": "3.1.0",
+          "from": "debug@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-3.1.0.tgz"
         },
         "map-stream": {
           "version": "0.0.7",
@@ -378,9 +378,9 @@
           "resolved": "https://registry.npmjs.org/pify/-/pify-3.0.0.tgz"
         },
         "pump": {
-          "version": "1.0.2",
-          "from": "pump@https://registry.npmjs.org/pump/-/pump-1.0.2.tgz",
-          "resolved": "https://registry.npmjs.org/pump/-/pump-1.0.2.tgz"
+          "version": "1.0.3",
+          "from": "pump@>=1.0.2 <2.0.0",
+          "resolved": "https://registry.npmjs.org/pump/-/pump-1.0.3.tgz"
         }
       }
     },
