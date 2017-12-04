@@ -629,7 +629,6 @@ var utils = {
     else
       return resource[p] + '';
   },
-
   getEditCols(model) {
     let { editCols, viewCols, properties } = model
     if (!editCols  &&  !viewCols)

@@ -156,9 +156,7 @@ var RowMixin = {
       return <Image source={{uri: uri}} style={styles.msgImage} />
     }
     if (!isMyMessage) {
-      let title = resource.from.title  && resource.from.title.split(' ').map((s) => {
-        return s.charAt(0) === '[' ? '' : s.charAt(0);
-      }).join('');
+      let title = resource.from.title  && resource.from.title.split(' ').map((s) => s.charAt(0) === '[' ? '' : s.charAt(0)).join('')
       if (!title)
         title = 'U'  // for UNKNOWN
       return <View style={{paddingRight: 3}}>

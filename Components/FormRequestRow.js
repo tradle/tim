@@ -386,6 +386,7 @@ class FormRequestRow extends Component {
   }
   formatShareables(params) {
     let { model, verification, onPress, providers } = params
+    let { bankStyle, resource, onSelect, to, share } = this.props
 
     var document = verification.document
 
@@ -405,33 +406,31 @@ class FormRequestRow extends Component {
 
     let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16, width: msgWidth - 100, color: '#555555'}]
-    let bankStyle = this.props.bankStyle
     let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
     var headerContent = <View style={headerStyle}>
                           <Text style={hs}>{utils.getDisplayName(document)}</Text>
                         </View>
 
-    let header = <TouchableHighlight underlayColor='transparent' onPress={this.props.onSelect.bind(this, document, verification)}>
+    let header = <TouchableHighlight underlayColor='transparent' onPress={onSelect.bind(this, document, verification)}>
                    <View style={styles.header}>
                      {headerContent}
                      {arrow}
                    </View>
                  </TouchableHighlight>
     var orgRow = <View/>
-    let resource = this.props.resource
     let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     let isItem = utils.isSavedItem(document)
     if (verification  && (verification.organization || isItem)) {
       var orgPhoto = !isItem  &&  verification.organization.photo
                    ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={styles.orgImage} />
                    : <View />
-      var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: this.props.resource._documentCreated ? 0.3 : 1}]}>
+      var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: resource._documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
-      var orgTitle = this.props.to[TYPE] === ORGANIZATION
-                   ? this.props.to.name
-                   : (this.props.to.organization ? this.props.to.organization.title : null);
+      var orgTitle = to[TYPE] === ORGANIZATION
+                   ? to.name
+                   : (to.organization ? to.organization.title : null);
       // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
       let verifiedBy
       // Not verified Form - still shareable
@@ -472,10 +471,10 @@ class FormRequestRow extends Component {
                       </View>
       if (onPress) {
       }
-      else if (this.props.resource._documentCreated) {
+      else if (resource._documentCreated) {
         orgRow =  <View style={chatStyles.shareView}>
                     {shareView}
-                    <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                    <TouchableHighlight onPress={onSelect.bind(this, document, verification)} underlayColor='transparent'>
                       {orgView}
                     </TouchableHighlight>
                   </View>
@@ -488,19 +487,19 @@ class FormRequestRow extends Component {
                               'with ' + orgTitle,
                               [
                                 {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                                {text: translate('Share'), onPress: this.props.share.bind(this, verification, this.props.to, this.props.resource)},
+                                {text: translate('Share'), onPress: share.bind(this, verification, to, resource)},
                               ]
                           )}>
                     {shareView}
                    </TouchableHighlight>
-                   <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                   <TouchableHighlight onPress={onSelect.bind(this, document, verification)} underlayColor='transparent'>
                      {orgView}
                    </TouchableHighlight>
                 </View>
       }
     }
     let content = <View style={{flex:1, paddingVertical: 3}}>
-                     <TouchableHighlight onPress={this.props.onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                     <TouchableHighlight onPress={onSelect.bind(this, document, verification)} underlayColor='transparent'>
                        {msg}
                      </TouchableHighlight>
                      {orgRow}

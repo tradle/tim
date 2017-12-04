@@ -145,13 +145,13 @@ var NewResourceMixin = {
     if (this.props.editCols) {
       eCols = {};
       this.props.editCols.forEach((r) => {
-        eCols[r] = props[r];
+        eCols[r] = props[r]
       })
     }
     else
-      eCols = utils.getEditCols(meta)
-    //  if (meta.editCols) {
-    //   // utils.arrayToObject(meta.editCols);
+       eCols = utils.getEditCols(meta)
+    // else if (meta.editCols) {
+    //   utils.arrayToObject(meta.editCols);
     //   editCols = {}
     //   meta.editCols.forEach((p) => {
     //     let idx = p.indexOf('_group')
@@ -258,7 +258,6 @@ var NewResourceMixin = {
       }
       if (!errMessage)
          errMessage = translate('thisFieldIsRequired')
-
       options.fields[p] = {
         bufferDelay: 20, // to eliminate missed keystrokes
         error: errMessage
