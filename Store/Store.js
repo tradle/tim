@@ -797,12 +797,13 @@ var Store = Reflux.createStore({
     }
   },
   addModels() {
-    voc.forEach((m) => {
+    for (let id in voc) {
+      let m = voc[id]
       // if (!m[ROOT_HASH])
       //   m[ROOT_HASH] = sha(m);
       Aviva.preparseModel(m)
-      models[m.id] = {
-        key: m.id,
+      models[id] = {
+        key: id,
         value: m
       }
       m[ROOT_HASH] = sha(m)
@@ -824,7 +825,7 @@ var Store = Reflux.createStore({
       this.addNameAndTitleProps(m)
       this.addVerificationsToFormModel(m)
       this.addFromAndTo(m)
-    })
+    }
   },
   _handleConnectivityChange(isConnected) {
     if (isConnected === this.isConnected) return
