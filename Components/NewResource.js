@@ -665,9 +665,9 @@ class NewResource extends Component {
     if (isRegistration)
       params.isRegistration = true
     if (this.props.originatingMessage  &&  this.props.originatingMessage[constants.TYPE] === FORM_ERROR) {
-      params.errors = {}
+      params.formErrors = {}
       this.props.originatingMessage.errors.forEach((r) => {
-        params.errors[r.name] = r.error
+        params.formErrors[r.name] = r.error
       })
     }
     var options = this.getFormFields(params);
@@ -1417,10 +1417,6 @@ var styles = StyleSheet.create({
     padding: 10,
     borderBottomColor: '#eeeeee',
     borderBottomWidth: 1
-  },
-  scroll: {
-    backgroundColor: 'transparent',
-    paddingTop:10
   },
   bar: {
     backgroundColor: 'transparent',

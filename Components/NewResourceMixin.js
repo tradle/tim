@@ -103,15 +103,13 @@ var NewResourceMixin = {
   getFormFields(params) {
     let {currency, bankStyle} = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
-    let { component, errors } = params
+    let { component, formErrors, model, data } = params
 
     let meta = this.props.model  ||  this.props.metadata;
-    let model = params.model;  // For the form
     let onSubmitEditing = this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
     let chooser = this.chooser  ||  this.props.chooser
     let models = utils.getModels();
-    let data = params.data;
     let options = {};
     options.fields = {};
 
@@ -143,55 +141,57 @@ var NewResourceMixin = {
       }
     }
 
-    let editCols
-    if (this.props.editCols) {
-      editCols = {};
-      this.props.editCols.forEach(function(r) {
-        editCols[r] = props[r];
-      })
-    }
-    else if (meta.editCols) {
-      utils.arrayToObject(meta.editCols);
-      editCols = {}
-      meta.editCols.forEach((p) => {
-        let idx = p.indexOf('_group')
-        if (idx === -1  ||  !props[p].list || props[p].title.toLowerCase() !== p)
-          editCols[p] = props[p]
-
-        if (idx !== -1  &&  props[p].list)
-          props[p].list.forEach((p) => editCols[p] = props[p])
-      })
-    }
-
     let eCols
-    if (editCols)
-      eCols = editCols
-    else if (!meta.viewCols)
-      eCols = props
-    else {
-      eCols = {}
-      meta.viewCols.forEach((p) => {
-        let idx = p.indexOf('_group')
-        if (idx === -1  ||  !props[p].list || props[p].title.toLowerCase() !== p)
-          eCols[p] = props[p]
-
-        if (idx !== -1  &&  props[p].list)
-          props[p].list.forEach((p) => eCols[p] = props[p])
-        // eCols[p] = props[p]
+    if (this.props.editCols) {
+      eCols = {};
+      this.props.editCols.forEach((r) => {
+        eCols[r] = props[r];
       })
-      for (let p in props) {
-        if (!eCols[p]  &&  !props[p].readOnly  &&  !props[p].hidden)
-          eCols[p] = props[p]
-      }
     }
+    else
+      eCols = utils.getEditCols(meta)
+    //  if (meta.editCols) {
+    //   // utils.arrayToObject(meta.editCols);
+    //   editCols = {}
+    //   meta.editCols.forEach((p) => {
+    //     let idx = p.indexOf('_group')
+    //     if (idx === -1  ||  !props[p].list || props[p].title.toLowerCase() !== p)
+    //       editCols[p] = props[p]
+
+    //     if (idx !== -1  &&  props[p].list)
+    //       props[p].list.forEach((p) => editCols[p] = props[p])
+    //   })
+    // }
+
+    // let eCols
+    // if (editCols)
+    //   eCols = editCols
+    // else if (!meta.viewCols)
+    //   eCols = props
+    // else {
+    //   eCols = {}
+    //   meta.viewCols.forEach((p) => {
+    //     let idx = p.indexOf('_group')
+    //     if (idx === -1  ||  !props[p].list || props[p].title.toLowerCase() !== p)
+    //       eCols[p] = props[p]
+
+    //     if (idx !== -1  &&  props[p].list)
+    //       props[p].list.forEach((p) => eCols[p] = props[p])
+    //     // eCols[p] = props[p]
+    //   })
+    //   for (let p in props) {
+    //     if (!eCols[p]  &&  !props[p].readOnly  &&  !props[p].hidden)
+    //       eCols[p] = props[p]
+    //   }
+    // }
     let { errs, requestedProperties } = this.props
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
     if (!requestedProperties  &&  data)
       requestedProperties = this.getRequestedProperties(data)
     if (requestedProperties) {
-      if (!errors)
-        errors = {}
+      if (!formErrors)
+        formErrors = {}
       for (let p in requestedProperties) {
         if (eCols[p]) {
           this.addError(p, params)
@@ -245,12 +245,23 @@ var NewResourceMixin = {
       let label = translate(props[p], meta) //props[p].title;
       if (!label)
         label = utils.makeLabel(p);
-      let errMessage = (errs  &&  errs[p])
-                     ? errs[p]
-                     : translate('thisFieldIsRequired')
+      let errMessage
+      if (errs  &&  errs[p]) {
+        if (resource[p] === this.props.resource[p])
+          errMessage = errs[p]
+      }
+      if (formErrors  &&  formErrors[p]) {
+        if (resource[p] === this.props.resource[p])
+          errMessage = formErrors[p]
+        else
+          delete formErrors[p]
+      }
+      if (!errMessage)
+         errMessage = translate('thisFieldIsRequired')
+
       options.fields[p] = {
-        error: errMessage, //'This field is required',
         bufferDelay: 20, // to eliminate missed keystrokes
+        error: errMessage
       }
       let isRange
       if (props[p].units) {
@@ -292,7 +303,7 @@ var NewResourceMixin = {
                     prop:  props[p],
                     required: !maybe,
                     model: meta,
-                    errors: errors,
+                    errors: formErrors,
                     component: component,
                     value: data[p] ? new Date(data[p]) : data[p]
                   })
@@ -319,7 +330,7 @@ var NewResourceMixin = {
                     value: v,
                     required: !maybe,
                     component: component,
-                    errors: errors,
+                    errors: formErrors,
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this);
@@ -360,7 +371,7 @@ var NewResourceMixin = {
                     model: meta,
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
-                    errors: errors,
+                    errors: formErrors,
                     editable: params.editable,
                   })
         }
@@ -371,7 +382,7 @@ var NewResourceMixin = {
                     model: meta,
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
-                    errors: errors,
+                    errors: formErrors,
                     component: component,
                     editable: params.editable,
                   })
@@ -384,7 +395,7 @@ var NewResourceMixin = {
                     value: data  &&  data[p] ? data[p] + '' : null,
                     required: !maybe,
                     onSubmitEditing: onSubmitEditing.bind(this),
-                    errors: errors,
+                    errors: formErrors,
                     component: component,
                     editable: params.editable,
                     keyboard: props[p].keyboard ||  (!search && type === 'number' ? 'numeric' : 'default'),
@@ -452,7 +463,7 @@ var NewResourceMixin = {
                     keyboard: 'numeric',
                     component: component,
                     required: !maybe,
-                    errors: errors,
+                    errors: formErrors,
                   })
 
           options.fields[p].onSubmitEditing = onSubmitEditing.bind(this)
@@ -477,7 +488,7 @@ var NewResourceMixin = {
             label: label,
             prop:  p,
             required: !maybe,
-            errors: errors,
+            errors: formErrors,
             component: component,
             chooser: options.fields[p].onFocus,
           })
@@ -520,7 +531,7 @@ var NewResourceMixin = {
       options.fields.video.template = this.myCustomTemplate.bind(this, {
           label: translate(props.video, meta),
           prop:  'video',
-          errors: errors,
+          errors: formErrors,
           component: component,
           required: !maybe
         })
@@ -529,11 +540,11 @@ var NewResourceMixin = {
   },
   addError(p, params) {
     let { errs } = this.props
-    let { errors } = params
+    let { formErrors } = params
     if (errs)
       errs[p] = ''
-    if (!errors[p])
-      errors[p] = translate('thisFieldIsRequired')
+    if (!formErrors[p])
+      formErrors[p] = translate('thisFieldIsRequired')
   },
   getNextKey() {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
