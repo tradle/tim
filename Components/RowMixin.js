@@ -157,7 +157,7 @@ var RowMixin = {
     }
     if (!isMyMessage) {
       let title = resource.from.title  && resource.from.title.split(' ').map((s) => {
-        return s.charAt(0);
+        return s.charAt(0) === '[' ? '' : s.charAt(0);
       }).join('');
       if (!title)
         title = 'U'  // for UNKNOWN
