@@ -121,7 +121,7 @@
     "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#pointerEvents",
     "react-native-gallery": "0.0.17",
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password#6ccf2955",
-    "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#72cd032",
+    "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger",
     "react-native-http": "github:tradle/react-native-http#834492d",
     "react-native-image-picker": "0.22.7",
     "react-native-infinite-scroll-view": "github:mvayngrib/react-native-infinite-scroll-view",

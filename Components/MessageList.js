@@ -184,7 +184,7 @@ class MessageList extends Component {
 
     if (action === 'assignRM_Confirmed') {
       if (application[ROOT_HASH] === params.application[ROOT_HASH]) {
-        Actions.list({modelName: MESSAGE, application: params.application, search: true})
+        // Actions.list({modelName: MESSAGE, application: params.application, search: true})
         let r = utils.clone(application)
         r.relationshipManager = params.application.relationshipManager
         this.setState({application: r})
@@ -502,7 +502,7 @@ class MessageList extends Component {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     if (!r[TYPE])
       return;
-    let { application } = this.props
+    let application = this.state.application || this.props.application
     let me = utils.getMe()
     // if (application) {
     //   if (!application.relationshipManager)
@@ -595,8 +595,8 @@ class MessageList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
+    let { application, isAggregation, bankStyle, originatingMessage, currency, country, navigator } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id).value;
-    let isAggregation = this.props.isAggregation;
     let me = utils.getMe();
     // let MessageRow = require('./MessageRow');
     let previousMessageTime = currentMessageTime;
@@ -608,11 +608,11 @@ class MessageList extends Component {
     let props = {
       onSelect: this.selectResource.bind(this),
       resource: resource,
-      bankStyle: this.props.bankStyle,
+      bankStyle: bankStyle,
       context: context,
-      application: this.props.application,
+      application: this.state.application || application,
       to: isAggregation ? resource.to : this.props.resource,
-      navigator: this.props.navigator,
+      navigator: navigator,
       switchChat: isContext ? this.switchChat.bind(this, resource) : null
     }
     if (model.subClassOf === 'tradle.MyProduct')
@@ -624,7 +624,7 @@ class MessageList extends Component {
     let moreProps = {
       share: this.share.bind(this),
       // sendStatus: sendStatus,
-      currency: this.props.resource.currency || this.props.currency,
+      currency: this.props.resource.currency || currency,
       country: this.props.resource.country,
       defaultPropertyValues: this.props.resource._defaultPropertyValues,
       previousMessageTime: previousMessageTime,
@@ -634,8 +634,8 @@ class MessageList extends Component {
     props = extend(props, moreProps)
     if (model.id === VERIFICATION) {
       if (this.state.verifiedByTrustedProvider  &&  this.state.verifiedByTrustedProvider[ROOT_HASH] === resource[ROOT_HASH]) {
-        props.shareWithRequestedParty = this.props.originatingMessage.from
-        props.originatingMessage = this.props.originatingMessage
+        props.shareWithRequestedParty = originatingMessage.from
+        props.originatingMessage = originatingMessage
       }
       return  <VerificationMessageRow {...props} />
     }
@@ -1012,6 +1012,8 @@ class MessageList extends Component {
   }
 
   paintMenuButton() {
+    if (this.props.application)
+      return
     return  <View style={[platformStyles.menuButtonNarrow, {width: 47, borderRadius: 24, alignItems: 'center', opacity: 0.4}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>

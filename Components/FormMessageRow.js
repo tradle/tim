@@ -40,7 +40,17 @@ class FormMessageRow extends Component {
     super(props);
   }
   shouldComponentUpdate(nextProps, nextState) {
-    let {resource, to, orientation} = this.props
+    let {resource, to, orientation, application} = this.props
+    if (application) {
+      let thisRM = application.relationshipManager
+      let nextRM = nextProps.application.relationshipManager
+      if (thisRM) {
+        if (nextProps.application  &&  (!nextRM  ||  utils.getId(nextRM) !== utils.getId(thisRM)))
+          return true
+      }
+      else if (nextRM)
+        return true
+    }
     return utils.getId(resource) !== utils.getId(nextProps.resource) ||
            !equal(to, nextProps.to)             ||
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
