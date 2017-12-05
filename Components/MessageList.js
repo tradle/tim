@@ -180,7 +180,7 @@ class MessageList extends Component {
         this.setState({productToForms: productToForms})
       return
     }
-    let { application, modelName, bankStyle, navigator, originatingMessage } = this.props
+    let { application, modelName, bankStyle, navigator } = this.props
 
     if (action === 'assignRM_Confirmed') {
       if (application[ROOT_HASH] === params.application[ROOT_HASH]) {
@@ -193,125 +193,8 @@ class MessageList extends Component {
     }
     let rtype = resource  &&  resource[TYPE]
     if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
-      if (!utils.isMessage(resource))
-        return
-      if (rtype === NEXT_FORM_REQUEST) {
-        let list = this.state.list
-        let r = list[list.length - 1]
-        if (r[TYPE] === FORM_REQUEST  &&  r.form === resource.after) {
-          // not fulfilled form request for multi-entry form will have it's own ID set
-          // as fulfilled document
-          if (!r._document || utils.getId(r) === r._document) {
-            let l = clone(list)
-            l.splice(l.length - 1 , 1)
-            this.setState({list: l})
-          }
-        }
-        return
-      }
-
-      let rid = utils.getId(chatWith)
-      let isContext = utils.isContext(chatWith[TYPE])
-      if (isContext) {
-        if (!resource._context  ||  utils.getId(resource._context) !== utils.getId(chatWith))
-          return
-      }
-      else if (chatWith[TYPE] !== PROFILE) {
-        let fid = resource.from.organization &&  utils.getId(resource.from.organization)
-        let tid = resource.to.organization && utils.getId(resource.to.organization)
-        if (rid !== fid  &&  rid !== tid  &&  !to)
-          return
-      }
-
-      let actionParams = {
-        query: this.state.filter,
-        modelName: modelName,
-        to: chatWith,
-        context: this.state.allContexts ? null : this.state.context,
-        limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
-      }
-      // if (resource._sendStatus) {
-      //   this.state.sendStatus = resource._sendStatus
-      //   this.state.sendResource = resource
-      // }
-      // let addedItem
-      let replace
-      if (rtype === FORM_REQUEST            ||
-          rtype === CONFIRM_PACKAGE_REQUEST ||
-          rtype === FORM_ERROR              ||
-          resource._denied                  ||
-          resource._approved) {
-        // addedItem = resource
-        if (resource._documentCreated  ||  resource._denied  ||  resource._approved)
-          replace = true
-      }
-      // else
-      //   addedItem = null
-
-      let list
-      list = this.state.list || []
-      if (replace) {
-        let resourceId = utils.getId(resource)
-        list = list.map((r) => utils.getId(r) === resourceId ? resource : r)
-      }
-      else {
-        list = list.map((r) => r)
-        list.push(resource)
-      }
-      if (!replace)
-        utils.pinFormRequest(list)
-
-      let state = {
-        // addedItem: addedItem,
-        list: list
-      }
-      let currentContext
-      if (utils.isContext(resource))
-        currentContext = resource
-      else if(rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
-        currentContext = resource._context
-      if (currentContext)
-        state.currentContext = currentContext
-      if (productToForms)
-        state.productToForms = productToForms
-      else if (utils.getModel(rtype).value.subClassOf === FORM  &&  resource._context) {
-        let product = resource._context.product
-        if (this.state.productToForms)
-          productToForms = clone(this.state.productToForms)
-        else
-          productToForms = {}
-
-        let l = productToForms[product]
-        if (!l) {
-          l = {}
-          productToForms[product] = {}
-        }
-        let forms = l[rtype]
-
-        if (!forms) {
-          forms = []
-          l[rtype] = forms
-        }
-        forms.push(utils.getId(resource))
-
-        state.productToForms = productToForms
-      }
-      if (shareableResources)
-        state.shareableResources = shareableResources
-      this.setState(state)
-
-      if (action === 'addVerification') {
-        if (originatingMessage  &&  originatingMessage.verifiers)  {
-          let docType = utils.getId(resource.document).split('_')[0]
-          this.state.verifiedByTrustedProvider = originatingMessage.form === docType
-                                               ? resource
-                                               : null
-        }
-        else
-          this.state.verifiedByTrustedProvider = null
-      }
-      // Actions.list(actionParams)
-      return;
+      this.add(params)
+      return
     }
     let { sendStatus, isAggregation, forgetMeFromCustomer, context, list, loadEarlierMessages, switchToContext } = params
     this.state.newItem = false
@@ -419,6 +302,130 @@ class MessageList extends Component {
     }
     else
       this.setState({isLoading: false, isEmployee: isEmployee})
+  }
+  add(params) {
+    let { action, resource, to, productToForms, shareableResources, modelName, originatingMessage } = params
+    if (!utils.isMessage(resource))
+      return
+
+    let chatWith = this.props.resource
+    let rtype = resource  &&  resource[TYPE]
+    if (rtype === NEXT_FORM_REQUEST) {
+      let list = this.state.list
+      let r = list[list.length - 1]
+      if (r[TYPE] === FORM_REQUEST  &&  r.form === resource.after) {
+        // not fulfilled form request for multi-entry form will have it's own ID set
+        // as fulfilled document
+        if (!r._document || utils.getId(r) === r._document) {
+          let l = clone(list)
+          l.splice(l.length - 1 , 1)
+          this.setState({list: l})
+        }
+      }
+      return
+    }
+
+    let rid = utils.getId(chatWith)
+    let isContext = utils.isContext(chatWith[TYPE])
+    if (isContext) {
+      if (!resource._context  ||  utils.getId(resource._context) !== utils.getId(chatWith))
+        return
+    }
+    else if (chatWith[TYPE] !== PROFILE) {
+      let fid = resource.from.organization &&  utils.getId(resource.from.organization)
+      let tid = resource.to.organization && utils.getId(resource.to.organization)
+      if (rid !== fid  &&  rid !== tid  &&  !to)
+        return
+    }
+
+    let actionParams = {
+      query: this.state.filter,
+      modelName: modelName,
+      to: chatWith,
+      context: this.state.allContexts ? null : this.state.context,
+      limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
+    }
+    // if (resource._sendStatus) {
+    //   this.state.sendStatus = resource._sendStatus
+    //   this.state.sendResource = resource
+    // }
+    // let addedItem
+    let replace
+    if (rtype === FORM_REQUEST            ||
+        rtype === CONFIRM_PACKAGE_REQUEST ||
+        rtype === FORM_ERROR              ||
+        resource._denied                  ||
+        resource._approved) {
+      // addedItem = resource
+      if (resource._documentCreated  ||  resource._denied  ||  resource._approved)
+        replace = true
+    }
+    // else
+    //   addedItem = null
+
+    let list
+    list = this.state.list || []
+    if (replace) {
+      let resourceId = utils.getId(resource)
+      list = list.map((r) => utils.getId(r) === resourceId ? resource : r)
+    }
+    else {
+      list = list.map((r) => r)
+      list.push(resource)
+    }
+    if (!replace)
+      utils.pinFormRequest(list)
+
+    let state = {
+      // addedItem: addedItem,
+      list: list
+    }
+    let currentContext
+    if (utils.isContext(resource))
+      currentContext = resource
+    else if(rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
+      currentContext = resource._context
+    if (currentContext)
+      state.currentContext = currentContext
+    if (productToForms)
+      state.productToForms = productToForms
+    else if (utils.getModel(rtype).value.subClassOf === FORM  &&  resource._context) {
+      let product = resource._context.product
+      if (this.state.productToForms)
+        productToForms = clone(this.state.productToForms)
+      else
+        productToForms = {}
+
+      let l = productToForms[product]
+      if (!l) {
+        l = {}
+        productToForms[product] = {}
+      }
+      let forms = l[rtype]
+
+      if (!forms) {
+        forms = []
+        l[rtype] = forms
+      }
+      forms.push(utils.getId(resource))
+
+      state.productToForms = productToForms
+    }
+    if (shareableResources)
+      state.shareableResources = shareableResources
+    this.setState(state)
+
+    if (action === 'addVerification') {
+      if (originatingMessage  &&  originatingMessage.verifiers)  {
+        let docType = utils.getId(resource.document).split('_')[0]
+        this.state.verifiedByTrustedProvider = originatingMessage.form === docType
+                                             ? resource
+                                             : null
+      }
+      else
+        this.state.verifiedByTrustedProvider = null
+    }
+    // Actions.list(actionParams)
   }
   hasProducts(resource) {
     return resource.products && resource.products.length
@@ -543,7 +550,8 @@ class MessageList extends Component {
         isVerifier: isVerifier
       }
     }
-    let showEdit = !isEmployee && !verification  &&  !r[PREV_HASH]  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable
+    // let showEdit = !isEmployee && !verification  &&  !r[PREV_HASH]  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable
+    let showEdit = r._latest  &&  !isEmployee && !verification  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable
     // if (showEdit  &&  isEmployee) {
     //   let rm
     //   if (!application  ||  !(rm = application.relationshipManager))
