@@ -55,7 +55,8 @@ class FormMessageRow extends Component {
            !equal(to, nextProps.to)             ||
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
            orientation != nextProps.orientation ||
-           resource._sendStatus !== nextProps.resource._sendStatus
+           resource._sendStatus !== nextProps.resource._sendStatus ||
+           resource._latest !== nextProps.resource._latest
            // (this.props.sendStatus !== SENT  &&  this.props.sendStatus !== nextProps.sendStatus)
   }
 

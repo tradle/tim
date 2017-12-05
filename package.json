@@ -149,6 +149,7 @@
     "react-native-qrcode": "^0.2.2",
     "react-native-signature-pad": "0.0.8",
     "react-native-swipeout": "github:mvayngrib/react-native-swipeout#6939c109",
+    "react-native-switch-selector": "^1.0.7",
     "react-native-vector-icons": "^4.1.1",
     "react-timer-mixin": "^0.13.3",
     "react-web": "github:mvayngrib/react-web#distdev",

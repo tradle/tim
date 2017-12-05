@@ -4389,7 +4389,7 @@ var Store = Reflux.createStore({
               let id = utils.getId(returnVal)
               delete list[id]
               db.del(id)
-              var params = {action: 'addItem', resource: returnVal}
+              let params = {action: 'addItem', resource: returnVal}
               self.trigger(params);
               return
             }
@@ -4401,7 +4401,7 @@ var Store = Reflux.createStore({
           let r = utils.clone(res)
           extend(r, returnVal)
           self._setItem(utils.getId(returnVal), returnVal)
-          var params = {action: 'addItem', resource: r}
+          let params = {action: 'addItem', resource: r}
           // return self.disableOtherFormRequestsLikeThis(returnVal)
           // .then(() => {
             // don't save until the real resource is created
@@ -4418,21 +4418,24 @@ var Store = Reflux.createStore({
       // Trigger painting before send. for that set ROOT_HASH to some temporary value like NONCE
       // and reset it after the real root hash will be known
       let isNew = returnVal[ROOT_HASH] == null
-      if (isNew)
+      if (isNew) {
         returnVal._outbound = true
+        returnVal._latest = true
+      }
       let rModel = self.getModel(returnVal[TYPE])
       let isContext = utils.isContext(rModel)
       let isForm = rModel.subClassOf === FORM
       returnVal[IS_MESSAGE] = true
+      let prevResId, prevResCached
       if (!isNew  &&  isForm) {
-        let formId = utils.getId(returnVal)
         let prevRes
+        prevResId = utils.getId(returnVal)
         try {
           prevRes = await self._keeper.get(returnVal[CUR_HASH])
         } catch(err) {
           prevRes = await self._getItemFromServer(utils.getId(returnVal))
         }
-        let prevResCached = self._getItem(formId)
+        prevResCached = self._getItem(prevResId)
         extend(prevResCached, prevRes)
         if (utils.compare(returnVal, prevResCached)) {
           self.trigger({action: 'noChanges'})
@@ -4460,9 +4463,9 @@ var Store = Reflux.createStore({
       let rId = utils.getId(returnVal.to)
       let to = self._getItem(rId)
       let permalink = to[ROOT_HASH]
-      var toChain = {}
+      let toChain = {}
 
-      let exclude = ['to', 'from', '_message', 'verifications', CUR_HASH, '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', 'idOld']
+      let exclude = ['to', 'from', 'verifications', CUR_HASH, 'idOld', '_message', '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', '_latest']
       // if (isNew)
       //   exclude.push(ROOT_HASH)
       extend(toChain, returnVal)
@@ -4470,6 +4473,7 @@ var Store = Reflux.createStore({
         delete toChain[p]
 
       let properties = rModel.properties
+
       if (isNew) {
         for (let p in toChain) {
           let prop = properties[p]
@@ -4490,7 +4494,7 @@ var Store = Reflux.createStore({
 
       // toChain.time = returnVal.time
 
-      var key = utils.makeId(IDENTITY, to[ROOT_HASH])
+      let key = utils.makeId(IDENTITY, to[ROOT_HASH])
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       try {
@@ -4502,7 +4506,7 @@ var Store = Reflux.createStore({
           returnVal[ROOT_HASH] = hash
         returnVal[CUR_HASH] = hash
 
-        var returnValKey = utils.getId(returnVal)
+        let returnValKey = utils.getId(returnVal)
         if (isContext)
           contextIdToResourceId[returnVal.contextId] = returnValKey
 
@@ -4520,9 +4524,9 @@ var Store = Reflux.createStore({
           self.addMessagesToChat(id, returnVal)
           org = toR.organization
         }
-        var params;
+        let params;
 
-        var sendStatus = (self.isConnected) ? SENDING : QUEUED
+        let sendStatus = (self.isConnected) ? SENDING : QUEUED
         if (isGuestSessionProof) {
           org = self._getItem(utils.getId(org))
           params = {action: 'getForms', to: org}
@@ -4537,7 +4541,7 @@ var Store = Reflux.createStore({
           }
         }
 
-        var m = self.getModel(returnVal[TYPE])
+        let m = self.getModel(returnVal[TYPE])
         try {
           if (!noTrigger)
             self.trigger(params);
@@ -4619,6 +4623,16 @@ var Store = Reflux.createStore({
         let rId = utils.getId(returnVal.to)
         let to = self._getItem(rId)
 
+        if (!isNew) {
+          let prevRes = self._getItem(prevResId)
+          prevRes._latest = false
+          prevResCached._latest = false
+
+          let org = to.organization ? self._getItem(to.organization) : to
+
+          self.trigger({action: 'updateItem', resource: utils.clone(prevResCached), to: org})
+          self.dbPut(prevResId, prevRes)
+        }
         if (!isNew  ||  self.getModel(returnVal[TYPE]).subClassOf !== FORM)
           return
         let allFormRequests = await self.searchMessages({modelName: FORM_REQUEST, to: to})
@@ -9361,8 +9375,8 @@ var Store = Reflux.createStore({
           chat = utils.getId(context.to) === utils.getId(this.getRepresentative(me.organization)) ? context.from : context.to
         else
           chat = utils.getId(context.to) === meId ? context.from : context.to
-        chat = this._getItem(chat)
-        let id  = chat.organization ? utils.getId(chat.organization) : utils.getId(chat)
+        let chatR = this._getItem(chat)
+        let id  = chatR && chatR.organization ? utils.getId(chatR.organization) : utils.getId(chatR)
         this.addMessagesToChat(id, val)
       }
       else {

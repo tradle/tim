@@ -37,7 +37,6 @@ var MarkdownPropertyEdit = require('./MarkdownPropertyEdit')
 var Markdown = require('./Markdown')
 
 var format = require('string-template')
-
 var constants = require('@tradle/constants');
 var t = require('tcomb-form-native');
 var Actions = require('../Actions/Actions');
@@ -77,6 +76,7 @@ import {
   DatePickerAndroid,
 } from 'react-native';
 
+import SwitchSelector from 'react-native-switch-selector'
 
 const DEFAULT_LINK_COLOR = '#a94442'
 // import transform from 'tcomb-json-schema'
@@ -569,6 +569,20 @@ var NewResourceMixin = {
         r[prop.name] = {}
       r[prop.name].value = value
     }
+    else if (prop.type === 'boolean')  {
+      if (value === 'null') {
+        delete r[prop.name]
+        delete this.floatingProps[prop.name]
+      }
+      else {
+        if (value === 'true')
+          value = true
+        else if (value === 'false')
+          value = false
+        r[prop.name] = value
+        this.floatingProps[prop.name] = value
+      }
+    }
     else {
       r[prop.name] = value
       this.floatingProps[prop.name] = value
@@ -580,7 +594,8 @@ var NewResourceMixin = {
 
     this.setState({
       resource: r,
-      requestedProperties: this.getRequestedProperties(r)
+      requestedProperties: this.getRequestedProperties(r),
+      inFocus: prop.name
     })
   },
   getRequestedProperties(r) {
@@ -1081,6 +1096,7 @@ var NewResourceMixin = {
     let labelStyle = styles.booleanLabel
     let textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
+    let lcolor = this.getLabelAndBorderColor(prop.name)
 
     let resource = this.state.resource
 
@@ -1106,19 +1122,38 @@ var NewResourceMixin = {
     }
 
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
-    let msgWidth = utils.dimensions(component).width - 90 // 90 - 40 margins + 50 switch
+    let msgWidth = utils.dimensions(component).width - 40 // 90 - 40 margins + 50 switch
     let help = this.getHelp(prop)
+
+    const options = [
+        { value: 'true', customIcon: <Icon size={30} color='#91D52A' name='ios-checkmark-circle' backgroundColor='transparent' />},
+        { value: 'null', customIcon: <Icon size={30} color='#cccccc' name='ios-radio-button-on' />},
+        { value: 'false', customIcon: <Icon size={30} color='deeppink' name='ios-close-circle'/> },
+    ];
+   // const options = [
+   //  { label: 'Y', value: 'true' },
+   //  { label: 'N/A', value: 'null' },
+   //  { label: 'N', value: 'false' },
+   // ];
+    let initial
+    let v = value + ''
+    for (let i=0; i<options.length  &&  !initial; i++) {
+      if (options[i].value === v)
+        initial = i
+    }
+    if (typeof initial === 'undefined')
+      initial = 1
     return (
       <View style={style.bottom10} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
-          this.onChangeText.bind(this, prop, !value)
+          this.onChangeText.bind(this, prop, value)
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-              <View style={{justifyContent: 'center', width: msgWidth}}>
-                <Text style={style}>{label}</Text>
+                <Text style={[style, {color: lcolor}]}>{label}</Text>
+              <View style={{paddingVertical: 15, width: msgWidth/2, alignSelf: 'flex-end'}}>
+                <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.onChangeText(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
               </View>
-              <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={linkColor} style={styles.contentLeft}/>
             </View>
           </View>
         </TouchableHighlight>
@@ -1126,6 +1161,9 @@ var NewResourceMixin = {
         {help}
       </View>
     )
+
+// <SwitchSelector options={options} initial={0} onPress={value => console.log("Call onPress with value: ", value)}/>
+// <Switch onValueChange={value => this.onChangeText(prop, value)} value={value} onTintColor={linkColor} style={styles.contentLeft}/>
   },
   myDateTemplate(params) {
     let { prop, required, component } = params
@@ -1936,7 +1974,7 @@ var styles= StyleSheet.create({
   },
   booleanContainer: {
     minHeight: 45,
-    marginTop: 20,
+    // marginTop: 20,
     borderColor: '#ffffff',
     // borderBottomColor: '#cccccc',
     // borderBottomWidth: 1,
@@ -1946,8 +1984,8 @@ var styles= StyleSheet.create({
     flex: 1
   },
   booleanContentStyle: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
+    // justifyContent: 'space-between',
+    // flexDirection: 'row',
     // paddingVertical: 5,
     // marginRight: 10,
     borderRadius: 4
@@ -2107,7 +2145,7 @@ var styles= StyleSheet.create({
     fontSize: 20
   },
   booleanText: {
-    marginTop: 5,
+    // marginTop: 5,
     fontSize: 20
   },
   dateLabel: {
