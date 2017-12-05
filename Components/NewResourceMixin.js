@@ -586,7 +586,8 @@ var NewResourceMixin = {
 
     this.setState({
       resource: r,
-      requestedProperties: this.getRequestedProperties(r)
+      requestedProperties: this.getRequestedProperties(r),
+      inFocus: prop.name
     })
   },
   getRequestedProperties(r) {
@@ -1081,6 +1082,7 @@ var NewResourceMixin = {
     let labelStyle = styles.booleanLabel
     let textStyle =  [styles.booleanText, {color: this.state.isRegistration ? '#ffffff' : '#757575'}]
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
+    let lcolor = this.getLabelAndBorderColor(prop.name)
 
     let resource = this.state.resource
 
@@ -1108,16 +1110,17 @@ var NewResourceMixin = {
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
     let msgWidth = utils.dimensions(component).width - 40 // 90 - 40 margins + 50 switch
     let help = this.getHelp(prop)
-// const options = [
-//     { value: '1', customIcon: <Icon size={25} color='green' name='ios-checkmark-circle-outline' backgroundColor='transparent' />},
-//     { value: '0', customIcon: <Icon size={25} color='#757575' name='ios-radio-button-off-outline' />},
-//     { value: '-1', customIcon: <Icon size={25} color='#ffaaaa' name='ios-close-circle'/> },
-// ];
-   const options = [
-    { label: 'Y', value: 'true' },
-    { label: 'N/A', value: 'null' },
-    { label: 'N', value: 'false' },
-   ];
+
+    const options = [
+        { value: 'true', customIcon: <Icon size={30} color='#91D52A' name='ios-checkmark-circle' backgroundColor='transparent' />},
+        { value: 'null', customIcon: <Icon size={30} color='#cccccc' name='ios-radio-button-on' />},
+        { value: 'false', customIcon: <Icon size={30} color='deeppink' name='ios-close-circle'/> },
+    ];
+   // const options = [
+   //  { label: 'Y', value: 'true' },
+   //  { label: 'N/A', value: 'null' },
+   //  { label: 'N', value: 'false' },
+   // ];
     let initial
     let v = value + ''
     for (let i=0; i<options.length  &&  !initial; i++) {
@@ -1133,9 +1136,9 @@ var NewResourceMixin = {
         }>
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
-                <Text style={style}>{label}</Text>
+                <Text style={[style, {color: lcolor}]}>{label}</Text>
               <View style={{paddingVertical: 15, width: msgWidth/2, alignSelf: 'flex-end'}}>
-                <SwitchSelector initial={initial} hasPadding={true} options={options} onPress={(v) => this.onChangeText(prop, v)} backgroundColor='transparent' buttonColor={linkColor} />
+                <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.onChangeText(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
               </View>
             </View>
           </View>
@@ -2109,7 +2112,7 @@ var styles= StyleSheet.create({
     fontSize: 20
   },
   booleanText: {
-    marginTop: 5,
+    // marginTop: 5,
     fontSize: 20
   },
   dateLabel: {
