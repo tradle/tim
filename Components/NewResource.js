@@ -422,8 +422,11 @@ class NewResource extends Component {
           }
         }
       }
-      if (props[p].type  === 'boolean'  &&  typeof v !== 'undefined')
+      if (props[p].type  === 'boolean') {//  &&  typeof v !== 'undefined')
+        if (typeof v === 'undefined')
+          json[p] = false
         return
+      }
       var isDate = Object.prototype.toString.call(v) === '[object Date]'
       if (!v  ||  (isDate  &&  isNaN(v.getTime())))  {
         var prop = props[p]
