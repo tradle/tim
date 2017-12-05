@@ -61,7 +61,7 @@
     "@tradle/biz-plugins": {
       "version": "1.0.0",
       "from": "tradle/biz-plugins",
-      "resolved": "git://github.com/tradle/biz-plugins.git#fdfa5a63798a92facf7d0912b5c451cb08aa807e",
+      "resolved": "git://github.com/tradle/biz-plugins.git#2d4f6bba1a88640112d7a6aae46ba0334015063e",
       "dependencies": {
         "@tradle/constants": {
           "version": "1.3.0",
@@ -88,7 +88,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#dc9bf4d8be7be05a2292e1e4303fbb5cb998318b",
+      "resolved": "git://github.com/tradle/custom-models.git#640158ce1a116990a594cb68c438ee689e93ba88",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
@@ -6301,7 +6301,7 @@
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "pgmemk/react-native-gifted-messenger#e0e1295",
+      "from": "pgmemk/react-native-gifted-messenger",
       "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#e0e12954392abe4cd1b0cc47e2ab3744113a9441"
     },
     "react-native-gifted-spinner": {
@@ -6366,7 +6366,7 @@
     },
     "react-native-orientation": {
       "version": "1.17.0",
-      "from": "yamill/react-native-orientation",
+      "from": "yamill/react-native-orientation#9a796cf0",
       "resolved": "git://github.com/yamill/react-native-orientation.git#9a796cf0790491bd7d96b905496dc43383316d0e"
     },
     "react-native-os": {
