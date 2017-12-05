@@ -1122,7 +1122,6 @@ var NewResourceMixin = {
     }
 
 // , Platform.OS === 'ios' ? {paddingLeft: 0} : {paddingLeft: 10}
-    let msgWidth = utils.dimensions(component).width - 40 // 90 - 40 margins + 50 switch
     let help = this.getHelp(prop)
 
     const options = [
@@ -1143,6 +1142,8 @@ var NewResourceMixin = {
     }
     if (typeof initial === 'undefined')
       initial = 1
+    let switchWidth = Math.floor(utils.getChatWidth() / 2)
+    let switchView = {paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
     return (
       <View style={style.bottom10} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
@@ -1151,7 +1152,7 @@ var NewResourceMixin = {
           <View style={styles.booleanContainer}>
             <View style={styles.booleanContentStyle}>
                 <Text style={[style, {color: lcolor}]}>{label}</Text>
-              <View style={{paddingVertical: 15, width: msgWidth/2, alignSelf: 'flex-end'}}>
+              <View style={switchView}>
                 <SwitchSelector initial={initial} hasPadding={true} fontSize={30} options={options} onPress={(v) => this.onChangeText(prop, v)} backgroundColor='transparent' buttonColor='#ececec' />
               </View>
             </View>

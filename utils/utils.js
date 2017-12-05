@@ -2238,6 +2238,9 @@ var utils = {
   //   let fromId = utils.getId(r.from)
   //   return toId === fromId  &&  toId === utils.getId(utils.getMe())
   // },
+  getChatWidth(component) {
+    return MAX_WIDTH
+  },
   getMessageWidth(component) {
     let width = component ? this.dimensions(component).width : this.dimensions().width
     width = width > MAX_WIDTH ? MAX_WIDTH : width
