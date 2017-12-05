@@ -295,7 +295,7 @@ var utils = {
 
     let properties = this.getModel(r1[TYPE]).value.properties
     let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
-    for (var p in r1) {
+    for (var p in properties) {
       if (!properties[p]  ||  exclude.indexOf(p) !== -1)
         continue
       if (r1[p] === r2[p])
