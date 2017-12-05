@@ -9300,8 +9300,8 @@ var Store = Reflux.createStore({
           chat = utils.getId(context.to) === utils.getId(this.getRepresentative(me.organization)) ? context.from : context.to
         else
           chat = utils.getId(context.to) === meId ? context.from : context.to
-        chat = this._getItem(chat)
-        let id  = chat.organization ? utils.getId(chat.organization) : utils.getId(chat)
+        let chatR = this._getItem(chat)
+        let id  = chatR && chatR.organization ? utils.getId(chatR.organization) : utils.getId(chatR)
         this.addMessagesToChat(id, val)
       }
       else {
