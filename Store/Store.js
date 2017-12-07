@@ -201,6 +201,7 @@ const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
 const SHARE_REQUEST       = 'tradle.ShareRequest'
 const APPLICATION         = 'tradle.Application'
+const VERIFIED_ITEM       = 'tradle.VerifiedItem'
 const MY_ENVIRONMENT      = 'environment.json'
 
 const WELCOME_INTERVAL = 600000
@@ -3667,12 +3668,27 @@ var Store = Reflux.createStore({
   },
 
   async onGetItem(params) {
-    var {resource, action, noTrigger, search, backlink} = params
+    var {resource, action, noTrigger, search, backlink, forwardlink} = params
     // await this._loadedResourcesDefer.promise
     let rId = utils.getId(resource)
     if (search) {
+      let isApplication = resource[TYPE] === APPLICATION
       let r = await this._getItemFromServer(rId)
-      let retParams = { resource: r, action: 'getItem' }
+      let list
+      if (isApplication  &&  forwardlink) {
+        let forwardlinkName = forwardlink.name
+        let m = this.getModel(resource[TYPE])
+        if (r[forwardlinkName]) {
+          if (forwardlink.items.ref !== VERIFIED_ITEM)
+            list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(fl.id)))
+          else
+            list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(fl.verification.id)))
+          r[forwardlinkName] = list
+        }
+      }
+      let retParams = { resource: r, action: action || 'getItem', forwardlink: forwardlink}
+      if (list)
+        retParams.list = list
       this.trigger(retParams)
       return
     }
@@ -3764,6 +3780,25 @@ var Store = Reflux.createStore({
         backlink: prop,
         // list: list,
         backlinkAdded: backlinkAdded
+      })
+    // })
+    // .catch((err) => {
+    //   debugger
+    // })
+  },
+  onExploreForwardlink(resource, prop, forwardlinkAdded) {
+    // return this.searchMessages({
+    //   prop: prop,
+    //   modelName: prop.items.ref,
+    //   to: resource
+    // })
+    // .then((list) => {
+      this.trigger({
+        action: 'exploreForwardlink',
+        resource: resource,
+        forwardlink: prop,
+        // list: list,
+        forwardlinkAdded: forwardlinkAdded
       })
     // })
     // .catch((err) => {
@@ -5298,7 +5333,7 @@ var Store = Reflux.createStore({
       retParams.addedItem = true
     // if (params.modelName === FORM)
     //   retParams.requestedModelName = FORM
-    retParams.requestedModelName = modelName
+    // retParams.requestedModelName = modelName
     if (!isAggregation  &&  to  &&  !prop) {
       if (to[TYPE] !== PROFILE  ||  !me.isEmployee) {
         // let to = list[utils.getId(to)].value
