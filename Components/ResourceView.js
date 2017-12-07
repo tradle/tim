@@ -49,12 +49,22 @@ const CHANGE_GESTURE_PASSWORD = 3
 const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
 const MY_PRODUCT = 'tradle.MyProduct'
-const PROFILE = constants.TYPES.PROFILE
+const APPLICATION = 'tradle.Application'
+const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 
-const TYPE = constants.TYPE
-const ROOT_HASH = constants.ROOT_HASH
-const FORM = 'tradle.Form'
-const VERIFICATION = 'tradle.Verification'
+const {
+  PROFILE,
+  IDENTITY,
+  VERIFICATION,
+  FORM,
+  MESSAGE,
+  ORGANIZATION
+} = constants.TYPES
+
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
 const AUTH_PROPS = ['useTouchId', 'useGesturePassword']
 
 import {
@@ -122,12 +132,13 @@ class ResourceView extends Component {
 
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     // if (resource.id || !resource[constants.ROOT_HASH])
-    let m  = utils.getModel(resource[TYPE]).value
+    let rtype = utils.getType(resource)
+    let m = utils.getModel(rtype).value
     if (m.inlined)
       return
     if (m.subClassOf  &&  utils.getModel(m.subClassOf).value.inlined)
       return
-      Actions.getItem( {resource: resource, search: search, backlink: backlink, isMessage: true} )
+    Actions.getItem( {resource, search, backlink, isMessage: true} )
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
@@ -136,24 +147,18 @@ class ResourceView extends Component {
     let {resource, action, error, pairingData, to, backlink} = params
 
     let isMe = utils.isMe(this.props.resource)
-    if (resource) {
-      if (utils.getId(resource) !== utils.getId(this.props.resource)) {
-        if (isMe) {
-          let me = utils.getMe()
-          if (action === 'addItem') {
-            let m = utils.getModel(resource[TYPE]).value
-            if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
-              Actions.getItem({resource: me})
-          }
-          else if (action === 'addMessage'  &&  resource[TYPE] === 'tradle.ConfirmPackageRequest')
+    if (resource  &&  utils.getId(resource) !== utils.getId(this.props.resource)) {
+      if (isMe) {
+        let me = utils.getMe()
+        if (action === 'addItem') {
+          let m = utils.getModel(resource[TYPE]).value
+          if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
             Actions.getItem({resource: me})
         }
-        return
+        else if (action === 'addMessage'  &&  resource[TYPE] === 'tradle.ConfirmPackageRequest')
+          Actions.getItem({resource: me})
       }
-      // if (isMe  &&  action === 'addItem') {
-      //   this.setState({resource: resource})
-      //   return
-      // }
+      return
     }
 
     switch (action) {
@@ -212,7 +217,7 @@ class ResourceView extends Component {
         passProps: {
           resource: to,
           filter: '',
-          modelName: constants.TYPES.MESSAGE,
+          modelName: MESSAGE,
           // currency: params.organization.currency,
           bankStyle: style,
           // dictionary: params.dictionary,
@@ -244,7 +249,7 @@ class ResourceView extends Component {
     this.setState({currentPhoto: photo});
   }
   onShowIdentityList(params) {
-    var me = utils.getMe();
+    let me = utils.getMe();
     this.props.navigator.push({
       id: 8,
       title: 'My Identities',
@@ -261,41 +266,42 @@ class ResourceView extends Component {
     if (this.state.isLoading)
       return <View/>
 
-    var dimensions = this.props.dimensions
-    var styles = createStyles()
+    let { navigator, bankStyle, currency, dimensions } = this.props
+    let { backlink, backlinkList, pairingData, isModalOpen } = this.state
+    let styles = createStyles()
 
-    var resource = this.state.resource;
-    var modelName = resource[TYPE];
-    var model = utils.getModel(modelName).value;
-    var photos = [];
+    let resource = this.state.resource;
+    let modelName = resource[TYPE];
+    let model = utils.getModel(modelName).value;
+    let photos = [];
     if (resource.photos  &&  resource.photos.length > 1) {
       extend(photos, resource.photos);
       photos.splice(0, 1);
     }
 
-    var isIdentity = model.id === PROFILE;
-    var isOrg = model.id === constants.TYPES.ORGANIZATION;
-    var me = utils.getMe()
-    var actionPanel
-    var isMe = utils.isMe(resource)
+    let isIdentity = model.id === PROFILE;
+    let isOrg = model.id === ORGANIZATION;
+    let me = utils.getMe()
+    let actionPanel
+    let isMe = utils.isMe(resource)
     if (me) {
       let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (me.organization  &&  utils.getId(me.organization) !== utils.getId(resource)))
       if (!noActionPanel  &&  utils.hasBacklinks(model))
        actionPanel = <ShowRefList lazy={this._lazyId}
                                   resource={resource}
-                                  navigator={this.props.navigator}
-                                  currency={this.props.currency}
-                                  bankStyle={this.props.bankStyle}
-                                  backlink={this.state.backlink}
-                                  backlinkList={this.state.backlinkList}/>
-        // actionPanel = <ShowRefList showQR={this.openModal.bind(this)} {...this.props} backlink={this.state.backlink} backlinkList={this.state.back
+                                  navigator={navigator}
+                                  currency={currency}
+                                  bankStyle={bankStyle}
+                                  backlink={backlink}
+                                  backlinkList={backlinkList}/>
+        // actionPanel = <ShowRefList showQR={this.openModal.bind(this)} {...this.props} backlink={backlink} backlinkList={back
     }
-    var qrcode, w
-    var {width, height} = utils.dimensions(ResourceView)
-    if (this.state.pairingData) {
+    let qrcode, w
+    let { width } = utils.dimensions(ResourceView)
+    if (pairingData) {
       w = Math.floor((width / 3) * 2)
       qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={this.state.pairingData} dimension={w} />
+                 <QRCode inline={true} content={pairingData} dimension={w} />
                </View>
     }
     else if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url) {
@@ -328,23 +334,22 @@ class ResourceView extends Component {
                 </View>
               </View>
     }
-
     let menu = isIdentity  &&  isMe  && this.renderActionSheet()
     let identityPhotoList, otherPhotoList
     if (isIdentity)
-      identityPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={5} />
+      identityPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={navigator} isView={true} numberInRow={5} />
     else
-      otherPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={this.props.navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
+      otherPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
     let propertySheet
     if (resource[TYPE] !== PROFILE  &&  !isOrg)
       propertySheet = <ShowPropertiesView resource={resource}
                         showRefResource={this.getRefResource.bind(this)}
-                        currency={this.props.currency}
+                        currency={currency}
                         excludedProperties={['photos']}
-                        navigator={this.props.navigator} />
+                        navigator={navigator} />
     let photoView
     if (!isOrg)
-      photoView = <PhotoView resource={resource} navigator={this.props.navigator}/>
+      photoView = <PhotoView resource={resource} navigator={navigator}/>
 
     return (
       <PageView style={platformStyles.container}>
@@ -354,7 +359,7 @@ class ResourceView extends Component {
             {identityPhotoList}
           </View>
           {actionPanel}
-          <Modal animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
+          <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
             <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
               <View style={styles.modalBackgroundStyle}>
                 {qrcode}
@@ -431,7 +436,7 @@ class ResourceView extends Component {
     this.setState({isModalOpen: false});
   }
   getRefResource(resource, prop) {
-    var model = utils.getModel(this.props.resource[TYPE]).value;
+    let model = utils.getModel(this.props.resource[TYPE]).value;
 
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);

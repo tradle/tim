@@ -428,12 +428,6 @@ class ResourceList extends Component {
         this.setState(state)
       return;
     }
-    var type = list[0][TYPE];
-    if (type  !== modelName  &&  modelName !== params.requestedModelName) {
-      var m = utils.getModel(type).value;
-      if (!m.subClassOf  ||  m.subClassOf != modelName)
-        return;
-    }
     if (this.props.isBacklink  &&  params.prop !== this.props.prop)
       return
     extend(state, {
