@@ -67,7 +67,7 @@ class VerificationRow extends Component {
   }
 
   render() {
-    let {resource, isChooser, lazy, parentResource, onSelect, prop } = this.props
+    let {resource, isChooser, lazy, parentResource, onSelect, prop, modelName } = this.props
     let model = utils.getModel(resource[TYPE]).value;
     let isMyProduct = model.subClassOf === MY_PRODUCT
     let isForm = model.subClassOf === FORM
@@ -168,6 +168,8 @@ class VerificationRow extends Component {
           title = resource.application.title
         else if (model.id === CONFIRMATION)
           title = resource.confirmationFor.title
+        else if (modelName === FORM)
+          title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
         else
           title = 'Submited by ' + resource.from.title
       }
