@@ -61,9 +61,9 @@ var ResourceMixin = {
     let id = utils.getId(resource)
     // if (id !== this.state.propValue)
     //   return;
-    let type = resource[constants.TYPE] || id.split('_')[0]
+    let type = utils.getType(resource)
     let model = utils.getModel(type).value;
-    let title = utils.getDisplayName(resource, model);
+    let title = utils.getDisplayName(resource);
     if (utils.isMessage(resource)) {
       let {bankStyle, search, currency, country} = this.props
       this.props.navigator.push({

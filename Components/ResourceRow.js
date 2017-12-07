@@ -554,57 +554,52 @@ class ResourceRow extends Component {
     // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
     let status, color, dateCompleted, dateEvaluated, dateStarted
 
-    dateStarted = <View style={{flexDirection: 'row'}}>
-                      <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
-                      <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
+    dateStarted = <View style={{flexDirection: 'row', paddingTop:5}}>
+                      <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
+                      <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
                     </View>
-    if (resource.certificate) {
+    if (resource.certificate)
       status = 'Approved'
-      color = 'green'
-    }
     else  if (resource.dateEvaluated) {
       status = 'Denied'
-      color = 'red'
       dateEvaluated = <View style={{flexDirection: 'row'}}>
-                        <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateEvaluated)}</Text>
-                        <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateEvaluated)}</Text>
+                        <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateEvaluated)}</Text>
+                        <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateEvaluated)}</Text>
                       </View>
     }
     else if (resource.dateCompleted) {
       status = 'Submitted'
-      color = '#7AAAc3'
       dateCompleted = <View style={{flexDirection: 'row'}}>
-                        <Text style={{fontSize: 16, color: '#aaaaaa'}}>{translate(props.dateCompleted)}</Text>
-                        <Text style={{fontSize: 16, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateCompleted)}</Text>
+                        <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateCompleted)}</Text>
+                        <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateCompleted)}</Text>
                       </View>
     }
     if (status)
-      status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}><Text style={{fontSize: 14, color: color}}>{translate(status)}</Text></View>
+      status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}><Text style={{fontSize: 12, color: '#7AAAc3'}}>{translate(status)}</Text></View>
     if (status !== 'Approved'  &&  status !== 'Denied') {
       let icolor
       let iname
-      if (resource.relationshipManager) {
-        iname = 'md-log-out'
-        icolor = utils.isRM(resource) ? 'blue' : 'red'
+      if (resource.relationshipManager &&  utils.isRM(resource)) {
+        // iname = 'md-log-out'
+        iname = 'ios-person-add'
+        icolor = '#7AAAc3'
       }
       else if (this.state.hasRM) {
-        iname = 'md-log-out'
-        icolor = 'blue'
-      }
-      else if (this.state.hasRM) {
-        iname = 'md-log-out'
-        icolor = 'blue'
+        // iname = 'md-log-out'
+        iname = 'ios-person-add'
+        icolor = '#7AAAc3'
       }
       else {
-        iname = 'md-log-in'
-        icolor = resource.relationshipManager ? 'red' : 'green'
+        // iname = 'md-log-in'
+        iname = resource.relationshipManager ? 'ios-person-add' : 'ios-person-add-outline'
+        icolor = resource.relationshipManager ? 'deeppink' : '#7AAAc3'
       }
-      let icon = <Icon name={iname} size={25} color={icolor} style={{alignSelf: 'flex-end'}}/>
-      if (__DEV__  ||  !resource.relationshipManager) {
-        icon = <TouchableOpacity onPress={() => this.assignRM()}>
-                 {icon}
-               </TouchableOpacity>
-      }
+      let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
+      // if (__DEV__  ||  !resource.relationshipManager) {
+      //   icon = <TouchableOpacity onPress={() => this.assignRM()}>
+      //            {icon}
+      //          </TouchableOpacity>
+      // }
 
       status = <View style={{flexDirection: 'column', justifyContent: 'center'}}>
                  {icon}
@@ -615,7 +610,7 @@ class ResourceRow extends Component {
     let aTitle = resource.applicant.title
     let applicant
     if (aTitle)
-      applicant = <Text style={styles.description}>{aTitle}</Text>
+      applicant = <Text style={styles.applicant}>{aTitle}</Text>
     let formsCount
     if (resource.forms)
       formsCount = <View style={styles.formsCount}>
@@ -714,6 +709,10 @@ var styles = StyleSheet.create({
     flexWrap: 'nowrap',
     color: '#999999',
     fontSize: 14,
+  },
+  applicant: {
+    color: '#999999',
+    fontSize: 16,
   },
   row: {
     backgroundColor: '#ffffff',

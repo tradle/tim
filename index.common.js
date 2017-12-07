@@ -46,6 +46,7 @@ var NewItem = require('./Components/NewItem');
 var RemediationItemsList = require('./Components/RemediationItemsList')
 var GridItemsList = require('./Components/GridItemsList')
 var ResourceView = require('./Components/ResourceView');
+var ApplicationView = require('./Components/ApplicationView')
 var MessageView = require('./Components/MessageView');
 var MessageList = require('./Components/MessageList');
 var ArticleView = require('./Components/ArticleView');
@@ -576,6 +577,8 @@ class TiMApp extends Component {
       return <SignatureView navigator={nav} {...props} />
     case 33:
       return <StringChooser navigator={nav} {...props} />
+    case 34:
+      return <ApplicationView navigator={nav} {...props } />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -653,6 +656,7 @@ var NavigationBarRouteMapper = {
     var rbTitle = route.rightButtonTitle
     var iconIdx = rbTitle.indexOf('|')
     var icon
+    var symbol
     var iconSize = 25
     var style = {}
     switch (rbTitle) {
@@ -684,12 +688,16 @@ var NavigationBarRouteMapper = {
       break
     case 'Approve/Deny':
       icon = 'md-thumbs-up'
+      // symbol = '👍'
       break
     }
     if (icon)  {
       let color = /*rbTitle === 'Done' ? '#7AAAC3' : */ '#7AAAC3'
       title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={color} style={[styles.icon, style]} />
     }
+    else if (symbol)
+      title = <Text style={{fontSize: 25}}>{symbol}</Text>
+
     else if (rbTitle.indexOf('|') === -1)
       title =  <Text style={style}>
                   {rbTitle}

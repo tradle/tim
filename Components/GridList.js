@@ -3,6 +3,7 @@
 var NoResources = require('./NoResources');
 // var ResourceRow = require('./ResourceRow');
 var ResourceView = require('./ResourceView');
+var ApplicationView = require('./ApplicationView')
 var VerificationRow = require('./VerificationRow');
 var NewResource = require('./NewResource');
 var MessageList = require('./MessageList');
@@ -62,6 +63,7 @@ const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
 const APPROVAL = 'tradle.ApplicationApproval'
 const APPLICATION = 'tradle.Application'
+const VERIFIED_ITEM = 'tradle.VerifiedItem'
 const MODEL = 'tradle.Model'
 
 const MONEY = 'tradle.Money'
@@ -147,6 +149,7 @@ class GridList extends Component {
     isAggregation: PropTypes.bool,
     isRegistration: PropTypes.bool,
     isBacklink: PropTypes.bool,
+    isForwardlink: PropTypes.bool,
     // backlinkList: PropTypes.array
   };
   constructor(props) {
@@ -223,7 +226,8 @@ class GridList extends Component {
     this.props.callback(orgs)
   }
   componentWillReceiveProps(props) {
-    if (props.isBacklink) {
+    let { resource, isBacklink, isForwardlink, search, forwardlink } = props
+    if (isBacklink) {
       // if (!props.resource['_' + props.prop.name + 'Count'])
       //   return
 
@@ -236,6 +240,11 @@ class GridList extends Component {
       //   this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
       // else
       //   this.state.dataSource = this.state.dataSource.cloneWithRows([])
+    }
+    else if (forwardlink) {
+      this.state.dataSource = this.state.dataSource.cloneWithRows([])
+      this.state.isLoading = true;
+      Actions.getItem({resource, search, action: 'list', forwardlink})
     }
     if (props.provider  &&  (!this.props.provider || utils.getId(this.props.provider) !== (utils.getId(props.provider)))) {
       Actions.list({modelName: ORGANIZATION})
@@ -266,7 +275,7 @@ class GridList extends Component {
     }
     else
       params.to = props.resource
-    params.isChat = true
+    params.isChat =  !props.isChooser
     params.listView = props.listView
     return params
   }
@@ -287,9 +296,9 @@ class GridList extends Component {
   }
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
-    let { chat, resource, search, modelName, isModel } = this.props
+    let { chat, resource, navigator, officialAccounts, search, modelName, isModel, isBacklink, isForwardlink, forwardlink } = this.props
     if (chat) {
-      utils.onNextTransitionEnd(this.props.navigator, () => {
+      utils.onNextTransitionEnd(navigator, () => {
         Actions.listSharedWith(resource, chat)
       });
       return
@@ -306,7 +315,7 @@ class GridList extends Component {
         return
         // Actions.listModels({modelName})
       }
-      else {
+      else if (!isForwardlink) {
         Actions.list({
           modelName: modelName,
           filterResource: resource,
@@ -318,19 +327,21 @@ class GridList extends Component {
       }
     }
     let me = utils.getMe()
-    if (me  &&  me.isEmployee && this.props.officialAccounts) {
-      utils.onNextTransitionEnd(this.props.navigator, () => {
+    if (me  &&  me.isEmployee  &&  officialAccounts) {
+      utils.onNextTransitionEnd(navigator, () => {
         Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
       });
     }
     let params = this.getParamsForBacklinkList(this.props)
     StatusBar.setHidden(false);
-    if (this.props.isBacklink)
+    if (isBacklink)
       Actions.list(params)
+    else if (isForwardlink)
+      Actions.getItem({resource, search, action: 'list', forwardlink})
     else
-      utils.onNextTransitionEnd(this.props.navigator, () => {
+      utils.onNextTransitionEnd(navigator, () => {
         Actions.list(params)
-        if (this.props.officialAccounts  &&  this.props.modelName === ORGANIZATION)
+        if (officialAccounts  &&  modelName === ORGANIZATION)
           Actions.hasTestProviders()
         // StatusBar.setHidden(false);
       });
@@ -342,7 +353,7 @@ class GridList extends Component {
 
   onListUpdate(params) {
     let { action, error } = params
-    let { navigator, modelName, isModel, search, prop } = this.props
+    let { navigator, modelName, isModel, search, prop, forwardlink } = this.props
     if (action === 'addApp') {
       navigator.pop()
       if (error)
@@ -439,7 +450,7 @@ class GridList extends Component {
         navigator.push(route)
       return
     }
-    let { chat, isBacklink, multiChooser, isChooser, sharingChat, isTest } = this.props
+    let { chat, isBacklink, isForwardlink, multiChooser, isChooser, sharingChat, isTest } = this.props
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!params.list) {
@@ -462,8 +473,13 @@ class GridList extends Component {
             if (!m.interfaces  ||  m.interfaces.indexOf(modelName) === -1)
               return
           }
-          else if (m.subClassOf !== modelName)
-            return
+          else if (m.subClassOf !== modelName) {
+            if (!isForwardlink  ||  !params.resource  ||  params.resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
+              return
+            // Application forward links
+            if (modelName !== VERIFIED_ITEM  ||  m.id !== VERIFICATION)
+              return
+          }
         }
       }
     }
@@ -476,7 +492,7 @@ class GridList extends Component {
     let list = params.list;
     if (list.length) {
       let type = list[0][TYPE];
-      if (type  !== modelName  &&  !isBacklink) {
+      if (type  !== modelName  &&  !isBacklink  &&  !isForwardlink) {
         let m = utils.getModel(type).value;
         if (m.subClassOf != modelName)
           return;
@@ -496,7 +512,7 @@ class GridList extends Component {
       }
       if (!params.first) {
         let l = this.state.list
-        if (l  &&  !isBacklink) { //  &&  l.length === this.limit * 2) {
+        if (l  &&  !isBacklink  &&  !isForwardlink) { //  &&  l.length === this.limit * 2) {
           let newList = []
           // if (this.direction === 'down') {
             // for (let i=this.limit; i<l.length; i++)
@@ -539,13 +555,7 @@ class GridList extends Component {
     if (search  &&  params.resource)
       state.resource = params.resource
 
-    let type = list[0][TYPE];
-    if (type  !== modelName  &&  modelName !== params.requestedModelName) {
-      let m = utils.getModel(type).value;
-      if (!m.subClassOf  ||  m.subClassOf != modelName)
-        return;
-    }
-    if (isBacklink  &&  params.prop !== prop)
+    if ((isBacklink  &&  params.prop !== prop) || (isForwardlink  &&  params.forwardlink !== forwardlink))
       return
     extend(state, {
       forceUpdate: params.forceUpdate,
@@ -583,11 +593,10 @@ class GridList extends Component {
         return true
       if (this.props.backlinkList  &&  this.props.backlinkList.length !== nextProps.backlinkList.length)
         return true
-      // let prop = this.props.prop.name
-      // if (this.props.resource[prop].length !== nextProps.resource[prop].length)
-      //   return true
-      // else if (this.state.prop !== nextState.prop)
-      //   return true
+    }
+    if (this.props.isForwardlink  &&  nextProps.isForwardlink) {
+      if (this.props.forwardlink !== nextProps.forwardlink)
+        return true
     }
     if (this.state.dataSource.getRowCount() !== nextState.dataSource.getRowCount())
       return true
@@ -676,6 +685,27 @@ class GridList extends Component {
       title = resource.name; //utils.getDisplayName(resource, model.value.properties);
     let style = this.mergeStyle(resource.style)
 
+    if (isApplication) {
+      let route = {
+        title: title,
+        id: 34,
+        component: ApplicationView,
+        // titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        passProps: {
+          resource: resource,
+          search: search
+        }
+      }
+      if (resource.relationshipManager) {
+        if (utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE) === utils.getId(me)  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
+          route.rightButtonTitle = 'Approve/Deny'
+          route.onRightButtonPress = () => this.approveDeny(resource)
+        }
+      }
+      navigator.push(route)
+      return
+    }
     let route = {
       component: MessageList,
       id: 11,
@@ -689,13 +719,6 @@ class GridList extends Component {
         application: search  ? resource : null,
         currency: resource.currency,
         bankStyle: style,
-      }
-    }
-
-    if (isApplication  &&  resource.relationshipManager) {
-      if (utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE) === utils.getId(me)  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
-        route.rightButtonTitle = 'Approve/Deny'
-        route.onRightButtonPress = () => this.approveDeny(resource)
       }
     }
 
@@ -1073,20 +1096,21 @@ class GridList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    let { isModel, isBacklink, modelName, prop, lazy, officialAccounts,
+    let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, officialAccounts,
           currency, navigator, search, isChooser, chat, multiChooser } = this.props
-    if (this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
+    if (!isChooser  &&  this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       if (viewCols)
         return this.renderGridRow(resource, sectionId, rowId)
     }
+    let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
     let model
     if (isModel)
       model = resource
-    else if (isBacklink)
+    else if (isBacklink  ||  isForwardlink)
       model = utils.getModel(utils.getType(resource)).value
     else
-      model = utils.getModel(modelName).value;
+      model = utils.getModel(rtype).value;
     if (model.isInterface)
       model = utils.getModel(utils.getType(resource)).value
     let isVerification = model.id === VERIFICATION  ||  model.subClassOf === VERIFICATION
@@ -1106,13 +1130,13 @@ class GridList extends Component {
                 lazy={lazy}
                 onSelect={() => this.selectResource(selectedResource)}
                 key={resource[ROOT_HASH]}
-                modelName={modelName}
+                modelName={rtype}
                 navigator={navigator}
                 prop={prop}
-                parentResource={resource}
+                parentResource={this.props.resource}
                 currency={currency}
                 isChooser={isChooser}
-                searchCriteria={search ? this.state.resource : null}
+                searchCriteria={isBacklink || isForwardlink ? null : (search ? this.state.resource : null)}
                 search={search}
                 resource={resource} />
       )
@@ -1661,7 +1685,7 @@ class GridList extends Component {
   render() {
     let content;
     let {isGrid, filter, dataSource, isLoading, refreshing} = this.state
-    let { isChooser, modelName, isModel, isBacklink } = this.props
+    let { isChooser, modelName, isModel, isBacklink, isForwardlink, resource, prop, forwardlink } = this.props
     let model = utils.getModel(modelName).value;
     if (dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
@@ -1698,7 +1722,7 @@ class GridList extends Component {
     let searchBar
     let { search, _readOnly, officialAccounts } = this.props
 
-    if (SearchBar  &&  !isBacklink) {
+    if (SearchBar  &&  !isBacklink  &&  !isForwardlink) {
       let hasSearch = isModel
       if (!hasSearch  && !search) {
         hasSearch = !_readOnly  ||  !utils.isContext(modelName)
@@ -1729,16 +1753,23 @@ class GridList extends Component {
         style.push({width: utils.getContentWidth(GridList), alignSelf: 'center'})
     }
     let loading
-    if (isLoading  &&  !isModel  &&  !isBacklink)
-       loading = <View style={styles.loadingView}>
-                   <View style={[platformStyles.container]}>
-                     <Text style={styles.loading}>{'Loading...'}</Text>
-                     <ActivityIndicator size='large' style={styles.indicator} />
-                   </View>
-                 </View>
-
+    if (isLoading  &&  !isModel) {
+      let showLoadingIndicator = true
+      if (isBacklink  ||  isForwardlink) {
+        let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
+        if (!resource['_' + pName + 'Count']  &&  (!resource[pName]  || !resource[pName].length))
+          showLoadingIndicator = false
+      }
+      if (showLoadingIndicator)
+        loading = <View style={styles.loadingView}>
+                    <View style={[platformStyles.container]}>
+                      <Text style={styles.loading}>{'Loading...'}</Text>
+                      <ActivityIndicator size='large' style={styles.indicator} />
+                    </View>
+                  </View>
+    }
     return (
-      <PageView style={style} separator={contentSeparator}>
+      <PageView style={isBacklink || isForwardlink  ? {} : platformStyles.container} separator={contentSeparator}>
         {network}
         {searchBar}
         <View style={styles.separator} />
@@ -1756,7 +1787,9 @@ class GridList extends Component {
     // });
   }
   renderActionSheet() {
-    let { search, modelName, prop, isBacklink, bookmark } = this.props
+    let { search, modelName, prop, isBacklink, isForwardlink, bookmark } = this.props
+    if (isForwardlink)
+      return
     if (bookmark)
       return
     let buttons

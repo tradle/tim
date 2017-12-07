@@ -60,6 +60,7 @@ var asyncActions = [
   'viewChat',
 
   'exploreBacklink',
+  'exploreForwardlink',
   'getDetails',
   'getProvider',
   'acceptTermsAndChat',
