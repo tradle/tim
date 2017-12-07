@@ -256,5 +256,6 @@
     "iproovFailedMessage": "Please try again. For best results, keep your face centered in the oval during the color flashes.",
     "iproovErrorTitle": "Oops! Something went wrong",
     "iproovErrorMessage": "Please wait a bit and try again",
-    "nameUnknown": "name unknown"
+    "nameUnknown": "name unknown",
+    "youAreTheRM": "You are the Relationship Manager for this application"
 }
