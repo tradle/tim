@@ -546,10 +546,10 @@ class NewResource extends Component {
     var blmodel = bl.items.ref ? utils.getModel(bl.items.ref).value : this.props.model
     if (bl.items.ref  &&  bl.allowToAdd) {
       this.props.navigator.push({
-        id: 10,
+        id: 30,
         title: translate(bl, blmodel), // Add new ' + bl.title,
         backButtonTitle: translate('back'),
-        component: ResourceList,
+        component: GridList,
         passProps: {
           modelName: bl.items.ref,
           to: this.state.resource.to,

@@ -3,6 +3,7 @@
 var React = require('react');
 var dateformat = require('dateformat')
 var ResourceList = require('./ResourceList')
+var GridList = require('./GridList')
 var EnumList = require('./EnumList')
 var FloatLabel = require('react-native-floating-labels')
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -1534,8 +1535,10 @@ var NewResourceMixin = {
     let route = {
       title: translate(prop), //m.title,
       // titleTextColor: '#7AAAC3',
-      id: 10,
-      component: ResourceList,
+      // id:  10,
+      // component: ResourceList,
+      id:  30,
+      component: GridList,
       backButtonTitle: 'Back',
       sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
       passProps: {
