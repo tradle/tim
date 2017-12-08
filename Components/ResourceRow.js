@@ -295,7 +295,6 @@ class ResourceRow extends Component {
 
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode) {
-      let title = utils.makeTitle(utils.getDisplayName(resource))
       action = <TouchableHighlight underlayColor='transparent' style={styles.actionView}
                   onPress={this.showResourceView.bind(this)}>
                 <View style={textStyle}>
@@ -331,6 +330,7 @@ class ResourceRow extends Component {
     return content
   }
   showResourceView(resource) {
+    let title = utils.getDisplayName(resource)
     let route = {
       title: title,
       id: 3,
