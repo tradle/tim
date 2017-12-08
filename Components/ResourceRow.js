@@ -17,6 +17,7 @@ var reactMixin = require('react-mixin');
 var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
+// import Pie from 'react-native-progress/Pie';
 
 import {
   Image,
@@ -294,24 +295,14 @@ class ResourceRow extends Component {
     let onPress = this.action.bind(this)
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode) {
-      var title = utils.makeTitle(utils.getDisplayName(resource))
       action = <View style={styles.actionView}>
-                <TouchableHighlight underlayColor='transparent' onPress={() => {
-                  this.props.navigator.push({
-                    title: title,
-                    id: 3,
-                    component: ResourceView,
-                    // titleTextColor: '#7AAAC3',
-                    backButtonTitle: 'Back',
-                    passProps: {resource: resource}
-                  })
-                }}>
+                <TouchableHighlight underlayColor='transparent' onPress={this.showResourceView.bind(this)}>
                 <View style={textStyle}>
-                   {resource.numberOfForms
+                   {resource._formsCount
                       ? <View style={{flexDirection: 'row'}}>
                           <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
                           <View style={styles.count}>
-                            <Text style={styles.countText}>{resource.numberOfForms}</Text>
+                            <Text style={styles.countText}>{resource._formsCount}</Text>
                           </View>
                         </View>
                       : <View />
@@ -339,7 +330,18 @@ class ResourceRow extends Component {
                   </View>
     return content
   }
-
+  showResourceView(resource) {
+    let title = utils.getDisplayName(resource)
+    let route = {
+      title: title,
+      id: 3,
+      component: ResourceView,
+      // titleTextColor: '#7AAAC3',
+      backButtonTitle: 'Back',
+      passProps: {resource: resource}
+    }
+    this.props.navigator.push(route)
+  }
   chooseToShare() {
     let resource = this.props.resource
     let id = utils.getId(resource)
@@ -554,7 +556,7 @@ class ResourceRow extends Component {
     // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
     let status, color, dateCompleted, dateEvaluated, dateStarted
 
-    dateStarted = <View style={{flexDirection: 'row', paddingTop:5}}>
+    dateStarted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
                       <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
                       <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
                     </View>
@@ -612,25 +614,33 @@ class ResourceRow extends Component {
     if (aTitle)
       applicant = <Text style={styles.applicant}>{aTitle}</Text>
     let formsCount
-    if (resource.forms)
+    if (resource.forms) {
       formsCount = <View style={styles.formsCount}>
                      <Text style={styles.formsCountText}>{resource.forms.length}</Text>
                    </View>
-    else
-      formsCount = <View/>
-    return  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+      // let formTypes = []
+      // resource.forms.forEach((item) => {
+      //   let itype = utils.getType(item.id)
+      //   if (formTypes.indexOf(itype) === -1)
+      //     formTypes.push(itype)
+      // })
+      // let progress = Math.floor(formTypes.length / m.value.forms.length)
+      // // formsCount = <Progress.Bar progress={progress} width={100} color='#7AAAC3' borderWidth={1} height={3} />
+      // formsCount = <Pie progress={progress} size={50} />
+    }
+    return  <View>
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
                   <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{translate(m.value)}</Text>
                   {formsCount}
                 </View>
                 {applicant}
+              </View>
+              <View style={{justifyContent: 'flex-end', marginTop: -30}}>
+                {status}
                 {dateStarted}
                 {dateCompleted}
                 {dateEvaluated}
-              </View>
-              <View style={{justifyContent: 'center'}}>
-                {status}
               </View>
             </View>
   }

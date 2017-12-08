@@ -17,8 +17,6 @@ var StyleSheet = require('../StyleSheet')
 var extend = require('extend');
 var constants = require('@tradle/constants');
 
-// var HomePageMixin = require('./HomePageMixin')
-
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
 import debug from '../utils/debug'

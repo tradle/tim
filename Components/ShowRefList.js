@@ -68,13 +68,15 @@ class ShowRefList extends Component {
     let itemProps = utils.getPropertiesWithAnnotation(model, 'items')
     if (itemProps) {
       for (var p in itemProps) {
+        if (itemProps[p].hidden)
+          continue
         if (isIdentity) {
-          if (!isMe  &&  props[p].allowRoles  &&  props[p].allowRoles === 'me')
+          if (!isMe  &&  itemProps[p].allowRoles  &&  itemProps[p].allowRoles === 'me')
             continue;
           if (p === 'verifiedByMe'  &&  !me.organization)
             continue
         }
-        if (props[p].items.backlink)
+        if (itemProps[p].items.backlink)
           propsToShow.push(p)
       }
     }

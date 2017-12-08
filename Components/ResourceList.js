@@ -35,10 +35,6 @@ var debug = Debug('tradle:app:messageList')
 
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PARTIAL = 'tradle.Partial'
-const TYPE = constants.TYPE
-const ROOT_HASH = constants.ROOT_HASH
-const PROFILE = constants.TYPES.PROFILE
-const ORGANIZATION = constants.TYPES.ORGANIZATION
 const CONFIRMATION = 'tradle.Confirmation'
 const DENIAL = 'tradle.ApplicationDenial'
 const BOOKMARK = 'tradle.Bookmark'
@@ -59,6 +55,22 @@ import {
   Text,
   Platform
 } from 'react-native';
+
+const {
+  MESSAGE,
+  ORGANIZATION,
+  PROFILE,
+  CUSTOMER_WAITING,
+  SELF_INTRODUCTION,
+  FORM,
+  VERIFICATION,
+  SETTINGS
+} = constants.TYPES
+
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
 
 import platformStyles from '../styles/platform'
 import StatusBar from './StatusBar'
@@ -126,10 +138,10 @@ class ResourceList extends Component {
       if (prop  &&  resource[prop.name])
         resource[prop.name].forEach((r) => this.state.chosen[utils.getId(r)] = r)
     }
-    var isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
+    let isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
     if (isRegistration)
       this.state.isRegistration = isRegistration;
-    var routes = this.props.navigator.getCurrentRoutes()
+    let routes = this.props.navigator.getCurrentRoutes()
     if (this.props.chat) {
       this.state.sharedWith = {}
       routes[routes.length - 1].onRightButtonPress = this.done.bind(this)
@@ -151,7 +163,7 @@ class ResourceList extends Component {
       if (!this.state.sharedWith[orgId])
         continue
       orgs.push(orgId)
-//       for (var rep in this.state.sharedWithMapping) {
+//       for (let rep in this.state.sharedWithMapping) {
 //         let org = this.state.sharedWithMapping[rep]
 //         if (utils.getId(org) === orgId)
 //           reps.push(rep)
@@ -194,7 +206,7 @@ class ResourceList extends Component {
     //     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
     //   });
     // }
-    var params = {
+    let params = {
       modelName: modelName,
       // limit: 10
     };
@@ -249,7 +261,7 @@ class ResourceList extends Component {
 
   onListUpdate(params) {
     let { navigator } = this.props
-    var action = params.action;
+    let action = params.action;
     if (action === 'addApp') {
       navigator.pop()
       if (params.error)
@@ -281,7 +293,7 @@ class ResourceList extends Component {
       return
     }
     if (action === 'addItem'  ||  action === 'addMessage') {
-      var model = action === 'addMessage'
+      let model = action === 'addMessage'
                 ? utils.getModel(modelName).value
                 : utils.getModel(params.resource[TYPE]).value;
       if (action === 'addItem'  &&  model.id !== modelName)
@@ -302,7 +314,7 @@ class ResourceList extends Component {
       if (!params.to)
         return
       let style = this.mergeStyle(params.to.style)
-      var route = {
+      let route = {
         title: params.to.name,
         component: MessageList,
         id: 11,
@@ -310,22 +322,22 @@ class ResourceList extends Component {
         passProps: {
           resource: params.to,
           filter: '',
-          modelName: constants.TYPES.MESSAGE,
+          modelName: MESSAGE,
           currency: params.to.currency,
           bankStyle: style,
           dictionary: params.dictionary
         },
       }
-      var me = utils.getMe()
+      let me = utils.getMe()
 
-      var msg = {
+      let msg = {
         message: translate('customerWaiting', me.firstName),
-        _t: constants.TYPES.SELF_INTRODUCTION,
+        _t: SELF_INTRODUCTION,
         identity: params.myIdentity,
         from: me,
         to: params.to
       }
-      // var sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
+      // let sendNotification = (resource.name === 'Rabobank'  &&  (!me.organization  ||  me.organization.name !== 'Rabobank'))
       // Actions.addMessage(msg, true, sendNotification)
       utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg})) //, true))
       if (navigator.getCurrentRoutes().length === 3)
@@ -404,11 +416,11 @@ class ResourceList extends Component {
       return
     if (action === 'listSharedWith'  &&  !this.props.chat)
       return
-    var list = params.list;
+    let list = params.list;
     if (list.length) {
-      var type = list[0][constants.TYPE];
+      let type = list[0][TYPE];
       if (type  !== modelName) {
-        var m = utils.getModel(type).value;
+        let m = utils.getModel(type).value;
         if (!m.subClassOf  ||  m.subClassOf != modelName)
           return;
       }
@@ -495,7 +507,7 @@ class ResourceList extends Component {
       return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
       return true
-    for (var i=0; i<this.state.list.length; i++) {
+    for (let i=0; i<this.state.list.length; i++) {
       if (this.state.list[i].numberOfForms !== nextState.list[i].numberOfForms)
         return true
       if (this.state.list[i][ROOT_HASH] !== nextState.list[i][ROOT_HASH])
@@ -507,19 +519,20 @@ class ResourceList extends Component {
   }
 
   selectResource(resource) {
-    var me = utils.getMe();
+    let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = utils.getModel(this.props.modelName);
-    var isContact = this.props.modelName === PROFILE;
+    let { modelName, callback, navigator, bankStyle, serverOffline, prop, currency, officialAccounts } = this.props
+    let model = utils.getModel(modelName);
+    let isContact = modelName === PROFILE;
     let rType = resource[TYPE]
-    var isVerificationR  = rType === constants.TYPES.VERIFICATION
-    var isMessage = utils.isMessage(resource)
+    let isVerificationR  = rType === VERIFICATION
+    let isMessage = utils.isMessage(resource)
 
-    var isOrganization = this.props.modelName === ORGANIZATION;
-    var m = utils.getModel(resource[TYPE]).value;
+    let isOrganization = modelName === ORGANIZATION;
+    let m = utils.getModel(resource[TYPE]).value;
     if (!isContact          &&
         !isOrganization     &&
-        !this.props.callback) {
+        !callback) {
       if (isMessage) {
         let title
         if (isVerificationR) {
@@ -529,20 +542,20 @@ class ResourceList extends Component {
         else
           title = utils.makeModelTitle(m)
 
-        this.props.navigator.push({
+        navigator.push({
           title: title,
           id: 5,
           component: MessageView,
           backButtonTitle: 'Back',
           passProps: {
             resource: resource,
-            bankStyle: this.props.bankStyle || defaultBankStyle
+            bankStyle: bankStyle || defaultBankStyle
           }
         });
       }
       else {
         let title = utils.makeTitle(utils.getDisplayName(resource))
-        this.props.navigator.push({
+        navigator.push({
           title: title,
           id: 3,
           component: ResourceView,
@@ -559,8 +572,8 @@ class ResourceList extends Component {
             passProps: {
               model: m,
               resource: resource,
-              serverOffline: this.props.serverOffline,
-              bankStyle: this.props.bankStyle || defaultBankStyle
+              serverOffline: serverOffline,
+              bankStyle: bankStyle || defaultBankStyle
             }
           },
 
@@ -569,14 +582,14 @@ class ResourceList extends Component {
       }
       return;
     }
-    if (this.props.prop) {
+    if (prop) {
       if (me) {
-        if  (this.props.modelName != PROFILE) {
+        if  (modelName != PROFILE) {
           this._selectResource(resource);
           return
         }
         if (utils.isMe(resource)  ||
-           (this.props.prop  &&  this.props.resource  &&  utils.isMe(this.props.resource))) {
+           (prop  &&  this.props.resource  &&  utils.isMe(this.props.resource))) {
           this._selectResource(resource);
           return;
         }
@@ -601,11 +614,10 @@ class ResourceList extends Component {
     }
     else
       title = resource.name //utils.getDisplayName(resource, model.value.properties);
-    var modelName = constants.TYPES.MESSAGE;
-    var self = this;
+    let self = this;
     let style = this.mergeStyle(resource.style)
 
-    var route = {
+    let route = {
       component: MessageList,
       id: 11,
       backButtonTitle: 'Back',
@@ -614,14 +626,14 @@ class ResourceList extends Component {
         resource: resource,
         limit: LIMIT,
         filter: '',
-        modelName: modelName,
+        modelName: MESSAGE,
         currency: resource.currency,
         bankStyle: style,
       }
     }
     if (isContact) { //  ||  isOrganization) {
       // route.title = resource.firstName
-      var isMe = isContact ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
+      let isMe = isContact ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
       if (isMe) {
         route.onRightButtonPress.rightButtonTitle = 'Edit'
         route.onRightButtonPress.onRightButtonPress = {
@@ -635,26 +647,43 @@ class ResourceList extends Component {
             bankStyle: style,
             model: utils.getModel(resource[TYPE]).value,
             resource: resource,
-            currency: this.props.currency,
+            currency: currency,
           }
         }
       }
     }
-    if (this.props.officialAccounts) {
+    else if (isOrganization) {
+      if (!utils.getMe().isEmployee) {
+        route.rightButtonTitle = 'View'
+        route.onRightButtonPress = {
+          title: title,
+          id: 3,
+          component: ResourceView,
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          passProps: {
+            bankStyle: bankStyle,
+            resource: resource,
+            currency: currency
+          }
+        }
+      }
+    }
+    if (officialAccounts) {
       // if (isOrganization)
       //   route.title = resource.name
-      var msg = {
+      let msg = {
         message: translate('customerWaiting', me.firstName),
-        _t: constants.TYPES.CUSTOMER_WAITING,
+        _t: CUSTOMER_WAITING,
         from: me,
         to: utils.isEmployee(resource) ? me.organization : resource,
         time: new Date().getTime()
       }
 
-      utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
+      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
     }
 
-    this.props.navigator.push(route);
+    navigator.push(route);
   }
   approveDeny(resource) {
     if (resource._denied) {
@@ -742,11 +771,11 @@ class ResourceList extends Component {
 
   }
   _selectResource(resource) {
-    var model = utils.getModel(this.props.modelName);
+    let model = utils.getModel(this.props.modelName);
     let title = utils.getDisplayName(resource);
-    var newTitle = title;
+    let newTitle = title;
     if (title.length > 20) {
-      var t = title.split(' ');
+      let t = title.split(' ');
       newTitle = '';
       t.forEach((word) => {
         if (newTitle.length + word.length > 20)
@@ -755,7 +784,7 @@ class ResourceList extends Component {
       })
     }
 
-    var route = {
+    let route = {
       title: utils.makeTitle(newTitle),
       id: 3,
       component: ResourceView,
@@ -768,7 +797,7 @@ class ResourceList extends Component {
       },
     }
     // Edit resource
-    var me = utils.getMe();
+    let me = utils.getMe();
     if ((me || this.state.isRegistration) &&  this.props.prop) {
       this.props.callback(this.props.prop, resource); // HACK for now
       if (this.props.returnRoute)
@@ -780,7 +809,7 @@ class ResourceList extends Component {
     if (me                       &&
        !model.value.isInterface  &&
        (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
-      var self = this ;
+      let self = this ;
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
         title: 'Edit',
@@ -798,14 +827,14 @@ class ResourceList extends Component {
     this.props.navigator.push(route);
   }
   showRefResources(resource, prop) {
-    var props = utils.getModel(resource[TYPE]).value.properties;
-    var propJson = props[prop];
-    var resourceTitle = utils.getDisplayName(resource);
+    let props = utils.getModel(resource[TYPE]).value.properties;
+    let propJson = props[prop];
+    let resourceTitle = utils.getDisplayName(resource);
     resourceTitle = utils.makeTitle(resourceTitle);
 
-    var backlinksTitle = propJson.title + ' - ' + resourceTitle;
+    let backlinksTitle = propJson.title + ' - ' + resourceTitle;
     backlinksTitle = utils.makeTitle(backlinksTitle);
-    var modelName = propJson.items.ref;
+    let modelName = propJson.items.ref;
 
     this.props.navigator.push({
       title: backlinksTitle,
@@ -893,16 +922,16 @@ class ResourceList extends Component {
   }
 
   renderRow(resource)  {
-    var model = this.props.isBacklink
+    let model = this.props.isBacklink
               ? utils.getModel(utils.getType(resource)).value
               : utils.getModel(this.props.modelName).value;
     if (model.isInterface)
       model = utils.getModel(utils.getType(resource)).value
- // || (model.id === constants.TYPES.FORM)
-    var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
-    var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
-    var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
-    var isSharedContext = utils.isContext(model)  &&  utils.isReadOnlyChat(resource)
+ // || (model.id === FORM)
+    let isVerification = model.id === VERIFICATION  ||  model.subClassOf === VERIFICATION
+    let isForm = model.id === FORM || model.subClassOf === FORM
+    let isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
+    let isSharedContext = utils.isContext(model)  &&  utils.isReadOnlyChat(resource)
 
     // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
 
@@ -948,7 +977,7 @@ class ResourceList extends Component {
         // newContact={this.state.newContact}
   }
   openSharedContextChat(resource) {
-    var route = {
+    let route = {
       // title: translate(utils.getModel(resource.product).value) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
       title: (resource.from.organization || resource.from.title) + '  →  ' + resource.to.organization.title,
       component: MessageList,
@@ -958,13 +987,13 @@ class ResourceList extends Component {
         resource: resource,
         context: resource,
         filter: '',
-        modelName: constants.TYPES.MESSAGE,
+        modelName: MESSAGE,
         // currency: params.to.currency,
         bankStyle: this.props.bankStyle || defaultBankStyle
       }
     }
     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
-    var isSharedContext = utils.isContext(resource[TYPE])  &&  utils.isReadOnlyChat(resource)
+    let isSharedContext = utils.isContext(resource[TYPE])  &&  utils.isReadOnlyChat(resource)
     if (isSharedContext  &&  resource._relationshipManager  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
       route.rightButtonTitle = 'Approve/Deny'
       route.onRightButtonPress = () => this.approveDeny(resource)
@@ -1000,11 +1029,11 @@ class ResourceList extends Component {
     )
   }
   renderFooter() {
-    var me = utils.getMe();
+    let me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
     let { modelName, bankStyle } = this.props
-    var model = utils.getModel(modelName).value;
+    let model = utils.getModel(modelName).value;
     if (!this.props.prop  &&  model.id !== ORGANIZATION) {
       if (!this.props.search ||  !this.state.resource || !Object.keys(this.state.resource).length)
         return <View />
@@ -1035,9 +1064,9 @@ class ResourceList extends Component {
      )
   }
   onSettingsPressed() {
-    var model = utils.getModel(constants.TYPES.SETTINGS).value
+    let model = utils.getModel(SETTINGS).value
     this.setState({hideMode: false})
-    var route = {
+    let route = {
       component: NewResource,
       title: 'Settings',
       backButtonTitle: 'Back',
@@ -1074,15 +1103,15 @@ class ResourceList extends Component {
   }
 
   addNew() {
-    var model = utils.getModel(this.props.modelName).value;
-    var r;
+    let model = utils.getModel(this.props.modelName).value;
+    let r;
     this.setState({hideMode: false})
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     if (this.props.resource) {
-      var props = model.properties;
-      for (var p in props) {
-        var isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[TYPE];
+      let props = model.properties;
+      for (let p in props) {
+        let isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[TYPE];
         if (props[p].ref  &&  !isBacklink) {
           if (utils.getModel(props[p].ref).value.isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
             isBacklink = true;
@@ -1099,7 +1128,7 @@ class ResourceList extends Component {
     }
     // Setting some property like insured person. The value for it will be another form
     //
-    if (this.props.prop  &&  model.subClassOf === constants.TYPES.FORM) {
+    if (this.props.prop  &&  model.subClassOf === FORM) {
       if (!r)
         r = {}
       r[TYPE] = this.props.prop.ref || this.props.prop.items.ref;
@@ -1141,8 +1170,8 @@ class ResourceList extends Component {
     })
   }
   render() {
-    var content;
-    var model = utils.getModel(this.props.modelName).value;
+    let content;
+    let model = utils.getModel(this.props.modelName).value;
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
         !utils.getMe().organization                 &&
@@ -1176,9 +1205,9 @@ class ResourceList extends Component {
           showsVerticalScrollIndicator={false} />;
     }
     let me = utils.getMe()
-    var actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
+    let actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     let footer = actionSheet && this.renderFooter()
-    var searchBar
+    let searchBar
     if (SearchBar) {
       if (!this.props._readOnly  ||  !utils.isContext(this.props.modelName)) {
         if ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length)) {
@@ -1411,7 +1440,7 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
       passProps: {
-        modelName: constants.TYPES.MESSAGE,
+        modelName: MESSAGE,
         isModel: true,
         search: true
       },

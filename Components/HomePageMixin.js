@@ -21,7 +21,11 @@ import {
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
 const APP_QR_CODE = '5'
-const PROFILE = constants.TYPES.PROFILE
+const {
+  PROFILE,
+  ORGANIZATION,
+  MESSAGE
+} = constants.TYPES
 
 var HomePageMixin = {
   scanFormsQRCode(isView) {
@@ -129,7 +133,7 @@ var HomePageMixin = {
       passProps: {
         resource: params.to,
         filter: '',
-        modelName: constants.TYPES.MESSAGE,
+        modelName: MESSAGE,
         currency: params.to.currency,
         bankStyle:  style,
         dictionary: params.dictionary,
@@ -148,9 +152,9 @@ var HomePageMixin = {
         officialAccounts: true,
         serverOffline: this.state.serverOffline,
         bankStyle: this.props.bankStyle,
-        modelName: constants.TYPES.ORGANIZATION
+        modelName: ORGANIZATION
       }
-    });
+    })
   }
 }
 

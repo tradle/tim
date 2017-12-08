@@ -674,6 +674,10 @@ var NavigationBarRouteMapper = {
     case 'Download':
       icon = 'md-download'
       break
+    case 'View':
+      icon = 'ios-eye'
+      iconSize = 32
+      break
     case 'Search':
       icon = 'md-search'
       break

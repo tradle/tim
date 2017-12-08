@@ -988,12 +988,12 @@ var NewResourceMixin = {
     // it good-naturedly interferes with validation
     let multiline = prop.maxLength > 100
     let help = prop.ref !== MONEY  && this.getHelp(prop)
-    let st = {paddingBottom: 10}
-    if (!help)
-      st.flex = 5
+    // let st = {paddingBottom: 10}
+    // if (!help)
+    //   st.flex = 5
 
     return (
-      <View style={st}>
+      <View style={styles.bottom10}>
         <FloatLabel
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
@@ -1146,7 +1146,7 @@ var NewResourceMixin = {
     let switchWidth = Math.floor(utils.getChatWidth() / 2)
     let switchView = {paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
     return (
-      <View style={style.bottom10} key={this.getNextKey()} ref={prop.name}>
+      <View style={styles.bottom10} key={this.getNextKey()} ref={prop.name}>
         <TouchableHighlight underlayColor='transparent' onPress={
           this.onChangeText.bind(this, prop, value)
         }>
