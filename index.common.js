@@ -652,6 +652,10 @@ var NavigationBarRouteMapper = {
       //     {rotate: '45deg'}
       //   ]}
       break
+    case 'View':
+      icon = 'ios-eye'
+      iconSize = 32
+      break
     case 'Search':
       icon = 'md-search'
       break
