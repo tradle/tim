@@ -299,11 +299,11 @@ class ResourceRow extends Component {
       action = <TouchableHighlight underlayColor='transparent' style={styles.actionView}
                   onPress={this.showResourceView.bind(this)}>
                 <View style={textStyle}>
-                   {resource.numberOfForms
+                   {resource._formsCount
                       ? <View style={{flexDirection: 'row'}}>
                           <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
                           <View style={styles.count}>
-                            <Text style={styles.countText}>{resource.numberOfForms}</Text>
+                            <Text style={styles.countText}>{resource._formsCount}</Text>
                           </View>
                         </View>
                       : <View />
