@@ -16,6 +16,7 @@ var ENV = require('../utils/env')
 var StyleSheet = require('../StyleSheet')
 var extend = require('extend');
 var constants = require('@tradle/constants');
+var HomePageMixin = require('./HomePageMixin')
 
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
@@ -252,7 +253,7 @@ class ApplicationView extends Component {
 
 reactMixin(ApplicationView.prototype, Reflux.ListenerMixin);
 reactMixin(ApplicationView.prototype, ResourceMixin);
-// reactMixin(ApplicationView.prototype, HomePageMixin)
+reactMixin(ApplicationView.prototype, HomePageMixin)
 ApplicationView = makeResponsive(ApplicationView)
 
 var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions }) {
