@@ -5643,7 +5643,7 @@ var Store = Reflux.createStore({
       let appFilter = { [TYPE]: PRODUCT_REQUEST, contextId: contextIds }
       // if (me.isEmployee)
       //   appFilter._author = myBot[ROOT_HASH]
-
+// list = list.filter((l) => l.requestFor !== EMPLOYEE_ONBOARDING)
       let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true })
       if (contextsResult) {
         contexts = contextsResult.map((r) => this.convertToResource(r.node))
@@ -5652,8 +5652,11 @@ var Store = Reflux.createStore({
           if (typeof contextId === 'object')
             return
           let context = contexts.filter((c) => c.contextId === contextId)
-          r._context = context[0]
-          this.addVisualProps(r._context)
+          // Case when no forms yet submitted
+          if (context.length) {
+            r._context = context[0]
+            this.addVisualProps(r._context)
+          }
           let id = utils.makeId(PROFILE, r.applicant.id.split('_')[1])
           let applicant = this._getItem(id)
           if (applicant) {
@@ -5904,13 +5907,13 @@ var Store = Reflux.createStore({
       return params.list.map((r) => this._getItem(r))
     var foundResources = {};
     let {modelName, limit, to, start, notVerified, query, all, isTest, sortProperty, asc} = params
-    if (params.search)
-      all = true
     var meta = this.getModel(modelName)
-    let ids = myCustomIndexes
-    // Product chooser for example
     if (utils.isEnum(meta))
       return this.getEnum(params)
+    if (params.search)
+      all = true
+    let ids = myCustomIndexes
+    // Product chooser for example
     var props = meta.properties;
     var containerProp, resourceId;
     var foundRecs = 0
