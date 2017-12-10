@@ -13,10 +13,13 @@ var defaultBankStyle = require('../styles/defaultBankStyle.json')
 
 import ENV from '../utils/env'
 
-var NOT_SPECIFIED = '[not specified]'
-var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
+const NOT_SPECIFIED = '[not specified]'
+const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
-var tada = []
+const APPLICATION = 'tradle.Application'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
+
+// var tada = []
 var skip
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -302,8 +305,11 @@ var ResourceMixin = {
                 <Image style={{width: w, height: h}} source={{uri: val}}/>
               </View>
       }
-      else
+      else {
+        if (modelName === APPLICATION  &&  pMeta.name === 'requestFor')
+          val = utils.makeModelTitle(val)
         val = <Text style={[styles.description]}>{val}</Text>;
+      }
     }
     return val
   },
