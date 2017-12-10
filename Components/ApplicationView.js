@@ -148,7 +148,7 @@ class ApplicationView extends Component {
       let rId = utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE)
       iconName = 'ios-person'
       if (rId !== utils.getId(me))
-        rmBg = 'deeppink'
+        rmBg = '#CA9DF2'
     }
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
