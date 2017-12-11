@@ -979,12 +979,13 @@ var NewResourceMixin = {
       lStyle = [lStyle, {color: lcolor}]
     let multiline = prop.maxLength > 100
     let help = prop.ref !== MONEY  && this.getHelp(prop)
-    // let st = {paddingBottom: 10}
-    // if (!help)
-    //   st.flex = 5
+    let st = {paddingBottom: 10}
+    // Especially for money type props
+    if (!help)
+      st.flex = 5
 
     return (
-      <View style={styles.bottom10}>
+      <View style={st}>
         <FloatLabel
           labelStyle={[lStyle, {color: lcolor}]}
           autoCorrect={false}
