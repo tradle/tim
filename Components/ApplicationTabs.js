@@ -181,7 +181,7 @@ class ApplicationTabs extends Component {
                 <View style={[buttonStyles.buttons, { borderBottomWidth: 0}]} key={'ShowRefList'}>
                   {refList}
                 </View>
-                {this.getAppStatus()}
+                {showDetails  &&  this.getAppStatus()}
                 {children}
                 <View>
                   {flinkRL}
