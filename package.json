@@ -14,7 +14,6 @@
     "build:dev": "mkdir -p web/dist && npm run clean && NODE_ENV=development node --max_old_space_size=4096 $(which webpack) --config web/webpack.config.js --progress --colors && npm run copyassets",
     "build": "mkdir -p web/dist && npm run clean && NODE_ENV=production node --max_old_space_size=4096 $(which webpack) --config web/webpack.config.js --progress --colors && npm run copyassets",
     "build:unminified": "mkdir -p web/dist && npm run clean && NODE_ENV=development node --max_old_space_size=4096 $(which webpack) --config web/webpack.config.js --progress --colors && npm run copyassets",
-    "build:dev": "PROVIDERS=dev npm run build",
     "build:u": "PROVIDERS=u npm run build",
     "build:s": "PROVIDERS=s npm run build",
     "build:static": "PROVIDERS=static npm run build",
