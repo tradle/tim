@@ -392,6 +392,28 @@ var Store = Reflux.createStore({
       db[method] = promisify(db[method].bind(db))
     })
 
+    const { put, batch } = db
+    db.put = (...args) => {
+      const length = JSON.stringify(args[1]).length / 1000
+      if (length > 100000) {
+        console.warn(`putting large value in indexedDB, ${length}KB, key: ${args[0]}`)
+      }
+
+      return put.apply(db, args)
+    }
+
+    db.batch = (...args) => {
+      const large = args[0].find(({ key, value }) => {
+        const length = JSON.stringify(value).length / 1000
+        if (length > 100000) {
+          console.warn(`putting large value in indexedDB, ${length}KB, key: ${key}`)
+          return true
+        }
+      })
+
+      return batch.apply(db, args)
+    }
+
     this.announcePresence = debounce(this.announcePresence.bind(this), 100)
     this._loadedResourcesDefer = Q.defer()
 
