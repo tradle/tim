@@ -217,20 +217,20 @@ class ApplicationTabs extends Component {
   }
   getAppStatus() {
     let resource = this.props.resource
-    if (!resource.forms)
-      return
-    // formsCount = <View style={styles.formsCount}>
-    //                <Text style={styles.formsCountText}>{resource.forms.length}</Text>
-    //              </View>
+    // if (!resource.forms)
+    //   return
     let formTypes = []
-    resource.forms.forEach((item) => {
-      let itype = utils.getType(item.id)
-      if (formTypes.indexOf(itype) === -1)
-        formTypes.push(itype)
-    })
-    let m = utils.getModel(resource.requestFor)
+    let progress = 0
+    if (resource.forms) {
+      resource.forms.forEach((item) => {
+        let itype = utils.getType(item.id)
+        if (formTypes.indexOf(itype) === -1)
+          formTypes.push(itype)
+      })
+      let m = utils.getModel(resource.requestFor)
 
-    let progress = formTypes.length / m.value.forms.length
+      progress = formTypes.length / m.value.forms.length
+    }
     let progressColor = '#7AAAC3'
     if (resource.status) {
       switch (resource.status) {
