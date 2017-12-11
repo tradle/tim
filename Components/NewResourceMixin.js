@@ -543,9 +543,10 @@ var NewResourceMixin = {
   },
   onChangeText(prop, value) {
     let r = {}
-    let {resource} = this.state
+    let {resource, missedRequiredOrErrorValue} = this.state
+    let search = this.props.search
     extend(true, r, resource)
-    if(prop.type === 'number'  &&  !this.props.search) {
+    if(prop.type === 'number'  &&  !search) {
       let val = Number(value)
       if (value.charAt(value.length - 1) === '.')
         value = val + .00
@@ -564,8 +565,15 @@ var NewResourceMixin = {
     }
     else if (prop.type === 'boolean')  {
       if (value === 'null') {
-        delete r[prop.name]
-        delete this.floatingProps[prop.name]
+        let m = utils.getModel(resource[TYPE]).value
+        if (!search  ||  (m.required  &&  m.required.indexOf(prop.name) !== -1)) {
+          delete r[prop.name]
+          delete this.floatingProps[prop.name]
+        }
+        else {
+          r[prop.name] = null
+          this.floatingProps[prop.name] = value
+        }
       }
       else {
         if (value === 'true')
@@ -580,9 +588,9 @@ var NewResourceMixin = {
       r[prop.name] = value
       this.floatingProps[prop.name] = value
     }
-    if (this.state.missedRequiredOrErrorValue)
-      delete this.state.missedRequiredOrErrorValue[prop.name]
-    if (!this.props.search  &&  r[constants.TYPE] !== SETTINGS)
+    if (missedRequiredOrErrorValue)
+      delete missedRequiredOrErrorValue[prop.name]
+    if (!search  &&  r[constants.TYPE] !== SETTINGS)
       Actions.saveTemporary(r)
 
     this.setState({

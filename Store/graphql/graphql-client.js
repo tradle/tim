@@ -86,6 +86,7 @@ var search = {
       CONTAINS: '',
       EQ: '',
       NEQ: '',
+      NULL: '',
       STARTS_WITH: '',
       GT: '',
       GTE: '',
@@ -163,6 +164,8 @@ var search = {
         else if (props[p].type === 'boolean') {
           if (val)
             op.EQ += `\n   ${p}: ${val},`
+          else if (val === null)
+            op.NULL += `\n ${p}: true`
           else
             op.NEQ += `\n   ${p}: true,`
         }
