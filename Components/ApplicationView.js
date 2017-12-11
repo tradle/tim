@@ -24,6 +24,8 @@ import debug from '../utils/debug'
 import ConversationsIcon from './ConversationsIcon'
 
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
+const DENIAL = 'tradle.ApplicationDenial'
+const APPROVAL = 'tradle.ApplicationApproval'
 
 const {
   TYPE,
@@ -41,6 +43,7 @@ import {
   Dimensions,
   Alert,
   TouchableOpacity,
+  ActivityIndicator
 } from 'react-native'
 
 import {
@@ -49,6 +52,7 @@ import {
 
 const ScrollView = LazyloadScrollView
 const LAZY_ID = 'lazyload-list'
+const APPLICATION = 'tradle.Application'
 let INSTANCE_ID = 0
 
 import React, { Component } from 'react'
@@ -90,7 +94,7 @@ class ApplicationView extends Component {
     let {resource, action, error, to, forwardlink, application} = params
 
     let isMe = utils.isMe(this.props.resource)
-    if (resource  &&  utils.getId(resource) !== utils.getId(this.props.resource))
+    if (resource  &&  resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
       return
 
     switch (action) {
@@ -124,12 +128,18 @@ class ApplicationView extends Component {
   }
 
   render() {
-    if (this.state.isLoading)
-      return <View/>
+    let styles = createStyles()
+    if (this.state.isLoading) {
+      return (
+                <View style={[platformStyles.container]}>
+                  <Text style={styles.loading}>{'Loading...'}</Text>
+                  <ActivityIndicator size='large' style={styles.indicator} />
+                </View>
+              )
+    }
 
     let { navigator, bankStyle, currency, dimensions } = this.props
     let { forwardlink } = this.state
-    let styles = createStyles()
 
     let resource = this.state.resource;
     let modelName = resource[TYPE];
@@ -143,13 +153,25 @@ class ApplicationView extends Component {
     let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
     let paddingRight = Platform.OS === 'android' ? 0 : 10
     let iconName = 'ios-person-add-outline'
-    let rmBg = '#7AAAc3'
-    if (resource.relationshipManager) {
+    let rmBg, icolor
+    let hasRM = resource.relationshipManager
+    let rmStyle
+    if (hasRM) {
       let rId = utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE)
       iconName = 'ios-person'
-      if (rId !== utils.getId(me))
+      if (rId === utils.getId(me))
+        rmBg = '#7AAAc3'
+      else
         rmBg = '#CA9DF2'
+      icolor = '#ffffff'
+      rmStyle = {backgroundColor: rmBg, opacity: 0.5}
     }
+    else {
+      rmBg = '#fff'
+      icolor = '#7AAAc3'
+      rmStyle = {backgroundColor: rmBg, opacity: 0.5, borderWidth: StyleSheet.hairlineWidth, borderColor: '#7AAAc3'}
+    }
+
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
                     <TouchableOpacity onPress={this.openChat.bind(this)} style={{paddingRight}}>
@@ -158,8 +180,8 @@ class ApplicationView extends Component {
                       </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => this.assignRM()}>
-                      <View style={[platformStyles.menuButtonRegular, {backgroundColor: rmBg, opacity: 0.5}]}>
-                        <Icon name={iconName} color='#ffffff' size={fontSize(30)} />
+                      <View style={[platformStyles.menuButtonRegular, rmStyle]}>
+                        <Icon name={iconName} color={icolor} size={fontSize(30)}/>
                       </View>
                     </TouchableOpacity>
                   </View>
@@ -173,17 +195,13 @@ class ApplicationView extends Component {
                             currency={currency}
                             forwardlink={forwardlink}
                             showDetails={this.state.showDetails}
+                            approve={this.approve.bind(this)}
+                            deny={this.deny.bind(this)}
                             bankStyle={bankStyle}/>
         </ScrollView>
        {footer}
       </PageView>
      );
-  }
-
-  getRefResource(resource, prop) {
-    this.state.prop = prop;
-    this.state.propValue = utils.getId(resource.id);
-    Actions.getItem({resource: resource});
   }
 
   assignRM() {
@@ -241,13 +259,79 @@ class ApplicationView extends Component {
       }
     }
 
-    if (resource.relationshipManager) {
-      if (utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE) === utils.getId(me)  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
-        route.rightButtonTitle = 'Approve/Deny'
-        route.onRightButtonPress = () => this.approveDeny(resource)
-      }
-    }
+    // if (resource.relationshipManager) {
+    //   if (utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE) === utils.getId(me)  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
+    //     route.rightButtonTitle = 'Approve/Deny'
+    //     route.onRightButtonPress = () => this.approveDeny(resource)
+    //   }
+    // }
     navigator.push(route)
+  }
+  approve() {
+    let resource = this.props.resource
+    console.log('Approve was chosen!')
+    if (!resource._appSubmitted) {
+      Alert.alert('Application is not yet submitted')
+      return
+    }
+    // if (resource.status === 'approved') {
+    //   Alert.alert('Application was approved')
+    //   return
+    // }
+    let isApplication = resource[TYPE] === APPLICATION
+    let applicant = isApplication ? resource.applicant : resource.from
+    Alert.alert(
+      translate('approveApplication', applicant.title),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          console.log('Canceled!')
+        }},
+        {text: translate('Approve'), onPress: () => {
+          Actions.hideModal()
+          let title = utils.makeModelTitle(utils.getModel(resource.product || resource.requestFor).value)
+          let me = utils.getMe()
+          let msg = {
+            [TYPE]: APPROVAL,
+            application: resource,
+            message: 'Your application for \'' + title + '\' was approved',
+            _context: isApplication ? resource._context : resource,
+            from: me,
+            to: applicant
+          }
+          Actions.addMessage({msg: msg})
+        }}
+      ]
+    )
+  }
+  deny() {
+    let resource = this.props.resource
+    let isApplication = resource[TYPE] === APPLICATION
+    let applicantTitle = utils.getDisplayName(resource.applicant || resource.from)
+    Alert.alert(
+      translate('denyApplication', applicantTitle),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          console.log('Canceled!')
+        }},
+        {text: translate('Deny'), onPress: () => {
+          Actions.hideModal()
+          let title = utils.makeModelTitle(utils.getModel(resource.product ||  resource.requestFor).value)
+          let me = utils.getMe()
+          let msg = {
+            [TYPE]: DENIAL,
+            application: resource,
+            message: 'Your application for \'' + title + '\' was denied',
+            _context: isApplication ? resource._context : resource,
+            from: me,
+            to: resource.applicant || resource.from
+          }
+          Actions.addMessage({msg: msg})
+        }}
+      ]
+    )
+
   }
 }
 
@@ -277,8 +361,73 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions })
     conversationsIcon: {
       marginLeft: 9,
       marginRight: 9
+    },
+    loading: {
+      fontSize: 17,
+      alignSelf: 'center',
+      marginTop: 80,
+      color: '#629BCA'
+    },
+    indicator: {
+      alignSelf: 'center',
+      backgroundColor: 'transparent',
+      marginTop: 20
     }
   })
 })
 
 module.exports = ApplicationView;
+  // chosenApprove() {
+  //   let resource = this.props.resource
+  //   console.log('Approve was chosen!')
+  //   if (!resource._appSubmitted)
+  //     Alert.alert('Application is not yet submitted')
+  //   else if (resource.status === 'approved') {
+  //     Alert.alert('Application was approved')
+  //     return
+  //   }
+  //   let applicant = resource[TYPE] === APPLICATION ? utils.getDisplayName(resource.applicant) : resource.from.title
+  //   Actions.showModal({
+  //     title: translate('approveApplication', translate(applicant)),
+  //     buttons: [
+  //       {
+  //         text: translate('cancel'),
+  //         onPress: () => {  Actions.hideModal(); console.log('Canceled!')}
+  //       },
+  //       {
+  //         text: translate('Approve'),
+  //         onPress: () => {
+  //           console.log('Approve was chosen!')
+  //           if (!resource._appSubmitted)
+  //             Alert.alert('Application is not yet submitted')
+  //           else
+  //             this.approve(resource)
+  //         }
+  //       },
+  //     ]
+  //   })
+  // }
+  // chosenDeny() {
+  //   let resource = this.props.resource
+  //   if (resource.status === 'denied') {
+  //     Alert.alert('Application was denied')
+  //     return
+  //   }
+  //   let applicant = resource[TYPE] === APPLICATION ? utils.getDisplayName(resource.applicant) : resource.from.title
+  //   Actions.showModal({
+  //     title: translate('denyApplication', translate(applicant)),
+  //     buttons: [
+  //       {
+  //         text: translate('cancel'),
+  //         onPress: () => {  Actions.hideModal(); console.log('Canceled!')}
+  //       },
+  //       {
+  //         text: translate('Deny'),
+  //         onPress: () => {
+  //           console.log('Deny was chosen!')
+  //           this.deny(resource)
+  //         }
+  //       },
+  //     ]
+  //   })
+  // }
