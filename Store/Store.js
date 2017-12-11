@@ -6713,8 +6713,15 @@ var Store = Reflux.createStore({
     if (isBacklinkProp) {
       for (let i=j; i<thisChatMessages.length; i++) {
         let type = utils.getType(thisChatMessages[i])
-        if (type !== modelName  &&  this.getModel(type).subClassOf !== modelName)
-          continue
+        let m = this.getModel(type)
+        if (type !== modelName) {
+          if (model.isInterface) {
+            if (!m.interfaces  ||  m.interfaces.indexOf(modelName) === -1)
+              continue
+          }
+          else if (m.subClassOf !== modelName)
+            continue
+        }
         if (isForm  &&  type === PRODUCT_REQUEST)
           continue
         this.addReferenceLink(thisChatMessages[i], links, all, refs)
