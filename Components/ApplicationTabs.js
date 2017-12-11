@@ -9,7 +9,17 @@ var reactMixin = require('react-mixin');
 var RowMixin = require('./RowMixin');
 var ShowPropertiesView = require('./ShowPropertiesView')
 var Actions = require('../Actions/Actions');
-import ProgressBar from 'react-native-progress/Bar';
+// import ProgressBar from 'react-native-progress/Bar';
+
+const ProgressBar = (function () {
+  switch (Platform.OS) {
+    case 'web':
+      return require('./ProgressBar')
+    default:
+      return require('react-native-progress/Bar')
+  }
+})()
+
 var constants = require('@tradle/constants')
 const {
   TYPE,
