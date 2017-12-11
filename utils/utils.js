@@ -78,6 +78,8 @@ var {
   FORM,
   ORGANIZATION,
   SIMPLE_MESSAGE,
+  PROFILE,
+  IDENTITY,
   CUSTOMER_WAITING
 } = constants.TYPES
 
@@ -924,14 +926,14 @@ var utils = {
       return
 
     if (me.organization._hasSupportLine) {
-      if (resource[TYPE] === TYPES.PROFILE)
+      if (resource[TYPE] === PROFILE)
         return true
       if (this.isContext(resource[TYPE])) {
         if (resource._relationshipManager)
           return true
       }
     }
-    else if (resource[TYPE] === TYPES.ORGANIZATION  && utils.getId(me.organization) === utils.getId(resource))
+    else if (resource[TYPE] === ORGANIZATION  && utils.getId(me.organization) === utils.getId(resource))
       return true
   },
   optimizeResource(resource, doNotChangeOriginal) {
@@ -1083,15 +1085,14 @@ var utils = {
     //   return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
     //          !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
     // }
-    // if (model.id === TYPES.VERIFICATION)
+    // if (model.id === VERIFICATION)
     //   return  utils.getId(me) === utils.getId(resource.from)
   },
   isRM(application) {
     if (!application || !application.relationshipManager)
       return
-    let rmHash = utils.getId(application.relationshipManager).split('_')[1]
-    let me = this.getMe()
-    return rmHash === me[ROOT_HASH]
+    let rmId = utils.getId(application.relationshipManager)
+    return rmId === this.getId(this.getMe()).replace(PROFILE, IDENTITY)
   },
   // isVerifier(resource, application) {
   //   if (!this.isEmployee(resource))
@@ -1104,7 +1105,7 @@ var utils = {
   //     return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
   //            !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
   //   }
-  //   if (model.id === TYPES.VERIFICATION)
+  //   if (model.id === VERIFICATION)
   //     return  utils.getId(me) === utils.getId(resource.from)
   // },
   // measure(component, cb) {
