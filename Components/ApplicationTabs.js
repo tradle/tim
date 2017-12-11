@@ -242,7 +242,7 @@ class ApplicationTabs extends Component {
     //        </View>
     //        </View>
 
-    return <View style={[styles.progress, { height: StyleSheet.hairlineWidth, backgroundColor: '#DCF3FF'}]}>
+    return <View style={styles.progress}>
              <ProgressBar progress={progress} width={utils.dimensions(ApplicationTabs).width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
            </View>
 
