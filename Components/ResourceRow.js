@@ -18,6 +18,7 @@ var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 // import Pie from 'react-native-progress/Pie';
+import ProgressBar from 'react-native-progress/Bar';
 
 import {
   Image,
@@ -554,78 +555,95 @@ class ResourceRow extends Component {
       return <View/>
     let props = model.properties
     // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
-    let status, color, dateCompleted, dateEvaluated, dateStarted
+    let color, dateCompleted, dateEvaluated, dateStarted
 
     dateStarted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
-                      <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
-                      <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
-                    </View>
-    if (resource.certificate)
-      status = 'Approved'
-    else  if (resource.dateEvaluated) {
-      status = 'Denied'
+                    <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
+                    <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
+                  </View>
+    // if (resource.certificate)
+    //   status = 'Approved'
+    // else
+    if (resource.dateEvaluated) {
+      // status = 'Denied'
       dateEvaluated = <View style={{flexDirection: 'row'}}>
                         <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateEvaluated)}</Text>
                         <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateEvaluated)}</Text>
                       </View>
     }
     else if (resource.dateCompleted) {
-      status = 'Submitted'
+      // status = 'Submitted'
       dateCompleted = <View style={{flexDirection: 'row'}}>
                         <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateCompleted)}</Text>
                         <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateCompleted)}</Text>
                       </View>
     }
-    if (status)
-      status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}><Text style={{fontSize: 12, color: '#7AAAc3'}}>{translate(status)}</Text></View>
-    if (status !== 'Approved'  &&  status !== 'Denied') {
-      let icolor
-      let iname
-      if (resource.relationshipManager &&  utils.isRM(resource)) {
-        // iname = 'md-log-out'
-        iname = 'ios-person-add'
-        icolor = '#7AAAc3'
-      }
-      else if (this.state.hasRM) {
-        // iname = 'md-log-out'
-        iname = 'ios-person-add'
-        icolor = '#7AAAc3'
-      }
-      else {
-        // iname = 'md-log-in'
-        iname = resource.relationshipManager ? 'ios-person-add' : 'ios-person-add-outline'
-        icolor = resource.relationshipManager ? 'deeppink' : '#7AAAc3'
-      }
-      let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
-      // if (__DEV__  ||  !resource.relationshipManager) {
-      //   icon = <TouchableOpacity onPress={() => this.assignRM()}>
-      //            {icon}
-      //          </TouchableOpacity>
-      // }
-
-      status = <View style={{flexDirection: 'column', justifyContent: 'center'}}>
-                 {icon}
-                 {status}
-               </View>
+    // if (status) {
+    //   status = <View style={{justifyContent: 'center', alignItems: 'flex-end'}}>
+    //               <Text style={{fontSize: 12, color: '#7AAAc3'}}>{translate(status)}</Text>
+    //             </View>
+    // }
+    // if (status !== 'Approved'  &&  status !== 'Denied') {
+    let icolor
+    let iname
+    if (resource.relationshipManager &&  utils.isRM(resource)) {
+      // iname = 'md-log-out'
+      iname = 'ios-person-add'
+      icolor = '#7AAAc3'
     }
+    else if (this.state.hasRM) {
+      // iname = 'md-log-out'
+      iname = 'ios-person-add'
+      icolor = '#7AAAc3'
+    }
+    else {
+      // iname = 'md-log-in'
+      iname = resource.relationshipManager ? 'ios-person-add' : 'ios-person-add-outline'
+      icolor = resource.relationshipManager ? '#CA9DF2' : '#7AAAc3'
+    }
+    let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
+    // if (__DEV__  ||  !resource.relationshipManager) {
+    //   icon = <TouchableOpacity onPress={() => this.assignRM()}>
+    //            {icon}
+    //          </TouchableOpacity>
+    // }
+
+    let rmIcon = <View style={{flexDirection: 'column', justifyContent: 'center'}}>
+                   {icon}
+                 </View>
+    // }
       // approved = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
     let aTitle = resource.applicant.title
     let applicant
     if (aTitle)
       applicant = <Text style={styles.applicant}>{aTitle}</Text>
-    let formsCount
+    let formsCount, progressBar
     if (resource.forms) {
-      formsCount = <View style={styles.formsCount}>
-                     <Text style={styles.formsCountText}>{resource.forms.length}</Text>
-                   </View>
-      // let formTypes = []
-      // resource.forms.forEach((item) => {
-      //   let itype = utils.getType(item.id)
-      //   if (formTypes.indexOf(itype) === -1)
-      //     formTypes.push(itype)
-      // })
-      // let progress = Math.floor(formTypes.length / m.value.forms.length)
-      // // formsCount = <Progress.Bar progress={progress} width={100} color='#7AAAC3' borderWidth={1} height={3} />
+      // formsCount = <View style={styles.formsCount}>
+      //                <Text style={styles.formsCountText}>{resource.forms.length}</Text>
+      //              </View>
+      let formTypes = []
+      resource.forms.forEach((item) => {
+        let itype = utils.getType(item.id)
+        if (formTypes.indexOf(itype) === -1)
+          formTypes.push(itype)
+      })
+      let progress = formTypes.length / m.value.forms.length
+      let progressColor = '#7AAAC3'
+      if (resource.status) {
+        switch (resource.status) {
+          case 'approved':
+            progressColor = '#A6D785'
+            break
+          case 'denied':
+            progressColor = '#EE3333'
+            break
+        }
+      }
+      progressBar = <View style={[styles.progress, { height: StyleSheet.hairlineWidth, backgroundColor: '#DCF3FF'}]}>
+        <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={7} />
+      </View>
+      // formsCount = <Progress.Bar progress={progress} width={100} color='#7AAAC3' borderWidth={1} height={3} />
       // formsCount = <Pie progress={progress} size={50} />
     }
     return  <View>
@@ -637,11 +655,12 @@ class ResourceRow extends Component {
                 {applicant}
               </View>
               <View style={{justifyContent: 'flex-end', marginTop: -30}}>
-                {status}
+                {rmIcon}
                 {dateStarted}
                 {dateCompleted}
                 {dateEvaluated}
               </View>
+              {progressBar}
             </View>
   }
   assignRM() {
@@ -885,6 +904,11 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,
   },
+  progress: {
+    marginTop: 10,
+    justifyContent: 'center',
+    alignSelf: 'center'
+  }
 });
 
 ResourceRow = makeResponsive(ResourceRow)

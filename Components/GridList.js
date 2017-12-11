@@ -60,8 +60,6 @@ var {
 } = constants.TYPES
 
 const CONFIRMATION = 'tradle.Confirmation'
-const DENIAL = 'tradle.ApplicationDenial'
-const APPROVAL = 'tradle.ApplicationApproval'
 const APPLICATION = 'tradle.Application'
 const VERIFIED_ITEM = 'tradle.VerifiedItem'
 const MODEL = 'tradle.Model'
@@ -697,12 +695,6 @@ class GridList extends Component {
           search: search
         }
       }
-      if (resource.relationshipManager) {
-        if (utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE) === utils.getId(me)  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
-          route.rightButtonTitle = 'Approve/Deny'
-          route.onRightButtonPress = () => this.approveDeny(resource)
-        }
-      }
       navigator.push(route)
       return
     }
@@ -820,98 +812,6 @@ class GridList extends Component {
     });
   }
 
-  approveDeny(resource) {
-    if (resource._denied) {
-      Alert.alert('Application was denied')
-      return
-    }
-    if (resource._approved) {
-      Alert.alert('Application was approved')
-      return
-    }
-    let applicant = resource[TYPE] === APPLICATION ? utils.getDisplayName(resource.applicant) : resource.from.title
-    Actions.showModal({
-      title: translate('approveThisApplicationFor', translate(applicant)),
-      buttons: [
-        {
-          text: translate('cancel'),
-          onPress: () => {  Actions.hideModal(); console.log('Canceled!')}
-        },
-        {
-          text: translate('Approve'),
-          onPress: () => {
-            console.log('Approve was chosen!')
-            if (!resource._appSubmitted)
-              Alert.alert('Application is not yet submitted')
-            else
-              this.approve(resource)
-          }
-        },
-        {
-          text: translate('Deny'),
-          onPress: () => {
-            console.log('Deny was chosen!')
-            this.deny(resource)
-          }
-        },
-      ]
-    })
-  }
-  approve(resource) {
-    let isApplication = resource[TYPE] === APPLICATION
-    let applicant = isApplication ? resource.applicant : resource.from
-    Alert.alert(
-      translate('approveApplication', applicant.title),
-      null,
-      [
-        {text: translate('cancel'), onPress: () => {
-          console.log('Canceled!')
-        }},
-        {text: translate('Approve'), onPress: () => {
-          Actions.hideModal()
-          let title = utils.makeModelTitle(utils.getModel(resource.product || resource.requestFor).value)
-          let me = utils.getMe()
-          let msg = {
-            [TYPE]: APPROVAL,
-            application: resource,
-            message: 'Your application for \'' + title + '\' was approved',
-            _context: isApplication ? resource._context : resource,
-            from: me,
-            to: applicant
-          }
-          Actions.addMessage({msg: msg})
-        }}
-      ]
-    )
-  }
-  deny(resource) {
-    let isApplication = resource[TYPE] === APPLICATION
-    let applicantTitle = utils.getDisplayName(resource.applicant || resource.from)
-    Alert.alert(
-      translate('denyApplication', applicantTitle),
-      null,
-      [
-        {text: translate('cancel'), onPress: () => {
-          console.log('Canceled!')
-        }},
-        {text: translate('Deny'), onPress: () => {
-          Actions.hideModal()
-          let title = utils.makeModelTitle(utils.getModel(resource.product ||  resource.requestFor).value)
-          let me = utils.getMe()
-          let msg = {
-            [TYPE]: DENIAL,
-            application: resource,
-            message: 'Your application for \'' + title + '\' was denied',
-            _context: isApplication ? resource._context : resource,
-            from: me,
-            to: resource.applicant || resource.from
-          }
-          Actions.addMessage({msg: msg})
-        }}
-      ]
-    )
-
-  }
   _selectResource(resource) {
     let { modelName, style, currency, prop, navigator, returnRoute, callback } = this.props
     let model = utils.getModel(modelName);
@@ -1514,11 +1414,6 @@ class GridList extends Component {
       }
     }
     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
-    let isSharedContext = utils.isContext(resource[TYPE])  &&  utils.isReadOnlyChat(resource)
-    if (isSharedContext  &&  resource._relationshipManager  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
-      route.rightButtonTitle = 'Approve/Deny'
-      route.onRightButtonPress = () => this.approveDeny(resource)
-    }
     this.props.navigator.push(route)
   }
   changeSharedWithList(id, value) {

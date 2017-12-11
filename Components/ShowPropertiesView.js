@@ -15,6 +15,9 @@ var DEFAULT_CURRENCY_SYMBOL = '£'
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
+const METHOD = 'tradle.Method'
+const PARTIAL = 'tradle.Partial'
+
 const BLOCKCHAIN_EXPLORERS = [
   'https://rinkeby.etherscan.io/tx/0x$TXID',
   // 'https://etherchain.org/tx/0x$TXID' // doesn't support rinkeby testnet
@@ -163,8 +166,8 @@ class ShowPropertiesView extends Component {
     }
     var first = true;
     let self = this
-    let isPartial = model.id === 'tradle.Partial'
-    let isMethod = model.subClassOf === 'tradle.Method'
+    let isPartial = model.id === PARTIAL
+    let isMethod = model.subClassOf === METHOD
 
     var viewCols = vCols.map((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)

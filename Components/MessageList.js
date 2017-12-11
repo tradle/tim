@@ -308,7 +308,7 @@ class MessageList extends Component {
 
       this.setState({
         // dataSource: this.state.dataSource.cloneWithRows(list),
-        isLoading: false,
+        isLoading: switchToContext ? true : false,
         list: list,
         shareableResources: shareableResources,
         allLoaded: false,
