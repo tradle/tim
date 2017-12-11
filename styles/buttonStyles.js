@@ -44,7 +44,7 @@ var buttonStyles = Object.freeze({
     backgroundColor: appStyle.TAB_COLOR,// '#F5FFED',
     borderBottomColor: '#a0a0a0',
     borderBottomWidth: 1,
-    alignSelf: 'stretch'
+    // alignSelf: 'stretch'
   },
   text: {
     color: '#757575',
