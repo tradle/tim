@@ -236,7 +236,7 @@
     "enterPasswordOrWipeOutTheDevice": "Enter password or wipe out the device",
     "wipeTheDevice": "Wipe out the device",
     "areYouSureYouWantToServeThisCustomer": "Are you sure you want to serve this customer?",
-    "approveThisApplicationFor": "Approve or Deny application for {1}",
+    "denyApplicationFor": "Deny application for {1}",
     "approveApplication": "Approve application for {1}",
     "denyApplication": "Deny application for {1}",
     "documentExpiredTitle": "Document expired",
