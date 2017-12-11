@@ -33,7 +33,6 @@ import { makeStylish } from './makeStylish'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PARTIAL = 'tradle.Partial'
 const CONFIRMATION = 'tradle.Confirmation'
-const DENIAL = 'tradle.ApplicationDenial'
 const BOOKMARK = 'tradle.Bookmark'
 
 const LIMIT = 10
@@ -677,91 +676,6 @@ class ResourceList extends Component {
 
     navigator.push(route);
   }
-  approveDeny(resource) {
-    if (resource._denied) {
-      Alert.alert('Application was denied')
-      return
-    }
-    if (resource._approved) {
-      Alert.alert('Application was approved')
-      return
-    }
-    Actions.showModal({
-      title: translate('approveThisApplicationFor', translate(resource.from.title)),
-      buttons: [
-        {
-          text: translate('cancel'),
-          onPress: () => {  Actions.hideModal(); console.log('Canceled!')}
-        },
-        {
-          text: translate('Approve'),
-          onPress: () => {
-            if (!resource._appSubmitted)
-              Alert.alert('Application is not yet submitted')
-            else
-              this.approve(resource)
-          }
-        },
-        {
-          text: translate('Deny'),
-          onPress: () => {
-            this.deny(resource)
-          }
-        },
-      ]
-    })
-  }
-  approve(resource) {
-    Actions.hideModal()
-    Alert.alert(
-      translate('approveApplication', resource.from.title),
-      null,
-      [
-        {text: translate('cancel'), onPress: () => {
-          console.log('Canceled!')
-        }},
-        {text: translate('Approve'), onPress: () => {
-          let title = utils.makeModelTitle(utils.getModel(resource.product).value)
-          let me = utils.getMe()
-          let msg = {
-            [TYPE]: CONFIRMATION,
-            confirmationFor: resource,
-            message: 'Your application for \'' + title + '\' was approved',
-            _context: resource,
-            from: me,
-            to: resource.from
-          }
-          Actions.addMessage({msg: msg})
-        }}
-      ]
-    )
-  }
-  deny(resource) {
-    Actions.hideModal()
-    Alert.alert(
-      translate('denyApplication', resource.from.title),
-      null,
-      [
-        {text: translate('cancel'), onPress: () => {
-          console.log('Canceled!')
-        }},
-        {text: translate('Deny'), onPress: () => {
-          let title = utils.makeModelTitle(utils.getModel(resource.product).value)
-          let me = utils.getMe()
-          let msg = {
-            [TYPE]: DENIAL,
-            application: resource,
-            message: 'Your application for \'' + title + '\' was denied',
-            _context: resource,
-            from: me,
-            to: resource.from
-          }
-          Actions.addMessage({msg: msg})
-        }}
-      ]
-    )
-
-  }
   _selectResource(resource) {
     let model = utils.getModel(this.props.modelName);
     let title = utils.getDisplayName(resource);
@@ -984,11 +898,6 @@ class ResourceList extends Component {
       }
     }
     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
-    let isSharedContext = utils.isContext(resource[TYPE])  &&  utils.isReadOnlyChat(resource)
-    if (isSharedContext  &&  resource._relationshipManager  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
-      route.rightButtonTitle = 'Approve/Deny'
-      route.onRightButtonPress = () => this.approveDeny(resource)
-    }
     this.props.navigator.push(route)
   }
   changeSharedWithList(id, value) {
