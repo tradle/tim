@@ -633,7 +633,7 @@ class ResourceRow extends Component {
           break
       }
     }
-    progressBar = <View style={[styles.progress, { backgroundColor: '#DCF3FF'}]}>
+    progressBar = <View style={styles.progress}>
                     <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
                   </View>
     return  <View>
