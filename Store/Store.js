@@ -5633,20 +5633,20 @@ var Store = Reflux.createStore({
         //   cursor.endCursor = null
     let list = result.map((r) => this.convertToResource(r.node))
     if (me.isEmployee  &&  modelName === APPLICATION) {
-      let contexts
-      let contextIds = []
+      let promises = []
       list.forEach((r) => {
         let c = r.context
-        if (typeof c === 'string'  &&  contextIds.indexOf(c) === -1)
-          contextIds.push(c)
+        if (typeof c === 'string') { //  &&  contextIds.indexOf(c) === -1) {
+          let appFilter = { [TYPE]: PRODUCT_REQUEST, contextId: c }
+          promises.push(graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true }))
+        }
       })
-      let appFilter = { [TYPE]: PRODUCT_REQUEST, contextId: contextIds }
-      // if (me.isEmployee)
-      //   appFilter._author = myBot[ROOT_HASH]
-// list = list.filter((l) => l.requestFor !== EMPLOYEE_ONBOARDING)
-      let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true })
+      // let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true })
+      let contexts
+      let contextsResult = await Q.all(promises)
       if (contextsResult) {
-        contexts = contextsResult.map((r) => this.convertToResource(r.node))
+        contextsResult = contextsResult.filter((r) => r)
+        contexts = contextsResult.map((r) => this.convertToResource(r[0].node))
         list.forEach((r) => {
           let contextId = r.context
           if (typeof contextId === 'object')
