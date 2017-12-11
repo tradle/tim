@@ -157,17 +157,17 @@ class ApplicationTabs extends Component {
       if (utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
         details = <View>
                    {details}
-                   <View style={{flexDirection: 'row', alignSelf: 'center'}}>
+                   <View style={{flexDirection: 'row', alignSelf: 'center', marginTop: 100}}>
                     <TouchableOpacity onPress={this.props.approve.bind(this)}>
                     <View style={styles.approve}>
-                      <Icon name='ios-thumbs-up-outline' color='#fff' size={25} style={{marginTop: 5}}/>
-                      <Text style={{fontSize: 20, color: '#ffffff', alignSelf: 'center'}}>{translate('Approve')}</Text>
+                      <Icon name='ios-thumbs-up-outline' color='#fff' size={25} style={{marginTop: 10}}/>
+                      <Text style={{paddingLeft: 10, fontSize: 20, color: '#ffffff', alignSelf: 'center'}}>{translate('Approve')}</Text>
                     </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={this.props.deny.bind(this)}>
                     <View style={styles.deny}>
-                      <Icon name='ios-thumbs-down-outline' color='#7AAAC3' size={25} style={{marginTop: 5}}/>
-                      <Text style={{fontSize: 20, color: '#7AAAC3', alignSelf: 'center'}}>{translate('Deny')}</Text>
+                      <Icon name='ios-thumbs-down-outline' color='#7AAAC3' size={25} style={{marginTop: 10}}/>
+                      <Text style={{paddingLeft: 10, fontSize: 20, color: '#7AAAC3', alignSelf: 'center'}}>{translate('Deny')}</Text>
                     </View>
                     </TouchableOpacity>
                   </View>
@@ -297,10 +297,9 @@ var styles = StyleSheet.create({
     backgroundColor: '#7AAAC3',
     flexDirection: 'row',
     justifyContent: 'center',
-    width: 150,
-    marginTop: 20,
+    width: 250,
     alignSelf: 'center',
-    height: 40,
+    height: 50,
     borderRadius: 15,
     marginRight: 20
   },
@@ -308,10 +307,9 @@ var styles = StyleSheet.create({
     backgroundColor: '#fff',
     flexDirection: 'row',
     justifyContent: 'center',
-    width: 150,
-    marginTop: 20,
+    width: 250,
     alignSelf: 'center',
-    height: 40,
+    height: 50,
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#7AAAC3'
