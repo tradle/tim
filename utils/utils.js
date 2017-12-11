@@ -298,7 +298,8 @@ var utils = {
     let properties = this.getModel(r1[TYPE]).value.properties
     let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
     for (var p in properties) {
-      if (!properties[p]  ||  exclude.indexOf(p) !== -1)
+      let prop = properties[p]
+      if (!prop  ||  exclude.indexOf(p) !== -1)
         continue
       if (r1[p] === r2[p])
         continue
@@ -313,17 +314,23 @@ var utils = {
       else if (typeof r1[p] === 'object') {
         if (!r2[p])
           return false
-        if (properties[p].ref === MONEY) {
+        if (prop.ref === MONEY) {
           if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
             return false
         }
-        else if (properties[p].inlined  ||  (properties[p].ref  &&  this.getModel(properties[p].ref).value.inlined))
+        else if (prop.inlined  ||  (prop.ref  &&  this.getModel(prop.ref).value.inlined))
           return this.compare(r1[p], r2[p], true)
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
-      else if (r1[p]  ||  r2[p])
-        return false
+      else {
+        if (r1[p]  ||  r2[p])
+          return false
+        if (prop.type === 'boolean') {
+          if (typeof r1[p]  !==  typeof r2[p])
+            return false
+        }
+      }
     }
     return true
   },
