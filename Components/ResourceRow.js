@@ -602,50 +602,40 @@ class ResourceRow extends Component {
       icolor = resource.relationshipManager ? '#CA9DF2' : '#7AAAc3'
     }
     let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
-    // if (__DEV__  ||  !resource.relationshipManager) {
-    //   icon = <TouchableOpacity onPress={() => this.assignRM()}>
-    //            {icon}
-    //          </TouchableOpacity>
-    // }
 
     let rmIcon = <View style={{flexDirection: 'column', justifyContent: 'center'}}>
                    {icon}
                  </View>
-    // }
-      // approved = <View  style={{justifyContent: 'center', alignItems: 'flex-end'}}><Icon name='ios-ribbon' size={20} color='#289427'/></View>
     let aTitle = resource.applicant.title
     let applicant
     if (aTitle)
       applicant = <Text style={styles.applicant}>{aTitle}</Text>
     let formsCount, progressBar
+    let formTypes = []
+    let progress = 0
     if (resource.forms) {
-      // formsCount = <View style={styles.formsCount}>
-      //                <Text style={styles.formsCountText}>{resource.forms.length}</Text>
-      //              </View>
-      let formTypes = []
       resource.forms.forEach((item) => {
         let itype = utils.getType(item.id)
         if (formTypes.indexOf(itype) === -1)
           formTypes.push(itype)
       })
-      let progress = formTypes.length / m.value.forms.length
-      let progressColor = '#7AAAC3'
-      if (resource.status) {
-        switch (resource.status) {
-          case 'approved':
-            progressColor = '#A6D785'
-            break
-          case 'denied':
-            progressColor = '#EE3333'
-            break
-        }
-      }
-      progressBar = <View style={[styles.progress, { height: StyleSheet.hairlineWidth, backgroundColor: '#DCF3FF'}]}>
-        <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={7} />
-      </View>
-      // formsCount = <Progress.Bar progress={progress} width={100} color='#7AAAC3' borderWidth={1} height={3} />
-      // formsCount = <Pie progress={progress} size={50} />
+      progress = formTypes.length / m.value.forms.length
     }
+
+    let progressColor = '#7AAAC3'
+    if (resource.status) {
+      switch (resource.status) {
+        case 'approved':
+          progressColor = '#A6D785'
+          break
+        case 'denied':
+          progressColor = '#EE3333'
+          break
+      }
+    }
+    progressBar = <View style={[styles.progress, { backgroundColor: '#DCF3FF'}]}>
+                    <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={7} />
+                  </View>
     return  <View>
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
