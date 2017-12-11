@@ -11,7 +11,7 @@ var ShowPropertiesView = require('./ShowPropertiesView')
 var Actions = require('../Actions/Actions');
 // import ProgressBar from 'react-native-progress/Bar';
 
-const ProgressBar = (function () {
+const ProgressBar = (() => {
   switch (Platform.OS) {
     case 'web':
       return require('./ProgressBar')

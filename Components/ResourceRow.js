@@ -18,7 +18,14 @@ var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var appStyle = require('../styles/appStyle.json')
 var StyleSheet = require('../StyleSheet')
 // import Pie from 'react-native-progress/Pie';
-import ProgressBar from 'react-native-progress/Bar';
+const ProgressBar = (() => {
+  switch (Platform.OS) {
+    case 'web':
+      return require('./ProgressBar')
+    default:
+      return require('react-native-progress/Bar')
+  }
+})()
 
 import {
   Image,
