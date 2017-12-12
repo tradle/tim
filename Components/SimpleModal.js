@@ -27,7 +27,8 @@ import {
   View,
   Text,
   Dimensions,
-  Platform
+  Platform,
+  ActivityIndicator
 } from 'react-native'
 
 import omit from 'object.omit'
@@ -36,7 +37,7 @@ const CENTER = false
 const noop = () => {}
 
 export default function SimpleModal (props) {
-  const { title='', message='', buttons=[], style=DEFAULT_STYLES } = props
+  const { title='', message='', buttons=[], style=DEFAULT_STYLES, showIndicator=false } = props
   let centerButtonStyle
   // if (buttons.length === 1) {
   //   centerButtonStyle = { flex: 1 }
@@ -63,6 +64,16 @@ export default function SimpleModal (props) {
   const modalProps = omit(props, ['title', 'message', 'buttons'])
   if (Platform.OS === 'android' && !modalProps.onRequestClose) {
     modalProps.onRequestClose = noop
+  }
+  if (showIndicator) {
+    return <Modal {...modalProps} >
+             <View style={style.indicatorContainer}>
+               <View style={style.indicatorContent}>
+                  <Text style={style.indicatorTitle}>{title || ''}</Text>
+                  <ActivityIndicator size='large' style={style.indicator} color='#000' />
+                </View>
+              </View>
+            </Modal>
   }
 
   return (
@@ -155,5 +166,33 @@ const DEFAULT_STYLES = StyleSheet.create({
   },
   okText: {
     color: '#fff'
-  }
+  },
+  indicator: {
+    alignSelf: 'center',
+    backgroundColor: 'transparent',
+    marginTop: 30
+  },
+  indicatorContainer: {
+    flexGrow: 1,
+    // alignItems: 'center',
+    justifyContent: 'center',
+    // backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    paddingHorizontal: 10
+  },
+  indicatorContent: {
+    alignSelf: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#eee',
+    borderRadius: 30,
+    opacity: 0.9,
+    paddingHorizontal: 50,
+    paddingVertical: 30
+    // width: 200,
+    // height: 150
+  },
+  indicatorTitle: {
+    alignSelf: 'center',
+    fontSize: 20,
+    color: '#000'
+  },
 })

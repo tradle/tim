@@ -69,7 +69,7 @@ class ApplicationTabs extends Component {
       propsToShow = Object.keys(itemProps)
 
     let showCurrent = showDetails ? currentMarker : null
-    let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
+    let detailsTab = <View style={buttonStyles.container} key={this.getNextKey()}>
                        <TouchableOpacity onPress={this.showDetails.bind(this)} underlayColor='transparent'>
                          <View style={styles.item}>
                            <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
@@ -171,13 +171,13 @@ class ApplicationTabs extends Component {
                     <TouchableOpacity onPress={this.props.approve.bind(this)}>
                     <View style={styles.approve}>
                       <Icon name='ios-thumbs-up-outline' color='#fff' size={25} style={{marginTop: 10}}/>
-                      <Text style={{paddingLeft: 10, fontSize: 20, color: '#ffffff', alignSelf: 'center'}}>{translate('Approve')}</Text>
+                      <Text style={styles.approveText}>{translate('Approve')}</Text>
                     </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={this.props.deny.bind(this)}>
                     <View style={styles.deny}>
                       <Icon name='ios-thumbs-down-outline' color='#7AAAC3' size={25} style={{marginTop: 10}}/>
-                      <Text style={{paddingLeft: 10, fontSize: 20, color: '#7AAAC3', alignSelf: 'center'}}>{translate('Deny')}</Text>
+                      <Text style={styles.denyText}>{translate('Deny')}</Text>
                     </View>
                     </TouchableOpacity>
                   </View>
@@ -219,8 +219,6 @@ class ApplicationTabs extends Component {
   }
   getAppStatus() {
     let resource = this.props.resource
-    // if (!resource.forms)
-    //   return
     let formTypes = []
     let progress = 0
     if (resource.forms) {
@@ -244,22 +242,10 @@ class ApplicationTabs extends Component {
           break
       }
     }
-    // return <View style={{marginVertical: 5}}>
-    //        <View style={{borderWidth: StyleSheet.hairlineWidth, borderColor: progressColor, flexDirection: 'row'}}>
-    //          <View style={{flex: formTypes.length, backgroundColor: progressColor, height: 20}} />
-    //          <View style={{flex: m.value.forms.length, backgroundColor: '#ffffff', height: 20}} />
-    //        </View>
-    //        <View style={{marginTop: -4, width: utils.dimensions(ApplicationTabs).width - 40}}>
-    //          <Text style={{color: 'red', fontSize: 16, marginTop: -17, alignSelf: 'center'}}>{resource.status}</Text>
-    //        </View>
-    //        </View>
 
     return <View style={styles.progress}>
              <ProgressBar progress={progress} width={utils.dimensions(ApplicationTabs).width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
            </View>
-
-    // formsCount = <Progress.Bar progress={progress} width={100} color='#7AAAC3' borderWidth={1} height={3} />
-    // formsCount = <Pie progress={progress} size={50} />
   }
 }
 
@@ -315,6 +301,11 @@ var styles = StyleSheet.create({
     borderRadius: 15,
     marginRight: 20
   },
+  approveText: {
+    fontSize: 20,
+    color: '#ffffff',
+    alignSelf: 'center'
+  },
   deny: {
     backgroundColor: '#fff',
     flexDirection: 'row',
@@ -325,6 +316,11 @@ var styles = StyleSheet.create({
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#7AAAC3'
+  },
+  denyText: {
+    fontSize: 20,
+    color: '#7AAAC3',
+    alignSelf: 'center'
   }
 })
 

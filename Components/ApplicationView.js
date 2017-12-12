@@ -71,6 +71,11 @@ class ApplicationView extends Component {
     }
     let currentRoutes = navigator.getCurrentRoutes()
     let len = currentRoutes.length
+
+    this.openChat = this.openChat.bind(this)
+    this.approve = this.approve.bind(this)
+    this.deny = this.deny.bind(this)
+
     if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle)
       currentRoutes[len - 1].onRightButtonPress = action.bind(this)
   }
@@ -114,32 +119,33 @@ class ApplicationView extends Component {
       break
     case 'assignRM_Confirmed':
       if (application[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
+        Actions.hideModal()
         let r = utils.clone(this.props.resource)
         r.relationshipManager = application.relationshipManager
-        this.setState({resource: r})
+        this.setState({resource: r, isLoading: false})
       }
       break
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return this.props.orientation !== nextProps.orientation               ||
-           this.state.resource     !== nextState.resource                 ||
-           this.state.forwardlink  !== nextState.forwardlink
+    return this.props.orientation !== nextProps.orientation    ||
+           this.state.resource    !== nextState.resource       ||
+           this.state.isLoading   !== nextState.isLoading      ||
+           this.state.forwardlink !== nextState.forwardlink
   }
 
   render() {
     let styles = createStyles()
-    if (this.state.isLoading) {
+    let { forwardlink, isLoading, hasRM } = this.state
+    if (isLoading)
       return (
-                <View style={[platformStyles.container]}>
-                  <Text style={styles.loading}>{'Loading...'}</Text>
-                  <ActivityIndicator size='large' style={styles.indicator} />
-                </View>
-              )
-    }
+              <View style={[platformStyles.container]}>
+                <Text style={styles.loading}>{'Loading...'}</Text>
+                <ActivityIndicator size='large' style={styles.indicator} />
+              </View>
+             )
 
     let { navigator, bankStyle, currency, dimensions } = this.props
-    let { forwardlink } = this.state
 
     let resource = this.state.resource;
     let modelName = resource[TYPE];
@@ -154,7 +160,7 @@ class ApplicationView extends Component {
     let paddingRight = Platform.OS === 'android' ? 0 : 10
     let iconName = 'ios-person-add-outline'
     let rmBg, icolor
-    let hasRM = resource.relationshipManager
+    hasRM = resource.relationshipManager
     let rmStyle, rId, meId
     if (hasRM) {
       rId = utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE)
@@ -172,6 +178,7 @@ class ApplicationView extends Component {
       icolor = '#7AAAc3'
       rmStyle = {backgroundColor: rmBg, opacity: 0.5, borderWidth: StyleSheet.hairlineWidth, borderColor: '#7AAAc3'}
     }
+    let homeStyle = {backgroundColor: '#fff', opacity: 0.9}
     let assignRM
     if (!rId  ||  rId !== meId)
       assignRM = <TouchableOpacity onPress={() => this.assignRM()}>
@@ -179,10 +186,18 @@ class ApplicationView extends Component {
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
                     </View>
                   </TouchableOpacity>
-
+    let routes = navigator.getCurrentRoutes()
+    let home
+    if (__DEV__)
+       home = <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={{alignSelf: 'flex-start', paddingRight}}>
+                  <View style={[platformStyles.menuButtonRegular, homeStyle]}>
+                    <Icon name='ios-home' color='#7AAAc3' size={33}/>
+                  </View>
+                </TouchableOpacity>
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
-                    <TouchableOpacity onPress={this.openChat.bind(this)} style={{paddingRight}}>
+                    {home}
+                    <TouchableOpacity onPress={this.openChat} style={{paddingRight}}>
                       <View style={[platformStyles.conversationButton, {backgroundColor: bgcolor, borderColor: bgcolor, borderWidth: 1, opacity: 0.5}]}>
                         <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
                       </View>
@@ -199,8 +214,8 @@ class ApplicationView extends Component {
                             currency={currency}
                             forwardlink={forwardlink}
                             showDetails={this.state.showDetails}
-                            approve={this.approve.bind(this)}
-                            deny={this.deny.bind(this)}
+                            approve={this.approve}
+                            deny={this.deny}
                             bankStyle={bankStyle}/>
         </ScrollView>
        {footer}
@@ -234,6 +249,7 @@ class ApplicationView extends Component {
           }
           Actions.addChatItem({resource: msg})
           this.setState({hasRM: true})
+          Actions.showModal({title: 'Loading...', showIndicator: true})
         }}
       ]
     )

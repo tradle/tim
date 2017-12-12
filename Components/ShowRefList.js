@@ -193,7 +193,7 @@ class ShowRefList extends Component {
     const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
     if (showQR) {
       refList.push(
-        <View style={[buttonStyles.container, {flex:1}]} key={this.getNextKey()}>
+        <View style={buttonStyles.container} key={this.getNextKey()}>
            <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
              <View style={styles.item}>
                <Icon name={'ios-qr-scanner'}  size={utils.getFontSize(30)}  color='#757575' />
