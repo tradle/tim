@@ -143,7 +143,7 @@ var NewResourceMixin = {
       })
     }
     else
-       eCols = utils.getEditCols(meta)
+      eCols = utils.getEditCols(meta) || props
     // else if (meta.editCols) {
     //   utils.arrayToObject(meta.editCols);
     //   editCols = {}
