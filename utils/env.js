@@ -124,7 +124,7 @@ const merged = extend({
   yukiOn: false,
   paintContextIds: false,
   tradleAPIKey: null,
-  tradleAPIEndpoint: 'https://4uyhrpryal.execute-api.us-east-1.amazonaws.com/dev'
+  tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/'
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
