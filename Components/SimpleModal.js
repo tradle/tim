@@ -70,7 +70,7 @@ export default function SimpleModal (props) {
              <View style={style.indicatorContainer}>
                <View style={style.indicatorContent}>
                   <Text style={style.indicatorTitle}>{title || ''}</Text>
-                  <ActivityIndicator size='large' style={style.indicator} color='#000' />
+                  <ActivityIndicator size='large' style={style.indicator} color='#757575' />
                 </View>
               </View>
             </Modal>
@@ -107,7 +107,7 @@ const DEFAULT_STYLES = StyleSheet.create({
     backgroundColor: '#ffffff',
     shadowOpacity: 0.3,
     shadowRadius: 10,
-    shadowColor: '#000000',
+    shadowColor: '#757575',
     shadowOffset: { width: 10, height: 10 },
     // boxShadow: '2px 2px 10px rgba(0, 0, 0, 0.2)'
   },
