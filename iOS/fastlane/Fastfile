@@ -81,7 +81,6 @@ platform :ios do
   lane :gym_prod do
     disable_automatic_code_signing(path: ENV['IOS_PROJECT'])
     gym(export_method: 'app-store')
-    enable_automatic_code_signing(path: ENV['IOS_PROJECT'])
   end
 
   desc "Submit a new Beta Build to Apple TestFlight"

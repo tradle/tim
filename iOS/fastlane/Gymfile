@@ -1,4 +1,5 @@
 scheme "Release"
+configuration "Release"
 clean true
 output_name "Tradle"
 workspace "Tradle.xcworkspace"
