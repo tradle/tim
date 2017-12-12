@@ -59,7 +59,7 @@ class ApplicationTabs extends Component {
       propsToShow = Object.keys(itemProps)
 
     let showCurrent = showDetails ? currentMarker : null
-    let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
+    let detailsTab = <View style={buttonStyles.container} key={this.getNextKey()}>
                        <TouchableOpacity onPress={this.showDetails.bind(this)} underlayColor='transparent'>
                          <View style={styles.item}>
                            <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
@@ -161,13 +161,13 @@ class ApplicationTabs extends Component {
                     <TouchableOpacity onPress={this.props.approve.bind(this)}>
                     <View style={styles.approve}>
                       <Icon name='ios-thumbs-up-outline' color='#fff' size={25} style={{marginTop: 5}}/>
-                      <Text style={{fontSize: 20, color: '#ffffff', alignSelf: 'center'}}>{translate('Approve')}</Text>
+                      <Text style={styles.approveText}>{translate('Approve')}</Text>
                     </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={this.props.deny.bind(this)}>
                     <View style={styles.deny}>
                       <Icon name='ios-thumbs-down-outline' color='#7AAAC3' size={25} style={{marginTop: 5}}/>
-                      <Text style={{fontSize: 20, color: '#7AAAC3', alignSelf: 'center'}}>{translate('Deny')}</Text>
+                      <Text style={styles.denyText}>{translate('Deny')}</Text>
                     </View>
                     </TouchableOpacity>
                   </View>
@@ -290,6 +290,11 @@ var styles = StyleSheet.create({
     borderRadius: 15,
     marginRight: 20
   },
+  approveText: {
+    fontSize: 20,
+    color: '#ffffff',
+    alignSelf: 'center'
+  },
   deny: {
     backgroundColor: '#fff',
     flexDirection: 'row',
@@ -301,6 +306,11 @@ var styles = StyleSheet.create({
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#7AAAC3'
+  },
+  denyText: {
+    fontSize: 20,
+    color: '#7AAAC3',
+    alignSelf: 'center'
   }
 })
 
