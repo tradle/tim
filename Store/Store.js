@@ -4503,7 +4503,7 @@ var Store = Reflux.createStore({
       let permalink = to[ROOT_HASH]
       let toChain = {}
 
-      let exclude = ['to', 'from', 'verifications', CUR_HASH, 'idOld', '_message', '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', '_latest']
+      let exclude = ['to', 'from', 'verifications', CUR_HASH, 'idOld', '_message', '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', '_latest', '_outbound']
       // if (isNew)
       //   exclude.push(ROOT_HASH)
       extend(toChain, returnVal)
