@@ -244,7 +244,7 @@ class ApplicationTabs extends Component {
     }
 
     return <View style={styles.progress}>
-             <ProgressBar progress={progress} width={utils.dimensions(ApplicationTabs).width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
+             <ProgressBar progress={progress} width={utils.getContentWidth(ApplicationTabs)} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
            </View>
   }
 }
@@ -304,6 +304,7 @@ var styles = StyleSheet.create({
   approveText: {
     fontSize: 20,
     color: '#ffffff',
+    paddingLeft: 10,
     alignSelf: 'center'
   },
   deny: {
@@ -320,6 +321,7 @@ var styles = StyleSheet.create({
   denyText: {
     fontSize: 20,
     color: '#7AAAC3',
+    paddingLeft: 10,
     alignSelf: 'center'
   }
 })

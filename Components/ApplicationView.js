@@ -178,7 +178,7 @@ class ApplicationView extends Component {
       icolor = '#7AAAc3'
       rmStyle = {backgroundColor: rmBg, opacity: 0.5, borderWidth: StyleSheet.hairlineWidth, borderColor: '#7AAAc3'}
     }
-    let homeStyle = {backgroundColor: '#fff', opacity: 0.9}
+    let homeStyle = {backgroundColor: '#fff', opacity: 0.9, borderColor: '#7AAAc3', borderWidth: 1}
     let assignRM
     if (!rId  ||  rId !== meId)
       assignRM = <TouchableOpacity onPress={() => this.assignRM()}>
