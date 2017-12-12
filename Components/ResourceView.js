@@ -49,8 +49,6 @@ const CHANGE_GESTURE_PASSWORD = 3
 const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
 const MY_PRODUCT = 'tradle.MyProduct'
-const APPLICATION = 'tradle.Application'
-const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 
 const {
   PROFILE,
