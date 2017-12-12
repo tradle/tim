@@ -185,19 +185,21 @@ class ApplicationTabs extends Component {
       }
     }
 
-    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails)
-      return   <View>
+    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
+      let style = {width: utils.getContentWidth(ApplicationTabs), height: utils.dimensions(ApplicationTabs).height}
+      return  <View style={style}>
                 {separator}
-                <View style={[buttonStyles.buttons, { borderBottomWidth: 0}]} key={'ShowRefList'}>
+                <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0, minHeight: refList &&  refList.length ? 70 : 0}]} key={'ApplicationTabs'}>
                   {refList}
                 </View>
                 {showDetails  &&  this.getAppStatus()}
                 {children}
-                <View>
+                <View style={{margin: 1, flex: 1}}>
                   {flinkRL}
                   {details}
                 </View>
               </View>
+    }
 
     return children || <View/>
   }

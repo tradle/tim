@@ -192,7 +192,7 @@ class ApplicationView extends Component {
                 </View>
     return (
       <PageView style={platformStyles.container}>
-        <ScrollView  ref='this' name={this._lazyId}>
+        <ScrollView  ref='this' style={{width: utils.getContentWidth(ApplicationView), alignSelf: 'center'}} name={this._lazyId}>
           <ApplicationTabs  lazy={this._lazyId}
                             resource={resource}
                             navigator={navigator}

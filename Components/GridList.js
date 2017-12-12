@@ -1664,7 +1664,7 @@ class GridList extends Component {
                   </View>
     }
     return (
-      <PageView style={isBacklink || isForwardlink  ? {} : platformStyles.container} separator={contentSeparator}>
+      <PageView style={isBacklink || isForwardlink  ? {flex: 1} : platformStyles.container} separator={contentSeparator}>
         {network}
         {searchBar}
         <View style={styles.separator} />
