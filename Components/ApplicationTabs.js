@@ -207,20 +207,18 @@ class ApplicationTabs extends Component {
   }
   getAppStatus() {
     let resource = this.props.resource
-    if (!resource.forms)
-      return
-    // formsCount = <View style={styles.formsCount}>
-    //                <Text style={styles.formsCountText}>{resource.forms.length}</Text>
-    //              </View>
     let formTypes = []
-    resource.forms.forEach((item) => {
-      let itype = utils.getType(item.id)
-      if (formTypes.indexOf(itype) === -1)
-        formTypes.push(itype)
-    })
-    let m = utils.getModel(resource.requestFor)
+    let progress = 0
+    if (resource.forms) {
+      resource.forms.forEach((item) => {
+        let itype = utils.getType(item.id)
+        if (formTypes.indexOf(itype) === -1)
+          formTypes.push(itype)
+      })
+      let m = utils.getModel(resource.requestFor)
 
-    let progress = formTypes.length / m.value.forms.length
+      progress = formTypes.length / m.value.forms.length
+    }
     let progressColor = '#7AAAC3'
     if (resource.status) {
       switch (resource.status) {
@@ -232,22 +230,10 @@ class ApplicationTabs extends Component {
           break
       }
     }
-    // return <View style={{marginVertical: 5}}>
-    //        <View style={{borderWidth: StyleSheet.hairlineWidth, borderColor: progressColor, flexDirection: 'row'}}>
-    //          <View style={{flex: formTypes.length, backgroundColor: progressColor, height: 20}} />
-    //          <View style={{flex: m.value.forms.length, backgroundColor: '#ffffff', height: 20}} />
-    //        </View>
-    //        <View style={{marginTop: -4, width: utils.dimensions(ApplicationTabs).width - 40}}>
-    //          <Text style={{color: 'red', fontSize: 16, marginTop: -17, alignSelf: 'center'}}>{resource.status}</Text>
-    //        </View>
-    //        </View>
 
     return <View style={styles.progress}>
              <ProgressBar progress={progress} width={utils.dimensions(ApplicationTabs).width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
            </View>
-
-    // formsCount = <Progress.Bar progress={progress} width={100} color='#7AAAC3' borderWidth={1} height={3} />
-    // formsCount = <Pie progress={progress} size={50} />
   }
 }
 
