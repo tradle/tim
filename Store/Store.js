@@ -285,6 +285,7 @@ var language
 var dictionary = {}
 var isAuthenticated
 var meDriver
+
 // var cursor = {}
 // var publishedIdentity
 var ready;
@@ -733,6 +734,7 @@ var Store = Reflux.createStore({
     }
   },
   readseal(seal) {
+    debugger
     let self = this
     const link = seal.link
     return meDriver.objects.get(link)
@@ -2352,7 +2354,7 @@ var Store = Reflux.createStore({
   },
 
   // Gets info about companies in this app, their bot representatives and their styles
-  getServiceProviders(params) {
+  async getServiceProviders(params) {
     let originalUrl = params.url
     let retry = params.retry
     let id = params.id
@@ -2393,51 +2395,45 @@ var Store = Reflux.createStore({
     if (languageCode)
       url += '?lang=' + languageCode
 
-    return doFetch(url, { headers: { cache: 'no-cache' } }, 5000)
-    .then((response) =>  {
-      if (response.status > 300)
-        throw new Error('Cannot access: ' + url)
-      return response.json()
-    })
-    .then((json) => {
-      json = utils.normalizeGetInfoResponse(json)
+    let response = await doFetch(url, { headers: { cache: 'no-cache' } }, 5000)
+    if (response.status > 300)
+      throw new Error('Cannot access: ' + url)
 
-      if (json.dictionary) {
-        extend(true, dictionary, json.dictionary)
-        if (me) {
-          me.dictionary = dictionary
-          if (language)
-            me.language = language
-          this.setMe(me)
-        }
+    let json = await response.json()
+    json = utils.normalizeGetInfoResponse(json)
+    if (json.dictionary) {
+      extend(true, dictionary, json.dictionary)
+      if (me) {
+        me.dictionary = dictionary
+        if (language)
+          me.language = language
+        this.setMe(me)
       }
-      let newProviders
-      if (!SERVICE_PROVIDERS) {
-        SERVICE_PROVIDERS = []
-        newProviders = true
-      }
+    }
+    let newProviders
+    if (!SERVICE_PROVIDERS) {
+      SERVICE_PROVIDERS = []
+      newProviders = true
+    }
 
-      var promises = []
-      json.providers.forEach(sp => {
-        this.parseProvider(sp, params, providerIds, newProviders)
-        promises.push(this.addInfo(sp, originalUrl, newServer))
-      })
-      if (utils.getMe())
-        this.setMe(utils.getMe())
-      return Q.allSettled(promises)
+    var promises = []
+    json.providers.forEach(sp => {
+      this.parseProvider(sp, params, providerIds, newProviders)
+      promises.push(this.addInfo(sp, originalUrl, newServer))
     })
-    .then((results) => {
-      let list = this.searchNotMessages({modelName: ORGANIZATION})
-      this.trigger({
-        action: 'list',
-        list: list,
-        modelName: ORGANIZATION
-      })
+    if (utils.getMe())
+      this.setMe(utils.getMe())
+    let results = await Q.allSettled(promises)
+    let list = this.searchNotMessages({modelName: ORGANIZATION})
+    this.trigger({
+      action: 'list',
+      list: list,
+      modelName: ORGANIZATION
+    })
 
-      return results
-        .filter(r => r.state === 'fulfilled')
-        .map(r => r.value)
-    })
+    return results
+      .filter(r => r.state === 'fulfilled')
+      .map(r => r.value)
     // .catch((err) => {
     //   debugger
     // })
@@ -3686,6 +3682,16 @@ var Store = Reflux.createStore({
           r[forwardlinkName] = list
         }
       }
+      if (!r._context) {
+        if (!resource._context)
+          debugger
+        r._context = resource._context
+      }
+      // if (isApplication  &&  !r._context) {
+      //   let context = await this.getContext(r.context, r)
+      //   if (context)
+      //     r._context = context
+      // }
       let retParams = { resource: r, action: action || 'getItem', forwardlink: forwardlink}
       if (list)
         retParams.list = list
