@@ -142,8 +142,11 @@ var NewResourceMixin = {
         eCols[r] = props[r]
       })
     }
-    else
-      eCols = utils.getEditCols(meta) || props
+    else {
+      eCols = utils.getEditCols(meta)
+      if (!eCols || !eCols.length)
+        eCols = props
+    }
     // else if (meta.editCols) {
     //   utils.arrayToObject(meta.editCols);
     //   editCols = {}
@@ -1594,6 +1597,8 @@ var NewResourceMixin = {
     let isArray = prop.type === 'array' || (this.props.search  &&  prop.ref  &&  utils.isEnum(prop.ref))
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
+      if (isEnum)
+        value = utils.buildRef(value)
       if (!this.floatingProps)
         this.floatingProps = {}
       this.floatingProps[propName] = value
