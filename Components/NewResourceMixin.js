@@ -151,7 +151,7 @@ var NewResourceMixin = {
     }
     else {
       eCols = utils.getEditCols(meta)
-      if (eCols)
+      if (!eCols || !eCols.length)
         eCols = props
     }
     // else if (meta.editCols) {
