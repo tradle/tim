@@ -140,7 +140,7 @@ class ApplicationView extends Component {
     if (isLoading)
       return (
               <View style={[platformStyles.container]}>
-                <Text style={styles.loading}>{'Loading...'}</Text>
+                <Text style={styles.loading}>{'In process...'}</Text>
                 <ActivityIndicator size='large' style={styles.indicator} />
               </View>
              )
