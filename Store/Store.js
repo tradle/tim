@@ -1799,7 +1799,7 @@ var Store = Reflux.createStore({
   },
 
   onSetProviderStyle(stylePack) {
-    const style = utils.interpretStylesPack(stylePack)
+    // const style = utils.interpretStylesPack(stylePack)
   },
   addToSettings(provider) {
     let r = this._getItem(SETTINGS + '_1')
@@ -2867,8 +2867,15 @@ var Store = Reflux.createStore({
       let toM = this.getModel(toType)
       isReadOnlyContext = utils.isContext(toM)  &&  utils.isReadOnlyChat(to)
     }
-
-
+/// TEST
+    // let isStylesPack = r[TYPE] === STYLES_PACK
+    // if (isStylesPack) {
+    //   let istyle = utils.interpretStylesPack(r)
+    //   if (to)
+    //     to.style = istyle
+    //   return
+    // }
+// end test
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
     var rr = {};
@@ -8104,7 +8111,7 @@ var Store = Reflux.createStore({
     batch.push({type: 'put', key: iKey, value: identity});
     return db.batch(batch)
     .then(() => {
-      var  params = {action: 'addItem', resource: value, me: value};
+      var  params = {action: 'addItem', resource: value, me: value, isRegistration: true};
       this.setMe(me)
       return this.trigger(params);
     })
@@ -9267,7 +9274,7 @@ var Store = Reflux.createStore({
       noTrigger = val.from.id === meId
     var isStylesPack = type === STYLES_PACK
     if (isStylesPack) {
-      org.style = utils.interpretStylesPack(val)
+      org.style = val //utils.interpretStylesPack(val)
       this.dbBatchPut(utils.getId(org), org, batch)
       this.trigger({action: 'customStyles', provider: org})
     }
