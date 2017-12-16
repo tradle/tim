@@ -9291,7 +9291,7 @@ var Store = Reflux.createStore({
     if (!isReadOnly) {
       let meId = utils.getId(to)
       if (type === MY_EMPLOYEE_PASS) {
-        setupEmployee()
+        await setupEmployee()
         this.client = graphQL.initClient(meDriver, me.organization.url)
       }
       else {
