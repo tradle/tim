@@ -4,6 +4,7 @@ import {
   StyleSheet,
   View,
   WebView,
+  PropTypes
 } from 'react-native'
 import AppIntro from 'react-native-app-intro'
 import utils from '../utils/utils'
