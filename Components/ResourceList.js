@@ -593,17 +593,6 @@ class ResourceList extends Component {
       }
     }
 
-// let msg = {
-//   "_t": "tradle.StylesPack",
-//   "backgroundImage": {
-//     "url": "https://s3.amazonaws.com/tradle-public-images/blue-underwater-gradient-opacity-15.png"
-//   },
-//   "logoNeedsText": true,
-//   "to": resource,
-//   from: me
-// }
-// Actions.addMessage({msg, to: resource})
-
     let title
     if (isContact)
       title = resource.firstName
