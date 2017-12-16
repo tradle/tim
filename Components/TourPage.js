@@ -1,10 +1,9 @@
-import React, { Component } from 'react'
+import React, { Component, PropTypes } from 'react'
 import {
   Platform,
   StyleSheet,
   View,
   WebView,
-  PropTypes
 } from 'react-native'
 import AppIntro from 'react-native-app-intro'
 import utils from '../utils/utils'
