@@ -650,6 +650,23 @@
       "from": "assert-plus@>=0.2.0 <0.3.0",
       "resolved": "https://registry.npmjs.org/assert-plus/-/assert-plus-0.2.0.tgz"
     },
+    "assign-deep": {
+      "version": "0.4.6",
+      "from": "assign-deep@>=0.4.5 <0.5.0",
+      "resolved": "https://registry.npmjs.org/assign-deep/-/assign-deep-0.4.6.tgz",
+      "dependencies": {
+        "kind-of": {
+          "version": "5.1.0",
+          "from": "kind-of@>=5.0.2 <6.0.0",
+          "resolved": "https://registry.npmjs.org/kind-of/-/kind-of-5.1.0.tgz"
+        }
+      }
+    },
+    "assign-symbols": {
+      "version": "0.1.1",
+      "from": "assign-symbols@>=0.1.1 <0.2.0",
+      "resolved": "https://registry.npmjs.org/assign-symbols/-/assign-symbols-0.1.1.tgz"
+    },
     "ast-traverse": {
       "version": "0.1.1",
       "from": "ast-traverse@>=0.1.1 <0.2.0",
@@ -3564,7 +3581,7 @@
     "etherscan-api": {
       "version": "3.0.8",
       "from": "mvayngrib/etherscan-api",
-      "resolved": "git://github.com/mvayngrib/etherscan-api.git#245c6927253fe4f305eaa24a256a76a3fd6c7189"
+      "resolved": "git://github.com/mvayngrib/etherscan-api.git#3b2862e5e53fdff861b249bf11e3e05e3571dede"
     },
     "event-emitter": {
       "version": "0.3.5",
@@ -6136,6 +6153,11 @@
       "from": "react-native-animatable@>=0.6.1 <0.7.0",
       "resolved": "https://registry.npmjs.org/react-native-animatable/-/react-native-animatable-0.6.1.tgz"
     },
+    "react-native-app-intro": {
+      "version": "1.1.5",
+      "from": "react-native-app-intro@>=1.1.5 <2.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-app-intro/-/react-native-app-intro-1.1.5.tgz"
+    },
     "react-native-async-storage-rocks": {
       "version": "2.0.0",
       "from": "react-native-async-storage-rocks@>=2.0.0 <3.0.0",
@@ -6153,7 +6175,7 @@
     },
     "react-native-branch": {
       "version": "1.1.1",
-      "from": "react-native-branch@>=1.0.0 <2.0.0",
+      "from": "react-native-branch@1.1.1",
       "resolved": "https://registry.npmjs.org/react-native-branch/-/react-native-branch-1.1.1.tgz"
     },
     "react-native-button": {
@@ -6452,6 +6474,11 @@
           "resolved": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.1.5.tgz"
         }
       }
+    },
+    "react-native-swiper": {
+      "version": "1.4.4",
+      "from": "git+https://github.com/FuYaoDe/react-native-swiper.git",
+      "resolved": "git+https://github.com/FuYaoDe/react-native-swiper.git#a6417ff41a8b2d490bdcc4541015ab35736d4595"
     },
     "react-native-switch-selector": {
       "version": "1.0.7",
