@@ -72,9 +72,10 @@ class TourRow extends Component {
   showTour() {
     let {resource, navigator, to, bankStyle} = this.props
     this.props.navigator.push({
-      title: translate('Tour'),
+      title: "",
       component: TourRow,
       id: 35,
+      backButtonTitle: null,
       // backButtonTitle: __DEV__ ? 'Back' : null,
       passProps: {
         bankStyle: bankStyle,
@@ -90,10 +91,8 @@ let styles = StyleSheet.create({
     flex: 1
   },
   resourceTitle: {
-    // flex: 1,
     fontSize: 20,
     paddingTop: 5
-    // marginBottom: 2,
   },
 });
 reactMixin(TourRow.prototype, RowMixin);
