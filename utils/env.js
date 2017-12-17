@@ -61,8 +61,6 @@ const merged = extend({
     'https://lo5d85p78d.execute-api.us-east-1.amazonaws.com/dev/',
     'https://yy6zli69ab.execute-api.us-east-1.amazonaws.com/dev/',
     'https://e1b8reh825.execute-api.us-east-1.amazonaws.com/dev/'
-        // 'http://localhost:21012',
-    'http://localhost:44444',
   ],
   LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/', // Goofy
   pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
