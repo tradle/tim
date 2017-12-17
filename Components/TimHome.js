@@ -550,6 +550,7 @@ class TimHome extends Component {
       this.showContacts()
       return
     }
+    this.state.firstPage = null
     if (firstPage) {
       switch (firstPage) {
       case 'chat':
@@ -557,25 +558,24 @@ class TimHome extends Component {
           permalink: this.state.permalink,
           url: this.state.url
         })
-        return
+        break
       case 'officialAccounts':
       case 'conversations':
         this.showOfficialAccounts()
-        return
+        break
       case 'profile':
         this.showHomePage()
-        return
+        break
       case 'scan':
         this.showScanHelp()
           // this.scanFormsQRCode()
-        return
+        break
       default:
         if (ENV.homePage)
           this.showHomePage()
         else
           this.showOfficialAccounts()
       }
-
       return
     }
 
