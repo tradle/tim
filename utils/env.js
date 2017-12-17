@@ -58,9 +58,9 @@ const merged = extend({
   // friendly
   // LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/',
   LOCAL_TRADLE_SERVERS: [
-    'https://n7lnep4jo7.execute-api.us-east-1.amazonaws.com/dev/',
-    'https://lm55971u7f.execute-api.us-east-1.amazonaws.com/dev/',
-    'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/'
+    'https://lo5d85p78d.execute-api.us-east-1.amazonaws.com/dev/',
+    'https://yy6zli69ab.execute-api.us-east-1.amazonaws.com/dev/',
+    'https://e1b8reh825.execute-api.us-east-1.amazonaws.com/dev/'
   ],
   LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/', // Goofy
   pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
@@ -124,7 +124,7 @@ const merged = extend({
   yukiOn: false,
   paintContextIds: false,
   tradleAPIKey: null,
-  tradleAPIEndpoint: 'https://4uyhrpryal.execute-api.us-east-1.amazonaws.com/dev'
+  tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/'
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]

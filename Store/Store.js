@@ -10654,13 +10654,10 @@ var Store = Reflux.createStore({
   },
   async onUpdateEnvironment(env) {
     env.dateModified = Date.now()
-    await db.put(MY_ENVIRONMENT, { ...ENV, ...env })
     this.updateEnvironmentInMemory(env)
+    await db.put(MY_ENVIRONMENT, ENV)
   },
   updateEnvironmentInMemory(env) {
-    debug('not updating ENV (disabled)')
-    return
-
     if (env.dateModified < ENV.dateModified) {
       debug('not updating ENV from storage, stored ENV is out of date')
       return
@@ -10671,6 +10668,7 @@ var Store = Reflux.createStore({
     if (key && key !== dotProp.get(ENV, keyPath)) {
       dotProp.set(ENV, keyPath, key)
       require('../Components/BlinkID').setLicenseKey(key)
+      ENV.dateModified = env.dateModified
     }
   }
 })

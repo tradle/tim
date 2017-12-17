@@ -2015,11 +2015,17 @@ var utils = {
   async fetchEnv() {
     if (!ENV.tradleAPIKey) return
 
-    const res = await fetch(`${ENV.tradleAPIEndpoint}/fs/environment.json`, {
+    const url = this.joinURL(ENV.tradleAPIEndpoint, 'fs', DeviceInfo.getBundleId(), 'environment.json')
+    const res = await fetch(url, {
       headers: {
         'x-api-key': ENV.tradleAPIKey
       }
     })
+
+    if (res.status > 300) {
+      const text = await res.text()
+      throw new Error(text)
+    }
 
     return await res.json()
   },

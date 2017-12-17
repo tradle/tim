@@ -22,7 +22,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#6f34f05022dfface75c0a482de043f0fd658bbbd",
+      "resolved": "git://github.com/tradle/aws-client.git#662085b80ddff628d70f51b67d71342aff3d2be4",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -6452,6 +6452,11 @@
           "resolved": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.1.5.tgz"
         }
       }
+    },
+    "react-native-switch-selector": {
+      "version": "1.0.7",
+      "from": "react-native-switch-selector@>=1.0.7 <2.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-switch-selector/-/react-native-switch-selector-1.0.7.tgz"
     },
     "react-native-tcp": {
       "version": "3.2.2",

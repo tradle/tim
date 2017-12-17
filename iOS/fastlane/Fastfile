@@ -57,12 +57,10 @@ platform :ios do
 
   lane :sign_manual do
     disable_automatic_code_signing(path: ENV['IOS_PROJECT'])
-    commit_version
   end
 
   lane :sign_auto do
     enable_automatic_code_signing(path: ENV['IOS_PROJECT'])
-    commit_version
   end
 
   desc "Runs all the tests"
@@ -81,12 +79,12 @@ platform :ios do
   lane :gym_prod do
     disable_automatic_code_signing(path: ENV['IOS_PROJECT'])
     gym(export_method: 'app-store')
-    enable_automatic_code_signing(path: ENV['IOS_PROJECT'])
   end
 
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta_testflight do |values|
+    sign_manual
     match(type: 'appstore')
     gym_prod
     pilot
