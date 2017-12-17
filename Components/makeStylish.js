@@ -23,6 +23,8 @@ import React, { Component } from 'react'
 
 var reactMixin = require('react-mixin')
 var Store = require('../Store/Store')
+var extend = require('extend');
+var defaultBankStyle = require('../styles/defaultBankStyle.json')
 var Reflux = require('reflux')
 
 export function makeStylish (WrappedComponent) {
@@ -36,7 +38,10 @@ export function makeStylish (WrappedComponent) {
     handleEvent(event) {
       const { action, provider } = event
       if (action === 'customStyles') {
-        this.setState({ provider, bankStyle: provider.style })
+        let style = {}
+        extend(style, defaultBankStyle)
+        extend(style, provider.style)
+        this.setState({ provider, bankStyle: style })
       }
     }
     render() {
