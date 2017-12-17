@@ -600,6 +600,7 @@ class ResourceList extends Component {
         }
       }
     }
+
     let title
     if (isContact)
       title = resource.firstName

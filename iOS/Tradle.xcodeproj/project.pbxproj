@@ -1635,7 +1635,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Release\" ]; then\n  export NODE_BINARY=node\n  ../scripts/install-ios-app.sh\n  PATH=$(bash -l -c 'echo $PATH') ../scripts/save-release.sh\nfi";
+			shellScript = "set -euo pipefail\nif [ \"$CONFIGURATION\" == \"Release\" ]; then\n  export NODE_BINARY=node\n  ../scripts/install-ios-app.sh\n  PATH=$(bash -l -c 'echo $PATH') ../scripts/save-release.sh\nfi";
 		};
 		611C8F29BAD860EA59E76678 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;

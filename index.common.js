@@ -34,6 +34,7 @@ var TimHome = require('./Components/TimHome');
 var MarkdownPropertyEdit = require('./Components/MarkdownPropertyEdit')
 var SignatureView = require('./Components/SignatureView')
 var AvivaIntroView = require('./Components/AvivaIntroView')
+var TourPage = require('./Components/TourPage')
 // var TsAndCs = require('./Components/TsAndCs')
 // var HomePage = require('./Components/HomePage')
 var PasswordCheck = require('./Components/PasswordCheck');
@@ -134,6 +135,10 @@ const landingPageMapping = {
     component: AvivaIntroView,
     id: AVIVA_INTRO_VIEW
   },
+  TourPage: {
+    component: TourPage,
+    id: 35
+  }
   // TsAndCs: {
   //   component: ArticleView,
   //   id: TERMS_AND_CONDITIONS
@@ -428,6 +433,8 @@ class TiMApp extends Component {
             />
           }
           onWillFocus={(newRoute) => {
+            if (!newRoute)
+              return
             let style = newRoute.passProps.bankStyle
             if (style)
               this.setState({navBarBgColor: style.navBarBackgroundColor || 'transparent'})
@@ -579,6 +586,8 @@ class TiMApp extends Component {
       return <StringChooser navigator={nav} {...props} />
     case 34:
       return <ApplicationView navigator={nav} {...props } />
+    case 35:
+      return <TourPage navigator={nav} {...props } />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />

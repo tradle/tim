@@ -272,6 +272,7 @@ var language
 var dictionary = {}
 var isAuthenticated
 var meDriver
+
 // var cursor = {}
 // var publishedIdentity
 var ready;
@@ -752,6 +753,7 @@ var Store = Reflux.createStore({
     }
   },
   readseal(seal) {
+    debugger
     let self = this
     const link = seal.link
     return meDriver.objects.get(link)
@@ -1823,7 +1825,7 @@ var Store = Reflux.createStore({
   },
 
   onSetProviderStyle(stylePack) {
-    const style = utils.interpretStylesPack(stylePack)
+    // const style = utils.interpretStylesPack(stylePack)
   },
   addToSettings(provider) {
     let r = this._getItem(SETTINGS + '_1')
@@ -2378,7 +2380,7 @@ var Store = Reflux.createStore({
   },
 
   // Gets info about companies in this app, their bot representatives and their styles
-  getServiceProviders(params) {
+  async getServiceProviders(params) {
     let originalUrl = params.url
     let retry = params.retry
     let id = params.id
@@ -2419,51 +2421,45 @@ var Store = Reflux.createStore({
     if (languageCode)
       url += '?lang=' + languageCode
 
-    return doFetch(url, { headers: { cache: 'no-cache' } }, 5000)
-    .then((response) =>  {
-      if (response.status > 300)
-        throw new Error('Cannot access: ' + url)
-      return response.json()
-    })
-    .then((json) => {
-      json = utils.normalizeGetInfoResponse(json)
+    let response = await doFetch(url, { headers: { cache: 'no-cache' } }, 5000)
+    if (response.status > 300)
+      throw new Error('Cannot access: ' + url)
 
-      if (json.dictionary) {
-        extend(true, dictionary, json.dictionary)
-        if (me) {
-          me.dictionary = dictionary
-          if (language)
-            me.language = language
-          this.setMe(me)
-        }
+    let json = await response.json()
+    json = utils.normalizeGetInfoResponse(json)
+    if (json.dictionary) {
+      extend(true, dictionary, json.dictionary)
+      if (me) {
+        me.dictionary = dictionary
+        if (language)
+          me.language = language
+        this.setMe(me)
       }
-      let newProviders
-      if (!SERVICE_PROVIDERS) {
-        SERVICE_PROVIDERS = []
-        newProviders = true
-      }
+    }
+    let newProviders
+    if (!SERVICE_PROVIDERS) {
+      SERVICE_PROVIDERS = []
+      newProviders = true
+    }
 
-      var promises = []
-      json.providers.forEach(sp => {
-        this.parseProvider(sp, params, providerIds, newProviders)
-        promises.push(this.addInfo(sp, originalUrl, newServer))
-      })
-      if (utils.getMe())
-        this.setMe(utils.getMe())
-      return Q.allSettled(promises)
+    var promises = []
+    json.providers.forEach(sp => {
+      this.parseProvider(sp, params, providerIds, newProviders)
+      promises.push(this.addInfo(sp, originalUrl, newServer))
     })
-    .then((results) => {
-      let list = this.searchNotMessages({modelName: ORGANIZATION})
-      this.trigger({
-        action: 'list',
-        list: list,
-        modelName: ORGANIZATION
-      })
+    if (utils.getMe())
+      this.setMe(utils.getMe())
+    let results = await Q.allSettled(promises)
+    let list = this.searchNotMessages({modelName: ORGANIZATION})
+    this.trigger({
+      action: 'list',
+      list: list,
+      modelName: ORGANIZATION
+    })
 
-      return results
-        .filter(r => r.state === 'fulfilled')
-        .map(r => r.value)
-    })
+    return results
+      .filter(r => r.state === 'fulfilled')
+      .map(r => r.value)
     // .catch((err) => {
     //   debugger
     // })
@@ -2895,8 +2891,15 @@ var Store = Reflux.createStore({
       let toM = this.getModel(toType)
       isReadOnlyContext = utils.isContext(toM)  &&  utils.isReadOnlyChat(to)
     }
-
-
+/// TEST
+    // let isStylesPack = r[TYPE] === STYLES_PACK
+    // if (isStylesPack) {
+    //   let istyle = utils.interpretStylesPack(r)
+    //   if (to)
+    //     to.style = istyle
+    //   return
+    // }
+// end test
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
     var rr = {};
@@ -3709,6 +3712,16 @@ var Store = Reflux.createStore({
           r[forwardlinkName] = list
         }
       }
+      if (!r._context) {
+        if (!resource._context)
+          debugger
+        r._context = resource._context
+      }
+      // if (isApplication  &&  !r._context) {
+      //   let context = await this.getContext(r.context, r)
+      //   if (context)
+      //     r._context = context
+      // }
       let retParams = { resource: r, action: action || 'getItem', forwardlink: forwardlink}
       if (list)
         retParams.list = list
@@ -4329,20 +4342,22 @@ var Store = Reflux.createStore({
     }
     // case for Remediation WealthCV -> CVItems. Linking items to container
     var readOnlyBacklinks = []
-    for (let pr in props) {
-      // if (!returnVal[pr]  &&  props[pr].backlink  &&  props[pr].ref  &&  props[pr].readOnly)
-      //   readOnlyBacklinks.push(props[pr])
-      let prop = props[pr]
-      if (!returnVal[pr]  &&  prop.ref  &&  prop.readOnly) {
-        let refM = this.getModel(prop.ref)
-        let aprops = utils.getPropertiesWithAnnotation(refM, 'items')
-        if (aprops) {
-          for (let apName in aprops) {
-            let ap = aprops[apName]
-            if (!ap.items.ref)
-              return
-            if (ap.items.ref === meta.id)
-              readOnlyBacklinks.push(prop)
+    if (!isRegistration) {
+      for (let pr in props) {
+        // if (!returnVal[pr]  &&  props[pr].backlink  &&  props[pr].ref  &&  props[pr].readOnly)
+        //   readOnlyBacklinks.push(props[pr])
+        let prop = props[pr]
+        if (!returnVal[pr]  &&  prop.ref  &&  prop.readOnly) {
+          let refM = this.getModel(prop.ref)
+          let aprops = utils.getPropertiesWithAnnotation(refM, 'items')
+          if (aprops) {
+            for (let apName in aprops) {
+              let ap = aprops[apName]
+              if (!ap.items.ref)
+                return
+              if (ap.items.ref === meta.id)
+                readOnlyBacklinks.push(prop)
+            }
           }
         }
       }
@@ -5290,6 +5305,9 @@ var Store = Reflux.createStore({
     let {modelName, first, prop, isAggregation, isChat} = params
     var meta = this.getModel(modelName)
     let isMessage = modelName === MESSAGE || isChat // utils.isMessage(meta)
+    // HACK for now
+    if (!isMessage)
+      isMessage = meta.subClassOf === FORM  ||  modelName === VERIFICATION
     // if (params.prop)
     //   debugger
     if (params.search && me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION)
@@ -8184,7 +8202,7 @@ var Store = Reflux.createStore({
     batch.push({type: 'put', key: iKey, value: identity});
     return db.batch(batch)
     .then(() => {
-      var  params = {action: 'addItem', resource: value, me: value};
+      var  params = {action: 'addItem', resource: value, me: value, isRegistration: true};
       this.setMe(me)
       return this.trigger(params);
     })
@@ -9358,7 +9376,13 @@ var Store = Reflux.createStore({
       noTrigger = val.from.id === meId
     var isStylesPack = type === STYLES_PACK
     if (isStylesPack) {
-      org.style = utils.interpretStylesPack(val)
+      org.style = utils.clone(val) //utils.interpretStylesPack(val)
+      let exclude = [ROOT_HASH, CUR_HASH, TYPE]
+      let spProps = this.getModel(STYLES_PACK).properties
+      for (let p in org.style) {
+        if (!spProps[p]  &&  exclude.indexOf(p) === -1)
+          delete org.style[p]
+      }
       this.dbBatchPut(utils.getId(org), org, batch)
       this.trigger({action: 'customStyles', provider: org})
     }
@@ -9375,7 +9399,7 @@ var Store = Reflux.createStore({
     if (!isReadOnly) {
       let meId = utils.getId(to)
       if (type === MY_EMPLOYEE_PASS) {
-        setupEmployee()
+        await setupEmployee()
         this.client = graphQL.initClient(meDriver, me.organization.url)
       }
       else {
@@ -10727,13 +10751,10 @@ var Store = Reflux.createStore({
   },
   async onUpdateEnvironment(env) {
     env.dateModified = Date.now()
-    await db.put(MY_ENVIRONMENT, { ...ENV, ...env })
     this.updateEnvironmentInMemory(env)
+    await db.put(MY_ENVIRONMENT, ENV)
   },
   updateEnvironmentInMemory(env) {
-    debug('not updating ENV (disabled)')
-    return
-
     if (env.dateModified < ENV.dateModified) {
       debug('not updating ENV from storage, stored ENV is out of date')
       return
@@ -10744,6 +10765,7 @@ var Store = Reflux.createStore({
     if (key && key !== dotProp.get(ENV, keyPath)) {
       dotProp.set(ENV, keyPath, key)
       require('../Components/BlinkID').setLicenseKey(key)
+      ENV.dateModified = env.dateModified
     }
   }
 })

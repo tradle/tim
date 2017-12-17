@@ -201,19 +201,6 @@ var utils = {
 
     return pack
   },
-  // temporary, let's hope
-  interpretStylesPack(stylesPack) {
-    let interpreted = {}
-    Object.keys(stylesPack).forEach(prop => {
-      // booHoo => BOO_HOO
-      if (prop.charAt(0) === '_')
-        return
-      const localName = utils.splitCamelCase(prop).join('_').toUpperCase()
-      interpreted[localName] = stylesPack[prop]
-    })
-
-    return interpreted
-  },
   joinCamelCase(parts) {
     return parts.map((part, i) => {
       if (part.toUpperCase() === part) {
@@ -681,14 +668,16 @@ var utils = {
      )
   },
   templateIt1(prop, resource, m) {
-    if (resource.id  &&  resource.title)
+    if (!resource[TYPE])
       return resource.title
+    // if (resource.id  &&  resource.title)
+    //   return resource.title
     let pgroup = prop.group
     if (!pgroup.length)
       return prop.displayAs
     let group = []
     let hasSetProps
-    let props = resource[TYPE] ? this.getModel(resource[TYPE]).value.properties : m.properties
+    let props = this.getModel(resource[TYPE]).value.properties
     for (let i=0; i<pgroup.length; i++) {
       let p = pgroup[i]
       let v =  resource[p] ? resource[p] : ''
@@ -1305,6 +1294,7 @@ var utils = {
   isSimulator() {
     if (utils.isWeb()) return false
 
+    let timezone = DeviceInfo.getTimezone()
     return DeviceInfo.getModel() === 'Simulator' || DeviceInfo.isEmulator()
   },
   toOldStyleWrapper: function (wrapper) {
@@ -2153,11 +2143,17 @@ var utils = {
   async fetchEnv() {
     if (!ENV.tradleAPIKey) return
 
-    const res = await fetch(`${ENV.tradleAPIEndpoint}/fs/environment.json`, {
+    const url = this.joinURL(ENV.tradleAPIEndpoint, 'fs', DeviceInfo.getBundleId(), 'environment.json')
+    const res = await fetch(url, {
       headers: {
         'x-api-key': ENV.tradleAPIKey
       }
     })
+
+    if (res.status > 300) {
+      const text = await res.text()
+      throw new Error(text)
+    }
 
     return await res.json()
   },
@@ -2415,5 +2411,18 @@ module.exports = utils;
   //     }
   //   }
   //   return displayName;
+  // },
+  // // temporary, let's hope
+  // interpretStylesPack(stylesPack) {
+  //   let interpreted = {}
+  //   Object.keys(stylesPack).forEach(prop => {
+  //     // booHoo => BOO_HOO
+  //     if (prop.charAt(0) === '_')
+  //       return
+  //     const localName = utils.splitCamelCase(prop).join('_').toUpperCase()
+  //     interpreted[localName] = stylesPack[prop]
+  //   })
+
+  //   return interpreted
   // },
 */

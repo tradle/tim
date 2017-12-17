@@ -234,7 +234,7 @@ class TimHome extends Component {
         this.setState({firstPage: pathname})
         this.show(pathname)
       }
-      if (pathname !== 'conversations')
+      if (pathname !== 'conversations') //  &&  pathname !== 'profile')
         return
     }
 
@@ -269,7 +269,6 @@ class TimHome extends Component {
     }
 
     return new Promise((resolve, reject) => {
-      let self = this
       Alert.alert(title, message, [
         {
           text: 'Cancel',
@@ -277,9 +276,9 @@ class TimHome extends Component {
         },
         {
           text: 'OK',
-          onPress: function () {
+          onPress: () => {
             // goto
-            self._unsafeHandleOpenURL({url: 'tradle:/' + ok})
+            this._unsafeHandleOpenURL({url: 'tradle:/' + ok})
             resolve()
           }
         }
@@ -374,26 +373,26 @@ class TimHome extends Component {
   }
 
   async handleEvent(params) {
-    const self = this
-    switch(params.action) {
+    let {action, activity, isConnected, models, me, isRegistration, provider, termsAccepted} = params
+    switch(action) {
     case 'busy':
       this.setState({
-        busyWith: params.activity
+        busyWith: activity
       })
 
       return
     case 'connectivity':
-      this._handleConnectivityChange(params.isConnected)
+      this._handleConnectivityChange(isConnected)
       return
     case 'reloadDB':
       this.setState({
         isLoading: false,
         message: translate('pleaseRestartTIM'), //Please restart TiM'
       });
-      utils.setModels(params.models);
+      utils.setModels(models);
       return
     case 'getProvider':
-      this.showChatPage(params.provider, params.termsAccepted)
+      this.showChatPage(provider, termsAccepted)
       // this.setState({
       //   provider: params.provider,
       //   action: 'chat'
@@ -412,13 +411,19 @@ class TimHome extends Component {
       this.signInAndContinue()
       return
     case 'getMe':
-      utils.setMe(params.me)
-      this.setState({hasMe: params.me})
+      utils.setMe(me)
+      this.setState({hasMe: me})
       var nav = this.props.navigator
       this.signInAndContinue()
       // await signIn(this.props.navigator)
       // this.showFirstPage()
       return
+    case 'addItem':
+      if (!isRegistration  ||  !ENV.tour)
+        return
+      // StatusBar.setHidden(true)
+      this.showLandingPage(null, ENV.tour)
+      break
     case 'offerKillSwitchAfterApplication':
       if (!utils.isWeb()) return
 
@@ -569,7 +574,7 @@ class TimHome extends Component {
     this.isDeepLink = false
 // /chat?url=https://ubs.tradle.io&permalink=72d63e70bd75e65cf94e2d1f7f04c59816ad183801b981428a8a0d1abbf00190
     let me = utils.getMe()
-    if (me  &&  me.isEmployee) {
+    if (!firstPage  &&  me  &&  me.isEmployee) {
       this.showContacts()
       return
     }
@@ -683,20 +688,22 @@ class TimHome extends Component {
   showLandingPage(provider, landingPage) {
     let style = {}
     extend(style, defaultBankStyle)
-    if (provider.style)
+    if (provider  &&  provider.style)
       extend(style, provider.style)
     let c = this.props.landingPageMapping[landingPage]
     this.props.navigator.push({
-      title: provider.name,
+      title: provider  &&  provider.name || '',
       component: c.component,
       id: c.id,
-      backButtonTitle: __DEV__ ? 'Back' : null,
+      // backButtonTitle: __DEV__ ? 'Back' : null,
       passProps: {
         bankStyle: style,
         resource: provider,
         url: this.state.url,
+        tour: ENV.tourPages,
+        callback: this.showFirstPage.bind(this),
         acceptTermsAndChat: this.acceptTermsAndChat.bind(this),
-        showChat: this.showChatPage.bind(this)
+        showChat: this.showChatPage.bind(this),
       }
     })
   }
@@ -778,7 +785,6 @@ class TimHome extends Component {
       },
     };
 
-    let self = this
     route.passProps.callback = async () => {
       if (ENV.requireSoftPIN) {
         await setPassword(this.props.navigator)
@@ -854,7 +860,6 @@ class TimHome extends Component {
       },
     };
 
-    let self = this
     route.passProps.callback = () => {
       setPassword(this.props.navigator)
       .then (() => {
@@ -915,7 +920,6 @@ class TimHome extends Component {
       this.restartTiM()
       return
     }
-
     // var url = Linking.getInitialURL();
     var {width, height} = utils.dimensions(TimHome)
     var h = height > 800 ? height - 220 : height - 180

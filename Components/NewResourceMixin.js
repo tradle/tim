@@ -1622,7 +1622,7 @@ var NewResourceMixin = {
 
     let prop = model.properties[propName]
     let isEnum = prop.ref  &&  utils.isEnum(prop.ref)
-    let isArray = prop.type === 'array' || (this.props.search  &&  isEnum)
+    let isArray = prop.type === 'array' || (this.props.search  &&  prop.ref  &&  utils.isEnum(prop.ref))
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
       if (isEnum)

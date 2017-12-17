@@ -7,6 +7,7 @@ var VerificationMessageRow = require('./VerificationMessageRow')
 var FormMessageRow = require('./FormMessageRow')
 var FormRequestRow = require('./FormRequestRow')
 var FormErrorRow = require('./FormErrorRow')
+var TourRow = require('./TourRow')
 var NoResources = require('./NoResources')
 var NewResource = require('./NewResource')
 var ProductChooser = require('./ProductChooser')
@@ -50,6 +51,7 @@ const REMEDIATION = 'tradle.Remediation'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const CONTEXT = 'tradle.Context'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
+const TOUR = 'tradle.Tour'
 var StyleSheet = require('../StyleSheet')
 
 import React, { Component } from 'react'
@@ -684,10 +686,13 @@ class MessageList extends Component {
     props.chooseTrustedProvider = this.chooseTrustedProvider
 
     if (model.id === FORM_ERROR)
-       return <FormErrorRow {...props} />
-    return model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST
-           ? <FormRequestRow {...props} />
-           : <MessageRow {...props} />
+      return <FormErrorRow {...props} />
+    else if (model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST)
+      return <FormRequestRow {...props} />
+    else if (model.id === TOUR)
+      return <TourRow {...props} />
+    else
+      return <MessageRow {...props} />
   }
   addedMessage(text) {
     Actions.list({

@@ -122,9 +122,8 @@ class MessageRow extends Component {
         if (isConfirmation)
           addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: bankStyle.confirmationBg}, styles.myConfCell]
         else {
-          let borderColor = '#efefef'
           let mstyle = {
-            borderColor: borderColor,
+            borderColor: '#efefef',
             backgroundColor: '#ffffff',
             borderTopLeftRadius: 0
           }

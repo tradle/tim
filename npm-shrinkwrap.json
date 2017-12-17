@@ -5,7 +5,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#6f34f05022dfface75c0a482de043f0fd658bbbd",
+      "resolved": "git://github.com/tradle/aws-client.git#662085b80ddff628d70f51b67d71342aff3d2be4",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -648,6 +648,23 @@
       "from": "assert-plus@>=0.2.0 <0.3.0",
       "resolved": "https://registry.npmjs.org/assert-plus/-/assert-plus-0.2.0.tgz",
       "optional": true
+    },
+    "assign-deep": {
+      "version": "0.4.6",
+      "from": "assign-deep@>=0.4.5 <0.5.0",
+      "resolved": "https://registry.npmjs.org/assign-deep/-/assign-deep-0.4.6.tgz",
+      "dependencies": {
+        "kind-of": {
+          "version": "5.1.0",
+          "from": "kind-of@>=5.0.2 <6.0.0",
+          "resolved": "https://registry.npmjs.org/kind-of/-/kind-of-5.1.0.tgz"
+        }
+      }
+    },
+    "assign-symbols": {
+      "version": "0.1.1",
+      "from": "assign-symbols@>=0.1.1 <0.2.0",
+      "resolved": "https://registry.npmjs.org/assign-symbols/-/assign-symbols-0.1.1.tgz"
     },
     "ast-query": {
       "version": "2.0.0",
@@ -6639,7 +6656,7 @@
     },
     "node-libs-browser": {
       "version": "1.0.0",
-      "from": "node-libs-browser@latest",
+      "from": "node-libs-browser@1.0.0",
       "resolved": "https://registry.npmjs.org/node-libs-browser/-/node-libs-browser-1.0.0.tgz",
       "dependencies": {
         "isarray": {
@@ -6653,9 +6670,21 @@
           "resolved": "https://registry.npmjs.org/os-browserify/-/os-browserify-0.2.1.tgz"
         },
         "readable-stream": {
-          "version": "2.1.5",
-          "from": "readable-stream@https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz"
+          "version": "2.3.3",
+          "from": "readable-stream@>=2.0.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.3.tgz",
+          "dependencies": {
+            "string_decoder": {
+              "version": "1.0.3",
+              "from": "string_decoder@>=1.0.3 <1.1.0",
+              "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.3.tgz"
+            }
+          }
+        },
+        "safe-buffer": {
+          "version": "5.1.1",
+          "from": "safe-buffer@>=5.1.1 <5.2.0",
+          "resolved": "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.1.1.tgz"
         },
         "stream-browserify": {
           "version": "2.0.1",
@@ -8001,6 +8030,11 @@
       "from": "oblador/react-native-animatable#d72c092",
       "resolved": "git://github.com/oblador/react-native-animatable.git#d72c09217ee992bcae47b7e6c3f1bb701da3ac05"
     },
+    "react-native-app-intro": {
+      "version": "1.1.5",
+      "from": "tradle/react-native-app-intro",
+      "resolved": "git://github.com/tradle/react-native-app-intro.git#f4294de53be937bbc3f248b011b17f39851b8401"
+    },
     "react-native-button": {
       "version": "1.8.2",
       "from": "react-native-button@>=1.3.1 <2.0.0",
@@ -8067,7 +8101,7 @@
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
-      "from": "pgmemk/react-native-gifted-messenger",
+      "from": "pgmemk/react-native-gifted-messenger#e0e1295",
       "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#e0e12954392abe4cd1b0cc47e2ab3744113a9441"
     },
     "react-native-gifted-spinner": {
@@ -8156,6 +8190,16 @@
           "resolved": "https://registry.npmjs.org/react-tween-state/-/react-tween-state-0.1.5.tgz"
         }
       }
+    },
+    "react-native-swiper": {
+      "version": "1.4.4",
+      "from": "git+https://github.com/FuYaoDe/react-native-swiper.git",
+      "resolved": "git+https://github.com/FuYaoDe/react-native-swiper.git#a6417ff41a8b2d490bdcc4541015ab35736d4595"
+    },
+    "react-native-switch-selector": {
+      "version": "1.0.7",
+      "from": "react-native-switch-selector@>=1.0.7 <2.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-switch-selector/-/react-native-switch-selector-1.0.7.tgz"
     },
     "react-native-vector-icons": {
       "version": "4.1.1",
