@@ -61,6 +61,8 @@ const merged = extend({
     'https://lo5d85p78d.execute-api.us-east-1.amazonaws.com/dev/',
     'https://yy6zli69ab.execute-api.us-east-1.amazonaws.com/dev/',
     'https://e1b8reh825.execute-api.us-east-1.amazonaws.com/dev/'
+        // 'http://localhost:21012',
+    'http://localhost:44444',
   ],
   LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/', // Goofy
   pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
@@ -88,7 +90,7 @@ const merged = extend({
   homePageScanQRCodePrompt: false,
   // auth settings
   // require touch id or device passcode
-  initWithDeepLink: '/profile',
+  // initWithDeepLink: 'https://link.tradle.io/chat?url=https%3A%2F%2Fyy6zli69ab.execute-api.us-east-1.amazonaws.com%2Fdev%2F&permalink=39861772703ae85fa134255f0b44749a8a70d85ba26dde287c1cb3f3ab932fbb',
   requireDeviceLocalAuth: false,
   autoOptInTouchId: false,
   autoRegister: false,
@@ -104,7 +106,16 @@ const merged = extend({
   registerForPushNotifications: true,
   hideVerificationsInChat: false,
   hideProductApplicationInChat: false,
-  landingPage: null, //"AvivaIntroView",
+  // landingPage: "AvivaIntroView",
+  // tour: "TourPage",
+  // tourPages: {
+  //   pages: [
+  //     'https://tradle.io/images/bot-big.png',
+  //     'https://tradle.io/',
+  //     'https://blog.tradle.io/',
+  //     'https://youtube.com/'
+  //   ]
+  // },
   showCollapsed: null, //{'tradle.PhotoID': 'document'}
   splashBackground: 'tradle',
   splashContrastColor: 'tradle',
