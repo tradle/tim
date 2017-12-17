@@ -341,7 +341,7 @@ class TimHome extends Component {
     clearTimeout(this.uhOhTimeout)
 
     // Need to laod data for landing page first
-    if (!ENV.landingPage  &&  !ENV.tour)
+    if (!ENV.landingPage  &&  !this.state.inTour)
       this.show()
   }
 
@@ -579,6 +579,7 @@ class TimHome extends Component {
       return
     }
     this.state.firstPage = null
+    this.state.inTour = false
     if (firstPage) {
       switch (firstPage) {
       case 'chat':
@@ -690,6 +691,7 @@ class TimHome extends Component {
     extend(style, defaultBankStyle)
     if (provider  &&  provider.style)
       extend(style, provider.style)
+    this.state.inTour = ENV.tourPages !== null
     let c = this.props.landingPageMapping[landingPage]
     this.props.navigator.push({
       title: provider  &&  provider.name || '',
