@@ -4319,20 +4319,22 @@ var Store = Reflux.createStore({
     }
     // case for Remediation WealthCV -> CVItems. Linking items to container
     var readOnlyBacklinks = []
-    for (let pr in props) {
-      // if (!returnVal[pr]  &&  props[pr].backlink  &&  props[pr].ref  &&  props[pr].readOnly)
-      //   readOnlyBacklinks.push(props[pr])
-      let prop = props[pr]
-      if (!returnVal[pr]  &&  prop.ref  &&  prop.readOnly) {
-        let refM = this.getModel(prop.ref)
-        let aprops = utils.getPropertiesWithAnnotation(refM, 'items')
-        if (aprops) {
-          for (let apName in aprops) {
-            let ap = aprops[apName]
-            if (!ap.items.ref)
-              return
-            if (ap.items.ref === meta.id)
-              readOnlyBacklinks.push(prop)
+    if (!isRegistration) {
+      for (let pr in props) {
+        // if (!returnVal[pr]  &&  props[pr].backlink  &&  props[pr].ref  &&  props[pr].readOnly)
+        //   readOnlyBacklinks.push(props[pr])
+        let prop = props[pr]
+        if (!returnVal[pr]  &&  prop.ref  &&  prop.readOnly) {
+          let refM = this.getModel(prop.ref)
+          let aprops = utils.getPropertiesWithAnnotation(refM, 'items')
+          if (aprops) {
+            for (let apName in aprops) {
+              let ap = aprops[apName]
+              if (!ap.items.ref)
+                return
+              if (ap.items.ref === meta.id)
+                readOnlyBacklinks.push(prop)
+            }
           }
         }
       }
@@ -5233,6 +5235,9 @@ var Store = Reflux.createStore({
     let {modelName, first, prop, isAggregation, isChat} = params
     var meta = this.getModel(modelName)
     let isMessage = modelName === MESSAGE || isChat // utils.isMessage(meta)
+    // HACK for now
+    if (!isMessage)
+      isMessage = meta.subClassOf === FORM  ||  modelName === VERIFICATION
     // if (params.prop)
     //   debugger
     if (params.search && me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION)
@@ -9274,7 +9279,13 @@ var Store = Reflux.createStore({
       noTrigger = val.from.id === meId
     var isStylesPack = type === STYLES_PACK
     if (isStylesPack) {
-      org.style = val //utils.interpretStylesPack(val)
+      org.style = utils.clone(val) //utils.interpretStylesPack(val)
+      let exclude = [ROOT_HASH, CUR_HASH, TYPE]
+      let spProps = this.getModel(STYLES_PACK).properties
+      for (let p in org.style) {
+        if (!spProps[p]  &&  exclude.indexOf(p) === -1)
+          delete org.style[p]
+      }
       this.dbBatchPut(utils.getId(org), org, batch)
       this.trigger({action: 'customStyles', provider: org})
     }
@@ -9291,7 +9302,7 @@ var Store = Reflux.createStore({
     if (!isReadOnly) {
       let meId = utils.getId(to)
       if (type === MY_EMPLOYEE_PASS) {
-        setupEmployee()
+        await setupEmployee()
         this.client = graphQL.initClient(meDriver, me.organization.url)
       }
       else {
