@@ -147,7 +147,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#d7771ec8ce8659a3f7ac16d53636037fb332ea86",
+      "resolved": "git://github.com/tradle/models.git#3f7e37d16c7093254c621bf929cb3699ee0f20e7",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
