@@ -672,7 +672,7 @@ class TimHome extends Component {
         bankStyle: style,
         resource: provider,
         url: this.state.url,
-        tourConf: ENV.tourConf,
+        tour: ENV.tourPages,
         callback: this.showFirstPage.bind(this),
         acceptTermsAndChat: this.acceptTermsAndChat.bind(this),
         showChat: this.showChatPage.bind(this),

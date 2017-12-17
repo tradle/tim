@@ -22,7 +22,7 @@ class TourPage extends Component {
     let url = 'https://github.com/facebook/react-native'
     // let url = 'https://tradle.io/'
 
-    let {pages} = this.props.tourConf
+    let {pages} = this.props.tour
     if (!pages) //  &&  !introImage  && !introTitle)
       return <View/>
 
