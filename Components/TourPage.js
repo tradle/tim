@@ -1,12 +1,9 @@
 import React, { Component, PropTypes } from 'react'
 import {
-  StyleSheet,
-  View,
   WebView,
 } from 'react-native'
 import AppIntro from 'react-native-app-intro'
 import utils from '../utils/utils'
-var translate = utils.translate
 
 import { makeResponsive } from 'react-native-orient'
 
@@ -17,16 +14,15 @@ class TourPage extends Component {
     callback: PropTypes.func,
   };
   render() {
-    let {width, height} = utils.dimensions(TourPage)
-
     let {pages} = this.props.tour
-    if (!pages) //  &&  !introImage  && !introTitle)
+    if (!pages)
       return <View/>
 
+    let {width, height} = utils.dimensions(TourPage)
     let tpages = []
     if (pages)
       tpages = pages.map((p, i) => (
-         <WebView style={[styles.webView, {width, height}]} key={'tour_' + i}
+         <WebView style={{width, height}} key={'tour_' + i}
                  source={{uri: p}}
                  startInLoadingState={true}
                  automaticallyAdjustContentInsets={false} />
@@ -64,23 +60,5 @@ class TourPage extends Component {
     console.log(index, total);
   }
 }
-
-const styles = StyleSheet.create({
-  slide: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    color: '#fff',
-    fontSize: 30,
-    fontWeight: 'bold',
-  },
-  webView: {
-    backgroundColor: '#ffffff',
-    // marginTop: 60,
-    // height: 350,
-  },
-});
 
 module.exports = makeResponsive(TourPage)
