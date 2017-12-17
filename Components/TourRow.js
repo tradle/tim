@@ -91,9 +91,8 @@ let styles = StyleSheet.create({
     flex: 1
   },
   resourceTitle: {
-    // flex: 1,
     fontSize: 20,
-    // marginBottom: 2,
+    paddingTop: 2
   },
 });
 reactMixin(TourRow.prototype, RowMixin);
