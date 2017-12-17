@@ -9538,7 +9538,7 @@ var Store = Reflux.createStore({
         let fRes = result.find((r) => utils.getId(r.from) === meId)
         me.firstName = fRes.firstName || fRes.givenName
         self._setItem(meId, me)
-        self.dbPut(meId, me)
+        await self.dbPut(meId, me)
       }
     }
   },
