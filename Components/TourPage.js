@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react'
 import {
-  Platform,
   StyleSheet,
   View,
 } from 'react-native'
@@ -14,13 +13,11 @@ import { makeResponsive } from 'react-native-orient'
 class TourPage extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
-    tourConf: PropTypes.string.isRequired,
+    tour: PropTypes.string.isRequired,
     callback: PropTypes.func,
   };
   render() {
     let {width, height} = utils.dimensions(TourPage)
-    let url = 'https://github.com/facebook/react-native'
-    // let url = 'https://tradle.io/'
 
     let {pages} = this.props.tour
     if (!pages) //  &&  !introImage  && !introTitle)
@@ -29,12 +26,10 @@ class TourPage extends Component {
     let tpages = []
     if (pages)
       tpages = pages.map((p, i) => (
-        <View style={[styles.slide, {position: 'absolute', height: height + 60, left: 0, top: -30}]} key={'tour_' + (i+1)}>
-         <WebView style={[styles.webView, {width}]}
+         <WebView style={[styles.webView, {width, height}]} key={'tour_' + i}
                  source={{uri: p}}
                  startInLoadingState={true}
                  automaticallyAdjustContentInsets={false} />
-        </View>
       ))
 
     return (
@@ -83,8 +78,8 @@ const styles = StyleSheet.create({
   },
   webView: {
     backgroundColor: '#ffffff',
-    marginTop: 60,
-    height: 350,
+    // marginTop: 60,
+    // height: 350,
   },
 });
 

@@ -15,7 +15,6 @@ var RowMixin = require('./RowMixin');
 var ResourceMixin = require('./ResourceMixin')
 import { makeResponsive } from 'react-native-orient'
 var StyleSheet = require('../StyleSheet')
-var TourPage = require('./TourPage')
 var reactMixin = require('react-mixin');
 var chatStyles = require('../styles/chatStyles')
 

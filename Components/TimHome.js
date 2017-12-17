@@ -341,7 +341,7 @@ class TimHome extends Component {
     clearTimeout(this.uhOhTimeout)
 
     // Need to laod data for landing page first
-    if (!ENV.landingPage)
+    if (!ENV.landingPage  &&  !ENV.tour)
       this.show()
   }
 
