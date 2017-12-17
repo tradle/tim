@@ -73,9 +73,10 @@ class TourRow extends Component {
   showTour() {
     let {resource, navigator, to, bankStyle} = this.props
     this.props.navigator.push({
-      title: translate('Tour'),
+      title: "",
       component: TourRow,
       id: 35,
+      backButtonTitle: null,
       // backButtonTitle: __DEV__ ? 'Back' : null,
       passProps: {
         bankStyle: bankStyle,
