@@ -945,12 +945,21 @@ var Store = Reflux.createStore({
   },
 
   setBusyWith(reason) {
-    this.busyWith = reason && translate(reason)
+    if (this.busyWith) {
+      debug(`${this.busyWith.name} took ${(Date.now() - this.busyWith.start)}ms`)
+    }
+
+    this.busyWith = {
+      name: reason && translate(reason),
+      start: Date.now()
+    }
+
+    debug(`busy with ${this.busyWith.name}`)
     this.triggerBusy()
   },
 
   triggerBusy() {
-    this.trigger({ action: 'busy', activity: this.busyWith })
+    this.trigger({ action: 'busy', activity: this.busyWith.name })
   },
 
   async buildDriver (...args) {
@@ -1714,29 +1723,40 @@ var Store = Reflux.createStore({
   async _preSendCheck(opts) {
     if (!__DEV__) return
 
-    if (!opts.to.permalink) {
-      debugger
-      Alert.alert(`STOP USING FINGERPRINT!`)
-    } else {
-      const botPermalink = this.getMyEmployerBotPermalink()
-      if (botPermalink && opts.to.permalink !== botPermalink) {
-        // should not happen
+    if (opts.to) {
+      if (!opts.to.permalink) {
         debugger
-        Alert.alert('PREVENTING SEND TO THE WRONG BOT')
-        throw new Error('invalid recipient, expected my own bot')
-        // opts.other.forward = opts.to.permalink
-        // opts.to.permalink = botPermalink
-      }
+        Alert.alert(`STOP USING FINGERPRINT!`)
+      } else {
+        const botPermalink = this.getMyEmployerBotPermalink()
+        if (botPermalink && opts.to.permalink !== botPermalink) {
+          // should not happen
+          debugger
+          Alert.alert('PREVENTING SEND TO THE WRONG BOT')
+          throw new Error('invalid recipient, expected my own bot')
+          // opts.other.forward = opts.to.permalink
+          // opts.to.permalink = botPermalink
+        }
 
-        // opts.to = botPermalink
+          // opts.to = botPermalink
+      }
     }
 
     if (opts.object && opts.object[SIG]) {
       try {
+        validateResource({
+          models: this.getModels(),
+          resource: opts.object
+        })
+      } catch (err) {
+        Alert.alert('Preventing send of invalid resource', err.message)
+        throw err
+      }
+
+      try {
         await promisify(tradleUtils.extractSigPubKey)(opts.object)
       } catch (err) {
-        debugger
-        Alert.alert('ABOUT TO SEND AN OBJECT WITH AN INVALID SIG')
+        Alert.alert('Preventing send of object with an invalid signature')
         throw err
       }
     }
@@ -1760,7 +1780,7 @@ var Store = Reflux.createStore({
 
   async meDriverExec(method, ...args) {
     // give animations a chance to animate
-    if (method === 'send' || method === 'signAndSend') {
+    if (method === 'sign' || method === 'send' || method === 'signAndSend') {
       await this._preSendCheck(...args)
     }
 
@@ -2965,7 +2985,7 @@ var Store = Reflux.createStore({
     // }
       return this.maybeWaitForIdentity({ permalink: hash })
     })
-    .then(() => meDriver.sign({ object: toChain }))
+    .then(() => this.meDriverExec('sign', { object: toChain }))
     .then((result) => {
       toChain = result.object
       let hash = protocol.linkString(result.object)
@@ -8406,6 +8426,7 @@ var Store = Reflux.createStore({
     }
 
     Push.init({ node, me, Store: this })
+    // Push.register()
   },
   async registerForPushNotifications() {
     await this._pushSemaphore.wait()
@@ -8420,6 +8441,10 @@ var Store = Reflux.createStore({
     try {
       // don't run in parallel, keychain is touchy
       const identityInfo = await identityUtils.generateIdentity()
+      if (__DEV__) {
+        this.setBusyWith('setting encryption key')
+      }
+
       await utils.setPassword(ENCRYPTION_KEY, encryptionKey)
       this.setBusyWith(null)
       return {
