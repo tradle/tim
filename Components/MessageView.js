@@ -498,7 +498,8 @@ class MessageView extends Component {
       [TYPE]: VERIFICATION,
       document: document,
       from: utils.getMe(),
-      to: resource.to
+      to: resource.to,
+      _context: resource._context
     }
     let params = {to: to, r: r}
     if (resource._context)
