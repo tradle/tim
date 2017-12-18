@@ -1,7 +1,6 @@
 
 import EventEmitter from 'EventEmitter'
 import {
-  Platform,
   Linking,
 } from 'react-native'
 import Branch from 'react-native-branch'
@@ -21,17 +20,17 @@ const matchURI = uri => {
   }
 }
 
-async function getReferringURL () {
-  const params = await Branch.getFirstReferringParams()
-  console.log('react-native-branch initial params', JSON.stringify(params))
-  return getUrlFromBundle({ params }) || await Linking.getInitialURL()
-}
+// async function getReferringURL () {
+//   const params = await Branch.getFirstReferringParams()
+//   console.log('react-native-branch initial params', JSON.stringify(params))
+//   return getUrlFromBundle({ params }) || await Linking.getInitialURL()
+// }
 
 async function getInitialURL() {
-  // const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
-  // const params = await Branch.getFirstReferringParams()
-  // console.log('react-native-branch initial params', JSON.stringify(params))
-  // return getUrlFromBundle({ params }) || await Linking.getInitialURL()
+  const bundle = await Branch.getLatestReferringParams()
+  const url = getUrlFromBundle(bundle)
+  if (url) return url
+
   return await Linking.getInitialURL()
 }
 
@@ -68,26 +67,20 @@ function stripProtocol (url) {
 
 const instance = new EventEmitter()
 instance.getInitialURL = getInitialURL
-instance.getReferringURL = getReferringURL
+// instance.getReferringURL = getReferringURL
 instance.addEventListener = instance.addListener
 instance.removeEventListener = instance.removeListener
 
-;(async function init () {
-  await getInitialURL()
-  Branch.subscribe(debounce(bundle => {
-    // if (error) {
-    //   if (Platform.OS === 'ios' && error.indexOf('310') !== -1) {
-    //     Alert.alert(translate('oops'), translate('behindProxy'))
-    //   } else {
-    //     Alert.alert(translate('oops'), translate('invalidDeepLink'))
-    //   }
+let initialized
+Branch.subscribe(debounce(bundle => {
+  // the first value is not an event, it's the cached initial url
+  if (!initialized) {
+    initialized = true
+    return
+  }
 
-    //   return
-    // }
-
-    const url = getUrlFromBundle(bundle)
-    if (url) instance.emit('url', { url })
-  }, 2000, true))
-}())
+  const url = getUrlFromBundle(bundle)
+  if (url) instance.emit('url', { url })
+}, 2000, true))
 
 export default instance

@@ -120,8 +120,7 @@ class TimHome extends Component {
 
     this.listenTo(Store, 'handleEvent');
     this._pressHandler = debounce(this._pressHandler, 500, true)
-    if (!isAndroid)
-      Linking.addEventListener('url', this._handleOpenURL);
+    Linking.addEventListener('url', this._handleOpenURL);
 
     // var url = LinkingIOS.popInitialURL()
     // if (url)
@@ -137,9 +136,7 @@ class TimHome extends Component {
     this.props.navigator.isConnected = isConnected
   }
   componentWillUnmount() {
-    if (!isAndroid)
-      Linking.removeEventListener('url', this._handleOpenURL);
-
+    Linking.removeEventListener('url', this._handleOpenURL);
     NetInfo.isConnected.removeEventListener(
       'change',
       this._handleConnectivityChange
@@ -163,7 +160,7 @@ class TimHome extends Component {
 
     Alert.alert('TRYING THE DEEP LINK')
     try {
-      const url = await Linking.getReferringURL() || ENV.initWithDeepLink
+      const url = await Linking.getInitialURL() || ENV.initWithDeepLink
       if (url)
         this._handleOpenURL({url})
       if (ENV.landingPage)
