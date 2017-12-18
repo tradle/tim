@@ -41,7 +41,6 @@ const LOCK_UP_MESSAGE = translate('temporarilyLocked', LOCK_TIME_STR)
 const LOCK_SCREEN_BG = ENV.brandBackground
 
 // const SETUP_MSG = 'Please set up Touch ID first, so the app can better protect your data.'
-const AUTH_FAILED_MSG = 'Authentication failed'
 const DEFAULT_OPTS = {
   reason: translate('unlockDevice'),
   fallbackToPasscode: true,
