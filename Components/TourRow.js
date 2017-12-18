@@ -2,9 +2,9 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
+import uiUtils from './uiUtils'
 import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
-import uiUtils from './uiUtils'
 const {
   TYPE,
   ROOT_HASH
@@ -36,30 +36,21 @@ class TourRow extends Component {
     super(props);
   }
   render() {
+    let styles = createStyles()
     let { resource, to, bankStyle, navigator } = this.props
-    let w = utils.dimensions(TourRow).width
-    let width = w * 0.8
+    // let width = utils.dimensions(TourRow).width * 0.8
     let rowStyle = [chatStyles.row, {backgroundColor: 'transparent', flexDirection: 'row', alignSelf: 'flex-start'}];
     let ownerPhoto = this.getOwnerPhoto(false)
 
-    let mstyle = {
-      borderColor: '#efefef',
-      backgroundColor: '#ffeffe',
-      borderTopLeftRadius: 0,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingVertical: 7,
-      width
-    }
-    let cellStyle = [chatStyles.verificationBody, mstyle]
+    let cellStyle = [chatStyles.verificationBody, styles.mstyle]
 
     let msgContent =  <View style={rowStyle}>
                         <View style={{marginTop: 2}}>
                           {ownerPhoto}
                         </View>
                         <View style={cellStyle}>
+                          <Icon name='ios-information-circle' size={30} color='#77ADFC'/>
                           <Text style={styles.resourceTitle} key={this.getNextKey()}>{resource.message}</Text>
-                          <Text style={{fontSize: 30, color: bankStyle.linkColor}}>☞</Text>
                         </View>
                       </View>
     return (
@@ -87,15 +78,27 @@ class TourRow extends Component {
   }
 }
 
-let styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  resourceTitle: {
-    fontSize: 20,
-    paddingTop: 2
-  },
-});
+var createStyles = utils.styleFactory(TourRow, function ({ dimensions }) {
+  var { width, height } = utils.dimensions(TourRow)
+  return StyleSheet.create({
+    container: {
+      flex: 1
+    },
+    resourceTitle: {
+      fontSize: 20,
+      paddingTop: 2
+    },
+    mstyle: {
+      borderColor: '#efefef',
+      // backgroundColor: '#ffeffe',
+      borderTopLeftRadius: 0,
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      paddingVertical: 7,
+      width: width * 0.8
+    }
+  })
+})
 reactMixin(TourRow.prototype, RowMixin);
 TourRow = makeResponsive(TourRow)
 
