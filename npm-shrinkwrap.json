@@ -5,7 +5,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#e1dcaee433fb8d55424d54c84feadda47308220c",
+      "resolved": "git://github.com/tradle/aws-client.git#17ce83938fe45e8199643f4d12590399b0150f7b",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -126,6 +126,33 @@
       "version": "1.0.0",
       "from": "tradle/ethereum-adapter-etherscan",
       "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#7f6b10539b53379b9ddc2671c65df329b1a8b587"
+    },
+    "@tradle/iot-message": {
+      "version": "1.0.0",
+      "from": "@tradle/iot-message@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/iot-message/-/iot-message-1.0.0.tgz",
+      "dependencies": {
+        "pify": {
+          "version": "3.0.0",
+          "from": "pify@^3.0.0",
+          "resolved": "https://registry.npmjs.org/pify/-/pify-3.0.0.tgz"
+        },
+        "protocol-buffers": {
+          "version": "3.2.1",
+          "from": "protocol-buffers@>=3.2.1 <4.0.0",
+          "resolved": "https://registry.npmjs.org/protocol-buffers/-/protocol-buffers-3.2.1.tgz"
+        },
+        "protocol-buffers-schema": {
+          "version": "3.3.2",
+          "from": "protocol-buffers-schema@>=3.1.1 <4.0.0",
+          "resolved": "https://registry.npmjs.org/protocol-buffers-schema/-/protocol-buffers-schema-3.3.2.tgz"
+        },
+        "varint": {
+          "version": "5.0.0",
+          "from": "varint@>=5.0.0 <6.0.0",
+          "resolved": "https://registry.npmjs.org/varint/-/varint-5.0.0.tgz"
+        }
+      }
     },
     "@tradle/keeper": {
       "version": "3.2.0",
