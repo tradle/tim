@@ -39,14 +39,6 @@ class TourRow extends Component {
   render() {
     let styles = createStyles()
     let { resource, to, bankStyle, navigator } = this.props
-<<<<<<< Updated upstream
-<<<<<<< HEAD
-    let width = utils.getMessageWidth(TourRow)
-=======
-    // let width = utils.dimensions(TourRow).width * 0.8
->>>>>>> origin/master
-=======
->>>>>>> Stashed changes
     let rowStyle = [chatStyles.row, {backgroundColor: 'transparent', flexDirection: 'row', alignSelf: 'flex-start'}];
     let ownerPhoto = this.getOwnerPhoto(false)
 
