@@ -54,6 +54,18 @@ var employee = require('../people/employee.json')
 const FRIEND = 'Friend'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
 
+// const COVER_PHOTOS = {
+//   Africa: '',
+//   America: '',
+//   Antarctica: '',
+//   Asia: '',
+//   Atlantic: '',
+//   Australia: '',
+//   Europe: '',
+//   Indian: '',
+//   Pacific: '',
+//   Other: ''
+// }
 var Q = require('q');
 Q.longStackSupport = true
 Q.onerror = function (err) {
@@ -116,7 +128,7 @@ var debounce = require('debounce')
 var asyncstorageDown = require('asyncstorage-down')
 var levelup = require('levelup')
 var mutexify = require('mutexify')
-
+// import DeviceInfo from 'react-native-device-info'
 // var updown = require('level-updown')
 
 var leveldown = require('cachedown')
@@ -2550,6 +2562,7 @@ var Store = Reflux.createStore({
     if (sp.style)
       this._getItem(okey).style = sp.style
     if (!list[ikey]) {
+      // let coverPhoto = COVER_PHOTOS[DeviceInfo.getTimezone().split('/')[0]]
       var profile = {
         [TYPE]: PROFILE,
         [ROOT_HASH]: hash,
@@ -4630,7 +4643,14 @@ var Store = Reflux.createStore({
           if (app)
             appToUpdate = utils.clone(app)
           else {
-            app = await self._getItemFromServer(returnVal.application)
+            let appId = utils.getId(returnVal.application)
+            if (foundRefs) {
+              let l = foundRefs.filter((r) => utils.getId(r.value) === appId)
+              if (l.length)
+                app = l[0].value
+            }
+            if (!app)
+              app = await self._getItemFromServer(returnVal.application)
             if (!app)
               appToUpdate = utils.clone(returnVal.applications)
             else {
