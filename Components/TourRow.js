@@ -37,7 +37,6 @@ class TourRow extends Component {
     super(props);
   }
   render() {
-    let styles = createStyles()
     let { resource, to, bankStyle, navigator } = this.props
     let rowStyle = [chatStyles.row, {backgroundColor: 'transparent', flexDirection: 'row', alignSelf: 'flex-start'}];
     let ownerPhoto = this.getOwnerPhoto(false)
