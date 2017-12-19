@@ -106,6 +106,8 @@ class FormErrorRow extends Component {
     let msgWidth = utils.dimensions(FormErrorRow).width * 0.8
 
     let width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(18) + 40) : msgWidth
+    if (!isMyMessage)
+      width -= 43
     let viewStyle = { width }
     let sendStatus = this.getSendStatus()
     var sealedStatus = (resource.txId)
