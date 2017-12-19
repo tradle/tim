@@ -46,7 +46,7 @@
     "@tradle/engine": "^5.3.3",
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.1.0",
-    "@tradle/models": "github:tradle/models",
+    "@tradle/models": "github:tradle/models#messagemodel",
     "@tradle/multiqueue": "^2.3.0",
     "@tradle/protocol": "^3.0.0",
     "@tradle/qr-schema": "^1.1.0",

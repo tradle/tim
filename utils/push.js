@@ -27,8 +27,19 @@ const NOTIFICATION_CAN_HAVE_DATA = Platform.OS === 'ios' || Platform.OS === 'web
 
 let onInitialized
 let onRegistered
-const whenInitialized = new Promise(resolve => onInitialized = resolve)
-const whenRegistered = new Promise(resolve => onRegistered = resolve)
+const whenInitialized = new Promise(resolve => {
+  onInitialized = (...args) => {
+    debug('initialized')
+    resolve(...args)
+  }
+})
+
+const whenRegistered = new Promise(resolve => {
+  onRegistered = (...args) => {
+    debug('registered')
+    resolve(...args)
+  }
+})
 
 // only allow this to run once
 exports.init = once(function (opts) {
@@ -105,6 +116,7 @@ function createPusher (opts) {
     }
 
     const token = await PushImpl.register()
+    debug('my push token', token)
     Actions.updateMe({ pushNotificationsAllowed: true })
 
     if (token) {

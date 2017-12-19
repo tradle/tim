@@ -2,9 +2,9 @@
 
 var utils = require('../utils/utils');
 var translate = utils.translate
+import uiUtils from './uiUtils'
 import Icon from 'react-native-vector-icons/Ionicons';
 var constants = require('@tradle/constants');
-import uiUtils from './uiUtils'
 const {
   TYPE,
   ROOT_HASH
@@ -32,33 +32,33 @@ import {
 import React, { Component } from 'react'
 
 class TourRow extends Component {
+  static displayName = 'TourRow';
   constructor(props) {
     super(props);
   }
   render() {
+    let styles = createStyles()
     let { resource, to, bankStyle, navigator } = this.props
+<<<<<<< Updated upstream
+<<<<<<< HEAD
     let width = utils.getMessageWidth(TourRow)
+=======
+    // let width = utils.dimensions(TourRow).width * 0.8
+>>>>>>> origin/master
+=======
+>>>>>>> Stashed changes
     let rowStyle = [chatStyles.row, {backgroundColor: 'transparent', flexDirection: 'row', alignSelf: 'flex-start'}];
     let ownerPhoto = this.getOwnerPhoto(false)
 
-    let mstyle = {
-      borderColor: '#efefef',
-      backgroundColor: '#ffeffe',
-      borderTopLeftRadius: 0,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      paddingVertical: 7,
-      width
-    }
-    let cellStyle = [chatStyles.verificationBody, mstyle]
+    let cellStyle = [chatStyles.verificationBody, styles.mstyle]
 
     let msgContent =  <View style={rowStyle}>
                         <View style={{marginTop: 2}}>
                           {ownerPhoto}
                         </View>
                         <View style={cellStyle}>
+                          <Icon name='md-information-circle' size={30} color='#77ADFC'/>
                           <Text style={styles.resourceTitle} key={this.getNextKey()}>{resource.message}</Text>
-                          <Text style={{fontSize: 30, color: bankStyle.linkColor}}>☞</Text>
                         </View>
                       </View>
     return (
@@ -86,15 +86,25 @@ class TourRow extends Component {
   }
 }
 
-let styles = StyleSheet.create({
+var styles = StyleSheet.create({
   container: {
     flex: 1
   },
   resourceTitle: {
     fontSize: 20,
-    paddingTop: 5
+    paddingTop: 5,
+    paddingLeft: 7
   },
-});
+  mstyle: {
+    borderColor: '#efefef',
+    // backgroundColor: '#ffeffe',
+    borderTopLeftRadius: 0,
+    flexDirection: 'row',
+    // justifyContent: 'center',
+    paddingVertical: 7,
+    width: utils.getMessageWidth(TourRow)
+  }
+})
 reactMixin(TourRow.prototype, RowMixin);
 TourRow = makeResponsive(TourRow)
 

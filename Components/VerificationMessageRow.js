@@ -156,7 +156,7 @@ class VerificationMessageRow extends Component {
                   </View>
 
     var viewStyle = {
-      width: msgWidth,
+      width: isMyMessage ? msgWidth : msgWidth - 43,
       // flexDirection: 'row',
       alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
       backgroundColor: 'transparent',
@@ -233,7 +233,7 @@ class VerificationMessageRow extends Component {
     var viewStyle = { margin: 1 } //, paddingRight: 10 }
     let contextId = this.getContextId(resource)
     if (!isMyMessage  &&  !isShared) {
-      messageBody = <View style={[chatStyles.row]}>
+      messageBody = <View style={[chatStyles.row, viewStyle]}>
                       {this.getOwnerPhoto(isMyMessage)}
                       {messageBody}
                     </View>

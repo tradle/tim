@@ -90,7 +90,7 @@ import {
 import ActivityIndicator from './ActivityIndicator'
 import StatusBar from './StatusBar'
 
-const isLinkingSupported = (utils.isIOS() || utils.isWeb()) && Linking
+const isLinkingSupported = Linking
 const isAndroid = Platform.OS === 'android'
 const FOOTER_TEXT_COLOR = ENV.splashContrastColor
 import React, { Component, PropTypes } from 'react'
@@ -165,6 +165,9 @@ class TimHome extends Component {
   async componentDidMount() {
     this._checkConnectivity()
 
+    if (!utils.getMe()) return
+
+    Alert.alert('TRYING THE DEEP LINK')
     try {
       let url
       if (isLinkingSupported) {

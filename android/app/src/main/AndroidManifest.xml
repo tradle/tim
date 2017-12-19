@@ -66,8 +66,9 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+
         <intent-filter>
-          <data android:scheme="tradle" android:host="open" />
+          <data android:scheme="tradle" />
           <action android:name="android.intent.action.VIEW" />
           <category android:name="android.intent.category.DEFAULT" />
           <category android:name="android.intent.category.BROWSABLE" />
@@ -77,7 +78,8 @@
           <action android:name="android.intent.action.VIEW" />
           <category android:name="android.intent.category.DEFAULT" />
           <category android:name="android.intent.category.BROWSABLE" />
-          <data android:scheme="https" android:host="@string/branch_app_link" android:pathPrefix="@string/branch_path_prefix" />
+          <data android:scheme="https" android:host="link.tradle.io" />
+          <data android:scheme="https" android:host="test-link.tradle.io" />
         </intent-filter>
       </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />

@@ -249,7 +249,7 @@ class ApplicationView extends Component {
           }
           Actions.addChatItem({resource: msg})
           this.setState({hasRM: true})
-          Actions.showModal({title: 'Loading...', showIndicator: true})
+          Actions.showModal({title: 'In process...', showIndicator: true})
         }}
       ]
     )
@@ -290,10 +290,6 @@ class ApplicationView extends Component {
   approve() {
     let resource = this.props.resource
     console.log('Approve was chosen!')
-    if (!resource._appSubmitted) {
-      Alert.alert('Application is not yet submitted')
-      return
-    }
     // if (resource.status === 'approved') {
     //   Alert.alert('Application was approved')
     //   return

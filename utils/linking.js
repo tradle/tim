@@ -1,7 +1,6 @@
 
 import EventEmitter from 'EventEmitter'
 import {
-  Platform,
   Linking,
 } from 'react-native'
 import Branch from 'react-native-branch'
@@ -21,19 +20,43 @@ const matchURI = uri => {
   }
 }
 
+// async function getReferringURL () {
+//   const params = await Branch.getFirstReferringParams()
+//   console.log('react-native-branch initial params', JSON.stringify(params))
+//   return getUrlFromBundle({ params }) || await Linking.getInitialURL()
+// }
+
 async function getInitialURL() {
-  // const bundle = await new Promise(resolve => Branch.getInitSession(resolve))
-  const bundle = await Branch.getFirstReferringParams()
-  return getUrlFromBundle(bundle) || await Linking.getInitialURL()
+  const bundle = await Branch.getLatestReferringParams()
+  const url = getUrlFromBundle(bundle)
+  if (url) return url
+
+  return await Linking.getInitialURL()
 }
 
-function getUrlFromBundle ({ uri, params, error }) {
-  if (uri || error) {
-    return matchURI(uri)
+function getUrlFromBundle ({ params, error }) {
+  if (error) {
+    console.error('react-native-branch error', error.stack)
+    return
   }
 
-  const branchLink = params && params['$deeplink_path']
-  const link = branchLink || uri
+  console.log('react-native-branch event', JSON.stringify(params))
+  if (params['+non_branch_link']) {
+    const nonBranchUrl = params['+non_branch_link']
+    return matchURI(nonBranchUrl)
+  }
+
+  if (!params['+clicked_branch_link']) {
+    // Indicates initialization success and some other conditions.
+    // No link was opened.
+    return
+  }
+
+  if (params['~referring_link']) {
+    return matchURI(params['~referring_link'])
+  }
+
+  const link = params['$deeplink_path']
   return link && stripProtocol(link)
 }
 
@@ -44,25 +67,20 @@ function stripProtocol (url) {
 
 const instance = new EventEmitter()
 instance.getInitialURL = getInitialURL
+// instance.getReferringURL = getReferringURL
 instance.addEventListener = instance.addListener
 instance.removeEventListener = instance.removeListener
 
-;(async function init () {
-  await getInitialURL()
-  Branch.subscribe(debounce(bundle => {
-    // if (error) {
-    //   if (Platform.OS === 'ios' && error.indexOf('310') !== -1) {
-    //     Alert.alert(translate('oops'), translate('behindProxy'))
-    //   } else {
-    //     Alert.alert(translate('oops'), translate('invalidDeepLink'))
-    //   }
+let initialized
+Branch.subscribe(debounce(bundle => {
+  // the first value is not an event, it's the cached initial url
+  if (!initialized) {
+    initialized = true
+    return
+  }
 
-    //   return
-    // }
-
-    const url = getUrlFromBundle(bundle)
-    if (url) instance.emit('url', { url })
-  }, 2000, true))
-}())
+  const url = getUrlFromBundle(bundle)
+  if (url) instance.emit('url', { url })
+}, 2000, true))
 
 export default instance

@@ -611,7 +611,10 @@ class FormRequestRow extends Component {
     let me = utils.getMe()
     let switchToContext = me.isEmployee  &&  context  &&  resource.product  && context.to.organization  &&  context.to.organization.id === me.organization.id
 
-    let isReadOnly = !switchToContext  && !context &&  (application || (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context))) //this.props.context  &&  this.props.context._readOnly
+    let isReadOnly = application != null
+
+    if (!isReadOnly)
+      isReadOnly = !switchToContext  && !context &&  (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context)) //this.props.context  &&  this.props.context._readOnly
     let self = this
     // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
     // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)

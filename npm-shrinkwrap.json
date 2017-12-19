@@ -3171,7 +3171,7 @@
     },
     "dot-prop": {
       "version": "4.2.0",
-      "from": "dot-prop@>=4.2.0 <4.3.0",
+      "from": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz",
       "resolved": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz"
     },
     "download": {

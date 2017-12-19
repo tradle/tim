@@ -108,15 +108,15 @@ const merged = extend({
   hideVerificationsInChat: false,
   hideProductApplicationInChat: false,
   // landingPage: "AvivaIntroView",
-  // tour: "TourPage",
-  // tourPages: {
-  //   pages: [
-  //     'https://tradle.io/images/bot-big.png',
-  //     'https://tradle.io/',
-  //     'https://blog.tradle.io/',
-  //     'https://youtube.com/'
-  //   ]
-  // },
+  tour: "TourPage",
+  tourPages: {
+    pages: [
+      'https://tradle.io/images/bot-big.png',
+      'https://tradle.io/',
+      'https://blog.tradle.io/',
+      'https://youtube.com/'
+    ]
+  },
   showCollapsed: null, //{'tradle.PhotoID': 'document'}
   splashBackground: 'tradle',
   splashContrastColor: 'tradle',

@@ -1,3 +1,4 @@
+import { Alert } from 'react-native'
 import { createHash } from 'crypto'
 import typeforce from 'typeforce'
 import Q from 'q'
@@ -9,6 +10,7 @@ if (accessGroup) ec.setAccessGroup(accessGroup)
 
 import { ec as ellipticEC } from 'elliptic'
 import { utils as tradleUtils } from '@tradle/engine'
+import promisify from 'pify'
 import nkeySE from './nkey-se'
 import nkeyECDSA from 'nkey-ecdsa'
 
@@ -30,24 +32,49 @@ if (__DEV__) {
 
 export const PASSWORD_ITEM_KEY = 'app-password'
 
-export function generateNewSet (opts={}) {
+export async function generateNewSet (opts={}) {
   typeforce({
     networks: 'Object'
   }, opts)
 
   const { networks } = opts
   const defaultKeySet = tradleUtils.defaultKeySet(networks)
-  return Promise.all(defaultKeySet.map(function (keyProps) {
+  debug(`generating ${defaultKeySet.length} keys`)
+  return await Promise.all(defaultKeySet.map(async (keyProps) => {
     keyProps = { ...keyProps } // defensive copy
     const gen = isKeychainNative(keyProps)
       ? createKeychainNativeKey(keyProps)
       : createKeychainResidentKey(keyProps, networks)
 
-    return gen.then(key => {
-      key.set('purpose', keyProps.purpose)
-      return key
-    })
+    const key = await gen
+    key.set('purpose', keyProps.purpose)
+    return key
   }))
+
+  // const keys = []
+  // let i = 0
+  // let allStart = Date.now()
+  // for (let keyProps of defaultKeySet) {
+  //   let start = Date.now()
+  //   keyProps = { ...keyProps } // defensive copy
+  //   const gen = isKeychainNative(keyProps)
+  //     ? createKeychainNativeKey(keyProps)
+  //     : createKeychainResidentKey(keyProps, networks)
+
+  //   Alert.alert('generating key', JSON.stringify(keyProps) + ', ' + (new Date()))
+  //   debug('generating key', JSON.stringify(keyProps) + ', ' + (new Date()))
+  //   const key = await gen
+  //   let time = Date.now() - start
+  //   Alert.alert(`generated key (${time}ms)`, JSON.stringify(keyProps) + ', ' + (new Date()))
+  //   key.set('purpose', keyProps.purpose)
+  //   keys.push(key)
+  //   i++
+  // }
+
+  // let time = Date.now() - allStart
+  // Alert.alert(`generated ${defaultKeySet.length} keys (${time}ms)`)
+
+  // return keys
 }
 
 export function saveKey (pub, priv) {
@@ -131,7 +158,7 @@ function createKeychainResidentKey (keyProps, networks) {
 }
 
 function createKeychainNativeKey (keyProps) {
-  return Q.ninvoke(nkeySE, 'gen', keyProps)
+  return promisify(nkeySE.gen)(keyProps)
 }
 
 function rejectNotFound () {
