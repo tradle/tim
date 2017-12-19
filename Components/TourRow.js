@@ -86,6 +86,7 @@ var createStyles = utils.styleFactory(TourRow, function ({ dimensions }) {
     },
     resourceTitle: {
       fontSize: 20,
+      paddingLeft: 5,
       paddingTop: 2
     },
     mstyle: {
@@ -93,7 +94,7 @@ var createStyles = utils.styleFactory(TourRow, function ({ dimensions }) {
       // backgroundColor: '#ffeffe',
       borderTopLeftRadius: 0,
       flexDirection: 'row',
-      justifyContent: 'space-around',
+      // justifyContent: 'space-around',
       paddingVertical: 7,
       width: width * 0.8
     }
