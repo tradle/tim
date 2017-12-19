@@ -49,7 +49,7 @@ class TourRow extends Component {
                           {ownerPhoto}
                         </View>
                         <View style={cellStyle}>
-                          <Icon name='ios-information-circle' size={30} color='#77ADFC'/>
+                          <Icon name='md-information-circle' size={30} color='#77ADFC'/>
                           <Text style={styles.resourceTitle} key={this.getNextKey()}>{resource.message}</Text>
                         </View>
                       </View>
