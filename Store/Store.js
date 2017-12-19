@@ -154,6 +154,7 @@ const {
  SELF_INTRODUCTION,
  FORGET_ME,
  FORGOT_YOU,
+ MONEY,
  SETTINGS,
 } = constants.TYPES
 
@@ -184,7 +185,7 @@ const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const VERIFIABLE          = 'tradle.Verifiable'
 const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
-const MONEY               = 'tradle.Money'
+const TOUR                = 'tradle.Tour'
 const CURRENCY            = 'tradle.Currency'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const PHOTO_ID            = 'tradle.PhotoID'
@@ -2850,22 +2851,6 @@ var Store = Reflux.createStore({
     let toType
     if (to)
       toType = to[TYPE]
-    // else if (application) {
-    //   // App works with PROFILE not IDENTITY to keep name for the customer
-    //   let parts = r.to.id.split('_')
-    //   toType = parts[0]
-    //   if (toType === IDENTITY) {
-    //     toType = PROFILE
-    //     r.to = {
-    //       [TYPE]: toType,
-    //       [ROOT_HASH]: parts[1],
-    //       [CUR_HASH]: parts[2],
-    //     }
-    //   }
-    //   to = r.to
-    // }
-    // if (!r.to[TYPE])
-    //   r.to = this._getItem(r.to)
     let isReadOnlyContext, orgId, orgRep
     if (toType === ORGANIZATION) {
       orgId = utils.getId(r.to)
@@ -2887,15 +2872,6 @@ var Store = Reflux.createStore({
       let toM = this.getModel(toType)
       isReadOnlyContext = utils.isContext(toM)  &&  utils.isReadOnlyChat(to)
     }
-/// TEST
-    // let isStylesPack = r[TYPE] === STYLES_PACK
-    // if (isStylesPack) {
-    //   let istyle = utils.interpretStylesPack(r)
-    //   if (to)
-    //     to.style = istyle
-    //   return
-    // }
-// end test
     let isSelfIntroduction = r[TYPE] === SELF_INTRODUCTION
 
     var rr = {};
@@ -2905,10 +2881,6 @@ var Store = Reflux.createStore({
       context = this._getItem(r._context) || r._context
     }
     rr[IS_MESSAGE] = true
-    // else if (application) {
-    //   rr._context = application._context
-    //   context = application._context
-    // }
 
     if (isContext)
       rr.contextId = this.getNonce()
@@ -2969,8 +2941,6 @@ var Store = Reflux.createStore({
       return promise
     })
     .then((result) => {
-    // if (r[TYPE] === PRODUCT_APPLICATION) {
-    //   let result = this.searchMessages({modelName: PRODUCT_APPLICATION, to: toOrg})
       if (result) {
         result = result.filter((r) => {
           return (r.message === r.message  &&  !r._documentCreated) ? true : false
@@ -2982,7 +2952,6 @@ var Store = Reflux.createStore({
           })
         }
       }
-    // }
       return this.maybeWaitForIdentity({ permalink: hash })
     })
     .then(() => this.meDriverExec('sign', { object: toChain }))
@@ -2995,12 +2964,6 @@ var Store = Reflux.createStore({
         rr._context = r._context = {id: utils.getId(r), title: r.requestFor}
         contextIdToResourceId[rr.contextId] = utils.getId(rr)
 
-        // let params = {
-        //   action: 'addItem',
-        //   resource: rr,
-        //   // sendStatus: sendStatus
-        // }
-        // self.trigger(params)
         self.addLastMessage(r, batch)
       }
       else if (!isWelcome  &&  !application)
@@ -3054,6 +3017,7 @@ var Store = Reflux.createStore({
 
           let identity = all.filter((id) => id.id === curId)
           console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
+          let rtitle = (r.to.organization  &&  r.to.organization.title) || utils.getDispalyName(r.to)
           var msg = {
             message: me.firstName + ' is waiting for the response',
             [TYPE]: SELF_INTRODUCTION,
@@ -3090,22 +3054,7 @@ var Store = Reflux.createStore({
         if (!toOrg)
             toOrg = to.organization ? to.organization : to
 
-        // if (rr._context &&  utils.isReadOnlyChat(rr._context)) {
-        //   let cId = utils.getId(rr._context)
-        //   self.addMessagesToChat(cId, rr)
-        //   // let context = self._getItem(rr._context)
-        //   if (rr[TYPE] === APPLICATION_DENIAL  ||  rr[TYPE] === CONFIRMATION) {
-        //     if (rr[TYPE] === APPLICATION_DENIAL)
-        //       context._denied = true
-        //     else
-        //       context._approved = true
-        //     self.trigger({action: 'updateRow', resource: context, forceUpdate: true})
-        //     self.dbPut(cId, context)
-        //   }
-        // }
-        // else
         if (rr[TYPE] === APPLICATION_DENIAL  || rr[TYPE] === APPLICATION_APPROVAL ||  rr[TYPE] === CONFIRMATION) {
-          // let app = await this._getItemFromServer(utils.getId(rr.application))
           self.trigger({action: 'updateRow', resource: application || r.application, forceUpdate: true})
         }
         self.addMessagesToChat(utils.getId(toOrg), rr)
@@ -3205,6 +3154,7 @@ var Store = Reflux.createStore({
         cb(rr)
     })
   },
+
   packMessage(toChain, from, to, context) {
     var sendParams = {}
     if (toChain[CUR_HASH]) {
@@ -3483,7 +3433,6 @@ var Store = Reflux.createStore({
     let result
 
     if (!dontSend) {
-      r[IS_MESSAGE] = true
       result = await meDriver.createObject({object: {
                   [TYPE]: VERIFICATION,
                   document: this.buildRef(document),
@@ -3491,20 +3440,20 @@ var Store = Reflux.createStore({
                 }})
     }
 
+    let context = r._context
     if (result) {
       r = utils.clone(result.object)
       r[ROOT_HASH] = result.permalink
       r[CUR_HASH] = result.link
       r.from = this.buildRef(me, dontSend)
       r.to = this.buildRef(this._getItem(to[0]))
+      r[IS_MESSAGE] = true
     }
     newVerification = this.buildRef(r, dontSend)
-    let context = r._context
-    if (!context) {
+    if (!context)
       context = document._context
-      if (context)
-        r._context = context
-    }
+    if (context)
+      r._context = context
     if (!dontSend)
       await this.sendMessageToContextOwners(result.object, to, context)
 
@@ -3682,8 +3631,8 @@ var Store = Reflux.createStore({
     // if (!r._sharedWith)
     //   r._sharedWith = []
     let id = utils.getId(shareWith)
-    if (id === utils.getId(utils.getMe()))
-      debugger
+    // if (id === utils.getId(utils.getMe()))
+    //   debugger
     // let hasThisShare = r._sharedWith.some((r) => r.shareBatchId === shareBatchId)
     let hasThisShare = r._sharedWith.some((r) => r.bankRepresentative === id)
     if (!hasThisShare)
@@ -9217,6 +9166,8 @@ var Store = Reflux.createStore({
 
     var noTrigger
     if (pList) {
+      noTrigger = true
+
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
@@ -9261,8 +9212,8 @@ var Store = Reflux.createStore({
       this.trigger({action: 'getItem', resource: org})
       // noTrigger = hasNoTrigger(orgId)
     }
-    if (isModelsPack  &&  this.preferences) {
-      if (this.preferences.firstPage === 'chat' && ENV.autoRegister) {
+    if (isModelsPack)  {
+      if (this.preferences  &&  this.preferences.firstPage === 'chat' && ENV.autoRegister) {
           // ENV.autoRegister                &&
           // org.products.length === 1) {
         let meRef = this.buildRef(utils.getMe())
@@ -9313,6 +9264,7 @@ var Store = Reflux.createStore({
       }
       this.dbBatchPut(utils.getId(org), org, batch)
       this.trigger({action: 'customStyles', provider: org})
+      noTrigger = true
     }
 
     if (!val.time)
