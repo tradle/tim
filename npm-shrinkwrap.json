@@ -22,7 +22,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#17ce83938fe45e8199643f4d12590399b0150f7b",
+      "resolved": "git://github.com/tradle/aws-client.git#6daeebc954e24d569808811319457475e9e99265",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -3129,7 +3129,7 @@
     },
     "dot-prop": {
       "version": "4.2.0",
-      "from": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz",
+      "from": "dot-prop@>=4.2.0 <4.3.0",
       "resolved": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz"
     },
     "drbg.js": {
@@ -6201,9 +6201,9 @@
       "resolved": "https://registry.npmjs.org/react-native-blinkid/-/react-native-blinkid-1.1.0.tgz"
     },
     "react-native-branch": {
-      "version": "2.1.1",
+      "version": "2.2.1",
       "from": "react-native-branch@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-branch/-/react-native-branch-2.1.1.tgz"
+      "resolved": "https://registry.npmjs.org/react-native-branch/-/react-native-branch-2.2.1.tgz"
     },
     "react-native-button": {
       "version": "1.8.2",
