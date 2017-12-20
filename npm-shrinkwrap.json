@@ -5,7 +5,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#17ce83938fe45e8199643f4d12590399b0150f7b",
+      "resolved": "git://github.com/tradle/aws-client.git#6daeebc954e24d569808811319457475e9e99265",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -3171,7 +3171,7 @@
     },
     "dot-prop": {
       "version": "4.2.0",
-      "from": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz",
+      "from": "dot-prop@>=4.2.0 <4.3.0",
       "resolved": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz"
     },
     "download": {
