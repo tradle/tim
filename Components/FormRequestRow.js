@@ -17,7 +17,6 @@ import CustomIcon from '../styles/customicons'
 var extend = require('extend')
 var equal = require('deep-equal')
 var formDefaults = require('../data/formDefaults.json')
-var TradleW = require('../img/TradleW.png')
 var Actions = require('../Actions/Actions');
 var StyleSheet = require('../StyleSheet')
 var reactMixin = require('react-mixin');
