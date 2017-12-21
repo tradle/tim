@@ -30,7 +30,10 @@ var ProgressInfo = require('./ProgressInfo')
 var PageView = require('./PageView')
 var extend = require('extend');
 var TimerMixin = require('react-timer-mixin')
+import BackgroundImage from './BackgroundImage'
+
 const clone = require('clone')
+const FOOTER_TEXT_COLOR = ENV.splashContrastColor
 
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
@@ -68,6 +71,7 @@ import {
   StatusBar,
   TouchableOpacity,
   Alert,
+  Modal,
   TouchableHighlight
 } from 'react-native'
 
@@ -95,6 +99,7 @@ class MessageList extends Component {
       isLoading: true,
       // selectedAssets: {},
       isConnected: props.navigator.isConnected,
+      showSplashScreen: true,
       // onlineStatus: props.resource._online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
       isEmployee:  props.resource  &&  utils.isEmployee(props.resource),
@@ -134,6 +139,10 @@ class MessageList extends Component {
 
     return true
   }
+  isLoading() {
+    let {showSplashScreen, list} = this.state
+    return showSplashScreen && list
+  }
   componentWillMount() {
     let { navigator, modelName, resource, prop, context, search, isAggregation, application } = this.props
     let params = {
@@ -154,6 +163,11 @@ class MessageList extends Component {
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
+    this._hideSplashScreenTimeout = setTimeout(() => {
+      this.setState({
+         showSplashScreen: false
+        })
+    }, 2000)
   }
   onAction(params) {
     let {action, error, to, isConnected} = params
@@ -306,7 +320,7 @@ class MessageList extends Component {
       this.setState({isLoading: false, isEmployee: isEmployee})
   }
   add(params) {
-    let { action, resource, to, productToForms, shareableResources, modelName, originatingMessage } = params
+    let { action, resource, to, productToForms, shareableResources, modelName, originatingMessage, application } = params
     if (!utils.isMessage(resource))
       return
 
@@ -375,12 +389,17 @@ class MessageList extends Component {
       list = list.map((r) => r)
       list.push(resource)
     }
-    if (!replace)
+    if (!replace  &&  !application)
       utils.pinFormRequest(list)
 
     let state = {
       // addedItem: addedItem,
-      list: list
+      list: list,
+    }
+    if (this.state.isLoading) {
+      // if (resurce._splash)
+      state.isLoading = false
+      StatusBar.setHidden(false);
     }
     let currentContext
     if (utils.isContext(resource))
@@ -681,6 +700,7 @@ class MessageList extends Component {
 
   componentWillUnmount() {
     clearTimeout(this._scrollTimeout)
+    clearTimeout(this._hideSplashScreenTimeout)
   }
 
   componentDidUpdate() {
@@ -694,6 +714,31 @@ class MessageList extends Component {
       }, 200)
   }
 
+  getSplashScreen() {
+    let splash = this.props.resource._splash
+    if (!splash)
+      return
+    // let splash = require('../img/Safe.png')
+    const { width, height } = utils.dimensions(MessageList)
+    let splashLayout = {
+      alignItems: 'center',
+      justifyContent: 'center',
+      width,
+      height
+    }
+
+    let spinner = <ActivityIndicator hidden='true' size='large' color='#79AAF2'/>
+    return (
+      <View style={styles.container}>
+        <BackgroundImage source={splash} />
+        <View style={splashLayout}>
+          <View style={styles.bottom}>
+            {spinner}
+          </View>
+        </View>
+      </View>
+    )
+  }
   render() {
     let { modelName, resource, bankStyle, navigator, originatingMessage, isAggregation } = this.props
     let application = this.state.application ||  this.props.application
@@ -809,6 +854,19 @@ class MessageList extends Component {
     if (!context  &&  isContext)
       context = resource
     let separator = utils.getContentSeparator(bankStyle)
+    let loading
+    if (this.isLoading()  &&  !application) {
+      let splash = this.getSplashScreen()
+      if (splash)
+        loading = <View style={styles.mainWrap}>
+                    <Modal visible={true}
+                          transparent={false}
+                          animationType='slide'>
+                      {splash}
+                    </Modal>
+                  </View>
+    }
+
     if (!bgImage)
       return (
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
@@ -819,6 +877,7 @@ class MessageList extends Component {
           {content}
           {actionSheet}
           {alert}
+          {loading}
         </PageView>
     )
     let {width, height} = utils.dimensions(MessageList)
@@ -835,6 +894,7 @@ class MessageList extends Component {
           {actionSheet}
           {alert}
         </Image>
+          {loading}
       </PageView>
     );
   }
@@ -1246,6 +1306,21 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     paddingLeft: 10,
     paddingRight: 10,
+  },
+  container: {
+    alignItems: 'center'
+  },
+  mainWrap: {
+    flex: 1,
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+  },
+  flexGrow: {
+    flexGrow: 1
+  },
+  bottom: {
+    position: 'absolute',
+    bottom: 30
   }
 });
 module.exports = MessageList;
