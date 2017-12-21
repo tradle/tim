@@ -1571,7 +1571,7 @@ class GridList extends Component {
   }
   render() {
     let content;
-    let {isGrid, filter, dataSource, isLoading, refreshing} = this.state
+    let {isGrid, filter, dataSource, isLoading, refreshing, list, isConnected} = this.state
     let { isChooser, modelName, isModel, isBacklink, isForwardlink, resource, prop, forwardlink } = this.props
     let model = utils.getModel(modelName).value;
     if (dataSource.getRowCount() === 0   &&
@@ -1627,8 +1627,16 @@ class GridList extends Component {
       }
     }
     let network
-    if (!isChooser && officialAccounts && modelName === ORGANIZATION)
-       network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
+    if (!isChooser) {
+      if (officialAccounts && modelName === ORGANIZATION)
+        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
+      else if (modelName === BOOKMARK  &&  list  &&  list.length) {
+        let org = list[0].from.organization
+        if (org)
+          network = <NetworkInfoProvider connected={isConnected} serverOffline={!org.online} />
+      }
+    }
+
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(this.props.bankStyle)
     let loading
