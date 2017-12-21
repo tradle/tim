@@ -62,9 +62,6 @@ class PhotoView extends Component {
     if (!currentPhoto)
       return <View />
 
-    let coverPhoto = utils.getPropertiesWithAnnotation(model, 'coverPhoto')
-    coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
-
     var url = currentPhoto.url;
     // var nextPhoto = resource.photos && resource.photos.length == 1
     var uri = utils.getImageUri(url);
@@ -81,7 +78,7 @@ class PhotoView extends Component {
     let {width, height} = utils.dimensions(PhotoView)
     let image = {
       width: width < height ? width : height,
-      height: Math.round(width < height ? height / 4 : width / 2),
+      height: Math.round(width < height ? height / 2.5 : width / 2),
       // alignSelf: 'stretch'
     }
     let style={transform: [{scale: this.state.anim}]}
@@ -95,11 +92,17 @@ class PhotoView extends Component {
  //              this.shwCarousel(resource.photos[0])
  //          }}
     let photoView
+    let coverPhoto = utils.getPropertiesWithAnnotation(model, 'coverPhoto')
+    coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
     if (coverPhoto) {
       let coverPhotoUri = coverPhoto.url
-      var coverPhotoSource = coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0
-               ? {uri: coverPhotoUri, isStatic: true}
-               : {uri: coverPhotoUri}
+      var coverPhotoSource
+      if (coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0)
+        coverPhotoSource = {uri: coverPhotoUri, isStatic: true}
+      // else if (coverPhotoUri.indexOf('..') === 0)
+      //   coverPhotoSource = require(coverPhotoUri)
+      else
+        coverPhotoSource = {uri: coverPhotoUri}
       var title = utils.getDisplayName(this.props.resource)
       let fontSize = title.length < 15 ? 30 : 24
       photoView = (
