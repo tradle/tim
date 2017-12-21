@@ -9586,25 +9586,24 @@ var Store = Reflux.createStore({
       }
       await self.onAddChatItem({resource: bookmark, noTrigger: true})
 
+      if (me.firstName === FRIEND) {
+        let toRep = self.getRepresentative(utils.getId(org))
+        toRep = self._getItem(toRep)
+        let result = []
+        let arr = [NAME, PERSONAL_INFO, APPLICANT]
+        for (let j=0; j<arr.length; j++) {
+          let sr = await self.searchMessages({modelName: arr[j], to: org})
+          if (sr)
+            result = result.concat(sr)
+        }
 
-      if (me.firstName !== FRIEND)
-        return
-      let toRep = self.getRepresentative(utils.getId(org))
-      toRep = self._getItem(toRep)
-      let result = []
-      let arr = [NAME, PERSONAL_INFO, APPLICANT]
-      for (let j=0; j<arr.length; j++) {
-        let sr = await self.searchMessages({modelName: arr[j], to: org})
-        if (sr)
-          result = result.concat(sr)
+        if (result.length) {
+          let fRes = result.find((r) => utils.getId(r.from) === meId)
+          me.firstName = fRes.firstName || fRes.givenName
+        }
       }
-
-      if (result.length) {
-        let fRes = result.find((r) => utils.getId(r.from) === meId)
-        me.firstName = fRes.firstName || fRes.givenName
-        self._setItem(meId, me)
-        await self.dbPut(meId, me)
-      }
+      self._setItem(meId, me)
+      await self.dbPut(meId, me)
     }
   },
   async getContext(contextId, val) {
