@@ -60,6 +60,7 @@ class MessageView extends Component {
       isConnected: props.navigator.isConnected,
       promptVisible: false,
       isLoading: !props.resource[TYPE],
+      showDetails: true,
       bankStyle: defaultBankStyle
     };
     let currentRoutes = props.navigator.getCurrentRoutes();
