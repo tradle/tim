@@ -61,9 +61,6 @@ class PhotoView extends Component {
     if (!currentPhoto)
       return <View />
 
-    let coverPhoto = utils.getPropertiesWithAnnotation(model, 'coverPhoto')
-    coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
-
     var url = currentPhoto.url;
     // var nextPhoto = resource.photos && resource.photos.length == 1
     var uri = utils.getImageUri(url);
@@ -92,7 +89,7 @@ class PhotoView extends Component {
 
     let image = {
       width: utils.getContentWidth(PhotoView) + 2,
-      height: height/ 4,
+      height: Math.floor(height/ 3),
       // alignSelf: 'stretch'
     }
             // <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, currentPhoto, true)}>
@@ -107,13 +104,19 @@ class PhotoView extends Component {
  //              this.shwCarousel(resource.photos[0])
  //          }}
     let photoView
+    let coverPhoto = utils.getPropertiesWithAnnotation(model, 'coverPhoto')
+    coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
     if (coverPhoto) {
       // let cpHeight = coverPhoto.height * width / coverPhoto.width
 
       let coverPhotoUri = coverPhoto.url
-      var coverPhotoSource = coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0
-               ? {uri: coverPhotoUri, isStatic: true}
-               : {uri: coverPhotoUri}
+      var coverPhotoSource
+      if (coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0)
+        coverPhotoSource = {uri: coverPhotoUri, isStatic: true}
+      // else if (coverPhotoUri.indexOf('..') === 0)
+      //   coverPhotoSource = require(coverPhotoUri)
+      else
+        coverPhotoSource = {uri: coverPhotoUri}
       var title = utils.getDisplayName(this.props.resource)
               // <Image resizeMode='cover' source={coverPhotoSource} style={{width: width, height: cpHeight}}>
 
