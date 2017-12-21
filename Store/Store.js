@@ -5288,7 +5288,7 @@ var Store = Reflux.createStore({
 
     let r = { [TYPE]: PROFILE, firstName: FRIEND }
     let tz = DeviceInfo.getTimezone()
-    let coverPhoto = COVER_PHOTOS[tz] ||  COVER_PHOTOS[tz.split('/')[0]]
+    let coverPhoto = tz  &&  (COVER_PHOTOS[tz] ||  COVER_PHOTOS[tz.split('/')[0]])
     if (coverPhoto) {
       r.coverPhoto = coverPhoto
       // let res = await fetch(coverPhoto.url)
