@@ -144,8 +144,10 @@ var NewResourceMixin = {
     }
     else {
       eCols = utils.getEditCols(meta)
-      if (!eCols || !eCols.length)
+      if (!eCols || utils.isEmpty(eCols))
         eCols = props
+      // else
+      //   eCols = Object.values(eCols)
     }
     // else if (meta.editCols) {
     //   utils.arrayToObject(meta.editCols);
