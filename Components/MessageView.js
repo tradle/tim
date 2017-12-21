@@ -57,16 +57,16 @@ class MessageView extends Component {
     super(props);
     this.state = {
       resource: props.resource,
-      isConnected: this.props.navigator.isConnected,
+      isConnected: props.navigator.isConnected,
       promptVisible: false,
       isLoading: !props.resource[TYPE],
       bankStyle: defaultBankStyle
     };
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
-    var len = currentRoutes.length;
+    let currentRoutes = props.navigator.getCurrentRoutes();
+    let len = currentRoutes.length;
     if (!currentRoutes[len - 1].onRightButtonPress  &&  currentRoutes[len - 1].rightButtonTitle) {
       if (this.props.isReview)
-        currentRoutes[len - 1].onRightButtonPress = this.props.action
+        currentRoutes[len - 1].onRightButtonPress = props.action
       else
         currentRoutes[len - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
     }
@@ -144,7 +144,7 @@ class MessageView extends Component {
   }
 
   renderActionSheet() {
-    var resource = this.state.resource;
+    let resource = this.state.resource;
     let m = utils.getModel(resource[TYPE]).value
     let bl = utils.getPropertiesWithAnnotation(m, 'items')
     if (utils.isEmpty(bl))
@@ -238,7 +238,7 @@ class MessageView extends Component {
     else {
       let properties = utils.getModel(this.state.resource[TYPE]).value.properties
       let msg = ''
-      for (var p in this.state.errorProps)
+      for (let p in this.state.errorProps)
         msg += msg ? ', ' + properties[p].title : properties[p].title
       msg = translate('pleaseCorrectFields', msg)
       let from = (application ? application.applicant : resource.from).title || 'Applicant'
@@ -294,7 +294,7 @@ class MessageView extends Component {
   }
 
   getRefResource(resource, prop) {
-    var model = utils.getModel(this.props.resource[TYPE]).value;
+    let model = utils.getModel(this.props.resource[TYPE]).value;
 
     this.state.prop = prop;
     // this.state.propValue = utils.getId(resource.id);
@@ -304,14 +304,14 @@ class MessageView extends Component {
 
   showVerification(resource, document) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = utils.getModel(document[TYPE]).value;
-    var title = model.title; //utils.getDisplayName(resource, model.properties);
-    var newTitle = title;
+    let model = utils.getModel(document[TYPE]).value;
+    let title = model.title; //utils.getDisplayName(resource, model.properties);
+    let newTitle = title;
     let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier = !resource && utils.isVerifier(document)
     let isEmployee = utils.isEmployee(this.props.resource)
-    var route = {
+    let route = {
       title: newTitle,
       id: 5,
       backButtonTitle: 'Back',
@@ -330,14 +330,14 @@ class MessageView extends Component {
   render() {
     if (this.state.isLoading)
       return <View/>
-    var resource = this.state.resource;
-    var model = utils.getModel(resource[TYPE]).value;
+    let resource = this.state.resource;
+    let model = utils.getModel(resource[TYPE]).value;
     let isVerification = model.id === VERIFICATION
     let isVerificationTree = isVerification &&  (resource.method || resource.sources)
     let t = resource.dateVerified ? resource.dateVerified : resource.time
-    var date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
-    var photos = resource.photos
-    var mainPhoto
+    let date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
+    let photos = resource.photos
+    let mainPhoto
     if (!photos) {
       photos = utils.getResourcePhotos(model, resource)
       let mainPhotoProp = utils.getMainPhotoProperty(model)
@@ -345,7 +345,7 @@ class MessageView extends Component {
     }
     else if (photos.length === 1)
       mainPhoto = photos[0]
-    var inRow = photos ? photos.length : 0
+    let inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
 
@@ -369,8 +369,8 @@ class MessageView extends Component {
                     </View>
                   </View>
 
-    var checkProps = !isVerification && this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
-    var actionPanel
+    let checkProps = !isVerification && this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
+    let actionPanel
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
     else {
@@ -391,7 +391,7 @@ class MessageView extends Component {
     }
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
-    var verificationTxID, separator
+    let verificationTxID, separator
     if (this.props.verification  &&  this.props.verification.txId) {
       verificationTxID =
           <View style={styles.txIdView}>
@@ -405,7 +405,7 @@ class MessageView extends Component {
     if (resource.message  &&  resource.message.length)
       msg = <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
 
-    // var isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
+    // let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
     let dateView
     if (isVerificationTree) {
       dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: bankStyle.productRowBgColor}]}>
@@ -413,7 +413,7 @@ class MessageView extends Component {
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
-    var actionSheet = this.renderActionSheet()
+    let actionSheet = this.renderActionSheet()
     let title = isVerification  ? this.makeViewTitle(model) : null
     let footer = actionSheet && this.renderFooter()
     let contentSeparator = utils.getContentSeparator(bankStyle)
