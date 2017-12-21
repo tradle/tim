@@ -102,7 +102,7 @@ const COVER_PHOTOS = {
     height: 720
   },
   Pacific: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Pacific.jpg',
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Pacific_Aukland.jpg',
     width: 1000,
     height: 669
   },
