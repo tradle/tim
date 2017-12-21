@@ -27,8 +27,8 @@ const matchURI = uri => {
 // }
 
 async function getInitialURL() {
-  const bundle = await Branch.getLatestReferringParams()
-  const url = getUrlFromBundle(bundle)
+  const params = await Branch.getLatestReferringParams()
+  const url = getUrlFromBundle({ params })
   if (url) return url
 
   return await Linking.getInitialURL()
