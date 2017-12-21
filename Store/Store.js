@@ -56,47 +56,53 @@ const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
 
 const COVER_PHOTOS = {
   Africa: {
-    url: 'https://cdn.pixabay.com/photo/2016/07/25/11/55/beach-1540362_960_720.jpg',
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Africa.jpg',
     width: 960,
     height: 640
   },
   America: {
-    url: 'https://cdn.pixabay.com/photo/2016/09/10/23/48/bridge-1660417_1280.jpg',
-    width: 944,
-    height: 717
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/America.jpg',
+    width: 1280,
+    height: 778
   },
   Antarctica: {
-    url: 'https://cdn.pixabay.com/photo/2017/01/17/17/57/antarctica-1987579_960_720.jpg',
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Antarctica.jpg',
     width: 960,
     height: 720
   },
   Asia: {
-    url: 'https://cdn.pixabay.com/photo/2017/05/11/23/21/panoramic-landscape-2305606_1280.jpg',
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Asia.jpg',
     width: 1280,
     height: 424
   },
+  'Asia/Tokyo': {
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Asia_Tokyo.jpg',
+    // https://cdn.pixabay.com/photo/2015/03/24/01/12/university-of-tokyo-686938_1280.jpg, w: 1280, h: 853
+    width: 1280,
+    height: 724
+  },
   Atlantic: {
-    url: 'https://c1.staticflickr.com/6/5755/31178437635_982f9b9eee_b.jpg',
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Atlantic.jpg',
     width: 1024,
     height: 683
   },
   Australia: {
-    url: 'https://cdn.pixabay.com/photo/2017/06/19/19/58/sydney-2420747_960_720.jpg',
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Australia.jpg',
     width: 960,
     height: 673
   },
   Europe: {
-    url: 'https://cdn.pixabay.com/photo/2015/03/26/07/34/prague-night-689897_960_720.jpg',
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Europe.jpg',
     width: 960,
     height: 640
   },
   Indian: {
-    url: 'https://cdn.pixabay.com/photo/2017/01/05/21/11/india-1956333_960_720.jpg',
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Indian.jpg',
     width: 960,
     height: 720
   },
   Pacific: {
-    url: 'https://c1.staticflickr.com/4/3808/11157483815_6b9c2c1fcb_b.jpg',
+    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Pacific.jpg',
     width: 1000,
     height: 669
   },
@@ -5217,7 +5223,7 @@ var Store = Reflux.createStore({
 
     let r = { [TYPE]: PROFILE, firstName: FRIEND }
     let tz = DeviceInfo.getTimezone()
-    let coverPhoto = COVER_PHOTOS[tz] ||  COVER_PHOTOS[tz.split('/')[0]]
+    let coverPhoto = tz  &&  (COVER_PHOTOS[tz] ||  COVER_PHOTOS[tz.split('/')[0]])
     if (coverPhoto) {
       r.coverPhoto = coverPhoto
       // let res = await fetch(coverPhoto.url)
