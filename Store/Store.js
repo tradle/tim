@@ -54,6 +54,53 @@ var employee = require('../people/employee.json')
 const FRIEND = 'Friend'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
 
+const COVER_PHOTOS = {
+  Africa: {
+    url: 'https://cdn.pixabay.com/photo/2016/07/25/11/55/beach-1540362_960_720.jpg',
+    width: 960,
+    height: 640
+  },
+  America: {
+    url: 'https://cdn.pixabay.com/photo/2016/09/10/23/48/bridge-1660417_1280.jpg',
+    width: 944,
+    height: 717
+  },
+  Antarctica: {
+    url: 'https://cdn.pixabay.com/photo/2017/01/17/17/57/antarctica-1987579_960_720.jpg',
+    width: 960,
+    height: 720
+  },
+  Asia: {
+    url: 'https://cdn.pixabay.com/photo/2017/05/11/23/21/panoramic-landscape-2305606_1280.jpg',
+    width: 1280,
+    height: 424
+  },
+  Atlantic: {
+    url: 'https://c1.staticflickr.com/6/5755/31178437635_982f9b9eee_b.jpg',
+    width: 1024,
+    height: 683
+  },
+  Australia: {
+    url: 'https://cdn.pixabay.com/photo/2017/06/19/19/58/sydney-2420747_960_720.jpg',
+    width: 960,
+    height: 673
+  },
+  Europe: {
+    url: 'https://cdn.pixabay.com/photo/2015/03/26/07/34/prague-night-689897_960_720.jpg',
+    width: 960,
+    height: 640
+  },
+  Indian: {
+    url: 'https://cdn.pixabay.com/photo/2017/01/05/21/11/india-1956333_960_720.jpg',
+    width: 960,
+    height: 720
+  },
+  Pacific: {
+    url: 'https://c1.staticflickr.com/4/3808/11157483815_6b9c2c1fcb_b.jpg',
+    width: 1000,
+    height: 669
+  },
+}
 var Q = require('q');
 Q.longStackSupport = __DEV__
 Q.onerror = function (err) {
@@ -117,6 +164,7 @@ var debounce = require('debounce')
 var mutexify = require('mutexify')
 const download = require('downloadjs')
 const collect = promisify(require('stream-collector'))
+import DeviceInfo from 'react-native-device-info'
 
 // const enforceOrder = require('@tradle/receive-in-order')
 const Multiqueue = require('@tradle/multiqueue')
@@ -3614,6 +3662,10 @@ var Store = Reflux.createStore({
       let fOrg = this._getItem(from.organization)
       if (fOrg.photos)
         r.from.photo = fOrg.photos[0]
+      if (!fOrg._online)
+        r.from.organization._online = false
+      else
+        r.from.organization._online = true
       if (r[TYPE] === VERIFICATION)
         r.organization = from.organization
     }
@@ -3623,6 +3675,10 @@ var Store = Reflux.createStore({
       let toOrg = this._getItem(to.organization)
       if (toOrg.photos)
         r.to.photo = toOrg.photos[0]
+      if (!toOrg._online)
+        r.to.organization._online = false
+      else
+        r.to.organization._online = true
     }
     if (r && r._verifiedBy) {
       let verifiedBy = this._getItem(r._verifiedBy)
@@ -4655,7 +4711,14 @@ var Store = Reflux.createStore({
           if (app)
             appToUpdate = utils.clone(app)
           else {
-            app = await self._getItemFromServer(returnVal.application)
+            let appId = utils.getId(returnVal.application)
+            if (foundRefs) {
+              let l = foundRefs.filter((r) => utils.getId(r.value) === appId)
+              if (l.length)
+                app = l[0].value
+            }
+            if (!app)
+              app = await self._getItemFromServer(returnVal.application)
             if (!app)
               appToUpdate = utils.clone(returnVal.applications)
             else {
@@ -5220,12 +5283,25 @@ var Store = Reflux.createStore({
         debug('Store.autoRegister', err.stack)
       }
     }
-    if (!me) {
-      await this.onAddItem({resource: {
-              [constants.TYPE]: constants.TYPES.PROFILE,
-              firstName: FRIEND
-            }, isRegistration: true})
+    if (me)
+      return
+
+    let r = { [TYPE]: PROFILE, firstName: FRIEND }
+    let tz = DeviceInfo.getTimezone()
+    let coverPhoto = COVER_PHOTOS[tz] ||  COVER_PHOTOS[tz.split('/')[0]]
+    if (coverPhoto) {
+      r.coverPhoto = coverPhoto
+      // let res = await fetch(coverPhoto.url)
+      // let blob = await res.blob()
+      // var objectURL = URL.createObjectURL(blob);
+      // let src = objectURL;
+      // r.coverPhoto = {
+      //   url: src,
+      //   width: coverPhoto.width,
+      //   height: coverPhoto.height
+      // }
     }
+    await this.onAddItem({resource: r, isRegistration: true})
   },
   async onGetProvider(params) {
     await this.ready
@@ -5235,7 +5311,7 @@ var Store = Reflux.createStore({
     let providerBot = this._getItem(utils.makeId(PROFILE, permalink))
     if (!providerBot  &&  serverUrl) {
       await this.onAddItem({
-        resource: {[constants.TYPE]: constants.TYPES.SETTINGS, url: serverUrl},
+        resource: {[TYPE]: SETTINGS, url: serverUrl},
         maxAttempts: 5
       })
       providerBot = this._getItem(utils.makeId(PROFILE, permalink))
@@ -5279,8 +5355,14 @@ var Store = Reflux.createStore({
       isMessage = meta.subClassOf === FORM  ||  modelName === VERIFICATION
     // if (params.prop)
     //   debugger
-    if (params.search && me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION)
-      return await this.searchServer(params)
+    if (params.search && me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION) {
+      try {
+        return await this.searchServer(params)
+      } catch (error) {
+        Alert.alert(error.message)
+        return
+      }
+    }
 
     if (!isMessage) {
       let {isTest, spinner, sponsorName, list, search} = params
@@ -8816,7 +8898,7 @@ var Store = Reflux.createStore({
       var org = fOrg ? this._getItem(utils.getId(fOrg)) : null
       var msg = {
         message: me.firstName + ' is waiting for the response',
-        [TYPE]: constants.TYPES.CUSTOMER_WAITING,
+        [TYPE]: CUSTOMER_WAITING,
         from: me,
         to: org,
         time: new Date().getTime()

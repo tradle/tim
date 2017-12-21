@@ -286,6 +286,8 @@ class FormMessageRow extends Component {
 
     var vCols = [];
     let isShared = this.isShared()
+    if (viewCols)
+      viewCols = utils.ungroup(model, viewCols)
 
     viewCols.forEach((v) => {
       if (vCols.length > MAX_PROPS_IN_FORM)
