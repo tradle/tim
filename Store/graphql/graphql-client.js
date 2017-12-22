@@ -328,7 +328,8 @@ var search = {
       return result.edges
     } catch(error) {
       // debugger
-      console.error(error)
+      console.log(error)
+      throw error
     }
 
     function prettify (obj) {

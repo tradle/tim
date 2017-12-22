@@ -2,7 +2,6 @@
 
 const parseURL = require('url').parse
 var Q = require('q')
-var Keychain = require('react-native-keychain')
 var debounce = require('debounce')
 // var DashboardView = require('./DashboardView')
 var ResourceList = require('./ResourceList');
@@ -467,22 +466,6 @@ class TimHome extends Component {
         bankStyle: defaultBankStyle
       };
     let me = utils.getMe();
-    // this.props.navigator.push({
-    //   id: 30,
-    //   component: Tabs,
-    //   title: 'Hey',
-    //   backButtonTitle: translate('back'),
-    //   passProps: {
-    //     bankStyle: defaultBankStyle,
-    //     rlProps: passProps,
-    //     profileProps: {
-    //       model: utils.getModel(me[TYPE]).value,
-    //       resource: me,
-    //       bankStyle: defaultBankStyle
-    //     }
-    //   }
-    // })
-
     Actions.getAllSharedContexts()
     Actions.hasPartials()
     Actions.hasBookmarks()
@@ -552,18 +535,6 @@ class TimHome extends Component {
         bankStyle: defaultBankStyle
       }
     })
-    // this.props.navigator.push({
-    //   title: translate('homePage'),
-    //   id: 30,
-    //   component: HomePage,
-    //   backButtonTitle: translate('back'),
-    //   passProps: {
-    //     sponsorName: 'UBS',
-    //     modelName: TYPES.ORGANIZATION,
-    //     bankStyle: defaultBankStyle,
-    //     officialAccounts: true,
-    //   }
-    // })
   }
   showFirstPage(noResetNavStack) {
     let firstPage = this.state.firstPage
@@ -581,6 +552,7 @@ class TimHome extends Component {
 
     this.isDeepLink = false
 // /chat?url=https://ubs.tradle.io&permalink=72d63e70bd75e65cf94e2d1f7f04c59816ad183801b981428a8a0d1abbf00190
+    let action = replace ? 'replace' : 'push'
     let me = utils.getMe()
     let action = replace ? 'replace' : 'push'
     if (!firstPage  &&  me  &&  me.isEmployee) {
@@ -766,12 +738,7 @@ class TimHome extends Component {
         }
       }
     }
-
-    // if (doReplace)
-    //   nav.replace(route)
-    // else
-    var nav = this.props.navigator
-    nav[action](route)
+    this.props.navigator[action](route)
   }
 
   register(cb) {
@@ -809,13 +776,6 @@ class TimHome extends Component {
       Actions.setAuthenticated(true)
       this.showFirstPage()
     }
-    // let nav = self.props.navigator
-    // route.passProps.callback = (me) => {
-    //   this.showVideoTour(() => {
-    //     Actions.getMe()
-    //     nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
-    //   })
-    // }
 
     route.passProps.editCols = ['firstName']//, 'lastName', 'language']
     route.titleTintColor = '#ffffff'
@@ -894,28 +854,6 @@ class TimHome extends Component {
     this.props.navigator.push(route);
   }
 
-//   showVideoTour(cb) {
-//     let onEnd = (err) => {
-//       if (err) debug('failed to load video', err)
-//       cb()
-//     }
-
-//     this.props.navigator.replace({
-//       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-//       id: 18,
-// //      title: 'Tradle',
-// //      titleTintColor: '#eeeeee',
-//       component: VideoPlayer,
-//       rightButtonTitle: __DEV__ ? 'Skip' : undefined,
-//       passProps: {
-//         uri: 'videotour',
-//         onEnd: onEnd,
-//         onError: onEnd,
-//         navigator: this.props.navigator
-//       },
-//       onRightButtonPress: onEnd
-//     })
-//   }
   onReloadDBPressed() {
     utils.setMe(null);
     utils.setModels(null);
@@ -1322,3 +1260,25 @@ module.exports = TimHome;
 
   //   this.props.navigator.push(route)
   // }
+//   showVideoTour(cb) {
+//     let onEnd = (err) => {
+//       if (err) debug('failed to load video', err)
+//       cb()
+//     }
+
+//     this.props.navigator.replace({
+//       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+//       id: 18,
+// //      title: 'Tradle',
+// //      titleTintColor: '#eeeeee',
+//       component: VideoPlayer,
+//       rightButtonTitle: __DEV__ ? 'Skip' : undefined,
+//       passProps: {
+//         uri: 'videotour',
+//         onEnd: onEnd,
+//         onError: onEnd,
+//         navigator: this.props.navigator
+//       },
+//       onRightButtonPress: onEnd
+//     })
+//   }
