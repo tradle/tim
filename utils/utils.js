@@ -33,6 +33,8 @@ import clone from 'clone'
 import Strings from './strings'
 import { id } from '@tradle/build-resource'
 
+const Promise = require('bluebird')
+
 // import Orientation from 'react-native-orientation'
 
 // var orientation = Orientation.getInitialOrientation()
@@ -2227,6 +2229,31 @@ var utils = {
     }
   },
 
+  series: async (data, fn) => {
+    const results = []
+    for (const item of data) {
+      const result = await fn(item)
+      results.push(result)
+    }
+
+    return results
+  },
+
+  batchify: function batchify (arr, batchSize) {
+    const batches = []
+    while (arr.length) {
+      batches.push(arr.slice(0, batchSize))
+      arr = arr.slice(batchSize)
+    }
+
+    return batches
+  },
+
+  batchProcess: async ({ data, batchSize=1, worker }) => {
+    const results = await utils.series(utils.batchify(data, batchSize), worker)
+    // flatten
+    return results.reduce((all, some) => all.concat(some), [])
+  },
 
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
   //   if (utils.isWeb()) {
