@@ -63,7 +63,8 @@ const COVER_PHOTOS = {
   America: {
     url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/America.jpg',
     width: 1280,
-    height: 778
+    height: 778,
+    languages: ['en-us']
   },
   Antarctica: {
     url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Antarctica.jpg',
@@ -73,11 +74,11 @@ const COVER_PHOTOS = {
   Asia: {
     url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Asia.jpg',
     width: 1280,
-    height: 424
+    height: 424,
+    languages: ['ja-jp', 'zh-cn', 'he']
   },
   'Asia/Tokyo': {
     url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Asia_Tokyo.jpg',
-    // https://cdn.pixabay.com/photo/2015/03/24/01/12/university-of-tokyo-686938_1280.jpg, w: 1280, h: 853
     width: 1280,
     height: 724
   },
@@ -89,22 +90,26 @@ const COVER_PHOTOS = {
   Australia: {
     url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Australia.jpg',
     width: 960,
-    height: 673
+    height: 673,
+    languages: ['en-au']
   },
   Europe: {
     url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Europe.jpg',
     width: 960,
-    height: 640
+    height: 640,
+    languages: ['en-gb', 'es-es', 'es', 'fr-fr', 'fr', 'de-de', 'de']
   },
   Indian: {
     url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Indian.jpg',
     width: 960,
-    height: 720
+    height: 720,
+    languages: ['hi']
   },
   Pacific: {
     url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Pacific_Aukland.jpg',
     width: 1000,
-    height: 669
+    height: 669,
+    languages: ['en-nz']
   },
 }
 var Q = require('q');
@@ -2542,7 +2547,6 @@ var Store = Reflux.createStore({
       return
 
     sp.bot.permalink = sp.bot.pub[ROOT_HASH] || protocol.linkString(sp.bot.pub)
-
     let newSp = {
       id: sp.id,
       org: utils.getId(sp.org),
@@ -5223,7 +5227,21 @@ var Store = Reflux.createStore({
 
     let r = { [TYPE]: PROFILE, firstName: FRIEND }
     let tz = DeviceInfo.getTimezone()
-    let coverPhoto = tz  &&  (COVER_PHOTOS[tz] ||  COVER_PHOTOS[tz.split('/')[0]])
+    let coverPhoto
+    if (tz)
+      coverPhoto = (COVER_PHOTOS[tz] ||  COVER_PHOTOS[tz.split('/')[0]])
+    else {
+      let lang = navigator.language
+      if (lang) {
+        leng = lang.toLowerCase()
+        for (let cp in COVER_PHOTOS) {
+          if (COVER_PHOTOS[cp].languages  &&  COVER_PHOTOS[cp].languages.indexOf(lang) !== -1) {
+            coverPhoto = COVER_PHOTOS[cp]
+            break
+          }
+        }
+      }
+    }
     if (coverPhoto) {
       r.coverPhoto = coverPhoto
       // let res = await fetch(coverPhoto.url)
