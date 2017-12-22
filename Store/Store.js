@@ -5677,19 +5677,20 @@ var Store = Reflux.createStore({
         //   cursor.endCursor = null
     let list = result.map((r) => this.convertToResource(r.node))
     if (me.isEmployee  &&  modelName === APPLICATION) {
-      let promises = []
-      list.forEach((r) => {
-        let c = r.context
-        if (typeof c === 'string') { //  &&  contextIds.indexOf(c) === -1) {
-          let appFilter = { [TYPE]: PRODUCT_REQUEST, contextId: c }
-          promises.push(graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true }))
-        }
-      })
-      // let contextsResult = await graphQL.searchServer({ modelName: PRODUCT_REQUEST, filterResource: appFilter, client: this.client, noCursorChange: true })
       let contexts
-      let contextsResult = await Q.all(promises)
+      let contextsResult = await graphQL.searchServer({
+        modelName: PRODUCT_REQUEST,
+        filterResource: {
+          [TYPE]: PRODUCT_REQUEST,
+          contextId: list
+            .map(({ context }) => context)
+            .filter(context => typeof context === 'string')
+        },
+        client: this.client,
+        noCursorChange: true
+      })
+
       if (contextsResult) {
-        contextsResult = contextsResult.filter((r) => r)
         contexts = contextsResult.map((r) => this.convertToResource(r[0].node))
         list.forEach((r) => {
           let contextId = r.context
@@ -5711,8 +5712,8 @@ var Store = Reflux.createStore({
           }
         })
       }
-
     }
+
     if (!noTrigger)
       this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
     return list
