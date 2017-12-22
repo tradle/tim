@@ -1441,11 +1441,12 @@ var NewResourceMixin = {
     let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
     color = {color: this.state.isRegistration ? '#eeeeee' : val ? '#555555' :  '#AAAAAA'}
     let propView
+    let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
     if (photoR) {
       if (utils.isImageDataURL(photoR.url)) {
         propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
       } else {
-        propView = <Icon name='ios-paper-outline' size={35} color={LINK_COLOR} />
+        propView = <Icon name='ios-paper-outline' size={35} color={linkColor} />
       }
     } else {
       propView = <Text style={[styles.input, fontSize, color]}>{label}</Text>
@@ -1460,7 +1461,6 @@ var NewResourceMixin = {
       // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
     let fontSize = styles.font20 //this.state.isRegistration ? styles.font20 : styles.font18
     // let fontSize = styles.font18 //this.state.isRegistration ? styles.font20 : styles.font18
-    let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
     let iconColor = this.state.isRegistration ? '#eeeeee' : linkColor
     let icon
     if (isVideo)
