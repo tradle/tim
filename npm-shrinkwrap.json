@@ -21,8 +21,8 @@
     },
     "@tradle/aws-client": {
       "version": "1.0.0",
-      "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#6daeebc954e24d569808811319457475e9e99265",
+      "from": "tradle/aws-client#1bd033b",
+      "resolved": "git://github.com/tradle/aws-client.git#1bd033b6859276e37e11d1363d1bffe1b294682f",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -145,9 +145,9 @@
       "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#7f6b10539b53379b9ddc2671c65df329b1a8b587"
     },
     "@tradle/iot-message": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "from": "@tradle/iot-message@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/iot-message/-/iot-message-1.0.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/iot-message/-/iot-message-1.0.1.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -191,7 +191,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#269be492c787a1d97cbab68e96fe2a517c2b4249",
+      "resolved": "git://github.com/tradle/models.git#a2706319c53c3b4e48d12c7b046b523c16726cc4",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",

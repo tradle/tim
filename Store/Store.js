@@ -5678,20 +5678,28 @@ var Store = Reflux.createStore({
     let list = result.map((r) => this.convertToResource(r.node))
     if (me.isEmployee  &&  modelName === APPLICATION) {
       let contexts
-      let contextsResult = await graphQL.searchServer({
-        modelName: PRODUCT_REQUEST,
-        filterResource: {
-          [TYPE]: PRODUCT_REQUEST,
-          contextId: list
-            .map(({ context }) => context)
-            .filter(context => typeof context === 'string')
-        },
-        client: this.client,
-        noCursorChange: true
+      let contextIds = list
+        .map(({ context }) => context)
+        .filter(context => typeof context === 'string')
+
+      let contextsResult = await utils.batchProcess({
+        data: contextIds,
+        batchSize: 30,
+        worker: async (batch) => {
+          return await graphQL.searchServer({
+            modelName: PRODUCT_REQUEST,
+            filterResource: {
+              [TYPE]: PRODUCT_REQUEST,
+              contextId: batch
+            },
+            client: this.client,
+            noCursorChange: true
+          })
+        }
       })
 
       if (contextsResult) {
-        contexts = contextsResult.map((r) => this.convertToResource(r[0].node))
+        contexts = contextsResult.map(({ node }) => this.convertToResource(node))
         list.forEach((r) => {
           let contextId = r.context
           if (typeof contextId === 'object')
