@@ -51,7 +51,7 @@ const DELETE = -1
 var debug = Debug('tradle:app:store')
 var employee = require('../people/employee.json')
 
-const FRIEND = 'Friend'
+const FRIEND = 'Tradler'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
 
 const COVER_PHOTOS = {
