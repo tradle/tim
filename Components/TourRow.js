@@ -32,6 +32,7 @@ import {
 import React, { Component } from 'react'
 
 class TourRow extends Component {
+  static displayName = 'TourRow'
   constructor(props) {
     super(props);
   }
