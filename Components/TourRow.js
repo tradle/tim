@@ -85,9 +85,9 @@ var createStyles = utils.styleFactory(TourRow, function ({ dimensions }) {
       flex: 1
     },
     resourceTitle: {
-      fontSize: 20,
+      fontSize: 18,
       paddingLeft: 5,
-      paddingTop: 2
+      paddingTop: 4
     },
     mstyle: {
       borderColor: '#efefef',
