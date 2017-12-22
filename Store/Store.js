@@ -5233,7 +5233,7 @@ var Store = Reflux.createStore({
     else {
       let lang = navigator.language
       if (lang) {
-        leng = lang.toLowerCase()
+        lang = lang.toLowerCase()
         for (let cp in COVER_PHOTOS) {
           if (COVER_PHOTOS[cp].languages  &&  COVER_PHOTOS[cp].languages.indexOf(lang) !== -1) {
             coverPhoto = COVER_PHOTOS[cp]
