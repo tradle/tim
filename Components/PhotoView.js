@@ -89,7 +89,7 @@ class PhotoView extends Component {
 
     let image = {
       width: utils.getContentWidth(PhotoView) + 2,
-      height: Math.floor(height/ 3),
+      height: Math.floor(height / 2.5),
       // alignSelf: 'stretch'
     }
             // <TouchableHighlight underlayColor='transparent' onPress={this.showCarousel.bind(this, currentPhoto, true)}>
