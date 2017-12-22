@@ -142,6 +142,8 @@ class MessageList extends Component {
   }
   isLoading() {
     let {showSplashScreen, list} = this.state
+    // if (!showSplashScreen)
+    //   debugger
     return showSplashScreen && list
   }
   componentWillMount() {
@@ -168,7 +170,7 @@ class MessageList extends Component {
       this.setState({
          showSplashScreen: false
         })
-    }, 2000)
+    }, 4000)
   }
   onAction(params) {
     let {action, error, to, isConnected} = params
@@ -460,6 +462,8 @@ class MessageList extends Component {
     if (this.state.list.length !== nextState.list.length)
       return true
     if (this.state.application !== nextState.application)
+      return true
+    if (this.state.showSplashScreen !== nextState.showSplashScreen)
       return true
     // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
     //   return false
@@ -842,16 +846,20 @@ class MessageList extends Component {
     let loading
     if (this.isLoading()  &&  !application) {
       let splash = this.getSplashScreen()
-      if (splash)
+      if (splash) {
+        StatusBar.setHidden(true)
         loading = <View style={styles.mainWrap}>
                     <Modal visible={true}
                           transparent={false}
                           animationType='slide'>
                       {splash}
+                      <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', position: 'absolute', bottom: 50}} />
                     </Modal>
                   </View>
+        return loading
+      }
     }
-
+    StatusBar.setHidden(false);
     if (!bgImage)
       return (
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
@@ -862,7 +870,6 @@ class MessageList extends Component {
           {content}
           {actionSheet}
           {alert}
-          {loading}
         </PageView>
     )
     let {width, height} = utils.dimensions(MessageList)
@@ -879,7 +886,6 @@ class MessageList extends Component {
           {actionSheet}
           {alert}
         </Image>
-          {loading}
       </PageView>
     );
   }
