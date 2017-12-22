@@ -554,7 +554,6 @@ class TimHome extends Component {
 // /chat?url=https://ubs.tradle.io&permalink=72d63e70bd75e65cf94e2d1f7f04c59816ad183801b981428a8a0d1abbf00190
     let action = replace ? 'replace' : 'push'
     let me = utils.getMe()
-    let action = replace ? 'replace' : 'push'
     if (!firstPage  &&  me  &&  me.isEmployee) {
       this.showContacts(action)
       return
