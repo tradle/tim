@@ -458,7 +458,7 @@ class TimHome extends Component {
     }
   }
 
-  showContacts() {
+  showContacts(action) {
     let passProps = {
         filter: '',
         modelName: this.props.modelName,
@@ -487,7 +487,7 @@ class TimHome extends Component {
     Actions.hasPartials()
     Actions.hasBookmarks()
     // return
-    this.props.navigator.push({
+    this.props.navigator[action]({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
       title: translate('officialAccounts'),
@@ -524,11 +524,11 @@ class TimHome extends Component {
       }
     });
   }
-  showHomePage() {
+  showHomePage(action) {
     let me = utils.getMe()
     let title = translate('profile')
     let m = utils.getModel(me[TYPE]).value
-    this.props.navigator.push({
+    this.props.navigator[action]({
       title: title,
       id: 3,
       component: ResourceView,
@@ -569,16 +569,22 @@ class TimHome extends Component {
     let firstPage = this.state.firstPage
     if (this.isDeepLink)
       this.state.firstPage = ENV.initWithDeepLink
+    let replace
     if (!noResetNavStack) {
+      // After tour
       var nav = this.props.navigator
-      nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
+      if (utils.isWeb()  &&  nav.getCurrentRoutes().length > 1)
+        replace = true
+      else
+        nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     }
 
     this.isDeepLink = false
 // /chat?url=https://ubs.tradle.io&permalink=72d63e70bd75e65cf94e2d1f7f04c59816ad183801b981428a8a0d1abbf00190
     let me = utils.getMe()
+    let action = replace ? 'replace' : 'push'
     if (!firstPage  &&  me  &&  me.isEmployee) {
-      this.showContacts()
+      this.showContacts(action)
       return
     }
     this.state.firstPage = null
@@ -593,33 +599,33 @@ class TimHome extends Component {
         break
       case 'officialAccounts':
       case 'conversations':
-        this.showOfficialAccounts()
+        this.showOfficialAccounts(action)
         break
       case 'profile':
-        this.showHomePage()
+        this.showHomePage(action)
         break
       case 'scan':
-        this.showScanHelp()
+        this.showScanHelp(action)
           // this.scanFormsQRCode()
         break
       default:
         if (ENV.homePage)
-          this.showHomePage()
+          this.showHomePage(action)
         else
-          this.showOfficialAccounts()
+          this.showOfficialAccounts(action)
       }
       return
     }
 
     if (ENV.homePage) {
-      this.showHomePage()
+      this.showHomePage(action)
       return
     }
 
     this.showOfficialAccounts()
   }
-  showScanHelp() {
-    this.props.navigator.push({
+  showScanHelp(action) {
+    this.props.navigator[action]({
       id: 7,
       component: ArticleView,
       backButtonTitle: 'Back',
@@ -712,7 +718,7 @@ class TimHome extends Component {
       }
     })
   }
-  showOfficialAccounts() {
+  showOfficialAccounts(action) {
     const me = utils.getMe()
     let passProps = {
       filter: '',
@@ -765,7 +771,7 @@ class TimHome extends Component {
     //   nav.replace(route)
     // else
     var nav = this.props.navigator
-    nav.push(route)
+    nav[action](route)
   }
 
   register(cb) {
