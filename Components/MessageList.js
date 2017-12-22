@@ -72,7 +72,8 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
-  TouchableHighlight
+  TouchableHighlight,
+  WebView
 } from 'react-native'
 
 import ActivityIndicator from './ActivityIndicator'
@@ -397,7 +398,6 @@ class MessageList extends Component {
       list: list,
     }
     if (this.state.isLoading) {
-      // if (resurce._splash)
       state.isLoading = false
       StatusBar.setHidden(false);
     }
@@ -715,29 +715,14 @@ class MessageList extends Component {
   }
 
   getSplashScreen() {
-    let splash = this.props.resource._splash
-    if (!splash)
+    let splashscreen = this.props.bankStyle.splashscreen
+    if (!splashscreen)
       return
-    // let splash = require('../img/Safe.png')
     const { width, height } = utils.dimensions(MessageList)
-    let splashLayout = {
-      alignItems: 'center',
-      justifyContent: 'center',
-      width,
-      height
-    }
-
-    let spinner = <ActivityIndicator hidden='true' size='large' color='#79AAF2'/>
-    return (
-      <View style={styles.container}>
-        <BackgroundImage source={splash} />
-        <View style={splashLayout}>
-          <View style={styles.bottom}>
-            {spinner}
-          </View>
-        </View>
-      </View>
-    )
+    return <WebView style={{width, height}}
+                    source={{uri: splashscreen}}
+                    startInLoadingState={true}
+                    automaticallyAdjustContentInsets={false} />
   }
   render() {
     let { modelName, resource, bankStyle, navigator, originatingMessage, isAggregation } = this.props
