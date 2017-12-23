@@ -1,27 +1,28 @@
+if (__DEV__) console.log('requiring FormRequestRow.js')
 'use strict';
 
 const debug = require('debug')('tradle:app:FormRequestRow')
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var NewResource = require('./NewResource');
-var RemediationItemsList = require('./RemediationItemsList')
+import NewResource from './NewResource'
+import RemediationItemsList from './RemediationItemsList'
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
-var ResourceList = require('./ResourceList')
-var RowMixin = require('./RowMixin');
-var CameraView = require('./CameraView')
-var StringChooser = require('./StringChooser')
+import constants from '@tradle/constants'
+import ResourceList from './ResourceList'
+import RowMixin from './RowMixin'
+import CameraView from './CameraView'
+import StringChooser from './StringChooser'
 import ImageInput from './ImageInput'
 
 import CustomIcon from '../styles/customicons'
-var extend = require('extend')
-var equal = require('deep-equal')
-var formDefaults = require('../data/formDefaults.json')
-var Actions = require('../Actions/Actions');
-var StyleSheet = require('../StyleSheet')
-var reactMixin = require('react-mixin');
+import extend from 'extend'
+import equal from 'deep-equal'
+import formDefaults from '../data/formDefaults.json'
+import Actions from '../Actions/Actions'
+import StyleSheet from '../StyleSheet'
+import reactMixin from 'react-mixin'
 
-var chatStyles = require('../styles/chatStyles')
+import chatStyles from '../styles/chatStyles'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const PHOTO = 'tradle.Photo'

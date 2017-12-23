@@ -1,19 +1,19 @@
+if (__DEV__) console.log('requiring SupervisoryViewPerProvider.js')
 'use strict';
 
-var PageView = require('./PageView')
+import PageView from './PageView'
 import ActionSheet from 'react-native-actionsheet'
-var utils = require('../utils/utils');
-var translate = utils.translate
-var reactMixin = require('react-mixin');
-var extend = require('extend')
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var constants = require('@tradle/constants');
+import utils, { translate } from '../utils/utils'
+import reactMixin from 'react-mixin'
+import extend from 'extend'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons';
-var buttonStyles = require('../styles/buttonStyles');
-var NetworkInfoProvider = require('./NetworkInfoProvider')
-var StyleSheet = require('../StyleSheet')
+import buttonStyles from '../styles/buttonStyles'
+import NetworkInfoProvider from './NetworkInfoProvider'
+import StyleSheet from '../StyleSheet'
 import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
@@ -32,8 +32,8 @@ import {
 
 import platformStyles from '../styles/platform'
 import ENV from '../utils/env'
+import SearchBar from './SearchBar'
 
-const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
 const MILLIS_IN_DAY = 86400000
 
 class SupervisoryViewPerProvider extends Component {

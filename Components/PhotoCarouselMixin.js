@@ -1,11 +1,12 @@
+if (__DEV__) console.log('requiring PhotoCarouselMixin.js')
 'use strict';
 
-var PhotoCarousel = require('./PhotoCarousel');
+import PhotoCarousel from './PhotoCarousel'
 import {
   Navigator
 } from 'react-native'
 import utils from '../utils/utils'
-var TYPE = require('@tradle/constants').TYPE
+import { TYPE } from '@tradle/constants'
 
 var PhotoCarouselMixin = {
   showCarousel(currentPhoto, isView) {

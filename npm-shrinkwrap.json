@@ -2,6 +2,12 @@
   "name": "Tradle",
   "version": "0.0.1",
   "dependencies": {
+    "@comandeer/babel-plugin-banner": {
+      "version": "1.0.0",
+      "from": "@comandeer/babel-plugin-banner@latest",
+      "resolved": "https://registry.npmjs.org/@comandeer/babel-plugin-banner/-/babel-plugin-banner-1.0.0.tgz",
+      "dev": true
+    },
     "@ldn0x7dc/react-native-view-pager": {
       "version": "0.0.9",
       "from": "@ldn0x7dc/react-native-view-pager@0.0.9",
@@ -21,8 +27,8 @@
     },
     "@tradle/aws-client": {
       "version": "1.0.0",
-      "from": "tradle/aws-client#1bd033b",
-      "resolved": "git://github.com/tradle/aws-client.git#1bd033b6859276e37e11d1363d1bffe1b294682f",
+      "from": "tradle/aws-client",
+      "resolved": "git://github.com/tradle/aws-client.git#295dcbbce188e3effbcc365620500425d38f3826",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -1982,6 +1988,12 @@
           "resolved": "https://registry.npmjs.org/regenerator-runtime/-/regenerator-runtime-0.10.5.tgz"
         }
       }
+    },
+    "babel-plugin-transform-inline-imports-commonjs": {
+      "version": "1.2.0",
+      "from": "babel-plugin-transform-inline-imports-commonjs@latest",
+      "resolved": "https://registry.npmjs.org/babel-plugin-transform-inline-imports-commonjs/-/babel-plugin-transform-inline-imports-commonjs-1.2.0.tgz",
+      "dev": true
     },
     "babel-plugin-transform-object-assign": {
       "version": "6.22.0",

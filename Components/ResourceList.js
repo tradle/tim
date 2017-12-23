@@ -1,32 +1,33 @@
+if (__DEV__) console.log('requiring ResourceList.js')
 'use strict';
 
-var NoResources = require('./NoResources');
-var ResourceRow = require('./ResourceRow');
-var ResourceView = require('./ResourceView');
-var VerificationRow = require('./VerificationRow');
-var NewResource = require('./NewResource');
-var MessageList = require('./MessageList');
-var MessageView = require('./MessageView')
-var PageView = require('./PageView')
-var GridList = require('./GridList')
-var SupervisoryView = require('./SupervisoryView')
+import NoResources from './NoResources'
+import ResourceRow from './ResourceRow'
+import ResourceView from './ResourceView'
+import VerificationRow from './VerificationRow'
+import NewResource from './NewResource'
+import MessageList from './MessageList'
+import MessageView from './MessageView'
+import PageView from './PageView'
+import GridList from './GridList'
+import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var reactMixin = require('react-mixin');
-var HomePageMixin = require('./HomePageMixin')
-var extend = require('extend')
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var constants = require('@tradle/constants');
+import reactMixin from 'react-mixin'
+import HomePageMixin from './HomePageMixin'
+import extend from 'extend'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons';
-var buttonStyles = require('../styles/buttonStyles');
-var NetworkInfoProvider = require('./NetworkInfoProvider')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
+import buttonStyles from '../styles/buttonStyles'
+import NetworkInfoProvider from './NetworkInfoProvider'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
 
-var appStyle = require('../styles/appStyle.json')
-var StyleSheet = require('../StyleSheet')
+import appStyle from '../styles/appStyle.json'
+import StyleSheet from '../StyleSheet'
 
 import { makeStylish } from './makeStylish'
 
@@ -53,6 +54,11 @@ import {
   Platform
 } from 'react-native';
 
+import platformStyles from '../styles/platform'
+import ENV from '../utils/env'
+import SearchBar from './SearchBar'
+import ConversationsIcon from './ConversationsIcon'
+
 const {
   MESSAGE,
   ORGANIZATION,
@@ -68,21 +74,6 @@ const {
   TYPE,
   ROOT_HASH
 } = constants
-
-import platformStyles from '../styles/platform'
-import ENV from '../utils/env'
-
-const SearchBar = (function () {
-  switch (Platform.OS) {
-    case 'android':
-    case 'web':
-      return require('./SearchBar')
-    case 'ios':
-      return require('react-native-search-bar')
-  }
-})()
-
-import ConversationsIcon from './ConversationsIcon'
 
 class ResourceList extends Component {
   props: {

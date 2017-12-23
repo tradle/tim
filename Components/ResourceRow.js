@@ -1,23 +1,24 @@
+if (__DEV__) console.log('requiring ResourceRow.js')
 'use strict';
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
 import LinearGradient from 'react-native-linear-gradient';
-var ArticleView = require('./ArticleView');
-var constants = require('@tradle/constants');
+import ArticleView from './ArticleView'
+import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons';
-var RowMixin = require('./RowMixin');
-var ResourceView = require('./ResourceView')
+import RowMixin from './RowMixin'
+import ResourceView from './ResourceView'
 
-var equal = require('deep-equal')
-var extend = require('extend')
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var reactMixin = require('react-mixin');
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
-var appStyle = require('../styles/appStyle.json')
-var StyleSheet = require('../StyleSheet')
+import equal from 'deep-equal'
+import extend from 'extend'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import reactMixin from 'react-mixin'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import appStyle from '../styles/appStyle.json'
+import StyleSheet from '../StyleSheet'
 // import Pie from 'react-native-progress/Pie';
 import ProgressBar from 'react-native-progress/Bar';
 

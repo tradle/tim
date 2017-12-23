@@ -1,9 +1,10 @@
+if (__DEV__) console.log('requiring ChatMessage.js')
 'use strict'
 
-var utils = require('../utils/utils');
-var constants = require('@tradle/constants');
-var TimerMixin = require('react-timer-mixin')
-var reactMixin = require('react-mixin');
+import utils from '../utils/utils'
+import constants from '@tradle/constants'
+import TimerMixin from 'react-timer-mixin'
+import reactMixin from 'react-mixin'
 
 import {
   View,

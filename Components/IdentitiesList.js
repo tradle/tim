@@ -1,18 +1,9 @@
+if (__DEV__) console.log('requiring IdentitiesList.js')
 'use strict';
 
-var reactMixin = require('react-mixin');
-var SearchBar = require('./SearchBar');
-var ResourceRow = require('./ResourceRow');
-var ResourceView = require('./ResourceView');
-var NewResource = require('./NewResource');
-var ResourceList = require('./ResourceList');
-var utils = require('../utils/utils');
-var Reflux = require('reflux');
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var reactMixin = require('react-mixin');
-var extend = require('extend');
-var constants = require('@tradle/constants');
+import reactMixin from 'react-mixin'
+import extend from 'extend'
+import constants from '@tradle/constants'
 
 import {
   ListView,
@@ -23,6 +14,15 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
+import SearchBar from './SearchBar'
+import ResourceRow from './ResourceRow'
+import ResourceView from './ResourceView'
+import NewResource from './NewResource'
+import ResourceList from './ResourceList'
+import utils from '../utils/utils'
+import Reflux from 'reflux'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
 
 class IdentitiesList extends Component {
   constructor(props) {

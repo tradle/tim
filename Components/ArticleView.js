@@ -1,3 +1,5 @@
+if (__DEV__) console.log('requiring ArticleView.js')
+
 import {
   WebView,
   View,
@@ -11,10 +13,11 @@ import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import StyleSheet from '../StyleSheet'
 
-// var defaultBankStyle = require('../styles/bankStyle.json')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
-var utils = require('../utils/utils');
-var translate = utils.translate
+// import defaultBankStyle from '../styles/bankStyle.json'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import utils, {
+  translate
+} from '../utils/utils'
 
 
 class ArticleView extends Component {

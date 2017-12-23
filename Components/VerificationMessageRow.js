@@ -1,21 +1,22 @@
+if (__DEV__) console.log('requiring VerificationMessageRow.js')
 'use strict';
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var MessageView = require('./MessageView');
-var NewResource = require('./NewResource');
+import MessageView from './MessageView'
+import NewResource from './NewResource'
 import CustomIcon from '../styles/customicons'
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
-var RowMixin = require('./RowMixin');
-var equal = require('deep-equal')
-// var BG_IMAGE = require('../img/verificationBg.jpg')
+import constants from '@tradle/constants'
+import RowMixin from './RowMixin'
+import equal from 'deep-equal'
+// import BG_IMAGE from '../img/verificationBg.jpg'
 
 import { makeResponsive } from 'react-native-orient'
-var Actions = require('../Actions/Actions')
-var StyleSheet = require('../StyleSheet')
-var chatStyles = require('../styles/chatStyles')
-var reactMixin = require('react-mixin');
+import Actions from '../Actions/Actions'
+import StyleSheet from '../StyleSheet'
+import chatStyles from '../styles/chatStyles'
+import reactMixin from 'react-mixin'
 
 import {
   Image,

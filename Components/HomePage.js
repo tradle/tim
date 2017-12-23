@@ -1,33 +1,34 @@
+if (__DEV__) console.log('requiring HomePage.js')
 'use strict';
 
-var NoResources = require('./NoResources');
-var ResourceRow = require('./ResourceRow');
-var SponsorRow = require('./SponsorRow')
-var ResourceView = require('./ResourceView');
-var ResourceList = require('./ResourceList');
-var VerificationRow = require('./VerificationRow');
-var NewResource = require('./NewResource');
-var MessageList = require('./MessageList');
-var MessageView = require('./MessageView')
-var HomePageMixin = require('./HomePageMixin')
-var PageView = require('./PageView')
-var SupervisoryView = require('./SupervisoryView')
+import NoResources from './NoResources'
+import ResourceRow from './ResourceRow'
+import SponsorRow from './SponsorRow'
+import ResourceView from './ResourceView'
+import ResourceList from './ResourceList'
+import VerificationRow from './VerificationRow'
+import NewResource from './NewResource'
+import MessageList from './MessageList'
+import MessageView from './MessageView'
+import HomePageMixin from './HomePageMixin'
+import PageView from './PageView'
+import SupervisoryView from './SupervisoryView'
 import ActionSheet from 'react-native-actionsheet'
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var reactMixin = require('react-mixin');
-var extend = require('extend')
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var constants = require('@tradle/constants');
+import reactMixin from 'react-mixin'
+import extend from 'extend'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons';
-var QRCodeScanner = require('./QRCodeScanner')
-var QRCode = require('./QRCode')
-var buttonStyles = require('../styles/buttonStyles');
-var NetworkInfoProvider = require('./NetworkInfoProvider')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
-var StyleSheet = require('../StyleSheet')
+import QRCodeScanner from './QRCodeScanner'
+import QRCode from './QRCode'
+import buttonStyles from '../styles/buttonStyles'
+import NetworkInfoProvider from './NetworkInfoProvider'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import StyleSheet from '../StyleSheet'
 
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
@@ -38,7 +39,7 @@ const ROOT_HASH = constants.ROOT_HASH
 const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 
-// var bankStyles = require('../styles/bankStyles')
+// import bankStyles from '../styles/bankStyles'
 const ENUM = 'tradle.Enum'
 
 import React, { Component, PropTypes } from 'react'

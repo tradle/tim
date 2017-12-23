@@ -1,8 +1,9 @@
+if (__DEV__) console.log('requiring Accordion.web.js')
 'use strict';
 
 import React, {Component} from  'react'
 
-var AccordionForWeb = require('react-native-accordion')
+import AccordionForWeb from 'react-native-accordion'
 
 class Accordion extends Component {
   render() {

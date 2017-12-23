@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring locker.js')
 import mutexify from 'mutexify'
 
 module.exports = function (opts={}) {

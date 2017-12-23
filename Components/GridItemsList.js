@@ -1,14 +1,15 @@
+if (__DEV__) console.log('requiring GridItemsList.js')
 'use strict';
 
-var PhotoList = require('./PhotoList')
-var PageView = require('./PageView')
-var utils = require('../utils/utils');
+import PhotoList from './PhotoList'
+import PageView from './PageView'
+import utils from '../utils/utils'
 var translate = utils.translate
 import ImagePicker from 'react-native-image-picker';
-var extend = require('extend')
-var equal = require('deep-equal')
+import extend from 'extend'
+import equal from 'deep-equal'
 import Icon from 'react-native-vector-icons/Ionicons'
-var constants = require('@tradle/constants');
+import constants from '@tradle/constants'
 // import ActionSheet from 'react-native-actionsheet'
 
 import {

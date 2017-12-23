@@ -1,24 +1,43 @@
+if (__DEV__) console.log('requiring NewResourceMixin.js')
  'use strict';
 
-var React = require('react');
-var dateformat = require('dateformat')
-var ResourceList = require('./ResourceList')
-var GridList = require('./GridList')
-var EnumList = require('./EnumList')
-var FloatLabel = require('react-native-floating-labels')
-import Icon from 'react-native-vector-icons/Ionicons';
-var utils = require('../utils/utils');
-var CameraView = require('./CameraView')
-var SignatureView = require('./SignatureView')
-var translate = utils.translate
-var moment = require('moment')
-var StyleSheet = require('../StyleSheet')
-var QRCodeScanner = require('./QRCodeScanner')
-var driverLicenseParser = require('../utils/driverLicenseParser')
-const debug = require('debug')('tradle:app:blinkid')
-var focusUri = require('../video/Focus1.mp4')
+import React from 'react'
+import {
+  Text,
+  View,
+  TouchableHighlight,
+  TouchableOpacity,
+  Platform,
+  Image,
+  Alert,
+  // StyleSheet,
+  Navigator,
+  Switch,
+  DatePickerAndroid,
+} from 'react-native';
 
-var plugins = require('@tradle/biz-plugins')
+import SwitchSelector from 'react-native-switch-selector'
+import format from 'string-template'
+import constants from '@tradle/constants'
+import t from 'tcomb-form-native'
+import extend from 'extend'
+import dateformat from 'dateformat'
+import ResourceList from './ResourceList'
+import GridList from './GridList'
+import EnumList from './EnumList'
+import FloatLabel from 'react-native-floating-labels'
+import Icon from 'react-native-vector-icons/Ionicons'
+import utils, {
+  translate
+} from '../utils/utils'
+import CameraView from './CameraView'
+import SignatureView from './SignatureView'
+import moment from 'moment'
+import StyleSheet from '../StyleSheet'
+import QRCodeScanner from './QRCodeScanner'
+import driverLicenseParser from '../utils/driverLicenseParser'
+import focusUri from '../video/Focus1.mp4'
+import plugins from '@tradle/biz-plugins'
 
 // import VideoPlayer from './VideoPlayer'
 // import omit from 'object.omit'
@@ -33,14 +52,11 @@ import BlinkID from './BlinkID'
 // import { parse as parseUSDL } from 'parse-usdl'
 
 // import Anyline from './Anyline'
-var MarkdownPropertyEdit = require('./MarkdownPropertyEdit')
-var Markdown = require('./Markdown')
+import MarkdownPropertyEdit from './MarkdownPropertyEdit'
+import Markdown from './Markdown'
+import Actions from '../Actions/Actions'
 
-var format = require('string-template')
-var constants = require('@tradle/constants');
-var t = require('tcomb-form-native');
-var Actions = require('../Actions/Actions');
-var extend = require('extend');
+const debug = require('debug')('tradle:app:blinkid')
 const DEFAULT_CURRENCY_SYMBOL = '£';
 const ENUM = 'tradle.Enum'
 const TYPE = constants.TYPE
@@ -63,21 +79,6 @@ var propTypesMap = {
   'date': t.Dat,
   'number': t.Num
 };
-import {
-  Text,
-  View,
-  TouchableHighlight,
-  TouchableOpacity,
-  Platform,
-  Image,
-  Alert,
-  // StyleSheet,
-  Navigator,
-  Switch,
-  DatePickerAndroid,
-} from 'react-native';
-
-import SwitchSelector from 'react-native-switch-selector'
 
 const DEFAULT_LINK_COLOR = '#a94442'
 // import transform from 'tcomb-json-schema'

@@ -1,77 +1,9 @@
+if (__DEV__) console.log('requiring TimHome.js')
 'use strict';
 
-const parseURL = require('url').parse
-var Q = require('q')
-var debounce = require('debounce')
-var ResourceList = require('./ResourceList');
-// var VideoPlayer = require('./VideoPlayer')
-var NewResource = require('./NewResource');
-// var HomePage = require('./HomePage')
-var HomePageMixin = require('./HomePageMixin')
-var ResourceView = require('./ResourceView');
-var MessageList = require('./MessageList')
-var extend = require('extend')
-var utils = require('../utils/utils');
-var translate = utils.translate
-var Reflux = require('reflux');
-var Actions = require('../Actions/Actions');
-var Store = require('../Store/Store');
-var reactMixin = require('react-mixin');
-var constants = require('@tradle/constants');
-var debug = require('debug')('tradle:app:Home')
-var PasswordCheck = require('./PasswordCheck')
-var ArticleView = require('./ArticleView');
-var FadeInView = require('./FadeInView')
-var TouchIDOptIn = require('./TouchIDOptIn')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
-
-var QRCodeScanner = require('./QRCodeScanner')
-var TimerMixin = require('react-timer-mixin')
-var isDeepLink
-
-const scanHelp = Platform.OS === 'android'
-  ? { uri: 'file:///android_asset/ScanHelp.html' }
-  : require('../html/ScanHelp.html')
-
-try {
-  var commitHash = require('../version').commit.slice(0, 7)
-} catch (err) {
-  // no version info available
-}
-var {
-  TYPE
-} = constants
-var {
-  ORGANIZATION,
-  CUSTOMER_WAITING,
-  MESSAGE
-} = constants.TYPES
-// var Progress = require('react-native-progress')
-import {
-  // authenticateUser,
-  hasTouchID,
-  signIn,
-  setPassword
-} from '../utils/localAuth'
-
-import { SyncStatus } from 'react-native-code-push'
-import Linking from '../utils/linking'
-import AutomaticUpdates from '../utils/automaticUpdates'
-import CustomIcon from '../styles/customicons'
-import BackgroundImage from './BackgroundImage'
-import Navs from '../utils/navs'
-import ENV from '../utils/env'
-
-const BOOKMARK = 'tradle.Bookmark'
-
-const BG_IMAGE = ENV.splashBackground
-const PASSWORD_ITEM_KEY = 'app-password'
-const SUBMIT_LOG_TEXT = {
-  submit: translate('submitLog'),
-  submitting: translate('submitting') + '...',
-  submitted: translate('restartApp')
-}
-
+import Q from 'q'
+import debounce from 'debounce'
+import React, { Component, PropTypes } from 'react'
 import {
   StyleSheet,
   Text,
@@ -87,14 +19,83 @@ import {
   Alert,
   Platform
 } from 'react-native'
+
+import ResourceList from './ResourceList'
+// import VideoPlayer from './VideoPlayer'
+import NewResource from './NewResource'
+// import HomePage from './HomePage'
+import HomePageMixin from './HomePageMixin'
+import ResourceView from './ResourceView'
+import MessageList from './MessageList'
+import extend from 'extend'
+import utils, { translate } from '../utils/utils'
+import Reflux from 'reflux'
+import Actions from '../Actions/Actions'
+import Store from '../Store/Store'
+import reactMixin from 'react-mixin'
+import constants from '@tradle/constants'
+import PasswordCheck from './PasswordCheck'
+import ArticleView from './ArticleView'
+import FadeInView from './FadeInView'
+import TouchIDOptIn from './TouchIDOptIn'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import QRCodeScanner from './QRCodeScanner'
+import TimerMixin from 'react-timer-mixin'
+import {
+  // authenticateUser,
+  hasTouchID,
+  signIn,
+  setPassword
+} from '../utils/localAuth'
+
+import { SyncStatus } from 'react-native-code-push'
+import Linking from '../utils/linking'
+import AutomaticUpdates from '../utils/automaticUpdates'
+import CustomIcon from '../styles/customicons'
+import BackgroundImage from './BackgroundImage'
+import Navs from '../utils/navs'
+import ENV from '../utils/env'
 import ActivityIndicator from './ActivityIndicator'
+
+const parseURL = require('url').parse
+const debug = require('debug')('tradle:app:Home')
+
+var isDeepLink
+
+try {
+  var commitHash = require('../version').commit.slice(0, 7)
+} catch (err) {
+  // no version info available
+}
+
+var {
+  TYPE
+} = constants
+var {
+  ORGANIZATION,
+  CUSTOMER_WAITING,
+  MESSAGE
+} = constants.TYPES
+// import Progress from 'react-native-progress'
+
+
+const BOOKMARK = 'tradle.Bookmark'
+
+const BG_IMAGE = ENV.splashBackground
+const PASSWORD_ITEM_KEY = 'app-password'
+const SUBMIT_LOG_TEXT = {
+  submit: translate('submitLog'),
+  submitting: translate('submitting') + '...',
+  submitted: translate('restartApp')
+}
+
+
 
 const isAndroid = Platform.OS === 'android'
 const FOOTER_TEXT_COLOR = ENV.splashContrastColor
-import React, { Component, PropTypes } from 'react'
 
 class TimHome extends Component {
-  static displayName = 'TimHome';
+  static displayName = 'TimHome'
   static orientation = 'PORTRAIT';
   props: {
     modelName: PropTypes.string.isRequired,
@@ -562,6 +563,10 @@ class TimHome extends Component {
     this.showOfficialAccounts()
   }
   showScanHelp(action) {
+    const scanHelp = Platform.OS === 'android'
+      ? { uri: 'file:///android_asset/ScanHelp.html' }
+      : require('../html/ScanHelp.html')
+
     this.props.navigator[action]({
       id: 7,
       component: ArticleView,

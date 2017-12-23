@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring analytics.js')
 import {
   Platform
 } from 'react-native'

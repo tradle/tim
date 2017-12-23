@@ -1,14 +1,15 @@
+if (__DEV__) console.log('requiring MarkdownPropertyEdit.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var PageView = require('./PageView')
-var extend = require('extend');
+import utils from '../utils/utils'
+import PageView from './PageView'
+import extend from 'extend'
 import Icon from 'react-native-vector-icons/Ionicons';
 
-var StyleSheet = require('../StyleSheet')
+import StyleSheet from '../StyleSheet'
 import platformStyles from '../styles/platform'
-var Markdown = require('./Markdown')
-var format = require('string-template')
+import Markdown from './Markdown'
+import format from 'string-template'
 
 import {
   Platform,

@@ -1,26 +1,26 @@
+if (__DEV__) console.log('requiring MessageView.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var translate = utils.translate
-var constants = require('@tradle/constants');
-var ArticleView = require('./ArticleView');
-var PhotoList = require('./PhotoList');
-var PhotoView = require('./PhotoView');
+import utils, { translate } from '../utils/utils'
+import constants from '@tradle/constants'
+import ArticleView from './ArticleView'
+import PhotoList from './PhotoList'
+import PhotoView from './PhotoView'
 import Icon from 'react-native-vector-icons/Ionicons';
 
-var ShowRefList = require('./ShowRefList');
-var VerificationView = require('./VerificationView')
-var NewResource = require('./NewResource');
-var PageView = require('./PageView')
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var Store = require('../Store/Store');
-var reactMixin = require('react-mixin');
-var extend = require('extend');
-var ResourceMixin = require('./ResourceMixin');
+import ShowRefList from './ShowRefList'
+import VerificationView from './VerificationView'
+import NewResource from './NewResource'
+import PageView from './PageView'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import Store from '../Store/Store'
+import reactMixin from 'react-mixin'
+import extend from 'extend'
+import ResourceMixin from './ResourceMixin'
 var HELP_COLOR = 'blue'
-var NetworkInfoProvider = require('./NetworkInfoProvider')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
+import NetworkInfoProvider from './NetworkInfoProvider'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
 
 const PHOTO = 'tradle.Photo'
 const { TYPE } = constants

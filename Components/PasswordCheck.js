@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring PasswordCheck.js')
 import React, { PropTypes } from 'react'
 import {
   View,
@@ -8,11 +9,11 @@ import {
 
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
-var TimerMixin = require('react-timer-mixin')
-var reactMixin = require('react-mixin')
+import TimerMixin from 'react-timer-mixin'
+import reactMixin from 'react-mixin'
 
-var PasswordGesture = require('react-native-gesture-password')
-var utils = require('../utils/utils')
+import PasswordGesture from 'react-native-gesture-password'
+import utils from '../utils/utils'
 var MIN_LENGTH = 5
 var Password1 = ''
 var BG_IMAGE = ENV.brandBackground

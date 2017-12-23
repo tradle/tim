@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring makeStylish.js')
 'use strict'
 // export default class StyleProvider {
 //   constructor(props) {
@@ -21,11 +22,11 @@
 
 import React, { Component } from 'react'
 
-var reactMixin = require('react-mixin')
-var Store = require('../Store/Store')
-var extend = require('extend');
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
-var Reflux = require('reflux')
+import reactMixin from 'react-mixin'
+import Store from '../Store/Store'
+import extend from 'extend'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import Reflux from 'reflux'
 
 export function makeStylish (WrappedComponent) {
   class Stylish extends Component {
