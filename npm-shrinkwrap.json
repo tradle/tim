@@ -2,12 +2,6 @@
   "name": "Tradle",
   "version": "0.0.1",
   "dependencies": {
-    "@comandeer/babel-plugin-banner": {
-      "version": "1.0.0",
-      "from": "@comandeer/babel-plugin-banner@latest",
-      "resolved": "https://registry.npmjs.org/@comandeer/babel-plugin-banner/-/babel-plugin-banner-1.0.0.tgz",
-      "dev": true
-    },
     "@ldn0x7dc/react-native-view-pager": {
       "version": "0.0.9",
       "from": "@ldn0x7dc/react-native-view-pager@0.0.9",
