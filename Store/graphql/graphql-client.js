@@ -1,14 +1,12 @@
 'use strict'
 
 import utils from '../../utils/utils'
-const gql = require('graphql-tag')
-var deepEqual = require('deep-equal')
-const tradle = require('@tradle/engine')
-const tradleUtils = tradle.utils
-
-const { ApolloClient, createNetworkInterface } = require('apollo-client')
-
-var constants = require('@tradle/constants');
+import gql from 'graphql-tag'
+import deepEqual from 'deep-equal'
+import tradle, { utils as tradleUtils } from '@tradle/engine'
+import { ApolloClient, createNetworkInterface } from 'apollo-client'
+import constants from '@tradle/constants'
+import printer from 'graphql/language/printer'
 const {
   TYPE,
   SIG,
@@ -44,7 +42,6 @@ var search = {
 
     networkInterface.use([{
       applyMiddleware: async (req, next) => {
-        const printer = require('graphql/language/printer')
         const body = tradleUtils.stringify({
           ...req.request,
           query: printer.print(req.request.query)

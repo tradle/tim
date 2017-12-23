@@ -1,11 +1,11 @@
 if (__DEV__) console.log('requiring faker.js')
-const crypto = require('crypto')
-const extend = require('xtend')
-const { constants } = require('@tradle/engine')
-const ENV = require('./env')
+import crypto from 'crypto'
+import extend from 'xtend'
+import { constants } from '@tradle/engine'
+import ENV from './env'
 const { TYPE } = constants
 
-var formDefaults = require('../data/formDefaults.json')
+import formDefaults from '../data/formDefaults.json'
 
 module.exports = {
   newAPIBasedVerification,

@@ -4,6 +4,8 @@ import { utils } from '@tradle/engine'
 import ENV from '../utils/env'
 import { generateIdentity } from '../utils/identity'
 import Yuki from '@tradle/yuki'
+import onboard from '@tradle/yuki/onboard'
+
 const Keychain = ENV.useKeychain !== false && !ENV.isWeb() && require('../utils/keychain')
 const YUKI_KEY = '~yuki'
 const NOT_FOUND = new Error('NotFound')
@@ -61,7 +63,6 @@ function inflate ({ node, identity, keys, db }) {
     db
   })
 
-  const onboard = require('@tradle/yuki/onboard')
   const api = yuki.use(onboard())
   yuki.welcome = api.welcome
   return yuki

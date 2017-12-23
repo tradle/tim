@@ -15,13 +15,13 @@ import once from 'once'
 import utils from './utils'
 import ENV from './env'
 import PushImpl from './push-impl'
+import { constants } from '@tradle/engine'
+import Actions from '../Actions/Actions'
 
 const { translate, waitsFor } = utils
-const constants = require('@tradle/engine').constants
 const TYPE = constants.TYPE
-const Actions = require('../Actions/Actions')
 const DENIED_ERROR = new Error('denied')
-// const PushModal = require('../Components/PushModal')
+// import PushModal from '../Components/PushModal'
 const pushServerURL = ENV.pushServerURL
 const isMobile = () => Platform.OS === 'ios' || Platform.OS === 'android'
 const NOTIFICATION_CAN_HAVE_DATA = Platform.OS === 'ios' || Platform.OS === 'web'

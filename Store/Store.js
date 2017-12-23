@@ -2,9 +2,9 @@ if (__DEV__) console.log('requiring Store.js')
 'use strict';
 
 import '../utils/perf'
-var path = require('path')
-var querystring = require('querystring')
-var parseURL = require('url').parse
+import path from 'path'
+import querystring from 'querystring'
+import { parse as parseURL } from 'url'
 import ReactNative, {
   Alert,
   NetInfo,
@@ -24,23 +24,22 @@ import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createSemaphore from 'psem'
-var EventEmitter = require('events')
-const co = require('bluebird').coroutine
-var TimerMixin = require('react-timer-mixin')
-var reactMixin = require('react-mixin');
+import EventEmitter from 'events'
+import { coroutine as co } from 'bluebird'
+import TimerMixin from 'react-timer-mixin'
+import reactMixin from 'react-mixin'
 
-var yukiConfig = require('../yuki.json')
+import yukiConfig from '../yuki.json'
 
-var path = require('path')
-var Reflux = require('reflux');
-var Actions = require('../Actions/Actions');
-var extend = require('extend');
-var Debug = require('debug')
+import Reflux from 'reflux'
+import Actions from '../Actions/Actions'
+import extend from 'extend'
+import Debug from 'debug'
 
-var deepEqual = require('deep-equal')
-var once = require('once')
+import deepEqual from 'deep-equal'
+import once from 'once'
 
-const createProcessor = require('level-change-processor')
+import createProcessor from 'level-change-processor'
 
 const SENT = 'Sent'
 const SENDING = 'Sending'
@@ -50,7 +49,7 @@ const ADD = 1
 const DELETE = -1
 
 var debug = Debug('tradle:app:store')
-var employee = require('../people/employee.json')
+import employee from '../people/employee.json'
 
 const FRIEND = 'Tradler'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
@@ -113,14 +112,14 @@ const COVER_PHOTOS = {
     languages: ['en-nz']
   },
 }
-var Q = require('q');
+import Q from 'q'
 Q.longStackSupport = true
 Q.onerror = function (err) {
   debug(err.stack)
   throw err
 }
 
-const ENV = require('../utils/env')
+import ENV from '../utils/env'
 // const graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
 // const client = new ApolloClient({
 //   networkInterface: createNetworkInterface({
@@ -128,9 +127,9 @@ const ENV = require('../utils/env')
 //   })
 // })
 
-// var AddressBook = require('NativeModules').AddressBook;
+// import AddressBook from 'NativeModules'.AddressBook;
 
-const tradle = require('@tradle/engine')
+import tradle from '@tradle/engine'
 var myCustomIndexes
 // build indexes to enable searching by subClassOf
 // and by from + subClassOf
@@ -150,10 +149,10 @@ const {
 // const MSG_LINK = '_msg'
 const IS_MESSAGE = '_message'
 
+import utils from '../utils/utils'
+import graphQL from './graphql/graphql-client'
+// import storeUtils from './utils/utils'
 const sampleData = require('@tradle/models').data
-const utils = require('../utils/utils');
-const graphQL = require('./graphql/graphql-client')
-// const storeUtils = require('./utils/utils')
 const voc = (function () {
   const base = require('@tradle/models').models
   const custom = require('@tradle/custom-models')
@@ -163,22 +162,22 @@ const voc = (function () {
   })
 }())
 
-var sampleProfile = require('../data/sampleProfile.json')
-var welcome = require('../data/welcome.json');
+import sampleProfile from '../data/sampleProfile.json'
+import welcome from '../data/welcome.json'
 
-var sha = require('stable-sha1');
+import sha from 'stable-sha1'
 var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
 var translate = utils.translate
-var promisify = require('pify');
+import promisify from 'pify'
 var collect = promisify(require('stream-collector'))
-var debounce = require('debounce')
-var asyncstorageDown = require('asyncstorage-down')
-var levelup = require('levelup')
-var mutexify = require('mutexify')
+import debounce from 'debounce'
+import asyncstorageDown from 'asyncstorage-down'
+import levelup from 'levelup'
+import mutexify from 'mutexify'
 import DeviceInfo from 'react-native-device-info'
-// var updown = require('level-updown')
+// import updown from 'level-updown'
 
-var leveldown = require('cachedown')
+import leveldown from 'cachedown'
 leveldown.setLeveldown(asyncstorageDown)
 var level = function (loc, opts) {
   opts = opts || {}
@@ -190,14 +189,14 @@ var level = function (loc, opts) {
   return levelup(loc, opts)
 }
 
-// const enforceOrder = require('@tradle/receive-in-order')
-const Multiqueue = require('@tradle/multiqueue')
+// import enforceOrder from '@tradle/receive-in-order'
+import Multiqueue from '@tradle/multiqueue'
 
-const Cache = require('lru-cache')
+import Cache from 'lru-cache'
 const NEXT_HASH = '_n'
 const LAST_MESSAGE_TIME = 'lastMessageTime'
 
-const constants = require('@tradle/constants')
+import constants from '@tradle/constants'
 const {
  ORGANIZATION,
  IDENTITY,
@@ -267,7 +266,7 @@ const MY_ENVIRONMENT      = 'environment.json'
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 
-// var Tim = require('tim')
+// import Tim from 'tim'
 // Tim.enableOptimizations()
 // Tim.CATCH_UP_INTERVAL = 10000
 // var Zlorp = Tim.Zlorp
@@ -275,12 +274,12 @@ const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 // Zlorp.LOOKUP_INTERVAL = 10000
 // Zlorp.KEEP_ALIVE_INTERVAL = 10000
 
-const Sendy = require('sendy')
-const SendyWS = require('sendy-ws')
-const TLSClient = require('sendy-axolotl')
-const AWSClient = require('@tradle/aws-client')
-// const DSA = require('@tradle/otr').DSA
-// const BigInt = require('@tradle/otr/vendor/bigint')
+import Sendy from 'sendy'
+import SendyWS from 'sendy-ws'
+import TLSClient from 'sendy-axolotl'
+import AWSClient from '@tradle/aws-client'
+// import DSA from '@tradle/otr'.DSA
+// import BigInt from '@tradle/otr/vendor/bigint'
 // const BigIntTimes = {}
 // Object.keys(BigInt).forEach(function (method) {
 //   const orig = BigInt[method]
@@ -294,28 +293,28 @@ const AWSClient = require('@tradle/aws-client')
 // })
 
 const SENDY_OPTS = { resendInterval: 30000, mtu: 10000, autoConnect: true }
-// const newOTRSwitchboard = require('sendy-otr-ws').Switchboard
+// import newOTRSwitchboard from 'sendy-otr-ws'.Switchboard
 const newSwitchboard = SendyWS.Switchboard
 const WebSocketClient = SendyWS.Client
-// const HttpClient = require('@tradle/transport-http').HttpClient
-// var getDHTKey = require('tim/lib/utils').getDHTKey
+// import HttpClient from '@tradle/transport-http'.HttpClient
+// import getDHTKey from 'tim/lib/utils'.getDHTKey
 
-var dns = require('dns')
-var map = require('map-stream')
-var Blockchain = require('@tradle/cb-blockr') // use tradle/cb-blockr fork
+import dns from 'dns'
+import map from 'map-stream'
+import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet
-var createKeeper = require('@tradle/keeper')
-var cachifyKeeper = require('@tradle/keeper/cachify')
-var crypto = require('crypto')
-const loadYuki = require('./yuki').loadOrCreate
-const Aviva = require('../utils/aviva')
-const monitorMissing = require('../utils/missing')
-const identityUtils = require('../utils/identity')
-const createNetworkAdapters = require('../utils/network-adapters')
+import createKeeper from '@tradle/keeper'
+import cachifyKeeper from '@tradle/keeper/cachify'
+import crypto from 'crypto'
+import { loadOrCreate as loadYuki } from './yuki'
+import Aviva from '../utils/aviva'
+import monitorMissing from '../utils/missing'
+import identityUtils from '../utils/identity'
+import createNetworkAdapters from '../utils/network-adapters'
 import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
-var validateResource = require('@tradle/validate-resource')
+import validateResource from '@tradle/validate-resource'
 
-// var tutils = require('@tradle/utils')
+// import tutils from '@tradle/utils'
 var isTest, originalMe;
 var currentEmployees = {}
 
@@ -353,7 +352,7 @@ var TOP_LEVEL_PROVIDERS = ENV.topLevelProviders || [ENV.topLevelProvider]
 var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? [].concat(ENV.LOCAL_TRADLE_SERVERS) : TOP_LEVEL_PROVIDERS.map(t => t.baseUrl)
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
-// var ALL_SERVICE_PROVIDERS = require('../data/serviceProviders')
+// import ALL_SERVICE_PROVIDERS from '../data/serviceProviders'
 var SERVICE_PROVIDERS
 var publishRequestSent = []
 var driverInfo = (function () {
@@ -12976,7 +12975,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 
   //   networkInterface.use([{
   //     applyMiddleware: async (req, next) => {
-  //       const printer = require('graphql/language/printer')
+  //       import printer from 'graphql/language/printer'
   //       const body = tradleUtils.stringify({
   //         ...req.request,
   //         query: printer.print(req.request.query)
