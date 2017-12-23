@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring NetworkInfoProvider.js')
 'use strict'
 
 import {
@@ -10,9 +11,9 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
-import utils from '../utils/utils'
-var translate = utils.translate
-var constants = require('@tradle/constants');
+import utils, { translate } from '../utils/utils'
+import constants from '@tradle/constants'
+
 const TYPE = constants.TYPE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 

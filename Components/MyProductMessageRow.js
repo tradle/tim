@@ -1,17 +1,17 @@
+if (__DEV__) console.log('requiring MyProductMessageRow.js')
 'use strict'
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var ArticleView = require('./ArticleView');
-var NewResource = require('./NewResource');
+import ArticleView from './ArticleView'
+import NewResource from './NewResource'
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
-var RowMixin = require('./RowMixin');
-var equal = require('deep-equal')
-var chatStyles = require('../styles/chatStyles')
-
-var reactMixin = require('react-mixin');
+import constants from '@tradle/constants'
+import RowMixin from './RowMixin'
+import equal from 'deep-equal'
+import chatStyles from '../styles/chatStyles'
 import { makeResponsive } from 'react-native-orient'
+import reactMixin from 'react-mixin'
 
 import {
   Image,

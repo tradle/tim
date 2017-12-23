@@ -1,17 +1,18 @@
+if (__DEV__) console.log('requiring ContextChooser.js')
 'use strict';
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var constants = require('@tradle/constants');
-var MessageList = require('./MessageList')
-var PageView = require('./PageView')
+import constants from '@tradle/constants'
+import MessageList from './MessageList'
+import PageView from './PageView'
 import platformStyles from '../styles/platform'
-var reactMixin = require('react-mixin');
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var MessageTypeRow = require('./MessageTypeRow');
-var StyleSheet = require('../StyleSheet')
+import reactMixin from 'react-mixin'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import MessageTypeRow from './MessageTypeRow'
+import StyleSheet from '../StyleSheet'
 
 import ActivityIndicator from './ActivityIndicator'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'

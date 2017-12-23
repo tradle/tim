@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring faker.js')
 const crypto = require('crypto')
 const extend = require('xtend')
 const { constants } = require('@tradle/engine')

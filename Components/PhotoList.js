@@ -1,13 +1,12 @@
+if (__DEV__) console.log('requiring PhotoList.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var groupByEveryN = utils.groupByEveryN
-var constants = require('@tradle/constants');
-var reactMixin = require('react-mixin');
-var PhotoCarouselMixin = require('./PhotoCarouselMixin');
-var RowMixin = require('./RowMixin')
-
-var equal = require('deep-equal')
+import utils from '../utils/utils'
+import constants from '@tradle/constants'
+import reactMixin from 'react-mixin'
+import PhotoCarouselMixin from './PhotoCarouselMixin'
+import RowMixin from './RowMixin'
+import equal from 'deep-equal'
 var cnt = 1000
 import {
   StyleSheet,
@@ -26,7 +25,7 @@ import React, { Component } from 'react'
 // const MIN_WIDTH = 140
 export const MIN_WIDTH = 140
 
-// var Animated = require('Animated');
+// import Animated from 'Animated'
 class PhotoList extends Component {
   static displayName = 'PhotoList'
   constructor(props) {

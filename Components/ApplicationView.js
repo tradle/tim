@@ -1,22 +1,24 @@
+if (__DEV__) console.log('requiring ApplicationView.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var translate = utils.translate
-var fontSize = utils.getFontSize
-var ApplicationTabs = require('./ApplicationTabs')
-var PageView = require('./PageView')
-import Icon from 'react-native-vector-icons/Ionicons';
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var Store = require('../Store/Store');
-var reactMixin = require('react-mixin');
-var ResourceMixin = require('./ResourceMixin');
-var MessageList = require('./MessageList')
-var ENV = require('../utils/env')
-var StyleSheet = require('../StyleSheet')
-var extend = require('extend');
-var constants = require('@tradle/constants');
-var HomePageMixin = require('./HomePageMixin')
+import utils, {
+  getFontSize as fontSize,
+  translate
+} from '../utils/utils'
+import ApplicationTabs from './ApplicationTabs'
+import PageView from './PageView'
+import Icon from 'react-native-vector-icons/Ionicons'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import Store from '../Store/Store'
+import reactMixin from 'react-mixin'
+import ResourceMixin from './ResourceMixin'
+import MessageList from './MessageList'
+import ENV from '../utils/env'
+import StyleSheet from '../StyleSheet'
+import extend from 'extend'
+import constants from '@tradle/constants'
+import HomePageMixin from './HomePageMixin'
 
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'

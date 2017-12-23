@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring CameraView.js')
 import {
   AppRegistry,
   StyleSheet,
@@ -6,7 +7,7 @@ import {
   TouchableHighlight,
   Platform
 } from 'react-native'
-// var Camera = require('react-native-camera');
+// import Camera from 'react-native-camera'
 import Camera from 'react-native-camera'
 import Icon from 'react-native-vector-icons/Ionicons'
 

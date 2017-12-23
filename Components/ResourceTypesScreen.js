@@ -1,12 +1,14 @@
+if (__DEV__) console.log('requiring ResourceTypesScreen.js')
 'use strict';
 
-var NewResource = require('./NewResource');
-var utils = require('../utils/utils');
-var reactMixin = require('react-mixin');
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var constants = require('@tradle/constants');
+import MessageTypeRow from './MessageTypeRow'
+import NewResource from './NewResource'
+import utils from '../utils/utils'
+import reactMixin from 'react-mixin'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import constants from '@tradle/constants'
 
 import React, { Component } from 'react'
 
@@ -117,7 +119,6 @@ class ResourceTypesScreen extends Component {
 
   renderRow(resource)  {
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
-    var MessageTypeRow = require('./MessageTypeRow');
 
     return (
       <MessageTypeRow

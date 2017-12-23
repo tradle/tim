@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring linking.js')
 
 import EventEmitter from 'EventEmitter'
 import {

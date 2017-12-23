@@ -1,14 +1,15 @@
+if (__DEV__) console.log('requiring ShowPropertiesView.js')
 'use strict';
 
-// var ArticleView = require('./ArticleView');
-var utils = require('../utils/utils');
+// import ArticleView from './ArticleView'
+import utils from '../utils/utils'
 var translate = utils.translate
-var constants = require('@tradle/constants');
-var RowMixin = require('./RowMixin')
-var ResourceMixin = require('./ResourceMixin')
-var reactMixin = require('react-mixin')
-var dateformat = require('dateformat')
-var Accordion = require('./Accordion')
+import constants from '@tradle/constants'
+import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
+import reactMixin from 'react-mixin'
+import dateformat from 'dateformat'
+import Accordion from './Accordion'
 import Icon from 'react-native-vector-icons/Ionicons'
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'

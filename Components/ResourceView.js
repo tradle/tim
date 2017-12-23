@@ -1,45 +1,61 @@
+if (__DEV__) console.log('requiring ResourceView.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var translate = utils.translate
-var fontSize = utils.getFontSize
-var ShowPropertiesView = require('./ShowPropertiesView');
-var PhotoView = require('./PhotoView');
-import PhotoList from './PhotoList';
-// import {MIN_WIDTH} from './PhotoList';
-// var AddNewIdentity = require('./AddNewIdentity');
-// var SwitchIdentity = require('./SwitchIdentity');
-var ShowRefList = require('./ShowRefList');
-var PageView = require('./PageView')
-import Icon from 'react-native-vector-icons/Ionicons';
-var IdentitiesList = require('./IdentitiesList');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var Store = require('../Store/Store');
-var reactMixin = require('react-mixin');
-var ResourceMixin = require('./ResourceMixin');
-var QRCode = require('./QRCode')
-var MessageList = require('./MessageList')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
-var ENV = require('../utils/env')
-var StyleSheet = require('../StyleSheet')
-var extend = require('extend');
-var constants = require('@tradle/constants');
-
-var HomePageMixin = require('./HomePageMixin')
-
-var ResourceList = require('./ResourceList')
-
-// import ActionSheet from './ActionSheet'
+import pick from 'object.pick'
+import extend from 'extend'
+import constants from '@tradle/constants'
 import ActionSheet from 'react-native-actionsheet'
+import {
+  // StyleSheet,
+  // ScrollView,
+  Image,
+  View,
+  Text,
+  Platform,
+  TextInput,
+  ListView,
+  Dimensions,
+  Modal,
+  Alert,
+  TouchableOpacity,
+} from 'react-native'
 
+import {
+  LazyloadScrollView,
+} from 'react-native-lazyload'
+
+import React, { Component } from 'react'
+import utils, {
+  translate,
+  getFontSize as fontSize
+} from '../utils/utils'
+
+import ShowPropertiesView from './ShowPropertiesView'
+import PhotoView from './PhotoView'
+import PhotoList from './PhotoList'
+import ShowRefList from './ShowRefList'
+import PageView from './PageView'
+import Icon from 'react-native-vector-icons/Ionicons'
+import IdentitiesList from './IdentitiesList'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import Store from '../Store/Store'
+import reactMixin from 'react-mixin'
+import ResourceMixin from './ResourceMixin'
+import QRCode from './QRCode'
+import MessageList from './MessageList'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import ENV from '../utils/env'
+import StyleSheet from '../StyleSheet'
+import HomePageMixin from './HomePageMixin'
+import ResourceList from './ResourceList'
+// import ActionSheet from './ActionSheet'
 import platformStyles from '../styles/platform'
 import { signIn } from '../utils/localAuth'
 import { makeResponsive } from 'react-native-orient'
 import Log from './Log'
 import debug from '../utils/debug'
 import ConversationsIcon from './ConversationsIcon'
-import pick from 'object.pick'
 import Navs from '../utils/navs'
 
 const TALK_TO_EMPLOYEE = '1'
@@ -69,29 +85,8 @@ const {
 } = constants
 const AUTH_PROPS = ['useTouchId', 'useGesturePassword']
 
-import {
-  // StyleSheet,
-  // ScrollView,
-  Image,
-  View,
-  Text,
-  Platform,
-  TextInput,
-  ListView,
-  Dimensions,
-  Modal,
-  Alert,
-  TouchableOpacity,
-} from 'react-native'
-
-import {
-  LazyloadScrollView,
-} from 'react-native-lazyload'
-
 const ScrollView = LazyloadScrollView
 const LAZY_ID = 'lazyload-list'
-
-import React, { Component } from 'react'
 
 const FINGERPRINT_COLOR = {
   ios: '#ffffff',
@@ -102,7 +97,7 @@ const FINGERPRINT_COLOR = {
 let INSTANCE_ID = 0
 
 class ResourceView extends Component {
-  static displayName = 'ResourceView';
+  static displayName = 'ResourceView'
   constructor(props) {
     super(props);
     this._lazyId = LAZY_ID + INSTANCE_ID++

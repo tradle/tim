@@ -1,61 +1,6 @@
+if (__DEV__) console.log('requiring MessageList.js')
 'use strict';
 
-var MessageView = require('./MessageView')
-var MessageRow = require('./MessageRow')
-var MyProductMessageRow = require('./MyProductMessageRow')
-var VerificationMessageRow = require('./VerificationMessageRow')
-var FormMessageRow = require('./FormMessageRow')
-var FormRequestRow = require('./FormRequestRow')
-var FormErrorRow = require('./FormErrorRow')
-var TourRow = require('./TourRow')
-var NoResources = require('./NoResources')
-var NewResource = require('./NewResource')
-var ProductChooser = require('./ProductChooser')
-var VerifierChooser = require('./VerifierChooser')
-var ResourceList = require('./ResourceList')
-var ChatContext = require('./ChatContext')
-var ContextChooser = require('./ContextChooser')
-import Icon from 'react-native-vector-icons/Ionicons'
-var utils = require('../utils/utils')
-var translate = utils.translate
-var reactMixin = require('react-mixin')
-var equal = require('deep-equal')
-var Store = require('../Store/Store')
-var Actions = require('../Actions/Actions')
-var Reflux = require('reflux')
-var constants = require('@tradle/constants')
-var GiftedMessenger = require('react-native-gifted-messenger')
-var NetworkInfoProvider = require('./NetworkInfoProvider')
-var ProgressInfo = require('./ProgressInfo')
-var PageView = require('./PageView')
-var extend = require('extend');
-var TimerMixin = require('react-timer-mixin')
-import BackgroundImage from './BackgroundImage'
-
-const clone = require('clone')
-const FOOTER_TEXT_COLOR = ENV.splashContrastColor
-
-import ActionSheet from 'react-native-actionsheet'
-import { makeResponsive } from 'react-native-orient'
-import { makeStylish } from './makeStylish'
-
-// var AddNewMessage = require('./AddNewMessage')
-// var SearchBar = require('react-native-search-bar')
-// var ResourceTypesScreen = require('./ResourceTypesScreen')
-
-var LIMIT = 500
-const { TYPE, TYPES, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
-const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM, FINANCIAL_PRODUCT } = TYPES
-const MY_PRODUCT = 'tradle.MyProduct'
-const FORM_REQUEST = 'tradle.FormRequest'
-const FORM_ERROR = 'tradle.FormError'
-const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
-const REMEDIATION = 'tradle.Remediation'
-const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
-const CONTEXT = 'tradle.Context'
-const PRODUCT_REQUEST = 'tradle.ProductRequest'
-const TOUR = 'tradle.Tour'
-var StyleSheet = require('../StyleSheet')
 
 import React, { Component } from 'react'
 import {
@@ -76,9 +21,66 @@ import {
   WebView
 } from 'react-native'
 
+import extend from 'extend'
+import TimerMixin from 'react-timer-mixin'
+import Reflux from 'reflux'
+import clone from 'clone'
+import constants from '@tradle/constants'
+import GiftedMessenger from 'react-native-gifted-messenger'
+import Icon from 'react-native-vector-icons/Ionicons'
+import reactMixin from 'react-mixin'
+import equal from 'deep-equal'
+import ActionSheet from 'react-native-actionsheet'
+import { makeResponsive } from 'react-native-orient'
+import MessageView from './MessageView'
+import MessageRow from './MessageRow'
+import MyProductMessageRow from './MyProductMessageRow'
+import VerificationMessageRow from './VerificationMessageRow'
+import FormMessageRow from './FormMessageRow'
+import FormRequestRow from './FormRequestRow'
+import FormErrorRow from './FormErrorRow'
+import TourRow from './TourRow'
+import NoResources from './NoResources'
+import NewResource from './NewResource'
+import ProductChooser from './ProductChooser'
+import VerifierChooser from './VerifierChooser'
+import ResourceList from './ResourceList'
+import ChatContext from './ChatContext'
+import ContextChooser from './ContextChooser'
+import utils, {
+  translate
+} from '../utils/utils'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import NetworkInfoProvider from './NetworkInfoProvider'
+import ProgressInfo from './ProgressInfo'
+import PageView from './PageView'
+import BackgroundImage from './BackgroundImage'
+import { makeStylish } from './makeStylish'
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles, {MenuIcon} from '../styles/platform'
 import ENV from '../utils/env'
+import StyleSheet from '../StyleSheet'
+
+const FOOTER_TEXT_COLOR = ENV.splashContrastColor
+
+
+// import AddNewMessage from './AddNewMessage'
+// import SearchBar from 'react-native-search-bar'
+// import ResourceTypesScreen from './ResourceTypesScreen'
+
+var LIMIT = 500
+const { TYPE, TYPES, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
+const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM, FINANCIAL_PRODUCT } = TYPES
+const MY_PRODUCT = 'tradle.MyProduct'
+const FORM_REQUEST = 'tradle.FormRequest'
+const FORM_ERROR = 'tradle.FormError'
+const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
+const REMEDIATION = 'tradle.Remediation'
+const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
+const CONTEXT = 'tradle.Context'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
+const TOUR = 'tradle.Tour'
 
 const NAV_BAR_HEIGHT = ENV.navBarHeight
 var currentMessageTime

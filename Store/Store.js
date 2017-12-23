@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring Store.js')
 'use strict';
 
 import '../utils/perf'

@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring ActionSheet.js')
 
 import React, { Component } from 'react'
 import ActionSheet from 'react-native-actionsheet'

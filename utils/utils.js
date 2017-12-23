@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring utils.js')
 'use strict'
 
 import React from 'react'
@@ -33,40 +34,40 @@ import clone from 'clone'
 import Strings from './strings'
 import { id } from '@tradle/build-resource'
 
-const Promise = require('bluebird')
-
 // import Orientation from 'react-native-orientation'
 
 // var orientation = Orientation.getInitialOrientation()
 // Orientation.addOrientationListener(o => orientation = o)
 
-var crypto = require('crypto')
-var debug = require('debug')('tradle:app:utils')
-var Q = require('q')
-var collect = require('stream-collector')
-var typeforce = require('typeforce')
-var t = require('tcomb-form-native');
-var equal = require('deep-equal')
-var moment = require('moment');
-var dateformat = require('dateformat')
-var Backoff = require('backoff')
-var extend = require('xtend')
-var fetch = global.fetch || require('whatwg-fetch')
-var levelErrors = require('levelup/lib/errors')
-const IS_MESSAGE = '_message'
+import crypto from 'crypto'
+import Q from 'q'
+import collect from 'stream-collector'
+import typeforce from 'typeforce'
+import t from 'tcomb-form-native'
+import equal from 'deep-equal'
+import moment from 'moment'
+import dateformat from 'dateformat'
+import Backoff from 'backoff'
+import extend from 'xtend'
+import levelErrors from 'levelup/lib/errors'
+import Cache from 'lru-cache'
+import mutexify from 'mutexify'
+import tradle, {
+  protocol,
+  utils as tradleUtils
+} from '@tradle/engine'
 
-const Cache = require('lru-cache')
-const mutexify = require('mutexify')
+import constants from '@tradle/constants'
+
+const Promise = require('bluebird')
+const debug = require('debug')('tradle:app:utils')
+
+const IS_MESSAGE = '_message'
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
   'Please fill out this form': 'fillTheForm',
   'Please take a **selfie** picture of your face': 'takeAPicture'
 }
-
-const tradle = require('@tradle/engine')
-const protocol = tradle.protocol
-const tradleUtils = tradle.utils
-var constants = require('@tradle/constants');
 
 var {
   TYPE,
@@ -77,6 +78,7 @@ var {
   PREV_HASH,
   SIG
 } = constants
+
 var {
   VERIFICATION,
   MONEY,

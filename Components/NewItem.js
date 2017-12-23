@@ -1,14 +1,15 @@
+if (__DEV__) console.log('requiring NewItem.js')
 'use strict';
 
-var t = require('tcomb-form-native');
-var utils = require('../utils/utils');
+import t from 'tcomb-form-native'
+import utils from '../utils/utils'
 var translate = utils.translate
-var extend = require('extend');
-var myStyles = require('../styles/styles');
-var constants = require('@tradle/constants');
-var NewResourceMixin = require('./NewResourceMixin');
-var PageView = require('./PageView')
-var reactMixin = require('react-mixin');
+import extend from 'extend'
+import myStyles from '../styles/styles'
+import constants from '@tradle/constants'
+import NewResourceMixin from './NewResourceMixin'
+import PageView from './PageView'
+import reactMixin from 'react-mixin'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
 

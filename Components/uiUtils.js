@@ -1,9 +1,10 @@
+if (__DEV__) console.log('requiring uiUtils.js')
 import utils from '../utils/utils'
 var translate = utils.translate
 
 import GridList from './GridList'
 import NewResource from './NewResource'
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
+import defaultBankStyle from '../styles/defaultBankStyle.json'
 const constants = require('@tradle/constants')
 
 var { TYPE } = constants

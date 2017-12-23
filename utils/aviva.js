@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring aviva.js')
 
 import { constants } from '@tradle/engine'
 import ENV from './env'

@@ -1,27 +1,7 @@
+if (__DEV__) console.log('requiring ShowRefList.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var translate = utils.translate
-import Icon from 'react-native-vector-icons/Ionicons';
-var buttonStyles = require('../styles/buttonStyles');
-var appStyle = require('../styles/appStyle.json')
-var reactMixin = require('react-mixin');
-var RowMixin = require('./RowMixin');
-var ResourceMixin = require('./ResourceMixin');
-var ShowPropertiesView = require('./ShowPropertiesView')
-var Actions = require('../Actions/Actions');
-var constants = require('@tradle/constants')
-const {
-  TYPE,
-  ROOT_HASH
-} = constants
-const {
-  VERIFICATION,
-  ORGANIZATION,
-  PROFILE,
-  FORM
-} = constants.TYPES
-
+import constants from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'
 import {
   View,
@@ -33,8 +13,31 @@ import {
 } from 'react-native';
 
 import React, { Component } from 'react'
+import GridList from './GridList'
+import utils, {
+  translate
+} from '../utils/utils'
 
+import Icon from 'react-native-vector-icons/Ionicons'
+import buttonStyles from '../styles/buttonStyles'
+import appStyle from '../styles/appStyle.json'
+import reactMixin from 'react-mixin'
+import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
+import ShowPropertiesView from './ShowPropertiesView'
+import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
+
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+const {
+  VERIFICATION,
+  ORGANIZATION,
+  PROFILE,
+  FORM
+} = constants.TYPES
 
 class ShowRefList extends Component {
   constructor(props) {
@@ -212,7 +215,6 @@ class ShowRefList extends Component {
     let backlinkRL, details, separator
     if (!showDetails  && (currentBacklink  ||  (backlinkList  &&  showDocuments))) {
       let modelName = showDocuments ? FORM : currentBacklink.items.ref
-      var GridList = require('./GridList')
       backlinkRL = <GridList
                     lazy={lazy}
                     modelName={modelName}

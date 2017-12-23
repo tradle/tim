@@ -1,20 +1,21 @@
+if (__DEV__) console.log('requiring SupervisoryView.js')
 'use strict';
 
-var PageView = require('./PageView')
+import PageView from './PageView'
 import ActionSheet from 'react-native-actionsheet'
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var reactMixin = require('react-mixin');
-var extend = require('extend')
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var constants = require('@tradle/constants');
+import reactMixin from 'react-mixin'
+import extend from 'extend'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons';
-var buttonStyles = require('../styles/buttonStyles');
-var NetworkInfoProvider = require('./NetworkInfoProvider')
-var SupervisoryViewPerProvider = require('./SupervisoryViewPerProvider')
-var StyleSheet = require('../StyleSheet')
+import buttonStyles from '../styles/buttonStyles'
+import NetworkInfoProvider from './NetworkInfoProvider'
+import SupervisoryViewPerProvider from './SupervisoryViewPerProvider'
+import StyleSheet from '../StyleSheet'
 import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'

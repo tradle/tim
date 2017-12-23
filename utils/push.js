@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring push.js')
 
 'use strict'
 

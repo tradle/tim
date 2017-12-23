@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring TourPage.js')
 import React, { Component, PropTypes } from 'react'
 import WebView from './WebView'
 import AppIntro from 'react-native-app-intro'

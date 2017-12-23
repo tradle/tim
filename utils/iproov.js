@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring iproov.js')
 import { NativeModules } from 'react-native'
 import Errors from './iproov-errors'
 

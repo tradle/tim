@@ -1,14 +1,15 @@
+if (__DEV__) console.log('requiring PhotoView.js')
 'use strict';
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
-var reactMixin = require('react-mixin');
-var PhotoCarouselMixin = require('./PhotoCarouselMixin');
+import constants from '@tradle/constants'
+import reactMixin from 'react-mixin'
+import PhotoCarouselMixin from './PhotoCarouselMixin'
 
 import Gallery from 'react-native-gallery'
 
-var equal = require('deep-equal')
+import equal from 'deep-equal'
 import {
   StyleSheet,
   Image,

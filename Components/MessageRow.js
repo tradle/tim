@@ -1,16 +1,52 @@
+if (__DEV__) console.log('requiring MessageRow.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var translate = utils.translate
-var ArticleView = require('./ArticleView');
-var MessageView = require('./MessageView');
-var ResourceView = require('./ResourceView')
-var NewResource = require('./NewResource');
-var ProductChooser = require('./ProductChooser');
-var PhotoList = require('./PhotoList');
-import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
+import extend from 'extend'
+import equal from 'deep-equal'
+import { makeResponsive } from 'react-native-orient'
+import reactMixin from 'react-mixin'
+import {
+  Image,
+  // StyleSheet,
+  Text,
+  TouchableHighlight,
+  Alert,
+  Navigator,
+  View,
+  Platform,
+  processColor
+} from 'react-native'
+
+import React, { Component } from 'react'
+import utils, {
+  translate
+} from '../utils/utils'
+
+import ArticleView from './ArticleView'
+import MessageView from './MessageView'
+import ResourceView from './ResourceView'
+import NewResource from './NewResource'
+import ProductChooser from './ProductChooser'
+import PhotoList from './PhotoList'
+import Icon from 'react-native-vector-icons/Ionicons'
+import constants from '@tradle/constants'
 import uiUtils from './uiUtils'
+import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
+import formDefaults from '../data/formDefaults.json'
+import Actions from '../Actions/Actions'
+import StyleSheet from '../StyleSheet'
+import chatStyles from '../styles/chatStyles'
+import ENV from '../utils/env'
+
+const MY_PRODUCT = 'tradle.MyProduct'
+const SHARE_CONTEXT = 'tradle.ShareContext'
+const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
+const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
+const CONFIRMATION = 'tradle.Confirmation'
+const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
+const INTRODUCTION = 'tradle.Introduction'
+const BOOKMARK = 'tradle.Bookmark'
 const {
   TYPE,
   ROOT_HASH
@@ -29,40 +65,6 @@ const {
   // PRODUCT_LIST
 } = constants.TYPES
 const LIMIT = 20
-var RowMixin = require('./RowMixin');
-var ResourceMixin = require('./ResourceMixin')
-var extend = require('extend')
-var equal = require('deep-equal')
-var formDefaults = require('../data/formDefaults.json')
-var Actions = require('../Actions/Actions');
-import { makeResponsive } from 'react-native-orient'
-var StyleSheet = require('../StyleSheet')
-var reactMixin = require('react-mixin');
-var chatStyles = require('../styles/chatStyles')
-
-const MY_PRODUCT = 'tradle.MyProduct'
-const SHARE_CONTEXT = 'tradle.ShareContext'
-const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
-const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
-const CONFIRMATION = 'tradle.Confirmation'
-const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
-const INTRODUCTION = 'tradle.Introduction'
-const BOOKMARK = 'tradle.Bookmark'
-
-import {
-  Image,
-  // StyleSheet,
-  Text,
-  TouchableHighlight,
-  Alert,
-  Navigator,
-  View,
-  Platform,
-  processColor
-} from 'react-native'
-
-import React, { Component } from 'react'
-import ENV from '../utils/env'
 
 class MessageRow extends Component {
   constructor(props) {

@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring ConversationsIcon.js')
 import React from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 

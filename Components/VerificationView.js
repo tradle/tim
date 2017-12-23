@@ -1,15 +1,16 @@
+if (__DEV__) console.log('requiring VerificationView.js')
 'use strict';
 
-var ArticleView = require('./ArticleView');
-var utils = require('../utils/utils');
+import ArticleView from './ArticleView'
+import utils from '../utils/utils'
 var translate = utils.translate
-var constants = require('@tradle/constants');
-var RowMixin = require('./RowMixin')
-var MessageView = require('./MessageView')
-var ResourceMixin = require('./ResourceMixin')
-var ResourceView = require('./ResourceView')
-var reactMixin = require('react-mixin')
-var dateformat = require('dateformat')
+import constants from '@tradle/constants'
+import RowMixin from './RowMixin'
+import MessageView from './MessageView'
+import ResourceMixin from './ResourceMixin'
+import ResourceView from './ResourceView'
+import reactMixin from 'react-mixin'
+import dateformat from 'dateformat'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
 

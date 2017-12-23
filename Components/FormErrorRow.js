@@ -1,18 +1,19 @@
+if (__DEV__) console.log('requiring FormErrorRow.js')
 'use strict';
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var NewResource = require('./NewResource');
+import NewResource from './NewResource'
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
-var RowMixin = require('./RowMixin');
-var ResourceMixin = require('./ResourceMixin')
-var extend = require('extend')
-var equal = require('deep-equal')
+import constants from '@tradle/constants'
+import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
+import extend from 'extend'
+import equal from 'deep-equal'
 import { makeResponsive } from 'react-native-orient'
-var StyleSheet = require('../StyleSheet')
-var reactMixin = require('react-mixin');
-var chatStyles = require('../styles/chatStyles')
+import StyleSheet from '../StyleSheet'
+import reactMixin from 'react-mixin'
+import chatStyles from '../styles/chatStyles'
 import ImageInput from './ImageInput'
 
 const ENUM = 'tradle.Enum'

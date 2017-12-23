@@ -1,11 +1,12 @@
+if (__DEV__) console.log('requiring SignatureView.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var PageView = require('./PageView')
-var extend = require('extend');
+import utils from '../utils/utils'
+import PageView from './PageView'
+import extend from 'extend'
 import Icon from 'react-native-vector-icons/Ionicons';
 
-var StyleSheet = require('../StyleSheet')
+import StyleSheet from '../StyleSheet'
 import platformStyles from '../styles/platform'
 
 import {
@@ -17,7 +18,7 @@ import {
 
 import React, { Component, PropTypes } from 'react'
 // import { makeResponsive } from 'react-native-orient'
-var SignaturePad = require('react-native-signature-pad')
+import SignaturePad from 'react-native-signature-pad'
 
 class SignatureView extends Component {
   props: {

@@ -1,38 +1,7 @@
+if (__DEV__) console.log('requiring ApplicationTabs.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var translate = utils.translate
-import Icon from 'react-native-vector-icons/Ionicons';
-var buttonStyles = require('../styles/buttonStyles');
-var appStyle = require('../styles/appStyle.json')
-var reactMixin = require('react-mixin');
-var RowMixin = require('./RowMixin');
-var ShowPropertiesView = require('./ShowPropertiesView')
-var Actions = require('../Actions/Actions');
-// import ProgressBar from 'react-native-progress/Bar';
-
-const ProgressBar = (() => {
-  switch (Platform.OS) {
-    case 'web':
-      return require('./ProgressBar')
-    default:
-      return require('react-native-progress/Bar')
-  }
-})()
-
-var constants = require('@tradle/constants')
-const {
-  TYPE,
-  ROOT_HASH
-} = constants
-
-const {
-  VERIFICATION,
-  FORM
-} = constants.TYPES
-
 import { makeResponsive } from 'react-native-orient'
-
 import {
   View,
   Text,
@@ -42,8 +11,31 @@ import {
 } from 'react-native';
 
 import React, { Component } from 'react'
+import Icon from 'react-native-vector-icons/Ionicons'
+import ProgressBar from './ProgressBar'
+import constants from '@tradle/constants'
+import utils, {
+  translate
+} from '../utils/utils'
 
+import buttonStyles from '../styles/buttonStyles'
+import appStyle from '../styles/appStyle.json'
+import reactMixin from 'react-mixin'
+import RowMixin from './RowMixin'
+import ShowPropertiesView from './ShowPropertiesView'
+import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
+import GridList from './GridList'
+
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+
+const {
+  VERIFICATION,
+  FORM
+} = constants.TYPES
 
 class ApplicationTabs extends Component {
   constructor(props) {
@@ -142,7 +134,6 @@ class ApplicationTabs extends Component {
     let flinkRL, details, separator
     if (!showDetails  &&  currentProp) {
       let modelName = currentProp.items.ref
-      var GridList = require('./GridList')
       flinkRL = <GridList
                     lazy={lazy}
                     modelName={modelName}

@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring localAuth.js')
 
 const debug = require('debug')('tradle:app:local-auth')
 import { Alert, Platform } from 'react-native'

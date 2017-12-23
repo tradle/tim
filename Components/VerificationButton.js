@@ -1,10 +1,11 @@
+if (__DEV__) console.log('requiring VerificationButton.js')
 'use strict';
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 import Icon from 'react-native-vector-icons/Ionicons';
-var reactMixin = require('react-mixin');
-var constants = require('@tradle/constants');
-var buttonStyles = require('../styles/buttonStyles');
+import reactMixin from 'react-mixin'
+import constants from '@tradle/constants'
+import buttonStyles from '../styles/buttonStyles'
 
 import {
   StyleSheet,

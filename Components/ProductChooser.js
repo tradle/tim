@@ -1,16 +1,18 @@
+if (__DEV__) console.log('requiring ProductChooser.js')
 'use strict';
 
-var NewResource = require('./NewResource');
-var utils = require('../utils/utils');
+import NewResource from './NewResource'
+import utils from '../utils/utils'
 var translate = utils.translate
-var equal = require('deep-equal')
-var reactMixin = require('react-mixin');
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var constants = require('@tradle/constants');
-var MessageList = require('./MessageList')
-var PageView = require('./PageView')
+import equal from 'deep-equal'
+import reactMixin from 'react-mixin'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import constants from '@tradle/constants'
+import MessageList from './MessageList'
+import MessageTypeRow from './MessageTypeRow'
+import PageView from './PageView'
 import platformStyles from '../styles/platform'
 
 const FORM_REQUEST = 'tradle.FormRequest'
@@ -169,7 +171,6 @@ class ProductChooser extends Component {
     var model = utils.getModel(resource[constants.TYPE] || resource.id)
     if (!model)
       return <View/>
-    var MessageTypeRow = require('./MessageTypeRow');
 
     return (
       <MessageTypeRow

@@ -1,17 +1,17 @@
+if (__DEV__) console.log('requiring VerificationRow.js')
 'use strict';
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var constants = require('@tradle/constants');
+import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons';
-var reactMixin = require('react-mixin');
-var RowMixin = require('./RowMixin');
-// var Accordion = require('react-native-accordion')
-var Swipeout = require('react-native-swipeout')
-var StyleSheet = require('../StyleSheet')
-var ArticleView = require('./ArticleView')
-var dateformat = require('dateformat')
-var appStyle = require('../styles/appStyle.json')
+import reactMixin from 'react-mixin'
+import RowMixin from './RowMixin'
+// import Accordion from 'react-native-accordion'
+import Swipeout from 'react-native-swipeout'
+import StyleSheet from '../StyleSheet'
+import dateformat from 'dateformat'
+import appStyle from '../styles/appStyle.json'
 
 var DEFAULT_CURRENCY_SYMBOL = '£'
 

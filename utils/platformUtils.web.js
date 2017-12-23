@@ -1,4 +1,4 @@
-'use strict'
+if (__DEV__) console.log('requiring platformUtils.web.js')
 
 import ReactDOM from 'react-dom'
 import extend from 'xtend'

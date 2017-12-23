@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring debug.js')
 
 import { EventEmitter } from 'events'
 import debug from 'debug'

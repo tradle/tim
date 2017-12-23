@@ -1,23 +1,21 @@
+if (__DEV__) console.log('requiring HomePageMixin.js')
 'use strict';
 
-var React = require('react');
-var debug = require('debug')('tradle:app:HomePageMixin')
-var utils = require('../utils/utils');
-var translate = utils.translate
-var constants = require('@tradle/constants');
-var QRCodeScanner = require('./QRCodeScanner')
-var Actions = require('../Actions/Actions')
-var ResourceList = require('./ResourceList')
-var MessageList = require('./MessageList')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
-var MessageList = require('./MessageList')
-var extend = require('extend')
-const qrCodeDecoder = require('@tradle/qr-schema')
-
+import React from 'react'
+import utils, { translate } from '../utils/utils'
+import constants from '@tradle/constants'
+import QRCodeScanner from './QRCodeScanner'
+import Actions from '../Actions/Actions'
+import ResourceList from './ResourceList'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import MessageList from './MessageList'
+import extend from 'extend'
+import qrCodeDecoder from '@tradle/qr-schema'
 import {
   Alert
-} from 'react-native';
+} from 'react-native'
 
+const debug = require('debug')('tradle:app:HomePageMixin')
 const WEB_TO_MOBILE = '0'
 const TALK_TO_EMPLOYEEE = '1'
 const APP_QR_CODE = '5'

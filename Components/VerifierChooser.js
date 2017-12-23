@@ -1,20 +1,21 @@
+if (__DEV__) console.log('requiring VerifierChooser.js')
 'use strict';
 
-// var ResourceRow = require('./ResourceRow');
-var MessageList = require('./MessageList');
-var PageView = require('./PageView')
-var utils = require('../utils/utils');
-var reactMixin = require('react-mixin');
-var extend = require('extend')
-var Store = require('../Store/Store');
-var Actions = require('../Actions/Actions');
-var Reflux = require('reflux');
-var constants = require('@tradle/constants');
-var buttonStyles = require('../styles/buttonStyles');
-var NetworkInfoProvider = require('./NetworkInfoProvider')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
-var StyleSheet = require('../StyleSheet')
-var TimerMixin = require('react-timer-mixin')
+import ResourceRow from './ResourceRow'
+import MessageList from './MessageList'
+import PageView from './PageView'
+import utils from '../utils/utils'
+import reactMixin from 'react-mixin'
+import extend from 'extend'
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import constants from '@tradle/constants'
+import buttonStyles from '../styles/buttonStyles'
+import NetworkInfoProvider from './NetworkInfoProvider'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import StyleSheet from '../StyleSheet'
+import TimerMixin from 'react-timer-mixin'
 
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PROFILE = 'tradle.Profile'
@@ -110,7 +111,6 @@ class VerifierChooser extends Component {
   }
 
   renderRow(resource)  {
-    var ResourceRow = require('./ResourceRow')
     return <ResourceRow
               onSelect={() => this.showVerifier(resource)}
               isChooser={true}

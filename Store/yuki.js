@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring yuki.js')
 import { AsyncStorage } from 'react-native'
 import { utils } from '@tradle/engine'
 import ENV from '../utils/env'

@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring hex-to-rgb.js')
 // THANKS https://github.com/sindresorhus/hex-rgb
 
 export default function toRGB (hex) {
