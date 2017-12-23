@@ -25,6 +25,7 @@ import {
 
 import { coroutine as co } from 'bluebird'
 import ENV from '../utils/env'
+import IProov from '../utils/iproov'
 
 const SHOW_TIME_INTERVAL = 60000
 const DEFAULT_CURRENCY_SYMBOL = '£'
@@ -372,7 +373,6 @@ var RowMixin = {
       return Alert.alert('IProov is not set up')
     }
 
-    const IProov = require('../utils/iproov')
     const me = utils.getMe()
     const opts = {
       username: me[ROOT_HASH],

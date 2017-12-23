@@ -25,6 +25,7 @@ import InfiniteScrollView from 'react-native-infinite-scroll-view'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 import NoResources from './NoResources'
 // import ResourceRow from './ResourceRow'
+import ResourceRow from './ResourceRow'
 import ResourceView from './ResourceView'
 import ApplicationView from './ApplicationView'
 import VerificationRow from './VerificationRow'
@@ -1030,7 +1031,6 @@ class GridList extends Component {
                 search={search}
                 resource={resource} />
       )
-    let ResourceRow = require('./ResourceRow')
     return (<ResourceRow
       lazy={lazy}
       onSelect={isSharedContext ? this.openSharedContextChat.bind(this) : this.selectResource.bind(this)}

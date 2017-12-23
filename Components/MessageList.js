@@ -654,7 +654,7 @@ class MessageList extends Component {
     let { application, isAggregation, bankStyle, originatingMessage, currency, country, navigator } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id).value;
     let me = utils.getMe();
-    // let MessageRow = require('./MessageRow');
+    // import MessageRow from './MessageRow'
     let previousMessageTime = currentMessageTime;
     let isContext = utils.isContext(this.props.resource)
     currentMessageTime = resource.time

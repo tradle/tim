@@ -1,6 +1,5 @@
 if (__DEV__) console.log('requiring localAuth.js')
 
-const debug = require('debug')('tradle:app:local-auth')
 import { Alert, Platform } from 'react-native'
 const LocalAuth = Platform.OS !== 'web' && require('react-native-local-auth')
 const Errors = LocalAuth && require('react-native-local-auth/data/errors')
@@ -15,11 +14,13 @@ import { coroutine as co } from 'bluebird'
 // hack!
 // hasTouchID().then(ENV.setHasTouchID)
 
-var utils = require('../utils/utils')
-var translate = utils.translate
-// var TouchIDOptIn = require('../Components/TouchIDOptIn')
-var Actions = require('../Actions/Actions');
+import utils, {
+  translate
+} from '../utils/utils'
+// import TouchIDOptIn from '../Components/TouchIDOptIn'
+import Actions from '../Actions/Actions'
 
+const debug = require('debug')('tradle:app:local-auth')
 const PASSWORD_ITEM_KEY = 'app-password'
 
 const isWeb = Platform.OS === 'web'

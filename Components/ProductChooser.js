@@ -14,10 +14,6 @@ import MessageList from './MessageList'
 import MessageTypeRow from './MessageTypeRow'
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
-
-const FORM_REQUEST = 'tradle.FormRequest'
-const PRODUCT_REQUEST = 'tradle.ProductRequest'
-const REMEDIATION = 'tradle.Remediation'
 import {
   ListView,
   Text,
@@ -26,8 +22,12 @@ import {
   Platform
 } from 'react-native'
 
-const SearchBar = Platform.OS !== 'ios' ? null : require('react-native-search-bar')
 import React, { Component } from 'react'
+import SearchBar from './SearchBar'
+
+const FORM_REQUEST = 'tradle.FormRequest'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
+const REMEDIATION = 'tradle.Remediation'
 
 class ProductChooser extends Component {
   constructor(props) {
