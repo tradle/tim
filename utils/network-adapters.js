@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring network-adapters.js')
 
 module.exports = function createNetworkAdapters ({ blockchainName, networkName }) {
   const adapter = getAdapterImplementation(blockchainName)

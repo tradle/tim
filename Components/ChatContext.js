@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring ChatContext.js')
 'use strict'
 
 import {
@@ -7,12 +8,15 @@ import {
   TouchableOpacity
 } from 'react-native'
 import React, { Component, PropTypes } from 'react'
-import utils from '../utils/utils'
-var PageView = require('./PageView')
-var translate = utils.translate
 import Icon from 'react-native-vector-icons/Ionicons'
+import constants from '@tradle/constants'
+import utils, {
+  translate
+} from '../utils/utils'
+
+import PageView from './PageView'
+
 const REMEDIATION = 'tradle.Remediation'
-var constants = require('@tradle/constants');
 const PROFILE = constants.TYPES.PROFILE
 
 class ChatContext extends Component {

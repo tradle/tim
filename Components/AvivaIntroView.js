@@ -1,20 +1,21 @@
+if (__DEV__) console.log('requiring AvivaIntroView.js')
 'use strict';
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
-var PageView = require('./PageView')
+import PageView from './PageView'
 import Icon from 'react-native-vector-icons/Ionicons';
-var Actions = require('../Actions/Actions');
-var ResourceMixin = require('./ResourceMixin');
-var QRCode = require('./QRCode')
-var MessageList = require('./MessageList')
-var ResourceView = require('./ResourceView')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
-var ENV = require('../utils/env')
-var StyleSheet = require('../StyleSheet')
-var extend = require('extend');
-var ArticleView = require('./ArticleView');
-var termsAndConditions = require('../termsAndConditions.json')
+import Actions from '../Actions/Actions'
+import ResourceMixin from './ResourceMixin'
+import QRCode from './QRCode'
+import MessageList from './MessageList'
+import ResourceView from './ResourceView'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import ENV from '../utils/env'
+import StyleSheet from '../StyleSheet'
+import extend from 'extend'
+import ArticleView from './ArticleView'
+import termsAndConditions from '../termsAndConditions.json'
 import CustomIcon from '../styles/customicons'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'

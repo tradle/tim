@@ -1,4 +1,4 @@
-
+if (__DEV__) console.log('requiring env.js')
 import {
   Platform
 } from 'react-native'
@@ -25,8 +25,8 @@ const DEV_PUSH_SERVER = 'https://push1.tradle.io' //`http://${LOCAL_IP}:48284`
 const PROD_PUSH_SERVER = 'https://push1-prod.tradle.io'
 
 const splash = {
-  tradle: require('../img/splash1536x2048.png'),
-  aviva: require('../img/Aviva.png')
+  get tradle() { return require('../img/splash1536x2048.png') },
+  get aviva() { return require('../img/Aviva.png') }
 }
 
 const splashContrastColor = {
@@ -35,8 +35,8 @@ const splashContrastColor = {
 }
 
 const brandBG = {
-  tradle: require('../img/bg.png'),
-  aviva: require('../img/Aviva.png')
+  get tradle() { return require('../img/bg.png') },
+  get aviva() { return require('../img/Aviva.png') }
 }
 
 const navBarHeight = Platform.select({
@@ -58,6 +58,7 @@ const merged = extend({
   // friendly
   // LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/',
   LOCAL_TRADLE_SERVERS: [
+    // 'http://localhost:21013',
     'https://lo5d85p78d.execute-api.us-east-1.amazonaws.com/dev/',
     'https://yy6zli69ab.execute-api.us-east-1.amazonaws.com/dev/',
     'https://e1b8reh825.execute-api.us-east-1.amazonaws.com/dev/'

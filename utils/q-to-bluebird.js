@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring q-to-bluebird.js')
 var mockery = require('mockery')
 mockery.enable({
   warnOnReplace: false,

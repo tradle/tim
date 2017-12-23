@@ -1,8 +1,9 @@
+if (__DEV__) console.log('requiring Log.js')
 
 import debug from '../utils/debug'
 import React, { Component } from 'react'
-var TimerMixin = require('react-timer-mixin')
-var reactMixin = require('react-mixin');
+import TimerMixin from 'react-timer-mixin'
+import reactMixin from 'react-mixin'
 
 import {
   View,

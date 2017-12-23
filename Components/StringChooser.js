@@ -1,16 +1,15 @@
+if (__DEV__) console.log('requiring StringChooser.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var translate = utils.translate
-var equal = require('deep-equal')
-var MessageList = require('./MessageList')
+import React, { Component } from 'react'
+import equal from 'deep-equal'
+import constants from '@tradle/constants'
+import StringRow from './StringRow'
+import utils, { translate } from '../utils/utils'
+import MessageList from './MessageList'
 
-var constants = require('@tradle/constants');
-var PageView = require('./PageView')
+import PageView from './PageView'
 import platformStyles from '../styles/platform'
-
-const FORM_REQUEST = 'tradle.FormRequest'
-const REMEDIATION = 'tradle.Remediation'
 import {
   ListView,
   Text,
@@ -19,8 +18,10 @@ import {
   Platform
 } from 'react-native'
 
-const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
-import React, { Component } from 'react'
+import SearchBar from './SearchBar'
+
+const FORM_REQUEST = 'tradle.FormRequest'
+const REMEDIATION = 'tradle.Remediation'
 
 class StringChooser extends Component {
   constructor(props) {
@@ -43,7 +44,6 @@ class StringChooser extends Component {
     if (!model)
       return null
     model = model.value;
-    var StringRow = require('./StringRow');
 
     return (
       <StringRow

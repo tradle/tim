@@ -1,48 +1,35 @@
-'use strict';
+if (__DEV__) console.log('requiring NewResource.js')
+'use strict'
 
-var debug = require('debug')('NewResource')
-var utils = require('../utils/utils');
-var translate = utils.translate
-var NewItem = require('./NewItem');
-var ResourceList = require('./ResourceList')
-var GridList = require('./GridList')
-var GridItemsList = require('./GridItemsList')
-var PhotoView = require('./PhotoView');
-var ResourceView = require('./ResourceView');
-var MessageView = require('./MessageView')
-var ResourceMixin = require('./ResourceMixin');
-var PageView = require('./PageView')
-var t = require('tcomb-form-native');
-var extend = require('extend');
-var Actions = require('../Actions/Actions');
-var Store = require('../Store/Store');
-var Reflux = require('reflux');
-var reactMixin = require('react-mixin');
-import Icon from 'react-native-vector-icons/Ionicons';
-var rStyles = require('../styles/registrationStyles');
-var NewResourceMixin = require('./NewResourceMixin');
-var equal = require('deep-equal')
-var constants = require('@tradle/constants');
-var termsAndConditions = require('../termsAndConditions.json')
-var StyleSheet = require('../StyleSheet')
+import utils, { translate } from '../utils/utils'
+import NewItem from './NewItem'
+import ResourceList from './ResourceList'
+import GridList from './GridList'
+import GridItemsList from './GridItemsList'
+import PhotoView from './PhotoView'
+import ResourceView from './ResourceView'
+import MessageView from './MessageView'
+import ResourceMixin from './ResourceMixin'
+import PageView from './PageView'
+import t from 'tcomb-form-native'
+import extend from 'extend'
+import Actions from '../Actions/Actions'
+import Store from '../Store/Store'
+import Reflux from 'reflux'
+import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons'
+import rStyles from '../styles/registrationStyles'
+import NewResourceMixin from './NewResourceMixin'
+import equal from 'deep-equal'
+import constants from '@tradle/constants'
+import termsAndConditions from '../termsAndConditions.json'
+import StyleSheet from '../StyleSheet'
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import ImageInput from './ImageInput'
-var chatStyles = require('../styles/chatStyles')
-
-var TextInputState = require('TextInputState')
-
+import chatStyles from '../styles/chatStyles'
+import TextInputState from 'TextInputState'
 import CustomIcon from '../styles/customicons'
-const ENUM = 'tradle.Enum'
-const FORM_ERROR = 'tradle.FormError'
-const PHOTO = 'tradle.Photo'
-const SETTINGS = 'tradle.Settings'
-const HAND_SIGNATURE = 'tradle.HandSignature'
-
-const DEFAULT_LINK_COLOR = '#a94442'
-
-var Form = t.form.Form;
-var stylesheet = require('../styles/styles')
-
+import stylesheet from '../styles/styles'
 import Native, {
   // StyleSheet,
   View,
@@ -65,7 +52,15 @@ import { makeResponsive } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
 
+const debug = require('debug')('NewResource')
 const BG_IMAGE = ENV.brandBackground
+const ENUM = 'tradle.Enum'
+const FORM_ERROR = 'tradle.FormError'
+const PHOTO = 'tradle.Photo'
+const SETTINGS = 'tradle.Settings'
+const HAND_SIGNATURE = 'tradle.HandSignature'
+const DEFAULT_LINK_COLOR = '#a94442'
+var Form = t.form.Form;
 
 class NewResource extends Component {
   static displayName = 'NewResource';

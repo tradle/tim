@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring BackgroundImage.js')
 import React, { Component } from 'react'
 import {
   Platform,

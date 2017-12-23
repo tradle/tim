@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring Geometry.js')
 
 import React, { Component, PropTypes } from 'react'
 import {

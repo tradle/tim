@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring EnumList.js')
 'use strict';
 
 import React, { Component } from 'react'
@@ -10,9 +11,9 @@ import {
   Platform,
   Text
 } from 'react-native'
-const SearchBar = Platform.OS === 'android' ? null : require('react-native-search-bar')
-var translate = require('../utils/utils').translate
-var StyleSheet = require('../StyleSheet')
+import { translate } from '../utils/utils'
+import StyleSheet from '../StyleSheet'
+import SearchBar from './SearchBar'
 
 class EnumList extends Component {
   props: {

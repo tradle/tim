@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring nkey-se.js')
 
 import crypto from 'crypto'
 import * as ec from 'react-native-ecc'

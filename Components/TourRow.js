@@ -1,22 +1,23 @@
+if (__DEV__) console.log('requiring TourRow.js')
 'use strict';
 
-var utils = require('../utils/utils');
+import utils from '../utils/utils'
 var translate = utils.translate
 import uiUtils from './uiUtils'
 import Icon from 'react-native-vector-icons/Ionicons';
-var constants = require('@tradle/constants');
+import constants from '@tradle/constants'
 const {
   TYPE,
   ROOT_HASH
 } = constants
 
 const LIMIT = 20
-var RowMixin = require('./RowMixin');
-var ResourceMixin = require('./ResourceMixin')
+import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
 import { makeResponsive } from 'react-native-orient'
-var StyleSheet = require('../StyleSheet')
-var reactMixin = require('react-mixin');
-var chatStyles = require('../styles/chatStyles')
+import StyleSheet from '../StyleSheet'
+import reactMixin from 'react-mixin'
+import chatStyles from '../styles/chatStyles'
 
 const TOUR = 'tradle.Tour'
 

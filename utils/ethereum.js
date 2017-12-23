@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring ethereum.js')
 
 const { etherscanApiKey } = require('./env')
 

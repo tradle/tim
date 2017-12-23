@@ -1,15 +1,16 @@
+if (__DEV__) console.log('requiring ResourceMixin.js')
 'use strict';
 
-var utils = require('../utils/utils');
-var extend = require('extend');
+import utils from '../utils/utils'
+import extend from 'extend'
 var translate = utils.translate
 import Icon from 'react-native-vector-icons/Ionicons';
-var equal = require('deep-equal')
-var StyleSheet = require('../StyleSheet')
-var PhotoList = require('./PhotoList')
-var constants = require('@tradle/constants');
-var Accordion = require('./Accordion')
-var defaultBankStyle = require('../styles/defaultBankStyle.json')
+import equal from 'deep-equal'
+import StyleSheet from '../StyleSheet'
+import PhotoList from './PhotoList'
+import constants from '@tradle/constants'
+import Accordion from './Accordion'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
 
 import ENV from '../utils/env'
 
@@ -55,7 +56,7 @@ var markdownStyles = {
   },
 }
 
-var Markdown = require('./Markdown')
+import Markdown from './Markdown'
 import React, { Component } from 'react'
 
 var ResourceMixin = {

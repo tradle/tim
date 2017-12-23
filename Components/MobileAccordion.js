@@ -1,8 +1,9 @@
+if (__DEV__) console.log('requiring MobileAccordion.js')
 'use strict';
 
 import React, {Component} from  'react'
 
-var Accordion = require('react-native-collapsible/Accordion')
+import Accordion from 'react-native-collapsible/Accordion'
 
 class MobileAccordion extends Component {
   // constructor(props) {

@@ -1,12 +1,13 @@
+if (__DEV__) console.log('requiring RemediationItemsList.js')
 'use strict';
 
-var MessageView = require('./MessageView')
-var utils = require('../utils/utils');
+import MessageView from './MessageView'
+import utils from '../utils/utils'
 var translate = utils.translate
-var constants = require('@tradle/constants');
+import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons';
 import platformStyles from '../styles/platform'
-var Actions = require('../Actions/Actions')
+import Actions from '../Actions/Actions'
 
 import React, { Component } from 'react'
 import {

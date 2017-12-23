@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring keychain.js')
 import { Alert } from 'react-native'
 import { createHash } from 'crypto'
 import typeforce from 'typeforce'

@@ -1,15 +1,16 @@
+if (__DEV__) console.log('requiring RowMixin.js')
 'use strict';
 
 const debug = require('debug')('tradle:app:RowMixin')
-var React = require('react');
-var utils = require('../utils/utils');
+import React from 'react'
+import utils from '../utils/utils'
 var translate = utils.translate
-var constants = require('@tradle/constants');
-var Actions = require('../Actions/Actions');
+import constants from '@tradle/constants'
+import Actions from '../Actions/Actions'
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomIcon from '../styles/customicons'
-var StyleSheet = require('../StyleSheet')
-var chatStyles = require('../styles/chatStyles')
+import StyleSheet from '../StyleSheet'
+import chatStyles from '../styles/chatStyles'
 var cnt = 0;
 import {
   Text,

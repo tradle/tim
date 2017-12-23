@@ -1,3 +1,4 @@
+if (__DEV__) console.log('requiring FadeInView.js')
 'use strict'
 
 import React, { Component } from 'react'
