@@ -26,7 +26,7 @@
     "fixasyncstorage": "cp AsyncStorage/AsyncStorage.js1 node_modules/react-native/Libraries/Storage/AsyncStorage.js && cp AsyncStorage/AsyncStorageTypes.js1 node_modules/react-native/Libraries/Storage/AsyncStorageTypes.js"
   },
   "dependencies": {
-    "@tradle/aws-client": "github:tradle/aws-client",
+    "@tradle/aws-client": "github:tradle/aws-client#1bd033b",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
     "@tradle/biz-plugins": "github:tradle/biz-plugins",
     "@tradle/build-resource": "^2.9.1",
@@ -36,7 +36,7 @@
     "@tradle/engine": "^5.3.3",
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.1.0",
-    "@tradle/models": "github:tradle/models#269be49",
+    "@tradle/models": "github:tradle/models",
     "@tradle/multiqueue": "^2.3.0",
     "@tradle/protocol": "^3.0.0",
     "@tradle/qr-schema": "^1.1.0",
