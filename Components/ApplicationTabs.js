@@ -12,7 +12,7 @@ import {
 
 import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
-import ProgressBar from 'react-native-progress/Bar'
+import ProgressBar from './ProgressBar'
 import constants from '@tradle/constants'
 import utils, {
   translate

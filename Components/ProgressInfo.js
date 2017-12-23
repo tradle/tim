@@ -16,7 +16,7 @@ const Reflux = require('reflux');
 const reactMixin = require('react-mixin');
 const TimerMixin = require('react-timer-mixin')
 
-import ProgressBar from 'react-native-progress/Bar';
+import ProgressBar from './ProgressBar';
 
 const { PERMALINK } = constants
 

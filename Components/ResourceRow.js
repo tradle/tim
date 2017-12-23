@@ -20,7 +20,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import appStyle from '../styles/appStyle.json'
 import StyleSheet from '../StyleSheet'
 // import Pie from 'react-native-progress/Pie';
-import ProgressBar from 'react-native-progress/Bar';
+import ProgressBar from './ProgressBar';
 
 import {
   Image,
