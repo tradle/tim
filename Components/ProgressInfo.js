@@ -11,10 +11,10 @@ import { constants } from '@tradle/engine'
 import utils from '../utils/utils'
 
 const debug = require('debug')('tradle:app:progressbar')
-const Store = require('../Store/Store');
-const Reflux = require('reflux');
-const reactMixin = require('react-mixin');
-const TimerMixin = require('react-timer-mixin')
+import Store from '../Store/Store'
+import Reflux from 'reflux'
+import reactMixin from 'react-mixin'
+import TimerMixin from 'react-timer-mixin'
 
 import ProgressBar from './ProgressBar';
 

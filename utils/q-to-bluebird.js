@@ -1,5 +1,5 @@
 if (__DEV__) console.log('requiring q-to-bluebird.js')
-var mockery = require('mockery')
+import mockery from 'mockery'
 mockery.enable({
   warnOnReplace: false,
   warnOnUnregistered: false

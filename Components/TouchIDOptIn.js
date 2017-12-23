@@ -13,9 +13,9 @@ import React, { Component, PropTypes } from 'react'
 import ArticleView from './ArticleView'
 import utils from '../utils/utils'
 import ENV from '../utils/env'
+import TOUCH_ID_IMG from '../img/touchid2.png'
 
 const BG_IMAGE = ENV.brandBackground
-const TOUCH_ID_IMG = require('../img/touchid2.png')
 const LINK_COLOR = '#7AAAC3'
 const BTN_COLOR = LINK_COLOR
 

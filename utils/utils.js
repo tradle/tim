@@ -105,7 +105,7 @@ const MSG_LINK = '_msg'
 const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
-// var dictionaries = require('@tradle/models').dict
+// import dictionaries from '@tradle/models'.dict
 var dictionary //= dictionaries[Strings.language]
 
 var propTypesMap = {

@@ -56,8 +56,8 @@ import BackgroundImage from './BackgroundImage'
 import Navs from '../utils/navs'
 import ENV from '../utils/env'
 import ActivityIndicator from './ActivityIndicator'
+import { parse as parseURL } from 'url'
 
-const parseURL = require('url').parse
 const debug = require('debug')('tradle:app:Home')
 
 var isDeepLink
