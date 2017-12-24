@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring GridItemsList.js')
+console.log('requiring GridItemsList.js')
 'use strict';
 
 import PhotoList from './PhotoList'

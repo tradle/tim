@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ProductChooser.js')
+console.log('requiring ProductChooser.js')
 'use strict';
 
 import NewResource from './NewResource'

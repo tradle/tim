@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring RemediationItemsList.js')
+console.log('requiring RemediationItemsList.js')
 'use strict';
 
 import MessageView from './MessageView'

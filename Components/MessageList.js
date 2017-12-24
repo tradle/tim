@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring MessageList.js')
+console.log('requiring MessageList.js')
 'use strict';
 
 import React, { Component } from 'react'

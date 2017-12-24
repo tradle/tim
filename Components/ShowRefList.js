@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ShowRefList.js')
+console.log('requiring ShowRefList.js')
 'use strict';
 
 import constants from '@tradle/constants'

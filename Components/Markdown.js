@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring Markdown.js')
+console.log('requiring Markdown.js')
 'use strict';
 
 import React, { Component, PropTypes } from 'react'

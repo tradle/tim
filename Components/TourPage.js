@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring TourPage.js')
+console.log('requiring TourPage.js')
 import React, { Component, PropTypes } from 'react'
 import {
   WebView,

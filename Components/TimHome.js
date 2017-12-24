@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring TimHome.js')
+console.log('requiring TimHome.js')
 'use strict';
 
 import Q from 'q'

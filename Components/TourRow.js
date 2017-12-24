@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring TourRow.js')
+console.log('requiring TourRow.js')
 'use strict';
 
 import utils from '../utils/utils'

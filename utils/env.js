@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring env.js')
+console.log('requiring env.js')
 import {
   Platform
 } from 'react-native'

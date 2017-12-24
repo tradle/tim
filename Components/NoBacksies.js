@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring NoBacksies.js')
+console.log('requiring NoBacksies.js')
 import React, { PropTypes, Component } from 'react'
 import {
   View,

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ProgressInfo.js')
+console.log('requiring ProgressInfo.js')
 'use strict'
 
 import {

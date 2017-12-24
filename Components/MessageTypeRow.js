@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring MessageTypeRow.js')
+console.log('requiring MessageTypeRow.js')
 'use strict';
 
 import utils from '../utils/utils'

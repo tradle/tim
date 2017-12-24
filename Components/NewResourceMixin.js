@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring NewResourceMixin.js')
+console.log('requiring NewResourceMixin.js')
  'use strict';
 
 import React from 'react'

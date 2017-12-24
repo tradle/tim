@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring keeper.js')
+console.log('requiring keeper.js')
 
 import through from 'through2'
 import pump from 'pump'

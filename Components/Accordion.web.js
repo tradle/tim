@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring Accordion.web.js')
+console.log('requiring Accordion.web.js')
 'use strict';
 
 import React, {Component} from  'react'

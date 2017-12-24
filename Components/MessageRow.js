@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring MessageRow.js')
+console.log('requiring MessageRow.js')
 'use strict';
 
 import extend from 'extend'

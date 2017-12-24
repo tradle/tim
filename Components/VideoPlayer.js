@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring VideoPlayer.js')
+console.log('requiring VideoPlayer.js')
 'use strict'
 
 import React, { PropTypes } from 'react'

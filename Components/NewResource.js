@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring NewResource.js')
+console.log('requiring NewResource.js')
 'use strict'
 
 import utils, { translate } from '../utils/utils'

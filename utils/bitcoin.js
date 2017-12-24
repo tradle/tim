@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring bitcoin.js')
+console.log('requiring bitcoin.js')
 
 import Networks from '@tradle/bitcoin-adapter'
 

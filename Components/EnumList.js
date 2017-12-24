@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring EnumList.js')
+console.log('requiring EnumList.js')
 'use strict';
 
 import React, { Component } from 'react'

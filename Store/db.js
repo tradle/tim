@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring db.js')
+console.log('requiring db.js')
 import {
   getPassword,
   setPassword,

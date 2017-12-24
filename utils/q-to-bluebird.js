@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring q-to-bluebird.js')
+console.log('requiring q-to-bluebird.js')
 import mockery from 'mockery'
 mockery.enable({
   warnOnReplace: false,

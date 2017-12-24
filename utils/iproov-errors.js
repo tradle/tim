@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring iproov-errors.js')
+console.log('requiring iproov-errors.js')
 export default {
   '1000': 'APIError',
   '1001': 'StreamingError',

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring logAll.js')
+console.log('requiring logAll.js')
 // Store apply and call
 global.logAll = true
 ;['setTimeout', 'setInterval', 'setImmediate'].forEach(method => {

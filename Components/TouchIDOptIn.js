@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring TouchIDOptIn.js')
+console.log('requiring TouchIDOptIn.js')
 
 import {
   View,

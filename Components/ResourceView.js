@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ResourceView.js')
+console.log('requiring ResourceView.js')
 'use strict';
 
 import pick from 'object.pick'

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring Log.js')
+console.log('requiring Log.js')
 
 import debug from '../utils/debug'
 import React, { Component } from 'react'

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ChatContext.js')
+console.log('requiring ChatContext.js')
 'use strict'
 
 import {

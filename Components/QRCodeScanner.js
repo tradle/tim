@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring QRCodeScanner.js')
+console.log('requiring QRCodeScanner.js')
 
 import {
   StyleSheet,
