@@ -2604,8 +2604,10 @@ var Store = Reflux.createStore({
     this._setItem(okey, org)
 
     list[okey].value._online = true
-    if (sp.style)
+    if (sp.style) {
+      // sp.style.splashscreen = 'https://s3.amazonaws.com/tradle-public-images/Aviva.png'
       this._getItem(okey).style = sp.style
+    }
     if (!list[ikey]) {
       var profile = {
         [TYPE]: PROFILE,
@@ -5367,6 +5369,7 @@ var Store = Reflux.createStore({
     let {to, context, loadEarlierMessages, allLoaded, spinner,
          isForgetting, limit, listView, _readOnly, gatherForms} = params
     let shareableResources, result, retParams
+console.time('getMessageList')
     if (me.isEmployee  &&  meta.id === MESSAGE  &&  context) {
       let myBot = this.getRepresentative(me.organization)
       result = await this.searchServer({
@@ -5599,6 +5602,7 @@ var Store = Reflux.createStore({
       if (context)
         retParams.productToForms = await this.gatherForms(utils.getId(to), context)
     }
+console.timeEnd('getMessageList')
     this.trigger(retParams)
   },
 
@@ -6207,7 +6211,7 @@ var Store = Reflux.createStore({
     var self = this
 
     var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop} = params
-
+console.time('searchAllMessages')
     var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
     var foundResources = [];
 
@@ -6342,6 +6346,7 @@ var Store = Reflux.createStore({
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a.time - b.time)
       utils.pinFormRequest(foundResources)
+console.timeEnd('searchAllMessages')
       return foundResources
     })
     .catch((err) => {
@@ -9669,7 +9674,8 @@ var Store = Reflux.createStore({
     return utils.dangerousReadDB(db)
     .then((results) => {
       if (!results.length)
-        return self.loadModels();
+        return
+        // return self.loadModels();
 
       results.forEach((data) => {
         if (data.value == null) return
@@ -9748,9 +9754,9 @@ var Store = Reflux.createStore({
       }
 
       console.log('Stream ended');
-      var noModels = utils.isEmpty(models);
-      if (noModels)
-        return self.loadModels();
+      // var noModels = utils.isEmpty(models);
+      // if (noModels)
+      //   return self.loadModels();
       if (me  &&  (!list[utils.getId(me)] || !list[utils.makeId(IDENTITY, me[ROOT_HASH])]))
         me = null
       console.log('Stream closed');
@@ -10543,14 +10549,14 @@ var Store = Reflux.createStore({
     if (utils.isEmpty(models))
       this.addModels()
 
-    // return this.loadStaticDbData(true)
-    // .then(() => {
-      return this.loadMyResources()
-    // })
-    // .then(self.loadAddressBook)
-    .catch((err) => {
-      err = err;
-    });
+    // // return this.loadStaticDbData(true)
+    // // .then(() => {
+    //   return this.loadMyResources()
+    // // })
+    // // .then(self.loadAddressBook)
+    // .catch((err) => {
+    //   err = err;
+    // });
   },
   loadStaticData() {
     sampleData.getResources().forEach((r) => {
@@ -10578,22 +10584,24 @@ var Store = Reflux.createStore({
   },
 
   loadModels() {
-    var batch = [];
+    // var batch = [];
 
-    for (var m in models)
-      batch.push({type: 'put', key: m, value: models[m].value});
+    // for (var m in models)
+    //   batch.push({type: 'put', key: m, value: models[m].value});
 
-    this.setBusyWith('loadingModels')
+    // this.setBusyWith('loadingModels')
 
-    // return Promise.resolve()
-    return db.batch(batch)
-          .then(() => {
-            this.setBusyWith('loadingResources')
-            return this.loadMyResources();
-          })
-          .catch((err) => {
-            err = err;
-          });
+    // // return Promise.resolve()
+    // return db.batch(batch)
+    //       .then(() => {
+    //         this.setBusyWith('loadingResources')
+    //         return this.loadMyResources();
+    //       })
+    //       .catch((err) => {
+    //         err = err;
+    //       });
+    this.setBusyWith('loadingResources')
+    return this.loadMyResources();
   },
 
   async onIdle() {
