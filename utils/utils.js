@@ -1738,7 +1738,7 @@ var utils = {
     }
   },
   submitLog: async function () {
-    const me = utils.getMe()
+    const me = utils.getMe() || { firstName: '[unknown]', lastName: '[unknown]' }
     try {
       const res = await submitLog(ENV.serverToSendLog + '?' + querystring.stringify({
         firstName: me.firstName,
