@@ -622,9 +622,13 @@ var NavigationBarRouteMapper = {
     let icon
     let symbol
     let iconSize = 25
+    let iconColor = /*rbTitle === 'Done' ? '#7AAAC3' : */ '#7AAAC3'
     let style = {}
+    let isSubmit
     switch (rbTitle) {
     case 'Done':
+      iconColor = '#fff'
+      isSubmit = true
       // if (route.passProps.bankStyle  &&  route.passProps.bankStyle.submitBarInFooter)
       //   return
     case 'Accept':
@@ -654,8 +658,11 @@ var NavigationBarRouteMapper = {
     }
     let title
     if (icon)  {
-      let color = /*rbTitle === 'Done' ? '#7AAAC3' : */ '#7AAAC3'
-      title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={color} style={[styles.icon, style]} />
+      title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={iconColor} style={[styles.icon, style]} />
+      if (isSubmit)
+        title = <View style={styles.submit}>
+                  {title}
+                </View>
     }
     else if (symbol)
       title = <Text style={{fontSize: 25}}>{symbol}</Text>
@@ -802,7 +809,7 @@ var NavigationBarRouteMapper = {
     let { width } = utils.dimensions(component)
 
     let tWidth = width * 0.8
-    let numberOfCharsInWidth = tWidth / utils.getFontSize(10)
+    let numberOfCharsInWidth = tWidth / utils.getFontSize(12)
     if (title.length < numberOfCharsInWidth)
       return title
     title = title.substring(0, numberOfCharsInWidth)
@@ -876,6 +883,15 @@ var styles = StyleSheet.create({
     color: '#2892C6',
     fontSize: 12,
     alignSelf: 'center'
+  },
+  submit: {
+    backgroundColor: '#7AAAC3',
+    borderColor: '#cccccc',
+    borderRadius: 5,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingRight: 10,
+    paddingLeft:15,
+    paddingBottom: 5
   }
 });
 
