@@ -349,7 +349,7 @@ class ResourceView extends Component {
 
     return (
       <PageView style={platformStyles.container}>
-        <ScrollView  ref='this' name={this._lazyId}>
+        <ScrollView  ref='this' name={this._lazyId} style={{backgroundColor: '#fff'}}>
           <View style={styles.photoBG}>
             {photoView}
             {identityPhotoList}

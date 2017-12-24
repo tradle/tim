@@ -1114,8 +1114,9 @@ class ResourceList extends Component {
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
     let contentSeparator = utils.getContentSeparator(this.props.bankStyle)
+    let style = {backgroundColor: '#fff'}
     return (
-      <PageView style={this.props.isBacklink ? {} : platformStyles.container} separator={contentSeparator}>
+      <PageView style={this.props.isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator}>
         {network}
         {searchBar}
         <View style={styles.separator} />
