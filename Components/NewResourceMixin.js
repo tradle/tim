@@ -2114,7 +2114,7 @@ var styles= StyleSheet.create({
     // justifyContent: 'center',
     borderColor: 'transparent',
     borderWidth: 1.5,
-    marginTop: 20,
+    marginTop: 10,
     marginHorizontal: 10,
     marginBottom: 5
   },
