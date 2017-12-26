@@ -621,8 +621,6 @@ var utils = {
   },
   getEditCols(model) {
     let { editCols, viewCols, properties } = model
-    if (!editCols  &&  !viewCols)
-      return properties
     let eCols = {}
     if (editCols) {
       editCols.forEach((p) => {
@@ -635,15 +633,17 @@ var utils = {
       })
       return eCols
     }
-    viewCols.forEach((p) => {
-      let idx = p.indexOf('_group')
-      if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
-        eCols[p] = properties[p]
+    if (viewCols) {
+      viewCols.forEach((p) => {
+        let idx = p.indexOf('_group')
+        if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
+          eCols[p] = properties[p]
 
-      if (idx !== -1  &&  properties[p].list)
-        properties[p].list.forEach((p) => eCols[p] = properties[p])
-      // eCols[p] = props[p]
-    })
+        if (idx !== -1  &&  properties[p].list)
+          properties[p].list.forEach((p) => eCols[p] = properties[p])
+        // eCols[p] = props[p]
+      })
+    }
     // ViewCols on top
     for (let p in properties) {
       if (!eCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden)
@@ -953,7 +953,7 @@ var utils = {
       Object.keys(res).forEach(p => {
         if (p === 'txId')
           return
-        if (p === '_context') {
+        if (p === '_context'  &&  res._context) {
           res._context = this.buildRef(res._context)
           return
         }
