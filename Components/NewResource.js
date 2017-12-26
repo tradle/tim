@@ -10,6 +10,7 @@ import PhotoView from './PhotoView'
 import ResourceView from './ResourceView'
 import MessageView from './MessageView'
 import ResourceMixin from './ResourceMixin'
+import ShowPropertiesView from './ShowPropertiesView'
 import PageView from './PageView'
 import t from 'tcomb-form-native'
 import extend from 'extend'
@@ -354,7 +355,7 @@ class NewResource extends Component {
     this.state.noScroll = false
     var resource = this.state.resource;
 
-    var value = this.refs.form.getValue();
+    var value = this.refs.form  &&  this.refs.form.getValue() ||  resource
     if (!value) {
       value = this.refs.form.refs.input.state.value;
       if (!value)
@@ -655,8 +656,27 @@ class NewResource extends Component {
     }
     var options = this.getFormFields(params);
 
-    var Model = t.struct(model);
+    if (!options) {
+      let contentSeparator = utils.getContentSeparator(bankStyle)
+      return <PageView style={platformStyles.container} separator={contentSeparator}>
+                <ShowPropertiesView resource={data}
+                                    bankStyle={bankStyle}
+                                    navigator={navigator} />
+                  <TouchableOpacity onPress={() => {
+                    this.onSavePressed()
+                      // navigator.pop()
+                      // Actions.addItem(data)
+                    }
+                  }>
+                  <View style={[styles.submit, {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}]}>
+                    <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 5}}/>
+                    <Text style={styles.submitText}>{translate('Submit')}</Text>
+                  </View>
+                </TouchableOpacity>
+             </PageView>
+    }
 
+    var Model = t.struct(model);
     var itemsMeta
     if (this.props.editCols) {
       itemsMeta = []
@@ -784,7 +804,7 @@ class NewResource extends Component {
                  </TouchableOpacity>
       else
         submit  = <TouchableOpacity onPress={this.onSavePressed}>
-                    <View style={styles.submit}>
+                    <View style={[styles.submit, {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}]}>
                       <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 5}}/>
                       <Text style={styles.submitText}>{translate('Submit')}</Text>
                     </View>

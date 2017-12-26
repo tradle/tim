@@ -139,51 +139,24 @@ var NewResourceMixin = {
     let eCols
     if (this.props.editCols) {
       eCols = {};
-      this.props.editCols.forEach((r) => {
-        eCols[r] = props[r]
-      })
+      this.props.editCols.forEach((r) => eCols[r] = props[r])
     }
     else {
       eCols = utils.getEditCols(meta)
-      if (!eCols || utils.isEmpty(eCols))
-        eCols = props
+      if (!eCols || utils.isEmpty(eCols)) {
+        eCols = {}
+        meta.required.forEach((p) => eCols[p] = props[p])
+        //   eCols = props
+      }
       // else
       //   eCols = Object.values(eCols)
     }
-    // else if (meta.editCols) {
-    //   utils.arrayToObject(meta.editCols);
-    //   editCols = {}
-    //   meta.editCols.forEach((p) => {
-    //     let idx = p.indexOf('_group')
-    //     if (idx === -1  ||  !props[p].list || props[p].title.toLowerCase() !== p)
-    //       editCols[p] = props[p]
+    let showReadOnly = true
+    for (let p in eCols) {
+      if (!props[p].readOnly)
+        showReadOnly = false
+    }
 
-    //     if (idx !== -1  &&  props[p].list)
-    //       props[p].list.forEach((p) => editCols[p] = props[p])
-    //   })
-    // }
-
-    // let eCols
-    // if (editCols)
-    //   eCols = editCols
-    // else if (!meta.viewCols)
-    //   eCols = props
-    // else {
-    //   eCols = {}
-    //   meta.viewCols.forEach((p) => {
-    //     let idx = p.indexOf('_group')
-    //     if (idx === -1  ||  !props[p].list || props[p].title.toLowerCase() !== p)
-    //       eCols[p] = props[p]
-
-    //     if (idx !== -1  &&  props[p].list)
-    //       props[p].list.forEach((p) => eCols[p] = props[p])
-    //     // eCols[p] = props[p]
-    //   })
-    //   for (let p in props) {
-    //     if (!eCols[p]  &&  !props[p].readOnly  &&  !props[p].hidden)
-    //       eCols[p] = props[p]
-    //   }
-    // }
     let { errs, requestedProperties } = this.props
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
@@ -233,7 +206,7 @@ var NewResourceMixin = {
       let formType = propTypesMap[type];
       // Don't show readOnly property in edit mode if not set
       let isReadOnly = props[p].readOnly
-      if (isReadOnly  &&  !search) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
+      if (isReadOnly  &&  !search  &&  !showReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
       this.setDefaultValue(p, data, true)
       if (utils.isHidden(p, resource)) {
@@ -867,12 +840,18 @@ var NewResourceMixin = {
     else
       title = utils.translate('Please click here to view/edit')
 
-    return <View style={st}>
-             <TouchableOpacity onPress={this.showMarkdownEditView.bind(this, prop)}>
-               <View style={vStyle}>
+    let header
+    if (prop.readOnly)
+      st.marginTop = -10
+    else
+      header = <View style={vStyle}>
                  <Text style={lStyle}>{title}</Text>
                  <Icon name='md-create' size={25}  color={this.props.bankStyle.linkColor} />
                </View>
+
+    return <View style={st}>
+             <TouchableOpacity onPress={this.showMarkdownEditView.bind(this, prop)}>
+               {header}
              </TouchableOpacity>
              {markdown}
           </View>
@@ -2168,9 +2147,9 @@ var styles= StyleSheet.create({
   bottom10: {
     paddingBottom: 10
   },
-  contentLeft: {
-    justifyContent: 'flex-end'
-  },
+  // contentLeft: {
+  //   justifyContent: 'flex-end'
+  // },
   floatingLabel: {
     marginTop: 20
   },
