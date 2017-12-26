@@ -9,6 +9,7 @@ import NewResource from './NewResource'
 import MessageList from './MessageList'
 import MessageView from './MessageView'
 import PageView from './PageView'
+import TourPage from './TourPage'
 import GridList from './GridList'
 import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
@@ -500,7 +501,7 @@ class ResourceList extends Component {
     return false
   }
 
-  selectResource(resource) {
+  selectResource(resource, replace) {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, callback, navigator, bankStyle, serverOffline, prop, currency, officialAccounts } = this.props
@@ -600,6 +601,43 @@ class ResourceList extends Component {
     let self = this;
     let style = this.mergeStyle(resource.style)
 
+    if (officialAccounts) {
+      // if (isOrganization)
+      //   route.title = resource.name
+      let msg = {
+        message: translate('customerWaiting', me.firstName),
+        _t: CUSTOMER_WAITING,
+        from: me,
+        to: utils.isEmployee(resource) ? me.organization : resource,
+        time: new Date().getTime()
+      }
+
+      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
+    }
+    if (isOrganization) {
+      if (resource._tour  &&  !resource._noTour) {
+        navigator.push({
+          title: "",
+          component: TourPage,
+          id: 35,
+          backButtonTitle: null,
+          // backButtonTitle: __DEV__ ? 'Back' : null,
+          passProps: {
+            bankStyle: bankStyle,
+            noTransitions: true,
+            tour: resource._tour,
+            callback: () => {
+              resource._noTour = true
+              Actions.addItem({resource: resource})
+              // resource._noSplash = true
+              this.selectResource(resource, 'replace')
+            }
+          }
+        })
+        return
+      }
+    }
+
     let route = {
       component: MessageList,
       id: 11,
@@ -612,6 +650,7 @@ class ResourceList extends Component {
         modelName: MESSAGE,
         currency: resource.currency,
         bankStyle: style,
+        hadTour: replace != null
       }
     }
     if (isContact) { //  ||  isOrganization) {
@@ -652,21 +691,9 @@ class ResourceList extends Component {
         }
       }
     }
-    if (officialAccounts) {
-      // if (isOrganization)
-      //   route.title = resource.name
-      let msg = {
-        message: translate('customerWaiting', me.firstName),
-        _t: CUSTOMER_WAITING,
-        from: me,
-        to: utils.isEmployee(resource) ? me.organization : resource,
-        time: new Date().getTime()
-      }
 
-      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
-    }
-
-    navigator.push(route);
+    let action = replace || 'push'
+    navigator[action](route);
   }
   _selectResource(resource) {
     let model = utils.getModel(this.props.modelName);
