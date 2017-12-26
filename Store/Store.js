@@ -564,6 +564,7 @@ var Store = Reflux.createStore({
     } catch(err)  {
       debug('Store.init ' + err.stack)
     }
+    this._noSplash = []
     let doMonitor = true
     if (!me  &&  ENV.autoRegister) { //  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
       me = await this.autoRegister()
@@ -2587,6 +2588,7 @@ var Store = Reflux.createStore({
       // allow to unhide the previously hidden provider
       if (newServer  &&  org._inactive)
         org._inactive = false
+      delete org._noSplash
       if (!org._isTest  &&  sp.publicConfig  &&   sp.publicConfig.sandbox === true)
         org._isTest = true
       this._mergeItem(okey, sp.org)
@@ -2597,6 +2599,8 @@ var Store = Reflux.createStore({
       // if (newOrg.name.indexOf('[TEST]') === 0)
       //   newOrg._isTest = true
     }
+    if (sp.tour)
+      org._tour = sp.tour
 
     this.configProvider(sp, org)
     this.resetForEmployee(me, org)
@@ -2605,8 +2609,8 @@ var Store = Reflux.createStore({
 
     list[okey].value._online = true
     if (sp.style) {
-      // sp.style.splashscreen = 'https://s3.amazonaws.com/tradle-public-images/Aviva.png'
       this._getItem(okey).style = sp.style
+      // sp.style.splashscreen = 'https://s3.amazonaws.com/tradle-public-images/aviva.html'
     }
     if (!list[ikey]) {
       var profile = {
@@ -5382,6 +5386,7 @@ console.time('getMessageList')
     }
     else
       result = await this._searchMessages(params)
+
     if (!result) {
       if (loadEarlierMessages)
         this.trigger(    {
@@ -5421,6 +5426,16 @@ console.time('getMessageList')
       to: to,
       isAggregation: isAggregation
     }
+    // Paint splash screen before opening chat only on app start
+    if (params.checkForSplash  &&  to) {
+      let toOrgId = utils.getId(to)
+      if (this._noSplash.indexOf(toOrgId) === -1) {
+        this._noSplash.push(toOrgId)
+        to._noSplash = true
+        this.trigger({action: 'list', list: this.searchMessages({modelName: ORGANIZATION}), forceUpdate: true})
+      }
+    }
+
     let hasMore = limit  &&  result.length > limit
     if (loadEarlierMessages || hasMore) {
       if (hasMore)
@@ -6099,6 +6114,8 @@ console.timeEnd('getMessageList')
         let orgId = utils.getId(r)
         let rr = {}
         extend(true, rr, r)
+        if (this._noSplash  &&  this._noSplash.indexOf(utils.getId(rr)) !== -1)
+          rr._noSplash = true
         retOrgs.push(rr)
       })
       // Allow all providers in chooser
@@ -6210,8 +6227,8 @@ console.timeEnd('getMessageList')
     // await this._loadedResourcesDefer.promise
     var self = this
 
-    var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop} = params
-console.time('searchAllMessages')
+    var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, checkForSplash} = params
+// console.time('searchAllMessages')
     var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
     var foundResources = [];
 
@@ -6345,8 +6362,22 @@ console.time('searchAllMessages')
       })
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a.time - b.time)
+      let list = []
+      let len = foundResources.length
+      for (let i=0; i<len; i++) {
+        let r = foundResources[i]
+        if (r[TYPE] === FORM_REQUEST  &&  r.requestFor === PRODUCT_REQUEST) {
+          if (i < len - 1) {
+            let r2 = foundResources[i + 1]
+            if (r2[TYPE] === FORM_REQUEST  &&  r2.requestFor === PRODUCT_REQUEST) {
+              foundResources.splice(i, 1)
+              len--
+            }
+          }
+        }
+      }
       utils.pinFormRequest(foundResources)
-console.timeEnd('searchAllMessages')
+// console.timeEnd('searchAllMessages')
       return foundResources
     })
     .catch((err) => {
@@ -7844,8 +7875,8 @@ console.timeEnd('searchAllMessages')
     let isInMyData = isMessage &&  utils.isSavedItem(value)
     var batch = [];
     value.time = value.time || new Date().getTime();
+    let isForm = model.subClassOf === FORM
     if (isMessage) {
-      let isForm = model.subClassOf === FORM
       if (/*isNew  &&*/  isForm  &&  !isInMyData) {
         if (!value._sharedWith)
           value._sharedWith = []
@@ -7882,6 +7913,8 @@ console.timeEnd('searchAllMessages')
 
     let meId = utils.getId(me)
     if (isMessage  &&  isNew) {
+      if (isForm)
+        this.addLastMessage(value, batch)
       this.addBacklinksTo(ADD, me, value, batch)
       if (value[TYPE] === SELFIE) {
         me = utils.clone(me)
@@ -7994,6 +8027,11 @@ console.timeEnd('searchAllMessages')
         // let mlist = this.searchMessages({modelName: FORM})
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
+      }
+      else if (!isNew  &&  model.id === ORGANIZATION  &&  value._noTour  &&  !originalR._noTour) {
+        value._noSplash = true
+        this._noSplash.push(iKey)
+        this._setItem(iKey, value)
       }
     })
     .catch((err) => {
@@ -9383,6 +9421,8 @@ console.timeEnd('searchAllMessages')
       }
       this.dbBatchPut(utils.getId(org), org, batch)
       this.trigger({action: 'customStyles', provider: org})
+      // this.trigger({action: 'addItem', resource: org})
+      this.trigger({action: 'list', modelName: ORGANIZATION})
       noTrigger = true
     }
 
@@ -10691,6 +10731,8 @@ console.timeEnd('searchAllMessages')
     list[key] = { key, value: { ...current.value, ...value } }
   },
   async gatherForms(to, context) {
+    if (!context)
+      return
     let product = context.requestFor
     let productM = this.getModel(product)
     let multiEntryForms = productM.multiEntryForms
