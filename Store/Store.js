@@ -4236,6 +4236,8 @@ var Store = Reflux.createStore({
         continue;
 
       var rValue = utils.getId(resource[p])
+      if (!rValue)
+        continue
       if (!refProps[rValue])
         refProps[rValue] = []
       refProps[rValue].push(p)
