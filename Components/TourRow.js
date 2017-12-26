@@ -14,6 +14,7 @@ const {
 const LIMIT = 20
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
+import TourPage from './TourPage'
 import { makeResponsive } from 'react-native-orient'
 import StyleSheet from '../StyleSheet'
 import reactMixin from 'react-mixin'
