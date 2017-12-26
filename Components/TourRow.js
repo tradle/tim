@@ -41,12 +41,9 @@ class TourRow extends Component {
     let styles = createStyles()
     let { resource, to, bankStyle, navigator } = this.props
     // let width = utils.dimensions(TourRow).width * 0.8
-    let rowStyle = [chatStyles.row, {backgroundColor: 'transparent', flexDirection: 'row', alignSelf: 'flex-start'}];
     let ownerPhoto = this.getOwnerPhoto(false)
-
     let cellStyle = [chatStyles.verificationBody, styles.mstyle]
-
-    let msgContent =  <View style={rowStyle}>
+    let msgContent =  <View style={chatStyles.row}>
                         <View style={{marginTop: 2}}>
                           {ownerPhoto}
                         </View>
@@ -67,7 +64,7 @@ class TourRow extends Component {
     let {resource, navigator, to, bankStyle} = this.props
     this.props.navigator.push({
       title: "",
-      component: TourRow,
+      component: TourPage,
       id: 35,
       backButtonTitle: null,
       // backButtonTitle: __DEV__ ? 'Back' : null,
@@ -83,20 +80,16 @@ class TourRow extends Component {
 var createStyles = utils.styleFactory(TourRow, function ({ dimensions }) {
   var { width, height } = utils.dimensions(TourRow)
   return StyleSheet.create({
-    container: {
-      flex: 1
-    },
     resourceTitle: {
       fontSize: 18,
       paddingLeft: 5,
+      color: '#555555',
       paddingTop: 4
     },
     mstyle: {
       borderColor: '#efefef',
-      // backgroundColor: '#ffeffe',
       borderTopLeftRadius: 0,
       flexDirection: 'row',
-      // justifyContent: 'space-around',
       paddingVertical: 7,
       width: width * 0.8
     }
