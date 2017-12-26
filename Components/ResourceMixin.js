@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ResourceMixin.js')
+console.log('requiring ResourceMixin.js')
 'use strict';
 
 import utils from '../utils/utils'

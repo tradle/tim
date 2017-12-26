@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ResourceTypesScreen.js')
+console.log('requiring ResourceTypesScreen.js')
 'use strict';
 
 import MessageTypeRow from './MessageTypeRow'

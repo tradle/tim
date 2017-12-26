@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ResourceList.js')
+console.log('requiring ResourceList.js')
 'use strict';
 
 import NoResources from './NoResources'

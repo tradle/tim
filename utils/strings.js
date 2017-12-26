@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring strings.js')
+console.log('requiring strings.js')
 
 import LocalizedStrings from 'react-native-localization'
 import ENV from './env'

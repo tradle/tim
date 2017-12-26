@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring AvivaIntroView.js')
+console.log('requiring AvivaIntroView.js')
 'use strict';
 
 import utils from '../utils/utils'

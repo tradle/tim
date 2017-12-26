@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring HomePage.js')
+console.log('requiring HomePage.js')
 'use strict';
 
 import NoResources from './NoResources'

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring utils.js')
+console.log('requiring utils.js')
 'use strict'
 
 import React from 'react'

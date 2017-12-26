@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring driverLicenseParser.js')
+console.log('requiring driverLicenseParser.js')
 'use strict'
 /**
  * adapted from Java implementation of the same parser

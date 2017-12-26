@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring VerificationButton.js')
+console.log('requiring VerificationButton.js')
 'use strict';
 
 import utils from '../utils/utils'

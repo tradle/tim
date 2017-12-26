@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring missing.js')
+console.log('requiring missing.js')
 import Promise from 'bluebird'
 import lexint from 'lexicographic-integer'
 import Restore from '@tradle/restore'

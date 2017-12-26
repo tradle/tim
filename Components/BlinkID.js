@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring BlinkID.js')
+console.log('requiring BlinkID.js')
 import { Platform } from 'react-native'
 import BlinkID from 'react-native-blinkid'
 import { microblink } from '../utils/env'

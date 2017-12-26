@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring VerifierChooser.js')
+console.log('requiring VerifierChooser.js')
 'use strict';
 
 import ResourceRow from './ResourceRow'

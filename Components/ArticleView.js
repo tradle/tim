@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ArticleView.js')
+console.log('requiring ArticleView.js')
 
 import {
   WebView,

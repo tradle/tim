@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring RowMixin.js')
+console.log('requiring RowMixin.js')
 'use strict';
 
 const debug = require('debug')('tradle:app:RowMixin')

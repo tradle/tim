@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring identity.js')
+console.log('requiring identity.js')
 import Q from 'q'
 import { utils as tradleUtils } from '@tradle/engine'
 import { useKeychain, blockchainName, networkName, isWeb } from './env'

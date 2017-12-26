@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring PhotoList.js')
+console.log('requiring PhotoList.js')
 'use strict';
 
 import utils from '../utils/utils'

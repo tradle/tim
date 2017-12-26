@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring automaticUpdates.js')
+console.log('requiring automaticUpdates.js')
 
 import { AsyncStorage, Alert } from 'react-native'
 import utils from './utils'

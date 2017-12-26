@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring SearchBar.js')
+console.log('requiring SearchBar.js')
 'use strict'
 
 import React, { Component } from 'react'

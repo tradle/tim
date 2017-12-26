@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring localAuth.js')
+console.log('requiring localAuth.js')
 
 import { Alert, Platform } from 'react-native'
 import LocalAuth from 'react-native-local-auth'

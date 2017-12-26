@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring SimpleModal.js')
+console.log('requiring SimpleModal.js')
 'use strict'
 /*
   To use SimpleModal you need to write something like that

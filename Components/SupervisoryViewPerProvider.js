@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring SupervisoryViewPerProvider.js')
+console.log('requiring SupervisoryViewPerProvider.js')
 'use strict';
 
 import PageView from './PageView'

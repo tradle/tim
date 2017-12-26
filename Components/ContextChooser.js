@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ContextChooser.js')
+console.log('requiring ContextChooser.js')
 'use strict';
 
 import utils from '../utils/utils'

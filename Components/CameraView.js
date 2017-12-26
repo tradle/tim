@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring CameraView.js')
+console.log('requiring CameraView.js')
 import {
   AppRegistry,
   StyleSheet,

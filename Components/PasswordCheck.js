@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring PasswordCheck.js')
+console.log('requiring PasswordCheck.js')
 import React, { PropTypes } from 'react'
 import {
   View,

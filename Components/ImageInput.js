@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ImageInput.js')
+console.log('requiring ImageInput.js')
 
 import React, {
   Component,
