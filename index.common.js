@@ -398,7 +398,7 @@ class TiMApp extends Component {
           onWillFocus={(newRoute) => {
             if (!newRoute)
               return
-            let style = newRoute.passProps.bankStyle
+            let style = (newRoute.id === MESSAGE_LIST && newRoute.passProps.resource && newRoute.passProps.resource.style) || newRoute.passProps.bankStyle
             if (style)
               this.setState({navBarBgColor: style.navBarBackgroundColor || 'transparent'})
             else
@@ -571,9 +571,10 @@ var NavigationBarRouteMapper = {
     if (index === 0  ||  route.noLeftButton)
       return <View/>
 
+    let bankStyle = route.passProps.bankStyle
     let color = '#7AAAC3'
-    if (route.passProps.bankStyle  &&  route.passProps.bankStyle.linkColor)
-      color = route.passProps.bankStyle.linkColor
+    if (bankStyle  &&  bankStyle.linkColor)
+      color = bankStyle.linkColor
 
     let previousRoute = navState.routeStack[index - 1];
     let lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
@@ -590,7 +591,7 @@ var NavigationBarRouteMapper = {
     let icon = iconIdx !== -1 ? lbTitle.substring(iconIdx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
 
     let title = icon
-              ? <Icon name={icon} size={utils.getFontSize(30)} color='#7AAAC3' style={styles.icon}/>
+              ? <Icon name={icon} size={utils.getFontSize(30)} color={color} style={styles.icon}/>
               : <Text style={style}>
                   {lbTitle}
                 </Text>
@@ -622,7 +623,8 @@ var NavigationBarRouteMapper = {
     let icon
     let symbol
     let iconSize = 25
-    let iconColor = /*rbTitle === 'Done' ? '#7AAAC3' : */ '#7AAAC3'
+    let bankStyle = route.passProps.bankStyle
+    let iconColor = bankStyle ? bankStyle.linkColor : '#7AAAC3'
     let style = {}
     let isSubmit
     switch (rbTitle) {
@@ -660,7 +662,7 @@ var NavigationBarRouteMapper = {
     if (icon)  {
       title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={iconColor} style={[styles.icon, style]} />
       if (isSubmit)
-        title = <View style={styles.submit}>
+        title = <View style={[styles.submit, {backgroundColor: bankStyle ? bankStyle.linkColor : '#7AAAC3'}]}>
                   {title}
                 </View>
     }
@@ -675,7 +677,7 @@ var NavigationBarRouteMapper = {
       let iconsList = rbTitle.split('|')
       let icons = []
       iconsList.forEach((i) => {
-        icons.push(<Icon name={i} key={i} size={20} color='#7AAAC3' style={styles.iconSpace} />)
+        icons.push(<Icon name={i} key={i} size={20} color={iconColor} style={styles.iconSpace} />)
       })
 
       title = <View style={styles.row}>
@@ -766,6 +768,9 @@ var NavigationBarRouteMapper = {
     }
     let t = route.title.split(' -- ')
     let st = t.length > 1 ? {marginTop: 2} : {}
+    let bankStyle = route.passProps.bankStyle
+    if (bankStyle)
+      st.color = bankStyle.linkColor
 
     let style = [platformStyles.navBarText, styles.navBarTitleText, st]
     if (route.titleTextColor)
