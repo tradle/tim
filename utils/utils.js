@@ -468,7 +468,7 @@ var utils = {
       // var idArr = r.id.split('_');
       // return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
     }
-    else {
+    else if (r[ROOT_HASH]) {
       let id = r[TYPE] + '_' + r[ROOT_HASH] // +  '_' + (r[CUR_HASH] || r[ROOT_HASH])
       let m = this.getModel(r[TYPE])
       if (m  &&  m.value.subClassOf !== ENUM)
