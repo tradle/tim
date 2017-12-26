@@ -159,8 +159,10 @@ class MessageList extends Component {
       search: search,
       isChat: true,
       isAggregation: isAggregation,
-      application: application
+      application: application,
     }
+    if (modelName === MESSAGE)
+      params.checkForSplash = true
 
     StatusBar.setHidden(false);
     utils.onNextTransitionEnd(navigator, () => Actions.list(params));
@@ -216,7 +218,6 @@ class MessageList extends Component {
       this.add(params)
       return
     }
-    let { sendStatus, isAggregation, forgetMeFromCustomer, context, list, loadEarlierMessages, switchToContext } = params
     this.state.newItem = false
     if (action === 'updateItem') {
       let resourceId = utils.getId(resource)
@@ -237,12 +238,12 @@ class MessageList extends Component {
       })
       return
     }
-    if (isAggregation !== isAggregation)
+    if (params.isAggregation !== this.props.isAggregation)
       return
     if (action !== 'messageList')
       return
 
-    if (forgetMeFromCustomer) {
+    if (params.forgetMeFromCustomer) {
       Actions.list({modelName: PROFILE})
       let routes = navigator.getCurrentRoutes()
       if (routes[routes.length - 1].component )
@@ -258,6 +259,7 @@ class MessageList extends Component {
       if (!doUpdate)
         return;
     }
+    let { context, list, loadEarlierMessages, switchToContext } = params
     if (loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
@@ -283,12 +285,13 @@ class MessageList extends Component {
       }
       return
     }
-    if (!list  &&  !forgetMeFromCustomer)
+    if (!list)
       return
 
     if (bankStyle   &&  params.bankStyle)
       extend(bankStyle, params.bankStyle)
     let isEmployee = utils.isEmployee(chatWith)
+    let state = {isLoading: false, isEmployee: isEmployee}
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let type = list[0][TYPE];
       if (type  !== modelName) {
@@ -304,8 +307,7 @@ class MessageList extends Component {
         }
       }
       let me = utils.getMe()
-
-      this.setState({
+      extend(state, {
         // dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: switchToContext ? true : false,
         list: list,
@@ -317,11 +319,10 @@ class MessageList extends Component {
         isEmployee: isEmployee,
         loadEarlierMessages: loadEarlierMessages,
         switchToContext: switchToContext,
-        productToForms: productToForms || this.state.productToForms
-      });
+        productToForms: productToForms || this.state.productToForms,
+      })
     }
-    else
-      this.setState({isLoading: false, isEmployee: isEmployee})
+    this.setState(state)
   }
   add(params) {
     let { action, resource, to, productToForms, shareableResources, modelName, originatingMessage, application } = params
@@ -720,8 +721,11 @@ class MessageList extends Component {
   }
 
   getSplashScreen() {
-    let splashscreen = this.props.bankStyle.splashscreen
+    let {resource, bankStyle} = this.props
+    let splashscreen = bankStyle.splashscreen
     if (!splashscreen)
+      return
+    if (resource  &&  resource._noSplash)
       return
     const { width, height } = utils.dimensions(MessageList)
     return <WebView style={{width, height}}
@@ -845,7 +849,7 @@ class MessageList extends Component {
       context = resource
     let separator = utils.getContentSeparator(bankStyle)
     let loading
-    if (this.isLoading()  &&  !application) {
+    if (!this.props.hadTour  &&  this.isLoading()  &&  !application) {
       let splash = this.getSplashScreen()
       if (splash) {
         StatusBar.setHidden(true)
