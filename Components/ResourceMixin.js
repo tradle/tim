@@ -283,10 +283,10 @@ var ResourceMixin = {
         val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
       else if (pMeta.type !== 'object'  &&  (typeof val === 'string')  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
         val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
-      else if (modelName === TERMS_AND_CONDITIONS)
-        val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
+      // else if (modelName === TERMS_AND_CONDITIONS) {
+      //   val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
       else if (pMeta.markdown) {
-        markdownStyles.color = this.props.bankStyle.linkColor,
+        // markdownStyles.color = this.props.bankStyle.linkColor
         val = <View style={styles.container}>
                 <Markdown markdownStyles={markdownStyles}>
                   {val}
