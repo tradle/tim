@@ -16,7 +16,7 @@ var debug = Debug('tradle:app')
 // require('regenerator/runtime') // support es7.asyncFunctions
 import './utils/shim'
 // import './utils/crypto'
-// import 'stream'
+import 'stream'
 import debounce from 'debounce'
 // require('./timmy')
 var ResourceList = require('./Components/ResourceList');
