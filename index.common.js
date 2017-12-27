@@ -642,8 +642,8 @@ var NavigationBarRouteMapper = {
       //   ]}
       break
     case 'View':
-      icon = 'ios-eye'
-      iconSize = 32
+      icon = 'md-eye'
+      iconSize = 28
       break
     case 'Search':
       icon = 'md-search'
