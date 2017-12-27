@@ -5433,8 +5433,10 @@ console.time('getMessageList')
       let toOrgId = utils.getId(to)
       if (this._noSplash.indexOf(toOrgId) === -1) {
         this._noSplash.push(toOrgId)
-        to._noSplash = true
-        this.trigger({action: 'list', list: this.searchMessages({modelName: ORGANIZATION}), forceUpdate: true})
+        let newTo = utils.clone(to)
+        newTo._noSplash = true
+        this._setItem(toOrgId, newTo)
+        // this.trigger({action: 'list', list: this.searchMessages({modelName: ORGANIZATION}), forceUpdate: true})
       }
     }
 

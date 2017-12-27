@@ -170,10 +170,11 @@ class MessageList extends Component {
   componentDidMount() {
     this.listenTo(Store, 'onAction');
     this._hideSplashScreenTimeout = setTimeout(() => {
+      this.props.resource._noSplash = true
       this.setState({
          showSplashScreen: false
         })
-    }, 4000)
+    }, 2000)
   }
   onAction(params) {
     let {action, error, to, isConnected} = params
@@ -727,7 +728,6 @@ class MessageList extends Component {
       return
     if (resource  &&  resource._noSplash)
       return
-    resource._noSplash = true
     const { width, height } = utils.dimensions(MessageList)
                     // startInLoadingState={true}
     return <WebView style={{width, height}}
@@ -737,6 +737,24 @@ class MessageList extends Component {
   render() {
     let { modelName, resource, bankStyle, navigator, originatingMessage, isAggregation } = this.props
     let application = this.state.application ||  this.props.application
+
+    let loading
+    if (!this.props.hadTour  &&  this.isLoading()  &&  !application) {
+      let splash = this.getSplashScreen()
+      if (splash) {
+        StatusBar.setHidden(true)
+        loading = <View style={styles.mainWrap}>
+                    <Modal visible={true}
+                          transparent={false}
+                          animationType='slide'>
+                      {splash}
+                      <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', position: 'absolute', bottom: 50}} />
+                    </Modal>
+                  </View>
+        return loading
+      }
+    }
+
     let model = utils.getModel(modelName).value;
     let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
     let bgStyle = {}
@@ -849,22 +867,6 @@ class MessageList extends Component {
     if (!context  &&  isContext)
       context = resource
     let separator = utils.getContentSeparator(bankStyle)
-    let loading
-    if (!this.props.hadTour  &&  this.isLoading()  &&  !application) {
-      let splash = this.getSplashScreen()
-      if (splash) {
-        StatusBar.setHidden(true)
-        loading = <View style={styles.mainWrap}>
-                    <Modal visible={true}
-                          transparent={false}
-                          animationType='slide'>
-                      {splash}
-                      <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', position: 'absolute', bottom: 50}} />
-                    </Modal>
-                  </View>
-        return loading
-      }
-    }
     StatusBar.setHidden(false);
     if (!bgImage)
       return (
