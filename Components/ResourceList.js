@@ -221,7 +221,7 @@ class ResourceList extends Component {
       params.to = resource
     params.listView = listView
     if (!officialAccounts)
-      params.limit = 10
+      params.limit = LIMIT
     // this.state.isLoading = true;
 
     // if (tabLabel) {
@@ -1153,7 +1153,8 @@ class ResourceList extends Component {
     );
   }
   _onRefresh() {
-    this.setState({refreshing: true});
+    if (this.state.list  &&  this.state.list.length > LIMIT)
+      this.setState({refreshing: true});
     // fetchData().then(() => {
     //   this.setState({refreshing: false});
     // });
