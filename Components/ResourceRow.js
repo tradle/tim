@@ -63,7 +63,10 @@ var dateProp
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
-    this.state = { isConnected: this.props.navigator.isConnected, resource: props.resource }
+    this.state = {
+      isConnected: this.props.navigator.isConnected,
+      resource: props.resource,
+    }
     if (props.changeSharedWithList)
       this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
@@ -81,8 +84,12 @@ class ResourceRow extends Component {
     this.listenTo(Store, 'onRowUpdate');
   }
   onRowUpdate(params) {
-    let { action, application } = params
+    let { action, application, online, resource } = params
     switch (action) {
+    case 'onlineStatus':
+      if (resource  &&  resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
+        this.setState({serverOffline: !online})
+      break
     case 'connectivity':
       this.setState({isConnected: params.isConnected})
       break
@@ -114,6 +121,8 @@ class ResourceRow extends Component {
       return true
     if (this.state.unread !== nextState.unread)
       return true
+    if (this.state.serverOffline !== nextState.serverOffline)
+      return true
     if (this.props.hideMode !== nextProps.hideMode)
       return true
     if (nextState.sharedWith  &&  nextState.sharedWith === this.state.sharedWith)
@@ -142,7 +151,7 @@ class ResourceRow extends Component {
   }
 
   render() {
-    let resource = this.state.application || this.props.resource;
+    let resource = this.state.application || this.state.resource;
     let photo;
     let rType = resource[TYPE]
     let isContact = rType === PROFILE;
@@ -197,7 +206,7 @@ class ResourceRow extends Component {
     if (!this.props.isChooser  &&  photo  &&  rType === ORGANIZATION) {
       let onlineStatus = (
         <Geometry.Circle size={20} style={styles.online}>
-          <Geometry.Circle size={18} style={{ backgroundColor: !resource._online || !this.props.navigator.isConnected ? '#FAD70C' : '#62C457'}} />
+          <Geometry.Circle size={18} style={{ backgroundColor: !resource._online /*|| !this.props.navigator.isConnected*/ ? '#FAD70C' : '#62C457'}} />
         </Geometry.Circle>
       )
 
