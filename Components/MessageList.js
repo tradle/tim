@@ -727,10 +727,11 @@ class MessageList extends Component {
       return
     if (resource  &&  resource._noSplash)
       return
+    resource._noSplash = true
     const { width, height } = utils.dimensions(MessageList)
+                    // startInLoadingState={true}
     return <WebView style={{width, height}}
                     source={{uri: splashscreen}}
-                    startInLoadingState={true}
                     automaticallyAdjustContentInsets={false} />
   }
   render() {

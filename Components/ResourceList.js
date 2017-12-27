@@ -628,6 +628,7 @@ class ResourceList extends Component {
             tour: resource._tour,
             callback: () => {
               resource._noTour = true
+              resource._noSplash = true
               Actions.addItem({resource: resource})
               // resource._noSplash = true
               this.selectResource(resource, 'replace')
