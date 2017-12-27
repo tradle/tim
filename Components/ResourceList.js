@@ -501,7 +501,7 @@ class ResourceList extends Component {
     return false
   }
 
-  selectResource(resource, replace) {
+  selectResource(resource, hadTour) {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, callback, navigator, bankStyle, serverOffline, prop, currency, officialAccounts } = this.props
@@ -602,20 +602,20 @@ class ResourceList extends Component {
     let style = this.mergeStyle(resource.style)
 
     if (officialAccounts) {
-      // if (isOrganization)
-      //   route.title = resource.name
-      let msg = {
-        message: translate('customerWaiting', me.firstName),
-        _t: CUSTOMER_WAITING,
-        from: me,
-        to: utils.isEmployee(resource) ? me.organization : resource,
-        time: new Date().getTime()
-      }
+      if (!hadTour) {
+        // if (isOrganization)
+        //   route.title = resource.name
+        let msg = {
+          message: translate('customerWaiting', me.firstName),
+          _t: CUSTOMER_WAITING,
+          from: me,
+          to: utils.isEmployee(resource) ? me.organization : resource,
+          time: new Date().getTime()
+        }
 
-      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
-    }
-    if (isOrganization) {
-      if (resource._tour  &&  !resource._noTour) {
+        utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
+      }
+      if (isOrganization  &&  resource._tour  &&  !resource._noTour) {
         navigator.push({
           title: "",
           component: TourPage,
@@ -650,7 +650,7 @@ class ResourceList extends Component {
         modelName: MESSAGE,
         currency: resource.currency,
         bankStyle: style,
-        hadTour: replace != null
+        hadTour: hadTour
       }
     }
     if (isContact) { //  ||  isOrganization) {
@@ -674,25 +674,23 @@ class ResourceList extends Component {
         }
       }
     }
-    else if (isOrganization) {
-      if (!utils.getMe().isEmployee) {
-        route.rightButtonTitle = 'View'
-        route.onRightButtonPress = {
-          title: title,
-          id: 3,
-          component: ResourceView,
-          titleTextColor: '#7AAAC3',
-          backButtonTitle: 'Back',
-          passProps: {
-            bankStyle: bankStyle,
-            resource: resource,
-            currency: currency
-          }
+    else if (isOrganization  &&  !utils.getMe().isEmployee) {
+      route.rightButtonTitle = 'View'
+      route.onRightButtonPress = {
+        title: title,
+        id: 3,
+        component: ResourceView,
+        titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        passProps: {
+          bankStyle: bankStyle,
+          resource: resource,
+          currency: currency
         }
       }
     }
 
-    let action = replace || 'push'
+    let action = hadTour ? 'replace' : 'push'
     navigator[action](route);
   }
   _selectResource(resource) {
