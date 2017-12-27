@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ApplicationView.js')
+console.log('requiring ApplicationView.js')
 'use strict';
 
 import utils, {

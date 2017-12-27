@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ResourceRow.js')
+console.log('requiring ResourceRow.js')
 'use strict';
 
 import utils from '../utils/utils'

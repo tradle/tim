@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ShowPropertiesView.js')
+console.log('requiring ShowPropertiesView.js')
 'use strict';
 
 // import ArticleView from './ArticleView'

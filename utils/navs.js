@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring navs.js')
+console.log('requiring navs.js')
 
 const navs = new Map()
 

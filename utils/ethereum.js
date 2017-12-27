@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ethereum.js')
+console.log('requiring ethereum.js')
 
 import createAdapter from '@tradle/ethereum-adapter-etherscan'
 import { etherscanApiKey } from './env'

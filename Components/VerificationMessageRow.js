@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring VerificationMessageRow.js')
+console.log('requiring VerificationMessageRow.js')
 'use strict';
 
 import utils from '../utils/utils'

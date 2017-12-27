@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring NoResources.js')
+console.log('requiring NoResources.js')
 'use strict'
 
 import {

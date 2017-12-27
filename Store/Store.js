@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring Store.js')
+console.log('requiring Store.js')
 'use strict';
 
 import '../utils/perf'
@@ -585,6 +585,7 @@ var Store = Reflux.createStore({
     } catch(err)  {
       debug('Store.init ' + err.stack)
     }
+    this._noSplash = []
     let doMonitor = true
     if (!me  &&  ENV.autoRegister) { //  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
       me = await this.autoRegister()
@@ -2617,6 +2618,7 @@ var Store = Reflux.createStore({
       // allow to unhide the previously hidden provider
       if (newServer  &&  org._inactive)
         org._inactive = false
+      delete org._noSplash
       if (!org._isTest  &&  sp.publicConfig  &&   sp.publicConfig.sandbox === true)
         org._isTest = true
       this._mergeItem(okey, sp.org)
@@ -2627,6 +2629,8 @@ var Store = Reflux.createStore({
       // if (newOrg.name.indexOf('[TEST]') === 0)
       //   newOrg._isTest = true
     }
+    if (sp.tour)
+      org._tour = sp.tour
 
     this.configProvider(sp, org)
     this.resetForEmployee(me, org)
@@ -2634,8 +2638,10 @@ var Store = Reflux.createStore({
     this._setItem(okey, org)
 
     list[okey].value._online = true
-    if (sp.style)
+    if (sp.style) {
       this._getItem(okey).style = sp.style
+      // sp.style.splashscreen = 'https://s3.amazonaws.com/tradle-public-images/aviva.html'
+    }
     if (!list[ikey]) {
       var profile = {
         [TYPE]: PROFILE,
@@ -4257,6 +4263,8 @@ var Store = Reflux.createStore({
         continue;
 
       var rValue = utils.getId(resource[p])
+      if (!rValue)
+        continue
       if (!refProps[rValue])
         refProps[rValue] = []
       refProps[rValue].push(p)
@@ -5441,6 +5449,7 @@ var Store = Reflux.createStore({
     let {to, context, loadEarlierMessages, allLoaded, spinner,
          isForgetting, limit, listView, _readOnly, gatherForms} = params
     let shareableResources, result, retParams
+console.time('getMessageList')
     if (me.isEmployee  &&  meta.id === MESSAGE  &&  context) {
       let myBot = this.getRepresentative(me.organization)
       result = await this.searchServer({
@@ -5453,6 +5462,7 @@ var Store = Reflux.createStore({
     }
     else
       result = await this._searchMessages(params)
+
     if (!result) {
       if (loadEarlierMessages)
         this.trigger(    {
@@ -5492,6 +5502,16 @@ var Store = Reflux.createStore({
       to: to,
       isAggregation: isAggregation
     }
+    // Paint splash screen before opening chat only on app start
+    if (params.checkForSplash  &&  to) {
+      let toOrgId = utils.getId(to)
+      if (this._noSplash.indexOf(toOrgId) === -1) {
+        this._noSplash.push(toOrgId)
+        to._noSplash = true
+        this.trigger({action: 'list', list: this.searchMessages({modelName: ORGANIZATION}), forceUpdate: true})
+      }
+    }
+
     let hasMore = limit  &&  result.length > limit
     if (loadEarlierMessages || hasMore) {
       if (hasMore)
@@ -5557,6 +5577,18 @@ var Store = Reflux.createStore({
           if (modelName === MESSAGE) {
             result.forEach(r => this.addVisualProps(r))
             let rmIdx = []
+            if (!me.isEmployee) {
+              let lastFrForPr
+              for (let i=result.length - 1; i>=0; i--) {
+                let r = result[i]
+                if (r[TYPE] === FORM_REQUEST  &&  r.form === PRODUCT_REQUEST) {
+                  if (lastFrForPr)
+                    result.splice(i, 1)
+                  else
+                    lastFrForPr = i
+                }
+              }
+            }
             let sharedVerifiedForms = []
             for (let i=0; i<result.length; i++) {
               let r = result[i]
@@ -5673,6 +5705,7 @@ var Store = Reflux.createStore({
       if (context)
         retParams.productToForms = await this.gatherForms(utils.getId(to), context)
     }
+console.timeEnd('getMessageList')
     this.trigger(retParams)
   },
 
@@ -6169,6 +6202,8 @@ var Store = Reflux.createStore({
         let orgId = utils.getId(r)
         let rr = {}
         extend(true, rr, r)
+        if (this._noSplash  &&  this._noSplash.indexOf(utils.getId(rr)) !== -1)
+          rr._noSplash = true
         retOrgs.push(rr)
       })
       // Allow all providers in chooser
@@ -6280,8 +6315,8 @@ var Store = Reflux.createStore({
     // await this._loadedResourcesDefer.promise
     var self = this
 
-    var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop} = params
-
+    var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, checkForSplash} = params
+// console.time('searchAllMessages')
     var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
     var foundResources = [];
 
@@ -6415,7 +6450,22 @@ var Store = Reflux.createStore({
       })
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a.time - b.time)
+      let list = []
+      let len = foundResources.length
+      for (let i=0; i<len; i++) {
+        let r = foundResources[i]
+        if (r[TYPE] === FORM_REQUEST  &&  r.requestFor === PRODUCT_REQUEST) {
+          if (i < len - 1) {
+            let r2 = foundResources[i + 1]
+            if (r2[TYPE] === FORM_REQUEST  &&  r2.requestFor === PRODUCT_REQUEST) {
+              foundResources.splice(i, 1)
+              len--
+            }
+          }
+        }
+      }
       utils.pinFormRequest(foundResources)
+// console.timeEnd('searchAllMessages')
       return foundResources
     })
     .catch((err) => {
@@ -7930,8 +7980,8 @@ var Store = Reflux.createStore({
     let isInMyData = isMessage &&  utils.isSavedItem(value)
     var batch = [];
     value.time = value.time || new Date().getTime();
+    let isForm = model.subClassOf === FORM
     if (isMessage) {
-      let isForm = model.subClassOf === FORM
       if (/*isNew  &&*/  isForm  &&  !isInMyData) {
         if (!value._sharedWith)
           value._sharedWith = []
@@ -7967,6 +8017,8 @@ var Store = Reflux.createStore({
 
     let meId = utils.getId(me)
     if (isMessage  &&  isNew) {
+      if (isForm)
+        this.addLastMessage(value, batch)
       this.addBacklinksTo(ADD, me, value, batch)
       if (value[TYPE] === SELFIE) {
         me = utils.clone(me)
@@ -8080,6 +8132,11 @@ var Store = Reflux.createStore({
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
       }
+      // else if (!isNew  &&  model.id === ORGANIZATION  &&  value._noTour  &&  !originalR._noTour) {
+      //   value._noSplash = true
+      //   this._noSplash.push(iKey)
+      //   this._setItem(iKey, value)
+      // }
     })
     .catch((err) => {
       if (!noTrigger) {
@@ -9479,6 +9536,8 @@ var Store = Reflux.createStore({
       }
       this.dbBatchPut(utils.getId(org), org, batch)
       this.trigger({action: 'customStyles', provider: org})
+      // this.trigger({action: 'addItem', resource: org})
+      this.trigger({action: 'list', modelName: ORGANIZATION})
       noTrigger = true
     }
 
@@ -9770,7 +9829,8 @@ var Store = Reflux.createStore({
     return utils.dangerousReadDB(db)
     .then((results) => {
       if (!results.length)
-        return self.loadModels();
+        return
+        // return self.loadModels();
 
       results.forEach((data) => {
         if (data.value == null) return
@@ -9849,9 +9909,9 @@ var Store = Reflux.createStore({
       }
 
       console.log('Stream ended');
-      var noModels = utils.isEmpty(models);
-      if (noModels)
-        return self.loadModels();
+      // var noModels = utils.isEmpty(models);
+      // if (noModels)
+      //   return self.loadModels();
       if (me  &&  (!list[utils.getId(me)] || !list[utils.makeId(IDENTITY, me[ROOT_HASH])]))
         me = null
       console.log('Stream closed');
@@ -10644,14 +10704,14 @@ var Store = Reflux.createStore({
     if (utils.isEmpty(models))
       this.addModels()
 
-    // return this.loadStaticDbData(true)
-    // .then(() => {
-      return this.loadMyResources()
-    // })
-    // .then(self.loadAddressBook)
-    .catch((err) => {
-      err = err;
-    });
+    // // return this.loadStaticDbData(true)
+    // // .then(() => {
+    //   return this.loadMyResources()
+    // // })
+    // // .then(self.loadAddressBook)
+    // .catch((err) => {
+    //   err = err;
+    // });
   },
   loadStaticData() {
     sampleData.getResources().forEach((r) => {
@@ -10679,22 +10739,24 @@ var Store = Reflux.createStore({
   },
 
   loadModels() {
-    var batch = [];
+    // var batch = [];
 
-    for (var m in models)
-      batch.push({type: 'put', key: m, value: models[m].value});
+    // for (var m in models)
+    //   batch.push({type: 'put', key: m, value: models[m].value});
 
-    this.setBusyWith('loadingModels')
+    // this.setBusyWith('loadingModels')
 
-    // return Promise.resolve()
-    return db.batch(batch)
-          .then(() => {
-            this.setBusyWith('loadingResources')
-            return this.loadMyResources();
-          })
-          .catch((err) => {
-            err = err;
-          });
+    // // return Promise.resolve()
+    // return db.batch(batch)
+    //       .then(() => {
+    //         this.setBusyWith('loadingResources')
+    //         return this.loadMyResources();
+    //       })
+    //       .catch((err) => {
+    //         err = err;
+    //       });
+    this.setBusyWith('loadingResources')
+    return this.loadMyResources();
   },
 
   async onIdle() {
@@ -10784,6 +10846,8 @@ var Store = Reflux.createStore({
     list[key] = { key, value: { ...current.value, ...value } }
   },
   async gatherForms(to, context) {
+    if (!context)
+      return
     let product = context.requestFor
     let productM = this.getModel(product)
     let multiEntryForms = productM.multiEntryForms

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring StringRow.js')
+console.log('requiring StringRow.js')
 'use strict';
 
 import utils from '../utils/utils'

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ResourceView.js')
+console.log('requiring ResourceView.js')
 'use strict';
 
 import pick from 'object.pick'
@@ -48,7 +48,6 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
 import HomePageMixin from './HomePageMixin'
-import ResourceList from './ResourceList'
 // import ActionSheet from './ActionSheet'
 import platformStyles from '../styles/platform'
 import { signIn } from '../utils/localAuth'
@@ -350,7 +349,7 @@ class ResourceView extends Component {
 
     return (
       <PageView style={platformStyles.container}>
-        <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center'}} name={this._lazyId}>
+        <ScrollView  ref='this' style={{width: utils.getContentWidth(ResourceView), alignSelf: 'center', backgroundColor: '#fff'}} name={this._lazyId}>
           <View style={styles.photoBG}>
             {photoView}
             {identityPhotoList}

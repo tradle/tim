@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring TourRow.js')
+console.log('requiring TourRow.js')
 'use strict';
 
 import utils from '../utils/utils'
@@ -14,6 +14,7 @@ const {
 const LIMIT = 20
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
+import TourPage from './TourPage'
 import { makeResponsive } from 'react-native-orient'
 import StyleSheet from '../StyleSheet'
 import reactMixin from 'react-mixin'
@@ -39,12 +40,9 @@ class TourRow extends Component {
   }
   render() {
     let { resource, to, bankStyle, navigator } = this.props
-    let rowStyle = [chatStyles.row, {backgroundColor: 'transparent', flexDirection: 'row', alignSelf: 'flex-start'}];
     let ownerPhoto = this.getOwnerPhoto(false)
-
     let cellStyle = [chatStyles.verificationBody, styles.mstyle]
-
-    let msgContent =  <View style={rowStyle}>
+    let msgContent =  <View style={chatStyles.row}>
                         <View style={{marginTop: 2}}>
                           {ownerPhoto}
                         </View>
@@ -65,7 +63,7 @@ class TourRow extends Component {
     let {resource, navigator, to, bankStyle} = this.props
     this.props.navigator.push({
       title: "",
-      component: TourRow,
+      component: TourPage,
       id: 35,
       backButtonTitle: null,
       // backButtonTitle: __DEV__ ? 'Back' : null,
@@ -85,7 +83,8 @@ var styles = StyleSheet.create({
   resourceTitle: {
     fontSize: 20,
     paddingTop: 5,
-    paddingLeft: 7
+    paddingLeft: 7,
+    color: '#555555'
   },
   mstyle: {
     borderColor: '#efefef',

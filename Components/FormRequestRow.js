@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring FormRequestRow.js')
+console.log('requiring FormRequestRow.js')
 'use strict';
 
 const debug = require('debug')('tradle:app:FormRequestRow')

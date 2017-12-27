@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring MessageList.js')
+console.log('requiring MessageList.js')
 'use strict';
 
 
@@ -144,6 +144,8 @@ class MessageList extends Component {
   }
   isLoading() {
     let {showSplashScreen, list} = this.state
+    // if (!showSplashScreen)
+    //   debugger
     return showSplashScreen && list
   }
   componentWillMount() {
@@ -158,8 +160,10 @@ class MessageList extends Component {
       search: search,
       isChat: true,
       isAggregation: isAggregation,
-      application: application
+      application: application,
     }
+    if (modelName === MESSAGE)
+      params.checkForSplash = true
 
     StatusBar.setHidden(false);
     utils.onNextTransitionEnd(navigator, () => Actions.list(params));
@@ -171,7 +175,7 @@ class MessageList extends Component {
       this.setState({
          showSplashScreen: false
         })
-    }, 2000)
+    }, 4000)
   }
 
   _watchSubmit() {
@@ -236,7 +240,6 @@ class MessageList extends Component {
       this.add(params)
       return
     }
-    let { sendStatus, isAggregation, forgetMeFromCustomer, context, list, loadEarlierMessages, switchToContext } = params
     this.state.newItem = false
     if (action === 'updateItem') {
       let resourceId = utils.getId(resource)
@@ -257,12 +260,12 @@ class MessageList extends Component {
       })
       return
     }
-    if (isAggregation !== isAggregation)
+    if (params.isAggregation !== this.props.isAggregation)
       return
     if (action !== 'messageList')
       return
 
-    if (forgetMeFromCustomer) {
+    if (params.forgetMeFromCustomer) {
       Actions.list({modelName: PROFILE})
       let routes = navigator.getCurrentRoutes()
       if (routes[routes.length - 1].component )
@@ -278,6 +281,7 @@ class MessageList extends Component {
       if (!doUpdate)
         return;
     }
+    let { context, list, loadEarlierMessages, switchToContext } = params
     if (loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
@@ -303,12 +307,13 @@ class MessageList extends Component {
       }
       return
     }
-    if (!list  &&  !forgetMeFromCustomer)
+    if (!list)
       return
 
     if (bankStyle   &&  params.bankStyle)
       extend(bankStyle, params.bankStyle)
     let isEmployee = utils.isEmployee(chatWith)
+    let state = {isLoading: false, isEmployee: isEmployee}
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let type = list[0][TYPE];
       if (type  !== modelName) {
@@ -324,8 +329,7 @@ class MessageList extends Component {
         }
       }
       let me = utils.getMe()
-
-      this.setState({
+      extend(state, {
         // dataSource: this.state.dataSource.cloneWithRows(list),
         isLoading: switchToContext ? true : false,
         list: list,
@@ -337,11 +341,10 @@ class MessageList extends Component {
         isEmployee: isEmployee,
         loadEarlierMessages: loadEarlierMessages,
         switchToContext: switchToContext,
-        productToForms: productToForms || this.state.productToForms
-      });
+        productToForms: productToForms || this.state.productToForms,
+      })
     }
-    else
-      this.setState({isLoading: false, isEmployee: isEmployee})
+    this.setState(state)
   }
   add(params) {
     let { action, resource, to, productToForms, shareableResources, modelName, originatingMessage, application } = params
@@ -485,6 +488,8 @@ class MessageList extends Component {
     if (utils.resized(this.props, nextProps))
       return true
     if (this.state.application !== nextState.application)
+      return true
+    if (this.state.showSplashScreen !== nextState.showSplashScreen)
       return true
     // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
     //   return false
@@ -745,13 +750,17 @@ class MessageList extends Component {
   }
 
   getSplashScreen() {
-    let splashscreen = this.props.bankStyle.splashscreen
+    let {resource, bankStyle} = this.props
+    let splashscreen = bankStyle.splashscreen
     if (!splashscreen)
       return
+    if (resource  &&  resource._noSplash)
+      return
+    resource._noSplash = true
     const { width, height } = utils.dimensions(MessageList)
+                    // startInLoadingState={true}
     return <WebView style={{width, height}}
                     source={{uri: splashscreen}}
-                    startInLoadingState={true}
                     automaticallyAdjustContentInsets={false} />
   }
   render() {
@@ -875,18 +884,22 @@ class MessageList extends Component {
       context = resource
     let separator = utils.getContentSeparator(bankStyle)
     let loading
-    if (this.isLoading()  &&  !application) {
+    if (!this.props.hadTour  &&  this.isLoading()  &&  !application) {
       let splash = this.getSplashScreen()
-      if (splash)
+      if (splash) {
+        StatusBar.setHidden(true)
         loading = <View style={styles.mainWrap}>
                     <Modal visible={true}
                           transparent={false}
                           animationType='slide'>
                       {splash}
+                      <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', position: 'absolute', bottom: 50}} />
                     </Modal>
                   </View>
+        return loading
+      }
     }
-
+    StatusBar.setHidden(false);
     if (!bgImage)
       return (
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
@@ -897,7 +910,6 @@ class MessageList extends Component {
           {content}
           {actionSheet}
           {alert}
-          {loading}
         </PageView>
     )
     let {width, height} = utils.dimensions(MessageList)
@@ -914,7 +926,6 @@ class MessageList extends Component {
           {actionSheet}
           {alert}
         </Image>
-          {loading}
       </PageView>
     );
   }

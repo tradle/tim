@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring platformUtilsMobile.js')
+console.log('requiring platformUtilsMobile.js')
 
 import {
   findNodeHandle,

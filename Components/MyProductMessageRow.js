@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring MyProductMessageRow.js')
+console.log('requiring MyProductMessageRow.js')
 'use strict'
 
 import utils from '../utils/utils'

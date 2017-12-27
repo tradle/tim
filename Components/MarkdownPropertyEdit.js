@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring MarkdownPropertyEdit.js')
+console.log('requiring MarkdownPropertyEdit.js')
 'use strict';
 
 import utils from '../utils/utils'

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring utils.js')
+console.log('requiring utils.js')
 'use strict'
 
 import React from 'react'
@@ -478,7 +478,7 @@ var utils = {
       // var idArr = r.id.split('_');
       // return idArr.length === 2 ? r.id : idArr[0] + '_' + idArr[1];
     }
-    else {
+    else if (r[ROOT_HASH]) {
       let id = r[TYPE] + '_' + r[ROOT_HASH] // +  '_' + (r[CUR_HASH] || r[ROOT_HASH])
       let m = this.getModel(r[TYPE])
       if (m  &&  m.value.subClassOf !== ENUM)
@@ -631,8 +631,6 @@ var utils = {
   },
   getEditCols(model) {
     let { editCols, viewCols, properties } = model
-    if (!editCols  &&  !viewCols)
-      return properties
     let eCols = {}
     if (editCols) {
       editCols.forEach((p) => {
@@ -645,18 +643,20 @@ var utils = {
       })
       return eCols
     }
-    viewCols.forEach((p) => {
-      let idx = p.indexOf('_group')
-      if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
-        eCols[p] = properties[p]
+    if (viewCols) {
+      viewCols.forEach((p) => {
+        let idx = p.indexOf('_group')
+        if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
+          eCols[p] = properties[p]
 
-      if (idx !== -1  &&  properties[p].list)
-        properties[p].list.forEach((p) => eCols[p] = properties[p])
-      // eCols[p] = props[p]
-    })
+        if (idx !== -1  &&  properties[p].list)
+          properties[p].list.forEach((p) => eCols[p] = properties[p])
+        // eCols[p] = props[p]
+      })
+    }
     // ViewCols on top
     for (let p in properties) {
-      if (!eCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden)
+      if (!eCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden  &&  p.indexOf('_group') !== p.length - 6)
         eCols[p] = properties[p]
     }
     return eCols
@@ -963,7 +963,7 @@ var utils = {
       Object.keys(res).forEach(p => {
         if (p === 'txId')
           return
-        if (p === '_context') {
+        if (p === '_context'  &&  res._context) {
           res._context = this.buildRef(res._context)
           return
         }
@@ -1834,7 +1834,7 @@ var utils = {
     }
   },
   submitLog: async function () {
-    const me = utils.getMe()
+    const me = utils.getMe() || { firstName: '[unknown]', lastName: '[unknown]' }
     try {
       const res = await submitLog(ENV.serverToSendLog + '?' + querystring.stringify({
         firstName: me.firstName,

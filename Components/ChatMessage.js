@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ChatMessage.js')
+console.log('requiring ChatMessage.js')
 'use strict'
 
 import utils from '../utils/utils'

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ApplicationTabs.js')
+console.log('requiring ApplicationTabs.js')
 'use strict';
 
 import { makeResponsive } from 'react-native-orient'

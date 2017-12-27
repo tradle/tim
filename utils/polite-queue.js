@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring polite-queue.js')
+console.log('requiring polite-queue.js')
 
 import { race } from 'bluebird'
 import createQueue from 'ya-promise-queue'

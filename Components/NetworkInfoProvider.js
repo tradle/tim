@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring NetworkInfoProvider.js')
+console.log('requiring NetworkInfoProvider.js')
 'use strict'
 
 import {

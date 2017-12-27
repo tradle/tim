@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring IdentitiesList.js')
+console.log('requiring IdentitiesList.js')
 'use strict';
 
 import reactMixin from 'react-mixin'

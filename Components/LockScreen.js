@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring LockScreen.js')
+console.log('requiring LockScreen.js')
 import React, { PropTypes, Component } from 'react'
 import {
   View,

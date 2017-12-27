@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring ShowRefList.js')
+console.log('requiring ShowRefList.js')
 'use strict';
 
 import constants from '@tradle/constants'
@@ -280,10 +280,12 @@ class ShowRefList extends Component {
   }
   hasPropsToShow(resource) {
     let m = utils.getModel(resource[TYPE]).value
-    let props = m.properties
     let viewCols = m.viewCols
+    if (!viewCols)
+      return
     viewCols = utils.ungroup(m, viewCols)
     let vCols = []
+    let props = m.properties
     viewCols.forEach((pr) => {
       if (props[pr].group)
         props[pr].group.forEach((gp) => vCols.push(gp))

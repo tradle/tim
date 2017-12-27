@@ -6,7 +6,7 @@ import deepEqual from 'deep-equal'
 import tradle, { utils as tradleUtils } from '@tradle/engine'
 import { ApolloClient, createNetworkInterface } from 'apollo-client'
 import constants from '@tradle/constants'
-import printer from 'graphql/language/printer'
+import { print as printQuery } from 'graphql/language/printer'
 const {
   TYPE,
   SIG,
@@ -44,7 +44,7 @@ var search = {
       applyMiddleware: async (req, next) => {
         const body = tradleUtils.stringify({
           ...req.request,
-          query: printer.print(req.request.query)
+          query: printQuery(req.request.query)
         })
 
         const { sig } = await meDriver.sign({

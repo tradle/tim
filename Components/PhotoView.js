@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring PhotoView.js')
+console.log('requiring PhotoView.js')
 'use strict';
 
 import utils from '../utils/utils'

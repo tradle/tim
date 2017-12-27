@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring Storage.js')
+console.log('requiring Storage.js')
 
 import {
   AsyncStorage

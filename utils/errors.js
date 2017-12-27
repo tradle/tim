@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring errors.js')
+console.log('requiring errors.js')
 import {
   Alert
 } from 'react-native'

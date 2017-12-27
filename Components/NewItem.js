@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring NewItem.js')
+console.log('requiring NewItem.js')
 'use strict';
 
 import t from 'tcomb-form-native'

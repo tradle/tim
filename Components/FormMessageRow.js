@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring FormMessageRow.js')
+console.log('requiring FormMessageRow.js')
 'use strict';
 
 import utils from '../utils/utils'
@@ -292,6 +292,8 @@ class FormMessageRow extends Component {
 
     viewCols.forEach((v) => {
       if (vCols.length > MAX_PROPS_IN_FORM)
+        return
+      if (properties[v].markdown)
         return
       if (properties[v].type === 'array') {
         if (resource[v]  &&  properties[v].items.ref  &&  utils.getModel(properties[v].items.ref).value.subClassOf === ENUM) {

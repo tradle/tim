@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring FormErrorRow.js')
+console.log('requiring FormErrorRow.js')
 'use strict';
 
 import utils from '../utils/utils'

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring NewResource.js')
+console.log('requiring NewResource.js')
 'use strict'
 
 import utils, { translate } from '../utils/utils'
@@ -10,6 +10,7 @@ import PhotoView from './PhotoView'
 import ResourceView from './ResourceView'
 import MessageView from './MessageView'
 import ResourceMixin from './ResourceMixin'
+import ShowPropertiesView from './ShowPropertiesView'
 import PageView from './PageView'
 import t from 'tcomb-form-native'
 import extend from 'extend'
@@ -99,11 +100,13 @@ class NewResource extends Component {
       modal: {},
       termsAccepted: isRegistration ? false : true
     }
+    this.onSavePressed = this.onSavePressed.bind(this)
+    this.showTermsAndConditions = this.showTermsAndConditions.bind(this)
     var currentRoutes = this.props.navigator.getCurrentRoutes()
     var currentRoutesLength = currentRoutes.length
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.props.search
             ? this.getSearchResult.bind(this)
-            : this.onSavePressed.bind(this)
+            : this.onSavePressed
 
     this.scrollviewProps = {
       automaticallyAdjustContentInsets:true,
@@ -370,7 +373,7 @@ class NewResource extends Component {
     this.state.noScroll = false
     var resource = this.state.resource;
 
-    var value = this.refs.form.getValue();
+    var value = this.refs.form  &&  this.refs.form.getValue() ||  resource
     if (!value) {
       value = this.refs.form.refs.input.state.value;
       if (!value)
@@ -671,8 +674,27 @@ class NewResource extends Component {
     }
     var options = this.getFormFields(params);
 
-    var Model = t.struct(model);
+    if (!options) {
+      let contentSeparator = utils.getContentSeparator(bankStyle)
+      return <PageView style={platformStyles.container} separator={contentSeparator}>
+                <ShowPropertiesView resource={data}
+                                    bankStyle={bankStyle}
+                                    navigator={navigator} />
+                  <TouchableOpacity onPress={() => {
+                    this.onSavePressed()
+                      // navigator.pop()
+                      // Actions.addItem(data)
+                    }
+                  }>
+                  <View style={[styles.submit, {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}]}>
+                    <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 5}}/>
+                    <Text style={styles.submitText}>{translate('Submit')}</Text>
+                  </View>
+                </TouchableOpacity>
+             </PageView>
+    }
 
+    var Model = t.struct(model);
     var itemsMeta
     if (this.props.editCols) {
       itemsMeta = []
@@ -722,12 +744,7 @@ class NewResource extends Component {
     var button = isRegistration
                ? <View>
                    <TouchableOpacity style={styles.thumbButton}
-                        onPress={() => {
-                          if (this.state.termsAccepted)
-                            this.onSavePressed()
-                          else
-                            this.showTermsAndConditions()
-                        }}>
+                      onPress={this.state.termsAccepted ? this.onSavePressed : this.showTermsAndConditions}>
                       <View style={styles.getStarted}>
                          <Text style={styles.getStartedText}>ENTER</Text>
                       </View>
@@ -805,6 +822,42 @@ class NewResource extends Component {
                       {formList}
                     </View>
     }
+
+    // var submit
+    // if (!isRegistration)
+    //   submit = <View style={styles.submitButton}>
+    //              <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
+    //                 <View style={[chatStyles.shareButton, {width: 100, backgroundColor: '#fdfdfd', paddingHorizontal: 10, justifyContent: 'center'}]}>
+    //                   <Text style={chatStyles.shareText}>{translate('Submit')}</Text>
+    //                   <Icon name='ios-send' size={25} style={{color: '#7AAAC3', paddingLeft: 5, transform: [{rotate: '45deg'}] }} />
+    //                 </View>
+    //               </TouchableOpacity>
+    //             </View>
+    // StatusBar.setHidden(true);
+    let submit
+    let bankStyle = this.props.bankStyle
+    if (!isRegistration) {
+      if (this.state.err) {
+        Alert.alert(this.state.err)
+        this.state.err = null
+      }
+      if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
+        submit = <TouchableOpacity onPress={this.onSavePressed}>
+                   <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
+                     <View style={styles.bar}>
+                       <Text style={{fontSize: 24,color: bankStyle.contextTextColor}}>{translate('next')}</Text>
+                     </View>
+                   </View>
+                 </TouchableOpacity>
+      else
+        submit  = <TouchableOpacity onPress={this.onSavePressed}>
+                    <View style={[styles.submit, {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}]}>
+                      <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 5}}/>
+                      <Text style={styles.submitText}>{translate('Submit')}</Text>
+                    </View>
+                  </TouchableOpacity>
+
+    }
     var content =
       <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center', paddingTop:10}}
                   ref='scrollView' {...this.scrollviewProps}>
@@ -823,85 +876,60 @@ class NewResource extends Component {
           </View>
         </View>
         {wait}
+        {submit}
       </ScrollView>
 
-    // var submit
-    // if (!isRegistration)
-    //   submit = <View style={styles.submitButton}>
-    //              <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
-    //                 <View style={[chatStyles.shareButton, {width: 100, backgroundColor: '#fdfdfd', paddingHorizontal: 10, justifyContent: 'center'}]}>
-    //                   <Text style={chatStyles.shareText}>{translate('Submit')}</Text>
-    //                   <Icon name='ios-send' size={25} style={{color: '#7AAAC3', paddingLeft: 5, transform: [{rotate: '45deg'}] }} />
-    //                 </View>
-    //               </TouchableOpacity>
-    //             </View>
-    // StatusBar.setHidden(true)
+    const { properties } = meta
+    const droppable = Object.keys(properties).find(key => {
+      const prop = properties[key]
+      const propMeta = prop.items || prop
+      const isPhoto = propMeta.ref === PHOTO
+      if (!isPhoto) return false
+      if (!ENV.canUseWebcam) return true
 
+      // if image processing is required
+      // let them upload, because there is none in web
+      return prop.component != null
+    })
+
+    if (droppable) {
+      const prop = properties[droppable]
+      return (
+        <DropPage
+          accept="image/*"
+          multiple={prop.type === 'array'}
+          style={platformStyles.container}
+          onDrop={(accepted, rejected) => this.onDropFiles({ prop, rejected, files: accepted })}
+        >
+          {content}
+          {submit}
+        </DropPage>
+      )
+    }
     if (!isRegistration) {
-      if (this.state.err) {
-        Alert.alert(this.state.err)
-        this.state.err = null
-      }
-      var submit
-      if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
-        submit = <TouchableOpacity onPress={this.onSavePressed.bind(this)} style={{width: '100%'}}>
-                   <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
-                     <View style={styles.bar}>
-                       <Text style={{fontSize: 24,color: bankStyle.contextTextColor}}>{translate('next')}</Text>
-                     </View>
-                   </View>
-                 </TouchableOpacity>
-
-      const { properties } = meta
-      const droppable = Object.keys(properties).find(key => {
-        const prop = properties[key]
-        const propMeta = prop.items || prop
-        const isPhoto = propMeta.ref === PHOTO
-        if (!isPhoto) return false
-        if (!ENV.canUseWebcam) return true
-
-        // if image processing is required
-        // let them upload, because there is none in web
-        return prop.component != null
-      })
-
-      if (droppable) {
-        const prop = properties[droppable]
-        return (
-          <DropPage
-            accept="image/*"
-            multiple={prop.type === 'array'}
-            style={platformStyles.container}
-            onDrop={(accepted, rejected) => this.onDropFiles({ prop, rejected, files: accepted })}
-          >
-            {content}
-            {submit}
-          </DropPage>
-        )
-      }
       let contentSeparator = utils.getContentSeparator(bankStyle)
       return <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator}>
                {content}
-               {submit}
               </PageView>
     }
     let title
-    if (!isRegistration  &&  !bankStyle.logoNeedsText) {
+    if (!isRegistration  &&  !bankStyle.logoNeedsText)
       title = <View style={{backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 25, justifyContent: 'center', alignItems: 'center'}}>
                 {translate(meta)}
               </View>
-    }
+
+    if (isRegistration)
+      title = <View style={styles.logo}>
+                <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
+              </View>
+
+
     return (
       <View style={{height: height, width: width, backgroundColor: bankStyle.BACKGROUND_COLOR}}>
         <BackgroundImage source={BG_IMAGE} style={styles.bgImage} />
         <View style={{justifyContent: 'center', alignItems: 'center', height: height}}>
-        {isRegistration
-          ? <View style={styles.logo}>
-              <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
-            </View>
-          : {title}
-        }
-        {content}
+          {title}
+          {content}
         </View>
       </View>
     )
@@ -1142,10 +1170,10 @@ class NewResource extends Component {
     let meta = this.props.model
     let resource = this.state.resource
     let blmodel = meta
-    var counter, count = 0
+    let counter
     let itemsArray = null
     let lcolor = this.getLabelAndBorderColor(bl.name)
-    var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+    let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
 
     let { bankStyle } = this.props
 
@@ -1167,14 +1195,14 @@ class NewResource extends Component {
       counter =
         <View>
           <View style={styles.itemsCounter}>
-            <Icon name='ios-camera-outline'  size={25} color={linkColor} />
+            <Icon name='ios-camera-outline'  size={35} color={linkColor} />
           </View>
         </View>;
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>
-                  <Icon name='ios-camera-outline'  size={25} color={linkColor} />
+                  <Icon name='ios-camera-outline'  size={35} color={linkColor} />
                 </View>
     }
     var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
@@ -1187,18 +1215,19 @@ class NewResource extends Component {
                   <Text style={styles.errorText}>{errTitle}</Text>
                 </View>
               : <View/>
-    var actionableItem = count
-                       ?  <TouchableOpacity style={styles.itemsWithCount}
-                           onPress={this.showItems.bind(this, bl, meta)}>
-                            {itemsArray}
-                          </TouchableOpacity>
-                       : <ImageInput
-                           prop={bl}
-                           style={styles.itemsWithoutCount}
-                           underlayColor='transparent'
-                           onImage={item => this.onAddItem(bl.name, item)}>
-                           {itemsArray}
-                         </ImageInput>
+    var actionableItem
+    if (count)
+      actionableItem = <TouchableOpacity style={styles.itemsWithCount} onPress={this.showItems.bind(this, bl, meta)}>
+                         {itemsArray}
+                       </TouchableOpacity>
+    else
+      actionableItem = <ImageInput
+                         prop={bl}
+                         style={styles.itemsWithoutCount}
+                         underlayColor='transparent'
+                         onImage={item => this.onAddItem(bl.name, item)}>
+                         {itemsArray}
+                       </ImageInput>
 
     let istyle = [count ? styles.photoButton : styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
 
@@ -1397,11 +1426,11 @@ var styles = StyleSheet.create({
     opacity: 0.7,
     alignSelf: 'flex-end',
   },
-  submitButton: {
-    paddingBottom: 30,
-    justifyContent: 'center',
-    alignSelf: 'center'
-  },
+  // submitButton: {
+  //   paddingBottom: 30,
+  //   justifyContent: 'center',
+  //   alignSelf: 'center'
+  // },
   noRegistration: {
     justifyContent: 'flex-start'
   },
@@ -1430,7 +1459,24 @@ var styles = StyleSheet.create({
     flex: 7,
     paddingTop: 15,
     paddingBottom: 7
-  }
+  },
+  submit: {
+    backgroundColor: '#7AAAC3',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: 340,
+    marginTop: 20,
+    marginBottom: 50,
+    alignSelf: 'center',
+    height: 40,
+    borderRadius: 5,
+    marginHorizontal: 20
+  },
+  submitText: {
+    fontSize: 20,
+    color: '#ffffff',
+    alignSelf: 'center'
+  },
 })
 
 module.exports = NewResource;

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring SignatureView.js')
+console.log('requiring SignatureView.js')
 'use strict';
 
 import utils from '../utils/utils'

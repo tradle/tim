@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring GridList.js')
+console.log('requiring GridList.js')
 'use strict';
 
 import React, { Component, PropTypes } from 'react'

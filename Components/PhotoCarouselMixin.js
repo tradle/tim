@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring PhotoCarouselMixin.js')
+console.log('requiring PhotoCarouselMixin.js')
 'use strict';
 
 import PhotoCarousel from './PhotoCarousel'

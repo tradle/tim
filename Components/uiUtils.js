@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring uiUtils.js')
+console.log('requiring uiUtils.js')
 import utils, {
   translate
 } from '../utils/utils'

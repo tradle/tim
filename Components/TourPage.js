@@ -1,6 +1,10 @@
-if (__DEV__) console.log('requiring TourPage.js')
+console.log('requiring TourPage.js')
 import React, { Component, PropTypes } from 'react'
 import WebView from './WebView'
+import {
+  View,
+  StatusBar
+} from 'react-native'
 import AppIntro from 'react-native-app-intro'
 import utils from '../utils/utils'
 
@@ -16,7 +20,7 @@ class TourPage extends Component {
     let {pages} = this.props.tour
     if (!pages)
       return <View/>
-
+    StatusBar.setHidden(true)
     let {width, height} = utils.dimensions(TourPage)
     let tpages = []
     if (pages)
@@ -46,11 +50,12 @@ class TourPage extends Component {
   doneBtnHandle = () => this.action();
 
   action() {
-    let { callback, navigator } = this.props
-    if (!utils.isWeb())
+    let { callback, navigator, noTransitions } = this.props
+    if (!utils.isWeb()  &&  !noTransitions)
       navigator.pop()
     if (callback)
       callback()
+    StatusBar.setHidden(false)
   }
 
   nextBtnHandle = (index) => {

@@ -1,5 +1,5 @@
-if (__DEV__) console.log('requiring db.js')
 import crypto from 'crypto'
+console.log('requiring db.js')
 import {
   getPassword,
   setPassword,

@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring HomePageMixin.js')
+console.log('requiring HomePageMixin.js')
 'use strict';
 
 import React from 'react'

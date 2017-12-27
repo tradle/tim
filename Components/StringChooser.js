@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring StringChooser.js')
+console.log('requiring StringChooser.js')
 'use strict';
 
 import React, { Component } from 'react'

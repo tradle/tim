@@ -1,4 +1,4 @@
-if (__DEV__) console.log('requiring VerificationView.js')
+console.log('requiring VerificationView.js')
 'use strict';
 
 import ArticleView from './ArticleView'

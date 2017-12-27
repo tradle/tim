@@ -24,57 +24,57 @@ import './utils/shim'
 import 'stream'
 import debounce from 'debounce'
 // require('./timmy')
-import ResourceList from './Components/ResourceList'
-import VerifierChooser from './Components/VerifierChooser'
+var ResourceList = require('./Components/ResourceList');
+var VerifierChooser = require('./Components/VerifierChooser')
 
-// import VideoPlayer from './Components/VideoPlayer
-import EnumList from './Components/EnumList'
-import GridList from './Components/GridList'
-import TimHome from './Components/TimHome'
-import MarkdownPropertyEdit from './Components/MarkdownPropertyEdit'
-import SignatureView from './Components/SignatureView'
-import AvivaIntroView from './Components/AvivaIntroView'
-import TourPage from './Components/TourPage'
-// import TsAndCs from './Components/TsAndCs'
-// import HomePage from './Components/HomePage'
-import PasswordCheck from './Components/PasswordCheck'
-import LockScreen from './Components/LockScreen'
-import TouchIDOptIn from './Components/TouchIDOptIn'
-// import ResourceTypesScreen from './Components/ResourceTypesScreen'
-import NewResource from './Components/NewResource'
-import NewItem from './Components/NewItem'
-// import ItemsList from './Components/ItemsList'
-import RemediationItemsList from './Components/RemediationItemsList'
-import GridItemsList from './Components/GridItemsList'
-import ResourceView from './Components/ResourceView'
-import ApplicationView from './Components/ApplicationView'
-import MessageView from './Components/MessageView'
-import MessageList from './Components/MessageList'
-import ArticleView from './Components/ArticleView'
-import IdentitiesList from './Components/IdentitiesList'
-import SupervisoryViewPerProvider from './Components/SupervisoryViewPerProvider'
-import SupervisoryView from './Components/SupervisoryView'
-// import SelectPhotoList from './Components/SelectPhotoList'
-import ProductChooser from './Components/ProductChooser'
-import StringChooser from './Components/StringChooser'
-import ContextChooser from './Components/ContextChooser'
-import CameraView from './Components/CameraView'
-import PhotoCarousel from './Components/PhotoCarousel'
-import QRCode from './Components/QRCode'
-import QRCodeScanner from './Components/QRCodeScanner'
+// var VideoPlayer = require('./Components/VideoPlayer')
+var EnumList = require('./Components/EnumList')
+var GridList = require('./Components/GridList');
+var TimHome = require('./Components/TimHome');
+var MarkdownPropertyEdit = require('./Components/MarkdownPropertyEdit')
+var SignatureView = require('./Components/SignatureView')
+var AvivaIntroView = require('./Components/AvivaIntroView')
+var TourPage = require('./Components/TourPage')
+// var TsAndCs = require('./Components/TsAndCs')
+// var HomePage = require('./Components/HomePage')
+var PasswordCheck = require('./Components/PasswordCheck');
+var LockScreen = require('./Components/LockScreen')
+var TouchIDOptIn = require('./Components/TouchIDOptIn');
+// var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
+var NewResource = require('./Components/NewResource');
+var NewItem = require('./Components/NewItem');
+// var ItemsList = require('./Components/ItemsList')
+var RemediationItemsList = require('./Components/RemediationItemsList')
+var GridItemsList = require('./Components/GridItemsList')
+var ResourceView = require('./Components/ResourceView');
+var ApplicationView = require('./Components/ApplicationView')
+var MessageView = require('./Components/MessageView');
+var MessageList = require('./Components/MessageList');
+var ArticleView = require('./Components/ArticleView');
+var IdentitiesList = require('./Components/IdentitiesList');
+var SupervisoryViewPerProvider = require('./Components/SupervisoryViewPerProvider')
+var SupervisoryView = require('./Components/SupervisoryView')
+// var SelectPhotoList = require('./Components/SelectPhotoList');
+var ProductChooser = require('./Components/ProductChooser')
+var StringChooser = require('./Components/StringChooser')
+var ContextChooser = require('./Components/ContextChooser')
+var CameraView = require('./Components/CameraView');
+var PhotoCarousel = require('./Components/PhotoCarousel');
+var QRCode = require('./Components/QRCode')
+var QRCodeScanner = require('./Components/QRCodeScanner')
 import Log from './Components/Log'
-import utils from './utils/utils'
-import constants from '@tradle/constants'
+var utils = require('./utils/utils');
+var translate = utils.translate
+var constants = require('@tradle/constants');
 import Icon from 'react-native-vector-icons/Ionicons'
-import Actions from './Actions/Actions'
-import * as AutomaticUpdates from './utils/automaticUpdates'
+var Actions = require('./Actions/Actions');
+import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
 import Reflux from 'reflux'
 import Store from './Store/Store'
 import extend from 'extend'
-import StyleSheet from './StyleSheet'
+var StyleSheet = require('./StyleSheet')
 
-const { translate } = utils
 const TIM_HOME = 1
 const NEW_RESOURCE = 4
 const MESSAGE_LIST = 11
@@ -85,7 +85,7 @@ const HEIGHT = 27
 const AVIVA_INTRO_VIEW = 50
 // const TERMS_AND_CONDITIONS = 51
 
-import reactMixin from 'react-mixin'
+var reactMixin = require('react-mixin');
 import {
   Navigator,
   Image,
@@ -108,7 +108,6 @@ import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
 import Transitions from './utils/transitions'
-import defaultBankStyle from './styles/defaultBankStyle.json'
 
 let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
@@ -132,15 +131,11 @@ utils.setGlobal('SUBMIT_DEBUG_LOG', utils.submitLog)
 
 const landingPageMapping = {
   AvivaIntroView: {
-    get component() {
-      return AvivaIntroView
-    },
+    component: AvivaIntroView,
     id: AVIVA_INTRO_VIEW
   },
   TourPage: {
-    get component() {
-      return TourPage
-    },
+    component: TourPage,
     id: 35
   }
   // TsAndCs: {
@@ -152,45 +147,22 @@ const landingPageMapping = {
 class TiMApp extends Component {
   constructor(props) {
     super(props)
-    var props = {
+    let passProps = {
       modelName: constants.TYPES.PROFILE,
       landingPageMapping: landingPageMapping
     }
-
-    // const testModal = () => {
-    //   Actions.hideModal()
-    //   setTimeout(() => {
-    //     Actions.showModal({
-    //       title: 'I am Title!',
-    //       message: 'I am message!',
-    //       buttons: [
-    //         {text:'Cancel', onPress: testModal },
-    //         {text:'OK', onPress: testModal }
-    //       ]
-    //     })
-    //   }, 2000)
-    // }
-
-    // testModal()
 
     this.state = {
       currentAppState: 'active',
       dateAppStateChanged: Date.now(),
       initialRoute: {
         id: 1,
-        // title: 'Trust in Motion',
-        // titleTextColor: '#7AAAC3',
         component: TimHome,
-        passProps: props,
+        passProps: passProps,
         navBarBgColor: 'transparent'
       },
-      props: props
+      props: passProps
     };
-    // var url = 'tradlekyc://71e4b7cd6c11ab7221537275988f113a879029ea';
-    // this._handleOpenURL({url});
-    // var isIphone = Device.isIphone();
-    // if (!isIphone)
-    //   isIphone = isIphone;
 
     ;['_handleOpenURL', '_handleAppStateChange', 'onNavigatorBeforeTransition', 'onNavigatorAfterTransition'].forEach((method) => {
       this[method] = this[method].bind(this)
@@ -280,11 +252,11 @@ class TiMApp extends Component {
     this.setState(newState)
   }
   _handleOpenURL(event) {
-    var url = event.url.trim();
-    var idx = url.indexOf('://');
-    var q = (idx + 3 === url.length) ? null : url.substring(idx + 3);
+    let url = event.url.trim();
+    let idx = url.indexOf('://');
+    let q = (idx + 3 === url.length) ? null : url.substring(idx + 3);
 
-    var r;
+    let r;
     if (!q) {
       r = {
         _t: 'tradle.Organization',
@@ -294,7 +266,7 @@ class TiMApp extends Component {
       }
     }
     else {
-      var params = q.split('=');
+      let params = q.split('=');
       if (params.length === 1) {
         switch (parseInt(params[0])) {
         case 1:
@@ -329,11 +301,11 @@ class TiMApp extends Component {
           r[constants.TYPE] = 'tradle.Organization';
       }
     }
-    var props = {modelName: 'tradle.Message'};
+    let props = {modelName: 'tradle.Message'};
 
     if (this.state.navigator) {
-      var currentRoutes = this.state.navigator.getCurrentRoutes();
-      var route = {
+      let currentRoutes = this.state.navigator.getCurrentRoutes();
+      let route = {
         title: r.name ||  'Chat',
         backButtonTitle: 'Back',
         component: MessageList,
@@ -439,7 +411,7 @@ class TiMApp extends Component {
           onWillFocus={(newRoute) => {
             if (!newRoute)
               return
-            let style = newRoute.passProps.bankStyle
+            let style = (newRoute.id === MESSAGE_LIST && newRoute.passProps.resource && newRoute.passProps.resource.style) || newRoute.passProps.bankStyle
             if (style)
               this.setState({navBarBgColor: style.navBarBackgroundColor || 'transparent'})
             else
@@ -476,7 +448,7 @@ class TiMApp extends Component {
       this._unlockOrientation()
     }
 
-    var props = route.passProps;
+    let props = route.passProps;
     if (!this.state.navigator) {
       this._navListeners = [
         nav.navigationContext.addListener('willfocus', this.onNavigatorBeforeTransition),
@@ -615,27 +587,28 @@ var NavigationBarRouteMapper = {
     if (index === 0  ||  route.noLeftButton)
       return <View/>
 
-    var color = '#7AAAC3'
-    if (route.passProps.bankStyle  &&  route.passProps.bankStyle.linkColor)
-      color = route.passProps.bankStyle.linkColor
+    let bankStyle = route.passProps.bankStyle
+    let color = '#7AAAC3'
+    if (bankStyle  &&  bankStyle.linkColor)
+      color = bankStyle.linkColor
 
-    var previousRoute = navState.routeStack[index - 1];
-    var lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
+    let previousRoute = navState.routeStack[index - 1];
+    let lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
     if (!lbTitle)
       return null;
-    var style = [platformStyles.navBarText];
+    let style = [platformStyles.navBarText];
     if (route.tintColor)
       style.push({color: route.tintColor});
     else {
       style.push(styles.navBarButtonText);
       style.push({color: color});
     }
-    var iconIdx = lbTitle.indexOf('|')
-    var icon = iconIdx !== -1 ? lbTitle.substring(iconIdx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
+    let iconIdx = lbTitle.indexOf('|')
+    let icon = iconIdx !== -1 ? lbTitle.substring(iconIdx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
 
     style.push({fontSize: utils.getFontSize(20)})
-    var title = icon
-              ? <Icon name={icon} size={utils.getFontSize(30)} color='#7AAAC3' style={styles.icon}/>
+    let title = icon
+              ? <Icon name={icon} size={utils.getFontSize(30)} color={color} style={styles.icon}/>
               : <Text style={style}>
                   {lbTitle}
                 </Text>
@@ -657,23 +630,24 @@ var NavigationBarRouteMapper = {
   RightButton: function(route, navigator, index, navState) {
     if (!route.rightButtonTitle)
       return <View/>
-    var style = [platformStyles.navBarText, styles.navBarButtonText];
-    if (route.tintColor)
-      style.push({color: route.tintColor});
-    else if (route.passProps.bankStyle)
-      style.push({color: route.passProps.bankStyle.linkColor || '#7AAAC3'})
-
-    style.push({fontSize: utils.getFontSize(20)})
-    var title
-
-    var rbTitle = route.rightButtonTitle
-    var iconIdx = rbTitle.indexOf('|')
-    var icon
-    var symbol
-    var iconSize = 25
-    var style = {}
+    // let style = [platformStyles.navBarText, styles.navBarButtonText];
+    // if (route.tintColor)
+    //   style.push({color: route.tintColor});
+    // else if (route.passProps.bankStyle)
+    //   style.push({color: route.passProps.bankStyle.linkColor || '#7AAAC3'})
+    let rbTitle = route.rightButtonTitle
+    let iconIdx = rbTitle.indexOf('|')
+    let icon
+    let symbol
+    let iconSize = 25
+    let bankStyle = route.passProps.bankStyle
+    let iconColor = bankStyle ? bankStyle.linkColor : '#7AAAC3'
+    let style = {}
+    let isSubmit
     switch (rbTitle) {
     case 'Done':
+      iconColor = '#fff'
+      isSubmit = true
       // if (route.passProps.bankStyle  &&  route.passProps.bankStyle.submitBarInFooter)
       //   return
     case 'Accept':
@@ -688,8 +662,8 @@ var NavigationBarRouteMapper = {
       icon = 'md-download'
       break
     case 'View':
-      icon = 'ios-eye'
-      iconSize = 32
+      icon = 'md-eye'
+      iconSize = 28
       break
     case 'Search':
       icon = 'md-search'
@@ -704,9 +678,13 @@ var NavigationBarRouteMapper = {
       icon = 'md-share'
       break
     }
+    let title
     if (icon)  {
-      let color = /*rbTitle === 'Done' ? '#7AAAC3' : */ '#7AAAC3'
-      title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={color} style={[styles.icon, style]} />
+      title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={iconColor} style={[styles.icon, style]} />
+      if (isSubmit)
+        title = <View style={[styles.submit, {backgroundColor: bankStyle ? bankStyle.linkColor : '#7AAAC3'}]}>
+                  {title}
+                </View>
     }
     else if (symbol)
       title = <Text style={{fontSize: 25}}>{symbol}</Text>
@@ -719,7 +697,7 @@ var NavigationBarRouteMapper = {
       let iconsList = rbTitle.split('|')
       let icons = []
       iconsList.forEach((i) => {
-        icons.push(<Icon name={i} key={i} size={20} color='#7AAAC3' style={styles.iconSpace} />)
+        icons.push(<Icon name={i} key={i} size={20} color={iconColor} style={styles.iconSpace} />)
       })
 
       title = <View>
@@ -765,7 +743,7 @@ var NavigationBarRouteMapper = {
   Title: function(route, navigator, index, navState) {
     if (!route.title)
       return <View/>
-    var org;
+    let org;
     if (route.passProps.modelName                       &&
         route.passProps.modelName === 'tradle.Message'  &&
         route.passProps.resource                        &&
@@ -808,8 +786,11 @@ var NavigationBarRouteMapper = {
     }
     let t = route.title.split(' -- ')
     let st = t.length > 1 ? {marginTop: 2} : {}
+    let bankStyle = route.passProps.bankStyle
+    if (bankStyle)
+      st.color = bankStyle.linkColor
 
-    var style = [platformStyles.navBarText, styles.navBarTitleText, st]
+    let style = [platformStyles.navBarText, styles.navBarTitleText, st]
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
 
@@ -851,7 +832,7 @@ var NavigationBarRouteMapper = {
     let { width } = utils.dimensions(component)
 
     let tWidth = width * 0.8
-    let numberOfCharsInWidth = tWidth / utils.getFontSize(10)
+    let numberOfCharsInWidth = tWidth / utils.getFontSize(12)
     if (title.length < numberOfCharsInWidth)
       return title
     title = title.substring(0, numberOfCharsInWidth)
@@ -924,6 +905,15 @@ var styles = StyleSheet.create({
     color: '#2892C6',
     fontSize: 12,
     alignSelf: 'center'
+  },
+  submit: {
+    backgroundColor: '#7AAAC3',
+    borderColor: '#cccccc',
+    borderRadius: 5,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingRight: 10,
+    paddingLeft:15,
+    paddingBottom: 5
   }
 });
 
