@@ -5503,6 +5503,18 @@ console.time('getMessageList')
           if (modelName === MESSAGE) {
             result.forEach(r => this.addVisualProps(r))
             let rmIdx = []
+            if (!me.isEmployee) {
+              let lastFrForPr
+              for (let i=result.length - 1; i>=0; i--) {
+                let r = result[i]
+                if (r[TYPE] === FORM_REQUEST  &&  r.form === PRODUCT_REQUEST) {
+                  if (lastFrForPr)
+                    result.splice(i, 1)
+                  else
+                    lastFrForPr = i
+                }
+              }
+            }
             let sharedVerifiedForms = []
             for (let i=0; i<result.length; i++) {
               let r = result[i]
@@ -8030,11 +8042,11 @@ console.timeEnd('getMessageList')
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
       }
-      else if (!isNew  &&  model.id === ORGANIZATION  &&  value._noTour  &&  !originalR._noTour) {
-        value._noSplash = true
-        this._noSplash.push(iKey)
-        this._setItem(iKey, value)
-      }
+      // else if (!isNew  &&  model.id === ORGANIZATION  &&  value._noTour  &&  !originalR._noTour) {
+      //   value._noSplash = true
+      //   this._noSplash.push(iKey)
+      //   this._setItem(iKey, value)
+      // }
     })
     .catch((err) => {
       if (!noTrigger) {
