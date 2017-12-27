@@ -646,7 +646,7 @@ var utils = {
     }
     // ViewCols on top
     for (let p in properties) {
-      if (!eCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden)
+      if (!eCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden  &&  p.indexOf('_group') !== p.length - 6)
         eCols[p] = properties[p]
     }
     return eCols
