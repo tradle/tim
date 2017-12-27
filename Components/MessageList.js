@@ -18,9 +18,8 @@ import {
   Alert,
   Modal,
   TouchableHighlight,
-  WebView
 } from 'react-native'
-
+import WebView from './WebView'
 import extend from 'extend'
 import TimerMixin from 'react-timer-mixin'
 import Reflux from 'reflux'
@@ -172,6 +171,7 @@ class MessageList extends Component {
     this.listenTo(Store, 'onAction');
     this._watchSubmit()
     this._hideSplashScreenTimeout = setTimeout(() => {
+      this.props.resource._noSplash = true
       this.setState({
          showSplashScreen: false
         })
@@ -756,7 +756,6 @@ class MessageList extends Component {
       return
     if (resource  &&  resource._noSplash)
       return
-    resource._noSplash = true
     const { width, height } = utils.dimensions(MessageList)
                     // startInLoadingState={true}
     return <WebView style={{width, height}}
