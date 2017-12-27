@@ -687,7 +687,7 @@ class NewResource extends Component {
                     }
                   }>
                   <View style={[styles.submit, {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}]}>
-                    <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 5}}/>
+                    <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 2}}/>
                     <Text style={styles.submitText}>{translate('Submit')}</Text>
                   </View>
                 </TouchableOpacity>
@@ -835,7 +835,6 @@ class NewResource extends Component {
     //             </View>
     // StatusBar.setHidden(true);
     let submit
-    let bankStyle = this.props.bankStyle
     if (!isRegistration) {
       if (this.state.err) {
         Alert.alert(this.state.err)
@@ -852,7 +851,7 @@ class NewResource extends Component {
       else
         submit  = <TouchableOpacity onPress={this.onSavePressed}>
                     <View style={[styles.submit, {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}]}>
-                      <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 5}}/>
+                      <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 2}}/>
                       <Text style={styles.submitText}>{translate('Submit')}</Text>
                     </View>
                   </TouchableOpacity>
@@ -1474,6 +1473,7 @@ var styles = StyleSheet.create({
   },
   submitText: {
     fontSize: 20,
+    paddingLeft: 5,
     color: '#ffffff',
     alignSelf: 'center'
   },
