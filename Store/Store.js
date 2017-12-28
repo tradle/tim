@@ -5297,17 +5297,16 @@ var Store = Reflux.createStore({
   onMessageList(params) {
     this.onList(params);
   },
-  onList(params) {
-    if (isLoaded)
-      this.getList(params);
-    else {
-      this.loadDB()
-      .then(() => {
-        isLoaded = true;
-        if (params.modelName)
-          this.getList(params);
-      });
+  async onList(params) {
+    Alert.alert('onList')
+    if (isLoaded) {
+      await this.getList(params)
+      return
     }
+    this.loadDB()
+    isLoaded = true;
+    if (params.modelName)
+      await this.getList(params);
   },
   async getList(params) {
     let {modelName, first, prop, isAggregation, isChat} = params
@@ -5377,7 +5376,7 @@ var Store = Reflux.createStore({
     let {to, context, loadEarlierMessages, allLoaded, spinner,
          isForgetting, limit, listView, _readOnly, gatherForms} = params
     let shareableResources, result, retParams
-console.time('getMessageList')
+
     if (me.isEmployee  &&  meta.id === MESSAGE  &&  context) {
       let myBot = this.getRepresentative(me.organization)
       result = await this.searchServer({
@@ -5635,7 +5634,6 @@ console.time('getMessageList')
       if (context)
         retParams.productToForms = await this.gatherForms(utils.getId(to), context)
     }
-console.timeEnd('getMessageList')
     this.trigger(retParams)
   },
 
