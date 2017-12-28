@@ -30,6 +30,8 @@ var MarkdownPropertyEdit = require('./Components/MarkdownPropertyEdit')
 var SignatureView = require('./Components/SignatureView')
 var AvivaIntroView = require('./Components/AvivaIntroView')
 var TourPage = require('./Components/TourPage')
+var SplashPage = require('./Components/SplashPage')
+
 // var TsAndCs = require('./Components/TsAndCs')
 // var HomePage = require('./Components/HomePage')
 var PasswordCheck = require('./Components/PasswordCheck');
@@ -548,6 +550,8 @@ class TiMApp extends Component {
       return <ApplicationView navigator={nav} {...props } />
     case 35:
       return <TourPage navigator={nav} {...props } />
+    case 36:
+      return <SplashPage navigator={nav} {...props } />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />

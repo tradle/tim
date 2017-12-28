@@ -61,9 +61,6 @@ import platformStyles, {MenuIcon} from '../styles/platform'
 import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
 
-const FOOTER_TEXT_COLOR = ENV.splashContrastColor
-
-
 // import AddNewMessage from './AddNewMessage'
 // import SearchBar from 'react-native-search-bar'
 // import ResourceTypesScreen from './ResourceTypesScreen'
@@ -101,7 +98,6 @@ class MessageList extends Component {
       isLoading: true,
       // selectedAssets: {},
       isConnected: props.navigator.isConnected,
-      showSplashScreen: true,
       // onlineStatus: props.resource._online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
       isEmployee:  props.resource  &&  utils.isEmployee(props.resource),
@@ -141,12 +137,6 @@ class MessageList extends Component {
 
     return true
   }
-  isLoading() {
-    let {showSplashScreen, list} = this.state
-    // if (!showSplashScreen)
-    //   debugger
-    return showSplashScreen && list
-  }
   componentWillMount() {
     let { navigator, modelName, resource, prop, context, search, isAggregation, application } = this.props
     let params = {
@@ -161,20 +151,12 @@ class MessageList extends Component {
       isAggregation: isAggregation,
       application: application,
     }
-    if (modelName === MESSAGE)
-      params.checkForSplash = true
 
     StatusBar.setHidden(false);
     utils.onNextTransitionEnd(navigator, () => Actions.list(params));
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
-    this._hideSplashScreenTimeout = setTimeout(() => {
-      this.props.resource._noSplash = true
-      this.setState({
-         showSplashScreen: false
-        })
-    }, 2000)
   }
   onAction(params) {
     let {action, error, to, isConnected} = params
@@ -466,8 +448,6 @@ class MessageList extends Component {
       return true
     if (this.state.application !== nextState.application)
       return true
-    if (this.state.showSplashScreen !== nextState.showSplashScreen)
-      return true
     // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
     //   return false
     if (nextState.isConnected !== this.state.isConnected  &&  this.state.isLoading === nextState.isLoading)
@@ -707,7 +687,6 @@ class MessageList extends Component {
 
   componentWillUnmount() {
     clearTimeout(this._scrollTimeout)
-    clearTimeout(this._hideSplashScreenTimeout)
   }
 
   componentDidUpdate() {
@@ -721,39 +700,9 @@ class MessageList extends Component {
       }, 200)
   }
 
-  getSplashScreen() {
-    let {resource, bankStyle} = this.props
-    let splashscreen = bankStyle.splashscreen
-    if (!splashscreen)
-      return
-    if (resource  &&  resource._noSplash)
-      return
-    const { width, height } = utils.dimensions(MessageList)
-                    // startInLoadingState={true}
-    return <WebView style={{width, height}}
-                    source={{uri: splashscreen}}
-                    automaticallyAdjustContentInsets={false} />
-  }
   render() {
     let { modelName, resource, bankStyle, navigator, originatingMessage, isAggregation } = this.props
     let application = this.state.application ||  this.props.application
-
-    let loading
-    if (!this.props.hadTour  &&  this.isLoading()  &&  !application) {
-      let splash = this.getSplashScreen()
-      if (splash) {
-        StatusBar.setHidden(true)
-        loading = <View style={styles.mainWrap}>
-                    <Modal visible={true}
-                          transparent={false}
-                          animationType='slide'>
-                      {splash}
-                      <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', position: 'absolute', bottom: 50}} />
-                    </Modal>
-                  </View>
-        return loading
-      }
-    }
 
     let model = utils.getModel(modelName).value;
     let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url

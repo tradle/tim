@@ -660,7 +660,7 @@ class ResourceList extends Component {
               resolvePromise()
               resource._noSplash = true
               this.selectResource(resource, 'replace')
-            }, 3000)
+            }, 2000)
             return
           }
         }
