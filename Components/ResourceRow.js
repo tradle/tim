@@ -305,21 +305,18 @@ class ResourceRow extends Component {
 
 
     let action
-    if (isOfficialAccounts  &&  !this.props.hideMode) {
+    if (isOfficialAccounts  &&  !this.props.hideMode  &&  resource._formsCount) {
       action = <TouchableHighlight underlayColor='transparent' style={styles.actionView}
                   onPress={this.showResourceView.bind(this)}>
-                <View style={textStyle}>
-                   {resource._formsCount
-                      ? <View style={{flexDirection: 'row'}}>
-                          <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-                          <View style={styles.count}>
-                            <Text style={styles.countText}>{resource._formsCount}</Text>
-                          </View>
-                        </View>
-                      : <View />
-                   }
-                </View>
-              </TouchableHighlight>
+                 <View style={textStyle}>
+                   <View style={{flexDirection: 'row'}}>
+                     <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+                     <View style={styles.count}>
+                       <Text style={styles.countText}>{resource._formsCount}</Text>
+                     </View>
+                   </View>
+                 </View>
+               </TouchableHighlight>
     }
     let content =  <View style={[styles.content, bg]} key={this.getNextKey()}>
                     <TouchableHighlight onPress={onPress} underlayColor='transparent'>
@@ -340,7 +337,8 @@ class ResourceRow extends Component {
                   </View>
     return content
   }
-  showResourceView(resource) {
+  showResourceView() {
+    let resource = this.props.resource
     let title = utils.getDisplayName(resource)
     let route = {
       title: title,
