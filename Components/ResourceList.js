@@ -668,6 +668,7 @@ class ResourceList extends Component {
             setTimeout(() => {
               resolvePromise()
               resource._noSplash = true
+              Actions.addItem({resource: resource})
               this.selectResource(resource, 'replace')
             }, 2000)
             return

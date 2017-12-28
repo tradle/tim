@@ -109,6 +109,8 @@ class ResourceRow extends Component {
         else
           this.setState({unread: params.resource._unread})
       }
+
+      break
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
