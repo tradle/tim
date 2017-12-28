@@ -14,8 +14,6 @@ class SplashPage extends Component {
     return <WebView style={{width, height}}
                  source={{uri: this.props.splashscreen}}
                  startInLoadingState={true}
-                 javaScriptEnabled={false}
-                 domStorageEnabled={false}
                  automaticallyAdjustContentInsets={false} />
   }
 }
