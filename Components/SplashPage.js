@@ -1,7 +1,5 @@
 import React, { Component, PropTypes } from 'react'
-import {
-  WebView,
-} from 'react-native'
+import WebView from './WebView'
 import utils from '../utils/utils'
 
 import { makeResponsive } from 'react-native-orient'
