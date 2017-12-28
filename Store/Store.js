@@ -5298,7 +5298,6 @@ var Store = Reflux.createStore({
     this.onList(params);
   },
   async onList(params) {
-    Alert.alert('onList')
     if (isLoaded) {
       await this.getList(params)
       return
