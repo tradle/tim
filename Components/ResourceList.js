@@ -10,6 +10,7 @@ import MessageList from './MessageList'
 import MessageView from './MessageView'
 import PageView from './PageView'
 import TourPage from './TourPage'
+import SplashPage from './SplashPage'
 import GridList from './GridList'
 import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
@@ -510,7 +511,7 @@ class ResourceList extends Component {
     return false
   }
 
-  selectResource(resource, hadTour) {
+  selectResource(resource, action) {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, callback, navigator, bankStyle, serverOffline, prop, currency, officialAccounts } = this.props
@@ -611,7 +612,7 @@ class ResourceList extends Component {
     let style = this.mergeStyle(resource.style)
 
     if (officialAccounts) {
-      if (!hadTour) {
+      if (!action) {
         // if (isOrganization)
         //   route.title = resource.name
         let msg = {
@@ -624,27 +625,54 @@ class ResourceList extends Component {
 
         utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
       }
-      if (isOrganization  &&  resource._tour  &&  !resource._noTour) {
-        navigator.push({
-          title: "",
-          component: TourPage,
-          id: 35,
-          backButtonTitle: null,
-          // backButtonTitle: __DEV__ ? 'Back' : null,
-          passProps: {
-            bankStyle: bankStyle,
-            noTransitions: true,
-            tour: resource._tour,
-            callback: () => {
-              resource._noTour = true
-              resource._noSplash = true
-              Actions.addItem({resource: resource})
-              // resource._noSplash = true
-              this.selectResource(resource, 'replace')
+      if (isOrganization) {
+        if (resource._tour  &&  !resource._noTour) {
+          navigator.push({
+            title: "",
+            component: TourPage,
+            id: 35,
+            backButtonTitle: null,
+            // backButtonTitle: __DEV__ ? 'Back' : null,
+            passProps: {
+              bankStyle: bankStyle,
+              noTransitions: true,
+              tour: resource._tour,
+              callback: () => {
+                resource._noTour = true
+                resource._noSplash = true
+                Actions.addItem({resource: resource})
+                // resource._noSplash = true
+                this.selectResource(resource, 'replace')
+              }
             }
+          })
+          return
+        }
+        if (!resource._noSplash)  {
+          let splashscreen = resource.style  &&  resource.style.splashscreen
+          if (splashscreen) {
+            let resolvePromise
+            let promise = new Promise(resolve => {
+              navigator.push({
+                title: "",
+                component: SplashPage,
+                id: 36,
+                backButtonTitle: null,
+                passProps: {
+                  splashscreen: splashscreen
+                }
+              })
+              resolvePromise = resolve
+            })
+            // return
+            setTimeout(() => {
+              resolvePromise()
+              resource._noSplash = true
+              this.selectResource(resource, 'replace')
+            }, 2000)
+            return
           }
-        })
-        return
+        }
       }
     }
 
@@ -660,7 +688,7 @@ class ResourceList extends Component {
         modelName: MESSAGE,
         currency: resource.currency,
         bankStyle: style,
-        hadTour: hadTour
+        hadTour: action !== null
       }
     }
     if (isContact) { //  ||  isOrganization) {
@@ -700,9 +728,9 @@ class ResourceList extends Component {
       }
     }
 
-    let action = hadTour ? 'replace' : 'push'
-    navigator[action](route);
+    navigator[action || 'push'](route);
   }
+
   _selectResource(resource) {
     let model = utils.getModel(this.props.modelName);
     let title = utils.getDisplayName(resource);
