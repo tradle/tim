@@ -64,7 +64,10 @@ var dateProp
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
-    this.state = { isConnected: this.props.navigator.isConnected, resource: props.resource }
+    this.state = {
+      isConnected: this.props.navigator.isConnected,
+      resource: props.resource,
+    }
     if (props.changeSharedWithList)
       this.state.sharedWith = true
     // Multichooser for sharing context; isChooser for choosing delegated trusted party for requested verification
@@ -82,8 +85,12 @@ class ResourceRow extends Component {
     this.listenTo(Store, 'onRowUpdate');
   }
   onRowUpdate(params) {
-    let { action, application } = params
+    let { action, application, online, resource } = params
     switch (action) {
+    case 'onlineStatus':
+      if (resource  &&  resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
+        this.setState({serverOffline: !online})
+      break
     case 'connectivity':
       this.setState({isConnected: params.isConnected})
       break
@@ -98,7 +105,7 @@ class ResourceRow extends Component {
       let hash = params.resource[ROOT_HASH] || params.resource.id.split('_')[1]
       if (hash === this.props.resource[ROOT_HASH]) {
         if (params.forceUpdate)
-          this.setState({forceUpdate: this.state.forceUpdate ? false : true})
+          this.setState({forceUpdate: this.state.forceUpdate ? false : true, resource: resource})
         else
           this.setState({unread: params.resource._unread})
       }
@@ -116,6 +123,8 @@ class ResourceRow extends Component {
     if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
       return true
     if (this.state.unread !== nextState.unread)
+      return true
+    if (this.state.serverOffline !== nextState.serverOffline)
       return true
     if (this.props.hideMode !== nextProps.hideMode)
       return true
@@ -145,7 +154,7 @@ class ResourceRow extends Component {
   }
 
   render() {
-    let resource = this.state.application || this.props.resource;
+    let resource = this.state.application || this.state.resource;
     let photo;
     let rType = resource[TYPE]
     let isContact = rType === PROFILE;
@@ -200,7 +209,7 @@ class ResourceRow extends Component {
     if (!this.props.isChooser  &&  photo  &&  rType === ORGANIZATION) {
       let onlineStatus = (
         <Geometry.Circle size={20} style={styles.online}>
-          <Geometry.Circle size={18} style={{ backgroundColor: !resource._online || !this.props.navigator.isConnected ? '#FAD70C' : '#62C457'}} />
+          <Geometry.Circle size={18} style={{ backgroundColor: !resource._online /*|| !this.props.navigator.isConnected*/ ? '#FAD70C' : '#62C457'}} />
         </Geometry.Circle>
       )
 
@@ -296,19 +305,16 @@ class ResourceRow extends Component {
 
     let onPress = this.action.bind(this)
     let action
-    if (isOfficialAccounts  &&  !this.props.hideMode) {
+    if (isOfficialAccounts  &&  !this.props.hideMode  &&  resource._formsCount) {
       action = <View style={styles.actionView}>
                 <TouchableHighlight underlayColor='transparent' onPress={this.showResourceView.bind(this)}>
                 <View style={textStyle}>
-                   {resource._formsCount
-                      ? <View style={{flexDirection: 'row'}}>
-                          <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
-                          <View style={styles.count}>
-                            <Text style={styles.countText}>{resource._formsCount}</Text>
-                          </View>
-                        </View>
-                      : <View />
-                   }
+                  <View style={{flexDirection: 'row'}}>
+                    <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+                    <View style={styles.count}>
+                      <Text style={styles.countText}>{resource._formsCount}</Text>
+                    </View>
+                  </View>
                 </View>
                </TouchableHighlight>
               </View>
@@ -332,7 +338,8 @@ class ResourceRow extends Component {
                   </View>
     return content
   }
-  showResourceView(resource) {
+  showResourceView() {
+    let resource = this.props.resource
     let title = utils.getDisplayName(resource)
     let route = {
       title: title,
@@ -876,18 +883,18 @@ var styles = StyleSheet.create({
     top: 25,
     backgroundColor: 'transparent'
   },
-  // count: {
-  //   alignSelf: 'flex-start',
-  //   minWidth: 18,
-  //   marginLeft: -7,
-  //   marginTop: 0,
-  //   backgroundColor: appStyle.COUNTER_BG_COLOR,
-  //   paddingHorizontal: 3,
-  //   borderWidth: StyleSheet.hairlineWidth,
-  //   borderRadius: 9,
-  //   borderColor: appStyle.COUNTER_COLOR,
-  //   paddingVertical: 1
-  // },
+  count: {
+    alignSelf: 'flex-start',
+    minWidth: 18,
+    marginLeft: -7,
+    marginTop: 0,
+    backgroundColor: appStyle.COUNTER_BG_COLOR,
+    paddingHorizontal: 3,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 9,
+    borderColor: appStyle.COUNTER_COLOR,
+    paddingVertical: 1
+  },
   countText: {
     fontSize: 12,
     // marginLeft: -7,

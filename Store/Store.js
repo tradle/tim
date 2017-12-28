@@ -2378,6 +2378,8 @@ var Store = Reflux.createStore({
     org._online = online
 
     this.trigger({action: 'onlineStatus', online: online, resource: org})
+    if (online)
+      this.trigger({action: 'connectivity', isConnected: online})
     this.announcePresence()
   },
 
@@ -5409,8 +5411,8 @@ var Store = Reflux.createStore({
           this.trigger({action: 'list', alert: translate('noConnection'), first: first, modelName: modelName})
         return
       }
-      if (!SERVICE_PROVIDERS)
-        this.trigger({action: 'onlineStatus', onlineStatus: false})
+      // if (!SERVICE_PROVIDERS)
+      //   this.trigger({action: 'onlineStatus', onlineStatus: false})
 
       if (isOrg) {
         let r1 = result.filter((r) => r.priority)
@@ -8039,8 +8041,10 @@ console.timeEnd('getMessageList')
       let toR = utils.getId(value.from) === meId
               ? this._getItem(value.to)
               : this._getItem(value.from)
-      if (toR.organization)
+      if (toR.organization) {
+        this.addVisualProps(value)
         this.addBacklinksTo(ADD, this._getItem(toR.organization), value, batch)
+      }
     }
     if (iKey === meId) {
       if (!value.photos.length)
@@ -8260,6 +8264,7 @@ console.timeEnd('getMessageList')
     let resModel = this.getModel(resource[TYPE])
 
     let isProfile = resource[TYPE] === PROFILE
+    let isOrg = resource[TYPE] === ORGANIZATION
     var props = resModel.properties
     let changedCounts
     let myBotId = me.isEmployee ? utils.getId(this.getRepresentative(me.organization)) : null
@@ -8294,7 +8299,13 @@ console.timeEnd('getMessageList')
             continue
         }
       }
-      if (utils.getId(msg[backlink]) === rId) {
+      let upCounter = utils.getId(msg[backlink]) === rId
+      // backlink will have a property corresponding to provider representative
+      if (!upCounter  &&  isOrg  &&  (backlink === 'to'  ||  backlink === 'from')) {
+        if (msg[backlink].organization  &&  msg[backlink].organization.id === rId)
+          upCounter = true
+      }
+      if (upCounter) {
         let cntProp = '_' + p + 'Count'
         changedCounts = true
 
@@ -8313,6 +8324,8 @@ console.timeEnd('getMessageList')
       this.dbBatchPut(rId, resource, batch);
     else
       this.dbPut(rId, resource)
+    if (!isProfile)
+      this.trigger({action: 'updateRow', resource: resource, forceUpdate: true})
   },
   registration(value) {
     isLoaded = true;
