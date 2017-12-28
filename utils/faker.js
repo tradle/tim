@@ -5,7 +5,7 @@ import { constants } from '@tradle/engine'
 import ENV from './env'
 const { TYPE } = constants
 
-import formDefaults from '../data/formDefaults.json'
+import formDefaults from '../data/formDefaults'
 
 module.exports = {
   newAPIBasedVerification,

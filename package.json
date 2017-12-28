@@ -5,7 +5,7 @@
   "scripts": {
     "start": "REACT_DEBUGGER='rndebugger-open --open --port 8081' && node --max_old_space_size=4096 ./node_modules/.bin/react-native start",
     "start:chrome": "&& node --max_old_space_size=4096 ./node_modules/.bin/react-native start",
-    "postinstall": "npm run nodeify && npm run installhooks && npm run placesecrets && ./fbdedupe.sh && ./hooks/update_version.sh && npm run fixasyncstorage",
+    "postinstall": "npm run nodeify && npm run installhooks && npm run placesecrets && ./fbdedupe.sh && ./hooks/update_version.sh && npm run fixasyncstorage && npm run clean:node_modules",
     "nodeify": "./node_modules/.bin/rn-nodeify --hack --exclude net,tls",
     "installhooks": "cp hooks/* .git/hooks/",
     "rmsymlinks": "find -L . -type l -exec rm {} \\;",
@@ -23,7 +23,8 @@
     "android:dryrun": "cd iOS && bundle exec fastlane android release_dryrun $@",
     "android:release": "cd iOS && bundle exec fastlane android release $@",
     "placesecrets": "./scripts/placesecrets.sh",
-    "fixasyncstorage": "cp AsyncStorage/AsyncStorage.js1 node_modules/react-native/Libraries/Storage/AsyncStorage.js && cp AsyncStorage/AsyncStorageTypes.js1 node_modules/react-native/Libraries/Storage/AsyncStorageTypes.js"
+    "fixasyncstorage": "cp AsyncStorage/AsyncStorage.js1 node_modules/react-native/Libraries/Storage/AsyncStorage.js && cp AsyncStorage/AsyncStorageTypes.js1 node_modules/react-native/Libraries/Storage/AsyncStorageTypes.js",
+    "clean:node_modules": "./scripts/clean_node_modules.js"
   },
   "dependencies": {
     "@tradle/aws-client": "github:tradle/aws-client",
