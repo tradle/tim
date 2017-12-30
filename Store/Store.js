@@ -7591,6 +7591,8 @@ var Store = Reflux.createStore({
           !msgModel.notShareable              &&
           !utils.isContext(msgModel)) {
         let productModel = this.getModel(r.product)
+        if (!productModel)
+          continue
         let isMultiEntry = productModel.multiEntryForms && productModel.multiEntryForms.indexOf(r.form) !== -1
 
         let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: r.form}, to: to.organization || to, search: me.isEmployee, context: r._context, noTrigger: true })
@@ -9447,8 +9449,6 @@ var Store = Reflux.createStore({
       }
       this.dbBatchPut(utils.getId(org), org, batch)
       this.trigger({action: 'customStyles', provider: org})
-      // this.trigger({action: 'addItem', resource: org})
-      this.trigger({action: 'list', modelName: ORGANIZATION})
       noTrigger = true
     }
 
