@@ -618,6 +618,7 @@ class ResourceList extends Component {
       }
       if (isOrganization) {
         if (resource._tour  &&  !resource._noTour) {
+          StatusBar.setHidden(true)
           navigator.push({
             title: "",
             component: TourPage,
@@ -640,6 +641,7 @@ class ResourceList extends Component {
           return
         }
         if (!resource._noSplash)  {
+          StatusBar.setHidden(true)
           let splashscreen = resource.style  &&  resource.style.splashscreen
           if (splashscreen) {
             let resolvePromise
@@ -667,6 +669,7 @@ class ResourceList extends Component {
         }
       }
     }
+    StatusBar.setHidden(false);
 
     let route = {
       component: MessageList,
@@ -704,7 +707,7 @@ class ResourceList extends Component {
         }
       }
     }
-    else if (isOrganization  &&  !utils.getMe().isEmployee) {
+    else if (isOrganization) { //  &&  !utils.getMe().isEmployee) {
       route.rightButtonTitle = 'View'
       route.onRightButtonPress = {
         title: title,
