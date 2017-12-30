@@ -17,7 +17,7 @@ class TourPage extends Component {
     callback: PropTypes.func,
   };
   render() {
-    let {pages} = this.props.tour
+    let {pages, doneBtnLabel, skipBtnLabel, nextBtnLabel, dotColor, activeDotColor, leftTextColor, rightTextColor} = this.props.tour
     if (!pages)
       return <View/>
     StatusBar.setHidden(true)
@@ -37,10 +37,10 @@ class TourPage extends Component {
         onDoneBtnClick={this.doneBtnHandle}
         onSkipBtnClick={this.onSkipBtnHandle}
         onSlideChange={this.onSlideChangeHandle}
-        dotColor='#C6E5F5'
-        activeDotColor='#7aaac3'
-        rightTextColor='#7aaac3'
-        leftTextColor='#7aaac3'
+        dotColor={dotColor || '#eeeeee'}
+        activeDotColor={activeDotColor || '#ffffff'}
+        rightTextColor={rightTextColor || '#ffffff'}
+        leftTextColor={leftTextColor || '#ffffff'}
       >
         {tpages}
       </AppIntro>
