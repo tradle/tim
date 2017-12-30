@@ -13,6 +13,7 @@ import constants from '@tradle/constants'
 import RowMixin from './RowMixin'
 import equal from 'deep-equal'
 import { makeResponsive } from 'react-native-orient'
+import { makeStylish } from './makeStylish'
 
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
@@ -52,6 +53,8 @@ class FormMessageRow extends Component {
       else if (nextRM)
         return true
     }
+    if (this.props.bankStyle !== nextProps.bankStyle)
+      return true
     return utils.getId(resource) !== utils.getId(nextProps.resource) ||
            !equal(to, nextProps.to)             ||
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
@@ -393,6 +396,7 @@ var styles = StyleSheet.create({
   }
 });
 reactMixin(FormMessageRow.prototype, RowMixin);
+FormMessageRow = makeStylish(FormMessageRow)
 FormMessageRow = makeResponsive(FormMessageRow)
 
 module.exports = FormMessageRow;
