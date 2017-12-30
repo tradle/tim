@@ -2,23 +2,6 @@
   "name": "Tradle",
   "version": "0.0.1",
   "dependencies": {
-    "@ldn0x7dc/react-native-view-pager": {
-      "version": "0.0.9",
-      "from": "@ldn0x7dc/react-native-view-pager@0.0.9",
-      "resolved": "https://registry.npmjs.org/@ldn0x7dc/react-native-view-pager/-/react-native-view-pager-0.0.9.tgz",
-      "dependencies": {
-        "react-mixin": {
-          "version": "3.0.5",
-          "from": "react-mixin@>=3.0.5 <4.0.0",
-          "resolved": "https://registry.npmjs.org/react-mixin/-/react-mixin-3.0.5.tgz"
-        },
-        "smart-mixin": {
-          "version": "2.0.0",
-          "from": "smart-mixin@>=2.0.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/smart-mixin/-/smart-mixin-2.0.0.tgz"
-        }
-      }
-    },
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
@@ -146,7 +129,7 @@
     },
     "@tradle/iot-message": {
       "version": "1.2.0",
-      "from": "@tradle/iot-message@>=1.0.1 <2.0.0",
+      "from": "@tradle/iot-message@>=1.2.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/@tradle/iot-message/-/iot-message-1.2.0.tgz",
       "dependencies": {
         "pify": {
@@ -1592,7 +1575,7 @@
     },
     "babel-plugin-transform-inline-imports-commonjs": {
       "version": "1.2.0",
-      "from": "babel-plugin-transform-inline-imports-commonjs@latest",
+      "from": "https://registry.npmjs.org/babel-plugin-transform-inline-imports-commonjs/-/babel-plugin-transform-inline-imports-commonjs-1.2.0.tgz",
       "resolved": "https://registry.npmjs.org/babel-plugin-transform-inline-imports-commonjs/-/babel-plugin-transform-inline-imports-commonjs-1.2.0.tgz",
       "dev": true
     },
