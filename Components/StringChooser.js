@@ -56,11 +56,10 @@ class StringChooser extends Component {
       );
   }
   render() {
-    var style = [styles.listview]
     var content =
-      <ListView ref='listview' style={style}
+      <ListView ref='listview' style={styles.listview}
         dataSource={this.state.dataSource}
-        removeClippedSubviews={true}
+        removeClippedSubviews={false}
         initialListSize={100}
         renderRow={this.renderRow.bind(this)}
         enableEmptySections={true}
@@ -90,18 +89,6 @@ var styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: '#ffffff',
   },
-  centerText: {
-    alignItems: 'center',
-  },
-  err: {
-    color: '#D7E6ED'
-  },
-  errContainer: {
-    height: 45,
-    paddingTop: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#eeeeee',
-  }
 });
 
 module.exports = StringChooser;

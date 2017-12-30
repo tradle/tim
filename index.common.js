@@ -192,13 +192,26 @@ class TiMApp extends Component {
     this._navListeners.forEach((listener) => listener.remove())
   }
 
-  onStoreEvent({ action, modal }) {
+  onStoreEvent(params) {
+    let { action, modal, provider } = params
     switch (action) {
       case 'showModal':
         this.setState({ modal })
         break
       case 'hideModal':
         this.setState({ modal: null })
+        break
+      case 'customStyles':
+        let routes = this.state.navigator.getCurrentRoutes()
+        let curRoute = routes[routes.length - 1]
+        let resource = curRoute.passProps.resource
+        if (resource  &&  utils.getId(resource) === utils.getId(provider)) {
+          curRoute.passProps.bankStyle = provider.style || curRoute.passProps.bankStyle
+          curRoute.passProps.resource = provider
+          let bg = provider.style  &&  provider.style.navBarBackgroundColor
+          if (bg)
+            this.setState({navBarBgColor: bg})
+        }
         break
     }
   }
@@ -413,7 +426,7 @@ class TiMApp extends Component {
           onWillFocus={(newRoute) => {
             if (!newRoute)
               return
-            let style = (newRoute.id === MESSAGE_LIST && newRoute.passProps.resource && newRoute.passProps.resource.style) || newRoute.passProps.bankStyle
+            let style = /*(newRoute.id === MESSAGE_LIST && newRoute.passProps.resource && newRoute.passProps.resource.style) ||*/ newRoute.passProps.bankStyle
             if (style)
               this.setState({navBarBgColor: style.navBarBackgroundColor || 'transparent'})
             else
