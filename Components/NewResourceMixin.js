@@ -152,8 +152,10 @@ var NewResourceMixin = {
       eCols = utils.getEditCols(meta)
       if (!eCols || utils.isEmpty(eCols)) {
         eCols = {}
-        meta.required.forEach((p) => eCols[p] = props[p])
-        //   eCols = props
+        if (meta.required)
+          meta.required.forEach((p) => eCols[p] = props[p])
+        else
+          eCols = props
       }
       // else
       //   eCols = Object.values(eCols)

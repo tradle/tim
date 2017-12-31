@@ -568,7 +568,7 @@ var utils = {
         excludeProps = ['from', 'to']
       for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
         let prop =  vCols[i]
-        if (props[prop].type === 'array')
+        if (props[prop].type === 'array' || props[prop].markdown)
           continue
         if ((!resource[prop]  &&  !props[prop].displayAs)  ||  excludeProps.indexOf[prop])
           continue
@@ -672,8 +672,9 @@ var utils = {
      )
   },
   templateIt1(prop, resource, m) {
-    if (!resource[TYPE])
+    if (!resource[TYPE]  &&  resource.title)
       return resource.title
+    let rtype = resource[TYPE] || (m  &&  m.id)
     // if (resource.id  &&  resource.title)
     //   return resource.title
     let pgroup = prop.group
@@ -681,7 +682,7 @@ var utils = {
       return prop.displayAs
     let group = []
     let hasSetProps
-    let props = this.getModel(resource[TYPE]).value.properties
+    let props = this.getModel(rtype).value.properties
     for (let i=0; i<pgroup.length; i++) {
       let p = pgroup[i]
       let v =  resource[p] ? resource[p] : ''

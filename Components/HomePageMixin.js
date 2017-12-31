@@ -80,6 +80,8 @@ var HomePageMixin = {
     let me = utils.getMe()
     switch (code) {
     case WEB_TO_MOBILE:
+      Actions.showModal({title: 'Connecting to ' + result.host, showIndicator: true})
+// Alert.alert('Connecting to ' + result.host)
       let r = {
         _t: 'tradle.GuestSessionProof',
         session: result.dataHash,
@@ -132,11 +134,13 @@ var HomePageMixin = {
         resource: params.to,
         filter: '',
         modelName: MESSAGE,
+        noLoadingIndicator: true,
         currency: params.to.currency,
         bankStyle:  style,
         dictionary: params.dictionary,
       }
     }
+    // this.props.navigator.push(route)
     this.props.navigator.replace(route)
   },
   showBanks() {
