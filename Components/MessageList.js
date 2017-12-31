@@ -703,7 +703,8 @@ class MessageList extends Component {
   render() {
     let { modelName, resource, bankStyle, navigator, originatingMessage, isAggregation } = this.props
     let application = this.state.application ||  this.props.application
-
+    let { list, noLoadingIndicator, isLoading, context, isConnected, isForgetting, allLoaded,
+          onlineStatus, loadEarlierMessages, customStyle, allContexts } = this.state
     let model = utils.getModel(modelName).value;
     let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
     let bgStyle = {}
@@ -719,9 +720,9 @@ class MessageList extends Component {
     // HACK for RM
     // hideTextInput = false
     let content
-    if (!this.state.list || !this.state.list.length) {
+    if (!list || !list.length) {
       if (navigator.isConnected  &&  resource[TYPE] === ORGANIZATION || application) {
-        if (this.state.isLoading) {
+        if (isLoading) {
           let menuBtn = !hideTextInput /*this.hasMenuButton() */ && (
             <View style={styles.footer}>
               {this.paintMenuButton()}
@@ -746,14 +747,14 @@ class MessageList extends Component {
       let maxHeight = h - NAV_BAR_HEIGHT
       // Chooser for trusted party verifier
       let isChooser = originatingMessage && originatingMessage.verifiers
-      let notRemediation = (this.state.context  &&  this.state.context.product !== REMEDIATION) ||
+      let notRemediation = (context  &&  context.product !== REMEDIATION) ||
                            (isContext && resource.product !== REMEDIATION)
       let me = utils.getMe()
       // if (me.isEmployee  &&  utils.getId(me.organization) !== utils.getId(resource));
       // else
       if (this.hasChatContext())
         maxHeight -= 45
-      else if (notRemediation &&  !isChooser  &&  (!this.state.isConnected  ||  (!isContext  &&  this.state.onlineStatus === false))) //  || (resource[TYPE] === ORGANIZATION  &&  !resource._online)))
+      else if (notRemediation &&  !isChooser  &&  (!isConnected  ||  (!isContext  &&  onlineStatus === false))) //  || (resource[TYPE] === ORGANIZATION  &&  !resource._online)))
         maxHeight -= 35
       // if (notRemediation  &&  !hideTextInput) //  &&  resource.products) //  &&  resource.products.length > 1))
       //   maxHeight -= 45
@@ -766,13 +767,13 @@ class MessageList extends Component {
       // Hide TextInput for shared context since it is read-only
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
-        loadEarlierMessagesButton={this.state.loadEarlierMessages}
+        loadEarlierMessagesButton={loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
-        messages={this.state.list}
-        // messageSent={this.state.sendResource}
+        messages={list}
+        // messageSent={sendResource}
         // messageSentStatus={this.state.sendStatus}
         // addedItem={this.state.addedItem}
-        customStyle={this.state.customStyle}
+        customStyle={customStyle}
         enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
@@ -805,14 +806,13 @@ class MessageList extends Component {
       chooser = <View/>
 
     let sepStyle = { height: 1,backgroundColor: 'transparent' }
-    if (!this.state.allLoaded  && !navigator.isConnected  &&  this.state.isForgetting)
+    if (!allLoaded  && !navigator.isConnected  &&  isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
     let me = utils.getMe()
     let actionSheet = !hideTextInput  && this.renderActionSheet()
-    let context = this.state.context
     let network
     if (originatingMessage)
-       network = <NetworkInfoProvider connected={this.state.isConnected} resource={resource} online={this.state.onlineStatus} />
+       network = <NetworkInfoProvider connected={isConnected} resource={resource} online={onlineStatus} />
     if (!context  &&  isContext)
       context = resource
     let separator = utils.getContentSeparator(bankStyle)
@@ -822,7 +822,7 @@ class MessageList extends Component {
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
           {network}
           <ProgressInfo recipient={resource[ROOT_HASH]} />
-          <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={this.state.allContexts} />
+          <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}
           {actionSheet}
@@ -837,7 +837,7 @@ class MessageList extends Component {
         <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
           {network}
           <ProgressInfo recipient={resource[ROOT_HASH]} />
-          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={this.state.allContexts} />
+          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}
           {actionSheet}
