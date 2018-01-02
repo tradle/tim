@@ -6995,8 +6995,14 @@ var Store = Reflux.createStore({
   },
   async onHasBookmarks() {
     let list = await this.searchMessages({modelName: BOOKMARK, to: me })
-    if (list  &&  list.length)
-      this.trigger({action: 'hasBookmarks', count: list.length})
+    if (list  &&  list.length) {
+      let style
+      if (me.isEmployee) {
+        let id = utils.getId(me.organization)
+        style = this._getItem(id).style
+      }
+      this.trigger({action: 'hasBookmarks', count: list.length, bankStyle: style})
+    }
   },
   onHasTestProviders() {
     const list = this.searchNotMessages({modelName: ORGANIZATION, isTest: true}) || []

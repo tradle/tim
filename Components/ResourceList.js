@@ -353,7 +353,11 @@ class ResourceList extends Component {
       return
     }
     if (action === 'hasBookmarks') { //  &&  officialAccounts  &&  (modelName === PROFILE || modelName === ORGANIZATION)) {
-      this.setState({bookmarksCount: params.count})
+      let state = {bookmarksCount: params.count}
+      if (params.bankStyle)
+        state.bankStyle = this.mergeStyle(params.bankStyle)
+
+      this.setState(state)
       return
     }
     if (action === 'hasTestProviders'  &&  officialAccounts) {
@@ -1402,15 +1406,16 @@ class ResourceList extends Component {
     })
   }
   showBookmarks() {
+    let passProps = {modelName: BOOKMARK}
+    if (this.state.bankStyle)
+      passProps.bankStyle = this.state.bankStyle
     this.props.navigator.push({
       title: 'Bookmarks',
       id: 30,
       component: GridList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
-      passProps: {
-        modelName: BOOKMARK
-      },
+      passProps,
     })
   }
   showAllPartials() {
