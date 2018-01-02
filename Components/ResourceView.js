@@ -161,6 +161,9 @@ class ResourceView extends Component {
       if (resource  &&  isMe)
         this.setState({resource: resource})
       break
+    case 'showDetails':
+      this.setState({showDetails: true, backlink: null, backlinkList: null, showDocuments: false})
+      break
     case 'showIdentityList':
       this.onShowIdentityList(params)
       break
@@ -221,6 +224,10 @@ class ResourceView extends Component {
       // this.props.navigator.jumpTo(routes[2])
       break
     case 'exploreBacklink':
+      // if (params.backlink !== this.state.backlink || params.backlinkAdded) {
+      //   this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false, showDocuments: false})
+      //   Actions.getItem({resource: this.props.resource})
+      // }
       if (backlink !== this.state.backlink)
         this.setState({backlink: backlink})
       break
@@ -343,8 +350,18 @@ class ResourceView extends Component {
                         excludedProperties={['photos']}
                         navigator={navigator} />
     let photoView
-    if (!isOrg)
-      photoView = <PhotoView resource={resource} navigator={navigator}/>
+    if (!isOrg) {
+      let photos = resource.photos
+      let mainPhoto
+      if (!photos) {
+        photos = utils.getResourcePhotos(model, resource)
+        let mainPhotoProp = utils.getMainPhotoProperty(model)
+        mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
+      }
+      else if (photos.length === 1)
+        mainPhoto = photos[0]
+      photoView = <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
+    }
 
     return (
       <PageView style={platformStyles.container}>
