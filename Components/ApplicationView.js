@@ -257,14 +257,14 @@ class ApplicationView extends Component {
     )
   }
   openChat() {
-    let { resource, navigator } = this.props
+    let { resource, navigator, bankStyle } = this.props
     let me = utils.getMe()
     let title
     if (resource.applicant.title)
       title = resource.applicant.title  + '  →  ' + me.organization.title
     else
       title = me.organization.title
-    let style = this.mergeStyle(resource.style)
+    let style = resource.style ? this.mergeStyle(resource.style) : bankStyle
     let route = {
       component: MessageList,
       id: 11,

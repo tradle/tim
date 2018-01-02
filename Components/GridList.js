@@ -683,7 +683,8 @@ class GridList extends Component {
         backButtonTitle: 'Back',
         passProps: {
           resource: resource,
-          search: search
+          search: search,
+          bankStyle: bankStyle
         }
       }
       navigator.push(route)
@@ -748,6 +749,8 @@ class GridList extends Component {
     let isMessage = utils.isMessage(resource)
     if (isMessage) {
       if (modelName === BOOKMARK) {
+        if (!bankStyle)
+          bankStyle = this.state.bankStyle
         uiUtils.showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
         return
       }
