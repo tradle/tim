@@ -16,7 +16,7 @@ import {
   Platform,
   processColor
 } from 'react-native'
-
+import WebView from './WebView'
 import React, { Component } from 'react'
 import utils, {
   translate
@@ -27,6 +27,7 @@ import MessageView from './MessageView'
 import ResourceView from './ResourceView'
 import NewResource from './NewResource'
 import ProductChooser from './ProductChooser'
+import SplashPage from './SplashPage'
 import PhotoList from './PhotoList'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
@@ -65,6 +66,7 @@ const {
   // PRODUCT_LIST
 } = constants.TYPES
 const LIMIT = 20
+
 
 class MessageRow extends Component {
   constructor(props) {
@@ -106,6 +108,8 @@ class MessageRow extends Component {
     let noMessage = !message  ||  !message.length;
     let isSimpleMessage = resource[TYPE] === SIMPLE_MESSAGE
 
+    let noBg = (isSimpleMessage  &&  resource.message.toLowerCase().indexOf('http') === 0)
+
     let isForgetting = model.id === FORGET_ME || model.id === FORGOT_YOU
     if (!renderedRow.length) {
       let vCols = noMessage ? null : utils.getDisplayName(resource);
@@ -116,7 +120,7 @@ class MessageRow extends Component {
       let fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = [chatStyles.myCell, {backgroundColor: bankStyle.myMessageBackgroundColor}]
+          addStyle = [chatStyles.myCell, noBg ? {borderColor: bankStyle.myMessageBackgroundColor, borderWidth: 1, backgroundColor: 'transparent', paddingHorizontal: 0, paddingVertical: 0, borderRadius: 0} : {backgroundColor: bankStyle.myMessageBackgroundColor}]
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
@@ -294,8 +298,9 @@ class MessageRow extends Component {
     photoStyle = (isLicense  &&  len === 1) ? chatStyles.bigImage : photoStyle;
 
     var viewStyle = { margin:1, backgroundColor: '#f7f7f7', whiteSpace: 'pre-wrap' }
-    var isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
-    var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
+    let isLicense = model.id.indexOf('License') !== -1  ||  model.id.indexOf('Passport') !== -1;
+
+    let bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     let contextId = this.getContextId(resource)
     return (
       <View style={[viewStyle, {backgroundColor: bg}]}>
@@ -596,8 +601,17 @@ class MessageRow extends Component {
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-        onPressCall = this.onPress.bind(this, resource.message);
-        vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={this.getNextKey()}>{resource[v]}</Text>);
+        if (resource[v].trim().indexOf(' ') === -1) {
+          let {width, height} = utils.dimensions(MessageRow)
+          vCols.push(<WebView key={this.getNextKey()} style={{width: utils.getMessageWidth(MessageRow), height: 150, borderWidth: 0}}
+             source={{uri: resource[v]}}
+             startInLoadingState={true}
+             automaticallyAdjustContentInsets={false} />)
+        }
+        else {
+          onPressCall = this.onPress.bind(this, resource.message);
+          vCols.push(<Text style={style} numberOfLines={first ? 2 : 1} key={this.getNextKey()}>{resource[v]}</Text>);
+        }
       }
       else if (isConfirmation) {
         style = [style, {color: this.props.bankStyle.confirmationColor}, chatStyles.resourceTitle]
@@ -724,8 +738,17 @@ class MessageRow extends Component {
         else if (isSimpleMessage) {
           let params = { resource, message: resource[v], bankStyle, noLink: true }
           let row = utils.parseMessage(params)
-          if (typeof row === 'string')
-            vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>)
+          if (typeof row === 'string') {
+            if (this.isUrl(resource[v])) {
+              let {width, height} = utils.dimensions(MessageRow)
+              vCols.push(<WebView key={this.getNextKey()} style={{width: width * 0.8, height: 150, borderWidth: 0}}
+                 source={{uri: resource[v]}}
+                 startInLoadingState={true}
+                 automaticallyAdjustContentInsets={false} />)
+            }
+            else
+              vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>)
+          }
           else
             vCols.push(row)
         }
@@ -754,6 +777,14 @@ class MessageRow extends Component {
     if (isSimpleMessage)
       return isConfirmation ? {isConfirmation: true} : null
     return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+  }
+  isUrl(message) {
+    let s = message.toLowerCase()
+    if (s.indexOf('http://') == 0  ||  s.indexOf('https://') == 0) {
+      if (s.trim().indexOf(' ') === -1)
+        return true
+    }
+    return false
   }
   showMyData() {
     let me = utils.getMe()
