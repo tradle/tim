@@ -917,10 +917,6 @@ var utils = {
     if (!resource[TYPE] && resource.id)
       return resource
     let m = this.getModel(resource[TYPE]).value
-    // let isForm = m.subClassOf === FORM
-    // let id = utils.getId(resource)
-    // if (isForm)
-    //   id += '_' + resource[CUR_HASH]
     let ref = {
       id: utils.getId(resource),
       title: resource.id ? resource.title : utils.getDisplayName(resource)

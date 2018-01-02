@@ -2378,8 +2378,8 @@ var Store = Reflux.createStore({
     org._online = online
 
     this.trigger({action: 'onlineStatus', online: online, resource: org})
-    if (online)
-      this.trigger({action: 'connectivity', isConnected: online})
+    // if (online)
+    //   this.trigger({action: 'connectivity', isConnected: online})
     this.announcePresence()
   },
 
@@ -6553,7 +6553,7 @@ var Store = Reflux.createStore({
         let rId = utils.getId(container)
         if (r[backlink]  &&  utils.getId(r[backlink]) === rId)
           list.push(r)
-        else if (isOrganization  && r._sharedWith.length > 1) {
+        else if (isOrganization  && r._sharedWith  &&  r._sharedWith.length > 1) {
           if (r._sharedWith.some((sh) => sh.bankRepresentative === rId))
             list.push(r)
         }
@@ -6806,7 +6806,7 @@ var Store = Reflux.createStore({
         if (!m) return
         if (isBacklinkProp) {
           if (resourceId)  {
-            if (utils.getId(r[backlink]) !== resourceId)
+            if (r[backlink]  &&  utils.getId(r[backlink]) !== resourceId)
               return
           }
           else if (me.isEmployee) {
@@ -9854,11 +9854,13 @@ var Store = Reflux.createStore({
         if (data.value == null) return
         let dtype = data.value.type
         if (dtype === MODEL) {
-          // let m = data.value
-          // models[data.key] = data;
-          // self.setPropertyNames(m.properties)
-          // if (utils.isEnum(m))
-          //   self.createEnumResources(m)
+          let m = data.value
+          if (models[data.key])
+            return
+          models[data.key] = data;
+          self.setPropertyNames(m.properties)
+          if (utils.isEnum(m))
+            self.createEnumResources(m)
           return
         }
         if (dtype === CUSTOMER_WAITING  ||  dtype === SELF_INTRODUCTION  ||  (dtype === FORM_REQUEST && data.value.product === PRODUCT_REQUEST))

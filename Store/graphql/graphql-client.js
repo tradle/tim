@@ -326,7 +326,7 @@ var search = {
     } catch(error) {
       // debugger
       console.log(error)
-      throw error
+      // throw error
     }
 
     function prettify (obj) {
