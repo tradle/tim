@@ -121,7 +121,7 @@ class MessageRow extends Component {
       let fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = [chatStyles.myCell, noBg ? {borderColor: bankStyle.myMessageBackgroundColor, borderWidth: 1, backgroundColor: 'transparent', paddingHorizontal: 0, paddingVertical: 0, borderWidth: 1, borderRadius: 0} : {backgroundColor: bankStyle.myMessageBackgroundColor}]
+          addStyle = [chatStyles.myCell, noBg ? {borderColor: bankStyle.myMessageBackgroundColor, borderWidth: 1, backgroundColor: 'transparent', paddingHorizontal: 0, paddingVertical: 0, borderRadius: 0} : {backgroundColor: bankStyle.myMessageBackgroundColor}]
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
