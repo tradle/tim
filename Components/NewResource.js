@@ -842,7 +842,7 @@ class NewResource extends Component {
       }
       if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={this.onSavePressed}>
-                   <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
+                   <View style={{ marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
                      <View style={styles.bar}>
                        <Text style={{fontSize: 24,color: bankStyle.contextTextColor}}>{translate('next')}</Text>
                      </View>
@@ -901,7 +901,6 @@ class NewResource extends Component {
           onDrop={(accepted, rejected) => this.onDropFiles({ prop, rejected, files: accepted })}
         >
           {content}
-          {submit}
         </DropPage>
       )
     }
