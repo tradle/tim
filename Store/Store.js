@@ -9747,11 +9747,11 @@ var Store = Reflux.createStore({
         if (data.value == null) return
         let dtype = data.value.type
         if (dtype === MODEL) {
-          let m = data.value
-          models[data.key] = data;
-          self.setPropertyNames(m.properties)
-          if (utils.isEnum(m))
-            self.createEnumResources(m)
+          // let m = data.value
+          // models[data.key] = data;
+          // self.setPropertyNames(m.properties)
+          // if (utils.isEnum(m))
+          //   self.createEnumResources(m)
           return
         }
         if (dtype === CUSTOMER_WAITING  ||  dtype === SELF_INTRODUCTION  ||  (dtype === FORM_REQUEST && data.value.product === PRODUCT_REQUEST))
