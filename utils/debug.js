@@ -25,7 +25,6 @@ const enabled = [
   'console',
   'tradle:*',
   'sendy:ws:client',
-  'tradle:channel',
   'multiqueue:*',
   '@tradle/aws-client'
 ].concat(consoleMethods.map(method => 'console.' + method))
