@@ -399,6 +399,14 @@ class NewResource extends Component {
                 missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
                 return
               }
+              if (!v.currency) {
+                if (resource[p].currency)
+                  v.currency = resource[p].currency
+                else {
+                  missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+                  return
+                }
+              }
             }
             else if (ref === 'tradle.Photo')
               return
