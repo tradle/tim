@@ -1844,7 +1844,7 @@ var NewResourceMixin = {
         let error = this.checkNumber(value[p], prop, err)
         if (error  &&  m.required.indexOf(p) === -1)
           deleteProps.push(p)
-        else if (!value[p].currency)
+        else if (!value[p].currency  &&  this.props.currency)
           value[p].currency = this.props.currency
       }
       else if (prop.units && prop.units === '[min - max]') {
