@@ -225,12 +225,12 @@ class ResourceView extends Component {
       // this.props.navigator.jumpTo(routes[2])
       break
     case 'exploreBacklink':
-      // if (params.backlink !== this.state.backlink || params.backlinkAdded) {
-      //   this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false, showDocuments: false})
-      //   Actions.getItem({resource: this.props.resource})
-      // }
-      if (backlink !== this.state.backlink)
-        this.setState({backlink: backlink})
+      if (params.backlink !== this.state.backlink || params.backlinkAdded) {
+        this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false, showDocuments: false})
+        Actions.getItem({resource: this.props.resource})
+      }
+      // if (backlink !== this.state.backlink)
+      //   this.setState({backlink: backlink})
       break
     // default:
     //   if (resource  &&  action !== 'onlineStatus')

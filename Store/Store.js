@@ -9444,6 +9444,7 @@ var Store = Reflux.createStore({
           }
         })
     }
+
     var isModelsPack = type === MODELS_PACK
     let pList = val.models
     // var isProductList = type === PRODUCT_LIST
@@ -9543,8 +9544,18 @@ var Store = Reflux.createStore({
         return
       }
     }
-    else
+    else {
+      if (contextId  &&  me.isEmployee  &&  (model.subClassOf === MY_PRODUCT || model.subClassOf === FORM)) {
+        // Update application row and view if on stack
+        let applications = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {context: context.contextId}})
+        let app = applications  &&  applications.length && applications[0]
+        if (app  &&  utils.isRM(app)) {
+          this.trigger({action: 'updateRow', resource: app, forceUpdate: true})
+          this.trigger({action: 'getItem', resource: app})
+        }
+      }
       noTrigger = val.from.id === meId
+    }
     var isStylesPack = type === STYLES_PACK
     if (isStylesPack) {
       org.style = utils.clone(val) //utils.interpretStylesPack(val)
@@ -9600,18 +9611,19 @@ var Store = Reflux.createStore({
             this.addMessagesToChat(cId, val)
 
           let changed = true
-          if (type === ASSIGN_RM)
-            context._assignedRM = val.employee
-          else if (type === APPLICATION_DENIAL)
+          // if (type === ASSIGN_RM)
+          //   context._assignedRM = val.employee
+          // else
+          if (type === APPLICATION_DENIAL)
             context._denied = true
           else if (type === APPLICATION_SUBMITTED)
             context._appSubmitted = true
           else if (type === APPLICATION_APPROVAL)
             context._approved = true
-          else
+          else if (type !== ASSIGN_RM)
             changed = false
           if (changed) {
-            this._setItem(cId, context)
+          // if (type === ASSIGN_RM  ||  type === APPLICATION_DENIAL ||  type === APPLICATION_SUBMITTED  ||  type === APPLICATION_APPROVAL) {              this._setItem(cId, context)
             this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
             this.dbBatchPut(cId, context, batch)
           }
