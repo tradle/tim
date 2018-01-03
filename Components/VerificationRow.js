@@ -251,9 +251,7 @@ class VerificationRow extends Component {
       if (this.props.search  &&  this.props.searchCriteria)
         this.formatFilteredResource(model, resource, renderedRows)
       let content = <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
-                      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                        {header}
-                      </View>
+                      {header}
                     </TouchableHighlight>
       if (!isVerification)
         content = <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
