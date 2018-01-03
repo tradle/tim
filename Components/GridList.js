@@ -154,7 +154,7 @@ class GridList extends Component {
 
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
-    this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 300//736
+    this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     this.limit = 10 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
@@ -1762,12 +1762,16 @@ class GridList extends Component {
     Actions.addChatItem({resource: resource})
   }
   renderHeader() {
-    let { search, modelName } = this.props
-    if (!search)
-      return
-    if (modelName !== PROFILE) {
-      if (this.state.isGrid  &&  !utils.isContext(modelName))
-        return this.renderGridHeader()
+    let { search, modelName, isChooser } = this.props
+    // if (!search)
+    //   return
+    if (!isChooser  &&  this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
+      let viewCols = this.getGridCols()
+      if (viewCols)
+      // if (modelName !== PROFILE) {
+        // if (this.state.isGrid  &&  !utils.isContext(modelName))
+          return this.renderGridHeader()
+      // }
     }
   }
 }
@@ -1897,7 +1901,7 @@ var styles = StyleSheet.create({
     height: 40
   },
   gridHeader: {
-    backgroundColor: '#f7f7f7'
+    backgroundColor: '#eeeeee'
   },
   center: {
     justifyContent: 'center'

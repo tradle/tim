@@ -247,9 +247,9 @@ class ShowRefList extends Component {
     }
 
     if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
-      let style = {width: utils.getContentWidth(ShowRefList)}
-      if (!isMessage)
-        style.height = utils.dimensions().height
+      let style = {width: utils.getContentWidth(ShowRefList), height: utils.dimensions(ShowRefList).height}
+      // if (!isMessage)
+      //   style.height = utils.dimensions(ShowRefList).height
       return <View style={style}>
                 {separator}
                 <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0, minHeight: refList &&  refList.length ? 70 : 0}]} key={'ShowRefList'}>
