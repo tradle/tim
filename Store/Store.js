@@ -6983,6 +6983,7 @@ var Store = Reflux.createStore({
       this.trigger({action: 'allContexts', list: contexts, to: params.to})
     }
     else {
+      extend(params, {modelName: PRODUCT_REQUEST})
       let list = await this.searchMessages(params)
       let l = list  &&  list.filter((r) => r._formsCount)
       this.trigger({action: 'allContexts', list: l, to: params.to})
