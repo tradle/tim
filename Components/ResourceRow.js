@@ -156,9 +156,11 @@ class ResourceRow extends Component {
   }
 
   render() {
-    let resource = this.state.application || this.state.resource;
-    let photo;
+    let resource = this.state.resource
     let rType = resource[TYPE]
+    if (rType !== APPLICATION)
+      resource = this.state.application || this.state.resource;
+    let photo;
     let isContact = rType === PROFILE;
     let isOrg = rType === ORGANIZATION
     let noImage;
