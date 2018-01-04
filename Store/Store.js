@@ -9466,6 +9466,7 @@ var Store = Reflux.createStore({
     let isWeb = utils.isWeb()
     if (pList) {
       noTrigger = true
+      this.addMessagesToChat(utils.getId(fOrg), val)
 
       org.products = []
       pList.forEach((m) => {
