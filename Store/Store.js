@@ -1200,11 +1200,6 @@ var Store = Reflux.createStore({
     }
 
     const trySend = co(function* (msg, recipientInfo, cb) {
-      try {
-        yield promisify(tradleUtils.extractSigPubKey)(msg.unserialized.object)
-      } catch (err) {
-        debugger
-      }
       const recipientHash = recipientInfo.permalink
       if (self._yuki && recipientHash === self._yuki.permalink) {
         return self._yuki.receive({ message: msg.unserialized.object })
