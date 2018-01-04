@@ -5204,7 +5204,7 @@ var Store = Reflux.createStore({
     let provider = this._getItem(providerId)
     let modelPacks = await this.searchMessages({modelName: MODELS_PACK})
     if (!modelPacks) {
-      this.trigger({action: 'models', list: retModels})
+      this.trigger({action: 'models', list: models})
       return
     }
 
