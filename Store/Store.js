@@ -9370,7 +9370,7 @@ var Store = Reflux.createStore({
     var noTrigger
     if (pList) {
       noTrigger = true
-
+      this.addMessagesToChat(utils.getId(fOrg), val)
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
