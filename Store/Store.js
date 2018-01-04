@@ -3118,10 +3118,13 @@ var Store = Reflux.createStore({
 
         if (!toOrg)
             toOrg = to.organization ? to.organization : to
-
-        if (rr[TYPE] === APPLICATION_DENIAL  || rr[TYPE] === APPLICATION_APPROVAL ||  rr[TYPE] === CONFIRMATION) {
+        let isDenial = rr[TYPE] === APPLICATION_DENIAL
+        let isApproval = rr[TYPE] === APPLICATION_APPROVAL
+        if (isApproval  ||  isDenial ||  rr[TYPE] === CONFIRMATION)
           self.trigger({action: 'updateRow', resource: application || r.application, forceUpdate: true})
-        }
+        if (isApproval)
+          Actions.showModal({title: 'In process...', showIndicator: true})
+
         self.addMessagesToChat(utils.getId(toOrg), rr)
       }
       this.addVisualProps(rr)
@@ -9445,7 +9448,8 @@ var Store = Reflux.createStore({
       }
     }
     else {
-      if (contextId  &&  me.isEmployee  &&  (model.subClassOf === MY_PRODUCT || model.subClassOf === FORM)) {
+      let isMyProduct = model.subClassOf === MY_PRODUCT
+      if (contextId  &&  me.isEmployee  &&  (isMyProduct || model.subClassOf === FORM)) {
         // Update application row and view if on stack
         let applications = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {context: context.contextId}})
         let app = applications  &&  applications.length && applications[0]
@@ -9454,6 +9458,9 @@ var Store = Reflux.createStore({
           this.trigger({action: 'getItem', resource: app})
         }
       }
+      if (isMyProduct)
+        Actions.hideModal()
+
       noTrigger = val.from.id === meId
     }
     var isStylesPack = type === STYLES_PACK
