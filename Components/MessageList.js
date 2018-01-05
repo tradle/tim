@@ -126,9 +126,10 @@ class MessageList extends Component {
     }
     // end HACK
     // No need to show context if provider has only one product and no share context
-    if ((!resource.products  ||  resource.products.length === 1)  &&  !resource._canShareContext)
-      return false
-
+    // if ((!resource.products  ||  resource.products.length === 1)  &&  !resource._canShareContext)
+    //   return false
+    if (resource._formsCount)
+      return true
     let isReadOnlyChat = utils.isReadOnlyChat(context)
     if (isReadOnlyChat  &&  resource._relationshipManager)
       return true
