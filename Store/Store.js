@@ -153,14 +153,7 @@ import utils from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 // import storeUtils from './utils/utils'
 const sampleData = require('@tradle/models').data
-const voc = (function () {
-  const base = require('@tradle/models').models
-  const custom = require('@tradle/custom-models')
-  return utils.clone({
-    ...base,
-    ...custom
-  })
-}())
+const voc = require('./voc')
 
 import sampleProfile from '../data/sampleProfile.json'
 import welcome from '../data/welcome.json'
