@@ -224,7 +224,9 @@ var utils = {
     return str.split(/(?=[A-Z])/g)
   },
   getModel(modelName) {
-    return models ? models[modelName] : null;
+    const model = models ? models[modelName] : null
+    if (!model) debug(`missing model: ${modelName}`)
+    return model
   },
   getDefaultLanguage: Strings.getDefaultLanguage,
   translate(...args) {

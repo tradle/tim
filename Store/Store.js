@@ -153,14 +153,7 @@ import utils from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 // import storeUtils from './utils/utils'
 const sampleData = require('@tradle/models').data
-const voc = (function () {
-  const base = require('@tradle/models').models
-  const custom = require('@tradle/custom-models')
-  return utils.clone({
-    ...base,
-    ...custom
-  })
-}())
+const voc = require('./voc')
 
 import sampleProfile from '../data/sampleProfile.json'
 import welcome from '../data/welcome.json'
@@ -1230,11 +1223,6 @@ var Store = Reflux.createStore({
     }
 
     const trySend = co(function* (msg, recipientInfo, cb) {
-      try {
-        yield promisify(tradleUtils.extractSigPubKey)(msg.unserialized.object)
-      } catch (err) {
-        debugger
-      }
       const recipientHash = recipientInfo.permalink
       if (self._yuki && recipientHash === self._yuki.permalink) {
         return self._yuki.receive({ message: msg.unserialized.object })
@@ -5210,7 +5198,6 @@ var Store = Reflux.createStore({
       this.trigger({action: 'models', list: retModels})
       return
     }
-
     let otherProviderModels = []
     let requestedModelsPack = modelPacks.filter((mp) => {
       let org = this._getItem(utils.getId(mp.from)).organization
@@ -9467,7 +9454,6 @@ var Store = Reflux.createStore({
     if (pList) {
       noTrigger = true
       this.addMessagesToChat(utils.getId(fOrg), val)
-
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
