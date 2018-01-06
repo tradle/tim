@@ -268,7 +268,7 @@ class ResourceView extends Component {
     if (this.state.isLoading)
       return <View/>
 
-    let { navigator, bankStyle, currency, dimensions } = this.props
+    let { navigator, bankStyle, currency, dimensions, application } = this.props
     let { backlink, backlinkList, pairingData, isModalOpen } = this.state
     let styles = createStyles()
 
@@ -287,7 +287,7 @@ class ResourceView extends Component {
     let actionPanel
     let isMe = utils.isMe(resource)
     if (me) {
-      let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  (me.organization  &&  utils.getId(me.organization) !== utils.getId(resource)))
+      let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  application) // (me.organization  &&  utils.getId(me.organization) !== utils.getId(resource)))
       if (!noActionPanel  &&  utils.hasBacklinks(model))
        actionPanel = <ShowRefList lazy={this._lazyId}
                                   resource={resource}
@@ -350,7 +350,8 @@ class ResourceView extends Component {
                         excludedProperties={['photos']}
                         navigator={navigator} />
     let photoView
-    if (!isOrg) {
+    // if (!isOrg) {
+    if (true) {
       let photos = resource.photos
       let mainPhoto
       if (!photos) {
