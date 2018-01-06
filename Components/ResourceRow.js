@@ -40,6 +40,7 @@ const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
 const APPLICATION = 'tradle.Application'
 const PARTIAL = 'tradle.Partial'
+const CUSTOM_MODEL_PREFIX = 'io.'
 
 var {
   ROOT_HASH,
@@ -164,11 +165,14 @@ class ResourceRow extends Component {
     let isOfficialAccounts = this.props.isOfficialAccounts
     let isModel = resource.type === MODEL
     if (isModel) {
+      let title = utils.makeModelTitle(resource)
+      if (resource.id.indexOf(CUSTOM_MODEL_PREFIX) === 0)
+        title += ' → ' + resource.id.split('.')[1]
       return  <View style={styles.content} key={this.getNextKey()}>
                 <TouchableOpacity onPress={() => this.props.selectModel(resource)} underlayColor='transparent'>
                   <View style={[styles.row, { width: utils.dimensions(ResourceRow).width - 10}]}>
                     <View style={[styles.textContainer, {margin: 7}]}>
-                      <Text style={styles.resourceTitle}>{utils.makeModelTitle(resource)}</Text>
+                      <Text style={styles.resourceTitle}>{title}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
