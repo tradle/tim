@@ -115,7 +115,7 @@ class PhotoView extends Component {
       )
     }
     else
-      photoView = <Image resizeMode='cover' source={source} style={image} />
+      photoView = <Image resizeMode='contain' source={source} style={image} />
 
     return (
           <Animated.View style={style}>
