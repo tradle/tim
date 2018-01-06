@@ -5,6 +5,11 @@ import ENV from '../utils/env'
 import { generateIdentity } from '../utils/identity'
 import Yuki from '@tradle/yuki'
 import onboard from '@tradle/yuki/onboard'
+import locale from './locale.json'
+import DeviceInfo from 'react-native-device-info'
+import { getYukiForRegion } from './locale'
+
+import YUKI_PER_REGION from './locale.json'
 
 const Keychain = ENV.useKeychain !== false && !ENV.isWeb() && require('../utils/keychain')
 const YUKI_KEY = '~yuki'
@@ -63,7 +68,14 @@ function inflate ({ node, identity, keys, db }) {
     db
   })
 
-  const api = yuki.use(onboard())
+  // let tz = DeviceInfo.getTimezone()
+  // let yukiPerRegion = tz  &&  (YUKI_PER_REGION[tz] ||  YUKI_PER_REGION[tz.split('/')[0]].yuki)
+  // let yukiName = yukiPerRegion  &&  yukiPerRegion.name
+
+  let yukiPerLocale = getYukiForRegion()
+  let yukiName = yukiPerLocale  &&  yukiPerLocale.name
+
+  const api = yukiName && yuki.use(onboard({ name: yukiName })) || yuki.use(onboard())
   yuki.welcome = api.welcome
   return yuki
 }
