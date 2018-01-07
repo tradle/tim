@@ -5,7 +5,6 @@ import ENV from '../utils/env'
 import { generateIdentity } from '../utils/identity'
 import Yuki from '@tradle/yuki'
 import onboard from '@tradle/yuki/onboard'
-import locale from './locale.json'
 import { getYukiForRegion } from './locale'
 
 const Keychain = ENV.useKeychain !== false && !ENV.isWeb() && require('../utils/keychain')
