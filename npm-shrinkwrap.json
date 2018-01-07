@@ -183,6 +183,16 @@
         }
       }
     },
+    "@tradle/models-corporate-onboarding": {
+      "version": "1.0.0",
+      "from": "tradle/models-corporate-onboarding",
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#95fc025d6be4d4e17c227958a73a3e1c5dbf67ce"
+    },
+    "@tradle/models-nz": {
+      "version": "1.0.0",
+      "from": "tradle/models-nz",
+      "resolved": "git://github.com/tradle/models-nz.git#9d4b750954aae439e417e0bf3f1e954f0af0faba"
+    },
     "@tradle/multiqueue": {
       "version": "2.3.0",
       "from": "@tradle/multiqueue@>=2.3.0 <3.0.0",

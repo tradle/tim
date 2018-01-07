@@ -130,9 +130,8 @@ class PhotoView extends Component {
         </Image>
       )
     }
-    else {
-      photoView = <Image resizeMode='cover' source={source} style={image} />
-    }
+    else
+      photoView = <Image resizeMode='contain' source={source} style={image} />
 
     return (
           <View>

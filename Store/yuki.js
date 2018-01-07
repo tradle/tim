@@ -5,6 +5,8 @@ import ENV from '../utils/env'
 import { generateIdentity } from '../utils/identity'
 import Yuki from '@tradle/yuki'
 import onboard from '@tradle/yuki/onboard'
+import locale from './locale.json'
+import { getYukiForRegion } from './locale'
 
 const Keychain = ENV.useKeychain !== false && !ENV.isWeb() && require('../utils/keychain')
 const YUKI_KEY = '~yuki'
@@ -63,7 +65,10 @@ function inflate ({ node, identity, keys, db }) {
     db
   })
 
-  const api = yuki.use(onboard())
+  let yukiPerLocale = getYukiForRegion()
+  let yukiName = yukiPerLocale  &&  yukiPerLocale.name
+
+  const api = yukiName && yuki.use(onboard({ name: yukiName })) || yuki.use(onboard())
   yuki.welcome = api.welcome
   return yuki
 }
