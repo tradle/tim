@@ -6,10 +6,7 @@ import { generateIdentity } from '../utils/identity'
 import Yuki from '@tradle/yuki'
 import onboard from '@tradle/yuki/onboard'
 import locale from './locale.json'
-import DeviceInfo from 'react-native-device-info'
 import { getYukiForRegion } from './locale'
-
-import YUKI_PER_REGION from './locale.json'
 
 const Keychain = ENV.useKeychain !== false && !ENV.isWeb() && require('../utils/keychain')
 const YUKI_KEY = '~yuki'
@@ -67,10 +64,6 @@ function inflate ({ node, identity, keys, db }) {
     keys,
     db
   })
-
-  // let tz = DeviceInfo.getTimezone()
-  // let yukiPerRegion = tz  &&  (YUKI_PER_REGION[tz] ||  YUKI_PER_REGION[tz.split('/')[0]].yuki)
-  // let yukiName = yukiPerRegion  &&  yukiPerRegion.name
 
   let yukiPerLocale = getYukiForRegion()
   let yukiName = yukiPerLocale  &&  yukiPerLocale.name
