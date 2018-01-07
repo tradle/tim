@@ -1011,6 +1011,8 @@ var utils = {
       if (!m)
         return
     }
+    else if (typeOrModel[TYPE])
+      m = this.getModel(typeOrModel[TYPE]).value
     return m.interfaces  &&  m.interfaces.indexOf(CONTEXT) !== -1
   },
   isEnum(typeOrModel) {

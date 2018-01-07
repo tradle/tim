@@ -54,64 +54,8 @@ import employee from '../people/employee.json'
 const FRIEND = 'Tradler'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
 
-const COVER_PHOTOS = {
-  Africa: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Africa.jpg',
-    width: 960,
-    height: 640
-  },
-  America: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/America.jpg',
-    width: 1280,
-    height: 778,
-    languages: ['en-us']
-  },
-  Antarctica: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Antarctica.jpg',
-    width: 960,
-    height: 720
-  },
-  Asia: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Asia.jpg',
-    width: 1280,
-    height: 424,
-    languages: ['ja-jp', 'zh-cn', 'he']
-  },
-  'Asia/Tokyo': {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Asia_Tokyo.jpg',
-    width: 1280,
-    height: 724
-  },
-  Atlantic: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Atlantic.jpg',
-    width: 1024,
-    height: 683
-  },
-  Australia: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Australia.jpg',
-    width: 960,
-    height: 673,
-    languages: ['en-au']
-  },
-  Europe: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Europe.jpg',
-    width: 960,
-    height: 640,
-    languages: ['en-gb', 'es-es', 'es', 'fr-fr', 'fr', 'de-de', 'de']
-  },
-  Indian: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Indian.jpg',
-    width: 960,
-    height: 720,
-    languages: ['hi']
-  },
-  Pacific: {
-    url: 'https://s3.amazonaws.com/tradle-public-images/profile-bg/Pacific_Aukland.jpg',
-    width: 1000,
-    height: 669,
-    languages: ['en-nz']
-  },
-}
+import { getCoverPhotoForRegion, getYukiForRegion } from './locale'
+
 import Q from 'q'
 Q.longStackSupport = true
 Q.onerror = function (err) {
@@ -1772,13 +1716,19 @@ var Store = Reflux.createStore({
   },
   addYuki() {
     const sp =  utils.clone(yukiConfig)
+    let yuki = getYukiForRegion()
+    if (yuki) {
+      sp.org.name = yuki.name
+      if (yuki.photos)
+        sp.org.photos = yuki.photos
+    }
     sp.bot = {
       [ROOT_HASH]: this._yuki.permalink,
       [CUR_HASH]: this._yuki.permalink,
       pub: this._yuki.identity,
       profile: {
         name: {
-          firstName: 'Yuki'
+          firstName: (yuki && yuki.name) || 'Yuki'
         }
       }
     }
@@ -5308,22 +5258,7 @@ var Store = Reflux.createStore({
       return
 
     let r = { [TYPE]: PROFILE, firstName: FRIEND }
-    let tz = DeviceInfo.getTimezone()
-    let coverPhoto
-    if (tz)
-      coverPhoto = (COVER_PHOTOS[tz] ||  COVER_PHOTOS[tz.split('/')[0]])
-    else {
-      let lang = navigator.language
-      if (lang) {
-        lang = lang.toLowerCase()
-        for (let cp in COVER_PHOTOS) {
-          if (COVER_PHOTOS[cp].languages  &&  COVER_PHOTOS[cp].languages.indexOf(lang) !== -1) {
-            coverPhoto = COVER_PHOTOS[cp]
-            break
-          }
-        }
-      }
-    }
+    let coverPhoto = getCoverPhotoForRegion()
     if (coverPhoto) {
       r.coverPhoto = coverPhoto
       // let res = await fetch(coverPhoto.url)
@@ -9471,6 +9406,7 @@ var Store = Reflux.createStore({
           this._emitter.emit('model:' + m.id)
         Aviva.preparseModel(m)
         this.addNameAndTitleProps(m)
+        m._versionId = val.versionId
         models[m.id] = {
           key: m.id,
           value: m

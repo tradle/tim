@@ -75,8 +75,10 @@ var search = {
       filterResource = null
 
     let table = `rl_${modelName.replace(/\./g, '_')}`
-    let query = `query {\n${table}\n`
     let model = utils.getModel(modelName).value
+    let versionId = null // model._versionId
+    let version = versionId ? '($modelsVersionId: String!)' : ''
+    let query = `query ${version} {\n${table}\n`
     let props = model.properties
     let inClause = []
     let op = {
@@ -218,6 +220,8 @@ var search = {
       }
     }
     query += '('
+    if (versionId)
+      query += `\nmodelsVersionId: $modelsVersionId\n`
     let hasFilter = qq.length
     if (!noCursorChange) {
       if (first  ||  cursor.modelName !== modelName) {
@@ -299,6 +303,7 @@ var search = {
       let data = await client.query({
           fetchPolicy: 'network-only',
           query: gql(`${query}`),
+          variables: versionId  &&  {modelsVersionId: versionId}
         })
       let result = data.data[table]
       if (!noCursorChange) {
