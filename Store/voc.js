@@ -1,14 +1,11 @@
-// const _ = require('lodash')
-// const base = require('@tradle/models').models
-// const custom = require('@tradle/custom-models')
-// const corp = require('@tradle/models-corporate-onboarding')
-// const nz = require('@tradle/models-nz')
+const _ = require('lodash')
 
-// module.exports = _.cloneDeep({
-//   ...base,
-//   ...custom,
-//   ...corp,
-//   ...nz
-// })
-
-module.exports = require('@tradle/models-shared')
+module.exports = _.extend(
+  {},
+  require('@tradle/models').models,
+  require('@tradle/custom-models'),
+  require('@tradle/models-corporate-onboarding'),
+  require('@tradle/models-products-bot'),
+  require('@tradle/models-onfido'),
+  require('@tradle/models-nz')
+)
