@@ -112,6 +112,9 @@ class MessageList extends Component {
     let { resource, allContexts } = this.props
     let application = this.state.application || this.props.application
     let context = this.state.context || this.props.context  ||  (application && application._context)
+    if (!context)
+      context = utils.isContext(resource)  &&  resource
+
     if (!context  ||  context.product === REMEDIATION)
       return false
 
