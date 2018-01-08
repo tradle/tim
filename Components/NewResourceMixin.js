@@ -162,8 +162,8 @@ var NewResourceMixin = {
     let { errs, requestedProperties } = this.props
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
-    if (!requestedProperties  &&  data)
-      requestedProperties = this.getRequestedProperties(data)
+    // if (!requestedProperties  &&  data)
+    //   requestedProperties = this.getRequestedProperties(data)
     if (requestedProperties) {
       if (!formErrors)
         formErrors = {}
@@ -576,7 +576,7 @@ var NewResourceMixin = {
 
     this.setState({
       resource: r,
-      requestedProperties: this.getRequestedProperties(r),
+      // requestedProperties: this.getRequestedProperties(r),
       inFocus: prop.name
     })
   },
@@ -1663,7 +1663,7 @@ var NewResourceMixin = {
     for (let p in this.floatingProps)
       r[p] = this.floatingProps[p]
 
-    state.requestedProperties = this.getRequestedProperties(r)
+    // state.requestedProperties = this.getRequestedProperties(r)
 
     this.setState(state);
     if (!this.props.search)
