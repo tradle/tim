@@ -137,6 +137,7 @@ class TimHome extends Component {
   }
   _handleConnectivityChange(isConnected) {
     this.props.navigator.isConnected = isConnected
+    this.state.isConnected = isConnected
   }
   componentWillUnmount() {
     if (isLinkingSupported)

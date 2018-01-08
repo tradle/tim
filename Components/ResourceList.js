@@ -443,11 +443,13 @@ class ResourceList extends Component {
         this.setState(state)
       return;
     }
-    else if (officialAccounts  &&  modelName === ORGANIZATION) {
-      let connected = list.some((r) => r._online)
-      if (connected)
-        state.isConnected = true
-    }
+    // else if (officialAccounts  &&  modelName === ORGANIZATION) {
+    //   let connected = list.some((r) => r._online)
+    //   if (connected) {
+    //     navigator.isConnected = true
+    //     state.isConnected = true
+    //   }
+    // }
     if (this.props.isBacklink  &&  params.prop !== this.props.prop)
       return
     extend(state, {

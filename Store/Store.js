@@ -3688,15 +3688,24 @@ var Store = Reflux.createStore({
       let isApplication = resource[TYPE] === APPLICATION
       let r = await this._getItemFromServer(rId)
       let list
-      if (isApplication  &&  forwardlink) {
-        let forwardlinkName = forwardlink.name
-        let m = this.getModel(resource[TYPE])
-        if (r[forwardlinkName]) {
-          if (forwardlink.items.ref !== VERIFIED_ITEM)
-            list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(fl.id)))
-          else
-            list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(fl.verification.id)))
-          r[forwardlinkName] = list
+      if (isApplication) {
+        if (forwardlink) {
+          let forwardlinkName = forwardlink.name
+          let m = this.getModel(resource[TYPE])
+          if (r[forwardlinkName]) {
+            if (forwardlink.items.ref !== VERIFIED_ITEM)
+              list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(fl.id)))
+            else
+              list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(fl.verification.id)))
+            r[forwardlinkName] = list
+          }
+        }
+        if (r.relationshipManager) {
+          let rmId = r.relationshipManager.id.replace(IDENTITY, PROFILE)
+          let rm = this._getItem(rmId)
+          if (rm)
+            r.relationshipManager.title = utils.getDisplayName(rm)
+            // r.relationshipManager = this.buildRef(rmProfile)
         }
       }
       if (!r._context) {
@@ -3744,6 +3753,7 @@ var Store = Reflux.createStore({
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
     var props = backlink ? [backlink] : resModel.properties;
+
     for (let p in props) {
       if (p.charAt(0) === '_'  ||  props[p].hidden)
         continue;
@@ -4692,6 +4702,7 @@ var Store = Reflux.createStore({
           }
           appToUpdate.relationshipManager = self._makeIdentityStub(me)
           self.trigger({action: 'updateRow', resource: appToUpdate })
+          self.trigger({action: 'getItem', resource: appToUpdate})
         //   self.dbPut(utils.getId(app), app)
         }
         let rId = utils.getId(returnVal.to)

@@ -122,9 +122,9 @@ class ApplicationView extends Component {
     case 'assignRM_Confirmed':
       if (application[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
         Actions.hideModal()
-        let r = utils.clone(this.props.resource)
-        r.relationshipManager = application.relationshipManager
-        this.setState({resource: r, isLoading: false})
+        // let r = utils.clone(this.props.resource)
+        // r.relationshipManager = application.relationshipManager
+        this.setState({resource: application, isLoading: false})
       }
       break
     }
