@@ -193,6 +193,21 @@
       "from": "tradle/models-nz",
       "resolved": "git://github.com/tradle/models-nz.git#9d4b750954aae439e417e0bf3f1e954f0af0faba"
     },
+    "@tradle/models-onfido": {
+      "version": "1.0.0",
+      "from": "tradle/models-onfido",
+      "resolved": "git://github.com/tradle/models-onfido.git#b0cd1fb5f9cb0aa17fb0413668ad82c24933fc9a"
+    },
+    "@tradle/models-products-bot": {
+      "version": "1.0.0",
+      "from": "tradle/models-products-bot",
+      "resolved": "git://github.com/tradle/models-products-bot.git#7c834fb6e5614a6d688e394324c5d51d94fb8965"
+    },
+    "@tradle/models-shared": {
+      "version": "1.0.0",
+      "from": "tradle/models-shared",
+      "resolved": "git://github.com/tradle/models-shared.git#d356efc8ea27493c9ca2960875404d35441d87f9"
+    },
     "@tradle/multiqueue": {
       "version": "2.3.0",
       "from": "@tradle/multiqueue@>=2.3.0 <3.0.0",
@@ -5848,9 +5863,9 @@
       "resolved": "https://registry.npmjs.org/localstorage-memory/-/localstorage-memory-1.0.2.tgz"
     },
     "lodash": {
-      "version": "4.16.2",
-      "from": "lodash@>=4.8.0 <5.0.0",
-      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.2.tgz"
+      "version": "4.17.4",
+      "from": "lodash@>=4.0.0 <5.0.0",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz">>>>>>> origin/master
     },
     "lodash-es": {
       "version": "4.17.4",
