@@ -225,6 +225,8 @@ class ShowPropertiesView extends Component {
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }
+        else if (pMeta.ref === constants.TYPES.IDENTITY)
+          val = <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).value.inlined) {
           if (!val[constants.TYPE])
             val[constants.TYPE] = pMeta.ref
