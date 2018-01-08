@@ -95,11 +95,8 @@ class ResourceRow extends Component {
       this.setState({isConnected: params.isConnected})
       break
     case 'assignRM_Confirmed':
-      if (application[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
-        let r = utils.clone(this.props.resource)
-        r.relationshipManager = application.relationshipManager
-        this.setState({application: r, resource: r})
-      }
+      if (application[ROOT_HASH] === this.props.resource[ROOT_HASH])
+        this.setState({application: application, resource: application})
       break
     case 'updateRow':
       let hash = params.resource[ROOT_HASH] || params.resource.id.split('_')[1]
