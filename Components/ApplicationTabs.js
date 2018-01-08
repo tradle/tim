@@ -22,6 +22,7 @@ import buttonStyles from '../styles/buttonStyles'
 import appStyle from '../styles/appStyle.json'
 import reactMixin from 'react-mixin'
 import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
 import ShowPropertiesView from './ShowPropertiesView'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
@@ -156,7 +157,7 @@ class ApplicationTabs extends Component {
                                     excludedProperties={['photos']}
                                     navigator={navigator} />
       if (utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
-        details = <View>
+        details = <View style={styles.buttonsFooter}>
                    {details}
                    <View style={{flexDirection: 'row', alignSelf: 'center'}}>
                     <TouchableOpacity onPress={this.props.approve.bind(this)}>
@@ -199,12 +200,7 @@ class ApplicationTabs extends Component {
     Actions.getDetails(this.props.resource)
   }
   getRefResource(resource, prop) {
-    var model = utils.getModel(this.props.resource[TYPE]).value;
-
-    this.state.prop = prop;
-    // this.state.propValue = utils.getId(resource.id);
     this.showRefResource(resource, prop)
-    // Actions.getItem(resource.id);
   }
   getAppStatus() {
     let resource = this.props.resource
@@ -239,6 +235,7 @@ class ApplicationTabs extends Component {
 }
 
 reactMixin(ApplicationTabs.prototype, RowMixin);
+reactMixin(ApplicationTabs.prototype, ResourceMixin);
 ApplicationTabs = makeResponsive(ApplicationTabs)
 
 var styles = StyleSheet.create({
@@ -312,6 +309,9 @@ var styles = StyleSheet.create({
     fontSize: 20,
     color: '#7AAAC3',
     alignSelf: 'center'
+  },
+  buttonsFooter: {
+    paddingBottom: 70
   }
 })
 
