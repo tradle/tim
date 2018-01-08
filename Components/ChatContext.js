@@ -46,8 +46,8 @@ class ChatContext extends Component {
         return <View/>
     }
     // No need to show context if provider has only one product and no share context
-    else if ((!chat.products  ||  chat.products.length === 1)  &&  !chat._canShareContext)
-      return <View/>
+    // else if ((!chat.products  ||  chat.products.length === 1)  &&  !chat._canShareContext)
+    //   return <View/>
     // if (!context  ||  context._readOnly)
     //   return <View/>
     let isReadOnlyChat = utils.isReadOnlyChat(context)
