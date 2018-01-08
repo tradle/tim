@@ -71,9 +71,9 @@
       }
     },
     "@tradle/build-resource": {
-      "version": "2.9.1",
+      "version": "2.14.1",
       "from": "@tradle/build-resource@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-2.9.1.tgz"
+      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-2.14.1.tgz"
     },
     "@tradle/cb-blockr": {
       "version": "3.2.1",
@@ -88,7 +88,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#640158ce1a116990a594cb68c438ee689e93ba88",
+      "resolved": "git://github.com/tradle/custom-models.git#3e0bda99bae45425329fa86859ec9c7c33e7bf54",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
@@ -395,9 +395,9 @@
       }
     },
     "@tradle/yuki": {
-      "version": "1.1.1",
+      "version": "1.2.0",
       "from": "@tradle/yuki@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.1.1.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.2.0.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
