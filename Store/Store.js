@@ -3446,6 +3446,8 @@ var Store = Reflux.createStore({
       if (!docFromServer)
         document = await this._getItemFromServer(document)
       let application = await this._getItemFromServer(document.application)
+      if (!application._context)
+        application._context = await this._getItemFromServer(utils.getId(r._context))
       this.trigger({action: 'assignRM_Confirmed', application: application})
     }
     // if (__DEV__) {
@@ -4052,7 +4054,7 @@ var Store = Reflux.createStore({
         message: messages.join('\n\n')
       })
 
-      let promiseAddItem = await this.onAddChatItem({ resource: item, noTrigger: true })
+      let promiseAddItem = this.onAddChatItem({ resource: item, noTrigger: true })
       let promiseSentEvent = new Promise(resolve => meDriver.once('sent', resolve))
       await Promise.all([
         promiseAddItem,
@@ -4700,6 +4702,8 @@ var Store = Reflux.createStore({
               self._setItem(utils.getId(app), app)
             }
           }
+          if (!appToUpdate._context)
+            appToUpdate._context = returnVal._context
           appToUpdate.relationshipManager = self._makeIdentityStub(me)
           self.trigger({action: 'updateRow', resource: appToUpdate })
           self.trigger({action: 'getItem', resource: appToUpdate})
@@ -5784,11 +5788,20 @@ var Store = Reflux.createStore({
     let contextId
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
+    let importedVerification
     if (application) {
       context = application._context
       if (!application.context)
         application = await this._getItemFromServer(application)
       contextId = application.context
+      var params = {
+        client: this.client,
+        author: me[ROOT_HASH],
+        context: contextId,
+        filterResource: {_payloadType: VERIFICATION}
+      }
+
+      importedVerification = graphQL.getChat(params)
     }
     else if (context)
       contextId = context.contextId
@@ -5811,47 +5824,54 @@ var Store = Reflux.createStore({
       if (to)
         author = to[TYPE] === PROFILE ? to[ROOT_HASH] : this.getRepresentative(to)[ROOT_HASH]
     }
-    let all = await graphQL.getChat({
+    let all = graphQL.getChat({
       client: this.client,
       context: contextId,
       filterResource: filterResource,
       author,
       recipient,
     })
+    let result = await Promise.all([all, importedVerification ||  Q()])
+
     let chatItems = []
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
 
     let inbound = true
     let outbound = false
-    if (!all  ||  !all.length)
+    if (!result  ||  !result.length)
       return
-    for (let i=0; i<2; i++) {
-      let list = all[i].data[table]
-      if (list.edges  &&  list.edges.length) {
-        list.edges.forEach(li => {
-        // for (let i=0; i<result.length; i++) {
-          let rr = this.convertMessageToResource(li.node, application)
-          if (rr[TYPE] === FORM_REQUEST  &&  rr.form === PRODUCT_REQUEST) //  &&  rr._documentCreated)
-            return
-          if (rr[TYPE] == NEXT_FORM_REQUEST)
-            return
-          if (!rr._context)
-            rr._context = context
-          if (li.node.originalSender === me[ROOT_HASH]) {
-            rr._outbound = true
-            rr._inbound = false
-          }
-          else {
-            rr._inbound = inbound
-            rr._outbound = outbound
-          }
-          rr._recipient = li._recipient
-          chatItems.push(rr)
-        })
-      }
-      if (!application) {
-        inbound = false
-        outbound = true
+    for (let j=0; j<2; j++) {
+      let response = result[j]
+      if (!response ||  !Array.isArray(response))
+        continue
+      for (let i=0; i<2; i++) {
+        let list = response[i].data[table]
+        if (list.edges  &&  list.edges.length) {
+          list.edges.forEach(li => {
+          // for (let i=0; i<result.length; i++) {
+            let rr = this.convertMessageToResource(li.node, application)
+            if (rr[TYPE] === FORM_REQUEST  &&  rr.form === PRODUCT_REQUEST) //  &&  rr._documentCreated)
+              return
+            if (rr[TYPE] == NEXT_FORM_REQUEST)
+              return
+            if (!rr._context)
+              rr._context = context
+            if (li.node.originalSender === me[ROOT_HASH]) {
+              rr._outbound = true
+              rr._inbound = false
+            }
+            else {
+              rr._inbound = inbound
+              rr._outbound = outbound
+            }
+            rr._recipient = li._recipient
+            chatItems.push(rr)
+          })
+        }
+        if (!application) {
+          inbound = false
+          outbound = true
+        }
       }
     }
     // Filter out resources like Introduction
@@ -10815,8 +10835,9 @@ var Store = Reflux.createStore({
       id = utils.getId(id)
     try {
       let result = await graphQL._getItem(id, this.client)
-      if (result)
+      if (result) {
         return this.convertToResource(result)
+      }
     }
     catch(err) {
       console.log('_getItemFromServer', err)

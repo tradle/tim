@@ -54,9 +54,9 @@
       }
     },
     "@tradle/build-resource": {
-      "version": "2.9.1",
+      "version": "2.14.1",
       "from": "@tradle/build-resource@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-2.9.1.tgz"
+      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-2.14.1.tgz"
     },
     "@tradle/cb-blockr": {
       "version": "3.2.1",
@@ -71,7 +71,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#640158ce1a116990a594cb68c438ee689e93ba88",
+      "resolved": "git://github.com/tradle/custom-models.git#3e0bda99bae45425329fa86859ec9c7c33e7bf54",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
@@ -174,7 +174,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#205240f7af2e2970c2db61c296fc33179ec4ffc4",
+      "resolved": "git://github.com/tradle/models.git#8da46ddd10d2b906916990de2fa0ecec9dca025c",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
@@ -202,11 +202,6 @@
       "version": "1.0.0",
       "from": "tradle/models-products-bot",
       "resolved": "git://github.com/tradle/models-products-bot.git#7c834fb6e5614a6d688e394324c5d51d94fb8965"
-    },
-    "@tradle/models-shared": {
-      "version": "1.0.0",
-      "from": "tradle/models-shared",
-      "resolved": "git://github.com/tradle/models-shared.git#d356efc8ea27493c9ca2960875404d35441d87f9"
     },
     "@tradle/multiqueue": {
       "version": "2.3.0",
@@ -405,9 +400,9 @@
       }
     },
     "@tradle/yuki": {
-      "version": "1.1.1",
+      "version": "1.2.0",
       "from": "@tradle/yuki@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.1.1.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.2.0.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
