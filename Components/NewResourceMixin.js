@@ -1618,8 +1618,8 @@ var NewResourceMixin = {
         setItemCount = true
       }
       else  {
+        let val
         if (prop.items) {
-          let val
           if (prop.items.ref  &&  isEnum)
             val = value.map((v) => utils.buildRef(v))
           else
