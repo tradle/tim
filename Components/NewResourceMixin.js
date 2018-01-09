@@ -1579,7 +1579,9 @@ var NewResourceMixin = {
 
     let prop = model.properties[propName]
     let isEnum = prop.ref  &&  utils.isEnum(prop.ref)
-    let isArray = prop.type === 'array' || (this.props.search  &&  prop.ref  &&  utils.isEnum(prop.ref))
+    let isMultichooser = this.props.search  &&  prop.ref  &&  utils.isEnum(prop.ref)
+    let isArray = prop.type === 'array'
+
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
       if (isEnum)
@@ -1589,8 +1591,8 @@ var NewResourceMixin = {
       this.floatingProps[propName] = value
       resource[propName] = value
     }
-    else if (isArray) {
-      let isEnum  = utils.isEnum(prop.items.ref)
+    else if (isArray || isMultichooser) {
+      let isEnum  = isArray ? utils.isEnum(prop.items.ref) : utils.isEnum(prop.ref)
       if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !isEnum) {
         if (!Array.isArray(value))
           value = [value]
@@ -1615,16 +1617,31 @@ var NewResourceMixin = {
 
         setItemCount = true
       }
-      else {
-        let val
-        if (prop.items.ref  &&  isEnum)
-          val = value.map((v) => utils.buildRef(v))
+      else  {
+        if (prop.items) {
+          let val
+          if (prop.items.ref  &&  isEnum)
+            val = value.map((v) => utils.buildRef(v))
+          else
+            val = value
+        }
+        else if (isEnum) {
+          if (value.length)
+            val = value.map((v) => utils.buildRef(v))
+        }
         else
           val = value
-        resource[propName] =  val
-        if (!this.floatingProps)
-          this.floatingProps = {}
-        this.floatingProps[propName] = resource[propName]
+        if (value.length) {
+          resource[propName] =  val
+          if (!this.floatingProps)
+            this.floatingProps = {}
+          this.floatingProps[propName] = resource[propName]
+        }
+        else {
+          delete resource[propName]
+          if (this.floatingProps)
+            delete this.floatingProps[propName]
+        }
       }
     }
     else {
