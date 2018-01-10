@@ -19,6 +19,15 @@ const PHOTO = 'tradle.Photo'
 const METHOD = 'tradle.Method'
 const PARTIAL = 'tradle.Partial'
 
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+const {
+  IDENTITY,
+  MONEY
+} = constants.TYPES
+
 const BLOCKCHAIN_EXPLORERS = [
   'https://rinkeby.etherscan.io/tx/0x$TXID',
   // 'https://etherchain.org/tx/0x$TXID' // doesn't support rinkeby testnet
@@ -75,7 +84,7 @@ class ShowPropertiesView extends Component {
   getViewCols(resource, model) {
     if (!resource)
       resource = this.props.resource
-    var modelName = resource[constants.TYPE];
+    var modelName = resource[TYPE];
     var model = utils.getModel(modelName).value;
     var vCols
 
@@ -141,7 +150,7 @@ class ShowPropertiesView extends Component {
     if (!vCols) {
       vCols = [];
       for (var p in props) {
-        if (p != constants.TYPE)
+        if (p != TYPE)
           vCols.push(p)
       }
       // HACK
@@ -220,17 +229,21 @@ class ShowPropertiesView extends Component {
                    </View>
           return
         }
-        if (pMeta.ref == constants.TYPES.MONEY) {
+        if (pMeta.ref == MONEY) {
           let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
         }
-        else if (pMeta.ref === constants.TYPES.IDENTITY)
-          val = <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
+        else if (pMeta.ref === IDENTITY) {
+          let title = val.title
+          if (!title)
+            title = val.id.split('_')[0] === utils.getMe()[ROOT_HASH] ? 'Me' : 'Not me'
+          val = <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
+        }
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).value.inlined) {
-          if (!val[constants.TYPE])
-            val[constants.TYPE] = pMeta.ref
-          return this.getViewCols(val, utils.getModel(val[constants.TYPE]).value)
+          if (!val[TYPE])
+            val[TYPE] = pMeta.ref
+          return this.getViewCols(val, utils.getModel(val[TYPE]).value)
         }
         else if (pMeta.mainPhoto)
           return
@@ -239,7 +252,7 @@ class ShowPropertiesView extends Component {
           val = val.title
         else if (showRefResource) {
           // ex. property that is referencing to the Organization for the contact
-          var value = val[constants.TYPE] ? utils.getDisplayName(val) : val.title;
+          var value = val[TYPE] ? utils.getDisplayName(val) : val.title;
           if (!value)
             value = utils.makeModelTitle(utils.getType(val))
           val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
@@ -259,12 +272,12 @@ class ShowPropertiesView extends Component {
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
           let labels = []
-          let type = val.find((l) => l.key === constants.TYPE  &&  l.value).value
+          let type = val.find((l) => l.key === TYPE  &&  l.value).value
           let lprops = utils.getModel(type).value.properties
           val.forEach((v) => {
             let key
             if (v.key.charAt(0) === '_') {
-              if (v.key === constants.TYPE) {
+              if (v.key === TYPE) {
                 key = 'type'
                 value = utils.getModel(v.value).value.title
               }
