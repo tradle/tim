@@ -665,12 +665,18 @@ var NavigationBarRouteMapper = {
     case 'Done':
       iconColor = '#fff'
       isSubmit = true
+      if (route.passProps.isChooser) {
+        icon = 'md-checkmark'
+        iconSize = 30
+      }
       // if (route.passProps.bankStyle  &&  route.passProps.bankStyle.submitBarInFooter)
       //   return
     case 'Accept':
-      icon = 'ios-send'
-      iconSize = 32
-      style.marginTop = utils.isAndroid() ? 15 :  0
+      if (!icon) {
+        icon = 'ios-send'
+        iconSize = 32
+      }
+      style = {marginTop: utils.isAndroid() ? 15 :  0}
       // style = {marginTop: 5, transform: [
       //     {rotate: '45deg'}
       //   ]}

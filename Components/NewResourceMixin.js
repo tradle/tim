@@ -59,10 +59,19 @@ import Actions from '../Actions/Actions'
 
 const debug = require('debug')('tradle:app:blinkid')
 const DEFAULT_CURRENCY_SYMBOL = '£';
-const TYPE = constants.TYPE
-const MONEY = constants.TYPES.MONEY
 
-const SETTINGS = 'tradle.Settings'
+const {
+  ENUM,
+  MONEY,
+  SETTINGS,
+  IDENTITY
+} = constants.TYPES
+
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+
 const COUNTRY = 'tradle.Country'
 const PHOTO = 'tradle.Photo'
 const YEAR = 3600 * 1000 * 24 * 365
@@ -451,8 +460,10 @@ var NewResourceMixin = {
           options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           continue;
         }
-        else if (search  &&  ref === PHOTO)
-          continue
+        else if (search) {
+          if (ref === PHOTO  ||  ref === IDENTITY)
+            continue
+        }
 
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
@@ -1540,8 +1551,9 @@ var NewResourceMixin = {
     return (errors && errors[propName]) || this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[propName]
   },
   chooser(prop, propName,event) {
-    let resource = this.state.resource;
-    let model = (this.props.model  ||  this.props.metadata)
+    let { resource, isRegistration } = this.state
+    let { model, metadata, bankStyle, search, navigator } = this.props
+    model = model  ||  metadata
     if (!resource) {
       resource = {};
       resource[TYPE] = model.id;
@@ -1553,7 +1565,7 @@ var NewResourceMixin = {
     let filter = event.nativeEvent.text;
     let propRef = prop.ref || prop.items.ref
     let m = utils.getModel(propRef).value;
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
+    let currentRoutes = navigator.getCurrentRoutes();
 
     let route = {
       title: translate(prop), //m.title,
@@ -1570,19 +1582,20 @@ var NewResourceMixin = {
         prop:           prop,
         modelName:      propRef,
         resource:       resource,
-        isRegistration: this.state.isRegistration,
-        bankStyle:      this.props.bankStyle,
+        search:         search,
+        isRegistration: isRegistration,
+        bankStyle:      bankStyle,
         returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       this.setChosenValue.bind(this)
       }
     }
-    if ((this.props.search  ||  prop.type === 'array')  && utils.isEnum(m)) {
+    if ((search  ||  prop.type === 'array')  && utils.isEnum(m)) {
       route.passProps.multiChooser = true
       route.rightButtonTitle = 'Done'
       route.passProps.onDone = this.multiChooser.bind(this, prop)
     }
 
-    this.props.navigator.push(route)
+    navigator.push(route)
   },
   multiChooser(prop, values) {
     let vArr = []

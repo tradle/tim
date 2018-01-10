@@ -76,7 +76,7 @@ var search = {
 
     let table = `rl_${modelName.replace(/\./g, '_')}`
     let model = utils.getModel(modelName).value
-    let versionId = null // model._versionId
+    let versionId = model._versionId
     let version = versionId ? '($modelsVersionId: String!)' : ''
     let query = `query ${version} {\n${table}\n`
     let props = model.properties
@@ -230,7 +230,7 @@ var search = {
       if (limit) {
         if (cursor) {
           if (cursor.filter) {
-            if (!filterResource  ||  deepEqual(filterResource,  cursor.filter))
+            if (!filterResource  ||  !deepEqual(filterResource,  cursor.filter))
               cursor = {endCursor: []}
           }
         }
@@ -257,7 +257,7 @@ var search = {
         else
           endCursor = null
         if (endCursor)
-          query += `after: "${endCursor}"\n`
+          query += `checkpoint: "${endCursor}"\n`
         query += `limit:  ${limit}\n`
       }
     }
@@ -316,18 +316,7 @@ var search = {
           // }
         }
       }
-      if (!result.edges.length) {
-        // this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, limit:  first})
-        return
-      }
-      //   // if (result.edges.length < limit)
-      //   //   cursor.endCursor = null
-      // let to = this.getRepresentative(utils.getId(me.organization))
-      // let toId = utils.getId(to)
-      // let list = result.edges.map((r) => this.convertToResource(r.node))
-      // if (!noTrigger)
-      //   this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, limit:  first})
-      return result.edges
+      return result.edges.length && result.edges
     } catch(error) {
       // debugger
       console.log(error)
@@ -539,6 +528,12 @@ var search = {
         let newarr = arr.concat(TYPE, SIG)
         arr = newarr
       }
+      arr.push(`_seal {
+                txId,
+                blockchain,
+                network,
+                time
+              }`)
     }
     if (properties) {
       let newProps = {}

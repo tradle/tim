@@ -132,7 +132,6 @@ class TimHome extends Component {
       );
       NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
     }
-
     Actions.start();
   }
   _handleConnectivityChange(isConnected) {

@@ -234,20 +234,11 @@ class FormMessageRow extends Component {
       // flexDirection: 'row',
       backgroundColor: 'transparent', // this.props.bankStyle.BACKGROUND_COLOR
     }
-    var sealedStatus = (resource.txId)
-                     ? <View style={chatStyles.sealedStatus}>
-                         <Icon style={{marginTop: 2}} name='md-done-all' size={20} color='#EBFCFF'/>
-                       </View>
-                     : <View />
-
-    let row
-    if (noContent)
-      row = <View/>
-    else
-      row = <View style={{paddingVertical: 5}}>
-              {renderedRow}
-              {sentTo}
-            </View>
+    var sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
+    let row = !noContent  &&  <View style={{paddingVertical: 5}}>
+                                {renderedRow}
+                                {sentTo}
+                              </View>
     let contextId = this.getContextId(resource)
 
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
@@ -259,10 +250,9 @@ class FormMessageRow extends Component {
         {ownerPhoto}
         <View style={[{flex:1, width: width}, chatStyles.verificationBody]}>
           <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}]}>
-            <View>
-              {sealedStatus}
-              <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[TYPE]).value)}</Text>
-            </View>
+            <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[TYPE]).value) + ' '}
+              <Icon style={{marginTop: 2}} name='md-done-all' size={20} color='#EBFCFF'/>
+            </Text>
             {arrowIcon}
           </View>
           {row}
