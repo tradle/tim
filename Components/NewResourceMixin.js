@@ -58,11 +58,19 @@ import Actions from '../Actions/Actions'
 
 const debug = require('debug')('tradle:app:blinkid')
 const DEFAULT_CURRENCY_SYMBOL = '£';
-const ENUM = 'tradle.Enum'
-const TYPE = constants.TYPE
-const MONEY = constants.TYPES.MONEY
 
-const SETTINGS = 'tradle.Settings'
+const {
+  ENUM,
+  MONEY,
+  SETTINGS,
+  IDENTITY
+} = constants.TYPES
+
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+
 const COUNTRY = 'tradle.Country'
 const PHOTO = 'tradle.Photo'
 const YEAR = 3600 * 1000 * 24 * 365
@@ -443,8 +451,10 @@ var NewResourceMixin = {
           options.fields[p].onEndEditing = onEndEditing.bind(this, p);
           continue;
         }
-        else if (search  &&  ref === PHOTO)
-          continue
+        else if (search) {
+          if (ref === PHOTO  ||  ref === IDENTITY)
+            continue
+        }
 
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
@@ -1543,6 +1553,7 @@ var NewResourceMixin = {
         prop:           prop,
         modelName:      propRef,
         resource:       resource,
+        search:         search,
         isRegistration: this.state.isRegistration,
         bankStyle:      this.props.bankStyle,
         returnRoute:    currentRoutes[currentRoutes.length - 1],
