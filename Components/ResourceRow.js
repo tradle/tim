@@ -40,7 +40,6 @@ const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
 const APPLICATION = 'tradle.Application'
 const PARTIAL = 'tradle.Partial'
-const CUSTOM_MODEL_PREFIX = 'io.'
 
 var {
   ROOT_HASH,
@@ -161,15 +160,29 @@ class ResourceRow extends Component {
     let noImage;
     let isOfficialAccounts = this.props.isOfficialAccounts
     let isModel = resource.type === MODEL
+    let style
+    if (isOfficialAccounts  &&  resource.style) {
+      style = {}
+      extend(style, defaultBankStyle)
+      style = extend(style, resource.style)
+    }
+    if (!style)
+      style = defaultBankStyle
     if (isModel) {
       let title = utils.makeModelTitle(resource)
-      if (resource.id.indexOf(CUSTOM_MODEL_PREFIX) === 0)
-        title += ' → ' + resource.id.split('.')[1]
+      let parts = resource.id.split('.')
+      if (parts.length > 2)
+        title = <Text style={styles.resourceTitle}>{title + '  →  '}
+                            <Text style={{color: style.linkColor}}>{parts[1] + '.' + parts[0]}</Text>
+                         </Text>
+
+      else
+        title = <Text style={styles.resourceTitle}>{title}</Text>
       return  <View style={styles.content} key={this.getNextKey()}>
                 <TouchableOpacity onPress={() => this.props.selectModel(resource)} underlayColor='transparent'>
                   <View style={[styles.row, { width: utils.dimensions(ResourceRow).width - 10}]}>
                     <View style={[styles.textContainer, {margin: 7}]}>
-                      <Text style={styles.resourceTitle}>{title}</Text>
+                      {title}
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -231,12 +244,6 @@ class ResourceRow extends Component {
     //                        </View>
     //                      </TouchableHighlight>
     //                    : <View />;
-    let style
-    if (isOfficialAccounts  &&  resource.style) {
-      style = {}
-      extend(style, defaultBankStyle)
-      style = extend(style, resource.style)
-    }
     let bg = style ? {backgroundColor: style.listBg} : {}
     let color = style ? {color: style.listColor} : {}
 
