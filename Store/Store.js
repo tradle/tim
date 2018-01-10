@@ -5621,7 +5621,7 @@ var Store = Reflux.createStore({
     return contexts[0]
   },
   async searchServer(params) {
-    let {direction, first, noTrigger, modelName, application, context, to, filterResource} = params
+    let {direction, first, noTrigger, modelName, application, context, to, filterResource, lastId} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
@@ -5648,7 +5648,7 @@ var Store = Reflux.createStore({
           filterResource._author = myBot[ROOT_HASH]
       }
     }
-    extend(params, {client: this.client, filterResource: filterResource})
+    extend(params, {client: this.client, filterResource: filterResource, noCursorChange: !lastId})
     let result = await graphQL.searchServer(params)
     if (!result) {
       if (!noTrigger)
@@ -5875,6 +5875,10 @@ var Store = Reflux.createStore({
       [CUR_HASH]: r._link,
       [TYPE]: r[TYPE],
     })
+    let seal = r._seal
+    if (seal)
+      rr.txId = seal.txId
+
     let lr = this._getItem(utils.getId(rr))
     if (lr) {
       let rr = pick(r, Object.keys(props).concat(toKeep))
@@ -5973,7 +5977,8 @@ var Store = Reflux.createStore({
 
     let sortProp = sortProperty || (isOrg ? LAST_MESSAGE_TIME : meta.sort)
 
-    var isIdentity = modelName === PROFILE;
+    var isProfile = modelName === PROFILE
+    var isIdentity = modelName === IDENTITY
     // to variable if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     if (to) {
@@ -6042,7 +6047,7 @@ var Store = Reflux.createStore({
       }
     }
     // Don't show current 'me' contact in contact list or my identities list
-    if (!containerProp  &&  me  &&  isIdentity) {
+    if (!containerProp  &&  me  &&  isProfile) {
       if (!isTest) {
         var myIdentities = this._getItem(MY_IDENTITIES).allIdentities;
         myIdentities.forEach((meId) =>  {
@@ -6054,7 +6059,7 @@ var Store = Reflux.createStore({
     if (utils.isEmpty(foundResources))
       return
     var result = utils.objectToArray(foundResources);
-    // if (isIdentity) {
+    // if (isProfile) {
     //   result.forEach(function(r) {
     //     if (r.organization) {
     //       var res = list[utils.getId(r.organization.id)];
@@ -6066,7 +6071,7 @@ var Store = Reflux.createStore({
     //     }
     //   });
     // }
-    if (isIdentity  && !all && me.isEmployee) {
+    if (isProfile  && !all && me.isEmployee) {
       let retPeople = []
       // Filter out the employees of other service providers from contact list
       // This will go away when thru-bot communications will deployed
