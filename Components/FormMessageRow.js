@@ -246,7 +246,7 @@ class FormMessageRow extends Component {
         <View style={[{flex:1}, chatStyles.verificationBody]}>
           <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}]}>
             <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[TYPE]).value) + ' '}
-              <Icon style={{marginTop: 2}} name='md-done-all' size={20} color='#EBFCFF'/>
+              {sealedStatus}
             </Text>
             {arrowIcon}
           </View>
