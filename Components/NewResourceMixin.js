@@ -1523,8 +1523,9 @@ var NewResourceMixin = {
     return (errors && errors[propName]) || this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[propName]
   },
   chooser(prop, propName,event) {
-    let resource = this.state.resource;
-    let model = (this.props.model  ||  this.props.metadata)
+    let { resource, isRegistration } = this.state
+    let { model, metadata, bankStyle, search, navigator } = this.props
+    model = model  ||  metadata
     if (!resource) {
       resource = {};
       resource[TYPE] = model.id;
@@ -1536,7 +1537,7 @@ var NewResourceMixin = {
     let filter = event.nativeEvent.text;
     let propRef = prop.ref || prop.items.ref
     let m = utils.getModel(propRef).value;
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
+    let currentRoutes = navigator.getCurrentRoutes();
 
     let route = {
       title: translate(prop), //m.title,
@@ -1554,19 +1555,19 @@ var NewResourceMixin = {
         modelName:      propRef,
         resource:       resource,
         search:         search,
-        isRegistration: this.state.isRegistration,
-        bankStyle:      this.props.bankStyle,
+        isRegistration: isRegistration,
+        bankStyle:      bankStyle,
         returnRoute:    currentRoutes[currentRoutes.length - 1],
         callback:       this.setChosenValue.bind(this)
       }
     }
-    if ((this.props.search  ||  prop.type === 'array')  && utils.isEnum(m)) {
+    if ((search  ||  prop.type === 'array')  && utils.isEnum(m)) {
       route.passProps.multiChooser = true
       route.rightButtonTitle = 'Done'
       route.passProps.onDone = this.multiChooser.bind(this, prop)
     }
 
-    this.props.navigator.push(route)
+    navigator.push(route)
   },
   multiChooser(prop, values) {
     let vArr = []
