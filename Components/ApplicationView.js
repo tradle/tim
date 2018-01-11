@@ -181,7 +181,7 @@ class ApplicationView extends Component {
     }
     let homeStyle = {backgroundColor: '#fff', opacity: 0.9}
     let assignRM
-    if (isRM)
+    if (!isRM)
       assignRM = <TouchableOpacity onPress={() => this.assignRM()}>
                     <View style={[platformStyles.menuButtonRegular, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
