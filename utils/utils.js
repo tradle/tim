@@ -585,8 +585,14 @@ var utils = {
     if (resource[p]) {
       if (meta[p].type === 'date')
         return this.getDateValue(resource[p])
-      if (meta[p].type !== 'object')
+      if (meta[p].type !== 'object') {
+        if (meta[p].range  ===  'model') {
+          let m = this.getModel(meta[p].range)
+          if (m)
+            return this.makeModelTitle(m.value)
+        }
         return resource[p];
+      }
       if (resource[p].title)
         return resource[p].title;
       if (meta[p].ref) {
@@ -1097,10 +1103,15 @@ var utils = {
     //   return  utils.getId(me) === utils.getId(resource.from)
   },
   isRM(application) {
-    if (!application || !application.relationshipManager)
+    if (!application)
       return
-    let rmId = utils.getId(application.relationshipManager)
-    return rmId === this.getId(this.getMe()).replace(PROFILE, IDENTITY)
+    let myIdentity = this.getId(this.getMe()).replace(PROFILE, IDENTITY)
+    if (application.relationshipManagers)
+      return application.relationshipManagers.some((r) => this.getId(r) === myIdentity)
+    if (application.relationshipManager) {
+      let rmId = utils.getId(application.relationshipManager)
+      return rmId === myIdentity
+    }
   },
   // isVerifier(resource, application) {
   //   if (!this.isEmployee(resource))

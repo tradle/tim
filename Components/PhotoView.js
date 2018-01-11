@@ -111,13 +111,12 @@ class PhotoView extends Component {
       // let cpHeight = coverPhoto.height * width / coverPhoto.width
 
       let coverPhotoUri = coverPhoto.url
-      var coverPhotoSource
+      var coverPhotoSource = { uri: coverPhotoUri, cache: 'force-cache' }
       if (coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0)
-        coverPhotoSource = {uri: coverPhotoUri, isStatic: true}
+        coverPhotoSource.isStatic = true
       // else if (coverPhotoUri.indexOf('..') === 0)
       //   coverPhotoSource = require(coverPhotoUri)
-      else
-        coverPhotoSource = {uri: coverPhotoUri}
+
       var title = utils.getDisplayName(this.props.resource)
               // <Image resizeMode='cover' source={coverPhotoSource} style={{width: width, height: cpHeight}}>
 

@@ -148,8 +148,6 @@ var search = {
           }
           else if (!val  ||  !val.trim().length)
             continue
-        }
-        if (props[p].type === 'string') {
           let len = val.length
           if (val.indexOf('*') === -1)
             op.EQ += `\n   ${p}: "${val}",`
@@ -204,6 +202,20 @@ var search = {
             else {
               op.EQ += `\n   ${p}__id: "${val.id}",`
             }
+          }
+        }
+        else if (props[p].type === 'array') {
+          if (props[p].items.ref) {
+            if (!val.length)
+              continue
+            let s = `${p}__id: [`
+            val.forEach((r, i) => {
+              if (i)
+                s += ', '
+              s += `"${utils.getId(r)}"`
+            })
+            s += ']'
+            inClause.push(s)
           }
         }
       }

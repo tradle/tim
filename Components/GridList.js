@@ -609,7 +609,6 @@ class GridList extends Component {
       return true
     if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== nextState.newContact))
       return true
-        // if (this.state.isConnected !== nextState.isConnected)
     //   if (!this.state.list && !nextState.list)
     //     return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
@@ -1384,7 +1383,7 @@ class GridList extends Component {
       direction: this.direction,
       search: search,
       to: modelName === BOOKMARK ? utils.getMe() : null,
-      filterResource: resource,
+      filterResource: (search  &&  this.state.resource) || resource,
       // from: list.length,
       lastId: utils.getId(list[list.length - 1])
     })

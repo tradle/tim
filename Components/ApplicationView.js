@@ -162,13 +162,12 @@ class ApplicationView extends Component {
     let paddingRight = Platform.OS === 'android' ? 0 : 10
     let iconName = 'ios-person-add-outline'
     let rmBg, icolor
-    hasRM = resource.relationshipManager
-    let rmStyle, rId, meId
+    hasRM = resource.relationshipManager ||  resource.relationshipManagers
+    let rmStyle, isRM
     if (hasRM) {
-      rId = utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE)
-      meId = utils.getId(me)
+      isRM = utils.isRM(resource)
       iconName = 'ios-person'
-      if (rId === meId)
+      if (isRM)
         rmBg = '#7AAAc3'
       else
         rmBg = '#CA9DF2'
@@ -182,7 +181,7 @@ class ApplicationView extends Component {
     }
     let homeStyle = {backgroundColor: '#fff', opacity: 0.9, borderColor: '#7AAAc3', borderWidth: 1}
     let assignRM
-    if (!rId  ||  rId !== meId)
+    if (isRM)
       assignRM = <TouchableOpacity onPress={() => this.assignRM()}>
                     <View style={[platformStyles.menuButtonRegular, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
@@ -228,7 +227,7 @@ class ApplicationView extends Component {
   assignRM() {
     let resource = this.props.resource
     let me = utils.getMe()
-    if (resource.relationshipManager  &&  utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE) === utils.getId(me)) {
+    if (utils.isRM(resource)) {
       Alert.alert(translate('youAreTheRM'))
       return
     }
