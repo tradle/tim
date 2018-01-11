@@ -125,8 +125,8 @@ class TimHome extends Component {
     // var url = LinkingIOS.popInitialURL()
     // if (url)
     //   this._handleOpenURL({url});
-    if (utils.isSimulator())
-      this._handleConnectivityChange(true)
+    // if (utils.isSimulator())
+    //   this._handleConnectivityChange(true)
 
     NetInfo.isConnected.addEventListener(
       'change',
