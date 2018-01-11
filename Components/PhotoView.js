@@ -97,13 +97,12 @@ class PhotoView extends Component {
     coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
     if (coverPhoto) {
       let coverPhotoUri = coverPhoto.url
-      var coverPhotoSource
+      var coverPhotoSource = { uri: coverPhotoUri, cache: 'force-cache' }
       if (coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0)
-        coverPhotoSource = {uri: coverPhotoUri, isStatic: true}
+        coverPhotoSource.isStatic = true
       // else if (coverPhotoUri.indexOf('..') === 0)
       //   coverPhotoSource = require(coverPhotoUri)
-      else
-        coverPhotoSource = {uri: coverPhotoUri}
+
       var title = utils.getDisplayName(this.props.resource)
       let fontSize = title.length < 15 ? 30 : 24
       photoView = (
