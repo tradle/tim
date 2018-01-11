@@ -457,12 +457,12 @@ var Store = Reflux.createStore({
       this._handleConnectivityChange.bind(this)
     );
 
-    // if (utils.isSimulator()) {
-    //   // isConnected always returns false on simulator
-    //   // https://github.com/facebook/react-native/issues/873
-    //   this.isConnected = true
-    // } else {
-      NetInfo.isConnected.fetch().done(
+    if (utils.isSimulator()) {
+      // isConnected always returns false on simulator
+      // https://github.com/facebook/react-native/issues/873
+      this.isConnected = true
+    } else {
+      NetInfo.isConnected.fetch().then(
         (isConnected) => {
           this.isConnected = isConnected
         }
