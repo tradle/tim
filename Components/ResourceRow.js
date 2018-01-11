@@ -605,7 +605,8 @@ class ResourceRow extends Component {
     // if (status !== 'Approved'  &&  status !== 'Denied') {
     let icolor
     let iname
-    if (resource.relationshipManager &&  utils.isRM(resource)) {
+    let hasRM = resource.relationshipManager  ||  resource.relationshipManagers
+    if (hasRM &&  utils.isRM(resource)) {
       // iname = 'md-log-out'
       iname = 'ios-person-add'
       icolor = '#7AAAc3'
@@ -617,8 +618,8 @@ class ResourceRow extends Component {
     }
     else {
       // iname = 'md-log-in'
-      iname = resource.relationshipManager ? 'ios-person-add' : 'ios-person-add-outline'
-      icolor = resource.relationshipManager ? '#CA9DF2' : '#7AAAc3'
+      iname = hasRM ? 'ios-person-add' : 'ios-person-add-outline'
+      icolor = hasRM ? '#CA9DF2' : '#7AAAc3'
     }
     let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
 

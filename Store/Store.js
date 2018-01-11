@@ -444,17 +444,17 @@ var Store = Reflux.createStore({
       this._handleConnectivityChange.bind(this)
     );
 
-    if (utils.isSimulator()) {
-      // isConnected always returns false on simulator
-      // https://github.com/facebook/react-native/issues/873
-      this.isConnected = true
-    } else {
+    // if (utils.isSimulator()) {
+    //   // isConnected always returns false on simulator
+    //   // https://github.com/facebook/react-native/issues/873
+    //   this.isConnected = true
+    // } else {
       NetInfo.isConnected.fetch().done(
         (isConnected) => {
           this.isConnected = isConnected
         }
       );
-    }
+    // }
     // storeUtils.init({db, list, contextIdToResourceId, models})
     this.addModels()
     this.loadModels()
@@ -4675,7 +4675,11 @@ var Store = Reflux.createStore({
           }
           if (!appToUpdate._context)
             appToUpdate._context = returnVal._context
-          appToUpdate.relationshipManager = self._makeIdentityStub(me)
+          // appToUpdate.relationshipManager = self._makeIdentityStub(me)
+
+          if (!appToUpdate.relationshipManagers)
+            appToUpdate.relationshipManagers = []
+          appToUpdate.relationshipManagers.push(self._makeIdentityStub(me))
           self.trigger({action: 'updateRow', resource: appToUpdate })
           self.trigger({action: 'getItem', resource: appToUpdate})
         //   self.dbPut(utils.getId(app), app)
@@ -5621,6 +5625,10 @@ var Store = Reflux.createStore({
     return contexts[0]
   },
   async searchServer(params) {
+    if (!this.client) {
+      Alert.alert(translate('serverIsUnreachable'))
+      return
+    }
     let {direction, first, noTrigger, modelName, application, context, to, filterResource, lastId} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
@@ -5648,6 +5656,7 @@ var Store = Reflux.createStore({
           filterResource._author = myBot[ROOT_HASH]
       }
     }
+
     extend(params, {client: this.client, filterResource: filterResource, noCursorChange: !lastId})
     let result = await graphQL.searchServer(params)
     if (!result) {
@@ -9562,7 +9571,7 @@ var Store = Reflux.createStore({
         message: 'My Customers',
         bookmark: {
           [TYPE]: APPLICATION,
-          relationshipManager: self._makeIdentityStub(me)
+          relationshipManagers: [self._makeIdentityStub(me)]
         },
         from: me
       }

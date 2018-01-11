@@ -163,11 +163,9 @@ class ApplicationView extends Component {
     let iconName = 'ios-person-add-outline'
     let rmBg, icolor
     hasRM = resource.relationshipManager ||  resource.relationshipManagers
-    let rmStyle, rId, meId
+    let rmStyle, isRM
     if (hasRM) {
-      let isRM = utils.isRM(resource)
-      // rId = utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE)
-      // meId = utils.getId(me)
+      isRM = utils.isRM(resource)
       iconName = 'ios-person'
       if (isRM)
         rmBg = '#7AAAc3'
@@ -183,7 +181,7 @@ class ApplicationView extends Component {
     }
     let homeStyle = {backgroundColor: '#fff', opacity: 0.9}
     let assignRM
-    if (!rId  ||  rId !== meId)
+    if (isRM)
       assignRM = <TouchableOpacity onPress={() => this.assignRM()}>
                     <View style={[platformStyles.menuButtonRegular, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
