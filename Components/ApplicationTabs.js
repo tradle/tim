@@ -63,7 +63,7 @@ class ApplicationTabs extends Component {
       propsToShow = Object.keys(itemProps)
 
     let showCurrent = showDetails ? currentMarker : null
-    let detailsTab = <View style={buttonStyles.container} key={this.getNextKey()}>
+    let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
                        <TouchableOpacity onPress={this.showDetails.bind(this)} underlayColor='transparent'>
                          <View style={styles.item}>
                            <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
