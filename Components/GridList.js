@@ -624,7 +624,7 @@ class GridList extends Component {
     return false
   }
 
-  selectResource(resource) {
+  selectResource({resource}) {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, search, callback, bankStyle, navigator, currency } = this.props
@@ -1021,7 +1021,7 @@ class GridList extends Component {
     if (isMessage  &&  resource !== model  &&  !isContext) //isVerification  || isForm || isMyProduct)
       return (<VerificationRow
                 lazy={lazy}
-                onSelect={() => this.selectResource(selectedResource)}
+                onSelect={() => this.selectResource({resource: selectedResource})}
                 key={resource[ROOT_HASH]}
                 modelName={rtype}
                 navigator={navigator}
@@ -1154,7 +1154,7 @@ class GridList extends Component {
                 {cols}
               </Row>
     if (this.props.search)
-      return  <TouchableOpacity  onPress={() => this.selectResource(resource)}>
+      return  <TouchableOpacity  onPress={() => this.selectResource({resource})}>
                 {row}
               </TouchableOpacity>
     else
