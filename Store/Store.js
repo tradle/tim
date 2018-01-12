@@ -9338,7 +9338,6 @@ var Store = Reflux.createStore({
     var noTrigger
     if (pList) {
       noTrigger = true
-      this.addMessagesToChat(utils.getId(fOrg), val)
       org.products = []
       pList.forEach((m) => {
         // HACK for not overwriting Tradle models
@@ -9422,6 +9421,7 @@ var Store = Reflux.createStore({
         })
         return
       }
+      this.addMessagesToChat(utils.getId(fOrg), val)
     }
     else {
       let isMyProduct = model.subClassOf === MY_PRODUCT
@@ -9566,16 +9566,16 @@ var Store = Reflux.createStore({
       me.isEmployee = true
       me.organization = self.buildRef(org)
       self.resetForEmployee(me, org)
-      let bookmark = {
-        [TYPE]: BOOKMARK,
-        message: 'My Customers',
-        bookmark: {
-          [TYPE]: APPLICATION,
-          relationshipManagers: [self._makeIdentityStub(me)]
-        },
-        from: me
-      }
-      await self.onAddChatItem({resource: bookmark, noTrigger: true})
+      // let bookmark = {
+      //   [TYPE]: BOOKMARK,
+      //   message: 'My Customers',
+      //   bookmark: {
+      //     [TYPE]: APPLICATION,
+      //     relationshipManagers: [self._makeIdentityStub(me)]
+      //   },
+      //   from: me
+      // }
+      // await self.onAddChatItem({resource: bookmark, noTrigger: true})
 
       bookmark = {
         [TYPE]: BOOKMARK,
