@@ -9577,7 +9577,7 @@ var Store = Reflux.createStore({
       // }
       // await self.onAddChatItem({resource: bookmark, noTrigger: true})
 
-      bookmark = {
+      let bookmark = {
         [TYPE]: BOOKMARK,
         message: 'All Applications',
         bookmark: {
