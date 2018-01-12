@@ -522,7 +522,7 @@ class ResourceList extends Component {
     return false
   }
 
-  selectResource(resource, action) {
+  selectResource({resource, action}) {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, callback, navigator, bankStyle, serverOffline, prop, currency, officialAccounts } = this.props
@@ -589,18 +589,18 @@ class ResourceList extends Component {
     if (prop) {
       if (me) {
         if  (modelName != PROFILE) {
-          this._selectResource(resource);
+          this._selectResource({resource});
           return
         }
         if (utils.isMe(resource)  ||
            (prop  &&  this.props.resource  &&  utils.isMe(this.props.resource))) {
-          this._selectResource(resource);
+          this._selectResource({resource});
           return;
         }
       }
       else {
         if (this.state.isRegistration) {
-          this._selectResource(resource);
+          this._selectResource({resource});
           return;
         }
       }
@@ -637,56 +637,58 @@ class ResourceList extends Component {
         utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
       }
       if (isOrganization) {
-        if (resource._tour  &&  !resource._noTour) {
-          StatusBar.setHidden(true)
-          navigator.push({
-            title: "",
-            component: TourPage,
-            id: 35,
-            backButtonTitle: null,
-            // backButtonTitle: __DEV__ ? 'Back' : null,
-            passProps: {
-              bankStyle: bankStyle,
-              noTransitions: true,
-              tour: resource._tour,
-              callback: () => {
-                resource._noTour = true
-                resource._noSplash = true
-                Actions.addItem({resource: resource})
-                // resource._noSplash = true
-                this.selectResource(resource, 'replace')
-              }
-            }
-          })
+        if (this.showTourOrSplash({resource, action: action || 'push', callback: this.selectResource}))
           return
-        }
-        if (!resource._noSplash)  {
-          StatusBar.setHidden(true)
-          let splashscreen = resource.style  &&  resource.style.splashscreen
-          if (splashscreen) {
-            let resolvePromise
-            let promise = new Promise(resolve => {
-              navigator.push({
-                title: "",
-                component: SplashPage,
-                id: 36,
-                backButtonTitle: null,
-                passProps: {
-                  splashscreen: splashscreen
-                }
-              })
-              resolvePromise = resolve
-            })
-            // return
-            setTimeout(() => {
-              resolvePromise()
-              resource._noSplash = true
-              Actions.addItem({resource: resource})
-              this.selectResource(resource, 'replace')
-            }, 2000)
-            return
-          }
-        }
+      //   if (resource._tour  &&  !resource._noTour) {
+      //     StatusBar.setHidden(true)
+      //     navigator.push({
+      //       title: "",
+      //       component: TourPage,
+      //       id: 35,
+      //       backButtonTitle: null,
+      //       // backButtonTitle: __DEV__ ? 'Back' : null,
+      //       passProps: {
+      //         bankStyle: bankStyle,
+      //         noTransitions: true,
+      //         tour: resource._tour,
+      //         callback: () => {
+      //           resource._noTour = true
+      //           resource._noSplash = true
+      //           Actions.addItem({resource: resource})
+      //           // resource._noSplash = true
+      //           this.selectResource(resource, 'replace')
+      //         }
+      //       }
+      //     })
+      //     return
+      //   }
+      //   if (!resource._noSplash)  {
+      //     StatusBar.setHidden(true)
+      //     let splashscreen = resource.style  &&  resource.style.splashscreen
+      //     if (splashscreen) {
+      //       let resolvePromise
+      //       let promise = new Promise(resolve => {
+      //         navigator.push({
+      //           title: "",
+      //           component: SplashPage,
+      //           id: 36,
+      //           backButtonTitle: null,
+      //           passProps: {
+      //             splashscreen: splashscreen
+      //           }
+      //         })
+      //         resolvePromise = resolve
+      //       })
+      //       // return
+      //       setTimeout(() => {
+      //         resolvePromise()
+      //         resource._noSplash = true
+      //         Actions.addItem({resource: resource})
+      //         this.selectResource(resource, 'replace')
+      //       }, 2000)
+      //       return
+      //     }
+      //   }
       }
     }
     StatusBar.setHidden(false);
@@ -952,7 +954,7 @@ class ResourceList extends Component {
     );
         // newContact={this.state.newContact}
   }
-  openSharedContextChat(resource) {
+  openSharedContextChat({resource}) {
     let route = {
       // title: translate(utils.getModel(resource.product).value) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
       title: (resource.from.organization || resource.from.title) + '  →  ' + resource.to.organization.title,

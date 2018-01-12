@@ -2,6 +2,8 @@ console.log('requiring HomePageMixin.js')
 'use strict';
 
 import React from 'react'
+import extend from 'extend'
+
 import utils, { translate } from '../utils/utils'
 import constants from '@tradle/constants'
 import QRCodeScanner from './QRCodeScanner'
@@ -9,10 +11,12 @@ import Actions from '../Actions/Actions'
 import ResourceList from './ResourceList'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import MessageList from './MessageList'
-import extend from 'extend'
+import TourPage from './TourPage'
+import SplashPage from './SplashPage'
 import qrCodeDecoder from '@tradle/qr-schema'
 import {
-  Alert
+  Alert,
+  StatusBar
 } from 'react-native'
 
 const debug = require('debug')('tradle:app:HomePageMixin')
@@ -157,6 +161,59 @@ var HomePageMixin = {
         modelName: ORGANIZATION
       }
     })
+  },
+  showTourOrSplash({resource, termsAccepted, action, callback, style}) {
+    let { navigator, bankStyle } = this.props
+    if (resource._tour  &&  !resource._noTour) {
+      StatusBar.setHidden(true)
+      navigator.push({
+        title: "",
+        component: TourPage,
+        id: 35,
+        backButtonTitle: null,
+        // backButtonTitle: __DEV__ ? 'Back' : null,
+        passProps: {
+          bankStyle: style || bankStyle,
+          noTransitions: true,
+          tour: resource._tour,
+          callback: () => {
+            resource._noTour = true
+            resource._noSplash = true
+            Actions.addItem({resource: resource})
+            // resource._noSplash = true
+            callback({resource, termsAccepted, action: 'replace'})
+          }
+        }
+      })
+      return true
+    }
+    if (resource._noSplash)
+      return
+    StatusBar.setHidden(true)
+    let splashscreen = resource.style  &&  resource.style.splashscreen
+    if (!splashscreen)
+      return
+    let resolvePromise
+    let promise = new Promise(resolve => {
+      navigator.push({
+        title: "",
+        component: SplashPage,
+        id: 36,
+        backButtonTitle: null,
+        passProps: {
+          splashscreen: splashscreen
+        }
+      })
+      resolvePromise = resolve
+    })
+    // return
+    setTimeout(() => {
+      resolvePromise()
+      resource._noSplash = true
+      Actions.addItem({resource: resource})
+      callback({resource, termsAccepted, action: 'replace'})
+    }, 2000)
+    return true
   }
 }
 

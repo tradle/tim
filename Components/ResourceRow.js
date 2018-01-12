@@ -386,7 +386,7 @@ class ResourceRow extends Component {
       this.props.changeSharedWithList(id, this.state.sharedWith ? false : true)
     }
     else
-      this.props.onSelect(this.state.resource)
+      this.props.onSelect({resource: this.state.resource})
   }
   formatRow(resource, style) {
     let self = this;

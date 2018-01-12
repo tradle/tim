@@ -35,7 +35,8 @@ const {
 
 const {
   VERIFICATION,
-  FORM
+  FORM,
+  IDENTITY
 } = constants.TYPES
 
 class ApplicationTabs extends Component {
@@ -90,6 +91,8 @@ class ApplicationTabs extends Component {
       if (ENV.hideVerificationsInChat  && ref === VERIFICATION)
         return
       if (ENV.hideProductApplicationInChat  &&  utils.isContext(ref))
+        return
+      if (ref === IDENTITY)
         return
       let propTitle = translate(props[p], model)
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
@@ -162,13 +165,11 @@ class ApplicationTabs extends Component {
                    <View style={{flexDirection: 'row', alignSelf: 'center', marginTop: 100}}>
                     <TouchableOpacity onPress={this.props.approve.bind(this)}>
                     <View style={styles.approve}>
-                      <Icon name='ios-thumbs-up-outline' color='#fff' size={25} style={{marginTop: 10}}/>
                       <Text style={styles.approveText}>{translate('Approve')}</Text>
                     </View>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={this.props.deny.bind(this)}>
                     <View style={styles.deny}>
-                      <Icon name='ios-thumbs-down-outline' color='#7AAAC3' size={25} style={{marginTop: 10}}/>
                       <Text style={styles.denyText}>{translate('Deny')}</Text>
                     </View>
                     </TouchableOpacity>
