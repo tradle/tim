@@ -35,7 +35,8 @@ const {
 
 const {
   VERIFICATION,
-  FORM
+  FORM,
+  IDENTITY
 } = constants.TYPES
 
 class ApplicationTabs extends Component {
@@ -90,6 +91,8 @@ class ApplicationTabs extends Component {
       if (ENV.hideVerificationsInChat  && ref === VERIFICATION)
         return
       if (ENV.hideProductApplicationInChat  &&  utils.isContext(ref))
+        return
+      if (ref === IDENTITY)
         return
       let propTitle = translate(props[p], model)
       var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
