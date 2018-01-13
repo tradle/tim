@@ -833,6 +833,7 @@ var Store = Reflux.createStore({
     debug('network connectivity changed, connected: ' + isConnected)
     this.isConnected = isConnected
     this.trigger({action: 'connectivity', isConnected: isConnected})
+    console.log('_handleConnectivityChange: ' + isConnected)
     if (!meDriver) return
 
     if (isConnected) {
@@ -5035,6 +5036,11 @@ var Store = Reflux.createStore({
   async shareVerification(ver, to, formRequest, shareBatchId) {
     var time = new Date().getTime()
     var toId = utils.getId(to)
+    // if (!this._getItem(ver)) {
+    //   this._setItem(ver)
+    //   ver._sharedWith = []
+    // }
+    // else
     if (!ver._sharedWith) {
       ver._sharedWith = []
       this.addSharedWith(ver, ver.from, ver.time, shareBatchId)
@@ -5381,16 +5387,16 @@ var Store = Reflux.createStore({
       isAggregation: isAggregation
     }
     // Paint splash screen before opening chat only on app start
-    if (params.checkForSplash  &&  to) {
-      let toOrgId = utils.getId(to)
-      if (this._noSplash.indexOf(toOrgId) === -1) {
-        this._noSplash.push(toOrgId)
-        let newTo = utils.clone(to)
-        newTo._noSplash = true
-        this._setItem(toOrgId, newTo)
-        // this.trigger({action: 'list', list: this.searchMessages({modelName: ORGANIZATION}), forceUpdate: true})
-      }
-    }
+    // if (params.checkForSplash  &&  to) {
+    //   let toOrgId = utils.getId(to)
+    //   if (this._noSplash.indexOf(toOrgId) === -1) {
+    //     this._noSplash.push(toOrgId)
+    //     let newTo = utils.clone(to)
+    //     newTo._noSplash = true
+    //     this._setItem(toOrgId, newTo)
+    //     // this.trigger({action: 'list', list: this.searchMessages({modelName: ORGANIZATION}), forceUpdate: true})
+    //   }
+    // }
 
     let hasMore = limit  &&  result.length > limit
     if (loadEarlierMessages || hasMore) {
@@ -6222,7 +6228,8 @@ var Store = Reflux.createStore({
     // await this._loadedResourcesDefer.promise
     var self = this
 
-    var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, checkForSplash} = params
+    // var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, checkForSplash} = params
+    var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop} = params
 // console.time('searchAllMessages')
     var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
     var foundResources = [];
@@ -7900,6 +7907,14 @@ var Store = Reflux.createStore({
       if (props['to']  &&  props['from'])
         this.addLastMessage(value, batch)
     }
+    else if (model.id === ORGANIZATION) {
+      // Avoid race condition and update provider state ASAP
+      let org = this._getItem(value)
+      if ((!org._noTour  &&  value._noTour) ||  (!org._noSplash  &&  value._noSplash)) {
+        this.trigger({action: 'addItem', resource: value})
+        noTrigger = true
+      }
+    }
     var iKey = utils.getId(value) //modelName + '_' + value[ROOT_HASH];
     this.dbBatchPut(iKey, value, batch);
 
@@ -7948,7 +7963,7 @@ var Store = Reflux.createStore({
     }
 
     let self = this
-    db.batch(batch)
+    return db.batch(batch)
     .then(() => {
       return db.get(iKey)
     })
