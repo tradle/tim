@@ -5899,6 +5899,8 @@ var Store = Reflux.createStore({
       extend(mr, rr)
       rr = mr
     }
+    if (!rr.time)
+      rr.time = r._time
 
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
