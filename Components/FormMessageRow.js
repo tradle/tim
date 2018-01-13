@@ -223,7 +223,7 @@ class FormMessageRow extends Component {
 
     let headerStyle = [
       chatStyles.verifiedHeader,
-      noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
+      // noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
       {backgroundColor: isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg}, // opacity: isShared ? 0.5 : 1},
       isMyMessage || isShared ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
     ]
@@ -235,10 +235,16 @@ class FormMessageRow extends Component {
       backgroundColor: 'transparent', // this.props.bankStyle.BACKGROUND_COLOR
     }
     var sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
-    let row = !noContent  &&  <View style={{paddingVertical: 5}}>
-                                {renderedRow}
-                                {sentTo}
-                              </View>
+    let model = utils.getModel(resource[TYPE]).value
+    if (noContent) {
+      let prop = model.properties.time
+      let val = dateformat(new Date(resource[prop.name]), 'mmm d, yyyy')
+      renderedRow = [this.getPropRow(prop, resource, val)]
+    }
+    let row = <View style={{paddingVertical: 5}}>
+                {renderedRow}
+                {sentTo}
+              </View>
     let contextId = this.getContextId(resource)
 
     var ownerPhoto = this.getOwnerPhoto(isMyMessage)
@@ -250,7 +256,7 @@ class FormMessageRow extends Component {
         {ownerPhoto}
         <View style={[{flex:1, width: width}, chatStyles.verificationBody]}>
           <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}]}>
-            <Text style={chatStyles.verificationHeaderText}>{translate(utils.getModel(resource[TYPE]).value) + ' '}
+            <Text style={chatStyles.verificationHeaderText}>{translate(model) + ' '}
               {sealedStatus}
             </Text>
             {arrowIcon}

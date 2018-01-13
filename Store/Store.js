@@ -839,7 +839,8 @@ var Store = Reflux.createStore({
       if (!m.properties.time) {
         m.properties.time = {
           type: 'date',
-          readOnly: true
+          readOnly: true,
+          title: 'Date'
         }
       }
       if (utils.isEnum(m))
@@ -4301,10 +4302,14 @@ var Store = Reflux.createStore({
       });
       return;
     }
-    // fix dates
+    // fix dates and money
     for (let pp in json) {
       if (props[pp]  &&  props[pp].type === 'date')
         json[pp] = new Date(json[pp]).getTime()
+      else if (props[pp]  &&  props[pp].ref === MONEY) {
+        if (typeof json[pp].value === 'string')
+          json[pp].value = parseFloat(json[pp].value)
+      }
     }
     // if (!isSelfIntroduction  &&  !doneWithMultiEntry)
     //   resource = utils.optimizeResource(resource, true)
