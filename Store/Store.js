@@ -816,7 +816,8 @@ var Store = Reflux.createStore({
       if (!m.properties.time) {
         m.properties.time = {
           type: 'date',
-          readOnly: true
+          readOnly: true,
+          title: 'Date'
         }
       }
       if (utils.isEnum(m))
