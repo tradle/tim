@@ -36,7 +36,7 @@ class MyProductMessageRow extends Component {
   }
 
   render() {
-    var resource = this.props.resource;
+    var { resource, application, to, bankStyle } = this.props;
     if (resource[constants.TYPE] === 'tradle.MyTaxesFiledConfirmation')
       return <View/>
     var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
@@ -46,16 +46,16 @@ class MyProductMessageRow extends Component {
     // Check if the provider that issued the MyProduct is the same as the one that
     // the chat user currently viewing it. If not that means that this MyProduct was shared
     // by user
-    let isReadOnlyChat = utils.isReadOnlyChat(this.props.to)
-    if (resource.from.organization  &&  !isReadOnlyChat) {
-      if (utils.getId(resource.from.organization) !== utils.getId(this.props.to))
+    let isReadOnlyChat = utils.isReadOnlyChat(to)
+    if (!application  &&  resource.from.organization  &&  !isReadOnlyChat) {
+      if (utils.getId(resource.from.organization) !== utils.getId(to))
         isMyMessage = true
     }
     var ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
 
-    let addStyle = [chatStyles.verificationBody, {backgroundColor: this.props.bankStyle.productBgColor , borderColor: this.props.bankStyle.confirmationColor}];
-    // let rowStyle = [chatStyles.row,  {backgroundColor: this.props.bankStyle.backgroundColor}];
+    let addStyle = [chatStyles.verificationBody, {backgroundColor: bankStyle.productBgColor , borderColor: bankStyle.confirmationColor}];
+    // let rowStyle = [chatStyles.row,  {backgroundColor: bankStyle.backgroundColor}];
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date}>{val}</Text>
@@ -109,7 +109,8 @@ class MyProductMessageRow extends Component {
         </View>
       </TouchableHighlight>
 
-    var viewStyle = { margin: 1, paddingTop: 7} //, backgroundColor: this.props.bankStyle.BACKGROUND_COLOR }
+
+    var viewStyle = { margin: 1, paddingTop: 7} //, backgroundColor: bankStyle.BACKGROUND_COLOR }
     return (
       <View style={viewStyle} key={this.getNextKey()}>
         {date}
