@@ -10792,13 +10792,14 @@ var Store = Reflux.createStore({
     if (!multiEntryForms)
       return
     if (me.isEmployee) {
-      let formRequests = await this.searchServer({modelName: FORM_REQUEST, limit: 100, context: context, noTrigger: true})
+      let formRequests = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: FORM_REQUEST}, context: context, noTrigger: true })
+      // let formRequests = await this.searchServer({modelName: FORM_REQUEST, limit: 100, context: context, noTrigger: true})
       if (!formRequests  ||  !formRequests.length)
         return
       let lastFormRequest = formRequests.filter((r) => r.form !== PRODUCT_REQUEST)
       if (!lastFormRequest.length)
         return
-      let form = lastFormRequest[0].form
+      let form = lastFormRequest[lastFormRequest.length - 1].form
       if (multiEntryForms.indexOf(form) === -1)
         return
       let m = this.getModel(form)
