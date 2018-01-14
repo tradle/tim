@@ -219,7 +219,7 @@ var utils = {
   },
   getModel(modelName) {
     const model = models ? models[modelName] : null
-    if (!model) debug(`missing model: ${modelName}`)
+    // if (!model) debug(`missing model: ${modelName}`)
     return model
   },
   getDefaultLanguage: Strings.getDefaultLanguage,
