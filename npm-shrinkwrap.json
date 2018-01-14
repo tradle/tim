@@ -357,9 +357,9 @@
       }
     },
     "@tradle/validate-resource": {
-      "version": "2.17.0",
+      "version": "2.17.1",
       "from": "@tradle/validate-resource@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-2.17.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-2.17.1.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
@@ -6226,8 +6226,8 @@
     },
     "react-native-app-intro": {
       "version": "1.1.5",
-      "from": "react-native-app-intro@>=1.1.5 <2.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-app-intro/-/react-native-app-intro-1.1.5.tgz"
+      "from": "pgmemk/react-native-app-intro#114",
+      "resolved": "git://github.com/pgmemk/react-native-app-intro.git#56dba78f0439c2094f405998e77d33b233d258b9"
     },
     "react-native-async-storage-rocks": {
       "version": "2.0.0",
