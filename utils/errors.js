@@ -8,6 +8,8 @@ import {
   setNativeExceptionHandler
 } from 'react-native-exception-handler'
 
+let afterFatalError
+
 setJSExceptionHandler(errorHandler, true)
 setNativeExceptionHandler(errorHandler, true)
 
@@ -23,14 +25,16 @@ function submitLog () {
 async function reporter (error, isFatal) {
   const pre = isFatal ? 'experienced fatal error' : 'experienced error'
   console.error(pre, error, error.stack)
-  if (!__DEV__) {
+  // submit first fatal error, but don't go into infinite loop
+  if (!__DEV__ && !afterFatalError) {
     await submitLog()
   }
 }
 
 async function errorHandler (e, isFatal) {
   await reporter(e, isFatal)
-  if (!__DEV__  &&  isFatal) {
+  if (!afterFatalError && isFatal) {
+    afterFatalError = true
     Alert.alert(
       'Unexpected error occurred',
       'We have reported this to our team! Click Restart App to restart the app!',
