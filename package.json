@@ -133,7 +133,7 @@
     "react-native-accordion": "github:mvayngrib/react-native-accordion#ad6ea87",
     "react-native-actionsheet": "^2.0.3",
     "react-native-animatable": "github:oblador/react-native-animatable#d72c092",
-    "react-native-app-intro": "github:pgmemk/react-native-app-intro#114",
+    "react-native-app-intro": "github:tradle/react-native-app-intro",
     "react-native-carousel": "github:tradle/react-native-carousel",
     "react-native-collapsible": "^0.8.0",
     "react-native-datepicker": "github:pgmemk/react-native-datepicker#ce456393",
