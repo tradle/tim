@@ -73,7 +73,7 @@ class TourPage extends Component {
 
   action() {
     let { callback, navigator, noTransitions } = this.props
-    if (!utils.isWeb()  &&  !noTransitions)
+    if ((!utils.isWeb()  &&  !noTransitions) ||  !callback)
       navigator.pop()
     if (callback)
       callback()
