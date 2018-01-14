@@ -5700,6 +5700,7 @@ var Store = Reflux.createStore({
         }
       })
 
+      contextsResult = contextsResult.filter(val => val)
       if (contextsResult) {
         contexts = contextsResult.map(({ node }) => this.convertToResource(node))
         list.forEach((r) => {
@@ -5712,8 +5713,15 @@ var Store = Reflux.createStore({
             r._context = context[0]
             this.addVisualProps(r._context)
           }
-          let id = utils.makeId(PROFILE, r.applicant.id.split('_')[1])
+          let id = utils.getId(r.applicant).replace(IDENTITY, PROFILE)
           let applicant = this._getItem(id)
+          if (r.applicantName) {
+            if (applicant.formatted.charAt(0) === '[') {
+              applicant.formatted = r.applicantName
+              db.put(id, applicant)
+            }
+            return
+          }
           if (applicant) {
             if (applicant.organization)
               r.applicant.title = applicant.organization.title

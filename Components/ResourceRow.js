@@ -626,7 +626,7 @@ class ResourceRow extends Component {
     let rmIcon = <View style={{flexDirection: 'column', justifyContent: 'center'}}>
                    {icon}
                  </View>
-    let aTitle = resource.applicant.title
+    let aTitle = resource.applicantName || resource.applicant.title
     let applicant
     if (aTitle)
       applicant = <Text style={styles.applicant}>{aTitle}</Text>
