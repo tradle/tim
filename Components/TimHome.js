@@ -30,7 +30,6 @@ import MessageList from './MessageList'
 import extend from 'extend'
 import utils, { translate } from '../utils/utils'
 import Reflux from 'reflux'
-import TourPage from './TourPage'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import reactMixin from 'react-mixin'
@@ -661,7 +660,6 @@ class TimHome extends Component {
       return
     // let resource = resource
     // if (resource._tour  &&  !resource._noTour) {
-    //   if (resource._tour  &&  !resource._noTour) {
     //     StatusBar.setHidden(true)
     //     navigator.push({
     //       title: "",

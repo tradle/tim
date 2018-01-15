@@ -8108,8 +8108,8 @@
     },
     "react-native-app-intro": {
       "version": "1.1.5",
-      "from": "pgmemk/react-native-app-intro#114",
-      "resolved": "git://github.com/pgmemk/react-native-app-intro.git#56dba78f0439c2094f405998e77d33b233d258b9"
+      "from": "tradle/react-native-app-intro",
+      "resolved": "git://github.com/tradle/react-native-app-intro.git#5323d2764d3e0e2093bcfa3d345817b6dbace752"
     },
     "react-native-button": {
       "version": "1.8.2",

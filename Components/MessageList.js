@@ -771,7 +771,7 @@ class MessageList extends Component {
         }
       }
     }
-    let isContext = utils.isContext(resource[TYPE])
+    let isContext = resource  &&  utils.isContext(resource[TYPE])
     if (!content) {
       let isAllMessages = model.id === MESSAGE
 

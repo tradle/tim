@@ -198,6 +198,7 @@ class GridList extends Component {
     this.numberOfPages = 0
     this.offset = 0
     this.contentHeight = 0
+    this._loadMoreContentAsync = debounce(this._loadMoreContentAsync.bind(this), 200)
   }
   done() {
     let orgs = []
@@ -662,8 +663,9 @@ class GridList extends Component {
     if (isContact)
       title = resource.firstName
     else if (isApplication) {
-      if (resource.applicant.title)
-        title = resource.applicant.title  + '  →  ' + me.organization.title
+      let aTitle = resource.applicantName || resource.applicant.title
+      if (aTitle)
+        title = aTitle  + '  →  ' + me.organization.title
       else
         title = me.organization.title
     }
