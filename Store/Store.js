@@ -5789,19 +5789,19 @@ var Store = Reflux.createStore({
           }
           let id = utils.getId(r.applicant).replace(IDENTITY, PROFILE)
           let applicant = this._getItem(id)
-          if (r.applicantName) {
-            if (applicant.formatted.charAt(0) === '[') {
-              applicant.formatted = r.applicantName
-              db.put(id, applicant)
-            }
-            return
-          }
-          if (applicant) {
-            if (applicant.organization)
-              r.applicant.title = applicant.organization.title
-            else
-              r.applicant.title = utils.getDisplayName(applicant)
-          }
+          if (applicant) {
+            if (r.applicantName) {
+              if (applicant.formatted.charAt(0) === '[') {
+                applicant.formatted = r.applicantName
+                db.put(id, applicant)
+              }
+              return
+            }
+            if (applicant.organization)
+              r.applicant.title = applicant.organization.title
+            else
+              r.applicant.title = utils.getDisplayName(applicant)
+          }
         })
       }
     }
