@@ -9639,19 +9639,18 @@ var Store = Reflux.createStore({
     this.addVisualProps(val)
     // if (!switchToContext  &&  isFormRequest  &&  context  &&  context._startForm)
     //   switchToContext = true
-    switchToContext = false
-    if (!noTrigger  &&  switchToContext) {
-      Alert.alert(
-        `The application for ${utils.makeModelTitle(resource.product)} was started by another employee`,
-        'Do you want to switch to it and continue from there?',
-        [
-          {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-          {text: translate('Ok'),     onPress: () => switchToChatContext(context, val.from)},
-        ]
-      )
-      // noTrigger = true
-    }
+    // if (!noTrigger  &&  switchToContext) {
+    //   Alert.alert(
+    //     `The application for ${utils.makeModelTitle(resource.product)} was started by another employee`,
+    //     'Do you want to switch to it and continue from there?',
+    //     [
+    //       {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+    //       {text: translate('Ok'),     onPress: () => switchToChatContext(context, val.from)},
+    //     ]
+    //   )
+    //   // noTrigger = true
     // }
+    // // }
     return noTrigger
 
     async function switchToChatContext(context, to) {
