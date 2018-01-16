@@ -196,10 +196,10 @@ class FormMessageRow extends Component {
                : <View/>
 
     let renderedRow = []
+    let isMyMessage = this.isMyMessage()
     let ret = this.formatRow(isMyMessage || isShared, renderedRow)
     let noContent = !hasSentTo &&  !renderedRow.length
 
-    let isMyMessage = this.isMyMessage()
     let isShared = this.isShared()
     // let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
 
