@@ -31,6 +31,8 @@ import reactMixin from 'react-mixin'
 import equal from 'deep-equal'
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
+import debounce from 'debounce'
+
 import MessageView from './MessageView'
 import MessageRow from './MessageRow'
 import MyProductMessageRow from './MyProductMessageRow'
@@ -107,11 +109,12 @@ class MessageList extends Component {
       hasProducts: props.resource  &&  this.hasProducts(props.resource),
       allLoaded: false
     }
+    this.onLoadEarlierMessages = debounce(this.onLoadEarlierMessages.bind(this), 200)
   }
   hasChatContext() {
     let { resource, allContexts } = this.props
     let application = this.state.application || this.props.application
-    let context = this.state.context || this.props.context  ||  (application && application._context)
+    let context = this.state.context || this.props.context  ||  (application && application._context) || this.state.currentContext
     if (!context)
       context = utils.isContext(resource)  &&  resource
 
@@ -126,6 +129,7 @@ class MessageList extends Component {
       let isChattingWithPerson = resource[TYPE] === PROFILE
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return false
+      return true
     }
     // end HACK
     // No need to show context if provider has only one product and no share context
@@ -430,15 +434,35 @@ class MessageList extends Component {
     if (action === 'addVerification') {
       if (originatingMessage  &&  originatingMessage.verifiers)  {
         let docType = utils.getId(resource.document).split('_')[0]
-        this.state.verifiedByTrustedProvider = originatingMessage.form === docType
-                                             ? resource
-                                             : null
+        this.state.verifiedByTrustedProvider = originatingMessage.form === docType && resource
       }
       else
         this.state.verifiedByTrustedProvider = null
     }
+    let me = utils.getMe()
+    if (me.isEmployee  && rtype === FORM_REQUEST && !resource._documentCreated) {
+      let rcontext = resource._context
+      if (rcontext  &&  this.state.allContexts) {
+        let meApplying = rcontext.from.organization  &&  rcontext.from.organization.id === me.organization.id
+        if (meApplying) {
+          Alert.alert(
+            `The application for ${utils.makeModelTitle(resource.product)} was started by another employee`,
+            'Do you want to switch to it and continue from there?',
+            [
+              {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+              {text: translate('Ok'),     onPress: () => this.switchToChatContext(rcontext, resource.from)},
+            ]
+          )
+        }
+      }
+    }
     // Actions.list(actionParams)
   }
+  switchToChatContext(context, to) {
+    this.setState({allContexts: false})
+    Actions.list({action: 'list', modelName: MESSAGE, to: this.props.resource, context: context, switchToContext: true})
+  }
+
   hasProducts(resource) {
     return resource.products && resource.products.length
   }
@@ -775,7 +799,7 @@ class MessageList extends Component {
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={loadEarlierMessages}
-        onLoadEarlierMessages={this.onLoadEarlierMessages.bind(this)}
+        onLoadEarlierMessages={this.onLoadEarlierMessages}
         messages={list}
         // messageSent={sendResource}
         // messageSentStatus={this.state.sendStatus}
