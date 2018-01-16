@@ -1396,7 +1396,7 @@ var Store = Reflux.createStore({
         if (utils.isReadOnlyChat(r))   //  &&  r._readOnly)
           this.addMessagesToChat(utils.getId(r.from), r, true)
         if (r.contextId)
-          contextIdToResourceId[r.contextId] = utils.getId(r)
+          contextIdToResourceId[r.contextId] = r
       }
       else  if (r.to) { // remove
         let fromId = utils.getId(r.from)
@@ -2547,13 +2547,20 @@ var Store = Reflux.createStore({
     this.configProvider(sp, org)
     this.resetForEmployee(me, org)
     batch.push({type: 'put', key: okey, value: org})
-    this._setItem(okey, org)
 
-    list[okey].value._online = true
+    org._online = true
     if (sp.style) {
-      this._getItem(okey).style = sp.style
+      org.style = sp.style
+      let logo = sp.style.logo
+      if (logo) {
+        if (!org.photos)
+          org.photos = [logo]
+        else if (org.photos[0].url !== logo.url)
+          org.photos.splice(0, 0, logo)
+      }
       // sp.style.splashscreen = 'https://s3.amazonaws.com/tradle-public-images/aviva.html'
     }
+    this._setItem(okey, org)
     if (!list[ikey]) {
       var profile = {
         [TYPE]: PROFILE,
@@ -2883,7 +2890,7 @@ var Store = Reflux.createStore({
     var context
     if (r._context) {
       rr._context = r._context
-      context = this._getItem(r._context) || r._context
+      context = this.findContext(r._context)
     }
     rr[IS_MESSAGE] = true
 
@@ -2967,7 +2974,7 @@ var Store = Reflux.createStore({
       rr[ROOT_HASH] = r[ROOT_HASH] = rr[CUR_HASH] = r[CUR_HASH] = hash
       if (isContext) {
         rr._context = r._context = {id: utils.getId(r), title: r.requestFor}
-        contextIdToResourceId[rr.contextId] = utils.getId(rr)
+        contextIdToResourceId[rr.contextId] = rr
 
         self.addLastMessage(r, batch)
       }
@@ -3238,7 +3245,7 @@ var Store = Reflux.createStore({
       let contextId = context.contextId  || this._getItem(context).contextId
       // let contextId = this._getItem(context).contextId
       if (!contextId) {
-        findContextId(utils.getId(context))
+        this.findContextId(utils.getId(context))
       }
       if (contextId)
         sendParams.other.context = contextId
@@ -3257,13 +3264,29 @@ var Store = Reflux.createStore({
       sendParams.to = { permalink: hash }
     }
     return sendParams
-    function findContextId(resourceId) {
-      for (let id in contextIdToResourceId) {
-        if (contextIdToResourceId[id] === resourceId)
-          return id
-      }
+  },
+  findContextId(resourceId) {
+    for (let id in contextIdToResourceId) {
+      let rid = utils.getId(contextIdToResourceId[id])
+      if (rid === resourceId)
+        return id
     }
-   },
+  },
+  findContext(resourceOrId) {
+    let rId
+    if (typeof resourceOrId === 'object') {
+      if (!resourceOrId.id)
+        return resourceOrId
+      rId = resourceOrId.id
+    }
+    else
+      rId = resourceOrId
+    let cId = this.findContextId(rId)
+    if (cId)
+      return contextIdToResourceId[cId]
+    else
+      return this._getItem(rId)
+  },
 
   // Every chat has it's own messages array where
   // all the messages present in order they were received
@@ -3627,7 +3650,7 @@ var Store = Reflux.createStore({
         r._verifiedBy.photo = verifiedBy.photos[0]
     }
     if (r._context  &&  !utils.isContext(r[TYPE])) {
-      let c = this._getItem(r._context)
+      let c = this.findContext(r._context)
       if (c)
         r._context = c
     }
@@ -4564,7 +4587,7 @@ var Store = Reflux.createStore({
 
         let returnValKey = utils.getId(returnVal)
         if (isContext)
-          contextIdToResourceId[returnVal.contextId] = returnValKey
+          contextIdToResourceId[returnVal.contextId] = returnVal
 
         if (!returnVal._context  &&  utils.isContext(rModel)) {
           let {requestFor, product} = returnVal
@@ -5335,17 +5358,19 @@ var Store = Reflux.createStore({
     if (!this.readAllOnce) {
       this.readAllOnce = true
     }
-    let {to, context, loadEarlierMessages, allLoaded, spinner,
-         isForgetting, limit, listView, _readOnly, gatherForms} = params
+    let {to, context, loadEarlierMessages, allLoaded, spinner, switchToContext,
+         isForgetting, limit, listView, _readOnly, gatherForms, lastId} = params
     let shareableResources, result, retParams
 
     if (me.isEmployee  &&  meta.id === MESSAGE  &&  context) {
       let myBot = this.getRepresentative(me.organization)
       result = await this.searchServer({
-        noTrigger: true,
+        noTrigger: switchToContext ? false : true,
         modelName,
         context: context,
-        to: to
+        to: to,
+        lastId: lastId,
+        direction: loadEarlierMessages ? 'up' : 'down'
       })
       // return result
     }
@@ -5582,8 +5607,11 @@ var Store = Reflux.createStore({
       }
     }
     retParams.first = first
-    if (context)
+    if (context) {
       retParams.context = context
+      if (switchToContext)
+        retParams.switchToContext = switchToContext
+    }
     if (shareableResources)
       retParams.shareableResources = shareableResources
     if (prop)
@@ -5715,14 +5743,14 @@ var Store = Reflux.createStore({
           }
           let id = utils.getId(r.applicant).replace(IDENTITY, PROFILE)
           let applicant = this._getItem(id)
-          if (r.applicantName) {
-            if (applicant.formatted.charAt(0) === '[') {
-              applicant.formatted = r.applicantName
-              db.put(id, applicant)
-            }
-            return
-          }
           if (applicant) {
+            if (r.applicantName) {
+              if (applicant.formatted.charAt(0) === '[') {
+                applicant.formatted = r.applicantName
+                db.put(id, applicant)
+              }
+              return
+            }
             if (applicant.organization)
               r.applicant.title = applicant.organization.title
             else
@@ -5738,7 +5766,7 @@ var Store = Reflux.createStore({
   },
   async getChat(params) {
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
-    let { application, context, to, noTrigger, filterResource, switchToContext } = params
+    let { application, context, to, noTrigger, filterResource, switchToContext, direction } = params
     let contextId
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
@@ -5782,6 +5810,7 @@ var Store = Reflux.createStore({
       client: this.client,
       context: contextId,
       filterResource: filterResource,
+      direction: direction,
       author,
       recipient,
     })
@@ -5799,6 +5828,8 @@ var Store = Reflux.createStore({
       if (!response ||  !Array.isArray(response))
         continue
       for (let i=0; i<2; i++) {
+        if (!response[i])
+          continue
         let list = response[i].data[table]
         if (list.edges  &&  list.edges.length) {
           list.edges.forEach(li => {
@@ -5810,7 +5841,17 @@ var Store = Reflux.createStore({
               return
             if (!rr._context)
               rr._context = context
-            if (li.node.originalSender === me[ROOT_HASH]) {
+            if (typeof li.node._inbound != 'undefined') {
+              if (li.node._inbound) {
+                rr._inbound = true
+                rr._outbound = false
+              }
+              else {
+                rr._outbound = true
+                rr._inbound = false
+              }
+            }
+            else if (li.node.originalSender === me[ROOT_HASH]) {
               rr._outbound = true
               rr._inbound = false
             }
@@ -5867,9 +5908,9 @@ var Store = Reflux.createStore({
   convertMessageToResource(msg) {
     let r = this.convertToResource(msg.object)
     if (msg.context) {
-      let cId = contextIdToResourceId[msg.context]
-      if (cId)
-        r._context = this._getItem(cId)
+      let context = contextIdToResourceId[msg.context]
+      if (context)
+        r._context = context
     }
     let recipientLink = msg._recipient
     let recipientId = utils.makeId(PROFILE, recipientLink)
@@ -6445,7 +6486,7 @@ var Store = Reflux.createStore({
     extend(r, obj)
     this._setItem(rId, r)
     if (r._context  &&  !utils.isContext(r[TYPE])) {
-      let rcontext = this._getItem(r._context)
+      let rcontext = this.findContext(r._context)
       if (!rcontext) {
         let rcontextId = utils.getId(r._context)
         rcontext = refsObj[rcontextId]
@@ -8943,8 +8984,9 @@ var Store = Reflux.createStore({
           let isReadOnlyChat
           let context
           if (val._context) {
-            context = this._getItem(val._context)
-            isReadOnlyChat = utils.isReadOnlyChat(context)
+            context = this.findContext(val._context)
+            if (context)
+              isReadOnlyChat = utils.isReadOnlyChat(context)
           }
           else
             isReadOnlyChat = utils.isReadOnlyChat(val)
@@ -8997,7 +9039,7 @@ var Store = Reflux.createStore({
         var fid = this._getItem(val.from)
         let productToForms = await this.gatherForms(fid, val._context)
         if (val._context)
-          val._context = this._getItem(val._context)
+          val._context = this.findContext(val._context)
         let shareables = await this.getShareableResources({foundResources: [val], to: val.from})
         this.trigger({action: 'addItem', resource: val, shareableResources: shareables, productToForms: productToForms})
       }
@@ -9196,41 +9238,63 @@ var Store = Reflux.createStore({
       }
     }
     let contextId, context
-    let switchToContext
     if (obj.object  &&  obj.object.context) {
-      contextId = contextIdToResourceId[obj.object.context]
-      if (!contextId) {
+      context = contextIdToResourceId[obj.object.context]
+      if (context)
+        contextId = utils.getId(context)
+      else
         // Original request was made by another employee
         // if (me.isEmployee) {
         context = await this.getContext(obj.object.context, val)
-        if (context) {
-          if (me.isEmployee  &&  isFormRequest  &&  val.product  && context.to.organization.id === me.organization.id) {
+      // if (context) {
+      //   if (me.isEmployee  &&  isFormRequest  &&  val.product  &&  context.from.organization  && context.from.organization.id === me.organization.id) {
+      //     let pModel = this.getModel(val.product)
+      //     let forms = pModel.forms
+      //     context._startForm = val.form
+      //     switchToContext = true
+      //     // Alert.alert(
+      //     //   'The application for `${}` was started by another employee',
+      //     //   'Do you want to switch to it and continue from there?',
+      //     //   [
+      //     //     {text: translate('Ok'),
+      //     //     onPress: () => {
+      //     //       // this.trigger({action: 'messageList', context: context, to: context.to, search: true})
+      //     //     }},
+      //     //     {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+      //     //   ]
+      //     // )
+      //   }
+      //   contextId = utils.getId(context)
+      //   contextIdToResourceId[obj.object.context] = context
+      //   ///
+      //   // this._setItem(contextId, context)
+      //   // this.dbBatchPut(contextId, context, batch)
+      //   // this.addMessagesToChat(utils.getId(fOrg || utils.getId(from)), context)
+      //   ///
+      //   val._context = this.buildRef(context)
+      // }
+      if (context) {
+        if (me.isEmployee  &&  isFormRequest  &&  val.product) {
+          // Someone is applying to my provider
+          let meApplying = context.from.organization  &&  context.from.organization.id === me.organization.id
+          let meServing = context.to.organization.id === me.organization.id
+          if (meApplying  ||  meServing) {
             let pModel = this.getModel(val.product)
             let forms = pModel.forms
             context._startForm = val.form
-            switchToContext = true
-            // Alert.alert(
-            //   'The application for `${}` was started by another employee',
-            //   'Do you want to switch to it and continue from there?',
-            //   [
-            //     {text: translate('Ok'),
-            //     onPress: () => {
-            //       // this.trigger({action: 'messageList', context: context, to: context.to, search: true})
-            //     }},
-            //     {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-            //   ]
-            // )
+            contextId = utils.getId(context)
+            contextIdToResourceId[obj.object.context] = context
+            // if (meServing) {
+            //   this._setItem(contextId, context)
+            //   this.dbBatchPut(contextId, context, batch)
+            //   this.addMessagesToChat(utils.getId(fOrg || utils.getId(from)), context)
+            // }
+            val._context = this.buildRef(context)
           }
-          contextId = utils.getId(context)
-          contextIdToResourceId[obj.object.context] = utils.getId(context)
-          ///
-          this._setItem(contextId, context)
-          this.dbBatchPut(contextId, context, batch)
-          this.addMessagesToChat(utils.getId(fOrg || utils.getId(from)), context)
-          ///
-          val._context = this.buildRef(context)
         }
       }
+
+
       // let context = this._getItem(contextId)
       // let r = await meDriver.objects.get({link: context[CUR_HASH], body: false})
       // contextId = utils.makeId(context)
@@ -9575,9 +9639,10 @@ var Store = Reflux.createStore({
     this.addVisualProps(val)
     // if (!switchToContext  &&  isFormRequest  &&  context  &&  context._startForm)
     //   switchToContext = true
+    switchToContext = false
     if (!noTrigger  &&  switchToContext) {
       Alert.alert(
-        `The application for ${utils.makeModelTitle(val.product)} was started by another employee`,
+        `The application for ${utils.makeModelTitle(resource.product)} was started by another employee`,
         'Do you want to switch to it and continue from there?',
         [
           {text: translate('cancel'), onPress: () => console.log('Canceled!')},
@@ -9638,30 +9703,57 @@ var Store = Reflux.createStore({
       await self.dbPut(meId, me)
     }
   },
+  // async getContext(contextId, val) {
+  //   let context, contexts
+  //   if (me.isEmployee) {
+  //     let myOrgRep = this.getRepresentative(me.organization)
+  //     // let msg = await this.searchServer({modelName: MESSAGE, noTrigger: true, filterResource: {contextId: contextId}})
+  //     contexts = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contextId}})
+  //   }
+  //   else {
+  //     contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
+  //     if (contexts)
+  //       contexts = contexts.filter((c) => c.contextId === contextId)
+  //   }
+  //   if (contexts  &&  contexts.length) {
+  //     // let context = contexts.filter((r) => r.from.id === r.to.id)[0]
+  //     // let cr = await this.searchServer({
+  //     //   modelName: MESSAGE,
+  //     //   noTrigger: true,
+  //     //   to: this._getItem(val.from),
+  //     //   filterResource: {object___link: context[CUR_HASH], context: context.contextId}
+  //     // })
+  //     context = contexts[0]
+  //     context.from = utils.clone(val.from)
+  //     contextIdToResourceId[contextId] = context
+  //   }
+  //   return context
+  // },
   async getContext(contextId, val) {
-    let context, contexts
+    let context
     if (me.isEmployee) {
       let myOrgRep = this.getRepresentative(me.organization)
       // let msg = await this.searchServer({modelName: MESSAGE, noTrigger: true, filterResource: {contextId: contextId}})
-      contexts = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contextId}})
+      let contexts = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contextId}})
+      let meId = utils.getId(me)
+      let botId = utils.getId(utils.getId(this.getRepresentative(me.organization)))
+
+      let meContext = contexts.filter((c) => c.from.id === meId)
+      if (!meContext.length)
+        meContext = contexts.filter((c) => c.from.id === botId)
+
+      context = meContext  &&  meContext[0] ||  contexts[0]
+      context.to = utils.clone(val.from)
+      this.addVisualProps(context)
     }
     else {
-      contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
+      let contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
       if (contexts)
         contexts = contexts.filter((c) => c.contextId === contextId)
-    }
-    if (contexts  &&  contexts.length) {
-      // let context = contexts.filter((r) => r.from.id === r.to.id)[0]
-      // let cr = await this.searchServer({
-      //   modelName: MESSAGE,
-      //   noTrigger: true,
-      //   to: this._getItem(val.from),
-      //   filterResource: {object___link: context[CUR_HASH], context: context.contextId}
-      // })
       context = contexts[0]
       context.from = utils.clone(val.from)
-      contextIdToResourceId[contextId] = utils.getId(context)
     }
+    contextIdToResourceId[contextId] = context
     return context
   },
   async changeName(val, fr) {
@@ -10776,6 +10868,10 @@ var Store = Reflux.createStore({
   async _getItemFromServer(id) {
     if (typeof id !== 'string')
       id = utils.getId(id)
+    if (!this.client) {
+      debugger
+      return
+    }
     try {
       let result = await graphQL._getItem(id, this.client)
       if (result) {
@@ -10794,6 +10890,11 @@ var Store = Reflux.createStore({
   async gatherForms(to, context) {
     if (!context)
       return
+    if (context.id) {
+      let contextId = this.findContextId(context.id)
+      if (contextId)
+        context = contextIdToResourceId[contextId]
+    }
     let product = context.requestFor
     let productM = this.getModel(product)
     let multiEntryForms = productM.multiEntryForms
