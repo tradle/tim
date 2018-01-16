@@ -115,7 +115,7 @@ class MessageList extends Component {
     if (!context)
       context = utils.isContext(resource)  &&  resource
 
-    if (!context  ||  context.product === REMEDIATION)
+    if (!context  ||  context.requestFor === REMEDIATION)
       return false
 
     // HACK - needs rewrite
@@ -736,7 +736,9 @@ class MessageList extends Component {
     let { modelName, resource, bankStyle, navigator, originatingMessage, isAggregation } = this.props
     let application = this.state.application ||  this.props.application
     let { list, noLoadingIndicator, isLoading, context, isConnected, isForgetting, allLoaded,
-          onlineStatus, loadEarlierMessages, customStyle, allContexts } = this.state
+          onlineStatus, loadEarlierMessages, customStyle, allContexts, currentContext } = this.state
+    if (currentContext)
+      context = currentContext
     let model = utils.getModel(modelName).value;
     let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
     let bgStyle = {}
@@ -755,11 +757,12 @@ class MessageList extends Component {
     if (!list || !list.length) {
       if (application  ||  navigator.isConnected  &&  resource[TYPE] === ORGANIZATION) {
         if (isLoading) {
-          let menuBtn = !hideTextInput /*this.hasMenuButton() */ && (
-            <View style={styles.footer}>
-              {this.paintMenuButton()}
-            </View>
-          )
+          let menuBtn
+          // let menuBtn = !hideTextInput /*this.hasMenuButton() */ && (
+          //   <View style={styles.footer}>
+          //     {this.paintMenuButton()}
+          //   </View>
+          // )
 
           content = <View style={{flex: 1}}>
                       <View style={[platformStyles.container, bgStyle]}>

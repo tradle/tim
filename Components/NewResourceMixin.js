@@ -1133,9 +1133,9 @@ var NewResourceMixin = {
     let help = this.getHelp(prop)
 
     const options = [
-        { value: 'true', customIcon: <Icon size={30} color='#91D52A' name='ios-checkmark-circle' backgroundColor='transparent' />},
-        { value: 'null', customIcon: <Icon size={30} color='#cccccc' name='ios-radio-button-on' />},
-        { value: 'false', customIcon: <Icon size={30} color='deeppink' name='ios-close-circle'/> },
+        { value: 'true', customIcon: <Icon size={30} color='#000' name='ios-checkmark' />},
+        { value: 'null', customIcon: <Icon size={30} color='#000' name='ios-radio-button-off' /> },
+        { value: 'false', customIcon: <Icon size={30} color='#000' name='ios-close' /> },
     ];
    // const options = [
    //  { label: 'Y', value: 'true' },

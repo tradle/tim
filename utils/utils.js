@@ -906,8 +906,8 @@ var utils = {
       if (!me.isEmployee  ||  !to.organization  ||  utils.getId(me.organization) !== utils.getId(to.organization))
         isReadOnly = true
     }
-
-    if (isReadOnly || !context  || (resource[TYPE] !== FORM_ERROR  &&   resource[TYPE] !== FORM_REQUEST))
+    let isContext = utils.isContext(resource)
+    if (isReadOnly || (!context && !isContext)  || (resource[TYPE] !== FORM_ERROR  &&   resource[TYPE] !== FORM_REQUEST))
       return isReadOnly
     // Form error can be used only by context originating contact
     // return !isReadOnly  &&  context
