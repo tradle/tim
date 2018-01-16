@@ -366,7 +366,7 @@ var search = {
                 // # _author: "3c67687a96fe59d8f98b1c90cc46f943b938d54cda852b12fb1d43396e28978a"
                 // # _inbound: false
                 // # _recipient: ${hash}
-  async getChat(params) {
+  async getChat1(params) {
     let { author, recipient, client, context, filterResource } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
     let contextVar = filterResource || context ? '' : '($context: String)'
@@ -381,11 +381,14 @@ var search = {
             property: time
             desc:true
           }
-        ) {
+        )
+        {
+          pageInfo { endCursor }
           edges {
             node {
               _author
               _recipient
+              _inbound
               originalSender
               object
               context
@@ -523,6 +526,79 @@ var search = {
       // }
       // // result.sort((a, b) => a.time - b.time)
       // return result
+    } catch (err) {
+      debugger
+    }
+
+  },
+  async getChat(params) {
+    let { author, recipient, client, context, filterResource } = params
+    let table = `rl_${MESSAGE.replace(/\./g, '_')}`
+    let contextVar = filterResource || context ? '' : '($context: String)'
+    let queryHeader =
+       `query ${contextVar} {
+          ${table} (
+          filter: {
+       `
+    let queryFooter = `
+          }
+          orderBy:{
+            property: time
+            desc:true
+          }
+        )
+        {
+          pageInfo { endCursor }
+          edges {
+            node {
+              _author
+              _recipient
+              _inbound
+              originalSender
+              object
+              context
+            }
+          }
+        }
+      }`
+
+
+    let eq = `
+            EQ: {
+            `
+    if (author)
+      eq += `              _counterparty: "${author}"\n`
+
+    let filter = ''
+    if (filterResource) {
+      for (let p in filterResource) {
+        filter += '             ' + p + ': ' + `"${filterResource[p]}"\n`
+      }
+    }
+    eq += filter
+    if (context)
+      eq += `             context: "${context}"`
+    eq += `
+            },
+          `
+    let neq = ''
+    if (!context  &&  !filterResource) {
+      context = null
+      neq = `
+            NEQ: {
+              context: $context
+            }
+            `
+    }
+
+    let query = queryHeader + eq + neq + queryFooter
+    try {
+      let result = await client.query({
+          fetchPolicy: 'network-only',
+          query: gql(`${query}`),
+          variables: filterResource || context ? null : {context: context}
+        })
+      return [result, null]
     } catch (err) {
       debugger
     }
