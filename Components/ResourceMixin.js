@@ -308,7 +308,7 @@ var ResourceMixin = {
               </View>
       }
       else {
-        if (modelName === APPLICATION  &&  pMeta.name === 'requestFor')
+        if (modelName === APPLICATION  &&  pMeta.range  &&  pMeta.range)
           val = utils.makeModelTitle(val)
         val = <Text style={[styles.description]}>{val}</Text>;
       }

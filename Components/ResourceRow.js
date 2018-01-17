@@ -571,8 +571,9 @@ class ResourceRow extends Component {
   applicationRow(resource, style) {
     let model = utils.getModel(resource[TYPE] || resource.id).value;
     let m = utils.getModel(resource.requestFor)
-    if (!m)
-      return <View/>
+    // if (!m)
+    //   return <View/>
+
     let props = model.properties
     // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
     let color, dateCompleted, dateEvaluated, dateStarted
@@ -634,7 +635,7 @@ class ResourceRow extends Component {
     let formsCount, progressBar
     let formTypes = []
     let progress = 0
-    if (resource.forms) {
+    if (m  &&  resource.forms) {
       resource.forms.forEach((item) => {
         let itype = utils.getType(item.id)
         if (formTypes.indexOf(itype) === -1)
@@ -660,7 +661,7 @@ class ResourceRow extends Component {
     return  <View>
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
-                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{translate(m.value)}</Text>
+                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{m ? translate(m.value) : utils.makeModelTitle(resource.requestFor)}</Text>
                   {formsCount}
                 </View>
                 {applicant}

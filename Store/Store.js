@@ -3466,13 +3466,19 @@ var Store = Reflux.createStore({
     if (dontSend)
       r._inbound = true
 
+    let context = r._context
+    if (!context) {
+      context = document._context
+      r._context = context
+    }
+
     let isAssignRM = document[TYPE] === ASSIGN_RM
     if (isAssignRM) {
       if (!docFromServer)
         document = await this._getItemFromServer(document)
       let application = await this._getItemFromServer(document.application)
       if (!application._context)
-        application._context = await this._getItemFromServer(utils.getId(r._context))
+        application._context = await this._getItemFromServer(utils.getId(context))
       this.trigger({action: 'assignRM_Confirmed', application: application})
     }
     // if (__DEV__) {
@@ -3500,7 +3506,6 @@ var Store = Reflux.createStore({
                 }})
     }
 
-    let context = r._context
     if (result) {
       r = utils.clone(result.object)
       r[ROOT_HASH] = result.permalink
@@ -3510,10 +3515,10 @@ var Store = Reflux.createStore({
       r[IS_MESSAGE] = true
     }
     newVerification = this.buildRef(r, dontSend)
-    if (!context)
-      context = document._context
-    if (context)
-      r._context = context
+    // if (!context)
+    //   context = document._context
+    // if (context)
+    //   r._context = context
     if (!dontSend)
       await this.sendMessageToContextOwners(result.object, to, context)
 
@@ -3721,9 +3726,9 @@ var Store = Reflux.createStore({
           let m = this.getModel(resource[TYPE])
           if (r[forwardlinkName]) {
             if (forwardlink.items.ref !== VERIFIED_ITEM)
-              list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(fl.id)))
+              list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl))))
             else
-              list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(fl.verification.id)))
+              list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl.verification))))
             r[forwardlinkName] = list
           }
         }
@@ -5742,7 +5747,7 @@ var Store = Reflux.createStore({
       Alert.alert(translate('serverIsUnreachable'))
       return
     }
-    let {direction, first, noTrigger, modelName, application, context, to, filterResource, lastId} = params
+    let {direction, first, noTrigger, modelName, application, context, filterResource, lastId} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
@@ -5765,7 +5770,7 @@ var Store = Reflux.createStore({
         if (!filterResource || !Object.keys(filterResource).length)
           filterResource = {[TYPE]: modelName}
         filterResource.archived = false
-        if (!filterResource._author)
+        if (!filterResource._author  &&  !filterResource.context)
           filterResource._author = myBot[ROOT_HASH]
       }
     }
@@ -5911,7 +5916,7 @@ var Store = Reflux.createStore({
             let rr = this.convertMessageToResource(li.node, application)
             if (rr[TYPE] === FORM_REQUEST  &&  rr.form === PRODUCT_REQUEST) //  &&  rr._documentCreated)
               return
-            if (rr[TYPE] == NEXT_FORM_REQUEST)
+            if (rr[TYPE] == NEXT_FORM_REQUEST  ||  rr[TYPE] === INTRODUCTION)
               return
             if (!rr._context)
               rr._context = context
@@ -7703,6 +7708,11 @@ var Store = Reflux.createStore({
     let {foundResources, to, context} = params
     if (!foundResources)
       return
+    if (context) {
+      let app = await this.searchServer({modelName: APPLICATION, filterResource: {context: context.contextId}, search: me.isEmployee, noTrigger: true })
+      if (app  &&  app.length  &&  app[0].status === 'completed')
+        return
+    }
     var verTypes = [];
     var meId = utils.getId(me)
     var simpleLinkMessages = {}
@@ -7732,7 +7742,7 @@ var Store = Reflux.createStore({
         let productModel = this.getModel(r.product)
         if (!productModel)
           continue
-        let isMultiEntry = productModel.multiEntryForms && productModel.multiEntryForms.indexOf(r.form) !== -1
+        // let isMultiEntry = productModel.multiEntryForms && productModel.multiEntryForms.indexOf(r.form) !== -1
 
         let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: r.form}, to: to.organization || to, search: me.isEmployee, context: r._context, noTrigger: true })
         if (res  &&  res.length) {
@@ -9338,6 +9348,9 @@ var Store = Reflux.createStore({
         // Original request was made by another employee
         // if (me.isEmployee) {
         context = await this.getContext(obj.object.context, val)
+      if (context)
+        val._context = this.buildRef(context)
+
       // if (context) {
       //   if (me.isEmployee  &&  isFormRequest  &&  val.product  &&  context.from.organization  && context.from.organization.id === me.organization.id) {
       //     let pModel = this.getModel(val.product)
@@ -9835,6 +9848,10 @@ var Store = Reflux.createStore({
       let myOrgRep = this.getRepresentative(me.organization)
       // let msg = await this.searchServer({modelName: MESSAGE, noTrigger: true, filterResource: {contextId: contextId}})
       let contexts = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contextId}})
+      if (!contexts) {
+        debugger
+        return
+      }
       let meId = utils.getId(me)
       let botId = utils.getId(utils.getId(this.getRepresentative(me.organization)))
 
@@ -11001,7 +11018,7 @@ var Store = Reflux.createStore({
     if (!multiEntryForms)
       return
     if (me.isEmployee) {
-      let formRequests = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: FORM_REQUEST}, context: context, noTrigger: true })
+      let formRequests = await this.searchServer({modelName: MESSAGE, to, filterResource: {_payloadType: FORM_REQUEST}, context: context, noTrigger: true })
       // let formRequests = await this.searchServer({modelName: FORM_REQUEST, limit: 100, context: context, noTrigger: true})
       if (!formRequests  ||  !formRequests.length)
         return
