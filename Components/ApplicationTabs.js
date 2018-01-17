@@ -209,7 +209,7 @@ class ApplicationTabs extends Component {
     let progress = 0
     if (resource.forms) {
       resource.forms.forEach((item) => {
-        let itype = utils.getType(item.id)
+        let itype = utils.getType(item)
         if (formTypes.indexOf(itype) === -1)
           formTypes.push(itype)
       })
