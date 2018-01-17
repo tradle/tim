@@ -347,8 +347,15 @@ var utils = {
     return tt !== stringName ? t : s
   },
   makeModelTitle(model, isPlural) {
-    if (typeof model === 'string')
-      return this.makeModelTitle(this.getModel(model).value, isPlural)
+    if (typeof model === 'string') {
+      let m = this.getModel(model)
+      if (m)
+        return this.makeModelTitle(m.value, isPlural)
+      else {
+        let idx = model.lastIndexOf('.')
+        return idx === -1 ? this.makeLabel(model) : this.makeLabel(model.substring(idx + 1))
+      }
+    }
     if (isPlural  &&  model.plural)
       return model.plural
     if (model.title)
