@@ -233,8 +233,10 @@ class FormMessageRow extends Component {
     let model = utils.getModel(resource[TYPE]).value
     if (noContent) {
       let prop = model.properties.time
-      let val = dateformat(new Date(resource[prop.name]), 'mmm d, yyyy')
-      renderedRow = [this.getPropRow(prop, resource, val)]
+      if (prop  &&  resource[prop.name]) {
+        let val = dateformat(new Date(resource[prop.name]), 'mmm d, yyyy')
+        renderedRow = [this.getPropRow(prop, resource, val)]
+      }
     }
     let row = <View style={{paddingVertical: 5}}>
                 {renderedRow}
