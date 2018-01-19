@@ -156,7 +156,7 @@ class GridList extends Component {
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
-    this.limit = 10 //this.isSmallScreen ? 20 : 40
+    this.limit = 20 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
       isLoading: true,
@@ -1581,7 +1581,7 @@ class GridList extends Component {
   }
   render() {
     let content;
-    let {isGrid, filter, dataSource, isLoading, refreshing, list, isConnected} = this.state
+    let {isGrid, filter, dataSource, isLoading, refreshing, list, isConnected, allLoaded} = this.state
     let { isChooser, modelName, isModel, isBacklink, isForwardlink, resource, prop, forwardlink } = this.props
     let model = utils.getModel(modelName).value;
     if (dataSource.getRowCount() === 0   &&
@@ -1608,7 +1608,7 @@ class GridList extends Component {
       initialListSize={10}
       pageSize={20}
       canLoadMore={true}
-      renderScrollComponent={props => <InfiniteScrollView {...props} />}
+      renderScrollComponent={props => <InfiniteScrollView {...props} allLoaded={allLoaded}/>}
       onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
       scrollRenderAhead={10}
       showsVerticalScrollIndicator={false} />;
