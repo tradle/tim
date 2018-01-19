@@ -40,8 +40,19 @@ class SplashPage extends Component {
                    startInLoadingState={true}
                    automaticallyAdjustContentInsets={false} />
     }
-    else
+    else {
+      let tour = {
+        "_t": "tradle.Tour",
+        "showDots": false,
+        "showSkipButton": false,
+        "showDoneButton": false,
+        "pages": [
+          splashscreen
+          // page
+        ]
+      }
       return <TourPage tour={splashscreen} callback={() => {}} />
+    }
   }
 }
 
