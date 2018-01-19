@@ -52,7 +52,14 @@ class SplashPage extends Component {
       ]
     }
 
-    return <TourPage tour={tour} callback={() => {}} />
+    return <TourPage customStyles={splashStyle} tour={tour} callback={() => {}} />
+  }
+}
+
+const splashStyle = {
+  title: {
+    fontWeight: 100,
+    fontSize: 50
   }
 }
 
