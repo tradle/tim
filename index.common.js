@@ -78,7 +78,8 @@ const MESSAGE_LIST = 11
 const MESSAGE_VIEW = 5
 const PASSWORD_CHECK = 20
 const REMEDIATION = 29
-const HEIGHT = 27
+const LOGO_HEIGHT = 27
+const TOUR_PAGE = 35
 const AVIVA_INTRO_VIEW = 50
 // const TERMS_AND_CONDITIONS = 51
 
@@ -129,7 +130,7 @@ const landingPageMapping = {
   },
   TourPage: {
     component: TourPage,
-    id: 35
+    id: TOUR_PAGE
   }
   // TsAndCs: {
   //   component: ArticleView,
@@ -415,7 +416,7 @@ class TiMApp extends Component {
               return
             let style = /*(newRoute.id === MESSAGE_LIST && newRoute.passProps.resource && newRoute.passProps.resource.style) ||*/ newRoute.passProps.bankStyle
             if (style)
-              this.setState({navBarBgColor: style.navBarBackgroundColor || 'transparent'})
+              this.setState({navBarBgColor: newRoute.id === TOUR_PAGE ? 'transparent' : style.navBarBackgroundColor || 'transparent'})
             else
               this.setState({navBarBgColor: 'transparent'})
           }}
@@ -561,7 +562,7 @@ class TiMApp extends Component {
       return <StringChooser navigator={nav} {...props} />
     case 34:
       return <ApplicationView navigator={nav} {...props } />
-    case 35:
+    case TOUR_PAGE:
       return <TourPage navigator={nav} {...props } />
     case 36:
       return <SplashPage navigator={nav} {...props } />
@@ -783,7 +784,7 @@ var NavigationBarRouteMapper = {
       else {
         let width
         if (photoObj.width  &&  photoObj.height)
-          width = photoObj.width > photoObj.height ? HEIGHT * (photoObj.width/photoObj.height) : HEIGHT
+          width = photoObj.width > photoObj.height ? LOGO_HEIGHT * (photoObj.width/photoObj.height) : LOGO_HEIGHT
         else
           width = 149
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width: width}, utils.isAndroid() ? {marginTop: 23} : {}]} />
@@ -855,12 +856,12 @@ var NavigationBarRouteMapper = {
 var styles = StyleSheet.create({
   msgImage: {
     // backgroundColor: '#dddddd',
-    height: HEIGHT,
+    height: LOGO_HEIGHT,
     marginRight: 3,
     resizeMode: 'contain',
     marginTop: 7,
     marginLeft: 0,
-    width: HEIGHT,
+    width: LOGO_HEIGHT,
     // borderRadius: 13,
     // borderColor: '#cccccc',
     // borderWidth: StyleSheet.hairlineWidth
