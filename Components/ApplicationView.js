@@ -257,6 +257,7 @@ class ApplicationView extends Component {
   }
   openChat() {
     let { resource, navigator, bankStyle } = this.props
+    resource = this.state.resource || resource
     let me = utils.getMe()
     let title
     if (resource.applicant.title)
