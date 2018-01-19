@@ -216,12 +216,17 @@ repositories {
 }
 
 dependencies {
+    compile 'com.android.support:multidex:1.0.1'
     compile project(':react-native-branch')
     compile project(':react-native-tcp')
     compile project(':react-native-os')
     compile project(':react-native-exception-handler')
-    compile project(':react-native-firebase-analytics')
-    compile 'com.google.android.gms:play-services-analytics:10.0.1'
+    compile(project(':react-native-firebase-analytics')) {
+        exclude group: 'com.google.firebase'
+    }
+    compile('com.google.android.gms:play-services-analytics:10.0.1') {
+        exclude group: 'com.google.android.gms'
+    }
     compile project(':react-native-splash-screen')
     compile project(':react-native-fabric')
     compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
@@ -236,15 +241,29 @@ dependencies {
     compile project(':react-native-vector-icons')
     compile project(':react-native-udp')
     compile project(':react-native-randombytes')
-    compile project(':react-native-push-notification')
-    compile ('com.google.android.gms:play-services-gcm:10.0.1') {
-        force = true;
+    compile(project(':react-native-push-notification'))
+    {
+        exclude group: 'com.google.android.gms'
     }
     compile project(':react-native-localization')
     compile project(':react-native-linear-gradient')
     compile project(':react-native-keychain')
     compile project(':react-native-image-picker')
-    compile project(':react-native-device-info')
+    compile(project(':react-native-device-info')) {
+        exclude group: 'com.google.android.gms'
+    }
+    compile ('com.google.android.gms:play-services-base:10.0.1') {
+        force = true;
+    }
+    compile ('com.google.android.gms:play-services-gcm:10.0.1') {
+        force = true;
+    }
+    compile ('com.google.firebase:firebase-core:10.0.1') {
+        force = true;
+    }
+    compile ('com.google.firebase:firebase-analytics:10.0.1') {
+        force = true;
+    }
     compile project(':react-native-code-push')
     compile project(':react-native-camera')
     compile fileTree(dir: "libs", include: ["*.jar"])

@@ -5,7 +5,7 @@
     "@tradle/aws-client": {
       "version": "1.0.0",
       "from": "tradle/aws-client",
-      "resolved": "git://github.com/tradle/aws-client.git#94e01b1ff358b2bd1c747d522cca90452911af2b",
+      "resolved": "git://github.com/tradle/aws-client.git#643c54926adfb57cd26c654b286e58d0af4e910f",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -50,16 +50,6 @@
           "version": "1.3.0",
           "from": "@tradle/constants@^1.3.0",
           "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-1.3.0.tgz"
-        },
-        "@tradle/validate-model": {
-          "version": "4.3.0",
-          "from": "@tradle/validate-model@>=4.1.0 <5.0.0",
-          "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-4.3.0.tgz"
-        },
-        "typeforce": {
-          "version": "1.12.0",
-          "from": "typeforce@>=1.10.6 <2.0.0",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.12.0.tgz"
         }
       }
     },
@@ -177,7 +167,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#f7b5bdf14d2eca48b51713e289d86e5a0dd96ec7"
+      "resolved": "git://github.com/tradle/models.git#227ad351c8f5efe5b5e4bfb6e78d5104606b101b"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -1058,12 +1048,6 @@
           "resolved": "https://registry.npmjs.org/js-tokens/-/js-tokens-3.0.2.tgz",
           "dev": true
         },
-        "lodash": {
-          "version": "4.17.4",
-          "from": "lodash@>=4.17.4 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
-          "dev": true
-        },
         "regenerator-runtime": {
           "version": "0.11.0",
           "from": "regenerator-runtime@^0.11.0",
@@ -1189,12 +1173,6 @@
           "version": "2.0.2",
           "from": "esutils@^2.0.2",
           "resolved": "https://registry.npmjs.org/esutils/-/esutils-2.0.2.tgz",
-          "dev": true
-        },
-        "lodash": {
-          "version": "4.17.4",
-          "from": "lodash@^4.17.4",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
           "dev": true
         },
         "regenerator-runtime": {
@@ -5144,10 +5122,20 @@
       "from": "invert-kv@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/invert-kv/-/invert-kv-1.0.0.tgz"
     },
+    "ip": {
+      "version": "1.1.5",
+      "from": "ip@>=1.1.5 <2.0.0",
+      "resolved": "https://registry.npmjs.org/ip/-/ip-1.1.5.tgz"
+    },
     "ipaddr.js": {
       "version": "1.1.1",
       "from": "ipaddr.js@1.1.1",
       "resolved": "https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-1.1.1.tgz"
+    },
+    "ip-regex": {
+      "version": "1.0.3",
+      "from": "ip-regex@>=1.0.3 <2.0.0",
+      "resolved": "https://registry.npmjs.org/ip-regex/-/ip-regex-1.0.3.tgz"
     },
     "is-absolute": {
       "version": "0.1.7",
@@ -7110,6 +7098,11 @@
       "from": "os-tmpdir@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/os-tmpdir/-/os-tmpdir-1.0.1.tgz"
     },
+    "p-debounce": {
+      "version": "1.0.0",
+      "from": "p-debounce@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/p-debounce/-/p-debounce-1.0.0.tgz"
+    },
     "pako": {
       "version": "0.2.9",
       "from": "pako@>=0.2.0 <0.3.0",
@@ -8197,8 +8190,8 @@
     },
     "react-native-infinite-scroll-view": {
       "version": "0.4.3",
-      "from": "mvayngrib/react-native-infinite-scroll-view",
-      "resolved": "git://github.com/mvayngrib/react-native-infinite-scroll-view.git#f5a738aa91d2d43f7479b7f557836bf99297facb"
+      "from": "tradle/react-native-infinite-scroll-view",
+      "resolved": "git://github.com/tradle/react-native-infinite-scroll-view.git#0bd85c7a0d3bbfb224b4e4ce701ffc581dcd1ff7"
     },
     "react-native-keychain": {
       "version": "0.3.1",

@@ -20,6 +20,7 @@ class TourPage extends Component {
     navigator: PropTypes.object.isRequired,
     tour: PropTypes.string.isRequired,
     callback: PropTypes.func,
+    customStyles: PropTypes.object
   };
   render() {
     const {pages, doneBtnLabel, skipBtnLabel, nextBtnLabel, dotColor, activeDotColor, leftTextColor, rightTextColor} = this.props.tour
@@ -59,6 +60,7 @@ class TourPage extends Component {
       activeDotColor: activeDotColor || '#ffffff',
       rightTextColor: rightTextColor || '#ffffff',
       leftTextColor: leftTextColor || '#ffffff',
+      customStyles: this.props.customStyles
     }
 
     if (pageArray) {

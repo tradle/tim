@@ -24,47 +24,40 @@ import { makeResponsive } from 'react-native-orient'
 //       "level": 10
 //     }]
 // }
-// let page = {
-//       "_t": "tradle.TourPage",
-//       "title": "Ready?",
-//       "description": "Finally, you will be in control of your own private information!",
-//       "img": "https://s3.amazonaws.com/app.tradle.io/pg/PG.png",
-//       "imgStyle": {
-//         "height": 59,
-//         "width": 59
-//       },
-//       "backgroundColor": "#4CB0CA",
-//       "fontColor": "#fff",
-//       "level": 10
-//     }
-
 class SplashPage extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
     splashscreen: PropTypes.object.isRequired,
   };
   render() {
-    let { splashscreen } = this.props
-    let {width, height} = utils.dimensions(SplashPage)
+    const { splashscreen } = this.props
+    const { width, height } = utils.dimensions(SplashPage)
     if (typeof splashscreen === 'string') {
       return <WebView style={{width, height}}
                    source={{uri: this.props.splashscreen}}
                    startInLoadingState={true}
                    automaticallyAdjustContentInsets={false} />
     }
-    else {
-      let tour = {
-        "_t": "tradle.Tour",
-        "showDots": false,
-        "showSkipButton": false,
-        "showDoneButton": false,
-        "pages": [
-          splashscreen
-          // page
-        ]
-      }
-      return <TourPage tour={splashscreen} callback={() => {}} />
+
+    const tour = {
+      "_t": "tradle.Tour",
+      "showDots": false,
+      "showSkipButton": false,
+      "showDoneButton": false,
+      "pages": [
+        splashscreen
+        // page
+      ]
     }
+
+    return <TourPage customStyles={splashStyle} tour={tour} callback={() => {}} />
+  }
+}
+
+const splashStyle = {
+  title: {
+    fontWeight: 100,
+    fontSize: 50
   }
 }
 
