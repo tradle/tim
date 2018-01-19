@@ -144,7 +144,7 @@
     "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#4a30ab5",
     "react-native-http": "github:tradle/react-native-http#834492d",
     "react-native-image-picker": "^0.19.3",
-    "react-native-infinite-scroll-view": "github:mvayngrib/react-native-infinite-scroll-view",
+    "react-native-infinite-scroll-view": "github:tradle/react-native-infinite-scroll-view",
     "react-native-keychain": "github:mvayngrib/react-native-keychain#6afb4e7",
     "react-native-linear-gradient": "^2.0.0",
     "react-native-localization": "^0.1.12",
