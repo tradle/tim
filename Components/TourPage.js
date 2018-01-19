@@ -32,7 +32,7 @@ class TourPage extends Component {
     if (withUrls.length && withoutUrl.length) {
       console.warn('invalid TourPage array, expected either all pages to have a "url", or none', pages)
     }
-
+    let { showSkipButton, showDoneButton, showDots } = this.props.tour
     let children = []
     let pageArray
     if (withUrls.length) {
@@ -47,11 +47,14 @@ class TourPage extends Component {
       pageArray = withoutUrl.map(page => _.pick(page, pageProps))
     }
 
-    const props = {
+    let props = {
       onNextBtnClick: this.nextBtnHandle,
       onDoneBtnClick: this.doneBtnHandle,
       onSkipBtnClick: this.onSkipBtnHandle,
       onSlideChange: this.onSlideChangeHandle,
+      showSkipButton: typeof showSkipButton === 'undefined' ? true : showSkipButton,
+      showDoneButton: typeof showDoneButton === 'undefined' ? true : showDoneButton,
+      showDots: typeof showDots === 'undefined' ? true : showDots,
       dotColor: dotColor || '#eeeeee',
       activeDotColor: activeDotColor || '#ffffff',
       rightTextColor: rightTextColor || '#ffffff',
