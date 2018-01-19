@@ -32,27 +32,27 @@ class SplashPage extends Component {
     splashscreen: PropTypes.object.isRequired,
   };
   render() {
-    let { splashscreen } = this.props
-    let {width, height} = utils.dimensions(SplashPage)
+    const { splashscreen } = this.props
+    const { width, height } = utils.dimensions(SplashPage)
     if (typeof splashscreen === 'string') {
       return <WebView style={{width, height}}
                    source={{uri: this.props.splashscreen}}
                    startInLoadingState={true}
                    automaticallyAdjustContentInsets={false} />
     }
-    else {
-      let tour = {
-        "_t": "tradle.Tour",
-        "showDots": false,
-        "showSkipButton": false,
-        "showDoneButton": false,
-        "pages": [
-          splashscreen
-          // page
-        ]
-      }
-      return <TourPage tour={splashscreen} callback={() => {}} />
+
+    const tour = {
+      "_t": "tradle.Tour",
+      "showDots": false,
+      "showSkipButton": false,
+      "showDoneButton": false,
+      "pages": [
+        splashscreen
+        // page
+      ]
     }
+
+    return <TourPage tour={tour} callback={() => {}} />
   }
 }
 
