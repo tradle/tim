@@ -12,7 +12,6 @@ import ReactNative, {
   AppState,
   InteractionManager
 } from 'react-native'
-
 import pick from 'object.pick'
 import dotProp from 'dot-prop'
 const noop = () => {}
@@ -3741,15 +3740,16 @@ var Store = Reflux.createStore({
         }
       }
       if (!r._context) {
-        if (!resource._context)
-          debugger
+        // if (!resource._context)
+        //   debugger
         r._context = resource._context
       }
-      // if (isApplication  &&  !r._context) {
-      //   let context = await this.getContext(r.context, r)
-      //   if (context)
-      //     r._context = context
-      // }
+
+      if (isApplication  &&  !r._context) {
+        let context = await this.getContext(r.context, r)
+        if (context)
+          r._context = context
+      }
       let retParams = { resource: r, action: action || 'getItem', forwardlink: forwardlink}
       if (list)
         retParams.list = list
@@ -5016,6 +5016,7 @@ var Store = Reflux.createStore({
       params.search = me.isEmployee,
       params.filterResource = {document: {id: documentId}}
       verifications  = await this.searchServer(params)
+      verifications = verifications  &&  !verifications.list
     }
     else
       verifications  = await this.searchMessages(params)
@@ -5438,19 +5439,24 @@ var Store = Reflux.createStore({
       this.readAllOnce = true
     }
     let {to, context, loadEarlierMessages, allLoaded, spinner, switchToContext,
-         isForgetting, limit, listView, _readOnly, gatherForms, lastId} = params
-    let shareableResources, result, retParams
+         isForgetting, limit, listView, _readOnly, gatherForms, lastId, endCursor} = params
+    let shareableResources, result, retParams, resourceCount
 
     if (me.isEmployee  &&  meta.id === MESSAGE  &&  context) {
       let myBot = this.getRepresentative(me.organization)
       result = await this.searchServer({
         noTrigger: switchToContext ? false : true,
         modelName,
+        endCursor,
         context: context,
+        limit: limit,
         to: to,
         lastId: lastId,
         direction: loadEarlierMessages ? 'up' : 'down'
       })
+      endCursor =  result.endCursor
+      resourceCount = result.resourceCount
+      result = result.list
       // return result
     }
     else
@@ -5460,11 +5466,12 @@ var Store = Reflux.createStore({
       if (loadEarlierMessages)
         this.trigger(    {
             action: !listView  &&  !prop && !_readOnly ? 'messageList' : 'list',
-            to: to,
             loadEarlierMessages: true,
-            first: first,
-            modelName: modelName,
-            isAggregation: isAggregation
+            to,
+            first,
+            modelName,
+            endCursor,
+            isAggregation
           })
       return
     }
@@ -5490,10 +5497,11 @@ var Store = Reflux.createStore({
       action: !listView  &&  !prop && !_readOnly && modelName !== BOOKMARK ? 'messageList' : 'list',
       list: result,
       spinner: spinner,
-      modelName: modelName,
-      isChat: isChat,
-      to: to,
-      isAggregation: isAggregation
+      modelName,
+      isChat,
+      to,
+      isAggregation,
+      endCursor
     }
     // Paint splash screen before opening chat only on app start
     // if (params.checkForSplash  &&  to) {
@@ -5513,6 +5521,8 @@ var Store = Reflux.createStore({
         result.splice(0, 1)
       retParams.loadEarlierMessages = true
     }
+    if (resourceCount)
+      retParams.resourceCount = resourceCount
     if (params.addedItem)
       retParams.addedItem = true
     // if (params.modelName === FORM)
@@ -5747,7 +5757,7 @@ var Store = Reflux.createStore({
       Alert.alert(translate('serverIsUnreachable'))
       return
     }
-    let {direction, first, noTrigger, modelName, application, context, filterResource, lastId} = params
+    let {direction, first, noTrigger, modelName, application, context, filterResource, endCursor, limit} = params
     if (modelName === MESSAGE)
       return await this.getChat(params)
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
@@ -5775,16 +5785,18 @@ var Store = Reflux.createStore({
       }
     }
 
-    extend(params, {client: this.client, filterResource: filterResource, noCursorChange: !lastId})
+    extend(params, {client: this.client, filterResource: filterResource, endCursor, noPaging: !endCursor})
     let result = await graphQL.searchServer(params)
-    if (!result) {
+    if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger)
         this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
       return
     }
+
+    let newCursor = limit  &&  result.pageInfo  &&  result.pageInfo.endCursor
         // if (result.edges.length < limit)
         //   cursor.endCursor = null
-    let list = result.map((r) => this.convertToResource(r.node))
+    let list = result.edges.map((r) => this.convertToResource(r.node))
     if (me.isEmployee  &&  modelName === APPLICATION) {
       let contexts
       let contextIds = list
@@ -5802,14 +5814,14 @@ var Store = Reflux.createStore({
               contextId: batch
             },
             client: this.client,
-            noCursorChange: true
+            noPaging: true
           })
         }
       })
-
-      contextsResult = contextsResult.filter(val => val)
-      if (contextsResult) {
-        contexts = contextsResult.map(({ node }) => this.convertToResource(node))
+      let contextsList = contextsResult  &&  contextsResult.edges
+      if (contextsList) {
+        contextsList = contextsList.filter(val => val)
+        contexts = contextsList.map(({ node }) => this.convertToResource(node))
         list.forEach((r) => {
           let contextId = r.context
           if (typeof contextId === 'object')
@@ -5840,12 +5852,13 @@ var Store = Reflux.createStore({
     }
 
     if (!noTrigger)
-      this.trigger({action: 'list', list: list, resource: filterResource, direction: direction, first: first})
-    return list
+      this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first})
+    return {list, endCursor: newCursor}
   },
   async getChat(params) {
     let myBot = me.isEmployee  &&  this.getRepresentative(me.organization)
-    let { application, context, to, noTrigger, filterResource, switchToContext, direction } = params
+    let { application, endCursor, context, to, noTrigger, filterResource,
+          switchToContext, direction, limit, modelName, loadEarlierMessages } = params
     let contextId
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
@@ -5868,13 +5881,14 @@ var Store = Reflux.createStore({
       contextId = context.contextId
     else if (!filterResource)
       return
-    if (!context  &&  contextId)
+    if (!context  &&  contextId) {
       context = await this.searchServer({
         modelName: PRODUCT_REQUEST,
         noTrigger: true,
         filterResource: {contextId: contextId, _author: myBot[ROOT_HASH]}
       })
-
+      context = context  &&  context.list  &&  context.list.length  &&  context.list[0]
+    }
     let author, recipient
     if (application) {
       author = (applicant  &&  applicant[ROOT_HASH]) || applicantId.split('_')[1]
@@ -5888,8 +5902,10 @@ var Store = Reflux.createStore({
     let all = graphQL.getChat({
       client: this.client,
       context: contextId,
-      filterResource: filterResource,
-      direction: direction,
+      filterResource,
+      limit,
+      direction,
+      endCursor,
       author,
       recipient,
     })
@@ -5902,50 +5918,47 @@ var Store = Reflux.createStore({
     let outbound = false
     if (!result  ||  !result.length)
       return
+    let resourceCount = result[0]  &&  result[0].edges.length
     for (let j=0; j<2; j++) {
       let response = result[j]
-      if (!response ||  !Array.isArray(response))
+      if (!response) // ||  !Array.isArray(response))
         continue
-      for (let i=0; i<2; i++) {
-        if (!response[i])
-          continue
-        let list = response[i].data[table]
-        if (list.edges  &&  list.edges.length) {
-          list.edges.forEach(li => {
-          // for (let i=0; i<result.length; i++) {
-            let rr = this.convertMessageToResource(li.node, application)
-            if (rr[TYPE] === FORM_REQUEST  &&  rr.form === PRODUCT_REQUEST) //  &&  rr._documentCreated)
-              return
-            if (rr[TYPE] == NEXT_FORM_REQUEST  ||  rr[TYPE] === INTRODUCTION)
-              return
-            if (!rr._context)
-              rr._context = context
-            if (typeof li.node._inbound != 'undefined') {
-              if (li.node._inbound) {
-                rr._inbound = true
-                rr._outbound = false
-              }
-              else {
-                rr._outbound = true
-                rr._inbound = false
-              }
+      let list = response.edges
+      if (list  &&  list.length) {
+        list.forEach(li => {
+        // for (let i=0; i<result.length; i++) {
+          let rr = this.convertMessageToResource(li.node, application)
+          if (rr[TYPE] === FORM_REQUEST  &&  rr.form === PRODUCT_REQUEST) //  &&  rr._documentCreated)
+            return
+          if (rr[TYPE] == NEXT_FORM_REQUEST  ||  rr[TYPE] === INTRODUCTION)
+            return
+          if (!rr._context)
+            rr._context = context
+          if (typeof li.node._inbound != 'undefined') {
+            if (li.node._inbound) {
+              rr._inbound = true
+              rr._outbound = false
             }
-            else if (li.node.originalSender === me[ROOT_HASH]) {
+            else {
               rr._outbound = true
               rr._inbound = false
             }
-            else {
-              rr._inbound = inbound
-              rr._outbound = outbound
-            }
-            rr._recipient = li._recipient
-            chatItems.push(rr)
-          })
-        }
-        if (!application) {
-          inbound = false
-          outbound = true
-        }
+          }
+          else if (li.node.originalSender === me[ROOT_HASH]) {
+            rr._outbound = true
+            rr._inbound = false
+          }
+          else {
+            rr._inbound = inbound
+            rr._outbound = outbound
+          }
+          rr._recipient = li._recipient
+          chatItems.push(rr)
+        })
+      }
+      if (!application) {
+        inbound = false
+        outbound = true
       }
     }
     // Filter out resources like Introduction
@@ -5971,6 +5984,7 @@ var Store = Reflux.createStore({
         }
       }
     }
+    let newCursor = limit  &&  result[0].pageInfo  &&  result[0].pageInfo.endCursor
     if (!noTrigger) {
       let style
       if (application) {
@@ -5980,9 +5994,9 @@ var Store = Reflux.createStore({
           style = SERVICE_PROVIDERS.filter((sp) => sp.org === applicantOrgId)[0].style
         }
       }
-      this.trigger({action: 'messageList', modelName: MESSAGE, to: params.to, list: chatItems, bankStyle: style, context: context, switchToContext: switchToContext})
+      this.trigger({action: 'messageList', modelName, to: params.to, allLoaded: resourceCount < limit, list: chatItems, bankStyle: style, context, endCursor: newCursor, switchToContext, loadEarlierMessages})
     }
-    return chatItems
+    return {list: chatItems, endCursor: newCursor, resourceCount}
   },
   convertMessageToResource(msg, application) {
     let r = this.convertToResource(msg.object)
@@ -7534,8 +7548,8 @@ var Store = Reflux.createStore({
     var self = this
     // var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
     var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true })
-    if (productsToShare  &&  productsToShare.length) {
-      productsToShare.forEach((r) => {
+    if (productsToShare  &&   productsToShare.list.length) {
+      productsToShare.list.forEach((r) => {
         let fromId = utils.getId(r.from)
         if (r._sharedWith) {
           let sw = r._sharedWith.filter((r) => {
@@ -7709,8 +7723,10 @@ var Store = Reflux.createStore({
     if (!foundResources)
       return
     if (context) {
-      let app = await this.searchServer({modelName: APPLICATION, filterResource: {context: context.contextId}, search: me.isEmployee, noTrigger: true })
-      if (app  &&  app.length  &&  app[0].status === 'completed')
+      if (context._appSubmitted)
+        return
+      let appSubmitted = await this.searchServer({modelName: APPLICATION_SUBMITTED, filterResource: {context: context.contextId}, search: me.isEmployee, noTrigger: true })
+      if (appSubmitted  &&  appSubmitted.list  &&  appSubmitted.list.length)
         return
     }
     var verTypes = [];
@@ -7745,7 +7761,7 @@ var Store = Reflux.createStore({
         // let isMultiEntry = productModel.multiEntryForms && productModel.multiEntryForms.indexOf(r.form) !== -1
 
         let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: r.form}, to: to.organization || to, search: me.isEmployee, context: r._context, noTrigger: true })
-        if (res  &&  res.length) {
+        if (res  &&  res.list  && res.list.length) {
           let showShare
           // if (isMultiEntry) {
           //   res.forEach((mr) => {
@@ -7795,11 +7811,11 @@ var Store = Reflux.createStore({
         // to: to,
         // filterResource: {_payloadType: verType}
       })
-      if (!ll)
+      if (!ll  ||  !ll.list  ||  !ll.list.length)
         continue
 
-      typeToDocs[verType] = ll
-      ll.forEach((r) => docs.push(utils.getId(r)))
+      typeToDocs[verType] = ll.list
+      ll.list.forEach((r) => docs.push(utils.getId(r)))
     }
     if (!docs.length)
       return
@@ -9636,7 +9652,7 @@ var Store = Reflux.createStore({
       if (contextId  &&  me.isEmployee  &&  (isMyProduct || model.subClassOf === FORM)) {
         // Update application row and view if on stack
         let applications = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {context: context.contextId}})
-        let app = applications  &&  applications.length && applications[0]
+        let app = applications  &&  applications.list.length && applications.list[0]
         if (app  &&  utils.isRM(app)) {
           this.trigger({action: 'updateRow', resource: app, forceUpdate: true})
           this.trigger({action: 'getItem', resource: app})
@@ -9767,9 +9783,9 @@ var Store = Reflux.createStore({
     // // }
     return noTrigger
 
-    async function switchToChatContext(context, to) {
-      await self.searchServer({modelName: MESSAGE, to: self._getItem(to.organization ||  to), context: context, switchToContext: true})
-    }
+    // async function switchToChatContext(context, to) {
+    //   await self.searchServer({modelName: MESSAGE, to: self._getItem(to.organization ||  to), context: context, switchToContext: true})
+    // }
     async function setupEmployee() {
       me.isEmployee = true
       me.organization = self.buildRef(org)
@@ -9848,25 +9864,29 @@ var Store = Reflux.createStore({
       let myOrgRep = this.getRepresentative(me.organization)
       // let msg = await this.searchServer({modelName: MESSAGE, noTrigger: true, filterResource: {contextId: contextId}})
       let contexts = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contextId}})
-      if (!contexts) {
+      if (!contexts  ||  !contexts.list) {
         debugger
         return
       }
       let meId = utils.getId(me)
       let botId = utils.getId(utils.getId(this.getRepresentative(me.organization)))
+      let list = contexts.list
+      if (list.length === 1)
+        context = list[0]
+      else {
+        let meContext = list.filter((c) => c.from.id === meId)
+        if (!meContext.length)
+          meContext = list.filter((c) => c.from.id === botId)
 
-      let meContext = contexts.filter((c) => c.from.id === meId)
-      if (!meContext.length)
-        meContext = contexts.filter((c) => c.from.id === botId)
-
-      context = meContext  &&  meContext[0] ||  contexts[0]
-      context.to = utils.clone(val.from)
+        context = meContext  &&  meContext[0] ||  contexts[0]
+        context.to = utils.clone(val.from)
+      }
       this.addVisualProps(context)
     }
     else {
       let contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
-      if (contexts)
-        contexts = contexts.filter((c) => c.contextId === contextId)
+      if (contexts  &&  contexts.list)
+        contexts = contexts.list.filter((c) => c.contextId === contextId)
       context = contexts[0]
       context.from = utils.clone(val.from)
     }
@@ -11020,9 +11040,9 @@ var Store = Reflux.createStore({
     if (me.isEmployee) {
       let formRequests = await this.searchServer({modelName: MESSAGE, to, filterResource: {_payloadType: FORM_REQUEST}, context: context, noTrigger: true })
       // let formRequests = await this.searchServer({modelName: FORM_REQUEST, limit: 100, context: context, noTrigger: true})
-      if (!formRequests  ||  !formRequests.length)
+      if (!formRequests  ||  !formRequests.list  ||  !formRequests.list.length)
         return
-      let lastFormRequest = formRequests.filter((r) => r.form !== PRODUCT_REQUEST)
+      let lastFormRequest = formRequests.list.filter((r) => r.form !== PRODUCT_REQUEST)
       if (!lastFormRequest.length)
         return
       let form = lastFormRequest[lastFormRequest.length - 1].form
@@ -11030,9 +11050,9 @@ var Store = Reflux.createStore({
         return
       let m = this.getModel(form)
       let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: form}, to: to.organization || to, search: me.isEmployee, context: context, noTrigger: true })
-      if (!res  ||  !res.length)
+      if (!res  ||  !res.list  || !res.list.length)
         return
-      let productToForms = {[product]: {[form]: res.map((r) => utils.getId(r))}}
+      let productToForms = {[product]: {[form]: res.list.map((r) => utils.getId(r))}}
       return productToForms
     }
     let allFormRequests = await this.searchMessages({modelName: FORM_REQUEST, to: to, context: context})

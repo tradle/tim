@@ -1,20 +1,45 @@
 import React, { Component, PropTypes } from 'react'
 import WebView from './WebView'
 import utils from '../utils/utils'
+import TourPage from './TourPage'
 
 import { makeResponsive } from 'react-native-orient'
-
+// const tour = {
+//   "_t": "tradle.Tour",
+//   "message": "Take a quick tour of chat bot?",
+//   "showDots": false,
+//   "showSkipButton": false,
+//   "showDoneButton": false,
+//   "pages": [
+//     {
+//       "title": "Ready?",
+//       "description": "Finally, you will be in control of your own private information!",
+//       "img": "https://s3.amazonaws.com/app.tradle.io/pg/PG.png",
+//       "imgStyle": {
+//         "height": 59,
+//         "width": 59
+//       },
+//       "backgroundColor": "#4CB0CA",
+//       "fontColor": "#fff",
+//       "level": 10
+//     }]
+// }
 class SplashPage extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
-    splashscreen: PropTypes.string.isRequired,
+    splashscreen: PropTypes.object.isRequired,
   };
   render() {
+    let { splashscreen } = this.props
     let {width, height} = utils.dimensions(SplashPage)
-    return <WebView style={{width, height}}
-                 source={{uri: this.props.splashscreen}}
-                 startInLoadingState={true}
-                 automaticallyAdjustContentInsets={false} />
+    if (typeof splashscreen === 'string') {
+      return <WebView style={{width, height}}
+                   source={{uri: this.props.splashscreen}}
+                   startInLoadingState={true}
+                   automaticallyAdjustContentInsets={false} />
+    }
+    else
+      return <TourPage tour={splashscreen} callback={() => {}} />
   }
 }
 

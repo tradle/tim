@@ -19,7 +19,6 @@ const { MONEY, ENUM, ORGANIZATION, FORM, MESSAGE } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
-var cursor = {}
 
 var search = {
   initClient(meDriver, url) {
@@ -69,7 +68,7 @@ var search = {
 
   async searchServer(params) {
     let self = this
-    let {client, modelName, filterResource, sortProperty, asc, limit, direction, first, notArchive, noCursorChange, properties} = params
+    let {client, modelName, filterResource, sortProperty, asc, limit, endCursor, direction, first, noPaging, properties} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -152,10 +151,14 @@ var search = {
           if (val.indexOf('*') === -1)
             op.EQ += `\n   ${p}: "${val}",`
           else if (len > 1) {
-            if (val.charAt(0) === '*')
-              op.STARTS_WITH = `\n   ${p}: "${val.substring(1)}",`
+            if (val.charAt(0) === '*') {
+              if (val.charAt(val.length - 1) === '*')
+                op.CONTAINS = `\n   ${p}: "${val.substring(1, len - 1)}",`
+              else
+                op.STARTS_WITH = `\n   ${p}: "${val.substring(1)}",`
+            }
             else if (val.charAt(len - 1) === '*')
-              op.CONTAINS = `\n   ${p}: "${val.substring(1, len - 1)}",`
+              op.CONTAINS = `\n   ${p}: "${val.substring(0, len - 1)}",`
           }
         }
         else if (props[p].type === 'boolean') {
@@ -234,46 +237,13 @@ var search = {
     query += '('
     if (versionId)
       query += `\nmodelsVersionId: $modelsVersionId\n`
-    let hasFilter = qq.length
-    if (!noCursorChange) {
-      if (first  ||  cursor.modelName !== modelName) {
-        cursor = {endCursor: []}
-      }
-      if (limit) {
-        if (cursor) {
-          if (cursor.filter) {
-            if (!filterResource  ||  !deepEqual(filterResource,  cursor.filter))
-              cursor = {endCursor: []}
-          }
-        }
-        cursor.endCursor = cursor.endCursor || []
-        cursor.modelName = modelName
-        cursor.filter = filterResource || null
-
-        let endCursor
-        let len = cursor.endCursor.length
-        if (len) {
-          if (direction === 'down')
-            endCursor = cursor.endCursor[len - 1]
-          else {
-            if (len > 2) {
-              cursor.endCursor.splice(len - 2, 1)
-              cursor.endCursor.splice(len - 1, 1)
-              len -= 2
-            }
-            else
-              cursor.endCursor = []
-            endCursor = (len - 1) ? cursor.endCursor[len - 2] : null
-          }
-        }
-        else
-          endCursor = null
-        if (endCursor)
-          query += `checkpoint: "${endCursor}"\n`
-        query += `limit:  ${limit}\n`
-      }
+    if (limit) {
+      if (endCursor)
+        query += `checkpoint: "${endCursor}"\n`
+      query += `limit:  ${limit}\n`
     }
-    if (hasFilter)
+
+    if (qq.length)
       query += `filter: { ${qq} },\n`
     if (sortProperty) {
       let sortBy
@@ -296,8 +266,6 @@ var search = {
         property: _time,
         desc: true
       }`
-    // if (limit)
-    //   query += `, limit: ${limit}`
     query += ')'
     query += `\n{\n`
     query += `pageInfo {\n endCursor\n}\n`
@@ -310,25 +278,14 @@ var search = {
     query += `\n}`   // close 'edges'
     query += `\n}`   // close properties block
     query += `\n}`   // close query
-
+console.log('endCursor: ', endCursor)
     try {
       let data = await client.query({
           fetchPolicy: 'network-only',
           query: gql(`${query}`),
           variables: versionId  &&  {modelsVersionId: versionId}
         })
-      let result = data.data[table]
-      if (!noCursorChange) {
-        let endCursor = result.pageInfo.endCursor
-        if (endCursor) {
-          // if (!params.direction  ||  params.direction === 'down') {
-            let hasThisCursor = cursor.endCursor.some((c) => c === endCursor)
-            if (!hasThisCursor)
-              cursor.endCursor.push(endCursor)
-          // }
-        }
-      }
-      return result.edges.length && result.edges
+      return data.data[table]
     } catch(error) {
       // debugger
       console.log(error)
@@ -366,185 +323,29 @@ var search = {
                 // # _author: "3c67687a96fe59d8f98b1c90cc46f943b938d54cda852b12fb1d43396e28978a"
                 // # _inbound: false
                 // # _recipient: ${hash}
-  async getChat1(params) {
-    let { author, recipient, client, context, filterResource } = params
-    let table = `rl_${MESSAGE.replace(/\./g, '_')}`
-    let contextVar = filterResource || context ? '' : '($context: String)'
-    let queryHeader =
-       `query ${contextVar} {
-          ${table} (
-          filter: {
-       `
-    let queryFooter = `
-          }
-          orderBy:{
-            property: time
-            desc:true
-          }
-        )
-        {
-          pageInfo { endCursor }
-          edges {
-            node {
-              _author
-              _recipient
-              _inbound
-              originalSender
-              object
-              context
-            }
-          }
-        }
-      }`
-
-
-    let eq = `
-            EQ: {
-              _inbound: true
-            `
-    if (author)
-      eq += `              _author: "${author}"\n`
-
-    let filter = ''
-    if (filterResource) {
-      for (let p in filterResource) {
-        filter += '             ' + p + ': ' + `"${filterResource[p]}"\n`
-      }
-    }
-    eq += filter
-    if (context)
-      eq += `             context: "${context}"`
-    eq += `
-            },
-          `
-    let neq = ''
-    if (!context  &&  !filterResource) {
-      context = null
-      neq = `
-            NEQ: {
-              context: $context
-            }
-            `
-    }
-
-    let query = queryHeader + eq + neq + queryFooter
-
-    // let query =
-    //     `query {
-    //         rl_tradle_Message(
-    //         limit: 20,
-    //         filter:{
-    //           EQ: {
-    //             _inbound: true
-    //             context: "${context}"
-    //             _author: "${author}"
-    //           }
-    //         },
-    //         orderBy:{
-    //           property: time
-    //           desc:true
-    //         }
-    //       ) {
-    //         edges {
-    //           node {
-    //             _author
-    //             _recipient
-    //             object
-    //           }
-    //         }
-    //       }
-    //     }`
-    let promisses = []
-    promisses.push(client.query({
-          fetchPolicy: 'network-only',
-          query: gql(`${query}`),
-        }))
-
-    eq = `
-            EQ: {
-              _inbound: false
-          `
-    if (author)
-      eq += `              _recipient: "${author}"\n`
-    eq += filter
-    if (context)
-      eq += `             context: "${context}"`
-    eq += `
-            },
-          `
-
-    let queryOutbound = queryHeader + eq + neq + queryFooter
-
-    // let queryOutbound = query.replace('_inbound: true', '_inbound: false').replace('_author', '_recipient')
-        // `query {
-        //     rl_tradle_Message(
-        //     limit: 20,
-        //     filter:{
-        //       EQ: {
-        //         _inbound: false
-        //         context: "${context}"
-        //         _recipient: "${author}"
-        //       }
-        //     },
-        //     orderBy:{
-        //       property: time
-        //       desc:true
-        //     }
-        //   ) {
-        //     edges {
-        //       node {
-        //         _author
-        //         _recipient
-        //         object
-        //       }
-        //     }
-        //   }
-        // }`
-
-    promisses.push(client.query({
-          fetchPolicy: 'network-only',
-          query: gql(`${queryOutbound}`),
-          variables: filterResource || context ? null : {context: context}
-        }))
-    try {
-      let all = await Promise.all(promisses)
-      return all
-      // let result = []
-      // let inbound = true
-      // let outbound = false
-      // for (let i=0; i<2; i++) {
-      //   let list = all[i].data[table]
-      //   if (list.edges  &&  list.edges.length) {
-      //     list.edges.forEach(r => {
-      //       r.node.object._inbound = inbound
-      //       r.node.object._outbound = outbound
-      //       result.push(r.node)
-      //     })
-      //   }
-      //   inbound = false
-      //   outbound = true
-      // }
-      // // result.sort((a, b) => a.time - b.time)
-      // return result
-    } catch (err) {
-      debugger
-    }
-
-  },
   async getChat(params) {
-    let { author, recipient, client, context, filterResource } = params
+    let { author, recipient, client, context, filterResource, limit, endCursor, direction } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
     let contextVar = filterResource || context ? '' : '($context: String)'
+    let limitP = limit ? `limit:  ${limit}` : ''
+    let checkpoint = limit  &&  endCursor ? `checkpoint: "${endCursor}"\n` : ''
+    // let desc = !direction || direction === 'down' ? true : false
+    let desc = true
+    // if (endCursor)
+    //   debugger
+
     let queryHeader =
        `query ${contextVar} {
           ${table} (
+          ${limitP}
+          ${checkpoint}
           filter: {
        `
     let queryFooter = `
           }
           orderBy:{
             property: time
-            desc:true
+            desc: ${desc}
           }
         )
         {
@@ -567,7 +368,7 @@ var search = {
             EQ: {
             `
     if (author)
-      eq += `              _counterparty: "${author}"\n`
+      eq += `_counterparty: "${author}"\n`
 
     let filter = ''
     if (filterResource) {
@@ -598,7 +399,7 @@ var search = {
           query: gql(`${query}`),
           variables: filterResource || context ? null : {context: context}
         })
-      return [result, null]
+      return result  &&  result.data[table]
     } catch (err) {
       debugger
     }
@@ -783,6 +584,215 @@ var search = {
       debugger
     }
   },
-
 }
 module.exports = search
+  // addEndCursor(params, query) {
+  //   let {modelName, filterResource, limit, direction, first, noPaging} = params
+  //   if (noPaging)
+  //     return
+
+  //   if (first  ||  cursor.modelName !== modelName) {
+  //     cursor = {endCursor: []}
+  //     return
+  //   }
+  //   if (!limit)
+  //     return
+  //   if (cursor) {
+  //     if (cursor.filter) {
+  //       if (!filterResource  ||  !deepEqual(filterResource,  cursor.filter))
+  //         cursor = {endCursor: []}
+  //     }
+  //   }
+  //   cursor.endCursor = cursor.endCursor || []
+  //   cursor.modelName = modelName
+  //   cursor.filter = filterResource || null
+
+  //   let endCursor
+  //   let len = cursor.endCursor.length
+  //   if (!len)
+  //     return
+  //   if (direction === 'down')
+  //     endCursor = cursor.endCursor[len - 1]
+  //   else {
+  //     if (len > 2) {
+  //       cursor.endCursor.splice(len - 2, 1)
+  //       cursor.endCursor.splice(len - 1, 1)
+  //       len -= 2
+  //     }
+  //     else
+  //       cursor.endCursor = []
+  //     endCursor = (len - 1) ? cursor.endCursor[len - 2] : null
+  //   }
+  //   if (endCursor)
+  //     query += `checkpoint: "${endCursor}"\n`
+  //   query += `limit:  ${limit}\n`
+  // }
+  // async getChat1(params) {
+  //   let { author, recipient, client, context, filterResource, inboundOnly, outboundOnly } = params
+  //   let table = `rl_${MESSAGE.replace(/\./g, '_')}`
+  //   let contextVar = filterResource || context ? '' : '($context: String)'
+  //   let queryHeader =
+  //      `query ${contextVar} {
+  //         ${table} (
+  //      `
+  //   let endCursor = this.getEndCursor(params)
+  //   if (endCursor)
+  //     query += `checkpoint: "${endCursor}"\n`
+
+  //   query += ` filter: {\n`
+  //   let queryFooter = `
+  //         }
+  //         orderBy:{
+  //           property: time
+  //           desc:true
+  //         }
+  //       )
+  //       {
+  //         pageInfo { endCursor }
+  //         edges {
+  //           node {
+  //             _author
+  //             _recipient
+  //             _inbound
+  //             originalSender
+  //             object
+  //             context
+  //           }
+  //         }
+  //       }
+  //     }`
+
+
+  //   let eq = `
+  //           EQ: {
+  //             _inbound: true
+  //           `
+  //   if (author)
+  //     eq += `              _author: "${author}"\n`
+
+  //   let filter = ''
+  //   if (filterResource) {
+  //     for (let p in filterResource) {
+  //       filter += '             ' + p + ': ' + `"${filterResource[p]}"\n`
+  //     }
+  //   }
+  //   eq += filter
+  //   if (context)
+  //     eq += `             context: "${context}"`
+  //   eq += `
+  //           },
+  //         `
+  //   let neq = ''
+  //   if (!context  &&  !filterResource) {
+  //     context = null
+  //     neq = `
+  //           NEQ: {
+  //             context: $context
+  //           }
+  //           `
+  //   }
+
+  //   let query = queryHeader + eq + neq + queryFooter
+
+  //   // let query =
+  //   //     `query {
+  //   //         rl_tradle_Message(
+  //   //         limit: 20,
+  //   //         filter:{
+  //   //           EQ: {
+  //   //             _inbound: true
+  //   //             context: "${context}"
+  //   //             _author: "${author}"
+  //   //           }
+  //   //         },
+  //   //         orderBy:{
+  //   //           property: time
+  //   //           desc:true
+  //   //         }
+  //   //       ) {
+  //   //         edges {
+  //   //           node {
+  //   //             _author
+  //   //             _recipient
+  //   //             object
+  //   //           }
+  //   //         }
+  //   //       }
+  //   //     }`
+  //   let promisses = []
+  //   promisses.push(client.query({
+  //         fetchPolicy: 'network-only',
+  //         query: gql(`${query}`),
+  //       }))
+
+  //   eq = `
+  //           EQ: {
+  //             _inbound: false
+  //         `
+  //   if (author)
+  //     eq += `              _recipient: "${author}"\n`
+  //   eq += filter
+  //   if (context)
+  //     eq += `             context: "${context}"`
+  //   eq += `
+  //           },
+  //         `
+
+  //   let queryOutbound = queryHeader + eq + neq + queryFooter
+
+  //   // let queryOutbound = query.replace('_inbound: true', '_inbound: false').replace('_author', '_recipient')
+  //       // `query {
+  //       //     rl_tradle_Message(
+  //       //     limit: 20,
+  //       //     filter:{
+  //       //       EQ: {
+  //       //         _inbound: false
+  //       //         context: "${context}"
+  //       //         _recipient: "${author}"
+  //       //       }
+  //       //     },
+  //       //     orderBy:{
+  //       //       property: time
+  //       //       desc:true
+  //       //     }
+  //       //   ) {
+  //       //     edges {
+  //       //       node {
+  //       //         _author
+  //       //         _recipient
+  //       //         object
+  //       //       }
+  //       //     }
+  //       //   }
+  //       // }`
+
+  //   promisses.push(client.query({
+  //         fetchPolicy: 'network-only',
+  //         query: gql(`${queryOutbound}`),
+  //         variables: filterResource || context ? null : {context: context}
+  //       }))
+  //   try {
+  //     let all = await Promise.all(promisses)
+  //     return all
+  //     // let result = []
+  //     // let inbound = true
+  //     // let outbound = false
+  //     // for (let i=0; i<2; i++) {
+  //     //   let list = all[i].data[table]
+  //     //   if (list.edges  &&  list.edges.length) {
+  //     //     list.edges.forEach(r => {
+  //     //       r.node.object._inbound = inbound
+  //     //       r.node.object._outbound = outbound
+  //     //       result.push(r.node)
+  //     //     })
+  //     //   }
+  //     //   inbound = false
+  //     //   outbound = true
+  //     // }
+  //     // // result.sort((a, b) => a.time - b.time)
+  //     // return result
+  //   } catch (err) {
+  //     debugger
+  //   }
+
+  // },

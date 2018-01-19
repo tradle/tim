@@ -19,7 +19,8 @@ import {
 import Reflux from 'reflux'
 import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons'
-import extend from 'extend'
+// import extend from 'extend'
+import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import InfiniteScrollView from 'react-native-infinite-scroll-view'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
@@ -46,7 +47,7 @@ import Actions from '../Actions/Actions'
 import buttonStyles from '../styles/buttonStyles'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import debounce from 'debounce'
+import debounce from 'p-debounce'
 import appStyle from '../styles/appStyle.json'
 import StyleSheet from '../StyleSheet'
 import { makeStylish } from './makeStylish'
@@ -160,7 +161,7 @@ class GridList extends Component {
       // isLoading: utils.getModels() ? false : true,
       isLoading: true,
       dataSource,
-
+      allLoaded: false,
       allowToAdd: prop  &&  prop.allowToAdd,
       filter: filter,
       hideMode: false,  // hide provider
@@ -198,7 +199,7 @@ class GridList extends Component {
     this.numberOfPages = 0
     this.offset = 0
     this.contentHeight = 0
-    this._loadMoreContentAsync = debounce(this._loadMoreContentAsync.bind(this), 200)
+    this._loadMoreContentAsync = debounce(this._loadMoreContentAsync.bind(this), 500)
   }
   done() {
     let orgs = []
@@ -311,7 +312,7 @@ class GridList extends Component {
           filterResource: resource,
           search: true,
           first: true,
-          limit: this.limit * 2
+          limit: this.limit
         })
         return
       }
@@ -338,11 +339,11 @@ class GridList extends Component {
   }
 
   componentDidMount() {
-    this.listenTo(Store, 'onListUpdate');
+    this.listenTo(Store, 'onAction');
   }
 
-  onListUpdate(params) {
-    let { action, error } = params
+  onAction(params) {
+    let { action, error, list, resource, endCursor } = params
     let { navigator, modelName, isModel, search, prop, forwardlink } = this.props
     if (action === 'addApp') {
       navigator.pop()
@@ -370,23 +371,23 @@ class GridList extends Component {
       return
     }
     if (action == 'newStyles'  &&  modelName === ORGANIZATION) {
-      this.setState({newStyles: params.resource})
+      this.setState({newStyles: resource})
       return
     }
     if (action === 'models') {
       this.setState({
-        dataSource: this.state.dataSource.cloneWithRows(params.list),
-        list: params.list
+        dataSource: this.state.dataSource.cloneWithRows(list),
+        list: list
       })
       return
     }
     if (action === 'addItem'  ||  action === 'addMessage') {
       let model = action === 'addMessage'
                 ? utils.getModel(modelName).value
-                : utils.getModel(params.resource[TYPE]).value;
+                : utils.getModel(resource[TYPE]).value;
       if (action === 'addItem'  &&  model.id !== modelName) {
         if (model.id === BOOKMARK  &&  !isModel) {
-          if (this.state.resource  &&  this.state.resource[TYPE] === params.resource.bookmark[TYPE]) {
+          if (this.state.resource  &&  this.state.resource[TYPE] === resource.bookmark[TYPE]) {
             Alert.alert('Bookmark was created')
           }
         }
@@ -443,11 +444,11 @@ class GridList extends Component {
     let { chat, isBacklink, isForwardlink, multiChooser, isChooser, sharingChat, isTest } = this.props
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
-      if (!params.list) {
+      if (!list) {
         if (params.alert)
           Alert.alert(params.alert)
         else if (search  &&  !isModel) {
-          if (params.isSearch  &&   params.resource)
+          if (params.isSearch  &&   resource)
             Alert.alert('No resources were found for this criteria')
           this.setState({refreshing: false, isLoading: false})
         }
@@ -455,8 +456,8 @@ class GridList extends Component {
       }
       if (params.isTest  !== isTest)
         return
-      if (params.list  &&  params.list.length) {
-        let m = utils.getModel(params.list[0][TYPE]).value
+      if (list  &&  list.length) {
+        let m = utils.getModel(list[0][TYPE]).value
         if (m.id !== modelName)  {
           let model = utils.getModel(modelName).value
           if (model.isInterface  ||  modelName === MESSAGE) {
@@ -464,7 +465,7 @@ class GridList extends Component {
               return
           }
           else if (m.subClassOf !== modelName) {
-            if (!isForwardlink  ||  !params.resource  ||  params.resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
+            if (!isForwardlink  ||  !resource  ||  resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
               return
             // Application forward links
             if (modelName !== VERIFIED_ITEM  ||  m.id !== VERIFICATION)
@@ -473,13 +474,13 @@ class GridList extends Component {
         }
       }
     }
-    if ((action !== 'list' &&  action !== 'listSharedWith')  ||  !params.list || params.isAggregation !== this.props.isAggregation)
+    if ((action !== 'list' &&  action !== 'listSharedWith')  ||  !list || params.isAggregation !== this.props.isAggregation)
       return;
     if (action === 'list'  &&  this.props.chat)
       return
     if (action === 'listSharedWith'  &&  !chat)
       return
-    let list = params.list;
+    let allLoaded
     if (list.length) {
       let type = list[0][TYPE];
       if (type  !== modelName  &&  !isBacklink  &&  !isForwardlink) {
@@ -500,9 +501,14 @@ class GridList extends Component {
         else
           ++this.numberOfPages
       }
+
+      if (list) {
+        if (list.length < this.limit)
+          allLoaded = true
+      }
       if (!params.first) {
         let l = this.state.list
-        if (l  &&  !isBacklink  &&  !isForwardlink) { //  &&  l.length === this.limit * 2) {
+        if (l  &&  !isBacklink  &&  !isForwardlink) { //  &&  l.length === this.limit ) {
           let newList = []
           // if (this.direction === 'down') {
             // for (let i=this.limit; i<l.length; i++)
@@ -532,9 +538,12 @@ class GridList extends Component {
       dataSource: this.state.dataSource.cloneWithRows(list),
       list: list,
       isLoading: false,
-      refreshing: false
+      refreshing: false,
+      allLoaded: allLoaded,
+      endCursor: endCursor
     }
-
+    if (this.state.endCursor)
+      state.prevEndCursor = this.state.endCursor
     if (!list.length) {
       if (!this.state.filter  ||  !this.state.filter.length)
         this.setState({isLoading: false})
@@ -542,12 +551,13 @@ class GridList extends Component {
         this.setState(state)
       return;
     }
-    if (search  &&  params.resource)
-      state.resource = params.resource
+
+    if (search  &&  resource)
+      state.resource = resource
 
     if ((isBacklink  &&  params.prop !== prop) || (isForwardlink  &&  params.forwardlink !== forwardlink))
       return
-    extend(state, {
+    _.extend(state, {
       forceUpdate: params.forceUpdate,
       dictionary: params.dictionary,
     })
@@ -576,8 +586,9 @@ class GridList extends Component {
   shouldComponentUpdate(nextProps, nextState) {
     if (nextState.forceUpdate)
       return true
-    if (this.state.resource !== nextState.resource)
+    if (!_.isEqual(this.state.resource, nextState.resource)) {
       return true
+    }
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop !== nextProps.prop)
         return true
@@ -986,6 +997,7 @@ class GridList extends Component {
       to: resource,
       prop: prop,
       first: true,
+      limit: this.limit,
       listView: listView
     });
   }
@@ -1063,12 +1075,12 @@ class GridList extends Component {
 
     let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
     if (this.props.search)
-      extend(params, {search: true, filterResource: this.state.resource, limit: this.limit * 2, first: true})
+      _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
     Actions.list(params)
   }
   searchWithFilter(filterResource) {
     this.setState({resource: filterResource})
-    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit * 2, first: true})
+    Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit, first: true})
   }
   getGridCols() {
     let model = utils.getModel(this.props.modelName).value
@@ -1367,6 +1379,8 @@ class GridList extends Component {
   async _loadMoreContentAsync() {
     if (this.state.refreshing)
       return
+    if (this.state.allLoaded)
+      return
     // if (this.direction === 'up' &&  this.numberOfPages < 2)
     //   return
     if (this.direction !== 'down')
@@ -1374,7 +1388,9 @@ class GridList extends Component {
     // if (this.offset < this.contentHeight / 2)
     //   return
     // debugger
-    let { list=[], order, sortProperty } = this.state
+    let { list=[], order, sortProperty, endCursor, prevEndCursor } = this.state
+    if (endCursor === prevEndCursor)
+      return
     let { modelName, search, resource } = this.props
     this.state.refreshing = true
     Actions.list({
@@ -1384,6 +1400,7 @@ class GridList extends Component {
       limit: this.limit,
       direction: this.direction,
       search: search,
+      endCursor: endCursor,
       to: modelName === BOOKMARK ? utils.getMe() : null,
       filterResource: (search  &&  this.state.resource) || resource,
       // from: list.length,
@@ -1556,7 +1573,7 @@ class GridList extends Component {
 
           self.state.list.forEach((r) => {
             let rr = {}
-            extend(rr, r)
+            _.extend(rr, r)
             l.push(rr)
           })
           l.push(resource)
@@ -1676,12 +1693,6 @@ class GridList extends Component {
         {actionSheet}
       </PageView>
     );
-  }
-  _onRefresh() {
-    this.setState({refreshing: true});
-    // fetchData().then(() => {
-    //   this.setState({refreshing: false});
-    // });
   }
   renderActionSheet() {
     let { search, modelName, prop, isBacklink, isForwardlink, bookmark } = this.props
@@ -2171,3 +2182,9 @@ module.exports = GridList;
   //   alignSelf: 'center',
   //   color: '#ffffff'
   // },
+  // _onRefresh() {
+  //   this.setState({refreshing: true});
+  //   // fetchData().then(() => {
+  //   //   this.setState({refreshing: false});
+  //   // });
+  // }

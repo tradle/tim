@@ -106,10 +106,20 @@ class MessageList extends Component {
       filter: props.filter,
       userInput: '',
       list: [],
+      limit: LIMIT,
       hasProducts: props.resource  &&  this.hasProducts(props.resource),
       allLoaded: false
     }
     this.onLoadEarlierMessages = debounce(this.onLoadEarlierMessages.bind(this), 200)
+    this.shareWith = this.shareWith.bind(this)
+    this.selectResource = this.selectResource.bind(this)
+    this.contextChooser = this.contextChooser.bind(this)
+    this.share = this.share.bind(this)
+    this.renderRow = this.renderRow.bind(this)
+    this.onSubmitEditing = this.onSubmitEditing.bind(this)
+    this.generateMenu = this.generateMenu.bind(this)
+    this.selectContext = this.selectContext.bind(this)
+    this.shareContext = this.shareContext.bind(this)
   }
   hasChatContext() {
     let { resource, allContexts } = this.props
@@ -271,26 +281,28 @@ class MessageList extends Component {
       if (!doUpdate)
         return;
     }
-    let { context, list, loadEarlierMessages, switchToContext } = params
+    let { context, list, loadEarlierMessages, switchToContext, endCursor, allLoaded } = params
     if (loadEarlierMessages  &&  this.state.postLoad) {
       if (!list || !list.length) {
         this.state.postLoad([], true)
-        this.state = {
-          allLoaded: true, isLoading: false, noScroll: true, loadEarlierMessages: false,
-          ...this.state
-        }
+        this.setState({allLoaded: true, isLoading: false, noScroll: true, loadEarlierMessages: false})
+        // this.state = {
+        //   allLoaded: true, isLoading: false, noScroll: true, loadEarlierMessages: false,
+        //   ...this.state
+        // }
       }
       else {
         this.state.postLoad(list, false)
-        let allLoaded = list.length < LIMIT
+        // let allLoaded = (resourceCount && resourceCount < LIMIT)  ||  list.length < LIMIT
         this.state.list.forEach((r) => {
           list.push(r)
         })
         this.setState({
-          list: list,
+          list,
+          allLoaded,
+          endCursor,
+          context: context ||  this.state.context,
           noScroll: true,
-          allLoaded: allLoaded,
-          context: context,
           productToForms: this.state.productToForms,
           loadEarlierMessages: !allLoaded
         })
@@ -303,7 +315,7 @@ class MessageList extends Component {
     if (bankStyle   &&  params.bankStyle)
       extend(bankStyle, params.bankStyle)
     let isEmployee = utils.isEmployee(chatWith)
-    let state = {isLoading: false, isEmployee: isEmployee}
+    let state = {isLoading: false, isEmployee}
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let type = list[0][TYPE];
       if (type  !== modelName) {
@@ -320,17 +332,16 @@ class MessageList extends Component {
       }
       let me = utils.getMe()
       extend(state, {
-        // dataSource: this.state.dataSource.cloneWithRows(list),
+        list,
+        shareableResources,
+        context: context ||  this.state.context,
+        isEmployee,
+        loadEarlierMessages,
+        switchToContext,
+        endCursor,
         isLoading: switchToContext ? true : false,
-        list: list,
-        shareableResources: shareableResources,
-        allLoaded: false,
-        // addedItem: this.state.addedItem,
-        context: context,
+        allLoaded: false, //list.length < this.state.limit ? true : false,
         allContexts: switchToContext ? false : this.state.allContexts,
-        isEmployee: isEmployee,
-        loadEarlierMessages: loadEarlierMessages,
-        switchToContext: switchToContext,
         productToForms: productToForms || this.state.productToForms,
       })
     }
@@ -471,7 +482,7 @@ class MessageList extends Component {
             'Do you want to switch to it and continue from there?',
             [
               {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-              {text: translate('Ok'),     onPress: () => this.switchToChatContext(rcontext, resource.from)},
+              {text: translate('Ok'),     onPress: () => this.switchToOneContext(rcontext, resource.from)},
             ]
           )
         }
@@ -479,9 +490,15 @@ class MessageList extends Component {
     }
     // Actions.list(actionParams)
   }
-  switchToChatContext(context, to) {
-    this.setState({allContexts: false})
-    Actions.list({action: 'list', modelName: MESSAGE, to: this.props.resource, context: context, switchToContext: true})
+  switchToOneContext(context, to) {
+    this.setState({allContexts: false, limit: LIMIT})
+    Actions.list({
+      modelName: MESSAGE,
+      to: this.props.resource,
+      context: context,
+      switchToContext: context != null,
+      limit: 20
+    })
   }
 
   hasProducts(resource) {
@@ -675,7 +692,7 @@ class MessageList extends Component {
     if (isContext)
       context = this.props.resource
     let props = {
-      onSelect: this.selectResource.bind(this),
+      onSelect: this.selectResource,
       resource: resource,
       bankStyle: bankStyle,
       context: context,
@@ -691,7 +708,7 @@ class MessageList extends Component {
     // let sendStatus = this.state.sendStatus &&  this.state.sendResource[ROOT_HASH] === resource[ROOT_HASH]
     //                ? this.state.sendStatus : (resource._sendStatus === 'Sent' ? null : resource._sendStatus)
     let moreProps = {
-      share: this.share.bind(this),
+      share: this.share,
       // sendStatus: sendStatus,
       currency: this.props.resource.currency || currency,
       country: this.props.resource.country,
@@ -768,6 +785,8 @@ class MessageList extends Component {
     let bgStyle = {}
     if (!bgImage  &&  bankStyle.backgroundColor)
       bgStyle = {backgroundColor: bankStyle.backgroundColor}
+    else
+      bgStyle = {backgroundColor: 'transparent'}
     let alert = <View />
     let hideTextInput
     if (modelName === ORGANIZATION)
@@ -840,11 +859,11 @@ class MessageList extends Component {
         enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
-        renderCustomMessage={this.renderRow.bind(this)}
-        handleSend={this.onSubmitEditing.bind(this)}
+        renderCustomMessage={this.renderRow}
+        handleSend={this.onSubmitEditing}
         submitOnReturn={true}
         underlineColorAndroid='transparent'
-        menu={this.generateMenu.bind(this)}
+        menu={this.generateMenu}
         keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         initialListSize={LIMIT}
@@ -881,12 +900,13 @@ class MessageList extends Component {
       context = resource
     let separator = utils.getContentSeparator(bankStyle)
     StatusBar.setHidden(false);
+    let progressInfoR = resource || application
     if (!bgImage)
       return (
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
           {network}
-          <ProgressInfo recipient={resource[ROOT_HASH]} />
-          <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={allContexts} />
+          <ProgressInfo recipient={progressInfoR[ROOT_HASH]} />
+          <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}
           {actionSheet}
@@ -900,8 +920,8 @@ class MessageList extends Component {
       <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
         <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
           {network}
-          <ProgressInfo recipient={resource[ROOT_HASH]} />
-          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={allContexts} />
+          <ProgressInfo recipient={progressInfoR[ROOT_HASH]} />
+          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}
           {actionSheet}
@@ -1015,20 +1035,22 @@ class MessageList extends Component {
       passProps: {
         resource: this.props.resource,
         // bankStyle: this.props.bankStyle,
-        selectContext: this.selectContext.bind(this)
+        selectContext: this.selectContext
       },
     })
   }
   // Select context to filter messages for the particular context
   selectContext(context) {
     this.props.navigator.pop()
-    Actions.list({
-      modelName: this.props.modelName,
-      to: this.props.resource,
-      context: context,
-      limit: context ? 300 : LIMIT
-    })
-    this.setState({context: context, allContexts: context == null})
+    this.switchToOneContext(context, this.props.resource)
+    // let limit = context ? 300 : LIMIT
+    // Actions.list({
+    //   modelName: this.props.modelName,
+    //   to: this.props.resource,
+    //   context: context,
+    //   limit: limit
+    // })
+    this.setState({context: context, allContexts: context == null, limit: this.state.limit})
   }
   // Show chooser of the organizations to share context with
   shareWith() {
@@ -1050,7 +1072,7 @@ class MessageList extends Component {
         modelName: ORGANIZATION,
         multiChooser: true,
         sharingChat: sharingChat,
-        onDone: this.shareContext.bind(this)
+        onDone: this.shareContext
       }
     });
   }
@@ -1105,23 +1127,24 @@ class MessageList extends Component {
   }
 
   onLoadEarlierMessages(oldestMessage = {}, callback = () => {}) {
-    this.state.loadEarlierMessages = true
-    // Your logic here
-    // Eg: Retrieve old messages from your server
-
-    // newest messages have to be at the begining of the array
+    if (this.state.allLoaded)
+      return
     let list = this.state.list;
     let id = list.length  &&  utils.getId(list[0])
     Actions.list({
       lastId: id,
       limit: LIMIT,
+      direction: 'up',
+      search: this.props.search,
       loadEarlierMessages: true,
       context: this.state.allContexts ? null : this.state.context,
       modelName: this.props.modelName,
       to: this.props.resource,
+      application: this.props.application,
+      endCursor: this.state.endCursor,
     })
     let earlierMessages = []
-    this.state.postLoad = callback
+    this.setState({postLoad: callback, loadEarlierMessages: true})
   }
   checkStart(evt) {
     evt = evt
