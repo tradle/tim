@@ -24,6 +24,20 @@ import { makeResponsive } from 'react-native-orient'
 //       "level": 10
 //     }]
 // }
+// let page = {
+//       "_t": "tradle.TourPage",
+//       "title": "Ready?",
+//       "description": "Finally, you will be in control of your own private information!",
+//       "img": "https://s3.amazonaws.com/app.tradle.io/pg/PG.png",
+//       "imgStyle": {
+//         "height": 59,
+//         "width": 59
+//       },
+//       "backgroundColor": "#4CB0CA",
+//       "fontColor": "#fff",
+//       "level": 10
+//     }
+
 class SplashPage extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
@@ -38,8 +52,19 @@ class SplashPage extends Component {
                    startInLoadingState={true}
                    automaticallyAdjustContentInsets={false} />
     }
-    else
+    else {
+      let tour = {
+        "_t": "tradle.Tour",
+        "showDots": false,
+        "showSkipButton": false,
+        "showDoneButton": false,
+        "pages": [
+          splashscreen
+          // page
+        ]
+      }
       return <TourPage tour={splashscreen} callback={() => {}} />
+    }
   }
 }
 
