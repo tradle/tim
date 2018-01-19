@@ -67,7 +67,7 @@ import StyleSheet from '../StyleSheet'
 // import SearchBar from 'react-native-search-bar'
 // import ResourceTypesScreen from './ResourceTypesScreen'
 
-var LIMIT = 10
+var LIMIT = 20
 const { TYPE, TYPES, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
 const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM, FINANCIAL_PRODUCT } = TYPES
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -111,6 +111,15 @@ class MessageList extends Component {
       allLoaded: false
     }
     this.onLoadEarlierMessages = debounce(this.onLoadEarlierMessages.bind(this), 200)
+    this.shareWith = this.shareWith.bind(this)
+    this.selectResource = this.selectResource.bind(this)
+    this.contextChooser = this.contextChooser.bind(this)
+    this.share = this.share.bind(this)
+    this.renderRow = this.renderRow.bind(this)
+    this.onSubmitEditing = this.onSubmitEditing.bind(this)
+    this.generateMenu = this.generateMenu.bind(this)
+    this.selectContext = this.selectContext.bind(this)
+    this.shareContext = this.shareContext.bind(this)
   }
   hasChatContext() {
     let { resource, allContexts } = this.props
@@ -461,7 +470,7 @@ class MessageList extends Component {
     // Actions.list(actionParams)
   }
   switchToOneContext(context, to) {
-    this.setState({allContexts: false, limit: 20})
+    this.setState({allContexts: false, limit: LIMIT})
     Actions.list({
       modelName: MESSAGE,
       to: this.props.resource,
@@ -658,7 +667,7 @@ class MessageList extends Component {
     if (isContext)
       context = this.props.resource
     let props = {
-      onSelect: this.selectResource.bind(this),
+      onSelect: this.selectResource,
       resource: resource,
       bankStyle: bankStyle,
       context: context,
@@ -674,7 +683,7 @@ class MessageList extends Component {
     // let sendStatus = this.state.sendStatus &&  this.state.sendResource[ROOT_HASH] === resource[ROOT_HASH]
     //                ? this.state.sendStatus : (resource._sendStatus === 'Sent' ? null : resource._sendStatus)
     let moreProps = {
-      share: this.share.bind(this),
+      share: this.share,
       // sendStatus: sendStatus,
       currency: this.props.resource.currency || currency,
       country: this.props.resource.country,
@@ -818,11 +827,11 @@ class MessageList extends Component {
         enableEmptySections={true}
         autoFocus={false}
         textRef={'chat'}
-        renderCustomMessage={this.renderRow.bind(this)}
-        handleSend={this.onSubmitEditing.bind(this)}
+        renderCustomMessage={this.renderRow}
+        handleSend={this.onSubmitEditing}
         submitOnReturn={true}
         underlineColorAndroid='transparent'
-        menu={this.generateMenu.bind(this)}
+        menu={this.generateMenu}
         keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
         maxHeight={maxHeight} // 64 for the navBar; 110 - with SearchBar
@@ -864,7 +873,7 @@ class MessageList extends Component {
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
           {network}
           <ProgressInfo recipient={progressInfoR[ROOT_HASH]} />
-          <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={allContexts} />
+          <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}
           {actionSheet}
@@ -879,7 +888,7 @@ class MessageList extends Component {
         <Image source={{uri: bgImage}}  resizeMode='cover' style={image}>
           {network}
           <ProgressInfo recipient={progressInfoR[ROOT_HASH]} />
-          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser.bind(this)} shareWith={this.shareWith.bind(this)} bankStyle={bankStyle} allContexts={allContexts} />
+          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}
           {actionSheet}
@@ -993,7 +1002,7 @@ class MessageList extends Component {
       passProps: {
         resource: this.props.resource,
         // bankStyle: this.props.bankStyle,
-        selectContext: this.selectContext.bind(this)
+        selectContext: this.selectContext
       },
     })
   }
@@ -1030,7 +1039,7 @@ class MessageList extends Component {
         modelName: ORGANIZATION,
         multiChooser: true,
         sharingChat: sharingChat,
-        onDone: this.shareContext.bind(this)
+        onDone: this.shareContext
       }
     });
   }
@@ -1087,7 +1096,6 @@ class MessageList extends Component {
   onLoadEarlierMessages(oldestMessage = {}, callback = () => {}) {
     if (this.state.allLoaded)
       return
-    // this.state.loadEarlierMessages = true
     let list = this.state.list;
     let id = list.length  &&  utils.getId(list[0])
     Actions.list({
@@ -1104,7 +1112,6 @@ class MessageList extends Component {
     })
     let earlierMessages = []
     this.setState({postLoad: callback, loadEarlierMessages: true})
-    // this.state.postLoad = callback
   }
   checkStart(evt) {
     evt = evt
