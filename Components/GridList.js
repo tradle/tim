@@ -156,7 +156,7 @@ class GridList extends Component {
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
-    this.limit = 10 //this.isSmallScreen ? 20 : 40
+    this.limit = 20 //this.isSmallScreen ? 20 : 40
     this.state = {
       // isLoading: utils.getModels() ? false : true,
       isLoading: true,
