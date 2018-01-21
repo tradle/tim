@@ -20,7 +20,7 @@ import {
   WebView
 } from 'react-native'
 
-import extend from 'extend'
+import _ from 'lodash'
 import TimerMixin from 'react-timer-mixin'
 import Reflux from 'reflux'
 import clone from 'clone'
@@ -28,7 +28,6 @@ import constants from '@tradle/constants'
 import GiftedMessenger from 'react-native-gifted-messenger'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
-import equal from 'deep-equal'
 import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
 import debounce from 'debounce'
@@ -292,7 +291,7 @@ class MessageList extends Component {
       return
 
     if (bankStyle   &&  params.bankStyle)
-      extend(bankStyle, params.bankStyle)
+      _.extend(bankStyle, params.bankStyle)
     let isEmployee = utils.isEmployee(chatWith)
     let state = {isLoading: false, isEmployee}
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
@@ -310,7 +309,7 @@ class MessageList extends Component {
         }
       }
       let me = utils.getMe()
-      extend(state, {
+      _.extend(state, {
         list,
         shareableResources,
         context: context ||  this.state.context,
@@ -692,7 +691,7 @@ class MessageList extends Component {
       switchToContext: this.state.switchToContext
     }
 
-    props = extend(props, moreProps)
+    props = _.extend(props, moreProps)
     if (model.id === VERIFICATION) {
       if (this.state.verifiedByTrustedProvider  &&  this.state.verifiedByTrustedProvider[ROOT_HASH] === resource[ROOT_HASH]) {
         props.shareWithRequestedParty = originatingMessage.from
