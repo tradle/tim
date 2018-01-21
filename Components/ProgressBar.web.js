@@ -10,9 +10,9 @@ import React, { Component, PropTypes } from 'react'
 const debug = require('debug')('tradle:app:progressbar')
 
 class ProgressBar extends Component {
-  static propTypes = {
-    recipient: PropTypes.string.isRequired
-  };
+  // static propTypes = {
+  //   recipient: PropTypes.string.isRequired
+  // };
   render() {
     let { progress, width, color, borderWidth, borderRadius, height } = this.props
     progress *= 10
