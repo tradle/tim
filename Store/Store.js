@@ -7562,6 +7562,8 @@ var Store = Reflux.createStore({
         docs.forEach((ver, i) => {
           let doc = ver.document
           let c = doc._context
+          if (!c)
+            return
           let requestFor = c.requestFor
           let multiEntryForms = this.getModel(requestFor).multiEntryForms
           if (!multiEntryForms || multiEntryForms.indexOf(doc[TYPE]) === -1)
@@ -7593,14 +7595,14 @@ var Store = Reflux.createStore({
         return;
       // Filter out the verification from the same company
       // var fromId = utils.getId(val.from)
-      // var fromOrgId = utils.getId(this._getItem(fromId).organization)
+      // var fromOrgId = utils.getId(self._getItem(fromId).organization)
       // if (fromOrgId === toId)
       //   return
-      var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
+      var document = doc.id ? self._getItem(utils.getId(doc.id)) : doc;
       if (!document  ||  document._inactive)
         return;
 
-      if (this.checkIfWasShared(document, to))
+      if (self.checkIfWasShared(document, to))
         return
       // Check if there is at least one verification by the listed in FormRequest verifiers
       if (hasVerifiers  &&  hasVerifiers[docType]) {
@@ -7610,7 +7612,7 @@ var Store = Reflux.createStore({
           let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
           if (!provider.length)
             return
-          let spReps = this.getRepresentatives(provider[0].org)
+          let spReps = self.getRepresentatives(provider[0].org)
           let sw = val._sharedWith.filter((r) => {
             return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
           })
@@ -7621,37 +7623,12 @@ var Store = Reflux.createStore({
           return
       }
 
-      /*
-      if (to  &&  org  &&  document.verifications) {
-        var thisCompanyVerification;
-        for (var i=0; i<document.verifications.length; i++) {
-          var v = this._getItem(utils.getId(document.verifications[i]));
-
-          if (v.organization  &&  utils.getId(org) === utils.getId(v.organization)) {
-            let sharedWith = doc._sharedWith
-            if (!sharedWith)
-              thisCompanyVerification = true;
-            else {
-              let sw = sharedWith.filter((r) => {
-                if (reps.some((rep) => utils.getId(rep) === r.bankRepresentative)))
-                  return true
-              })
-              if (sw.length)
-                thisCompanyVerification = true
-            }
-            break;
-          }
-        }
-        // if (thisCompanyVerification)
-        //   return;
-      }
-      */
       var value = {};
       extend(value, val);
       value.document = document;
 
-      this.addVisualProps(value)
-      this.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+      self.addVisualProps(value)
+      self.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
     }
   },
   async getShareableResourcesForEmployee(params) {
@@ -7825,7 +7802,7 @@ var Store = Reflux.createStore({
           return
       }
       let frId = utils.getId(val.from.id)
-      let fr = this._getItem(frId)
+      let fr = self._getItem(frId)
       if (!fr)
         return
 
@@ -7835,7 +7812,7 @@ var Store = Reflux.createStore({
         return;
       // Filter out the verification from the same company
       // var fromId = utils.getId(val.from)
-      // var fromOrgId = utils.getId(this._getItem(fromId).organization)
+      // var fromOrgId = utils.getId(self._getItem(fromId).organization)
       // if (fromOrgId === toId)
       //   return
       let document = typeToDocs[docType].filter((d) => utils.getId(d) === doc.id)[0]
@@ -7845,11 +7822,11 @@ var Store = Reflux.createStore({
         if (utils.getId(context) === contextId)
           return
       }
-      // // var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
+      // // var document = doc.id ? self._getItem(utils.getId(doc.id)) : doc;
       // // if (!document  ||  document._inactive)
       // //   return;
 
-      // if (this.checkIfWasShared(document, to))
+      // if (self.checkIfWasShared(document, to))
       //   return
       // Check if there is at least one verification by the listed in FormRequest verifiers
       if (hasVerifiers  &&  hasVerifiers[docType]) {
@@ -7859,7 +7836,7 @@ var Store = Reflux.createStore({
           let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
           if (!provider.length)
             return
-          let spReps = this.getRepresentatives(provider[0].org)
+          let spReps = self.getRepresentatives(provider[0].org)
           let sw = val._sharedWith.filter((r) => {
             return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
           })
@@ -7873,8 +7850,8 @@ var Store = Reflux.createStore({
       extend(value, val);
       value.document = document;
 
-      this.addVisualProps(value)
-      return this.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+      self.addVisualProps(value)
+      return self.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
     }
   },
   checkIfWasShared(document, to) {
