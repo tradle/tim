@@ -1087,7 +1087,7 @@ var NewResourceMixin = {
                <Text style={styles.font14, {color: '#eeeeee'}}>{err}</Text>
              </View>
 
-    let addStyle = {paddingVertical: 3, marginTop: prop.type === 'object' ||  prop.type === 'date' ? 0 : 2, backgroundColor: '#990000'}
+    let addStyle = {paddingVertical: 3, marginTop: prop.type === 'object' ||  prop.type === 'date' ||  prop.items ? 0 : 2, backgroundColor: '#990000'}
     return <View style={[styles.err, {paddingHorizontal: 10}]} key={this.getNextKey()}>
              <View style={addStyle}>
                <Text style={styles.font14, {paddingLeft: 5, color: '#eeeeee'}}>{err}</Text>
@@ -1748,7 +1748,8 @@ var NewResourceMixin = {
                     value: value.value ? value.value + '' : '',
                     required: required,
                     model: model,
-                    errors: errors,
+                    noError: true,
+                    // errors: errors,
                     editable: editable,
                     component: component,
                     keyboard: search ? null : 'numeric',
@@ -1760,13 +1761,14 @@ var NewResourceMixin = {
                     enumProp: utils.getModel(MONEY).value.properties.currency,
                     required: required,
                     value:    utils.normalizeCurrencySymbol(value.currency),
-                    errors:   errors,
+                    // errors:   errors,
                     component: component,
                     // noError:  errors && errors[prop],
                     noError: true
                   })
         }
       </View>
+      {this.getErrorView({prop})}
       {this.getHelp(prop)}
       </View>
     );

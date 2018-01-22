@@ -84,12 +84,12 @@ class NewResource extends Component {
 
   constructor(props) {
     super(props);
-    var r = {};
+    let r = {};
     if (props.resource)
       r = utils.clone(props.resource) //extend(true, r, props.resource)
     else
       r[constants.TYPE] = props.model.id
-    var isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[constants.ROOT_HASH]);
+    let isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[constants.ROOT_HASH]);
 
     this.state = {
       resource: r,
@@ -102,8 +102,8 @@ class NewResource extends Component {
     }
     this.onSavePressed = this.onSavePressed.bind(this)
     this.showTermsAndConditions = this.showTermsAndConditions.bind(this)
-    var currentRoutes = this.props.navigator.getCurrentRoutes()
-    var currentRoutesLength = currentRoutes.length
+    let currentRoutes = this.props.navigator.getCurrentRoutes()
+    let currentRoutesLength = currentRoutes.length
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.props.search
             ? this.getSearchResult.bind(this)
             : this.onSavePressed
@@ -199,7 +199,7 @@ class NewResource extends Component {
   }
 
   itemAdded(params) {
-    var resource = params.resource;
+    let resource = params.resource;
     if (params.action === 'languageChange') {
       this.props.navigator.popToTop()
       return
@@ -221,7 +221,7 @@ class NewResource extends Component {
       return
     }
     if (params.action === 'getTemporary') {
-      var r = {}
+      let r = {}
       extend(r, this.state.resource)
       extend(r, params.resource)
       this.setState({
@@ -242,7 +242,7 @@ class NewResource extends Component {
       Alert.alert(
         params.error,
       )
-      var actionParams = {
+      let actionParams = {
         query: this.state.filter,
         modelName: this.props.modelName,
         to: this.props.resource,
@@ -275,14 +275,14 @@ class NewResource extends Component {
       return;
     }
 
-    var self = this;
-    var title = utils.getDisplayName(resource);
-    var isMessage = utils.isMessage(resource)
+    let self = this;
+    let title = utils.getDisplayName(resource);
+    let isMessage = utils.isMessage(resource)
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
     if (isMessage) {
       if (this.props.originatingMessage  &&  resource[constants.ROOT_HASH] !== this.props.originatingMessage[constants.ROOT_HASH]) {
-        var params = {
+        let params = {
           value: {_documentCreated: true, _document: utils.getId(resource)},
           resource: this.props.originatingMessage,
           meta: utils.getModel(this.props.originatingMessage[constants.TYPE]).value
@@ -292,9 +292,9 @@ class NewResource extends Component {
         return;
       }
     }
-    var currentRoutes = self.props.navigator.getCurrentRoutes();
-    var currentRoutesLength = currentRoutes.length;
-    var navigateTo = (currentRoutesLength == 2)
+    let currentRoutes = self.props.navigator.getCurrentRoutes();
+    let currentRoutesLength = currentRoutes.length;
+    let navigateTo = (currentRoutesLength == 2)
              ? this.props.navigator.replace
              : this.props.navigator.replacePrevious
     // Editing form originated from chat
@@ -371,9 +371,9 @@ class NewResource extends Component {
 
     this.state.submitted = true
     this.state.noScroll = false
-    var resource = this.state.resource;
+    let resource = this.state.resource;
 
-    var value = this.refs.form  &&  this.refs.form.getValue() ||  resource
+    let value = this.refs.form  &&  this.refs.form.getValue() ||  resource
     if (!value) {
       value = this.refs.form.refs.input.state.value;
       if (!value)
@@ -381,28 +381,28 @@ class NewResource extends Component {
     }
 
     // value is a tcomb Struct
-    var json = utils.clone(value);
+    let json = utils.clone(value);
     let isNew = !resource[constants.ROOT_HASH]
     this.checkEnums(json, resource)
     if (this.floatingProps) {
-      for (var p in this.floatingProps) {
+      for (let p in this.floatingProps) {
         if (isNew  ||  resource[p] !== this.floatingProps[p])
           json[p] = this.floatingProps[p]
       }
     }
     let model = this.props.model
     let props = model.properties
-    var required = utils.ungroup(model, model.required)
+    let required = utils.ungroup(model, model.required)
     if (!required) {
       required = []
-      for (var p in props) {
+      for (let p in props) {
         if (p.charAt(0) !== '_'  &&  !props[p].readOnly)
           required.push(p)
       }
     }
-    var missedRequiredOrErrorValue = {}
+    let missedRequiredOrErrorValue = {}
     required.forEach((p) =>  {
-      var v = (typeof json[p] !== 'undefined') || json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
+      let v = (typeof json[p] !== 'undefined') || json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
       if (v) {
         if (typeof v === 'string'  &&  !v.length) {
           v = null
@@ -429,7 +429,7 @@ class NewResource extends Component {
             else if (ref === 'tradle.Photo')
               return
             else if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
-              var units = props[p].units
+              let units = props[p].units
               if (units)
                 v = v.value
               else {
@@ -451,9 +451,9 @@ class NewResource extends Component {
           json[p] = false
         return
       }
-      var isDate = Object.prototype.toString.call(v) === '[object Date]'
+      let isDate = Object.prototype.toString.call(v) === '[object Date]'
       if (!v  ||  (isDate  &&  isNaN(v.getTime())))  {
-        var prop = props[p]
+        let prop = props[p]
         if (prop.items  &&  prop.items.backlink)
           return
         if ((prop.ref) ||  isDate  ||  prop.items) {
@@ -466,8 +466,8 @@ class NewResource extends Component {
       }
     })
 
-    var err = this.validateProperties(json)
-    for (var p in err)
+    let err = this.validateProperties(json)
+    for (let p in err)
       missedRequiredOrErrorValue[p] = err[p]
 
     // if ('scanJson' in missedRequiredOrErrorValue) {
@@ -481,7 +481,7 @@ class NewResource extends Component {
       console.log('onSavePressed not all required: submitted = false')
 
       this.state.submitted = false
-      var state = {
+      let state = {
         missedRequiredOrErrorValue: missedRequiredOrErrorValue
       }
       this.setState(state)
@@ -493,11 +493,11 @@ class NewResource extends Component {
     // HACK: adding new server url action should disable keyboard on submission
     if (resource[constants.TYPE] === SETTINGS)
       this.setState({submitted: false, disableEditing: true})
-    var r = {}
+    let r = {}
     extend(true, r, resource)
     json._context = r._context ||  (this.props.originatingMessage  &&  this.props.originatingMessage._context)
     delete r.url
-    var params = {
+    let params = {
       value: json,
       resource: r,
       meta: this.props.model,
@@ -515,8 +515,8 @@ class NewResource extends Component {
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field
   checkEnums(json, resource) {
-    var props = this.props.model.properties
-    for (var p in json) {
+    let props = this.props.model.properties
+    for (let p in json) {
       if (!props[p]  ||  !props[p].ref)
         continue
       let m = utils.getModel(props[p].ref).value
@@ -525,14 +525,14 @@ class NewResource extends Component {
     }
   }
   addFormValues() {
-    var value = this.refs.form.getValue();
-    var json = value ? value : this.refs.form.refs.input.state.value;
-    var resource = this.state.resource;
+    let value = this.refs.form.getValue();
+    let json = value ? value : this.refs.form.refs.input.state.value;
+    let resource = this.state.resource;
     if (!resource) {
       resource = {};
       resource[constants.TYPE] = this.props.model.id;
     }
-    for (var p in json)
+    for (let p in json)
       if (!resource[p] && json[p])
         resource[p] = json[p];
     return resource;
@@ -540,16 +540,16 @@ class NewResource extends Component {
   onAddItem(propName, item) {
     if (!item)
       return;
-    var resource = this.addFormValues();
+    let resource = this.addFormValues();
     if (this.props.model.properties[propName].items.ref)
       item[constants.TYPE] = this.props.model.properties[propName].items.ref
-    var items = resource[propName];
+    let items = resource[propName];
     if (!items) {
       items = [];
       resource[propName] = items;
     }
     items.push(item);
-    var itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
+    let itemsCount = this.state.itemsCount ? this.state.itemsCount  + 1 : 1
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[propName]
     this.setState({
@@ -561,13 +561,13 @@ class NewResource extends Component {
   }
 
   onNewPressed(bl) {
-    var resource = this.addFormValues();
+    let resource = this.addFormValues();
     this.setState({resource: resource, err: '', inFocus: bl.name});
     // if (bl.name === 'photos') {
     //   this.showChoice(bl);
     //   return;
     // }
-    var blmodel = bl.items.ref ? utils.getModel(bl.items.ref).value : this.props.model
+    let blmodel = bl.items.ref ? utils.getModel(bl.items.ref).value : this.props.model
     if (bl.items.ref  &&  bl.allowToAdd) {
       this.props.navigator.push({
         id: 30,
@@ -603,64 +603,48 @@ class NewResource extends Component {
     });
   }
   getSearchResult() {
-    var value = this.refs.form.getValue();
+    let value = this.refs.form.getValue();
     if (!value) {
       value = this.refs.form.refs.input.state.value;
       if (!value)
         value = {}
     }
     this.checkEnums(value, this.state.resource)
-    var currentRoutes = this.props.navigator.getCurrentRoutes()
-    var currentRoutesLength = currentRoutes.length
+    let currentRoutes = this.props.navigator.getCurrentRoutes()
+    let currentRoutesLength = currentRoutes.length
 
     // HACK: set filtering resource for right button on RL so that next
     // time filter shows in the form
     currentRoutes[currentRoutesLength - 2].onRightButtonPress.passProps.resource = value
     this.props.navigator.pop()
     this.props.searchWithFilter(value)
-
-    // let {model} = this.props
-    // this.props.navigator.replace({
-    //   id: 31,
-    //   title: translate('Search ' + utils.makeModelTitle(model)),
-    //   backButtonTitle: 'Back',
-    //   component: GridList,
-    //   passProps: {
-    //     modelName: model.id,
-    //     resource: value,
-    //     bankStyle: this.props.bankStyle,
-    //     currency: this.props.currency,
-    //     limit: 20,
-    //     search: true
-    //   }
-    // })
   }
 
   render() {
     if (this.state.isUploading)
       return <View/>
 
-    var props = this.props;
-    var parentBG = {backgroundColor: '#7AAAC3'};
-    var resource = this.state.resource;
+    let props = this.props;
+    let parentBG = {backgroundColor: '#7AAAC3'};
+    let resource = this.state.resource;
 
-    var meta =  props.model;
+    let meta =  props.model;
     if (this.props.setProperty)
       this.state.resource[this.props.setProperty.name] = this.props.setProperty.value;
-    var data = {};
-    var model = {};
-    var arrays = [];
+    let data = {};
+    let model = {};
+    let arrays = [];
     extend(true, data, resource);
-    var isMessage = utils.isMessage(resource)
-    var isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
-    var showSendVerificationForm = false;
-    var formToDisplay;
+    let isMessage = utils.isMessage(resource)
+    let isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
+    let showSendVerificationForm = false;
+    let formToDisplay;
     if (isMessage) {
-      var len = resource.message  &&  utils.splitMessage(resource.message).length;
+      let len = resource.message  &&  utils.splitMessage(resource.message).length;
       if (len < 2)
         showSendVerificationForm = true;
     }
-    var params = {
+    let params = {
         meta: meta,
         data: data,
         model: model,
@@ -680,8 +664,7 @@ class NewResource extends Component {
         params.formErrors[r.name] = r.error
       })
     }
-    var options = this.getFormFields(params);
-
+    let options = this.getFormFields(params);
     if (!options) {
       let contentSeparator = utils.getContentSeparator(bankStyle)
       return <PageView style={platformStyles.container} separator={contentSeparator}>
@@ -702,8 +685,8 @@ class NewResource extends Component {
              </PageView>
     }
 
-    var Model = t.struct(model);
-    var itemsMeta
+    let Model = t.struct(model);
+    let itemsMeta
     if (this.props.editCols) {
       itemsMeta = []
       this.props.editCols.forEach((p) => {
@@ -714,12 +697,12 @@ class NewResource extends Component {
     else
       itemsMeta = utils.getItemsMeta(meta);
 
-    var self = this;
-    var arrayItems = [];
-    var itemsArray
+    let self = this;
+    let arrayItems = [];
+    let itemsArray
     if (!this.props.search) {
-      for (var p in itemsMeta) {
-        var bl = itemsMeta[p]
+      for (let p in itemsMeta) {
+        let bl = itemsMeta[p]
         if (bl.icon === 'ios-telephone-outline') {
           bl.icon = 'ios-call-outline'
         }
@@ -729,9 +712,8 @@ class NewResource extends Component {
           continue
         }
         let blmodel = meta
-        var counter, count = 0
         itemsArray = null
-        var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+        let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
         if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO))
           arrayItems.push(this.getPhotoItem(bl, styles))
         else
@@ -743,13 +725,13 @@ class NewResource extends Component {
     else
       Form.stylesheet = stylesheet
 
-    var style = {backgroundColor: 'transparent'}
+    let style = {backgroundColor: 'transparent'}
     if (!options)
       options = {}
     options.auto = 'placeholders';
     options.tintColor = 'red'
-    var photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
-    var button = isRegistration
+    let photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
+    let button = isRegistration
                ? <View>
                    <TouchableOpacity style={styles.thumbButton}
                       onPress={this.state.termsAccepted ? this.onSavePressed : this.showTermsAndConditions}>
@@ -759,9 +741,9 @@ class NewResource extends Component {
                    </TouchableOpacity>
                  </View>
                : <View style={styles.noRegistrationButton} />
-    var width = isRegistration ? utils.dimensions(NewResource).width : utils.getContentWidth(NewResource)
-    var height = utils.dimensions(NewResource).height
-    var formStyle = isRegistration
+    let width = isRegistration ? utils.dimensions(NewResource).width : utils.getContentWidth(NewResource)
+    let height = utils.dimensions(NewResource).height
+    let formStyle = isRegistration
                   ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
                   : {justifyContent: 'flex-start', width: width}
     let jsonProps = utils.getPropertiesWithRange('json', meta)
@@ -831,7 +813,7 @@ class NewResource extends Component {
                     </View>
     }
 
-    // var submit
+    // let submit
     // if (!isRegistration)
     //   submit = <View style={styles.submitButton}>
     //              <TouchableOpacity onPress={this.onSavePressed.bind(this)}>
@@ -865,7 +847,7 @@ class NewResource extends Component {
                   </TouchableOpacity>
 
     }
-    var content =
+    let content =
       <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center', paddingTop:10}}
                   ref='scrollView' {...this.scrollviewProps}>
         <View style={[styles.container, formStyle]}>
@@ -913,6 +895,16 @@ class NewResource extends Component {
       )
     }
     if (!isRegistration) {
+      let errors
+      if (this.state.missedRequiredOrErrorValue  &&  !utils.isEmpty(this.state.missedRequiredOrErrorValue)) {
+        errors = <View style={styles.errors}>
+                   <Text style={styles.errorsText}>{translate('fillRequiredFields')}</Text>
+                 </View>
+        // errors = <View style={{height: 35, justifyContent: 'center', alignItems: 'flex-end'}}>
+        //            <Text style={{color: '#990000', fontSize: 14, paddingRight: 10}}>{'Please fill out all required properties'}</Text>
+        //          </View>
+
+      }
       let contentSeparator = utils.getContentSeparator(bankStyle)
       return <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator}>
                {content}
@@ -1005,8 +997,8 @@ class NewResource extends Component {
   }
 
   cancelItem(pMeta, item) {
-    var list = this.state.resource[pMeta.name];
-    for (var i=0; i<list.length; i++) {
+    let list = this.state.resource[pMeta.name];
+    for (let i=0; i<list.length; i++) {
       if (equal(list[i], item)) {
         list.splice(i, 1);
         this.setState({
@@ -1018,15 +1010,15 @@ class NewResource extends Component {
     }
   }
 
-  showItems(prop, model, event) {
-    var resource = this.state.resource;
-    var model = (this.props.model  ||  this.props.metadata)
+  showItems(prop) {
+    let resource = this.state.resource;
+    let model = (this.props.model  ||  this.props.metadata)
     if (!resource) {
       resource = {};
       resource[constants.TYPE] = model.id;
     }
 
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    let currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       title: translate('tapToRemovePhotos'), //Tap to remove photos',
       titleTintColor: 'red',
@@ -1050,18 +1042,17 @@ class NewResource extends Component {
       return
     let meta = this.props.model
     let blmodel = meta
-    var counter, count = 0
-    let itemsArray = null
-    var count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     let lcolor = this.getLabelAndBorderColor(bl.name)
     let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
     let { bankStyle } = this.props
     let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
 
+    let counter, itemsArray
+    let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     if (count) {
       let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
 
-      var separator = <View style={styles.separator}></View>
+      let separator = <View style={styles.separator}></View>
       let cstyle = count ? styles.activePropTitle : styles.noItemsText
       itemsArray = <View>
                      <Text style={[cstyle, {color: lcolor}]}>{translate(bl, blmodel)}</Text>
@@ -1081,18 +1072,12 @@ class NewResource extends Component {
                   }
                 </View>
     }
-    var err = this.state.missedRequiredOrErrorValue
+    let err = this.state.missedRequiredOrErrorValue
             ? this.state.missedRequiredOrErrorValue[bl.name]
             : null
-    var errTitle = translate('thisFieldIsRequired')
-    var error = err
-              ? <View style={styles.error}>
-                  <Text style={styles.errorText}>{errTitle}</Text>
-                </View>
-              : <View/>
 
-    var aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-    var actionableItem = isPhoto
+    let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
+    let actionableItem = isPhoto
       ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
           {itemsArray}
         </ImageInput>
@@ -1149,15 +1134,16 @@ class NewResource extends Component {
     let acStyle = [{flex: 1, position: 'absolute', right: 0},
                    count || utils.isWeb() ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}
                  ]
-    var actionableCounter = isPhoto
+    let actionableCounter = isPhoto
       ? <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
           {counter}
         </ImageInput>
       : <TouchableHighlight style={acStyle}
             onPress={this.onNewPressed.bind(this, bl, meta)}>
           {counter}
-        </TouchableHighlight>
+        </TouchableOpacity>
 
+    let error = this.getErrorView({prop: bl})
     return (
       <View key={this.getNextKey()}>
         <View style={[istyle, {marginHorizontal: 10, borderBottomColor: lcolor}]} ref={bl.name}>
@@ -1166,8 +1152,8 @@ class NewResource extends Component {
             {actionableCounter}
           </View>
         </View>
-        {this.getHelp(bl)}
         {error}
+        {this.getHelp(bl)}
       </View>
     );
   }
@@ -1185,10 +1171,10 @@ class NewResource extends Component {
 
     let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
     if (count) {
-      var items = []
-      var arr = resource[bl.name]
-      var n = Math.min(arr.length, utils.isWeb() ? utils.dimensions().width - 100 / 40 :  7)
-      for (var i=0; i<n; i++) {
+      let items = []
+      let arr = resource[bl.name]
+      let n = Math.min(arr.length, utils.isWeb() ? utils.dimensions().width - 100 / 40 :  7)
+      for (let i=0; i<n; i++) {
         items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
           this.openModal(arr[i])
         }}/>)
@@ -1211,17 +1197,9 @@ class NewResource extends Component {
                   <Icon name='ios-camera-outline'  size={35} color={linkColor} />
                 </View>
     }
-    var title = translate(bl, blmodel) //.title || utils.makeLabel(p)
-    var err = this.state.missedRequiredOrErrorValue
-            ? this.state.missedRequiredOrErrorValue[bl.name]
-            : null
-    var errTitle = translate('thisFieldIsRequired')
-    var error = err
-              ? <View style={styles.error}>
-                  <Text style={styles.errorText}>{errTitle}</Text>
-                </View>
-              : <View/>
-    var actionableItem
+    let title = translate(bl, blmodel) //.title || utils.makeLabel(p)
+    let error = this.getErrorView({prop: bl})
+    let actionableItem
     if (count)
       actionableItem = <TouchableOpacity style={styles.itemsWithCount} onPress={this.showItems.bind(this, bl, meta)}>
                          {itemsArray}
@@ -1270,18 +1248,18 @@ class NewResource extends Component {
 
   onSubmitEditing(msg) {
     msg = msg ? msg : this.state.userInput;
-    var assets = this.state.selectedAssets;
-    var isNoAssets = utils.isEmpty(assets);
+    let assets = this.state.selectedAssets;
+    let isNoAssets = utils.isEmpty(assets);
     if (!msg  &&  isNoAssets)
       return;
-    var me = utils.getMe();
-    var resource = {from: utils.getMe(), to: this.props.resource.to};
-    var model = this.props.model;
+    let me = utils.getMe();
+    let resource = {from: utils.getMe(), to: this.props.resource.to};
+    let model = this.props.model;
 
-    var toName = utils.getDisplayName(resource.to);
-    var meName = utils.getDisplayName(me);
-    var modelName = constants.TYPES.SIMPLE_MESSAGE;
-    var value = {
+    let toName = utils.getDisplayName(resource.to);
+    let meName = utils.getDisplayName(me);
+    let modelName = constants.TYPES.SIMPLE_MESSAGE;
+    let value = {
       message: msg
               ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
               : '',
@@ -1302,8 +1280,8 @@ class NewResource extends Component {
       value._context = this.props.context
 
     if (!isNoAssets) {
-      var photos = [];
-      for (var assetUri in assets)
+      let photos = [];
+      for (let assetUri in assets)
         photos.push({url: assetUri, title: 'photo'});
 
       value.photos = photos;
@@ -1402,15 +1380,15 @@ var styles = StyleSheet.create({
     marginRight: 2,
     borderRadius: 5
   },
-  error: {
-    marginTop: -10,
-    backgroundColor: 'transparent'
-  },
-  errorText: {
-    fontSize: 14,
-    marginLeft: 10,
-    color: '#a94442'
-  },
+  // error: {
+  //   marginTop: -10,
+  //   backgroundColor: 'transparent'
+  // },
+  // errorText: {
+  //   fontSize: 14,
+  //   marginLeft: 10,
+  //   color: '#a94442'
+  // },
   items: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1484,6 +1462,16 @@ var styles = StyleSheet.create({
     color: '#ffffff',
     alignSelf: 'center'
   },
+  errors: {
+    height: 35,
+    justifyContent: 'center',
+    backgroundColor: '#990000',
+    alignItems: 'center'
+  },
+  errorsText: {
+    color: '#eeeeee',
+    fontSize: 16
+  }
 })
 
 module.exports = NewResource;
