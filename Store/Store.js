@@ -5020,8 +5020,11 @@ var Store = Reflux.createStore({
     }
     else
       verifications  = await this.searchMessages(params)
-    if (!verifications)
+    if (!verifications) {
+      if (batch.length)
+        db.batch(batch)
       return
+    }
 
     let all = verifications.length
     for (let i=0; i<all; i++) {
@@ -5718,7 +5721,11 @@ var Store = Reflux.createStore({
 
   async getCurrentContext(to, orgId) {
     // let c = await this.searchMessages({modelName: PRODUCT_APPLICATION, to: to})
-    let c = await this.searchMessages({modelName: CONTEXT, to: to})
+    let c
+    if (me.isEmployee)
+      c = await this.searchServer({modelName: CONTEXT, to: to})
+    else
+      c = await this.searchMessages({modelName: CONTEXT, to: to})
     if (!c  ||  !c.length)
       return
 
@@ -5889,15 +5896,17 @@ var Store = Reflux.createStore({
       })
       context = context  &&  context.list  &&  context.list.length  &&  context.list[0]
     }
-    let author, recipient
+    let author //, recipient
     if (application) {
       author = (applicant  &&  applicant[ROOT_HASH]) || applicantId.split('_')[1]
-      recipient = myBot[ROOT_HASH]
+      // recipient = myBot[ROOT_HASH]
     }
     else {
-      recipient = myBot[ROOT_HASH]
+      // recipient = myBot[ROOT_HASH]
       if (to)
         author = to[TYPE] === PROFILE ? to[ROOT_HASH] : this.getRepresentative(to)[ROOT_HASH]
+      else
+        author = myBot[ROOT_HASH]
     }
     let all = graphQL.getChat({
       client: this.client,
@@ -5907,7 +5916,7 @@ var Store = Reflux.createStore({
       direction,
       endCursor,
       author,
-      recipient,
+      // recipient,
     })
     let result = await Promise.all([all, importedVerification ||  Q()])
 
@@ -6510,7 +6519,15 @@ var Store = Reflux.createStore({
         this.addVisualProps(r)
       })
       // Minor hack before we intro sort property here
-      foundResources.sort((a, b) => a.time - b.time)
+      let sortedFR = []
+
+      for (let i=links.length - 1; i>=0; i--) {
+        let fr = foundResources.find((r) => r[CUR_HASH] === links[i])
+        if (fr)
+          sortedFR.push(fr)
+      }
+      foundResources = sortedFR
+      // foundResources.sort((a, b) => a.time - b.time)
       let list = []
       let len = foundResources.length
       for (let i=0; i<len; i++) {
@@ -7546,7 +7563,7 @@ var Store = Reflux.createStore({
     var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
     var reps = isOrg ? this.getRepresentatives(org) : [utils.getId(to)]
     var self = this
-    // var productsToShare = await this.searchMessages({modelName: MY_PRODUCT, to: utils.getMe(), strict: true, search: me.isEmployee })
+
     var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true })
     if (productsToShare  &&   productsToShare.list.length) {
       productsToShare.list.forEach((r) => {
@@ -7588,19 +7605,78 @@ var Store = Reflux.createStore({
     if (!verTypes.length)
       return {verifications: shareableResources}
     let toId = utils.getId(to)
-    // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
     let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {[TYPE]: verTypes}})
-    if (!l) //  &&  !me.isEmployee)
-      return
-    let rep = me.isEmployee ? this.getRepresentative(me.organization) : null
-    if (me.isEmployee)
-      rep = utils.getId(rep)
-    l.forEach((val) => {
-      var id = utils.getId(val.to.id);
-      if (id !== meId) {
-        if (me.isEmployee  &&  id !== rep)
+    // if (!l)
+    //   return
+    let verifiedShares = {}
+    if (l) {
+      l.forEach((val) => {
+        checkOneVerification(val)
+        verifiedShares[utils.getId(val.document)] = val
+      })
+    }
+    // Allow sharing non-verified forms
+    let curContext = await this.getCurrentContext(to)
+    let promises = []
+    verTypes.forEach((verType) => {
+      if (hasVerifiers  &&  hasVerifiers[verType])
+        return
+      promises.push(this.searchSharables({modelName: verType}))
+    })
+    let result = await Promise.all(promises)
+    result.forEach((ll) => {
+      if (!ll)
+        return
+
+      ll.forEach((r) => {
+        if (r.verificationsCount)
           return
+        if (verifiedShares[utils.getId(r)])
+          return
+        if (this.checkIfWasShared(r, to))
+          return
+        if (!curContext  ||  (r._context  &&  utils.getId(curContext) !== utils.getId(r._context))) {
+          let rr = {
+            [TYPE]: VERIFICATION,
+            document: r,
+            organization: this._getItem(utils.getId(r.to)).organization
+          }
+          this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+        }
+      })
+    })
+    let multientryResources = {}
+    if (shareableResources) {
+      for (let t in shareableResources) {
+        let docs = shareableResources[t]
+        let rm = []
+        docs.forEach((ver, i) => {
+          let doc = ver.document
+          let c = doc._context
+          let requestFor = c.requestFor
+          let multiEntryForms = this.getModel(requestFor).multiEntryForms
+          if (!multiEntryForms || multiEntryForms.indexOf(doc[TYPE]) === -1)
+            return
+          let cId = utils.getId(c)
+          let meContexts = multientryResources[t]
+          if (!meContexts) {
+            meContexts = {}
+            multientryResources[t] = meContexts
+          }
+          if (!meContexts[cId])
+            meContexts[cId] = []
+          meContexts[cId].push(ver)
+          // rm.push[i]
+        })
+        if (rm) {
+          for (let i=rm.length - 1; i>=0; i--)
+            docs.splice(rm[i], 1)
+        }
       }
+    }
+    return {verifications: shareableResources, multiEntryForms: multientryResources, providers: shareableResourcesRootToOrgs}
+    function checkOneVerification(val) {
+      var id = utils.getId(val.to.id);
 
       var doc = val.document
       var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
@@ -7667,56 +7743,7 @@ var Store = Reflux.createStore({
 
       this.addVisualProps(value)
       this.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
-    })
-    // Allow sharing non-verified forms
-    let curContext = await this.getCurrentContext(to)
-    let repId
-    if (me.isEmployee) {
-      let rep = this.getRepresentative(me.organization)
-      repId = rep[ROOT_HASH]
     }
-    for (let i=0; i<verTypes.length; i++) {
-      let verType = verTypes[i]
-      if (hasVerifiers  &&  hasVerifiers[verType])
-        return
-      var ll = await this.searchSharables({
-        modelName: verType,
-        filterResource: {_author: repId}
-      })
-      // var ll = await this.searchMessages({modelName: verType, search: me.isEmployee})
-      // var l = this.searchNotMessages({modelName: verType, notVerified: true})
-      if (!ll)
-        return
-
-      ll.forEach((r) => {
-        if (r.verificationsCount)
-          return
-        if (this.checkIfWasShared(r, to))
-          return
-        if (me.isEmployee) {
-          if (!r._context  ||  (r._context  &&  utils.getId(curContext) !== utils.getId(r._context))) {
-            let rr = {
-              [TYPE]: VERIFICATION,
-              document: r,
-              organization: this._getItem(utils.getId(r.to)).organization
-            }
-            if (!shareableResources[verType])
-              shareableResources[verType] = []
-            shareableResources[verType].push(rr)
-            // addAndCheckShareable(rr)
-          }
-        }
-        if (!curContext  ||  (r._context  &&  utils.getId(curContext) !== utils.getId(r._context))) {
-          let rr = {
-            [TYPE]: VERIFICATION,
-            document: r,
-            organization: this._getItem(utils.getId(r.to)).organization
-          }
-          this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
-        }
-      })
-    }
-    return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
   },
   async getShareableResourcesForEmployee(params) {
     let {foundResources, to, context} = params
@@ -7732,9 +7759,16 @@ var Store = Reflux.createStore({
     var verTypes = [];
     var meId = utils.getId(me)
     var simpleLinkMessages = {}
-    var meId = utils.getId(utils.getMe())
+    var meId = utils.getId(me)
+    let repId, myRep
+    if (me.isEmployee) {
+      myRep = this.getRepresentative(me.organization)
+      repId = myRep[ROOT_HASH]
+    }
 
     var hasVerifiers = []
+    var contexts = {}
+    let toR = (to.organization  &&  this._getItem(to.organization)) || to
     for (var i=0; i<foundResources.length; i++) {
       var r = foundResources[i]
       if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
@@ -7760,21 +7794,22 @@ var Store = Reflux.createStore({
           continue
         // let isMultiEntry = productModel.multiEntryForms && productModel.multiEntryForms.indexOf(r.form) !== -1
 
-        let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: r.form}, to: to.organization || to, search: me.isEmployee, context: r._context, noTrigger: true })
+        let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: r.form}, to: toR, search: me.isEmployee, context: r._context, noTrigger: true })
         if (res  &&  res.list  && res.list.length) {
-          let showShare
+          // let showShare
           // if (isMultiEntry) {
           //   res.forEach((mr) => {
           //     if (r.context !== mr._context.contextId)
           //       showShare = true
           //   })
           // }
-          if (!showShare) {
+          // if (!showShare) {
             // this._getItem(utils.getId(r))._documentCreated = true
             // r._documentCreated = true
             continue
-          }
+          // }
         }
+        contexts[utils.getId(r._context)] = r._context
         verTypes.push(msgModel.id);
         if (r.verifiers)
           hasVerifiers[msgModel.id] = r.verifiers
@@ -7793,11 +7828,6 @@ var Store = Reflux.createStore({
 
     // Allow sharing non-verified forms
     // let context = await this.getCurrentContext(to)
-    let repId
-    if (me.isEmployee) {
-      let rep = this.getRepresentative(me.organization)
-      repId = rep[ROOT_HASH]
-    }
     let typeToDocs = {}
     let docs = []
     for (let i=0; i<verTypes.length; i++) {
@@ -7806,34 +7836,83 @@ var Store = Reflux.createStore({
         continue
       var ll = await this.searchSharables({
         modelName: verType,
+        filterResource: {_author: myRep[CUR_HASH]},
+        noTrigger: true,
         // modelName: MESSAGE,
-        // filterResource: {_author: repId}
-        // to: to,
-        // filterResource: {_payloadType: verType}
+        // to: myRep,
+        // filterResource: {_payloadType: verType},
       })
       if (!ll  ||  !ll.list  ||  !ll.list.length)
         continue
 
       typeToDocs[verType] = ll.list
-      ll.list.forEach((r) => docs.push(utils.getId(r)))
+      ll.list.forEach((r) => {
+        let dId = utils.getId(r)
+        if (!contexts[dId])
+        // if (!this.checkIfWasShared(r, to))
+          docs.push(dId)
+      })
     }
     if (!docs.length)
       return
+
     let toId = utils.getId(to)
     // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
-    let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {document: docs}, properties: ['document']})
-    if (!l)
-      return
-    let rep
-    if (me.isEmployee) {
-      let representative = this.getRepresentative(me.organization)
-      rep = utils.getId(representative)
+    let result = await this.searchSharables({modelName: VERIFICATION, filterResource: {document: docs}, properties: ['document'], noTrigger: true,})
+    let verifiedShares ={}
+    // let promises = []
+    if (result  &&  result.list) {
+      let rep
+      if (me.isEmployee) {
+        let representative = this.getRepresentative(me.organization)
+        rep = utils.getId(representative)
+      }
+      let contextId = context && utils.getId(context)
+
+      let l = result.list
+      l.forEach((val) => {
+        checkOneVerification(val, contextId)
+        // if (checkOneVerification(val, contextId)) {
+        //   if (!val._context) {
+        //     let vTo = val.to.id.split('_')
+        //     promises.push(this.searchServer({modelName: MESSAGE, to: val.to, filterResource: {_payloadType: VERIFICATION, object___link: val[CUR_HASH]}}))
+        //   }
+        // }
+        verifiedShares[utils.getId(val.document)] = val
+      })
     }
-    let contextId = context && utils.getId(context)
-    l.forEach((val) => {
+    for (let t in typeToDocs) {
+      let list = typeToDocs[t]
+
+      list.forEach((d) => {
+        if (verifiedShares[utils.getId(d)])
+          return
+        let rr = {
+          [TYPE]: VERIFICATION,
+          document: d,
+          organization: this._getItem(utils.getId(d.from)).organization
+        }
+        this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+        // if (this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})) {
+        //   if (!d._context) {
+        //     let dTo = this._getItem(d.to)
+        //     promises.push(this.searchServer({modelName: MESSAGE, to: dTo, filterResource: {_payloadType: d[TYPE], object___link: d[CUR_HASH]}}))
+        //   }
+        // }
+      })
+    }
+    // if (promises.length) {
+    //   contexts = await Promise.all(promises)
+    //   contexts.forEach((c) => {
+    //     c = c
+    //   })
+    // }
+
+    return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
+    function checkOneVerification(val, contextId) {
       var id = utils.getId(val.to.id);
       if (id !== meId) {
-        if (me.isEmployee  &&  id !== rep)
+        if (me.isEmployee  &&  id !== myRep)
           return
       }
       let frId = utils.getId(val.from.id)
@@ -7857,12 +7936,12 @@ var Store = Reflux.createStore({
         if (utils.getId(context) === contextId)
           return
       }
-      // var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
-      // if (!document  ||  document._inactive)
-      //   return;
+      // // var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
+      // // if (!document  ||  document._inactive)
+      // //   return;
 
-      if (this.checkIfWasShared(document, to))
-        return
+      // if (this.checkIfWasShared(document, to))
+      //   return
       // Check if there is at least one verification by the listed in FormRequest verifiers
       if (hasVerifiers  &&  hasVerifiers[docType]) {
         let verifiers = hasVerifiers[docType]
@@ -7886,10 +7965,8 @@ var Store = Reflux.createStore({
       value.document = document;
 
       this.addVisualProps(value)
-      this.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
-    })
-
-    return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
+      return this.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+    }
   },
   checkIfWasShared(document, to) {
     let toId = utils.getId(to)
@@ -7974,6 +8051,7 @@ var Store = Reflux.createStore({
       shareableResources[docType].push(verification)
       shareableResourcesRootToR[r[ROOT_HASH]] = r
       this.addSharedWithProvider(verification, shareables)
+      return true
     }
   },
   addSharedWithProvider(verification, shareables) {

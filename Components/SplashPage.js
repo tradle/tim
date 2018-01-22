@@ -56,7 +56,7 @@ class SplashPage extends Component {
 
 const splashStyle = {
   title: {
-    fontWeight: 100,
+    fontWeight: '100',
     fontSize: 50
   }
 }
