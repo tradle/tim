@@ -7653,6 +7653,8 @@ var Store = Reflux.createStore({
         docs.forEach((ver, i) => {
           let doc = ver.document
           let c = doc._context
+          if (!c)
+            return
           let requestFor = c.requestFor
           let multiEntryForms = this.getModel(requestFor).multiEntryForms
           if (!multiEntryForms || multiEntryForms.indexOf(doc[TYPE]) === -1)
@@ -7687,11 +7689,11 @@ var Store = Reflux.createStore({
       // var fromOrgId = utils.getId(this._getItem(fromId).organization)
       // if (fromOrgId === toId)
       //   return
-      var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
+      var document = doc.id ? self._getItem(utils.getId(doc)) : doc;
       if (!document  ||  document._inactive)
         return;
 
-      if (this.checkIfWasShared(document, to))
+      if (self.checkIfWasShared(document, to))
         return
       // Check if there is at least one verification by the listed in FormRequest verifiers
       if (hasVerifiers  &&  hasVerifiers[docType]) {
@@ -7701,7 +7703,7 @@ var Store = Reflux.createStore({
           let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
           if (!provider.length)
             return
-          let spReps = this.getRepresentatives(provider[0].org)
+          let spReps = self.getRepresentatives(provider[0].org)
           let sw = val._sharedWith.filter((r) => {
             return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
           })
@@ -7741,8 +7743,8 @@ var Store = Reflux.createStore({
       extend(value, val);
       value.document = document;
 
-      this.addVisualProps(value)
-      this.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+      self.addVisualProps(value)
+      self.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
     }
   },
   async getShareableResourcesForEmployee(params) {
@@ -7916,7 +7918,7 @@ var Store = Reflux.createStore({
           return
       }
       let frId = utils.getId(val.from.id)
-      let fr = this._getItem(frId)
+      let fr = self._getItem(frId)
       if (!fr)
         return
 
@@ -7926,7 +7928,7 @@ var Store = Reflux.createStore({
         return;
       // Filter out the verification from the same company
       // var fromId = utils.getId(val.from)
-      // var fromOrgId = utils.getId(this._getItem(fromId).organization)
+      // var fromOrgId = utils.getId(self._getItem(fromId).organization)
       // if (fromOrgId === toId)
       //   return
       let document = typeToDocs[docType].filter((d) => utils.getId(d) === doc.id)[0]
@@ -7936,11 +7938,11 @@ var Store = Reflux.createStore({
         if (utils.getId(context) === contextId)
           return
       }
-      // // var document = doc.id ? this._getItem(utils.getId(doc.id)) : doc;
+      // // var document = doc.id ? self._getItem(utils.getId(doc.id)) : doc;
       // // if (!document  ||  document._inactive)
       // //   return;
 
-      // if (this.checkIfWasShared(document, to))
+      // if (self.checkIfWasShared(document, to))
       //   return
       // Check if there is at least one verification by the listed in FormRequest verifiers
       if (hasVerifiers  &&  hasVerifiers[docType]) {
@@ -7950,7 +7952,7 @@ var Store = Reflux.createStore({
           let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
           if (!provider.length)
             return
-          let spReps = this.getRepresentatives(provider[0].org)
+          let spReps = self.getRepresentatives(provider[0].org)
           let sw = val._sharedWith.filter((r) => {
             return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
           })
@@ -7964,8 +7966,8 @@ var Store = Reflux.createStore({
       extend(value, val);
       value.document = document;
 
-      this.addVisualProps(value)
-      return this.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+      self.addVisualProps(value)
+      return self.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
     }
   },
   checkIfWasShared(document, to) {
@@ -9255,6 +9257,8 @@ var Store = Reflux.createStore({
           val.prefill = p
         }
         this.trigger({action: 'addItem', resource: val})
+        if (from.organization  && this.isYuki(from.organization))
+          this.trigger({action: 'yuki', yuki: {resource: val, organization: this._getItem(from.organization)}})
       }
     }
     else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
@@ -9271,6 +9275,9 @@ var Store = Reflux.createStore({
         }, 2000)
       }
     }
+  },
+  isYuki(fromOrg) {
+    return utils.getId(fromOrg) === utils.getId(yukiConfig.org)
   },
   putIdentityInDB(val, batch) {
     var profile = {}
