@@ -1720,7 +1720,8 @@ var NewResourceMixin = {
                     value: value.value ? value.value + '' : '',
                     required: required,
                     model: model,
-                    errors: errors,
+                    noError: true,
+                    // errors: errors,
                     editable: editable,
                     component: component,
                     keyboard: search ? null : 'numeric',
@@ -1732,13 +1733,14 @@ var NewResourceMixin = {
                     enumProp: utils.getModel(MONEY).value.properties.currency,
                     required: required,
                     value:    utils.normalizeCurrencySymbol(value.currency),
-                    errors:   errors,
+                    // errors:   errors,
                     component: component,
                     // noError:  errors && errors[prop],
                     noError: true
                   })
         }
       </View>
+      {this.getErrorView({prop})}
       {this.getHelp(prop)}
       </View>
     );
