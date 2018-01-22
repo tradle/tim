@@ -225,7 +225,7 @@ class ApplicationView extends Component {
   }
 
   assignRM() {
-    let resource = this.props.resource
+    let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
     if (utils.isRM(resource)) {
       Alert.alert(translate('youAreTheRM'))
@@ -256,8 +256,8 @@ class ApplicationView extends Component {
     )
   }
   openChat() {
-    let { resource, navigator, bankStyle } = this.props
-    resource = this.state.resource || resource
+    let { navigator, bankStyle } = this.props
+    let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
     let title
     if (resource.applicant.title)
@@ -290,7 +290,7 @@ class ApplicationView extends Component {
     navigator.push(route)
   }
   approve() {
-    let resource = this.props.resource
+    let resource = this.state.resource || this.props.resource
     console.log('Approve was chosen!')
     // if (resource.status === 'approved') {
     //   Alert.alert('Application was approved')
@@ -323,7 +323,7 @@ class ApplicationView extends Component {
     )
   }
   deny() {
-    let resource = this.props.resource
+    let resource = this.state.resource || this.props.resource
     let isApplication = resource[TYPE] === APPLICATION
     let applicantTitle = utils.getDisplayName(resource.applicant || resource.from)
     Alert.alert(

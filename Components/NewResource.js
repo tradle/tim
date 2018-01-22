@@ -1228,8 +1228,8 @@ class NewResource extends Component {
             </ImageInput>
           </View>
         </View>
-        {this.getHelp(bl)}
         {error}
+        {this.getHelp(bl)}
       </View>
     );
   }
