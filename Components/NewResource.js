@@ -40,7 +40,6 @@ import Native, {
   // StatusBar,
   Alert,
   Navigator,
-  TouchableHighlight,
   TouchableOpacity,
   Animated
 } from 'react-native';
@@ -1095,42 +1094,6 @@ class NewResource extends Component {
       let height = resource[bl.name].photo ? 55 : 45
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
-    if (!count  ||  !isPhoto) {
-      var aiStyle = [{paddingBottom: 7}]
-      return (
-        <View key={this.getNextKey()}>
-          <View style={[istyle, {marginHorizontal: 10}]} ref={bl.name}>
-           {isPhoto
-            ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
-                <View style={styles.items}>
-                  {itemsArray}
-                  {counter}
-                </View>
-              </ImageInput>
-            : <TouchableHighlight style={aiStyle} underlayColor='transparent'
-                  onPress={this.onNewPressed.bind(this, bl, meta)}>
-                <View style={styles.items}>
-                  {itemsArray}
-                  {counter}
-                </View>
-              </TouchableHighlight>
-          }
-          </View>
-          {error}
-        </View>
-      )
-    }
-    var aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-    var actionableItem = isPhoto
-      ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
-          {itemsArray}
-        </ImageInput>
-      : <TouchableHighlight style={aiStyle} underlayColor='transparent'
-            onPress={this.onNewPressed.bind(this, bl, meta)}>
-          {itemsArray}
-        </TouchableHighlight>
-
-
     let acStyle = [{flex: 1, position: 'absolute', right: 0},
                    count || utils.isWeb() ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}
                  ]
@@ -1138,7 +1101,7 @@ class NewResource extends Component {
       ? <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
           {counter}
         </ImageInput>
-      : <TouchableHighlight style={acStyle}
+      : <TouchableOpacity style={acStyle}
             onPress={this.onNewPressed.bind(this, bl, meta)}>
           {counter}
         </TouchableOpacity>
