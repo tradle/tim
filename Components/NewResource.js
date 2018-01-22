@@ -1024,8 +1024,8 @@ class NewResource extends Component {
             {actionableCounter}
           </View>
         </View>
-        {this.getHelp(bl)}
         {error}
+        {this.getHelp(bl)}
       </View>
     );
   }
@@ -1099,8 +1099,8 @@ class NewResource extends Component {
             </ImageInput>
           </View>
         </View>
-        {this.getHelp(bl)}
         {error}
+        {this.getHelp(bl)}
       </View>
     );
   }
