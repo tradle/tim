@@ -811,7 +811,14 @@ var NewResourceMixin = {
   onTakePic(prop, data) {
     if (!data)
       return
-    utils.onTakePic(prop, data, this.props.originatingMessage)
+    if (utils.isOnePropForm(this.props.resource))
+      utils.onTakePic(prop, data, this.props.originatingMessage)
+    else {
+      data.url = data.data
+      delete data.data
+      this.setChosenValue(prop, data)
+    }
+
     this.props.navigator.pop()
   },
 
@@ -1686,7 +1693,7 @@ var NewResourceMixin = {
     }
     else {
       let id = utils.getId(value)
-      resource[propName] = utils.buildRef(value)
+      resource[propName] = value[ROOT_HASH] ?  utils.buildRef(value) : value
 
       if (!this.floatingProps)
         this.floatingProps = {}
