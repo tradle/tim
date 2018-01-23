@@ -68,7 +68,7 @@ var search = {
 
   async searchServer(params) {
     let self = this
-    let {client, modelName, filterResource, sortProperty, asc, limit, endCursor, direction, first, noPaging, properties} = params
+    let {client, modelName, filterResource, sortProperty, asc, limit, endCursor, direction, first, properties} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
