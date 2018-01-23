@@ -7645,43 +7645,8 @@ var Store = Reflux.createStore({
         }
       })
     })
-<<<<<<< HEAD
-    let multientryResources = {}
-    if (shareableResources) {
-      for (let t in shareableResources) {
-        let docs = shareableResources[t]
-        let rm = []
-        docs.forEach((ver, i) => {
-          let doc = ver.document
-          let c = doc._context
-          if (!c)
-            return
-          let requestFor = c.requestFor
-          let multiEntryForms = this.getModel(requestFor).multiEntryForms
-          if (!multiEntryForms || multiEntryForms.indexOf(doc[TYPE]) === -1)
-            return
-          let cId = utils.getId(c)
-          let meContexts = multientryResources[t]
-          if (!meContexts) {
-            meContexts = {}
-            multientryResources[t] = meContexts
-          }
-          if (!meContexts[cId])
-            meContexts[cId] = []
-          meContexts[cId].push(ver)
-          // rm.push[i]
-        })
-        if (rm) {
-          for (let i=rm.length - 1; i>=0; i--)
-            docs.splice(rm[i], 1)
-        }
-      }
-    }
-    return {verifications: shareableResources, multiEntryForms: multientryResources, providers: shareableResourcesRootToOrgs}
-=======
     let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources)
     return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
->>>>>>> origin/master
     function checkOneVerification(val) {
       var id = utils.getId(val.to.id);
 
@@ -7694,11 +7659,7 @@ var Store = Reflux.createStore({
       // var fromOrgId = utils.getId(self._getItem(fromId).organization)
       // if (fromOrgId === toId)
       //   return
-<<<<<<< HEAD
       var document = doc.id ? self._getItem(utils.getId(doc)) : doc;
-=======
-      var document = doc.id ? self._getItem(utils.getId(doc.id)) : doc;
->>>>>>> origin/master
       if (!document  ||  document._inactive)
         return;
 
