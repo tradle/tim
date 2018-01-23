@@ -502,7 +502,6 @@ var styles = StyleSheet.create({
   verificationHeaderText: {
     color: '#555555',
     fontStyle: 'italic',
-    flex: 1
   },
   header: {
     backgroundColor: 'transparent',
