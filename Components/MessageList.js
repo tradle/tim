@@ -43,6 +43,7 @@ import TourRow from './TourRow'
 import NoResources from './NoResources'
 import NewResource from './NewResource'
 import ProductChooser from './ProductChooser'
+import StringChooser from './StringChooser'
 import VerifierChooser from './VerifierChooser'
 import ResourceList from './ResourceList'
 import ChatContext from './ChatContext'
@@ -905,12 +906,27 @@ class MessageList extends Component {
 
   getActionSheetItems() {
     let { resource, application } = this.props
-    if (application)
-      return
-    let me = utils.getMe()
-    let hasSupportLine = utils.hasSupportLine(resource)
+
     let buttons = []
     let cancelIndex = 1
+    if (application) {
+      if (!utils.isRM(application)  ||  !this.hasAdditionalForms(application))
+        return
+        cancelIndex++
+      buttons.push({
+        index: 0,
+        title: translate('formChooser'),
+        callback: () => this.chooseFormForApplication()
+      })
+      buttons.push({
+        index: cancelIndex,
+        title: translate('cancel'),
+        callback: () => {}
+      })
+      return buttons
+    }
+    let me = utils.getMe()
+    let hasSupportLine = utils.hasSupportLine(resource)
 
     if (hasSupportLine) {
       let isOrg = this.props.resource[TYPE] === ORGANIZATION
@@ -944,6 +960,8 @@ class MessageList extends Component {
       }
     }
     else if (ENV.allowForgetMe) {
+      if (application)
+        return
       buttons.push({
         index: cancelIndex,
         title: translate('forgetMe'),
@@ -971,7 +989,42 @@ class MessageList extends Component {
     })
     return buttons
   }
-
+  chooseFormForApplication() {
+    let application = this.props.application
+    let model = utils.getModel(application.requestFor).value
+    this.props.navigator.push({
+      title: translate(utils.makeModelTitle(model)),
+      id: 33,
+      component: StringChooser,
+      backButtonTitle: 'Back',
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        strings:   model.additionalForms,
+        bankStyle: this.props.bankStyle,
+        callback:  (val) => {
+          let m = utils.getModel(val).value
+          let msg = {
+            [TYPE]: FORM_REQUEST,
+            message: m.formRequestMessage
+                    ? translate(m.formRequestMessage)
+                    : translate('fillTheForm', translate(utils.makeModelTitle(m))),
+                // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
+            product: model.id,
+            form: val,
+            from: utils.getMe(),
+            to: application.applicant,
+            _context: application._context,
+            context: application.context
+          }
+          // msg._t = constants.TYPES.SIMPLE_MESSAGE
+          // msg.message = '[' + (model.properties.photos ? translate('fillTheFormWithAttachments') : translate('fillTheForm')) + '](' + model.id + ')'
+          utils.onNextTransitionEnd(this.props.navigator, () => Actions.addMessage({msg: msg}))
+          // resource[prop.name] = val
+          // Actions.addChatItem({resource: resource, disableFormRequest: oResource})
+        },
+      }
+    });
+  }
   renderActionSheet() {
     const buttons = this.getActionSheetItems()
     if (!buttons || !buttons.length) return
@@ -1087,13 +1140,19 @@ class MessageList extends Component {
   }
 
   paintMenuButton() {
-    if (this.props.application)
-      return
+    let { application } = this.props
+    if (application) {
+      if (!utils.isRM(application)  ||  !this.hasAdditionalForms(application))
+        return
+    }
     return  <View style={[platformStyles.menuButtonNarrow, {width: 47, borderRadius: 24, alignItems: 'center', opacity: 0.4}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
-
+  hasAdditionalForms(application) {
+    let m = utils.getModel(application.requestFor).value
+    return m.additionalForms !== null
+  }
   onLoadEarlierMessages(oldestMessage = {}, callback = () => {}) {
     if (this.state.allLoaded)
       return
