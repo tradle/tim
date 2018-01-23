@@ -1886,8 +1886,7 @@ var utils = {
     }
     return msg
   },
-  isOnePropForm() {
-    const resource = this.props.resource;
+  isOnePropForm(resource) {
     let type = resource[TYPE]
     let isFormRequest = type === FORM_REQUEST
     let isFormError = type === FORM_ERROR
