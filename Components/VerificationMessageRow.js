@@ -106,7 +106,7 @@ class VerificationMessageRow extends Component {
     let headerStyle = [
       styles.header,
       isMyMessage  ||  isShared ? styles.headerRight : styles.headerLeft,
-      {backgroundColor: bankStyle.verifiedHeaderColor, marginTop: 0, paddingVertical: 10, alignSelf: 'center', paddingLeft: 10}
+      {backgroundColor: bankStyle.verifiedHeaderColor, marginTop: 0, paddingVertical: 10} //, alignSelf: 'center', paddingLeft: 10}
     ]
     headerStyle = StyleSheet.flatten(headerStyle)
     // let bulletStyle = {color: color, marginHorizontal: 7, alignSelf: 'center'}
@@ -503,7 +503,7 @@ var styles = StyleSheet.create({
   verificationHeaderText: {
     color: '#555555',
     fontStyle: 'italic',
-    flex: 0.8
+    // flex: 0.8
   },
   header: {
     marginTop: 10,
