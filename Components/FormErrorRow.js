@@ -102,7 +102,7 @@ class FormErrorRow extends Component {
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
 
-    let prop =  this.isOnePropForm()
+    let prop =  utils.isOnePropForm(resource)
     // HACK
     let msgWidth = utils.dimensions(FormErrorRow).width * 0.8
 

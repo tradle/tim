@@ -111,7 +111,7 @@ class FormRequestRow extends Component {
 
     let onPressCall
     let isFormRequest = resource[TYPE] === FORM_REQUEST
-    let prop =  this.isOnePropForm()
+    let prop =  utils.isOnePropForm(resource)
 
     let linkColor
     if (application)
