@@ -5929,7 +5929,8 @@ var Store = Reflux.createStore({
         }
       }
     }
-    noTrigger = noTrigger  &&  filterResource._payloadType
+    if (!noTrigger)
+      noTrigger = filterResource  &&  filterResource._payloadType
     let newCursor = limit  &&  result[0].pageInfo  &&  result[0].pageInfo.endCursor
     if (!noTrigger) {
       let style
@@ -9138,7 +9139,9 @@ var Store = Reflux.createStore({
         let productToForms = await this.gatherForms(fid, val._context)
         if (val._context)
           val._context = this.findContext(val._context)
-        let shareables = await this.getShareableResources({foundResources: [val], to: val.from})
+        let shareables
+        if (!me.isEmployee  ||  !from.organization  ||  utils.getId(from.organization) !== utils.getId(me.organization))
+          shareables = await this.getShareableResources({foundResources: [val], to: val.from})
         this.trigger({action: 'addItem', resource: val, shareableResources: shareables, productToForms: productToForms})
       }
       else {
@@ -9630,6 +9633,8 @@ var Store = Reflux.createStore({
         let applications = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {context: context.contextId}})
         let app = applications  &&  applications.list.length && applications.list[0]
         if (app  &&  utils.isRM(app)) {
+          if (context  &&  !app._context)
+            app._context = context
           this.trigger({action: 'updateRow', resource: app, forceUpdate: true})
           this.trigger({action: 'getItem', resource: app})
         }
