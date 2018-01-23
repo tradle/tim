@@ -1745,7 +1745,8 @@ var Store = Reflux.createStore({
       try {
         validateResource({
           models: this.getModels(),
-          resource: opts.object
+          resource: opts.object,
+          ignoreReadOnly: true
         })
       } catch (err) {
         Alert.alert('Preventing send of invalid resource', err.message)
@@ -4583,7 +4584,7 @@ var Store = Reflux.createStore({
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       try {
-        validateResource({resource: toChain, models: self.getModels()})
+        validateResource({resource: toChain, models: self.getModels(), ignoreReadOnly: true})
 
         let data = await meDriver.createObject({object: toChain})
         let hash = data.link
