@@ -106,7 +106,7 @@ class VerificationMessageRow extends Component {
     let headerStyle = [
       styles.header,
       isMyMessage  ||  isShared ? styles.headerRight : styles.headerLeft,
-      {backgroundColor: bankStyle.verifiedHeaderColor, marginTop: 0, paddingVertical: 10} //, alignSelf: 'center', paddingLeft: 10}
+      {backgroundColor: bankStyle.verifiedHeaderColor}
     ]
     headerStyle = StyleSheet.flatten(headerStyle)
     // let bulletStyle = {color: color, marginHorizontal: 7, alignSelf: 'center'}
@@ -406,7 +406,7 @@ class VerificationMessageRow extends Component {
         verifiedBy = translate('fromMyData')
       else
         verifiedBy = translate('sentTo', verification.organization.title)
-
+debugger
       var orgView = <View style={styles.orgView}>
                       <Text style={chatStyles.description}>
                         {verifiedBy}
@@ -503,13 +503,14 @@ var styles = StyleSheet.create({
   verificationHeaderText: {
     color: '#555555',
     fontStyle: 'italic',
-    // flex: 0.8
+    flex: 1
   },
   header: {
-    marginTop: 10,
     backgroundColor: 'transparent',
     flexDirection: 'row',
-    paddingVertical: 5,
+    // paddingVertical: 5,
+    marginTop: 0,
+    padding: 10, //, alignSelf: 'center', paddingLeft: 10}
     justifyContent: 'center'
   },
   headerRight: {
