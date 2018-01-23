@@ -111,6 +111,8 @@ const MSG_LINK = '_msg'
 const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
+const IPROOV_SELFIE = 'tradle.IProovSelfie'
+
 // import dictionaries from '@tradle/models'.dict
 var dictionary //= dictionaries[Strings.language]
 
@@ -649,6 +651,8 @@ var utils = {
     let eCols = {}
     if (editCols) {
       editCols.forEach((p) => {
+        if (properties[p].readOnly)
+          return
         let idx = p.indexOf('_group')
         if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
           eCols[p] = properties[p]
@@ -2011,6 +2015,38 @@ var utils = {
       }
     })
   },
+  isOnePropForm(resource) {
+    let type = resource[TYPE]
+    let isFormRequest = type === FORM_REQUEST
+    let isFormError = type === FORM_ERROR
+    if (!isFormRequest  &&  !isFormError)
+      return
+    let ftype = isFormRequest
+              ? resource.form
+              : utils.getType(resource.prefill)
+    const model = utils.getModel(ftype).value
+    const props = model.properties
+    let eCols = []
+    for (let p in props) {
+      let prop = props[p]
+      if (!prop.readOnly  &&
+        !prop.hidden      &&
+        !prop.list )
+        eCols.push(props[p])
+    }
+
+    if (eCols.length === 1) {
+      let p = eCols[0]
+      if (ftype === IPROOV_SELFIE)
+        return p
+      if (ftype === PRODUCT_REQUEST)
+        return p
+      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
+        return p
+    }
+    return
+  },
+
   isSealableModel: function (model) {
     return model.subClassOf === 'tradle.Form' || model.subClassOf === 'tradle.MyProduct' || model.id === 'tradle.Verification'
   },

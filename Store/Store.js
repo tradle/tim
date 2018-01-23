@@ -1775,7 +1775,8 @@ var Store = Reflux.createStore({
       try {
         validateResource({
           models: this.getModels(),
-          resource: opts.object
+          resource: opts.object,
+          ignoreReadOnly: true
         })
       } catch (err) {
         Alert.alert('Preventing send of invalid resource', err.message)
@@ -3512,6 +3513,7 @@ var Store = Reflux.createStore({
       r.from = this.buildRef(me, dontSend)
       r.to = this.buildRef(this._getItem(to[0]))
       r[IS_MESSAGE] = true
+      r._context = context
     }
     newVerification = this.buildRef(r, dontSend)
     // if (!context)
@@ -4611,7 +4613,7 @@ var Store = Reflux.createStore({
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       try {
-        validateResource({resource: toChain, models: self.getModels()})
+        validateResource({resource: toChain, models: self.getModels(), ignoreReadOnly: true})
 
         let data = await meDriver.createObject({object: toChain})
         let hash = data.link
@@ -5941,6 +5943,12 @@ var Store = Reflux.createStore({
             return
           if (rr[TYPE] == NEXT_FORM_REQUEST  ||  rr[TYPE] === INTRODUCTION)
             return
+          if (rr[TYPE] === VERIFICATION  &&  !rr.document.title) {
+            let docId = utils.getId(rr.document)
+            let docs = chatItems.filter((r) => utils.getId(r) === docId)
+            if (docs  &&  docs.length)
+              rr.document.title = utils.getDisplayName(docs[0])
+          }
           if (!rr._context)
             rr._context = context
           if (typeof li.node._inbound != 'undefined') {
@@ -5993,6 +6001,7 @@ var Store = Reflux.createStore({
         }
       }
     }
+    noTrigger = noTrigger  &&  filterResource._payloadType
     let newCursor = limit  &&  result[0].pageInfo  &&  result[0].pageInfo.endCursor
     if (!noTrigger) {
       let style
@@ -7925,8 +7934,10 @@ var Store = Reflux.createStore({
       docs.forEach((ver, i) => {
         let doc = ver.document
         let c = doc._context
-        if (!c)
+        if (!c) {
+          let context = this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: doc[TYPE], object___link: doc[CUR_HASH]}})
           return
+        }
         let requestFor = c.requestFor
         let multiEntryForms = this.getModel(requestFor).multiEntryForms
         if (!multiEntryForms || multiEntryForms.indexOf(doc[TYPE]) === -1)
