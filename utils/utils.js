@@ -2041,7 +2041,7 @@ var utils = {
         return p
       if (ftype === PRODUCT_REQUEST)
         return p
-      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
+      if (p  &&  p.type === 'object'  &&  p.ref === PHOTO) // ||  utils.getModel(p.ref).value.subClassOf === ENUM))
         return p
     }
     return
