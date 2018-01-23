@@ -406,7 +406,6 @@ class VerificationMessageRow extends Component {
         verifiedBy = translate('fromMyData')
       else
         verifiedBy = translate('sentTo', verification.organization.title)
-debugger
       var orgView = <View style={styles.orgView}>
                       <Text style={chatStyles.description}>
                         {verifiedBy}
@@ -508,7 +507,7 @@ var styles = StyleSheet.create({
   header: {
     backgroundColor: 'transparent',
     flexDirection: 'row',
-    // paddingVertical: 5,
+    alignItems: 'center',
     marginTop: 0,
     padding: 10, //, alignSelf: 'center', paddingLeft: 10}
     justifyContent: 'center'
