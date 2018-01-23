@@ -4268,6 +4268,8 @@ var Store = Reflux.createStore({
         continue
       if (props[p].type === 'array')
         json[p] = resource[p];
+      if (!json[p]  &&  props[p].readOnly)
+        json[p] = resource[p];
       let ref = props[p].ref
       // Chaeck if valid enum value
       if (ref  &&  utils.isEnum(ref)) {
@@ -4287,8 +4289,8 @@ var Store = Reflux.createStore({
       json.from = json.from || resource.from
       json.to = json.to || resource.to
     }
-    if (!json[TYPE])
-      json[TYPE] = meta.id;
+    // if (!json[TYPE])
+    //   json[TYPE] = meta.id;
     var error = this.checkRequired(json, props);
     if (error) {
       foundRefs.forEach((val) => {
