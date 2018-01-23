@@ -7574,8 +7574,8 @@ var Store = Reflux.createStore({
     var self = this
 
     var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true })
-    if (productsToShare  &&   productsToShare.list.length) {
-      productsToShare.list.forEach((r) => {
+    if (productsToShare  &&   productsToShare.length) {
+      productsToShare.forEach((r) => {
         let fromId = utils.getId(r.from)
         if (r._sharedWith) {
           let sw = r._sharedWith.filter((r) => {
