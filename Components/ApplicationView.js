@@ -275,7 +275,7 @@ class ApplicationView extends Component {
         filter: '',
         search: true,
         modelName: MESSAGE,
-        application: this.state.resource || resource,
+        application: resource,
         currency: resource.currency,
         bankStyle: style,
       }
