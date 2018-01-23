@@ -7554,38 +7554,8 @@ var Store = Reflux.createStore({
         }
       })
     })
-    let multientryResources = {}
-    if (shareableResources) {
-      for (let t in shareableResources) {
-        let docs = shareableResources[t]
-        let rm = []
-        docs.forEach((ver, i) => {
-          let doc = ver.document
-          let c = doc._context
-          if (!c)
-            return
-          let requestFor = c.requestFor
-          let multiEntryForms = this.getModel(requestFor).multiEntryForms
-          if (!multiEntryForms || multiEntryForms.indexOf(doc[TYPE]) === -1)
-            return
-          let cId = utils.getId(c)
-          let meContexts = multientryResources[t]
-          if (!meContexts) {
-            meContexts = {}
-            multientryResources[t] = meContexts
-          }
-          if (!meContexts[cId])
-            meContexts[cId] = []
-          meContexts[cId].push(ver)
-          // rm.push[i]
-        })
-        if (rm) {
-          for (let i=rm.length - 1; i>=0; i--)
-            docs.splice(rm[i], 1)
-        }
-      }
-    }
-    return {verifications: shareableResources, multiEntryForms: multientryResources, providers: shareableResourcesRootToOrgs}
+    let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources)
+    return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
     function checkOneVerification(val) {
       var id = utils.getId(val.to.id);
 
@@ -7631,6 +7601,7 @@ var Store = Reflux.createStore({
       self.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
     }
   },
+
   async getShareableResourcesForEmployee(params) {
     let {foundResources, to, context} = params
     if (!foundResources)
@@ -7794,7 +7765,8 @@ var Store = Reflux.createStore({
     //   })
     // }
 
-    return {verifications: shareableResources, providers: shareableResourcesRootToOrgs}
+    let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources)
+    return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
     function checkOneVerification(val, contextId) {
       var id = utils.getId(val.to.id);
       if (id !== meId) {
@@ -7853,6 +7825,38 @@ var Store = Reflux.createStore({
       self.addVisualProps(value)
       return self.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
     }
+  },
+  getMultiEntriesToShare(shareableResources) {
+    let multientryResources = {}
+    for (let t in shareableResources) {
+      let docs = shareableResources[t]
+      let rm = []
+      docs.forEach((ver, i) => {
+        let doc = ver.document
+        let c = doc._context
+        if (!c)
+          return
+        let requestFor = c.requestFor
+        let multiEntryForms = this.getModel(requestFor).multiEntryForms
+        if (!multiEntryForms || multiEntryForms.indexOf(doc[TYPE]) === -1)
+          return
+        let cId = utils.getId(c)
+        let meContexts = multientryResources[t]
+        if (!meContexts) {
+          meContexts = {}
+          multientryResources[t] = meContexts
+        }
+        if (!meContexts[cId])
+          meContexts[cId] = []
+        meContexts[cId].push(ver)
+        // rm.push[i]
+      })
+      if (rm) {
+        for (let i=rm.length - 1; i>=0; i--)
+          docs.splice(rm[i], 1)
+      }
+    }
+    return multientryResources
   },
   checkIfWasShared(document, to) {
     let toId = utils.getId(to)
@@ -9141,6 +9145,8 @@ var Store = Reflux.createStore({
           val.prefill = p
         }
         this.trigger({action: 'addItem', resource: val})
+        // if (from.organization  && this.isYuki(from.organization))
+        //   this.trigger({action: 'yuki', yuki: {resource: val, organization: this._getItem(from.organization)}})
       }
     }
     else if (representativeAddedTo /* &&  !triggeredOrgs*/) {
@@ -9156,6 +9162,9 @@ var Store = Reflux.createStore({
       }, 2000)
     }
   },
+  // isYuki(fromOrg) {
+  //   return utils.getId(fromOrg) === utils.getId(yukiConfig.org)
+  // },
   putIdentityInDB(val, batch) {
     var profile = {}
     // var me = utils.getMe()
