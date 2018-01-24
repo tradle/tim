@@ -444,6 +444,8 @@ console.log('endCursor: ', endCursor)
           continue
         let iref = prop.items.ref
         if (iref) {
+          if (prop.items.backlink)
+            continue
           if (iref === model.id) {
             arr.push(
               `${p} {
