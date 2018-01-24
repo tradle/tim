@@ -403,7 +403,9 @@ var Store = Reflux.createStore({
     }
 
     db.batch = (...args) => {
-      const large = args[0].find(({ key, value }) => {
+      const large = args[0].find(({ type, key, value }) => {
+        if (type === 'del')
+          return
         const length = JSON.stringify(value).length / 1000
         if (length > 100000) {
           console.warn(`putting large value in indexedDB, ${length}KB, key: ${key}`)
