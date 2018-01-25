@@ -777,27 +777,28 @@ var utils = {
     }
     return val;
   },
-  formatDate(date, noTime) {
+  formatDate(date, showTime) {
     // var dayDiff = moment(new Date()).dayOfYear() - moment(date).dayOfYear();
     var date = new Date(date);
     var now = new Date()
 
     var dayDiff = Math.floor((now.getTime() - date.getTime()) / (3600 * 24 * 1000))
+    if (dayDiff === 0)
+      dayDiff = now.getDate() - date.getDate()
     var noTime = true
     var val;
     switch (dayDiff) {
     case 0:
-      noTime = false
       val = 'today, ' + dateformat(date, 'h:MM TT')
       // val = moment(date).format('h:mA') //moment(date).fromNow();
       break;
     case 1:
-      noTime = false
-      val = 'yesterday, ' + (noTime ? '' : dateformat(date, 'h:MM TT'))
+      // noTime = false
+      val = 'yesterday, ' + dateformat(date, 'h:MM TT')
       // val = moment(date).format('[yesterday], h:mA');
       break;
     default:
-      val = dateformat(date, 'mmm d, yyyy' + (noTime ? '' : ', h:MM TT'));
+      val = dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));
       // val = moment(date).format('LL');
     }
     return val;

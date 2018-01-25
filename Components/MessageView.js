@@ -27,7 +27,7 @@ const PHOTO = 'tradle.Photo'
 const { TYPE } = constants
 const ITEM = 'tradle.Item'
 // import Prompt from 'react-native-prompt'
-const { VERIFICATION, ENUM, MONEY } = constants.TYPES
+const { VERIFICATION, ENUM, MONEY, FORM } = constants.TYPES
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 
 import ActionSheet from './ActionSheet'
@@ -336,8 +336,13 @@ class MessageView extends Component {
     let model = utils.getModel(resource[TYPE]).value;
     let isVerification = model.id === VERIFICATION
     let isVerificationTree = isVerification &&  (resource.method || resource.sources)
+    let isForm = model.subClassOf === FORM
     let t = resource.dateVerified ? resource.dateVerified : resource.time
-    let date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
+    let date
+    if (isForm  &&  t)
+      date = utils.formatDate(new Date(t), true)
+    else
+      date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
     let photos = resource.photos
     let mainPhoto
     if (!photos) {
@@ -408,10 +413,11 @@ class MessageView extends Component {
       msg = <View><Text style={styles.itemTitle}>{resource.message}</Text></View>
 
     // let isVerification = this.props.resource[TYPE] === constants.TYPES.VERIFICATION
+    // borderBottomColor: bankStyle.productRowBgColor
     let dateView
-    if (isVerificationTree) {
-      dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: bankStyle.productRowBgColor}]}>
-                  <Text style={styles.dateLabel}>{translate(model.properties.dateVerified, model)}</Text>
+    if (isVerificationTree || isForm) {
+      dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: '#eee' }]}>
+                  <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('Date')}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
@@ -425,7 +431,6 @@ class MessageView extends Component {
       bigPhoto = <View style={styles.photoBG} ref='bigPhoto'>
                   <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
                  </View>
-
     return (
       <PageView style={[platformStyles.container, {height: utils.dimensions().height, alignItems: 'center'}]} separator={contentSeparator}>
       <ScrollView
@@ -560,7 +565,7 @@ var styles = StyleSheet.create({
 
   band: {
     height: 30,
-    backgroundColor: '#f7f7f7',
+    backgroundColor: '#fafafa',
     // borderColor:  '#f7f7f7',
     borderBottomWidth: 1,
     alignSelf: 'stretch',
