@@ -3476,6 +3476,7 @@ var Store = Reflux.createStore({
 
     let isAssignRM = document[TYPE] === ASSIGN_RM
     if (isAssignRM) {
+      Actions.hideModal()
       if (!docFromServer)
         document = await this._getItemFromServer(document)
       let application = await this._getItemFromServer(document.application)
@@ -4415,6 +4416,11 @@ var Store = Reflux.createStore({
         // }
       }
 
+    }
+    let displayableProps = utils.getPropertiesWithAnnotation(meta, 'displayAs')
+    if (displayableProps  &&  !utils.isEmpty(displayableProps)) {
+      for (let p in displayableProps)
+        returnVal[p] = utils.templateIt(props[p], returnVal)
     }
 
     // if (!isRegistration) {
@@ -5690,12 +5696,18 @@ var Store = Reflux.createStore({
       if (!context  &&  modelName !== PRODUCT_REQUEST) {
         for (let i=result.length - 1; i>=0  &&  !context; i--) {
           let res = result[i]
+          let contextIdToContext = {}
           if (res[TYPE] === FORM_REQUEST  &&  res._context) {
             context = res._context
             if (!context.contextId) {
               let c = this._getItem(context)
-              if (!c)
-                c = this._getItemFromServer(context)
+              if (!c) {
+                let cId = utils.getId(context)
+                let c = contextIdToContext[cId]
+                if (!c)
+                  c = await this._getItemFromServer(context)
+                contextIdToContext[cId] = c
+              }
               context = c
             }
 
