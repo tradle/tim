@@ -683,7 +683,7 @@ class GridList extends Component {
       title = me.organization.title + '  →  ' + utils.getDisplayName(resource)
     else
       title = resource.name; //utils.getDisplayName(resource, model.value.properties);
-    let style = this.mergeStyle(resource.style)
+    let style = bankStyle || this.mergeStyle(resource.style)
 
     if (isApplication) {
       let route = {
@@ -695,7 +695,7 @@ class GridList extends Component {
         passProps: {
           resource: resource,
           search: search,
-          bankStyle: bankStyle
+          bankStyle: style
         }
       }
       navigator.push(route)
