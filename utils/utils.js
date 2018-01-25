@@ -586,7 +586,7 @@ var utils = {
         return this.getDateValue(resource[p])
       if (meta[p].type !== 'object') {
         if (meta[p].range  ===  'model') {
-          let m = this.getModel(meta[p].range)
+          let m = this.getModel(resource[p])
           if (m)
             return this.makeModelTitle(m.value)
         }
