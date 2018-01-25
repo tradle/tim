@@ -684,7 +684,7 @@ class GridList extends Component {
       title = me.organization.title + '  →  ' + utils.getDisplayName(resource)
     else
       title = resource.name; //utils.getDisplayName(resource, model.value.properties);
-    let style = this.mergeStyle(resource.style)
+    let style = bankStyle || this.mergeStyle(resource.style)
 
     if (isApplication) {
       let route = {
