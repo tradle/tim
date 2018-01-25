@@ -1447,7 +1447,7 @@ var NewResourceMixin = {
       const isScan = params.prop === 'scan'
       let useImageInput
       if (utils.isWeb()) {
-        useImageInput = isScan || !ENV.canUseWebcam
+        useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
       } else {
         useImageInput = !isScan || !BlinkID
       }
