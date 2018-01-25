@@ -94,7 +94,7 @@ class VerificationRow extends Component {
     }
     let hasPhoto = photo != null
     if (photo)
-      photo = <Image host={lazy} placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+      photo = <Image host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else if (isForm || isVerification)
       photo = <View style={{alignItems: 'center', width: 70}}>
                 <Icon name={model.icon || 'ios-paper-outline'} size={40} style={{marginTop: 8}} color={model.iconColor ? model.iconColor : '#cccccc'} />
