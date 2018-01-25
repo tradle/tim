@@ -695,7 +695,7 @@ class GridList extends Component {
         passProps: {
           resource: resource,
           search: search,
-          bankStyle: bankStyle
+          bankStyle: style
         }
       }
       navigator.push(route)
