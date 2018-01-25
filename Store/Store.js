@@ -11103,6 +11103,18 @@ var Store = Reflux.createStore({
       require('../Components/BlinkID').setLicenseKey(key)
       ENV.dateModified = env.dateModified
     }
+  },
+
+  getBizPluginsContext() {
+    return {
+      bot: {
+        objects: {
+          get: link => this._keeper.get(link)
+        }
+      },
+      productsAPI: {},
+      models: utils.getModels()
+    }
   }
 })
 // );

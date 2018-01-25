@@ -2184,6 +2184,10 @@ var utils = {
     return results.reduce((all, some) => all.concat(some), [])
   },
 
+  isPromise(obj) {
+    return obj && typeof obj.then === 'function'
+  }
+
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
   //   if (utils.isWeb()) {
   //     const { width=0, height=0 } = shadowOffset

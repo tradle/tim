@@ -29,7 +29,7 @@
   "dependencies": {
     "@tradle/aws-client": "github:tradle/aws-client",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
-    "@tradle/biz-plugins": "github:tradle/biz-plugins",
+    "@tradle/biz-plugins": "github:tradle/biz-plugins#cloud",
     "@tradle/build-resource": "^2.14.1",
     "@tradle/cb-blockr": "^3.2.1",
     "@tradle/constants": "^2.1.0",
