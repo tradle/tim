@@ -29,6 +29,7 @@ var asyncActions = [
 
   'reloadModels',
   'getModels',
+  'getRequestedProperties',
 
   'list',
   'listSharedWith',

@@ -27,6 +27,7 @@ import EventEmitter from 'events'
 import { coroutine as co } from 'bluebird'
 import TimerMixin from 'react-timer-mixin'
 import reactMixin from 'react-mixin'
+import plugins from '@tradle/biz-plugins'
 
 import yukiConfig from '../yuki.json'
 
@@ -3419,7 +3420,51 @@ var Store = Reflux.createStore({
 
     return orgRep
   },
+  async onGetRequestedProperties(r, noTrigger) {
+    let rtype = r[TYPE]
+    if (!plugins.length)
+      return
 
+    let context = this.getBizPluginsContext()
+    let moreInfo
+    for (let i=0; i<plugins.length; i++) {
+      let plugin = plugins[i]
+      if (!plugin(context).validateForm)
+        continue
+      moreInfo = plugin(context).validateForm.call(
+          {models: {[rtype]: utils.getModel(rtype).value}},
+          {application: r._context, form: r}
+      )
+      if (moreInfo  &&  utils.isPromise(moreInfo))
+        moreInfo = await moreInfo
+      if (moreInfo  &&  moreInfo.requestedProperties)
+        break
+    }
+    if (!moreInfo)
+      return
+    // let moreInfo = plugin().validateForm({application: r._context, form: r})
+    let rprops = {}
+    if (moreInfo) {
+      moreInfo.requestedProperties.forEach((r) => {
+        rprops[r.name] = r.message || ''
+      })
+    }
+    if (!noTrigger)
+      this.trigger({action: 'formEdit', requestedProperties: rprops})
+    return rprops
+    // return rprops
+  },
+  getBizPluginsContext() {
+    return {
+      bot: {
+        objects: {
+          get: link => this._keeper.get(link)
+        }
+      },
+      productsAPI: {},
+      models: utils.getModels()
+    }
+  },
   async onAddVerification(params) {
     let { r, dontSend, notOneClickVerification } = params
 
@@ -3983,14 +4028,15 @@ var Store = Reflux.createStore({
   onSaveTemporary(resource) {
     temporaryResources[resource[TYPE]] = resource
   },
-  onGetTemporary(type) {
+  async onGetTemporary(type) {
     var r = temporaryResources[type]
     // if (!r) {
     //   r = {_t: type}
     //   if (type === SETTINGS)
     //     r.url = SERVICE_PROVIDERS_BASE_URL || SERVICE_PROVIDERS_BASE_URL_DEFAULT
     // }
-    this.trigger({action: 'getTemporary', resource: r})
+    let requestedProperties = r  &&  await this.onGetRequestedProperties(r, true)
+    this.trigger({action: 'getTemporary', resource: r, requestedProperties: requestedProperties})
   },
 
   async onAddAll(resource, to, message) {
@@ -11105,17 +11151,6 @@ var Store = Reflux.createStore({
     }
   },
 
-  getBizPluginsContext() {
-    return {
-      bot: {
-        objects: {
-          get: link => this._keeper.get(link)
-        }
-      },
-      productsAPI: {},
-      models: utils.getModels()
-    }
-  }
 })
 // );
 
