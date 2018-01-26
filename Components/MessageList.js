@@ -606,7 +606,7 @@ class MessageList extends Component {
       }
     }
     // let showEdit = !isEmployee && !verification  &&  !r[PREV_HASH]  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable
-    let showEdit = r._latest  &&  !isEmployee && !verification  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable
+    let showEdit = !model.notEditable  &&   r._latest  && !application && !verification  &&  model.subClassOf !== MY_PRODUCT
     // if (showEdit  &&  isEmployee) {
     //   let rm
     //   if (!application  ||  !(rm = application.relationshipManager))
