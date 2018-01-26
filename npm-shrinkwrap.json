@@ -8151,15 +8151,8 @@
     },
     "react-native-floating-labels": {
       "version": "1.1.1",
-      "from": "pgmemk/react-native-floating-labels#pointerEvents",
-      "resolved": "git://github.com/pgmemk/react-native-floating-labels.git#bb1a33bbd4941333cad508b2c4d08be0c9e9805c",
-      "dependencies": {
-        "lodash": {
-          "version": "3.10.1",
-          "from": "lodash@https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz"
-        }
-      }
+      "from": "mvayngrib/react-native-floating-labels#pointerEvents",
+      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#e606a5da6c97163d3c7c0d090629bb18d9576bd3"
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
