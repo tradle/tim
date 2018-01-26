@@ -2338,7 +2338,7 @@ var utils = {
 
   isPromise(obj) {
     return obj && typeof obj.then === 'function'
-  }
+  },
 
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
   //   if (utils.isWeb()) {
