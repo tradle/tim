@@ -21,7 +21,7 @@ import SwitchSelector from 'react-native-switch-selector'
 import format from 'string-template'
 import constants from '@tradle/constants'
 import t from 'tcomb-form-native'
-import extend from 'extend'
+import _ from 'lodash'
 import dateformat from 'dateformat'
 import ResourceList from './ResourceList'
 import GridList from './GridList'
@@ -178,11 +178,11 @@ var NewResourceMixin = {
     let { errs, requestedProperties } = this.props
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
-    // if (!requestedProperties  &&  data)
-    //   requestedProperties = this.getRequestedProperties(data)
     if (requestedProperties) {
-      if (!formErrors)
-        formErrors = {}
+      if (!formErrors) {
+        _.extend(params, {formErrors: {}})
+        formErrors = params.formErrors
+      }
       for (let p in requestedProperties) {
         if (eCols[p]) {
           this.addError(p, params)
@@ -545,7 +545,8 @@ var NewResourceMixin = {
     let r = {}
     let {resource, missedRequiredOrErrorValue} = this.state
     let search = this.props.search
-    extend(true, r, resource)
+    _.extend(r, resource)
+    // extend(true, r, resource)
     if(prop.type === 'number'  &&  !search) {
       let val = Number(value)
       if (value.charAt(value.length - 1) === '.')
@@ -595,37 +596,8 @@ var NewResourceMixin = {
 
     this.setState({
       resource: r,
-      // requestedProperties: this.getRequestedProperties(r),
       inFocus: prop.name
     })
-  },
-  getRequestedProperties(r) {
-    let rtype = r[TYPE]
-    if (!plugins.length)
-      return
-
-    let moreInfo
-    for (let i=0; i<plugins.length; i++) {
-      let plugin = plugins[i]
-      if (!plugin().validateForm)
-        continue
-      moreInfo = plugin().validateForm.call(
-          {models: {[rtype]: utils.getModel(rtype).value}},
-          {application: r._context, form: r}
-      )
-      if (moreInfo  &&  moreInfo.requestedProperties)
-        break
-    }
-    if (!moreInfo)
-      return
-    // let moreInfo = plugin().validateForm({application: r._context, form: r})
-    let rprops = {}
-    if (moreInfo) {
-      moreInfo.requestedProperties.forEach((r) => {
-        rprops[r.name] = r.message || ''
-      })
-    }
-    return rprops
   },
   onChangeTextValue(prop, value, event) {
     console.log(arguments)
@@ -638,7 +610,7 @@ var NewResourceMixin = {
     //                                     ? {value: value}
     //                                     : value
     let r = {}
-    extend(r, this.state.resource)
+    _.extend(r, this.state.resource)
     for (let p in this.floatingProps)
       r[p] = this.floatingProps[p]
     if (!this.props.search)
@@ -724,7 +696,7 @@ var NewResourceMixin = {
 
     // const tradleObj = utils.fromMicroBlink(result)
     const r = {}
-    extend(true, r, this.state.resource)
+    _.extend(r, this.state.resource)
 
     r[prop] = {
       url: result.image.base64,
@@ -1330,7 +1302,7 @@ var NewResourceMixin = {
 
   changeTime: function(prop, date) {
     let r = {}
-    extend(true, r, this.state.resource)
+    _.extend(r, this.state.resource)
     r[prop.name] = date.getTime()
     if (!this.floatingProps)
       this.floatingProps = {}
@@ -1522,7 +1494,7 @@ var NewResourceMixin = {
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[propName]
     let r = {}
-    extend(true, r, this.state.resource)
+    _.extend(r, this.state.resource)
     r[propName] = item
     if (!this.floatingProps)
       this.floatingProps = {}
@@ -1614,7 +1586,7 @@ var NewResourceMixin = {
   // setting chosen from the list property on the resource like for ex. Organization on Contact
   setChosenValue(propName, value) {
     let resource = {}
-    extend(resource, this.state.resource)
+    _.extend(resource, this.state.resource)
     if (typeof propName === 'object')
       propName = propName.name
 
@@ -1723,15 +1695,16 @@ var NewResourceMixin = {
 
 
     let r = {}
-    extend(r, this.state.resource)
+    _.extend(r, this.state.resource)
     for (let p in this.floatingProps)
       r[p] = this.floatingProps[p]
 
-    // state.requestedProperties = this.getRequestedProperties(r)
-
     this.setState(state);
-    if (!this.props.search)
+    if (!this.props.search) {
+      if (plugins.length)
+        Actions.getRequestedProperties(r)
       Actions.saveTemporary(r)
+    }
   },
 
   // MONEY value and curency template
@@ -1844,7 +1817,7 @@ var NewResourceMixin = {
   },
   setChosenEnumValue(propName, enumPropName, value) {
     let resource = {}
-    extend(true, resource, this.state.resource)
+    _.extend(true, resource, this.state.resource)
     // clause for the items properies - need to redesign
     // resource[propName][enumPropName] = value
     if (resource[propName]) {

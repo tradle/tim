@@ -125,7 +125,7 @@ class NewResource extends Component {
            this.state.isLoadingVideo !== nextState.isLoadingVideo  ||
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.inFocus !== nextState.inFocus                ||
-           this.state.disableEditing !== nextState.disableEditing    ||
+           this.state.disableEditing !== nextState.disableEditing  ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
@@ -156,7 +156,7 @@ class NewResource extends Component {
   }
 
   componentDidMount() {
-    this.listenTo(Store, 'itemAdded');
+    this.listenTo(Store, 'onAction');
     if (!Keyboard) return
 
     Keyboard.addListener('keyboardWillShow', (e) => {
@@ -197,49 +197,56 @@ class NewResource extends Component {
     }
   }
 
-  itemAdded(params) {
-    let resource = params.resource;
-    if (params.action === 'languageChange') {
+  onAction(params) {
+    let { resource, action, error, requestedProperties } = params
+    if (action === 'languageChange') {
       this.props.navigator.popToTop()
       return
     }
-    if (params.action === 'noChanges') {
+    if (action === 'noChanges') {
       this.setState({err: translate('nothingChanged'), submitted: false})
       return
     }
-    if (params.action === 'getItem'  &&  utils.getId(this.state.resource) === utils.getId(params.resource)) {
+    if (action === 'getItem'  &&  utils.getId(this.state.resource) === utils.getId(resource)) {
       this.setState({
-        resource: params.resource,
+        resource: resource,
         isUploading: false
       })
       return
     }
-    if (params.action === 'noAccessToServer') {
+    if (action === 'formEdit') {
+      if (requestedProperties)
+        this.setState({requestedProperties: requestedProperties})
+      return
+    }
+    if (action === 'noAccessToServer') {
       this.setState({submitted: true, disableEditing: false})
       this.props.navigator.pop()
       return
     }
-    if (params.action === 'getTemporary') {
+    if (action === 'getTemporary') {
       let r = {}
       extend(r, this.state.resource)
-      extend(r, params.resource)
+      extend(r, resource)
+
       this.setState({
         resource: r,
-        isUploading: false
+        isUploading: false,
+        requestedProperties
       })
       return
     }
 
-    if (params.action === 'runVideo'  && this.state.isRegistration) {
+    if (action === 'runVideo'  && this.state.isRegistration) {
       if (this.props.callback)
         this.setState({isLoadingVideo: true})
       return;
     }
-    if (!resource  &&  params.error &&  params.action === 'addItem') {
+    if (!resource  &&  error &&  action === 'addItem') {
       this.state.submitted = false
       console.log('addItem: submitted = false')
       Alert.alert(
-        params.error,
+        error,
       )
       let actionParams = {
         query: this.state.filter,
@@ -248,19 +255,19 @@ class NewResource extends Component {
       }
       return
     }
-    if (!resource  ||  (params.action !== 'addItem'  &&  params.action !== 'addMessage')) {
+    if (!resource  ||  (action !== 'addItem'  &&  action !== 'addMessage')) {
       return;
     }
     if (this.state.resource[constants.TYPE] !== resource[constants.TYPE])
       return
-    if (params.error) {
+    if (error) {
       if (resource[constants.TYPE] == this.state.resource[constants.TYPE])
-        this.setState({err: params.error, resource: resource, isRegistration: this.state.isRegistration});
+        this.setState({err: error, resource: resource, isRegistration: this.state.isRegistration});
       console.log('addItem error: submitted = false')
       this.state.submitted = false
       return;
     }
-    if (params.action === 'addItem') {
+    if (action === 'addItem') {
       // If the resource was being modified, show the list of parties with whom the resource has been
       // previously shared and allow customer to choose who he wants to sharae the modifications with
       // if (resource._sharedWith  &&  resource._sharedWith.length > 1) {
@@ -331,7 +338,7 @@ class NewResource extends Component {
     });
     if (currentRoutesLength != 2)
       this.props.navigator.pop();
-//     console.log('itemAdded: submitted = false')
+//     console.log('onAction: submitted = false')
 //     this.state.submitted = false
   }
   // Show providers this resource was shared with and allow customer to choose

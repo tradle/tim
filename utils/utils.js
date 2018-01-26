@@ -647,7 +647,7 @@ var utils = {
       return resource[p] + '';
   },
   getEditCols(model) {
-    let { editCols, viewCols, properties } = model
+    let { editCols, properties } = model
     let eCols = {}
     if (editCols) {
       editCols.forEach((p) => {
@@ -662,23 +662,46 @@ var utils = {
       })
       return eCols
     }
+    let viewCols = this.getViewCols(model)
+    if (viewCols)
+       viewCols.forEach((p) => eCols[p] = properties[p])
+    // if (viewCols) {
+    //   viewCols.forEach((p) => {
+    //     let idx = p.indexOf('_group')
+    //     if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
+    //       eCols[p] = properties[p]
+
+    //     if (idx !== -1  &&  properties[p].list)
+    //       properties[p].list.forEach((p) => eCols[p] = properties[p])
+    //     // eCols[p] = props[p]
+    //   })
+    // }
+    // // ViewCols on top
+    // for (let p in properties) {
+    //   if (!eCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden  &&  p.indexOf('_group') !== p.length - 6)
+    //     eCols[p] = properties[p]
+    // }
+    return eCols
+  },
+  getViewCols(model) {
+    let { viewCols, properties } = model
+    let vCols = []
     if (viewCols) {
       viewCols.forEach((p) => {
         let idx = p.indexOf('_group')
         if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
-          eCols[p] = properties[p]
+          vCols.push(p)
 
         if (idx !== -1  &&  properties[p].list)
-          properties[p].list.forEach((p) => eCols[p] = properties[p])
+          properties[p].list.forEach((p) => vCols.push(p))
         // eCols[p] = props[p]
       })
     }
-    // ViewCols on top
     for (let p in properties) {
-      if (!eCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden  &&  p.indexOf('_group') !== p.length - 6)
-        eCols[p] = properties[p]
+      if (!vCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden  &&  p.indexOf('_group') !== p.length - 6)
+        vCols.push(p)
     }
-    return eCols
+    return vCols
   },
   template (t, o) {
     return t.replace(/{([^{}]*)}/g,
@@ -2312,6 +2335,10 @@ var utils = {
     // flatten
     return results.reduce((all, some) => all.concat(some), [])
   },
+
+  isPromise(obj) {
+    return obj && typeof obj.then === 'function'
+  }
 
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
   //   if (utils.isWeb()) {

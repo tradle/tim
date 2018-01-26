@@ -282,7 +282,7 @@ class ShowRefList extends Component {
     let m = utils.getModel(resource[TYPE]).value
     let viewCols = m.viewCols
     if (!viewCols)
-      return
+      viewCols = utils.getViewCols(m)
     viewCols = utils.ungroup(m, viewCols)
     let vCols = []
     let props = m.properties
