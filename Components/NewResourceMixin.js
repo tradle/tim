@@ -118,6 +118,8 @@ var NewResourceMixin = {
     let options = {};
     options.fields = {};
 
+    meta = originatingMessage  &&  utils.getModelForFormRequest(originatingMessage) || meta
+
     let props, bl;
     if (!meta.items)
       props = meta.properties;
@@ -172,6 +174,7 @@ var NewResourceMixin = {
 
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
+
     if (requestedProperties) {
       if (!formErrors) {
         _.extend(params, {formErrors: {}})
