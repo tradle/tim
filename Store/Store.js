@@ -152,6 +152,7 @@ const {
  MONEY,
  SETTINGS,
 } = constants.TYPES
+const LENS = 'tradle.Lens'
 
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
@@ -263,7 +264,8 @@ const AUTHENTICATION_TIMEOUT = LocalAuth.TIMEOUT
 const ON_RECEIVED_PROGRESS = 0.66
 const NUM_MSGS_BEFORE_REG_FOR_PUSH = __DEV__ ? 3 : 10
 const ALL_MESSAGES = '_all'
-var models = {};
+var models = {}
+var lenses = {}
 var list = {};
 var msgToObj = {}
 var enums = {}
@@ -3440,8 +3442,10 @@ var Store = Reflux.createStore({
       if (moreInfo  &&  moreInfo.requestedProperties)
         break
     }
-    if (!moreInfo)
+    if (!moreInfo) {
+      this.trigger({action: 'formEdit', requestedProperties: {}})
       return
+    }
     // let moreInfo = plugin().validateForm({application: r._context, form: r})
     let rprops = {}
     if (moreInfo) {
@@ -3462,7 +3466,7 @@ var Store = Reflux.createStore({
         }
       },
       productsAPI: {},
-      models: utils.getModels()
+      models: this.getModels()
     }
   },
   async onAddVerification(params) {
@@ -9638,6 +9642,13 @@ var Store = Reflux.createStore({
         batch.push({type: 'put', key: m.id, value: m})
       })
       utils.setModels(models)
+
+      if (val.lenses) {
+        val.lenses.forEach((l) => {
+          batch.push({type: 'put', key: l.id, value: l})
+          lenses[l.id] = l
+        })
+      }
       let orgId = utils.getId(org)
       list[orgId].value = org
       this.dbBatchPut(utils.getId(org), org, batch)
@@ -10055,6 +10066,12 @@ var Store = Reflux.createStore({
           if (utils.isEnum(m))
             self.createEnumResources(m)
           return
+        }
+        if (data.value[TYPE] === LENS) {
+          let lens = data.value
+          if (lenses[lens.id])
+            return
+          lenses[lens.id] = lens
         }
         if (dtype === CUSTOMER_WAITING  ||  dtype === SELF_INTRODUCTION  ||  (dtype === FORM_REQUEST && data.value.product === PRODUCT_REQUEST))
           return
@@ -10910,7 +10927,13 @@ var Store = Reflux.createStore({
     return mm
   },
   getModel(modelName) {
-    return models[modelName] && models[modelName].value
+    return models  &&  models[modelName] && models[modelName].value
+  },
+  getLenses() {
+    return lenses
+  },
+  getLens(id) {
+    return lenses[id]
   },
   loadDB() {
     const self = this
@@ -10946,9 +10969,10 @@ var Store = Reflux.createStore({
     if (enumList.filter((e) => e[ROOT_HASH] === r[ROOT_HASH]).length)
       return
     enumList.push(r)
-    let id = utils.getId(r)
+    // let id = utils.getId(r)
+    let key = [r[TYPE], r[ROOT_HASH], r[CUR_HASH]].join('_')
     if (saveInDB)
-      batch.push({type: 'put', key: id, value: r})
+      batch.push({type: 'put', key, value: r})
   },
 
   loadModels() {
