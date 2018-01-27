@@ -19,26 +19,29 @@ import {
 
 import SwitchSelector from 'react-native-switch-selector'
 import format from 'string-template'
-import constants from '@tradle/constants'
 import t from 'tcomb-form-native'
 import _ from 'lodash'
 import dateformat from 'dateformat'
-import ResourceList from './ResourceList'
-import GridList from './GridList'
 import EnumList from './EnumList'
 import FloatLabel from 'react-native-floating-labels'
 import Icon from 'react-native-vector-icons/Ionicons'
+import moment from 'moment'
+
+import constants from '@tradle/constants'
+import plugins from '@tradle/biz-plugins'
+
+import ResourceList from './ResourceList'
+import GridList from './GridList'
+import Store from '../Store/Store'
 import utils, {
   translate
 } from '../utils/utils'
 import CameraView from './CameraView'
 import SignatureView from './SignatureView'
-import moment from 'moment'
 import StyleSheet from '../StyleSheet'
 import QRCodeScanner from './QRCodeScanner'
 import driverLicenseParser from '../utils/driverLicenseParser'
 import focusUri from '../video/Focus1.mp4'
-import plugins from '@tradle/biz-plugins'
 
 // import VideoPlayer from './VideoPlayer'
 // import omit from 'object.omit'
@@ -112,7 +115,7 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let {currency, bankStyle} = this.props
+    let { currency, bankStyle, editCols, originatingMessage, search, errs, requestedProperties } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data } = params
 
@@ -120,9 +123,10 @@ var NewResourceMixin = {
     let onSubmitEditing = this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
     let chooser = this.chooser  ||  this.props.chooser
-    let models = utils.getModels();
     let options = {};
     options.fields = {};
+
+    meta = originatingMessage  &&  utils.getModelForFormRequest(originatingMessage) || meta
 
     let props, bl;
     if (!meta.items)
@@ -135,7 +139,7 @@ var NewResourceMixin = {
         props = utils.getModel(meta.items.ref).value.properties;
     }
 
-    let dModel = data  &&  models[data[TYPE]]
+    let dModel = data  &&  Store.getModel[data[TYPE]]
     if (!utils.isEmpty(data)) {
       if (!meta.items && data[TYPE] !== meta.id) {
         let interfaces = meta.interfaces;
@@ -152,10 +156,11 @@ var NewResourceMixin = {
       }
     }
 
+
     let eCols
-    if (this.props.editCols) {
+    if (editCols) {
       eCols = {};
-      this.props.editCols.forEach((r) => eCols[r] = props[r])
+      editCols.forEach((r) => eCols[r] = props[r])
     }
     else {
       eCols = utils.getEditCols(meta)
@@ -175,9 +180,9 @@ var NewResourceMixin = {
         showReadOnly = false
     }
 
-    let { errs, requestedProperties } = this.props
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
+
     if (requestedProperties) {
       if (!formErrors) {
         _.extend(params, {formErrors: {}})
@@ -210,7 +215,6 @@ var NewResourceMixin = {
     required = utils.arrayToObject(required);
 
     let resource = this.state.resource
-    let { search } = this.props
     for (let p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
@@ -467,7 +471,7 @@ var NewResourceMixin = {
 
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
-        let subModel = models[ref];
+        let subModel = Store.getModel(ref);
         if (data  &&  data[p]) {
           options.fields[p].value = data[p][TYPE]
                                   ? utils.getId(data[p])
@@ -1531,7 +1535,7 @@ var NewResourceMixin = {
   },
   chooser(prop, propName,event) {
     let { resource, isRegistration } = this.state
-    let { model, metadata, bankStyle, search, navigator } = this.props
+    let { model, metadata, bankStyle, search, navigator, originatingMessage } = this.props
     model = model  ||  metadata
     if (!resource) {
       resource = {};
@@ -1546,6 +1550,8 @@ var NewResourceMixin = {
     let m = utils.getModel(propRef).value;
     let currentRoutes = navigator.getCurrentRoutes();
 
+    let pmodel = utils.getModelForFormRequest(originatingMessage)
+
     let route = {
       title: translate(prop), //m.title,
       // titleTextColor: '#7AAAC3',
@@ -1558,7 +1564,7 @@ var NewResourceMixin = {
       passProps: {
         filter:         filter,
         isChooser:      true,
-        prop:           prop,
+        prop:           pmodel.properties[propName],
         modelName:      propRef,
         resource:       resource,
         search:         search,
