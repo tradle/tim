@@ -9905,7 +9905,7 @@ var Store = Reflux.createStore({
         })
       }
       // let orgId = utils.getId(org)
-      list[orgId].value = org
+      // list[orgId].value = org
       // self.dbBatchPut(utils.getId(org), org, batch)
       // self.trigger({action: 'getItem', resource: org})
       // noTrigger = hasNoTrigger(orgId)
