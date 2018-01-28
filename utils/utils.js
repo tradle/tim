@@ -230,7 +230,8 @@ var utils = {
     let lens = fr.lens
     if (!lens)
       return model
-    let lensProps = Store.getLens(lens).properties
+    let rlens = Store.getLens(lens)
+    let lensProps = rlens.properties
     if (!lensProps)
       return model
     let cmodel = _.cloneDeep(model)
@@ -239,6 +240,13 @@ var utils = {
       let lprop = lensProps[p]
       let prop = props[p]
       _.extend(prop, lprop)
+    }
+    if (rlens.hidden) {
+      if (!cmodel.hidden)
+        cmodel.hidden = []
+      rlens.hidden.forEach((p) => {
+        cmodel.hidden.push(p)
+      })
     }
     return cmodel
   },
