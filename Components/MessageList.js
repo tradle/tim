@@ -320,12 +320,12 @@ class MessageList extends Component {
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
       let type = list[0][TYPE];
       if (type  !== modelName) {
-        let model = utils.getModel(modelName).value;
+        let model = Store.getModel(modelName);
         if (model.id !== MESSAGE) {
           if (!model.isInterface)
             return;
           else {
-            let rModel = utils.getModel(type).value;
+            let rModel = Store.getModel(type);
             if (!rModel.interfaces  ||  rModel.interfaces.indexOf(modelName) === -1)
               return;
           }
@@ -438,7 +438,7 @@ class MessageList extends Component {
       state.currentContext = currentContext
     if (productToForms)
       state.productToForms = productToForms
-    else if (utils.getModel(rtype).value.subClassOf === FORM  &&  resource._context) {
+    else if (Store.getModel(rtype).subClassOf === FORM  &&  resource._context) {
       let product = resource._context.product
       if (this.state.productToForms)
         productToForms = clone(this.state.productToForms)
@@ -599,13 +599,13 @@ class MessageList extends Component {
     //   if (relHash !== me[ROOT_HASH])
     //     return
     // }
-    let model = utils.getModel(r[TYPE]).value;
+    let model = Store.getModel(r[TYPE]);
     let title //utils.getDisplayName(resource, model.properties);
 
     if (r[TYPE] === VERIFICATION) {
       let type = utils.getType(r.document)
       if (type)
-        title = translate(utils.getModel(type).value)
+        title = translate(Store.getModel(type))
     }
     if (!title)
       title = translate(model) //translate(utils.makeModelTitle(model))
@@ -685,7 +685,7 @@ class MessageList extends Component {
 
   renderRow(resource, sectionId, rowId)  {
     let { application, isAggregation, bankStyle, originatingMessage, currency, country, navigator } = this.props
-    let model = utils.getModel(resource[TYPE] || resource.id).value;
+    let model = Store.getModel(resource[TYPE] || resource.id);
     let me = utils.getMe();
     // import MessageRow from './MessageRow'
     let previousMessageTime = currentMessageTime;
@@ -783,7 +783,7 @@ class MessageList extends Component {
           onlineStatus, loadEarlierMessages, customStyle, allContexts, currentContext } = this.state
     if (currentContext)
       context = currentContext
-    let model = utils.getModel(modelName).value;
+    let model = Store.getModel(modelName);
     let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
     let bgStyle = {}
     if (!bgImage  &&  bankStyle.backgroundColor)
@@ -1025,7 +1025,7 @@ class MessageList extends Component {
   }
   chooseFormForApplication() {
     let application = this.props.application
-    let model = utils.getModel(application.requestFor).value
+    let model = Store.getModel(application.requestFor)
     this.props.navigator.push({
       title: translate(utils.makeModelTitle(model)),
       id: 33,
@@ -1036,7 +1036,7 @@ class MessageList extends Component {
         strings:   model.additionalForms,
         bankStyle: this.props.bankStyle,
         callback:  (val) => {
-          let m = utils.getModel(val).value
+          let m = Store.getModel(val)
           let msg = {
             [TYPE]: FORM_REQUEST,
             message: m.formRequestMessage
@@ -1118,7 +1118,7 @@ class MessageList extends Component {
     else
       sharingChat = this.props.resource
     this.props.navigator.push({
-      title: translate(utils.getModel(this.state.context.product).value),
+      title: translate(Store.getModel(this.state.context.product)),
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
@@ -1134,7 +1134,7 @@ class MessageList extends Component {
   shareContext(orgs) {
     delete orgs[utils.getId(this.props.resource)]
     Alert.alert(
-      translate('shareContext', utils.getModel(this.state.context.product).value.title),
+      translate('shareContext', Store.getModel(this.state.context.product).title),
       translate('shareAllPastAndFutureMessages'),
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},
@@ -1184,7 +1184,7 @@ class MessageList extends Component {
             </View>
   }
   hasAdditionalForms(application) {
-    let m = utils.getModel(application.requestFor).value
+    let m = Store.getModel(application.requestFor)
     return m.additionalForms !== null
   }
   onLoadEarlierMessages(oldestMessage = {}, callback = () => {}) {
@@ -1220,7 +1220,7 @@ class MessageList extends Component {
     let resource = this.props.resource
     this.setState({show: false})
     this.props.navigator.push({
-      title: translate(utils.getModel(FORM).value),
+      title: translate(Store.getModel(FORM)),
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
@@ -1241,7 +1241,7 @@ class MessageList extends Component {
       //   // titleTextColor: '#999999',
       //   rightButtonTitle: translate('done'),
       //   passProps: {
-      //     model: utils.getModel('tradle.NewMessageModel').value,
+      //     model: Store.getModel('tradle.NewMessageModel'),
       //     currency: resource.currency,
       //     // callback: this.modelAdded.bind(this)
       //   }
@@ -1252,7 +1252,7 @@ class MessageList extends Component {
     if (this.props.isAggregation)
       return
     // let modelName = MESSAGE
-    // let model = utils.getModel(modelName).value;
+    // let model = Store.getModel(modelName);
     // let isInterface = model.isInterface;
     // if (!isInterface)
     //   return;
@@ -1295,13 +1295,13 @@ class MessageList extends Component {
     let { modelName, resource, navigator, callback } = this.props
     if (modelName === MESSAGE)
       return
-    let model = utils.getModel(modelName).value;
+    let model = Store.getModel(modelName);
     if (!model.isInterface)
       return;
 
     let currentRoutes = navigator.getCurrentRoutes();
     navigator.push({
-      title: translate(utils.getModel(FINANCIAL_PRODUCT).value),
+      title: translate(Store.getModel(FINANCIAL_PRODUCT)),
       id: 15,
       component: ProductChooser,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
@@ -1321,7 +1321,7 @@ class MessageList extends Component {
         // titleTextColor: '#999999',
         rightButtonTitle: 'Done',
         passProps: {
-          model: utils.getModel('tradle.NewMessageModel').value,
+          model: Store.getModel('tradle.NewMessageModel'),
           currency: resource.currency,
           country: resource.country,
           // callback: this.modelAdded.bind(this)
@@ -1333,7 +1333,7 @@ class MessageList extends Component {
     let me = utils.getMe();
     let { resource, application, modelName } = this.props
 
-    let model = utils.getModel(modelName).value;
+    let model = Store.getModel(modelName);
 
     let toName = utils.getDisplayName(resource);
     let meName = utils.getDisplayName(me);
@@ -1444,7 +1444,7 @@ module.exports = MessageList;
         titleTextColor: '#7AAAC3',
         rightButtonTitle: 'Done',
         passProps: {
-          model: utils.getModel('tradle.NewMessageModel').value,
+          model: Store.getModel('tradle.NewMessageModel'),
           callback: this.modelAdded.bind(this)
         }
       }
@@ -1494,5 +1494,5 @@ module.exports = MessageList;
   //     }
   //   });
   // }
-      // 'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[TYPE]).value.properties) + '\' to forget you',
+      // 'Are you sure you want \'' + utils.getDisplayName(resource, Store.getModel(resource[TYPE]).properties) + '\' to forget you',
 */
