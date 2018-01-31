@@ -13,6 +13,8 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import MessageList from './MessageList'
 import TourPage from './TourPage'
 import SplashPage from './SplashPage'
+import Store from '../Store/Store'
+import GridHeader from './GridHeader'
 import qrCodeDecoder from '@tradle/qr-schema'
 import {
   Alert,
@@ -28,6 +30,9 @@ const {
   ORGANIZATION,
   MESSAGE
 } = constants.TYPES
+
+const DATA_CLAIM = 'tradle.DataClaim'
+const APPLICATION = 'tradle.Application'
 
 var HomePageMixin = {
   scanFormsQRCode(isView) {
@@ -84,7 +89,7 @@ var HomePageMixin = {
     let me = utils.getMe()
     switch (code) {
     case WEB_TO_MOBILE:
-      Actions.showModal({title: 'Connecting to ' + result.host, showIndicator: true})
+      Actions.showModal({title: 'Connecting to ' + result.data.host, showIndicator: true})
 // Alert.alert('Connecting to ' + result.host)
       let r = {
         _t: 'tradle.DataClaim',
@@ -104,7 +109,7 @@ var HomePageMixin = {
           url: data.host,
           hash: data.provider
         },
-        meta: utils.getModel('tradle.DataClaim').value,
+        meta: Store.getModel(DATA_CLAIM),
         disableAutoResponse: true})
       break
     // case TALK_TO_EMPLOYEEE:
@@ -214,6 +219,43 @@ var HomePageMixin = {
       callback({resource, termsAccepted, action: 'replace'})
     }, 2000)
     return true
+  },
+  renderGridHeader() {
+    let { modelName, navigator, multiChooser } = this.props
+    if (modelName === APPLICATION)
+      return <View/>
+    let model = Store.getModel(modelName)
+    let props = model.properties
+    let gridCols = this.getGridCols() // model.gridCols || model.viewCols;
+    if (gridCols)
+    return (
+      // <GridHeader gridCols={gridCols} modelName={modelName} navigator={navigator} />
+      <GridHeader gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} />
+    )
+  },
+  getGridCols() {
+    let model = Store.getModel(this.props.modelName)
+    let props = model.properties
+    let gridCols = model.gridCols || model.viewCols
+    if (!gridCols)
+      return
+    let vCols = []
+    gridCols.forEach((v) => {
+      if (/*!props[v].readOnly &&*/ !props[v].list  &&  props[v].range !== 'json')
+        vCols.push(v)
+    })
+    // if (vCols.length === 7)
+    //   vCols.splice(6, 1)
+    return vCols
+  },
+  checkAll() {
+    let chosen = {}
+    let check = utils.isEmpty(this.state.chosen)
+    if (check  &&  this.props.list)
+      this.props.list.forEach((r) => {
+        chosen[utils.getId(r)] = r
+      })
+    this.setState({chosen: chosen})
   }
 }
 
