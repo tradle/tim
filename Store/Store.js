@@ -659,7 +659,7 @@ var Store = Reflux.createStore({
 
     if (payload[TYPE] === VERIFICATION && payload.sources) {
       const sourceToAuthor = await lookupSourceAuthors(meDriver, payload.sources)
-      for (var [verification, author] of sourceToAuthor) {
+      for (let [verification, author] of sourceToAuthor) {
         let a = this._getItem(utils.makeId(PROFILE, author.permalink))
         verification.from = this.buildRef(a)
         verification.from.organization = utils.clone(a.organization)
@@ -684,7 +684,7 @@ var Store = Reflux.createStore({
 
       let type = payload.leaves.find(l => l.key === TYPE && l.value).value
       payload.type = type
-      var r = {
+      let r = {
         [TYPE]: type,
         [ROOT_HASH]: msg.partialinfo.permalink,
         [CUR_HASH]: msg.partialinfo.link
@@ -851,7 +851,7 @@ var Store = Reflux.createStore({
     return db.get(MY_IDENTITIES)
     .then((value) => {
       if (value) {
-        var key = MY_IDENTITIES
+        let key = MY_IDENTITIES
         this._setItem(key, value)
         return db.get(value.currentIdentity.replace(PROFILE, IDENTITY))
       }
@@ -880,7 +880,7 @@ var Store = Reflux.createStore({
         this.dbPut(utils.getId(me), me)
 
       this.setMe(me)
-      var key = utils.getId(me)
+      let key = utils.getId(me)
       this._setItem(key, me)
       return me
     })
@@ -931,8 +931,8 @@ var Store = Reflux.createStore({
     this.trigger({ action: 'authenticated', value: authenticated })
   },
   getSettings() {
-    var self = this
-    var key = SETTINGS + '_1'
+    let self = this
+    let key = SETTINGS + '_1'
     return db.get(key)
     .then((value) => {
       if (value) {
@@ -971,7 +971,7 @@ var Store = Reflux.createStore({
     return ret
   },
   buildCustomIndexes() {
-    var self = this
+    let self = this
     myCustomIndexes = tradle.dbs.msgMeta({
       node: meDriver,
       db: 'msgMetaIIII.db',
@@ -1007,15 +1007,15 @@ var Store = Reflux.createStore({
     return myCustomIndexes
   },
   _buildDriver ({ keys, identity, encryption }) {
-    var self = this
-    // var keeper = level('unencrypted-keeper', {
+    let self = this
+    // let keeper = level('unencrypted-keeper', {
     //   valueEncoding: {
     //     encode: json => JSON.stringify(json),
     //     decode: json => utils.rebuf(JSON.parse(json))
     //   }
     // })
 
-    var keeper = createKeeper({
+    let keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
       db: asyncstorageDown,
       encryption: encryption
@@ -1028,8 +1028,8 @@ var Store = Reflux.createStore({
     const networkAdapters = createNetworkAdapters(ENV)
     const { wsClients, restoreMonitors, identifierProp } = driverInfo
 
-    // var whitelist = driverInfo.whitelist
-    // var tlsKey = driverInfo.tlsKey
+    // let whitelist = driverInfo.whitelist
+    // let tlsKey = driverInfo.tlsKey
 
     // return Q.ninvoke(dns, 'resolve4', 'tradle.io')
     //   .then(function (addrs) {
@@ -1076,7 +1076,7 @@ var Store = Reflux.createStore({
     let noProviders
     if (!SERVICE_PROVIDERS_BASE_URLS) {
       let settingsId = SETTINGS + '_1'
-      var settings = this._getItem(settingsId)
+      let settings = this._getItem(settingsId)
       fixOldSettings(settings)
 
       let updateSettings
@@ -1102,7 +1102,7 @@ var Store = Reflux.createStore({
       }
       else {
         SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS ? SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice() : []
-        var settings = {
+        let settings = {
           [TYPE]: SETTINGS,
           [ROOT_HASH]: '1',
           [CUR_HASH]: '1',
@@ -1123,7 +1123,7 @@ var Store = Reflux.createStore({
     // if (tlsKey) tlsKey = kiki.toKey(tlsKey).priv()
 
     const tlsKey = driverInfo.tlsKey = TLS_ENABLED && meDriver.keys.filter(k => k.get('purpose') === 'tls')[0]
-    // var fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
+    // let fromPubKey = meDriver.identity.pubkeys.filter(k => k.type === 'ec' && k.purpose === 'sign')[0]
     meDriver._send = function (msg, recipientInfo, cb) {
       const start = Date.now()
       const monitor = setInterval(function () {
@@ -1413,7 +1413,7 @@ var Store = Reflux.createStore({
     for (let id in chatMessages) {
       if (id === ALL_MESSAGES)
         continue
-      var arr = chatMessages[id]
+      let arr = chatMessages[id]
       arr.sort((a, b) => a.time - b.time)
       chatMessages[id] = this.filterChatMessages(arr, id)
     }
@@ -1503,94 +1503,6 @@ var Store = Reflux.createStore({
       // db.batch(batch)
     }
     return messages
-    // Compact all SelfIntroduction
-    // messages = messages.filter((rr, i) => {
-    //   let r = this._getItem(rr.id)
-    //   return r[TYPE] === SELF_INTRODUCTION ? false : true
-    //     // delete list[id]
-    // })
-    // addPhoto(r)
-    // let newResult = messages.filter((rr, i) => {
-    //   let time = rr.time
-    //   let id = rr.id
-    //   let type = id.split('_')[0]
-    //   // Compact ProductList resources that go one after another
-    //   // if (type === PRODUCT_LIST  &&  i !== messages.length - 1) {
-    //   //   var next = messages[i + 1]
-
-    //   //   if (next && next.id.split('_')[0] === PRODUCT_LIST) {
-    //   //     // delete list[id]
-    //   //     return false
-    //   //   }
-    //   // }
-    //   // if (r[TYPE] === CUSTOMER_WAITING) {
-    //   //   let f = list[utils.getId(r.from)].value.organization
-    //   //   let t = list[utils.getId(r.to)].value.organization
-    //   //   if (utils.getId(f) === utils.getId(t))
-    //   //     return false
-    //   // }
-    //   let r = this._getItem(rr.id)
-
-    //   // Check if there was request for the next form after multy-entry form
-    //   let fromId = utils.getId(r.from)
-
-    //   if (!me.isEmployee  &&  fromId !== meId  &&  list[fromId]) {
-    //     let rFrom = this._getItem(fromId)
-    //     if (!rFrom.bot) {
-    //       let photos = rFrom.photos
-    //       if (photos)
-    //         r.from.photo = photos[0]
-    //       else
-    //         r.from.photo = employee
-    //     }
-    //   }
-    //   let m = this.getModel(r[TYPE])
-    //   // r.from.photos = list[utils.getId(r.from)].value.photos;
-    //   // var to = list[utils.getId(r.to)]
-    //   // if (!to) console.log(r.to)
-    //   // r.to.photos = to  &&  to.value.photos;
-    //   if (m.subClassOf === FORM) {
-    //     // set organization and photos for items properties for better displaying
-    //     let form = this._getItem(utils.getId(r.to))
-    //     if (orgId  &&  r._sharedWith  &&  r._sharedWith.length > 1) {
-    //       // if (utils.getId(r.to.organization) !== toOrgId) {
-    //       //   let filteredVerifications = this.getSharedVerificationsAboutThisForm(r, toOrgId)
-    //       // }
-    //     }
-    //     r.to.organization = form.organization
-    //     for (let p in r) {
-    //       if (!m.properties[p]  ||  m.properties[p].type !== 'array' ||  !m.properties[p].items.ref)
-    //         continue
-    //       let pModel = this.getModel(m.properties[p].items.ref)
-    //       if (pModel.properties.photos) {
-    //         let items = r[p]
-    //         items.forEach((ir) => {
-    //           let irRes = this._getItem(utils.getId(ir))
-    //           // HACK - bad forgetMe
-    //           let itemPhotos = irRes  && irRes.photos
-    //           if (itemPhotos)
-    //             ir.photo = itemPhotos[0].url
-    //         })
-    //       }
-    //     }
-    //   }
-    //   return true
-    // })
-    // if (lastId  &&  lastId.split('_')[0] === PRODUCT_LIST) {
-    //   let i=newResult.length - 1
-    //   for (; i>=0; i--) {
-    //     if (newResult[i][TYPE] !== PRODUCT_LIST)
-    //       break
-    //   }
-    //   let msg = newResult[i]
-    //   newResult.splice(i, 1)
-    //   for (let ii=0; ii<allMessages.length; ii++) {
-    //     if (allMessages[ii].id === msg.id)
-    //       allMessages.splice(ii, 1)
-    //   }
-    // }
-    // return newResult
-    // return newResult.reverse()
     function addPhoto(r) {
       // let r = self._getItem(rr.id)
 
@@ -4943,7 +4855,7 @@ var Store = Reflux.createStore({
     // if (resource[TYPE] === VERIFICATION) {
     //   if (!Array.isArray(shareWithList))
     //     sharedWithList = [sharedWithList]
-    this.shareAll(resource.document, shareWithList, originatingResource)
+    this.shareAll(resource.document || resource, shareWithList, originatingResource)
     //   return
     // }
 
@@ -5028,7 +4940,7 @@ var Store = Reflux.createStore({
       this.dbBatchPut(documentId, document, batch)
       document._sendStatus = SENT
       this._setItem(documentId, document)
-      this.trigger({action: 'addItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
+      this.trigger({action: 'updateItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
     }
     // let m = this.getModel(VERIFICATION)
     let docModel = this.getModel(document[TYPE])
@@ -5076,6 +4988,60 @@ var Store = Reflux.createStore({
     db.batch(batch)
   },
 
+  async shareForms(documents, to, formRequest, shareBatchId) {
+    var time = new Date().getTime()
+    try {
+      if (utils.getMe().isEmployee) {
+        let hashes = documents.map((d) => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
+        let sr = {
+          [TYPE]: SHARE_REQUEST,
+          links: hashes,
+          with:  [{
+            id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
+          }]
+        }
+        let msg = this.packMessage(sr, me, to)
+        if (!msg.other)
+          msg.other = {}
+        msg.other.context = formRequest._context.contextId
+        msg.seal =  true
+        await this.meDriverSignAndSend(msg)
+      }
+      else {
+
+        let opts = {
+          other: {
+            context:  formRequest._context.contextId,
+          },
+          to: { permalink: to[ROOT_HASH] },
+          seal: true,
+          link: hash
+        }
+        await this.meDriverSend(opts)
+      }
+    }
+    catch(err) {
+      console.log(err)
+      return
+    }
+
+    if (!document._sharedWith) {
+      document._sharedWith = []
+      if (!utils.isMyProduct(document)  &&  !utils.isSavedItem(document))
+        this.addSharedWith(document, document.to, document.time, shareBatchId)
+    }
+    if (utils.isSavedItem(document)) {
+      document._creationTime = document.time
+      document._sentTime = new Date().getTime()
+      let docId = utils.getId(document)
+      document.to = to
+      this._setItem(docId, document)
+      this.dbPut(docId, document)
+    }
+
+    this.addSharedWith(document, to, time, shareBatchId)
+    this.addMessagesToChat(utils.getId(to.organization), document, false, time)
+  },
   async shareForm(document, to, formRequest, shareBatchId) {
     var time = new Date().getTime()
     let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
@@ -5362,6 +5328,7 @@ var Store = Reflux.createStore({
     if (params.modelName)
       await this.getList(params);
   },
+
   async getList(params) {
     let {modelName, first, prop, isAggregation, isChat} = params
     var meta = this.getModel(modelName)
@@ -7502,6 +7469,7 @@ var Store = Reflux.createStore({
     var meId = utils.getId(utils.getMe())
 
     var hasVerifiers = []
+    let formToProduct = {}
     for (var i=0; i<foundResources.length; i++) {
       var r = foundResources[i]
       if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
@@ -7534,6 +7502,7 @@ var Store = Reflux.createStore({
           !msgModel.notShareable              &&
           !utils.isContext(msgModel)) {
         verTypes.push(msgModel.id);
+        formToProduct[msgModel.id] = r.product
         if (r.verifiers)
           hasVerifiers[msgModel.id] = r.verifiers
       }
@@ -7628,10 +7597,10 @@ var Store = Reflux.createStore({
         }
       })
     })
-    let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources)
+    let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources, formToProduct)
     return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
     function checkOneVerification(val) {
-      var id = utils.getId(val.to.id);
+      let id = utils.getId(val.to.id);
 
       var doc = val.document
       var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
@@ -7698,6 +7667,7 @@ var Store = Reflux.createStore({
     }
 
     var hasVerifiers = []
+    let formToProduct = {}
     var contexts = {}
     let toR = (to.organization  &&  this._getItem(to.organization)) || to
     for (var i=0; i<foundResources.length; i++) {
@@ -7742,6 +7712,7 @@ var Store = Reflux.createStore({
         }
         contexts[utils.getId(r._context)] = r._context
         verTypes.push(msgModel.id);
+        formToProduct[msgModel.id] = r.product
         if (r.verifiers)
           hasVerifiers[msgModel.id] = r.verifiers
       }
@@ -7839,10 +7810,10 @@ var Store = Reflux.createStore({
     //   })
     // }
 
-    let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources)
+    let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources, formToProduct)
     return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
     function checkOneVerification(val, contextId) {
-      var id = utils.getId(val.to.id);
+      let id = utils.getId(val.to.id);
       if (id !== meId) {
         if (me.isEmployee  &&  id !== myRep)
           return
@@ -7852,13 +7823,13 @@ var Store = Reflux.createStore({
       if (!fr)
         return
 
-      var doc = val.document
-      var docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
+      let doc = val.document
+      let docType = (doc.id && doc.id.split('_')[0]) || doc[TYPE];
       if (verTypes.indexOf(docType) === -1)
         return;
       // Filter out the verification from the same company
-      // var fromId = utils.getId(val.from)
-      // var fromOrgId = utils.getId(self._getItem(fromId).organization)
+      // let fromId = utils.getId(val.from)
+      // let fromOrgId = utils.getId(self._getItem(fromId).organization)
       // if (fromOrgId === toId)
       //   return
       let document = typeToDocs[docType].filter((d) => utils.getId(d) === doc.id)[0]
@@ -7868,7 +7839,7 @@ var Store = Reflux.createStore({
         if (utils.getId(context) === contextId)
           return
       }
-      // // var document = doc.id ? self._getItem(utils.getId(doc.id)) : doc;
+      // // let document = doc.id ? self._getItem(utils.getId(doc.id)) : doc;
       // // if (!document  ||  document._inactive)
       // //   return;
 
@@ -7892,7 +7863,7 @@ var Store = Reflux.createStore({
         if (!foundVerifiedForm)
           return
       }
-      var value = {};
+      let value = {};
       extend(value, val);
       value.document = document;
 
@@ -7900,37 +7871,45 @@ var Store = Reflux.createStore({
       return self.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
     }
   },
-  getMultiEntriesToShare(shareableResources) {
+  getMultiEntriesToShare(shareableResources, formToProduct) {
     let multientryResources = {}
     for (let t in shareableResources) {
       let docs = shareableResources[t]
-      let rm = []
+      // let rm = []
       docs.forEach((ver, i) => {
         let doc = ver.document
-        let c = doc._context
-        if (!c) {
-          let context = this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: doc[TYPE], object___link: doc[CUR_HASH]}})
-          return
-        }
-        let requestFor = c.requestFor
+        let requestFor = formToProduct[t]
         let multiEntryForms = this.getModel(requestFor).multiEntryForms
-        if (!multiEntryForms || multiEntryForms.indexOf(doc[TYPE]) === -1)
+        if (!multiEntryForms || multiEntryForms.indexOf(t) === -1)
           return
-        let cId = utils.getId(c)
         let meContexts = multientryResources[t]
         if (!meContexts) {
-          meContexts = {}
+          meContexts = []
           multientryResources[t] = meContexts
         }
-        if (!meContexts[cId])
-          meContexts[cId] = []
-        meContexts[cId].push(ver)
+        meContexts.push(ver)
+
+        // let c = doc._context
+        // if (!c) {
+        //   // let context = this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: doc[TYPE], object___link: doc[CUR_HASH]}})
+        //   return
+        // }
+        // let cId = utils.getId(c)
+        // let meContexts = multientryResources[t]
+        // if (!meContexts) {
+        //   meContexts = {}
+        //   multientryResources[t] = meContexts
+        // }
+        // if (!meContexts[cId])
+        //   meContexts[cId] = []
+        // meContexts[cId].push(ver)
+        // meContexts.push(ver)
         // rm.push[i]
       })
-      if (rm) {
-        for (let i=rm.length - 1; i>=0; i--)
-          docs.splice(rm[i], 1)
-      }
+      // if (rm) {
+      //   for (let i=rm.length - 1; i>=0; i--)
+      //     docs.splice(rm[i], 1)
+      // }
     }
     return multientryResources
   },
@@ -8830,6 +8809,8 @@ var Store = Reflux.createStore({
 
   publishMyIdentity(orgRep, disableAutoResponse) {
     var self = this
+    if (me.isEmployee)
+      return
     var msg = {
       [TYPE]: IDENTITY_PUBLISHING_REQUEST,
       // [NONCE]: self.getNonce(),
@@ -8850,93 +8831,6 @@ var Store = Reflux.createStore({
       debugger
     })
   },
-  // loadAddressBook() {
-  //   return // method not used currently
-
-  //   var self = this;
-  //   return Q.ninvoke(AddressBook, 'checkPermission')
-  //   .then(function(permission) {
-  //     // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
-  //     if(permission === AddressBook.PERMISSION_UNDEFINED)
-  //       return Q.ninvoke(AddressBook, 'requestPermission')
-  //              .then(function(permission) {
-  //                if (permission === AddressBook.PERMISSION_AUTHORIZED)
-  //                  return self.storeContacts.bind(self);
-  //              });
-  //     else if (permission === AddressBook.PERMISSION_AUTHORIZED)
-  //       return self.storeContacts()
-  //     else if (permission === AddressBook.PERMISSION_DENIED) {
-  //       //handle permission denied
-  //       return
-  //     }
-  //   })
-  // },
-  // storeContacts() {
-  //   var self = this;
-  //   var dfd = Q.defer();
-  //   var batch = [];
-  //   let pModel = this.getModel(PROFILE)
-  //   var props = pModel.properties;
-  //   AddressBook.getContacts(function(err, contacts) {
-  //     contacts.forEach(function(contact) {
-  //       var contactInfo = [];
-  //       var newIdentity = {
-  //         firstName: contact.firstName,
-  //         lastName: contact.lastName,
-  //         // formatted: contact.firstName + ' ' + contact.lastName,
-  //         contactInfo: contactInfo
-  //       };
-  //       newIdentity[TYPE] = PROFILE;
-  //       var myIdentities = self._getItem(MY_IDENTITIES)
-  //       if (myIdentities)  {
-  //         var currentIdentity = myIdentities.currentIdentity;
-  //         newIdentity[constants.OWNER] = {
-  //           id: currentIdentity,
-  //           title: utils.getDisplayName(currentIdentity, pModel)
-  //         };
-  //         // if (me.organization) {
-  //         //   var photos = list[utils.getId(me.organization.id)].value.photos;
-  //         //   if (photos)
-  //         //     me.organization.photo = photos[0].url;
-  //         // }
-  //       }
-
-  //       if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
-  //         newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
-  //       var phoneNumbers = contact.phoneNumbers;
-  //       if (phoneNumbers) {
-  //         phoneNumbers.forEach(function(phone) {
-  //           contactInfo.push({identifier: phone.number, type: phone.label + ' phone'})
-  //         })
-  //       }
-  //       var emailAddresses = contact.emailAddresses;
-  //       if (emailAddresses)
-  //         emailAddresses.forEach(function(email) {
-  //           contactInfo.push({identifier: email.email, type: email.label + ' email'})
-  //         });
-  //       newIdentity[ROOT_HASH] = sha(newIdentity);
-  //       newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
-  //       var key = utils.getId(newIdentity)
-  //       if (!list[key])
-  //         batch.push({type: 'put', key: key, value: newIdentity});
-  //     });
-  //     if (batch.length)
-  //       // identityDb.batch(batch, function(err, value) {
-  //       db.batch(batch, function(err, value) {
-  //         if (err)
-  //           dfd.reject(err);
-  //         else {
-  //           self.loadMyResources()
-  //           .then(function() {
-  //             dfd.resolve();
-  //           })
-  //         }
-  //       });
-  //     else
-  //       dfd.resolve();
-  //   })
-  //   return dfd.promise;
-  // },
   monitorTim() {
     this._keeper = {}
     ;['get', 'put', 'batch', 'del'].forEach(method => {
@@ -9414,37 +9308,8 @@ var Store = Reflux.createStore({
         // Original request was made by another employee
         // if (me.isEmployee) {
         context = await this.getContext(obj.object.context, val)
-      if (context)
-        val._context = this.buildRef(context)
-
-      // if (context) {
-      //   if (me.isEmployee  &&  isFormRequest  &&  val.product  &&  context.from.organization  && context.from.organization.id === me.organization.id) {
-      //     let pModel = this.getModel(val.product)
-      //     let forms = pModel.forms
-      //     context._startForm = val.form
-      //     switchToContext = true
-      //     // Alert.alert(
-      //     //   'The application for `${}` was started by another employee',
-      //     //   'Do you want to switch to it and continue from there?',
-      //     //   [
-      //     //     {text: translate('Ok'),
-      //     //     onPress: () => {
-      //     //       // this.trigger({action: 'messageList', context: context, to: context.to, search: true})
-      //     //     }},
-      //     //     {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-      //     //   ]
-      //     // )
-      //   }
-      //   contextId = utils.getId(context)
-      //   contextIdToResourceId[obj.object.context] = context
-      //   ///
-      //   // this._setItem(contextId, context)
-      //   // this.dbBatchPut(contextId, context, batch)
-      //   // this.addMessagesToChat(utils.getId(fOrg || utils.getId(from)), context)
-      //   ///
-      //   val._context = this.buildRef(context)
-      // }
       if (context) {
+        val._context = this.buildRef(context)
         if (me.isEmployee  &&  isFormRequest  &&  val.product) {
           // Someone is applying to my provider
           let meApplying = context.from.organization  &&  context.from.organization.id === me.organization.id
@@ -9460,7 +9325,7 @@ var Store = Reflux.createStore({
             //   this.dbBatchPut(contextId, context, batch)
             //   this.addMessagesToChat(utils.getId(fOrg || utils.getId(from)), context)
             // }
-            val._context = this.buildRef(context)
+            // val._context = this.buildRef(context)
           }
         }
       }
@@ -9603,83 +9468,6 @@ var Store = Reflux.createStore({
       let stopHere = await modelsPackHandler()
       if (stopHere)
         return
-      // org.products = []
-      // let pList = val.models || []
-      // pList.forEach((m) => {
-      //   if (!this.getModel(m.id))
-      //     this._emitter.emit('model:' + m.id)
-      //   Aviva.preparseModel(m)
-      //   this.addNameAndTitleProps(m)
-      //   m._versionId = val.versionId
-      //   models[m.id] = {
-      //     key: m.id,
-      //     value: m
-      //   }
-      //   // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
-      //   //   org.products.push(m.id)
-      //   if (utils.isEnum(m))
-      //     this.createEnumResources(m)
-
-      //   // if (utils.isMessage(m)) {
-      //   if (m.subClassOf === FORM) {
-      //     this.addVerificationsToFormModel(m)
-      //     this.addFromAndTo(m)
-      //   }
-      //   if (!m[ROOT_HASH])
-      //     m[ROOT_HASH] = 1
-
-      //   batch.push({type: 'put', key: m.id, value: m})
-      // })
-      // utils.setModels(models)
-
-      // if (val.lenses) {
-      //   val.lenses.forEach((l) => {
-      //     batch.push({type: 'put', key: l.id, value: l})
-      //     lenses[l.id] = l
-      //   })
-      // }
-      // let orgId = utils.getId(org)
-      // list[orgId].value = org
-      // this.dbBatchPut(utils.getId(org), org, batch)
-      // this.trigger({action: 'getItem', resource: org})
-      // // noTrigger = hasNoTrigger(orgId)
-      // if (this.preferences  &&  this.preferences.firstPage === 'chat' && ENV.autoRegister) {
-      //     // ENV.autoRegister                &&
-      //     // org.products.length === 1) {
-      //   let meRef = this.buildRef(utils.getMe())
-      //   let pa = await this.searchMessages({modelName: PRODUCT_REQUEST})
-      //   let product = org.products[0]
-      //   let hasThisProductApp
-      //   if (pa) {
-      //     hasThisProductApp = pa.some((r) => r.requestFor === product)
-      //   }
-      //   if (hasThisProductApp)
-      //     return
-      //   if (org._greeting) {
-      //     let msg = {
-      //       [TYPE]: SIMPLE_MESSAGE,
-      //       [ROOT_HASH]: val.from.title.replace(' ', '_') + '_1',
-      //       message: translate(org._greeting),
-      //       time: new Date().getTime(),
-      //       from: val.from,
-      //       to: meRef
-      //     }
-      //     let msgId = utils.getId(msg)
-      //     this._setItem(msgId, msg)
-      //     this.addMessagesToChat(utils.getId(org), msg)
-      //     this.trigger({action: 'addMessage', resource: msg})
-      //     db.put(msgId, msg)
-      //   }
-      //   this.onAddMessage({
-      //     msg: {
-      //       [TYPE]: PRODUCT_REQUEST,
-      //       requestFor: product,
-      //       from: meRef,
-      //       to: val.from
-      //     }
-      //   })
-      //   return
-      // }
       this.addMessagesToChat(utils.getId(fOrg), val)
     }
     else {
@@ -9946,32 +9734,6 @@ var Store = Reflux.createStore({
     }
 
   },
-  // async getContext(contextId, val) {
-  //   let context, contexts
-  //   if (me.isEmployee) {
-  //     let myOrgRep = this.getRepresentative(me.organization)
-  //     // let msg = await this.searchServer({modelName: MESSAGE, noTrigger: true, filterResource: {contextId: contextId}})
-  //     contexts = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contextId}})
-  //   }
-  //   else {
-  //     contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
-  //     if (contexts)
-  //       contexts = contexts.filter((c) => c.contextId === contextId)
-  //   }
-  //   if (contexts  &&  contexts.length) {
-  //     // let context = contexts.filter((r) => r.from.id === r.to.id)[0]
-  //     // let cr = await this.searchServer({
-  //     //   modelName: MESSAGE,
-  //     //   noTrigger: true,
-  //     //   to: this._getItem(val.from),
-  //     //   filterResource: {object___link: context[CUR_HASH], context: context.contextId}
-  //     // })
-  //     context = contexts[0]
-  //     context.from = utils.clone(val.from)
-  //     contextIdToResourceId[contextId] = context
-  //   }
-  //   return context
-  // },
   async getContext(contextId, val) {
     let context
     if (me.isEmployee) {
@@ -13700,4 +13462,117 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //     }
   //   }
   //   return d
+  // },
+  // loadAddressBook() {
+  //   return // method not used currently
+
+  //   var self = this;
+  //   return Q.ninvoke(AddressBook, 'checkPermission')
+  //   .then(function(permission) {
+  //     // AddressBook.PERMISSION_AUTHORIZED || AddressBook.PERMISSION_UNDEFINED || AddressBook.PERMISSION_DENIED
+  //     if(permission === AddressBook.PERMISSION_UNDEFINED)
+  //       return Q.ninvoke(AddressBook, 'requestPermission')
+  //              .then(function(permission) {
+  //                if (permission === AddressBook.PERMISSION_AUTHORIZED)
+  //                  return self.storeContacts.bind(self);
+  //              });
+  //     else if (permission === AddressBook.PERMISSION_AUTHORIZED)
+  //       return self.storeContacts()
+  //     else if (permission === AddressBook.PERMISSION_DENIED) {
+  //       //handle permission denied
+  //       return
+  //     }
+  //   })
+  // },
+  // storeContacts() {
+  //   var self = this;
+  //   var dfd = Q.defer();
+  //   var batch = [];
+  //   let pModel = this.getModel(PROFILE)
+  //   var props = pModel.properties;
+  //   AddressBook.getContacts(function(err, contacts) {
+  //     contacts.forEach(function(contact) {
+  //       var contactInfo = [];
+  //       var newIdentity = {
+  //         firstName: contact.firstName,
+  //         lastName: contact.lastName,
+  //         // formatted: contact.firstName + ' ' + contact.lastName,
+  //         contactInfo: contactInfo
+  //       };
+  //       newIdentity[TYPE] = PROFILE;
+  //       var myIdentities = self._getItem(MY_IDENTITIES)
+  //       if (myIdentities)  {
+  //         var currentIdentity = myIdentities.currentIdentity;
+  //         newIdentity[constants.OWNER] = {
+  //           id: currentIdentity,
+  //           title: utils.getDisplayName(currentIdentity, pModel)
+  //         };
+  //         // if (me.organization) {
+  //         //   var photos = list[utils.getId(me.organization.id)].value.photos;
+  //         //   if (photos)
+  //         //     me.organization.photo = photos[0].url;
+  //         // }
+  //       }
+
+  //       if (contact.thumbnailPath  &&  contact.thumbnailPath.length)
+  //         newIdentity.photos = [{type: 'address book', url: contact.thumbnailPath}];
+  //       var phoneNumbers = contact.phoneNumbers;
+  //       if (phoneNumbers) {
+  //         phoneNumbers.forEach(function(phone) {
+  //           contactInfo.push({identifier: phone.number, type: phone.label + ' phone'})
+  //         })
+  //       }
+  //       var emailAddresses = contact.emailAddresses;
+  //       if (emailAddresses)
+  //         emailAddresses.forEach(function(email) {
+  //           contactInfo.push({identifier: email.email, type: email.label + ' email'})
+  //         });
+  //       newIdentity[ROOT_HASH] = sha(newIdentity);
+  //       newIdentity[CUR_HASH] = newIdentity[ROOT_HASH];
+  //       var key = utils.getId(newIdentity)
+  //       if (!list[key])
+  //         batch.push({type: 'put', key: key, value: newIdentity});
+  //     });
+  //     if (batch.length)
+  //       // identityDb.batch(batch, function(err, value) {
+  //       db.batch(batch, function(err, value) {
+  //         if (err)
+  //           dfd.reject(err);
+  //         else {
+  //           self.loadMyResources()
+  //           .then(function() {
+  //             dfd.resolve();
+  //           })
+  //         }
+  //       });
+  //     else
+  //       dfd.resolve();
+  //   })
+  //   return dfd.promise;
+  // },
+  // async getContext(contextId, val) {
+  //   let context, contexts
+  //   if (me.isEmployee) {
+  //     let myOrgRep = this.getRepresentative(me.organization)
+  //     // let msg = await this.searchServer({modelName: MESSAGE, noTrigger: true, filterResource: {contextId: contextId}})
+  //     contexts = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contextId}})
+  //   }
+  //   else {
+  //     contexts = await this.searchMessages({modelName: PRODUCT_REQUEST})
+  //     if (contexts)
+  //       contexts = contexts.filter((c) => c.contextId === contextId)
+  //   }
+  //   if (contexts  &&  contexts.length) {
+  //     // let context = contexts.filter((r) => r.from.id === r.to.id)[0]
+  //     // let cr = await this.searchServer({
+  //     //   modelName: MESSAGE,
+  //     //   noTrigger: true,
+  //     //   to: this._getItem(val.from),
+  //     //   filterResource: {object___link: context[CUR_HASH], context: context.contextId}
+  //     // })
+  //     context = contexts[0]
+  //     context.from = utils.clone(val.from)
+  //     contextIdToResourceId[contextId] = context
+  //   }
+  //   return context
   // },
