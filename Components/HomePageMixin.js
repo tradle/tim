@@ -2,7 +2,7 @@ console.log('requiring HomePageMixin.js')
 'use strict';
 
 import React from 'react'
-import extend from 'extend'
+import _ from 'lodash'
 
 import utils, { translate } from '../utils/utils'
 import constants from '@tradle/constants'
@@ -126,8 +126,8 @@ var HomePageMixin = {
   },
   mergeStyle(newStyle) {
     let style = {}
-    extend(style, defaultBankStyle)
-    return newStyle ? extend(style, newStyle) : style
+    _.extend(style, defaultBankStyle)
+    return newStyle ? _.extend(style, newStyle) : style
   },
   showChat(params) {
     if (!params.to)
