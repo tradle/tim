@@ -47,7 +47,6 @@ import equal from 'deep-equal'
 import moment from 'moment'
 import dateformat from 'dateformat'
 import Backoff from 'backoff'
-import extend from 'xtend'
 import _ from 'lodash'
 import levelErrors from 'levelup/lib/errors'
 import Cache from 'lru-cache'
@@ -227,11 +226,11 @@ var utils = {
   },
   getModelForFormRequest(fr) {
     let model = Store.getModel(fr.form)
-    let lens = fr.lens
-    if (!lens)
+    let lensId = fr.lens
+    if (!lensId)
       return model
-    let rlens = Store.getLens(lens)
-    let lensProps = rlens.properties
+    let lens = Store.getLens(lensId)
+    let lensProps = lens  &&  lens.properties
     if (!lensProps)
       return model
     let cmodel = _.cloneDeep(model)
@@ -241,10 +240,10 @@ var utils = {
       let prop = props[p]
       _.extend(prop, lprop)
     }
-    if (rlens.hidden) {
+    if (lens.hidden) {
       if (!cmodel.hidden)
         cmodel.hidden = []
-      rlens.hidden.forEach((p) => {
+      lens.hidden.forEach((p) => {
         cmodel.hidden.push(p)
       })
     }
@@ -256,32 +255,36 @@ var utils = {
     if (!pin  &&  !limit)
       return list
     let isEnum = this.isEnum(prop.ref)
-    if (isEnum  &&  limit  &&  limit.length) {
-      let limitMap = {}
-      let newlist = list.filter((l) => {
-        let id = l[ROOT_HASH]
-        if (limit.indexOf(id) === -1)
-          return true
-        else
-          limitMap[id] = l
-        return false
-      })
-      list = limit.map((id) => limitMap[id])
+    if (isEnum) {
+      if (limit  &&  limit.length) {
+        let limitMap = {}
+        let newlist = list.filter((l) => {
+          let id = l[ROOT_HASH]
+          if (limit.indexOf(id) === -1)
+            return true
+          else
+            limitMap[id] = l
+          return false
+        })
+        list = limit.map((id) => limitMap[id])
+      }
     }
-    if (isEnum  &&  pin  &&  pin.length) {
-      let pinMap = {}
-      let newlist = list.filter((l) => {
-        let id = l[ROOT_HASH]
-        if (pin.indexOf(id) === -1)
-          return true
-        else
-          pinMap[id] = l
-        return false
-      })
-      if (this.isEmpty(pinMap))
-        return list
-      let newpin = pin.map((id) => pinMap[id])
-      list = newpin.concat(newlist)
+    if (pin  &&  pin.length) {
+      if (isEnum) {
+        let pinMap = {}
+        let newlist = list.filter((l) => {
+          let id = l[ROOT_HASH]
+          if (pin.indexOf(id) === -1)
+            return true
+          else
+            pinMap[id] = l
+          return false
+        })
+        if (this.isEmpty(pinMap))
+          return list
+        let newpin = pin.map((id) => pinMap[id])
+        list = newpin.concat(newlist)
+      }
     }
     return list
   },
@@ -1362,7 +1365,7 @@ var utils = {
   // TODO: add maxTries
   tryWithExponentialBackoff(fn, opts) {
     opts = opts || {}
-    const backoff = Backoff.exponential(extend(BACKOFF_DEFAULTS, opts))
+    const backoff = Backoff.exponential(_.extend(BACKOFF_DEFAULTS, opts))
     return fn().catch(backOffAndLoop)
 
     function backOffAndLoop () {
@@ -2052,7 +2055,7 @@ var utils = {
     }
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
-    let newParams = extend({}, params)
+    let newParams = _.extend({}, params)
     newParams.idx = idx
     newParams.message = message2
     return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
