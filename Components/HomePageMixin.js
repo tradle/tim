@@ -55,30 +55,30 @@ var HomePageMixin = {
   },
 
   async onread(isView, result) {
-    // Pairing devices QRCode
     try {
-      result = qrCodeDecoder.fromHex(result.data).data
+      result = qrCodeDecoder.fromHex(result.data)
     } catch (err) {
       debug('failed to parse qrcode', result.data)
       this.onUnknownQRCode()
       return
     }
 
+    const { schema, data } = result
     let h, code
-    if (typeof result.data === 'string') {
-      if (result.data.charAt(0) === '{') {
-        let h = JSON.parse(result.data)
-        Actions.sendPairingRequest(h)
-        this.props.navigator.pop()
-        return
-      }
-      else {
-        h = result.data.split(';')
-        code = h[0]
-      }
-    }
-    else
-     code = result.schema === 'ImportData' ? WEB_TO_MOBILE : "0" // result.dataHash, result.provider]
+    // if (typeof result.data === 'string') {
+    //   if (result.data.charAt(0) === '{') {
+    //     let h = JSON.parse(result.data)
+    //     Actions.sendPairingRequest(h)
+    //     this.props.navigator.pop()
+    //     return
+    //   }
+    //   else {
+    //     h = result.data.split(';')
+    //     code = h[0]
+    //   }
+    // }
+    // else
+     code = schema === 'ImportData' ? WEB_TO_MOBILE : "0" // result.dataHash, result.provider]
 
     // post to server request for the forms that were filled on the web
     let me = utils.getMe()
@@ -87,31 +87,31 @@ var HomePageMixin = {
       Actions.showModal({title: 'Connecting to ' + result.host, showIndicator: true})
 // Alert.alert('Connecting to ' + result.host)
       let r = {
-        _t: 'tradle.GuestSessionProof',
-        session: result.dataHash,
+        _t: 'tradle.DataClaim',
+        claimId: data.dataHash,
         from: {
           id: utils.getId(me),
           title: utils.getDisplayName(me)
         },
         to: {
-          id: utils.makeId(PROFILE, result.provider)
+          id: utils.makeId(PROFILE, data.provider)
         }
       }
       Actions.addChatItem({
         resource: r,
         value: r,
         provider: {
-          url: result.host,
-          hash: result.provider
+          url: data.host,
+          hash: data.provider
         },
-        meta: utils.getModel('tradle.GuestSessionProof').value,
+        meta: utils.getModel('tradle.DataClaim').value,
         disableAutoResponse: true})
       break
     // case TALK_TO_EMPLOYEEE:
-    //   Actions.getEmployeeInfo(result.data.substring(code.length + 1))
+    //   Actions.getEmployeeInfo(data.substring(code.length + 1))
     //   break
     case APP_QR_CODE:
-      Actions.addApp(result.data.substring(code.length + 1))
+      Actions.addApp(data.substring(code.length + 1))
       break
     default:
       // keep scanning

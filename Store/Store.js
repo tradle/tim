@@ -9691,111 +9691,90 @@ var Store = Reflux.createStore({
         })
     }
 
-    var isModelsPack = type === MODELS_PACK
-    let pList = val.models
-    // var isProductList = type === PRODUCT_LIST
-    // var pList = isProductList ? val.list : val.models
-
     var noTrigger
-    let isWeb = utils.isWeb()
-    if (pList) {
+    var isModelsPack = type === MODELS_PACK
+    if (isModelsPack) {
       noTrigger = true
-      org.products = []
-      pList.forEach((m) => {
-        // HACK for not overwriting Tradle models
-        // if (isModelsPack  &&  /^tradle\.[^.]+$/.test(m.id)) {
-        //   Alert.alert(
-        //     'Service Provider namespacing error',
-        //     'This service provider is using data models in a reserved namespace. Please notify them.'
-        //   )
-
-        //   // console.log('ModelsPack: the tradle.* namespace is reserved. Please rename and resend the model')
-        //   return
-        // }
-
-        if (!this.getModel(m.id))
-          this._emitter.emit('model:' + m.id)
-        Aviva.preparseModel(m)
-        this.addNameAndTitleProps(m)
-        m._versionId = val.versionId
-        models[m.id] = {
-          key: m.id,
-          value: m
-        }
-        // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
-        //   org.products.push(m.id)
-
-        if (utils.isEnum(m))
-          this.createEnumResources(m)
-
-        // if (utils.isMessage(m)) {
-        if (isWeb  &&  m.id === PHOTO_ID) {
-          let scanProp = m.properties['scan']
-          scanProp.title = 'Upload'
-          // scanProp.icon = 'md-download'
-        }
-        // if (utils.isMessage(m)) {
-        if (m.subClassOf === FORM) {
-          this.addVerificationsToFormModel(m)
-          this.addFromAndTo(m)
-        }
-        if (!m[ROOT_HASH])
-          m[ROOT_HASH] = 1
-
-        batch.push({type: 'put', key: m.id, value: m})
-      })
-      utils.setModels(models)
-
-      if (val.lenses) {
-        val.lenses.forEach((l) => {
-          batch.push({type: 'put', key: l.id, value: l})
-          lenses[l.id] = l
-        })
-      }
-      let orgId = utils.getId(org)
-      list[orgId].value = org
-      this.dbBatchPut(utils.getId(org), org, batch)
-      this.trigger({action: 'getItem', resource: org})
-      // noTrigger = hasNoTrigger(orgId)
-    }
-    if (isModelsPack)  {
-      if (this.preferences  &&  this.preferences.firstPage === 'chat' && ENV.autoRegister) {
-          // ENV.autoRegister                &&
-          // org.products.length === 1) {
-        let meRef = this.buildRef(utils.getMe())
-        let pa = await this.searchMessages({modelName: PRODUCT_REQUEST})
-        let product = org.products[0]
-        let hasThisProductApp
-        if (pa) {
-          hasThisProductApp = pa.some((r) => r.requestFor === product)
-        }
-        if (hasThisProductApp)
-          return
-        if (org._greeting) {
-          let msg = {
-            [TYPE]: SIMPLE_MESSAGE,
-            [ROOT_HASH]: val.from.title.replace(' ', '_') + '_1',
-            message: translate(org._greeting),
-            time: new Date().getTime(),
-            from: val.from,
-            to: meRef
-          }
-          let msgId = utils.getId(msg)
-          this._setItem(msgId, msg)
-          this.addMessagesToChat(utils.getId(org), msg)
-          this.trigger({action: 'addMessage', resource: msg})
-          db.put(msgId, msg)
-        }
-        this.onAddMessage({
-          msg: {
-            [TYPE]: PRODUCT_REQUEST,
-            requestFor: product,
-            from: meRef,
-            to: val.from
-          }
-        })
+      let stopHere = await modelsPackHandler()
+      if (stopHere)
         return
-      }
+      // org.products = []
+      // let pList = val.models || []
+      // pList.forEach((m) => {
+      //   if (!this.getModel(m.id))
+      //     this._emitter.emit('model:' + m.id)
+      //   Aviva.preparseModel(m)
+      //   this.addNameAndTitleProps(m)
+      //   m._versionId = val.versionId
+      //   models[m.id] = {
+      //     key: m.id,
+      //     value: m
+      //   }
+      //   // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
+      //   //   org.products.push(m.id)
+      //   if (utils.isEnum(m))
+      //     this.createEnumResources(m)
+
+      //   // if (utils.isMessage(m)) {
+      //   if (m.subClassOf === FORM) {
+      //     this.addVerificationsToFormModel(m)
+      //     this.addFromAndTo(m)
+      //   }
+      //   if (!m[ROOT_HASH])
+      //     m[ROOT_HASH] = 1
+
+      //   batch.push({type: 'put', key: m.id, value: m})
+      // })
+      // utils.setModels(models)
+
+      // if (val.lenses) {
+      //   val.lenses.forEach((l) => {
+      //     batch.push({type: 'put', key: l.id, value: l})
+      //     lenses[l.id] = l
+      //   })
+      // }
+      // let orgId = utils.getId(org)
+      // list[orgId].value = org
+      // this.dbBatchPut(utils.getId(org), org, batch)
+      // this.trigger({action: 'getItem', resource: org})
+      // // noTrigger = hasNoTrigger(orgId)
+      // if (this.preferences  &&  this.preferences.firstPage === 'chat' && ENV.autoRegister) {
+      //     // ENV.autoRegister                &&
+      //     // org.products.length === 1) {
+      //   let meRef = this.buildRef(utils.getMe())
+      //   let pa = await this.searchMessages({modelName: PRODUCT_REQUEST})
+      //   let product = org.products[0]
+      //   let hasThisProductApp
+      //   if (pa) {
+      //     hasThisProductApp = pa.some((r) => r.requestFor === product)
+      //   }
+      //   if (hasThisProductApp)
+      //     return
+      //   if (org._greeting) {
+      //     let msg = {
+      //       [TYPE]: SIMPLE_MESSAGE,
+      //       [ROOT_HASH]: val.from.title.replace(' ', '_') + '_1',
+      //       message: translate(org._greeting),
+      //       time: new Date().getTime(),
+      //       from: val.from,
+      //       to: meRef
+      //     }
+      //     let msgId = utils.getId(msg)
+      //     this._setItem(msgId, msg)
+      //     this.addMessagesToChat(utils.getId(org), msg)
+      //     this.trigger({action: 'addMessage', resource: msg})
+      //     db.put(msgId, msg)
+      //   }
+      //   this.onAddMessage({
+      //     msg: {
+      //       [TYPE]: PRODUCT_REQUEST,
+      //       requestFor: product,
+      //       from: meRef,
+      //       to: val.from
+      //     }
+      //   })
+      //   return
+      // }
       this.addMessagesToChat(utils.getId(fOrg), val)
     }
     else {
@@ -9984,6 +9963,89 @@ var Store = Reflux.createStore({
       self._setItem(meId, me)
       await self.dbPut(meId, me)
     }
+    async function modelsPackHandler() {
+      // org.products = []
+      let pList = val.models || []
+      pList.forEach((m) => {
+        if (!self.getModel(m.id))
+          self._emitter.emit('model:' + m.id)
+        Aviva.preparseModel(m)
+        self.addNameAndTitleProps(m)
+        m._versionId = val.versionId
+        models[m.id] = {
+          key: m.id,
+          value: m
+        }
+        // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
+        //   org.products.push(m.id)
+        if (utils.isEnum(m))
+          self.createEnumResources(m)
+
+        if (utils.isWeb()  &&  m.id === PHOTO_ID) {
+          let scanProp = m.properties['scan']
+          scanProp.title = 'Upload'
+          // scanProp.icon = 'md-download'
+        }
+
+        // if (utils.isMessage(m)) {
+        if (m.subClassOf === FORM) {
+          self.addVerificationsToFormModel(m)
+          self.addFromAndTo(m)
+        }
+        if (!m[ROOT_HASH])
+          m[ROOT_HASH] = 1
+
+        batch.push({type: 'put', key: m.id, value: m})
+      })
+      utils.setModels(models)
+
+      if (val.lenses) {
+        val.lenses.forEach((l) => {
+          batch.push({type: 'put', key: l.id, value: l})
+          lenses[l.id] = l
+        })
+      }
+      // let orgId = utils.getId(org)
+      // list[orgId].value = org
+      // self.dbBatchPut(utils.getId(org), org, batch)
+      // self.trigger({action: 'getItem', resource: org})
+      // noTrigger = hasNoTrigger(orgId)
+      if (!self.preferences  ||  self.preferences.firstPage !== 'chat' ||  !ENV.autoRegister)
+        return
+        // ENV.autoRegister                &&
+        // org.products.length === 1) {
+      let meRef = self.buildRef(utils.getMe())
+      let pa = await self.searchMessages({modelName: PRODUCT_REQUEST})
+      let product = org.products[0]
+      let hasThisProductApp
+      if (pa  &&  pa.some((r) => r.requestFor === product))
+        return true
+      if (org._greeting) {
+        let msg = {
+          [TYPE]: SIMPLE_MESSAGE,
+          [ROOT_HASH]: val.from.title.replace(' ', '_') + '_1',
+          message: translate(org._greeting),
+          time: new Date().getTime(),
+          from: val.from,
+          to: meRef
+        }
+        let msgId = utils.getId(msg)
+        self._setItem(msgId, msg)
+        self.addMessagesToChat(utils.getId(org), msg)
+        self.trigger({action: 'addMessage', resource: msg})
+        db.put(msgId, msg)
+      }
+      self.onAddMessage({
+        msg: {
+          [TYPE]: PRODUCT_REQUEST,
+          requestFor: product,
+          from: meRef,
+          to: val.from
+        }
+      })
+      return true
+    }
+
   },
   // async getContext(contextId, val) {
   //   let context, contexts

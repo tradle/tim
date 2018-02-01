@@ -160,7 +160,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#227ad351c8f5efe5b5e4bfb6e78d5104606b101b"
+      "resolved": "git://github.com/tradle/models.git#b3529f89ee25a154b4f52bfea69ca0b37f6931cf"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -8152,7 +8152,7 @@
     "react-native-floating-labels": {
       "version": "1.1.1",
       "from": "mvayngrib/react-native-floating-labels#pointerEvents",
-      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#e606a5da6c97163d3c7c0d090629bb18d9576bd3"
+      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#acb492a874e90601878759e47e2a1704132c8094"
     },
     "react-native-gifted-messenger": {
       "version": "0.0.16",
