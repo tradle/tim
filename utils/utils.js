@@ -448,7 +448,7 @@ var utils = {
         newLabel += ch
       }
     }
-    return newLabel
+    return newLabel.trim()
     // return label
     //       // insert a space before all caps
     //       .replace(/([A-Z])/g, ' $1')
@@ -462,6 +462,7 @@ var utils = {
           .replace(/([A-Z])/g, ' $1')
           // uppercase the first character
           .replace(/^./, function(str){ return str.toUpperCase(); })
+          .trim()
   },
   arrayToObject(arr) {
     if (!arr)
