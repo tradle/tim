@@ -491,6 +491,7 @@ class FormRequestRow extends Component {
     let orgTitle = to[TYPE] === ORGANIZATION
                  ? to.name
                  : (to.organization ? to.organization.title : null);
+    let verifiedBy
     if (verification[constants.ROOT_HASH]) {
       let orgs
       if (providers) {

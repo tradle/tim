@@ -22,14 +22,14 @@ import ResourceView from './ResourceView'
 import MessageView from './MessageView'
 import RowMixin from './RowMixin'
 import PageView from './PageView'
-import GridList from './GridList'
+import ArticleView from './ArticleView'
 import utils, {
   translate
 } from '../utils/utils'
 import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
-import constants from '@tradle/constants'
 
+import constants from '@tradle/constants'
 var {
   TYPE,
   ROOT_HASH,
@@ -165,8 +165,6 @@ class GridRow extends Component {
       if (size < gridCols.length)
         gridCols.splice(size, gridCols.length - size)
     }
-    // let size = gridCols ? gridCols.length : 1
-    // let widthCols = utils.dimensions(GridList).width / 100
     let colSize =  isSmallScreen ? size / 2 : 1
     if (multiChooser)
       size++

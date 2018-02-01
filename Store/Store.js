@@ -4940,7 +4940,8 @@ var Store = Reflux.createStore({
       this.dbBatchPut(documentId, document, batch)
       document._sendStatus = SENT
       this._setItem(documentId, document)
-      this.trigger({action: 'updateItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
+      this.trigger({action: 'addItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
+      // this.trigger({action: 'updateItem', sendStatus: SENT, resource: document, to: this._getItem(toOrgId)})
     }
     // let m = this.getModel(VERIFICATION)
     let docModel = this.getModel(document[TYPE])
@@ -4958,7 +4959,7 @@ var Store = Reflux.createStore({
       params.search = me.isEmployee,
       params.filterResource = {document: {id: documentId}}
       verifications  = await this.searchServer(params)
-      verifications = verifications  &&  !verifications.list
+      verifications = verifications  &&  verifications.list
     }
     else
       verifications  = await this.searchMessages(params)
@@ -7815,7 +7816,7 @@ var Store = Reflux.createStore({
     function checkOneVerification(val, contextId) {
       let id = utils.getId(val.to.id);
       if (id !== meId) {
-        if (me.isEmployee  &&  id !== myRep)
+        if (me.isEmployee  &&  id !== utils.getId(myRep))
           return
       }
       let frId = utils.getId(val.from.id)
