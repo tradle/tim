@@ -258,5 +258,7 @@
     "iproovErrorMessage": "Please wait a bit and try again",
     "nameUnknown": "name unknown",
     "youAreTheRM": "You are the Relationship Manager for this application",
-    "fillRequiredFields": "Please fill out all required fields"
+    "fillRequiredFields": "Please fill out all required fields",
+    "multientryToShare": "There are {1} documents to share",
+    "nothingToShare": "Nothing to share"
 }
