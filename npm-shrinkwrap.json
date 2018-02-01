@@ -6349,7 +6349,7 @@
     "react-native-floating-labels": {
       "version": "1.1.1",
       "from": "mvayngrib/react-native-floating-labels#pointerEvents",
-      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#e606a5da6c97163d3c7c0d090629bb18d9576bd3"
+      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#acb492a874e90601878759e47e2a1704132c8094"
     },
     "react-native-gallery": {
       "version": "0.0.17",
