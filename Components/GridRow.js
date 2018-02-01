@@ -359,19 +359,6 @@ class GridRow extends Component {
       parts.push(<Text style={style} key={this.getNextKey(resource)}>{val.substring(idx)}</Text>)
     return parts
   }
-  chooseToShare() {
-    let resource = this.props.resource
-    let id = utils.getId(resource)
-    if (this.state.isChosen) {
-      this.setState({isChosen: false})
-      delete this.props.chosen[id]
-    }
-    else {
-      this.setState({isChosen: true})
-      this.props.chosen[id] = resource
-    }
-  }
-
 }
 reactMixin(GridRow.prototype, Reflux.ListenerMixin);
 reactMixin(GridRow.prototype, RowMixin)
