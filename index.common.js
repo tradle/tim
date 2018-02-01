@@ -26,7 +26,7 @@ import debounce from 'debounce'
 // require('./timmy')
 var ResourceList = require('./Components/ResourceList');
 var VerifierChooser = require('./Components/VerifierChooser')
-
+var ShareResourceList = require('./Components/ShareResourceList')
 // var VideoPlayer = require('./Components/VideoPlayer')
 var EnumList = require('./Components/EnumList')
 var GridList = require('./Components/GridList');
@@ -582,6 +582,8 @@ class TiMApp extends Component {
       return <TourPage navigator={nav} {...props } />
     case 36:
       return <SplashPage navigator={nav} {...props } />
+    case 37:
+      return <ShareResourceList navigator={nav} {...props } />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />

@@ -230,7 +230,7 @@ var NewResourceMixin = {
       let isReadOnly = props[p].readOnly
       if (isReadOnly  &&  !search  &&  !showReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
-      this.setDefaultValue(p, data, true)
+      this.setDefaultValue(props[p], data, true)
       if (utils.isHidden(p, resource)) {
         // if (!resource[p])
         //   this.setDefaultValue(p, resource, true)
@@ -1511,23 +1511,27 @@ var NewResourceMixin = {
     });
   },
   setDefaultValue(prop, data, isHidden) {
-    // no defaults if edit mode
+    let p = prop.name
     let resource = this.state.resource
-    if (resource[prop]  ||  resource[constants.ROOT_HASH])
+    if (resource[p]  ||  resource[constants.ROOT_HASH])
       return
     let defaults = this.props.defaultPropertyValues
-    if (!defaults)
+    let value
+    if (defaults) {
+      let vals = defaults[resource[TYPE]]
+      if (vals  &&  vals[p])
+        value = vals[p]
+    }
+    else
+      value = prop.default
+    if (!value)
       return
-    let vals = defaults[resource[TYPE]]
-    if (!vals  ||  !vals[prop])
-      return
-
-    data[prop] = vals[prop]
-    resource[prop] = vals[prop]
+    data[p] = value
+    resource[p] = value
     if (isHidden) {
       if (!this.floatingProps)
         this.floatingProps = {}
-      this.floatingProps[prop] = vals[prop]
+      this.floatingProps[p] = value
     }
   },
   hasError(errors, propName) {
@@ -1550,7 +1554,10 @@ var NewResourceMixin = {
     let m = utils.getModel(propRef).value;
     let currentRoutes = navigator.getCurrentRoutes();
 
-    let pmodel = utils.getModelForFormRequest(originatingMessage)
+    if (originatingMessage) {
+      let pmodel = utils.getModelForFormRequest(originatingMessage)
+      prop = pmodel.properties[propName]
+    }
 
     let route = {
       title: translate(prop), //m.title,
@@ -1564,7 +1571,7 @@ var NewResourceMixin = {
       passProps: {
         filter:         filter,
         isChooser:      true,
-        prop:           pmodel.properties[propName],
+        prop:           prop,
         modelName:      propRef,
         resource:       resource,
         search:         search,

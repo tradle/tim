@@ -363,18 +363,6 @@ class ResourceRow extends Component {
     }
     this.props.navigator.push(route)
   }
-  chooseToShare() {
-    let resource = this.props.resource
-    let id = utils.getId(resource)
-    if (this.state.isChosen) {
-      this.setState({isChosen: false})
-      delete this.props.chosen[id]
-    }
-    else {
-      this.setState({isChosen: true})
-      this.props.chosen[id] = resource
-    }
-  }
   action() {
     if (this.props.multiChooser)
       this.chooseToShare()

@@ -2,7 +2,7 @@ console.log('requiring HomePageMixin.js')
 'use strict';
 
 import React from 'react'
-import extend from 'extend'
+import _ from 'lodash'
 
 import utils, { translate } from '../utils/utils'
 import constants from '@tradle/constants'
@@ -13,6 +13,8 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import MessageList from './MessageList'
 import TourPage from './TourPage'
 import SplashPage from './SplashPage'
+import Store from '../Store/Store'
+import GridHeader from './GridHeader'
 import qrCodeDecoder from '@tradle/qr-schema'
 import {
   Alert,
@@ -28,6 +30,9 @@ const {
   ORGANIZATION,
   MESSAGE
 } = constants.TYPES
+
+const DATA_CLAIM = 'tradle.DataClaim'
+const APPLICATION = 'tradle.Application'
 
 var HomePageMixin = {
   scanFormsQRCode(isView) {
@@ -55,63 +60,63 @@ var HomePageMixin = {
   },
 
   async onread(isView, result) {
-    // Pairing devices QRCode
     try {
-      result = qrCodeDecoder.fromHex(result.data).data
+      result = qrCodeDecoder.fromHex(result.data)
     } catch (err) {
       debug('failed to parse qrcode', result.data)
       this.onUnknownQRCode()
       return
     }
 
+    const { schema, data } = result
     let h, code
-    if (typeof result.data === 'string') {
-      if (result.data.charAt(0) === '{') {
-        let h = JSON.parse(result.data)
-        Actions.sendPairingRequest(h)
-        this.props.navigator.pop()
-        return
-      }
-      else {
-        h = result.data.split(';')
-        code = h[0]
-      }
-    }
-    else
-     code = result.schema === 'ImportData' ? WEB_TO_MOBILE : "0" // result.dataHash, result.provider]
+    // if (typeof result.data === 'string') {
+    //   if (result.data.charAt(0) === '{') {
+    //     let h = JSON.parse(result.data)
+    //     Actions.sendPairingRequest(h)
+    //     this.props.navigator.pop()
+    //     return
+    //   }
+    //   else {
+    //     h = result.data.split(';')
+    //     code = h[0]
+    //   }
+    // }
+    // else
+     code = schema === 'ImportData' ? WEB_TO_MOBILE : "0" // result.dataHash, result.provider]
 
     // post to server request for the forms that were filled on the web
     let me = utils.getMe()
     switch (code) {
     case WEB_TO_MOBILE:
-      Actions.showModal({title: 'Connecting to ' + result.host, showIndicator: true})
+      Actions.showModal({title: 'Connecting to ' + result.data.host, showIndicator: true})
 // Alert.alert('Connecting to ' + result.host)
       let r = {
-        _t: 'tradle.GuestSessionProof',
-        session: result.dataHash,
+        _t: 'tradle.DataClaim',
+        claimId: data.dataHash,
         from: {
           id: utils.getId(me),
           title: utils.getDisplayName(me)
         },
         to: {
-          id: utils.makeId(PROFILE, result.provider)
+          id: utils.makeId(PROFILE, data.provider)
         }
       }
       Actions.addChatItem({
         resource: r,
         value: r,
         provider: {
-          url: result.host,
-          hash: result.provider
+          url: data.host,
+          hash: data.provider
         },
-        meta: utils.getModel('tradle.GuestSessionProof').value,
+        meta: Store.getModel(DATA_CLAIM),
         disableAutoResponse: true})
       break
     // case TALK_TO_EMPLOYEEE:
-    //   Actions.getEmployeeInfo(result.data.substring(code.length + 1))
+    //   Actions.getEmployeeInfo(data.substring(code.length + 1))
     //   break
     case APP_QR_CODE:
-      Actions.addApp(result.data.substring(code.length + 1))
+      Actions.addApp(data.substring(code.length + 1))
       break
     default:
       // keep scanning
@@ -121,8 +126,8 @@ var HomePageMixin = {
   },
   mergeStyle(newStyle) {
     let style = {}
-    extend(style, defaultBankStyle)
-    return newStyle ? extend(style, newStyle) : style
+    _.extend(style, defaultBankStyle)
+    return newStyle ? _.extend(style, newStyle) : style
   },
   showChat(params) {
     if (!params.to)
@@ -214,6 +219,55 @@ var HomePageMixin = {
       callback({resource, termsAccepted, action: 'replace'})
     }, 2000)
     return true
+  },
+  renderGridHeader() {
+    let { modelName, navigator, multiChooser } = this.props
+    if (modelName === APPLICATION)
+      return <View/>
+    let model = Store.getModel(modelName)
+    let props = model.properties
+    let gridCols = this.getGridCols() // model.gridCols || model.viewCols;
+    if (gridCols)
+    return (
+      // <GridHeader gridCols={gridCols} modelName={modelName} navigator={navigator} />
+      <GridHeader gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)}/>
+    )
+  },
+  getGridCols() {
+    let model = Store.getModel(this.props.modelName)
+    let props = model.properties
+    let gridCols = model.gridCols || model.viewCols
+    if (!gridCols)
+      return
+    let vCols = []
+    gridCols.forEach((v) => {
+      if (/*!props[v].readOnly &&*/ !props[v].list  &&  props[v].range !== 'json')
+        vCols.push(v)
+    })
+    // if (vCols.length === 7)
+    //   vCols.splice(6, 1)
+    return vCols
+  },
+  checkAll() {
+    let chosen = {}
+    let check = utils.isEmpty(this.state.chosen)
+    if (check  &&  this.props.list)
+      this.props.list.forEach((r) => {
+        chosen[utils.getId(r)] = r
+      })
+    this.setState({chosen: chosen})
+  },
+  sort(prop) {
+    let order = this.state.order || {}
+    let curOrder = order[prop]
+
+    order[prop] = curOrder ? false : true
+    this.setState({order: order, sortProperty: prop, list: []})
+
+    let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
+    if (this.props.search)
+      _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
+    Actions.list(params)
   }
 }
 

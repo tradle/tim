@@ -427,6 +427,18 @@ var RowMixin = {
       if (resource._context  &&  resource._context.contextId)
         return <Text style={{fontSize: 16, color:'red'}}>{resource._context.contextId}</Text>
     }
+  },
+  chooseToShare() {
+    let resource = this.props.resource
+    let id = utils.getId(resource)
+    if (this.state.isChosen) {
+      this.setState({isChosen: false})
+      delete this.props.chosen[id]
+    }
+    else {
+      this.setState({isChosen: true})
+      this.props.chosen[id] = resource
+    }
   }
 }
 

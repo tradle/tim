@@ -13,6 +13,7 @@ import RowMixin from './RowMixin'
 import CameraView from './CameraView'
 import StringChooser from './StringChooser'
 import ImageInput from './ImageInput'
+import ShareResourceList from './ShareResourceList'
 
 import CustomIcon from '../styles/customicons'
 import extend from 'extend'
@@ -305,37 +306,56 @@ class FormRequestRow extends Component {
     var vtt = [];
     var cnt = 0;
     var chatOrg = to[TYPE] === ORGANIZATION  &&  utils.getId(to)
-    let { verifications, providers } = shareableResources
+    let { verifications, providers, multientryResources } = shareableResources
     let resourceContextId = resource._context  &&  utils.getId(resource._context)
-    for (var t in  verifications) {
-      if (t !== formModel.id)
-        continue
-      var ver = verifications[t];
-      var r = ver[0]
-      var totalShareables = ver.length
-      ver.forEach((r) => {
-        let document = r.document
-        if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
-          return
-        // Dont' share forms for the same product
-        if (resourceContextId  &&  document._context  && resourceContextId === utils.getId(document._context))
-          return
-        var vModel = utils.getModel(r[TYPE]);
-        var doc = this.formatShareables({
-          model: formModel,
-          verification: r,
-          // isAccordion: totalShareables > 1,
-          providers: providers  &&  providers[document[constants.ROOT_HASH]]
+    if (!utils.isEmpty(multientryResources)) {
+      for (let t in  multientryResources) {
+        if (t !== formModel.id)
+          continue
+        // let contexts = multientryResources[t]
+        // for (let c in contexts) {
+        //   if (c === resourceContextId)
+        //     continue
+        //   let meShare = this.formatMultiEntryShareable({context: c, verifications: contexts[c], model: formModel})
+          let meverifications = multientryResources[t]
+          if (meverifications.length > 1) {
+            let meShare = this.formatMultiEntryShareable({verifications: meverifications, model: formModel})
+            vtt.push(meShare)
+          }
+        // }
+      }
+    }
+    if (!vtt.length) {
+      for (var t in  verifications) {
+        if (t !== formModel.id)
+          continue
+        var ver = verifications[t];
+        var r = ver[0]
+        var totalShareables = ver.length
+        ver.forEach((r) => {
+          let document = r.document
+          if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
+            return
+          // Dont' share forms for the same product
+          if (resourceContextId  &&  document._context  && resourceContextId === utils.getId(document._context))
+            return
+          var vModel = utils.getModel(r[TYPE]);
+          var doc = this.formatShareables({
+            model: formModel,
+            verification: r,
+            // isAccordion: totalShareables > 1,
+            providers: providers  &&  providers[document[constants.ROOT_HASH]]
+          })
+          if (cnt) {
+            doc = <View key={this.getNextKey()}>
+                    <View style={styles.separator} />
+                    {doc}
+                  </View>
+          }
+          vtt.push(doc);
+          cnt++;
         })
-        if (cnt) {
-          doc = <View key={this.getNextKey()}>
-                  <View style={styles.separator} />
-                  {doc}
-                </View>
-        }
-        vtt.push(doc);
-        cnt++;
-      })
+      }
     }
     if (!vtt.length)
       return null
@@ -388,26 +408,26 @@ class FormRequestRow extends Component {
     let { model, verification, onPress, providers } = params
     let { bankStyle, resource, onSelect, to, share } = this.props
 
-    var document = verification.document
+    let document = verification.document
 
-    var docModel = utils.getModel(document[TYPE]).value;
-    var isMyProduct = docModel.subClassOf === MY_PRODUCT
-    var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
-    var idx = docModelTitle.indexOf('Verification');
-    var docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
+    let docModel = utils.getModel(document[TYPE]).value;
+    let isMyProduct = docModel.subClassOf === MY_PRODUCT
+    let docModelTitle = docModel.title || utils.makeLabel(docModel.id)
+    let idx = docModelTitle.indexOf('Verification');
+    let docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
 
-    var msg;
+    let msg;
     if (document.message  &&  docModel.subClassOf !== FORM)
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
     else
       msg = <View/>
-    var headerStyle = {paddingTop: 5, paddingLeft: 10}
-    var isShared = this.isShared(verification)
+    let headerStyle = {paddingTop: 5, paddingLeft: 10}
+    let isShared = this.isShared(verification)
 
     let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16, width: msgWidth - 100, color: '#555555'}]
     let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
-    var headerContent = <View style={headerStyle}>
+    let headerContent = <View style={headerStyle}>
                           <Text style={hs}>{utils.getDisplayName(document)}</Text>
                         </View>
 
@@ -417,58 +437,12 @@ class FormRequestRow extends Component {
                      {arrow}
                    </View>
                  </TouchableHighlight>
-    var orgRow = <View/>
-    let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
+    let orgRow = <View/>
+    // let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     let isItem = utils.isSavedItem(document)
+    let verifiedBy
     if (verification  && (verification.organization || isItem)) {
-      var orgPhoto = !isItem  &&  verification.organization.photo
-                   ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={styles.orgImage} />
-                   : <View />
-      var shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: resource._documentCreated ? 0.3 : 1}]}>
-                        <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
-                        <Text style={chatStyles.shareText}>{translate('Share')}</Text>
-                      </View>
-      var orgTitle = to[TYPE] === ORGANIZATION
-                   ? to.name
-                   : (to.organization ? to.organization.title : null);
-      // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
-      let verifiedBy
-      // Not verified Form - still shareable
-      if (verification[constants.ROOT_HASH]) {
-        let orgs
-        if (providers) {
-          providers.forEach((p) => {
-            if (!orgs)
-              orgs = p.title
-            else
-              orgs += ', ' + p.title
-          })
-        }
-        else
-          orgs = verification.organization.title
-        verifiedBy = doShareDocument ? translate('verifiedBy', orgs) : translate('verificationBy', orgs)
-      }
-      else if (isItem)
-        verifiedBy = translate('fromMyData')
-      else {
-        let meId = utils.getId(utils.getMe())
-        if (utils.getId(document.from) === meId)
-          verifiedBy = translate('sentTo', verification.organization.title)
-        else
-          verifiedBy = translate('issuedBy', verification.organization.title)
-      }
-
-      var orgView = <View style={styles.orgView}>
-                      <Text style={[chatStyles.description, {paddingRight: 5}]}>
-                        {verifiedBy}
-                      </Text>
-                        {verification.dateVerified
-                          ? <View style={{flexDirection: 'row'}}>
-                              <Text style={styles.verifiedDate}>{utils.formatDate(verification.dateVerified)}</Text>
-                            </View>
-                          : <View/>
-                        }
-                      </View>
+      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem)
       if (onPress) {
       }
       else if (resource._documentCreated) {
@@ -505,11 +479,184 @@ class FormRequestRow extends Component {
                      {orgRow}
                    </View>
 
-    // var verifiedBy = verification && verification.organization ? verification.organization.title : ''
+    // let verifiedBy = verification && verification.organization ? verification.organization.title : ''
     return <View style={styles.container} key={this.getNextKey()}>
              {header}
              {content}
            </View>
+  }
+  getParts(verification, isItem) {
+    let { resource, to, shareableResources } = this.props
+    let document = verification.document
+    let providers = shareableResources.providers
+    let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
+    let orgPhoto = !isItem  &&  verification.organization.photo
+                 ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={styles.orgImage} />
+                 : <View />
+    let shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: resource._documentCreated ? 0.3 : 1}]}>
+                      <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
+                      <Text style={chatStyles.shareText}>{translate('Share')}</Text>
+                    </View>
+    let orgTitle = to[TYPE] === ORGANIZATION
+                 ? to.name
+                 : (to.organization ? to.organization.title : null);
+    let verifiedBy
+    if (verification[constants.ROOT_HASH]) {
+      let orgs
+      if (providers) {
+        if (Array.isArray(providers)) {
+          providers.forEach((p) => {
+            if (!orgs)
+              orgs = p.title
+            else
+              orgs += ', ' + p.title
+          })
+        }
+        else {
+          for (let pr in providers) {
+            let arr = providers[pr]
+            arr.forEach((p) => {
+              if (!orgs)
+                orgs = p.title
+              else
+                orgs += ', ' + p.title
+            })
+          }
+        }
+      }
+      else
+        orgs = verification.organization.title
+      verifiedBy = doShareDocument ? translate('verifiedBy', orgs) : translate('verificationBy', orgs)
+    }
+    else if (isItem)
+      verifiedBy = translate('fromMyData')
+    else {
+      let meId = utils.getId(utils.getMe())
+      if (utils.getId(document.from) === meId)
+        verifiedBy = translate('sentTo', verification.organization.title)
+      else
+        verifiedBy = translate('issuedBy', verification.organization.title)
+    }
+    let orgView = <View style={styles.orgView}>
+                    <Text style={[chatStyles.description, {paddingRight: 5}]}>
+                      {verifiedBy}
+                    </Text>
+                      {verification.dateVerified
+                        ? <View style={{flexDirection: 'row'}}>
+                            <Text style={styles.verifiedDate}>{utils.formatDate(verification.dateVerified)}</Text>
+                          </View>
+                        : <View/>
+                      }
+                    </View>
+    return {verifiedBy, orgPhoto, shareView, orgTitle, orgView}
+  }
+  formatMultiEntryShareable(params) {
+    // let { model, verifications, onPress, context, providers } = params
+    let { model, verifications, onPress, providers } = params
+    let { bankStyle, resource, onSelect, to, share } = this.props
+
+    let documents = verifications.map((v) => v.document)
+    let verification = verifications[0]
+    let document = documents[0]
+
+    let docModel = model
+    let isMyProduct = docModel.subClassOf === MY_PRODUCT
+    let docModelTitle = docModel.title || utils.makeLabel(docModel.id)
+    let idx = docModelTitle.indexOf('Verification');
+    let docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
+
+    let msg;
+    if (document.message  &&  docModel.subClassOf !== FORM)
+      msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
+
+    let headerStyle = {paddingTop: 5, paddingLeft: 10}
+    let isShared = this.isShared(verification)
+
+    let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
+    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16, width: msgWidth - 100, color: bankStyle.linkColor}]
+    let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
+
+    // let docRows = documents.map((d) => {
+    //   return <TouchableHighlight underlayColor='transparent' onPress={onSelect.bind(this, document, verification)} key={this.getNextKey()}>
+    //            <Text style={hs}>{utils.getDisplayName(d)}</Text>
+    //          </TouchableHighlight>
+    // })
+
+    let orgRow = <View/>
+    let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
+    let isItem = utils.isSavedItem(document)
+    let verifiedBy
+    if (verification  && (verification.organization || isItem)) {
+      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem)
+      if (onPress) {
+      }
+      else if (resource._documentCreated) {
+        orgRow =  <View style={chatStyles.shareView}>
+                    {shareView}
+                    <TouchableHighlight onPress={onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                      {orgView}
+                    </TouchableHighlight>
+                  </View>
+      }
+      else {
+        orgRow = <View style={[chatStyles.shareView]}>
+                   <TouchableHighlight underlayColor='transparent' onPress={this.showDocuments.bind(this, documents, verifications, verifiedBy || '')}>
+                    {shareView}
+                   </TouchableHighlight>
+                   <TouchableHighlight onPress={onSelect.bind(this, documents, verifications)} underlayColor='transparent'>
+                     {orgView}
+                   </TouchableHighlight>
+                </View>
+      }
+    }
+    let headerContent = <View style={headerStyle}>
+                          <Text style={hs}>{translate('multientryToShare', documents.length)}</Text>
+                        </View>
+
+    let header = <TouchableHighlight underlayColor='transparent' onPress={this.showDocuments.bind(this, documents, verifications, verifiedBy || '')}>
+                   <View style={styles.header}>
+                     {headerContent}
+                     {arrow}
+                   </View>
+                 </TouchableHighlight>
+    let content = <View style={{flex:1, paddingVertical: 3}}>
+                     {orgRow}
+                   </View>
+
+    // let verifiedBy = verification && verification.organization ? verification.organization.title : ''
+    return <View style={styles.container} key={this.getNextKey()}>
+             {header}
+             {content}
+           </View>
+  }
+  showDocuments(documents, verifications, verifiedBy) {
+    let { navigator, bankStyle, resource, to } = this.props
+    // navigator.push({
+    //   title: utils.makeModelTitle(documents[0][TYPE]),
+    //   id: 37,
+    //   component: SimpleResourceList,
+    //   backButtonTitle: 'Back',
+    //   passProps: {
+    //     list: documents,
+    //     bankStyle: bankStyle
+    //   }
+    // })
+    let modelName = documents[0][TYPE]
+    navigator.push({
+      title: utils.makeModelTitle(modelName) + '  →  '  + verifiedBy,
+      id: 37,
+      component: ShareResourceList,
+      backButtonTitle: 'Back',
+      passProps: {
+        multiChooser: true,
+        list: documents,
+        verifications: verifications,
+        formRequest: resource,
+        to: to,
+        modelName: modelName,
+        bankStyle: bankStyle
+      }
+    })
   }
 
   createNewResource(model, isMyMessage) {

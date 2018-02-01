@@ -22,11 +22,15 @@ import Icon from 'react-native-vector-icons/Ionicons'
 // import extend from 'extend'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
+import { makeResponsive } from 'react-native-orient'
 import InfiniteScrollView from 'react-native-infinite-scroll-view'
+import CustomIcon from '../styles/customicons'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 import NoResources from './NoResources'
 // import ResourceRow from './ResourceRow'
 import ResourceRow from './ResourceRow'
+import GridRow from './GridRow'
+import GridHeader from './GridHeader'
 import ResourceView from './ResourceView'
 import ApplicationView from './ApplicationView'
 import VerificationRow from './VerificationRow'
@@ -55,6 +59,7 @@ import platformStyles from '../styles/platform'
 import ENV from '../utils/env'
 import ConversationsIcon from './ConversationsIcon'
 import SearchBar from './SearchBar'
+import chatStyles from '../styles/chatStyles'
 
 const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
@@ -68,26 +73,22 @@ var {
   PROFILE,
   IDENTITY,
   ORGANIZATION,
-  SELF_INTRODUCTION,
-  CUSTOMER_WAITING,
   FINANCIAL_PRODUCT,
   VERIFICATION,
   MESSAGE,
   CUSTOMER_WAITING,
   SELF_INTRODUCTION,
   FORM,
+  ENUM,
   SETTINGS,
+  MONEY,
+  MODEL,
   INTRODUCTION
 } = constants.TYPES
 
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION = 'tradle.Application'
 const VERIFIED_ITEM = 'tradle.VerifiedItem'
-const MODEL = 'tradle.Model'
-
-const MONEY = 'tradle.Money'
-const FORM = 'tradle.Form'
-const ENUM = 'tradle.Enum'
 const PHOTO = 'tradle.Photo'
 
 const METHOD = 'tradle.Method'
@@ -95,7 +96,6 @@ const BOOKMARK = 'tradle.Bookmark'
 
 var excludeFromBrowsing = [
   FORM,
-  PRODUCT_LIST,
   ENUM,
   BOOKMARK,
   // INTRODUCTION,
@@ -590,6 +590,9 @@ class GridList extends Component {
     if (!_.isEqual(this.state.resource, nextState.resource)) {
       return true
     }
+    if (this.state.chosen !== nextState.chosen)
+      return true
+
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop !== nextProps.prop)
         return true
@@ -1009,11 +1012,27 @@ class GridList extends Component {
 
   renderRow(resource, sectionId, rowId)  {
     let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, officialAccounts,
-          currency, navigator, search, isChooser, chat, multiChooser } = this.props
+          currency, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
     if (!isChooser  &&  this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       if (viewCols)
-        return this.renderGridRow(resource, sectionId, rowId)
+        return (
+          <GridRow lazy={lazy}
+            onSelect={isSharedContext ? this.openSharedContextChat.bind(this) : this.selectResource.bind(this)}
+            key={resource[ROOT_HASH]}
+            isSmallScreen={this.isSmallScreen}
+            modelName={modelName}
+            navigator={navigator}
+            currency={currency}
+            rowId={rowId}
+            gridCols={viewCols}
+            isOfficialAccounts={officialAccounts}
+            multiChooser={multiChooser}
+            isChooser={isChooser}
+            resource={resource}
+            bankStyle={bankStyle}
+            chosen={this.state.chosen} />
+          );
     }
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
     let model
@@ -1043,14 +1062,17 @@ class GridList extends Component {
                 onSelect={() => this.selectResource({resource: selectedResource})}
                 key={resource[ROOT_HASH]}
                 modelName={rtype}
+                bankStyle={bankStyle}
                 navigator={navigator}
                 prop={prop}
                 parentResource={this.props.resource}
+                multiChooser={multiChooser}
                 currency={currency}
                 isChooser={isChooser}
                 searchCriteria={isBacklink || isForwardlink ? null : (search ? this.state.resource : null)}
                 search={search}
-                resource={resource} />
+                resource={resource}
+                chosen={this.state.chosen} />
       )
     return (<ResourceRow
       lazy={lazy}
@@ -1071,36 +1093,9 @@ class GridList extends Component {
       chosen={this.state.chosen} />
     );
   }
-  sort(prop) {
-    let order = this.state.order || {}
-    let curOrder = order[prop]
-
-    order[prop] = curOrder ? false : true
-    this.setState({order: order, sortProperty: prop, list: []})
-
-    let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
-    if (this.props.search)
-      _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
-    Actions.list(params)
-  }
   searchWithFilter(filterResource) {
     this.setState({resource: filterResource})
     Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit, first: true})
-  }
-  getGridCols() {
-    let model = Store.getModel(this.props.modelName)
-    let props = model.properties
-    let viewCols = model.gridCols || model.viewCols
-    if (!viewCols)
-      return
-    let vCols = []
-    viewCols.forEach((v) => {
-      if (/*!props[v].readOnly &&*/ !props[v].list  &&  props[v].range !== 'json')
-        vCols.push(v)
-    })
-    // if (vCols.length === 7)
-    //   vCols.splice(6, 1)
-    return vCols
   }
   getNextKey(resource) {
     return resource[ROOT_HASH] + '_' + cnt++
@@ -1121,265 +1116,6 @@ class GridList extends Component {
       style = [style, {fontWeight: '600'}]
 
     return <Text style={style} key={this.getNextKey(resource)}>{val}</Text>
-  }
-
-  renderGridRow(resource, sectionId, rowId)  {
-    let viewCols = this.getGridCols()
-    let size
-    if (viewCols) {
-      let model = Store.getModel(this.props.modelName)
-      let props = model.properties
-
-      let vCols = viewCols.filter((c) => props[c].type !== 'array')
-      viewCols = vCols
-      size = Math.min(viewCols.length, 12)
-      if (size < viewCols.length)
-        viewCols.splice(size, viewCols.length - size)
-    }
-    // let size = viewCols ? viewCols.length : 1
-    let widthCols = utils.dimensions(GridList).width / 100
-    size = Math.min(size, Math.floor(widthCols * 100/100))
-    let colSize =  this.isSmallScreen ? size / 2 : 1
-
-    let key = this.getNextKey(resource)
-    let cols
-    if (viewCols  &&  viewCols.length) {
-      cols = viewCols.map((v) => (
-        <Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent: 'center'}]} key={key + v}>
-          {this.formatCol(resource, v) || <View />}
-        </Col>
-      ))
-    }
-    else {
-      let color = this.props.isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
-      let style = [styles.description, color]
-      // cols = <Col sm={size} md={1} lg={1} style={styles.col} key={key + rowId}>
-      //         {this.formatCol(resource, null) || <View />}
-      //       </Col>
-      let m = Store.getModel(this.props.modelName)
-      let rModel = Store.getModel(resource[TYPE])
-      let typeTitle
-      if (rModel.id !== m.id  &&  rModel.subClassOf === m.id)
-        typeTitle = <Text style={styles.type}>{utils.makeModelTitle(rModel)}</Text>
-      let cellStyle = {paddingVertical: 5, paddingLeft: 7}
-      cols = <View style={cellStyle}>
-               {typeTitle}
-               <Col sm={1} md={1} lg={1} style={styles.col} key={key + rowId}>
-                 <Text style={style}>{utils.getDisplayName(resource)}</Text>
-               </Col>
-             </View>
-    }
-    let row = <Row size={size} style={styles.gridRow, {backgroundColor: rowId % 2 ? '#f9f9f9' : 'transparent'}} key={key} nowrap>
-                {cols}
-              </Row>
-    if (this.props.search)
-      return  <TouchableOpacity  onPress={() => this.selectResource({resource})}>
-                {row}
-              </TouchableOpacity>
-    else
-      return row
-  }
-  formatCol(resource, prop) {
-    let model = Store.getModel(resource[TYPE] || resource.id);
-    let properties = model.properties;
-    let isContact = resource[TYPE] === PROFILE;
-    let v = prop
-    let backlink
-    if (properties[v].type === 'array') {
-      if (properties[v].items.backlink)
-        backlink = v;
-    }
-
-    if (properties[v].type === 'array')
-      return
-
-    if (!resource[v]  &&  !properties[v].displayAs)
-      return
-
-    let style = [styles.description]
-    if (isContact  &&  v === 'organization') {
-      style.push({alignSelf: 'flex-end', marginTop: 20})
-      style.push(styles.verySmallLetters);
-    }
-    if (properties[v].style)
-      style.push(properties[v].style);
-    let ref = properties[v].ref;
-    let row
-    let cellStyle = {paddingVertical: 5, paddingLeft: 7}
-
-    let criteria = this.props.search  &&  this.state.resource  &&  this.state.resource[v]
-
-    if (ref) {
-      if (!resource[v])
-        return
-      if (criteria)
-        style.push({fontWeight: '600'})
-
-      let refM = Store.getModel(ref)
-      if (ref === MONEY) {
-        style.push({alignSelf: 'flex-end', paddingRight: 10})
-        row = <Text style={style} key={this.getNextKey(resource)}>{resource[v].currency + resource[v]}</Text>
-      }
-      else if (ref === PHOTO)
-        row = <Image source={{uri: resource[v].url}} style={styles.thumb} />
-      else {
-        row = <Text style={styles.description} key={this.getNextKey(resource)}>{utils.getDisplayName(resource[v])}</Text>
-        if (refM.isInterface || refM.id === FORM) {
-          let resType = utils.getType(resource[v])
-          let resM = Store.getModel(resType)
-          row = <View key={this.getNextKey(resource)}>
-                  <Text style={styles.type}>{utils.makeModelTitle(resM)}</Text>
-                  {row}
-                </View>
-        }
-        if (refM.subClassOf !== ENUM) {
-          let isMessage = utils.isMessage(resource)
-          row = <TouchableOpacity onPress={() => {
-                  this.props.navigator.push({
-                    title: utils.getDisplayName(resource),
-                    id: isMessage ? 5 : 3,
-                    component: isMessage ?  MessageView : ResourceView,
-                    // titleTextColor: '#7AAAC3',
-                    backButtonTitle: 'Back',
-                    passProps: {
-                      bankStyle: this.props.bankStyle,
-                      search: this.props.search,
-                      resource: resource[v]
-                    }
-                  });
-                  }}>
-                  {row}
-                </TouchableOpacity>
-        }
-      }
-      return <View style={cellStyle}>{row}</View>
-    }
-    if (properties[v].type === 'date')
-      return <View style={cellStyle}>{this.addDateProp(resource, v)}</View>
-
-    if (resource[v]  &&  (typeof resource[v] != 'string')) {
-      if (criteria)
-        style.push({fontWeight: '600'})
-      if (properties[v].type === 'number')
-        style.push({alignSelf: 'flex-end', paddingRight: 10})
-      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[v] + ''}</Text></View>
-    }
-    if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') === 0  ||  resource[v].indexOf('https://') === 0))
-      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(this, resource)} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
-
-    let val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
-    let msgParts = utils.splitMessage(val);
-    if (msgParts.length <= 2)
-      val = msgParts[0];
-    else {
-      val = '';
-      for (let i=0; i<msgParts.length - 1; i++)
-        val += msgParts[i];
-    }
-    val = val.replace(/\*/g, '')
-    if (criteria) {
-      if (criteria.indexOf('*') === -1) {
-        style.push({fontWeight: '600'})
-        return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
-      }
-      else {
-        let parts = this.highlightCriteria(resource, val, criteria, style)
-        return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{parts}</Text></View>
-      }
-    }
-    else {
-      if (this.props.isModel  &&  (v === 'form'  ||  v === 'product')) {
-        let m = Store.getModel(v)
-        if (m)
-          val = utils.makeModelTitle(m)
-      }
-      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
-    }
-  }
-  onPress(resource) {
-    let title = utils.makeTitle(utils.getDisplayName(resource));
-    this.props.navigator.push({
-      id: 7,
-      title: title,
-      component: ArticleView,
-      passProps: {url: resource.url}
-    });
-  }
-
-  highlightCriteria(resource,val, criteria, style) {
-    criteria = criteria.replace(/\*/g, '')
-    let idx = val.indexOf(criteria)
-    let part
-    let parts = []
-
-    if (idx > 0) {
-      parts.push(<Text style={style} key={this.getNextKey(resource)}>{val.substring(0, idx)}</Text>)
-      idx++
-    }
-    parts.push(<Text style={[style, {fontWeight: '800'}]} key={this.getNextKey(resource)}>{val.substring(idx, idx + criteria.length)}</Text>)
-    idx += criteria.length
-    if (idx < val.length)
-      parts.push(<Text style={style} key={this.getNextKey(resource)}>{val.substring(idx)}</Text>)
-    return parts
-  }
-
-  renderGridHeader() {
-    if (this.state.isLoading)
-      return <View/>
-    let { modelName } = this.props
-    if (modelName === APPLICATION)
-      return <View/>
-    let model = Store.getModel(modelName)
-    let props = model.properties
-    let viewCols = this.getGridCols() // model.gridCols || model.viewCols;
-    if (!viewCols)
-      return <View />
-
-    let size
-    if (viewCols) {
-      let vCols = viewCols.filter((c) => props[c].type !== 'array')
-      viewCols = vCols
-      size = Math.min(viewCols.length, 12)
-      if (size < viewCols.length)
-        viewCols.splice(size, viewCols.length - size)
-    }
-    else
-      size = 1
-
-    let widthCols = utils.dimensions(GridList).width / 100
-    size = Math.min(size, Math.floor(widthCols * 100/100))
-
-    let smCol = this.isSmallScreen ? size/2 : 1
-    let {sortProperty, order} = this.state
-    let cols = viewCols.map((p) => {
-      let colStyle
-      if (sortProperty  &&  sortProperty === p) {
-        let asc = order[sortProperty]
-        colStyle = [styles.col, asc ? styles.sortAscending : styles.sortDescending]
-      }
-      else
-        colStyle = styles.col
-      let prop = props[p]
-      let textStyle
-      if (prop.type === 'number' || prop.type === 'date' || prop.ref === MONEY)
-        textStyle = {alignSelf: 'flex-end', paddingRight: 10}
-      else
-        textStyle = {}
-      return <Col sm={smCol} md={1} lg={1} style={colStyle} key={p + cnt}>
-        <TouchableOpacity onPress={() => this.sort(p)}>
-          <Text style={[styles.cell, textStyle]}>
-            {props[p].title.toUpperCase()}
-          </Text>
-        </TouchableOpacity>
-      </Col>
-    })
-
-    return <View style={styles.gridHeader} key='Datagrid_h1'>
-            <Row size={size} style={styles.headerRow} key='Datagrid_h2' nowrap>
-              {cols}
-            </Row>
-          </View>
-
   }
   async _loadMoreContentAsync() {
     if (this.state.refreshing)
@@ -1596,14 +1332,14 @@ class GridList extends Component {
   render() {
     let content;
     let {isGrid, filter, dataSource, isLoading, refreshing, list, isConnected, allLoaded} = this.state
-    let { isChooser, modelName, isModel, isBacklink, isForwardlink, resource, prop, forwardlink } = this.props
+    let { isChooser, modelName, isModel, isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = this.props
     let model = Store.getModel(modelName);
     if (dataSource.getRowCount() === 0   &&
-        utils.getMe()                               &&
-        !utils.getMe().organization                 &&
-        model.subClassOf !== ENUM                   &&
+        utils.getMe()                    &&
+        !utils.getMe().organization      &&
+        model.subClassOf !== ENUM        &&
         !isChooser                       &&
-        modelName !== ORGANIZATION  &&
+        modelName !== ORGANIZATION       &&
         (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
       content = <NoResources
                   filter={filter}
@@ -1687,6 +1423,7 @@ class GridList extends Component {
                     </View>
                   </View>
     }
+
     return (
       <PageView style={isBacklink || isForwardlink  ? {flex: 1} : platformStyles.container} separator={contentSeparator}>
         {network}
@@ -1794,6 +1531,7 @@ class GridList extends Component {
 }
 reactMixin(GridList.prototype, Reflux.ListenerMixin);
 reactMixin(GridList.prototype, HomePageMixin)
+GridList = makeResponsive(GridList)
 GridList = makeStylish(GridList)
 
 var styles = StyleSheet.create({
@@ -2192,4 +1930,29 @@ module.exports = GridList;
   //   // fetchData().then(() => {
   //   //   this.setState({refreshing: false});
   //   // });
+  // }
+  // renderGridHeader() {
+  //   let { modelName, navigator } = this.props
+  //   if (modelName === APPLICATION)
+  //     return <View/>
+  //   let model = Store.getModel(modelName)
+  //   let props = model.properties
+  //   let viewCols = this.getGridCols() // model.gridCols || model.viewCols;
+  //   if (viewCols)
+  //   return (
+  //     <GridHeader gridCols={viewCols} modelName={modelName} navigator={navigator} />
+  //     // <GridHeader gridCols={viewCols} multiChooser={shareMultiEntryList != null} checkAll={this.checkAll.bind(this)} modelName={modelName} navigator={navigator} />
+  //   )
+  // }
+  // sort(prop) {
+  //   let order = this.state.order || {}
+  //   let curOrder = order[prop]
+
+  //   order[prop] = curOrder ? false : true
+  //   this.setState({order: order, sortProperty: prop, list: []})
+
+  //   let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
+  //   if (this.props.search)
+  //     _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
+  //   Actions.list(params)
   // }
