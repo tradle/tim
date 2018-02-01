@@ -494,12 +494,25 @@ class FormRequestRow extends Component {
     if (verification[constants.ROOT_HASH]) {
       let orgs
       if (providers) {
-        providers.forEach((p) => {
-          if (!orgs)
-            orgs = p.title
-          else
-            orgs += ', ' + p.title
-        })
+        if (Array.isArray(providers)) {
+          providers.forEach((p) => {
+            if (!orgs)
+              orgs = p.title
+            else
+              orgs += ', ' + p.title
+          })
+        }
+        else {
+          for (let pr in providers) {
+            let arr = providers[pr]
+            arr.forEach((p) => {
+              if (!orgs)
+                orgs = p.title
+              else
+                orgs += ', ' + p.title
+            })
+          }
+        }
       }
       else
         orgs = verification.organization.title

@@ -1519,7 +1519,10 @@ var NewResourceMixin = {
     let m = utils.getModel(propRef).value;
     let currentRoutes = navigator.getCurrentRoutes();
 
-    let pmodel = utils.getModelForFormRequest(originatingMessage)
+    if (originatingMessage) {
+      let pmodel = utils.getModelForFormRequest(originatingMessage)
+      prop = pmodel.properties[propName]
+    }
 
     let route = {
       title: translate(prop), //m.title,
@@ -1533,7 +1536,7 @@ var NewResourceMixin = {
       passProps: {
         filter:         filter,
         isChooser:      true,
-        prop:           pmodel.properties[propName],
+        prop:           prop,
         modelName:      propRef,
         resource:       resource,
         search:         search,
