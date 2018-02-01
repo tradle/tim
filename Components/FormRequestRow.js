@@ -308,13 +308,14 @@ class FormRequestRow extends Component {
         //     continue
         //   let meShare = this.formatMultiEntryShareable({context: c, verifications: contexts[c], model: formModel})
           let meverifications = multientryResources[t]
-          let meShare = this.formatMultiEntryShareable({verifications: meverifications, model: formModel})
-
-          vtt.push(meShare)
+          if (meverifications.length > 1) {
+            let meShare = this.formatMultiEntryShareable({verifications: meverifications, model: formModel})
+            vtt.push(meShare)
+          }
         // }
       }
     }
-    else {
+    if (!vtt.length) {
       for (var t in  verifications) {
         if (t !== formModel.id)
           continue
@@ -432,7 +433,7 @@ class FormRequestRow extends Component {
     let isItem = utils.isSavedItem(document)
     let verifiedBy
     if (verification  && (verification.organization || isItem)) {
-      let { verifiedBy, orgPhoto, shareView, orgTitle } = this.getParts(verification, isItem)
+      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem)
       if (onPress) {
       }
       else if (resource._documentCreated) {
@@ -563,7 +564,7 @@ class FormRequestRow extends Component {
     let isItem = utils.isSavedItem(document)
     let verifiedBy
     if (verification  && (verification.organization || isItem)) {
-      let { verifiedBy, orgPhoto, shareView, orgTitle } = this.getParts(verification, isItem)
+      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem)
       if (onPress) {
       }
       else if (resource._documentCreated) {

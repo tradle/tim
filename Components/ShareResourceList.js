@@ -1,13 +1,15 @@
 console.log('requiring StringChooser.js')
 'use strict';
 
-import React, { Component } from 'react'
-import equal from 'deep-equal'
+import React, { Component, PropTypes } from 'react'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import HomePageMixin from './HomePageMixin'
 import constants from '@tradle/constants'
-var { TYPE, ROOT_HASH } = constants
+var {
+  TYPE,
+  ROOT_HASH
+} = constants
 import utils, { translate } from '../utils/utils'
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
@@ -19,7 +21,6 @@ import StyleSheet from '../StyleSheet'
 import Actions from '../Actions/Actions'
 
 import PageView from './PageView'
-import platformStyles from '../styles/platform'
 import {
   ListView,
   Text,
@@ -28,15 +29,13 @@ import {
   Alert
 } from 'react-native'
 
-      //   shareMultiEntryList: documents,
-      //   verifications: verifications,
-      //   formRequest: resource,
-      //   to: to,
-      //   modelName: modelName,
-      //   bankStyle: bankStyle
-      // }
-
 class ShareResourceList extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    list: PropTypes.object.isRequired,
+    formRequest: PropTypes.object,
+    multiChooser: PropTypes.boolean,
+  };
   constructor(props) {
     super(props);
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(ShareResourceList).width < 736
@@ -44,10 +43,13 @@ class ShareResourceList extends Component {
       rowHasChanged: (row1, row2) => row1 !== row2,
     });
     this.state = {
-      strings: props.strings,
       dataSource: dataSource.cloneWithRows(props.list),
       chosen: {}
     }
+    this.share = this.share.bind(this)
+    this.renderRow = this.renderRow.bind(this)
+    this.renderHeader = this.renderHeader.bind(this)
+    this.shareChosen = this.shareChosen.bind(this)
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (this.state.chosen !== nextState.chosen)
@@ -84,7 +86,7 @@ class ShareResourceList extends Component {
     }
   }
   renderRow(resource, sectionId, rowId)  {
-    let { navigator, bankStyle, multiChooser, formRequest } = this.props
+    let { navigator, bankStyle, multiChooser } = this.props
     let gridCols = !this.isSmallScreen  &&  this.getGridCols()
     let modelName = resource[TYPE]
     if (gridCols)
@@ -132,8 +134,8 @@ class ShareResourceList extends Component {
                     dataSource={this.state.dataSource}
                     removeClippedSubviews={false}
                     initialListSize={100}
-                    renderRow={this.renderRow.bind(this)}
-                    renderHeader={this.renderHeader.bind(this)}
+                    renderRow={this.renderRow}
+                    renderHeader={this.renderHeader}
                     enableEmptySections={true}
                     automaticallyAdjustContentInsets={false}
                     keyboardDismissMode='on-drag'
@@ -142,17 +144,17 @@ class ShareResourceList extends Component {
 
     let bgStyle =  {backgroundColor: bankStyle  &&  bankStyle.backgroundColor || '#ffffff'}
     let bg = {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}
-    let shareButton = <TouchableOpacity onPress={this.shareChosen.bind(this)}>
-                        <View style={[styles.shareButton, bg]}>
-                          <CustomIcon name='tradle' style={{color: '#ffffff'}} size={32} />
-                          <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
-                        </View>
-                      </TouchableOpacity>
+    let submit = <TouchableOpacity onPress={this.shareChosen}>
+                   <View style={[styles.shareButton, bg]}>
+                     <CustomIcon name='tradle' style={{color: '#ffffff'}} size={32} />
+                     <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
+                   </View>
+                 </TouchableOpacity>
 
     return (
       <PageView style={[styles.container, bgStyle]}>
         {content}
-        {shareButton}
+        {submit}
       </PageView>
     );
   }
@@ -162,14 +164,30 @@ class ShareResourceList extends Component {
       return this.renderGridHeader()
   }
   shareChosen() {
-    let { resource, to, formRequest, navigator } = this.props
     let chosen = this.state.chosen
-    if (utils.isEmpty(chosen))
+    if (utils.isEmpty(chosen)) {
       Alert.alert(translate('nothingToShare'))
-    else {
-      for (let r in chosen)
-        Actions.share(chosen[r], to, formRequest)
+      return
     }
+    let list = []
+    for (let r in chosen)
+      list.push(utils.getDisplayName(chosen[r]))
+    let listStr = list.join(', ')
+
+    Alert.alert(
+      translate('youAreAboutToShare', translate(utils.makeModelTitle(this.props.modelName))),
+      listStr,
+      [
+        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+        {text: translate('Ok'), onPress: this.share},
+      ]
+    )
+  }
+  share() {
+    let { to, formRequest, navigator } = this.props
+    let chosen = this.state.chosen
+    for (let r in chosen)
+      Actions.share(chosen[r], to, formRequest)
     navigator.pop()
   }
 }

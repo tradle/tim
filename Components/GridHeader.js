@@ -14,7 +14,6 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
-import CustomIcon from '../styles/customicons'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 import utils, {
@@ -31,13 +30,15 @@ class GridHeader extends Component {
     modelName: PropTypes.string.isRequired,
     gridCols: PropTypes.array.isRequired,
     multiChooser: PropTypes.boolean,
-    checkAll: PropTypes.func
+    isSmallScreen: PropTypes.boolean,
+    checkAll: PropTypes.func,
+    sort: PropTypes.func
     // backlinkList: PropTypes.array
   };
   constructor(props) {
     super(props);
 
-    let {resource, modelName, prop, filter, serverOffline, search, multiChooser, gridCols} = this.props
+    let {resource, modelName, multiChooser, gridCols} = this.props
     let model = Store.getModel(modelName)
 
     let size = gridCols ? gridCols.length : 1
@@ -45,18 +46,6 @@ class GridHeader extends Component {
     this.state = {
       isChecked: false
     };
-  }
-  sort(prop) {
-    let order = this.state.order || {}
-    let curOrder = order[prop]
-
-    order[prop] = curOrder ? false : true
-    this.setState({order: order, sortProperty: prop, list: []})
-
-    let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
-    if (this.props.search)
-      _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
-    Actions.list(params)
   }
   render() {
     let { modelName, isSmallScreen } = this.props
@@ -96,7 +85,7 @@ class GridHeader extends Component {
       else
         textStyle = {}
       return <Col sm={smCol} md={1} lg={1} style={colStyle} key={p}>
-                <TouchableOpacity onPress={() => this.sort(p)}>
+                <TouchableOpacity onPress={() => this.props.sort(p)}>
                   <Text style={[styles.cell, textStyle]}>
                     {props[p].title.toUpperCase()}
                   </Text>

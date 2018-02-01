@@ -260,5 +260,6 @@
     "youAreTheRM": "You are the Relationship Manager for this application",
     "fillRequiredFields": "Please fill out all required fields",
     "multientryToShare": "There are {1} documents to share",
+    "youAreAboutToShare": "You are about to share\n '{1}'\n documents",
     "nothingToShare": "Nothing to share"
 }

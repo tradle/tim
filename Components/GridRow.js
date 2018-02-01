@@ -27,8 +27,6 @@ import utils, {
   translate
 } from '../utils/utils'
 import Store from '../Store/Store'
-import Actions from '../Actions/Actions'
-import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
 import constants from '@tradle/constants'
 
@@ -45,14 +43,14 @@ var {
 } = constants.TYPES
 
 const PHOTO = 'tradle.Photo'
-const BOOKMARK = 'tradle.Bookmark'
 
 class GridRow extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
-    multiChooser: PropTypes.boolean,
     gridCols: PropTypes.array.isRequired,
+    multiChooser: PropTypes.boolean,
+    isSmallScreen: PropTypes.boolean,
     chosen: PropTypes.boolean,
   };
   constructor(props) {
