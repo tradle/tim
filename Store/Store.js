@@ -4989,60 +4989,59 @@ var Store = Reflux.createStore({
     db.batch(batch)
   },
 
-  async shareForms(documents, to, formRequest, shareBatchId) {
-    var time = new Date().getTime()
-    try {
-      if (utils.getMe().isEmployee) {
-        let hashes = documents.map((d) => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
-        let sr = {
-          [TYPE]: SHARE_REQUEST,
-          links: hashes,
-          with:  [{
-            id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
-          }]
-        }
-        let msg = this.packMessage(sr, me, to)
-        if (!msg.other)
-          msg.other = {}
-        msg.other.context = formRequest._context.contextId
-        msg.seal =  true
-        await this.meDriverSignAndSend(msg)
-      }
-      else {
+  // async shareForms(documents, to, formRequest, shareBatchId) {
+  //   var time = new Date().getTime()
+  //   try {
+  //     if (utils.getMe().isEmployee) {
+  //       let hashes = documents.map((d) => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
+  //       let sr = {
+  //         [TYPE]: SHARE_REQUEST,
+  //         links: hashes,
+  //         with:  [{
+  //           id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
+  //         }]
+  //       }
+  //       let msg = this.packMessage(sr, me, to)
+  //       if (!msg.other)
+  //         msg.other = {}
+  //       msg.other.context = formRequest._context.contextId
+  //       msg.seal =  true
+  //       await this.meDriverSignAndSend(msg)
+  //     }
+  //     else {
+  //       let opts = {
+  //         other: {
+  //           context:  formRequest._context.contextId,
+  //         },
+  //         to: { permalink: to[ROOT_HASH] },
+  //         seal: true,
+  //         link: hash
+  //       }
+  //       await this.meDriverSend(opts)
+  //     }
+  //   }
+  //   catch(err) {
+  //     console.log(err)
+  //     return
+  //   }
 
-        let opts = {
-          other: {
-            context:  formRequest._context.contextId,
-          },
-          to: { permalink: to[ROOT_HASH] },
-          seal: true,
-          link: hash
-        }
-        await this.meDriverSend(opts)
-      }
-    }
-    catch(err) {
-      console.log(err)
-      return
-    }
+  //   if (!document._sharedWith) {
+  //     document._sharedWith = []
+  //     if (!utils.isMyProduct(document)  &&  !utils.isSavedItem(document))
+  //       this.addSharedWith(document, document.to, document.time, shareBatchId)
+  //   }
+  //   if (utils.isSavedItem(document)) {
+  //     document._creationTime = document.time
+  //     document._sentTime = new Date().getTime()
+  //     let docId = utils.getId(document)
+  //     document.to = to
+  //     this._setItem(docId, document)
+  //     this.dbPut(docId, document)
+  //   }
 
-    if (!document._sharedWith) {
-      document._sharedWith = []
-      if (!utils.isMyProduct(document)  &&  !utils.isSavedItem(document))
-        this.addSharedWith(document, document.to, document.time, shareBatchId)
-    }
-    if (utils.isSavedItem(document)) {
-      document._creationTime = document.time
-      document._sentTime = new Date().getTime()
-      let docId = utils.getId(document)
-      document.to = to
-      this._setItem(docId, document)
-      this.dbPut(docId, document)
-    }
-
-    this.addSharedWith(document, to, time, shareBatchId)
-    this.addMessagesToChat(utils.getId(to.organization), document, false, time)
-  },
+  //   this.addSharedWith(document, to, time, shareBatchId)
+  //   this.addMessagesToChat(utils.getId(to.organization), document, false, time)
+  // },
   async shareForm(document, to, formRequest, shareBatchId) {
     var time = new Date().getTime()
     let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
