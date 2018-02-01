@@ -35,7 +35,7 @@ import {
   // StyleSheet,
   Platform,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   Alert,
   // View
 } from 'react-native';
@@ -55,20 +55,33 @@ class VerificationRow extends Component {
     onSelect: PropTypes.func.isRequired,
     prop: PropTypes.object,
     currency: PropTypes.object,
-    isChooser: PropTypes.boolean
+    isChooser: PropTypes.boolean,
+    multiChooser: PropTypes.boolean,
   };
   constructor(props) {
     super(props);
+    let isChosen = false
+    if (props.multiChooser) {
+      // multivalue ENUM property
+      if (props.chosen  &&  props.chosen[utils.getId(props.resource)])
+        this.state.isChosen = true
+    }
+
+    this.state = {
+      isChosen: isChosen
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
     if (this.props.searchCriteria !== nextProps.searchCriteria)
       return true
+    if (this.state.isChosen !== nextState.isChosen)
+      return true
     return false
   }
 
   render() {
-    let {resource, isChooser, lazy, parentResource, onSelect, prop, modelName } = this.props
+    let {resource, isChooser, lazy, parentResource, onSelect, prop, modelName, multiChooser, bankStyle } = this.props
     let model = utils.getModel(resource[TYPE]).value;
     let isMyProduct = model.subClassOf === MY_PRODUCT
     let isForm = model.subClassOf === FORM
@@ -217,7 +230,15 @@ class VerificationRow extends Component {
       this.formatFilteredResource(model, resource, renderedRows)
     else if (isBookmark  &&  !resource.message)
       this.formatBookmark(utils.getModel(resource.bookmark[TYPE]).value, resource.bookmark, renderedRows)
+    let multiChooserIcon
+    if (multiChooser) {
+      multiChooserIcon = <View style={styles.multiChooser}>
+                           <TouchableOpacity underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
+                             <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={bankStyle && bankStyle.linkColor  ||  '#7AAAC3'} />
+                           </TouchableOpacity>
+                         </View>
 
+    }
     let header =  <View style={[styles.header, {flex: 1}]} key={this.getNextKey()}>
                     <View style={{flexDirection: 'row', marginHorizontal: 10}}>
                       {photo}
@@ -226,9 +247,10 @@ class VerificationRow extends Component {
                           <View style={{flexDirection: 'column', flex: 1}}>
                             {titleComponent}
                             {description}
-                          {renderedRows}
+                            {renderedRows}
                           </View>
                           {supportingDocuments}
+                          {multiChooserIcon}
                         </View>
                           {sharedFrom}
                         <View style={{marginTop: sharedFrom ? -3 : 3, flexDirection: 'row', justifyContent: 'flex-end'}}>
@@ -242,19 +264,19 @@ class VerificationRow extends Component {
     let row
     if (isChooser)
       row = <View>
-              <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
+              <TouchableOpacity onPress={onSelect.bind(this)} underlayColor='transparent'>
                {header}
-              </TouchableHighlight>
+              </TouchableOpacity>
             </View>
     else if (notAccordion) {
       let renderedRows = []
       if (this.props.search  &&  this.props.searchCriteria)
         this.formatFilteredResource(model, resource, renderedRows)
-      let content = <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
+      let content = <TouchableOpacity onPress={onSelect.bind(this)} underlayColor='transparent'>
                       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                         {header}
                       </View>
-                    </TouchableHighlight>
+                    </TouchableOpacity>
       if (!isVerification)
         content = <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
                     {content}
@@ -264,11 +286,11 @@ class VerificationRow extends Component {
             </View>
     }
     // else {
-    //   let content = <TouchableHighlight onPress={onSelect.bind(this)} underlayColor='transparent'>
+    //   let content = <TouchableOpacity onPress={onSelect.bind(this)} underlayColor='transparent'>
     //                     <View style={styles.textContainer}>
     //                       {rows}
     //                     </View>
-    //                   </TouchableHighlight>
+    //                   </TouchableOpacity>
     //   row = <View host={lazy}>
     //          <Accordion
     //            header={header}
@@ -636,10 +658,12 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,
   },
-  // verySmallLettersCenter: {
-  //   fontSize: 12,
-  //   color: '#2E3B4E'
-  // },
+  multiChooser: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    backgroundColor: 'transparent'
+  },
 });
 
 module.exports = VerificationRow;
