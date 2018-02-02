@@ -388,7 +388,7 @@ class NewResource extends Component {
           required.push(p)
       }
     }
-    requestedProperties = this.state.requestedProperties || this.props.requestedProperties
+    let requestedProperties = this.state.requestedProperties || this.props.requestedProperties
     if (requestedProperties) {
       for (let p in requestedProperties)
         if (required.indexOf(p) === -1)

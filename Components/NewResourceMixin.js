@@ -207,7 +207,7 @@ var NewResourceMixin = {
     required = utils.arrayToObject(required);
 
     let resource = this.state.resource
-    for (var p in eCols) {
+    for (let p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
 
