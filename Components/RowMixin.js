@@ -18,8 +18,6 @@ import {
   Text,
   View,
   Alert,
-  Navigator,
-  // StyleSheet,
   Platform,
   Image,
   Navigator
