@@ -8,7 +8,6 @@ import NewResource from './NewResource'
 import RemediationItemsList from './RemediationItemsList'
 import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
-import ResourceList from './ResourceList'
 import RowMixin from './RowMixin'
 import CameraView from './CameraView'
 import StringChooser from './StringChooser'
@@ -28,6 +27,7 @@ import chatStyles from '../styles/chatStyles'
 const MY_PRODUCT = 'tradle.MyProduct'
 const PHOTO = 'tradle.Photo'
 const FORM_REQUEST = 'tradle.FormRequest'
+const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const ITEM = 'tradle.Item'
@@ -255,7 +255,7 @@ class FormRequestRow extends Component {
       </View>
     )
   }
-  chooser(prop) {
+  productChooser(prop) {
     let oResource = this.props.resource
     let model = utils.getModel(oResource.form).value
     let resource = {
@@ -831,7 +831,7 @@ class FormRequestRow extends Component {
           }
           else {
             msg = <View key={this.getNextKey()} style={styles.center}>
-                  <TouchableHighlight onPress={() => this.chooser(prop)} underlayColor='transparent'>
+                  <TouchableHighlight onPress={() => form.id === PRODUCT_REQUEST ? this.productChooser(prop) : this.chooser(prop)} underlayColor='transparent'>
                     <View style={styles.message}>
                       <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
                       {resource._documentCreated ? null : icon}
