@@ -455,14 +455,20 @@ var utils = {
     //       // uppercase the first character
     //       .replace(/^./, function(str){ return str.toUpperCase(); }).trim()
   },
-  makeLabel(label) {
-    return label
+  makeLabel(label, isPlural) {
+    label = label
           .replace(/_/g, ' ')
           // insert a space before all caps
           .replace(/([A-Z])/g, ' $1')
           // uppercase the first character
           .replace(/^./, function(str){ return str.toUpperCase(); })
           .trim()
+    let parts = label.split(' ')
+    if (parts.length === 1)
+      return label
+    // keep abbreviations intact
+    let newLabel = parts.reduce((sum, cur) => sum + (cur.length === 1 ? cur : ' ' + cur))
+    return newLabel
   },
   arrayToObject(arr) {
     if (!arr)
@@ -2006,7 +2012,7 @@ var utils = {
         return p
       if (ftype === PRODUCT_REQUEST)
         return p
-      if (p  &&  p.type === 'object'  &&  p.ref === PHOTO) // ||  Store.getModel(p.ref).subClassOf === ENUM))
+      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  Store.getModel(p.ref).subClassOf === ENUM))
         return p
     }
     return
