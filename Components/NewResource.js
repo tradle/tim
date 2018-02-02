@@ -388,6 +388,12 @@ class NewResource extends Component {
           required.push(p)
       }
     }
+    requestedProperties = this.state.requestedProperties || this.props.requestedProperties
+    if (requestedProperties) {
+      for (let p in requestedProperties)
+        if (required.indexOf(p) === -1)
+          required.push(p)
+    }
     let missedRequiredOrErrorValue = {}
     required.forEach((p) =>  {
       let v = (typeof json[p] !== 'undefined') || json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];

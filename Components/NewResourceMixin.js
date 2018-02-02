@@ -182,7 +182,7 @@ var NewResourceMixin = {
       }
       for (let p in requestedProperties) {
         if (eCols[p]) {
-          this.addError(p, params)
+          // this.addError(p, params)
           continue
         }
         let idx = p.indexOf('_group')
@@ -190,11 +190,11 @@ var NewResourceMixin = {
         if (idx !== -1  &&  props[p].list) {
           props[p].list.forEach((pp) => {
             eCols[pp] = props[pp]
-            this.addError(p, params)
+            // this.addError(p, params)
           })
         }
-        else
-          this.addError(p, params)
+        // else
+        //   this.addError(p, params)
       }
     }
     else if (data) {
@@ -207,14 +207,16 @@ var NewResourceMixin = {
     required = utils.arrayToObject(required);
 
     let resource = this.state.resource
-    for (let p in eCols) {
+    for (var p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
 
       if (meta  &&  meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
         continue
 
-      let maybe = required  &&  !required.hasOwnProperty(p);
+      let maybe = required  &&  !required.hasOwnProperty(p)
+      if (maybe  &&  requestedProperties  &&  requestedProperties[p] !== null)
+        maybe = false
 
       let type = props[p].type;
       let formType = propTypesMap[type];
