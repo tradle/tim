@@ -12,6 +12,7 @@ import CustomIcon from '../styles/customicons'
 import CameraView from './CameraView'
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
+import ResourceList from './ResourceList'
 var cnt = 0;
 import {
   Text,
@@ -20,7 +21,8 @@ import {
   Navigator,
   // StyleSheet,
   Platform,
-  Image
+  Image,
+  Navigator
 } from 'react-native';
 
 import { coroutine as co } from 'bluebird'
@@ -439,6 +441,40 @@ var RowMixin = {
       this.setState({isChosen: true})
       this.props.chosen[id] = resource
     }
+  },
+  chooser(prop) {
+    let oResource = this.props.resource
+    let model = utils.getModel(oResource.form).value
+    let resource = {
+      [TYPE]: model.id,
+      from: utils.getMe(),
+      to: oResource.from
+    }
+    if (oResource._context)
+      resource._context = oResource._context
+
+    var propRef = prop.ref
+    var m = utils.getModel(propRef).value;
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.props.navigator.push({
+      title: translate(prop), //m.title,
+      // titleTextColor: '#7AAAC3',
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        isChooser:      true,
+        prop:           prop,
+        modelName:      propRef,
+        resource:       resource,
+        returnRoute:    currentRoutes[currentRoutes.length - 1],
+        callback:       (prop, val) => {
+          resource[prop.name] = utils.buildRef(val)
+          Actions.addChatItem({resource: resource, disableFormRequest: oResource})
+        },
+      }
+    });
   }
 }
 
