@@ -579,18 +579,18 @@ class ResourceList extends Component {
     if (prop) {
       if (me) {
         if  (modelName != PROFILE) {
-          this._selectResource({resource});
+          this._selectResource(resource);
           return
         }
         if (utils.isMe(resource)  ||
            (prop  &&  this.props.resource  &&  utils.isMe(this.props.resource))) {
-          this._selectResource({resource});
+          this._selectResource(resource);
           return;
         }
       }
       else {
         if (this.state.isRegistration) {
-          this._selectResource({resource});
+          this._selectResource(resource);
           return;
         }
       }
