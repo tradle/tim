@@ -9558,7 +9558,6 @@ var Store = Reflux.createStore({
 
     var noTrigger
     var isModelsPack = type === MODELS_PACK
-
     if (isModelsPack) {
       noTrigger = true
       let stopHere = await modelsPackHandler()
@@ -9769,6 +9768,12 @@ var Store = Reflux.createStore({
         //   org.products.push(m.id)
         if (utils.isEnum(m))
           self.createEnumResources(m)
+
+        if (utils.isWeb()  &&  m.id === PHOTO_ID) {
+          let scanProp = m.properties['scan']
+          scanProp.title = 'Upload'
+          // scanProp.icon = 'md-download'
+        }
 
         // if (utils.isMessage(m)) {
         if (m.subClassOf === FORM) {
