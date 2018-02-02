@@ -808,7 +808,7 @@ var Store = Reflux.createStore({
         key: id,
         value: m
       }
-      m[ROOT_HASH] = sha(m)
+      // m[ROOT_HASH] = sha(m)
       if (!m.properties[TYPE]) {
         m.properties[TYPE] = {
           type: 'string',
