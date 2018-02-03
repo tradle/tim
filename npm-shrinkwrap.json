@@ -21,7 +21,7 @@
     },
     "@tradle/aws-client": {
       "version": "1.0.0",
-      "from": "tradle/aws-client",
+      "from": "git://github.com/tradle/aws-client.git#643c54926adfb57cd26c654b286e58d0af4e910f",
       "resolved": "git://github.com/tradle/aws-client.git#643c54926adfb57cd26c654b286e58d0af4e910f",
       "dependencies": {
         "pify": {
@@ -182,7 +182,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#95fc025d6be4d4e17c227958a73a3e1c5dbf67ce"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#a43fab8f2fc9b1b3d13c9db60df18a41c02238d3"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -200,14 +200,14 @@
       "resolved": "git://github.com/tradle/models-products-bot.git#7c834fb6e5614a6d688e394324c5d51d94fb8965"
     },
     "@tradle/multiqueue": {
-      "version": "2.3.0",
-      "from": "@tradle/multiqueue@>=2.3.0 <2.4.0",
-      "resolved": "https://registry.npmjs.org/@tradle/multiqueue/-/multiqueue-2.3.0.tgz",
+      "version": "2.3.1",
+      "from": "@tradle/multiqueue@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/multiqueue/-/multiqueue-2.3.1.tgz",
       "dependencies": {
         "duplexify": {
-          "version": "3.5.1",
+          "version": "3.5.3",
           "from": "duplexify@>=3.5.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/duplexify/-/duplexify-3.5.1.tgz"
+          "resolved": "https://registry.npmjs.org/duplexify/-/duplexify-3.5.3.tgz"
         },
         "isarray": {
           "version": "1.0.0",
@@ -215,9 +215,9 @@
           "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
         },
         "pump": {
-          "version": "1.0.2",
+          "version": "1.0.3",
           "from": "pump@>=1.0.2 <2.0.0",
-          "resolved": "https://registry.npmjs.org/pump/-/pump-1.0.2.tgz"
+          "resolved": "https://registry.npmjs.org/pump/-/pump-1.0.3.tgz"
         },
         "readable-stream": {
           "version": "2.3.3",
@@ -5154,9 +5154,9 @@
       "resolved": "https://registry.npmjs.org/merge/-/merge-1.2.0.tgz"
     },
     "merge2": {
-      "version": "1.2.0",
+      "version": "1.2.1",
       "from": "merge2@>=1.0.3 <2.0.0",
-      "resolved": "https://registry.npmjs.org/merge2/-/merge2-1.2.0.tgz"
+      "resolved": "https://registry.npmjs.org/merge2/-/merge2-1.2.1.tgz"
     },
     "merkle-proofs": {
       "version": "1.0.3",
