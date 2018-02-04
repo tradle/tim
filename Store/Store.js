@@ -3906,7 +3906,7 @@ var Store = Reflux.createStore({
       // model.interfaces = [];
       // model.interfaces.push(MESSAGE);
       // var rootHash = sha(model);
-      model[ROOT_HASH] = rootHash;
+      // model[ROOT_HASH] = rootHash;
       model[constants.OWNER] = this.buildRef(me)
       // model[constants.OWNER] = {
       //   id: PROFILE + '_' + me[ROOT_HASH],
