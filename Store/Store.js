@@ -1344,8 +1344,11 @@ var Store = Reflux.createStore({
 
           let chkId = (toId === meId) ? fromId : toId
 
-          if (!c  &&  me.isEmployee) {
-            this.addMessagesToChat(chkId, r, true)
+          if (!c) {
+            if (me.isEmployee)
+              this.addMessagesToChat(chkId, r, true)
+            else
+              debugger
             continue
           }
           this.addVisualProps(c)
@@ -3902,7 +3905,7 @@ var Store = Reflux.createStore({
       }
       // model.interfaces = [];
       // model.interfaces.push(MESSAGE);
-      var rootHash = sha(model);
+      // var rootHash = sha(model);
       model[ROOT_HASH] = rootHash;
       model[constants.OWNER] = this.buildRef(me)
       // model[constants.OWNER] = {
