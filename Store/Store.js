@@ -8978,7 +8978,7 @@ var Store = Reflux.createStore({
       if (obj.txId) {
         inDB.txId = obj.txId
         inDB.sealedTime = obj.timestamp
-        db.put(valId, inDB)
+        await db.put(valId, inDB)
       }
       return
     }
