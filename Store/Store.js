@@ -734,7 +734,6 @@ var Store = Reflux.createStore({
     }
   },
   readseal(seal) {
-    debugger
     let self = this
     const link = seal.link
     return meDriver.objects.get(link)
@@ -743,8 +742,7 @@ var Store = Reflux.createStore({
           return
         }
 
-        const wrapper = { ...seal, ...obj }
-        save(wrapper)
+        return { ...seal, ...obj }
       })
 
     function save (wrapper) {
