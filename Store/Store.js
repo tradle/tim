@@ -768,7 +768,7 @@ var Store = Reflux.createStore({
           return
         }
 
-        return { ...seal, ...obj }
+        return save({ ...seal, ...obj })
       })
 
     function save (wrapper) {
