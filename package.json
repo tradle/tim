@@ -36,7 +36,7 @@
     "lint": "eslint --quiet ."
   },
   "dependencies": {
-    "@tradle/aws-client": "github:tradle/aws-client",
+    "@tradle/aws-client": "git://github.com/tradle/aws-client.git#643c54926adfb57cd26c654b286e58d0af4e910f",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
     "@tradle/biz-plugins": "github:tradle/biz-plugins#cloud",
     "@tradle/build-resource": "^2.14.1",
@@ -51,7 +51,7 @@
     "@tradle/models-nz": "github:tradle/models-nz",
     "@tradle/models-onfido": "github:tradle/models-onfido",
     "@tradle/models-products-bot": "github:tradle/models-products-bot",
-    "@tradle/multiqueue": "^2.3.0",
+    "@tradle/multiqueue": "^2.3.1",
     "@tradle/protocol": "^3.0.0",
     "@tradle/qr-schema": "^1.1.0",
     "@tradle/restore": "github:tradle/restore",

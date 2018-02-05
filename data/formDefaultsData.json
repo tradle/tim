@@ -666,7 +666,8 @@
       "title": "United States"
     },
     "numberOfEmployees": 20,
-    "officialAddress": "1 Mars Way",
+    "streetAddress": "1 Mars Way",
+    "region": "CA",
     "photos": [
       {
         "height": 256,
