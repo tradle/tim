@@ -8918,6 +8918,9 @@ var Store = Reflux.createStore({
     if (val[TYPE] === INTRODUCTION)
       return
 
+    if (obj.txId)
+      val.txId = obj.txId
+
     if (val[TYPE] === SIMPLE_MESSAGE  &&  val.message === ALREADY_PUBLISHED_MESSAGE)
       return
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
@@ -8980,8 +8983,6 @@ var Store = Reflux.createStore({
       else
         return;
     }
-    if (obj.txId)
-      val.txId = obj.txId
     // val.permissionKey = obj.permissionKey
     var key = utils.getId(val)
     var batch = []
