@@ -1791,10 +1791,28 @@ var Store = Reflux.createStore({
       clientId: `${node.permalink}${node.permalink}`
     })
 
+    let queueMonitorTimeout
+    const checkMissing = ({ tip, seq }) => {
+      if (tip === seq) {
+        clearTimeout(queueMonitorTimeout)
+        queueMonitorTimeout = null
+        return
+      }
+
+      if (queueMonitorTimeout) return
+
+      queueMonitorTimeout = setTimeout(() => {
+        debug('aws-client detected missing messages, reconnecting')
+        client.reset()
+      }, 2000)
+    }
+
     client.onmessage = async (msg) => {
       debug(`receiving msg ${msg._n} from ${counterparty}`)
-      await this.queueReceive({ msg, from: counterparty })
+      const result = await this.queueReceive({ msg, from: counterparty })
+      checkMissing(result)
     }
+
     client.on('disconnect', function () {
       self.setProviderOnlineStatus(provider.hash, false)
     })
