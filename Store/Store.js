@@ -12,6 +12,7 @@ import ReactNative, {
   AppState,
   InteractionManager
 } from 'react-native'
+import _ from 'lodash'
 import pick from 'object.pick'
 import dotProp from 'dot-prop'
 const noop = () => {}
@@ -758,7 +759,6 @@ var Store = Reflux.createStore({
     }
   },
   readseal(seal) {
-    debugger
     let self = this
     const link = seal.link
     return meDriver.objects.get(link)
@@ -767,8 +767,7 @@ var Store = Reflux.createStore({
           return
         }
 
-        const wrapper = { ...seal, ...obj }
-        save(wrapper)
+        return { ...seal, ...obj }
       })
 
     function save (wrapper) {
@@ -1823,21 +1822,31 @@ var Store = Reflux.createStore({
       clientId: `${node.permalink}${node.permalink}`
     })
 
-    let queueMonitorTimeout
-    const checkMissing = ({ tip, seq }) => {
-      if (tip === seq) {
-        clearTimeout(queueMonitorTimeout)
-        queueMonitorTimeout = null
-        return
-      }
+    const checkMissing = (() => {
+      const onMissing = _.debounce(() => {
+        if (!_.size(missing)) return
 
-      if (queueMonitorTimeout) return
-
-      queueMonitorTimeout = setTimeout(() => {
+        // TODO: request missing messages directly
+        missing = {}
         debug('aws-client detected missing messages, reconnecting')
         client.reset()
-      }, 2000)
-    }
+      })
+
+      let queueMonitorTimeout
+      let missing = {}
+      return ({ tip, seq }) => {
+        if (tip >= seq) {
+          for (let i = seq; i <= tip; i++) {
+            delete missing[i]
+          }
+
+          return
+        }
+
+        missing[tip + 1] = true
+        onMissing()
+      }
+    })();
 
     client.onmessage = async (msg) => {
       debug(`receiving msg ${msg._n} from ${counterparty}`)
