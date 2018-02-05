@@ -146,7 +146,7 @@ const {
  SETTINGS,
 } = constants.TYPES
 const LENS = 'tradle.Lens'
-
+const SEAL = 'tradle.Seal'
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
 // const SHARED_RESOURCE     = 'tradle.SharedResource'
@@ -235,6 +235,7 @@ import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet
 import createKeeper from '@tradle/keeper'
 import cachifyKeeper from '@tradle/keeper/cachify'
+import Restore from '@tradle/restore'
 import crypto from 'crypto'
 import { loadOrCreate as loadYuki } from './yuki'
 import Aviva from '../utils/aviva'
@@ -1201,7 +1202,6 @@ var Store = Reflux.createStore({
             message: msg
           })
         } catch (err) {
-          debugger
           if (/timetravel/i.test(err.type)) {
             self.abortUnsent({ to: identifier })
             debug('aborting time traveler message', err.stack)
@@ -2151,6 +2151,8 @@ var Store = Reflux.createStore({
       case SELF_INTRODUCTION:
         await this.receiveSelfIntroduction({ msg, org, identifier })
         break
+      case SEAL:
+        await this.receiveSeal(msg.object)
       default:
         break
       }
@@ -2250,6 +2252,26 @@ var Store = Reflux.createStore({
     const permalink = utils.getPermalink(identity)
     await this.addContactIdentity({ identity, permalink })
     await this.addContact({ identity, profile: {} }, permalink)
+  },
+
+  async receiveSeal(seal) {
+    const node = await this._enginePromise
+    await promisify(node.actions.readSeal)({
+      blockchain: seal.blockchain,
+      networkName: seal.network,
+      link: seal.link,
+      // hack to make actions validator happy
+      basePubKey: {
+        pub: new Buffer(0),
+        curve: 'secp256k1'
+      },
+      sealAddress: seal.address || '<n/a>',
+      txId: seal.txId,
+      // confirmations claimed by the server
+      // are not to be trusted
+      confirmations: 0,
+      addresses: seal.address ? [seal.address] : []
+    })
   },
 
   setProviderOnlineStatus(permalink, online) {
