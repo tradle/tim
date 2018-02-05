@@ -8935,21 +8935,22 @@ var Store = Reflux.createStore({
 
     if (val[TYPE] === INTRODUCTION)
       return
-
-    if (obj.txId)
-      val.txId = obj.txId
-
     if (val[TYPE] === SIMPLE_MESSAGE  &&  val.message === ALREADY_PUBLISHED_MESSAGE)
       return
+
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
 
     let valId = utils.getId(val)
-    if (val[TYPE] === VERIFICATION)
-      console.log('New Verification', valId)
-
-    if (this._getItem(valId))
+    let inDB = this._getItem(valId)
+    if (inDB) {
+      if (obj.txId) {
+        inDb.txId = obj.txId
+        inDB.sealedTime = obj.timestamp
+        db.put(valId, inDB)
+      }
       return
+    }
     let originalSender = obj.object.originalSender
     if (originalSender)
       val._originalSender = originalSender
@@ -8963,7 +8964,6 @@ var Store = Reflux.createStore({
     var fromId = obj.objectinfo  &&  obj.objectinfo.author
                ? obj.objectinfo.author
                : obj.from[ROOT_HASH]
-               // : obj.txId ? obj.from[ROOT_HASH] : null
     fromId = utils.makeId(PROFILE, fromId)
 
     var from = this._getItem(fromId)
@@ -9316,10 +9316,10 @@ var Store = Reflux.createStore({
       val._sharedWith = inDB._sharedWith
       if (inDB.verifications)
         val.verifications = inDB.verifications
-      if (val.txId  &&  !inDB.txId) {
-        val.time = inDB.time
-        val.sealedTime = val.time || obj.timestamp
-      }
+      // if (val.txId  &&  !inDB.txId) {
+      //   val.time = inDB.time
+      //   val.sealedTime = val.time || obj.timestamp
+      // }
     }
     let contextId, context
     if (obj.object  &&  obj.object.context) {
