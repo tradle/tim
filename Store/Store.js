@@ -7543,24 +7543,6 @@ var Store = Reflux.createStore({
       })
     }
   },
-  onDownloadAllSharedContexts() {
-    let list = this.getAllSharedContexts()
-    let result = list.map((context) => {
-      let c = utils.optimizeResource(context)
-      let forms = this.searchMessages({modelName: MESSAGE, to: context})
-      // filter out the ProductApplication
-      if (forms  &&  forms.length > 1) {
-        c.forms = []
-        for (let i=0; i<forms.length; i++) {
-          let r = forms[i]
-          if (r[TYPE] !== PRODUCT_APPLICATION)
-            c.forms.push(utils.optimizeResource(r))
-        }
-      }
-      return c
-    })
-    download(JSON.stringify(result, null, 2), 'datadump.json', 'application/json')
-  },
   async onGetAllSharedContexts() {
     await Q.all([this._loadedResourcesDefer])
     let list = await this.getAllSharedContexts()
