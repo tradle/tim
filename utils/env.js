@@ -55,6 +55,7 @@ const merged = extend({
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
   LOCAL_TRADLE_SERVERS: [
+    'http://localhost:21012',
     'http://localhost:21013',
     // safe-re
     'https://yy6zli69ab.execute-api.us-east-1.amazonaws.com/dev/',
