@@ -743,7 +743,7 @@ var Store = Reflux.createStore({
         }
 
         const wrapper = { ...seal, ...obj }
-        save(wrapper)
+        return save(wrapper)
       })
 
     function save (wrapper) {
@@ -8947,7 +8947,9 @@ var Store = Reflux.createStore({
       if (obj.txId) {
         inDB.txId = obj.txId
         inDB.sealedTime = obj.timestamp
-        db.put(valId, inDB)
+        inDB.blockchain = obj.blockchain
+        inDB.networkName = obj.networkName
+        await db.put(valId, inDB)
       }
       return
     }

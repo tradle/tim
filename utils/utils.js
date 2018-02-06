@@ -1059,7 +1059,7 @@ var utils = {
     //   res = this.optimizeResource1(resource, doNotChangeOriginal)
     // else {
       var properties = m.properties
-      var exclude = ['from', 'to', 'time']
+      var exclude = ['from', 'to', 'time', 'sealedTime', 'txId', 'blockchain', 'networkName']
       let isVerification = m.id === VERIFICATION
       let isProductApplication = m.id === PRODUCT_APPLICATION
       let isContext = this.isContext(m)
@@ -1067,8 +1067,6 @@ var utils = {
       let isFormError = m.id === FORM_ERROR
       let isBookmark = m.id === BOOKMARK
       Object.keys(res).forEach(p => {
-        if (p === 'txId')
-          return
         if (p === '_context'  &&  res._context) {
           res._context = this.buildRef(res._context)
           return
