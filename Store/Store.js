@@ -12,6 +12,7 @@ import ReactNative, {
   AppState,
   InteractionManager
 } from 'react-native'
+import _ from 'lodash'
 import pick from 'object.pick'
 import dotProp from 'dot-prop'
 const noop = () => {}
@@ -153,7 +154,7 @@ const {
  SETTINGS,
 } = constants.TYPES
 const LENS = 'tradle.Lens'
-
+const SEAL = 'tradle.Seal'
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
 // const SHARED_RESOURCE     = 'tradle.SharedResource'
@@ -243,6 +244,7 @@ import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet
 import createKeeper from '@tradle/keeper'
 import cachifyKeeper from '@tradle/keeper/cachify'
+import Restore from '@tradle/restore'
 import crypto from 'crypto'
 import { loadOrCreate as loadYuki } from './yuki'
 import Aviva from '../utils/aviva'
@@ -733,7 +735,6 @@ var Store = Reflux.createStore({
     }
   },
   readseal(seal) {
-    debugger
     let self = this
     const link = seal.link
     return meDriver.objects.get(link)
@@ -742,8 +743,7 @@ var Store = Reflux.createStore({
           return
         }
 
-        const wrapper = { ...seal, ...obj }
-        return save(wrapper)
+        return save({ ...seal, ...obj })
       })
 
     function save (wrapper) {
@@ -1170,7 +1170,6 @@ var Store = Reflux.createStore({
             message: msg
           })
         } catch (err) {
-          debugger
           if (/timetravel/i.test(err.type)) {
             self.abortUnsent({ to: identifier })
             debug('aborting time traveler message', err.stack)
@@ -1791,21 +1790,31 @@ var Store = Reflux.createStore({
       clientId: `${node.permalink}${node.permalink}`
     })
 
-    let queueMonitorTimeout
-    const checkMissing = ({ tip, seq }) => {
-      if (tip === seq) {
-        clearTimeout(queueMonitorTimeout)
-        queueMonitorTimeout = null
-        return
-      }
+    const checkMissing = (() => {
+      const onMissing = _.debounce(() => {
+        if (!_.size(missing)) return
 
-      if (queueMonitorTimeout) return
-
-      queueMonitorTimeout = setTimeout(() => {
+        // TODO: request missing messages directly
+        missing = {}
         debug('aws-client detected missing messages, reconnecting')
         client.reset()
-      }, 2000)
-    }
+      })
+
+      let queueMonitorTimeout
+      let missing = {}
+      return ({ tip, seq }) => {
+        if (tip >= seq) {
+          for (let i = seq; i <= tip; i++) {
+            delete missing[i]
+          }
+
+          return
+        }
+
+        missing[tip + 1] = true
+        onMissing()
+      }
+    })();
 
     client.onmessage = async (msg) => {
       debug(`receiving msg ${msg._n} from ${counterparty}`)
@@ -2110,6 +2119,8 @@ var Store = Reflux.createStore({
       case SELF_INTRODUCTION:
         await this.receiveSelfIntroduction({ msg, org, identifier })
         break
+      case SEAL:
+        await this.receiveSeal(msg.object)
       default:
         break
       }
@@ -2209,6 +2220,26 @@ var Store = Reflux.createStore({
     const permalink = utils.getPermalink(identity)
     await this.addContactIdentity({ identity, permalink })
     await this.addContact({ identity, profile: {} }, permalink)
+  },
+
+  async receiveSeal(seal) {
+    const node = await this._enginePromise
+    await promisify(node.actions.readSeal)({
+      blockchain: seal.blockchain,
+      networkName: seal.network,
+      link: seal.link,
+      // hack to make actions validator happy
+      basePubKey: {
+        pub: new Buffer(0),
+        curve: 'secp256k1'
+      },
+      sealAddress: seal.address || '<n/a>',
+      txId: seal.txId,
+      // confirmations claimed by the server
+      // are not to be trusted
+      confirmations: 0,
+      addresses: seal.address ? [seal.address] : []
+    })
   },
 
   setProviderOnlineStatus(permalink, online) {
