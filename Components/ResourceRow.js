@@ -119,6 +119,8 @@ class ResourceRow extends Component {
       return true
     if (this.state.application !== nextState.application)
       return true
+    if (this.props.resource.type === MODEL  &&  this.props.resource.id !== nextProps.resource.id)
+      return true
     if (this.props.resource.lastMessage !== nextProps.resource.lastMessage)
       return true
     if (this.state.unread !== nextState.unread)
@@ -153,16 +155,16 @@ class ResourceRow extends Component {
   }
 
   render() {
-    let resource = this.state.resource
+    let isModel = this.props.resource.type === MODEL
+    let resource = (isModel && this.props.resource) || this.state.resource
     let rType = resource[TYPE]
-    if (rType !== APPLICATION)
-      resource = this.state.application || this.state.resource;
+    if (rType !== APPLICATION  &&  this.state.application)
+      resource = this.state.application
     let photo;
     let isContact = rType === PROFILE;
     let isOrg = rType === ORGANIZATION
     let noImage;
     let isOfficialAccounts = this.props.isOfficialAccounts
-    let isModel = resource.type === MODEL
     let style
     if (isOfficialAccounts  &&  resource.style) {
       style = {}

@@ -9053,6 +9053,8 @@ var Store = Reflux.createStore({
       if (obj.txId) {
         inDB.txId = obj.txId
         inDB.sealedTime = obj.timestamp
+        inDB.blockchain = obj.blockchain
+        inDB.networkName = obj.networkName
         await db.put(valId, inDB)
       }
       return
