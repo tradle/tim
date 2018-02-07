@@ -758,8 +758,8 @@
       "_t": "tradle.Phone"
     }]
   },
-  "tradle.OnfidoApplicant": {
-    "_t": "tradle.OnfidoApplicant",
+  "tradle.onfido.Applicant": {
+    "_t": "tradle.onfido.Applicant",
     "country": {
       "id": "tradle.Country_589d4aad918e33dec42dd38b80cc73616556178c",
       "title": "United Kingdom"
