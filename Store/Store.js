@@ -1819,7 +1819,7 @@ var Store = Reflux.createStore({
       },
       // position,
       // TODO: generate long-lived clientId: `${node.permalink}${nonce}`
-      clientId: `${node.permalink}${node.permalink}`
+      clientId: `${node.permalink}${counterparty}`
     })
 
     const checkMissing = (() => {
