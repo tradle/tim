@@ -147,7 +147,7 @@
     "react-native-keychain": "github:mvayngrib/react-native-keychain#rn40",
     "react-native-linear-gradient": "^2.0.0",
     "react-native-localization": "^0.1.12",
-    "react-native-orient": "1.3.2",
+    "react-native-orient": "^1.3.3",
     "react-native-orientation": "github:yamill/react-native-orientation#9a796cf0",
     "react-native-progress": "3.2.0",
     "react-native-prompt": "^1.0.0",
