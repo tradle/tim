@@ -261,5 +261,6 @@
     "fillRequiredFields": "Please fill out all required fields",
     "multientryToShare": "There are {1} documents to share",
     "youAreAboutToShare": "You are about to share\n '{1}'\n documents",
-    "nothingToShare": "Nothing to share"
+    "nothingToShare": "Nothing to share",
+    "importingData": "Importing {1} documents from {2}"
 }
