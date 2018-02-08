@@ -22,6 +22,7 @@ import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
 import Keychain from 'react-native-keychain'
 import { getDimensions, getOrientation } from 'react-native-orient'
+import validateResource from '@tradle/validate-resource'
 
 import AsyncStorage from '../Store/Storage'
 import Store from '../Store/Store'
@@ -108,6 +109,7 @@ const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const { parseStub } = validateResource.utils
 
 // import dictionaries from '@tradle/models'.dict
 var dictionary //= dictionaries[Strings.language]
@@ -224,8 +226,23 @@ var utils = {
   splitCamelCase(str) {
     return str.split(/(?=[A-Z])/g)
   },
+  getRequestedFormType(formReqOrErr) {
+    if (formReqOrErr[TYPE] === FORM_REQUEST) {
+      return formReqOrErr.form
+    }
+
+    if (formReqOrErr[TYPE] === FORM_ERROR) {
+      const type = formReqOrErr.prefill && formReqOrErr.prefill[TYPE]
+      if (type) return type
+
+      return parseStub(formReqOrErr.prefill).type
+    }
+
+    throw new Error('expected tradle.FormRequest or tradle.FormError')
+  },
   getModelForFormRequest(fr) {
-    let model = Store.getModel(fr.form)
+    const form = utils.getRequestedFormType(fr)
+    let model = Store.getModel(form)
     let lensId = fr.lens
     if (!lensId)
       return model
