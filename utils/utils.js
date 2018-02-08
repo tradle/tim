@@ -1088,7 +1088,6 @@ var utils = {
       var properties = m.properties
       var exclude = ['from', 'to', 'time', 'sealedTime', 'txId', 'blockchain', 'networkName']
       let isVerification = m.id === VERIFICATION
-      let isProductApplication = m.id === PRODUCT_APPLICATION
       let isContext = this.isContext(m)
       let isFormRequest = m.id === FORM_REQUEST
       let isFormError = m.id === FORM_ERROR
@@ -1099,8 +1098,6 @@ var utils = {
           return
         }
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
-          return
-        if (isProductApplication  &&  p === 'product')
           return
         if (isContext  &&  (p === 'requestFor' || p === 'contextId'))
           return
@@ -1114,6 +1111,8 @@ var utils = {
         }
         else if (isBookmark  &&  p === 'bookmark')
           return
+        else if (properties[p]  &&  properties[p].ref  &&  this.isContainerProp(res, properties[p], m))
+          res[p] = this.buildRef(res[p])
         else
           delete res[p]
       })
@@ -1135,6 +1134,22 @@ var utils = {
     delete res.from.photo
 
     return res
+  },
+
+  isContainerProp(resource, prop, pModel) {
+    if (!prop.ref  ||  !prop.readOnly)
+      return
+    let refM = Store.getModel(prop.ref)
+    let aprops = this.getPropertiesWithAnnotation(refM, 'items')
+    if (!aprops)
+      return
+    for (let apName in aprops) {
+      let ap = aprops[apName]
+      if (!ap.items.ref)
+        return
+      if (ap.items.ref === pModel.id)
+        return true
+    }
   },
   isContext(typeOrModel) {
     let m = typeOrModel
@@ -2028,6 +2043,8 @@ var utils = {
     //   return true
   },
   isItem(model) {
+    if (typeof model === 'string')
+      model = Store.getModel(model)
     return model.interfaces  &&  model.interfaces.indexOf(ITEM) !== -1
   },
   isDocument(model) {

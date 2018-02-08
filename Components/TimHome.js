@@ -402,6 +402,9 @@ class TimHome extends Component {
     case 'getForms':
       this.showChat(params)
       return
+    case 'showProfile':
+      this.showProfile('replace', params.importingData)
+      return
     case 'noAccessToServer':
       Alert.alert(translate('noAccessToServer'))
       return
@@ -506,10 +509,18 @@ class TimHome extends Component {
       }
     });
   }
-  showHomePage(action) {
+  showProfile(action, importingData) {
+    if (importingData) {
+      // this.props.navigator.pop()
+      // this.props.navigator.pop()
+      let len = this.props.navigator.getCurrentRoutes().length
+      this.props.navigator.popN(len - 2)
+      return
+    }
     let me = utils.getMe()
     let title = translate('profile')
     let m = utils.getModel(me[TYPE]).value
+
     this.props.navigator[action]({
       title: title,
       id: 3,
@@ -572,7 +583,7 @@ class TimHome extends Component {
         this.showOfficialAccounts(action)
         break
       case 'profile':
-        this.showHomePage(action)
+        this.showProfile(action)
         break
       case 'scan':
         this.showScanHelp(action)
@@ -580,7 +591,7 @@ class TimHome extends Component {
         break
       default:
         if (ENV.homePage)
-          this.showHomePage(action)
+          this.showProfile(action)
         else
           this.showOfficialAccounts(action)
       }
@@ -588,7 +599,7 @@ class TimHome extends Component {
     }
 
     if (ENV.homePage) {
-      this.showHomePage(action)
+      this.showProfile(action)
       return
     }
 

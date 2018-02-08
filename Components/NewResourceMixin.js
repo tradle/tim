@@ -223,7 +223,7 @@ var NewResourceMixin = {
         continue
 
       let maybe = required  &&  !required.hasOwnProperty(p)
-      if (maybe  &&  requestedProperties  &&  requestedProperties[p] !== null)
+      if (maybe  &&  requestedProperties  &&  requestedProperties[p] != null)
         maybe = false
 
       let type = props[p].type;
