@@ -89,8 +89,6 @@ var HomePageMixin = {
     let me = utils.getMe()
     switch (code) {
     case WEB_TO_MOBILE:
-      Actions.showModal({title: 'Connecting to ' + result.data.host, showIndicator: true})
-// Alert.alert('Connecting to ' + result.host)
       let r = {
         _t: 'tradle.DataClaim',
         claimId: data.dataHash,
