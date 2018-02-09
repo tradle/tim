@@ -544,12 +544,11 @@ class MessageRow extends Component {
       return null
     }
     if (model.id === DATA_CLAIM) {
+      let w = Math.floor(0.8 * utils.dimensions().width) - 40
       let message = 'Scanned QR code to import data from ' + resource.to.organization.title
-      let msg = <View key={this.getNextKey()}>
-                  <View style={chatStyles.rowContainer}>
-                    <Icon size={50} name='md-qr-scanner' color='#ffffff' style={{paddingHorizontal: 10}} />
-                    <Text style={[chatStyles.resourceTitle, {color: '#ffffff', justifyContent: 'center'}]}>{resource.message || message}</Text>
-                  </View>
+      let msg = <View style={[chatStyles.rowContainer, {width:w}]}  key={this.getNextKey()}>
+                  <Icon size={50} name='ios-qr-scanner' color='#ffffff' style={{paddingRight: 10}} />
+                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff', justifyContent: 'center'}]}>{resource.message || message}</Text>
                 </View>
       renderedRow.push(msg);
       return null
