@@ -487,7 +487,7 @@ class MessageRow extends Component {
     // }
 
     if (resource[TYPE] === DATA_BUNDLE) {
-      let message = 'Click here to see ' + resource.items.length + ' resources imported from ' + resource.from.title + ' on your profile page.'
+      let message = 'Click here to see ' + resource.items.length + ' resources imported from ' + resource.from.organization.title + ' on your profile page.'
       let msg = <View key={this.getNextKey()}>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                     <View style={{flex: 1}}>
@@ -544,7 +544,7 @@ class MessageRow extends Component {
       return null
     }
     if (model.id === DATA_CLAIM) {
-      let message = 'Request for remediation to \n' + resource.to.organization.title
+      let message = 'Scanned QR code to import data from ' + resource.to.organization.title
       let msg = <View key={this.getNextKey()}>
                   <View style={chatStyles.rowContainer}>
                     <Icon size={50} name='md-qr-scanner' color='#ffffff' style={{paddingHorizontal: 10}} />
