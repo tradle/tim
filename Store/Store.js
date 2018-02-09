@@ -93,6 +93,7 @@ const {
 
 // const MSG_LINK = '_msg'
 const IS_MESSAGE = '_message'
+const NOT_CHAT_ITEM = '_notChatItem'
 
 import utils from '../utils/utils'
 import graphQL from './graphql/graphql-client'
@@ -192,6 +193,9 @@ const BOOKMARK            = 'tradle.Bookmark'
 const SHARE_REQUEST       = 'tradle.ShareRequest'
 const APPLICATION         = 'tradle.Application'
 const VERIFIED_ITEM       = 'tradle.VerifiedItem'
+const DATA_BUNDLE         = 'tradle.DataBundle'
+const DATA_CLAIM          = 'tradle.DataClaim'
+
 const MY_ENVIRONMENT      = 'environment.json'
 
 const WELCOME_INTERVAL = 600000
@@ -3403,6 +3407,8 @@ var Store = Reflux.createStore({
     // if (org.name.toUpperCase() === 'YUKI')
     //   return me
     var result = this.searchNotMessages({modelName: PROFILE, all: true})
+    if (!result.length)
+      return
     var orgRep;
     result.some((ir) =>  {
       if (!ir.organization) return
@@ -3463,19 +3469,23 @@ var Store = Reflux.createStore({
     }
   },
   async onAddVerification(params) {
-    let { r, dontSend, notOneClickVerification } = params
+    let { r, dontSend, notOneClickVerification, noTrigger } = params
 
     let to = params.to || [r.to]
     let docStub = params.document || r.document
     let docId = utils.getId(docStub)
     let document = this._getItem(docId)
     let docFromServer
-    if (!document  &&  me.isEmployee) {
-      document = await this._getItemFromServer(docId)
-      if (!document)
+    if (!document) {
+      if (me.isEmployee) {
+        document = await this._getItemFromServer(docId)
+        if (!document)
+          document = docStub
+        else
+          docFromServer = true
+      }
+      else if (r[NOT_CHAT_ITEM])
         document = docStub
-      else
-        docFromServer = true
     }
     r.document = document
     if (dontSend)
@@ -3484,7 +3494,8 @@ var Store = Reflux.createStore({
     let context = r._context
     if (!context) {
       context = document._context
-      r._context = context
+      if (context)
+        r._context = context
     }
 
     let isAssignRM = document[TYPE] === ASSIGN_RM
@@ -3582,7 +3593,6 @@ var Store = Reflux.createStore({
       if (!isReadOnly) {
         doc._verificationsCount = !doc._verificationsCount ? 1 : ++doc._verificationsCount
         this.dbBatchPut(docId, doc, batch);
-
         this.addBacklinksTo(ADD, me, r, batch)
         this.setMe(me)
         this.trigger({action: 'addItem', resource: utils.clone(me)})
@@ -3627,7 +3637,7 @@ var Store = Reflux.createStore({
     }
     else
       this.addMessagesToChat(from.organization ? utils.getId(from.organization) : fromId, r)
-    if (!isAssignRM) {
+    if (!isAssignRM  &&  !noTrigger) {
       if (notOneClickVerification)
         this.trigger({action: 'addItem', resource: r});
       else
@@ -4147,11 +4157,12 @@ var Store = Reflux.createStore({
   },
   async onAddChatItem(params) {
     extend(params, {isMessage: true})
-    return this.onAddItem(params)
+    await this.onAddItem(params)
   },
   async onAddItem(params) {
     var self = this
-    var {resource, disableFormRequest, isMessage, disableAutoResponse, doneWithMultiEntry, value, chat, shareWith, cb, meta, isRegistration, provider, noTrigger} = params
+    var {resource, disableFormRequest, isMessage, disableAutoResponse, doneWithMultiEntry,
+         value, chat, shareWith, cb, meta, isRegistration, provider, noTrigger} = params
     if (!value)
       value = resource
 
@@ -4169,8 +4180,8 @@ var Store = Reflux.createStore({
     var props = meta.properties;
 
     if (meta.id == VERIFICATION  ||  meta.subClassOf === VERIFICATION) {
-      debugger
-      return await this.onAddVerification({r: resource, notOneClickVerification: true});
+      // debugger
+      return await this.onAddVerification({r: resource, notOneClickVerification: true, noTrigger: noTrigger, dontSend: resource[NOT_CHAT_ITEM]});
     }
     else if (meta.id === BOOKMARK)
       resource.to = resource.from
@@ -4400,22 +4411,9 @@ var Store = Reflux.createStore({
     var readOnlyBacklinks = []
     if (!isRegistration) {
       for (let pr in props) {
-        // if (!returnVal[pr]  &&  props[pr].backlink  &&  props[pr].ref  &&  props[pr].readOnly)
-        //   readOnlyBacklinks.push(props[pr])
         let prop = props[pr]
-        if (!returnVal[pr]  &&  prop.ref  &&  prop.readOnly) {
-          let refM = this.getModel(prop.ref)
-          let aprops = utils.getPropertiesWithAnnotation(refM, 'items')
-          if (aprops) {
-            for (let apName in aprops) {
-              let ap = aprops[apName]
-              if (!ap.items.ref)
-                return
-              if (ap.items.ref === meta.id)
-                readOnlyBacklinks.push(prop)
-            }
-          }
-        }
+        if (utils.isContainerProp(returnVal, prop, meta))
+          readOnlyBacklinks.push(prop)
       }
     }
     if (readOnlyBacklinks.length) {
@@ -4449,12 +4447,11 @@ var Store = Reflux.createStore({
 
     if (isRegistration)
       await handleRegistration()
-    else if (isMessage) {
-      // debugger
+    else if (isMessage  &&  !returnVal[NOT_CHAT_ITEM])
       await handleMessage(noTrigger, returnVal)
     }
     else
-      await save(returnVal) //, isBecomingEmployee)
+      await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (disableFormRequest) {
       // let fr =  disableFormRequest // this._getItem(disableFormRequest)
       if (!disableFormRequest._documentCreated) {
@@ -4669,6 +4666,12 @@ var Store = Reflux.createStore({
         if (isGuestSessionProof) {
           org = self._getItem(utils.getId(org))
           params = {action: 'getForms', to: org}
+        }
+        else if (returnVal[TYPE] === DATA_CLAIM) {
+          org = self._getItem(utils.getId(org))
+          Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})
+          params = {action: 'getForms', to: org}
+          // params = {action: 'showProfile', importingData: true}
         }
         else {
           returnVal._sendStatus = sendStatus
@@ -5694,7 +5697,7 @@ var Store = Reflux.createStore({
                   continue
                 }
               }
-              if (m.subClassOf !== FORM)
+              if (m.subClassOf !== FORM  ||  m.id === DATA_BUNDLE)
                 continue
               // Case when event to display ML is before the new resource was sent
               let formCreatorId = r.to.organization
@@ -6214,7 +6217,7 @@ var Store = Reflux.createStore({
   async _searchNotMessages(params) {
     await this._loadedResourcesDefer.promise
     let result = this.searchNotMessages(params)
-    if (!result  ||  params.modelName !== ORGANIZATION)
+    if (result.length  ||  params.modelName !== ORGANIZATION)
       return result
     let props = this.getModel(ORGANIZATION).properties
 
@@ -6325,7 +6328,7 @@ var Store = Reflux.createStore({
       }
     }
     if (utils.isEmpty(foundResources))
-      return
+      return []
     var result = utils.objectToArray(foundResources);
     // if (isProfile) {
     //   result.forEach(function(r) {
@@ -6376,7 +6379,7 @@ var Store = Reflux.createStore({
       // result = retOrgs
     }
     if (result.length === 1  ||  !sortProp)
-      return result
+      return result || []
     // sortProp = sortProperty || sortProp
     asc = (typeof asc != 'undefined') ? asc : false;
     if (props[sortProp].type == 'date') {
@@ -6468,11 +6471,13 @@ var Store = Reflux.createStore({
       return r
     return
   },
-  _searchMessages(params) {
-    return this._loadedResourcesDefer.promise
-    .then(() => {
-      return this.searchMessages(params)
-    })
+  async _searchMessages(params) {
+    await this._loadedResourcesDefer.promise
+    let result = await this.searchMessages(params)
+    if (!result  ||  params.prop)
+      return result
+    // Don't show the remediation resources
+    return result.filter((r) => !r[NOT_CHAT_ITEM])
   },
 
   async searchAllMessages(params) {
@@ -6566,10 +6571,16 @@ var Store = Reflux.createStore({
     let refs = []
     let all = {}
     if (typeof lastId === 'undefined' || j) {
+      let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
       for (let i=j; i>=0; i--) {
         if (isChatWithOrg  &&  meOrgId === toOrgId) {
           let item = this._getItem(thisChatMessages[i].id)
           if (item._originalSender  ||  item._forward)
+            continue
+        }
+        if (!isBacklinkProp) {
+          let item = this._getItem(thisChatMessages[i].id)
+          if (item[NOT_CHAT_ITEM])
             continue
         }
         this.addReferenceLink(thisChatMessages[i], links, all, refs)
@@ -6798,9 +6809,9 @@ var Store = Reflux.createStore({
       var isForm = m.subClassOf === FORM
       var isMyProduct = m.subClassOf === MY_PRODUCT
       let isContext = utils.isContext(m)
-      if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isContext)
-        // check if this is verification resource
-        return;
+      // if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isContext)
+      //   // check if this is verification resource
+      //   return;
       // var fromID = utils.getId(r.from);
       var toID = utils.getId(r.to);
 
@@ -7237,7 +7248,7 @@ var Store = Reflux.createStore({
   },
   onHasPartials() {
     let list = this.searchNotMessages({modelName: PARTIAL})
-    if (list  &&  list.length)
+    if (list.length)
       this.trigger({action: 'hasPartials', count: list.length})
   },
   async onHasBookmarks() {
@@ -7253,14 +7264,14 @@ var Store = Reflux.createStore({
   },
   onHasTestProviders() {
     const list = this.searchNotMessages({modelName: ORGANIZATION, isTest: true}) || []
-    const testProviders = list.filter((r) => r._isTest)
+    const testProviders = list.length  &&  list.filter((r) => r._isTest)
     if (testProviders.length) {
       this.trigger({action: 'hasTestProviders', list: testProviders})
     }
   },
   onGetAllPartials(resource) {
     let plist = this.searchNotMessages({modelName: PARTIAL})
-    if (!plist  ||  !plist.length)
+    if (!plist.length)
       return
 
     let allContextsArr = plist.filter((r) => utils.isContext(r))
@@ -8267,7 +8278,8 @@ var Store = Reflux.createStore({
         this._setItem(meId, me)
       }
       this.setMe(me)
-      this.trigger({action: 'addItem', resource: me})
+      if (!noTrigger)
+        this.trigger({action: 'addItem', resource: me})
 
       let toR = utils.getId(value.from) === meId
               ? this._getItem(value.to)
@@ -8298,12 +8310,13 @@ var Store = Reflux.createStore({
         let toId = utils.getId(value.to)
         if (toId === meId)
           toId = utils.getId(value.from)
-        if (value.to.organization  &&  value.from.organization  &&  utils.getId(value.to.organization)  !== utils.getId(value.from.organization)) {
+        if (value[NOT_CHAT_ITEM]  ||  (value.to.organization  &&  value.from.organization  &&  utils.getId(value.to.organization)  !== utils.getId(value.from.organization))) {
           let org = this._getItem(toId).organization
           this.addMessagesToChat(utils.getId(org), value)
         }
         else if (value._context  &&  utils.isReadOnlyChat(value._context))
           this.addMessagesToChat(utils.getId(value._context), value)
+
       }
       if (mid) {
         this._setItem(MY_IDENTITIES, mid)
@@ -8376,6 +8389,7 @@ var Store = Reflux.createStore({
       // }
     })
     .catch((err) => {
+      debugger
       if (!noTrigger) {
         this.trigger({action: 'addItem', error: err.message, resource: value})
       }
@@ -8383,14 +8397,14 @@ var Store = Reflux.createStore({
     })
     function getContainerProp(model) {
       let props = model.properties
-      let refProps = utils.getPropertiesWithAnnotation(props, 'ref')
+      let refProps = utils.getPropertiesWithAnnotation(model, 'ref')
       for (let p in refProps) {
         let l = props[p]
-        let container = this.getModel(l.ref)
-        if (!utils.isMessage(container))
-          continue
+        let container = self.getModel(l.ref)
+        // if (!utils.isMessage(container))
+        //   continue
         let cProps = container.properties
-        let containerBl = utils.getPropertiesWithAnnotation(cProps, 'items')
+        let containerBl = utils.getPropertiesWithAnnotation(container, 'items')
         for (let c in containerBl)  {
           if (cProps[c].items.ref === model.id)
             return {container: props[p], item: cProps[c]}
@@ -8762,8 +8776,7 @@ var Store = Reflux.createStore({
       // Choose any employee from the company to send the notification about the customer
       if (r[TYPE] === ORGANIZATION) {
         var employees = this.searchNotMessages({modelName: PROFILE, prop: 'organization', to: r})
-
-        if (employees)
+        if (employees.length)
           pubkeys = list[utils.makeId(IDENTITY, employees[0][ROOT_HASH])].pubkeys
       }
     }
@@ -9430,6 +9443,7 @@ var Store = Reflux.createStore({
       //   val.sealedTime = val.time || obj.timestamp
       // }
     }
+
     let contextId, context
     if (obj.object  &&  obj.object.context) {
       context = contextIdToResourceId[obj.object.context]
@@ -9591,6 +9605,52 @@ var Store = Reflux.createStore({
             this.trigger({action: 'updateItem', resource: r})
           }
         })
+    }
+    if (val[TYPE] === DATA_BUNDLE) {
+      Actions.showModal({title: translate('importingData', val.items.length, val.from.title), showIndicator: true})
+      setTimeout(() => Actions.hideModal(), 2000)
+      let result = await Promise.all(val.items.map(item => meDriver.saveObject({object: item})))
+      let orgR = this._getItem(val.from).organization
+      let orgId = utils.getId(orgR)
+      for (let i=0; i<result.length; i++) {
+        let item = result[i]
+        let r = item.object
+        r[ROOT_HASH] = item.permalink
+        r[CUR_HASH] = item.link
+        let m = this.getModel(r[TYPE])
+        let isMyMessage = r[TYPE] !== VERIFICATION  &&  m.subClassOf !== MY_PRODUCT
+        r.from = isMyMessage ? this.buildRef(me) : val.from
+        r.to = isMyMessage ? val.from : this.buildRef(me)
+        if (!r.time)
+          r.time = new Date().getTime()
+        if (!m.interfaces  ||  m.interfaces.indexOf(ITEM) === -1)
+          r[IS_MESSAGE] = true
+        r[NOT_CHAT_ITEM] = true
+        if (context)
+          r._context = context
+        await this.onAddChatItem({resource: r, noTrigger: true})
+      }
+
+      // let bundleItems = result.map((item) => {
+      //   let r = item.object
+      //   r[ROOT_HASH] = item.permalink
+      //   r[CUR_HASH] = item.link
+      //   let m = this.getModel(r[TYPE])
+      //   let isMyMessage = r[TYPE] !== VERIFICATION  &&  m.subClassOf !== MY_PRODUCT
+      //   r.from = isMyMessage ? this.buildRef(me) : val.from
+      //   r.to = isMyMessage ? val.from : this.buildRef(me)
+      //   r[IS_MESSAGE] = true
+      //   r[NOT_CHAT_ITEM] = true
+      //   if (context)
+      //     r._context = context
+      //   return this.onAddChatItem({resource: r, noTrigger: true})
+      //   // let rId = utils.getId(r)
+      //   // this._setItem(rId, r)
+      //   // this.addMessagesToChat(orgId, r)
+      //   // this.dbBatchPut(rId, r, batch)
+      // })
+      // let items = await Promise.all(bundleItems)
+      Actions.hideModal()
     }
 
     var noTrigger
@@ -10149,7 +10209,7 @@ var Store = Reflux.createStore({
         SERVICE_PROVIDERS.forEach((p) => this._getItem(p.org)._online = true)
       else {
         let orgs = self.searchNotMessages({modelName: ORGANIZATION})
-        if (orgs)
+        if (orgs.length)
           orgs.forEach((org) => {
             self._getItem(utils.getId(org))._online = false
           })

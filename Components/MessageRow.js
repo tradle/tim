@@ -43,7 +43,9 @@ import ENV from '../utils/env'
 const MY_PRODUCT = 'tradle.MyProduct'
 const SHARE_CONTEXT = 'tradle.ShareContext'
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
-const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
+// const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
+const DATA_BUNDLE = 'tradle.DataBundle'
+const DATA_CLAIM = 'tradle.DataClaim'
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const INTRODUCTION = 'tradle.Introduction'
@@ -86,7 +88,6 @@ class MessageRow extends Component {
 
     let me = utils.getMe();
 
-    let isRemediationCompleted = resource[TYPE] === REMEDIATION_SIMPLE_MESSAGE
     let isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
@@ -120,7 +121,9 @@ class MessageRow extends Component {
       let fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = [chatStyles.myCell, noBg ? {borderColor: bankStyle.myMessageBackgroundColor, borderWidth: 1, backgroundColor: 'transparent', paddingHorizontal: 0, paddingVertical: 0, borderRadius: 0} : {backgroundColor: bankStyle.myMessageBackgroundColor}]
+          addStyle = [chatStyles.myCell,
+                      noBg ? {borderColor: bankStyle.myMessageBackgroundColor, borderWidth: 1, backgroundColor: 'transparent', paddingHorizontal: 0, paddingVertical: 0, borderRadius: 0}
+                           : {backgroundColor: bankStyle.myMessageBackgroundColor}]
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
@@ -130,7 +133,7 @@ class MessageRow extends Component {
         else {
           let mstyle = {
             borderColor: '#efefef',
-            backgroundColor: '#ffffff',
+            backgroundColor: model.id === DATA_BUNDLE ? '#eeffee' : '#ffffff',
             borderTopLeftRadius: 0
           }
           addStyle = (isSimpleMessage && message.length < 30)
@@ -139,8 +142,13 @@ class MessageRow extends Component {
         }
       }
 
-      let isRemediationCompleted = resource[TYPE] === REMEDIATION_SIMPLE_MESSAGE
-      if (isMyMessage  &&  !isSimpleMessage  &&  !isRemediationCompleted) {
+      // let isRemediationCompleted = resource[TYPE] === REMEDIATION_SIMPLE_MESSAGE
+      // if (isMyMessage  &&  !isSimpleMessage  &&  !isRemediationCompleted) {
+      //   let st = {backgroundColor: bankStyle.contextBackgroundColor}
+      //   addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
+      // }
+      let isDataBundle = resource[TYPE] === DATA_BUNDLE
+      if (isMyMessage  &&  !isSimpleMessage  &&  !isDataBundle) {
         let st = {backgroundColor: bankStyle.contextBackgroundColor}
         addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       }
@@ -469,21 +477,35 @@ class MessageRow extends Component {
       return {onPressCall: null}
 
     }
-    let isRemediationCompleted = resource[TYPE] === REMEDIATION_SIMPLE_MESSAGE
-    if (isRemediationCompleted) {
+    // let isRemediationCompleted = resource[TYPE] === REMEDIATION_SIMPLE_MESSAGE
+    // if (isRemediationCompleted) {
+    //   let msg = <View key={this.getNextKey()}>
+    //               <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+    //                 <View style={{flex: 1}}>
+    //                   <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
+    //                 </View>
+    //                 <Icon style={{color: bankStyle.linkColor, paddingLeft: 10}} size={20} name={'ios-arrow-forward'} />
+    //               </View>
+    //             </View>
+
+    //   renderedRow.push(msg)
+    //   return {onPressCall: isMyMessage ? this.showMyData.bind(this) : null}
+    // }
+
+    if (resource[TYPE] === DATA_BUNDLE) {
+      let message = 'Click here to see ' + resource.items.length + ' resources imported from ' + resource.from.organization.title + ' on your profile page.'
       let msg = <View key={this.getNextKey()}>
                   <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                     <View style={{flex: 1}}>
-                      <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
+                      <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message || message}</Text>
                     </View>
-                    <Icon style={{color: bankStyle.linkColor, paddingLeft: 10}} size={20} name={'ios-arrow-forward'} />
+                    <Icon style={{color: bankStyle.linkColor, paddingLeft: 10, alignSelf: 'center'}} size={20} name={'ios-arrow-forward'} />
                   </View>
                 </View>
 
       renderedRow.push(msg)
-      return {onPressCall: isMyMessage ? this.showMyData.bind(this) : null}
+      return {onPressCall: this.showMyData.bind(this)}
     }
-
     // let isProductList = model.id === PRODUCT_LIST
     // if (isProductList) {
     //   // Case when the needed form was sent along with the message
@@ -523,6 +545,16 @@ class MessageRow extends Component {
                     {profile}
                     <Icon style={{color: bankStyle.linkColor, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
                   </View>
+                </View>
+      renderedRow.push(msg);
+      return null
+    }
+    if (model.id === DATA_CLAIM) {
+      let w = Math.floor(0.8 * utils.dimensions().width) - 40
+      let message = 'Scanned QR code to import data from ' + resource.to.organization.title
+      let msg = <View style={[chatStyles.rowContainer, {width:w}]}  key={this.getNextKey()}>
+                  <Icon size={50} name='ios-qr-scanner' color='#ffffff' style={{paddingRight: 10}} />
+                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff', justifyContent: 'center'}]}>{resource.message || message}</Text>
                 </View>
       renderedRow.push(msg);
       return null
@@ -763,7 +795,7 @@ class MessageRow extends Component {
       // if (title.length > 30)
       //   title = title.substring(0, 27) + '...'
 
-      vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: isMyMessage ? '#EBFCFF' : bankStyle.contextBorderColor}]} key={this.getNextKey()}>{title}</Text>);
+      vCols.push(<Text style={[chatStyles.resourceTitle, chatStyles.formType, {color: (isMyMessage  &&  '#EBFCFF') || bankStyle.contextBorderColor}]} key={this.getNextKey()}>{title}</Text>);
     }
     if (vCols  &&  vCols.length) {
       vCols.forEach((v) => {

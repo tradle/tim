@@ -589,12 +589,12 @@
         "full": "122 BURNS CRESCENT EDINBURGH EH1 9GP"
       },
       "document": {
-        "dateOfIssue": 1358553600000,
+        "dateOfIssue": "01/19/2013",
         "country": "GBR",
         "documentNumber": "MORGA753116SM9IJ 35",
         "personalNumber": null,
         "issuer": "DVLA",
-        "dateOfExpiry": 1674086400000
+        "dateOfExpiry": "01/18/2023"
       }
     }
   },
