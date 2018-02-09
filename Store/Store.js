@@ -4449,7 +4449,6 @@ var Store = Reflux.createStore({
       await handleRegistration()
     else if (isMessage  &&  !returnVal[NOT_CHAT_ITEM])
       await handleMessage(noTrigger, returnVal)
-    }
     else
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (disableFormRequest) {
