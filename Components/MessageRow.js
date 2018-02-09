@@ -123,7 +123,7 @@ class MessageRow extends Component {
       if (isMyMessage) {
         if (!noMessage)
           addStyle = [chatStyles.myCell,
-                      noBG ? {borderColor: bankStyle.myMessageBackgroundColor, borderWidth: 1, backgroundColor: 'transparent', paddingHorizontal: 0, paddingVertical: 0, borderRadius: 0}
+                      noBg ? {borderColor: bankStyle.myMessageBackgroundColor, borderWidth: 1, backgroundColor: 'transparent', paddingHorizontal: 0, paddingVertical: 0, borderRadius: 0}
                            : {backgroundColor: bankStyle.myMessageBackgroundColor}]
       }
       else if (isForgetting)
