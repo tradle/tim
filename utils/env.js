@@ -49,6 +49,13 @@ const navBarHeight = Platform.select({
 })
 // LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
 
+const bundleId = DeviceInfo.getBundleId()
+const APP_URL = Platform.select({
+  ios: `https://itunes.apple.com/us/app/${bundleId}`,
+  android: `https://play.google.com/store/apps/details?id=${bundleId}`,
+  web: 'https://app.tradle.io'
+})
+
 const merged = extend({
   GCM_SENDER_ID: '633104277721',
   serviceID: 'tradle',
@@ -137,7 +144,8 @@ const merged = extend({
   yukiOn: false,
   paintContextIds: false,
   tradleAPIKey: null,
-  tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/'
+  tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/',
+  APP_URL
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]

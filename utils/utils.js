@@ -2363,6 +2363,10 @@ var utils = {
     return appVersion !== DeviceInfo.getVersion()
   },
 
+  openInAppStore() {
+    return Linking.openURL(ENV.APP_URL)
+  },
+
   waitsFor: function (prerequisite, fn) {
     return async function runAfterPrerequisite (...args) {
       await prerequisite
