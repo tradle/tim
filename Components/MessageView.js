@@ -1,32 +1,37 @@
 console.log('requiring MessageView.js')
 'use strict';
 
+import Reflux from 'reflux'
+import reactMixin from 'react-mixin'
+import _ from 'lodash'
+import Icon from 'react-native-vector-icons/Ionicons';
+
 import utils, { translate } from '../utils/utils'
 import constants from '@tradle/constants'
 import ArticleView from './ArticleView'
 import PhotoList from './PhotoList'
 import PhotoView from './PhotoView'
-import Icon from 'react-native-vector-icons/Ionicons';
 
 import ShowRefList from './ShowRefList'
 import VerificationView from './VerificationView'
 import NewResource from './NewResource'
 import PageView from './PageView'
 import Actions from '../Actions/Actions'
-import Reflux from 'reflux'
 import Store from '../Store/Store'
-import reactMixin from 'react-mixin'
-import extend from 'extend'
 import ResourceMixin from './ResourceMixin'
-var HELP_COLOR = 'blue'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 
 const PHOTO = 'tradle.Photo'
-const { TYPE } = constants
 const ITEM = 'tradle.Item'
 // import Prompt from 'react-native-prompt'
-const { VERIFICATION, ENUM, MONEY, FORM } = constants.TYPES
+const { TYPE } = constants
+const {
+  VERIFICATION,
+  ENUM,
+  MONEY,
+  FORM
+} = constants.TYPES
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 
 import ActionSheet from './ActionSheet'
@@ -124,10 +129,10 @@ class MessageView extends Component {
       if (params.style) {
         let style = {}
         if (this.props.bankStyle)
-          extend(style, this.props.bankStyle)
+          _.extend(style, this.props.bankStyle)
         else
-          extend(style, defaultBankStyle)
-        extend(style, params.style)
+          _.extend(style, defaultBankStyle)
+        _.extend(style, params.style)
         state.bankStyle = style
       }
       this.setState(state)
@@ -286,7 +291,7 @@ class MessageView extends Component {
     let errorProps = {}
 
     if (this.state.errorProps)
-      extend(errorProps, this.state.errorProps)
+      _.extend(errorProps, this.state.errorProps)
     if (this.state.errorProps  &&  this.state.errorProps[prop.name])
       delete errorProps[prop.name]
     else
@@ -429,8 +434,9 @@ class MessageView extends Component {
       bigPhoto = <View style={styles.photoBG} ref='bigPhoto'>
                   <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
                  </View>
+    let height = utils.dimensions(MessageView).height - 80
     return (
-      <PageView style={[platformStyles.container, {height: utils.dimensions().height - 80}]} separator={contentSeparator}>
+      <PageView style={[platformStyles.container, {height}]} separator={contentSeparator}>
       <ScrollView
         ref='messageView'
         keyboardShouldPersistTaps="always">
