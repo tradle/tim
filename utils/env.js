@@ -5,7 +5,7 @@ import {
 
 import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
-import environment from '../environment.json'
+import environment from '../environment-cloud.json'
 
 // const DEV_PUSH_SERVER = 'https://push1.tradle.io'
 const LOCAL_IP = (function () {
