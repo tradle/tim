@@ -431,8 +431,9 @@ class MessageView extends Component {
       bigPhoto = <View style={styles.photoBG} ref='bigPhoto'>
                   <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
                  </View>
+    let height = utils.dimensions(MessageView).height
     return (
-      <PageView style={[platformStyles.container, {height: utils.dimensions().height, alignItems: 'center'}]} separator={contentSeparator}>
+      <PageView style={[platformStyles.container, {height, alignItems: 'center'}]} separator={contentSeparator}>
       <ScrollView
         ref='messageView'
         keyboardShouldPersistTaps="always"
