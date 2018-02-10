@@ -22,11 +22,11 @@ function getReleaseDir ({
 }) {
   if (!version) version = getVersion({ platform })
 
-  // const releases = fs.readdirSync(`./release/${platform}/${version}`)
-  // const releaseDirname = releases.find(r => r.indexOf(gitHash) === 0)
-  // if (!releaseDirname) throw new Error('release dir not found, run bundle.sh first')
+  const releases = fs.readdirSync(path.resolve(__dirname, `release/${platform}/${version}`))
+  const releaseDirname = releases.find(r => r.indexOf(gitHash) === 0)
+  if (!releaseDirname) throw new Error('release dir not found, run bundle.sh first')
 
-  return path.resolve(__dirname, `release/${platform}/${version}/${gitHash}/`)
+  return path.resolve(__dirname, `release/${platform}/${version}/${releaseDirname}/`)
 }
 
 function getVersion ({ platform }) {
