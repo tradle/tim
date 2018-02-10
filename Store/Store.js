@@ -2467,7 +2467,8 @@ var Store = Reflux.createStore({
       url: originalUrl,
       style: sp.style,
       permalink: sp.bot.permalink,
-      publicConfig: sp.publicConfig,
+      sandbox: sp.sandbox,
+      // publicConfig: sp.publicConfig,
       aws: sp.aws
     }
     // Check is this is an update SP info
@@ -2502,7 +2503,7 @@ var Store = Reflux.createStore({
       if (newServer  &&  org._inactive)
         org._inactive = false
       delete org._noSplash
-      if (!org._isTest  &&  sp.publicConfig  &&   sp.publicConfig.sandbox === true)
+      if (!org._isTest  &&  sp.sandbox === true)
         org._isTest = true
       this._mergeItem(okey, sp.org)
     }
@@ -2635,7 +2636,7 @@ var Store = Reflux.createStore({
     if (!config)
       return
     let orgId = utils.getId(org)
-    org._isTest = sp.publicConfig.sandbox
+    org._isTest = sp.sandbox
     for (let p in config)
       org['_' + p] = config[p]
 

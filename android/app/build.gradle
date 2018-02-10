@@ -112,7 +112,7 @@ android {
     // }
 
     compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    // buildToolsVersion "26.0.2"
 
     def vmajor = project.property('VERSION_MAJOR').toInteger()
     def vminor = project.property('VERSION_MINOR').toInteger()
