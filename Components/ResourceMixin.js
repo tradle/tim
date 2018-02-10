@@ -315,7 +315,18 @@ var ResourceMixin = {
     return val
   },
   showJson(params) {
-    // let (prop, json, isView, jsonRows, skipLabels, indent, isOnfido} = params
+    let { json } = params
+    if (!Array.isArray(json))
+      return this.showJsonPart(params)
+    return json.map((r) => {
+      let p = _.clone(params)
+      p.json = r
+      p.jsonRows = []
+      return this.showJsonPart(p)
+    })
+  },
+  showJsonPart(params) {
+    let {prop, json, isView, jsonRows, skipLabels, indent, isOnfido, isBreakdown} = params
     let prop = params.prop
     let json = params.json
     let isView = params.isView
