@@ -12,7 +12,7 @@
     "reset": "rm -fr $TMPDIR/react-* && watchman watch-del-all",
     "lint": "eslint --quiet .",
     "lintfile": "eslint --quiet",
-    "prepush": "npm run lint",
+    "precommit": "npm run lint",
     "dev:setup": "cd iOS && bundle install && cd ../android && bundle install && npm run placesecrets",
     "bundle:ios": "./bundle.sh ios",
     "bundle:android": "./bundle.sh android",
