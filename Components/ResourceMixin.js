@@ -327,14 +327,6 @@ var ResourceMixin = {
   },
   showJsonPart(params) {
     let {prop, json, isView, jsonRows, skipLabels, indent, isOnfido, isBreakdown} = params
-    let prop = params.prop
-    let json = params.json
-    let isView = params.isView
-    let jsonRows = params.jsonRows
-    let skipLabels = params.skipLabels
-    let indent = params.indent
-    let isOnfido = params.isOnfido
-    let isBreakdown = params.isBreakdown
     // let json = JSON.parse(jsonStr)
     // let jsonRows = []
     let rType = this.props.resource[constants.TYPE]
