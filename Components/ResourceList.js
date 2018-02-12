@@ -1396,6 +1396,7 @@ class ResourceList extends Component {
           </View>
         )
     }
+    let width = utils.getContentWidth()
     let header = utils.getMe().isEmployee  &&  this.props.officialAccounts ? styles.header : {}
     return  (
       <View style={[header, { width }]}>
