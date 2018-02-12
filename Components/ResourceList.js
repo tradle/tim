@@ -1396,10 +1396,9 @@ class ResourceList extends Component {
           </View>
         )
     }
-
-    let width = utils.getContentWidth()
+    let header = utils.getMe().isEmployee  &&  this.props.officialAccounts ? styles.header : {}
     return  (
-      <View style={[styles.header, { width }]}>
+      <View style={[header, { width }]}>
         {search}
         {conversations}
         {bookmarks}

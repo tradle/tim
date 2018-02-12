@@ -3322,6 +3322,16 @@ var Store = Reflux.createStore({
       allMessages = []
       chatMessages[ALL_MESSAGES] = allMessages
     }
+    else {
+      // Request for remediation
+      if (r[TYPE] === DATA_CLAIM)
+        Actions.showModal({title: 'Connecting to ' + this._getItem(id).name, showIndicator: true})
+      // request for remediation failed
+      else if (r[TYPE] === SIMPLE_MESSAGE) {
+        if (utils.getType(allMessages[allMessages.length - 1].id) === DATA_CLAIM)
+          Actions.hideModal()
+      }
+    }
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
       if (!isInit) {
@@ -4668,8 +4678,8 @@ var Store = Reflux.createStore({
           params = {action: 'getForms', to: org}
         }
         else if (returnVal[TYPE] === DATA_CLAIM) {
-          org = self._getItem(utils.getId(org))
-          Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})
+          // org = self._getItem(utils.getId(org))
+          // Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})
           params = {action: 'getForms', to: org}
           // params = {action: 'showProfile', importingData: true}
         }
@@ -5018,7 +5028,7 @@ var Store = Reflux.createStore({
     }
     var documentId = utils.getId(document)
     if (r[TYPE] === FORM_REQUEST)
-      r.document = documentId
+      r._document = documentId
 
     this.dbBatchPut(key, r, batch)
     // utils.optimizeResource(document)
@@ -6809,9 +6819,10 @@ var Store = Reflux.createStore({
       var isForm = m.subClassOf === FORM
       var isMyProduct = m.subClassOf === MY_PRODUCT
       let isContext = utils.isContext(m)
-      // if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isContext)
-      //   // check if this is verification resource
-      //   return;
+      let isDataClaim = m.id == DATA_CLAIM
+      if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isContext && !isDataClaim)
+        // check if this is verification resource
+        return;
       // var fromID = utils.getId(r.from);
       var toID = utils.getId(r.to);
 
@@ -8017,6 +8028,8 @@ var Store = Reflux.createStore({
       docs.forEach((ver, i) => {
         let doc = ver.document
         let requestFor = formToProduct[t]
+        if (!requestFor)
+          return
         let multiEntryForms = this.getModel(requestFor).multiEntryForms
         if (!multiEntryForms || multiEntryForms.indexOf(t) === -1)
           return

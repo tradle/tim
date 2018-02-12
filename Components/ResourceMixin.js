@@ -1,16 +1,16 @@
 console.log('requiring ResourceMixin.js')
 'use strict';
 
-import utils from '../utils/utils'
-import extend from 'extend'
-var translate = utils.translate
+import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
-import equal from 'deep-equal'
+
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
 import constants from '@tradle/constants'
 import Accordion from './Accordion'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
+import utils from '../utils/utils'
+var translate = utils.translate
 
 import ENV from '../utils/env'
 
@@ -316,11 +316,11 @@ var ResourceMixin = {
     return val
   },
   showJson(params) {
-    let {prop, json, isView, jsonRows, skipLabels, indent, isOnfido, isBreakdown} = params
+    let { json } = params
     if (!Array.isArray(json))
       return this.showJsonPart(params)
     return json.map((r) => {
-      let p = _.clone(params)
+      let p = _.cloneDeep(params)
       p.json = r
       p.jsonRows = []
       return this.showJsonPart(p)
