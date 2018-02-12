@@ -3322,7 +3322,7 @@ var Store = Reflux.createStore({
       allMessages = []
       chatMessages[ALL_MESSAGES] = allMessages
     }
-    else {
+    else if (!isInit) {
       // Request for remediation
       if (r[TYPE] === DATA_CLAIM)
         Actions.showModal({title: 'Connecting to ' + this._getItem(id).name, showIndicator: true})
