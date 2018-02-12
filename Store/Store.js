@@ -3292,6 +3292,16 @@ var Store = Reflux.createStore({
       allMessages = []
       chatMessages[ALL_MESSAGES] = allMessages
     }
+    else {
+      // Request for remediation
+      if (r[TYPE] === DATA_CLAIM)
+        Actions.showModal({title: 'Connecting to ' + this._getItem(id).name, showIndicator: true})
+      // request for remediation failed
+      else if (r[TYPE] === SIMPLE_MESSAGE) {
+        if (utils.getType(allMessages[allMessages.length - 1].id) === DATA_CLAIM)
+          Actions.hideModal()
+      }
+    }
     let rid = utils.getId(r)
     if (messages  &&  messages.length) {
       if (!isInit) {
@@ -4639,8 +4649,8 @@ var Store = Reflux.createStore({
           params = {action: 'getForms', to: org}
         }
         else if (returnVal[TYPE] === DATA_CLAIM) {
-          org = self._getItem(utils.getId(org))
-          Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})
+          // org = self._getItem(utils.getId(org))
+          // Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})
           params = {action: 'getForms', to: org}
           // params = {action: 'showProfile', importingData: true}
         }
