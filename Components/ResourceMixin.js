@@ -363,7 +363,7 @@ var ResourceMixin = {
           label = <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
         jsonRows.push(<View style={{flexDirection: 'row', paddingVertical: 3, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
                         {label}
-                        <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{json[p]}</Text>
+                        <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{json[p] + ''}</Text>
                       </View>)
       }
     }
