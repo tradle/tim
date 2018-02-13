@@ -294,7 +294,9 @@ class VerificationRow extends Component {
       if (this.props.search  &&  this.props.searchCriteria)
         this.formatFilteredResource(model, resource, renderedRows)
       let content = <TouchableOpacity onPress={onSelect.bind(this)} underlayColor='transparent'>
-                      {header}
+                      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                        {header}
+                      </View>
                     </TouchableOpacity>
       if (!isVerification)
         content = <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
@@ -792,12 +794,4 @@ module.exports = VerificationRow;
   //       renderedRow.push(v);
   //     });
   //   }
-  // }
-  // onPress(url) {
-  //   this.props.navigator.push({
-  //     id: 7,
-  //     component: ArticleView,
-  //     backButtonTitle: 'Back',
-  //     passProps: {url: url}
-  //   });
   // }
