@@ -56,7 +56,7 @@ var {
 
 var RowMixin = {
   addDateProp(dateProp, style) {
-    let resource = this.props.resource;
+    let resource = this.state.resource;
     let properties = utils.getModel(resource[TYPE] || resource.id).value.properties;
     if (properties[dateProp]  &&  properties[dateProp].style)
       style = [style, properties[dateProp].style];

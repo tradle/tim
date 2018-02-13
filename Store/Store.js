@@ -2542,6 +2542,10 @@ var Store = Reflux.createStore({
     else {
       org = {}
       extend(org, sp.org)
+      if (sp.sandbox) {
+        delete org.sandbox
+        org._isTest = true
+      }
       // if (newOrg.name.indexOf('[TEST]') === 0)
       //   newOrg._isTest = true
     }
@@ -6487,7 +6491,10 @@ var Store = Reflux.createStore({
     if (!result  ||  params.prop)
       return result
     // Don't show the remediation resources
-    return result.filter((r) => !r[NOT_CHAT_ITEM])
+    let rep = params.to
+    if (params.to[TYPE]  &&  params.to[TYPE] === ORGANIZATION)
+      rep = this.getRepresentative(params.to)
+    return result.filter((r) => this.isChatItem(r, utils.getId(rep)))
   },
 
   async searchAllMessages(params) {
@@ -6590,7 +6597,7 @@ var Store = Reflux.createStore({
         }
         if (!isBacklinkProp) {
           let item = this._getItem(thisChatMessages[i].id)
-          if (item[NOT_CHAT_ITEM])
+          if (!this.isChatItem(item, chatId))
             continue
         }
         this.addReferenceLink(thisChatMessages[i], links, all, refs)
@@ -6863,7 +6870,16 @@ var Store = Reflux.createStore({
     // primitive filtering for this commit
     await this.checkAndFilter(params)
   },
-
+  // Don't show this item in chat it was originated in but show it where it was shared
+  isChatItem(item, chatId) {
+    if (!item[NOT_CHAT_ITEM])
+      return true
+    if (!item._sharedWith  ||  item._sharedWith.length <= 1)
+      return false
+    if (utils.getId(item.from) === chatId  ||  utils.getId(item.to) === chatId)
+      return false
+    return true
+  },
   async checkAndFilter(params) {
     let {r, foundResources, prop, query, filterOutForms} = params
     if (!query) {
@@ -9621,7 +9637,7 @@ var Store = Reflux.createStore({
     }
     if (val[TYPE] === DATA_BUNDLE) {
       Actions.showModal({title: translate('importingData', val.items.length, val.from.title), showIndicator: true})
-      setTimeout(() => Actions.hideModal(), 2000)
+      setTimeout(() => Actions.hideModal(), 3000)
       let result = await Promise.all(val.items.map(item => meDriver.saveObject({object: item})))
       let orgR = this._getItem(val.from).organization
       let orgId = utils.getId(orgR)
