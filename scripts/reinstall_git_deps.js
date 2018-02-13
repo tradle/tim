@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var proc = require('child_process')
-var pkg = require('./package.json')
+var pkg = require('../package.json')
 var modules = process.argv.slice(2)
 
 var gitDeps = Object.keys(pkg.dependencies)
@@ -13,7 +13,7 @@ if (!gitDeps.length) {
   throw new Error('nothing to install')
 }
 
-const installLine = `npm i --save ${gitDeps.join(' ')}`
+const installLine = `npm i --save ${gitDeps.join(' ')} && ./reshrink.sh`
 console.log(`running: ${installLine}`)
 
 proc.execSync(installLine, {

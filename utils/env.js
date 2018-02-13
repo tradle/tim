@@ -62,14 +62,16 @@ const merged = extend({
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
   LOCAL_TRADLE_SERVERS: [
-    'http://localhost:21012',
-    'http://localhost:21013',
+    `http://${LOCAL_IP}:21012`,
+    // `http://${LOCAL_IP}:21013`,
+    // // // pg
+    // 'https://z3qm44zk1f.execute-api.us-east-1.amazonaws.com/dev',
     // safe-re
-    'https://yy6zli69ab.execute-api.us-east-1.amazonaws.com/dev/',
+    'https://yy6zli69ab.execute-api.us-east-1.amazonaws.com/dev',
     // friendly
-    'https://e1b8reh825.execute-api.us-east-1.amazonaws.com/dev/',
-    // pg
-    'https://nc8gzb1grf.execute-api.us-east-1.amazonaws.com/dev'
+    'https://e1b8reh825.execute-api.us-east-1.amazonaws.com/dev',
+    // easy
+    'https://xnh2fyi8l3.execute-api.us-east-1.amazonaws.com/dev',
   ],
   LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/', // Goofy
   pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
