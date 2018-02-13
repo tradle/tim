@@ -4608,7 +4608,7 @@ var Store = Reflux.createStore({
         returnVal.contextId = self.getNonce()
       let rId = utils.getId(returnVal.to)
       let to = self._getItem(rId)
-      let permalink = to[ROOT_HASH]
+      // let permalink = to[ROOT_HASH]
       let toChain = {}
 
       let exclude = ['to', 'from', 'verifications', CUR_HASH, 'idOld', '_message', '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', '_latest', '_outbound']
@@ -4670,13 +4670,13 @@ var Store = Reflux.createStore({
           self.addMessagesToChat(id, returnVal)
           org = toR.organization
         }
+        org = self._getItem(utils.getId(org))
+
         let params;
 
         let sendStatus = (self.isConnected) ? SENDING : QUEUED
-        if (isGuestSessionProof) {
-          org = self._getItem(utils.getId(org))
+        if (isGuestSessionProof)
           params = {action: 'getForms', to: org}
-        }
         else if (returnVal[TYPE] === DATA_CLAIM) {
           // org = self._getItem(utils.getId(org))
           // Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})

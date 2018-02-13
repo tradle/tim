@@ -28,6 +28,8 @@ const TYPE = constants.TYPE
 const VERIFICATION = constants.TYPES.VERIFICATION
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const CONFIRMATION = 'tradle.Confirmation'
+const CHECK  = 'tradle.Check'
+const STATUS = 'tradle.Status'
 const IMAGE_PLACEHOLDER = utils.whitePixel
 
 import {
@@ -191,7 +193,26 @@ class VerificationRow extends Component {
         title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
     }
 
-    let description = title === dn ? null : <Text style={styles.description}>{dn}</Text>
+    let isCheck = model.subClassOf === CHECK
+    let description
+    if (title !== dn)  {
+      if (isCheck) {
+        let color, icon
+        if (resource.status.id === STATUS + '_pass') {
+          color = 'green'
+          icon = 'md-checkmark'
+        }
+        else {
+          color = 'red'
+          icon = 'md-close'
+        }
+        description = <Text style={[styles.description, {alignItems: 'center'}]}>{dn + '  '}
+                        <Icon color={color} size={20} name={icon}/>
+                      </Text>
+      }
+      else
+        description = <Text style={styles.description}>{dn}</Text>
+    }
 
     let titleComponent
     if (isVerification)

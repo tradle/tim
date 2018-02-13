@@ -44,7 +44,7 @@
     "@tradle/biz-plugins": {
       "version": "1.0.0",
       "from": "tradle/biz-plugins#cloud",
-      "resolved": "git://github.com/tradle/biz-plugins.git#08ea9735e92165ac67066a8fd9ed777b70b38b79"
+      "resolved": "git://github.com/tradle/biz-plugins.git#6f38a164d79eb3406af332d39d0e134a8251a8d3"
     },
     "@tradle/build-resource": {
       "version": "2.14.1",
@@ -69,7 +69,7 @@
     "@tradle/embed": {
       "version": "0.0.0",
       "from": "tradle/embed",
-      "resolved": "git://github.com/tradle/embed.git#379be5aba8ac888e3e1bf780ee6d072a84b8dd63"
+      "resolved": "git://github.com/tradle/embed.git#6b5098ced77e6b5acb3db52138e2f1c8ea42c588"
     },
     "@tradle/engine": {
       "version": "5.3.4",
