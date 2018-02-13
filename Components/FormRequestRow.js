@@ -34,7 +34,8 @@ const ITEM = 'tradle.Item'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 
 const {
-  TYPE
+  TYPE,
+  ROOT_HASH
 } = constants
 
 const {
@@ -334,7 +335,7 @@ class FormRequestRow extends Component {
             model: formModel,
             verification: r,
             // isAccordion: totalShareables > 1,
-            providers: providers  &&  providers[document[constants.ROOT_HASH]]
+            providers: providers  &&  providers[document[ROOT_HASH]]
           })
           if (cnt) {
             doc = <View key={this.getNextKey()}>
@@ -492,7 +493,7 @@ class FormRequestRow extends Component {
                  ? to.name
                  : (to.organization ? to.organization.title : null);
     let verifiedBy
-    if (verification[constants.ROOT_HASH]) {
+    if (verification[ROOT_HASH]) {
       let orgs
       if (providers) {
         if (Array.isArray(providers)) {
@@ -504,15 +505,16 @@ class FormRequestRow extends Component {
           })
         }
         else {
-          for (let pr in providers) {
-            let arr = providers[pr]
-            arr.forEach((p) => {
-              if (!orgs)
-                orgs = p.title
-              else
-                orgs += ', ' + p.title
-            })
-          }
+          let arr = providers[verification.document[ROOT_HASH]]
+          // for (let pr in providers) {
+          //   let arr = providers[pr]
+          arr.forEach((p) => {
+            if (!orgs)
+              orgs = p.title
+            else
+              orgs += ', ' + p.title
+          })
+          // }
         }
       }
       else
