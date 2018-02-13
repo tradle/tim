@@ -13,7 +13,7 @@ if (!modelsDeps.length) {
   throw new Error('nothing to install')
 }
 
-const installLine = `npm i --save ${modelsDeps.join(' ')}`
+const installLine = `npm i --save ${modelsDeps.join(' ')} && ./reshrink.sh`
 console.log(`running: ${installLine}`)
 
 proc.execSync(installLine, {

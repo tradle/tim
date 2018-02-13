@@ -13,7 +13,7 @@ if (!gitDeps.length) {
   throw new Error('nothing to install')
 }
 
-const installLine = `npm i --save ${gitDeps.join(' ')}`
+const installLine = `npm i --save ${gitDeps.join(' ')} && ./reshrink.sh`
 console.log(`running: ${installLine}`)
 
 proc.execSync(installLine, {
