@@ -6417,8 +6417,11 @@ var Store = Reflux.createStore({
     if (!result  ||  params.prop)
       return result
     // Don't show the remediation resources
-    let rep = params.to
-    if (params.to[TYPE]  &&  params.to[TYPE] === ORGANIZATION)
+    let to = params.to
+    if (!to)
+      return result
+    let rep = to
+    if (to[TYPE]  &&  to[TYPE] === ORGANIZATION)
       rep = this.getRepresentative(params.to)
     return result.filter((r) => this.isChatItem(r, utils.getId(rep)))
   },
