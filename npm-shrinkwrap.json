@@ -4,7 +4,7 @@
   "dependencies": {
     "@tradle/aws-client": {
       "version": "1.1.0",
-      "from": "@tradle/aws-client@latest",
+      "from": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.1.0.tgz",
       "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.1.0.tgz",
       "dependencies": {
         "pify": {
@@ -64,7 +64,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#687473af348ae962a0e0a3d90773d372061f6e25"
+      "resolved": "git://github.com/tradle/custom-models.git#b67d520b6c26f5e53683662f76c3ef215a19446c"
     },
     "@tradle/embed": {
       "version": "0.0.0",
@@ -160,12 +160,12 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#7b11400eb3020607e9ca87795ca53f79aa185d71"
+      "resolved": "git://github.com/tradle/models.git#ec5a3b31502ec64e40fca2699cc5859960130daa"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#a43fab8f2fc9b1b3d13c9db60df18a41c02238d3"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#4ab090215d4eb024d78b9180631ede37a43edc0e"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
