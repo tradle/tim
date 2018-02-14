@@ -62,7 +62,7 @@ console.log(trace.join('\n'))
 function printUsage () {
   console.log(`
   Usage:
-      ./source-mapper.js -r /path/to/release/dir -t /path/to/stack-trace-from-min-js
+      ./map-strack-trace.js -r /path/to/release/dir -t /path/to/stack-trace-from-min-js
 
   Options:
       -h, --help              print usage
