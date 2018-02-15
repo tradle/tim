@@ -11,7 +11,7 @@ import {
   View,
   TouchableOpacity,
   Image,
-  NetInfo,
+  // NetInfo,
   ScrollView,
   // Linking,
   StatusBar,
@@ -108,7 +108,7 @@ class TimHome extends Component {
     };
 
     this._handleOpenURL = this._handleOpenURL.bind(this)
-    this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
+    // this._handleConnectivityChange = this._handleConnectivityChange.bind(this)
   }
   componentWillMount() {
     this.uhOhTimeout = this.setTimeout(() => {
@@ -125,13 +125,12 @@ class TimHome extends Component {
     // var url = LinkingIOS.popInitialURL()
     // if (url)
     //   this._handleOpenURL({url});
-    if (NetInfo) {
-      NetInfo.isConnected.addEventListener(
-        'change',
-        this._handleConnectivityChange.bind(this)
-      );
-      NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
-    }
+
+    // NetInfo.isConnected.addEventListener(
+    //   'change',
+    //   this._handleConnectivityChange
+    // );
+    // NetInfo.isConnected.fetch().then(isConnected => this._handleConnectivityChange(isConnected))
     Actions.start();
   }
   _handleConnectivityChange(isConnected) {
@@ -157,11 +156,27 @@ class TimHome extends Component {
     } catch (err) {
       debug('failed to check connectivity', err)
     }
+=======
+    Linking.removeEventListener('url', this._handleOpenURL);
+    // NetInfo.isConnected.removeEventListener(
+    //   'change',
+    //   this._handleConnectivityChange
+    // );
+>>>>>>> origin/master
   }
+  // async _checkConnectivity() {
+  //   try {
+  //     const isConnected = await NetInfo.isConnected.fetch()
+  //     const firstRoute = this.props.navigator.getCurrentRoutes()[0]
+  //     firstRoute.isConnected = isConnected
+  //   } catch (err) {
+  //     debug('failed to check connectivity', err)
+  //   }
+  // }
 
 
   async componentDidMount() {
-    this._checkConnectivity()
+    // this._checkConnectivity()
 
     if (!utils.getMe()) return
 

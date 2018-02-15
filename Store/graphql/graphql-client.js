@@ -586,6 +586,29 @@ console.log('endCursor: ', endCursor)
       debugger
     }
   },
+  async getObjects(links, client) {
+    let table = 'rl_objects'
+    let query = `
+    query {
+        ${table} (
+          links: ["${links.join('","')}"]
+        )
+        {
+          objects
+        }
+     }`
+    try {
+      let result = await client.query({
+        fetchPolicy: 'network-only',
+        query: gql(`${query}`)
+      })
+      return result.data[table]  &&  result.data[table].objects
+    }
+    catch(err) {
+      console.log('graphQL._getItem', err)
+      debugger
+    }
+  }
 }
 module.exports = search
   // addEndCursor(params, query) {

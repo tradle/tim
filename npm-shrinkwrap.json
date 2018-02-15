@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "dependencies": {
     "@tradle/aws-client": {
-      "version": "1.1.0",
-      "from": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.1.0.tgz",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.1.0.tgz",
+      "version": "1.2.0",
+      "from": "@tradle/aws-client@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.2.0.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -64,7 +64,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#b67d520b6c26f5e53683662f76c3ef215a19446c"
+      "resolved": "git://github.com/tradle/custom-models.git#5440bfc85677ade37fde22f45c96c57df22c9918"
     },
     "@tradle/embed": {
       "version": "0.0.0",
@@ -160,7 +160,12 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#ec5a3b31502ec64e40fca2699cc5859960130daa"
+      "resolved": "git://github.com/tradle/models.git#25d537b5d37ad68ebad78093b76f9a1259574471"
+    },
+    "@tradle/models-cloud": {
+      "version": "1.0.0",
+      "from": "tradle/models-cloud",
+      "resolved": "git://github.com/tradle/models-cloud.git#abed0c79b99b7983f73b0863a16ac57bbc8f05f4"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -654,9 +659,9 @@
       "optional": true
     },
     "assign-deep": {
-      "version": "0.4.6",
+      "version": "0.4.7",
       "from": "assign-deep@>=0.4.5 <0.5.0",
-      "resolved": "https://registry.npmjs.org/assign-deep/-/assign-deep-0.4.6.tgz",
+      "resolved": "https://registry.npmjs.org/assign-deep/-/assign-deep-0.4.7.tgz",
       "dependencies": {
         "kind-of": {
           "version": "5.1.0",
@@ -9159,7 +9164,7 @@
     "react-native-app-intro": {
       "version": "1.1.5",
       "from": "tradle/react-native-app-intro",
-      "resolved": "git://github.com/tradle/react-native-app-intro.git#5323d2764d3e0e2093bcfa3d345817b6dbace752"
+      "resolved": "git://github.com/tradle/react-native-app-intro.git#303c3eef19a11eb1952e2118bde81ef219ef0e17"
     },
     "react-native-button": {
       "version": "1.8.2",
@@ -9938,6 +9943,11 @@
       "version": "2.0.0",
       "from": "rlp@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/rlp/-/rlp-2.0.0.tgz"
+    },
+    "rn-fetch": {
+      "version": "1.0.0",
+      "from": "rn-fetch@latest",
+      "resolved": "https://registry.npmjs.org/rn-fetch/-/rn-fetch-1.0.0.tgz"
     },
     "rn-markdown": {
       "version": "1.1.1",

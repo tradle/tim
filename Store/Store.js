@@ -25,7 +25,7 @@ import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createSemaphore from 'psem'
 import EventEmitter from 'events'
-import { coroutine as co } from 'bluebird'
+import Promise, { coroutine as co } from 'bluebird'
 import TimerMixin from 'react-timer-mixin'
 import reactMixin from 'react-mixin'
 import plugins from '@tradle/biz-plugins'
@@ -460,32 +460,41 @@ var Store = Reflux.createStore({
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
+
     this._identityPromises = {}
+    const connectivityPromise = Promise.race([
+        NetInfo.isConnected.fetch()
+          .then(isConnected => this._handleConnectivityChange(isConnected)),
+        // timeout after 2s
+        Promise.delay(2000)
+    ])
+    .catch(err => debug('failed to get network connectivity', err.message))
 
     NetInfo.isConnected.addEventListener(
       'change',
-      this._handleConnectivityChange.bind(this)
+      async (isConnected) => {
+        // make sure events arrive after initial fetch
+        await connectivityPromise
+        this._handleConnectivityChange(isConnected)
+      }
     );
 
-    if (utils.isSimulator()) {
-      // isConnected always returns false on simulator
-      // https://github.com/facebook/react-native/issues/873
-      this.isConnected = true
-    } else {
-      NetInfo.isConnected.fetch().then(
-        (isConnected) => {
-          this.isConnected = isConnected
-        }
-      );
+    // NetInfo.isConnected.addEventListener(
+    //   'change',
+    //   this._handleConnectivityChange.bind(this)
+    // );
 
-      if (utils.isSimulator()) {
-        // isConnected always returns false on simulator
-        // https://github.com/facebook/react-native/issues/873
-        this.isConnected = true
-      } else {
-        NetInfo.isConnected.fetch().then(isConnected => this.isConnected = isConnected)
-      }
-    }
+    // // if (utils.isSimulator()) {
+    // //   // isConnected always returns false on simulator
+    // //   // https://github.com/facebook/react-native/issues/873
+    // //   this.isConnected = true
+    // // } else {
+    //   NetInfo.isConnected.fetch().done(
+    //     (isConnected) => {
+    //       this.isConnected = isConnected
+    //     }
+    //   );
+    // }
     // storeUtils.init({db, list, contextIdToResourceId, models})
     this.addModels()
     this.loadModels()
@@ -1986,9 +1995,11 @@ var Store = Reflux.createStore({
 
       const numConnected = Object.keys(self._connectedServers).length
       if (numConnected === 0) {
-        self.trigger({ action: 'onlineStatus', online: false })
+        self._handleConnectivityChange(false)
+        // self.trigger({ action: 'onlineStatus', online: false })
       } else if (numConnected === 1) {
-        self.trigger({ action: 'onlineStatus', online: true })
+        self._handleConnectivityChange(true)
+        // self.trigger({ action: 'onlineStatus', online: true })
       }
 
       wsClients
@@ -3767,6 +3778,7 @@ var Store = Reflux.createStore({
           let forwardlinkName = forwardlink.name
           let m = this.getModel(resource[TYPE])
           if (r[forwardlinkName]) {
+            // list = await this.getObjects(r[forwardlinkName], forwardlink)
             if (forwardlink.items.ref !== VERIFIED_ITEM)
               list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl))))
             else
@@ -3857,6 +3869,24 @@ var Store = Reflux.createStore({
       }
     }
     this.trigger(retParams);
+  },
+  async getObjects(list, prop) {
+    let links
+    if (prop) {
+      let forwardlinkName = prop.name
+      if (prop.items.ref !== VERIFIED_ITEM)
+        links = list.map((fl) => fl.id.split('_')[2])
+      else
+        links = list.map((fl) => utils.getId(fl.verification).split('_')[2])
+    }
+    else
+      links = Object.keys(list)
+      // links = list.map((r) => utils.getId(r).split('_')[2])
+
+    if (!links  ||  !links.length)
+      return
+    let objects = await graphQL.getObjects(links, this.client)
+    return objects.map((r) => this.convertToResource(r))
   },
   async getBacklinkResources(prop, res) {
     let items = prop.items
@@ -5813,7 +5843,7 @@ var Store = Reflux.createStore({
     if (prop)
       retParams.prop = prop
     if (gatherForms  &&  modelName === MESSAGE) {
-      if (!context) {
+      if (!context  &&  result  &&  result.length) {
         for (let i=result.length  &&  !context; i>=0; i--)
           context = result[0][TYPE] === FORM_REQUEST  && result[0]._context
       }
@@ -6497,6 +6527,8 @@ var Store = Reflux.createStore({
     let rep = to
     if (to[TYPE]  &&  to[TYPE] === ORGANIZATION)
       rep = this.getRepresentative(params.to)
+    if (!rep)
+      return result
     return result.filter((r) => this.isChatItem(r, utils.getId(rep)))
   },
 
@@ -6696,6 +6728,74 @@ var Store = Reflux.createStore({
     let link = this.addLink(links, stub)
     if (link)
       all[link] = stub.id
+  },
+  async handleAll(params) {
+    let { link, links, all, refsObj, refs, resource, to, foundResources, list, prop, query } = params
+    let objects = await this.getObjects(all)
+    // objects.forEach((r) => {
+    //   if (refs.indexOf(r[CUR_HASH]))
+    //     refsObj[utils.getId(r)] = r
+    // })
+    let checked = []
+    objects.forEach((rr) => {
+      if (links.indexOf(rr[CUR_HASH]) === -1)
+        return
+      let rId = utils.getId(rr)
+      let r = this._getItem(rId)
+      this._setItem(rId, r)
+      extend(r, rr)
+
+      if (r._context  &&  !utils.isContext(r[TYPE])) {
+        let rcontext = this.findContext(r._context)
+        if (!rcontext) {
+          let rcontextId = utils.getId(r._context)
+          rcontext = refsObj[rcontextId]
+          if (!rcontextId) {
+            rcontext = this._getItemFromServer(rcontextId)
+            refsObj[rcontextId] = rcontext
+          }
+        }
+        r._context = rcontext
+      }
+      let hash = r[CUR_HASH]
+      if (refs.indexOf(hash) !== -1) {
+        refsObj[utils.getId(r)] = r
+        if (links.indexOf(hash) === -1)
+          return
+      }
+
+      _.extend(params, { r })
+      let backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
+      let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
+      try {
+        if (isBacklinkProp) {
+          let container = resource  ||  to
+          let isOrganization = container[TYPE] === ORGANIZATION
+          if (isOrganization  && ['to', 'from'].indexOf(backlink) !== -1)
+            container = this.getRepresentative(utils.getId(container))
+
+
+          let rId = utils.getId(container)
+          if (r[backlink]  &&  utils.getId(r[backlink]) === rId)
+            list.push(r)
+          else if (isOrganization  && r._sharedWith  &&  r._sharedWith.length > 1) {
+            if (r._sharedWith.some((sh) => sh.bankRepresentative === rId))
+              list.push(r)
+          }
+          if (query)
+            checked.push(this.checkAndFilter(params))
+        }
+        else
+          checked.push(this.checkResource(params))
+        if (checked   &&  isBacklinkProp) {
+          if (query)
+            list.push(r)
+        }
+      } catch (err) {
+      }
+    })
+    if (checked.length)
+      await Promise.all(checked)
   },
   async handleOne(params) {
     let { link, links, all, refsObj, refs, resource, to, prop, list, query } = params

@@ -28,8 +28,8 @@ var trace = fs.readFileSync(path.resolve(argv.trace), { encoding: 'utf8'})
   .split('\n')
   .map(line => line.split(':'))
   .map(parts => {
-    const column = parts.pop()
-    const line = parts.pop()
+    const column = Number(parts.pop())
+    const line = Number(parts.pop())
     const originalPos = smc.originalPositionFor({ line, column })
     let relPath = originalPos.source
     if (!relPath) return

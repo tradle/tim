@@ -37,7 +37,7 @@
     "update:models": "npm i -S tradle/models tradle/custom-models tradle/models-corporate-onboarding tradle/models-nz tradle/models-onfido tradle/models-products-bot && ./reshrink.sh"
   },
   "dependencies": {
-    "@tradle/aws-client": "^1.1.0",
+    "@tradle/aws-client": "^1.2.0",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
     "@tradle/biz-plugins": "github:tradle/biz-plugins#cloud",
     "@tradle/build-resource": "^2.14.1",
@@ -48,6 +48,7 @@
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.1.0",
     "@tradle/models": "github:tradle/models",
+    "@tradle/models-cloud": "github:tradle/models-cloud",
     "@tradle/models-corporate-onboarding": "github:tradle/models-corporate-onboarding",
     "@tradle/models-nz": "github:tradle/models-nz",
     "@tradle/models-onfido": "github:tradle/models-onfido",
@@ -163,6 +164,7 @@
     "readable-stream": "^1.0.33",
     "reflux": "^0.4.1",
     "regenerator": "^0.8.42",
+    "rn-fetch": "^1.0.0",
     "rn-markdown": "^1.1.1",
     "sendy": "3.2.0",
     "sendy-axolotl": "^1.0.1",
