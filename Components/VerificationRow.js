@@ -633,18 +633,13 @@ var styles = StyleSheet.create({
     fontSize: 12,
   },
   cellImage: {
-    backgroundColor: '#dddddd',
     height: 60,
     marginRight: 10,
     marginVertical: 3,
     width: 60,
-    borderColor: '#7AAAc3',
-    // borderRadius:10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   verySmallLetters: {
     fontSize: 12,
-    // alignSelf: 'flex-end',
     color: '#b4c3cb'
   },
   refPropertyRow: {
