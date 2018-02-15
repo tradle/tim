@@ -196,7 +196,7 @@ class VerificationRow extends Component {
     let isCheck = model.subClassOf === CHECK
     let description
     if (title !== dn)  {
-      if (isCheck) {
+      if (isCheck  &&  resource.status) {
         let color, icon
         if (resource.status.id === STATUS + '_pass') {
           color = 'green'
