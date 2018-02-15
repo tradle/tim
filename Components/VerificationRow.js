@@ -196,15 +196,21 @@ class VerificationRow extends Component {
     let isCheck = model.subClassOf === CHECK
     let description
     if (title !== dn)  {
-      if (isCheck) {
+      if (isCheck  &&  resource.status) {
         let color, icon
-        if (resource.status.id === STATUS + '_pass') {
+        switch (resource.status.title) {
+          case 'Pass':
           color = 'green'
           icon = 'md-checkmark'
-        }
-        else {
+          break
+        case 'Fail':
           color = 'red'
           icon = 'md-close'
+          break
+        default:
+          color = 'blue'
+          icon = 'ios-information-circle-outline'
+          break
         }
         description = <Text style={[styles.description, {alignItems: 'center'}]}>{dn + '  '}
                         <Icon color={color} size={20} name={icon}/>
