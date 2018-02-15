@@ -3848,6 +3848,24 @@ var Store = Reflux.createStore({
     }
     this.trigger(retParams);
   },
+  async getObjects(list, prop) {
+    let links
+    if (prop) {
+      let forwardlinkName = prop.name
+      if (prop.items.ref !== VERIFIED_ITEM)
+        links = list.map((fl) => fl.id.split('_')[2])
+      else
+        links = list.map((fl) => utils.getId(fl.verification).split('_')[2])
+    }
+    else
+      links = Object.keys(list)
+      // links = list.map((r) => utils.getId(r).split('_')[2])
+
+    if (!links  ||  !links.length)
+      return
+    let objects = await graphQL.getObjects(links, this.client)
+    return objects.map((r) => this.convertToResource(r))
+  },
   async getBacklinkResources(prop, res) {
     let items = prop.items
     if (!items  ||  !items.backlink)
