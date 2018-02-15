@@ -3757,6 +3757,7 @@ var Store = Reflux.createStore({
           let forwardlinkName = forwardlink.name
           let m = this.getModel(resource[TYPE])
           if (r[forwardlinkName]) {
+            // list = await this.getObjects(r[forwardlinkName], forwardlink)
             if (forwardlink.items.ref !== VERIFIED_ITEM)
               list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl))))
             else
@@ -5776,7 +5777,7 @@ var Store = Reflux.createStore({
     if (prop)
       retParams.prop = prop
     if (gatherForms  &&  modelName === MESSAGE) {
-      if (!context) {
+      if (!context  &&  result  &&  result.length) {
         for (let i=result.length  &&  !context; i>=0; i--)
           context = result[0][TYPE] === FORM_REQUEST  && result[0]._context
       }
@@ -6460,6 +6461,8 @@ var Store = Reflux.createStore({
     let rep = to
     if (to[TYPE]  &&  to[TYPE] === ORGANIZATION)
       rep = this.getRepresentative(params.to)
+    if (!rep)
+      return result
     return result.filter((r) => this.isChatItem(r, utils.getId(rep)))
   },
 
@@ -6659,6 +6662,74 @@ var Store = Reflux.createStore({
     let link = this.addLink(links, stub)
     if (link)
       all[link] = stub.id
+  },
+  async handleAll(params) {
+    let { link, links, all, refsObj, refs, resource, to, foundResources, list, prop, query } = params
+    let objects = await this.getObjects(all)
+    // objects.forEach((r) => {
+    //   if (refs.indexOf(r[CUR_HASH]))
+    //     refsObj[utils.getId(r)] = r
+    // })
+    let checked = []
+    objects.forEach((rr) => {
+      if (links.indexOf(rr[CUR_HASH]) === -1)
+        return
+      let rId = utils.getId(rr)
+      let r = this._getItem(rId)
+      this._setItem(rId, r)
+      extend(r, rr)
+
+      if (r._context  &&  !utils.isContext(r[TYPE])) {
+        let rcontext = this.findContext(r._context)
+        if (!rcontext) {
+          let rcontextId = utils.getId(r._context)
+          rcontext = refsObj[rcontextId]
+          if (!rcontextId) {
+            rcontext = this._getItemFromServer(rcontextId)
+            refsObj[rcontextId] = rcontext
+          }
+        }
+        r._context = rcontext
+      }
+      let hash = r[CUR_HASH]
+      if (refs.indexOf(hash) !== -1) {
+        refsObj[utils.getId(r)] = r
+        if (links.indexOf(hash) === -1)
+          return
+      }
+
+      _.extend(params, { r })
+      let backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
+      let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
+      try {
+        if (isBacklinkProp) {
+          let container = resource  ||  to
+          let isOrganization = container[TYPE] === ORGANIZATION
+          if (isOrganization  && ['to', 'from'].indexOf(backlink) !== -1)
+            container = this.getRepresentative(utils.getId(container))
+
+
+          let rId = utils.getId(container)
+          if (r[backlink]  &&  utils.getId(r[backlink]) === rId)
+            list.push(r)
+          else if (isOrganization  && r._sharedWith  &&  r._sharedWith.length > 1) {
+            if (r._sharedWith.some((sh) => sh.bankRepresentative === rId))
+              list.push(r)
+          }
+          if (query)
+            checked.push(this.checkAndFilter(params))
+        }
+        else
+          checked.push(this.checkResource(params))
+        if (checked   &&  isBacklinkProp) {
+          if (query)
+            list.push(r)
+        }
+      } catch (err) {
+      }
+    })
+    if (checked.length)
+      await Promise.all(checked)
   },
   async handleOne(params) {
     let { link, links, all, refsObj, refs, resource, to, prop, list, query } = params
