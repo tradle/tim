@@ -23,29 +23,29 @@ class PhotoCarousel extends Component {
     return utils.resized(this.props, nextProps)
   }
   render() {
-    var photoUrls = [];
-    var currentPhoto = this.props.currentPhoto || (this.props.photos && this.props.photos[0])
-    var currentPhotoIndex = -1;
-    var n = this.props.photos && this.props.photos.length || 1;
+    let photoUrls = [];
+    let currentPhoto = this.props.currentPhoto || (this.props.photos && this.props.photos[0])
+    let currentPhotoIndex = -1;
+    let n = this.props.photos && this.props.photos.length || 1;
 
-    var model = utils.getModel(this.props.resource[constants.TYPE]).value;
-    var isVertical = currentPhoto.isVertical
-    var cnt = 2000
-    var r = this.props.resource
-    var styles = createStyles()
-    var photos = []
-    for (var j=0; j<2; j++) {
-      for (var i=0; i<n; i++) {
-        var photo = this.props.photos[i];
+    let model = utils.getModel(this.props.resource[constants.TYPE]).value;
+    let isVertical = currentPhoto.isVertical
+    let cnt = 2000
+    let r = this.props.resource
+    let styles = createStyles()
+    let photos = []
+    for (let j=0; j<2; j++) {
+      for (let i=0; i<n; i++) {
+        let photo = this.props.photos[i];
 
         if (currentPhotoIndex == -1  &&  photo.url !== currentPhoto.url)
           continue;
         if (currentPhotoIndex == -1)
           currentPhotoIndex = i;
-        var key = r[constants.ROOT_HASH] + cnt++
+        let key = r[constants.ROOT_HASH] + cnt++
         if (photo.width) {
-          var {width, height} = utils.dimensions(PhotoCarousel)
-          var w = width, h, padding
+          let {width, height} = utils.dimensions(PhotoCarousel)
+          let w = width, h, padding
 
           if (height > width) {
             if (photo.width > width)
@@ -88,6 +88,10 @@ class PhotoCarousel extends Component {
       }
       n = currentPhotoIndex
     }
+    if (!photos.length) {
+      debugger
+      return <View/>
+    }
     return (
       <Carousel width={width}
                 loop={false}
@@ -100,7 +104,7 @@ class PhotoCarousel extends Component {
   }
 }
 
-var createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions }) {
+let createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions }) {
   return StyleSheet.create({
     image: {
       width: dimensions.width,
