@@ -25,7 +25,7 @@ import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
 import createSemaphore from 'psem'
 import EventEmitter from 'events'
-import { coroutine as co } from 'bluebird'
+import Promise, { coroutine as co } from 'bluebird'
 import TimerMixin from 'react-timer-mixin'
 import reactMixin from 'react-mixin'
 import plugins from '@tradle/biz-plugins'
@@ -445,23 +445,40 @@ var Store = Reflux.createStore({
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
+
     this._identityPromises = {}
+    const connectivityPromise = Promise.race([
+        NetInfo.isConnected.fetch()
+          .then(isConnected => this._handleConnectivityChange(isConnected)),
+        // timeout after 2s
+        Promise.delay(2000)
+    ])
+    .catch(err => debug('failed to get network connectivity', err.message))
 
     NetInfo.isConnected.addEventListener(
       'change',
-      this._handleConnectivityChange.bind(this)
+      async (isConnected) => {
+        // make sure events arrive after initial fetch
+        await connectivityPromise
+        this._handleConnectivityChange(isConnected)
+      }
     );
 
-    // if (utils.isSimulator()) {
-    //   // isConnected always returns false on simulator
-    //   // https://github.com/facebook/react-native/issues/873
-    //   this.isConnected = true
-    // } else {
-      NetInfo.isConnected.fetch().done(
-        (isConnected) => {
-          this.isConnected = isConnected
-        }
-      );
+    // NetInfo.isConnected.addEventListener(
+    //   'change',
+    //   this._handleConnectivityChange.bind(this)
+    // );
+
+    // // if (utils.isSimulator()) {
+    // //   // isConnected always returns false on simulator
+    // //   // https://github.com/facebook/react-native/issues/873
+    // //   this.isConnected = true
+    // // } else {
+    //   NetInfo.isConnected.fetch().done(
+    //     (isConnected) => {
+    //       this.isConnected = isConnected
+    //     }
+    //   );
     // }
     // storeUtils.init({db, list, contextIdToResourceId, models})
     this.addModels()
@@ -1954,9 +1971,11 @@ var Store = Reflux.createStore({
 
       const numConnected = Object.keys(self._connectedServers).length
       if (numConnected === 0) {
-        self.trigger({ action: 'onlineStatus', online: false })
+        self._handleConnectivityChange(false)
+        // self.trigger({ action: 'onlineStatus', online: false })
       } else if (numConnected === 1) {
-        self.trigger({ action: 'onlineStatus', online: true })
+        self._handleConnectivityChange(true)
+        // self.trigger({ action: 'onlineStatus', online: true })
       }
 
       wsClients
