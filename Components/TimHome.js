@@ -140,29 +140,10 @@ class TimHome extends Component {
   componentWillUnmount() {
     if (isLinkingSupported)
       Linking.removeEventListener('url', this._handleOpenURL);
-
-    if (NetInfo) {
-      NetInfo.isConnected.removeEventListener(
-        'change',
-        this._handleConnectivityChange.bind(this)
-      );
-    }
-  }
-  async _checkConnectivity() {
-    try {
-      const isConnected = NetInfo ? await NetInfo.isConnected.fetch() : true
-      const firstRoute = this.props.navigator.getCurrentRoutes()[0]
-      firstRoute.isConnected = isConnected
-    } catch (err) {
-      debug('failed to check connectivity', err)
-    }
-=======
-    Linking.removeEventListener('url', this._handleOpenURL);
     // NetInfo.isConnected.removeEventListener(
     //   'change',
     //   this._handleConnectivityChange
     // );
->>>>>>> origin/master
   }
   // async _checkConnectivity() {
   //   try {
