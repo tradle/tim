@@ -22,9 +22,6 @@ import {
 } from 'react-native'
 
 const debug = require('debug')('tradle:app:HomePageMixin')
-const WEB_TO_MOBILE = '0'
-const TALK_TO_EMPLOYEEE = '1'
-const APP_QR_CODE = '5'
 const {
   PROFILE,
   ORGANIZATION,
@@ -69,26 +66,10 @@ var HomePageMixin = {
     }
 
     const { schema, data } = result
-    let h, code
-    // if (typeof result.data === 'string') {
-    //   if (result.data.charAt(0) === '{') {
-    //     let h = JSON.parse(result.data)
-    //     Actions.sendPairingRequest(h)
-    //     this.props.navigator.pop()
-    //     return
-    //   }
-    //   else {
-    //     h = result.data.split(';')
-    //     code = h[0]
-    //   }
-    // }
-    // else
-     code = schema === 'ImportData' ? WEB_TO_MOBILE : "0" // result.dataHash, result.provider]
-
     // post to server request for the forms that were filled on the web
     let me = utils.getMe()
-    switch (code) {
-    case WEB_TO_MOBILE:
+    switch (schema) {
+    case 'ImportData':
       let r = {
         _t: 'tradle.DataClaim',
         claimId: data.dataHash,
@@ -113,8 +94,8 @@ var HomePageMixin = {
     // case TALK_TO_EMPLOYEEE:
     //   Actions.getEmployeeInfo(data.substring(code.length + 1))
     //   break
-    case APP_QR_CODE:
-      Actions.addApp(data.substring(code.length + 1))
+    case 'AddProvider':
+      Actions.addApp({ url: data.host, permalink: data.provider })
       break
     default:
       // keep scanning
