@@ -4870,39 +4870,29 @@ var Store = Reflux.createStore({
       // title: utils.getDisplayName(r)
     }
   },
-  onAddApp(serverUrl) {
-    const parts = serverUrl.split(';')
-    const [url, id] = parts
-    // let idx = serverUrl.lastIndexOf('/')
-    // let id = parts[parts.length - 1]
-    // let url = parts.slice(0, parts.length - 1).join('/')
-    const fullUrl = utils.joinURL(url, id)
-    return this.getInfo({serverUrls: [url], retry: false, id: id})
-    .then(() => {
-      const newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => r.id === id)
-      if (!newProvider) {
-        return this.trigger({
-          action: 'addApp',
-          error: `no provider found at url: ${fullUrl}`
-        })
-      }
 
-      this.addToSettings(newProvider)
-      this.trigger({ action: 'addApp' })
-
-      // let list = self.searchNotMessages({modelName: ORGANIZATION})
-      // this.trigger({
-      //   action: 'list',
-      //   list: list,
-      // })
-    })
-    .catch(err => {
-       // this.trigger({action: 'addApp', error: 'Oops! No one is there.'})
+  async onAddApp({ url, permalink }) {
+    try {
+      await this.getInfo({serverUrls: [url], retry: false, id: permalink })
+    } catch (err) {
       this.trigger({
         action: 'addApp',
-        error: `Server at ${fullUrl} is unavailable: ` + err.message
+        error: `Server at ${url} is unavailable: ` + err.message
       })
-    })
+
+      return
+    }
+
+    const newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => r.permalink === permalink)
+    if (!newProvider) {
+      return this.trigger({
+        action: 'addApp',
+        error: `no provider found at url: ${url}`
+      })
+    }
+
+    this.addToSettings(newProvider)
+    this.trigger({ action: 'addApp' })
   },
 
   onGetMe() {
