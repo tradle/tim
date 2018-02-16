@@ -5,31 +5,34 @@ var path = require('path')
 var argv = require('minimist')(process.argv.slice(2), {
   alias: {
     h: 'help',
-    r: 'release',
-    b: 'bundle',
     t: 'trace'
   }
 })
 
-if (argv.help || !(argv.release || argv.bundle) || !argv.trace) {
+if (argv.help || !argv.trace) {
   printUsage()
   process.exit(1)
 }
 
 var SourceMapConsumer = require('source-map').SourceMapConsumer
-var bundlePath = argv.bundle ? path.resolve(argv.bundle) : path.resolve(argv.release, 'main.jsbundle')
-var minifiedJS = fs.readFileSync(bundlePath, 'utf8')
-var rawSourceMap = JSON.parse(fs.readFileSync(bundlePath + '.map'))
-rawSourceMap.sourcesContent = [minifiedJS]
-
-var smc = new SourceMapConsumer(rawSourceMap)
+var smcs = {}
 const cwd = process.cwd()
 var trace = fs.readFileSync(path.resolve(argv.trace), { encoding: 'utf8'})
   .split('\n')
-  .map(line => line.split(':'))
+  .filter(s => s)
+  .map(line => line.match(/([^/:()]+\.js):(\d+):(\d+)/).slice(1))
   .map(parts => {
     const column = Number(parts.pop())
     const line = Number(parts.pop())
+    const file = path.resolve(`web/dist/${parts.pop()}`)
+    if (!smcs[file]) {
+      const minifiedJS = fs.readFileSync(file, 'utf8')
+      const rawSourceMap = JSON.parse(fs.readFileSync(file + '.map'))
+      rawSourceMap.sourcesContent = [minifiedJS]
+      smcs[file] = new SourceMapConsumer(rawSourceMap)
+    }
+
+    const smc = smcs[file]
     const originalPos = smc.originalPositionFor({ line, column })
     let relPath = originalPos.source
     if (!relPath) return
@@ -37,6 +40,10 @@ var trace = fs.readFileSync(path.resolve(argv.trace), { encoding: 'utf8'})
     const idx = relPath.indexOf(cwd)
     if (idx !== -1) {
       relPath = relPath.slice(idx + cwd.length + 1)
+    }
+
+    if (relPath.startsWith('webpack:///')) {
+      relPath = relPath.slice(11)
     }
 
     return `${relPath}:${originalPos.line}`
