@@ -342,20 +342,9 @@ class GridList extends Component {
 
   onAction(params) {
     let { action, error, list, resource, endCursor } = params
-    let { navigator, modelName, isModel, search, prop, forwardlink } = this.props
-    if (action === 'addApp') {
-      navigator.pop()
-      if (error)
-        Alert.alert(error)
-      // Actions.list(ORGANIZATION)
-      return
-    }
     if (error)
       return;
-    // if (params.action === 'onlineStatus') {
-    //   this.setState({serverOffline: !params.online})
-    //   return
-    // }
+    let { navigator, modelName, isModel, search, prop, forwardlink } = this.props
     if (action === 'newContact') {
       let routes = navigator.getCurrentRoutes()
       let curRoute = routes[routes.length - 1]
