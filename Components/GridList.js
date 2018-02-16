@@ -345,14 +345,6 @@ class GridList extends Component {
     if (error)
       return;
     let { navigator, modelName, isModel, search, prop, forwardlink } = this.props
-    if (action === 'newContact') {
-      let routes = navigator.getCurrentRoutes()
-      let curRoute = routes[routes.length - 1]
-      if (curRoute.id === 11  &&  curRoute.passProps.resource[ROOT_HASH] === params.newContact[ROOT_HASH])
-        return
-      this.setState({newContact: params.newContact})
-      return
-    }
     if (action === 'connectivity') {
       this.setState({isConnected: params.isConnected})
       return
@@ -599,22 +591,10 @@ class GridList extends Component {
       return true
     if (this.state.serverOffline !== nextState.serverOffline)
       return true
-    // if (this.state.sharedContextCount !== nextState.sharedContextCount)
-    //   return true
-    // if (this.state.hasPartials !== nextState.hasPartials)
-    //   return true
-    // if (this.state.bookmarksCount !== nextState.bookmarksCount)
-    //   return true
-    // if (this.state.hasTestProviders !== nextState.hasTestProviders)
-    //   return true
     if (nextState.isConnected !== this.state.isConnected)
       return true
     if (this.state.newStyles !== nextState.newStyles)
       return true
-    if (nextState.newContact  &&  (!this.state.newContact ||  this.state.newContact !== nextState.newContact))
-      return true
-    //   if (!this.state.list && !nextState.list)
-    //     return true
     if (!this.state.list  ||  !nextState.list  ||  this.state.list.length !== nextState.list.length)
       return true
     for (let i=0; i<this.state.list.length; i++) {
@@ -1070,7 +1050,6 @@ class GridList extends Component {
       hideMode={this.state.hideMode}
       navigator={navigator}
       changeSharedWithList={chat ? this.changeSharedWithList.bind(this) : null}
-      newContact={this.state.newContact}
       currency={currency}
       isOfficialAccounts={officialAccounts}
       multiChooser={multiChooser}
