@@ -247,7 +247,8 @@ class ShowRefList extends Component {
     }
 
     if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
-      let height = utils.isWeb() ? '100%' : utils.dimensions(ShowRefList).height
+let height = utils.dimensions(ShowRefList).height
+             // let height = utils.isWeb() ? '100%' : utils.dimensions(ShowRefList).height
       let style = {width: utils.getContentWidth(ShowRefList), height}
       // if (!isMessage)
       //   style.height = utils.dimensions(ShowRefList).height
