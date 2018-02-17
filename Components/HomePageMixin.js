@@ -146,7 +146,7 @@ var HomePageMixin = {
       }
     })
   },
-  showTourOrSplash({resource, termsAccepted, action, callback, style}) {
+  showTourOrSplash({resource, showProfile, termsAccepted, action, callback, style}) {
     let { navigator, bankStyle } = this.props
     if (resource._tour  &&  !resource._noTour) {
       StatusBar.setHidden(true)
@@ -165,7 +165,7 @@ var HomePageMixin = {
             resource._noSplash = true
             Actions.addItem({resource: resource})
             // resource._noSplash = true
-            callback({resource, termsAccepted, action: 'replace'})
+            callback({resource, termsAccepted, action: 'replace', showProfile})
           }
         }
       })
@@ -195,7 +195,7 @@ var HomePageMixin = {
       resolvePromise()
       resource._noSplash = true
       Actions.addItem({resource: resource})
-      callback({resource, termsAccepted, action: 'replace'})
+      callback({resource, termsAccepted, action: 'replace', showProfile})
     }, 2000)
     return true
   },

@@ -67,14 +67,21 @@ var QRCodeScanner = require('./Components/QRCodeScanner')
 import Log from './Components/Log'
 var utils = require('./utils/utils');
 var translate = utils.translate
+
 var constants = require('@tradle/constants');
+const {
+  TYPE
+} = constants
+const {
+  PROFILE
+} = constants.TYPES
+
 import Icon from 'react-native-vector-icons/Ionicons'
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
 import Reflux from 'reflux'
 import Store from './Store/Store'
-import extend from 'extend'
 var StyleSheet = require('./StyleSheet')
 
 const TIM_HOME = 1
@@ -151,7 +158,7 @@ class TiMApp extends Component {
   constructor(props) {
     super(props)
     let passProps = {
-      modelName: constants.TYPES.PROFILE,
+      modelName: PROFILE,
       landingPageMapping: landingPageMapping
     }
 
@@ -313,8 +320,8 @@ class TiMApp extends Component {
       }
       else {
         r = JSON.parse(decodeURIComponent(params[1]));
-        if (!r[constants.TYPE])
-          r[constants.TYPE] = 'tradle.Organization';
+        if (!r[TYPE])
+          r[TYPE] = 'tradle.Organization';
       }
     }
     let props = {modelName: 'tradle.Message'};
@@ -624,7 +631,13 @@ var NavigationBarRouteMapper = {
       style.push({color: color});
     }
     let iconIdx = lbTitle.indexOf('|')
-    let icon = iconIdx !== -1 ? lbTitle.substring(iconIdx + 1) : lbTitle === 'Back' ? 'ios-arrow-back' : null
+    let icon
+    if (iconIdx !== -1)
+      icon = lbTitle.substring(iconIdx + 1)
+    else if (lbTitle === 'Back')
+      icon = 'ios-arrow-back'
+    else if (lbTitle === 'Profile')
+      icon = 'md-person'
 
     style.push({fontSize: utils.getFontSize(20)})
     let title = icon
@@ -639,7 +652,7 @@ var NavigationBarRouteMapper = {
     return (
       <TouchableOpacity
         hitSlop={HIT_SLOP}
-        onPress={goBack.bind(null, navigator)}>
+        onPress={route.passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
         <View style={styles.navBarLeftButton}>
           {status}
           {title}
@@ -774,7 +787,7 @@ var NavigationBarRouteMapper = {
         route.passProps.modelName === 'tradle.Message'  &&
         route.passProps.resource                        &&
         route.passProps.resource.organization           &&
-        route.passProps.resource[constants.TYPE] === constants.TYPES.PROFILE)
+        route.passProps.resource[TYPE] === PROFILE)
           // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
           // if (route.passProps.resource.organization)
@@ -797,7 +810,7 @@ var NavigationBarRouteMapper = {
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
     let logoNeedsText = (!route.passProps.resource  &&  route.id !== 7) ||
-                        // route.passProps.resource[constants.TYPE] !== constants.TYPES.ORGANIZATION ||
+                        // route.passProps.resource[TYPE] !== ORGANIZATION ||
                         !route.passProps.bankStyle ||
                         route.passProps.bankStyle.logoNeedsText
     if (uri) {

@@ -389,7 +389,7 @@ class TimHome extends Component {
       utils.setModels(models);
       return
     case 'getProvider':
-      this.showChatPage({resource: provider, termsAccepted})
+      this.showChatPage({resource: provider, termsAccepted, showProfile: true})
       // this.setState({
       //   provider: params.provider,
       //   action: 'chat'
@@ -631,7 +631,7 @@ class TimHome extends Component {
       })
   }
 
-  showChatPage({resource, termsAccepted, action}) {
+  showChatPage({resource, termsAccepted, action, showProfile}) {
     let me = utils.getMe()
 
     if (ENV.landingPage  &&  !termsAccepted) {
@@ -663,7 +663,7 @@ class TimHome extends Component {
       extend(style, resource.style)
 
 
-    if (this.showTourOrSplash({resource: resource, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
+    if (this.showTourOrSplash({resource, showProfile, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
       return
     // let resource = resource
     // if (resource._tour  &&  !resource._noTour) {
@@ -722,7 +722,20 @@ class TimHome extends Component {
       title: resource.name,
       component: MessageList,
       id: 11,
-      backButtonTitle: 'Back',
+      backButtonTitle: showProfile ? 'Profile' : 'Back',
+      rightButtonTitle: 'View',
+      onRightButtonPress: {
+        title: resource.name,
+        id: 3,
+        component: ResourceView,
+        titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        passProps: {
+          bankStyle: style,
+          resource: resource,
+          currency: currency
+        }
+      },
       passProps: {
         resource: resource,
         modelName: MESSAGE,
@@ -730,6 +743,9 @@ class TimHome extends Component {
         bankStyle:  style
       }
     }
+    if (showProfile)
+      route.passProps.onLeftButtonPress = () => this.showProfile('replace')
+
     if (action  ||  (termsAccepted  &&  routes.length === 3))
       navigator.replace(route)
     else
