@@ -1,5 +1,7 @@
 console.log('requiring linking.js')
 
+import _ from 'lodash'
+import querystring from 'querystring'
 import EventEmitter from 'EventEmitter'
 import {
   Linking,
@@ -9,6 +11,7 @@ import debounce from 'debounce'
 import { translate } from './utils'
 import { appScheme, deepLinkHost } from './env'
 
+const BRANCH_SPECIAL_CHARS = '$+~'
 const uriRegexes = [
   `https?://${deepLinkHost}/(.*)`,
   `${appScheme}://(.*)`
@@ -53,12 +56,18 @@ function getUrlFromBundle ({ params, error }) {
     return
   }
 
+  const link = params['$deeplink_path']
+  if (link) {
+    return stripProtocol(link) + '?' + querystring.stringify(getOriginalQuery(params))
+  }
+
   if (params['~referring_link']) {
     return matchURI(params['~referring_link'])
   }
+}
 
-  const link = params['$deeplink_path']
-  return link && stripProtocol(link)
+function getOriginalQuery (params) {
+  return _.pickBy(params, (value, key) => !BRANCH_SPECIAL_CHARS.includes(key[0]))
 }
 
 function stripProtocol (url) {
