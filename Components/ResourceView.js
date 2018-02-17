@@ -54,7 +54,7 @@ import { signIn } from '../utils/localAuth'
 import { makeResponsive } from 'react-native-orient'
 import Log from './Log'
 import debug from '../utils/debug'
-import ConversationsIcon from './ConversationsIcon'
+// import ConversationsIcon from './ConversationsIcon'
 import Navs from '../utils/navs'
 
 const TALK_TO_EMPLOYEE = '1'
@@ -316,24 +316,33 @@ class ResourceView extends Component {
       qrcode = <View />
 
     let footer
-    let conversations
+    // let conversations
     let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
     let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
     let paddingRight = Platform.OS === 'android' ? 0 : 10
+    // if (isIdentity) {
+    //   footer = <View style={styles.footer}>
+    //             <View style={styles.row}>
+    //               <TouchableOpacity onPress={this.showBanks.bind(this)} style={{paddingRight}}>
+    //                 <View style={[platformStyles.conversationButton, {backgroundColor: bgcolor, borderColor: bgcolor, borderWidth: 1, opacity: 0.5}]}>
+    //                   <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
+    //                 </View>
+    //               </TouchableOpacity>
+    //               <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+    //                 <View style={[platformStyles.menuButtonRegular, {opacity: 0.5}]}>
+    //                   <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(30)} />
+    //                 </View>
+    //               </TouchableOpacity>
+    //             </View>
+    //           </View>
+    // }
     if (isIdentity) {
       footer = <View style={styles.footer}>
-                <View style={styles.row}>
-                  <TouchableOpacity onPress={this.showBanks.bind(this)} style={{paddingRight}}>
-                    <View style={[platformStyles.conversationButton, {backgroundColor: bgcolor, borderColor: bgcolor, borderWidth: 1, opacity: 0.5}]}>
-                      <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
-                    </View>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-                    <View style={[platformStyles.menuButtonRegular, {opacity: 0.5}]}>
-                      <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(30)} />
-                    </View>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+                  <View style={[platformStyles.menuButtonRegular, {opacity: 0.5}]}>
+                    <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(30)} />
+                  </View>
+                </TouchableOpacity>
               </View>
     }
     let menu = isIdentity  &&  isMe  && this.renderActionSheet()
