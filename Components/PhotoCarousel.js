@@ -34,6 +34,7 @@ class PhotoCarousel extends Component {
     let r = this.props.resource
     let styles = createStyles()
     let photos = []
+    let {width, height} = utils.dimensions(PhotoCarousel)
     for (let j=0; j<2; j++) {
       for (let i=0; i<n; i++) {
         let photo = this.props.photos[i];
@@ -43,8 +44,8 @@ class PhotoCarousel extends Component {
         if (currentPhotoIndex == -1)
           currentPhotoIndex = i;
         let key = r[constants.ROOT_HASH] + cnt++
+
         if (photo.width) {
-          let {width, height} = utils.dimensions(PhotoCarousel)
           let w = width, h, padding
 
           if (height > width) {
