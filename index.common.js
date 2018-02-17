@@ -1,7 +1,38 @@
 'use strict'
 
 import './utils/errors'
+import './utils/shim'
+
+import React, { Component } from 'react'
+import Reflux from 'reflux'
+import Icon from 'react-native-vector-icons/Ionicons'
+import reactMixin from 'react-mixin'
+import Orientation from 'react-native-orientation'
+var ReactPerf = __DEV__ && require('ReactPerf')
 import SplashScreen from 'react-native-splash-screen'
+import 'stream'
+import debounce from 'debounce'
+import {
+  Navigator,
+  Image,
+  View,
+  TouchableOpacity,
+  Dimensions,
+  Alert,
+  Platform,
+  AppState,
+  AppRegistry,
+  Text,
+  BackAndroid
+} from 'react-native';
+
+var constants = require('@tradle/constants');
+const {
+  TYPE
+} = constants
+const {
+  PROFILE
+} = constants.TYPES
 
 // import './utils/logAll'
 // import './utils/perf'
@@ -14,10 +45,7 @@ import Debug from './utils/debug'
 var debug = Debug('tradle:app')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
-import './utils/shim'
 // import './utils/crypto'
-import 'stream'
-import debounce from 'debounce'
 // require('./timmy')
 var ResourceList = require('./Components/ResourceList');
 var VerifierChooser = require('./Components/VerifierChooser')
@@ -32,15 +60,11 @@ var AvivaIntroView = require('./Components/AvivaIntroView')
 var TourPage = require('./Components/TourPage')
 var SplashPage = require('./Components/SplashPage')
 
-// var TsAndCs = require('./Components/TsAndCs')
-// var HomePage = require('./Components/HomePage')
 var PasswordCheck = require('./Components/PasswordCheck');
 var LockScreen = require('./Components/LockScreen')
 var TouchIDOptIn = require('./Components/TouchIDOptIn');
-// var ResourceTypesScreen = require('./Components/ResourceTypesScreen');
 var NewResource = require('./Components/NewResource');
 var NewItem = require('./Components/NewItem');
-// var ItemsList = require('./Components/ItemsList')
 var RemediationItemsList = require('./Components/RemediationItemsList')
 var GridItemsList = require('./Components/GridItemsList')
 var ResourceView = require('./Components/ResourceView');
@@ -51,7 +75,6 @@ var ArticleView = require('./Components/ArticleView');
 var IdentitiesList = require('./Components/IdentitiesList');
 var SupervisoryViewPerProvider = require('./Components/SupervisoryViewPerProvider')
 var SupervisoryView = require('./Components/SupervisoryView')
-// var SelectPhotoList = require('./Components/SelectPhotoList');
 var ProductChooser = require('./Components/ProductChooser')
 var StringChooser = require('./Components/StringChooser')
 var ContextChooser = require('./Components/ContextChooser')
@@ -60,22 +83,14 @@ var PhotoCarousel = require('./Components/PhotoCarousel');
 var QRCode = require('./Components/QRCode')
 var QRCodeScanner = require('./Components/QRCodeScanner')
 import Log from './Components/Log'
+import HomePageMixin from './Components/HomePageMixin'
+
 var utils = require('./utils/utils');
 var translate = utils.translate
 
-var constants = require('@tradle/constants');
-const {
-  TYPE
-} = constants
-const {
-  PROFILE
-} = constants.TYPES
-
-import Icon from 'react-native-vector-icons/Ionicons'
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
-import Reflux from 'reflux'
 import Store from './Store/Store'
 var StyleSheet = require('./StyleSheet')
 
@@ -90,25 +105,6 @@ const TOUR_PAGE = 35
 const AVIVA_INTRO_VIEW = 50
 // const TERMS_AND_CONDITIONS = 51
 
-var reactMixin = require('react-mixin');
-import {
-  Navigator,
-  Image,
-  View,
-  TouchableOpacity,
-  Dimensions,
-  // StyleSheet,
-  Alert,
-  // StatusBar,
-  Platform,
-  // Linking,
-  AppState,
-  AppRegistry,
-  Text,
-  BackAndroid
-} from 'react-native';
-
-import Orientation from 'react-native-orientation'
 import platformStyles from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
 
@@ -120,12 +116,10 @@ Text.defaultProps = function() {
   };
 };
 
-import React, { Component } from 'react'
 import Push from './utils/push'
 import Navs from './utils/navs'
 import Analytics from './utils/analytics'
 
-var ReactPerf = __DEV__ && require('ReactPerf')
 // if (ReactPerf) ReactPerf.toggle()
 
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
@@ -660,6 +654,7 @@ var NavigationBarRouteMapper = {
     let iconColor = bankStyle ? bankStyle.linkColor : '#7AAAC3'
     let style = {}
     let isSubmit
+    let isProfile
     switch (rbTitle) {
     case 'Done':
       iconColor = '#fff'
@@ -688,10 +683,15 @@ var NavigationBarRouteMapper = {
       icon = 'md-search'
       break
     case 'Profile':
+      isProfile = true
+      style = {marginTop: 2}
+      iconSize = 28
       icon = 'md-person'
       break
     case 'Edit':
-      icon = 'md-create'
+      iconSize = 28
+      style = {marginTop: 2, marginRight: -4}
+      icon = 'ios-create-outline'
       break
     case 'Share':
       icon = 'md-share'
@@ -740,6 +740,8 @@ var NavigationBarRouteMapper = {
                   if (typeof route.onRightButtonPress === 'function') {
                     route.onRightButtonPress()
                   }
+                  else if (isProfile)
+                    HomePageMixin.showProfile(navigator)
                   else if (route.onRightButtonPress.stateChange) {
                     if (route.onRightButtonPress.before)
                       route.onRightButtonPress.before();
