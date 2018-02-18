@@ -75,6 +75,8 @@ const {
 } = constants
 
 const COUNTRY = 'tradle.Country'
+const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
+
 const PHOTO = 'tradle.Photo'
 const YEAR = 3600 * 1000 * 24 * 365
 const DAY  = 3600 * 1000 * 24
@@ -700,6 +702,10 @@ var NewResourceMixin = {
       width: result.image.width,
       height: result.image.height
     }
+    let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, Store.getModel(r[TYPE]))
+    if (docScannerProps  &&  docScannerProps.length)
+      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(Store.getModel(DOCUMENT_SCANNER), 'blinkid')
+
 
     let dateOfExpiry
     ;['mrtd', 'usdl', 'eudl'].some(docType => {
