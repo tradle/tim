@@ -34,6 +34,8 @@
     "docker:build": "npm run build:serverinenv && ./buildimage.sh env",
     "docker:push": "docker push tradle/web-app",
     "lint": "eslint --quiet .",
+    "precommit": "npm run lint",
+    "prepush": "npm run lint",
     "update:models": "npm i -S tradle/models tradle/custom-models tradle/models-corporate-onboarding tradle/models-nz tradle/models-onfido tradle/models-products-bot && ./reshrink.sh"
   },
   "dependencies": {
