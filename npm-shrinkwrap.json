@@ -81,7 +81,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#5440bfc85677ade37fde22f45c96c57df22c9918"
+      "resolved": "git://github.com/tradle/custom-models.git#345fa113a9b3dbafc5ca7d3ea3441fc2303fb2f5"
     },
     "@tradle/embed": {
       "version": "1.0.0",
@@ -192,7 +192,7 @@
     "@tradle/models-nz": {
       "version": "1.0.0",
       "from": "tradle/models-nz",
-      "resolved": "git://github.com/tradle/models-nz.git#f4b063f002aeec539c9866c9e38286337db1c3d4"
+      "resolved": "git://github.com/tradle/models-nz.git#b1da67a6f047316810454adb1f46cfae00ec1d19"
     },
     "@tradle/models-onfido": {
       "version": "1.0.0",
