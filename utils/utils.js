@@ -629,9 +629,12 @@ var utils = {
   getPropertiesWithAnnotation(model, annotation) {
     let props = {}
     let meta = model.properties
-    for (let p in meta)
+    for (let p in meta) {
       if (meta[p][annotation])
         props[p] = meta[p]
+      // else if (meta[p].items  &&  meta[p].items[annotation] === annotation)
+      //   props[p] = meta[p]
+    }
 
     return props
   },
@@ -1804,6 +1807,14 @@ var utils = {
       return photos
     }
   },
+  getPropertiesWithRef(ref, model) {
+    let props = this.getPropertiesWithAnnotation(model, 'ref')
+    let rProps = []
+    for (let p in props)
+      if (props[p].ref === ref  ||  (props[p].items  &&  props[p].items.ref === ref))
+        rProps.push(props[p])
+    return rProps
+  },
   getPropertiesWithRange(range, model) {
     let props = model.properties
     let rProps = []
@@ -2055,6 +2066,18 @@ var utils = {
     for (let p in props)
       if (p !== TYPE)
         return p
+  },
+  buildStubByEnumTitleOrId(model, titleOrId) {
+    let enumEnum = model.enum
+    let val
+    enumEnum.forEach((r) => {
+      if (r.title === titleOrId  ||  r.id === titleOrId)
+        val = {
+          id: [model.id, r.id].join('_'),
+          title: r.title
+        }
+    })
+    return val
   },
   requestCameraAccess: async function (opts={}) {
     if (utils.isAndroid()) {
@@ -2312,7 +2335,6 @@ var utils = {
 
     return 'unknown'
   },
-
   whitePixel: {
     uri: 'data:image/gif;base64,R0lGODlhAQABAIAAAP7//wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='
   },

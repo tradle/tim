@@ -44,6 +44,7 @@ const CONFIRMATION = 'tradle.Confirmation'
 const BOOKMARK = 'tradle.Bookmark'
 
 const LIMIT = 10
+const SCAN_QR_CODE_VIEW = 16
 
 const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
 
@@ -258,7 +259,9 @@ class ResourceList extends Component {
     let { navigator } = this.props
     let action = params.action;
     if (action === 'addApp') {
-      navigator.pop()
+      let routes = navigator.getCurrentRoutes()
+      if (routes[routes.length - 1].id === SCAN_QR_CODE_VIEW)
+        navigator.pop()
       if (params.error)
         Alert.alert(params.error)
       // Actions.list(ORGANIZATION)
@@ -1471,6 +1474,7 @@ class ResourceList extends Component {
       component: ResourceList,
       backButtonTitle: 'Back',
       titleTextColor: '#7AAAC3',
+      rightButtonTitle: 'Profile',
       passProps: {
         modelName: ORGANIZATION,
         isTest: true,

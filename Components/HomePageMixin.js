@@ -11,6 +11,8 @@ import Actions from '../Actions/Actions'
 import ResourceList from './ResourceList'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import MessageList from './MessageList'
+import ResourceView from './ResourceView'
+import NewResource from './NewResource'
 import TourPage from './TourPage'
 import SplashPage from './SplashPage'
 import Store from '../Store/Store'
@@ -22,6 +24,9 @@ import {
 } from 'react-native'
 
 const debug = require('debug')('tradle:app:HomePageMixin')
+const {
+  TYPE
+} = constants
 const {
   PROFILE,
   ORGANIZATION,
@@ -199,6 +204,44 @@ var HomePageMixin = {
     }, 2000)
     return true
   },
+  showProfile(navigator, action, importingData) {
+    if (importingData) {
+      // this.props.navigator.pop()
+      // this.props.navigator.pop()
+      let len = navigator.getCurrentRoutes().length
+      navigator.popN(len - 2)
+      return
+    }
+    let me = utils.getMe()
+    let title = translate('profile')
+    let m = utils.getModel(me[TYPE]).value
+
+    navigator[action || 'push']({
+      title: title,
+      id: 3,
+      component: ResourceView,
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Edit',
+      onRightButtonPress: {
+        title: title,
+        id: 4,
+        component: NewResource,
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: m,
+          resource: me,
+          bankStyle: defaultBankStyle
+        }
+      },
+      passProps: {
+        resource: me,
+        backlink: m.properties.myForms,
+        bankStyle: defaultBankStyle
+      }
+    })
+  },
+
   renderGridHeader() {
     let { modelName, navigator, multiChooser } = this.props
     if (modelName === APPLICATION)

@@ -358,28 +358,49 @@ class ShowPropertiesView extends Component {
                </View>
              </View>
              );
-    });
-    if (resource.txId) { // || utils.isSealableModel(model)) {
-      let header = (<View style={{padding: 10 }} key={this.getNextKey()}>
+    })
+    let { txId, blockchain, networkName } = resource
+    if (txId) { // || utils.isSealableModel(model)) {
+      let content
+      let header = (<View style={{padding: 10}} key={this.getNextKey()}>
                       <View style={[styles.textContainer, styles.row]}>
                         <Text style={styles.bigTitle}>{translate('dataSecurity')}</Text>
                         <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
                       </View>
                       <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: bankStyle.linkColor}} />
                     </View>)
-      let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
-      let txs = (
-        <View>
-          {
-            BLOCKCHAIN_EXPLORERS.map((url, i) => {
-              url = url.replace('$TXID', resource.txId)
-              return this.getBlockchainExplorerRow(url, i)
-            })
-          }
-        </View>
-      )
+      if (blockchain === 'corda') {
+        let description = 'You\'ll be able to verify this transaction when you launch your Corda node.'
+        content = <View style={{paddingHorizontal: 10}}>
+                   <View style={{flexDirection: 'row', paddingVertical: 3}}>
+                     <Text style={styles.dsTitle}>Blockchain: </Text>
+                     <Text style={styles.dsValue}>{blockchain}</Text>
+                   </View>
+                   <View style={{flexDirection: 'row'}}>
+                     <Text style={styles.dsTitle}>Network: </Text>
+                     <Text style={styles.dsValue}>{networkName}</Text>
+                   </View>
+                   <View>
+                     <Text style={styles.title}>TxID: </Text>
+                     <Text style={styles.dsValue}>{txId}</Text>
+                   </View>
+                   <Text style={[styles.content, {marginTop: 20}]}>{description}</Text>
+                  </View>
+      }
+      else {
+        let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
+        let txs = (
+          <View>
+            {
+              BLOCKCHAIN_EXPLORERS.map((url, i) => {
+                url = url.replace('$TXID', txId)
+                return this.getBlockchainExplorerRow(url, i)
+              })
+            }
+          </View>
+        )
 
-      let content = <View style={{paddingHorizontal: 10}}>
+        content = <View style={{paddingHorizontal: 10}}>
                      <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
                        <Text style={styles.content}>{description}
                          <Text style={{color: bankStyle.linkColor, paddingHorizontal: 7}}> Learn more</Text>
@@ -387,6 +408,7 @@ class ShowPropertiesView extends Component {
                      </TouchableOpacity>
                      {txs}
                     </View>
+      }
       let self = this
       let row = <Accordion
                   sections={['txId']}
@@ -477,6 +499,20 @@ var styles = StyleSheet.create({
   description: {
     fontSize: 18,
     marginVertical: 3,
+    marginHorizontal: 7,
+    color: '#2E3B4E',
+  },
+  dsTitle: {
+    width: 90,
+    fontSize: 16,
+    // fontFamily: 'Avenir Next',
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7,
+    color: '#9b9b9b'
+  },
+  dsValue: {
+    fontSize: 18,
     marginHorizontal: 7,
     color: '#2E3B4E',
   },

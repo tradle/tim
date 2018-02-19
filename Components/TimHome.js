@@ -399,7 +399,7 @@ class TimHome extends Component {
       this.showChat(params)
       return
     case 'showProfile':
-      this.showProfile('replace', params.importingData)
+      this.showProfile(navigator, 'replace', params.importingData)
       return
     case 'noAccessToServer':
       Alert.alert(translate('noAccessToServer'))
@@ -505,43 +505,6 @@ class TimHome extends Component {
       }
     });
   }
-  showProfile(action, importingData) {
-    if (importingData) {
-      // this.props.navigator.pop()
-      // this.props.navigator.pop()
-      let len = this.props.navigator.getCurrentRoutes().length
-      this.props.navigator.popN(len - 2)
-      return
-    }
-    let me = utils.getMe()
-    let title = translate('profile')
-    let m = utils.getModel(me[TYPE]).value
-
-    this.props.navigator[action]({
-      title: title,
-      id: 3,
-      component: ResourceView,
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Edit',
-      onRightButtonPress: {
-        title: title,
-        id: 4,
-        component: NewResource,
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Done',
-        passProps: {
-          model: m,
-          resource: me,
-          bankStyle: defaultBankStyle
-        }
-      },
-      passProps: {
-        resource: me,
-        backlink: m.properties.myForms,
-        bankStyle: defaultBankStyle
-      }
-    })
-  }
   showFirstPage(noResetNavStack) {
     let firstPage = this.state.firstPage
     if (this.isDeepLink)
@@ -579,25 +542,25 @@ class TimHome extends Component {
         this.showOfficialAccounts(action)
         break
       case 'profile':
-        this.showProfile(action)
+        this.showProfile(navigator, action)
         break
       case 'scan':
         this.showScanHelp(action)
           // this.scanFormsQRCode()
         break
       default:
-        if (ENV.homePage)
-          this.showProfile(action)
-        else
+        // if (ENV.homePage)
+        //   this.showProfile(action)
+        // else
           this.showOfficialAccounts(action)
       }
       return
     }
 
-    if (ENV.homePage) {
-      this.showProfile(action)
-      return
-    }
+    // if (ENV.homePage) {
+    //   this.showProfile(action)
+    //   return
+    // }
 
     this.showOfficialAccounts()
   }
@@ -744,7 +707,7 @@ class TimHome extends Component {
       }
     }
     if (showProfile)
-      route.passProps.onLeftButtonPress = () => this.showProfile('replace')
+      route.passProps.onLeftButtonPress = () => this.showProfile(navigator, 'replace')
 
     if (action  ||  (termsAccepted  &&  routes.length === 3))
       navigator.replace(route)
@@ -822,7 +785,7 @@ class TimHome extends Component {
         }
       }
     }
-    this.props.navigator[action](route)
+    this.props.navigator[action || 'push'](route)
   }
 
   register(cb) {
