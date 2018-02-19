@@ -8,7 +8,7 @@ import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
 import Orientation from 'react-native-orientation'
-var ReactPerf = __DEV__ && require('ReactPerf')
+var ReactPerf = __DEV__ && !utils.isWeb() && require('react-addons-perf')
 import SplashScreen from 'react-native-splash-screen'
 import 'stream'
 import debounce from 'debounce'
@@ -126,7 +126,6 @@ import Push from './utils/push'
 import Navs from './utils/navs'
 import Analytics from './utils/analytics'
 
-var ReactPerf = __DEV__ && !utils.isWeb() && require('react-addons-perf')
 // if (ReactPerf) ReactPerf.toggle()
 
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
