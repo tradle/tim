@@ -157,7 +157,7 @@ class TimHome extends Component {
   async componentDidMount() {
     // this._checkConnectivity()
 
-    if (!utils.getMe()) return
+    // if (!utils.getMe()) return
 
     Alert.alert('TRYING THE DEEP LINK')
     try {
