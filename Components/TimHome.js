@@ -60,8 +60,6 @@ import { parse as parseURL } from 'url'
 
 const debug = require('debug')('tradle:app:Home')
 
-var isDeepLink
-
 try {
   var commitHash = require('../version').commit.slice(0, 7)
 } catch (err) {
@@ -228,7 +226,7 @@ class TimHome extends Component {
     let qs = query ? require('querystring').parse(query) : {}
 
     let state = {firstPage: pathname}
-    extend(state, qs)
+    extend(state, {qs: qs})
     this.setState(state)
     // Actions.setPreferences(state)
 
@@ -378,7 +376,7 @@ class TimHome extends Component {
       utils.setModels(models);
       return
     case 'applyForProduct':
-      this.showChatPage({resource: provider, action: 'replace'})
+      this.showChatPage({resource: provider, action: this.wasDeepLink ? 'push' : 'replace', showProfile: this.wasDeepLink})
       break
     case 'getProvider':
       this.showChatPage({resource: provider, termsAccepted, showProfile: true})
@@ -486,8 +484,10 @@ class TimHome extends Component {
   }
   showFirstPage(noResetNavStack) {
     let firstPage = this.state.firstPage
-    if (this.isDeepLink)
+    if (this.isDeepLink) {
       this.state.firstPage = ENV.initWithDeepLink
+      this.wasDeepLink = true
+    }
     let replace
     if (!noResetNavStack) {
       // After tour
@@ -511,10 +511,14 @@ class TimHome extends Component {
     if (firstPage) {
       switch (firstPage) {
       case 'chat':
-        Actions.getProvider({
-          permalink: this.state.permalink,
-          url: this.state.url
-        })
+        // Actions.getProvider({
+        //   permalink: this.state.permalink,
+        //   url: this.state.url
+        // })
+        Actions.getProvider(this.state.qs)
+        break
+      case 'applyForProduct':
+        Actions.applyForProduct(this.state.qs)
         break
       case 'officialAccounts':
       case 'conversations':
@@ -687,8 +691,9 @@ class TimHome extends Component {
     }
     if (showProfile)
       route.passProps.onLeftButtonPress = () => this.showProfile(navigator, 'replace')
-
-    if (action  ||  (termsAccepted  &&  routes.length === 3))
+    if (action)
+      navigator[action](route)
+    else if (termsAccepted  &&  routes.length === 3)
       navigator.replace(route)
     else
       navigator.push(route)

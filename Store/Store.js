@@ -4849,15 +4849,29 @@ var Store = Reflux.createStore({
       // title: utils.getDisplayName(r)
     }
   },
-
-  async onAddApp({ url, permalink }) {
+  async onApplyForProduct({ host, provider, product }) {
+    let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true })
+    if (!newProvider)
+      return
+    let org = this._getItem(newProvider.org)
+    let resource = {
+      [TYPE]: PRODUCT_REQUEST,
+      requestFor: product,
+      from: me,
+      to: this.getRepresentative(org)
+    }
+    await this.onAddChatItem({resource, noTrigger: true,  })
+    this.trigger({ action: 'applyForProduct', provider: org })
+  },
+  async onAddApp({ url, permalink, noTrigger }) {
     try {
       await this.getInfo({serverUrls: [url], retry: false, id: permalink })
     } catch (err) {
-      this.trigger({
-        action: 'addApp',
-        error: `Server at ${url} is unavailable: ` + err.message
-      })
+      if (!noTrigger)
+        this.trigger({
+          action: 'addApp',
+          error: `Server at ${url} is unavailable: ` + err.message
+        })
 
       return
     }
@@ -4871,7 +4885,9 @@ var Store = Reflux.createStore({
     }
 
     this.addToSettings(newProvider)
-    this.trigger({ action: 'addApp' })
+    if (!noTrigger)
+      this.trigger({ action: 'addApp' })
+    return newProvider
   },
 
   onGetMe() {
