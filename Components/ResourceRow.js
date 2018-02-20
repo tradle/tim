@@ -59,8 +59,6 @@ var {
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const MAX_LENGTH = 70
 
-var dateProp
-
 class ResourceRow extends Component {
   constructor(props) {
     super(props)
@@ -277,7 +275,7 @@ class ResourceRow extends Component {
     this.dateProp = utils.isContext(resource[TYPE]) ? 'time' : this.dateProp
 
     let dateRow
-    if (!this.props.isChooser  &&  this.dateProp  &&  resource[this.dateProp]) {
+    if (!this.isOfficialAccounts  &&  !this.props.isChooser  &&  this.dateProp  &&  resource[this.dateProp]) {
       let val = utils.formatDate(new Date(resource[this.dateProp]), true)
       // let dateBlock = self.addDateProp(resource, dateProp, true);
       dateRow = <View style={styles.dateRow}>
@@ -425,7 +423,7 @@ class ResourceRow extends Component {
       if (properties[v].type !== 'date'  ||  !resource[v])
         continue;
       if (resource[v]) {
-        if (v === 'dateSubmitted' || v === 'lastMessageTime') {
+        if (v === 'dateSubmitted') { // || v === 'lastMessageTime') {
           this.dateProp = v;
           if (!datePropsCounter)
             datePropIdx = i;
@@ -440,7 +438,7 @@ class ResourceRow extends Component {
     let color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
     let isContact = resource[TYPE] === PROFILE;
     viewCols.forEach((v) => {
-      if (v === dateProp)
+      if (v === this.dateProp)
         return;
       if (properties[v].type === 'array')
         return;
@@ -471,7 +469,7 @@ class ResourceRow extends Component {
         first = false;
       }
       else if (properties[v].type === 'date') {
-        if (!dateProp)
+        if (!this.dateProp)
           vCols.push(self.addDateProp(v));
         else
           return;
