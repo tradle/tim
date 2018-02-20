@@ -247,11 +247,9 @@ class ShowRefList extends Component {
     }
 
     if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
-let height = utils.dimensions(ShowRefList).height
-             // let height = utils.isWeb() ? '100%' : utils.dimensions(ShowRefList).height
-      let style = {width: utils.getContentWidth(ShowRefList), height}
-      // if (!isMessage)
-      //   style.height = utils.dimensions(ShowRefList).height
+      // Not working for long raw data like Centix check
+      // let style = {width: utils.getContentWidth(ShowRefList), utils.dimensions(ShowRefList).height}
+      let style = {width: utils.getContentWidth(ShowRefList)}
       return <View style={style}>
                 {separator}
                 <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0, minHeight: refList &&  refList.length ? 70 : 0}]} key={'ShowRefList'}>
