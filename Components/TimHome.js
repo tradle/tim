@@ -369,6 +369,8 @@ class TimHome extends Component {
 
   async handleEvent(params) {
     let {action, activity, isConnected, models, me, isRegistration, provider, termsAccepted} = params
+    var nav = this.props.navigator
+
     switch(action) {
     case 'busy':
       this.setState({
@@ -400,7 +402,7 @@ class TimHome extends Component {
       this.showChat(params)
       return
     case 'showProfile':
-      this.showProfile(navigator, 'replace', params.importingData)
+      this.showProfile(nav, 'replace', params.importingData)
       return
     case 'noAccessToServer':
       Alert.alert(translate('noAccessToServer'))
@@ -414,7 +416,6 @@ class TimHome extends Component {
     case 'getMe':
       utils.setMe(me)
       this.setState({hasMe: me})
-      var nav = this.props.navigator
       this.signInAndContinue()
       // await signIn(this.props.navigator)
       // this.showFirstPage()
@@ -532,6 +533,7 @@ class TimHome extends Component {
     }
     this.state.firstPage = null
     this.state.inTour = false
+    let navigator = this.props.navigator
     if (firstPage) {
       switch (firstPage) {
       case 'chat':
