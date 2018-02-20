@@ -1324,7 +1324,7 @@ var Store = Reflux.createStore({
       let rr = this._getItem(p)
       if (!utils.isMessage(rr))
         continue
-      if (rr[TYPE] === SELF_INTRODUCTION)
+      if (rr[TYPE] === SELF_INTRODUCTION  ||  rr[TYPE] === SEAL)
         continue
       let r = utils.clone(rr)
       let m = this.getModel(r[TYPE])
@@ -9764,6 +9764,8 @@ var Store = Reflux.createStore({
       this.trigger({action: 'customStyles', provider: org})
       noTrigger = true
     }
+    if (type === SEAL)
+      noTrigger = true
 
     if (!val.time)
       val.time = obj.timestamp
