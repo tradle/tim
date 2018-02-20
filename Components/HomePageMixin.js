@@ -102,6 +102,9 @@ var HomePageMixin = {
     case 'AddProvider':
       Actions.addApp({ url: data.host, permalink: data.provider })
       break
+    case 'ApplyForProduct':
+      Actions.applyForProduct(data)
+      break
     default:
       // keep scanning
       this.onUnknownQRCode()
