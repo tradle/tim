@@ -236,7 +236,7 @@ class TimHome extends Component {
     let qs = query ? require('querystring').parse(query) : {}
 
     let state = {firstPage: pathname}
-    extend(state, qs)
+    extend(state, {qs: qs})
     extend(this.state, state)
     // this.setState(state)
     // Actions.setPreferences(state)
@@ -535,10 +535,14 @@ class TimHome extends Component {
     if (firstPage) {
       switch (firstPage) {
       case 'chat':
-        Actions.getProvider({
-          permalink: this.state.permalink,
-          url: this.state.url
-        })
+        // Actions.getProvider({
+        //   permalink: this.state.permalink,
+        //   url: this.state.url
+        // })
+        Actions.getProvider(this.state.qs)
+        break
+      case 'applyForProduct':
+        Actions.applyForProduct(this.state.qs)
         break
       case 'applyForProduct':
         Actions.applyForProduct({host: this.state.host, provider: this.state.provider, product: this.state.product })
