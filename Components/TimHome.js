@@ -377,6 +377,9 @@ class TimHome extends Component {
       });
       utils.setModels(models);
       return
+    case 'applyForProduct':
+      this.showChatPage({resource: provider, action: 'replace'})
+      break
     case 'getProvider':
       this.showChatPage({resource: provider, termsAccepted, showProfile: true})
       // this.setState({

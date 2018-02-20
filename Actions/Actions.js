@@ -13,6 +13,7 @@ var asyncActions = [
   'addNewIdentity',
   'addVerification',
   'addAll',
+  'applyForProduct',
 
   'getItem',
   'getMe',
