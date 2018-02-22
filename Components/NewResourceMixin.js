@@ -841,7 +841,7 @@ var NewResourceMixin = {
     let markdown, title
     if (hasValue) {
       markdown = <View style={styles.markdown}>
-                   <Markdown markdownStyles={this.getMarkdownStyles()}>
+                   <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle, true)}>
                      {value}
                    </Markdown>
                  </View>
@@ -1018,26 +1018,6 @@ var NewResourceMixin = {
     if (key.nativeEvent.code === 'Enter')
       onSubmit()
   },
-  getMarkdownStyles() {
-    const markdownStyles = {
-      heading1: {
-        fontSize: 24,
-        color: 'purple',
-      },
-      link: {
-        color: this.props.bankStyle.linkColor,
-        textDecorationLine: 'none'
-      },
-      mailTo: {
-        color: 'orange',
-      },
-      text: {
-        color: '#757575',
-        fontStyle: 'italic'
-      },
-    }
-    return markdownStyles
-  },
   getHelp(prop) {
     if (!prop.description)
       return <View style={styles.help}/>
@@ -1045,7 +1025,7 @@ var NewResourceMixin = {
     // borderBottomColor: '#cccccc',
     return (
       <View style={styles.help}>
-        <Markdown markdownStyles={this.getMarkdownStyles()}>
+        <Markdown markdownStyles={utils.getMarkdownStyles(this.props.bankStyle, true)}>
           {prop.description}
         </Markdown>
       </View>
@@ -1534,6 +1514,10 @@ var NewResourceMixin = {
       value = prop.default
     if (!value)
       return
+    if (prop.type === 'date') {
+      if (typeof value === 'string')
+        value = this.getDateRange(value)
+    }
     data[p] = value
     resource[p] = value
     if (isHidden) {
