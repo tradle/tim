@@ -2125,6 +2125,27 @@ var utils = {
              <Text>{utils.parseMessage(newParams)}</Text>
            </Text>
   },
+  getMarkdownStyles(bankStyle, isItalic, isMyMessage, isChat) {
+    const markdownStyles = {
+      heading1: {
+        fontSize: 24,
+        color: 'purple',
+      },
+      link: {
+        color: isMyMessage? 'lightblue' : bankStyle  &&  bankStyle.linkColor || '#555555',
+        textDecorationLine: 'none'
+      },
+      mailTo: {
+        color: 'orange',
+      },
+      text: {
+        color: isMyMessage ? '#ffffff' : '#757575',
+        fontSize: isChat ? 16 : 14,
+        fontStyle: isItalic  &&  'italic' || 'normal'
+      },
+    }
+    return markdownStyles
+  },
   addDefaultPropertyValuesFor(provider) {
     defaultPropertyValues[this.getId(provider)] = provider._defaultPropertyValues
   },
