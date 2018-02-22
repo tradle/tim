@@ -823,7 +823,7 @@ var NewResourceMixin = {
     if (required)
       label += ' *'
 
-    let {bankStyle} = this.props
+    let { bankStyle, navigator } = this.props
     let hasValue = value  &&  value.length
     if (hasValue) {
       value = format(value, this.state.resource).trim()
