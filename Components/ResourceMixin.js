@@ -39,23 +39,6 @@ import {
   Navigator
 } from 'react-native'
 
-var markdownStyles = {
-  heading1: {
-    fontSize: 24,
-    color: 'purple',
-  },
-  link: {
-    textDecorationLine: 'none'
-  },
-  mailTo: {
-    color: 'orange',
-  },
-  text: {
-    color: '#757575',
-    fontStyle: 'italic'
-  },
-}
-
 import Markdown from './Markdown'
 import React, { Component } from 'react'
 
@@ -234,6 +217,7 @@ var ResourceMixin = {
     });
   },
   renderSimpleProp(val, pMeta, modelName, component) {
+    let { bankStyle } = this.props
     if (Array.isArray(val)) {
       if (pMeta.items.backlink)
         return <View  key={this.getNextKey()} />
@@ -276,7 +260,7 @@ var ResourceMixin = {
         val += ' ' + pMeta.units
 
       if (val === NOT_SPECIFIED)
-        val = <Text style={[styles.description, {color: this.props.bankStyle.linkColor}]}>{val}</Text>
+        val = <Text style={[styles.description, {color: bankStyle.linkColor}]}>{val}</Text>
       else if (typeof val === 'number')
         val = <Text style={styles.description}>{val}</Text>;
       else if (typeof val === 'boolean')
@@ -286,9 +270,9 @@ var ResourceMixin = {
       // else if (modelName === TERMS_AND_CONDITIONS) {
       //   val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
       else if (pMeta.markdown) {
-        // markdownStyles.color = this.props.bankStyle.linkColor
+        // markdownStyles.color = bankStyle.linkColor
         val = <View style={styles.container}>
-                <Markdown markdownStyles={markdownStyles}>
+                <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle)}>
                   {val}
                 </Markdown>
               </View>
