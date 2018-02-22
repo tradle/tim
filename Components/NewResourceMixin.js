@@ -1003,7 +1003,7 @@ var NewResourceMixin = {
     // borderBottomColor: '#cccccc',
     return (
       <View style={styles.help}>
-        <Markdown markdownStyles={this.getMarkdownStyles()}>
+        <Markdown markdownStyles={utils.getMarkdownStyles(this.props.bankStyle, true)}>
           {prop.description}
         </Markdown>
       </View>
