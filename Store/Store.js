@@ -841,33 +841,43 @@ var Store = Reflux.createStore({
       let m = voc[id]
       // if (!m[ROOT_HASH])
       //   m[ROOT_HASH] = sha(m);
-      Aviva.preparseModel(m)
-      models[id] = {
-        key: id,
-        value: m
-      }
-      // m[ROOT_HASH] = sha(m)
-      if (!m.properties[TYPE]) {
-        m.properties[TYPE] = {
-          type: 'string',
-          readOnly: true
-        }
-      }
-      if (!m.properties.time) {
-        m.properties.time = {
-          type: 'date',
-          readOnly: true,
-          title: 'Date'
-        }
-      }
-      if (utils.isEnum(m))
-        this.createEnumResources(m)
+      this.parseOneModel(m)
+    }
+  },
 
-      this.addNameAndTitleProps(m)
+  parseOneModel(m) {
+    Aviva.preparseModel(m)
+    this.addNameAndTitleProps(m)
+    models[m.id] = {
+      key: m.id,
+      value: m
+    }
+    if (!m.properties[TYPE]) {
+      m.properties[TYPE] = {
+        type: 'string',
+        readOnly: true
+      }
+    }
+    if (!m.properties.time) {
+      m.properties.time = {
+        type: 'date',
+        readOnly: true,
+        title: 'Date'
+      }
+    }
+
+    // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
+    //   org.products.push(m.id)
+    if (utils.isEnum(m))
+      this.createEnumResources(m)
+
+    // if (utils.isMessage(m)) {
+    if (m.subClassOf === FORM) {
       this.addVerificationsToFormModel(m)
       this.addFromAndTo(m)
     }
   },
+
   _handleConnectivityChange(isConnected) {
     if (isConnected === this.isConnected) return
 
@@ -9994,32 +10004,8 @@ var Store = Reflux.createStore({
       pList.forEach((m) => {
         if (!self.getModel(m.id))
           self._emitter.emit('model:' + m.id)
-        Aviva.preparseModel(m)
-        self.addNameAndTitleProps(m)
         m._versionId = val.versionId
-        models[m.id] = {
-          key: m.id,
-          value: m
-        }
-        // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
-        //   org.products.push(m.id)
-        if (utils.isEnum(m))
-          self.createEnumResources(m)
-
-        if (utils.isWeb()  &&  m.id === PHOTO_ID) {
-          let scanProp = m.properties['scan']
-          scanProp.title = 'Upload'
-          // scanProp.icon = 'md-download'
-        }
-
-        // if (utils.isMessage(m)) {
-        if (m.subClassOf === FORM) {
-          self.addVerificationsToFormModel(m)
-          self.addFromAndTo(m)
-        }
-        if (!m[ROOT_HASH])
-          m[ROOT_HASH] = 1
-
+        self.parseOneModel(m)
         batch.push({type: 'put', key: m.id, value: m})
       })
       utils.setModels(models)
