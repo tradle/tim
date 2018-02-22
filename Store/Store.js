@@ -552,9 +552,9 @@ var Store = Reflux.createStore({
     if (!utils.isEmpty(list))
       isLoaded = true;
 
+    await this._loadedResourcesDefer.promise
     if (me) {
       await this.getDriver(me)
-    await this._loadedResourcesDefer.promise
       if (doMonitor)
         this.monitorTim()
     }
@@ -2470,13 +2470,18 @@ var Store = Reflux.createStore({
     if (utils.getMe())
       this.setMe(utils.getMe())
     let results = await Q.allSettled(promises)
-    let list = this.searchNotMessages({modelName: ORGANIZATION})
-    this.trigger({
-      action: 'list',
-      list: list,
-      modelName: ORGANIZATION
-    })
 
+    let isSandbox = json.providers[0].sandbox
+    if (isSandbox)
+      this.onHasTestProviders()
+    else  {
+      let list = this.searchNotMessages({modelName: ORGANIZATION})
+      this.trigger({
+        action: 'list',
+        list: list,
+        modelName: ORGANIZATION
+      })
+    }
     return results
       .filter(r => r.state === 'fulfilled')
       .map(r => r.value)
