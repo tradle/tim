@@ -87,7 +87,7 @@ class ResourceRow extends Component {
     switch (action) {
     case 'onlineStatus':
       if (resource  &&  resource[ROOT_HASH] === this.props.resource[ROOT_HASH])
-        this.setState({serverOffline: !online})
+        this.setState({serverOffline: !online, resource})
       break
     case 'connectivity':
       this.setState({isConnected: params.isConnected})
