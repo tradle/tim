@@ -8140,7 +8140,11 @@ var Store = Reflux.createStore({
     return multientryResources
   },
   checkIfWasShared(document, to) {
-    let toId = utils.getId(to)
+    let toId
+    if (utils.getType(to) === PROFILE)
+      toId = utils.getId(to.organization)
+    else
+      toId = utils.getId(to)
     if (document._sharedWith) {
       if (document._sharedWith.some((r) => {
         let org = this._getItem(r.bankRepresentative).organization
