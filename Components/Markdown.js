@@ -20,13 +20,13 @@ Markdown.renderer.link = props => {
   const { href } = markdown
   return (
     <TouchableOpacity onPress={() => {
-      this.props.navigator.push({
+      props.passThroughProps.navigator.push({
         id: 7,
         component: ArticleView,
         backButtonTitle: 'Back',
-        title: translate(markdown.children[0].children[0].text),
+        title: translate(markdown.children[0].text),
         passProps: {
-          bankStyle: this.props.bankStyle,
+          bankStyle: props.passThroughProps.bankStyle,
           href: href
         }
       })
@@ -37,6 +37,10 @@ Markdown.renderer.link = props => {
       </View>
     </TouchableOpacity>
   )
+  // return <View>
+  //         {props.children}
+  //        </View>
+
 }
 
 module.exports = Markdown

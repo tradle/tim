@@ -39,6 +39,7 @@ import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
 import ENV from '../utils/env'
+import Markdown from './Markdown'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const SHARE_CONTEXT = 'tradle.ShareContext'
@@ -136,9 +137,10 @@ class MessageRow extends Component {
             backgroundColor: model.id === DATA_BUNDLE ? '#eeffee' : '#ffffff',
             borderTopLeftRadius: 0
           }
-          addStyle = (isSimpleMessage && message.length < 30)
-                   ? [chatStyles.verificationBody, mstyle]
-                   : [chatStyles.verificationBody, {flex: 1}, mstyle]
+          addStyle = [chatStyles.verificationBody, mstyle]
+          // addStyle = (isSimpleMessage && message.length < 30)
+          //          ? [chatStyles.verificationBody, mstyle]
+          //          : [chatStyles.verificationBody, {flex: 1}, mstyle]
         }
       }
 
@@ -183,8 +185,8 @@ class MessageRow extends Component {
       else
         verPhoto = <View style={{height: 0, width:0}} />
     }
-
-    let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
+    let rowStyle = isSimpleMessage ? {backgroundColor: 'transparent'} : [chatStyles.row, {backgroundColor: 'transparent'}];
+    // let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
     let val = this.getTime(resource);
     let date = val
              ? <Text style={chatStyles.date}>{val}</Text>
@@ -224,7 +226,9 @@ class MessageRow extends Component {
     let sendStatus
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
-      let viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+      // let viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+      let viewStyle = isSimpleMessage ? {} : {flexDirection: 'row'}
+      viewStyle.alignSelf = isMyMessage ? 'flex-end' : 'flex-start'
       if (message) {
         if (/*message.charAt(0) === '['  || */ longMessage)
           viewStyle.maxWidth = msgWidth; //isMyMessage || !hasOwnerPhoto ? w - 70 : w - 50;
@@ -245,24 +249,20 @@ class MessageRow extends Component {
 
       let cellStyle
       if (addStyle) {
-        if (/*hasOwnerPhoto  ||  */!isSimpleMessage  ||  longMessage)
+        if (!isSimpleMessage) // || hasOwnerPhoto  ||  longMessage
           cellStyle = [chatStyles.textContainer, addStyle]
         else
           cellStyle = addStyle
       }
       else
         cellStyle = chatStyles.textContainer
-      // if (isFormError) {
-      //   viewStyle.maxWidth = Math.min(600, msgWidth)
-      //   viewStyle.width =  Math.min(600, message.length * utils.getFontSize(10) + 40)
-      // }
-
+      let bubbleStyle = isSimpleMessage ? {} : styles.container
       let msgContent =  <View style={[rowStyle, viewStyle]}>
                           <View style={{marginTop: 2}}>
                           {ownerPhoto}
                           </View>
                           <View style={cellStyle}>
-                            <View style={styles.container}>
+                            <View style={bubbleStyle}>
                             {this.isShared()
                               ? <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
                                   <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
@@ -769,7 +769,16 @@ class MessageRow extends Component {
         }
         else if (isSimpleMessage) {
           let params = { resource, message: resource[v], bankStyle, noLink: true }
-          let row = utils.parseMessage(params)
+          let row
+          if  (this.messageHasLink(resource[v]))
+            row = <View style={{maxWidth: utils.dimensions().width * 0.8}}  key={this.getNextKey()}>
+                        <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle, false, isMyMessage, true)} passThroughProps={{navigator, bankStyle}}>
+                          {resource[v]}
+                        </Markdown>
+                     </View>
+          else
+            row = utils.parseMessage(params)
+
           if (typeof row === 'string') {
             if (this.isUrl(resource[v])) {
               let {width, height} = utils.dimensions(MessageRow)
@@ -809,6 +818,20 @@ class MessageRow extends Component {
     if (isSimpleMessage)
       return isConfirmation ? {isConfirmation: true} : null
     return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+  }
+  messageHasLink(message, pos) {
+    let lidx = message.indexOf('[')
+    if (lidx === -1)
+      return
+    let ridx = message.indexOf(']', lidx)
+    if (ridx === -1)
+      return
+    if (message.length === ridx)
+      return
+    if (message.indexOf('(http') !== ridx + 1)
+      return this.messageHasLink(message, ridx + 1)
+    if (message.indexOf(')', ridx) !== -1)
+      return true
   }
   isUrl(message) {
     let s = message.toLowerCase()
