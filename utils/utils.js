@@ -2269,7 +2269,7 @@ var utils = {
       },
       text: {
         color: isMyMessage ? '#ffffff' : '#757575',
-        fontSize: isChat ? 16 : 14,
+        fontSize: isChat ? 18 : 14,
         fontStyle: isItalic  &&  'italic' || 'normal'
       },
     }
