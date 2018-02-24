@@ -236,9 +236,10 @@ class FormMessageRow extends Component {
       if (prop  &&  resource[prop.name]) {
         let val = dateformat(new Date(resource[prop.name]), 'mmm d, yyyy')
         renderedRow = [this.getPropRow(prop, resource, val)]
+        noContent = false
       }
     }
-    let row = <View style={{paddingVertical: 5}}>
+    let row = <View style={{paddingVertical: noContent ? 0 : 5}}>
                 {renderedRow}
                 {sentTo}
               </View>
@@ -252,7 +253,7 @@ class FormMessageRow extends Component {
       <View style={st, viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
         <View style={[{flex:1}, chatStyles.verificationBody]}>
-          <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}]}>
+          <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}, noContent  &&  styles.noContentStyle]}>
             <Text style={chatStyles.verificationHeaderText}>{translate(model) + ' '}
               {sealedStatus}
             </Text>
@@ -391,6 +392,11 @@ var styles = StyleSheet.create({
   youSharedText: {
     color: '#ffffff',
     fontSize: 18
+  },
+  noContentStyle: {
+    marginBottom: -6,
+    borderBottomRightRadius: 10,
+    borderBottomLeftRadius: 10
   }
 });
 reactMixin(FormMessageRow.prototype, RowMixin);
