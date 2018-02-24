@@ -522,9 +522,9 @@ class TimHome extends Component {
       case 'applyForProduct':
         Actions.applyForProduct(this.state.qs)
         break
-      case 'applyForProduct':
-        Actions.applyForProduct({host: this.state.host, provider: this.state.provider, product: this.state.product })
-        break
+      // case 'applyForProduct':
+      //   Actions.applyForProduct({host: this.state.host, provider: this.state.provider, product: this.state.product })
+      //   break
       case 'officialAccounts':
       case 'conversations':
         this.showOfficialAccounts(action)
