@@ -1383,9 +1383,8 @@ class ResourceList extends Component {
           </View>
         )
     }
-    let header = utils.getMe().isEmployee  &&  this.props.officialAccounts ? styles.header : {}
     return  (
-      <View style={header}>
+      <View>
         {search}
         {conversations}
         {bookmarks}
