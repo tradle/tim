@@ -703,13 +703,12 @@ var NavigationBarRouteMapper = {
       break
     case 'Profile':
       isProfile = true
-      style = {marginTop: 2}
       iconSize = 28
       icon = 'md-person'
       break
     case 'Edit':
       iconSize = 28
-      style = {marginTop: 2, marginRight: -4}
+      style = {marginRight: -4}
       icon = 'ios-create-outline'
       break
     case 'Share':
