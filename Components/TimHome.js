@@ -159,7 +159,7 @@ class TimHome extends Component {
 
     // if (!utils.getMe()) return
 
-    Alert.alert('TRYING THE DEEP LINK')
+    // Alert.alert('TRYING THE DEEP LINK')
     try {
       let url
       if (isLinkingSupported) {
@@ -517,8 +517,10 @@ class TimHome extends Component {
     if (!noResetNavStack) {
       // After tour
       var nav = this.props.navigator
-      if (utils.isWeb()  &&  nav.getCurrentRoutes().length > 1)
-        replace = true
+      if (utils.isWeb()) {
+        if (nav.getCurrentRoutes().length > 1)
+          replace = true
+      }
       else
         nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     }
