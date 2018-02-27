@@ -9,9 +9,9 @@ const TYPE = constants.TYPE
 const debug = require('debug')('tradle:sse-push')
 // http://michalzalecki.com/progressive-web-apps-with-webpack/
 const swURL = require('file?name=service-worker.js!./service-worker')
-const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'https://push1.tradle.io'
+// const pushServerURL = __DEV__ ? `http://${ENV.LOCAL_IP}:48284` : 'https://push1.tradle.io'
 // const pushServerURL = `http://${ENV.LOCAL_IP}:48284`
-
+const { pushServerURL } = ENV
 const willRegister = ENV.registerForPushNotifications
 let initialized
 let initialize = new Promise(resolve => {
