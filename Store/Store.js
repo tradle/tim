@@ -5486,9 +5486,10 @@ var Store = Reflux.createStore({
   async onGetProvider(params) {
     await this.ready
     await this._loadedResourcesDefer.promise
-    let permalink = params.permalink
-    let serverUrl = params.url
-    let providerBot = this._getItem(utils.makeId(PROFILE, permalink))
+    // backwards compat
+    let permalink = params.permalink || params.provider
+    let serverUrl = params.url || params.host
+    let providerBot = permalink && this._getItem(utils.makeId(PROFILE, permalink))
     if (!providerBot  &&  serverUrl) {
       await this.onAddItem({
         resource: {[TYPE]: SETTINGS, url: serverUrl},
