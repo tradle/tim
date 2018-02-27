@@ -4901,7 +4901,7 @@ var Store = Reflux.createStore({
   },
   async onAddApp({ url, permalink, noTrigger }) {
     try {
-      await this.getInfo({serverUrls: [url], retry: false, id: permalink })
+      await this.getInfo({serverUrls: [url], retry: false}) //, hash: permalink })
     } catch (err) {
       if (!noTrigger)
         this.trigger({
