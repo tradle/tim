@@ -165,12 +165,7 @@
     "@tradle/models-cloud": {
       "version": "1.0.0",
       "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#2d3d4006463fd1e7fcf36887fd6993074a4cd11b"
-    },
-    "@tradle/models-cloud": {
-      "version": "1.0.0",
-      "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#abed0c79b99b7983f73b0863a16ac57bbc8f05f4"
+      "resolved": "git://github.com/tradle/models-cloud.git#0aaf2f731491d02480cd2074fb4409cfd97d31c6"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -180,7 +175,7 @@
     "@tradle/models-nz": {
       "version": "1.0.0",
       "from": "tradle/models-nz",
-      "resolved": "git://github.com/tradle/models-nz.git#b1da67a6f047316810454adb1f46cfae00ec1d19"
+      "resolved": "git://github.com/tradle/models-nz.git#3d35e1cce18132e1037136e2f871a6c87f195f7a"
     },
     "@tradle/models-onfido": {
       "version": "1.0.0",
@@ -4699,11 +4694,6 @@
           "version": "3.0.0",
           "from": "bytes@3.0.0",
           "resolved": "https://registry.npmjs.org/bytes/-/bytes-3.0.0.tgz"
-        },
-        "content-type": {
-          "version": "1.0.4",
-          "from": "content-type@>=1.0.4 <1.1.0",
-          "resolved": "https://registry.npmjs.org/content-type/-/content-type-1.0.4.tgz"
         },
         "cookie": {
           "version": "0.3.1",
@@ -10752,9 +10742,9 @@
       "resolved": "https://registry.npmjs.org/strip-outer/-/strip-outer-1.0.0.tgz"
     },
     "strong-data-uri": {
-      "version": "1.0.4",
+      "version": "1.0.5",
       "from": "strong-data-uri@>=1.0.4 <2.0.0",
-      "resolved": "https://registry.npmjs.org/strong-data-uri/-/strong-data-uri-1.0.4.tgz"
+      "resolved": "https://registry.npmjs.org/strong-data-uri/-/strong-data-uri-1.0.5.tgz"
     },
     "style-loader": {
       "version": "0.13.2",
@@ -11186,9 +11176,9 @@
       "resolved": "https://registry.npmjs.org/trim-right/-/trim-right-1.0.1.tgz"
     },
     "truncate": {
-      "version": "1.0.5",
-      "from": "truncate@>=1.0.2 <1.1.0",
-      "resolved": "https://registry.npmjs.org/truncate/-/truncate-1.0.5.tgz"
+      "version": "2.0.1",
+      "from": "truncate@>=2.0.1 <3.0.0",
+      "resolved": "https://registry.npmjs.org/truncate/-/truncate-2.0.1.tgz"
     },
     "tryit": {
       "version": "1.0.3",
