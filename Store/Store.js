@@ -3456,7 +3456,7 @@ var Store = Reflux.createStore({
       if (!plugin(context).validateForm)
         continue
       moreInfo = plugin(context).validateForm.call(
-          {models: {[rtype]: utils.getModel(rtype).value}},
+          {models: {[rtype]: this.getModel(rtype)}},
           {application: r._context, form: r}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
@@ -9954,7 +9954,7 @@ var Store = Reflux.createStore({
           self._emitter.emit('model:' + m.id)
         m._versionId = val.versionId
 
-        storeUtils.parseOneModel(m)
+        storeUtils.parseOneModel(m, models, enums)
         batch.push({type: 'put', key: m.id, value: m})
       })
       utils.setModels(models)
@@ -9965,6 +9965,7 @@ var Store = Reflux.createStore({
           lenses[l.id] = l
         })
       }
+      await db.batch(batch)
       // let orgId = utils.getId(org)
       // list[orgId].value = org
       // self.dbBatchPut(utils.getId(org), org, batch)
@@ -11023,9 +11024,25 @@ var Store = Reflux.createStore({
     let mm = {}
     for (let m in models)
       mm[m] = models[m].value
+
     return mm
   },
   getModel(modelName) {
+    let m = modelName
+    if (typeof modelName === 'string')
+      m = models  &&  models[modelName] && models[modelName].value
+
+    if (m) {
+      let rModel = _.cloneDeep(m)
+      storeUtils.addOns(rModel, models, enums)
+      // let props = rModel.properties
+      // for (let p in props)
+      //   props[p].name = p
+      return rModel
+    }
+  },
+
+  getOriginalModel(modelName) {
     return models  &&  models[modelName] && models[modelName].value
   },
   getLenses() {

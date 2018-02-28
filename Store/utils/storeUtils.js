@@ -27,11 +27,12 @@ var storeUtils = {
   },
   parseOneModel(m, models, enums) {
     Aviva.preparseModel(m)
-    this.addNameAndTitleProps(m)
+    // this.addNameAndTitleProps(m)
     models[m.id] = {
       key: m.id,
       value: m
     }
+
     if (!m.properties[TYPE]) {
       m.properties[TYPE] = {
         type: 'string',
@@ -39,12 +40,29 @@ var storeUtils = {
       }
     }
     if (!m.properties.time) {
+
       m.properties.time = {
         type: 'date',
         readOnly: true,
         title: 'Date'
       }
     }
+  },
+  addOns(m, models, enums) {
+    // Aviva.preparseModel(m)
+    this.addNameAndTitleProps(m)
+    // models[m.id] = {
+    //   key: m.id,
+    //   value: m
+    // }
+
+    // if (!m.properties.time) {
+    //   m.properties.time = {
+    //     type: 'date',
+    //     readOnly: true,
+    //     title: 'Date'
+    //   }
+    // }
 
     // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
     //   org.products.push(m.id)
