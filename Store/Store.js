@@ -10031,6 +10031,7 @@ var Store = Reflux.createStore({
           lenses[l.id] = l
         })
       }
+      await db.batch(batch)
       // let orgId = utils.getId(org)
       // list[orgId].value = org
       // self.dbBatchPut(utils.getId(org), org, batch)
