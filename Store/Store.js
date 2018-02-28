@@ -4636,7 +4636,7 @@ var Store = Reflux.createStore({
           })
         }
       }
-      if (isNew  &&  isContext)
+      if (isNew  &&  isContext  &&  !returnVal.contextId)
         returnVal.contextId = self.getNonce()
       let rId = utils.getId(returnVal.to)
       let to = self._getItem(rId)
