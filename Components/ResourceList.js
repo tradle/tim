@@ -1384,7 +1384,7 @@ class ResourceList extends Component {
         )
     }
     return  (
-      <View>
+      <View style={{paddingHorizontal: 20}}>
         {search}
         {conversations}
         {bookmarks}
