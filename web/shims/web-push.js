@@ -54,7 +54,7 @@ exports.init = function (opts) {
     () => initialized(opts),
     err => {
       console.error('failed to register service worker for Push notifications', err)
-      throw err
+      // throw err
     }
   )
 }
