@@ -2444,7 +2444,7 @@ var Store = Reflux.createStore({
     if (languageCode)
       url += '?lang=' + languageCode
 
-    let response = await doFetch(url, { headers: { cache: 'no-cache' } }, 5000)
+    let response = await doFetch(url, { headers: { cache: 'no-cache' } }, 15000)
     if (response.status > 300)
       throw new Error('Cannot access: ' + url)
 
@@ -4657,7 +4657,7 @@ var Store = Reflux.createStore({
           })
         }
       }
-      if (isNew  &&  isContext)
+      if (isNew  &&  isContext  &&  !returnVal.contextId)
         returnVal.contextId = self.getNonce()
       let rId = utils.getId(returnVal.to)
       let to = self._getItem(rId)
