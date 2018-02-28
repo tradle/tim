@@ -540,11 +540,9 @@ var NewResourceMixin = {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
   onChangeText(prop, value) {
-    let r = {}
     let {resource, missedRequiredOrErrorValue} = this.state
     let search = this.props.search
-    _.extend(r, resource)
-    // extend(true, r, resource)
+    let r = _.cloneDeep(resource)
     if(prop.type === 'number'  &&  !search) {
       let val = Number(value)
       if (value.charAt(value.length - 1) === '.')
@@ -558,8 +556,6 @@ var NewResourceMixin = {
       if (!this.floatingProps[prop.name])
         this.floatingProps[prop.name] = {}
       this.floatingProps[prop.name].value = value
-      if (!r[prop.name])
-        r[prop.name] = {}
       r[prop.name].value = value
     }
     else if (prop.type === 'boolean')  {
@@ -596,23 +592,6 @@ var NewResourceMixin = {
       resource: r,
       inFocus: prop.name
     })
-  },
-  onChangeTextValue(prop, value, event) {
-    console.log(arguments)
-    this.state.resource[prop.name] = value
-    // this.setState({resource: this.state.resource})
-    if (!this.floatingProps)
-      this.floatingProps = {}
-    this.floatingProps[prop.name] = value;
-    // prop.type === 'object' && prop.ref === MONEY
-    //                                     ? {value: value}
-    //                                     : value
-    let r = {}
-    _.extend(r, this.state.resource)
-    for (let p in this.floatingProps)
-      r[p] = this.floatingProps[p]
-    if (!this.props.search)
-      Actions.saveTemporary(r)
   },
 
   async showBlinkIDScanner(prop) {
@@ -693,8 +672,7 @@ var NewResourceMixin = {
     }
 
     // const tradleObj = utils.fromMicroBlink(result)
-    const r = {}
-    _.extend(r, this.state.resource)
+    const r = _.cloneDeep(this.state.resource)
 
     r[prop] = {
       url: result.image.base64,
@@ -1264,8 +1242,7 @@ var NewResourceMixin = {
   },
 
   changeTime: function(prop, date) {
-    let r = {}
-    _.extend(r, this.state.resource)
+    let r = _.cloneDeep(this.state.resource)
     r[prop.name] = date.getTime()
     if (!this.floatingProps)
       this.floatingProps = {}
@@ -1449,8 +1426,7 @@ var NewResourceMixin = {
       item[TYPE] = props[propName].ref
     if (this.state.missedRequiredOrErrorValue)
       delete this.state.missedRequiredOrErrorValue[propName]
-    let r = {}
-    _.extend(r, this.state.resource)
+    let r = _.cloneDeep(this.state.resource)
     r[propName] = item
     if (!this.floatingProps)
       this.floatingProps = {}
@@ -1554,8 +1530,7 @@ var NewResourceMixin = {
   },
   // setting chosen from the list property on the resource like for ex. Organization on Contact
   setChosenValue(propName, value) {
-    let resource = {}
-    _.extend(resource, this.state.resource)
+    let resource = _.cloneDeep(this.state.resource)
     if (typeof propName === 'object')
       propName = propName.name
 
@@ -1663,8 +1638,7 @@ var NewResourceMixin = {
     state.inFocus = propName
 
 
-    let r = {}
-    _.extend(r, this.state.resource)
+    let r = _.cloneDeep(this.state.resource)
     for (let p in this.floatingProps)
       r[p] = this.floatingProps[p]
 
@@ -1785,8 +1759,7 @@ var NewResourceMixin = {
     });
   },
   setChosenEnumValue(propName, enumPropName, value) {
-    let resource = {}
-    _.extend(true, resource, this.state.resource)
+    let resource = _.cloneDeep(this.state.resource)
     // clause for the items properies - need to redesign
     // resource[propName][enumPropName] = value
     if (resource[propName]) {
@@ -2614,4 +2587,21 @@ module.exports = NewResourceMixin
   //       navigator: this.props.navigator
   //     },
   //   })
+  // },
+  // onChangeTextValue(prop, value, event) {
+  //   console.log(arguments)
+  //   this.state.resource[prop.name] = value
+  //   // this.setState({resource: this.state.resource})
+  //   if (!this.floatingProps)
+  //     this.floatingProps = {}
+  //   this.floatingProps[prop.name] = value;
+  //   // prop.type === 'object' && prop.ref === MONEY
+  //   //                                     ? {value: value}
+  //   //                                     : value
+  //   let r = {}
+  //   _.extend(r, this.state.resource)
+  //   for (let p in this.floatingProps)
+  //     r[p] = this.floatingProps[p]
+  //   if (!this.props.search)
+  //     Actions.saveTemporary(r)
   // },
