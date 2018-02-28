@@ -43,7 +43,6 @@ class StringChooser extends Component {
     let model = utils.getModel(modelId)
     if (!model)
       return null
-    model = model.value;
 
     return (
       <StringRow

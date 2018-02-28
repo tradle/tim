@@ -129,10 +129,10 @@ class ResourceView extends Component {
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     // if (resource.id || !resource[constants.ROOT_HASH])
     let rtype = utils.getType(resource)
-    let m = utils.getModel(rtype).value
+    let m = utils.getModel(rtype)
     if (m.inlined)
       return
-    if (m.subClassOf  &&  utils.getModel(m.subClassOf).value.inlined)
+    if (m.subClassOf  &&  utils.getModel(m.subClassOf).inlined)
       return
     Actions.getItem( {resource, search, backlink, isMessage: true} )
   }
@@ -147,7 +147,7 @@ class ResourceView extends Component {
       if (isMe) {
         let me = utils.getMe()
         if (action === 'addItem') {
-          let m = utils.getModel(resource[TYPE]).value
+          let m = utils.getModel(resource[TYPE])
           if (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === 'tradle.ConfirmPackageRequest'  ||  m.subClassOf === MY_PRODUCT)
             Actions.getItem({resource: me})
         }
@@ -275,7 +275,7 @@ class ResourceView extends Component {
 
     let resource = this.state.resource;
     let modelName = resource[TYPE];
-    let model = utils.getModel(modelName).value;
+    let model = utils.getModel(modelName);
     let photos = [];
     if (resource.photos  &&  resource.photos.length > 1) {
       extend(photos, resource.photos);
@@ -465,7 +465,7 @@ class ResourceView extends Component {
     this.setState({isModalOpen: false});
   }
   getRefResource(resource, prop) {
-    let model = utils.getModel(this.props.resource[TYPE]).value;
+    let model = utils.getModel(this.props.resource[TYPE]);
 
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);
@@ -520,7 +520,7 @@ class ResourceView extends Component {
     const { navigator } = this.props
     const currentRoute = Navs.getCurrentRoute(navigator)
     await signIn(navigator, settings, isChangeGesturePassword)
-    Actions.addItem({resource: me, value: settings, meta: utils.getModel(PROFILE).value})
+    Actions.addItem({resource: me, value: settings, meta: utils.getModel(PROFILE)})
 
     if (Navs.getCurrentRoute(navigator) !== currentRoute) {
       navigator.popToRoute(currentRoute)

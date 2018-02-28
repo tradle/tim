@@ -57,14 +57,14 @@ class VerificationView extends Component {
         <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.verifiedHeaderColor}]}>
           <Text style={[styles.description, {color: this.props.bankStyle.verifiedHeaderTextColor, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
         </View>
-        {this.renderVerification(resource, utils.getModel(constants.TYPES.VERIFICATION).value, vTree, 0, 0)}
+        {this.renderVerification(resource, utils.getModel(constants.TYPES.VERIFICATION), vTree, 0, 0)}
       </View>
     );
   }
 
   renderVerification(resource, model, vTree, currentLayer) {
     resource = resource || this.props.resource;
-    let vModel = utils.getModel(constants.TYPES.VERIFICATION).value
+    let vModel = utils.getModel(constants.TYPES.VERIFICATION)
     let bankStyle = this.props.bankStyle
     if (resource.method) {
       let displayName = utils.getDisplayName(resource.method)
@@ -100,7 +100,7 @@ class VerificationView extends Component {
     return vTree
   }
   showMethod(r) {
-    let m = utils.getModel(utils.getType(r.method)).value
+    let m = utils.getModel(utils.getType(r.method))
     this.props.navigator.push({
       title: utils.makeModelTitle(m),
       id: 3,
@@ -127,7 +127,7 @@ class VerificationView extends Component {
     let modelName = resource[TYPE];
     if (!model)
       model = utils.getModel(modelName)
-    // let model = utils.getModel(modelName).value;
+    // let model = utils.getModel(modelName);
     let vCols = model.viewCols ? utils.clone(model.viewCols) : null
     let props = model.properties
 
@@ -157,14 +157,14 @@ class VerificationView extends Component {
       // Then show link for document to be able to review it
       let dType = utils.getId(r.document).split('_')[0]
       if (this.state.documentType !== dType) {
-        let mv = utils.getModel(VERIFICATION).value
+        let mv = utils.getModel(VERIFICATION)
         retCols.push(
           <View key={this.getNextKey()}>
              <View style={styles.separator}></View>
              <View  style={[style, {backgroundColor: this.props.bankStyle.sourcedVerificationBgColor}]}>
                <TouchableOpacity onPress={this.showResource.bind(this, r.document, dType)} >
                  <Text style={[styles.title, {color: this.props.bankStyle.sourcedVerificationTextColor}]}>{translate(mv.properties.document)}</Text>
-                 <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate(utils.getModel(dType).value)}</Text>
+                 <Text style={[styles.description, {color: '#7AAAC3'}]}>{translate(utils.getModel(dType))}</Text>
                </TouchableOpacity>
              </View>
           </View>
@@ -202,11 +202,11 @@ class VerificationView extends Component {
           let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
           val = (c || CURRENCY_SYMBOL) + val.value
         }
-        else if (pMeta.inlined ||  utils.getModel(pMeta.ref).value.inlined)
-          return this.renderResource(val, utils.getModel(val[TYPE]).value)
+        else if (pMeta.inlined ||  utils.getModel(pMeta.ref).inlined)
+          return this.renderResource(val, utils.getModel(val[TYPE]))
 
         // Could be enum like props
-        else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
+        else if (utils.getModel(pMeta.ref).subClassOf === ENUM)
           val = val.title
         else if (this.props.showVerification) {
           let value = val[TYPE] ? utils.getDisplayName(val) : val.title
@@ -278,7 +278,7 @@ class VerificationView extends Component {
   }
   showResource(r, type) {
     let route = {
-      title: translate(utils.getModel(type).value),
+      title: translate(utils.getModel(type)),
       id: 5,
       backButtonTitle: 'Back',
       component: MessageView,

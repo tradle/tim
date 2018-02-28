@@ -47,7 +47,7 @@ class VerificationMessageRow extends Component {
   }
   render() {
     let { resource, application, bankStyle } = this.props
-    let model = utils.getModel(resource[constants.TYPE]).value;
+    let model = utils.getModel(resource[constants.TYPE]);
     let renderedRow = [];
 
     var time = this.getTime(resource);
@@ -58,7 +58,7 @@ class VerificationMessageRow extends Component {
     var isMyMessage = this.isMyMessage();
 
     var dType = utils.getType(resource.document)
-    var msgModel = utils.getModel(dType).value
+    var msgModel = utils.getModel(dType)
     var orgName = resource._verifiedBy
                 ? resource._verifiedBy.title
                 : resource.organization  ? resource.organization.title : ''
@@ -268,12 +268,12 @@ class VerificationMessageRow extends Component {
     else
       passProps.verification = resource
 
-    var model = utils.getModel(r[constants.TYPE]).value;
+    var model = utils.getModel(r[constants.TYPE]);
     let title
     if (r[constants.TYPE] === constants.TYPES.VERIFICATION) {
       let type = utils.getType(r.document)
       if (type)
-        title = translate(utils.getModel(type).value)
+        title = translate(utils.getModel(type))
     }
     if (!title)
       title = translate(model)
@@ -313,7 +313,7 @@ class VerificationMessageRow extends Component {
 
     let isThirdParty = !document[constants.TYPE]
     let type = document[constants.TYPE] || utils.getType(document)
-    var docModel = utils.getModel(type).value;
+    var docModel = utils.getModel(type);
     var isMyProduct = docModel.subClassOf === MY_PRODUCT
     var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
     var idx = docModelTitle.indexOf('Verification');

@@ -62,7 +62,7 @@ class ContextChooser extends Component {
   }
 
   renderRow(resource)  {
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id)
 
     return (
       <MessageTypeRow

@@ -201,7 +201,7 @@ var utils = {
   toStylesPack(oldStylesFormat) {
     if (oldStylesFormat[TYPE] === STYLES_PACK) return oldStylesFormat
 
-    const { properties } = Store.getModel(STYLES_PACK)
+    const { properties } = this.getModel(STYLES_PACK)
     const pack = {
       [TYPE]: STYLES_PACK
     }
@@ -249,13 +249,19 @@ var utils = {
   },
   getModelForFormRequest(fr) {
     const form = utils.getRequestedFormType(fr)
-    let model = Store.getModel(form)
+    let model = Store.getOriginalModel(form)
     let lensId = fr.lens
     if (!lensId)
-      return model
+      return this.getModel(model)
+
     let lens = Store.getLens(lensId)
 
-    return Lens.merge({ models: Store.getModels(), model, lens })
+    let merged = Lens.merge({ models: this.getModels(), model, lens })
+    // let m = _.cloneDeep(merged)
+    // let props = m.properties
+    // for (let p in props)
+    //   props[p].name = p
+    return this.getModel(merged)
   },
   applyLens({prop, value, list}) {
     let pin = prop.pin
@@ -297,9 +303,10 @@ var utils = {
     return list
   },
   getModel(modelName) {
-    const model = models ? models[modelName] : null
-    // if (!model) debug(`missing model: ${modelName}`)
-    return model
+    return Store.getModel(modelName)
+    // const model = models ? models[modelName] : null
+    // // if (!model) debug(`missing model: ${modelName}`)
+    // return model
   },
   getDefaultLanguage: Strings.getDefaultLanguage,
   translate(...args) {
@@ -371,7 +378,7 @@ var utils = {
 
     if (isInlined) return equal(r1, r2)
 
-    let properties = Store.getModel(r1[TYPE]).properties
+    let properties = this.getModel(r1[TYPE]).properties
     let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
     for (var p in properties) {
       let prop = properties[p]
@@ -394,7 +401,7 @@ var utils = {
           if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
             return false
         }
-        else if (prop.inlined  ||  (prop.ref  &&  Store.getModel(prop.ref).inlined))
+        else if (prop.inlined  ||  (prop.ref  &&  this.getModel(prop.ref).inlined))
           return this.compare(r1[p], r2[p], true)
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
@@ -431,7 +438,7 @@ var utils = {
   },
   makeModelTitle(model, isPlural) {
     if (typeof model === 'string') {
-      let m = Store.getModel(model)
+      let m = this.getModel(model)
       if (m)
         return this.makeModelTitle(m, isPlural)
       else {
@@ -508,7 +515,7 @@ var utils = {
           if (p === excludeModels[i])
             found = true
           else {
-            var em = Store.getModel(p)
+            var em = this.getModel(p)
             if (em.subClassOf  &&  em.subClassOf === excludeModels[i])
               found = true;
           }
@@ -532,12 +539,12 @@ var utils = {
   },
   isSubclassOf(type, subType) {
     if (typeof type === 'string')
-      return Store.getModel(type).subClassOf === subType
+      return this.getModel(type).subClassOf === subType
     if (type.type)  {
       if (type.type === 'tradle.Model')
       return type.subClassOf === subType
     }
-    return Store.getModel(type[TYPE]).subClassOf === subType
+    return this.getModel(type[TYPE]).subClassOf === subType
   },
   isMyProduct(type) {
     return this.isSubclassOf(type, MY_PRODUCT)
@@ -569,7 +576,7 @@ var utils = {
     }
     else if (r[ROOT_HASH]) {
       let id = r[TYPE] + '_' + r[ROOT_HASH] // +  '_' + (r[CUR_HASH] || r[ROOT_HASH])
-      let m = Store.getModel(r[TYPE])
+      let m = this.getModel(r[TYPE])
       if (m  &&  m.subClassOf !== ENUM)
         id +=  '_' + (r[CUR_HASH] || r[ROOT_HASH])
       // return  m  &&  (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === MY_PRODUCT)
@@ -579,7 +586,7 @@ var utils = {
     }
   },
   makeId(type, permalink, link) {
-    let model = Store.getModel(type)
+    let model = this.getModel(type)
     link = link || permalink
     return id({model, permalink, link})
   },
@@ -603,7 +610,7 @@ var utils = {
       if (props[p].type !== 'array')  //  &&  required[p]) {
         continue
       let ref = props[p].items.ref
-      if (!ref  ||  Store.getModel(ref).subClassOf !== ENUM)
+      if (!ref  ||  this.getModel(ref).subClassOf !== ENUM)
         itemsMeta[p] = props[p];
     }
     return itemsMeta;
@@ -634,10 +641,10 @@ var utils = {
         if (resource.id)
           return ""
       }
-      model = Store.getModel(resource[TYPE])
+      model = this.getModel(resource[TYPE])
     }
     let props = model.properties
-    let resourceModel = resource[TYPE] ? Store.getModel(resource[TYPE]) : null
+    let resourceModel = resource[TYPE] ? this.getModel(resource[TYPE]) : null
     var displayName = '';
     for (var p in props) {
       if (p.charAt(0) === '_')
@@ -677,7 +684,7 @@ var utils = {
         return this.getDateValue(resource[p])
       if (meta[p].type !== 'object') {
         if (meta[p].range  ===  'model') {
-          let m = Store.getModel(resource[p])
+          let m = this.getModel(resource[p])
           if (m)
             return this.makeModelTitle(m)
         }
@@ -691,7 +698,7 @@ var utils = {
           return (c || '') + resource[p].value
         }
         else {
-          let rm = Store.getModel(resource[p][TYPE])
+          let rm = this.getModel(resource[p][TYPE])
           if (rm)
             return this.getDisplayName(resource[p], rm);
         }
@@ -723,7 +730,7 @@ var utils = {
     if (!resource[p]  &&  prop.displayAs)
       return this.templateIt(prop, resource);
     if (prop.type == 'object')
-      return resource[p].title || this.getDisplayName(resource[p], Store.getModel(resource[p][TYPE]).properties);
+      return resource[p].title || this.getDisplayName(resource[p], this.getModel(resource[p][TYPE]).properties);
     else
       return resource[p] + '';
   },
@@ -805,14 +812,14 @@ var utils = {
       return prop.displayAs
     let group = []
     let hasSetProps
-    let props = Store.getModel(rtype).properties
+    let props = this.getModel(rtype).properties
     for (let i=0; i<pgroup.length; i++) {
       let p = pgroup[i]
       let v =  resource[p] ? resource[p] : ''
       if (v)
         hasSetProps = true
       if (typeof v === 'object')
-        v = v.title ? v.title : utils.getDisplayName(v, Store.getModel(props[p].ref).properties)
+        v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref).properties)
       else if (props  &&  props[p].range  &&  props[p].range  === 'check')
         v = ''
       group.push(v)
@@ -1040,7 +1047,7 @@ var utils = {
   buildRef(resource) {
     if (!resource[TYPE] && resource.id)
       return resource
-    let m = Store.getModel(resource[TYPE])
+    let m = this.getModel(resource[TYPE])
     let ref = {
       id: utils.getId(resource),
       title: resource.id ? resource.title : utils.getDisplayName(resource)
@@ -1069,7 +1076,7 @@ var utils = {
   },
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? _.cloneDeep(resource) : resource
-    let m = Store.getModel(res[TYPE])
+    let m = this.getModel(res[TYPE])
     // if (!m.interfaces)
     //   res = this.optimizeResource1(resource, doNotChangeOriginal)
     // else {
@@ -1127,7 +1134,7 @@ var utils = {
   isContainerProp(resource, prop, pModel) {
     if (!prop.ref  ||  !prop.readOnly)
       return
-    let refM = Store.getModel(prop.ref)
+    let refM = this.getModel(prop.ref)
     let aprops = this.getPropertiesWithAnnotation(refM, 'items')
     if (!aprops)
       return
@@ -1142,18 +1149,18 @@ var utils = {
   isContext(typeOrModel) {
     let m = typeOrModel
     if (typeof typeOrModel === 'string') {
-      m = Store.getModel(typeOrModel)
+      m = this.getModel(typeOrModel)
       if (!m)
         return
     }
     else if (typeOrModel[TYPE])
-      m = Store.getModel(typeOrModel[TYPE])
+      m = this.getModel(typeOrModel[TYPE])
     return m.interfaces  &&  m.interfaces.indexOf(CONTEXT) !== -1
   },
   isEnum(typeOrModel) {
     let m = typeOrModel
     if (typeof typeOrModel === 'string') {
-      m = Store.getModel(typeOrModel)
+      m = this.getModel(typeOrModel)
       if (!m)
         return
     }
@@ -1223,7 +1230,7 @@ var utils = {
     let me = this.getMe()
     if (!me.isEmployee)
       return false
-    // let model = Store.getModel(resource[TYPE])
+    // let model = this.getModel(resource[TYPE])
     // if (model.subClassOf === FORM) {
     //   return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
     //          !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
@@ -1248,7 +1255,7 @@ var utils = {
   //   let me = this.getMe()
   //   if (!me.isEmployee)
   //     return false
-  //   let model = Store.getModel(resource[TYPE])
+  //   let model = this.getModel(resource[TYPE])
   //   if (model.subClassOf === FORM) {
   //     return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
   //            !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
@@ -1745,7 +1752,7 @@ var utils = {
     }
   },
   getPhotoProperty(resource) {
-    let props = Store.getModel(resource[TYPE]).properties
+    let props = this.getModel(resource[TYPE]).properties
     let photoProp
     for (let p in resource) {
       if (props[p].ref === PHOTO  &&  props[p].mainPhoto)
@@ -2029,9 +2036,9 @@ var utils = {
   isMessage(m) {
     return m[IS_MESSAGE]
     // if (typeof m === 'string')
-    //   m = Store.getModel(m)
+    //   m = this.getModel(m)
     // else if (m[TYPE])  // resource was passed
-    //   m = Store.getModel(m[TYPE])
+    //   m = this.getModel(m[TYPE])
 
     // if (m.isInterface  &&  (m.id === MESSAGE || m.id === DOCUMENT || m.id === ITEM))
     //   return true
@@ -2040,7 +2047,7 @@ var utils = {
   },
   isItem(model) {
     if (typeof model === 'string')
-      model = Store.getModel(model)
+      model = this.getModel(model)
     return model.interfaces  &&  model.interfaces.indexOf(ITEM) !== -1
   },
   isDocument(model) {
@@ -2164,7 +2171,7 @@ var utils = {
     let ftype = isFormRequest
               ? resource.form
               : utils.getType(resource.prefill)
-    const model = Store.getModel(ftype)
+    const model = this.getModel(ftype)
     const props = model.properties
     let eCols = []
     for (let p in props) {
@@ -2181,7 +2188,7 @@ var utils = {
         return p
       if (ftype === PRODUCT_REQUEST)
         return p
-      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  Store.getModel(p.ref).subClassOf === ENUM))
+      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  this.getModel(p.ref).subClassOf === ENUM))
         return p
     }
     return
@@ -2192,7 +2199,7 @@ var utils = {
   },
   isSavedItem(r) {
     let type = this.getType(r)
-    let m = Store.getModel(type)
+    let m = this.getModel(type)
     if (!m.interfaces || m.interfaces.indexOf(ITEM) === -1)
       return
     let toId = utils.getId(r.to)
@@ -2224,7 +2231,7 @@ var utils = {
       message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
       formType = formType.substring(0, i2)
       if (resource[TYPE] === FORM_REQUEST) {
-        let form = Store.getModel(resource.form)
+        let form = this.getModel(resource.form)
         if (form.subClassOf === MY_PRODUCT)
           linkColor = '#aaaaaa'
       }
@@ -2268,7 +2275,7 @@ var utils = {
   },
   isHidden(p, resource) {
     let modelName = resource[TYPE]
-    if (!this.isMessage(Store.getModel(modelName)))
+    if (!this.isMessage(this.getModel(modelName)))
       return
     // Check if the resource is one of the remedition resources
     // and in a reviewing after scan process - there are no from or to in it
@@ -2432,7 +2439,7 @@ var utils = {
       return
     let lr = result[startI]
     let rtype = lr[TYPE]
-    let pinFR = rtype === VERIFICATION // || Store.getModel(rtype).subClassOf === FORM
+    let pinFR = rtype === VERIFICATION // || this.getModel(rtype).subClassOf === FORM
     if (!pinFR)
       return
     let contextId = utils.getId(lr._context)
@@ -2581,11 +2588,11 @@ module.exports = utils;
         return resource.title
       if (resource.id)
         return ""
-      meta = Store.getModel(resource[TYPE]).properties
+      meta = this.getModel(resource[TYPE]).properties
     }
     let dProps = this.getPropertiesWithAnnotation(meta, 'displayName')
 
-    let m = Store.getModel(resource[TYPE])
+    let m = this.getModel(resource[TYPE])
     let vCols = m  &&  m.viewCols
     var displayName = '';
     if (vCols) {
@@ -2630,9 +2637,9 @@ module.exports = utils;
   //       if (resource.id)
   //         return ""
   //     }
-  //     meta = Store.getModel(resource[TYPE]).properties
+  //     meta = this.getModel(resource[TYPE]).properties
   //   }
-  //   let m = resource[TYPE] ? Store.getModel(resource[TYPE]) : null
+  //   let m = resource[TYPE] ? this.getModel(resource[TYPE]) : null
   //   var displayName = '';
   //   for (var p in meta) {
   //     if (p.charAt(0) === '_')
@@ -2679,7 +2686,7 @@ module.exports = utils;
   // },
   // getModelForFormRequest(fr) {
   //   const form = utils.getRequestedFormType(fr)
-  //   let model = Store.getModel(form)
+  //   let model = this.getModel(form)
   //   let lensId = fr.lens
   //   if (!lensId)
   //     return model

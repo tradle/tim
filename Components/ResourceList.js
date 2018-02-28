@@ -212,12 +212,12 @@ class ResourceList extends Component {
     if (sortProperty)
       params.sortProperty = sortProperty;
     if (prop)
-      params.prop = Store.getModel(resource[TYPE]).properties[prop.name];
+      params.prop = utils.getModel(resource[TYPE]).properties[prop.name];
     if (params.prop) {
-      let m = Store.getModel(resource[TYPE])
+      let m = utils.getModel(resource[TYPE])
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
-        // if (Store.getModel(modelName).interfaces)
+        // if (utils.getModel(modelName).interfaces)
         //   params.to = resource.to
         params.resource = resource
       else if (params.prop.items  &&  params.prop.items.backlink)
@@ -292,8 +292,8 @@ class ResourceList extends Component {
     }
     if (action === 'addItem'  ||  action === 'addMessage') {
       let model = action === 'addMessage'
-                ? Store.getModel(modelName)
-                : Store.getModel(params.resource[TYPE]);
+                ? utils.getModel(modelName)
+                : utils.getModel(params.resource[TYPE]);
       if (action === 'addItem'  &&  model.id !== modelName)
         return
       if (action === 'addMessage'  &&  modelName !== PROFILE)
@@ -407,7 +407,7 @@ class ResourceList extends Component {
       if (params.isTest  !== this.props.isTest)
         return
       if (params.list  &&  params.list.length) {
-        let m = Store.getModel(params.list[0][TYPE])
+        let m = utils.getModel(params.list[0][TYPE])
         if (m.id !== modelName  &&  m.subClassOf !== modelName)
           return
       }
@@ -422,7 +422,7 @@ class ResourceList extends Component {
     if (list.length) {
       let type = list[0][TYPE];
       if (type  !== modelName) {
-        let m = Store.getModel(type);
+        let m = utils.getModel(type);
         if (!m.subClassOf  ||  m.subClassOf != modelName)
           return;
       }
@@ -531,14 +531,14 @@ class ResourceList extends Component {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, callback, navigator, bankStyle, serverOffline, prop, currency, officialAccounts } = this.props
-    let model = Store.getModel(modelName);
+    let model = utils.getModel(modelName);
     let isContact = modelName === PROFILE;
     let rType = resource[TYPE]
     let isVerificationR  = rType === VERIFICATION
     let isMessage = utils.isMessage(resource)
 
     let isOrganization = modelName === ORGANIZATION;
-    let m = Store.getModel(resource[TYPE]);
+    let m = utils.getModel(resource[TYPE]);
     if (!isContact          &&
         !isOrganization     &&
         !callback) {
@@ -546,7 +546,7 @@ class ResourceList extends Component {
         let title
         if (isVerificationR) {
           let type = utils.getType(resource.document)
-          title = utils.makeModelTitle(Store.getModel(type))
+          title = utils.makeModelTitle(utils.getModel(type))
         }
         else
           title = utils.makeModelTitle(m)
@@ -727,7 +727,7 @@ class ResourceList extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             bankStyle: style,
-            model: Store.getModel(resource[TYPE]),
+            model: utils.getModel(resource[TYPE]),
             resource: resource,
             currency: currency,
           }
@@ -754,7 +754,7 @@ class ResourceList extends Component {
   }
 
   _selectResource(resource) {
-    let model = Store.getModel(this.props.modelName);
+    let model = utils.getModel(this.props.modelName);
     let title = utils.getDisplayName(resource);
     let newTitle = title;
     if (title.length > 20) {
@@ -801,7 +801,7 @@ class ResourceList extends Component {
         rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
         passProps: {
-          model: Store.getModel(resource[TYPE]),
+          model: utils.getModel(resource[TYPE]),
           bankStyle: this.props.style,
           resource: me
         }
@@ -810,7 +810,7 @@ class ResourceList extends Component {
     this.props.navigator.push(route);
   }
   showRefResources(resource, prop) {
-    let props = Store.getModel(resource[TYPE]).properties;
+    let props = utils.getModel(resource[TYPE]).properties;
     let propJson = props[prop];
     let resourceTitle = utils.getDisplayName(resource);
     resourceTitle = utils.makeTitle(resourceTitle);
@@ -847,7 +847,7 @@ class ResourceList extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: Store.getModel(resource[TYPE]),
+            model: utils.getModel(resource[TYPE]),
             bankStyle: this.props.style,
             resource: resource
           }
@@ -865,7 +865,7 @@ class ResourceList extends Component {
   onSearchChange(filter) {
     if (this.props.search) {
       let modelName = filter
-      let model = Store.getModel(modelName)
+      let model = utils.getModel(modelName)
       if (!model)
         return
       this.props.navigator.push({
@@ -905,10 +905,10 @@ class ResourceList extends Component {
 
   renderRow(resource)  {
     let model = this.props.isBacklink
-              ? Store.getModel(utils.getType(resource))
-              : Store.getModel(this.props.modelName);
+              ? utils.getModel(utils.getType(resource))
+              : utils.getModel(this.props.modelName);
     if (model.isInterface)
-      model = Store.getModel(utils.getType(resource))
+      model = utils.getModel(utils.getType(resource))
  // || (model.id === FORM)
     let isVerification = model.id === VERIFICATION  ||  model.subClassOf === VERIFICATION
     let isForm = model.id === FORM || model.subClassOf === FORM
@@ -960,7 +960,7 @@ class ResourceList extends Component {
   }
   openSharedContextChat({resource}) {
     let route = {
-      // title: translate(Store.getModel(resource.product)) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
+      // title: translate(utils.getModel(resource.product)) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
       title: (resource.from.organization || resource.from.title) + '  →  ' + resource.to.organization.title,
       component: MessageList,
       id: 11,
@@ -1010,7 +1010,7 @@ class ResourceList extends Component {
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
     let { modelName, bankStyle } = this.props
-    let model = Store.getModel(modelName);
+    let model = utils.getModel(modelName);
     if (!this.props.prop  &&  model.id !== ORGANIZATION) {
       if (!this.props.search ||  !this.state.resource || !Object.keys(this.state.resource).length)
         return <View />
@@ -1041,7 +1041,7 @@ class ResourceList extends Component {
      )
   }
   onSettingsPressed() {
-    let model = Store.getModel(SETTINGS)
+    let model = utils.getModel(SETTINGS)
     this.setState({hideMode: false})
     let route = {
       component: NewResource,
@@ -1080,7 +1080,7 @@ class ResourceList extends Component {
   }
 
   addNew() {
-    let model = Store.getModel(this.props.modelName);
+    let model = utils.getModel(this.props.modelName);
     let r;
     this.setState({hideMode: false})
     // resource if present is a container resource as for example subreddit for posts or post for comments
@@ -1090,7 +1090,7 @@ class ResourceList extends Component {
       for (let p in props) {
         let isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[TYPE];
         if (props[p].ref  &&  !isBacklink) {
-          if (Store.getModel(props[p].ref).isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
+          if (utils.getModel(props[p].ref).isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
             isBacklink = true;
         }
         if (isBacklink) {
@@ -1148,7 +1148,7 @@ class ResourceList extends Component {
   }
   render() {
     let content;
-    let model = Store.getModel(this.props.modelName);
+    let model = utils.getModel(this.props.modelName);
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
         !utils.getMe().organization                 &&
@@ -1247,7 +1247,7 @@ class ResourceList extends Component {
           onPress: this.onSettingsPressed
         },
         {
-          text: translate('hideResource', translate(Store.getModel(this.props.modelName))),
+          text: translate('hideResource', translate(utils.getModel(this.props.modelName))),
           onPress: () => this.setState({hideMode: true})
         },
         {
@@ -1279,7 +1279,7 @@ class ResourceList extends Component {
         {text: translate('Ok'), onPress: () => {
           let r = utils.clone(resource)
           r._inactive = true
-          Actions.addItem({resource: resource, value: r, meta: Store.getModel(resource[TYPE])})
+          Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE])})
           this.setState({hideMode: false})
         }},
       ]

@@ -49,7 +49,7 @@ var ResourceMixin = {
     // if (id !== this.state.propValue)
     //   return;
     let type = utils.getType(resource)
-    let model = utils.getModel(type).value;
+    let model = utils.getModel(type);
     let title = utils.getDisplayName(resource);
     if (utils.isMessage(resource)) {
       let {bankStyle, search, currency, country} = this.props
@@ -86,7 +86,7 @@ var ResourceMixin = {
   showResources(resource, prop) {
     this.props.navigator.push({
       id: 10,
-      title: translate(prop, utils.getModel(resource[constants.TYPE]).value),
+      title: translate(prop, utils.getModel(resource[constants.TYPE])),
       titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       component: require('./ResourceList'),
@@ -108,7 +108,7 @@ var ResourceMixin = {
     if (!itemsMeta) {
       let ref = pMeta.items.ref;
       if (ref) {
-        pMeta = utils.getModel(ref).value;
+        pMeta = utils.getModel(ref);
         itemsMeta = pMeta.properties;
       }
     }
@@ -150,7 +150,7 @@ var ResourceMixin = {
             value = v[p];
         }
         else if (itemMeta.ref)
-          value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref).value);
+          value = v[p].title  ||  utils.getDisplayName(v[p], utils.getModel(itemMeta.ref));
         else
           value = v[p].title;
 
@@ -225,7 +225,7 @@ var ResourceMixin = {
 
       let vCols = pMeta.viewCols;
       if (!vCols)
-        vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).value.viewCols
+        vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
       let cnt = val.length;
       val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
       let title = pMeta.title || utils.makeLabel(pMeta.name)

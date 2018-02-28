@@ -88,7 +88,7 @@ class ShowPropertiesView extends Component {
     if (!resource)
       resource = this.props.resource
     var modelName = resource[TYPE];
-    var model = utils.getModel(modelName).value;
+    var model = utils.getModel(modelName);
     var vCols
 
     let { checkProperties, excludedProperties, bankStyle, currency, showRefResource, onPageLayout } = this.props
@@ -243,15 +243,15 @@ class ShowPropertiesView extends Component {
             title = val.id.split('_')[0] === utils.getMe()[ROOT_HASH] ? 'Me' : 'Not me'
           val = <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
         }
-        else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).value.inlined) {
+        else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
           if (!val[TYPE])
             val[TYPE] = pMeta.ref
-          return this.getViewCols(val, utils.getModel(val[TYPE]).value)
+          return this.getViewCols(val, utils.getModel(val[TYPE]))
         }
         else if (pMeta.mainPhoto)
           return
         // Could be enum like props
-        else if (utils.getModel(pMeta.ref).value.subClassOf === ENUM)
+        else if (utils.getModel(pMeta.ref).subClassOf === ENUM)
           val = val.title
         else if (showRefResource) {
           // ex. property that is referencing to the Organization for the contact
@@ -276,13 +276,13 @@ class ShowPropertiesView extends Component {
         if (isPartial  &&  p === 'leaves') {
           let labels = []
           let type = val.find((l) => l.key === TYPE  &&  l.value).value
-          let lprops = utils.getModel(type).value.properties
+          let lprops = utils.getModel(type).properties
           val.forEach((v) => {
             let key
             if (v.key.charAt(0) === '_') {
               if (v.key === TYPE) {
                 key = 'type'
-                value = utils.getModel(v.value).value.title
+                value = utils.getModel(v.value).title
               }
               else
                 return
@@ -290,7 +290,7 @@ class ShowPropertiesView extends Component {
             else {
               key = lprops[v.key]  &&  lprops[v.key].title
               if (v.value  &&  v.key  && (v.key === 'product'  ||  v.key === 'form'))
-                value = utils.getModel(v.value).value.title
+                value = utils.getModel(v.value).title
               else
                 value = v.value || '[not shared]'
               if (typeof value === 'object')
@@ -313,7 +313,7 @@ class ShowPropertiesView extends Component {
         if (isItems  &&  pMeta.items.ref) {
           if  (pMeta.items.ref === PHOTO)
             return
-          if (utils.getModel(pMeta.items.ref).value.subClassOf === ENUM) {
+          if (utils.getModel(pMeta.items.ref).subClassOf === ENUM) {
             let values = val.map((v) => utils.getDisplayName(v)).join(', ')
             return <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
                      <View style={{paddingLeft: 10}}>

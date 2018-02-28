@@ -57,7 +57,7 @@ var {
 var RowMixin = {
   addDateProp(dateProp, style) {
     let resource = this.state.resource;
-    let properties = utils.getModel(resource[TYPE] || resource.id).value.properties;
+    let properties = utils.getModel(resource[TYPE] || resource.id).properties;
     if (properties[dateProp]  &&  properties[dateProp].style)
       style = [style, properties[dateProp].style];
     let val = utils.formatDate(new Date(resource[dateProp]));
@@ -76,7 +76,7 @@ var RowMixin = {
         // val = (val.currency || CURRENCY_SYMBOL) + val.value
       }
       else {
-        let m = utils.getModel(prop.ref).value
+        let m = utils.getModel(prop.ref)
         if (m.subClassOf === ENUM) {
           if (typeof val === 'string')
             val = utils.createAndTranslate(val)
@@ -85,7 +85,7 @@ var RowMixin = {
         }
       }
     }
-    let model = utils.getModel(resource[TYPE]).value
+    let model = utils.getModel(resource[TYPE])
 
     let style = {flexDirection: 'row', justifyContent: 'center'}
     let propTitle = translate(prop, model)
@@ -205,7 +205,7 @@ var RowMixin = {
     if (toId === meId)
       return false
 
-    if (utils.getModel(r[TYPE]).value.subClassOf == MY_PRODUCT) {
+    if (utils.getModel(r[TYPE]).subClassOf == MY_PRODUCT) {
       let org = r.from.organization
       if (org  &&  utils.getId(r.from.organization) !== utils.getId(this.props.to))
         return true
@@ -442,7 +442,7 @@ var RowMixin = {
   },
   chooser(prop) {
     let oResource = this.props.resource
-    let model = utils.getModel(oResource.form).value
+    let model = utils.getModel(oResource.form)
     let resource = {
       [TYPE]: model.id,
       from: utils.getMe(),
@@ -452,7 +452,7 @@ var RowMixin = {
       resource._context = oResource._context
 
     var propRef = prop.ref
-    var m = utils.getModel(propRef).value;
+    var m = utils.getModel(propRef);
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       title: translate(prop), //m.title,

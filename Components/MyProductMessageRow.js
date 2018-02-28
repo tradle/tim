@@ -39,7 +39,7 @@ class MyProductMessageRow extends Component {
     var { resource, application, to, bankStyle } = this.props;
     if (resource[constants.TYPE] === 'tradle.MyTaxesFiledConfirmation')
       return <View/>
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id);
     var renderedRow = [];
 
     let isMyMessage
@@ -129,7 +129,7 @@ class MyProductMessageRow extends Component {
 
   formatRow(isMyMessage, renderedRow) {
     var resource = this.props.resource;
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id);
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols)

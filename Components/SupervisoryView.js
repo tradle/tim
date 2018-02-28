@@ -48,7 +48,7 @@ class SupervisoryView extends Component {
     super(props);
 
     this.state = {
-      // isLoading: utils.getModels() ? false : true,
+      // isLoading: Store.getModels() ? false : true,
       isLoading: true,
       dataSource: new ListView.DataSource({
         rowHasChanged: function(row1, row2) {
@@ -153,7 +153,7 @@ class SupervisoryView extends Component {
     if (this.state.isLoading)
       return <View/>
     // HACK for now
-    // let app = utils.getModel(this.product).value
+    // let app = utils.getModel(this.product)
     //         <Row size={3} style={styles.topRow}>
     //           <Col sm={3} md={3} lg={3}>
     //             <Text style={{fontWeight: '600', alignSelf: 'center', paddingVertical: 5, fontSize: 16 }}>

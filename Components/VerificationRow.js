@@ -84,21 +84,21 @@ class VerificationRow extends Component {
 
   render() {
     let {resource, isChooser, lazy, parentResource, onSelect, prop, modelName, multiChooser, bankStyle } = this.props
-    let model = utils.getModel(resource[TYPE]).value;
+    let model = utils.getModel(resource[TYPE]);
     let isMyProduct = model.subClassOf === MY_PRODUCT
     let isForm = model.subClassOf === FORM
     let isBookmark = model.id === BOOKMARK
     let isVerification = resource.document != null
     let r = isVerification ? resource.document : resource
 
-    let listModel = utils.getModel(this.props.modelName).value
+    let listModel = utils.getModel(this.props.modelName)
     let ph = utils.getMainPhotoProperty(listModel)
 
     let photo
     if (r  &&  isMyProduct)
       photo = resource.from.photo
     else {
-      let docModel = utils.getModel(utils.getType(r)).value
+      let docModel = utils.getModel(utils.getType(r))
       let mainPhotoProp = utils.getMainPhotoProperty(docModel)
       if (mainPhotoProp)
         photo = r[mainPhotoProp]
@@ -122,8 +122,8 @@ class VerificationRow extends Component {
       photo = <View style={{width: 70}} />
 
     let verificationRequest = resource.document
-                            ? utils.getModel(utils.getType(resource.document)).value
-                            : utils.getModel(resource[TYPE]).value;
+                            ? utils.getModel(utils.getType(resource.document))
+                            : utils.getModel(resource[TYPE]);
 
     let rows = [];
 
@@ -256,7 +256,7 @@ class VerificationRow extends Component {
     if (this.props.search  &&  this.props.searchCriteria)
       this.formatFilteredResource(model, resource, renderedRows)
     else if (isBookmark  &&  !resource.message)
-      this.formatBookmark(utils.getModel(resource.bookmark[TYPE]).value, resource.bookmark, renderedRows)
+      this.formatBookmark(utils.getModel(resource.bookmark[TYPE]), resource.bookmark, renderedRows)
     let multiChooserIcon
     if (multiChooser) {
       multiChooserIcon = <View style={styles.multiChooser}>
@@ -350,7 +350,7 @@ class VerificationRow extends Component {
   }
 
   formatFilteredResource(model, resource, renderedRows) {
-    let props = (utils.getModel(resource[TYPE] || resource.id).value).properties
+    let props = (utils.getModel(resource[TYPE] || resource.id)).properties
     let searchCriteria = this.props.searchCriteria
     let viewCols = []
     for (let p in searchCriteria) {
@@ -453,7 +453,7 @@ class VerificationRow extends Component {
           if (msgModel) {
             vCols.push(<View key={this.getNextKey()} style={styles.msgParts}>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                         <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.title}</Text>
                        </View>);
             return;
           }
@@ -507,7 +507,7 @@ class VerificationRow extends Component {
           }
           else if (resource[v].title)
             val = resource[v].title
-          else if (utils.getModel(ref).value.subClassOf === ENUM) {
+          else if (utils.getModel(ref).subClassOf === ENUM) {
             val = ''
             resource[v].forEach((r, i) => {
               if (i)
@@ -556,7 +556,7 @@ class VerificationRow extends Component {
           if (msgModel) {
             vCols.push(<View key={this.getNextKey()} style={styles.msgParts}>
                          <Text style={style}>{msgParts[0]}</Text>
-                         <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.value.title}</Text>
+                         <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.title}</Text>
                        </View>);
             return;
           }
@@ -773,7 +773,7 @@ module.exports = VerificationRow;
   //         if (msgModel) {
   //           vCols.push(<View key={self.getNextKey()} style={styles.msgParts}>
   //                        <Text style={style}>{msgParts[0]}</Text>
-  //                        <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.value.title}</Text>
+  //                        <Text style={[style, {color: '#7AAAC3'}]}>{msgModel.title}</Text>
   //                      </View>);
   //           return;
   //         }

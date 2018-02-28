@@ -65,7 +65,7 @@ class FormErrorRow extends Component {
 
   render() {
     var resource = this.props.resource;
-    var model = utils.getModel(resource[TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id)
 
     var isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
     var to = this.props.to;
@@ -180,7 +180,7 @@ class FormErrorRow extends Component {
                       </View>
       }
     }
-    var model = utils.getModel(this.props.resource[TYPE]).value;
+    var model = utils.getModel(this.props.resource[TYPE])
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     return (
       <View style={[styles.viewStyle, {backgroundColor: bg, width: width, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'}]}>
@@ -225,7 +225,7 @@ class FormErrorRow extends Component {
     // if (isPrefilled)
     //   extend(true, resource, formDefaults[model.id])
     let type = utils.getType(r)
-    let model = utils.getModel(type).value
+    let model = utils.getModel(type)
     this.props.navigator.push({
       id: 4,
       title: translate(model),
@@ -248,7 +248,7 @@ class FormErrorRow extends Component {
   }
   formatRow(isMyMessage, renderedRow) {
     let {resource, to, application } = this.props
-    var model = utils.getModel(resource[TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id)
 
     let isContext = to[TYPE]  &&  utils.isContext(to[TYPE])
     let context = isContext ? to : resource._context
@@ -298,7 +298,7 @@ class FormErrorRow extends Component {
         <View key={self.getNextKey()} style={{paddingBottom: 3}}>
           <Text style={[style, {color: '#555555'}]}>{resource.message} </Text>
           <View style={chatStyles.rowContainer}>
-            <Text style={[style, {color: resource._documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype).value)}</Text>
+            <Text style={[style, {color: resource._documentCreated || isReadOnlyChat ?  '#aaaaaa' : self.props.bankStyle.formErrorColor}]}>{translate(utils.getModel(rtype))}</Text>
             <Icon name={iconName} size={iconSize} color={resource._documentCreated || isReadOnlyChat ? self.props.bankStyle.fixErrorColor : self.props.bankStyle.formErrorColor} style={Platform.OS === 'web' ? {marginTop: -3} : {}}/>
           </View>
         </View>

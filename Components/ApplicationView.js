@@ -87,10 +87,10 @@ class ApplicationView extends Component {
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     // if (resource.id || !resource[constants.ROOT_HASH])
     let rtype = utils.getType(resource)
-    let m = utils.getModel(rtype).value
+    let m = utils.getModel(rtype)
     if (m.inlined)
       return
-    if (m.subClassOf  &&  utils.getModel(m.subClassOf).value.inlined)
+    if (m.subClassOf  &&  utils.getModel(m.subClassOf).inlined)
       return
     Actions.getItem( {resource, search, forwardlink} )
   }
@@ -151,7 +151,7 @@ class ApplicationView extends Component {
 
     let resource = this.state.resource;
     let modelName = resource[TYPE];
-    let model = utils.getModel(modelName).value;
+    let model = utils.getModel(modelName)
 
     let me = utils.getMe()
 
@@ -307,7 +307,7 @@ class ApplicationView extends Component {
         }},
         {text: translate('Approve'), onPress: () => {
           Actions.hideModal()
-          let title = utils.makeModelTitle(utils.getModel(resource.product || resource.requestFor).value)
+          let title = utils.makeModelTitle(utils.getModel(resource.product || resource.requestFor))
           let me = utils.getMe()
           let msg = {
             [TYPE]: APPROVAL,
@@ -335,7 +335,7 @@ class ApplicationView extends Component {
         }},
         {text: translate('Deny'), onPress: () => {
           Actions.hideModal()
-          let title = utils.makeModelTitle(utils.getModel(resource.product ||  resource.requestFor).value)
+          let title = utils.makeModelTitle(utils.getModel(resource.product ||  resource.requestFor))
           let me = utils.getMe()
           let msg = {
             [TYPE]: DENIAL,

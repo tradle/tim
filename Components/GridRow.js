@@ -156,7 +156,7 @@ class GridRow extends Component {
     let { multiChooser, search, resource, modelName, rowId, gridCols, bankStyle, isSmallScreen } = this.props
     let size
     if (gridCols) {
-      let model = Store.getModel(modelName)
+      let model = utils.getModel(modelName)
       let props = model.properties
 
       let vCols = gridCols.filter((c) => props[c].type !== 'array')
@@ -179,8 +179,8 @@ class GridRow extends Component {
       ))
     }
     else {
-      let m = Store.getModel(modelName)
-      let rModel = Store.getModel(resource[TYPE])
+      let m = utils.getModel(modelName)
+      let rModel = utils.getModel(resource[TYPE])
       let typeTitle
       if (rModel.id !== m.id  &&  rModel.subClassOf === m.id)
         typeTitle = <Text style={styles.type}>{utils.makeModelTitle(rModel)}</Text>
@@ -213,7 +213,7 @@ class GridRow extends Component {
   }
   formatCol(prop) {
     let resource = this.props.resource
-    let model = Store.getModel(resource[TYPE] || resource.id);
+    let model = utils.getModel(resource[TYPE] || resource.id);
     let properties = model.properties;
     let isContact = resource[TYPE] === PROFILE;
     let v = prop
@@ -248,7 +248,7 @@ class GridRow extends Component {
       if (criteria)
         style.push({fontWeight: '600'})
 
-      let refM = Store.getModel(ref)
+      let refM = utils.getModel(ref)
       if (ref === MONEY) {
         style.push({alignSelf: 'flex-end', paddingRight: 10})
         row = <Text style={style} key={this.getNextKey(resource)}>{resource[v].currency + resource[v]}</Text>
@@ -259,7 +259,7 @@ class GridRow extends Component {
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{utils.getDisplayName(resource[v])}</Text>
         if (refM.isInterface || refM.id === FORM) {
           let resType = utils.getType(resource[v])
-          let resM = Store.getModel(resType)
+          let resM = utils.getModel(resType)
           row = <View key={this.getNextKey(resource)}>
                   <Text style={styles.type}>{utils.makeModelTitle(resM)}</Text>
                   {row}
@@ -322,7 +322,7 @@ class GridRow extends Component {
     }
     else {
       if (this.props.isModel  &&  (v === 'form'  ||  v === 'product')) {
-        let m = Store.getModel(v)
+        let m = utils.getModel(v)
         if (m)
           val = utils.makeModelTitle(m)
       }
@@ -396,7 +396,7 @@ var styles = StyleSheet.create({
 
 module.exports = GridRow;
   // addDateProp(resource, dateProp, style) {
-  //   let properties = Store.getModel(resource[TYPE] || resource.id).properties;
+  //   let properties = utils.getModel(resource[TYPE] || resource.id).properties;
   //   if (properties[dateProp]  &&  properties[dateProp].style)
   //     style = [style, properties[dateProp].style];
   //   let val = utils.formatDate(new Date(resource[dateProp]));

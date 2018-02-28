@@ -151,7 +151,7 @@ class GridList extends Component {
       }
     })
     let {resource, officialAccounts, modelName, prop, filter, serverOffline, search} = this.props
-    let model = Store.getModel(modelName)
+    let model = utils.getModel(modelName)
 
     let viewCols = this.getGridCols()
     let size = viewCols ? viewCols.length : 1
@@ -254,9 +254,9 @@ class GridList extends Component {
     if (props.sortProperty)
       params.sortProperty = props.sortProperty;
     if (props.prop)
-      params.prop = Store.getModel(props.resource[TYPE]).properties[props.prop.name];
+      params.prop = utils.getModel(props.resource[TYPE]).properties[props.prop.name];
     if (params.prop) {
-      let m = Store.getModel(props.resource[TYPE])
+      let m = utils.getModel(props.resource[TYPE])
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
         params.resource = props.resource
@@ -363,8 +363,8 @@ class GridList extends Component {
     }
     if (action === 'addItem'  ||  action === 'addMessage') {
       let model = action === 'addMessage'
-                ? Store.getModel(modelName)
-                : Store.getModel(resource[TYPE]);
+                ? utils.getModel(modelName)
+                : utils.getModel(resource[TYPE]);
       if (action === 'addItem'  &&  model.id !== modelName) {
         if (model.id === BOOKMARK  &&  !isModel) {
           if (this.state.resource  &&  this.state.resource[TYPE] === resource.bookmark[TYPE]) {
@@ -437,9 +437,9 @@ class GridList extends Component {
       if (params.isTest  !== isTest)
         return
       if (list  &&  list.length) {
-        let m = Store.getModel(list[0][TYPE])
+        let m = utils.getModel(list[0][TYPE])
         if (m.id !== modelName)  {
-          let model = Store.getModel(modelName)
+          let model = utils.getModel(modelName)
           if (model.isInterface  ||  modelName === MESSAGE) {
             if (!m.interfaces  ||  m.interfaces.indexOf(modelName) === -1)
               return
@@ -464,7 +464,7 @@ class GridList extends Component {
     if (list.length) {
       let type = list[0][TYPE];
       if (type  !== modelName  &&  !isBacklink  &&  !isForwardlink) {
-        let m = Store.getModel(type);
+        let m = utils.getModel(type);
         if (m.subClassOf != modelName)
           return;
       }
@@ -474,7 +474,7 @@ class GridList extends Component {
           return utils.getId(r) !== sharingChatId
         })
       }
-      let m = Store.getModel(modelName)
+      let m = utils.getModel(modelName)
       if (isChooser)
         list = utils.applyLens({prop, list})
       if (search) {
@@ -709,7 +709,7 @@ class GridList extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             bankStyle: style,
-            model: Store.getModel(resource[TYPE]),
+            model: utils.getModel(resource[TYPE]),
             resource: resource,
             currency: currency,
           }
@@ -734,7 +734,7 @@ class GridList extends Component {
   }
   selectResourceFromServer(resource) {
     let { modelName, search, bankStyle, navigator, currency } = this.props
-    let model = Store.getModel(modelName);
+    let model = utils.getModel(modelName);
     let isMessage = utils.isMessage(resource)
     if (isMessage) {
       if (modelName === BOOKMARK) {
@@ -744,12 +744,12 @@ class GridList extends Component {
         return
       }
       let rType = resource[TYPE]
-      let m = Store.getModel(rType)
+      let m = utils.getModel(rType)
       let isVerificationR  = rType === VERIFICATION
       let title
       if (isVerificationR) {
         let type = utils.getType(resource.document)
-        title = utils.makeModelTitle(Store.getModel(type))
+        title = utils.makeModelTitle(utils.getModel(type))
       }
       else
         title = utils.makeModelTitle(m)
@@ -797,7 +797,7 @@ class GridList extends Component {
 
   _selectResource(resource) {
     let { modelName, style, currency, prop, navigator, returnRoute, callback } = this.props
-    let model = Store.getModel(modelName);
+    let model = utils.getModel(modelName);
     let title = utils.getDisplayName(resource);
     let newTitle = title;
     if (title.length > 20) {
@@ -843,7 +843,7 @@ class GridList extends Component {
         rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
         passProps: {
-          model: Store.getModel(resource[TYPE]),
+          model: utils.getModel(resource[TYPE]),
           bankStyle: style,
           resource: me
         }
@@ -852,7 +852,7 @@ class GridList extends Component {
     navigator.push(route);
   }
   showRefResources(resource, prop) {
-    let props = Store.getModel(resource[TYPE]).properties;
+    let props = utils.getModel(resource[TYPE]).properties;
     let propJson = props[prop];
     let resourceTitle = utils.getDisplayName(resource);
     resourceTitle = utils.makeTitle(resourceTitle);
@@ -889,7 +889,7 @@ class GridList extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: Store.getModel(resource[TYPE]),
+            model: utils.getModel(resource[TYPE]),
             bankStyle: style,
             resource: resource
           }
@@ -1008,11 +1008,11 @@ class GridList extends Component {
     if (isModel)
       model = resource
     else if (isBacklink  ||  isForwardlink)
-      model = Store.getModel(utils.getType(resource))
+      model = utils.getModel(utils.getType(resource))
     else
-      model = Store.getModel(rtype);
+      model = utils.getModel(rtype);
     if (model.isInterface)
-      model = Store.getModel(utils.getType(resource))
+      model = utils.getModel(utils.getType(resource))
     let isVerification = model.id === VERIFICATION  ||  model.subClassOf === VERIFICATION
     let isForm = model.id === FORM || model.subClassOf === FORM
     let isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
@@ -1069,7 +1069,7 @@ class GridList extends Component {
     return resource[ROOT_HASH] + '_' + cnt++
   }
   addDateProp(resource, dateProp, style) {
-    let properties = Store.getModel(resource[TYPE] || resource.id).properties;
+    let properties = utils.getModel(resource[TYPE] || resource.id).properties;
     if (properties[dateProp]  &&  properties[dateProp].style)
       style = [style, properties[dateProp].style];
     let val = utils.formatDate(new Date(resource[dateProp]));
@@ -1119,7 +1119,7 @@ class GridList extends Component {
 
   openSharedContextChat(resource) {
     let route = {
-      // title: translate(Store.getModel(resource.product)) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
+      // title: translate(utils.getModel(resource.product)) + ' -- ' + (resource.from.organization || resource.from.title) + ' ->  ' + resource.to.organization.title,
       title: (resource.from.organization || resource.from.title) + '  →  ' + resource.to.organization.title,
       component: MessageList,
       id: 11,
@@ -1174,7 +1174,7 @@ class GridList extends Component {
     if (prop  &&  !prop.allowToAdd)
       return
     let me = utils.getMe()
-    let model = Store.getModel(modelName);
+    let model = utils.getModel(modelName);
     let noMenuButton
     if (!prop  &&  model.id !== ORGANIZATION) {
       noMenuButton = (!search &&  !isModel  &&  (!this.state.resource || !Object.keys(this.state.resource).length))
@@ -1208,7 +1208,7 @@ class GridList extends Component {
      )
   }
   onSettingsPressed() {
-    let model = Store.getModel(SETTINGS)
+    let model = utils.getModel(SETTINGS)
     this.setState({hideMode: false})
     let route = {
       component: NewResource,
@@ -1231,7 +1231,7 @@ class GridList extends Component {
     this.props.navigator.push(route)
   }
   addNew() {
-    let model = Store.getModel(this.props.modelName);
+    let model = utils.getModel(this.props.modelName);
     let r;
     this.setState({hideMode: false})
     // resource if present is a container resource as for example subreddit for posts or post for comments
@@ -1241,7 +1241,7 @@ class GridList extends Component {
       for (let p in props) {
         let isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[TYPE];
         if (props[p].ref  &&  !isBacklink) {
-          if (Store.getModel(props[p].ref).isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
+          if (utils.getModel(props[p].ref).isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
             isBacklink = true;
         }
         if (isBacklink) {
@@ -1301,7 +1301,7 @@ class GridList extends Component {
     let content;
     let {isGrid, filter, dataSource, isLoading, refreshing, list, isConnected, allLoaded} = this.state
     let { isChooser, modelName, isModel, isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = this.props
-    let model = Store.getModel(modelName);
+    let model = utils.getModel(modelName);
     if (dataSource.getRowCount() === 0   &&
         utils.getMe()                    &&
         !utils.getMe().organization      &&
@@ -1437,7 +1437,7 @@ class GridList extends Component {
           onPress: () => this.onSettingsPressed()
         },
         {
-          text: translate('hideResource', translate(Store.getModel(modelName))),
+          text: translate('hideResource', translate(utils.getModel(modelName))),
           onPress: () => this.setState({hideMode: true})
         },
         {
@@ -1469,7 +1469,7 @@ class GridList extends Component {
         {text: translate('Ok'), onPress: () => {
           let r = utils.clone(resource)
           r._inactive = true
-          Actions.addItem({resource: resource, value: r, meta: Store.getModel(resource[TYPE])})
+          Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE])})
           this.setState({hideMode: false})
         }},
       ]
@@ -1691,7 +1691,7 @@ module.exports = GridList;
   //         id: PROFILE + '_' + h[2]
   //       }
   //     }
-  //     Actions.addItem({resource: r, value: r, meta: Store.getModel('tradle.GuestSessionProof')}) //, disableAutoResponse: true})
+  //     Actions.addItem({resource: r, value: r, meta: utils.getModel('tradle.GuestSessionProof')}) //, disableAutoResponse: true})
   //     break
   //   case TALK_TO_EMPLOYEEE:
   //     Actions.getEmployeeInfo(result.data.substring(h[0].length + 1))
@@ -1764,10 +1764,10 @@ module.exports = GridList;
   //     let modelName = filter
   //     if (modelName === FORM || modelName === 'Form')
   //       return
-  //     let model = Store.getModel(modelName)
+  //     let model = utils.getModel(modelName)
   //     if (!model) {
   //       modelName = 'tradle.' + modelName
-  //       model = Store.getModel(modelName)
+  //       model = utils.getModel(modelName)
   //       if (!model)
   //         return
   //     }
@@ -1903,7 +1903,7 @@ module.exports = GridList;
   //   let { modelName, navigator } = this.props
   //   if (modelName === APPLICATION)
   //     return <View/>
-  //   let model = Store.getModel(modelName)
+  //   let model = utils.getModel(modelName)
   //   let props = model.properties
   //   let viewCols = this.getGridCols() // model.gridCols || model.viewCols;
   //   if (viewCols)

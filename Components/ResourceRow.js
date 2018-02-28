@@ -212,7 +212,7 @@ class ResourceRow extends Component {
                 </LinearGradient>
       }
       else  {
-        let model = utils.getModel(resource[TYPE]).value;
+        let model = utils.getModel(resource[TYPE]);
         let icon = model.icon;
         if (icon)
           photo = <View style={styles.cell}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
@@ -378,7 +378,7 @@ class ResourceRow extends Component {
   }
   formatRow(resource, style) {
     let self = this;
-    let model = utils.getModel(resource[TYPE] || resource.id).value;
+    let model = utils.getModel(resource[TYPE] || resource.id);
     let viewCols = model.gridCols || model.viewCols;
     let renderedViewCols;
     if (!viewCols  &&  model.id !== APPLICATION) {
@@ -510,7 +510,7 @@ class ResourceRow extends Component {
               val = val.substring(5)
               let lastMessageType = resource.lastMessageType
               if (lastMessageType) {
-                let msgModel = utils.getModel(lastMessageType).value
+                let msgModel = utils.getModel(lastMessageType)
                 let icon
                 if (msgModel.subClassOf === FINANCIAL_PRODUCT)
                   icon = 'ios-usd'
@@ -557,7 +557,7 @@ class ResourceRow extends Component {
     ];
   }
   applicationRow(resource, style) {
-    let model = utils.getModel(resource[TYPE] || resource.id).value;
+    let model = utils.getModel(resource[TYPE] || resource.id);
     let m = utils.getModel(resource.requestFor)
     // if (!m)
     //   return <View/>
@@ -629,7 +629,7 @@ class ResourceRow extends Component {
         if (formTypes.indexOf(itype) === -1)
           formTypes.push(itype)
       })
-      progress = formTypes.length / m.value.forms.length
+      progress = formTypes.length / m.forms.length
     }
 
     let progressColor = '#7AAAC3'
@@ -649,7 +649,7 @@ class ResourceRow extends Component {
     return  <View>
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
-                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{m ? translate(m.value) : utils.makeModelTitle(resource.requestFor)}</Text>
+                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{m ? translate(m) : utils.makeModelTitle(resource.requestFor)}</Text>
                   {formsCount}
                 </View>
                 {applicant}
@@ -691,7 +691,7 @@ class ResourceRow extends Component {
   }
   onPress(event) {
     let { resource, navigator } = this.props
-    let model = utils.getModel(resource[TYPE] || resource.id).value;
+    let model = utils.getModel(resource[TYPE] || resource.id);
     let title = utils.makeTitle(utils.getDisplayName(resource, model));
     navigator.push({
       id: 7,

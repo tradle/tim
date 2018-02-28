@@ -100,7 +100,7 @@ class FormRequestRow extends Component {
   }
   render() {
     let { resource, to, bankStyle, application } = this.props
-    let model = utils.getModel(resource[TYPE] || resource.id).value;
+    let model = utils.getModel(resource[TYPE] || resource.id);
 
     let me = utils.getMe();
 
@@ -229,7 +229,7 @@ class FormRequestRow extends Component {
 
     // onPressCall = prop  &&  !prop.allowPicturesFromLibrary ? this.showCamera({prop: prop}) : onPressCall
     let messageBody
-    let isMyProduct = isFormRequest  &&  utils.getModel(resource.form).value.subClassOf === MY_PRODUCT
+    let isMyProduct = isFormRequest  &&  utils.getModel(resource.form).subClassOf === MY_PRODUCT
     if (prop  ||  isMyProduct  ||  application  ||  resource._documentCreated)
       messageBody = msgContent
     else
@@ -268,7 +268,7 @@ class FormRequestRow extends Component {
   }
   productChooser(prop) {
     let oResource = this.props.resource
-    let model = utils.getModel(oResource.form).value
+    let model = utils.getModel(oResource.form)
     let resource = {
       [TYPE]: model.id,
       from: utils.getMe(),
@@ -298,7 +298,7 @@ class FormRequestRow extends Component {
     if (!shareableResources) // || !this.props.resource.message)
       return null
 
-    let formModel = utils.getModel(resource.form).value
+    let formModel = utils.getModel(resource.form)
     let isMultientryForm = isMultientry(resource)
     let { product } = resource
     let entries = (isMultientryForm  &&  productToForms  &&  productToForms[product])
@@ -418,7 +418,7 @@ class FormRequestRow extends Component {
 
     let document = verification.document
 
-    let docModel = utils.getModel(document[TYPE]).value;
+    let docModel = utils.getModel(document[TYPE]);
     let isMyProduct = docModel.subClassOf === MY_PRODUCT
     let docModelTitle = docModel.title || utils.makeLabel(docModel.id)
     let idx = docModelTitle.indexOf('Verification');
@@ -733,7 +733,7 @@ class FormRequestRow extends Component {
     if (typeof messagePart === 'string')
       messagePart = null
 
-    let form = utils.getModel(resource.form).value
+    let form = utils.getModel(resource.form)
     // if (this.props.shareableResources)
     //   style = styles.description;
     let onPressCall
@@ -743,7 +743,7 @@ class FormRequestRow extends Component {
     let isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let { product } = resource
     if (!resource._documentCreated  &&  product) {
-      let multiEntryForms = utils.getModel(product).value.multiEntryForms
+      let multiEntryForms = utils.getModel(product).multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
         if (productToForms) {
           let forms = productToForms[product]
@@ -909,7 +909,7 @@ class FormRequestRow extends Component {
         value: {_documentCreated: true, _document: utils.getId(resource)},
         doneWithMultiEntry: true,
         resource: resource,
-        meta: utils.getModel(resource[TYPE]).value
+        meta: utils.getModel(resource[TYPE])
       }
       Actions.addChatItem(params)
     }
@@ -972,8 +972,8 @@ class FormRequestRow extends Component {
 function isMultientry(resource) {
   if (!resource.product)
     return false
-  let form = utils.getModel(resource.form).value
-  let product = utils.getModel(resource.product).value
+  let form = utils.getModel(resource.form)
+  let product = utils.getModel(resource.product)
   let multiEntryForms = product.multiEntryForms
   return  multiEntryForms && multiEntryForms.indexOf(form.id) !== -1 ? true : false
 }
