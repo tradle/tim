@@ -69,7 +69,7 @@ const {
   // PRODUCT_LIST
 } = constants.TYPES
 const LIMIT = 20
-
+const MESSAGE_WITH_LINK_REGEX = /\[(?:[^\]]+)\]\(https?:\/\/[^)]+\)/ig
 
 class MessageRow extends Component {
   constructor(props) {
@@ -819,19 +819,8 @@ class MessageRow extends Component {
       return isConfirmation ? {isConfirmation: true} : null
     return {onPressCall: this.props.onSelect.bind(this, resource, null)}
   }
-  messageHasLink(message, pos) {
-    let lidx = message.indexOf('[')
-    if (lidx === -1)
-      return
-    let ridx = message.indexOf(']', lidx)
-    if (ridx === -1)
-      return
-    if (message.length === ridx)
-      return
-    if (message.indexOf('(http') !== ridx + 1)
-      return this.messageHasLink(message, ridx + 1)
-    if (message.indexOf(')', ridx) !== -1)
-      return true
+  messageHasLink(message) {
+    return MESSAGE_WITH_LINK_REGEX.test(message)
   }
   isUrl(message) {
     let s = message.toLowerCase()
