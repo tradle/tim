@@ -143,7 +143,7 @@ class NewResource extends Component {
     else {
      if (resource.id) {
         let type = utils.getType(resource.id)
-        if (!Store.getModel(type).inlined)
+        if (!utils.getModel(type).inlined)
           Actions.getItem({resource: resource})
       }
       else if (this.state.isUploading)
@@ -273,7 +273,7 @@ class NewResource extends Component {
         let params = {
           value: {_documentCreated: true, _document: utils.getId(resource)},
           resource: this.props.originatingMessage,
-          meta: Store.getModel(this.props.originatingMessage[constants.TYPE])
+          meta: utils.getModel(this.props.originatingMessage[constants.TYPE])
         }
         Actions.addChatItem(params)
         this.props.navigator.pop();
@@ -405,7 +405,7 @@ class NewResource extends Component {
         else if (typeof v === 'object')  {
           let ref = props[p].ref
           if (ref) {
-            let rModel = Store.getModel(ref)
+            let rModel = utils.getModel(ref)
             if (ref === constants.TYPES.MONEY) {
               if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
                 missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
@@ -515,7 +515,7 @@ class NewResource extends Component {
     for (let p in json) {
       if (!props[p]  ||  !props[p].ref)
         continue
-      let m = Store.getModel(props[p].ref)
+      let m = utils.getModel(props[p].ref)
       if (m.subClassOf  &&  m.subClassOf === ENUM)
         json[p] = resource[p]
     }
@@ -563,7 +563,7 @@ class NewResource extends Component {
     //   this.showChoice(bl);
     //   return;
     // }
-    let blmodel = bl.items.ref ? Store.getModel(bl.items.ref) : this.props.model
+    let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : this.props.model
     if (bl.items.ref  &&  bl.allowToAdd) {
       this.props.navigator.push({
         id: 30,
@@ -1171,7 +1171,7 @@ class NewResource extends Component {
       value.photos = photos;
     }
     this.setState({userInput: '', selectedAssets: {}});
-    Actions.addMessage({msg: value}); //, this.state.resource, Store.getModel(modelName));
+    Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName));
   }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);

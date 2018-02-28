@@ -153,7 +153,7 @@ class SupervisoryViewPerProvider extends Component {
       rows.push(<Row size={8} style={styles.topRow} key={'app_' + cnt++}>
                   <Col sm={8} md={8} lg={8}>
                     <Text style={styles.topRowCell}>
-                      {utils.getModel(productType).value.title}
+                      {utils.getModel(productType).title}
                     </Text>
                   </Col>
                 </Row>)
@@ -281,7 +281,7 @@ module.exports = SupervisoryViewPerProvider
       rows.push(<Row size={8} style={styles.topRow} key={'app_' + cnt++}>
                   <Col sm={8} md={8} lg={8}>
                     <Text style={styles.topRowCell}>
-                      {utils.getModel(a.productType).value.title}
+                      {utils.getModel(a.productType).title}
                     </Text>
                   </Col>
                 </Row>)

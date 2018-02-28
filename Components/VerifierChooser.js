@@ -118,7 +118,7 @@ class VerifierChooser extends Component {
               resource={resource} />
   }
   render() {
-    var model = utils.getModel(this.props.modelName).value;
+    var model = utils.getModel(this.props.modelName);
     var content = <ListView
           dataSource={this.state.dataSource}
           enableEmptySections={true}
@@ -147,7 +147,7 @@ class VerifierChooser extends Component {
     })
 
     Actions.addItem({
-      meta: utils.getModel(SETTINGS).value,
+      meta: utils.getModel(SETTINGS),
       resource: {
         [constants.TYPE]: SETTINGS,
         url: resource.url,

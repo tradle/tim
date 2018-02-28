@@ -92,7 +92,7 @@ class NewItem extends Component {
       // HACK ref props of array type props reside on resource for now
       var props = this.props.metadata.items.properties
       if (props) {
-        var rProps = utils.getModel(resource[constants.TYPE]).value.properties
+        var rProps = utils.getModel(resource[constants.TYPE]).properties
         for (var p in props) {
           if (p === propName)
             continue

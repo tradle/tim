@@ -1,4 +1,5 @@
 console.log('requiring uiUtils.js')
+
 import utils, {
   translate
 } from '../utils/utils'
@@ -14,9 +15,9 @@ const BOOKMARK = 'tradle.Bookmark'
 var uiUtils = {
   showBookmarks(params) {
     let { resource, searchFunction, navigator, bankStyle, currency } = params
-    let model = utils.getModel(BOOKMARK)
+    // let model = utils.getModel(BOOKMARK)
     let btype = resource.bookmark[TYPE]
-    let bm = utils.getModel(btype).value
+    let bm = utils.getModel(btype)
     navigator.push({
       id: 30,
       title: translate('searchSomething', utils.makeModelTitle(bm)),

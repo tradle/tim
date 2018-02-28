@@ -31,7 +31,6 @@ import plugins from '@tradle/biz-plugins'
 
 import ResourceList from './ResourceList'
 import GridList from './GridList'
-import Store from '../Store/Store'
 import utils, {
   translate
 } from '../utils/utils'
@@ -130,10 +129,10 @@ var NewResourceMixin = {
       if (!meta.items.ref)
         props = meta.items.properties;
       else
-        props = utils.getModel(meta.items.ref).value.properties;
+        props = utils.getModel(meta.items.ref).properties;
     }
 
-    let dModel = data  &&  Store.getModel[data[TYPE]]
+    let dModel = data  &&  utils.getModel(data[TYPE])
     if (!utils.isEmpty(data)) {
       if (!meta.items && data[TYPE] !== meta.id) {
         let interfaces = meta.interfaces;
@@ -466,7 +465,7 @@ var NewResourceMixin = {
 
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
-        let subModel = Store.getModel(ref);
+        let subModel = utils.getModel(ref);
         if (data  &&  data[p]) {
           options.fields[p].value = data[p][TYPE]
                                   ? utils.getId(data[p])
@@ -502,7 +501,7 @@ var NewResourceMixin = {
         options.fields.url.onEndEditing = onEndEditing.bind(this, 'url')
       options.fields.url.template = textTemplate.bind(this, {
                 label: label,
-                prop:  utils.getModel(SETTINGS).value.properties.url,
+                prop:  utils.getModel(SETTINGS).properties.url,
                 value: this.state.resource.url,
                 required: false,
                 keyboard: 'url'
@@ -565,7 +564,7 @@ var NewResourceMixin = {
     }
     else if (prop.type === 'boolean')  {
       if (value === 'null') {
-        let m = utils.getModel(resource[TYPE]).value
+        let m = utils.getModel(resource[TYPE])
         if (!search  ||  (m.required  &&  m.required.indexOf(prop.name) !== -1)) {
           delete r[prop.name]
           delete this.floatingProps[prop.name]
@@ -702,9 +701,9 @@ var NewResourceMixin = {
       width: result.image.width,
       height: result.image.height
     }
-    let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, Store.getModel(r[TYPE]))
+    let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
     if (docScannerProps  &&  docScannerProps.length)
-      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(Store.getModel(DOCUMENT_SCANNER), 'blinkid')
+      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkid')
 
 
     let dateOfExpiry
@@ -1315,7 +1314,7 @@ var NewResourceMixin = {
     else if (metadata.items.properties)
       prop = metadata.items.properties[params.prop]
     else
-      prop = utils.getModel(metadata.items.ref).value.properties[params.prop]
+      prop = utils.getModel(metadata.items.ref).properties[params.prop]
 
     // let isRequired = this.props.model && this.props.model.required  &&  this.props.model.required.indexOf(params.prop) !== -1
 
@@ -1344,7 +1343,7 @@ var NewResourceMixin = {
         this.floatingProps[prop.name] = resource[params.prop]
       }
       else {
-        let rModel = utils.getModel(prop.ref  ||  prop.items.ref).value
+        let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
         // let m = utils.getId(resource[params.prop]).split('_')[0]
         label = utils.getDisplayName(resource[params.prop], rModel)
         if (!label) {
@@ -1418,7 +1417,7 @@ var NewResourceMixin = {
 
       if (useImageInput) {
         let aiStyle = {flex: 7, paddingTop: 15, paddingBottom: help ? 0 : 7}
-        let m = utils.getModel(prop.ref).value
+        let m = utils.getModel(prop.ref)
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                        {content}
                      </ImageInput>
@@ -1508,7 +1507,7 @@ var NewResourceMixin = {
 
     let filter = event.nativeEvent.text;
     let propRef = prop.ref || prop.items.ref
-    let m = utils.getModel(propRef).value;
+    let m = utils.getModel(propRef);
     let currentRoutes = navigator.getCurrentRoutes();
 
     if (originatingMessage) {
@@ -1564,7 +1563,7 @@ var NewResourceMixin = {
     let isItem = this.props.metadata != null
     let model = this.props.model
     if (!model  &&  isItem)
-      model = utils.getModel(this.props.metadata.items.ref).value
+      model = utils.getModel(this.props.metadata.items.ref)
 
     let prop = model.properties[propName]
     let isEnum = prop.ref  &&  utils.isEnum(prop.ref)
@@ -1708,7 +1707,7 @@ var NewResourceMixin = {
           {
              this.myEnumTemplate({
                     prop:     prop,
-                    enumProp: utils.getModel(MONEY).value.properties.currency,
+                    enumProp: utils.getModel(MONEY).properties.currency,
                     required: required,
                     value:    utils.normalizeCurrencySymbol(value.currency),
                     // errors:   errors,
@@ -1834,7 +1833,7 @@ var NewResourceMixin = {
   },
   validateProperties(value) {
     let m = value[TYPE]
-                   ? utils.getModel(value[TYPE]).value
+                   ? utils.getModel(value[TYPE])
                    : this.props.model
     let properties = m.properties
     let err = []

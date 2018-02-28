@@ -47,7 +47,7 @@ class ShowRefList extends Component {
   }
   render() {
     var { resource, backlink, backlinkList, showDocuments, showDetails, bankStyle, children, navigator, lazy, currency } = this.props
-    var model = utils.getModel(resource[TYPE]).value;
+    var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
     let self = this
     var refList = [];
@@ -163,7 +163,7 @@ class ShowRefList extends Component {
       if (ENV.hideProductApplicationInChat  &&  utils.isContext(ref))
         return
       let propTitle = translate(props[p], model)
-      var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
+      var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).icon;
       if (!icon)
         icon = 'ios-checkmark';
       let cnt = resource['_' + p + 'Count'] // &&  resource[p].length
@@ -220,7 +220,7 @@ class ShowRefList extends Component {
                     lazy={lazy}
                     modelName={modelName}
                     prop={currentBacklink}
-                    sortProperty={utils.getModel(modelName).value.sortProperty}
+                    sortProperty={utils.getModel(modelName).sortProperty}
                     resource={resource}
                     isBacklink={true}
                     listView={true}
@@ -277,7 +277,7 @@ class ShowRefList extends Component {
     })
   }
   hasPropsToShow(resource) {
-    let m = utils.getModel(resource[TYPE]).value
+    let m = utils.getModel(resource[TYPE])
     let viewCols = m.viewCols
     if (!viewCols)
       viewCols = utils.getViewCols(m)

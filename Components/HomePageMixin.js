@@ -15,7 +15,6 @@ import ResourceView from './ResourceView'
 import NewResource from './NewResource'
 import TourPage from './TourPage'
 import SplashPage from './SplashPage'
-import Store from '../Store/Store'
 import GridHeader from './GridHeader'
 import qrCodeDecoder from '@tradle/qr-schema'
 import {
@@ -93,7 +92,7 @@ var HomePageMixin = {
           url: data.host,
           hash: data.provider
         },
-        meta: Store.getModel(DATA_CLAIM),
+        meta: utils.getModel(DATA_CLAIM),
         disableAutoResponse: true})
       break
     // case TALK_TO_EMPLOYEEE:
@@ -217,7 +216,7 @@ var HomePageMixin = {
     }
     let me = utils.getMe()
     let title = translate('profile')
-    let m = utils.getModel(me[TYPE]).value
+    let m = utils.getModel(me[TYPE])
 
     navigator[action || 'push']({
       title: title,
@@ -249,7 +248,7 @@ var HomePageMixin = {
     let { modelName, navigator, multiChooser } = this.props
     if (modelName === APPLICATION)
       return <View/>
-    let model = Store.getModel(modelName)
+    let model = utils.getModel(modelName)
     let props = model.properties
     let gridCols = this.getGridCols() // model.gridCols || model.viewCols;
     if (gridCols)
@@ -259,7 +258,7 @@ var HomePageMixin = {
     )
   },
   getGridCols() {
-    let model = Store.getModel(this.props.modelName)
+    let model = utils.getModel(this.props.modelName)
     let props = model.properties
     let gridCols = model.gridCols || model.viewCols
     if (!gridCols)

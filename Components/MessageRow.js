@@ -103,7 +103,7 @@ class MessageRow extends Component {
     let photoListStyle = {height: 3};
     let addStyle
 
-    let model = utils.getModel(resource[TYPE] || resource.id).value;
+    let model = utils.getModel(resource[TYPE] || resource.id);
 
     let isContext = utils.isContext(model)
     let message = isContext ? ret.message : resource.message
@@ -343,7 +343,7 @@ class MessageRow extends Component {
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
-        model: utils.getModel(resource[TYPE]).value,
+        model: utils.getModel(resource[TYPE]),
         resource: resource,
         additionalInfo: this.props.resource,
         editCols: ['photos']
@@ -407,7 +407,7 @@ class MessageRow extends Component {
     else
       passProps.verification = resource
 
-    let model = utils.getModel(r[TYPE]).value;
+    let model = utils.getModel(r[TYPE]);
     let route = {
       id: 5,
       component: MessageView,
@@ -436,12 +436,12 @@ class MessageRow extends Component {
 
   formatRow(isMyMessage, renderedRow) {
     let { resource, bankStyle, navigator, to, isLast, currency } = this.props
-    let model = utils.getModel(resource[TYPE] || resource.id).value;
+    let model = utils.getModel(resource[TYPE] || resource.id);
 
     let isReadOnlyChat = to[TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
 
     if (utils.isContext(model)) {
-      let msgModel = utils.getModel(resource.product).value
+      let msgModel = utils.getModel(resource.product)
       let str = !navigator.isConnected  &&  isLast
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
               : translate('newProductMsg', translate(msgModel))
@@ -697,7 +697,6 @@ class MessageRow extends Component {
           if (msgModel) {
             // if (this.props.shareableResources  &&  !isSimpleMessage)
             //   style = /*isSimpleMessage ? chatStyles.resourceTitle : */chatStyles.description;
-            msgModel = msgModel.value;
             let shareMyProduct = msgModel.subClassOf === MY_PRODUCT
             if (shareMyProduct) {
               color = {color: '#aaaaaa'}
@@ -845,14 +844,14 @@ class MessageRow extends Component {
     })
     // let n = this.props.navigator.getCurrentRoutes().length
     // this.props.navigator.popN(n - 2)
-    // this.showResources(me, utils.getModel(me[TYPE]).value.properties.myForms)
+    // this.showResources(me, utils.getModel(me[TYPE]).properties.myForms)
   }
 
   // onChooseProduct() {
   //   if (this.props.isAggregation)
   //     return
   //   let modelName = MESSAGE
-  //   let model = utils.getModel(modelName).value;
+  //   let model = utils.getModel(modelName);
   //   let isInterface = model.isInterface;
   //   if (!isInterface)
   //     return;
@@ -881,7 +880,7 @@ class MessageRow extends Component {
       [ROOT_HASH]: s[1]
     }
 
-    let rmodel = utils.getModel(s[0]).value;
+    let rmodel = utils.getModel(s[0]);
     let title = translate(rmodel);
     this.props.navigator.push({
       title: title,

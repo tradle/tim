@@ -74,7 +74,7 @@ var search = {
       filterResource = null
 
     let table = `rl_${modelName.replace(/\./g, '_')}`
-    let model = utils.getModel(modelName).value
+    let model = utils.getModel(modelName)
     let versionId = model._versionId
     let version = versionId ? '($modelsVersionId: String!)' : ''
     let query = `query ${version} {\n${table}\n`
@@ -506,7 +506,7 @@ console.log('endCursor: ', endCursor)
         }`
       )
     }
-    let m = utils.getModel(ref).value
+    let m = utils.getModel(ref)
     if (m.subClassOf === ENUM) {
       if (m.enum)
         return (
@@ -533,7 +533,7 @@ console.log('endCursor: ', endCursor)
   addInlined(prop) {
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
     let p = prop.name
-    let refM = utils.getModel(ref).value
+    let refM = utils.getModel(ref)
     if (ref === FORM  ||  refM.isInterface  ||  refM.subClassOf === ENUM) {
       if (prop.range === 'json')
         return p
@@ -563,7 +563,6 @@ console.log('endCursor: ', endCursor)
     let model = utils.getModel(modelName)
     if (!model)
       return
-    model = model.value
 
     let table = `r_${modelName.replace(/\./g, '_')}`
 

@@ -84,7 +84,7 @@ class ProductChooser extends Component {
       else if (resource[constants.TYPE] === constants.TYPES.PROFILE   ||
                utils.isContext(resource[constants.TYPE])) {
         if (context  &&  context.product !== REMEDIATION) {
-          const productModel = utils.getModel(context.product).value
+          const productModel = utils.getModel(context.product)
           products = getForms(productModel)
         }
         else if (params.resource.products  &&  params.resource.products.length) {
@@ -225,7 +225,7 @@ class ProductChooser extends Component {
 }
 
 function getModel (id) {
-  return utils.getModel(id).value
+  return utils.getModel(id)
 }
 
 function getForms (model) {

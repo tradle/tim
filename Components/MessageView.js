@@ -86,7 +86,7 @@ class MessageView extends Component {
       Actions.getItem({resource: resource, search: search})
       return
     }
-    let m = utils.getModel(resource[TYPE]).value
+    let m = utils.getModel(resource[TYPE])
     let vCols = m.viewCols
     if (!vCols)
       return
@@ -96,7 +96,7 @@ class MessageView extends Component {
       if (!resource[col])
         return
       let ref = props[col].ref
-      if (ref  &&  ref !== MONEY  &&  utils.getModel(ref).value.subClassOf !== ENUM) {
+      if (ref  &&  ref !== MONEY  &&  utils.getModel(ref).subClassOf !== ENUM) {
         if (resource[col].id)
           runGetItem = true
       }
@@ -151,7 +151,7 @@ class MessageView extends Component {
 
   renderActionSheet() {
     let resource = this.state.resource;
-    let m = utils.getModel(resource[TYPE]).value
+    let m = utils.getModel(resource[TYPE])
     let bl = utils.getPropertiesWithAnnotation(m, 'items')
     if (utils.isEmpty(bl))
       return
@@ -161,7 +161,7 @@ class MessageView extends Component {
       let l = bl[p]
       if (!l.items.ref  ||  !l.items.backlink)
         continue
-      let pm = utils.getModel(l.items.ref).value
+      let pm = utils.getModel(l.items.ref)
       if (utils.isItem(pm)) {
         itemBl = l
         break
@@ -204,7 +204,7 @@ class MessageView extends Component {
     r.from = me
     r.to = me
     r._context = this.props.resource._context
-    let model = utils.getModel(r[TYPE]).value
+    let model = utils.getModel(r[TYPE])
 
     let self = this
     this.props.navigator.push({
@@ -230,7 +230,7 @@ class MessageView extends Component {
 
   verifyOrCreateError() {
     let { resource, application } = this.props
-    let model = utils.getModel(resource[TYPE]).value
+    let model = utils.getModel(resource[TYPE])
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
         translate('verifyPrompt'), // + utils.getDisplayName(resource),
@@ -242,7 +242,7 @@ class MessageView extends Component {
       )
     }
     else {
-      let properties = utils.getModel(this.state.resource[TYPE]).value.properties
+      let properties = utils.getModel(this.state.resource[TYPE]).properties
       let msg = ''
       for (let p in this.state.errorProps)
         msg += msg ? ', ' + properties[p].title : properties[p].title
@@ -300,7 +300,7 @@ class MessageView extends Component {
   }
 
   getRefResource(resource, prop) {
-    let model = utils.getModel(this.props.resource[TYPE]).value;
+    let model = utils.getModel(this.props.resource[TYPE]);
 
     this.state.prop = prop;
     // this.state.propValue = utils.getId(resource.id);
@@ -310,7 +310,7 @@ class MessageView extends Component {
 
   showVerification(resource, document) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    let model = utils.getModel(document[TYPE]).value;
+    let model = utils.getModel(document[TYPE]);
     let title = model.title; //utils.getDisplayName(resource, model.properties);
     let newTitle = title;
     let me = utils.getMe()
@@ -337,7 +337,7 @@ class MessageView extends Component {
     if (this.state.isLoading)
       return <View/>
     let resource = this.state.resource;
-    let model = utils.getModel(resource[TYPE]).value;
+    let model = utils.getModel(resource[TYPE]);
     let isVerification = model.id === VERIFICATION
     let isVerificationTree = isVerification &&  (resource.method || resource.sources)
     let isForm = model.subClassOf === FORM
@@ -496,7 +496,7 @@ class MessageView extends Component {
   verify() {
     let { navigator, resource } = this.props
     navigator.pop();
-    let model = utils.getModel(resource[TYPE]).value;
+    let model = utils.getModel(resource[TYPE]);
     let me = utils.getMe();
     let from = resource.from;
     let document = {

@@ -45,7 +45,7 @@ class ApplicationTabs extends Component {
   }
   render() {
     var { resource, bankStyle, children, navigator, lazy, showDetails, currency, forwardlink } = this.props
-    var model = utils.getModel(resource[TYPE]).value;
+    var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
     var refList = [];
     var me = utils.getMe()
@@ -95,7 +95,7 @@ class ApplicationTabs extends Component {
       if (ref === IDENTITY)
         return
       let propTitle = translate(props[p], model)
-      var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).value.icon;
+      var icon = props[p].icon  ||  utils.getModel(props[p].items.ref).icon;
       if (!icon) {
         if (ref === FORM)
           icon = 'ios-body-outline'
@@ -142,7 +142,7 @@ class ApplicationTabs extends Component {
                     lazy={lazy}
                     modelName={modelName}
                     forwardlink={currentProp}
-                    sortProperty={utils.getModel(modelName).value.sortProperty}
+                    sortProperty={utils.getModel(modelName).sortProperty}
                     resource={resource}
                     search={true}
                     isForwardlink={true}
@@ -215,7 +215,7 @@ class ApplicationTabs extends Component {
       })
       let m = utils.getModel(resource.requestFor)
 
-      progress = formTypes.length / m.value.forms.length
+      progress = formTypes.length / m.forms.length
     }
     let progressColor = '#7AAAC3'
     if (resource.status) {

@@ -19,7 +19,6 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import utils, {
   translate
 } from '../utils/utils'
-import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
 
 const MONEY = constants.TYPES
@@ -39,7 +38,7 @@ class GridHeader extends Component {
     super(props);
 
     let {resource, modelName, multiChooser, gridCols} = this.props
-    let model = Store.getModel(modelName)
+    let model = utils.getModel(modelName)
 
     let size = gridCols ? gridCols.length : 1
     this.limit = 20 //this.isSmallScreen ? 20 : 40
@@ -49,7 +48,7 @@ class GridHeader extends Component {
   }
   render() {
     let { modelName, isSmallScreen } = this.props
-    let model = Store.getModel(modelName)
+    let model = utils.getModel(modelName)
     let props = model.properties
     let gridCols = this.props.gridCols
     if (!gridCols)

@@ -86,7 +86,7 @@ class FormMessageRow extends Component {
     else
       passProps.verification = resource
 
-    var model = utils.getModel(r[TYPE]).value;
+    var model = utils.getModel(r[TYPE]);
     var route = {
       id: 5,
       component: MessageView,
@@ -115,7 +115,7 @@ class FormMessageRow extends Component {
   }
   render() {
     let { resource, to, bankStyle, application } = this.props
-    var model = utils.getModel(resource[TYPE]).value
+    var model = utils.getModel(resource[TYPE])
     let photos = utils.getResourcePhotos(model, resource)
     var photoListStyle = {height: 3};
     var photoUrls = []
@@ -230,7 +230,7 @@ class FormMessageRow extends Component {
       backgroundColor: 'transparent', // this.props.bankStyle.BACKGROUND_COLOR
     }
     var sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
-    let model = utils.getModel(resource[TYPE]).value
+    let model = utils.getModel(resource[TYPE])
     if (noContent) {
       let prop = model.properties.time
       if (prop  &&  resource[prop.name]) {
@@ -268,7 +268,7 @@ class FormMessageRow extends Component {
 
   formatRow(isMyMessage, renderedRow) {
     var resource = this.props.resource;
-    var model = utils.getModel(resource[TYPE] || resource.id).value;
+    var model = utils.getModel(resource[TYPE] || resource.id);
 
     var viewCols = model.gridCols || model.viewCols;
     if (!viewCols) {
@@ -293,7 +293,7 @@ class FormMessageRow extends Component {
       if (properties[v].markdown)
         return
       if (properties[v].type === 'array') {
-        if (resource[v]  &&  properties[v].items.ref  &&  utils.getModel(properties[v].items.ref).value.subClassOf === ENUM) {
+        if (resource[v]  &&  properties[v].items.ref  &&  utils.getModel(properties[v].items.ref).subClassOf === ENUM) {
           let val
           resource[v].forEach((r) => {
             let title = utils.getDisplayName(r)
@@ -349,7 +349,7 @@ class FormMessageRow extends Component {
         else if (properties[v].displayAs)
           val = utils.templateIt(properties[v], resource)
         else if (model.id === PRODUCT_REQUEST  &&  v === 'requestFor')
-          val = utils.makeModelTitle(utils.getModel(resource[v]).value)
+          val = utils.makeModelTitle(utils.getModel(resource[v]))
         else
           val = properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
 

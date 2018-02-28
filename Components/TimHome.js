@@ -470,14 +470,14 @@ class TimHome extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(me[TYPE]).value,
+            model: utils.getModel(me[TYPE]),
             resource: me,
             bankStyle: defaultBankStyle
           }
         },
         passProps: {
           bankStyle: defaultBankStyle,
-          backlink: utils.getModel(me[TYPE]).value.properties.myForms,
+          backlink: utils.getModel(me[TYPE]).properties.myForms,
           resource: me
         }
       }
@@ -762,9 +762,9 @@ class TimHome extends Component {
           backButtonTitle: translate('back'),
           rightButtonTitle: translate('done'),
           passProps: {
-            model: utils.getModel(me[TYPE]).value,
+            model: utils.getModel(me[TYPE]),
             resource: me,
-            backlink: utils.getModel(me[TYPE]).value.properties.myForms,
+            backlink: utils.getModel(me[TYPE]).properties.myForms,
             bankStyle: defaultBankStyle
           }
         },
@@ -784,7 +784,7 @@ class TimHome extends Component {
       return;
     }
 
-    let model = utils.getModel(modelName).value;
+    let model = utils.getModel(modelName);
     let route = {
       component: NewResource,
       titleTextColor: '#BCD3E6',
@@ -852,7 +852,7 @@ class TimHome extends Component {
       return;
     }
 
-    let model = utils.getModel(modelName).value;
+    let model = utils.getModel(modelName);
     let route = {
       component: NewResource,
       titleTextColor: '#BCD3E6',
@@ -1264,7 +1264,7 @@ module.exports = TimHome;
   //     return
   //   }
 
-  //   var model = utils.getModel(SETTINGS).value
+  //   var model = utils.getModel(SETTINGS)
   //   var route = {
   //     component: NewResource,
   //     title: translate('settings'),

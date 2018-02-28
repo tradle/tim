@@ -82,7 +82,7 @@ class RemediationItemsList extends Component {
       <TouchableOpacity onPress={this.selectResource.bind(this, resource, rowId)}  key={rowId} style={styles.viewStyle}>
         <View style={styles.row}>
           <View style={{flexDirection: 'column', flex: 1}}>
-            <Text style={styles.modelTitle}>{translate(utils.getModel(resource[constants.TYPE]).value)}</Text>
+            <Text style={styles.modelTitle}>{translate(utils.getModel(resource[constants.TYPE]))}</Text>
             <Text style={styles.resourceTitle}>{utils.getDisplayName(resource)}</Text>
           </View>
           {this.props.reviewed[rowId]
@@ -101,7 +101,7 @@ class RemediationItemsList extends Component {
     this.props.navigator.pop()
   }
   selectResource(resource, rowId) {
-    var title = translate(utils.getModel(resource[constants.TYPE]).value)
+    var title = translate(utils.getModel(resource[constants.TYPE]))
     this.props.navigator.push({
       title: title,
       id: 5,
