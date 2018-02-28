@@ -537,8 +537,10 @@ class GridList extends Component {
     if (search  &&  resource)
       state.resource = resource
 
-    if ((isBacklink  &&  params.prop !== prop) || (isForwardlink  &&  params.forwardlink !== forwardlink))
+    if ((isBacklink  &&  params.prop !== prop) || (isForwardlink  &&  params.forwardlink !== forwardlink)) {
+      this.setState(state)
       return
+    }
     _.extend(state, {
       forceUpdate: params.forceUpdate,
       dictionary: params.dictionary,
