@@ -47,7 +47,7 @@
     "@tradle/models-products-bot": "github:tradle/models-products-bot",
     "@tradle/multiqueue": "^2.3.1",
     "@tradle/protocol": "^3.0.0",
-    "@tradle/qr-schema": "^1.4.0",
+    "@tradle/qr-schema": "^1.7.0",
     "@tradle/restore": "github:tradle/restore",
     "@tradle/validate-model": "^5.3.0",
     "@tradle/validate-resource": "github:tradle/validate-resource",
