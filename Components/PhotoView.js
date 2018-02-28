@@ -53,7 +53,7 @@ class PhotoView extends Component {
     if (!resource)
       return <View />;
     var modelName = resource[constants.TYPE];
-    var model = utils.getModel(modelName).value;
+    var model = utils.getModel(modelName);
     if (!model.interfaces  &&  !model.isInterface  &&  !resource[constants.ROOT_HASH])
       return <View />
 

@@ -499,7 +499,8 @@ var Store = Reflux.createStore({
     storeUtils.addModels({models, enums})
     this.loadModels()
     // await storeUtils.loadModels()
-    utils.setModels(models);
+    // utils.setModels(models);
+    utils.setModels(this.getModels())
     this.loadStaticData()
     // if (true) {
     if (false) {
@@ -10023,7 +10024,8 @@ var Store = Reflux.createStore({
         storeUtils.parseOneModel(m, models, enums)
         batch.push({type: 'put', key: m.id, value: m})
       })
-      utils.setModels(models)
+      utils.setModels(self.getModels())
+      // utils.setModels(models)
 
       if (val.lenses) {
         val.lenses.forEach((l) => {
@@ -10311,7 +10313,7 @@ var Store = Reflux.createStore({
       if (me  &&  (!list[utils.getId(me)] || !list[utils.makeId(IDENTITY, me[ROOT_HASH])]))
         me = null
       console.log('Stream closed');
-      utils.setModels(models);
+      utils.setModels(self.getModels()) //models);
     })
     .then(() => {
       if (me  &&  me.isEmployee) {
