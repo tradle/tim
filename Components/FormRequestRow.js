@@ -48,7 +48,7 @@ import {
   Image,
   // StyleSheet,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   Alert,
   Navigator,
   View,
@@ -233,9 +233,9 @@ class FormRequestRow extends Component {
     if (prop  ||  isMyProduct  ||  application  ||  resource._documentCreated)
       messageBody = msgContent
     else
-      messageBody = <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+      messageBody = <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}}>
                       {msgContent}
-                    </TouchableHighlight>
+                    </TouchableOpacity>
 
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     let contextId = this.getContextId(resource)
@@ -309,7 +309,8 @@ class FormRequestRow extends Component {
     var chatOrg = to[TYPE] === ORGANIZATION  &&  utils.getId(to)
     let { verifications, providers, multientryResources } = shareableResources
     let resourceContextId = resource._context  &&  utils.getId(resource._context)
-    if (!utils.isEmpty(multientryResources)) {
+    let hasMultientry = !utils.isEmpty(multientryResources)
+    if (hasMultientry) {
       for (let t in  multientryResources) {
         if (t !== formModel.id)
           continue
@@ -320,7 +321,7 @@ class FormRequestRow extends Component {
         //   let meShare = this.formatMultiEntryShareable({context: c, verifications: contexts[c], model: formModel})
           let meverifications = multientryResources[t]
           if (meverifications.length > 1) {
-            let meShare = this.formatMultiEntryShareable({verifications: meverifications, model: formModel})
+            let meShare = this.formatMultiEntryShareable({verifications: meverifications, model: formModel, multiChooser: true})
             vtt.push(meShare)
           }
         // }
@@ -392,6 +393,12 @@ class FormRequestRow extends Component {
             <View style={abStyle}/>
           </View>
     }
+    // if (!hasMultientry  &&  vtt.length > 3) {
+    //   let documents = verifications[formModel.id].map((v) => v.document)
+    //   let meShare = this.formatMultiEntryShareable({verifications: verifications[formModel.id], model: formModel, multiChooser: false})
+    //   vtt = []
+    //   vtt.push(meShare)
+    // }
 
     let shareStyle = {marginTop: -10, width: width, backgroundColor: '#ffffff', borderBottomLeftRadius: 10, borderBottomRightRadius: 10}
     return (
@@ -432,12 +439,12 @@ class FormRequestRow extends Component {
                           <Text style={hs}>{utils.getDisplayName(document)}</Text>
                         </View>
 
-    let header = <TouchableHighlight underlayColor='transparent' onPress={onSelect.bind(this, document, verification)}>
+    let header = <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
                    <View style={styles.header}>
                      {headerContent}
                      {arrow}
                    </View>
-                 </TouchableHighlight>
+                 </TouchableOpacity>
     let orgRow = <View/>
     // let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     let isItem = utils.isSavedItem(document)
@@ -449,14 +456,14 @@ class FormRequestRow extends Component {
       else if (resource._documentCreated) {
         orgRow =  <View style={chatStyles.shareView}>
                     {shareView}
-                    <TouchableHighlight onPress={onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                    <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
                       {orgView}
-                    </TouchableHighlight>
+                    </TouchableOpacity>
                   </View>
       }
       else {
         orgRow = <View style={[chatStyles.shareView]}>
-                   <TouchableHighlight underlayColor='transparent' onPress={onPress ? onPress : () =>
+                   <TouchableOpacity onPress={onPress ? onPress : () =>
                             Alert.alert(
                               'Sharing ' + docTitle + ' ' + verifiedBy,
                               'with ' + orgTitle,
@@ -466,17 +473,17 @@ class FormRequestRow extends Component {
                               ]
                           )}>
                     {shareView}
-                   </TouchableHighlight>
-                   <TouchableHighlight onPress={onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                   </TouchableOpacity>
+                   <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
                      {orgView}
-                   </TouchableHighlight>
+                   </TouchableOpacity>
                 </View>
       }
     }
     let content = <View style={{flex:1, paddingVertical: 3}}>
-                     <TouchableHighlight onPress={onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                     <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
                        {msg}
-                     </TouchableHighlight>
+                     </TouchableOpacity>
                      {orgRow}
                    </View>
 
@@ -554,7 +561,7 @@ class FormRequestRow extends Component {
   }
   formatMultiEntryShareable(params) {
     // let { model, verifications, onPress, context, providers } = params
-    let { model, verifications, onPress, providers } = params
+    let { model, verifications, onPress, providers, multiChooser } = params
     let { bankStyle, resource, onSelect, to, share } = this.props
 
     let documents = verifications.map((v) => v.document)
@@ -579,9 +586,9 @@ class FormRequestRow extends Component {
     let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
 
     // let docRows = documents.map((d) => {
-    //   return <TouchableHighlight underlayColor='transparent' onPress={onSelect.bind(this, document, verification)} key={this.getNextKey()}>
+    //   return <TouchableOpacity onPress={onSelect.bind(this, document, verification)} key={this.getNextKey()}>
     //            <Text style={hs}>{utils.getDisplayName(d)}</Text>
-    //          </TouchableHighlight>
+    //          </TouchableOpacity>
     // })
 
     let orgRow = <View/>
@@ -595,19 +602,19 @@ class FormRequestRow extends Component {
       else if (resource._documentCreated) {
         orgRow =  <View style={chatStyles.shareView}>
                     {shareView}
-                    <TouchableHighlight onPress={onSelect.bind(this, document, verification)} underlayColor='transparent'>
+                    <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
                       {orgView}
-                    </TouchableHighlight>
+                    </TouchableOpacity>
                   </View>
       }
       else {
         orgRow = <View style={[chatStyles.shareView]}>
-                   <TouchableHighlight underlayColor='transparent' onPress={this.showDocuments.bind(this, documents, verifications, verifiedBy || '')}>
+                   <TouchableOpacity underlayColor='transparent' onPress={this.showDocuments.bind(this, {documents, verifications, verifiedBy: verifiedBy || '', multiChooser: multiChooser})}>
                     {shareView}
-                   </TouchableHighlight>
-                   <TouchableHighlight onPress={onSelect.bind(this, documents, verifications)} underlayColor='transparent'>
+                   </TouchableOpacity>
+                   <TouchableOpacity onPress={onSelect.bind(this, documents, verifications)}>
                      {orgView}
-                   </TouchableHighlight>
+                   </TouchableOpacity>
                 </View>
       }
     }
@@ -615,12 +622,12 @@ class FormRequestRow extends Component {
                           <Text style={hs}>{translate('multientryToShare', documents.length)}</Text>
                         </View>
 
-    let header = <TouchableHighlight underlayColor='transparent' onPress={this.showDocuments.bind(this, documents, verifications, verifiedBy || '')}>
+    let header = <TouchableOpacity onPress={this.showDocuments.bind(this, {documents, verifications, verifiedBy: verifiedBy || '', multiChooser: true})}>
                    <View style={styles.header}>
                      {headerContent}
                      {arrow}
                    </View>
-                 </TouchableHighlight>
+                 </TouchableOpacity>
     let content = <View style={{flex:1, paddingVertical: 3}}>
                      {orgRow}
                    </View>
@@ -631,7 +638,7 @@ class FormRequestRow extends Component {
              {content}
            </View>
   }
-  showDocuments(documents, verifications, verifiedBy) {
+  showDocuments({documents, verifications, verifiedBy, multiChooser}) {
     let { navigator, bankStyle, resource, to } = this.props
     // navigator.push({
     //   title: utils.makeModelTitle(documents[0][TYPE]),
@@ -650,13 +657,13 @@ class FormRequestRow extends Component {
       component: ShareResourceList,
       backButtonTitle: 'Back',
       passProps: {
-        multiChooser: true,
+        multiChooser,
+        verifications,
+        to,
+        modelName,
+        bankStyle,
         list: documents,
-        verifications: verifications,
         formRequest: resource,
-        to: to,
-        modelName: modelName,
-        bankStyle: bankStyle
       }
     })
   }
@@ -775,15 +782,14 @@ class FormRequestRow extends Component {
     if (sameFormRequestForm  &&  !resource._documentCreated) {
       link = <View style={[chatStyles.rowContainer, styles.link]}>
                <View style={[chatStyles.textContainer, styles.center]}>
-                 <TouchableHighlight underlayColor='transparent' style={{paddingRight: 15}} onPress={() => {
+                 <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
                    this.createNewResource(form, isMyMessage)
                  }}>
                    <View style={styles.multiEntryButton}>
                      <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
                    </View>
-                 </TouchableHighlight>
-                 <TouchableHighlight underlayColor='transparent' onPress={() => {
-
+                 </TouchableOpacity>
+                 <TouchableOpacity onPress={() => {
                     Alert.alert(
 
                       translate('areYouSureAboutNextForm', translate(form)),
@@ -797,7 +803,7 @@ class FormRequestRow extends Component {
                    <View style={styles.multiEntryButton}>
                      <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
                    </View>
-                </TouchableHighlight>
+                </TouchableOpacity>
               </View>
              </View>
     }
@@ -845,31 +851,31 @@ class FormRequestRow extends Component {
               mColor = bankStyle.incomingMessageTextColor
 
              msg = <View key={this.getNextKey()}>
-                     <TouchableHighlight onPress={() => this.showIproovScanner(prop, prop.name)} underlayColor='transparent'>
+                     <TouchableOpacity onPress={() => this.showIproovScanner(prop, prop.name)}>
                        <View style={styles.row}>
                          <Text style={[chatStyles.resourceTitle, {flex: 1, color: mColor}]}>{str}</Text>
                          {resource._documentCreated ? null : icon}
                        </View>
-                     </TouchableHighlight>
+                     </TouchableOpacity>
                    </View>
           }
           else {
             msg = <View key={this.getNextKey()} style={styles.center}>
-                  <TouchableHighlight onPress={() => form.id === PRODUCT_REQUEST ? this.productChooser(prop) : this.chooser(prop)} underlayColor='transparent'>
+                  <TouchableOpacity onPress={() => form.id === PRODUCT_REQUEST ? this.productChooser(prop) : this.chooser(prop)}>
                     <View style={styles.message}>
                       <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
                       {resource._documentCreated ? null : icon}
                     </View>
-                  </TouchableHighlight>
+                  </TouchableOpacity>
                </View>
             // const animatedStyle = {minHeight: this.animatedValue}
             // msg = <View key={this.getNextKey()} style={{justifyContent: 'center'}}>
-            //       <TouchableHighlight onPress={() => this.chooser(prop)} underlayColor='transparent'>
+            //       <TouchableOpacity onPress={() => this.chooser(prop)}>
             //         <Animated.View style={[{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}, animatedStyle]}>
             //           <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
             //           {resource._documentCreated ? null : icon}
             //         </Animated.View>
-            //       </TouchableHighlight>
+            //       </TouchableOpacity>
             //    </View>
           }
         }

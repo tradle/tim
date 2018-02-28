@@ -36,6 +36,7 @@ import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import Strings from './strings'
 import { id } from '@tradle/build-resource'
+import Lens from '@tradle/lens'
 
 // import Orientation from 'react-native-orientation'
 
@@ -253,24 +254,8 @@ var utils = {
     if (!lensId)
       return model
     let lens = Store.getLens(lensId)
-    let lensProps = lens  &&  lens.properties
-    if (!lensProps)
-      return model
-    let cmodel = _.cloneDeep(model)
-    let props = cmodel.properties
-    for (let p in lensProps) {
-      let lprop = lensProps[p]
-      let prop = props[p]
-      _.extend(prop, lprop)
-    }
-    if (lens.hidden) {
-      if (!cmodel.hidden)
-        cmodel.hidden = []
-      lens.hidden.forEach((p) => {
-        cmodel.hidden.push(p)
-      })
-    }
-    return cmodel
+
+    return Lens.merge({ models: Store.getModels(), model, lens })
   },
   applyLens({prop, value, list}) {
     let pin = prop.pin
@@ -1109,7 +1094,7 @@ var utils = {
         if (isVerification  &&  p === 'document')
           res[p] = this.buildRef(res[p])
         else if (isFormError  &&  p === 'prefill') {
-          if (res[ROOT_HASH])
+          if (res[p][ROOT_HASH])
             res[p] = this.buildRef(res[p])
         }
         else if (isBookmark  &&  p === 'bookmark')
@@ -2691,5 +2676,51 @@ module.exports = utils;
   //   })
 
   //   return interpreted
+  // },
+  // getModelForFormRequest(fr) {
+  //   const form = utils.getRequestedFormType(fr)
+  //   let model = Store.getModel(form)
+  //   let lensId = fr.lens
+  //   if (!lensId)
+  //     return model
+  //   let lens = Store.getLens(lensId)
+
+  //   let lensProps = lens  &&  lens.properties
+  //   if (!lensProps)
+  //     return model
+  //   let cmodel = _.cloneDeep(model)
+  //   let props = cmodel.properties
+  //   for (let p in lensProps) {
+  //     let lprop = lensProps[p]
+  //     let prop = props[p]
+  //     _.extend(prop, lprop)
+  //   }
+  //   if (lens.hidden) {
+  //     if (!cmodel.hidden)
+  //       cmodel.hidden = []
+  //     lens.hidden.forEach((p) => {
+  //       cmodel.hidden.push(p)
+  //     })
+  //   }
+  //   if (lens.required) {
+  //     cmodel.required = []
+  //     lens.required.forEach((p) => {
+  //       cmodel.required.push(p)
+  //     })
+  //   }
+  //   if (lens.editCols) {
+  //     cmodel.editCols = []
+  //     lens.editCols.forEach((p) => {
+  //       cmodel.editCols.push(p)
+  //     })
+  //   }
+  //   if (lens.viewCols) {
+  //     cmodel.viewCols = []
+  //     lens.viewCols.forEach((p) => {
+  //       cmodel.viewCols.push(p)
+  //     })
+  //   }
+
+  //   return cmodel
   // },
 */

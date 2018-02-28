@@ -205,8 +205,12 @@ class FormErrorRow extends Component {
         errs = this.props.resource.errors
     }
     else if (resource.requestedProperties) {
-      for (let p of resource.requestedProperties)
+      for (let p of resource.requestedProperties) {
         requestedProperties[p.name] = p.message || ''
+        if (!resource.errors)
+          resource.errors = []
+        resource.errors.push({name: [p.name], error: translate('thisFieldIsRequired')})
+      }
     }
 
     let me = utils.getMe()

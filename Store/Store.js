@@ -97,7 +97,7 @@ const NOT_CHAT_ITEM = '_notChatItem'
 
 import utils from '../utils/utils'
 import graphQL from './graphql/graphql-client'
-// import storeUtils from './utils/utils'
+import storeUtils from './utils/storeUtils'
 const sampleData = require('@tradle/models').data
 const voc = require('./voc')
 
@@ -289,7 +289,7 @@ var SERVICE_PROVIDERS_BASE_URL_DEFAULTS = __DEV__ ? [].concat(ENV.LOCAL_TRADLE_S
 var SERVICE_PROVIDERS_BASE_URLS
 var HOSTED_BY = TOP_LEVEL_PROVIDERS.map(t => t.name)
 // import ALL_SERVICE_PROVIDERS from '../data/serviceProviders'
-var SERVICE_PROVIDERS
+var SERVICE_PROVIDERS = []
 var publishRequestSent = []
 var driverInfo = (function () {
   const clientToIdentifiers = new Map()
@@ -496,7 +496,7 @@ var Store = Reflux.createStore({
     //   );
     // }
     // storeUtils.init({db, list, contextIdToResourceId, models})
-    this.addModels()
+    storeUtils.addModels({models, enums})
     this.loadModels()
     // await storeUtils.loadModels()
     utils.setModels(models);
@@ -836,47 +836,47 @@ var Store = Reflux.createStore({
       })
     }
   },
-  addModels() {
-    for (let id in voc) {
-      let m = voc[id]
-      // if (!m[ROOT_HASH])
-      //   m[ROOT_HASH] = sha(m);
-      this.parseOneModel(m)
-    }
-  },
+  // addModels() {
+  //   for (let id in voc) {
+  //     let m = voc[id]
+  //     // if (!m[ROOT_HASH])
+  //     //   m[ROOT_HASH] = sha(m);
+  //     storeUtils.parseOneModel(m)
+  //   }
+  // },
 
-  parseOneModel(m) {
-    Aviva.preparseModel(m)
-    this.addNameAndTitleProps(m)
-    models[m.id] = {
-      key: m.id,
-      value: m
-    }
-    if (!m.properties[TYPE]) {
-      m.properties[TYPE] = {
-        type: 'string',
-        readOnly: true
-      }
-    }
-    if (!m.properties.time) {
-      m.properties.time = {
-        type: 'date',
-        readOnly: true,
-        title: 'Date'
-      }
-    }
+  // parseOneModel(m) {
+  //   Aviva.preparseModel(m)
+  //   storeUtils.addNameAndTitleProps(m)
+  //   models[m.id] = {
+  //     key: m.id,
+  //     value: m
+  //   }
+  //   if (!m.properties[TYPE]) {
+  //     m.properties[TYPE] = {
+  //       type: 'string',
+  //       readOnly: true
+  //     }
+  //   }
+  //   if (!m.properties.time) {
+  //     m.properties.time = {
+  //       type: 'date',
+  //       readOnly: true,
+  //       title: 'Date'
+  //     }
+  //   }
 
-    // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
-    //   org.products.push(m.id)
-    if (utils.isEnum(m))
-      this.createEnumResources(m)
+  //   // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
+  //   //   org.products.push(m.id)
+  //   if (utils.isEnum(m))
+  //     this.createEnumResources(m)
 
-    // if (utils.isMessage(m)) {
-    if (m.subClassOf === FORM) {
-      this.addVerificationsToFormModel(m)
-      this.addFromAndTo(m)
-    }
-  },
+  //   // if (utils.isMessage(m)) {
+  //   if (m.subClassOf === FORM) {
+  //     storeUtils.addVerificationsToFormModel(m)
+  //     storeUtils.addFromAndTo(m)
+  //   }
+  // },
 
   _handleConnectivityChange(isConnected) {
     if (isConnected === this.isConnected) return
@@ -939,7 +939,7 @@ var Store = Reflux.createStore({
   },
   setMe(newMe) {
     me = newMe
-    if (SERVICE_PROVIDERS  &&  me.organization  &&  !me.organization.url) {
+    if (SERVICE_PROVIDERS.length  &&  me.organization  &&  !me.organization.url) {
       let orgId = utils.getId(me.organization)
       let o = SERVICE_PROVIDERS.filter((r) => {
         return r.org == orgId ? true : false
@@ -1482,8 +1482,8 @@ var Store = Reflux.createStore({
     let productApp = {}
     let removeMsg = []
     let pl
-    let allMessages = chatMessages[ALL_MESSAGES]
     let self = this
+    let allMessages = chatMessages[ALL_MESSAGES]
     // Compact all FormRequests that were fulfilled
     for (let i=messages.length - 1; i>=0; i--) {
       let r = this._getItem(messages[i].id)
@@ -1612,6 +1612,8 @@ var Store = Reflux.createStore({
   },
   getInfo(params) {
     let serverUrls = params.serverUrls
+    if (!serverUrls.length)
+      return
     let retry = params.retry
     let id = params.id
     let newServer = params.newServer
@@ -1676,8 +1678,8 @@ var Store = Reflux.createStore({
       }
     }
 
-    if (!SERVICE_PROVIDERS)
-      SERVICE_PROVIDERS = []
+    // if (!SERVICE_PROVIDERS)
+    //   SERVICE_PROVIDERS = []
     // sp.org.contacts = [utils.optimizeResource(me)]
 
     this.parseProvider(sp)
@@ -2300,7 +2302,7 @@ var Store = Reflux.createStore({
   },
 
   setProviderOnlineStatus(permalink, online) {
-    if (!SERVICE_PROVIDERS) return
+    // if (!SERVICE_PROVIDERS) return
 
     const provider = SERVICE_PROVIDERS.find(provider => {
       return provider.permalink === permalink
@@ -2457,8 +2459,8 @@ var Store = Reflux.createStore({
       }
     }
     let newProviders
-    if (!SERVICE_PROVIDERS) {
-      SERVICE_PROVIDERS = []
+    if (!SERVICE_PROVIDERS.length) {
+      // SERVICE_PROVIDERS = []
       newProviders = true
     }
 
@@ -2770,8 +2772,8 @@ var Store = Reflux.createStore({
     var ikey = utils.makeId(IDENTITY, hash)
     var pkey = utils.makeId(PROFILE, hash)
 
-    var profile = list[pkey] && this._getItem(pkey)
-    var identity = list[ikey]  &&  this._getItem(ikey)
+    var profile = this._getItem(pkey)
+    var identity = this._getItem(ikey)
 
     var batch = []
     var newContact = !profile  ||  !identity
@@ -3245,7 +3247,7 @@ var Store = Reflux.createStore({
     // let isEmployee = me.isEmployee && (!r.to.organization || utils.getId(r.to.organization) === utils.getId(me.organization))
     if (isEmployee) {
       let arr
-      if (SERVICE_PROVIDERS)
+      if (SERVICE_PROVIDERS.length) {
         arr = SERVICE_PROVIDERS.filter((sp) => {
           let reps = this.getRepresentatives(sp.org)
           let talkingToBot = reps.forEach((r) => {
@@ -3253,6 +3255,7 @@ var Store = Reflux.createStore({
           })
           return talkingToBot  &&  talkingToBot.length ? true : false
         })
+      }
       else  {
         if (!to.bot)
           arr = [to]
@@ -4885,7 +4888,7 @@ var Store = Reflux.createStore({
       // title: utils.getDisplayName(r)
     }
   },
-  async onApplyForProduct({ host, provider, product }) {
+  async onApplyForProduct({ host, provider, product, contextId }) {
     let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true })
     if (!newProvider)
       return
@@ -4896,6 +4899,8 @@ var Store = Reflux.createStore({
       from: me,
       to: this.getRepresentative(org)
     }
+    if (contextId)
+      resource.contextId = contextId
     await this.onAddChatItem({resource, noTrigger: true,  })
     this.trigger({ action: 'applyForProduct', provider: org })
   },
@@ -5503,8 +5508,8 @@ var Store = Reflux.createStore({
     }
   },
   getProviderById(providerId) {
-    if (!SERVICE_PROVIDERS)
-      return
+    // if (!SERVICE_PROVIDERS)
+    //   return
     let provider
     SERVICE_PROVIDERS.forEach((sp) => {
       if (sp.id === providerId)
@@ -8500,13 +8505,13 @@ var Store = Reflux.createStore({
           me.languageCode = lang.code
           this.setMe(me)
           var urls = []
-          if (SERVICE_PROVIDERS) {
-            SERVICE_PROVIDERS.forEach((sp) => {
-              if (urls.indexOf(sp.url) === -1)
-                urls.push(sp.url)
-            })
-            return this.getInfo({serverUrls: urls})
-          }
+          // if (SERVICE_PROVIDERS.length) {
+          SERVICE_PROVIDERS.forEach((sp) => {
+            if (urls.indexOf(sp.url) === -1)
+              urls.push(sp.url)
+          })
+          return this.getInfo({serverUrls: urls})
+          // }
         }
       }
     })
@@ -8792,10 +8797,10 @@ var Store = Reflux.createStore({
     const settings = this._getItem(key)
     let allProviders, oneProvider
     if (value.id) {
-      if (SERVICE_PROVIDERS) {
-        if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
-          return
-      }
+      // if (SERVICE_PROVIDERS) {
+      if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
+        return
+      // }
       // We don't have this provider yet
       if (settings  &&  settings.urls.indexOf(value.url) !== -1) {
         // check if all providers were fetched from this server.
@@ -9724,7 +9729,7 @@ var Store = Reflux.createStore({
 
         newFormRequestVerifiers(from, SERVICE_PROVIDERS, val, orgs)
         //============
-        if (SERVICE_PROVIDERS && val.verifiers) {
+        if (SERVICE_PROVIDERS.length && val.verifiers) {
           if (!val.message) {
             val.message = 'Please have this form verified by one of our trusted associates'
           }
@@ -10015,7 +10020,7 @@ var Store = Reflux.createStore({
         if (!self.getModel(m.id))
           self._emitter.emit('model:' + m.id)
         m._versionId = val.versionId
-        self.parseOneModel(m)
+        storeUtils.parseOneModel(m)
         batch.push({type: 'put', key: m.id, value: m})
       })
       utils.setModels(models)
@@ -10154,53 +10159,53 @@ var Store = Reflux.createStore({
     return fr
   },
   // if the last message showing was PRODUCT_LIST. No need to re-render
-  addNameAndTitleProps(m, aprops) {
-    var mprops = aprops  ||  m.properties
-    for (let p in mprops) {
-      if (p.charAt(0) === '_')
-        continue
-      if (!mprops[p].name)
-        mprops[p].name = p
-      if (!mprops[p].title)
-        mprops[p].title = utils.makeLabel(p)
-      if (mprops[p].type === 'array') {
-        var aprops = mprops[p].items.properties
-        if (aprops)
-          this.addNameAndTitleProps(m, aprops)
-      }
-    }
-  },
-  addFromAndTo(m) {
-    if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
-      return
-    let properties = m.properties
-    if (properties.from  &&  properties.to)
-      return
-    properties.from = {
-      type: 'object',
-      ref: IDENTITY,
-      readOnly: true
-    }
-    properties.to = {
-      type: 'object',
-      ref: IDENTITY,
-      readOnly: true
-    }
-  },
-  addVerificationsToFormModel(m) {
-    if (m.subClassOf !== FORM  ||  m.verifications)
-      return
-    m.properties.verifications = {
-      type: 'array',
-      readOnly: true,
-      title: 'Verifications',
-      name: 'verifications',
-      items: {
-        backlink: 'document',
-        ref: VERIFICATION
-      }
-    }
-  },
+  // addNameAndTitleProps(m, aprops) {
+  //   var mprops = aprops  ||  m.properties
+  //   for (let p in mprops) {
+  //     if (p.charAt(0) === '_')
+  //       continue
+  //     if (!mprops[p].name)
+  //       mprops[p].name = p
+  //     if (!mprops[p].title)
+  //       mprops[p].title = utils.makeLabel(p)
+  //     if (mprops[p].type === 'array') {
+  //       var aprops = mprops[p].items.properties
+  //       if (aprops)
+  //         this.addNameAndTitleProps(m, aprops)
+  //     }
+  //   }
+  // },
+  // addFromAndTo(m) {
+  //   if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
+  //     return
+  //   let properties = m.properties
+  //   if (properties.from  &&  properties.to)
+  //     return
+  //   properties.from = {
+  //     type: 'object',
+  //     ref: IDENTITY,
+  //     readOnly: true
+  //   }
+  //   properties.to = {
+  //     type: 'object',
+  //     ref: IDENTITY,
+  //     readOnly: true
+  //   }
+  // },
+  // addVerificationsToFormModel(m) {
+  //   if (m.subClassOf !== FORM  ||  m.verifications)
+  //     return
+  //   m.properties.verifications = {
+  //     type: 'array',
+  //     readOnly: true,
+  //     title: 'Verifications',
+  //     name: 'verifications',
+  //     items: {
+  //       backlink: 'document',
+  //       ref: VERIFICATION
+  //     }
+  //   }
+  // },
   loadMyResources() {
     //   this._loadedResourcesDefer.resolve()
     // return
@@ -10224,7 +10229,7 @@ var Store = Reflux.createStore({
           models[data.key] = data;
           self.setPropertyNames(m.properties)
           if (utils.isEnum(m))
-            self.createEnumResources(m)
+            storeUtils.createEnumResources(m, enums)
           return
         }
         if (data.value[TYPE] === LENS) {
@@ -10341,7 +10346,7 @@ var Store = Reflux.createStore({
       }
     })
     .then(() => {
-      if (SERVICE_PROVIDERS)
+      if (SERVICE_PROVIDERS.length)
         SERVICE_PROVIDERS.forEach((p) => this._getItem(p.org)._online = true)
       else {
         let orgs = self.searchNotMessages({modelName: ORGANIZATION})
@@ -10391,25 +10396,25 @@ var Store = Reflux.createStore({
     })
   },
   // Creates resources from subClassOf tradle.Enum models that have 'enum' model property
-  createEnumResources(model) {
-    if (!utils.isEnum(model)  ||  !model.enum)
-      return
-    let eProp
-    for (let p in model.properties) {
-      if (p !== TYPE) {
-        eProp = p
-        break
-      }
-    }
-    model.enum.forEach((r) => {
-      let enumItem = {
-        [TYPE]: model.id,
-        [ROOT_HASH]: r.id,
-        [eProp]: r.title
-      }
-      this.loadStaticItem(enumItem)
-    })
-  },
+  // createEnumResources(model) {
+  //   if (!utils.isEnum(model)  ||  !model.enum)
+  //     return
+  //   let eProp
+  //   for (let p in model.properties) {
+  //     if (p !== TYPE) {
+  //       eProp = p
+  //       break
+  //     }
+  //   }
+  //   model.enum.forEach((r) => {
+  //     let enumItem = {
+  //       [TYPE]: model.id,
+  //       [ROOT_HASH]: r.id,
+  //       [eProp]: r.title
+  //     }
+  //     this.loadStaticItem(enumItem)
+  //   })
+  // },
   // Cleanup and notify customer that FI successfully forgotten him
   forgotYou(resource) {
     var org = this._getItem(utils.getId(resource.organization))
@@ -10730,7 +10735,7 @@ var Store = Reflux.createStore({
   },
   // Devices one
   onGenPairingData() {
-    if (!SERVICE_PROVIDERS) {
+    if (!SERVICE_PROVIDERS.length) {
       this.trigger({action: 'genPairingData', error: 'Can\'t connect to server'})
       return
     }
@@ -11098,7 +11103,7 @@ var Store = Reflux.createStore({
   loadDB() {
     const self = this
     if (utils.isEmpty(models))
-      this.addModels()
+      storeUtils.addModels({models, enums})
 
     // // return this.loadStaticDbData(true)
     // // .then(() => {
@@ -11111,29 +11116,29 @@ var Store = Reflux.createStore({
   },
   loadStaticData() {
     sampleData.getResources().forEach((r) => {
-      this.loadStaticItem(r)
+      storeUtils.loadStaticItem(r, enums)
     });
   },
-  loadStaticItem(r, saveInDB, batch) {
-    if (!r[ROOT_HASH])
-      r[ROOT_HASH] = sha(r)
+  // loadStaticItem(r, saveInDB, batch) {
+  //   if (!r[ROOT_HASH])
+  //     r[ROOT_HASH] = sha(r)
 
-    r[CUR_HASH] = r[ROOT_HASH]
-    let type = r[TYPE]
-    let enumList = enums[type]
-    if (!enumList) {
-      enumList = []
-      enums[type] = enumList
-    }
+  //   r[CUR_HASH] = r[ROOT_HASH]
+  //   let type = r[TYPE]
+  //   let enumList = enums[type]
+  //   if (!enumList) {
+  //     enumList = []
+  //     enums[type] = enumList
+  //   }
 
-    if (enumList.filter((e) => e[ROOT_HASH] === r[ROOT_HASH]).length)
-      return
-    enumList.push(r)
-    // let id = utils.getId(r)
-    let key = [r[TYPE], r[ROOT_HASH], r[CUR_HASH]].join('_')
-    if (saveInDB)
-      batch.push({type: 'put', key, value: r})
-  },
+  //   if (enumList.filter((e) => e[ROOT_HASH] === r[ROOT_HASH]).length)
+  //     return
+  //   enumList.push(r)
+  //   // let id = utils.getId(r)
+  //   let key = [r[TYPE], r[ROOT_HASH], r[CUR_HASH]].join('_')
+  //   if (saveInDB)
+  //     batch.push({type: 'put', key, value: r})
+  // },
 
   loadModels() {
     // var batch = [];
