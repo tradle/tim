@@ -142,7 +142,7 @@ class ApplicationView extends Component {
     if (isLoading)
       return (
               <View style={[platformStyles.container]}>
-                <Text style={styles.loading}>{'In process...'}</Text>
+                <Text style={styles.loading}>{'In progress...'}</Text>
                 <ActivityIndicator size='large' style={styles.indicator} />
               </View>
              )
@@ -250,7 +250,7 @@ class ApplicationView extends Component {
           }
           Actions.addChatItem({resource: msg})
           this.setState({hasRM: true})
-          Actions.showModal({title: 'In process...', showIndicator: true})
+          Actions.showModal({title: 'In progress...', showIndicator: true})
         }}
       ]
     )
@@ -298,8 +298,9 @@ class ApplicationView extends Component {
     // }
     let isApplication = resource[TYPE] === APPLICATION
     let applicant = isApplication ? resource.applicant : resource.from
+    let approvalPhrase = applicant.title ? 'approveApplicationFor' : 'approveApplication'
     Alert.alert(
-      translate('approveApplication', applicant.title),
+      translate(approvalPhrase, applicant.title || ''),
       null,
       [
         {text: translate('cancel'), onPress: () => {

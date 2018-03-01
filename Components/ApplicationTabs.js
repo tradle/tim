@@ -159,7 +159,7 @@ class ApplicationTabs extends Component {
                                     currency={currency}
                                     excludedProperties={['photos']}
                                     navigator={navigator} />
-      if (utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
+      if (!resource.draft  &&  utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
         details = <View style={styles.buttonsFooter}>
                    {details}
                    <View style={{flexDirection: 'row', alignSelf: 'center', marginTop: 100}}>
