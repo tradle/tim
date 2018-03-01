@@ -81,7 +81,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#b95accf29fe8469479ae4045fe1baf65cd1cad61"
+      "resolved": "git://github.com/tradle/custom-models.git#edf862e531859b5938c77bc3fb48211905bcbab7"
     },
     "@tradle/embed": {
       "version": "1.0.0",
@@ -169,6 +169,11 @@
         }
       }
     },
+    "@tradle/lens": {
+      "version": "1.1.1",
+      "from": "@tradle/lens@latest",
+      "resolved": "http://registry.npmjs.org/@tradle/lens/-/lens-1.1.1.tgz"
+    },
     "@tradle/merge-models": {
       "version": "2.1.0",
       "from": "@tradle/merge-models@>=2.0.0 <3.0.0",
@@ -182,7 +187,7 @@
     "@tradle/models-cloud": {
       "version": "1.0.0",
       "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#0aaf2f731491d02480cd2074fb4409cfd97d31c6"
+      "resolved": "git://github.com/tradle/models-cloud.git#4f29dde68ff9582f31f0ac972e25b474767806bf"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -259,10 +264,20 @@
       "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-3.0.0.tgz"
     },
     "@tradle/qr-schema": {
-      "version": "1.4.0",
+      "version": "1.7.0",
       "from": "@tradle/qr-schema@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-1.4.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-1.7.0.tgz",
       "dependencies": {
+        "is-extendable": {
+          "version": "1.0.1",
+          "from": "is-extendable@>=1.0.0 <2.0.0",
+          "resolved": "https://registry.npmjs.org/is-extendable/-/is-extendable-1.0.1.tgz"
+        },
+        "object.omit": {
+          "version": "3.0.0",
+          "from": "object.omit@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/object.omit/-/object.omit-3.0.0.tgz"
+        },
         "protocol-buffers": {
           "version": "3.2.1",
           "from": "protocol-buffers@>=3.2.1 <4.0.0",
@@ -4432,6 +4447,18 @@
       "from": "is-path-inside@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/is-path-inside/-/is-path-inside-1.0.0.tgz",
       "dev": true
+    },
+    "is-plain-object": {
+      "version": "2.0.4",
+      "from": "is-plain-object@>=2.0.4 <3.0.0",
+      "resolved": "https://registry.npmjs.org/is-plain-object/-/is-plain-object-2.0.4.tgz",
+      "dependencies": {
+        "isobject": {
+          "version": "3.0.1",
+          "from": "isobject@>=3.0.1 <4.0.0",
+          "resolved": "https://registry.npmjs.org/isobject/-/isobject-3.0.1.tgz"
+        }
+      }
     },
     "is-posix-bracket": {
       "version": "0.1.1",
