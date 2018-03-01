@@ -32,7 +32,7 @@ Markdown.renderer.link = props => {
     )
   }
 
-  return <a href={href}>{props.children}</a>
+  return <a href={href} target="_blank">{props.children}</a>
 
   // return <View>
   //         {props.children}
