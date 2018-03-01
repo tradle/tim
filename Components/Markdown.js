@@ -26,17 +26,17 @@ Markdown.renderer.link = props => {
         Actions.triggerDeepLink(href)
       else
         Linking.openURL(href)
-      //   props.passThroughProps.navigator.push({
-      //     id: 7,
-      //     component: ArticleView,
-      //     backButtonTitle: 'Back',
-      //     title: translate(markdown.children[0].text),
-      //     passProps: {
-      //       bankStyle: props.passThroughProps.bankStyle,
-      //       href: href
-      //     }
-      //   })
-      // }
+      // props.passThroughProps.navigator.push({
+      //   id: 7,
+      //   component: ArticleView,
+      //   backButtonTitle: 'Back',
+      //   title: translate(markdown.children[0].text),
+      //   passProps: {
+      //     bankStyle: props.passThroughProps.bankStyle,
+      //     href: href
+      //   }
+      // })
+
     }}>
       <View>
         {props.children}
