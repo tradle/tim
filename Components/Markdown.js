@@ -9,7 +9,8 @@ var translate = utils.translate
 
 import {
   TouchableOpacity,
-  View
+  View,
+  Linking
 } from 'react-native'
 
 const Markdown = createMarkdownRenderer()
@@ -20,16 +21,17 @@ Markdown.renderer.link = props => {
   const { href } = markdown
   return (
     <TouchableOpacity onPress={() => {
-      props.passThroughProps.navigator.push({
-        id: 7,
-        component: ArticleView,
-        backButtonTitle: 'Back',
-        title: translate(markdown.children[0].text),
-        passProps: {
-          bankStyle: props.passThroughProps.bankStyle,
-          href: href
-        }
-      })
+      Linking.openURL(href)
+      // props.passThroughProps.navigator.push({
+      //   id: 7,
+      //   component: ArticleView,
+      //   backButtonTitle: 'Back',
+      //   title: translate(markdown.children[0].text),
+      //   passProps: {
+      //     bankStyle: props.passThroughProps.bankStyle,
+      //     href: href
+      //   }
+      // })
 
     }}>
       <View>
