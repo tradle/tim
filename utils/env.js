@@ -76,7 +76,8 @@ const merged = extend({
     // 'https://orj69mhz91.execute-api.us-east-1.amazonaws.com/dev'
   ],
   LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/', // Goofy
-  pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
+  // pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
+  pushServerURL: PROD_PUSH_SERVER,
   isAndroid: function () {
     return Platform.OS === 'android'
   },
