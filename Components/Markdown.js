@@ -1,6 +1,7 @@
 console.log('requiring Markdown.js')
 'use strict';
 
+import { parse as parseUrl } from 'url'
 import React, { Component, PropTypes } from 'react'
 import createMarkdownRenderer from 'rn-markdown'
 import ArticleView from './ArticleView'
@@ -20,7 +21,8 @@ Markdown.renderer.container = View
 Markdown.renderer.link = props => {
   const { markdown } = props
   const { href } = markdown
-  if (href.indexOf('localhost:3001') !== -1) {
+  const { host } = parseUrl(href)
+  if (host === window.location.host) {
     return (
       <TouchableOpacity onPress={() => Actions.triggerDeepLink(href)}>
         <View>
