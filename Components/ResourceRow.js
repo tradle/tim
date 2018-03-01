@@ -522,7 +522,7 @@ class ResourceRow extends Component {
                   lastMessageTypeIcon = <Icon name={icon} size={14} color='#7AAAc3' style={{paddingLeft: 1, marginTop: 1}}/>
               }
             }
-            let w = utils.getContentWidth(ResourceRow).width - 145
+            let w = utils.getContentWidth(ResourceRow) - 145
             row = <View style={{flexDirection: 'row'}} key={self.getNextKey()}>
                     <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'} />
                     {lastMessageTypeIcon}
@@ -648,12 +648,12 @@ class ResourceRow extends Component {
                   </View>
     let draft
     if (resource.draft) {
-      let width = utils.dimensions(ResourceRow).width
-      draft = <View style={{position: 'absolute', top: 0, width}}>
+      draft = <View style={{position: 'absolute', top: 0, width: '100%'}}>
                  <Text style={{fontSize: 70, color: '#f5f5f5', fontWeight: '600', alignSelf: 'center'}}>{translate('DRAFT')}</Text>
               </View>
     }
     return  <View>
+              {draft}
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
                   <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{m ? translate(m) : utils.makeModelTitle(resource.requestFor)}</Text>
