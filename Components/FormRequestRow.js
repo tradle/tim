@@ -879,7 +879,8 @@ class FormRequestRow extends Component {
       Actions.addMessage({msg: {
         from: resource.to,
         to: resource.from,
-        _context: self.props.context  ||  resource._context,
+        _context: resource._context,
+        // _context: self.props.context  ||  resource._context,
         [TYPE]: NEXT_FORM_REQUEST,
         after: form.id
       }})
