@@ -4926,7 +4926,7 @@ var Store = Reflux.createStore({
         return r.permalink === permalink
       }
 
-      return r.url === url
+      return utils.urlsEqual(r.url, url)
     })
 
     if (!newProvider) {

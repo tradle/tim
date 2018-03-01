@@ -367,7 +367,7 @@ console.log('endCursor: ', endCursor)
     let eq = `
             EQ: {
             `
-    if (author)
+    if (author  &&  !context)
       eq += `_counterparty: "${author}"\n`
 
     let filter = ''
