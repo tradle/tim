@@ -4198,6 +4198,9 @@ var Store = Reflux.createStore({
     //   }
     // })
   },
+  onTriggerDeepLink(url) {
+    this.trigger({action: 'deepLink', url})
+  },
   async onAddChatItem(params) {
     extend(params, {isMessage: true})
     await this.onAddItem(params)

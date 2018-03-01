@@ -357,7 +357,7 @@ class TimHome extends Component {
   }
 
   async handleEvent(params) {
-    let {action, activity, isConnected, models, me, isRegistration, provider, termsAccepted} = params
+    let {action, activity, isConnected, models, me, isRegistration, provider, termsAccepted, url} = params
     var nav = this.props.navigator
 
     switch(action) {
@@ -379,6 +379,10 @@ class TimHome extends Component {
       return
     case 'applyForProduct':
       this.showChatPage({resource: provider, action: this.wasDeepLink ? 'push' : 'replace', showProfile: this.wasDeepLink})
+      break
+    case 'deepLink':
+      this.isDeepLink = true
+      await this._handleOpenURL({url})
       break
     case 'getProvider':
       this.showChatPage({resource: provider, termsAccepted, showProfile: true})

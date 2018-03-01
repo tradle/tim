@@ -68,7 +68,9 @@ var asyncActions = [
   'acceptTermsAndChat',
   'setPreferences',
   'getDocuments',
-  'hasTestProviders'
+  'hasTestProviders',
+
+  'triggerDeepLink'
 ]
 
 var syncActions = [
