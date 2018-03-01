@@ -20,29 +20,18 @@ Markdown.renderer.container = View
 Markdown.renderer.link = props => {
   const { markdown } = props
   const { href } = markdown
-  return (
-    <TouchableOpacity onPress={() => {
-      if (href.indexOf('localhost:3001') !== -1)
-        Actions.triggerDeepLink(href)
-      else
-        Linking.openURL(href)
-      // props.passThroughProps.navigator.push({
-      //   id: 7,
-      //   component: ArticleView,
-      //   backButtonTitle: 'Back',
-      //   title: translate(markdown.children[0].text),
-      //   passProps: {
-      //     bankStyle: props.passThroughProps.bankStyle,
-      //     href: href
-      //   }
-      // })
+  if (href.indexOf('localhost:3001') !== -1) {
+    return (
+      <TouchableOpacity onPress={() => Actions.triggerDeepLink(href)}>
+        <View>
+          {props.children}
+        </View>
+      </TouchableOpacity>
+    )
+  }
 
-    }}>
-      <View>
-        {props.children}
-      </View>
-    </TouchableOpacity>
-  )
+  return <a href={href}>{props.children}</a>
+
   // return <View>
   //         {props.children}
   //        </View>
