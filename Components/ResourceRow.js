@@ -646,6 +646,13 @@ class ResourceRow extends Component {
     progressBar = <View style={styles.progress}>
                     <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
                   </View>
+    let draft
+    if (resource.draft) {
+      let width = utils.dimensions(ResourceRow).width
+      draft = <View style={{position: 'absolute', top: 0, width}}>
+                 <Text style={{fontSize: 70, color: '#f5f5f5', fontWeight: '600', alignSelf: 'center'}}>{translate('DRAFT')}</Text>
+              </View>
+    }
     return  <View>
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>

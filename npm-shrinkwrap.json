@@ -64,7 +64,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#b95accf29fe8469479ae4045fe1baf65cd1cad61"
+      "resolved": "git://github.com/tradle/custom-models.git#edf862e531859b5938c77bc3fb48211905bcbab7"
     },
     "@tradle/embed": {
       "version": "1.0.0",
@@ -152,6 +152,11 @@
         }
       }
     },
+    "@tradle/lens": {
+      "version": "1.1.1",
+      "from": "@tradle/lens@latest",
+      "resolved": "http://registry.npmjs.org/@tradle/lens/-/lens-1.1.1.tgz"
+    },
     "@tradle/merge-models": {
       "version": "2.1.0",
       "from": "@tradle/merge-models@>=2.0.0 <3.0.0",
@@ -165,7 +170,7 @@
     "@tradle/models-cloud": {
       "version": "1.0.0",
       "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#0aaf2f731491d02480cd2074fb4409cfd97d31c6"
+      "resolved": "git://github.com/tradle/models-cloud.git#4f29dde68ff9582f31f0ac972e25b474767806bf"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -6160,11 +6165,25 @@
       "resolved": "https://registry.npmjs.org/is-path-inside/-/is-path-inside-1.0.0.tgz",
       "dev": true
     },
+<<<<<<< HEAD
     "is-plain-obj": {
       "version": "1.1.0",
       "from": "is-plain-obj@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/is-plain-obj/-/is-plain-obj-1.1.0.tgz",
       "dev": true
+=======
+    "is-plain-object": {
+      "version": "2.0.4",
+      "from": "is-plain-object@>=2.0.4 <3.0.0",
+      "resolved": "https://registry.npmjs.org/is-plain-object/-/is-plain-object-2.0.4.tgz",
+      "dependencies": {
+        "isobject": {
+          "version": "3.0.1",
+          "from": "isobject@>=3.0.1 <4.0.0",
+          "resolved": "https://registry.npmjs.org/isobject/-/isobject-3.0.1.tgz"
+        }
+      }
+>>>>>>> origin/master
     },
     "is-posix-bracket": {
       "version": "0.1.1",

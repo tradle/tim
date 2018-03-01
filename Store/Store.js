@@ -4918,7 +4918,14 @@ var Store = Reflux.createStore({
       return
     }
 
-    const newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => r.permalink === permalink)
+    const newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => {
+      if (permalink) {
+        return r.permalink === permalink
+      }
+
+      return r.url === url
+    })
+
     if (!newProvider) {
       return this.trigger({
         action: 'addApp',
