@@ -1038,7 +1038,7 @@ var Store = Reflux.createStore({
     })
     return myCustomIndexes
   },
-  _buildDriver ({ keys, identity, encryption }) {
+  async _buildDriver ({ keys, identity, encryption }) {
     let self = this
     // let keeper = level('unencrypted-keeper', {
     //   valueEncoding: {
@@ -1587,7 +1587,7 @@ var Store = Reflux.createStore({
 
     }
   },
-  getInfo(params) {
+  async getInfo(params) {
     let serverUrls = params.serverUrls
     if (!serverUrls.length)
       return
@@ -4900,7 +4900,14 @@ var Store = Reflux.createStore({
       return
     }
 
-    const newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => r.permalink === permalink)
+    const newProvider = tradleUtils.find(SERVICE_PROVIDERS, r => {
+      if (permalink) {
+        return r.permalink === permalink
+      }
+
+      return r.url === url
+    })
+
     if (!newProvider) {
       return this.trigger({
         action: 'addApp',
