@@ -1055,7 +1055,7 @@ var Store = Reflux.createStore({
     })
     return myCustomIndexes
   },
-  _buildDriver ({ keys, identity, encryption }) {
+  async _buildDriver ({ keys, identity, encryption }) {
     let self = this
     // let keeper = level('unencrypted-keeper', {
     //   valueEncoding: {
@@ -1611,7 +1611,7 @@ var Store = Reflux.createStore({
 
     }
   },
-  getInfo(params) {
+  async getInfo(params) {
     let serverUrls = params.serverUrls
     if (!serverUrls.length)
       return
