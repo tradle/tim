@@ -500,7 +500,7 @@ class MessageList extends Component {
       to: this.props.resource,
       context: context,
       switchToContext: context != null,
-      limit: 20
+      limit: LIMIT
     })
   }
 
