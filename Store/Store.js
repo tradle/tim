@@ -6761,10 +6761,12 @@ var Store = Reflux.createStore({
       }
     }
     else if (r[TYPE] === FORM_ERROR) {
-      let prefill = this._getItem(r.prefill.id)
-      let phash = prefill ? prefill[CUR_HASH] : r.prefill.id.split('_')[2]
-      refs.push(phash)
-      all[phash] = utils.getId(r.prefill)
+      if (r.prefill.id) {
+        let prefill = this._getItem(r.prefill.id)
+        let phash = prefill ? prefill[CUR_HASH] : r.prefill.id.split('_')[2]
+        refs.push(phash)
+        all[phash] = utils.getId(r.prefill)
+      }
     }
     let link = this.addLink(links, stub)
     if (link)
