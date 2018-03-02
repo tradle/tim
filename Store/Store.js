@@ -4872,7 +4872,7 @@ var Store = Reflux.createStore({
     }
   },
   async onApplyForProduct({ host, provider, product, contextId }) {
-    let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true })
+    let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
       return
     let org = this._getItem(newProvider.org)
@@ -4887,7 +4887,7 @@ var Store = Reflux.createStore({
     await this.onAddChatItem({resource, noTrigger: true,  })
     this.trigger({ action: 'applyForProduct', provider: org })
   },
-  async onAddApp({ url, permalink, noTrigger }) {
+  async onAddApp({ url, permalink, noTrigger, addSettings }) {
     try {
       await this.getInfo({serverUrls: [url], retry: false}) //, hash: permalink })
     } catch (err) {
@@ -4915,7 +4915,11 @@ var Store = Reflux.createStore({
       })
     }
 
-    this.addToSettings(newProvider)
+    // !!!! Review why we need addToSettings
+    if (addSettings)
+      this.addSettings(newProvider)
+    else
+      this.addToSettings(newProvider)
     if (!noTrigger)
       this.trigger({ action: 'addApp' })
     return newProvider
@@ -8733,6 +8737,7 @@ var Store = Reflux.createStore({
       err = err;
     });
   },
+  // !!! review and remove the legacy code for several providers on one server
   addSettings: co(function* addSettings (value, maxAttempts, getAllProviders) {
     var self = this
     var v = value.url
@@ -8745,8 +8750,14 @@ var Store = Reflux.createStore({
     let allProviders, oneProvider
     if (value.id) {
       // if (SERVICE_PROVIDERS) {
-      if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url))
+      if (SERVICE_PROVIDERS.some((r) => r.id === value.id  &&  r.url === value.url)) {
+        if (settings  &&  settings.urls.indexOf(value.url) === -1) {
+          self._mergeItem(key, { urls: [...settings.urls, value.url] })
+          value = self._getItem(key)
+          return self.dbPut(key, value)
+        }
         return
+      }
       // }
       // We don't have this provider yet
       if (settings  &&  settings.urls.indexOf(value.url) !== -1) {
