@@ -540,6 +540,8 @@ var NewResourceMixin = {
     return (this.props.model  ||  this.props.metadata).id + '_' + cnt++
   },
   onChangeText(prop, value) {
+    if(prop.type === 'string'  &&  !value.trim().length)
+      value = ''
     let {resource, missedRequiredOrErrorValue} = this.state
     let search = this.props.search
     let r = _.cloneDeep(resource)
