@@ -883,7 +883,7 @@ var styles = StyleSheet.create({
   multiChooser: {
     position: 'absolute',
     right: 10,
-    top: 10,
+    // top: 10,
     backgroundColor: 'transparent'
   },
   chooser: {
