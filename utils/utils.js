@@ -252,7 +252,7 @@ var utils = {
     let model = Store.getOriginalModel(form)
     let lensId = fr.lens
     if (!lensId)
-      return this.getModel(model)
+      return Store.getAugmentedModel(model)
 
     let lens = Store.getLens(lensId)
 
@@ -261,7 +261,7 @@ var utils = {
     // let props = m.properties
     // for (let p in props)
     //   props[p].name = p
-    return this.getModel(merged)
+    return Store.getAugmentedModel(merged)
   },
   applyLens({prop, value, list}) {
     let pin = prop.pin

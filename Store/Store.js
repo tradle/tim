@@ -262,6 +262,7 @@ const ON_RECEIVED_PROGRESS = 0.66
 const NUM_MSGS_BEFORE_REG_FOR_PUSH = __DEV__ ? 3 : 10
 const ALL_MESSAGES = '_all'
 var models = {}
+var modelsWithAddOns = {}
 var lenses = {}
 var list = {};
 var msgToObj = {}
@@ -8802,6 +8803,7 @@ var Store = Reflux.createStore({
       err = err;
     });
   },
+  // !!! review and remove the legacy code for several providers on one server
   addSettings: co(function* addSettings (value, maxAttempts, getAllProviders) {
     var self = this
     var v = value.url
@@ -11117,18 +11119,25 @@ var Store = Reflux.createStore({
     return mm
   },
   getModel(modelName) {
+    const cached = modelsWithAddOns[modelName]
+    if (cached) return cached
+
     let m = modelName
     if (typeof modelName === 'string')
       m = models  &&  models[modelName] && models[modelName].value
 
     if (m) {
-      let rModel = _.cloneDeep(m)
-      storeUtils.addOns(rModel, models, enums)
-      // let props = rModel.properties
-      // for (let p in props)
-      //   props[p].name = p
-      return rModel
+      return modelsWithAddOns[modelName] = this.getAugmentedModel(m)
     }
+  },
+
+  getAugmentedModel(model) {
+    model = _.cloneDeep(model)
+    storeUtils.addOns(model, models, enums)
+    // let props = rModel.properties
+    // for (let p in props)
+    //   props[p].name = p
+    return model
   },
 
   getOriginalModel(modelName) {
