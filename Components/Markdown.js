@@ -21,16 +21,16 @@ Markdown.renderer.container = View
 Markdown.renderer.link = props => {
   const { markdown } = props
   const { href } = markdown
-  const { host } = parseUrl(href)
-  if (host === window.location.host) {
-    return (
-      <TouchableOpacity onPress={() => Actions.triggerDeepLink(href)}>
-        <View>
-          {props.children}
-        </View>
-      </TouchableOpacity>
-    )
-  }
+  // const { host } = parseUrl(href)
+  // if (host === window.location.host) {
+  //   return (
+  //     <TouchableOpacity onPress={() => Actions.triggerDeepLink(href)}>
+  //       <View>
+  //         {props.children}
+  //       </View>
+  //     </TouchableOpacity>
+  //   )
+  // }
 
   return <a href={href} target="_blank">{props.children}</a>
 
