@@ -4872,6 +4872,22 @@ var Store = Reflux.createStore({
       // title: utils.getDisplayName(r)
     }
   },
+  async insurePublishingIdentity(org) {
+    if (!me)
+      return
+    let orgId = utils.getId(org)
+    if (!this.isConnected  ||  publishRequestSent[orgId])
+      return
+    let meDriver = await this.getDriver(me)
+    let status = await meDriver.identityPublishStatus()
+    if (status/* || !self.isConnected*/) {
+      publishRequestSent[orgId] = true
+      if (!status.watches.link  &&  !status.link) {
+        let orgRep = this.getRepresentative(orgId)
+        await this.publishMyIdentity(orgRep)
+      }
+    }
+  },
   async onApplyForProduct({ host, provider, product, contextId }) {
     let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
@@ -4883,8 +4899,8 @@ var Store = Reflux.createStore({
       from: me,
       to: this.getRepresentative(org)
     }
-    if (contextId)
-      resource.contextId = contextId
+    if (me)
+      await this.insurePublishingIdentity(org)
     await this.onAddChatItem({resource, noTrigger: true,  })
     this.trigger({ action: 'applyForProduct', provider: org })
   },
