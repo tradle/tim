@@ -230,7 +230,7 @@ class ApplicationTabs extends Component {
     }
 
     return <View style={styles.progress}>
-             <ProgressBar progress={progress} width={utils.dimensions(ApplicationTabs).width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
+             <ProgressBar progress={progress} width={utils.dimensions(ApplicationTabs).width - 34} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
            </View>
   }
 }

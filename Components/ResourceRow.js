@@ -643,7 +643,7 @@ class ResourceRow extends Component {
       }
     }
     progressBar = <View style={styles.progress}>
-                    <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={7} />
+                    <ProgressBar progress={progress} width={utils.dimensions().width - 30} color={progressColor} borderWidth={1} borderRadius={0} height={7} />
                   </View>
     let draft
     if (resource.draft) {
