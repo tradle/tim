@@ -5470,6 +5470,7 @@ var Store = Reflux.createStore({
     }
     if (providerBot) {
       let provider = this._getItem(utils.getId(providerBot.organization))
+      await this.insurePublishingIdentity(provider)
       this.trigger({action: 'getProvider', provider: provider, termsAccepted: params.termsAccepted})
     }
   },
