@@ -372,7 +372,24 @@ var ResourceMixin = {
         if (utils.isEmpty(json[p])  ||  this.checkIfJsonEmpty(json[p]))
           continue
         if (Array.isArray(json[p])) {
-          json[p].forEach((js) => this.showJson({json: js, isView: isView, jsonRows: []}))
+          let arrRows = []
+          json[p].forEach((js) => {
+            if (typeof js === 'object')
+              this.showJson({json: js, isView: isView, jsonRows: arrRows, indent: indent - 1})
+            else {
+              arrRows.push(<View style={{paddingVertical: 3, paddingRight: 10, paddingLeft: isView ? 10 * (indent) : 10 * (indent - 1)}} key={this.getNextKey()}>
+                             <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                               <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
+                               <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{js + ''}</Text>
+                             </View>
+                          </View>)
+            }
+          })
+
+          jsonRows.push(<View style={{paddingVertical: 3, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
+                           {arrRows}
+                        </View>
+                        )
           continue
         }
         // if (isBreakdown  &&  json[p].properties) {
