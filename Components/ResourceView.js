@@ -129,9 +129,7 @@ class ResourceView extends Component {
     // if (resource.id || !resource[constants.ROOT_HASH])
     let rtype = utils.getType(resource)
     let m = utils.getModel(rtype)
-    if (m.inlined)
-      return
-    if (m.subClassOf  &&  utils.getModel(m.subClassOf).inlined)
+    if (utils.isInlined(m))
       return
     Actions.getItem( {resource, search, backlink, isMessage: true} )
   }

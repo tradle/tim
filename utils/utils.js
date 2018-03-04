@@ -546,6 +546,13 @@ var utils = {
   isVerification(type) {
     return this.isSubclassOf(type, VERIFICATION)
   },
+  isInlined(m) {
+    if (m.inlined)
+      return true
+    if (!m.subClassOf)
+      return false
+    return this.isInlined(this.getModel(m.subClassOf))
+  },
   getFontSize(fontSize) {
     // return fontSize
     let fontScale = PixelRatio.getFontScale()
