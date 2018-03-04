@@ -627,17 +627,17 @@ class TimHome extends Component {
       if (utils.getId(currentRoute.passProps.resource) === utils.getId(resource))
         return
     }
-    if (!action) {
-      var msg = {
-        message: translate('customerWaiting', me.firstName),
-        _t: CUSTOMER_WAITING,
-        from: me,
-        to: resource,
-        time: new Date().getTime()
-      }
+    // if (!action) {
+    //   var msg = {
+    //     message: translate('customerWaiting', me.firstName),
+    //     _t: CUSTOMER_WAITING,
+    //     from: me,
+    //     to: resource,
+    //     time: new Date().getTime()
+    //   }
 
-      utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
-    }
+    //   utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
+    // }
     let style = {}
     extend(style, defaultBankStyle)
     if (resource.style)
