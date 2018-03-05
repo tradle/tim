@@ -6183,8 +6183,12 @@ var Store = Reflux.createStore({
       [TYPE]: r[TYPE],
     })
     let seal = r._seal
-    if (seal)
+    if (seal) {
       rr.txId = seal.txId
+      rr.sealedTime = seal.timestamp
+      rr.blockchain = seal.blockchain
+      rr.networkName = seal.network
+    }
 
     let lr = this._getItem(utils.getId(rr))
     if (lr) {
