@@ -706,7 +706,7 @@ module.exports = VerificationRow;
   //   var verPhoto;
   //   var vCols = [];
   //   var self = this;
-  //   var model = utils.getModel(resource[TYPE] || resource.id).value;
+  //   var model = utils.getModel(resource[TYPE] || resource.id);
 
   //   var properties = model.properties;
   //   var noMessage = !resource.message  ||  !resource.message.length;

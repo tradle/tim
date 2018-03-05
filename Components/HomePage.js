@@ -124,7 +124,7 @@ class HomePage extends Component {
     var isVerification = model.value.id === constants.TYPES.VERIFICATION
     var isForm = model.value.id === constants.TYPES.FORM
     var isOrganization = this.props.modelName === ORGANIZATION;
-    var m = utils.getModel(resource[TYPE]).value;
+    var m = utils.getModel(resource[TYPE]);
     var title = isIdentity ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
     var modelName = constants.TYPES.MESSAGE;
     var self = this;
@@ -160,9 +160,9 @@ class HomePage extends Component {
   }
 
   renderRow(resource)  {
-    var model = utils.getModel(this.props.modelName).value;
+    var model = utils.getModel(this.props.modelName);
     if (model.isInterface)
-      model = utils.getModel(resource[TYPE]).value
+      model = utils.getModel(resource[TYPE])
  // || (model.id === constants.TYPES.FORM)
     var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
     var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
@@ -184,7 +184,7 @@ class HomePage extends Component {
     var me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
-    var model = utils.getModel(this.props.modelName).value;
+    var model = utils.getModel(this.props.modelName);
     if (!this.props.prop  &&  model.id !== ORGANIZATION)
       return <View />
     // if (model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT ||  model.subClassOf === ENUM)
@@ -206,7 +206,7 @@ class HomePage extends Component {
 
   render() {
     var content;
-    var model = utils.getModel(this.props.modelName).value;
+    var model = utils.getModel(this.props.modelName);
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
         !utils.getMe().organization                 &&
@@ -292,7 +292,7 @@ class HomePage extends Component {
     )
   }
   onSettingsPressed() {
-    var model = utils.getModel(constants.TYPES.SETTINGS).value
+    var model = utils.getModel(constants.TYPES.SETTINGS)
     this.setState({hideMode: false})
     var route = {
       component: NewResource,
@@ -367,7 +367,7 @@ class HomePage extends Component {
         backButtonTitle: translate('back'),
         rightButtonTitle: translate('done'),
         passProps: {
-          model: utils.getModel(me[constants.TYPE]).value,
+          model: utils.getModel(me[constants.TYPE]),
           resource: me,
           bankStyle: defaultBankStyle
         }
