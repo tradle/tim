@@ -406,10 +406,10 @@ console.log('endCursor: ', endCursor)
 
   },
   getAllPropertiesForServerSearch(params) {
-    let {model, inlined, properties} = params
+    let {model, inlined, properties, currentProp} = params
     let props = model.properties
     let arr
-    if (model.inlined)
+    if (utils.isInlined(model))
       arr = []
     else {
       arr = ['_permalink', '_link', '_time', '_author', '_authorTitle', '_virtual', 'time']
@@ -446,15 +446,20 @@ console.log('endCursor: ', endCursor)
         if (iref) {
           if (prop.items.backlink)
             continue
-          if (iref === model.id) {
+          if (prop.inlined) {
+            if (currentProp  &&  currentProp === prop)
+              continue
+            arr.push(this.addInlined(prop))
+          }
+          else if (iref === model.id) {
             arr.push(
               `${p} {
                 id
               }`
             )
           }
-          else if (prop.inlined)
-            arr.push(this.addInlined(prop))
+          // else if (prop.inlined)
+          //   arr.push(this.addInlined(prop))
           else
             arr.push(
               `${p} {
@@ -534,21 +539,20 @@ console.log('endCursor: ', endCursor)
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
     let p = prop.name
     let refM = utils.getModel(ref)
-    if (ref === FORM  ||  refM.isInterface  ||  refM.subClassOf === ENUM) {
-      if (prop.range === 'json')
-        return p
-      else
-        return (
-          `${p} {
-            id
-            title
-          }`
-        )
-    }
-    else if (refM.abstract)
+    if (prop.range === 'json')
       return p
+    if (refM.abstract)
+      return p
+    if (/*ref === FORM  || */ refM.isInterface  ||  refM.subClassOf === ENUM) {
+      return (
+        `${p} {
+          id
+          title
+        }`
+      )
+    }
     else {
-      let allProps = this.getAllPropertiesForServerSearch({model: refM, inlined: true})
+      let allProps = this.getAllPropertiesForServerSearch({model: refM, inlined: true, currentProp: prop})
       return (
         `${p} {
           ${allProps.toString().replace(/,/g, '\n')}
