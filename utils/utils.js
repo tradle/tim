@@ -275,7 +275,12 @@ var utils = {
             limitMap[id] = l
           return false
         })
-        list = limit.map((id) => limitMap[id])
+        // pin.filter((id) => pinMap[id])
+        list = []
+        limit.forEach(p => {
+          if (limitMap[p])
+            list.push(limitMap[p])
+        })
       }
     }
     if (pin  &&  pin.length) {
@@ -291,7 +296,12 @@ var utils = {
         })
         if (this.isEmpty(pinMap))
           return list
-        let newpin = pin.map((id) => pinMap[id])
+        let newpin = [] //= pin.filter((id) => pinMap[id])
+        pin.forEach(p => {
+          if (pinMap[p])
+            newpin.push(pinMap[p])
+        })
+
         list = newpin.concat(newlist)
       }
     }
