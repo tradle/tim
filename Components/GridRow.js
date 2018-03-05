@@ -43,6 +43,7 @@ var {
 } = constants.TYPES
 
 const PHOTO = 'tradle.Photo'
+const OBJECT = 'tradle.Object'
 
 class GridRow extends Component {
   props: {
@@ -256,8 +257,9 @@ class GridRow extends Component {
       else if (ref === PHOTO)
         row = <Image source={{uri: resource[v].url}} style={styles.thumb} />
       else {
-        row = <Text style={styles.description} key={this.getNextKey(resource)}>{utils.getDisplayName(resource[v])}</Text>
-        if (refM.isInterface || refM.id === FORM) {
+        let title = utils.getDisplayName(resource[v])
+        row = <Text style={styles.description} key={this.getNextKey(resource)}>{title}</Text>
+        if (refM.isInterface || refM.id === FORM  || refM.id === OBJECT) {
           let resType = utils.getType(resource[v])
           let resM = utils.getModel(resType)
           row = <View key={this.getNextKey(resource)}>
