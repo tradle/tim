@@ -507,7 +507,7 @@ module.exports = RowMixin;
 
   //   let isThirdParty = !document[TYPE]
   //   let type = document[TYPE] || utils.getType(document)
-  //   var docModel = utils.getModel(type).value;
+  //   var docModel = utils.getModel(type);
   //   var isMyProduct = docModel.subClassOf === MY_PRODUCT
   //   var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
   //   var idx = docModelTitle.indexOf('Verification');
@@ -701,7 +701,7 @@ module.exports = RowMixin;
   //               }
   //             }
   //             else {
-  //               var m = utils.getModel(properties[v].ref).value
+  //               var m = utils.getModel(properties[v].ref)
   //               if (m.subClassOf  &&  m.subClassOf == ENUM)
   //                 val = resource[v].title
   //             }
