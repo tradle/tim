@@ -70,7 +70,7 @@ class IdentitiesList extends Component {
       return;
     var me = params.me;
     var modelName = me[constants.TYPE];
-    var model = utils.getModel(modelName).value;
+    var model = utils.getModel(modelName);
     var meName = utils.getDisplayName(me);
     var self = this;
     var route = {
@@ -114,7 +114,7 @@ class IdentitiesList extends Component {
   // }
 
   renderRow(resource)  {
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id);
     var me = utils.getMe();
     return (
       <ResourceRow

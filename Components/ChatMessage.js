@@ -29,7 +29,7 @@ class ChatMessage extends Component {
     if (!isMessage)
       return <View/>
     var title = resource.to[constants.TYPE]
-              ? utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).value.properties)
+              ? utils.getDisplayName(resource.to, utils.getModel(resource.to[constants.TYPE]).properties)
               : resource.to.title;
     if (resource.message  &&  utils.splitMessage(resource.message).length === 1)
       return <View></View>;

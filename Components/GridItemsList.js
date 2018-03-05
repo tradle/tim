@@ -75,7 +75,7 @@ class GridItemsList extends Component {
   }
 
   render() {
-    var m = utils.getModel(this.props.resource[constants.TYPE]).value
+    var m = utils.getModel(this.props.resource[constants.TYPE])
     var prop = m.properties[this.props.prop]
     // var buttons = [translate('addNew', prop.title), translate('cancel')]
     let icon = Platform.OS === 'ios' ?  'md-add' : 'md-add'
@@ -163,7 +163,7 @@ var styles = StyleSheet.create({
 module.exports = GridItemsList;
 
   // showMenu() {
-  //   var m = utils.getModel(this.props.resource[constants.TYPE]).value
+  //   var m = utils.getModel(this.props.resource[constants.TYPE])
   //   var buttons = [translate('addNew', m.properties[this.props.prop].title), translate('cancel')]
   //   var self = this;
   //   ActionSheetIOS.showActionSheetWithOptions({

@@ -55,8 +55,6 @@ class ResourceTypesScreen extends Component {
   }
   selectResource(resource) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = utils.getModel(this.props.modelName);
-
     if (resource[constants.TYPE])
       return;
     if (this.props.sendForm) {
@@ -75,7 +73,7 @@ class ResourceTypesScreen extends Component {
       return;
     }
     var page = {
-      model: utils.getModel(resource.id).value,
+      model: utils.getModel(resource.id),
       resource: {
         'from': utils.getMe(),
         'to': this.props.resource
@@ -101,7 +99,7 @@ class ResourceTypesScreen extends Component {
   sendFormTo(model, msg) {
     var me = utils.getMe();
     var resource = {from: utils.getMe(), to: this.props.resource};
-    // var model = utils.getModel(this.props.modelName).value;
+    // var model = utils.getModel(this.props.modelName);
 
     var toName = utils.getDisplayName(resource.to);
     var meName = utils.getDisplayName(me);
@@ -118,7 +116,7 @@ class ResourceTypesScreen extends Component {
   }
 
   renderRow(resource)  {
-    var model = utils.getModel(resource[constants.TYPE] || resource.id).value;
+    var model = utils.getModel(resource[constants.TYPE] || resource.id);
 
     return (
       <MessageTypeRow
