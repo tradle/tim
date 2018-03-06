@@ -379,6 +379,45 @@ const {
   newFormRequestVerifiers
 } = require('../utils/faker')
 
+const getEmployeeBookmarks = ({ me, botPermalink }) => {
+  const createdByBot = [
+    APPLICATION,
+    VERIFICATION,
+    SEAL,
+    'tradle.SanctionsCheck',
+    'tradle.CorporationExistsCheck',
+  ].map(id => {
+    const model = utils.getModel(id)
+    return {
+      [TYPE]: BOOKMARK,
+      message: utils.makeModelTitle(model, true),
+      bookmark: {
+        [TYPE]: id,
+        _author: botPermalink
+      },
+      from: me
+    }
+  })
+
+  const createdByCustomers = [
+    // 'tradle.BusinessInformation',
+    // 'tradle.PersonalInfo'
+  ].map(id => {
+    const model = utils.getModel(id)
+    return {
+      [TYPE]: BOOKMARK,
+      message: utils.makeModelTitle(model, false),
+      bookmark: {
+        [TYPE]: id,
+        _recipient: botPermalink
+      },
+      to: me
+    }
+  })
+
+  return createdByBot.concat(createdByCustomers)
+}
+
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
   mixins: [TimerMixin],
@@ -10030,16 +10069,15 @@ var Store = Reflux.createStore({
       // }
       // await self.onAddChatItem({resource: bookmark, noTrigger: true})
 
-      let bookmark = {
-        [TYPE]: BOOKMARK,
-        message: 'All Applications',
-        bookmark: {
-          [TYPE]: APPLICATION,
-          _author: self.getRepresentative(me.organization)[ROOT_HASH]
-        },
-        from: me
+      const bookmarks = getEmployeeBookmarks({
+        me,
+        botPermalink: self.getRepresentative(me.organization)[ROOT_HASH]
+      })
+
+      for (const bookmark of bookmarks) {
+        // can we do this in parallel?
+        await self.onAddChatItem({resource: bookmark, noTrigger: true})
       }
-      await self.onAddChatItem({resource: bookmark, noTrigger: true})
 
       if (me.firstName === FRIEND) {
         let toRep = self.getRepresentative(utils.getId(org))
