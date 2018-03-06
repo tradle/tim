@@ -270,7 +270,8 @@ class ResourceView extends Component {
     let { navigator, bankStyle, currency, dimensions, application } = this.props
     let { backlink, backlinkList, pairingData, isModalOpen } = this.state
     let styles = createStyles()
-
+    if (!bankStyle)
+      bankStyle = defaultBankStyle
     let resource = this.state.resource;
     let modelName = resource[TYPE];
     let model = utils.getModel(modelName);
@@ -356,6 +357,7 @@ class ResourceView extends Component {
                         showRefResource={this.getRefResource.bind(this)}
                         currency={currency}
                         excludedProperties={['photos']}
+                        bankStyle={bankStyle}
                         navigator={navigator} />
     let photoView
     // if (!isOrg) {
