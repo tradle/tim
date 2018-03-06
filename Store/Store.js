@@ -11074,16 +11074,19 @@ var Store = Reflux.createStore({
 
     return mm
   },
-  getModel(modelName) {
-    const cached = modelsWithAddOns[modelName]
+  getModel(modelOrId) {
+    const id = typeof modelOrId === 'string' ? modelOrId : modelOrId.id
+    const cached = modelsWithAddOns[id]
     if (cached) return cached
+    if (!models) return
 
-    let m = modelName
-    if (typeof modelName === 'string')
-      m = models  &&  models[modelName] && models[modelName].value
+    const model = typeof modelOrId === 'string'
+      ? models[id] && models[id].value
+      : modelOrId
 
-    if (m) {
-      return modelsWithAddOns[modelName] = this.getAugmentedModel(m)
+    if (model) {
+      modelsWithAddOns[id] = this.getAugmentedModel(model)
+      return modelsWithAddOns[id]
     }
   },
 
