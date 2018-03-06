@@ -6106,6 +6106,8 @@ var Store = Reflux.createStore({
     }
     // Filter out resources like Introduction
     chatItems = chatItems.filter((r) => r.time)
+    chatItems = _.uniqBy(chatItems, CUR_HASH)
+
     chatItems.sort((a, b) => {
       return a.time - b.time
     })
