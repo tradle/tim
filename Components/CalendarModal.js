@@ -41,9 +41,17 @@ module.exports = function createCalendarModal (props) {
     theme: defaultTheme,
     showTodayHelper: false,
     selectedDate: new Date(),
-    min: DEFAULT_MIN_DATE,
     minDate: DEFAULT_MIN_DATE,
     ...calendarProps
+  }
+
+  // don't render dates outside allowed range
+  if (calendarProps.minDate) {
+    calendarProps.min = calendarProps.minDate
+  }
+
+  if (calendarProps.maxDate) {
+    calendarProps.max = calendarProps.maxDate
   }
 
   let { theme, selectedDate } = calendarProps
