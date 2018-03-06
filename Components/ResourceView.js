@@ -270,6 +270,7 @@ class ResourceView extends Component {
     let { navigator, bankStyle, currency, dimensions, application } = this.props
     let { backlink, backlinkList, pairingData, isModalOpen } = this.state
     let styles = createStyles()
+
     if (!bankStyle)
       bankStyle = defaultBankStyle
     let resource = this.state.resource;

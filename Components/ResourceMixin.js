@@ -78,7 +78,7 @@ var ResourceMixin = {
         passProps: {
           resource: resource,
           prop: prop,
-          bankStyle: bankStyle  ||  defaultBankStyle,
+          bankStyle: bankStyle || defaultBankStyle,
           currency: this.props.currency
         }
       })

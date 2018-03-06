@@ -937,7 +937,7 @@ class GridList extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
-          model: utils.getModel(model),
+          model: Store.getAugmentedModel(model),
           resource: this.state.resource,
           searchWithFilter: this.searchWithFilter.bind(this),
           search: true,
@@ -1007,7 +1007,7 @@ class GridList extends Component {
             multiChooser={multiChooser}
             isChooser={isChooser}
             resource={resource}
-            bankStyle={bankStyle || defaultBankStyle}
+            bankStyle={bankStyle  ||  defaultBankStyle}
             chosen={this.state.chosen} />
           );
     }
