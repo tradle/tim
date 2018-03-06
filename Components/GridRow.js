@@ -267,25 +267,25 @@ class GridRow extends Component {
                   {row}
                 </View>
         }
-        if (refM.subClassOf !== ENUM) {
-          let isMessage = utils.isMessage(resource)
-          row = <TouchableOpacity onPress={() => {
-                  this.props.navigator.push({
-                    title: utils.getDisplayName(resource),
-                    id: isMessage ? 5 : 3,
-                    component: isMessage ?  MessageView : ResourceView,
-                    // titleTextColor: '#7AAAC3',
-                    backButtonTitle: 'Back',
-                    passProps: {
-                      bankStyle: this.props.bankStyle,
-                      search: this.props.search,
-                      resource: resource[v]
-                    }
-                  });
-                  }}>
-                  {row}
-                </TouchableOpacity>
-        }
+      //   if (refM.subClassOf !== ENUM) {
+      //     let isMessage = utils.isMessage(resource)
+      //     row = <TouchableOpacity onPress={() => {
+      //             this.props.navigator.push({
+      //               title: utils.getDisplayName(resource),
+      //               id: isMessage ? 5 : 3,
+      //               component: isMessage ?  MessageView : ResourceView,
+      //               // titleTextColor: '#7AAAC3',
+      //               backButtonTitle: 'Back',
+      //               passProps: {
+      //                 bankStyle: this.props.bankStyle,
+      //                 search: this.props.search,
+      //                 resource: resource[v]
+      //               }
+      //             });
+      //             }}>
+      //             {row}
+      //           </TouchableOpacity>
+      //   }
       }
       return <View style={cellStyle}>{row}</View>
     }
