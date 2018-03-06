@@ -1194,8 +1194,8 @@ class GridList extends Component {
     else
       employee = <View/>
 
-    let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
-    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    let icon = Platform.OS !== 'android' ?  'md-more' : 'md-menu'
+    let color = Platform.OS !== 'android' ? '#ffffff' : 'red'
     let menuBtn
     if (!bookmark  &&  !noMenuButton)
       menuBtn = <TouchableOpacity onPress={() => this.ActionSheet.show()}>
