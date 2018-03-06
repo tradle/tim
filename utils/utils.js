@@ -705,7 +705,7 @@ var utils = {
           let c = this.normalizeCurrencySymbol(resource[p].currency)
           return (c || '') + resource[p].value
         }
-        else {
+        else if (resource[p][TYPE]) {
           let rm = this.getModel(resource[p][TYPE])
           if (rm)
             return this.getDisplayName(resource[p], rm);
