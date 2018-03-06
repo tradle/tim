@@ -50,8 +50,8 @@ var ResourceMixin = {
     let type = utils.getType(resource)
     let model = utils.getModel(type);
     let title = utils.getDisplayName(resource);
+    let {bankStyle, search, currency, country} = this.props
     if (utils.isMessage(resource)) {
-      let {bankStyle, search, currency, country} = this.props
       this.props.navigator.push({
         id: 5,
         component: require('./MessageView'),
@@ -77,6 +77,7 @@ var ResourceMixin = {
         passProps: {
           resource: resource,
           prop: prop,
+          bankStyle: bankStyle || defaultBankStyle,
           currency: this.props.currency
         }
       })
