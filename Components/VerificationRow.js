@@ -166,7 +166,7 @@ class VerificationRow extends Component {
 
     let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
     let date = !isBookmark &&  r  &&  <View style={{alignItems: 'flex-end'}}>
-                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy')}</Text>
+                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy h:MM')}</Text>
                       </View>
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
     let title
