@@ -3,6 +3,19 @@
 // The service worker running in background to receive the incoming
 // push notifications and user clicks
 
+function showDefaultNotification () {
+  var title = 'You have a message waiting!'
+  var body = 'Click to open your Tradle tab'
+  var icon = 'https://tradle.io/images/logo.png'
+  var tag = 'tradle-app-notification-tag'
+  // TODO: check existing notifications
+  return self.registration.showNotification(title, {
+    body: body,
+    icon: icon,
+    tag: tag
+  })
+}
+
 // A push has arrived ...
 self.addEventListener('push', function(event) {
   // Since there is no payload data with the first version
@@ -20,16 +33,7 @@ self.addEventListener('push', function(event) {
         return
       }
 
-      var title = 'You have a message waiting!'
-      var body = 'Click to open your Tradle tab'
-      var icon = '/img/logo-blue.png'
-      var tag = 'tradle-app-notification-tag'
-      // TODO: check existing notifications
-      return self.registration.showNotification(title, {
-        body: body,
-        icon: icon,
-        tag: tag
-      })
+      return showDefaultNotification()
     })
   )
 })
