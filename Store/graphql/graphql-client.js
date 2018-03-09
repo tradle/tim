@@ -63,6 +63,23 @@ var search = {
       }
     }])
 
+    networkInterface.useAfter([
+      {
+        applyAfterware(result, next) {
+          const { response } = result
+          if (response.status > 300) {
+            const err = Error('request failed')
+            err.status = response.status
+            err.statusText = response.statusText
+            err.response = response
+            throw err
+          }
+
+          next()
+        }
+      }
+    ])
+
     return new ApolloClient({ networkInterface })
   },
 
