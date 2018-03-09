@@ -324,7 +324,7 @@ console.log('endCursor: ', endCursor)
                 // # _inbound: false
                 // # _recipient: ${hash}
   async getChat(params) {
-    let { author, recipient, client, context, filterResource, limit, endCursor, direction } = params
+    let { author, recipient, client, context, filterResource, limit, endCursor, direction, application } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
     let contextVar = filterResource || context ? '' : '($context: String)'
     let limitP = limit ? `limit:  ${limit}` : ''
@@ -367,7 +367,8 @@ console.log('endCursor: ', endCursor)
     let eq = `
             EQ: {
             `
-    if (author  &&  !context)
+    // for app view prevent prevent from displaying double wrapped messages
+    if (author  &&  (!context ||  application))
       eq += `_counterparty: "${author}"\n`
 
     let filter = ''
