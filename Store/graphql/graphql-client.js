@@ -299,6 +299,7 @@ console.log('endCursor: ', endCursor)
     try {
       let data = await client.query({
           fetchPolicy: 'network-only',
+          errorPolicy: 'all',
           query: gql(`${query}`),
           variables: versionId  &&  {modelsVersionId: versionId}
         })
@@ -374,6 +375,7 @@ console.log('endCursor: ', endCursor)
               _inbound
               originalSender
               object
+              time
               context
             }
           }
@@ -414,6 +416,7 @@ console.log('endCursor: ', endCursor)
     try {
       let result = await client.query({
           fetchPolicy: 'network-only',
+          errorPolicy: 'all',
           query: gql(`${query}`),
           variables: filterResource || context ? null : {context: context}
         })
@@ -598,6 +601,7 @@ console.log('endCursor: ', endCursor)
     try {
       let result = await client.query({
         fetchPolicy: 'network-only',
+        errorPolicy: 'all',
         query: gql(`${query}`)
       })
       return result.data[table]
@@ -621,6 +625,7 @@ console.log('endCursor: ', endCursor)
     try {
       let result = await client.query({
         fetchPolicy: 'network-only',
+        errorPolicy: 'all',
         query: gql(`${query}`)
       })
       return result.data[table]  &&  result.data[table].objects
