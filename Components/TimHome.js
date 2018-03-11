@@ -71,7 +71,7 @@ var {
 } = constants
 var {
   ORGANIZATION,
-  CUSTOMER_WAITING,
+  // CUSTOMER_WAITING,
   MESSAGE
 } = constants.TYPES
 // import Progress from 'react-native-progress'
