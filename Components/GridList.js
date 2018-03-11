@@ -726,7 +726,7 @@ class GridList extends Component {
       if (isOrganization)
         route.title = resource.name
       let msg = {
-        message: translate('customerWaiting', me.firstName),
+        // message: translate('customerWaiting', me.firstName),
         _t: CUSTOMER_WAITING,
         from: me,
         to: utils.isEmployee(resource) ? me.organization : resource,
@@ -988,6 +988,19 @@ class GridList extends Component {
   renderRow(resource, sectionId, rowId)  {
     let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, officialAccounts,
           currency, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
+
+    let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
+    let model
+    if (isModel)
+      model = resource
+    else if (isBacklink  ||  isForwardlink)
+      model = utils.getModel(utils.getType(resource))
+    else
+      model = utils.getModel(rtype);
+    if (model.isInterface)
+      model = utils.getModel(utils.getType(resource))
+    let isContext = utils.isContext(model)
+    let isSharedContext = isContext  &&  utils.isReadOnlyChat(resource)
     if (!isChooser  &&  this.state.isGrid  &&  modelName !== APPLICATION  &&  modelName !== BOOKMARK) { //!utils.isContext(this.props.modelName)) {
       let viewCols = this.getGridCols()
       if (viewCols)
@@ -1009,21 +1022,9 @@ class GridList extends Component {
             chosen={this.state.chosen} />
           );
     }
-    let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
-    let model
-    if (isModel)
-      model = resource
-    else if (isBacklink  ||  isForwardlink)
-      model = utils.getModel(utils.getType(resource))
-    else
-      model = utils.getModel(rtype);
-    if (model.isInterface)
-      model = utils.getModel(utils.getType(resource))
     let isVerification = model.id === VERIFICATION  ||  model.subClassOf === VERIFICATION
     let isForm = model.id === FORM || model.subClassOf === FORM
     let isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
-    let isContext = utils.isContext(model)
-    let isSharedContext = isContext  &&  utils.isReadOnlyChat(resource)
 
     let selectedResource = resource
 
@@ -1363,13 +1364,15 @@ class GridList extends Component {
     }
     let network
     if (!isChooser) {
-      if (officialAccounts && modelName === ORGANIZATION)
-        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-      else if (modelName === BOOKMARK  &&  list  &&  list.length) {
+      if (modelName === BOOKMARK  &&  list  &&  list.length) {
         let org = list[0].from.organization
         if (org)
           network = <NetworkInfoProvider connected={isConnected} serverOffline={!org._online} />
       }
+      // if (officialAccounts && modelName === ORGANIZATION)
+      //   network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
+      else
+        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     }
 
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
