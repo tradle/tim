@@ -270,7 +270,7 @@ class VerificationRow extends Component {
                     <View style={{flexDirection: 'row', marginHorizontal: 10}}>
                       {photo}
                       <View style={[styles.noImageBlock, {flex: 1,  justifyContent: 'center'}]}>
-                        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                        <View style={{flexDirection: 'row', justifyContent: 'space-between', minHeight: 40}}>
                           <View style={{flexDirection: 'column', flex: 1}}>
                             {titleComponent}
                             {description}
@@ -299,7 +299,7 @@ class VerificationRow extends Component {
       let renderedRows = []
       if (this.props.search  &&  this.props.searchCriteria)
         this.formatFilteredResource(model, resource, renderedRows)
-      let content = <TouchableOpacity onPress={onSelect.bind(this)} underlayColor='transparent'>
+      let content = <TouchableOpacity onPress={onSelect.bind(this)}>
                       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                         {header}
                       </View>
