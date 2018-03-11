@@ -227,9 +227,9 @@ class MessageRow extends Component {
     let sendStatus
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
     if (showMessageBody) {
-      // let viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
-      let viewStyle = isSimpleMessage ? {} : {flexDirection: 'row'}
-      viewStyle.alignSelf = isMyMessage ? 'flex-end' : 'flex-start'
+      let viewStyle = {flexDirection: 'row', alignSelf: isMyMessage ? 'flex-end' : 'flex-start'};
+      // let viewStyle = isSimpleMessage ? {} : {flexDirection: 'row'}
+      // viewStyle.alignSelf = isMyMessage ? 'flex-end' : 'flex-start'
       if (message) {
         if (message.charAt(0) === '['  ||  longMessage)
           viewStyle.width = msgWidth
