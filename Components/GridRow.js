@@ -389,11 +389,17 @@ var styles = StyleSheet.create({
     height: 40
   },
   multiChooser: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    marginRight: 10,
     backgroundColor: 'transparent'
   },
+  // multiChooser: {
+  //   position: 'absolute',
+  //   right: 10,
+  //   top: 10,
+  //   backgroundColor: 'transparent'
+  // },
 });
 
 module.exports = GridRow;
