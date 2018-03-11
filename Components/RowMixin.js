@@ -212,6 +212,8 @@ var RowMixin = {
         return true
     }
     if (me.isEmployee) {
+      if (r.from.organization  &&  me.organization.id !== r.from.organization.id)
+        return false
       if (r._context) {
         // check if the employee is the applicant
         let cFrom = r._context.from
