@@ -38,6 +38,7 @@ var asyncActions = [
   'productList',
   'start',
   'share',
+  'shareMany',
   'startTransition',
   'endTransition',
   // 'talkToRepresentative',

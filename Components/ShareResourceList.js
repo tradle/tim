@@ -185,9 +185,11 @@ class ShareResourceList extends Component {
   }
   share() {
     let { to, formRequest, navigator } = this.props
-    let chosen = this.state.chosen
-    for (let r in chosen)
-      Actions.share(chosen[r], to, formRequest)
+    let chosen = Object.values(this.state.chosen)
+    Actions.shareMany(chosen, to, formRequest)
+    // let chosen = this.state.chosen
+    // for (let r in chosen)
+    //   Actions.share(chosen[r], to, formRequest)
     navigator.pop()
   }
 }

@@ -19,6 +19,7 @@ import StyleSheet from '../StyleSheet'
 import extend from 'extend'
 import constants from '@tradle/constants'
 import HomePageMixin from './HomePageMixin'
+import NetworkInfoProvider from './NetworkInfoProvider'
 
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
@@ -70,6 +71,7 @@ class ApplicationView extends Component {
     this.state = {
       resource: resource,
       isLoading: true,
+      isConnected: props.navigator.isConnected,
     }
     let currentRoutes = navigator.getCurrentRoutes()
     let len = currentRoutes.length
@@ -138,10 +140,12 @@ class ApplicationView extends Component {
 
   render() {
     let styles = createStyles()
-    let { forwardlink, isLoading, hasRM } = this.state
+    let { forwardlink, isLoading, hasRM, isConnected } = this.state
+    let network = <NetworkInfoProvider connected={isConnected} resource={resource} />
     if (isLoading)
       return (
               <View style={[platformStyles.container]}>
+                {network}
                 <Text style={styles.loading}>{'In progress...'}</Text>
                 <ActivityIndicator size='large' style={styles.indicator} />
               </View>
@@ -209,6 +213,7 @@ class ApplicationView extends Component {
     return (
       <PageView style={platformStyles.container}>
         <ScrollView  ref='this' style={{width: utils.getContentWidth(ApplicationView), alignSelf: 'center'}} name={this._lazyId}>
+        {network}
           <ApplicationTabs  lazy={this._lazyId}
                             resource={resource}
                             navigator={navigator}

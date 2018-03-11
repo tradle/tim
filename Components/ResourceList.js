@@ -632,7 +632,7 @@ class ResourceList extends Component {
         // if (isOrganization)
         //   route.title = resource.name
         let msg = {
-          message: translate('customerWaiting', me.firstName),
+          // message: translate('customerWaiting', me.firstName),
           _t: CUSTOMER_WAITING,
           from: me,
           to: utils.isEmployee(resource) ? me.organization : resource,

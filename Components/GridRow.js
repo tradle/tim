@@ -389,26 +389,11 @@ var styles = StyleSheet.create({
     height: 40
   },
   multiChooser: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    marginRight: 10,
     backgroundColor: 'transparent'
   },
 });
 
 module.exports = GridRow;
-  // addDateProp(resource, dateProp, style) {
-  //   let properties = utils.getModel(resource[TYPE] || resource.id).properties;
-  //   if (properties[dateProp]  &&  properties[dateProp].style)
-  //     style = [style, properties[dateProp].style];
-  //   let val = utils.formatDate(new Date(resource[dateProp]));
-
-  //   if (!style)
-  //     style = []
-  //   style.push({alignSelf: 'flex-end', paddingRight: 10})
-  //   if (this.props.search  &&  this.state.resource  &&  this.state.resource[dateProp])
-  //     style = [style, {fontWeight: '600'}]
-
-  //   return <Text style={style} key={this.getNextKey(resource)}>{val}</Text>
-  // }
-
