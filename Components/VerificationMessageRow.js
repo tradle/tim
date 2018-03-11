@@ -30,16 +30,16 @@ import {
   processColor
 } from 'react-native'
 
-var [
+var {
   TYPE,
   ROOT_HASH
-] = constants
+} = constants
 
-var [
+var {
   VERIFICATION,
   PROFILE,
   ORGANIZATION
-] = constants.TYPES
+} = constants.TYPES
 
 import React, { Component } from 'react'
 const MY_PRODUCT = 'tradle.MyProduct'
