@@ -30,6 +30,17 @@ import {
   processColor
 } from 'react-native'
 
+var [
+  TYPE,
+  ROOT_HASH
+] = constants
+
+var [
+  VERIFICATION,
+  PROFILE,
+  ORGANIZATION
+] = constants.TYPES
+
 import React, { Component } from 'react'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM = 'tradle.Form'
@@ -47,7 +58,7 @@ class VerificationMessageRow extends Component {
   }
   render() {
     let { resource, application, bankStyle } = this.props
-    let model = utils.getModel(resource[constants.TYPE]);
+    let model = utils.getModel(resource[TYPE]);
     let renderedRow = [];
 
     var time = this.getTime(resource);
@@ -75,7 +86,7 @@ class VerificationMessageRow extends Component {
           let org = resource.organization || resource.to.organization
           isThirdPartyVerification = utils.getId(org) !== utils.getId(context.to.organization)
         }
-        else if (this.props.to[constants.TYPE] === constants.TYPES.PROFILE)
+        else if (this.props.to[TYPE] === PROFILE)
           isThirdPartyVerification = utils.getId(me) !== utils.getId(context.to) || (resource._verifiedBy  &&  utils.getId(me.organization) !== utils.getId(resource._verifiedBy))
       }
       else
@@ -254,7 +265,7 @@ class VerificationMessageRow extends Component {
   }
   verify(event) {
     var resource = this.props.resource;
-    var isVerification = resource[constants.TYPE] === constants.TYPES.VERIFICATION;
+    var isVerification = resource[TYPE] === VERIFICATION;
     var r = resource // isVerification &&  !resource.sources  &&  !resource.method  ? resource.document : resource
 
     var passProps = {
@@ -267,9 +278,9 @@ class VerificationMessageRow extends Component {
     else
       passProps.verification = resource
 
-    var model = utils.getModel(r[constants.TYPE]);
+    var model = utils.getModel(r[TYPE]);
     let title
-    if (r[constants.TYPE] === constants.TYPES.VERIFICATION) {
+    if (r[TYPE] === VERIFICATION) {
       let type = utils.getType(r.document)
       if (type)
         title = translate(utils.getModel(type))
@@ -310,8 +321,8 @@ class VerificationMessageRow extends Component {
 
     var document = verification.document
 
-    let isThirdParty = !document[constants.TYPE]
-    let type = document[constants.TYPE] || utils.getType(document)
+    let isThirdParty = !document[TYPE]  &&  !document.title
+    let type = document[TYPE] || utils.getType(document)
     var docModel = utils.getModel(type);
     var isMyProduct = docModel.subClassOf === MY_PRODUCT
     var docModelTitle = docModel.title || utils.makeLabel(docModel.id)
@@ -379,7 +390,7 @@ class VerificationMessageRow extends Component {
                         <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>
                       </View>
-      var orgTitle = this.props.to[constants.TYPE] === constants.TYPES.ORGANIZATION
+      var orgTitle = this.props.to[TYPE] === ORGANIZATION
                    ? this.props.to.name
                    : (this.props.to.organization ? this.props.to.organization.title : null);
       // let o = verification.organization.title.length < 25 ? verification.organization.title : verification.organization.title.substring(0, 27) + '..'
@@ -387,7 +398,7 @@ class VerificationMessageRow extends Component {
       if (isMyProduct)
         verifiedBy = translate('issuedBy', verification.organization.title)
       // Not verified Form - still shareable
-      else if (verification[constants.ROOT_HASH]) {
+      else if (verification[ROOT_HASH]) {
         let orgs
         if (providers) {
           providers.forEach((p) => {
