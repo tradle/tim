@@ -1,0 +1,18 @@
+"- Add it to your Tradle mobile app using [this link](https://link.tradle.io/chat?provider=5ca52a9c48651de446866c5d3f83e13d7b1736504af33e7b60a683e8ffbef0d3&host=http%3A%2F%2F192.168.1.153%3A21012)
+- Add it to your Tradle web app using [this link](http://localhost:55555/#/chat?provider=5ca52a9c48651de446866c5d3f83e13d7b1736504af33e7b60a683e8ffbef0d3&host=http%3A%2F%2F192.168.1.153%3A21012)
+- Invite employees using [this link](http://localhost:55555/#/applyForProduct?provider=5ca52a9c48651de446866c5d3f83e13d7b1736504af33e7b60a683e8ffbef0d3&host=http%3A%2F%2F192.168.1.153%3A21012&product=tradle.EmployeeOnboarding)"
+
+
+
+
+http://localhost:3001/#/chat?permalink=09456d1a60963fa72e47e12a7eb51a136fcdb3c518b3a0e4fc942ad461f487bc&url=https%3A%2F%2Fz3qm44zk1f.execute-api.us-east-1.amazonaws.com%2Fdev
+
+
+http://localhost:3001/#/applyForProduct?provider=09456d1a60963fa72e47e12a7eb51a136fcdb3c518b3a0e4fc942ad461f487bc&host=https%3A%2F%2Fz3qm44zk1f.execute-api.us-east-1.amazonaws.com%2Fdev&_k=at59rr&product=tradle.EmployeeOnboarding
+
+http://link.tradle.io/applyForProduct?provider=ca8898bac73d7cdc07a1570c729e5f5daaa11f111ba6f4178db56d91b4a4d068&host=http%3A%2F%2Flocalhost:20212%2Fdev&_k=at59rr&product=tradle.EmployeeOnboarding
+
+
+
+"tradle.Profile_ca8898bac73d7cdc07a1570c729e5f5daaa11f111ba6f4178db56d91b4a4d068_
+ca8898bac73d7cdc07a1570c729e5f5daaa11f111ba6f4178db56d91b4a4d068

@@ -3,6 +3,7 @@
 import utils from '../../utils/utils'
 import gql from 'graphql-tag'
 import deepEqual from 'deep-equal'
+
 import tradle, { utils as tradleUtils } from '@tradle/engine'
 import { ApolloClient, createNetworkInterface } from 'apollo-client'
 import constants from '@tradle/constants'

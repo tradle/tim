@@ -5799,10 +5799,10 @@ var Store = Reflux.createStore({
         noTrigger: switchToContext ? false : true,
         modelName,
         endCursor,
-        context: context,
-        limit: limit,
-        to: to,
-        lastId: lastId,
+        context,
+        limit,
+        to,
+        lastId,
         direction: loadEarlierMessages ? 'up' : 'down'
       })
       endCursor =  result.endCursor
@@ -6861,6 +6861,10 @@ var Store = Reflux.createStore({
         }
         if (!isBacklinkProp) {
           let item = this._getItem(thisChatMessages[i].id)
+          if (!item) {
+            debugger
+            continue
+          }
           if (!this.isChatItem(item, chatId))
             continue
         }
@@ -11476,9 +11480,8 @@ var Store = Reflux.createStore({
     }
     try {
       let result = await graphQL._getItem(id, this.client)
-      if (result) {
+      if (result)
         return this.convertToResource(result)
-      }
     }
     catch(err) {
       console.log('_getItemFromServer', err)

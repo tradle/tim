@@ -2135,13 +2135,12 @@ var utils = {
       ]
     )
   },
-  requestForModels() {
-    let me = utils.getMe()
+  requestForModels(to) {
+    let me = this.getMe()
     var msg = {
-      message: this.translate('customerWaiting', me.firstName),
       _t: CUSTOMER_WAITING,
       from: me,
-      to: me.organization,
+      to: to || me.organization,
       time: new Date().getTime()
     }
     return msg
