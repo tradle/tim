@@ -20,9 +20,9 @@
       }
     },
     "@tradle/aws-client": {
-      "version": "1.5.0",
+      "version": "1.5.1",
       "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.5.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.5.1.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -126,9 +126,9 @@
       }
     },
     "@tradle/errors": {
-      "version": "1.1.0",
-      "from": "@tradle/errors@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/errors/-/errors-1.1.0.tgz"
+      "version": "1.1.1",
+      "from": "@tradle/errors@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/errors/-/errors-1.1.1.tgz"
     },
     "@tradle/ethereum-adapter-etherscan": {
       "version": "1.0.0",
@@ -343,9 +343,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "5.3.0",
+      "version": "5.7.4",
       "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-5.3.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-5.7.4.tgz",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
@@ -355,9 +355,9 @@
       }
     },
     "@tradle/validate-resource": {
-      "version": "2.18.1",
-      "from": "tradle/validate-resource",
-      "resolved": "git://github.com/tradle/validate-resource.git#60f7454df5e81dadad904d0eaba9a1d9cffdffba",
+      "version": "2.21.5",
+      "from": "@tradle/validate-resource@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-2.21.5.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
@@ -368,11 +368,6 @@
           "version": "2.0.0",
           "from": "ms@2.0.0",
           "resolved": "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz"
-        },
-        "typeforce": {
-          "version": "1.12.0",
-          "from": "typeforce@^1.12.0",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.12.0.tgz"
         }
       }
     },
