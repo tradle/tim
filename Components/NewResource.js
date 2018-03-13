@@ -1345,6 +1345,7 @@ var styles = StyleSheet.create({
   },
   submitText: {
     fontSize: 20,
+    paddingLeft: 7,
     color: '#ffffff',
     alignSelf: 'center'
   },

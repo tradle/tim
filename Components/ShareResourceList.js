@@ -146,7 +146,7 @@ class ShareResourceList extends Component {
     let bg = {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}
     let submit = <TouchableOpacity onPress={this.shareChosen}>
                    <View style={[styles.shareButton, bg]}>
-                     <CustomIcon name='tradle' style={{color: '#ffffff'}} size={32} />
+                     <CustomIcon name='tradle' style={{color: '#ffffff', marginTop: 3}} size={32} />
                      <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
                    </View>
                  </TouchableOpacity>
