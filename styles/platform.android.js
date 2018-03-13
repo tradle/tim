@@ -15,7 +15,7 @@ export default StyleSheet.create({
   // },
 
   navBarText: {
-    marginTop: 19,
+    marginTop: 15,
     fontSize: 17,
   },
   menuButtonNarrow: {
