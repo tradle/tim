@@ -60,16 +60,21 @@ const merged = extend({
   LOCAL_TRADLE_SERVERS: [
     `http://${LOCAL_IP}:21012`,
     // `http://${LOCAL_IP}:21013`,
-    // // // pg
-    // 'https://z3qm44zk1f.execute-api.us-east-1.amazonaws.com/dev',
-    // safe-re
-    'https://yy6zli69ab.execute-api.us-east-1.amazonaws.com/dev',
-    // friendly
-    'https://e1b8reh825.execute-api.us-east-1.amazonaws.com/dev',
-    // easy
-    'https://xnh2fyi8l3.execute-api.us-east-1.amazonaws.com/dev',
+    // slim
+    'https://zxoapug0li.execute-api.us-east-1.amazonaws.com/dev',
+    // tradle.io
+    'https://xwkirqs1x0.execute-api.us-east-1.amazonaws.com/dev',
+    // friendly.io
+    'https://mwv4egtz17.execute-api.us-east-1.amazonaws.com/dev',
+    // safere.io
+    'https://xefpez2yf0.execute-api.us-east-1.amazonaws.com/dev',
+    // easybank.io
+    'https://dxceehvttl.execute-api.us-east-1.amazonaws.com/dev',
+    // perpetualguardian.co.nz
+    'https://hkooibqf60.execute-api.us-east-1.amazonaws.com/dev',
+    // r3.com
+    'https://9xzhlnx5fb.execute-api.us-east-1.amazonaws.com/dev',
   ],
-  LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/', // Goofy
   // pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   pushServerURL: PROD_PUSH_SERVER,
   isAndroid: function () {

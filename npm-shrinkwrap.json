@@ -20,9 +20,9 @@
       }
     },
     "@tradle/aws-client": {
-      "version": "1.5.1",
+      "version": "1.6.0",
       "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.5.1.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.6.0.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -187,7 +187,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#6cdac6b4e601ee2395c0a4292e55001e58665fed"
+      "resolved": "git://github.com/tradle/models.git#0c56b4cc93e3b3837d93db94e7cc94e945296d4c"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",

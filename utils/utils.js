@@ -2396,6 +2396,18 @@ var utils = {
     return obj && typeof obj.then === 'function'
   },
 
+  isAWSProvider: function (provider)  {
+    if (provider.aws) return true
+    if (provider.connectEndpoint) return provider.connectEndpoint.aws
+  },
+
+  getIotClientId: function ({ permalink, provider }) {
+    const { connectEndpoint, hash } = provider
+    const prefix = connectEndpoint && connectEndpoint.clientIdPrefix || ''
+    return `${prefix}${permalink}${provider.hash.slice(0, 6)}`
+    // return new Buffer(`${permalink}${counterparty.slice(0, 6)}`, 'hex').toString('base64')
+  },
+
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
   //   if (utils.isWeb()) {
   //     const { width=0, height=0 } = shadowOffset
