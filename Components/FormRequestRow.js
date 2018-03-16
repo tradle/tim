@@ -652,7 +652,7 @@ class FormRequestRow extends Component {
     // })
     let modelName = documents[0][TYPE]
     navigator.push({
-      title: utils.makeModelTitle(modelName) + '  →  '  + verifiedBy,
+      title: utils.makeModelTitle(modelName) + (verifiedBy  &&  ('  →  '  + verifiedBy)),
       id: 37,
       component: ShareResourceList,
       backButtonTitle: 'Back',

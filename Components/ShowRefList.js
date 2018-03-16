@@ -45,8 +45,8 @@ class ShowRefList extends Component {
     this.state = {docs: null}
   }
   render() {
-    var { resource, backlink, backlinkList, showDocuments, showDetails, bankStyle, children, navigator, lazy, currency } = this.props
-    var model = utils.getModel(resource[TYPE]);
+    var { resource, model, backlink, backlinkList, showDocuments, showDetails, bankStyle, children, navigator, lazy, currency } = this.props
+    model = model || utils.getModel(resource[TYPE]);
     var props = model.properties;
     let self = this
     var refList = [];

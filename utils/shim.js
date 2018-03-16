@@ -52,3 +52,57 @@ require('any-promise/register/bluebird')
 function cleanup (err) {
   console.log('cleanup', arguments)
 }
+// error-ex, this is for you!
+if (!Error.captureStackTrace) {
+  Error.captureStackTrace = function (error) {
+    const container = new Error()
+
+    Object.defineProperty(error, 'stack', {
+      configurable: true,
+      get: function getStack() {
+        var stack = container.stack
+
+        Object.defineProperty(this, 'stack', {
+          value: stack
+        })
+
+        return stack
+      }
+    })
+  }
+}
+
+// global.location = global.location || { port: 80 }
+
+// ;[
+//   "assert",
+//   "zlib",
+//   "inherits",
+//   "console",
+//   "constants",
+//   "crypto",
+//   "dns",
+//   "domain",
+//   "events",
+//   "http",
+//   "https",
+//   "os",
+//   "path",
+//   "punycode",
+//   "querystring",
+//   "fs",
+//   "dgram",
+//   "readable-stream",
+//   "stream",
+//   "string_decoder",
+//   "timers",
+//   "tty",
+//   "url",
+//   "util",
+//   "net",
+//   "vm"
+// ].forEach(function (m) {
+//   try {
+//     require(m)
+//   } catch (err) {}
+// })

@@ -111,11 +111,11 @@ class VerificationRow extends Component {
     if (photo)
       photo = <Image host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else if (isForm || isVerification)
-      photo = <View style={{alignItems: 'center', width: 70}}>
+      photo = <View style={styles.photo}>
                 <Icon name={model.icon || 'ios-paper-outline'} size={40} style={{marginTop: 8}} color={model.iconColor ? model.iconColor : '#cccccc'} />
               </View>
     else if (isMyProduct)
-      photo = <View style={{alignItems: 'center', width: 70}}>
+      photo = <View style={styles.photo}>
                 <Icon name={model.icon || 'ios-ribbon-outline'} size={40} style={{marginTop: 8}} color={model.iconColor ? model.iconColor : '#cccccc'} />
               </View>
     else if (ph)
@@ -195,6 +195,7 @@ class VerificationRow extends Component {
 
     let isCheck = model.subClassOf === CHECK
     let description
+    let titleComponent
     if (title !== dn)  {
       if (isCheck  &&  resource.status) {
         let color, icon
@@ -212,24 +213,26 @@ class VerificationRow extends Component {
           icon = 'ios-information-circle-outline'
           break
         }
-        description = <Text style={[styles.description, {alignItems: 'center'}]}>{dn + '  '}
-                        <Icon color={color} size={20} name={icon}/>
-                      </Text>
+        titleComponent = <View style={{flexDirection: 'row'}}>
+                           <Icon color={color} size={25} name={icon} style={{marginTop: -4}}/>
+                           <Text style={[styles.rTitle, {paddingLeft: 10}]}>{dn}</Text>
+                         </View>
       }
       else
-        description = <Text style={styles.description}>{dn}</Text>
+        titleComponent = <Text style={styles.description}>{dn}</Text>
     }
 
-    let titleComponent
     if (isVerification)
       titleComponent = <Text style={[styles.rTitle, {fontWeight: '600'}]}>{'Verification: '}
                           <Text style={[styles.rTitle, {fontWeight: '400'}]}>{title}</Text>
                         </Text>
-    else if (isBookmark  &&  resource.message) {
+    else if (isBookmark  &&  resource.message)
       titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
-    }
-    else
+    else if (!titleComponent)
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
+    else
+      description = <Text style={[styles.description, {paddingLeft: 30}]}>{title}</Text>
+
     let supportingDocuments
     if (isForm  &&  resource._supportingDocuments  &&  resource._supportingDocuments.length)
       supportingDocuments = <View style={{flexDirection: 'row', backgroundColor: '#fff', justifyContent: 'center', paddingTop: 10, paddingRight:5}}>
@@ -266,12 +269,12 @@ class VerificationRow extends Component {
                          </View>
 
     }
-    let header =  <View style={[styles.header, {flex: 1}]} key={this.getNextKey()}>
-                    <View style={{flexDirection: 'row', marginHorizontal: 10}}>
+    let header =  <View style={styles.header} key={this.getNextKey()}>
+                    <View style={styles.row}>
                       {photo}
-                      <View style={[styles.noImageBlock, {flex: 1,  justifyContent: 'center'}]}>
+                      <View style={styles.noImageBlock}>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between', minHeight: 40}}>
-                          <View style={{flexDirection: 'column', flex: 1}}>
+                          <View style={styles.title}>
                             {titleComponent}
                             {description}
                             {renderedRows}
@@ -587,16 +590,20 @@ reactMixin(VerificationRow.prototype, RowMixin);
 var styles = StyleSheet.create({
   textContainer: {
     flex: 1,
-    // borderColor: 'green'
     marginHorizontal: 10,
     padding: 5,
   },
   title: {
-    fontSize: 18,
-    marginBottom: 3,
-    color: '#555555',
+    flexDirection: 'column',
+    flex: 1,
+    justifyContent: 'center'
+  },
+  row: {
+    flexDirection: 'row',
+    marginHorizontal: 10
   },
   header: {
+    flex: 1,
     backgroundColor: '#ffffff',
     borderBottomColor: '#f0f0f0',
     borderBottomWidth: 1
@@ -610,6 +617,8 @@ var styles = StyleSheet.create({
     // marginBottom: 2,
   },
   noImageBlock: {
+    flex: 1,
+    justifyContent: 'center',
     flexDirection: 'column',
     alignSelf: 'stretch',
     paddingVertical: 3
@@ -686,6 +695,10 @@ var styles = StyleSheet.create({
     top: 10,
     backgroundColor: 'transparent'
   },
+  photo: {
+    alignItems: 'center',
+    width: 70
+  }
 });
 
 module.exports = VerificationRow;

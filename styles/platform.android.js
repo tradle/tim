@@ -10,7 +10,7 @@ module.exports = exports = StyleSheet.create({
     flex: 1,
   },
   navBarText: {
-    marginTop: 19,
+    marginTop: 15,
     fontSize: 17,
   },
   menuButtonNarrow: {

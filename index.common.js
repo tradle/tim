@@ -108,7 +108,6 @@ const REMEDIATION = 29
 const LOGO_HEIGHT = 27
 const TOUR_PAGE = 35
 const AVIVA_INTRO_VIEW = 50
-// const TERMS_AND_CONDITIONS = 51
 
 import platformStyles from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
@@ -141,10 +140,6 @@ const landingPageMapping = {
     component: TourPage,
     id: TOUR_PAGE
   }
-  // TsAndCs: {
-  //   component: ArticleView,
-  //   id: TERMS_AND_CONDITIONS
-  // }
 }
 
 class TiMApp extends Component {
@@ -566,8 +561,6 @@ class TiMApp extends Component {
     //   return <HomePage navigator={nav} {...props} />
     case AVIVA_INTRO_VIEW:
       return <AvivaIntroView navigator={nav} {...props} />
-    // case TERMS_AND_CONDITIONS:
-    //   return <TsAndCs navigator={nav} {...props}  />
     case 30:
       return <GridList navigator={nav} {...props} />
     case 31:
@@ -671,6 +664,8 @@ var NavigationBarRouteMapper = {
     let style = {}
     let isSubmit
     let isProfile
+    let isAndroid = utils.isAndroid()
+    let viewStyle = {}
     switch (rbTitle) {
     case 'Done':
       iconColor = '#fff'
@@ -685,8 +680,9 @@ var NavigationBarRouteMapper = {
       if (!icon) {
         icon = 'ios-send'
         iconSize = 32
+        viewStyle = isAndroid ? {paddingTop: 10} : {}
       }
-      style = {marginTop: utils.isAndroid() ? 15 :  0}
+      style = {marginTop: isAndroid ? 2 : 0}
       // style = {marginTop: 5, transform: [
       //     {rotate: '45deg'}
       //   ]}
@@ -815,7 +811,7 @@ var NavigationBarRouteMapper = {
                         route.passProps.bankStyle.logoNeedsText
     if (uri) {
       if (logoNeedsText)
-        photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 23} : {}]} />
+        photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 18} : {}]} />
       else {
         let width
         if (photoObj.width  &&  photoObj.height)
@@ -902,6 +898,7 @@ var styles = StyleSheet.create({
   msgImageNoText: {
     // backgroundColor: '#dddddd',
     height: 27,
+    resizeMode: 'contain',
     marginRight: 3,
     marginTop: 7,
     marginLeft: 0,

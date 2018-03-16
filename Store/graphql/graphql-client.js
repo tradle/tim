@@ -388,7 +388,7 @@ console.log('endCursor: ', endCursor)
             EQ: {
             `
     // for app view prevent prevent from displaying double wrapped messages
-    if (author  &&  (!context ||  application))
+    if (author) //  &&  (!context ||  application))
       eq += `_counterparty: "${author}"\n`
 
     let filter = ''

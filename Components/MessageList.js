@@ -615,6 +615,7 @@ class MessageList extends Component {
     let isVerifier = application ? utils.isRM(application) : !verification && utils.isVerifier(r)
     let { resource, bankStyle, currency, country } = this.props
     let isEmployee = utils.isEmployee(resource)
+    let lensId = utils.getLensId(r, resource)
     let route = {
       title: newTitle,
       id: 5,
@@ -624,6 +625,7 @@ class MessageList extends Component {
       passProps: {
         bankStyle: bankStyle,
         resource: r,
+        lensId: lensId,
         application: application,
         currency: resource.currency || currency,
         country: resource.country,
@@ -652,8 +654,9 @@ class MessageList extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
-          model: model,
+          model: utils.getLensedModel(r, lensId),
           resource: r,
+          lensId: lensId,
           currency: resource.currency || this.props.currency,
           country: resource.country,
           chat: resource,
