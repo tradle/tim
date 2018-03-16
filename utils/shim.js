@@ -51,6 +51,26 @@ require('debug').formatters.j = require('json-stringify-safe')
 
 require('any-promise/register/bluebird')
 
+// error-ex, this is for you!
+if (!Error.captureStackTrace) {
+  Error.captureStackTrace = function (error) {
+    const container = new Error()
+
+    Object.defineProperty(error, 'stack', {
+      configurable: true,
+      get: function getStack() {
+        var stack = container.stack
+
+        Object.defineProperty(this, 'stack', {
+          value: stack
+        })
+
+        return stack
+      }
+    })
+  }
+}
+
 // global.location = global.location || { port: 80 }
 
 // ;[
