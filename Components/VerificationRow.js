@@ -195,6 +195,7 @@ class VerificationRow extends Component {
 
     let isCheck = model.subClassOf === CHECK
     let description
+    let titleComponent
     if (title !== dn)  {
       if (isCheck  &&  resource.status) {
         let color, icon
@@ -212,24 +213,26 @@ class VerificationRow extends Component {
           icon = 'ios-information-circle-outline'
           break
         }
-        description = <Text style={[styles.description, {alignItems: 'center'}]}>{dn + '  '}
-                        <Icon color={color} size={20} name={icon}/>
-                      </Text>
+        titleComponent = <View style={{flexDirection: 'row'}}>
+                           <Icon color={color} size={25} name={icon} style={{marginTop: -4}}/>
+                           <Text style={[styles.rTitle, {paddingLeft: 10}]}>{dn}</Text>
+                         </View>
       }
       else
-        description = <Text style={styles.description}>{dn}</Text>
+        titleComponent = <Text style={styles.description}>{dn}</Text>
     }
 
-    let titleComponent
     if (isVerification)
       titleComponent = <Text style={[styles.rTitle, {fontWeight: '600'}]}>{'Verification: '}
                           <Text style={[styles.rTitle, {fontWeight: '400'}]}>{title}</Text>
                         </Text>
-    else if (isBookmark  &&  resource.message) {
+    else if (isBookmark  &&  resource.message)
       titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
-    }
-    else
+    else if (!titleComponent)
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
+    else
+      description = <Text style={[styles.description, {paddingLeft: 30}]}>{title}</Text>
+
     let supportingDocuments
     if (isForm  &&  resource._supportingDocuments  &&  resource._supportingDocuments.length)
       supportingDocuments = <View style={{flexDirection: 'row', backgroundColor: '#fff', justifyContent: 'center', paddingTop: 10, paddingRight:5}}>
