@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "dependencies": {
     "@tradle/aws-client": {
-      "version": "1.5.0",
+      "version": "1.6.0",
       "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.5.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.6.0.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -64,7 +64,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#305cd4dbab99b8c39254a9951d463ae1d02b61fd"
+      "resolved": "git://github.com/tradle/custom-models.git#576f5b32d80136bd3147b04bb3310297c756a5b9"
     },
     "@tradle/embed": {
       "version": "1.0.0",
@@ -109,9 +109,9 @@
       }
     },
     "@tradle/errors": {
-      "version": "1.1.0",
-      "from": "@tradle/errors@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/errors/-/errors-1.1.0.tgz"
+      "version": "1.1.1",
+      "from": "@tradle/errors@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/errors/-/errors-1.1.1.tgz"
     },
     "@tradle/ethereum-adapter-etherscan": {
       "version": "1.0.0",
@@ -170,12 +170,12 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#6cdac6b4e601ee2395c0a4292e55001e58665fed"
+      "resolved": "git://github.com/tradle/models.git#0d367550f467fd25ef96bab5b977f096349fd73e"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
       "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#4f29dde68ff9582f31f0ac972e25b474767806bf"
+      "resolved": "git://github.com/tradle/models-cloud.git#443671d8f93d33f17b166a5a97e21875ec09f18f"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -185,7 +185,7 @@
     "@tradle/models-nz": {
       "version": "1.0.0",
       "from": "tradle/models-nz",
-      "resolved": "git://github.com/tradle/models-nz.git#f4b063f002aeec539c9866c9e38286337db1c3d4"
+      "resolved": "git://github.com/tradle/models-nz.git#3d35e1cce18132e1037136e2f871a6c87f195f7a"
     },
     "@tradle/models-onfido": {
       "version": "1.0.0",
@@ -326,9 +326,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "5.3.0",
+      "version": "5.7.4",
       "from": "@tradle/validate-model@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-5.3.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-5.7.4.tgz",
       "dependencies": {
         "typeforce": {
           "version": "1.12.0",
@@ -338,9 +338,9 @@
       }
     },
     "@tradle/validate-resource": {
-      "version": "2.18.1",
-      "from": "tradle/validate-resource",
-      "resolved": "git://github.com/tradle/validate-resource.git#60f7454df5e81dadad904d0eaba9a1d9cffdffba",
+      "version": "2.21.5",
+      "from": "@tradle/validate-resource@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-2.21.5.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
@@ -351,11 +351,6 @@
           "version": "2.0.0",
           "from": "ms@2.0.0",
           "resolved": "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz"
-        },
-        "typeforce": {
-          "version": "1.12.0",
-          "from": "typeforce@^1.12.0",
-          "resolved": "https://registry.npmjs.org/typeforce/-/typeforce-1.12.0.tgz"
         }
       }
     },
@@ -7165,7 +7160,7 @@
     "marked": {
       "version": "0.3.16",
       "from": "marked@>=0.3.6 <0.4.0",
-      "resolved": "http://registry.npmjs.org/marked/-/marked-0.3.16.tgz"
+      "resolved": "https://registry.npmjs.org/marked/-/marked-0.3.16.tgz"
     },
     "math-expression-evaluator": {
       "version": "1.2.17",
@@ -10016,7 +10011,7 @@
     "rn-markdown": {
       "version": "1.2.1",
       "from": "rn-markdown@latest",
-      "resolved": "http://registry.npmjs.org/rn-markdown/-/rn-markdown-1.2.1.tgz"
+      "resolved": "https://registry.npmjs.org/rn-markdown/-/rn-markdown-1.2.1.tgz"
     },
     "rndm": {
       "version": "1.2.0",

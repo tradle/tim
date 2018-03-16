@@ -1864,6 +1864,8 @@ var Store = Reflux.createStore({
     }
     client = new AWSClient({
       endpoint: url,
+      iotEndpoint: provider.connectEndpoint && provider.connectEndpoint.endpoint,
+      parentTopic: provider.connectEndpoint && provider.connectEndpoint.parentTopic,
       node,
       counterparty,
       getSendPosition: () => {
@@ -1882,7 +1884,10 @@ var Store = Reflux.createStore({
       },
       // position,
       // TODO: generate long-lived clientId: `${node.permalink}${nonce}`
-      clientId: `${node.permalink}${counterparty}`
+      clientId: utils.getIotClientId({
+        permalink: node.permalink,
+        provider
+      })
     })
 
     const checkMissing = (() => {
@@ -1937,7 +1942,7 @@ var Store = Reflux.createStore({
 
   addProvider(provider) {
     let self = this
-    if (provider.aws) {
+    if (utils.isAWSProvider(provider)) {
       return this.addAWSProvider(provider)
     }
 
@@ -2567,7 +2572,7 @@ var Store = Reflux.createStore({
       permalink: sp.bot.permalink,
       sandbox: sp.sandbox,
       // publicConfig: sp.publicConfig,
-      aws: sp.aws
+      connectEndpoint: sp.connectEndpoint
     }
     // Check is this is an update SP info
     let oldSp
@@ -2709,7 +2714,13 @@ var Store = Reflux.createStore({
 
     return Q.allSettled(promises)
     .then(() => {
-      const common = { hash, txId: sp.bot.txId, aws: sp.aws }
+      const common = {
+        hash,
+        txId: sp.bot.txId,
+        aws: sp.aws,
+        connectEndpoint: sp.connectEndpoint
+      }
+
       if (!sp.isEmployee)
         return { ...common, id: sp.id, url }
 
