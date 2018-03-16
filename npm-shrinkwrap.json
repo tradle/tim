@@ -81,7 +81,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#305cd4dbab99b8c39254a9951d463ae1d02b61fd"
+      "resolved": "git://github.com/tradle/custom-models.git#576f5b32d80136bd3147b04bb3310297c756a5b9"
     },
     "@tradle/embed": {
       "version": "1.0.0",
@@ -187,12 +187,12 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#0c56b4cc93e3b3837d93db94e7cc94e945296d4c"
+      "resolved": "git://github.com/tradle/models.git#0d367550f467fd25ef96bab5b977f096349fd73e"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
       "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#abed0c79b99b7983f73b0863a16ac57bbc8f05f4"
+      "resolved": "git://github.com/tradle/models-cloud.git#443671d8f93d33f17b166a5a97e21875ec09f18f"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -202,7 +202,7 @@
     "@tradle/models-nz": {
       "version": "1.0.0",
       "from": "tradle/models-nz",
-      "resolved": "git://github.com/tradle/models-nz.git#f4b063f002aeec539c9866c9e38286337db1c3d4"
+      "resolved": "git://github.com/tradle/models-nz.git#3d35e1cce18132e1037136e2f871a6c87f195f7a"
     },
     "@tradle/models-onfido": {
       "version": "1.0.0",
@@ -271,7 +271,7 @@
     "@tradle/qr-schema": {
       "version": "1.7.0",
       "from": "@tradle/qr-schema@latest",
-      "resolved": "http://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-1.7.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-1.7.0.tgz",
       "dependencies": {
         "is-extendable": {
           "version": "1.0.1",
@@ -5158,7 +5158,7 @@
     "marked": {
       "version": "0.3.16",
       "from": "marked@>=0.3.6 <0.4.0",
-      "resolved": "http://registry.npmjs.org/marked/-/marked-0.3.16.tgz"
+      "resolved": "https://registry.npmjs.org/marked/-/marked-0.3.16.tgz"
     },
     "media-typer": {
       "version": "0.3.0",
@@ -6881,7 +6881,7 @@
     "rn-markdown": {
       "version": "1.2.1",
       "from": "rn-markdown@latest",
-      "resolved": "http://registry.npmjs.org/rn-markdown/-/rn-markdown-1.2.1.tgz"
+      "resolved": "https://registry.npmjs.org/rn-markdown/-/rn-markdown-1.2.1.tgz"
     },
     "rn-nodeify": {
       "version": "8.2.0",
