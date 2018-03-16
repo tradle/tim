@@ -22,7 +22,7 @@
     "@tradle/aws-client": {
       "version": "1.4.1",
       "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.4.1.tgz",
+      "resolved": "http://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.4.1.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -81,7 +81,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#9fbda336ecc6374e5e134ef64fde029872af6230"
+      "resolved": "git://github.com/tradle/custom-models.git#305cd4dbab99b8c39254a9951d463ae1d02b61fd"
     },
     "@tradle/embed": {
       "version": "1.0.0",
@@ -194,12 +194,12 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#7419d4e4ea0b558fdfe242a73b583cd7ebcd3c91"
+      "resolved": "git://github.com/tradle/models.git#6cdac6b4e601ee2395c0a4292e55001e58665fed"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
       "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#443671d8f93d33f17b166a5a97e21875ec09f18f"
+      "resolved": "git://github.com/tradle/models-cloud.git#abed0c79b99b7983f73b0863a16ac57bbc8f05f4"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -209,7 +209,7 @@
     "@tradle/models-nz": {
       "version": "1.0.0",
       "from": "tradle/models-nz",
-      "resolved": "git://github.com/tradle/models-nz.git#3d35e1cce18132e1037136e2f871a6c87f195f7a"
+      "resolved": "git://github.com/tradle/models-nz.git#f4b063f002aeec539c9866c9e38286337db1c3d4"
     },
     "@tradle/models-onfido": {
       "version": "1.0.0",
@@ -278,7 +278,7 @@
     "@tradle/qr-schema": {
       "version": "1.7.0",
       "from": "@tradle/qr-schema@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-1.7.0.tgz",
+      "resolved": "http://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-1.7.0.tgz",
       "dependencies": {
         "is-extendable": {
           "version": "1.0.1",
@@ -5170,7 +5170,7 @@
     "marked": {
       "version": "0.3.16",
       "from": "marked@>=0.3.6 <0.4.0",
-      "resolved": "https://registry.npmjs.org/marked/-/marked-0.3.16.tgz"
+      "resolved": "http://registry.npmjs.org/marked/-/marked-0.3.16.tgz"
     },
     "media-typer": {
       "version": "0.3.0",
@@ -6383,7 +6383,7 @@
     "react-native-floating-labels": {
       "version": "1.1.1",
       "from": "mvayngrib/react-native-floating-labels#pointerEvents",
-      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#acb492a874e90601878759e47e2a1704132c8094"
+      "resolved": "git://github.com/mvayngrib/react-native-floating-labels.git#27a3f99ab9fd5771a0280c5bce6f0a15f1c613c4"
     },
     "react-native-gallery": {
       "version": "0.0.17",
@@ -6893,7 +6893,7 @@
     "rn-markdown": {
       "version": "1.2.1",
       "from": "rn-markdown@latest",
-      "resolved": "https://registry.npmjs.org/rn-markdown/-/rn-markdown-1.2.1.tgz"
+      "resolved": "http://registry.npmjs.org/rn-markdown/-/rn-markdown-1.2.1.tgz"
     },
     "rn-nodeify": {
       "version": "8.2.0",
