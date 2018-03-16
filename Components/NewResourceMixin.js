@@ -116,10 +116,19 @@ var NewResourceMixin = {
     let onSubmitEditing = this.onSavePressed
     let onEndEditing = this.onEndEditing  ||  params.onEndEditing
     let chooser = this.chooser  ||  this.props.chooser
-    let options = {};
-    options.fields = {};
 
-    meta = originatingMessage  &&  utils.getModelForFormRequest(originatingMessage) || meta
+    meta = originatingMessage  &&  utils.getLensedModel(originatingMessage) || meta
+    // let lens
+    // if (originatingMessage)  {
+    //   meta = utils.getLensedModel(originatingMessage)
+    //   lens = originatingMessage.lens
+    // }
+    // if (data  &&  data._lens) {
+    //   meta = utils.getLensedModel(data)
+    //   lens = data._lens
+    // }
+    // if (lens)
+    //   this.floatingProps = {_lens: lens}
 
     let props, bl;
     if (!meta.items)
@@ -207,6 +216,7 @@ var NewResourceMixin = {
     let required = utils.ungroup(meta, meta.required)
     required = utils.arrayToObject(required);
 
+    let options = {fields: {}}
     let resource = this.state.resource
     for (let p in eCols) {
       if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
@@ -1489,7 +1499,7 @@ var NewResourceMixin = {
     let currentRoutes = navigator.getCurrentRoutes();
 
     if (originatingMessage) {
-      let pmodel = utils.getModelForFormRequest(originatingMessage)
+      let pmodel = utils.getLensedModel(originatingMessage)
       prop = pmodel.properties[propName]
     }
 

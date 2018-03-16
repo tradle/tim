@@ -84,11 +84,11 @@ class ShowPropertiesView extends Component {
   getViewCols(resource, model) {
     if (!resource)
       resource = this.props.resource
-    var modelName = resource[TYPE];
-    var model = utils.getModel(modelName);
-    var vCols
-
     let { checkProperties, excludedProperties, bankStyle, currency, showRefResource, onPageLayout } = this.props
+    var modelName = resource[TYPE];
+    if (!model)
+      model = this.props.model  ||  utils.getModel(modelName);
+    var vCols
 
     var props = model.properties;
     if (checkProperties) {
@@ -148,18 +148,19 @@ class ShowPropertiesView extends Component {
     }
 
     if (!vCols) {
-      vCols = [];
-      for (var p in props) {
-        if (p != TYPE)
-          vCols.push(p)
-      }
-      // HACK
-      if (utils.isMessage(resource)) {
-        if (!excludedProperties)
-          excludedProperties = []
-        excludedProperties.push('from')
-        excludedProperties.push('to')
-      }
+      vCols = utils.getViewCols(model)
+      // vCols = [];
+      // for (var p in props) {
+      //   if (p != TYPE)
+      //     vCols.push(p)
+      // }
+      // // HACK
+      // if (utils.isMessage(resource)) {
+      //   if (!excludedProperties)
+      //     excludedProperties = []
+      //   excludedProperties.push('from')
+      //   excludedProperties.push('to')
+      // }
     }
     var isMessage = utils.isMessage(resource)
     if (!isMessage) {

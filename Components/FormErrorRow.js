@@ -224,7 +224,8 @@ class FormErrorRow extends Component {
       component: NewResource,
       // titleTextColor: '#7AAAC3',
       passProps:  {
-        model: model,
+        model: utils.getLensedModel(resource), //model,
+        lensId: resource.lens,
         resource: r,
         isPrefilled: true,
         errs: errs,

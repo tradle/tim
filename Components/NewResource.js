@@ -492,15 +492,21 @@ class NewResource extends Component {
     let r = {}
     extend(true, r, resource)
     json._context = r._context ||  (this.props.originatingMessage  &&  this.props.originatingMessage._context)
+
     delete r.url
+    let lensId = this.props.lensId
     let params = {
       value: json,
       resource: r,
-      meta: this.props.model,
+      meta: model,
+      lens: lensId,
       isRegistration: this.state.isRegistration
     };
     if (this.props.chat)
       params.chat = this.props.chat
+    if (!lensId  &&  this.floatingProps  &&  this.floatingProps._lens)
+      params.lens = this.floatingProps._lens
+
     params.doNotSend = this.props.doNotSend
     // HACK
     if (!resource.from  ||  !resource.to)

@@ -336,8 +336,9 @@ class MessageView extends Component {
   render() {
     if (this.state.isLoading)
       return <View/>
+    let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification } = this.props
     let resource = this.state.resource;
-    let model = utils.getModel(resource[TYPE]);
+    let model = utils.getLensedModel(resource, lensId);
     let isVerification = model.id === VERIFICATION
     let isVerificationTree = isVerification &&  (resource.method || resource.sources)
     let isForm = model.subClassOf === FORM
@@ -361,16 +362,16 @@ class MessageView extends Component {
       inRow = 5;
 
     let propertySheet
-    let bankStyle = this.state.bankStyle || this.props.style
+    let bankStyle = this.state.bankStyle || style
     if (isVerificationTree)
-      propertySheet = <VerificationView navigator={this.props.navigator}
+      propertySheet = <VerificationView navigator={navigator}
                                         resource={resource}
                                         bankStyle={bankStyle}
-                                        currency={this.props.currency}
+                                        currency={currency}
                                         showVerification={this.showVerification.bind(this)}/>
     let content = <View>
                     <View style={styles.photoListStyle}>
-                      <PhotoList photos={photos} resource={resource} isView={true} navigator={this.props.navigator} numberInRow={inRow} />
+                      <PhotoList photos={photos} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
                     </View>
                     <View style={styles.rowContainer}>
                       {msg}
@@ -380,7 +381,7 @@ class MessageView extends Component {
                     </View>
                   </View>
 
-    let checkProps = !isVerification && this.props.isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
+    let checkProps = !isVerification && isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
     let actionPanel
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
@@ -390,12 +391,13 @@ class MessageView extends Component {
                                  resource={this.state.resource}
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
+                                 model={model}
                                  showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
                                  bankStyle={bankStyle}
                                  onPageLayout={this.onPageLayout.bind(this)}
                                  showRefResource={this.getRefResource.bind(this)}
-                                 defaultPropertyValues={this.props.defaultPropertyValues}
+                                 defaultPropertyValues={defaultPropertyValues}
                                  checkProperties={checkProps} >
                       {content}
                     </ShowRefList>
@@ -403,11 +405,11 @@ class MessageView extends Component {
         // <FromToView resource={resource} navigator={this.props.navigator} />
         // <MoreLikeThis resource={resource} navigator={this.props.navigator}/>
     let verificationTxID, separator
-    if (this.props.verification  &&  this.props.verification.txId) {
+    if (verification  &&  verification.txId) {
       verificationTxID =
           <View style={styles.txIdView}>
             <Text style={styles.title}>Verification Transaction Id</Text>
-            <Text style={styles.verification} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + this.props.verification.txId)}>{this.props.verification.txId}</Text>
+            <Text style={styles.verification} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + verification.txId)}>{verification.txId}</Text>
           </View>
       separator = <View style={styles.separator}></View>
     }
@@ -432,7 +434,7 @@ class MessageView extends Component {
     let bigPhoto
     if (mainPhoto)
       bigPhoto = <View style={styles.photoBG} ref='bigPhoto'>
-                  <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={this.props.navigator}/>
+                  <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
                  </View>
     let height = utils.dimensions(MessageView).height - 80
     return (

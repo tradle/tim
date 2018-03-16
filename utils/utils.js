@@ -228,24 +228,27 @@ var utils = {
   splitCamelCase(str) {
     return str.split(/(?=[A-Z])/g)
   },
-  getRequestedFormType(formReqOrErr) {
-    if (formReqOrErr[TYPE] === FORM_REQUEST) {
-      return formReqOrErr.form
+  getRequestedFormType(resource) {
+    if (resource[TYPE] === FORM_REQUEST) {
+      return resource.form
     }
 
-    if (formReqOrErr[TYPE] === FORM_ERROR) {
-      const type = formReqOrErr.prefill && formReqOrErr.prefill[TYPE]
+    if (resource[TYPE] === FORM_ERROR) {
+      const type = resource.prefill && resource.prefill[TYPE]
       if (type) return type
 
-      return parseStub(formReqOrErr.prefill).type
+      return parseStub(resource.prefill).type
     }
 
-    throw new Error('expected tradle.FormRequest or tradle.FormError')
+    return resource[TYPE]
+
+    // throw new Error('expected tradle.FormRequest or tradle.FormError')
   },
-  getModelForFormRequest(fr) {
+  getLensedModel(fr, lensId) {
     const form = utils.getRequestedFormType(fr)
     let model = Store.getOriginalModel(form)
-    let lensId = fr.lens
+    lensId = lensId  ||  fr.lens
+
     if (!lensId)
       return Store.getAugmentedModel(model)
 
@@ -306,6 +309,20 @@ var utils = {
       }
     }
     return list
+  },
+  getLensId(resource, provider) {
+    if (!resource._sharedWith)
+      return
+    let lens
+    if (provider[TYPE] === ORGANIZATION) {
+      provider.contacts.forEach(c => {
+        resource._sharedWith.forEach(s => {
+          if (s.bankRepresentative === c.id)
+            lens = s.lens
+        })
+      })
+    }
+    return lens
   },
   getModel(modelName) {
     return Store.getModel(modelName)
@@ -668,8 +685,11 @@ var utils = {
     }
     if (!displayName.length  &&  resourceModel) {
       let vCols = resourceModel.viewCols
-      if (!vCols)
-        return displayName
+      if (!vCols) {
+        vCols = this.getViewCols(resourceModel)
+        if (!vCols)
+          return displayName
+      }
       let excludeProps = []
       if (this.isMessage(resourceModel))
         excludeProps = ['from', 'to']
@@ -2452,153 +2472,3 @@ function dateFromParts (parts) {
 }
 
 module.exports = utils;
-/*
-  getDisplayName1(resource, meta) {
-    if (!meta) {
-      if (resource.title)
-        return resource.title
-      if (resource.id)
-        return ""
-      meta = this.getModel(resource[TYPE]).properties
-    }
-    let dProps = this.getPropertiesWithAnnotation(meta, 'displayName')
-
-    let m = this.getModel(resource[TYPE])
-    let vCols = m  &&  m.viewCols
-    var displayName = '';
-    if (vCols) {
-      vCols.forEach((p) => {
-        if (dProps[p]) {
-          let dn = this.getPropStringValue(meta[p], resource)
-          displayName += displayName.length ? ' ' + dn : dn;
-        }
-      })
-      // if (displayName.length)
-      //   return displayName
-    }
-    // if models does not have viewCols or not all displayName props are listed in viewCols
-    for (var p in meta) {
-      if (p.charAt(0) === '_')
-        continue
-      if (vCols  &&  vCols.indexOf(p) !== -1)
-        continue
-      if (dProps)  {
-        if (!dProps[p]) {
-          if (!displayName  &&  m  &&  resource[p]  &&  m.subClassOf === 'tradle.Enum')
-            return resource[p];
-          continue
-        }
-        else {
-          let dn = this.getPropStringValue(meta[p], resource)
-          displayName += displayName.length ? ' ' + dn : dn;
-        }
-      }
-      // let dn = this.getPropStringValue(meta[p], resource)
-      // displayName += displayName.length ? ' ' + dn : dn;
-    }
-    return displayName;
-  },
-  // getDisplayName(resource, meta) {
-  //   if (Array.isArray(resource))
-  //     return
-  //   if (!meta) {
-  //     if (!resource[TYPE]) {
-  //       if (resource.id   &&   resource.title)
-  //         return resource.title
-  //       if (resource.id)
-  //         return ""
-  //     }
-  //     meta = this.getModel(resource[TYPE]).properties
-  //   }
-  //   let m = resource[TYPE] ? this.getModel(resource[TYPE]) : null
-  //   var displayName = '';
-  //   for (var p in meta) {
-  //     if (p.charAt(0) === '_')
-  //       continue
-  //     if (!meta[p].displayName) {
-  //       if (!displayName  &&  m  &&  resource[p]  &&  m.subClassOf === ENUM)
-  //         return resource[p];
-  //       continue
-  //     }
-  //     let dn = this.getStringValueForProperty(resource, p, meta)
-  //     if (dn)
-  //       displayName += displayName.length ? ' ' + dn : dn;
-  //   }
-  //   if (!displayName.length  &&  m) {
-  //     let vCols = m.viewCols
-  //     if (!vCols)
-  //       return displayName
-  //     let excludeProps = []
-  //     if (this.isMessage(m))
-  //       excludeProps = ['from', 'to']
-  //     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
-  //       let prop =  vCols[i]
-  //       if (meta[prop].type === 'array')
-  //         continue
-  //       if (!resource[prop]  ||  excludeProps.indexOf[prop])
-  //         continue
-  //       displayName = this.getStringValueForProperty(resource, prop, m.properties)
-  //     }
-  //   }
-  //   return displayName;
-  // },
-  // // temporary, let's hope
-  // interpretStylesPack(stylesPack) {
-  //   let interpreted = {}
-  //   Object.keys(stylesPack).forEach(prop => {
-  //     // booHoo => BOO_HOO
-  //     if (prop.charAt(0) === '_')
-  //       return
-  //     const localName = utils.splitCamelCase(prop).join('_').toUpperCase()
-  //     interpreted[localName] = stylesPack[prop]
-  //   })
-
-  //   return interpreted
-  // },
-  // getModelForFormRequest(fr) {
-  //   const form = utils.getRequestedFormType(fr)
-  //   let model = this.getModel(form)
-  //   let lensId = fr.lens
-  //   if (!lensId)
-  //     return model
-  //   let lens = Store.getLens(lensId)
-
-  //   let lensProps = lens  &&  lens.properties
-  //   if (!lensProps)
-  //     return model
-  //   let cmodel = _.cloneDeep(model)
-  //   let props = cmodel.properties
-  //   for (let p in lensProps) {
-  //     let lprop = lensProps[p]
-  //     let prop = props[p]
-  //     _.extend(prop, lprop)
-  //   }
-  //   if (lens.hidden) {
-  //     if (!cmodel.hidden)
-  //       cmodel.hidden = []
-  //     lens.hidden.forEach((p) => {
-  //       cmodel.hidden.push(p)
-  //     })
-  //   }
-  //   if (lens.required) {
-  //     cmodel.required = []
-  //     lens.required.forEach((p) => {
-  //       cmodel.required.push(p)
-  //     })
-  //   }
-  //   if (lens.editCols) {
-  //     cmodel.editCols = []
-  //     lens.editCols.forEach((p) => {
-  //       cmodel.editCols.push(p)
-  //     })
-  //   }
-  //   if (lens.viewCols) {
-  //     cmodel.viewCols = []
-  //     lens.viewCols.forEach((p) => {
-  //       cmodel.viewCols.push(p)
-  //     })
-  //   }
-
-  //   return cmodel
-  // },
-*/
