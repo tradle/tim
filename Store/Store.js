@@ -161,12 +161,10 @@ const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 // const SHARED_RESOURCE     = 'tradle.SharedResource'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const INTRODUCTION        = 'tradle.Introduction'
-// const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 const PRODUCT_REQUEST     = 'tradle.ProductRequest'
 const CONTEXT             = 'tradle.Context'
 const PARTIAL             = 'tradle.Partial'
 const MY_PRODUCT          = 'tradle.MyProduct'
-const GUEST_SESSION_PROOF = 'tradle.GuestSessionProof'
 const FORM_ERROR          = 'tradle.FormError'
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const MY_EMPLOYEE_PASS    = 'tradle.MyEmployeeOnboarding'
@@ -1839,7 +1837,6 @@ var Store = Reflux.createStore({
       debug(`not creating aws client for ${counterparty}. All comm will go through my employer`)
       return
     }
-
     client = new AWSClient({
       endpoint: url,
       node,
@@ -3793,16 +3790,19 @@ var Store = Reflux.createStore({
   onGetFrom(resource) {
     this.onGetItem({resource: resource, action: 'getFrom'});
   },
-  addSharedWith(r, shareWith, time, shareBatchId) {
+  addSharedWith(r, shareWith, time, shareBatchId, lens) {
     // if (!r._sharedWith)
     //   r._sharedWith = []
     let id = utils.getId(shareWith)
     // if (id === utils.getId(utils.getMe()))
     //   debugger
     // let hasThisShare = r._sharedWith.some((r) => r.shareBatchId === shareBatchId)
-    let hasThisShare = r._sharedWith.some((r) => r.bankRepresentative === id)
-    if (!hasThisShare)
-      r._sharedWith.push(this.createSharedWith(id, time, shareBatchId))
+    let hasThisShare = r._sharedWith  &&  r._sharedWith.some((r) => r.bankRepresentative === id)
+    if (!hasThisShare) {
+      if (!r._sharedWith)
+        r._sharedWith = []
+      r._sharedWith.push(this.createSharedWith(id, time, shareBatchId, lens))
+    }
   },
 
   async onGetItem(params) {
@@ -4250,7 +4250,7 @@ var Store = Reflux.createStore({
   async onAddItem(params) {
     var self = this
     var {resource, disableFormRequest, isMessage, disableAutoResponse, doneWithMultiEntry,
-         value, chat, shareWith, cb, meta, isRegistration, provider, noTrigger} = params
+         value, chat, shareWith, cb, meta, isRegistration, provider, noTrigger, lens} = params
     if (!value)
       value = resource
 
@@ -4273,7 +4273,6 @@ var Store = Reflux.createStore({
     }
     else if (meta.id === BOOKMARK)
       resource.to = resource.from
-    let isGuestSessionProof = meta.id === GUEST_SESSION_PROOF
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
@@ -4295,11 +4294,6 @@ var Store = Reflux.createStore({
     }
 
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
-    if (isGuestSessionProof) {
-      resource[TYPE] = PRODUCT_REQUEST
-      resource.requestFor = REMEDIATION
-    }
-
     var isNew = !resource[ROOT_HASH];
 
     if (!isNew  &&  !resource[CUR_HASH])
@@ -4315,42 +4309,6 @@ var Store = Reflux.createStore({
     //   }
     //   isBecomingEmployee = isBecomingEmployee.isBecomingEmployee
     // }
-    // Data were obtaipackmy scanning QR code of the forms that were entered on Web
-    if (isGuestSessionProof) { // || isBecomingEmployee) {
-      await this.getDriver(me)
-      if (provider)
-        await this.addSettings(provider)
-      let status = await meDriver.identityPublishStatus()
-      if (!status.watches.link  &&  !status.link) {
-        // let rep = isBecomingEmployee
-        //         ? self.getRepresentative(resource.organization)
-        //         : self._getItem(utils.getId(resource.to))
-        let rep = self._getItem(utils.getId(resource.to))
-        await self.publishMyIdentity(rep, disableAutoResponse)
-      }
-      else {
-        let orgRep
-        // if (isBecomingEmployee)
-        //   orgRep = self.getRepresentative(resource.organization)
-        // else
-          orgRep = self._getItem(resource.to)
-
-        console.log('Store.onAddItem: type = ' + resource[TYPE] + (resource.to ? '; to = ' + resource.to.title : ''))
-
-        var msg = {
-          message: me.firstName + ' is waiting for the response',
-          [TYPE]: SELF_INTRODUCTION,
-          identity: meDriver.identity,
-          profile: {
-            firstName: me.firstName,
-          },
-          from: me,
-          to: orgRep
-        }
-
-        await self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
-      }
-    }
     let results = []
     // let exclude = ['to', 'from']
     for (let p in resource) {
@@ -4414,8 +4372,10 @@ var Store = Reflux.createStore({
       if (!json[p]  &&  props[p].readOnly)
         json[p] = resource[p];
       let ref = props[p].ref
-      // Chaeck if valid enum value
+      // Check if valid enum value
       if (ref  &&  utils.isEnum(ref)) {
+        if (!json[p])
+          continue
         if ((typeof json[p] === 'string')  ||  !this._getItem(utils.getId(json[p]))) {
           let enumList = this.searchNotMessages({modelName: ref})
           let eprop = utils.getEnumProperty(this.getModel(ref))
@@ -4536,7 +4496,7 @@ var Store = Reflux.createStore({
     if (isRegistration)
       await handleRegistration()
     else if (isMessage  &&  !returnVal[NOT_CHAT_ITEM])
-      await handleMessage(noTrigger, returnVal)
+      await handleMessage(noTrigger, returnVal, lens)
     else
       await save(returnVal, returnVal[NOT_CHAT_ITEM]) //, isBecomingEmployee)
     if (disableFormRequest) {
@@ -4596,7 +4556,7 @@ var Store = Reflux.createStore({
       })
     }
 
-    async function handleMessage (noTrigger, returnVal) {
+    async function handleMessage (noTrigger, returnVal, lens) {
       // TODO: fix hack
       // hack: we don't know root hash yet, use a fake
       if (returnVal._documentCreated)  {
@@ -4752,9 +4712,7 @@ var Store = Reflux.createStore({
         let params;
 
         let sendStatus = (self.isConnected) ? SENDING : QUEUED
-        if (isGuestSessionProof)
-          params = {action: 'getForms', to: org}
-        else if (returnVal[TYPE] === DATA_CLAIM) {
+        if (returnVal[TYPE] === DATA_CLAIM) {
           // org = self._getItem(utils.getId(org))
           // Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})
           params = {action: 'getForms', to: org}
@@ -4835,7 +4793,7 @@ var Store = Reflux.createStore({
 
         delete returnVal._sharedWith
         delete returnVal.verifications
-        await save(returnVal, true)
+        await save(returnVal, true, lens)
 
         if (returnVal[TYPE] === ASSIGN_RM) {
           let app = self._getItem(returnVal.application)
@@ -4900,13 +4858,14 @@ var Store = Reflux.createStore({
       }
 
     }
-    async function save (returnVal, noTrigger) {
+    async function save (returnVal, noTrigger, lens) {
       let r = {
         modelName: returnVal[TYPE],
         resource: returnVal,
         dhtKey: returnVal[ROOT_HASH],
         isRegistration: isRegistration,
-        noTrigger: noTrigger
+        noTrigger: noTrigger,
+        lens: lens
       }
       if (params.maxAttempts)
         r.maxAttempts = params.maxAttempts
@@ -5070,10 +5029,10 @@ var Store = Reflux.createStore({
       return document
     })
     let shareBatchId = new Date().getTime()
-    debugger
+    // debugger
     let doShareDocuments = (typeof formResource.requireRawData === 'undefined')  ||  formResource.requireRawData
     if (doShareDocuments) {
-      let errorMsg = await this.shareForms(documents, to, formResource, shareBatchId)
+      let errorMsg = await this.shareForms({documents, to, formRequest: formResource, batch, shareBatchId})
       if (errorMsg) {
         this.trigger({action: 'addItem', errorMsg: 'Sharing failed: ' + errorMsg, resource: document, to: this._getItem(toOrgId)})
         return
@@ -5122,23 +5081,7 @@ var Store = Reflux.createStore({
         await db.batch(batch)
       return
     }
-    await this.shareVerifications(verifications, to, formResource, shareBatchId)
-
-    verifications.forEach((ver) => {
-    // let all = verifications.length
-    // for (let i=0; i<all; i++) {
-      // let ver = this._getItem(verifications[i])
-      // let ver = verifications[i]
-      let vId = utils.getId(ver)
-      if (!ver._context)
-        ver._context = formResource._context
-      // await this.shareVerification(ver, to, formResource, shareBatchId)
-      // Check if Verification was created by different employee
-      // let v = this._getItem(vId)
-      // if (!v)
-      this._setItem(vId, ver)
-      this.dbBatchPut(vId, ver, batch)
-    })
+    await this.shareVerifications({verifications, to, formRequest: formResource, batch, shareBatchId})
     if (!doShareDocuments)
       this.addLastMessage(verifications[verifications.length - 1], batch, to)
 
@@ -5200,296 +5143,139 @@ var Store = Reflux.createStore({
       })
     }
 
-    // if (resource[TYPE] === VERIFICATION) {
-    //   if (!Array.isArray(shareWithList))
-    //     sharedWithList = [sharedWithList]
     await this.shareAll([resource.document || resource], shareWithList, originatingResource)
-    //   return
-    // }
-
-    // let promisses = []
-    // shareWithList.forEach((r) => {
-    //   promisses.push(this.onShareOne(resource, this._getItem(r)))
-    // })
-    // Q.all(promisses)
-    // .then((results) => {
-    //   debugger
-    // })
   },
 
-  async shareForms(documents, to, formRequest, shareBatchId) {
+  async shareResources(resources, to, formRequest, shareBatchId) {
+    let hashes = resources.map((d) => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
+    let sr = {
+      [TYPE]: SHARE_REQUEST,
+      links: hashes,
+      with:  [{
+        id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
+      }]
+    }
+    let msg = this.packMessage(sr, me, to)
+    if (!msg.other)
+      msg.other = {}
+    msg.other.context = formRequest._context.contextId
+    msg.seal =  true
+    await this.meDriverSignAndSend(msg)
+  },
+  async shareVerifications({verifications, to, formRequest, batch, shareBatchId}) {
     var time = new Date().getTime()
-    try {
-      if (utils.getMe().isEmployee) {
-        let hashes = documents.map((d) => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
-        let sr = {
-          [TYPE]: SHARE_REQUEST,
-          links: hashes,
-          with:  [{
-            id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
-          }]
-        }
-        let msg = this.packMessage(sr, me, to)
-        if (!msg.other)
-          msg.other = {}
-        msg.other.context = formRequest._context.contextId
-        msg.seal =  true
-        await this.meDriverSignAndSend(msg)
-        documents.forEach((document) => this.handleSharedDoc(document, to, shareBatchId))
-      }
-      else {
-        await Promise.all(documents.map(document => this.shareForm(document, to, formRequest, shareBatchId)))
-        // let opts = {
-        //   other: {
-        //     context:  formRequest._context.contextId,
-        //   },
-        //   to: { permalink: to[ROOT_HASH] },
-        //   seal: true,
-        //   link: hash
-        // }
-        // await this.meDriverSend(opts)
-      }
-    }
-    catch(err) {
-      console.log(err)
-      return
-    }
-
-    // documents.forEach((document) => {
-    //   if (!document._sharedWith) {
-    //     document._sharedWith = []
-    //     if (!utils.isMyProduct(document)  &&  !utils.isSavedItem(document))
-    //       this.addSharedWith(document, document.to, document.time, shareBatchId)
-    //   }
-    //   if (utils.isSavedItem(document)) {
-    //     document._creationTime = document.time
-    //     document._sentTime = new Date().getTime()
-    //     let docId = utils.getId(document)
-    //     document.to = to
-    //     this._setItem(docId, document)
-    //     this.dbPut(docId, document)
-    //   }
-
-    //   this.addSharedWith(document, to, time, shareBatchId)
-    //   this.addMessagesToChat(utils.getId(to.organization), document, false, time)
-    // })
-  },
-  handleSharedDoc(document, to, time, shareBatchId) {
-    if (!document._sharedWith) {
-      document._sharedWith = []
-      if (!utils.isMyProduct(document)  &&  !utils.isSavedItem(document))
-        this.addSharedWith(document, document.to, document.time, shareBatchId)
-    }
-    if (utils.isSavedItem(document)) {
-      document._creationTime = document.time
-      document._sentTime = new Date().getTime()
-      let docId = utils.getId(document)
-      document.to = to
-      this._setItem(docId, document)
-      this.dbPut(docId, document)
-    }
-
-    this.addSharedWith(document, to, time, shareBatchId)
-    this.addMessagesToChat(utils.getId(to.organization), document, false, time)
-  },
-  async shareVerifications(verifications, to, formRequest, shareBatchId) {
-    var time = new Date().getTime()
-    var toId = utils.getId(to)
-    // let v = this.getResourceToSend(ver)
-    // let msg = this.packMessage(v, me, to)
     try {
       if (me.isEmployee) {
-        let hashes = verifications.map((d) => d[CUR_HASH] || this._getItem(d)[CUR_HASH])
-        let sr = {
-          [TYPE]: SHARE_REQUEST,
-          links: hashes,
-          with:  [{
-            id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
-          }]
-        }
-        let msg = this.packMessage(sr, me, to)
-        if (!msg.other)
-          msg.other = {}
-        msg.other.context = formRequest._context.contextId
-        msg.seal =  true
-        await this.meDriverSignAndSend(msg)
-        verifications.forEach(ver => this.handleSharedVerification(ver, to, time, shareBatchId))
+        await this.shareResources(verifications, to, formRequest, shareBatchId)
+        verifications.forEach(resource => this.handleSharedVerification({resource, to, time, formRequest, batch, shareBatchId}))
       }
-      else {
-        await Promise.all(verifications.map(ver => this.shareVerification(ver, to, formRequest, shareBatchId)))
-        // let promisses = []
-        // verifications.forEach(ver => {
-        //   let opts = {
-        //     other: {
-        //       context:  formRequest._context.contextId,
-        //     },
-        //     to: { permalink: to[ROOT_HASH] },
-        //     seal: true,
-        //     link: ver[CUR_HASH]
-        //   }
-
-        //   promisses.push(this.meDriverSend(opts))
-        // })
-        // await Promise.all(promisses)
-      }
+      else
+        await Promise.all(verifications.map(resource => this.shareVerification({resource, to, formRequest, batch, shareBatchId})))
     }
     catch(err) {
       console.log(err)
       debugger
     }
-    // verifications.forEach(ver => {
-    //   if (!ver._sharedWith) {
-    //     ver._sharedWith = []
-    //     this.addSharedWith(ver, ver.from, ver.time, shareBatchId)
-    //   }
-    //   this.addSharedWith(ver, to, time, shareBatchId)
-    //   ver._sendStatus = this.isConnected ? SENDING : QUEUED
-    //   let orgId = utils.getId(to.organization)
-    //   this.addMessagesToChat(orgId, ver, false, time)
-
-    //   this.addVisualProps(ver)
-    //   let toOrg = this._getItem(orgId)
-    //   ver._sentTime = new Date().getTime()
-    //   ver._sendStatus = SENT
-    //   this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
-    // })
   },
-  handleSharedVerification(ver, to, time, shareBatchId) {
-    if (!ver._sharedWith) {
-      ver._sharedWith = []
-      this.addSharedWith(ver, ver.from, ver.time, shareBatchId)
-    }
-    this.addSharedWith(ver, to, time, shareBatchId)
-    ver._sendStatus = this.isConnected ? SENDING : QUEUED
-    let orgId = utils.getId(to.organization)
-    this.addMessagesToChat(orgId, ver, false, time)
-
-    this.addVisualProps(ver)
-    let toOrg = this._getItem(orgId)
-    ver._sentTime = new Date().getTime()
-    ver._sendStatus = SENT
-    this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
-  },
-  async shareForm(document, to, formRequest, shareBatchId) {
+  async shareForms({documents, to, formRequest, batch, shareBatchId}) {
     var time = new Date().getTime()
-    let hash = document[CUR_HASH] || this._getItem(document)[CUR_HASH]
     try {
-      if (utils.getMe().isEmployee) {
-        let sr = {
-          [TYPE]: SHARE_REQUEST,
-          links: [hash],
-          with:  [{
-            id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
-          }]
-        }
-        let msg = this.packMessage(sr, me, to)
-        if (!msg.other)
-          msg.other = {}
-        msg.other.context = formRequest._context.contextId
-        msg.seal =  true
-        await this.meDriverSignAndSend(msg)
+      if (me.isEmployee) {
+        await this.shareResources(documents, to, formRequest, shareBatchId)
+        documents.forEach(resource => this.handleSharedDoc({resource, to, batch, formRequest, shareBatchId}))
       }
-      else {
-        let opts = {
-          other: {
-            context:  formRequest._context.contextId,
-          },
-          to: { permalink: to[ROOT_HASH] },
-          seal: true,
-          link: hash
-        }
-        await this.meDriverSend(opts)
+      else
+        await Promise.all(documents.map(resource => this.shareForm({resource, to, formRequest, batch, shareBatchId})))
+    }
+    catch(err) {
+      console.log(err)
+      debugger
+    }
+  },
+  handleSharedDoc({resource, to, batch, formRequest, shareBatchId}) {
+    if (!resource._sharedWith) {
+      resource._sharedWith = []
+      if (!utils.isMyProduct(resource)  &&  !utils.isSavedItem(resource))
+        this.addSharedWith(resource, resource.to, resource.time, shareBatchId)
+    }
+    let time = new Date().getTime()
+    this.addSharedWith(resource, to, time, shareBatchId, formRequest.lens)
+    let orgId = utils.getId(to.organization)
+    this.addMessagesToChat(orgId, resource, false, time)
+
+    if (utils.isSavedItem(resource)) {
+      resource._creationTime = resource.time
+      resource._sentTime = new Date().getTime()
+      let docId = utils.getId(resource)
+      resource.to = to
+      this._setItem(docId, resource, batch)
+      this.dbBatchPut(docId, resource)
+    }
+  },
+
+  handleSharedVerification({resource, to, formRequest, shareBatchId, batch}) {
+    if (!resource._sharedWith) {
+      resource._sharedWith = []
+      this.addSharedWith(resource, resource.from, resource.time, shareBatchId)
+    }
+    let time = new Date().getTime()
+    this.addSharedWith(resource, to, time, shareBatchId, formRequest.lens)
+    resource._sendStatus = this.isConnected ? SENDING : QUEUED
+    let orgId = utils.getId(to.organization)
+    this.addMessagesToChat(orgId, resource, false, time)
+
+    this.addVisualProps(resource)
+    let toOrg = this._getItem(orgId)
+    resource._sentTime = new Date().getTime()
+    resource._sendStatus = SENT
+    let vId = utils.getId(resource)
+    if (!resource._context)
+      resource._context = formRequest._context
+    this._setItem(vId, resource)
+    this.dbBatchPut(vId, resource, batch)
+    this.trigger({action: 'addItem', context: resource.context, resource: resource, to: toOrg})
+  },
+  async shareResource({resource, to, formRequest, shareBatchId}) {
+    var time = new Date().getTime()
+    let hash = resource[CUR_HASH] || this._getItem(resource)[CUR_HASH]
+    try {
+      let opts = {
+        other: {
+          context:  formRequest._context.contextId,
+        },
+        to: { permalink: to[ROOT_HASH] },
+        seal: true,
+        link: hash
       }
+      await this.meDriverSend(opts)
     }
     catch(err) {
       console.log(err)
       return
     }
-    this.handleSharedDoc(document, to, time, shareBatchId)
-    // if (!document._sharedWith) {
-    //   document._sharedWith = []
-    //   if (!utils.isMyProduct(document)  &&  !utils.isSavedItem(document))
-    //     this.addSharedWith(document, document.to, document.time, shareBatchId)
-    // }
-    // if (utils.isSavedItem(document)) {
-    //   document._creationTime = document.time
-    //   document._sentTime = new Date().getTime()
-    //   let docId = utils.getId(document)
-    //   document.to = to
-    //   this._setItem(docId, document)
-    //   this.dbPut(docId, document)
-    // }
-
-    // this.addSharedWith(document, to, time, shareBatchId)
-    // this.addMessagesToChat(utils.getId(to.organization), document, false, time)
   },
-  async shareVerification(ver, to, formRequest, shareBatchId) {
-    var time = new Date().getTime()
-    var toId = utils.getId(to)
-    // if (!this._getItem(ver)) {
-    //   this._setItem(ver)
-    //   ver._sharedWith = []
-    // }
-    // else
-    if (!ver._sharedWith) {
-      ver._sharedWith = []
-      this.addSharedWith(ver, ver.from, ver.time, shareBatchId)
-    }
-    this.addSharedWith(ver, to, time, shareBatchId)
-
-    ver._sendStatus = this.isConnected ? SENDING : QUEUED
-    let orgId = utils.getId(to.organization)
-    this.addMessagesToChat(orgId, ver, false, time)
-
-    this.addVisualProps(ver)
-    let toOrg = this._getItem(orgId)
-    this.trigger({action: 'addItem', context: ver.context, resource: ver, to: toOrg})
-    // let v = this.getResourceToSend(ver)
-    // let msg = this.packMessage(v, me, to)
-    try {
-      if (utils.getMe().isEmployee) {
-        let sr = {
-          [TYPE]: SHARE_REQUEST,
-          links: [ver[CUR_HASH]],
-          with:  [{
-            id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
-          }]
-        }
-        let msg = this.packMessage(sr, me, to)
-        if (!msg.other)
-          msg.other = {}
-        msg.other.context = formRequest._context.contextId
-        msg.seal =  true
-        await this.meDriverSignAndSend(msg)
-      }
-      else {
-        let opts = {
-          other: {
-            context:  formRequest._context.contextId,
-          },
-          to: { permalink: to[ROOT_HASH] },
-          seal: true,
-          link: ver[CUR_HASH]
-        }
-        await this.meDriverSend(opts)
-      }
-    }
-    catch(err) {
-      console.log(err)
-      debugger
-    }
-    if (ver) {
-      ver._sentTime = new Date().getTime()
-      this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver, to: toOrg})
-      ver._sendStatus = SENT
-    }
+  async shareForm({resource, to, formRequest, batch, shareBatchId}) {
+    await this.shareResource({resource, to, formRequest, shareBatchId})
+    this.handleSharedDoc({resource, to, formRequest, batch, shareBatchId})
   },
-  createSharedWith(toId, time, shareBatchId) {
-    return {
+  async shareVerification({resource, to, formRequest, batch, shareBatchId}) {
+    await this.shareResource({resource, to, formRequest, shareBatchId})
+    this.handleSharedVerification({resource, to, formRequest, batch, shareBatchId})
+    // if (ver) {
+    //   ver._sentTime = new Date().getTime()
+    //   this.trigger({action: 'updateItem', sendStatus: SENT, resource: ver, to: toOrg})
+    //   ver._sendStatus = SENT
+    // }
+  },
+  createSharedWith(toId, time, shareBatchId, lens) {
+    let stub = {
       bankRepresentative: toId,
       timeShared: time,
       shareBatchId: shareBatchId
     }
+    if (lens)
+      stub.lens = lens
+    return stub
   },
   checkRequired(resource, meta) {
     var type = resource[TYPE];
@@ -5815,9 +5601,9 @@ var Store = Reflux.createStore({
     // retParams.requestedModelName = modelName
     if (!isAggregation  &&  to  &&  !prop) {
       if (to[TYPE] !== PROFILE  ||  !me.isEmployee) {
-        // let to = list[utils.getId(to)].value
-        // if (to  &&  to[TYPE] === ORGANIZATION)
-        // entering the chat should clear customer's unread indicator
+        // // let to = list[utils.getId(to)].value
+        // // if (to  &&  to[TYPE] === ORGANIZATION)
+        // // entering the chat should clear customer's unread indicator
         shareableResources = await this.getShareableResources({foundResources: result, to, context})
       }
       let toId = utils.getId(to)
@@ -8002,7 +7788,7 @@ var Store = Reflux.createStore({
       })
     }
     // Allow sharing non-verified forms
-    let curContext = await this.getCurrentContext(to)
+    let curContext = context || await this.getCurrentContext(to)
     let promises = []
     verTypes.forEach((verType) => {
       if (hasVerifiers  &&  hasVerifiers[verType])
@@ -8483,7 +8269,7 @@ var Store = Reflux.createStore({
     return crypto.randomBytes(32).toString('hex')
   },
   _putResourceInDB(params) {
-    var {modelName, isRegistration, noTrigger, dhtKey, maxAttempts} = params
+    var {modelName, isRegistration, noTrigger, dhtKey, maxAttempts, lens} = params
     var value = params.resource
     // Cleanup null form values
     for (let p in value) {
@@ -8525,7 +8311,7 @@ var Store = Reflux.createStore({
       if (/*isNew  &&*/  isForm  &&  !isInMyData) {
         if (!value._sharedWith)
           value._sharedWith = []
-        this.addSharedWith(value, value.to, new Date().getTime())
+        this.addSharedWith(value, value.to, value.time, value.time, lens)
       }
       // if (isNew)
       //   this.addVisualProps(value)
@@ -9549,7 +9335,7 @@ var Store = Reflux.createStore({
           val._context = this.findContext(val._context)
         let shareables
         if (!me.isEmployee  ||  !from.organization  ||  utils.getId(from.organization) !== utils.getId(me.organization))
-          shareables = await this.getShareableResources({foundResources: [val], to: val.from})
+          shareables = await this.getShareableResources({foundResources: [val], to: val.from, context: val._context})
         this.trigger({action: 'addItem', resource: val, shareableResources: shareables, productToForms: productToForms})
       }
       else {
