@@ -20,11 +20,11 @@ import {
   Alert,
   Platform,
   Image,
-  Navigator
 } from 'react-native'
 import PropTypes from 'prop-types';
 
 import { coroutine as co } from 'bluebird'
+import Navigator from './Navigator'
 import ENV from '../utils/env'
 import IProov from '../utils/iproov'
 
