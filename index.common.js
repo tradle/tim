@@ -41,7 +41,7 @@ try {
   var NativeAppEventEmitter = require('RCTNativeAppEventEmitter')
 } catch (err) {}
 
-require('babel-polyfill')
+// require('babel-polyfill')
 
 // require('react-native-level')
 import Debug from './utils/debug'
@@ -91,7 +91,7 @@ import HomePageMixin from './Components/HomePageMixin'
 
 var utils = require('./utils/utils');
 var translate = utils.translate
-var ReactPerf = __DEV__ && !utils.isWeb() && require('react-addons-perf')
+var ReactPerf //= __DEV__ && !utils.isWeb() && require('react-addons-perf')
 
 var Actions = require('./Actions/Actions');
 import * as AutomaticUpdates from './utils/automaticUpdates';

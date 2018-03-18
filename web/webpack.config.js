@@ -50,7 +50,7 @@ var common = {
   resolve: {
     alias: {
       'q': 'bluebird-q',
-      'react-native': 'react-web/lib/index.js',
+      'react-native': 'react-web',
       // 'react-native': 'react-web/lib/react-web.js',
       'ReactART': 'react-art',
       'RCTNativeAppEventEmitter': emptyObjPath,
@@ -299,7 +299,8 @@ function getBabelLoader () {
     // },
     exclude: [
       /errno/,
-      /xtend/
+      /xtend/,
+      /react-dropzone/
     ],
     query: {
       compact: false,

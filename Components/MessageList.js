@@ -7,6 +7,7 @@ import {
   // ListView,
   // StyleSheet,
   Image,
+  ImageBackground,
   Platform,
   PixelRatio,
   View,
@@ -58,7 +59,6 @@ import Actions from '../Actions/Actions'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import ProgressInfo from './ProgressInfo'
 import PageView from './PageView'
-import BackgroundImage from './BackgroundImage'
 import { makeStylish } from './makeStylish'
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles, {MenuIcon} from '../styles/platform'
@@ -925,14 +925,15 @@ class MessageList extends Component {
 
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
-        <BackgroundImage source={{uri: bgImage}}  resizeMode='cover' style={image} />
-        {network}
-        <ProgressInfo recipient={progressInfoR[ROOT_HASH]} />
-        <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
-        <View style={ sepStyle } />
-        {content}
-        {actionSheet}
-        {alert}
+        <ImageBackground source={{uri: bgImage}}  resizeMode='cover' style={image}>
+          {network}
+          <ProgressInfo recipient={progressInfoR[ROOT_HASH]} />
+          <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
+          <View style={ sepStyle } />
+          {content}
+          {actionSheet}
+          {alert}
+        </ImageBackground>
       </PageView>
     );
   }

@@ -1,11 +1,11 @@
 'use strict';
 
+import Navigator from 'react-native-deprecated-custom-components/src/Navigator'
 import React, {
-  Navigator,
   Platform
 } from 'react-native';
 
-const buildStyleInterpolator = Platform.OS === 'web' && require('react-web/lib/Navigator/polyfills/buildStyleInterpolator')
+const buildStyleInterpolator = Platform.OS === 'web' && require('react-native-deprecated-custom-components/src/buildStyleInterpolator')
 
 const NoTransition = {
   opacity: {

@@ -2,7 +2,7 @@ console.log('requiring platformUtils.web.js')
 
 import ReactDOM from 'react-dom'
 import extend from 'xtend'
-import NavigationBarStylesIOS from 'react-web/lib/Navigator/NavigatorNavigationBarStylesIOS'
+import NavigationBarStylesIOS from 'react-native-deprecated-custom-components/src/NavigatorNavigationBarStylesIOS'
 
 module.exports = {
   getNode: function getNode (component) {
