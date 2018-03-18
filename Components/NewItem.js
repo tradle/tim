@@ -23,8 +23,9 @@ import {
   ScrollView,
   TouchableHighlight,
 } from 'react-native'
+import PropTypes from 'prop-types'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 
 class NewItem extends Component {
   static displayName = 'NewItem'

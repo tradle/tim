@@ -40,14 +40,15 @@ import {
   TouchableOpacity,
   Alert,
   // View
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import {
   LazyloadView as View,
   LazyloadImage as Image
 } from 'react-native-lazyload'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 
 class VerificationRow extends Component {
   props: {

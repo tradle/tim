@@ -42,10 +42,9 @@ const ORGANIZATION = constants.TYPES.ORGANIZATION
 // import bankStyles from '../styles/bankStyles'
 const ENUM = 'tradle.Enum'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import {
   ListView,
-  Navigator,
   Alert,
   TouchableOpacity,
   Image,
@@ -53,7 +52,8 @@ import {
   View,
   Text,
   Platform
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import platformStyles from '../styles/platform'
 import ENV from '../utils/env'

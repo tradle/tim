@@ -40,6 +40,7 @@ import {
   Dimensions,
   Platform
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import { isChrome } from '../utils/browser'

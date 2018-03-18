@@ -14,12 +14,12 @@ import constants from '@tradle/constants'
 
 import {
   StyleSheet,
-  PropTypes,
   Platform,
   ScrollView,
   TouchableHighlight,
   View,
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import platformStyles from '../styles/platform'

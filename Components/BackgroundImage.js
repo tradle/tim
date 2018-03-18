@@ -6,6 +6,7 @@ import {
   Image,
   Dimensions
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import { makeResponsive, getDimensions } from 'react-native-orient'
 

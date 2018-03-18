@@ -1,5 +1,8 @@
-import React, { Component, PropTypes } from 'react'
-import WebView from './WebView'
+import React, { Component } from 'react'
+import {
+  WebView,
+} from 'react-native'
+import PropTypes from 'prop-types'
 import utils from '../utils/utils'
 import TourPage from './TourPage'
 

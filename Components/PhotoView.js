@@ -20,6 +20,7 @@ import {
   Easing,
   TouchableHighlight
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import * as Animatable from 'react-native-animatable'

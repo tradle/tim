@@ -21,7 +21,8 @@ import {
   Platform,
   Image,
   Navigator
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import { coroutine as co } from 'bluebird'
 import ENV from '../utils/env'

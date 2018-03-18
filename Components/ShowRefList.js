@@ -10,7 +10,8 @@ import {
   TextInput,
   TouchableHighlight,
   Platform,
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
 import GridList from './GridList'

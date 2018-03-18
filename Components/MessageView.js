@@ -44,10 +44,10 @@ import {
   TouchableOpacity,
   View,
   Text,
-  PropTypes,
   Alert,
   Platform
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import platformStyles from '../styles/platform'

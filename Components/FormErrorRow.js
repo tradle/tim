@@ -28,11 +28,11 @@ import {
   Text,
   TouchableHighlight,
   Alert,
-  Navigator,
   View,
   Platform,
   processColor
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import ENV from '../utils/env'

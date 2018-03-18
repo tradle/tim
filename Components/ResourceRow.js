@@ -30,7 +30,8 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   View
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'

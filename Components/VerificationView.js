@@ -26,8 +26,9 @@ import {
   Text,
   TouchableOpacity,
 } from 'react-native'
+import PropTypes from 'prop-types'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 class VerificationView extends Component {
   props: {
     navigator: PropTypes.object.isRequired,

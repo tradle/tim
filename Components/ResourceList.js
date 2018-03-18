@@ -48,18 +48,18 @@ const SCAN_QR_CODE_VIEW = 16
 
 const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import {
   ListView,
   RefreshControl,
-  Navigator,
   Alert,
   TouchableOpacity,
   Image,
   View,
   Text,
   Platform
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import platformStyles from '../styles/platform'
 import ENV from '../utils/env'

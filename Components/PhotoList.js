@@ -20,6 +20,7 @@ import {
   TextInput,
   TouchableHighlight,
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 // const MIN_WIDTH = 140

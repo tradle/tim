@@ -4,8 +4,9 @@ import {
   View,
   StyleSheet
 } from 'react-native'
+import PropTypes from 'prop-types'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react';
 
 const debug = require('debug')('tradle:app:progressbar')
 

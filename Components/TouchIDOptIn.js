@@ -8,8 +8,9 @@ import {
   TouchableHighlight,
   Dimensions
 } from 'react-native'
+import PropTypes from 'prop-types'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import ArticleView from './ArticleView'
 import utils from '../utils/utils'
 import ENV from '../utils/env'

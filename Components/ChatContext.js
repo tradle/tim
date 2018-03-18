@@ -7,7 +7,8 @@ import {
   Text,
   TouchableOpacity
 } from 'react-native'
-import React, { Component, PropTypes } from 'react'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
 import utils, {

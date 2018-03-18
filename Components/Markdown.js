@@ -2,7 +2,9 @@ console.log('requiring Markdown.js')
 'use strict';
 
 import { parse as parseUrl } from 'url'
-import React, { Component, PropTypes } from 'react'
+import { deepLinkHost } from '../utils/env'
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import createMarkdownRenderer from 'rn-markdown'
 import ArticleView from './ArticleView'
 import utils from '../utils/utils'

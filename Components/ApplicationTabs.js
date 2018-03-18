@@ -8,7 +8,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'

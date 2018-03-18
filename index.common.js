@@ -11,8 +11,8 @@ import Orientation from 'react-native-orientation'
 import SplashScreen from 'react-native-splash-screen'
 import 'stream'
 import debounce from 'debounce'
+import Navigator from './Components/Navigator'
 import {
-  Navigator,
   Image,
   View,
   TouchableOpacity,
@@ -22,7 +22,7 @@ import {
   AppState,
   AppRegistry,
   Text,
-  BackAndroid
+  BackHandler
 } from 'react-native';
 
 var constants = require('@tradle/constants');
@@ -468,8 +468,8 @@ class TiMApp extends Component {
 
       this.state.navigator = nav;
       Navs.watch(nav)
-      if (BackAndroid) {
-        BackAndroid.addEventListener('hardwareBackPress', () => goBack(this.state.navigator))
+      if (BackHandler) {
+        BackHandler.addEventListener('hardwareBackPress', () => goBack(this.state.navigator))
       }
     }
 

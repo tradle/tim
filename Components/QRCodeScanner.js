@@ -2,17 +2,17 @@ console.log('requiring QRCodeScanner.js')
 
 import {
   StyleSheet,
-  TouchableHighlight,
-  Platform
+  TouchableHighlight
 } from 'react-native'
+import PropTypes from 'prop-types'
 
-import React, { Component, PropTypes } from 'react'
-import utils from '../utils/utils'
+import React, { Component } from 'react'
+import Camera from 'react-native-camera'
 import debounce from 'debounce'
-var Camera = utils.isWeb() ? null : require('react-native-camera').default
+
 var ICON_BORDER_COLOR = '#D7E6ED'
 import Icon from 'react-native-vector-icons/Ionicons'
-var Dir = Camera && Camera.Type
+var Dir = Camera.constants.Type
 
 
 class QRCodeScanner extends Component {
@@ -90,4 +90,4 @@ var styles = {
   }
 }
 
-module.exports = Camera && QRCodeScanner
+module.exports = QRCodeScanner

@@ -39,6 +39,7 @@ import {
   Image,
   Navigator
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import Markdown from './Markdown'
 import React, { Component } from 'react'

@@ -1,8 +1,7 @@
 console.log('requiring ImageInput.js')
 
 import React, {
-  Component,
-  PropTypes
+  Component
 } from 'react'
 
 import {
@@ -11,6 +10,7 @@ import {
   Linking,
   Alert
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import ImagePicker from 'react-native-image-picker'
 import utils from '../utils/utils'

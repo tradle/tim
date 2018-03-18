@@ -5,6 +5,7 @@ import PhotoCarousel from './PhotoCarousel'
 import {
   Navigator
 } from 'react-native'
+import PropTypes from 'prop-types'
 import utils from '../utils/utils'
 import { TYPE } from '@tradle/constants'
 

@@ -1,11 +1,12 @@
 console.log('requiring TourPage.js')
 import _ from 'lodash'
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import WebView from './WebView'
 import {
   View,
   StatusBar,
 } from 'react-native'
+import PropTypes from 'prop-types'
 import AppIntro from 'react-native-app-intro'
 import utils from '../utils/utils'
 
