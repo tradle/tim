@@ -33,6 +33,8 @@ async function reporter (error, isFatal) {
 
 async function errorHandler (e, isFatal) {
   await reporter(e, isFatal)
+  if (__DEV__) return
+
   if (!afterFatalError && isFatal) {
     afterFatalError = true
     Alert.alert(

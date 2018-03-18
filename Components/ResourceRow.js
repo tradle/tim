@@ -30,7 +30,8 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   View
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'

@@ -6,6 +6,7 @@ import {
   View,
   TouchableHighlight
 } from 'react-native'
+import PropTypes from 'prop-types'
 // import Camera from 'react-native-camera'
 import Camera from 'react-native-camera'
 import Icon from 'react-native-vector-icons/Ionicons'

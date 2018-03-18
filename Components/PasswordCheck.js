@@ -1,5 +1,6 @@
 console.log('requiring PasswordCheck.js')
-import React, { PropTypes } from 'react'
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import {
   View,
   Image,
@@ -22,8 +23,8 @@ var MODES = {
   set: 'set'
 }
 
-var PasswordCheck = React.createClass({
-  propTypes: {
+class PasswordCheck extends Component {
+  static propTypes = {
     validate: PropTypes.func.isRequired,
     promptInvalid: PropTypes.string.isRequired,
     // whether the user already has a password
@@ -41,19 +42,19 @@ var PasswordCheck = React.createClass({
     promptRetryCheck: PropTypes.string,
     successMsg: PropTypes.string,
     failMsg: PropTypes.string,
-    mode: function (props, propName) {
+    mode(props, propName) {
       return props[propName] in MODES ? null : new Error('Invalid mode')
     }
-  },
+  };
 
-  getDefaultProps: function () {
+  getDefaultProps() {
     return {
       validate: () => true,
       maxAttempts: Infinity
     }
-  },
+  }
 
-  getInitialState: function() {
+  getInitialState() {
     var state
     if (this.props.mode === MODES.check) {
       var message = this.props.isChange
@@ -76,22 +77,22 @@ var PasswordCheck = React.createClass({
         attempts: 0
       }
     }
-  },
+  }
 
-  _onStart: function () {
+  _onStart() {
     this.doSetState({ status: 'normal' })
-  },
+  }
 
-  _onEntered: function (password) {
+  _onEntered (password) {
     switch (this.props.mode) {
       case MODES.check:
         return this._checkPassword(password)
       case MODES.set:
         return this._setPassword(password)
     }
-  },
+  }
 
-  _setPassword: function (password) {
+  _setPassword (password) {
     if (this.state.attempts === 0) {
       if (!this.props.validate(password)) {
         return this.doSetState({
@@ -126,9 +127,9 @@ var PasswordCheck = React.createClass({
       status: 'wrong',
       message: this.props.promptRetrySet
     })
-  },
+  }
 
-  doSetState: function (state) {
+  doSetState (state) {
     this.setState(state)
     clearTimeout(this._resetToNormalTimeout)
     if (state.status === 'wrong') {
@@ -138,13 +139,13 @@ var PasswordCheck = React.createClass({
         }
       }, 1500)
     }
-  },
+  }
 
   componentWillUnmount() {
     clearTimeout(this._resetToNormalTimeout)
-  },
+  }
 
-  _checkPassword: function (password) {
+  _checkPassword (password) {
     if (!this.props.validate(password)) {
       return this.doSetState({
         status: 'wrong',
@@ -180,9 +181,9 @@ var PasswordCheck = React.createClass({
         })
       })
       .done()
-  },
+  }
 
-  render: function() {
+  render() {
     return (
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
@@ -211,7 +212,7 @@ var PasswordCheck = React.createClass({
       </View>
     )
   }
-})
+}
 reactMixin(PasswordCheck.prototype, TimerMixin)
 
 PasswordCheck.displayName = 'PasswordCheck'

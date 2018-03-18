@@ -14,9 +14,10 @@ import {
   View,
   Text,
   ScrollView,
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 // import { makeResponsive } from 'react-native-orient'
 import SignaturePad from 'react-native-signature-pad'
 

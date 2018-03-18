@@ -1,11 +1,10 @@
 console.log('requiring GridList.js')
 'use strict';
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import {
   ListView,
   RefreshControl,
-  Navigator,
   Alert,
   TouchableOpacity,
   ActivityIndicator,
@@ -15,6 +14,7 @@ import {
   Text,
   Platform
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import Reflux from 'reflux'
 import constants from '@tradle/constants'

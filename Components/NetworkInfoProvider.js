@@ -9,6 +9,7 @@ import {
   Animated,
   TouchableOpacity
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import utils, { translate } from '../utils/utils'

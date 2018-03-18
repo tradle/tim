@@ -12,6 +12,7 @@ import {
   Text,
   StyleSheet
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 // Component is used in 2 other components

@@ -1,12 +1,13 @@
 console.log('requiring GridHeader.js')
 'use strict';
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import {
   TouchableOpacity,
   View,
   Text,
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons'

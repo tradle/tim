@@ -18,6 +18,7 @@ import {
   Platform,
   View
 } from 'react-native'
+import PropTypes from 'prop-types'
 var { TYPE } = constants
 import React, { Component } from 'react'
 

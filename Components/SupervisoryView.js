@@ -20,11 +20,10 @@ import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import {
   ListView,
   // StyleSheet,
-  Navigator,
   Alert,
   // AlertIOS,
   // ActionSheetIOS,
@@ -34,7 +33,8 @@ import {
   View,
   Text,
   Platform
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import platformStyles from '../styles/platform'
 import ENV from '../utils/env'

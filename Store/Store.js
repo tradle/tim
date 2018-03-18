@@ -494,7 +494,7 @@ var Store = Reflux.createStore({
     .catch(err => debug('failed to get network connectivity', err.message))
 
     NetInfo.isConnected.addEventListener(
-      'change',
+      'connectionChange',
       async (isConnected) => {
         // make sure events arrive after initial fetch
         await connectivityPromise

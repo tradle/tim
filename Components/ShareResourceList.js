@@ -1,7 +1,7 @@
 console.log('requiring StringChooser.js')
 'use strict';
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import HomePageMixin from './HomePageMixin'
@@ -28,6 +28,7 @@ import {
   View,
   Alert
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 class ShareResourceList extends Component {
   props: {

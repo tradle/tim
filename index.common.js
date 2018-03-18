@@ -8,12 +8,12 @@ import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
 import Orientation from 'react-native-orientation'
-var ReactPerf = __DEV__ && require('ReactPerf')
+var ReactPerf //= __DEV__ && require('ReactPerf')
 import SplashScreen from 'react-native-splash-screen'
 import 'stream'
 import debounce from 'debounce'
+import Navigator from './Components/Navigator'
 import {
-  Navigator,
   Image,
   View,
   TouchableOpacity,
@@ -23,7 +23,7 @@ import {
   AppState,
   AppRegistry,
   Text,
-  BackAndroid
+  BackHandler
 } from 'react-native';
 
 var constants = require('@tradle/constants');
@@ -453,8 +453,8 @@ class TiMApp extends Component {
 
       this.state.navigator = nav;
       Navs.watch(nav)
-      if (BackAndroid) {
-        BackAndroid.addEventListener('hardwareBackPress', () => goBack(this.state.navigator))
+      if (BackHandler) {
+        BackHandler.addEventListener('hardwareBackPress', () => goBack(this.state.navigator))
       }
     }
 

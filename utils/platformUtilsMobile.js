@@ -6,8 +6,8 @@ import {
   Platform
 } from 'react-native'
 
-import NavigationBarStylesIOS from 'NavigatorNavigationBarStylesIOS'
-import NavigationBarStylesAndroid from 'NavigatorNavigationBarStylesAndroid'
+import NavigationBarStylesIOS from 'react-native-deprecated-custom-components/src/NavigatorNavigationBarStylesIOS'
+import NavigationBarStylesAndroid from 'react-native-deprecated-custom-components/src/NavigatorNavigationBarStylesAndroid'
 
 const NavBarStyles = Platform.OS === 'ios' ? NavigationBarStylesIOS : NavigationBarStylesAndroid
 const RCTUIManager = NativeModules.UIManager

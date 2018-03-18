@@ -1,5 +1,6 @@
 console.log('requiring BlinkID.js')
 import { Platform } from 'react-native'
+import PropTypes from 'prop-types'
 import BlinkID from 'react-native-blinkid'
 import { microblink } from '../utils/env'
 import { isSimulator } from '../utils/utils'

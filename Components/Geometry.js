@@ -1,6 +1,8 @@
 console.log('requiring Geometry.js')
 
-import React, { Component, PropTypes } from 'react'
+import PropTypes from 'prop-types';
+
+import React, { Component } from 'react';
 import {
   View
 } from 'react-native'

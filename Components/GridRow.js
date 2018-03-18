@@ -1,7 +1,7 @@
 console.log('requiring GridRow.js')
 'use strict';
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import {
   TouchableOpacity,
   Image,
@@ -9,6 +9,7 @@ import {
   Text,
   Platform
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons'

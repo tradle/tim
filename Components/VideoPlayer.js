@@ -1,7 +1,7 @@
 console.log('requiring VideoPlayer.js')
 'use strict'
 
-import React, { PropTypes } from 'react'
+import React from 'react'
 import {
   AppRegistry,
   StyleSheet,
@@ -9,6 +9,7 @@ import {
   View,
   TouchableOpacity,
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 // import Video from 'react-native-video'
 var utils = require('../utils/utils')
