@@ -20,11 +20,10 @@ import TimerMixin from 'react-timer-mixin'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PROFILE = 'tradle.Profile'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import {
   ListView,
   // StyleSheet,
-  Navigator,
   Alert,
   // AlertIOS,
   // ActionSheetIOS,
@@ -33,7 +32,8 @@ import {
   View,
   Text,
   Platform
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
 import platformStyles from '../styles/platform'
 

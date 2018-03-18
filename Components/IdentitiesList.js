@@ -12,6 +12,7 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import SearchBar from './SearchBar'

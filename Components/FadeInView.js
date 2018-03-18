@@ -3,6 +3,7 @@ console.log('requiring FadeInView.js')
 
 import React, { Component } from 'react'
 import {Animated, TouchableHighlight, Text, View} from 'react-native'
+import PropTypes from 'prop-types'
 import {translate} from '../utils/utils'
 
 class FadeInView extends React.Component {

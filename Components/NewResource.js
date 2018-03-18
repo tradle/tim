@@ -41,12 +41,12 @@ import Native, {
   Platform,
   // StatusBar,
   Alert,
-  Navigator,
   TouchableOpacity,
   Animated
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'

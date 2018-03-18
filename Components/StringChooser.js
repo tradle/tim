@@ -17,6 +17,7 @@ import {
   View,
   Platform
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import SearchBar from './SearchBar'
 

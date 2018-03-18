@@ -3,11 +3,10 @@ console.log('requiring TimHome.js')
 
 import Q from 'q'
 import debounce from 'debounce'
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react'
 import {
   StyleSheet,
   Text,
-  Navigator,
   View,
   TouchableOpacity,
   Image,
@@ -19,6 +18,7 @@ import {
   Alert,
   Platform
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import ResourceList from './ResourceList'
 // import VideoPlayer from './VideoPlayer'

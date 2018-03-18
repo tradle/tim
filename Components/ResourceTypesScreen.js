@@ -19,6 +19,7 @@ import {
   View,
   AlertIOS
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 class ResourceTypesScreen extends Component {
   constructor(props) {

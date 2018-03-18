@@ -5,8 +5,9 @@ import {
   View,
   StyleSheet
 } from 'react-native'
+import PropTypes from 'prop-types'
 
-import React, { Component, PropTypes } from 'react'
+import React, { Component } from 'react';
 import { constants } from '@tradle/engine'
 import utils from '../utils/utils'
 

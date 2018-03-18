@@ -5,12 +5,12 @@ import React, { Component } from 'react'
 import {
   ListView,
   // StyleSheet,
-  PropTypes,
   TouchableHighlight,
   View,
   Platform,
   Text
 } from 'react-native'
+import PropTypes from 'prop-types'
 import { translate } from '../utils/utils'
 import StyleSheet from '../StyleSheet'
 import SearchBar from './SearchBar'

@@ -5,7 +5,8 @@ import {
   Text,
   StyleSheet,
   View,
-} from 'react-native';
+} from 'react-native'
+import PropTypes from 'prop-types';
 import utils from '../utils/utils'
 import React, { Component } from 'react'
 

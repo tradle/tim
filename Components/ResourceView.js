@@ -19,6 +19,7 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import {
   LazyloadScrollView,

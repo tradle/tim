@@ -44,19 +44,20 @@ const {
   ENUM
 } = constants.TYPES
 
+import Navigator from './Navigator'
 import {
   Image,
   // StyleSheet,
   Text,
   TouchableOpacity,
   Alert,
-  Navigator,
   View,
   Platform,
   // Animated,
   // Easing,
   processColor
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 

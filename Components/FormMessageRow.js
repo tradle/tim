@@ -30,10 +30,10 @@ import {
   // StyleSheet,
   Text,
   TouchableHighlight,
-  Navigator,
   View,
   Image
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 

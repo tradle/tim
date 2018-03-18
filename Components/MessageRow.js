@@ -11,12 +11,12 @@ import {
   Text,
   TouchableHighlight,
   Alert,
-  Navigator,
   View,
   Platform,
   WebView,
   processColor
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import utils, {

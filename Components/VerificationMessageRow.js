@@ -25,10 +25,10 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
-  Navigator,
   View,
   processColor
 } from 'react-native'
+import PropTypes from 'prop-types'
 
 var {
   TYPE,

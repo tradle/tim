@@ -62,18 +62,18 @@ const merged = extend({
     // `http://${LOCAL_IP}:21013`,
     // slim
     'https://zxoapug0li.execute-api.us-east-1.amazonaws.com/dev',
-    // tradle.io
-    'https://xwkirqs1x0.execute-api.us-east-1.amazonaws.com/dev',
-    // friendly.io
-    'https://mwv4egtz17.execute-api.us-east-1.amazonaws.com/dev',
-    // safere.io
-    'https://xefpez2yf0.execute-api.us-east-1.amazonaws.com/dev',
-    // easybank.io
-    'https://dxceehvttl.execute-api.us-east-1.amazonaws.com/dev',
-    // perpetualguardian.co.nz
-    'https://hkooibqf60.execute-api.us-east-1.amazonaws.com/dev',
-    // r3.com
-    'https://9xzhlnx5fb.execute-api.us-east-1.amazonaws.com/dev',
+    // // tradle.io
+    // 'https://xwkirqs1x0.execute-api.us-east-1.amazonaws.com/dev',
+    // // friendly.io
+    // 'https://mwv4egtz17.execute-api.us-east-1.amazonaws.com/dev',
+    // // safere.io
+    // 'https://xefpez2yf0.execute-api.us-east-1.amazonaws.com/dev',
+    // // easybank.io
+    // 'https://dxceehvttl.execute-api.us-east-1.amazonaws.com/dev',
+    // // perpetualguardian.co.nz
+    // 'https://hkooibqf60.execute-api.us-east-1.amazonaws.com/dev',
+    // // r3.com
+    // 'https://9xzhlnx5fb.execute-api.us-east-1.amazonaws.com/dev',
   ],
   // pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   pushServerURL: PROD_PUSH_SERVER,
