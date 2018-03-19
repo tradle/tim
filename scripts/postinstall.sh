@@ -10,6 +10,8 @@ npm run placesecrets
 npm run fixasyncstorage
 npm run clean:node_modules
 
+sed -i '' "s/EMULATOR_LOCALHOST = \"10\.0\.2\.2\";/EMULATOR_LOCALHOST = \"localhost\";/" "./node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/systeminfo/AndroidInfoHelpers.java"
+
 echo "Creating project without FaceDetector"
 if [ -e node_modules/react-native-camera/ios/FaceDetector ]; then
   rm -rf node_modules/react-native-camera/ios/FaceDetector

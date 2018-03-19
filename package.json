@@ -133,7 +133,7 @@
     "react-native-exception-handler": "2.2.0",
     "react-native-fabric": "^0.4.1",
     "react-native-fabric-crashlytics": "0.1.8",
-    "react-native-firebase-analytics": "^4.0.2",
+    "react-native-firebase": "^3.3.1",
     "react-native-flexbox-grid": "^0.3.2",
     "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#dev",
     "react-native-gallery": "github:tradle/react-native-gallery",
