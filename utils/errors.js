@@ -23,6 +23,7 @@ function submitLog () {
 }
 
 async function reporter (error, isFatal) {
+  debugger
   const pre = isFatal ? 'experienced fatal error' : 'experienced error'
   console.error(pre, error, error.stack)
   // submit first fatal error, but don't go into infinite loop

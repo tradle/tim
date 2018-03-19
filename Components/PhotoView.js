@@ -13,6 +13,7 @@ import equal from 'deep-equal'
 import {
   StyleSheet,
   Image,
+  ImageBackground,
   View,
   Text,
   Modal,
@@ -107,11 +108,11 @@ class PhotoView extends Component {
       var title = utils.getDisplayName(this.props.resource)
       let fontSize = title.length < 15 ? 30 : 24
       photoView = (
-        <Image resizeMode='cover' source={coverPhotoSource} style={image}>
+        <ImageBackground resizeMode='cover' source={coverPhotoSource} style={image}>
           <View style={{height: 50, backgroundColor: '#000000', alignSelf: 'stretch', opacity: 0.2, position: 'absolute', left: 0, bottom: 0, width: width}} />
           <Image resizeMode='cover' source={source} style={{width: 80, height: 80, /*borderWidth: 2, borderColor: '#ffffff',*/ position: 'absolute', left: 10, bottom: 10}} />
           <Text style={{fontSize: fontSize, color: '#ffffff', position: 'absolute', left: 100, bottom: 10}}>{title}</Text>
-        </Image>
+        </ImageBackground>
       )
     }
     else

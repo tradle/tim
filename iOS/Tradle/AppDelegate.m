@@ -17,7 +17,7 @@
 #import "CodePush.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
- #import "QTouchposeApplication.h"
+#import "QTouchposeApplication.h"
 #import "Orientation.h"
 #import <asl.h>
 #import "SplashScreen.h"
