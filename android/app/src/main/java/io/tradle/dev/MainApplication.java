@@ -7,13 +7,13 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import io.branch.rnbranch.RNBranchPackage;
 import com.peel.react.TcpSocketsModule;
 import com.peel.react.rnos.RNOSModule;
 import com.masteratul.exceptionhandler.ReactNativeExceptionHandlerPackage;
 import io.branch.referral.Branch;
 import com.evollu.react.fa.FIRAnalyticsPackage;
-import com.cboy.rn.splashscreen.SplashScreenReactPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -21,7 +21,7 @@ import com.facebook.soloader.SoLoader;
 import com.github.yamill.orientation.OrientationPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
-import com.lwansbrough.RCTCamera.RCTCameraPackage;
+import org.reactnative.camera.RNCameraPackage;
 import com.microsoft.codepush.react.CodePush;
 import com.oblador.keychain.KeychainPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
@@ -57,12 +57,12 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+            new SplashScreenReactPackage(),
             new RNBranchPackage(),
             new TcpSocketsModule(),
             new RNOSModule(),
             new ReactNativeExceptionHandlerPackage(),
             new FIRAnalyticsPackage(),
-            new SplashScreenReactPackage(),
         new FabricPackage(),
         new RNAsyncSnappyStoragePackage(),
         // new TcpSocketsModule(),
@@ -78,7 +78,7 @@ public class MainApplication extends Application implements ReactApplication {
         new ReactNativeLocalizationPackage(),
         new LinearGradientPackage(),
         new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG),
-        new RCTCameraPackage(),
+        new RNCameraPackage(),
         new OrientationPackage(),
         new ECCPackage(),
         new LocalAuthPackage(),

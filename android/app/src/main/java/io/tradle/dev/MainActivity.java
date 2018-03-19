@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import com.crashlytics.android.Crashlytics;
 import io.fabric.sdk.android.Fabric;
-import com.cboy.rn.splashscreen.SplashScreen;
+import org.devio.rn.splashscreen.SplashScreen;
 import io.branch.rnbranch.RNBranchModule;
 
 public class MainActivity extends ReactActivity {
