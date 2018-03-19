@@ -13,6 +13,7 @@ import equal from 'deep-equal'
 import {
   StyleSheet,
   Image,
+  ImageBackground,
   View,
   Text,
   Modal,
