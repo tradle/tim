@@ -53,12 +53,20 @@ class CameraView extends Component {
       ? Camera.constants.Type.front : Camera.constants.Type.back;
     this.setState(state);
   }
-  _takePicture() {
-    var self = this;
-    this.refs.cam.capture(function(err, data) {
-      console.log(err, data);
-      self.props.onTakePic(data);
-    });
+  async _takePicture() {
+    let data
+    try {
+      data = await this.refs.cam.takePictureAsync()
+    } catch (err) {
+      console.error(err)
+      return
+    }
+
+    this.props.onTakePic({
+      ...data,
+      // backwards compat
+      path: data.uri
+    })
   }
 }
 
