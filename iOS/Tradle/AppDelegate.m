@@ -8,13 +8,13 @@
  */
 
 #import "AppDelegate.h"
+#import <CodePush/CodePush.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 #import <React/RCTLinkingManager.h>
 #import <React/RCTLog.h>
 #import <React/RCTPushNotificationManager.h>
 #import <React/RCTEventEmitter.h>
-#import "CodePush.h"
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
 #import "QTouchposeApplication.h"

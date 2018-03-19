@@ -7,8 +7,6 @@ import constants from '@tradle/constants'
 import reactMixin from 'react-mixin'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
 
-import Gallery from 'react-native-gallery'
-
 import equal from 'deep-equal'
 import {
   StyleSheet,
