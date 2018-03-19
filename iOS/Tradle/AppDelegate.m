@@ -22,8 +22,7 @@
 #import <asl.h>
 #import "SplashScreen.h"
 #import <react-native-branch/RNBranch.h>
-
-#import "Firebase.h"
+#import <Firebase.h>
 
 @implementation AppDelegate
 

@@ -7,13 +7,14 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import io.invertase.firebase.RNFirebasePackage;
+import io.invertase.firebase.analytics.RNFirebaseAnalyticsPackage;
 import org.devio.rn.splashscreen.SplashScreenReactPackage;
 import io.branch.rnbranch.RNBranchPackage;
 import com.peel.react.TcpSocketsModule;
 import com.peel.react.rnos.RNOSModule;
 import com.masteratul.exceptionhandler.ReactNativeExceptionHandlerPackage;
 import io.branch.referral.Branch;
-import com.evollu.react.fa.FIRAnalyticsPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -57,12 +58,13 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+            new RNFirebasePackage(),
+            new RNFirebaseAnalyticsPackage(),
             new SplashScreenReactPackage(),
             new RNBranchPackage(),
             new TcpSocketsModule(),
             new RNOSModule(),
             new ReactNativeExceptionHandlerPackage(),
-            new FIRAnalyticsPackage(),
         new FabricPackage(),
         new RNAsyncSnappyStoragePackage(),
         // new TcpSocketsModule(),

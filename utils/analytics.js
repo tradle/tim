@@ -3,13 +3,14 @@ import {
   Platform
 } from 'react-native'
 
-import Analytics from 'react-native-firebase-analytics'
+import firebase from 'react-native-firebase'
 import ENV from './env'
 import { getRouteName } from './utils'
 
 let ENABLED
 let PREV_ROUTE
 const debug = require('debug')('tradle:app:analytics')
+const Analytics = firebase.analytics()
 
 setEnabled(ENV.analyticsEnabled)
 
@@ -44,7 +45,7 @@ module.exports = (function () {
 function setEnabled (bool=true) {
   ENABLED = bool
   debug(`analytics on: ${bool}`)
-  Analytics.setEnabled(bool)
+  Analytics.setAnalyticsCollectionEnabled(bool)
 }
 
 function sendEvent ({ category, action, label, value }) {
