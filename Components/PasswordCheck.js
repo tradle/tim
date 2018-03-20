@@ -47,21 +47,21 @@ class PasswordCheck extends Component {
     }
   };
 
-  getDefaultProps() {
-    return {
-      validate: () => true,
-      maxAttempts: Infinity
-    }
+  static defaultProps = {
+    validate: () => true,
+    maxAttempts: Infinity
   }
 
-  getInitialState() {
+  constructor(props) {
+    super(props)
+
     var state
     if (this.props.mode === MODES.check) {
       var message = this.props.isChange
         ? this.props.promptCheckCurrent
         : this.props.promptCheck
 
-      return {
+      this.state = {
         status: 'normal',
         message: message,
         attempts: 0
@@ -71,7 +71,7 @@ class PasswordCheck extends Component {
         ? this.props.promptSetChange
         : this.props.promptSet
 
-      return {
+      this.state = {
         status: 'normal',
         message: message,
         attempts: 0
