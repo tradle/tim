@@ -71,7 +71,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#e2b488f36e69b411d8e2320810809eff64182d98"
+      "resolved": "git://github.com/tradle/custom-models.git#5fa5de1b7aa958515f85d7e05b5c6a6fe1f2ebc6"
     },
     "@tradle/embed": {
       "version": "1.0.0",
