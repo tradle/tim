@@ -200,39 +200,7 @@ const MY_ENVIRONMENT      = 'environment.json'
 const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 
-// import Tim from 'tim'
-// Tim.enableOptimizations()
-// Tim.CATCH_UP_INTERVAL = 10000
-// var Zlorp = Tim.Zlorp
-// Zlorp.ANNOUNCE_INTERVAL = 10000
-// Zlorp.LOOKUP_INTERVAL = 10000
-// Zlorp.KEEP_ALIVE_INTERVAL = 10000
-
-import Sendy from 'sendy'
-import SendyWS from 'sendy-ws'
-import TLSClient from 'sendy-axolotl'
 import AWSClient from '@tradle/aws-client'
-// import DSA from '@tradle/otr'.DSA
-// import BigInt from '@tradle/otr/vendor/bigint'
-// const BigIntTimes = {}
-// Object.keys(BigInt).forEach(function (method) {
-//   const orig = BigInt[method]
-//   BigIntTimes[method] = 0
-//   BigInt[method] = function () {
-//     var now = Date.now()
-//     var result = orig.apply(this, arguments)
-//     BigIntTimes[method] += Date.now() - now
-//     return result
-//   }
-// })
-
-const SENDY_OPTS = { resendInterval: 30000, mtu: 10000, autoConnect: true }
-// import newOTRSwitchboard from 'sendy-otr-ws'.Switchboard
-const newSwitchboard = SendyWS.Switchboard
-const WebSocketClient = SendyWS.Client
-// import HttpClient from '@tradle/transport-http'.HttpClient
-// import getDHTKey from 'tim/lib/utils'.getDHTKey
-
 import map from 'map-stream'
 import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet
@@ -2161,27 +2129,27 @@ var Store = Reflux.createStore({
     )
   },
 
-  async receivePairingRequest({ payload }) {
-    const rootHash = utils.getPermalink(payload.identity)
-    Alert.alert(
-      translate('pairingRequest'),
-      null,
-      [
-        {text: translate('Ok'),
-        onPress: () => {
-          this.trigger({action: 'acceptingPairingRequest', resource: payload})
-          // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
-          // .then(() => {
-          //   Alert.alert(translate('pairingRequestWasProcesseed'))
-          // })
-          // .catch((err) => {
-          //   debugger
-          // })
-        }},
-        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-      ]
-    )
-  },
+  // async receivePairingRequest({ payload }) {
+  //   const rootHash = utils.getPermalink(payload.identity)
+  //   Alert.alert(
+  //     translate('pairingRequest'),
+  //     null,
+  //     [
+  //       {text: translate('Ok'),
+  //       onPress: () => {
+  //         this.trigger({action: 'acceptingPairingRequest', resource: payload})
+  //         // return self.onProcessPairingRequest(list[PAIRING_DATA + '_1'].value, payload)
+  //         // .then(() => {
+  //         //   Alert.alert(translate('pairingRequestWasProcesseed'))
+  //         // })
+  //         // .catch((err) => {
+  //         //   debugger
+  //         // })
+  //       }},
+  //       {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+  //     ]
+  //   )
+  // },
 
   triggerProgress(update) {
     debug(`progress receiving from ${update.recipient[ROOT_HASH]}: ${update.progress}`)
@@ -2243,7 +2211,8 @@ var Store = Reflux.createStore({
       }
 
       if (payload[TYPE] === PAIRING_REQUEST) {
-        this.receivePairingRequest({ payload })
+        console.error('received pairing request, but pairing not supported yet')
+        // this.receivePairingRequest({ payload })
       }
 
       return
@@ -2368,16 +2337,16 @@ var Store = Reflux.createStore({
     this.trigger({ action: 'list', list: l, modelName: ORGANIZATION })
   },
 
-  onPairingRequestAccepted(payload) {
-    return this.onProcessPairingRequest(this._getItem(PAIRING_DATA + '_1'), payload)
-    .then(() => {
-      this.trigger({action: 'pairingRequestAccepted'})
-    })
-    .catch((err) => {
-      debugger
-      this.trigger({action: 'invalidPairingRequest', error: (err.fullType === 'exists' ? translate('thisDeviceWasAlreadyPaired') : translate('invalidPairingRequest'))})
-    })
-  },
+  // onPairingRequestAccepted(payload) {
+  //   return this.onProcessPairingRequest(this._getItem(PAIRING_DATA + '_1'), payload)
+  //   .then(() => {
+  //     this.trigger({action: 'pairingRequestAccepted'})
+  //   })
+  //   .catch((err) => {
+  //     debugger
+  //     this.trigger({action: 'invalidPairingRequest', error: (err.fullType === 'exists' ? translate('thisDeviceWasAlreadyPaired') : translate('invalidPairingRequest'))})
+  //   })
+  // },
 
   getIdentifier(identityInfo) {
     identityInfo = identityInfo || meDriver.identityInfo
@@ -2393,56 +2362,6 @@ var Store = Reflux.createStore({
     })
 
     return key.pubKeyString || key.pub
-  },
-
-  getWsClient(baseUrl) {
-    const url = utils.joinURL(baseUrl, 'ws?' + querystring.stringify({
-      from: this.getIdentifier(),
-      // pubKey: this.getIdentifierPubKey()
-    })).replace(/^http/, 'ws')
-
-    return new WebSocketClient({
-      url: url,
-      autoConnect: true,
-      // for now, till we figure out why binary
-      // doesn't work (socket.io parser errors on decode)
-      forceBase64: true
-    })
-  },
-
-  getTransport(wsClient) {
-    const tlsKey = driverInfo.tlsKey
-    var self = this
-    return newSwitchboard({
-      identifier: this.getIdentifier(),
-      unreliable: wsClient,
-      clientForRecipient: function (recipient) {
-        const sendy = new Sendy({ ...SENDY_OPTS, name: recipient })
-        // let prevPercent
-        // sendy.on('progress', ({ total, progress }) => {
-        //   if (!willShowProgressBar({ length: total })) return // don't show progress bar for < 30KB
-
-        //   const percent = ON_RECEIVED_PROGRESS * 100 * progress / total | 0
-        //   if (!percent || percent === prevPercent) return
-
-        //   prevPercent = percent
-        //   const org = self._getItem(PROFILE + '_' + recipient).organization
-        //   self.triggerProgress({ progress: percent / 100, recipient: self._getItem(org)})
-        //   debug(`${percent}% of message downloaded from ${recipient}`)
-        // })
-
-        if (!tlsKey) return sendy
-
-        return new TLSClient({
-          key: {
-            secretKey: tlsKey.priv,
-            publicKey: tlsKey.pub
-          },
-          client: sendy,
-          theirPubKey: new Buffer(recipient, 'hex')
-        })
-      }
-    })
   },
 
   // Gets info about companies in this app, their bot representatives and their styles
@@ -10765,357 +10684,357 @@ var Store = Reflux.createStore({
     })
   },
   // Devices one
-  onGenPairingData() {
-    if (!SERVICE_PROVIDERS.length) {
-      this.trigger({action: 'genPairingData', error: 'Can\'t connect to server'})
-      return
-    }
-    let pairingData = {
-      nonce: crypto.randomBytes(32).toString('base64'),
-      identity: meDriver.link,
-      firstName: me.firstName,
-      rendezvous: {
-        url: SERVICE_PROVIDERS[0].url + '/' + SERVICE_PROVIDERS[0].id
-      }
-    }
-    let dbPairingData = utils.clone(pairingData)
-    dbPairingData[TYPE] = PAIRING_DATA
-    // db.put(PAIRING_DATA + '_1', pairingData)
-    list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
-    this.trigger({action: 'genPairingData', pairingData: JSON.stringify(pairingData)})
-  },
+  // onGenPairingData() {
+  //   if (!SERVICE_PROVIDERS.length) {
+  //     this.trigger({action: 'genPairingData', error: 'Can\'t connect to server'})
+  //     return
+  //   }
+  //   let pairingData = {
+  //     nonce: crypto.randomBytes(32).toString('base64'),
+  //     identity: meDriver.link,
+  //     firstName: me.firstName,
+  //     rendezvous: {
+  //       url: SERVICE_PROVIDERS[0].url + '/' + SERVICE_PROVIDERS[0].id
+  //     }
+  //   }
+  //   let dbPairingData = utils.clone(pairingData)
+  //   dbPairingData[TYPE] = PAIRING_DATA
+  //   // db.put(PAIRING_DATA + '_1', pairingData)
+  //   list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
+  //   this.trigger({action: 'genPairingData', pairingData: JSON.stringify(pairingData)})
+  // },
 
-  onSendPairingRequest (pairingData) {
-    // device 2 sends pairing request
-    let publishedIdentity
-    let deviceId
+  // onSendPairingRequest (pairingData) {
+  //   // device 2 sends pairing request
+  //   let publishedIdentity
+  //   let deviceId
 
-    let myIdentities = this._getItem(MY_IDENTITIES)
-    if (myIdentities) {
-      publishedIdentity = myIdentities.allIdentities[0].publishedIdentity
-      deviceId = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).deviceId
-    }
+  //   let myIdentities = this._getItem(MY_IDENTITIES)
+  //   if (myIdentities) {
+  //     publishedIdentity = myIdentities.allIdentities[0].publishedIdentity
+  //     deviceId = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).deviceId
+  //   }
 
-    let promise = myIdentities
-                ? Q()
-                : this.createNewIdentity()
-                // : Q.ninvoke(tradleUtils, 'newIdentity', {
-                //       networkName,
-                //       keys: KEY_SET
-                //   })
-    return promise
-    .then(({ encryptionKey, identityInfo }) => {
-      if (!identityInfo)
-        return
-      publishedIdentity = identityInfo.identity
-      let mePub = publishedIdentity.pubkeys
-      let mePriv = identityInfo.keys
-      let currentIdentity = utils.makeId(PROFILE, pairingData.identity)
-      var myIdentities = {
-        [TYPE]: MY_IDENTITIES_TYPE,
-        currentIdentity: currentIdentity,
-        allIdentities: [{
-          id: currentIdentity,
-          // title: utils.getDisplayName(value, models[me[TYPE]].value.properties),
-          privkeys: mePriv,
-          publishedIdentity: publishedIdentity
-        }]
-      }
-      var profile = {
-        [TYPE]: PROFILE,
-        [ROOT_HASH]: pairingData.identity,
-        firstName: pairingData.firstName,
-        formatted: pairingData.firstName,
-      }
-      deviceId = identityInfo.link
-      var identity = {
-        [TYPE]: IDENTITY,
-        [ROOT_HASH]: pairingData.identity,
-        pubkeys: mePub,
-        deviceId: deviceId
-      }
-      let batch = []
-      list[currentIdentity] = {
-        key: currentIdentity,
-        value: profile
-      }
-      let identityId = utils.getId(identity)
-      list[identityId] = {
-        key: identityId,
-        value: identity
-      }
-      list[MY_IDENTITIES] = {
-        key: MY_IDENTITIES,
-        value: myIdentities
-      }
-      batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-      batch.push({type: 'put', key: currentIdentity, value: profile})
-      batch.push({type: 'put', key: utils.getId(identity), value: identity})
-      db.batch(batch)
-    })
-   .then(() => {
-      const pairingReq = {
-        [TYPE]: PAIRING_REQUEST,
-        identity: publishedIdentity
-      }
+  //   let promise = myIdentities
+  //               ? Q()
+  //               : this.createNewIdentity()
+  //               // : Q.ninvoke(tradleUtils, 'newIdentity', {
+  //               //       networkName,
+  //               //       keys: KEY_SET
+  //               //   })
+  //   return promise
+  //   .then(({ encryptionKey, identityInfo }) => {
+  //     if (!identityInfo)
+  //       return
+  //     publishedIdentity = identityInfo.identity
+  //     let mePub = publishedIdentity.pubkeys
+  //     let mePriv = identityInfo.keys
+  //     let currentIdentity = utils.makeId(PROFILE, pairingData.identity)
+  //     var myIdentities = {
+  //       [TYPE]: MY_IDENTITIES_TYPE,
+  //       currentIdentity: currentIdentity,
+  //       allIdentities: [{
+  //         id: currentIdentity,
+  //         // title: utils.getDisplayName(value, models[me[TYPE]].value.properties),
+  //         privkeys: mePriv,
+  //         publishedIdentity: publishedIdentity
+  //       }]
+  //     }
+  //     var profile = {
+  //       [TYPE]: PROFILE,
+  //       [ROOT_HASH]: pairingData.identity,
+  //       firstName: pairingData.firstName,
+  //       formatted: pairingData.firstName,
+  //     }
+  //     deviceId = identityInfo.link
+  //     var identity = {
+  //       [TYPE]: IDENTITY,
+  //       [ROOT_HASH]: pairingData.identity,
+  //       pubkeys: mePub,
+  //       deviceId: deviceId
+  //     }
+  //     let batch = []
+  //     list[currentIdentity] = {
+  //       key: currentIdentity,
+  //       value: profile
+  //     }
+  //     let identityId = utils.getId(identity)
+  //     list[identityId] = {
+  //       key: identityId,
+  //       value: identity
+  //     }
+  //     list[MY_IDENTITIES] = {
+  //       key: MY_IDENTITIES,
+  //       value: myIdentities
+  //     }
+  //     batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+  //     batch.push({type: 'put', key: currentIdentity, value: profile})
+  //     batch.push({type: 'put', key: utils.getId(identity), value: identity})
+  //     db.batch(batch)
+  //   })
+  //  .then(() => {
+  //     const pairingReq = {
+  //       [TYPE]: PAIRING_REQUEST,
+  //       identity: publishedIdentity
+  //     }
 
-      const hmac = crypto.createHmac('sha256', pairingData.nonce)
-      hmac.update(tradleUtils.stringify(pairingReq))
-      pairingReq.auth = hmac.digest('base64')
+  //     const hmac = crypto.createHmac('sha256', pairingData.nonce)
+  //     hmac.update(tradleUtils.stringify(pairingReq))
+  //     pairingReq.auth = hmac.digest('base64')
 
-      const url = pairingData.rendezvous.url
-      let transport = driverInfo.wsClients.byUrl[url]
-      if (!transport) {
-        let wsClient = this.getWsClient(url, deviceId)
-        transport = this.getTransport(wsClient, deviceId)
-        driverInfo.wsClients.byUrl[url] = transport
-      }
-      let self = this
-      transport.on('message', (msg, from) => {
-        try {
-          const payload = JSON.parse(msg)
-          if (payload[TYPE] === PAIRING_RESPONSE) {
-            transport.destroy()
-            delete driverInfo.wsClients.byUrl[url]
+  //     const url = pairingData.rendezvous.url
+  //     let transport = driverInfo.wsClients.byUrl[url]
+  //     if (!transport) {
+  //       let wsClient = this.getWsClient(url, deviceId)
+  //       transport = this.getTransport(wsClient, deviceId)
+  //       driverInfo.wsClients.byUrl[url] = transport
+  //     }
+  //     let self = this
+  //     transport.on('message', (msg, from) => {
+  //       try {
+  //         const payload = JSON.parse(msg)
+  //         if (payload[TYPE] === PAIRING_RESPONSE) {
+  //           transport.destroy()
+  //           delete driverInfo.wsClients.byUrl[url]
 
-            return self.onProcessPairingResponse(this._getItem(PAIRING_DATA + '_1'), payload)
-            .then(() => {
-              debugger
-              Alert.alert('Pairing was successful')
-              this.trigger({action: 'pairingSuccessful'})
-            })
-            .catch((err) => {
-              debugger
-              Alert.alert(err)
-            })
-          }
-        } catch (err) {
-          debugger
-        }
-      })
+  //           return self.onProcessPairingResponse(this._getItem(PAIRING_DATA + '_1'), payload)
+  //           .then(() => {
+  //             debugger
+  //             Alert.alert('Pairing was successful')
+  //             this.trigger({action: 'pairingSuccessful'})
+  //           })
+  //           .catch((err) => {
+  //             debugger
+  //             Alert.alert(err)
+  //           })
+  //         }
+  //       } catch (err) {
+  //         debugger
+  //       }
+  //     })
 
-      // if (!transport) {
-      //   let wsClient = this.getWsClient(url, meDriver.permalink)
-      //   transport = this.getTransport(wsClient, meDriver.permalink)
-      //   driverInfo.wsClients.byUrl[url] = transport
-      // }
-      const pairingReqStr = tradleUtils.stringify(pairingReq)
+  //     // if (!transport) {
+  //     //   let wsClient = this.getWsClient(url, meDriver.permalink)
+  //     //   transport = this.getTransport(wsClient, meDriver.permalink)
+  //     //   driverInfo.wsClients.byUrl[url] = transport
+  //     // }
+  //     const pairingReqStr = tradleUtils.stringify(pairingReq)
 
-      function send () {
-        return Q.ninvoke(transport, 'send', pairingData.identity, pairingReqStr)
-          .then(() => {
-            // debugger
-            let dbPairingData = utils.clone(pairingData)
-            dbPairingData[TYPE] = PAIRING_DATA
-            // db.put(PAIRING_DATA + '_1', pairingData)
-            list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
-          })
-          .catch((err) => {
-            debugger
-          })
-      }
+  //     function send () {
+  //       return Q.ninvoke(transport, 'send', pairingData.identity, pairingReqStr)
+  //         .then(() => {
+  //           // debugger
+  //           let dbPairingData = utils.clone(pairingData)
+  //           dbPairingData[TYPE] = PAIRING_DATA
+  //           // db.put(PAIRING_DATA + '_1', pairingData)
+  //           list[PAIRING_DATA + '_1'] = {key: PAIRING_DATA + '_1', value: dbPairingData}
+  //         })
+  //         .catch((err) => {
+  //           debugger
+  //         })
+  //     }
 
-      return utils.tryWithExponentialBackoff(send)
-    })
-      // .then(() => {
-      //   this.trigger({action: 'sentPairingRequest', pairingData: pairingData})
-      // })
-  },
+  //     return utils.tryWithExponentialBackoff(send)
+  //   })
+  //     // .then(() => {
+  //     //   this.trigger({action: 'sentPairingRequest', pairingData: pairingData})
+  //     // })
+  // },
 
-  onProcessPairingRequest(pairingData, pairingReq) {
-    const myPubKeys = meDriver.identity.pubkeys
-    const alreadyPaired = pairingReq.identity.pubkeys.some(a => {
-      return myPubKeys.some(b => {
-        return a.pub === b.pub
-      })
-    })
+  // onProcessPairingRequest(pairingData, pairingReq) {
+  //   const myPubKeys = meDriver.identity.pubkeys
+  //   const alreadyPaired = pairingReq.identity.pubkeys.some(a => {
+  //     return myPubKeys.some(b => {
+  //       return a.pub === b.pub
+  //     })
+  //   })
 
-    const verify = crypto.createHmac('sha256', pairingData.nonce)
-    verify.update(tradleUtils.stringify(tradleUtils.omit(pairingReq, 'auth')))
-    if (verify.digest('base64') !== pairingReq.auth) {
-      return Promise.reject(new Error('invalidPairingRequest'))
-    }
+  //   const verify = crypto.createHmac('sha256', pairingData.nonce)
+  //   verify.update(tradleUtils.stringify(tradleUtils.omit(pairingReq, 'auth')))
+  //   if (verify.digest('base64') !== pairingReq.auth) {
+  //     return Promise.reject(new Error('invalidPairingRequest'))
+  //   }
 
-    if (alreadyPaired) {
-      // won't work because prev is not right
-      return sendResponse()
-    }
+  //   if (alreadyPaired) {
+  //     // won't work because prev is not right
+  //     return sendResponse()
+  //   }
 
-    const allPubKeys = meDriver.identity.pubkeys.concat(pairingReq.identity.pubkeys)
-    const pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
-    let identity = {
-            keys: meDriver.keys.concat(pairingReq.identity.pubkeys),
-            identity: tradleUtils.clone(meDriver.identity, {
-              pubkeys: pubkeys // allPubKeys.map(pk => tradleUtils.clone(pk))
-            })
-          }
-    return Q.ninvoke(meDriver, 'updateIdentity', identity)
-    .then(() => {
-      let batch = []
-      batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
-      this.updatePubkeys(batch)
-      // let batch = []
-      // let id = IDENTITY + '_' + utils.getMe()[ROOT_HASH]
-      // let myIdentity = list[id].value
+  //   const allPubKeys = meDriver.identity.pubkeys.concat(pairingReq.identity.pubkeys)
+  //   const pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
+  //   let identity = {
+  //           keys: meDriver.keys.concat(pairingReq.identity.pubkeys),
+  //           identity: tradleUtils.clone(meDriver.identity, {
+  //             pubkeys: pubkeys // allPubKeys.map(pk => tradleUtils.clone(pk))
+  //           })
+  //         }
+  //   return Q.ninvoke(meDriver, 'updateIdentity', identity)
+  //   .then(() => {
+  //     let batch = []
+  //     batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
+  //     this.updatePubkeys(batch)
+  //     // let batch = []
+  //     // let id = IDENTITY + '_' + utils.getMe()[ROOT_HASH]
+  //     // let myIdentity = list[id].value
 
-      // myIdentity.pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
+  //     // myIdentity.pubkeys = allPubKeys.map(pk => tradleUtils.clone(pk))
 
-      // updatePubkeys(myIdentity.pubkeys)
-      // let myIdentities = list[MY_IDENTITIES].value
-      // let currentIdentity = myIdentities.currentIdentity
-      // myIdentities.allIdentities.forEach((r) => {
-      //   if (r.id === currentIdentity)
-      //     r.publishedIdentity.pubkeys = utils.clone(myIdentity.pubkeys)
-      // })
+  //     // updatePubkeys(myIdentity.pubkeys)
+  //     // let myIdentities = list[MY_IDENTITIES].value
+  //     // let currentIdentity = myIdentities.currentIdentity
+  //     // myIdentities.allIdentities.forEach((r) => {
+  //     //   if (r.id === currentIdentity)
+  //     //     r.publishedIdentity.pubkeys = utils.clone(myIdentity.pubkeys)
+  //     // })
 
-      // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-      // batch.push({type: 'put', key: id, value: myIdentity})
-      // batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
+  //     // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+  //     // batch.push({type: 'put', key: id, value: myIdentity})
+  //     // batch.push({type: 'put', key: PAIRING_REQUEST + '_1', value: pairingReq})
 
-      // // If pairing request was not verified what do we want to do
-      // db.batch(batch)
-    })
-    .then(() => {
-      return sendResponse()
-    })
+  //     // // If pairing request was not verified what do we want to do
+  //     // db.batch(batch)
+  //   })
+  //   .then(() => {
+  //     return sendResponse()
+  //   })
 
-    function sendResponse () {
-      const getPrev = meDriver.identity[PREV_HASH] ? Q.ninvoke(meDriver.keeper, 'get',  meDriver.identity[PREV_HASH]) : Promise.resolve(meDriver.identity)
-      return getPrev.then(prev => {
-        const pairingRes = {
-          [TYPE]: PAIRING_RESPONSE,
-          // can we make it secure without sending prev?
-          prev: prev,
-          identity: meDriver.identity
-        }
+  //   function sendResponse () {
+  //     const getPrev = meDriver.identity[PREV_HASH] ? Q.ninvoke(meDriver.keeper, 'get',  meDriver.identity[PREV_HASH]) : Promise.resolve(meDriver.identity)
+  //     return getPrev.then(prev => {
+  //       const pairingRes = {
+  //         [TYPE]: PAIRING_RESPONSE,
+  //         // can we make it secure without sending prev?
+  //         prev: prev,
+  //         identity: meDriver.identity
+  //       }
 
-        const url = pairingData.rendezvous.url
-        let transport = driverInfo.wsClients.byUrl[url]
-        const pairingResStr = tradleUtils.stringify(pairingRes)
-        return utils.tryWithExponentialBackoff(send)
+  //       const url = pairingData.rendezvous.url
+  //       let transport = driverInfo.wsClients.byUrl[url]
+  //       const pairingResStr = tradleUtils.stringify(pairingRes)
+  //       return utils.tryWithExponentialBackoff(send)
 
-        function send () {
-          return Q.ninvoke(transport, 'send', tradleUtils.hexLink(pairingReq.identity), pairingResStr)
-            .then(() => {
-              db.put(PAIRING_RESPONSE + '_1', pairingRes)
-              debugger
-            })
-            .catch((err) => {
-              debugger
-            })
-        }
-      })
-    }
-  },
-  updatePubkeys(batch, identity) {
-    let myIdentities = this._getItem(MY_IDENTITIES)
-    let currentIdentity = myIdentities.currentIdentity
+  //       function send () {
+  //         return Q.ninvoke(transport, 'send', tradleUtils.hexLink(pairingReq.identity), pairingResStr)
+  //           .then(() => {
+  //             db.put(PAIRING_RESPONSE + '_1', pairingRes)
+  //             debugger
+  //           })
+  //           .catch((err) => {
+  //             debugger
+  //           })
+  //       }
+  //     })
+  //   }
+  // },
+  // updatePubkeys(batch, identity) {
+  //   let myIdentities = this._getItem(MY_IDENTITIES)
+  //   let currentIdentity = myIdentities.currentIdentity
 
-    let id = currentIdentity.replace(PROFILE, IDENTITY)
-    list[id].value = identity || meDriver.identity
+  //   let id = currentIdentity.replace(PROFILE, IDENTITY)
+  //   list[id].value = identity || meDriver.identity
 
-    myIdentities.allIdentities.forEach((r) => {
-      if (r.id === currentIdentity)
-        r.publishedIdentity = this._getItem(id)
-    })
+  //   myIdentities.allIdentities.forEach((r) => {
+  //     if (r.id === currentIdentity)
+  //       r.publishedIdentity = this._getItem(id)
+  //   })
 
-    batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-    batch.push({type: 'put', key: id, value: this._getItem(id)})
+  //   batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+  //   batch.push({type: 'put', key: id, value: this._getItem(id)})
 
-    // If pairing request was not verified what do we want to do
-    db.batch(batch)
-  },
+  //   // If pairing request was not verified what do we want to do
+  //   db.batch(batch)
+  // },
 
-  onProcessPairingResponse (pairingData, pairingRes) {
-    // device 2 validate response
-    if (tradleUtils.hexLink(pairingRes.prev) !== pairingData.identity)
-      return Promise.reject(new Error('prev identity does not match expected'))
+  // onProcessPairingResponse (pairingData, pairingRes) {
+  //   // device 2 validate response
+  //   if (tradleUtils.hexLink(pairingRes.prev) !== pairingData.identity)
+  //     return Promise.reject(new Error('prev identity does not match expected'))
 
-    let pubkeys = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).pubkeys
-    const hasMyKeys = pubkeys.every(myKey => {
-      return pairingRes.identity.pubkeys.some(theirKey => {
-        return deepEqual(theirKey, myKey)
-      })
-    })
-    // const hasMyKeys = meDriver.identity.pubkeys.every(myKey => {
-    //   return pairingRes.identity.pubkeys.some(theirKey => {
-    //     return deepEqual(theirKey, myKey)
-    //   })
-    // })
+  //   let pubkeys = this._getItem(utils.makeId(IDENTITY, pairingData.identity)).pubkeys
+  //   const hasMyKeys = pubkeys.every(myKey => {
+  //     return pairingRes.identity.pubkeys.some(theirKey => {
+  //       return deepEqual(theirKey, myKey)
+  //     })
+  //   })
+  //   // const hasMyKeys = meDriver.identity.pubkeys.every(myKey => {
+  //   //   return pairingRes.identity.pubkeys.some(theirKey => {
+  //   //     return deepEqual(theirKey, myKey)
+  //   //   })
+  //   // })
 
-    if (!hasMyKeys)
-      return Promise.reject(new Error(translate('deviceDoesNotHaveMyKeys')))
+  //   if (!hasMyKeys)
+  //     return Promise.reject(new Error(translate('deviceDoesNotHaveMyKeys')))
 
-    let batch = []
-    this.updatePubkeys(batch, pairingRes.identity)
+  //   let batch = []
+  //   this.updatePubkeys(batch, pairingRes.identity)
 
 
-    // let myIdentities = list[MY_IDENTITIES].value
-    // let currentIdentity = myIdentities.currentIdentity
+  //   // let myIdentities = list[MY_IDENTITIES].value
+  //   // let currentIdentity = myIdentities.currentIdentity
 
-    // myIdentities.allIdentities.forEach((r) => {
-    //   if (r.id === currentIdentity)
-    //     r.publishedIdentity.pubkeys = pairingRes.identity.pubkeys
-    // })
+  //   // myIdentities.allIdentities.forEach((r) => {
+  //   //   if (r.id === currentIdentity)
+  //   //     r.publishedIdentity.pubkeys = pairingRes.identity.pubkeys
+  //   // })
 
-    // let id = IDENTITY + '_' + pairingData.identity
-    // list[id].value.pubkeys = utils.clone(pairingRes.identity.pubkeys)
-    // let batch = []
-    // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
-    // batch.push({type: 'put', key: id, value: list[id].value})
-    // db.batch(batch)
+  //   // let id = IDENTITY + '_' + pairingData.identity
+  //   // list[id].value.pubkeys = utils.clone(pairingRes.identity.pubkeys)
+  //   // let batch = []
+  //   // batch.push({type: 'put', key: MY_IDENTITIES, value: myIdentities})
+  //   // batch.push({type: 'put', key: id, value: list[id].value})
+  //   // db.batch(batch)
 
-    let me = this._getItem(utils.makeId(PROFILE, pairingData.identity))
-    return this.getDriver(me)
-    .then(() =>  this.addContactIdentity({ identity: pairingRes.prev }))
-    .then(() => {
-      Q.ninvoke(meDriver, 'setIdentity', {
-        keys: meDriver.keys.concat(pairingRes.identity.pubkeys),
-        identity: pairingRes.identity
-      })
-    })
-    .then(() => {
-      this.setMe(me)
-      // let me = utils.getMe()
-      // let oldId = IDENTITY + '_' + me[ROOT_HASH]
-      // delete list[oldId]
+  //   let me = this._getItem(utils.makeId(PROFILE, pairingData.identity))
+  //   return this.getDriver(me)
+  //   .then(() =>  this.addContactIdentity({ identity: pairingRes.prev }))
+  //   .then(() => {
+  //     Q.ninvoke(meDriver, 'setIdentity', {
+  //       keys: meDriver.keys.concat(pairingRes.identity.pubkeys),
+  //       identity: pairingRes.identity
+  //     })
+  //   })
+  //   .then(() => {
+  //     this.setMe(me)
+  //     // let me = utils.getMe()
+  //     // let oldId = IDENTITY + '_' + me[ROOT_HASH]
+  //     // delete list[oldId]
 
-      // let oldProfileId = utils.getId(me)
-      // let profile = list[oldProfileId].value
-      // delete list[oldProfileId]
+  //     // let oldProfileId = utils.getId(me)
+  //     // let profile = list[oldProfileId].value
+  //     // delete list[oldProfileId]
 
-      // profile[ROOT_HASH] = pairingRes.identity[ROOT_HASH]
-      // profile[CUR_HASH] = pairingRes.identity[ROOT_HASH]
+  //     // profile[ROOT_HASH] = pairingRes.identity[ROOT_HASH]
+  //     // profile[CUR_HASH] = pairingRes.identity[ROOT_HASH]
 
-      // let newId = IDENTITY + '_' + pairingRes.identity[ROOT_HASH]
-      // list[newId] = {
-      //   key: newId,
-      //   value: utils.clone(pairingRes.identity)
-      // }
-      // let newProfileId = PROFILE + '_' +  pairingRes.identity[ROOT_HASH]
-      // list[newProfileId] = {
-      //   key: newProfileId,
-      //   value: profile
-      // }
-      // let myIdentities = list[MY_IDENTITIES].value
-      // myIdentities.currentIdentity = newProfileId
-      // myIdentities.allIdentities.forEach((r) => {
-      //   if (r.id !== oldProfileId)
-      //     return
-      //   r.id = newProfileId,
-      //   r.publishedIdentity.pubkeys = utils.clone(pairingRes.identity.pubkeys)
-      // })
+  //     // let newId = IDENTITY + '_' + pairingRes.identity[ROOT_HASH]
+  //     // list[newId] = {
+  //     //   key: newId,
+  //     //   value: utils.clone(pairingRes.identity)
+  //     // }
+  //     // let newProfileId = PROFILE + '_' +  pairingRes.identity[ROOT_HASH]
+  //     // list[newProfileId] = {
+  //     //   key: newProfileId,
+  //     //   value: profile
+  //     // }
+  //     // let myIdentities = list[MY_IDENTITIES].value
+  //     // myIdentities.currentIdentity = newProfileId
+  //     // myIdentities.allIdentities.forEach((r) => {
+  //     //   if (r.id !== oldProfileId)
+  //     //     return
+  //     //   r.id = newProfileId,
+  //     //   r.publishedIdentity.pubkeys = utils.clone(pairingRes.identity.pubkeys)
+  //     // })
 
-      // let batch = []
-      // batch.push({type: 'del', key: oldId})
-      // batch.push({type: 'del', key: oldProfileId})
-      // batch.push({type: 'put', key: MY_IDENTITIES, value: list[MY_IDENTITIES].value})
-      // batch.push({type: 'put', key: newId, value: list[newId].value})
-      // batch.push({type: 'put', key: newProfileId, value: list[newProfileId].value})
-      // batch.push({type: 'put', key: PAIRING_RESPONSE + '_1', value: pairingRes})
-      // db.batch(batch)
-    })
-  },
+  //     // let batch = []
+  //     // batch.push({type: 'del', key: oldId})
+  //     // batch.push({type: 'del', key: oldProfileId})
+  //     // batch.push({type: 'put', key: MY_IDENTITIES, value: list[MY_IDENTITIES].value})
+  //     // batch.push({type: 'put', key: newId, value: list[newId].value})
+  //     // batch.push({type: 'put', key: newProfileId, value: list[newProfileId].value})
+  //     // batch.push({type: 'put', key: PAIRING_RESPONSE + '_1', value: pairingRes})
+  //     // db.batch(batch)
+  //   })
+  // },
   getModels() {
     let mm = {}
     for (let m in models)
