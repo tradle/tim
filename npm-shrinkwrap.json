@@ -2076,11 +2076,6 @@
           "from": "os-locale@>=1.4.0 <2.0.0",
           "resolved": "https://registry.npmjs.org/os-locale/-/os-locale-1.4.0.tgz"
         },
-        "window-size": {
-          "version": "0.1.4",
-          "from": "window-size@>=0.1.2 <0.2.0",
-          "resolved": "https://registry.npmjs.org/window-size/-/window-size-0.1.4.tgz"
-        },
         "wordwrap": {
           "version": "0.0.2",
           "from": "wordwrap@0.0.2",
@@ -6145,8 +6140,8 @@
     },
     "react-native-datepicker": {
       "version": "1.3.2",
-      "from": "pgmemk/react-native-datepicker#c4b8721",
-      "resolved": "git://github.com/pgmemk/react-native-datepicker.git#c4b872194b70ba66f7994934b22594ee05ef8e06"
+      "from": "pgmemk/react-native-datepicker#dev",
+      "resolved": "git://github.com/pgmemk/react-native-datepicker.git#2f56c8b2a306f2376a6de129d182cded02c8fa9d"
     },
     "react-native-deprecated-custom-components": {
       "version": "0.1.1",
@@ -6218,12 +6213,12 @@
     "react-native-gifted-messenger": {
       "version": "0.0.16",
       "from": "pgmemk/react-native-gifted-messenger#dev",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#7f08e82f552fe86f261ffc0103b63c7b5414f831"
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#57095d08ce5591572a2bd72d5cf4c9d13be82caa"
     },
     "react-native-gifted-spinner": {
-      "version": "0.0.4",
-      "from": "react-native-gifted-spinner@0.0.4",
-      "resolved": "https://registry.npmjs.org/react-native-gifted-spinner/-/react-native-gifted-spinner-0.0.4.tgz"
+      "version": "0.1.0",
+      "from": "react-native-gifted-spinner@>=0.1.0 <0.2.0",
+      "resolved": "https://registry.npmjs.org/react-native-gifted-spinner/-/react-native-gifted-spinner-0.1.0.tgz"
     },
     "react-native-http": {
       "version": "1.0.0",
@@ -8159,6 +8154,11 @@
       "version": "1.1.1",
       "from": "win-release@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/win-release/-/win-release-1.1.1.tgz"
+    },
+    "window-size": {
+      "version": "0.1.4",
+      "from": "window-size@>=0.1.2 <0.2.0",
+      "resolved": "https://registry.npmjs.org/window-size/-/window-size-0.1.4.tgz"
     },
     "wordwrap": {
       "version": "1.0.0",
