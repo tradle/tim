@@ -6151,8 +6151,8 @@
     },
     "react-native-accordion": {
       "version": "1.0.1",
-      "from": "mvayngrib/react-native-accordion#dev",
-      "resolved": "git://github.com/mvayngrib/react-native-accordion.git#8a3d1dce891f3120ebf3160e37d0e66e1f254d49"
+      "from": "tradle/react-native-accordion#dev",
+      "resolved": "git://github.com/tradle/react-native-accordion.git#0c4dcaf267a7437afa16a6b4ae38f71c03b7dd3c"
     },
     "react-native-actionsheet": {
       "version": "2.3.0",
