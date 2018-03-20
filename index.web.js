@@ -24,7 +24,7 @@ import {
 if (global.history && global.history.length) {
   const historyIndex = parseInt(location.hash.replace('#/scene_', ''))
   if (historyIndex) {
-    location.href = location.href.slice(0, location.href.indexOf('#'))
+    location.href = location.href.slice(0, location.href.indexOf('#') + 1)
   }
 }
 
