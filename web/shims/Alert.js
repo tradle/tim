@@ -85,7 +85,7 @@ function appendModal (modal) {
   ReactDOM.render(modal, el)
   const id = 'alert-' + Math.random()
   el.firstChild.id = id
-  document.querySelector('.react-root').appendChild(el)
+  document.querySelector('body').appendChild(el)
   return function remove () {
     const child = document.getElementById(id)
     child.parentNode.removeChild(child)

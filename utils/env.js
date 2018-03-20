@@ -107,7 +107,6 @@ const merged = extend({
   // auth settings
   // require touch id or device passcode
   initWithDeepLink: '/profile',
-  allowPasswordProtection: false,
   lenientPassword: true,
   requireDeviceLocalAuth: false,
   autoOptInTouchId: false,

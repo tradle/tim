@@ -125,8 +125,8 @@ class PasswordCheck extends Component {
     const password = this._getInput('password')
     const passwordAgain = this._getInput('passwordAgain')
     password.focus()
-    password.addEventListener('keydown', onKeyDown)
-    if (passwordAgain) passwordAgain.addEventListener('keydown', onKeyDown)
+    password._node.addEventListener('keydown', onKeyDown)
+    if (passwordAgain) passwordAgain._node.addEventListener('keydown', onKeyDown)
 
     function onKeyDown (e) {
       if (!this.value || self.isDisabled()) return
@@ -185,17 +185,17 @@ class PasswordCheck extends Component {
     }
   }
 
-  getValue() {
-    const password = this._getInput('password')
-    const passwordAgain = this._getInput('passwordAgain')
-    return {
-      password: password.value,
-      passwordAgain: passwordAgain && passwordAgain.value
-    }
-  }
+  // getValue() {
+  //   const password = this._getInput('password')
+  //   const passwordAgain = this._getInput('passwordAgain')
+  //   return {
+  //     password: password.value,
+  //     passwordAgain: passwordAgain && passwordAgain.value
+  //   }
+  // }
 
   _onSet() {
-    const errors = this.validatePasswordChoice(this.getValue(), true)
+    const errors = this.validatePasswordChoice(this.state.value, true)
     if (errors.password || errors.passwordAgain) {
       this.setState({ errors })
     } else {
@@ -204,7 +204,7 @@ class PasswordCheck extends Component {
   }
 
   _onCheck() {
-    const fields = this.getValue()
+    const fields = this.state.value
     if (!fields) return
 
     // const errors = this.validatePasswordChoice(fields)
