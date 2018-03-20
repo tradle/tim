@@ -126,7 +126,7 @@
     "react-native-code-push": "^5.3.2",
     "react-native-collapsible": "^0.10.0",
     "react-native-crypto": "^2.1.0",
-    "react-native-datepicker": "github:pgmemk/react-native-datepicker#c4b8721",
+    "react-native-datepicker": "github:pgmemk/react-native-datepicker#dev",
     "react-native-deprecated-custom-components": "github:tradle/react-native-custom-components",
     "react-native-device-info": "^0.21.2",
     "react-native-ecc": "^1.4.0",
