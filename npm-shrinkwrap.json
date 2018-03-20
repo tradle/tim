@@ -6370,8 +6370,8 @@
     },
     "react-native-deprecated-custom-components": {
       "version": "0.1.1",
-      "from": "mvayngrib/react-native-custom-components",
-      "resolved": "git://github.com/mvayngrib/react-native-custom-components.git#f4fa67b381bce360d4ef93dad564101b2fa0a147",
+      "from": "tradle/react-native-custom-components",
+      "resolved": "git://github.com/tradle/react-native-custom-components.git#f4fa67b381bce360d4ef93dad564101b2fa0a147",
       "dependencies": {
         "create-react-class": {
           "version": "15.6.0",
@@ -6412,8 +6412,8 @@
     },
     "react-native-flexbox-grid": {
       "version": "0.3.2",
-      "from": "react-native-flexbox-grid@latest",
-      "resolved": "https://registry.npmjs.org/react-native-flexbox-grid/-/react-native-flexbox-grid-0.3.2.tgz"
+      "from": "tradle/react-native-flexbox-grid",
+      "resolved": "git://github.com/tradle/react-native-flexbox-grid.git#c83210d6a6ffe48433fc48d3d0da4b17e8a38bbb"
     },
     "react-native-floating-labels": {
       "version": "1.1.1",
