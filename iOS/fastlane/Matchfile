@@ -4,4 +4,4 @@ type "development" # The default type, can be: appstore, adhoc or development
 
 app_identifier ["io.tradle.dev.tim"]
 username "ios-dev@tradle.io" # Your Apple Developer Portal username
-force_for_new_devices true
+#force_for_new_devices true

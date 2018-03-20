@@ -4,13 +4,14 @@ import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
 import {
-  View
+  View,
+  ViewPropTypes
 } from 'react-native'
 
 class Circle extends Component {
   static propTypes = {
     size: PropTypes.number.isRequired,
-    style: View.propTypes.style        // style
+    style: ViewPropTypes.style        // style
   };
 
   render() {

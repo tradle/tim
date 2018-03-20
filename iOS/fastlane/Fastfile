@@ -71,14 +71,16 @@ platform :ios do
   desc "Build the app"
   lane :dryrun do
     match
-    gym(
-      export_method: 'app-store'
-    )
+    gym_prod
   end
 
   lane :gym_prod do
-    disable_automatic_code_signing(path: ENV['IOS_PROJECT'])
-    gym(export_method: 'app-store')
+    sign_manual
+    gym(
+      scheme: 'Release',
+      workspace: ENV['WORKSPACE'],
+      export_method: 'app-store'
+    )
   end
 
   desc "Submit a new Beta Build to Apple TestFlight"
@@ -87,7 +89,13 @@ platform :ios do
     sign_manual
     match(type: 'appstore')
     gym_prod
-    pilot
+    # build_app(
+    #   workspace: ENV['WORKSPACE'],
+    #   scheme: 'Release',
+    #   clean: true
+    # )
+
+    upload_to_testflight
   end
 
   desc "Deploy a new version to the App Store"
