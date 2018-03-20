@@ -60,6 +60,7 @@
 #endif
 
   [RNBranch initSessionWithLaunchOptions:launchOptions isReferrable:YES];
+  [FIRApp configure];
 
   /**
    * OPTION 2
@@ -88,7 +89,6 @@
   // RCTSetLogFunction(CrashlyticsReactLogFunction);
 #endif
 
-  [FIRApp configure];
   return YES;
 }
 
