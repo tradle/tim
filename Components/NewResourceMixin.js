@@ -1009,7 +1009,7 @@ var NewResourceMixin = {
     );
   },
   onKeyPress(onSubmit, key) {
-    if (key.nativeEvent.code === 'Enter')
+    if (key.nativeEvent.key === 'Enter')
       onSubmit()
   },
   getHelp(prop) {

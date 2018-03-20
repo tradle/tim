@@ -114,7 +114,7 @@ class CameraView extends Component {
     let media
     if (this.state.photo) {
       const { data, width, height } = this.state.photo
-      media = <Image source={{uri: data}} width={width} height={height} style={styles.camera} />
+      media = <Image source={{uri: data}} style={{width, height}} />
     } else {
       media = this.renderCamera()
     }
@@ -127,7 +127,7 @@ class CameraView extends Component {
         <View style={{ width }}>
           {this.renderButtons()}
         </View>
-        <canvas ref="canvas" style={styles.canvas}></canvas>
+        <canvas ref="canvas" style={canvasStyle}></canvas>
       </View>
     )
   }
@@ -147,6 +147,13 @@ function getCameraDimensions (component, ratio=DEFAULT_ASPECT_RATIO) {
 
 CameraView = makeResponsive(CameraView)
 module.exports = CameraView
+
+// mus be plain object
+const canvasStyle = {
+  width: 0,
+  height: 0
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -164,10 +171,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around'
-  },
-  canvas: {
-    width: 0,
-    height: 0
   },
   errorContainer: {
     paddingHorizontal: 50

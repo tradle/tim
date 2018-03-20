@@ -55,7 +55,7 @@ class DropPage extends Component {
         onDragLeave={() => this.onDragEvent('leave')}
         onDragOver={() => this.onDragEvent('over')}
         onDrop={this.onDrop}
-        disableClick="true"
+        disableClick={true}
       >
         {overlay}
         <View style={[styles.inner, { height }]}>

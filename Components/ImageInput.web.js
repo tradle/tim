@@ -1,9 +1,9 @@
 
 import React, {
-  Component,
-  PropTypes
+  Component
 } from 'react'
 
+import PropTypes from 'prop-types'
 import {
   Platform,
   TouchableHighlight,
@@ -18,7 +18,7 @@ import {
   translate
 } from '../utils/utils'
 
-const FileInput = Platform.OS === 'web' && require('react-file-input')
+import FileInput from 'react-file-input'
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
