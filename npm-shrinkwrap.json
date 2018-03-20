@@ -6428,7 +6428,7 @@
     "react-native-gesture-password": {
       "version": "0.1.4",
       "from": "mvayngrib/react-native-gesture-password",
-      "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#cdf7bc208288173e23791bf6d226762466ffb3f3"
+      "resolved": "git://github.com/mvayngrib/react-native-gesture-password.git#28cf69759e3329df66c66985f396fc1432552570"
     },
     "react-native-gesture-responder": {
       "version": "0.1.1",
