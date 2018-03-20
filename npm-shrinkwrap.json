@@ -4148,21 +4148,7 @@
     "key-encoder": {
       "version": "1.1.6",
       "from": "mvayngrib/key-encoder-js",
-      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#d88c777e31fa88e9a421c0c8dc57fcad15c6dc63",
-      "dependencies": {
-        "asn1.js": {
-          "version": "2.2.1",
-          "from": "asn1.js@>=2.2.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/asn1.js/-/asn1.js-2.2.1.tgz",
-          "dependencies": {
-            "bn.js": {
-              "version": "2.2.0",
-              "from": "bn.js@>=2.0.0 <3.0.0",
-              "resolved": "https://registry.npmjs.org/bn.js/-/bn.js-2.2.0.tgz"
-            }
-          }
-        }
-      }
+      "resolved": "git://github.com/mvayngrib/key-encoder-js.git#d4574052671b6e10fbaf39d4cea36d90f151d15e"
     },
     "kind-of": {
       "version": "3.2.2",
@@ -5085,7 +5071,7 @@
     },
     "nkey-ecdsa": {
       "version": "1.1.0",
-      "from": "nkey-ecdsa@>=1.1.0 <2.0.0",
+      "from": "nkey-ecdsa@latest",
       "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz"
     },
     "nkey-ethereum": {
