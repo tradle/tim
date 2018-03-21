@@ -281,9 +281,9 @@
       }
     },
     "@tradle/yuki": {
-      "version": "1.2.0",
-      "from": "@tradle/yuki@>=1.2.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.2.0.tgz",
+      "version": "1.4.0",
+      "from": "@tradle/yuki@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.4.0.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
