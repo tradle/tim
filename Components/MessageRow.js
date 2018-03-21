@@ -72,8 +72,11 @@ const LIMIT = 20
 const MESSAGE_WITH_LINK_REGEX = /\[(?:[^\]]+)\]\(https?:\/\/[^)]+\)/ig
 
 class MessageRow extends Component {
+  static displayName = 'MessageRow';
   constructor(props) {
     super(props);
+    this.showMyData = this.showMyData.bind(this)
+    // this.verify = this.verify.bind(this)
   }
   shouldComponentUpdate(nextProps, nextState) {
     let {to, resource, orientation} = this.props
@@ -86,6 +89,7 @@ class MessageRow extends Component {
   }
   render() {
     let { resource, to, bankStyle, navigator } = this.props
+    let styles = createStyles({bankStyle})
 
     let me = utils.getMe();
 
@@ -94,7 +98,7 @@ class MessageRow extends Component {
     let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
     let renderedRow = [];
-    let ret = this.formatRow(isMyMessage, renderedRow);
+    let ret = this.formatRow(isMyMessage, renderedRow, styles);
     let onPressCall = ret ? ret.onPressCall : null
     let isConfirmation = resource[TYPE] === CONFIRMATION
 
@@ -122,15 +126,13 @@ class MessageRow extends Component {
       let fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
-          addStyle = [chatStyles.myCell,
-                      noBg ? {borderColor: bankStyle.myMessageBackgroundColor, borderWidth: 1, backgroundColor: 'transparent', paddingHorizontal: 0, paddingVertical: 0, borderRadius: 0}
-                           : {backgroundColor: bankStyle.myMessageBackgroundColor}]
+          addStyle = [chatStyles.myCell,  noBg  && styles.noBg || styles.bg]
       }
       else if (isForgetting)
         addStyle = styles.forgetCell
       else {
         if (isConfirmation)
-          addStyle = [chatStyles.verificationBody, {borderColor: '#cccccc', backgroundColor: bankStyle.confirmationBg}, styles.myConfCell]
+          addStyle = [chatStyles.verificationBody, styles.myConfCell]
         else {
           let mstyle = {
             borderColor: '#efefef',
@@ -183,7 +185,7 @@ class MessageRow extends Component {
         }
       }
       else
-        verPhoto = <View style={{height: 0, width:0}} />
+        verPhoto = <View style={styles.noPhotos} />
     }
     let rowStyle = isSimpleMessage ? {backgroundColor: 'transparent'} : [chatStyles.row, {backgroundColor: 'transparent'}];
     // let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
@@ -243,7 +245,7 @@ class MessageRow extends Component {
       sendStatus = this.getSendStatus()
       let sealedStatus = (resource.txId)
                        ? <View style={chatStyles.sealedStatus}>
-                           <Icon name={'ios-ribbon-outline'} size={30} color='#316A99' style={{opacity: 0.5}} />
+                           <Icon name={'ios-ribbon-outline'} size={30} color='#316A99' style={styles.ribbonIcon} />
                          </View>
                        : <View />
 
@@ -394,49 +396,7 @@ class MessageRow extends Component {
     });
   }
 
-  verify(event) {
-    let resource = this.props.resource;
-    let isVerification = resource[TYPE] === VERIFICATION;
-    let r = isVerification ? resource.document : resource
-
-    let passProps = {
-      resource: r,
-      bankStyle: this.props.bankStyle,
-      currency: this.props.currency
-    }
-    if (!isVerification)
-      passProps.verify = true
-    else
-      passProps.verification = resource
-
-    let model = utils.getModel(r[TYPE]);
-    let route = {
-      id: 5,
-      component: MessageView,
-      backButtonTitle: 'Back',
-      passProps: passProps,
-      title: translate(model)
-    }
-    if (this.isMyMessage()) {
-      route.rightButtonTitle = 'Edit';
-      route.onRightButtonPress = {
-        title: 'Edit',
-        component: NewResource,
-        // titleTextColor: '#7AAAC3',
-        id: 4,
-        passProps: {
-          resource: r,
-          metadata: model,
-          bankStyle: this.props.bankStyle,
-          currency: this.props.currency,
-          callback: this.props.onSelect.bind(this, r)
-        }
-      };
-    }
-    this.props.navigator.push(route);
-  }
-
-  formatRow(isMyMessage, renderedRow) {
+  formatRow(isMyMessage, renderedRow, styles) {
     let { resource, bankStyle, navigator, to, isLast, currency } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id);
 
@@ -463,8 +423,8 @@ class MessageRow extends Component {
       let iname = model.id === APPLICATION_DENIAL ? 'md-close-circle' : 'ios-ribbon-outline'
       let icolor = model.id === APPLICATION_DENIAL ? 'red' : '#ffffff'
       let msg = <View key={this.getNextKey()}>
-                  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <View style={{flex: 1}}>
+                  <View style={styles.rowSpace}>
+                    <View style={styles.container}>
                       <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message}</Text>
                     </View>
                     <View style={{justifyContent: 'flex-end', paddingLeft:10}}>
@@ -495,16 +455,16 @@ class MessageRow extends Component {
     if (resource[TYPE] === DATA_BUNDLE) {
       let message = 'Click here to see ' + resource.items.length + ' resources imported from ' + resource.from.organization.title + ' on your profile page.'
       let msg = <View key={this.getNextKey()}>
-                  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                    <View style={{flex: 1}}>
+                  <View style={styles.rowSpace}>
+                    <View style={styles.container}>
                       <Text style={[chatStyles.resourceTitle, {color: isMyMessage ? '#ffffff' : '#555555'}]}>{resource.message || message}</Text>
                     </View>
-                    <Icon style={{color: bankStyle.linkColor, paddingLeft: 10, alignSelf: 'center'}} size={20} name={'ios-arrow-forward'} />
+                    <Icon style={styles.arrowIcon} size={20} name={'ios-arrow-forward'} />
                   </View>
                 </View>
 
       renderedRow.push(msg)
-      return {onPressCall: this.showMyData.bind(this)}
+      return {onPressCall: this.showMyData}
     }
     // let isProductList = model.id === PRODUCT_LIST
     // if (isProductList) {
@@ -527,7 +487,7 @@ class MessageRow extends Component {
       let msg = <View key={this.getNextKey()}>
                   <View style={chatStyles.rowContainer}>
                     <Text style={[chatStyles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.message}</Text>
-                    <Icon style={{color: bankStyle.linkColor, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
+                    <Icon style={styles.personIcon} size={20} name={'ios-person'} />
                   </View>
                 </View>
       renderedRow.push(msg);
@@ -543,7 +503,7 @@ class MessageRow extends Component {
                   <View style={chatStyles.rowContainer}>
                     <Text style={[chatStyles.resourceTitle, {paddingRight: 20, color: isMyMessage ? '#ffffff' : '#757575', fontStyle: isCustomerWaiting ? 'italic' : 'normal'}]}>{resource.message}</Text>
                     {profile}
-                    <Icon style={{color: bankStyle.linkColor, backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'ios-person'} />
+                    <Icon style={styles.personIcon} size={20} name={'ios-person'} />
                   </View>
                 </View>
       renderedRow.push(msg);
@@ -553,7 +513,7 @@ class MessageRow extends Component {
       let w = Math.floor(0.8 * utils.dimensions().width) - 40
       let message = 'Scanned QR code to import data from ' + resource.to.organization.title
       let msg = <View style={[chatStyles.rowContainer, {width:w}]}  key={this.getNextKey()}>
-                  <Icon size={50} name='ios-qr-scanner' color='#ffffff' style={{paddingRight: 10}} />
+                  <Icon size={50} name='ios-qr-scanner' color='#ffffff' style={styles.qrIcon} />
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff', justifyContent: 'center'}]}>{resource.message || message}</Text>
                 </View>
       renderedRow.push(msg);
@@ -562,12 +522,12 @@ class MessageRow extends Component {
 
     if (model.id === SHARE_CONTEXT) {
       let msg = <View key={this.getNextKey()}>
-                  <View style={{flexDirection: 'row'}}>
+                  <View style={styles.row}>
                     <View style={{flexDirection: 'column'}}>
                       <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message}</Text>
                     </View>
                     <View style={{justifyContent: 'center'}}>
-                      <Icon style={{color: '#ffffff', backgroundColor: 'transparent',  paddingLeft: 5}} size={20} name={'md-share'} />
+                      <Icon style={styles.shareIcon} size={20} name={'md-share'} />
                     </View>
                   </View>
                 </View>
@@ -650,8 +610,8 @@ class MessageRow extends Component {
         vCols.push(
           <View key={this.getNextKey()}>
             <Text style={[style]}>{resource[v]}</Text>
-            <Icon style={[{color: this.props.bankStyle.confirmationColor, alignSelf: 'flex-end', width: 50, height: 50, marginTop: -25, opacity: 0.2}]} size={45} name={'ios-flower'} />
-            <Icon style={{color: this.props.bankStyle.confirmationColor, alignSelf: 'flex-end', marginTop: -30}} size={30} name={'ios-done-all'} />
+            <Icon style={styles.flowerIcon} size={45} name={'ios-flower'} />
+            <Icon style={styles.doneAll} size={30} name={'ios-done-all'} />
           </View>
         );
 
@@ -663,8 +623,8 @@ class MessageRow extends Component {
 
         if (!val)
           return
-        if (model.properties.verifications  &&  !isMyMessage)
-          onPressCall = this.verify.bind(this);
+        // if (model.properties.verifications  &&  !isMyMessage)
+        //   onPressCall = this.verify
         if (!isMyMessage)
           style = [style, {paddingBottom: 10, color: '#2892C6'}];
         vCols.push(this.getPropRow(properties[v], resource, val))
@@ -771,10 +731,10 @@ class MessageRow extends Component {
           let row
           if  (this.messageHasLink(resource[v]))
             row = <View style={{maxWidth: utils.dimensions().width * 0.8}}  key={this.getNextKey()}>
-                        <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle, false, isMyMessage, true)} passThroughProps={{navigator, bankStyle}}>
-                          {resource[v]}
-                        </Markdown>
-                     </View>
+                    <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle, false, isMyMessage, true)} passThroughProps={{navigator, bankStyle}}>
+                      {resource[v]}
+                    </Markdown>
+                  </View>
           else
             row = utils.parseMessage(params)
 
@@ -898,30 +858,94 @@ class MessageRow extends Component {
   }
 }
 
-let styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  forgetCell: {
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    justifyContent: 'flex-end',
-    borderRadius: 10,
-    borderTopLeftRadius: 0,
-    backgroundColor: 'red',
-  },
-  myConfCell: {
-    paddingVertical: 5,
-    paddingHorizontal: 7,
-    justifyContent: 'flex-end',
-    borderTopLeftRadius: 0,
-    borderRadius: 10,
-  },
-  white18: {
-    color: '#ffffff',
-    fontSize: 18
-  },
-});
+var createStyles = utils.styleFactory(MessageRow, function ({ dimensions, bankStyle }) {
+  return StyleSheet.create({
+    container: {
+      flex: 1
+    },
+    forgetCell: {
+      paddingVertical: 5,
+      paddingHorizontal: 7,
+      justifyContent: 'flex-end',
+      borderRadius: 10,
+      borderTopLeftRadius: 0,
+      backgroundColor: 'red',
+    },
+    myConfCell: {
+      paddingVertical: 5,
+      paddingHorizontal: 7,
+      justifyContent: 'flex-end',
+      borderTopLeftRadius: 0,
+      borderRadius: 10,
+      borderColor: '#cccccc',
+      backgroundColor: bankStyle.confirmationBg
+    },
+    white18: {
+      color: '#ffffff',
+      fontSize: 18
+    },
+    row: {
+      flexDirection: 'row'
+    },
+    rowSpace: {
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    noPhotos: {
+      height: 0,
+      width:0
+    },
+    noBg: {
+      borderColor: bankStyle.myMessageBackgroundColor,
+      borderWidth: 1,
+      backgroundColor: 'transparent',
+      paddingHorizontal: 0,
+      paddingVertical: 0,
+      borderRadius: 0
+    },
+    bg: {
+      backgroundColor: bankStyle.myMessageBackgroundColor
+    },
+    personIcon: {
+      color: bankStyle.linkColor,
+      backgroundColor: 'transparent',
+      paddingLeft: 5
+    },
+    arrowIcon: {
+      color: bankStyle.linkColor,
+      paddingLeft: 10,
+      alignSelf: 'center'
+    },
+    qrIcon: {
+      paddingRight: 10
+    },
+    shareIcon: {
+      color: '#ffffff',
+      backgroundColor: 'transparent',
+      paddingLeft: 5
+    },
+    folderIcon: {
+      position: 'absolute',
+      right: 0
+    },
+    ribbonIcon: {
+      opacity: 0.5
+    },
+    flowerIcon: {
+      color: bankStyle.confirmationColor,
+      alignSelf: 'flex-end',
+      width: 50,
+      height: 50,
+      marginTop: -25,
+      opacity: 0.2
+    },
+    doneAll: {
+      color: bankStyle.confirmationColor,
+      alignSelf: 'flex-end',
+      marginTop: -30
+    },
+  })
+})
 reactMixin(MessageRow.prototype, RowMixin);
 reactMixin(MessageRow.prototype, ResourceMixin)
 MessageRow = makeResponsive(MessageRow)

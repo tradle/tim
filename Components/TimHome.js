@@ -993,7 +993,7 @@ class TimHome extends Component {
         <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
           <View style={styles.flexGrow} />
             { utils.getMe()
-              ? <TouchableOpacity style={[styles.thumbButton, {justifyContent: 'flex-end',  opacity: me ? 1 : 0}]}
+              ? <TouchableOpacity style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
                     underlayColor='transparent' onPress={() => this._pressHandler()}>
                   <View style={styles.getStarted}>
                      <Text style={styles.getStartedText}>Get started</Text>
@@ -1191,6 +1191,7 @@ var styles = (function () {
     thumbButton: {
       // marginBottom: 10,
       alignSelf: 'center',
+      justifyContent: 'flex-end',
       // justifyContent: isLandscape ? 'flex-start' : 'center',
       // padding: 40,
     },

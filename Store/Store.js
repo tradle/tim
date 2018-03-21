@@ -29,6 +29,7 @@ import Promise, { coroutine as co } from 'bluebird'
 import TimerMixin from 'react-timer-mixin'
 import reactMixin from 'react-mixin'
 import plugins from '@tradle/biz-plugins'
+import appPlugins from '../plugins'
 
 import yukiConfig from '../yuki.json'
 
@@ -3519,13 +3520,20 @@ var Store = Reflux.createStore({
   },
   async onGetRequestedProperties(r, noTrigger) {
     let rtype = r[TYPE]
-    if (!plugins.length)
+    if (!plugins.length  &&  !appPlugins.length)
       return
 
+    let allPlugins = plugins && plugins.slice() || []
+    let appP = require('../plugins')
+    appP.forEach(p => allPlugins.push(p))
+
+    // if (appPlugins)
+    //   appPlugins.forEach(p => allPlugins.push(p))
     let context = this.getBizPluginsContext()
     let moreInfo
-    for (let i=0; i<plugins.length; i++) {
-      let plugin = plugins[i]
+
+    for (let i=0; i<allPlugins.length; i++) {
+      let plugin = allPlugins[i]
       if (!plugin(context).validateForm)
         continue
       moreInfo = plugin(context).validateForm.call(
@@ -3543,13 +3551,21 @@ var Store = Reflux.createStore({
     }
     // let moreInfo = plugin().validateForm({application: r._context, form: r})
     let rprops = {}
+    let message
     if (moreInfo) {
       moreInfo.requestedProperties.forEach((r) => {
         rprops[r.name] = r.message || ''
       })
+      if (moreInfo.message) {
+        if (message)
+          message += '; ' + moreInfo.message
+        else
+          message = moreInfo.message
+      }
+
     }
     if (!noTrigger)
-      this.trigger({action: 'formEdit', requestedProperties: rprops})
+      this.trigger({action: 'formEdit', requestedProperties: rprops, resource: r, message: message})
     return rprops
     // return rprops
   },
@@ -5830,7 +5846,7 @@ var Store = Reflux.createStore({
         for (let i=result.length - 1; i>=0  &&  !context; i--) {
           let res = result[i]
           let contextIdToContext = {}
-          if (res[TYPE] === FORM_REQUEST  &&  res._context) {
+          if (/*res[TYPE] === FORM_REQUEST  &&  */ res._context) {
             context = res._context
             if (!context.contextId) {
               let c = this._getItem(context)

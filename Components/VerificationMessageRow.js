@@ -48,6 +48,7 @@ const FORM = 'tradle.Form'
 class VerificationMessageRow extends Component {
   constructor(props) {
     super(props);
+    this.verify = this.verify.bind(this)
   }
   shouldComponentUpdate(nextProps, nextState) {
     if (utils.resized(this.props, nextProps)  &&  this.props.orientation !== 'UNKNOWN'  &&  nextProps.orientation !== 'UNKNOWN')
@@ -124,7 +125,7 @@ class VerificationMessageRow extends Component {
     let row = this.formatDocument({
                 model: msgModel,
                 verification: resource,
-                onPress: this.verify.bind(this),
+                onPress: this.verify,
                 // isAccordion: isThirdPartyVerification,
                 isMyMessage: isMyMessage || isShared
               })

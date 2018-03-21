@@ -321,7 +321,8 @@ var ResourceMixin = {
     skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
     let bankStyle = this.state.bankStyle ||  this.props.bankStyle || defaultBankStyle
 
-    let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
+    // let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
+    let bg = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
     let backlinksBg = {backgroundColor: bg, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
     if (prop) {
@@ -330,8 +331,9 @@ var ResourceMixin = {
         let color = json.result === 'clear' ? 'green' : 'red'
         state = <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
       }
-      jsonRows.push(<View style={backlinksBg} key={this.getNextKey()}>
-                      <Text  style={[styles.bigTitle, {color: color, paddingVertical: 10}]}>{translate(prop)}</Text>
+      let style = {opacity: 0.7, ...backlinksBg}
+      jsonRows.push(<View style={style} key={this.getNextKey()}>
+                      <Text  style={[styles.hugeTitle, {color: color, paddingVertical: 10}]}>{translate(prop)}</Text>
                       {state}
                     </View>)
     }
@@ -537,6 +539,13 @@ var styles = StyleSheet.create({
     marginVertical: 3,
     marginHorizontal: 7,
     color: '#2E3B4E',
+  },
+  hugeTitle: {
+    fontSize: 24,
+    // fontFamily: 'Avenir Next',
+    // marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7
   },
   bigTitle: {
     fontSize: 20,

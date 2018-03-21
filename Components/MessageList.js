@@ -432,14 +432,14 @@ class MessageList extends Component {
     let currentContext
     if (utils.isContext(resource))
       currentContext = resource
-    else if(rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
+    else //if (rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
       currentContext = resource._context
     if (currentContext)
       state.currentContext = currentContext
     if (productToForms)
       state.productToForms = productToForms
     else if (utils.getModel(rtype).subClassOf === FORM  &&  resource._context) {
-      let product = resource._context.product
+      let product = resource._context.requestFor
       if (this.state.productToForms)
         productToForms = clone(this.state.productToForms)
       else
@@ -831,8 +831,8 @@ class MessageList extends Component {
       let maxHeight = h - NAV_BAR_HEIGHT
       // Chooser for trusted party verifier
       let isChooser = originatingMessage && originatingMessage.verifiers
-      let notRemediation = (context  &&  context.product !== REMEDIATION) ||
-                           (isContext && resource.product !== REMEDIATION)
+      let notRemediation = (context  &&  context.requestFor !== REMEDIATION) ||
+                           (isContext && resource.requestFor !== REMEDIATION)
       let me = utils.getMe()
       if (this.hasChatContext())
         maxHeight -= 45
@@ -1121,7 +1121,7 @@ class MessageList extends Component {
     else
       sharingChat = this.props.resource
     this.props.navigator.push({
-      title: translate(utils.getModel(this.state.context.product)),
+      title: translate(utils.getModel(this.state.context.requestFor)),
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
@@ -1137,7 +1137,7 @@ class MessageList extends Component {
   shareContext(orgs) {
     delete orgs[utils.getId(this.props.resource)]
     Alert.alert(
-      translate('shareContext', utils.getModel(this.state.context.product).title),
+      translate('shareContext', utils.getModel(this.state.context.requestFor).title),
       translate('shareAllPastAndFutureMessages'),
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},
@@ -1347,7 +1347,8 @@ class MessageList extends Component {
               : '',
       from: me,
       to: resource,
-      _context: this.state.context || this.state.currentContext
+      _context: this.state.currentContext || this.state.context
+      // _context: this.state.context || this.state.currentContext
     }
     this.setState({userInput: ''}) //, selectedAssets: {}});
     if (this.state.clearCallback)
