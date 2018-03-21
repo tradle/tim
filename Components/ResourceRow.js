@@ -228,7 +228,7 @@ class ResourceRow extends Component {
         </Geometry.Circle>
       )
 
-      photo = <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      photo = <View style={styles.providerLogo}>
                 <View>
                   {photo}
                   {onlineStatus}
@@ -907,6 +907,10 @@ var styles = StyleSheet.create({
     marginTop: 10,
     justifyContent: 'center',
     alignSelf: 'center'
+  },
+  providerLogo: {
+    flexDirection: 'row',
+    alignItems: 'center'
   }
 });
 
