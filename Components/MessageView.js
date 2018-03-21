@@ -536,6 +536,7 @@ class MessageView extends Component {
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
 reactMixin(MessageView.prototype, ResourceMixin);
 MessageView = makeResponsive(MessageView)
+
 var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
     itemTitle: {
