@@ -81,6 +81,13 @@ var common = {
         loader: 'imports?define=>false'
       },
       {
+        test: /postMock.html$/,
+        loader: 'file-loader',
+        // options: {
+        //   name: '[name].[ext]',
+        // }
+      },
+      {
         test: /\.html$/,
         loader: 'html-loader'
       }
