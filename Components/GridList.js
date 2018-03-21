@@ -1084,11 +1084,13 @@ class GridList extends Component {
     // return !properties[dateProp]  ||  properties[dateProp].skipLabel || style
     //     ? <Text style={style} key={this.getNextKey()}>{val}</Text>
     //     : <View style={{flexDirection: 'row'}} key={this.getNextKey()}><Text style={style}>{properties[dateProp].title}</Text><Text style={style}>{val}</Text></View>
-    if (!style)
-      style = []
-    style.push({alignSelf: 'flex-end', paddingRight: 10})
+    let addStyle = {alignSelf: 'flex-end', paddingRight: 10}
     if (this.props.search  &&  this.state.resource  &&  this.state.resource[dateProp])
-      style = [style, {fontWeight: '600'}]
+      _.extend(addStyle, {fontWeight: '600'})
+    if (style)
+      style.push(addStyle)
+    else
+      style = addStyle
 
     return <Text style={style} key={this.getNextKey(resource)}>{val}</Text>
   }
@@ -1156,7 +1158,7 @@ class GridList extends Component {
         <View style={styles.testProvidersRow} key={'testProviders_1'}>
           <TouchableOpacity onPress={this.showTestProviders.bind(this)}>
             <View style={styles.row}>
-              <Icon name='ios-pulse-outline' size={utils.getFontSize(45)} color={appStyle.TEST_PROVIDERS_ROW_FG_COLOR} style={[styles.cellImage, {paddingLeft: 5}]} />
+              <Icon name='ios-pulse-outline' size={utils.getFontSize(45)} color={appStyle.TEST_PROVIDERS_ROW_FG_COLOR} style={styles.cellImage} />
               <View style={styles.textContainer}>
                 <Text style={[styles.resourceTitle, styles.testProvidersText]}>{translate('testProviders')}</Text>
               </View>
@@ -1208,7 +1210,7 @@ class GridList extends Component {
       menuBtn = <View/>
 
     return (
-        <View style={[styles.footer, {justifyContent: 'space-between'}]}>
+        <View style={styles.footer}>
           <View/>
           {employee}
           {menuBtn}
@@ -1518,13 +1520,14 @@ var styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     flexWrap: 'nowrap',
-    justifyContent: 'flex-end',
+    // justifyContent: 'flex-end',
     height: 45,
     paddingHorizontal: 10,
     backgroundColor: 'transparent',
     // borderColor: '#eeeeee',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#cccccc',
+    justifyContent: 'space-between'
   },
   row: {
     flexDirection: 'row',
@@ -1544,6 +1547,7 @@ var styles = StyleSheet.create({
     height: 50,
     marginRight: 10,
     width: 50,
+    paddingLeft: 5
   },
   testProviders: {
     position: 'absolute',
