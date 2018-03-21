@@ -97,6 +97,13 @@ class NewResource extends Component {
     }
     this.onSavePressed = this.onSavePressed.bind(this)
     this.showTermsAndConditions = this.showTermsAndConditions.bind(this)
+    this.acceptTsAndCs = this.acceptTsAndCs.bind(this)
+    this.setChosenValue = this.setChosenValue.bind(this)
+    this.onAddItem = this.onAddItem.bind(this)
+    this.onEndEditing = this.onEndEditing.bind(this)
+    this.onChange = this.onChange.bind(this)
+    this.cancelItem = this.cancelItem.bind(this)
+
     let currentRoutes = this.props.navigator.getCurrentRoutes()
     let currentRoutesLength = currentRoutes.length
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.props.search
@@ -181,7 +188,7 @@ class NewResource extends Component {
   }
 
   onAction(params) {
-    let { resource, action, error, requestedProperties } = params
+    let { resource, action, error, requestedProperties, message } = params
     if (action === 'languageChange') {
       this.props.navigator.popToTop()
       return
@@ -198,7 +205,7 @@ class NewResource extends Component {
       return
     }
     if (action === 'formEdit') {
-      this.setState({requestedProperties: requestedProperties})
+      this.setState({requestedProperties: requestedProperties, resource: resource ||  this.state.resource, message: message })
       return
     }
     if (action === 'noAccessToServer') {
@@ -390,9 +397,10 @@ class NewResource extends Component {
     }
     let requestedProperties = this.state.requestedProperties || this.props.requestedProperties
     if (requestedProperties) {
-      for (let p in requestedProperties)
-        if (required.indexOf(p) === -1)
+      for (let p in requestedProperties) {
+        if (p.indexOf('_group') === -1  &&  required.indexOf(p) === -1)
           required.push(p)
+      }
     }
     let missedRequiredOrErrorValue = {}
     required.forEach((p) =>  {
@@ -582,7 +590,7 @@ class NewResource extends Component {
           resource: this.state.resource,
           isChooser: true,
           prop: bl,
-          callback:    this.setChosenValue.bind(this),
+          callback: this.setChosenValue,
           bankStyle: this.props.bankStyle,
           currency: this.props.currency
         }
@@ -599,7 +607,7 @@ class NewResource extends Component {
         metadata: bl,
         resource: this.state.resource,
         parentMeta: this.props.model,
-        onAddItem: this.onAddItem.bind(this),
+        onAddItem: this.onAddItem,
         currency: this.props.currency
       }
     });
@@ -626,19 +634,20 @@ class NewResource extends Component {
     if (this.state.isUploading)
       return <View/>
 
-    let props = this.props;
     let parentBG = {backgroundColor: '#7AAAC3'};
     let resource = this.state.resource;
 
-    let meta =  props.model;
-    if (this.props.setProperty)
-      this.state.resource[this.props.setProperty.name] = this.props.setProperty.value;
+    let meta =  this.props.model;
+    let { originatingMessage, setProperty, editCols, bankStyle, search } = this.props
+    let styles = createStyles({bankStyle, isRegistration})
+    if (setProperty)
+      this.state.resource[setProperty.name] = setProperty.value;
     let data = {};
     let model = {};
     let arrays = [];
     extend(true, data, resource);
     let isMessage = utils.isMessage(resource)
-    let isFinancialProduct = isMessage  &&  this.props.model.subClassOf && this.props.model.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
+    let isFinancialProduct = isMessage  &&  meta.subClassOf && meta.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
     let showSendVerificationForm = false;
     let formToDisplay;
     if (isMessage) {
@@ -651,21 +660,22 @@ class NewResource extends Component {
         data: data,
         model: model,
         items: arrays,
-        onEndEditing: this.onEndEditing.bind(this),
+        onEndEditing: this.onEndEditing,
         component: NewResource,
         editable: this.state.disableEditing ? !this.state.disableEditing : true
       };
-    if (this.props.editCols)
-      params.editCols = this.props.editCols;
+    if (editCols)
+      params.editCols = editCols;
     let isRegistration = this.state.isRegistration
     if (isRegistration)
       params.isRegistration = true
-    if (this.props.originatingMessage  &&  this.props.originatingMessage[constants.TYPE] === FORM_ERROR) {
+    if (originatingMessage  &&  originatingMessage[constants.TYPE] === FORM_ERROR) {
       params.formErrors = {}
-      this.props.originatingMessage.errors.forEach((r) => {
+      originatingMessage.errors.forEach((r) => {
         params.formErrors[r.name] = r.error
       })
     }
+
     let options = this.getFormFields(params);
     if (!options) {
       let contentSeparator = utils.getContentSeparator(bankStyle)
@@ -673,14 +683,9 @@ class NewResource extends Component {
                 <ShowPropertiesView resource={data}
                                     bankStyle={bankStyle}
                                     navigator={navigator} />
-                  <TouchableOpacity onPress={() => {
-                    this.onSavePressed()
-                      // navigator.pop()
-                      // Actions.addItem(data)
-                    }
-                  }>
-                  <View style={[styles.submit, {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}]}>
-                    <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 5}}/>
+                <TouchableOpacity onPress={this.onSavePressed}>
+                  <View style={styles.submit}>
+                    <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                     <Text style={styles.submitText}>{translate('Submit')}</Text>
                   </View>
                 </TouchableOpacity>
@@ -689,9 +694,9 @@ class NewResource extends Component {
 
     let Model = t.struct(model);
     let itemsMeta
-    if (this.props.editCols) {
+    if (editCols) {
       itemsMeta = []
-      this.props.editCols.forEach((p) => {
+      editCols.forEach((p) => {
         if (meta.properties[p].type === 'array')
           itemsMeta.push(meta.properties[p])
       })
@@ -702,7 +707,7 @@ class NewResource extends Component {
     let self = this;
     let arrayItems = [];
     let itemsArray
-    if (!this.props.search) {
+    if (!search) {
       for (let p in itemsMeta) {
         let bl = itemsMeta[p]
         if (bl.icon === 'ios-telephone-outline') {
@@ -744,12 +749,15 @@ class NewResource extends Component {
                  </View>
                : <View style={styles.noRegistrationButton} />
     let formStyle = isRegistration
-                  ? {justifyContent: 'center', height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
+                  ? {justifyContent: 'center', flex: 1, height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
                   : styles.noRegistration
     let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons = []
     if (jsonProps  &&  jsonProps.length) {
+      let hidden = meta.properties.hidden
       jsonProps.forEach((prop) => {
+        if (hidden  &&  hidden.indexOf(prop.name) !== -1)
+          return
         let val = this.state.resource[prop.name]
         if (val) {
           let params = {prop: prop, json: val, jsonRows: [], isView: true}
@@ -781,7 +789,7 @@ class NewResource extends Component {
           </TouchableOpacity>))
 
       formsToSign = <View>
-                      <Text style={{fontSize: 22, alignSelf: 'center', color: this.props.bankStyle.linkColor}}>Forms you are signing</Text>
+                      <Text style={styles.formsToSign}>Forms you are signing</Text>
                       {formList}
                     </View>
     }
@@ -798,7 +806,6 @@ class NewResource extends Component {
     //             </View>
     // StatusBar.setHidden(true);
     let submit
-    let bankStyle = this.props.bankStyle
     if (!isRegistration) {
       if (this.state.err) {
         Alert.alert(this.state.err)
@@ -806,16 +813,16 @@ class NewResource extends Component {
       }
       if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={this.onSavePressed}>
-                   <View style={{marginHorizontal: -3, marginBottom: -2, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
+                   <View style={styles.submitBarInFooter}>
                      <View style={styles.bar}>
-                       <Text style={{fontSize: 24,color: bankStyle.contextTextColor}}>{translate('next')}</Text>
+                       <Text style={styles.submitBarInFooterText}>{translate('next')}</Text>
                      </View>
                    </View>
                  </TouchableOpacity>
       else
         submit  = <TouchableOpacity onPress={this.onSavePressed}>
-                    <View style={[styles.submit, {backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3'}]}>
-                      <Icon name='ios-send' color='#fff' size={30} style={{marginTop: 5}}/>
+                    <View style={styles.submit}>
+                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                       <Text style={styles.submitText}>{translate('Submit')}</Text>
                     </View>
                   </TouchableOpacity>
@@ -826,7 +833,7 @@ class NewResource extends Component {
                   ref='scrollView' {...this.scrollviewProps}
                   keyboardShouldPersistTaps="always"
                   keyboardDismissMode={isRegistration || Platform.OS === 'ios' ? 'on-drag' : 'interactive'}>
-        <View style={[styles.container, formStyle]}
+        <View style={formStyle}
           onStartShouldSetResponderCapture={(e) => {
             if (Platform.OS === 'android') {
               const focusField = TextInputState.currentlyFocusedField();
@@ -836,10 +843,10 @@ class NewResource extends Component {
             }
           }}>
           <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
-            <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange.bind(this)}/>
+            <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
             {formsToSign}
             {button}
-            <View style={{marginTop: isRegistration ? 0 : -10, paddingBottom: 20}}>
+            <View style={styles.arrayItems}>
               {arrayItems}
             </View>
             {jsons}
@@ -861,6 +868,11 @@ class NewResource extends Component {
         //          </View>
 
       }
+      else if (this.state.message) {
+        errors = <View style={styles.errors}>
+                   <Text style={styles.errorsText}>{translate(this.state.message)}</Text>
+                 </View>
+      }
       let contentSeparator = utils.getContentSeparator(bankStyle)
       return <PageView style={platformStyles.container} separator={contentSeparator}>
                {errors}
@@ -869,7 +881,7 @@ class NewResource extends Component {
     }
     let title
     if (!isRegistration  &&  !bankStyle.logoNeedsText)
-      title = <View style={{backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 25, justifyContent: 'center', alignItems: 'center'}}>
+      title = <View style={styles.logoNeedsText}>
                 {translate(meta)}
               </View>
 
@@ -914,7 +926,7 @@ class NewResource extends Component {
       rightButtonTitle: 'Accept',
       passProps: {
         resource: termsAndConditions,
-        action: this.acceptTsAndCs.bind(this)
+        action: this.acceptTsAndCs
       }
    })
   }
@@ -959,10 +971,10 @@ class NewResource extends Component {
       passProps: {
         prop:        prop.name,
         resource:    resource,
-        onAddItem:   this.onAddItem.bind(this),
+        onAddItem:   this.onAddItem,
         list:        resource[prop.name],
         returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback:    this.setChosenValue.bind(this),
+        callback:    this.setChosenValue,
       }
     });
   }
@@ -980,7 +992,7 @@ class NewResource extends Component {
     let counter, itemsArray
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     if (count) {
-      let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem.bind(this))}</View>
+      let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem)}</View>
 
       let separator = <View style={styles.separator}></View>
       let cstyle = count ? styles.activePropTitle : styles.noItemsText
@@ -995,7 +1007,7 @@ class NewResource extends Component {
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
-      counter = <View style={[styles.itemsCounterEmpty]}>{
+      counter = <View style={styles.itemsCounterEmpty}>{
                   isPhoto
                     ? <Icon name='ios-camera-outline'  size={25} color={linkColor} />
                     : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={linkColor} />
@@ -1007,16 +1019,17 @@ class NewResource extends Component {
             : null
 
     let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-    let actionableItem = isPhoto
-      ? <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
-          {itemsArray}
-        </ImageInput>
-      : <TouchableOpacity style={aiStyle}
-            onPress={this.onNewPressed.bind(this, bl, meta)}>
-          {itemsArray}
-        </TouchableOpacity>
+    let actionableItem
+    if (isPhoto)
+      actionableItem = <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
+                        {itemsArray}
+                      </ImageInput>
+    else
+      actionableItem = <TouchableOpacity style={aiStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
+                        {itemsArray}
+                      </TouchableOpacity>
 
-    let istyle = [styles.itemButton]
+    let istyle = [styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
     if (err)
       istyle.push({marginBottom: 10})
     else if (!count)
@@ -1025,20 +1038,22 @@ class NewResource extends Component {
       let height = resource[bl.name].photo ? 55 : 45
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
-
+    istyle = StyleSheet.flatten(istyle)
     let acStyle = [{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]
-    let actionableCounter = isPhoto
-      ? <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
-          {counter}
-        </ImageInput>
-      : <TouchableOpacity style={acStyle}
-            onPress={this.onNewPressed.bind(this, bl, meta)}>
-          {counter}
-        </TouchableOpacity>
+    let actionableCounter
+    if (isPhoto)
+      actionableCounter = <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
+                            {counter}
+                          </ImageInput>
+    else
+      actionableCounter = <TouchableOpacity style={acStyle}
+                              onPress={this.onNewPressed.bind(this, bl, meta)}>
+                            {counter}
+                          </TouchableOpacity>
     let error = this.getErrorView({prop: bl})
     return (
       <View key={this.getNextKey()}>
-        <View style={[istyle, {marginHorizontal: 10, borderBottomColor: lcolor}]} ref={bl.name}>
+        <View style={istyle} ref={bl.name}>
           <View style={styles.items}>
             {actionableItem}
             {actionableCounter}
@@ -1185,188 +1200,224 @@ reactMixin(NewResource.prototype, NewResourceMixin);
 reactMixin(NewResource.prototype, ResourceMixin);
 NewResource = makeResponsive(NewResource)
 
-var styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  noItemsText: {
-    fontSize: 20,
-    color: '#AAAAAA',
-    // alignSelf: 'center',
-    // paddingLeft: 10
-  },
-  forms: {
-    fontSize: 18,
-    color: '#757575',
-    padding: 10
-  },
-  itemsText: {
-    fontSize: 20,
-    color: '#000000',
-    // alignSelf: 'center',
-    paddingLeft: 10
-  },
-  itemsCounterEmpty: {
-    paddingHorizontal: 5
-  },
-  itemsCounter: {
-    marginTop: 25,
-    paddingHorizontal: 5
-  },
-  itemButton: {
-    height: 60,
-    marginLeft: 10,
-    // marginLeft: 10,
-    borderColor: '#ffffff',
-    // borderBottomColor: '#b1b1b1',
-    // borderBottomWidth: 1,
-    paddingBottom: 10,
-    justifyContent: 'flex-end',
-  },
-  photoButton: {
-    marginLeft: 10,
-    borderColor: '#ffffff',
-    // borderBottomColor: '#b1b1b1',
-    // borderBottomWidth: 1,
-    // paddingBottom: 5,
-  },
+var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankStyle, isRegistration }) {
+  return StyleSheet.create({
+    container: {
+      flex: 1
+    },
+    noItemsText: {
+      fontSize: 20,
+      color: '#AAAAAA',
+      // alignSelf: 'center',
+      // paddingLeft: 10
+    },
+    forms: {
+      fontSize: 18,
+      color: '#757575',
+      padding: 10
+    },
+    itemsText: {
+      fontSize: 20,
+      color: '#000000',
+      // alignSelf: 'center',
+      paddingLeft: 10
+    },
+    itemsCounterEmpty: {
+      paddingHorizontal: 5
+    },
+    itemsCounter: {
+      marginTop: 25,
+      paddingHorizontal: 5
+    },
+    itemButton: {
+      height: 60,
+      marginLeft: 10,
+      // marginLeft: 10,
+      borderColor: '#ffffff',
+      // borderBottomColor: '#b1b1b1',
+      // borderBottomWidth: 1,
+      paddingBottom: 10,
+      justifyContent: 'flex-end',
+    },
+    photoButton: {
+      marginLeft: 10,
+      borderColor: '#ffffff',
+      // borderBottomColor: '#b1b1b1',
+      // borderBottomWidth: 1,
+      // paddingBottom: 5,
+    },
 
-  photoBG: {
-    // marginTop: -15,
-    alignItems: 'center',
-    paddingBottom: 10,
-    // backgroundColor: '#245D8C'
-  },
-  err: {
-    // paddingVertical: 10,
-    flexWrap: 'wrap',
-    paddingHorizontal: 25,
-    fontSize: 16,
-    color: 'darkred',
-  },
-  getStartedText: {
-    // color: '#f0f0f0',
-    color: '#eeeeee',
-    fontSize: 20,
-    fontWeight:'300',
-    alignSelf: 'center'
-  },
-  getStarted: {
-    backgroundColor: '#467EAE', //'#2892C6',
-    paddingVertical: 10,
-    marginLeft: 10,
-    alignSelf: 'stretch',
-  },
-  thumbButton: {
-    marginTop: 20,
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  thumb: {
-    width:  40,
-    height: 40,
-    marginRight: 2,
-    borderRadius: 5
-  },
-  // error: {
-  //   marginTop: -10,
-  //   backgroundColor: 'transparent'
-  // },
-  // errorText: {
-  //   fontSize: 14,
-  //   marginLeft: 10,
-  //   color: '#a94442'
-  // },
-  items: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  activePropTitle: {
-    fontSize: 12,
-    marginTop: 20,
-    paddingBottom: 5,
-    // marginBottom: 5,
-    color: '#bbbbbb'
-  },
-  photoStrip: {
-    paddingBottom: 5
-  },
-  photoStripItems: {
-    flexDirection: 'row'
-  },
-  logo: {
-    opacity: 0.7,
-    alignSelf: 'flex-end',
-  },
-  // submitButton: {
-  //   paddingBottom: 30,
-  //   justifyContent: 'center',
-  //   alignSelf: 'center'
-  // },
-  noRegistration: {
-    justifyContent: 'flex-start'
-  },
-  noRegistrationButton: {
-    height: 0
-  },
-  indicator: {
-    alignItems: 'center',
-    marginTop: 50
-  },
-  formListItem: {
-    padding: 10,
-    borderBottomColor: '#eeeeee',
-    borderBottomWidth: 1
-  },
-  scroll: {
-    backgroundColor: 'transparent',
-    paddingTop:10
-  },
-  bar: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 10,
-    justifyContent: 'center'
-  },
-  itemsWithCount: {
-    flex: 7,
-    paddingTop: 15
-  },
-  itemsWithoutCount: {
-    flex: 7,
-    paddingTop: 15,
-    paddingBottom: 7
-  },
-  submit: {
-    backgroundColor: '#7AAAC3',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: 340,
-    marginTop: 20,
-    marginBottom: 50,
-    alignSelf: 'center',
-    height: 40,
-    borderRadius: 5,
-    marginHorizontal: 20
-  },
-  submitText: {
-    fontSize: 20,
-    paddingLeft: 7,
-    color: '#ffffff',
-    alignSelf: 'center'
-  },
-  errors: {
-    height: 35,
-    justifyContent: 'center',
-    backgroundColor: '#990000',
-    alignItems: 'center'
-  },
-  errorsText: {
-    color: '#eeeeee',
-    fontSize: 16
-  }
+    photoBG: {
+      // marginTop: -15,
+      alignItems: 'center',
+      paddingBottom: 10,
+      // backgroundColor: '#245D8C'
+    },
+    err: {
+      // paddingVertical: 10,
+      flexWrap: 'wrap',
+      paddingHorizontal: 25,
+      fontSize: 16,
+      color: 'darkred',
+    },
+    getStartedText: {
+      // color: '#f0f0f0',
+      color: '#eeeeee',
+      fontSize: 20,
+      fontWeight:'300',
+      alignSelf: 'center'
+    },
+    getStarted: {
+      backgroundColor: '#467EAE', //'#2892C6',
+      paddingVertical: 10,
+      marginLeft: 10,
+      alignSelf: 'stretch',
+    },
+    thumbButton: {
+      marginTop: 20,
+      alignSelf: 'stretch',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    thumb: {
+      width:  40,
+      height: 40,
+      marginRight: 2,
+      borderRadius: 5
+    },
+    // error: {
+    //   marginTop: -10,
+    //   backgroundColor: 'transparent'
+    // },
+    // errorText: {
+    //   fontSize: 14,
+    //   marginLeft: 10,
+    //   color: '#a94442'
+    // },
+    items: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    activePropTitle: {
+      fontSize: 12,
+      marginTop: 20,
+      paddingBottom: 5,
+      // marginBottom: 5,
+      color: '#bbbbbb'
+    },
+    photoStrip: {
+      paddingBottom: 5
+    },
+    photoStripItems: {
+      flexDirection: 'row'
+    },
+    logo: {
+      opacity: 0.7,
+      alignSelf: 'flex-end',
+    },
+    // submitButton: {
+    //   paddingBottom: 30,
+    //   justifyContent: 'center',
+    //   alignSelf: 'center'
+    // },
+    noRegistration: {
+      flex: 1,
+      justifyContent: 'flex-start'
+    },
+    noRegistrationButton: {
+      height: 0
+    },
+    indicator: {
+      alignItems: 'center',
+      marginTop: 50
+    },
+    formListItem: {
+      padding: 10,
+      borderBottomColor: '#eeeeee',
+      borderBottomWidth: 1
+    },
+    scroll: {
+      backgroundColor: 'transparent',
+      paddingTop:10
+    },
+    bar: {
+      backgroundColor: 'transparent',
+      paddingHorizontal: 10,
+      justifyContent: 'center'
+    },
+    itemsWithCount: {
+      flex: 7,
+      paddingTop: 15
+    },
+    itemsWithoutCount: {
+      flex: 7,
+      paddingTop: 15,
+      paddingBottom: 7
+    },
+    submit: {
+      backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 340,
+      marginTop: 20,
+      marginBottom: 50,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 5,
+      marginHorizontal: 20
+    },
+    submitText: {
+      fontSize: 20,
+      paddingLeft: 7,
+      color: '#ffffff',
+      alignSelf: 'center'
+    },
+    errors: {
+      height: 45,
+      justifyContent: 'center',
+      backgroundColor: '#990000',
+      alignItems: 'center'
+    },
+    errorsText: {
+      color: '#eeeeee',
+      fontSize: 16
+    },
+    sendIcon: {
+      marginTop: 5
+    },
+    formsToSign: {
+      fontSize: 22,
+      alignSelf: 'center',
+      color: bankStyle.linkColor
+    },
+    submitBarInFooter: {
+      marginHorizontal: -3,
+      marginBottom: -2,
+      backgroundColor: bankStyle.contextBackgroundColor,
+      borderTopColor: bankStyle.contextBackgroundColor,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      height: 45,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    submitBarInFooterText: {
+      fontSize: 24,
+      color: bankStyle.contextTextColor
+    },
+    logoNeedsText: {
+      backgroundColor: bankStyle.contextBackgroundColor,
+      borderTopColor: bankStyle.contextBackgroundColor,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      height: 25,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    arrayItems: {
+      marginTop: isRegistration ? 0 : -10,
+      paddingBottom: 20
+    }
+  })
 })
-
 module.exports = NewResource;
   // showChoice(prop) {
   //   var self = this;

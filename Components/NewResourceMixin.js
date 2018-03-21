@@ -27,7 +27,6 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import moment from 'moment'
 
 import constants from '@tradle/constants'
-import plugins from '@tradle/biz-plugins'
 
 import ResourceList from './ResourceList'
 import GridList from './GridList'
@@ -200,6 +199,7 @@ var NewResourceMixin = {
         if (idx !== -1  &&  props[p].list) {
           props[p].list.forEach((pp) => {
             eCols[pp] = props[pp]
+            requestedProperties[pp] = ''
             // this.addError(p, params)
           })
         }
@@ -226,7 +226,7 @@ var NewResourceMixin = {
         continue
 
       let maybe = required  &&  !required.hasOwnProperty(p)
-      if (maybe  &&  requestedProperties  &&  requestedProperties[p] != null)
+      if (maybe  &&  requestedProperties && p.indexOf('_group') === -1 &&  requestedProperties[p] != null)
         maybe = false
 
       let type = props[p].type;
@@ -739,6 +739,10 @@ var NewResourceMixin = {
     this.floatingProps[prop] = resource[prop]
     this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
     this.setState({ resource })
+    if (!this.props.search) {
+      Actions.getRequestedProperties(resource)
+      Actions.saveTemporary(resource)
+    }
   },
 
   showCamera(params) {
@@ -1656,8 +1660,7 @@ var NewResourceMixin = {
 
     this.setState(state);
     if (!this.props.search) {
-      if (plugins.length)
-        Actions.getRequestedProperties(r)
+      Actions.getRequestedProperties(r)
       Actions.saveTemporary(r)
     }
   },
