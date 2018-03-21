@@ -65,7 +65,6 @@ import constants from '@tradle/constants'
 
 const Promise = require('bluebird')
 const debug = require('debug')('tradle:app:utils')
-
 const IS_MESSAGE = '_message'
 var strMap = {
   'Please fill out this form and attach a snapshot of the original document': 'fillTheFormWithAttachments',
@@ -140,6 +139,8 @@ var stylesCache = {}
 
 var defaultPropertyValues = {}
 var hidePropertyInEdit = {}
+
+const IS_URL_REGEX = /^https?:\/\//
 
 var utils = {
   isEmpty(obj) {
@@ -2566,11 +2567,13 @@ var utils = {
   },
   getContentWidth(component) {
     let width = component ? this.dimensions(component).width : this.dimensions().width
-    return ENV.fullScreen ? width - 20 : Math.min(width, MAX_WIDTH)
+    return width > MAX_WIDTH ? MAX_WIDTH : width
+    // return ENV.fullScreen ? width - 20 : Math.min(width, MAX_WIDTH)
   },
   setGlobal: function (key, val) {
     global[key] = val
-  }
+  },
+  isUrl: str => IS_URL_REGEX.test(str)
 }
 
 if (__DEV__) {
