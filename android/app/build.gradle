@@ -122,7 +122,10 @@ android {
 
     defaultConfig {
         applicationId "io.tradle.dev"
-        minSdkVersion 17
+        // https://developer.android.com/training/articles/keystore.html
+        // KeyPairGenerator for EC is supported on APIs 23+
+        // minSdkVersion 23
+        minSdkVersion 19
         targetSdkVersion 23
         versionCode vbuild
         versionName vmajor + "." + vminor + "." + vpatch

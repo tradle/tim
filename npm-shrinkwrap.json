@@ -6161,9 +6161,9 @@
       "resolved": "https://registry.npmjs.org/react-native-device-info/-/react-native-device-info-0.21.2.tgz"
     },
     "react-native-ecc": {
-      "version": "1.4.0",
-      "from": "react-native-ecc@>=1.4.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-ecc/-/react-native-ecc-1.4.0.tgz"
+      "version": "2.1.0",
+      "from": "react-native-ecc@latest",
+      "resolved": "https://registry.npmjs.org/react-native-ecc/-/react-native-ecc-2.1.0.tgz"
     },
     "react-native-exception-handler": {
       "version": "2.2.0",
