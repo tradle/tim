@@ -872,8 +872,9 @@ class NewResource extends Component {
                   </TouchableOpacity>
 
     }
+    let contentStyle = {backgroundColor: 'transparent', width: width, alignSelf: 'center', paddingTop:10}
     let content =
-      <ScrollView style={{backgroundColor: 'transparent', width: width, alignSelf: 'center', paddingTop:10}}
+      <ScrollView style={contentStyle}
                   ref='scrollView' {...this.scrollviewProps}>
         <View style={formStyle}>
           {photoView}
@@ -893,6 +894,7 @@ class NewResource extends Component {
         {submit}
       </ScrollView>
 
+
     const { properties } = meta
     const droppable = Object.keys(properties).find(key => {
       const prop = properties[key]
@@ -905,18 +907,21 @@ class NewResource extends Component {
       // let them upload, because there is none in web
       return prop.component != null
     })
-
     if (droppable) {
       const prop = properties[droppable]
+      let contentSeparator = utils.getContentSeparator(bankStyle)
+      // return (
       return (
-        <DropPage
-          accept="image/*"
-          multiple={prop.type === 'array'}
-          style={platformStyles.container}
-          onDrop={(accepted, rejected) => this.onDropFiles({ prop, rejected, files: accepted })}
-        >
-          {content}
-        </DropPage>
+        <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator}>
+          <DropPage
+            accept="image/*"
+            multiple={prop.type === 'array'}
+            style={platformStyles.container}
+            onDrop={(accepted, rejected) => this.onDropFiles({ prop, rejected, files: accepted })}
+          >
+            {content}
+          </DropPage>
+        </PageView>
       )
     }
     if (!isRegistration) {
