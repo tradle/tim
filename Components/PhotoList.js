@@ -69,7 +69,7 @@ class PhotoList extends Component {
   }
   render() {
     var photos = this.props.photos;
-    if (!photos ||  !photos.length || (photos.length === 1  &&  this.props.isView))
+    if (!photos ||  !photos.length) // || (photos.length === 1  &&  this.props.isView))
       return null;
     // if (this.props.isView  &&  photos.length === 1  &&  Platform.OS !== 'web')
     //   return null
