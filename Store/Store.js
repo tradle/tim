@@ -5890,7 +5890,9 @@ var Store = Reflux.createStore({
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
     let importedVerification
-    if (application) {
+    // Right now we request all imported verificationsthe first time.
+    // May be we'll decide to page them too
+    if (application  &&  !endCursor) {
       context = application._context
       if (!application.context)
         application = await this._getItemFromServer(application)

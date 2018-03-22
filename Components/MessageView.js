@@ -5,6 +5,7 @@ import Reflux from 'reflux'
 import reactMixin from 'react-mixin'
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
+import { makeResponsive } from 'react-native-orient'
 
 import utils, { translate } from '../utils/utils'
 import constants from '@tradle/constants'
@@ -531,6 +532,7 @@ class MessageView extends Component {
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
 reactMixin(MessageView.prototype, ResourceMixin);
+MessageView = makeResponsive(MessageView)
 
 var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
