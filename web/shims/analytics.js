@@ -4,12 +4,15 @@ const debug = require('debug')('tradle:app:analytics')
 
 const noop = function () {}
 const ga = global.ga || noop
-
-module.exports = {
+const analyticsApi = {
   logEvent,
   setUserId,
   setUserProperty,
-  setEnabled
+  setAnalyticsCollectionEnabled
+}
+
+export default {
+  analytics: () => analyticsApi
 }
 
 function logEvent (action, data) {
@@ -36,6 +39,6 @@ function setUserProperty (key, value) {
   debug('setUserProperty not implemented')
 }
 
-function setEnabled (bool) {
+function setAnalyticsCollectionEnabled (bool) {
   debug('setEnabled not implemented')
 }
