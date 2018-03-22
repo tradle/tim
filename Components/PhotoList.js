@@ -72,53 +72,25 @@ class PhotoList extends Component {
     if (!photos ||  !photos.length || (photos.length == 1  &&  this.props.isView))
       return null;
 
-    var styles = createStyles()
-    var val = this.renderPhotoList(photos, styles);
+    var val = this.renderPhotoList(photos);
     return (
        <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5}]} key={this.getNextKey()}>
          {val}
        </View>
      );
   }
-
-  renderPhotoList(val, styles) {
-    // var dataSource = this.state.dataSource.cloneWithRows(
-    //   groupByEveryN(val, this.props.numberInRow || 3)
-    // );
-    // return (
-    //   <View style={styles.row}>
-    //      <ListView
-    //         scrollEnabled = {false}
-    //         removeClippedSubviews={false}
-    //         enableEmptySections={true}
-    //         renderRow={this.renderRow.bind(this, styles)}
-    //         dataSource={dataSource} />
-    //   </View>
-    // );
+  renderPhotoList(photos) {
     var imageStyle = this.props.style;
-    var len = val.length
-    if (!imageStyle  ||  utils.isEmpty(imageStyle)) {
-      switch (len) {
-      case 1:
-      case 2:
-      case 3:
-        imageStyle = [styles.thumb3];
-        break;
-      case 4:
-        imageStyle = [styles.thumb4];
-        break;
-      default:
-      case 5:
-        imageStyle = [styles.thumb5];
-        break;
-      }
-    }
+    var len = photos.length
+    if (!imageStyle  ||  utils.isEmpty(imageStyle))
+      imageStyle = this.getPhotoStyle(photos)
+
     let inRow = this.props.numberInRow || Math.floor(utils.dimensions().width / imageStyle[0].width) - 1 // 2 is padding
     let rows = []
     for (var i=0; i<len; i++) {
       let row = []
       for (let j = 0; j<inRow  &&  i < len; j++, i++)
-        row.push(this.renderRow(styles, val[i], imageStyle))
+        row.push(this.renderRow(photos[i], imageStyle))
 
       rows.push(<View style={{flexDirection: 'row'}} key={this.getNextKey()}>
                   {row}
@@ -130,14 +102,8 @@ class PhotoList extends Component {
         {rows}
       </View>
     );
-    // return (
-    //   <View style={styles.row}>
-    //     {this.renderRow(styles, val)}
-    //   </View>
-    // );
-
   }
-  renderRow(styles, photo, imageStyle)  {
+  renderRow(photo, imageStyle)  {
     var uri = photo.url
     if (!uri)
       return
@@ -152,128 +118,42 @@ class PhotoList extends Component {
         </TouchableHighlight>
       </View>
     )
-    // return (
-    //   <Animated.View style={[{paddingTop: 2, margin: 1}, {transform: [{scale: this.state.anim}]},imageStyle[0]]} key={this.getNextKey() + '_photo'}>
-    //     <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
-    //        <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
-    //     </TouchableHighlight>
-    //   </Animated.View>
-    // )
   }
 
+  getPhotoStyle(photos) {
+    var width = utils.dimensions(PhotoList).width
+    var d3 = Math.min((width / 3) - 5, 240)
+    var d4 = Math.min((width / 4) - 5, 190)
+    var d5 = Math.min((width / 5) - 5, MIN_WIDTH)
+    switch (photos.length) {
+    case 1:
+    case 2:
+    case 3:
+      return {width: d3, height: d3};
+    case 4:
+      return {width: d4, height: d4};
+    default:
+    case 5:
+      return {width: d5, height: d5};
+    }
+  }
 }
 reactMixin(PhotoList.prototype, PhotoCarouselMixin);
 reactMixin(PhotoList.prototype, RowMixin);
 
-var createStyles = utils.styleFactory(PhotoList, function ({ dimensions }) {
-  var width = dimensions.width
-  var d3 = Math.min((width / 3) - 5, 240)
-  var d4 = Math.min((width / 4) - 5, 190)
-  var d5 = Math.min((width / 5) - 5, MIN_WIDTH)
-  return StyleSheet.create({
-    photoContainer: {
-      paddingTop: 5,
-      // alignSelf: 'center',
-    },
-    thumb3: {
-      width: d3,
-      height: d3,
-    },
-    thumb4: {
-      width: d4,
-      height: d4,
-    },
-    thumb5: {
-      width: d5,
-      height: d5,
-    },
-    thumbCommon: {
-      borderWidth: 0.5,
-      margin: 1,
-      borderColor: '#999999'
-    },
-    row: {
-      flexDirection: 'row',
-      // marginTop: 3,
-      flex: 1,
-    },
-  })
+var styles = StyleSheet.create({
+  photoContainer: {
+    paddingTop: 5,
+  },
+  thumbCommon: {
+    borderWidth: 0.5,
+    margin: 1,
+    borderColor: '#999999'
+  },
+  row: {
+    flexDirection: 'row',
+    flex: 1,
+  },
 })
 
 module.exports = PhotoList;
-  // renderPhotoList(val, styles) {
-  //   var dataSource = this.state.dataSource.cloneWithRows(
-  //     groupByEveryN(val, this.props.numberInRow || 3)
-  //   );
-  //   return (
-  //     <View style={styles.row}>
-  //        <ListView
-  //           scrollEnabled = {true}
-  //           removeClippedSubviews={false}
-  //           enableEmptySections={true}
-  //           style={{overflow: 'visible'}}
-  //           renderRow={this.renderRow.bind(this, styles)}
-  //           dataSource={dataSource} />
-  //     </View>
-  //   );
-  // }
-
-  // renderRow(styles, photos)  {
-  //   var len = photos.length;
-  //   var imageStyle = this.props.style;
-  //   if (!imageStyle) {
-  //     switch (len) {
-  //       case 1:
-  //       case 2:
-  //       case 3:
-  //         imageStyle = [styles.thumb3];
-  //         break;
-  //       case 4:
-  //         imageStyle = [styles.thumb4];
-  //         break;
-  //       default:
-  //       case 5:
-  //         imageStyle = [styles.thumb5];
-  //         break;
-  //      }
-  //    }
-  //    var photos = photos.map((photo) => {
-  //     if (photo === null)
-  //       return null;
-  //     // var title = !photo.title || photo.title === 'photo'
-  //     //           ? <View />
-  //     //           : <Text style={styles.photoTitle}>{photo.title}</Text>
-
-  //     // return (
-  //     // <Animated.Image                         // Base: Image, Text, View
-  //     //   source={{uri: utils.getImageUri(photo.url)}}
-  //     //   style={{
-  //     //     flex: 1,
-  //     //     transform: [                        // `transform` is an ordered array
-  //     //       {scale: this.state.bounceValue},  // Map `bounceValue` to `scale`
-  //     //     ]
-  //     //   }}
-  //     // />);
-  //     // var uri = utils.getImageUri(photo.url)
-  //     var uri = photo.url
-  //     if (!uri)
-  //       return <View />
-  //     var source = {uri: uri};
-  //     if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
-  //       source.isStatic = true;
-
-  //     return (
-  //       <View style={[{paddingTop: 2, margin: 1, flexDirection: 'column'}, imageStyle[0]]} key={this.getNextKey() + '_photo'}>
-  //         <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
-  //            <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
-  //         </TouchableHighlight>
-  //       </View>
-  //     );
-  //   });
-
-  //   return (
-  //     <View style={styles.row}>
-  //       {photos}
-  //     </View>
-  //   );
-  // }
