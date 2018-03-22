@@ -45,7 +45,8 @@ module.exports = {
 
     return ffPrivateDetector
   },
-  navBarHeight: isSafari || isIE ? 64 : 0
+  navBarHeight: 64
+  // navBarHeight: isSafari || isIE ? 64 : 0
 }
 
 // adapted from https://gist.github.com/cou929/7973956
