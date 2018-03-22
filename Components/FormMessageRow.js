@@ -40,6 +40,7 @@ import React, { Component } from 'react'
 class FormMessageRow extends Component {
   constructor(props) {
     super(props);
+    this.onPress = this.onPress.bind(this)
   }
   shouldComponentUpdate(nextProps, nextState) {
     let {resource, to, orientation, application} = this.props
@@ -70,48 +71,6 @@ class FormMessageRow extends Component {
       component: ArticleView,
       passProps: {url: this.props.resource.message}
     });
-  }
-  verify(event) {
-    var resource = this.props.resource;
-    var isVerification = resource[TYPE] === VERIFICATION;
-    var r = isVerification ? resource.document : resource
-    var bankStyle = this.props.bankStyle
-    var passProps = {
-      resource: r,
-      bankStyle: bankStyle,
-      currency: this.props.currency
-    }
-    if (!isVerification)
-      passProps.verify = true
-    else
-      passProps.verification = resource
-
-    var model = utils.getModel(r[TYPE]);
-    var route = {
-      id: 5,
-      component: MessageView,
-      backButtonTitle: 'Back',
-      passProps: passProps,
-      title: translate(model)
-    }
-    if (this.isMyMessage()) {
-      route.rightButtonTitle = 'Edit'
-      route.onRightButtonPress = {
-        title: 'Edit',
-        component: NewResource,
-        // titleTextColor: '#7AAAC3',
-        id: 4,
-        passProps: {
-          resource: r,
-          metadata: model,
-          bankStyle: bankStyle,
-          currency: this.props.currency,
-          callback: this.props.onSelect.bind(this, r),
-          defaultPropertyValues: this.props.defaultPropertyValues,
-        }
-      };
-    }
-    this.props.navigator.push(route);
   }
   render() {
     let { resource, to, bankStyle, application } = this.props
@@ -197,7 +156,7 @@ class FormMessageRow extends Component {
 
     let renderedRow = []
     let isMyMessage = this.isMyMessage()
-    let ret = this.formatRow(isMyMessage || isShared, renderedRow)
+    this.formatRow(isMyMessage || isShared, renderedRow)
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let isShared = this.isShared()
@@ -277,7 +236,6 @@ class FormMessageRow extends Component {
         return
     }
     var first = true;
-    var self = this;
 
     var properties = model.properties;
     var onPressCall;
@@ -320,7 +278,7 @@ class FormMessageRow extends Component {
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-        onPressCall = this.onPress.bind(self);
+        onPressCall = this.onPress;
         vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>);
       }
       if (resource[v]  &&  properties[v].signature) {
@@ -355,8 +313,8 @@ class FormMessageRow extends Component {
 
         if (!val)
           return
-        if (model.properties.verifications  &&  !isMyMessage && !utils.isVerifier(resource))
-          onPressCall = this.verify.bind(self);
+        // if (model.properties.verifications  &&  !isMyMessage && !utils.isVerifier(resource))
+        //   onPressCall = this.verify.bind(this)
         if (!isMyMessage && !isShared)
           style = [style, {paddingBottom: 10, color: '#2892C6'}];
         vCols.push(this.getPropRow(properties[v], resource, val))
@@ -378,9 +336,9 @@ class FormMessageRow extends Component {
         renderedRow.push(v);
       })
     }
-    if (onPressCall)
-      return {onPressCall: onPressCall}
-    return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+    // if (onPressCall)
+    //   return {onPressCall: onPressCall}
+    // return {onPressCall: this.props.onSelect.bind(this, resource, null)}
   }
 }
 

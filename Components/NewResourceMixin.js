@@ -27,7 +27,6 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import moment from 'moment'
 
 import constants from '@tradle/constants'
-import plugins from '@tradle/biz-plugins'
 
 import Navigator from './Navigator'
 import ResourceList from './ResourceList'
@@ -201,6 +200,7 @@ var NewResourceMixin = {
         if (idx !== -1  &&  props[p].list) {
           props[p].list.forEach((pp) => {
             eCols[pp] = props[pp]
+            requestedProperties[pp] = ''
             // this.addError(p, params)
           })
         }
@@ -227,7 +227,7 @@ var NewResourceMixin = {
         continue
 
       let maybe = required  &&  !required.hasOwnProperty(p)
-      if (maybe  &&  requestedProperties  &&  requestedProperties[p] != null)
+      if (maybe  &&  requestedProperties && p.indexOf('_group') === -1 &&  requestedProperties[p] != null)
         maybe = false
 
       let type = props[p].type;
@@ -703,18 +703,18 @@ var NewResourceMixin = {
       if (!scan) return
 
       const { personal, document } = scan
-      if (personal.dateOfBirth) {
-        personal.dateOfBirth = formatDate(personal.dateOfBirth)
-      }
+      // if (personal.dateOfBirth) {
+      //   personal.dateOfBirth = formatDate(personal.dateOfBirth)
+      // }
 
-      if (document.dateOfExpiry) {
-        dateOfExpiry = document.dateOfExpiry
-        document.dateOfExpiry = formatDate(document.dateOfExpiry)
-      }
+      // if (document.dateOfExpiry) {
+      //   dateOfExpiry = document.dateOfExpiry
+      //   document.dateOfExpiry = formatDate(document.dateOfExpiry)
+      // }
 
-      if (document.dateOfIssue) {
-        document.dateOfIssue = formatDate(document.dateOfIssue)
-      }
+      // if (document.dateOfIssue) {
+      //   document.dateOfIssue = formatDate(document.dateOfIssue)
+      // }
 
       r[prop + 'Json'] = scan
       return
@@ -740,6 +740,10 @@ var NewResourceMixin = {
     this.floatingProps[prop] = resource[prop]
     this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
     this.setState({ resource })
+    if (!this.props.search) {
+      Actions.getRequestedProperties(resource)
+      Actions.saveTemporary(resource)
+    }
   },
 
   showCamera(params) {
@@ -1657,8 +1661,7 @@ var NewResourceMixin = {
 
     this.setState(state);
     if (!this.props.search) {
-      if (plugins.length)
-        Actions.getRequestedProperties(r)
+      Actions.getRequestedProperties(r)
       Actions.saveTemporary(r)
     }
   },

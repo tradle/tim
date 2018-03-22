@@ -5,6 +5,7 @@ import Reflux from 'reflux'
 import reactMixin from 'react-mixin'
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
+import { makeResponsive } from 'react-native-orient'
 
 import utils, { translate } from '../utils/utils'
 import constants from '@tradle/constants'
@@ -52,6 +53,7 @@ import platformStyles from '../styles/platform'
 import StyleSheet from '../StyleSheet'
 
 class MessageView extends Component {
+  static displayName = 'MessageView';
   props: {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
@@ -76,6 +78,12 @@ class MessageView extends Component {
       else
         currentRoutes[len - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
     }
+    this.doVerify = this.doVerify.bind(this)
+    this.showVerification = this.showVerification.bind(this)
+    this.onCheck = this.onCheck.bind(this)
+    this.onPageLayout = this.onPageLayout.bind(this)
+    this.getRefResource = this.getRefResource.bind(this)
+
   }
   componentWillMount() {
     // if (this.props.resource.id)
@@ -237,7 +245,7 @@ class MessageView extends Component {
         null,
         [
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
-          {text: 'Ok', onPress: this.verify.bind(this)},
+          {text: 'Ok', onPress: this.doVerify},
         ]
       )
     }
@@ -363,12 +371,13 @@ class MessageView extends Component {
 
     let propertySheet
     let bankStyle = this.state.bankStyle || style
+    let styles = createStyles({bankStyle})
     if (isVerificationTree)
       propertySheet = <VerificationView navigator={navigator}
                                         resource={resource}
                                         bankStyle={bankStyle}
                                         currency={currency}
-                                        showVerification={this.showVerification.bind(this)}/>
+                                        showVerification={this.showVerification}/>
     let content = <View>
                     <View style={styles.photoListStyle}>
                       <PhotoList photos={photos} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
@@ -381,7 +390,7 @@ class MessageView extends Component {
                     </View>
                   </View>
 
-    let checkProps = !isVerification && isVerifier /* && !utils.isReadOnlyChat(resource)*/ ? this.onCheck.bind(this) : null
+    let checkProps = !isVerification && isVerifier /* && !utils.isReadOnlyChat(resource)*/ && this.onCheck
     let actionPanel
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
@@ -395,8 +404,8 @@ class MessageView extends Component {
                                  showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
                                  bankStyle={bankStyle}
-                                 onPageLayout={this.onPageLayout.bind(this)}
-                                 showRefResource={this.getRefResource.bind(this)}
+                                 onPageLayout={this.onPageLayout}
+                                 showRefResource={this.getRefResource}
                                  defaultPropertyValues={defaultPropertyValues}
                                  checkProperties={checkProps} >
                       {content}
@@ -422,14 +431,14 @@ class MessageView extends Component {
     // borderBottomColor: bankStyle.productRowBgColor
     let dateView
     if (isVerificationTree || isForm) {
-      dateView = <View style={[styles.band, {flexDirection: 'row', justifyContent: 'flex-end', borderBottomColor: '#eee' }]}>
+      dateView = <View style={styles.band}>
                   <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('Date')}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
     let actionSheet = this.renderActionSheet()
-    let title = isVerification  ? this.makeViewTitle(model) : null
-    let footer = actionSheet && this.renderFooter()
+    let title = isVerification  ? this.makeViewTitle(model, styles) : null
+    let footer = actionSheet && this.renderFooter(styles)
     let contentSeparator = utils.getContentSeparator(bankStyle)
     let bigPhoto
     if (mainPhoto)
@@ -462,17 +471,17 @@ class MessageView extends Component {
     else
       this.refs.messageView.scrollTo({y: scrollTo})
   }
-  makeViewTitle(model) {
+  makeViewTitle(model, styles) {
     let rTitle
-    let bankStyle = this.state.bankStyle || this.props.bankStyle
+    // let bankStyle = this.state.bankStyle || this.props.bankStyle
     if (this.props.bankStyle  &&  !this.props.bankStyle.logoNeedsText)
-      rTitle = <View style={{alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.navBarBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center'}}>
-                 <Text style={{fontSize: 24, color:  bankStyle.contextBackgroundColor}}>{translate(model)}</Text>
+      rTitle = <View style={styles.viewTitle}>
+                 <Text style={styles.viewTitleText}>{translate(model)}</Text>
                </View>
     return rTitle
   }
 
-  renderFooter() {
+  renderFooter(styles) {
     let icon = 'md-add' //Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
     return (
@@ -495,7 +504,7 @@ class MessageView extends Component {
     });
   }
 
-  verify() {
+  doVerify() {
     let { navigator, resource } = this.props
     navigator.pop();
     let model = utils.getModel(resource[TYPE]);
@@ -523,91 +532,110 @@ class MessageView extends Component {
 }
 reactMixin(MessageView.prototype, Reflux.ListenerMixin);
 reactMixin(MessageView.prototype, ResourceMixin);
+MessageView = makeResponsive(MessageView)
 
-var styles = StyleSheet.create({
-  itemTitle: {
-    fontSize: 18,
-    margin: 5,
-    marginBottom: 0,
-    color: '#7AAAC3'
-  },
-  title: {
-    fontSize: 18,
-    // fontFamily: 'Avenir Next',
-    marginHorizontal: 7,
-    color: '#9b9b9b'
-  },
-  verification: {
-    fontSize: 18,
-    marginVertical: 3,
-    marginHorizontal: 7,
-    color: '#7AAAC3',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#eeeeee',
-    marginHorizontal: 15
-  },
-  photoBG: {
-    backgroundColor: '#f7f7f7',
-    alignItems: 'center',
-  },
-  photoListStyle: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-  },
-  footer: {
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    justifyContent: 'flex-end',
-    height: 45,
-    paddingHorizontal: 10,
-    backgroundColor: 'transparent',
-    // borderColor: '#eeeeee',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#cccccc',
-  },
+var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankStyle }) {
+  return StyleSheet.create({
+    itemTitle: {
+      fontSize: 18,
+      margin: 5,
+      marginBottom: 0,
+      color: '#7AAAC3'
+    },
+    title: {
+      fontSize: 18,
+      // fontFamily: 'Avenir Next',
+      marginHorizontal: 7,
+      color: '#9b9b9b'
+    },
+    verification: {
+      fontSize: 18,
+      marginVertical: 3,
+      marginHorizontal: 7,
+      color: '#7AAAC3',
+    },
+    separator: {
+      height: 1,
+      backgroundColor: '#eeeeee',
+      marginHorizontal: 15
+    },
+    photoBG: {
+      backgroundColor: '#f7f7f7',
+      alignItems: 'center',
+    },
+    photoListStyle: {
+      flexDirection: 'row',
+      alignSelf: 'center',
+    },
+    footer: {
+      flexDirection: 'row',
+      flexWrap: 'nowrap',
+      justifyContent: 'flex-end',
+      height: 45,
+      paddingHorizontal: 10,
+      backgroundColor: 'transparent',
+      // borderColor: '#eeeeee',
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: '#cccccc',
+    },
 
-  band: {
-    height: 30,
-    backgroundColor: '#fafafa',
-    // borderColor:  '#f7f7f7',
-    borderBottomWidth: 1,
-    alignSelf: 'stretch',
-    // paddingRight: 10,
-    // paddingTop: 3,
-    // marginTop: -10,
-  },
-  // rowContainer: {
-  //   paddingBottom: 10,
-  //   // paddingHorizontal: 10
-  // },
-  date: {
-    fontSize: 14,
-    marginTop: 5,
-    marginRight: 10,
-    alignSelf: 'flex-end',
-    color: '#2E3B4E'
-    // color: '#b4c3cb'
-  },
-  dateLabel: {
-    fontSize: 14,
-    marginTop: 5,
-    marginRight: 10,
-    color: '#999999'
-    // color: '#b4c3cb'
-  },
-  dateValue: {
-    fontSize: 14,
-    marginTop: 5,
-    marginRight: 10,
-    color: '#555555'
-    // color: '#b4c3cb'
-  },
-  txIdView: {
-    padding :10,
-    flex: 1
-  }
-});
+    band: {
+      height: 30,
+      backgroundColor: '#fafafa',
+      // borderColor:  '#f7f7f7',
+      borderBottomWidth: 1,
+      alignSelf: 'stretch',
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      borderBottomColor: '#eee',
+      // paddingRight: 10,
+      // paddingTop: 3,
+      // marginTop: -10,
+    },
+    // rowContainer: {
+    //   paddingBottom: 10,
+    //   // paddingHorizontal: 10
+    // },
+    date: {
+      fontSize: 14,
+      marginTop: 5,
+      marginRight: 10,
+      alignSelf: 'flex-end',
+      color: '#2E3B4E'
+      // color: '#b4c3cb'
+    },
+    dateLabel: {
+      fontSize: 14,
+      marginTop: 5,
+      marginRight: 10,
+      color: '#999999'
+      // color: '#b4c3cb'
+    },
+    dateValue: {
+      fontSize: 14,
+      marginTop: 5,
+      marginRight: 10,
+      color: '#555555'
+      // color: '#b4c3cb'
+    },
+    txIdView: {
+      padding :10,
+      flex: 1
+    },
+    viewTitle: {
+      alignSelf: 'stretch',
+      alignItems: 'center',
+      backgroundColor: bankStyle.navBarBackgroundColor,
+      borderTopColor: bankStyle.contextBackgroundColor,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      height: 45,
+      justifyContent: 'center'
+    },
+    viewTitleText: {
+      fontSize: 24,
+      color:  bankStyle.contextBackgroundColor
+    }
+  })
+})
 
 module.exports = MessageView;

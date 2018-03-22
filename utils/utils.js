@@ -419,8 +419,10 @@ var utils = {
           if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
             return false
         }
-        else if (prop.inlined  ||  (prop.ref  &&  this.getModel(prop.ref).inlined))
-          return this.compare(r1[p], r2[p], true)
+        else if (prop.inlined  ||  (prop.ref  &&  this.getModel(prop.ref).inlined)) {
+          if (!this.compare(r1[p], r2[p], true))
+            return false
+        }
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
           return false
       }
@@ -1650,7 +1652,7 @@ var utils = {
   styleFactory(Component, create) {
     if (!Component.displayName) throw new Error('component must have "displayName"')
 
-    return () => {
+    return (additionalParams) => {
       var key = Component.displayName
       if (!stylesCache[key]) {
         stylesCache[key] = {}
@@ -1669,8 +1671,10 @@ var utils = {
         if (switchWidthHeight) {
           dimensions = { width: height, height: width }
         }
-
-        subCache[orientation] = create({ dimensions })
+        let params = { dimensions }
+        if (additionalParams)
+          _.extend(params, additionalParams)
+        subCache[orientation] = create(params)
       }
 
       return subCache[orientation]
