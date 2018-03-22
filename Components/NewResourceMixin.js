@@ -702,18 +702,18 @@ var NewResourceMixin = {
       if (!scan) return
 
       const { personal, document } = scan
-      if (personal.dateOfBirth) {
-        personal.dateOfBirth = formatDate(personal.dateOfBirth)
-      }
+      // if (personal.dateOfBirth) {
+      //   personal.dateOfBirth = formatDate(personal.dateOfBirth)
+      // }
 
-      if (document.dateOfExpiry) {
-        dateOfExpiry = document.dateOfExpiry
-        document.dateOfExpiry = formatDate(document.dateOfExpiry)
-      }
+      // if (document.dateOfExpiry) {
+      //   dateOfExpiry = document.dateOfExpiry
+      //   document.dateOfExpiry = formatDate(document.dateOfExpiry)
+      // }
 
-      if (document.dateOfIssue) {
-        document.dateOfIssue = formatDate(document.dateOfIssue)
-      }
+      // if (document.dateOfIssue) {
+      //   document.dateOfIssue = formatDate(document.dateOfIssue)
+      // }
 
       r[prop + 'Json'] = scan
       return
