@@ -44,7 +44,7 @@ if ((ENV.offerKillSwitchAfterApplication || ENV.wipeAfterApplication) && localSt
 
   showAlert({
     title: `All is well`,
-    message: `Local data successfully deleted. Aviva is now processing your verification details and will contact you again shortly. Your data has been erased from the browser's local storage.`
+    message: `Local data successfully deleted. We are now processing your verification details and will contact you again shortly. Your data has been erased from the browser's local storage.`
   })
 } else {
   testEnvironment().then(init, alertError)
@@ -141,7 +141,7 @@ function alertError (err) {
 
 function showAlert ({ title, message }) {
   const rootEl = document.createElement('div')
-  rootEl.className = 'react-root'
+  rootEl.className = 'body'
   document.body.appendChild(rootEl)
   Alert.alert(title, message, [])
 }
