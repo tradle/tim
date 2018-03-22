@@ -232,7 +232,7 @@ class VerificationRow extends Component {
     else if (!titleComponent)
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
     else
-      description = <Text style={[styles.description, {paddingLeft: 30}]}>{title}</Text>
+      description = <Text style={styles.description}>{title}</Text>
 
     let supportingDocuments
     if (isForm  &&  resource._supportingDocuments  &&  resource._supportingDocuments.length)
