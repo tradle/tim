@@ -66,8 +66,8 @@ const merged = extend({
     // `http://${LOCAL_IP}:21013`,
     // slim
     'https://zxoapug0li.execute-api.us-east-1.amazonaws.com/dev',
-    // tradle.io
-    'https://xwkirqs1x0.execute-api.us-east-1.amazonaws.com/dev',
+    // // tradle.io
+    // 'https://xwkirqs1x0.execute-api.us-east-1.amazonaws.com/dev',
     // // friendly.io
     // 'https://mwv4egtz17.execute-api.us-east-1.amazonaws.com/dev',
     // // safere.io

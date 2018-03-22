@@ -8,6 +8,7 @@ import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
 import Orientation from 'react-native-orientation'
+var ReactPerf //= __DEV__ && require('ReactPerf')
 import SplashScreen from 'react-native-splash-screen'
 import 'stream'
 import debounce from 'debounce'

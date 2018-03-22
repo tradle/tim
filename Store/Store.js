@@ -470,7 +470,7 @@ var Store = Reflux.createStore({
 
     this._identityPromises = {}
     const connectivityPromise = Promise.race([
-        NetInfo.isConnected.fetch()
+        NetInfo.getConnectionInfo()
           .then(isConnected => this._handleConnectivityChange(isConnected)),
         // timeout after 2s
         Promise.delay(2000)
