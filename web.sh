@@ -8,7 +8,7 @@ node scripts/rm-rn-peerdeps.js
 cp node_modules/tcomb-form-native/lib/templates/bootstrap/datepicker.ios.js node_modules/tcomb-form-native/lib/templates/bootstrap/datepicker.web.js
 cp node_modules/tcomb-form-native/lib/templates/bootstrap/select.ios.js node_modules/tcomb-form-native/lib/templates/bootstrap/select.web.js
 # cp node_modules/react-native-local-auth/LocalAuth.android.js node_modules/react-native-local-auth/LocalAuth.web.js
-cp node_modules/react-native-carousel/CarouselPager.android.js node_modules/react-native-carousel/CarouselPager.web.js
+# cp node_modules/react-native-carousel/CarouselPager.android.js node_modules/react-native-carousel/CarouselPager.web.js
 sed -i '' "s/ReactLocalization;/ReactLocalization \|\| \{ language: 'en_US' \};/g" node_modules/react-native-localization/LocalizedStrings.js
 sed -i '' "s/RNDeviceInfo;/RNDeviceInfo \|\| \{};/g" node_modules/react-native-device-info/deviceinfo.js
 sed -i '' "s/this\.opts/opts/g" node_modules/map-stream/index.js
