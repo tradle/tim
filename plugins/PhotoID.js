@@ -1,3 +1,5 @@
+import dateformat from 'dateformat'
+
 import { TYPE } from '@tradle/constants'
 import { translate } from '../utils/utils'
 
@@ -48,14 +50,25 @@ module.exports = function PhotoID ({ models }) {
 }
 function prefillValues(form, values, model) {
   let props = model.properties
+  let dateProps = ['dateOfExpiry', 'dateOfBirth', 'dateOfIssue', 'birthData']
   for (let p in values) {
     if (typeof values[p] === 'object')
       prefillValues(form, values[p], model)
+    else if (dateProps.includes(p)) {//props[p].type === 'date') {
+      // form[p] = Number(values[p])
+      form[p] = formatDate(values[p], 'yyyy-mm-dd')
+      values[p] = formatDate(values[p], 'mmm dS, yyyy')
+    }
     else {
       if (!props[p])
         continue
       form[p] = values[p]
     }
   }
+}
+function formatDate (date, format) {
+  if (typeof date === 'string')
+    return dateformat(date, format)
+  return dateformat(new Date(date), 'UTC:' + format)
 }
 
