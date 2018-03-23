@@ -38,7 +38,7 @@ var buttonStyles = Object.freeze({
     flexDirection: 'row',
   },
   container: {
-    alignSelf: 'center',
+    alignSelf: 'flex-start',
     paddingHorizontal: 7,
     justifyContent: 'center',
     // paddingTop: 10,
@@ -48,6 +48,11 @@ var buttonStyles = Object.freeze({
     backgroundColor: appStyle.TAB_COLOR,// '#F5FFED',
     borderBottomColor: '#a0a0a0',
     borderBottomWidth: 1,
+    // alignSelf: 'stretch'
+  },
+  buttonsNoBorder: {
+    flexDirection: 'row',
+    backgroundColor: appStyle.TAB_COLOR,// '#F5FFED',
     // alignSelf: 'stretch'
   },
   text: {
