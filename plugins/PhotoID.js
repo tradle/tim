@@ -50,20 +50,25 @@ module.exports = function PhotoID ({ models }) {
 }
 function prefillValues(form, values, model) {
   let props = model.properties
-  let dateProps = ['dateOfExpiry', 'dateOfBirth', 'dateOfIssue', 'birthData']
+  let dateProps = ['dateOfExpiry', 'dateOfBirth', 'dateOfIssue']
   for (let p in values) {
-    if (typeof values[p] === 'object')
-      prefillValues(form, values[p], model)
+    let val = val
+    if (typeof val === 'object')
+      prefillValues(form, val, model)
     else if (dateProps.includes(p)) {//props[p].type === 'date') {
-      // form[p] = Number(values[p])
-      form[p] = formatDate(values[p], 'yyyy-mm-dd')
-      values[p] = formatDate(values[p], 'mmm dS, yyyy')
+      // form[p] = Number(val)
+      form[p] = formatDate(val, 'yyyy-mm-dd')
+      val = formatDate(val, 'mmm dS, yyyy')
     }
     else {
       if (!props[p])
         continue
-      form[p] = values[p]
+      form[p] = val
     }
+  }
+  if (form.birthData) {
+    let parts = form.birthData.split(' ')
+    form.birthData = formatDate(parts[0], 'mmm dS, yyyy')
   }
 }
 function formatDate (date, format) {
