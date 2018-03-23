@@ -5,15 +5,20 @@
 */
 'use strict';
 
+import { StyleSheet, Dimensions } from 'react-native'
+import utils from '../utils/utils'
+import appStyle from './appStyle.json'
+import { circled } from './utils'
+import * as platformButtons from './platform'
+
+const {
+  footerButtonObject={},
+  homeButtonObject={}
+} = platformButtons
+
 var FONT_SIZE = 12;
 var FONT_SIZE_1 = 17;
 var FONT_WEIGHT = '500';
-
-
-var utils = require('../utils/utils')
-var appStyle = require('./appStyle.json')
-
-import { Dimensions } from 'react-native'
 
 (function adjustFontSize () {
   var { width, height } = Dimensions.get('window')
@@ -22,8 +27,7 @@ import { Dimensions } from 'react-native'
     // iPhone 4, 5
     FONT_SIZE--
   }
-})()
-
+})();
 
 var buttonStyles = Object.freeze({
   icon: {
@@ -90,6 +94,15 @@ var buttonStyles = Object.freeze({
     color: '#ffffff',
     fontFamily: 'Avenir Next',
     fontSize: utils.getFontSize(FONT_SIZE_1)
+  },
+  menuButton: {
+    ...footerButtonObject,
+    backgroundColor: 'red'
+  },
+  conversationButton: footerButtonObject,
+  homeButton: {
+    ...homeButtonObject,
+    opacity: 0.9
   }
 });
 

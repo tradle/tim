@@ -3,6 +3,7 @@
 import StyleSheet from '../StyleSheet'
 import {Platform} from 'react-native';
 import {getFontSize} from '../utils/utils'
+
 export default StyleSheet.create({
   container: {
     backgroundColor: '#f7f7f7',
@@ -18,23 +19,19 @@ export default StyleSheet.create({
     marginTop: 15,
     fontSize: 17,
   },
-  menuButtonNarrow: {
-    marginTop: 2,
-    paddingHorizontal: 5
-  },
-  menuButtonRegular: {
-    marginTop: 2,
-    paddingHorizontal: 5
-  },
-  conversationButton: {
-    marginTop: 2,
-    paddingHorizontal: 5
-  },
+  // menuButtonNarrow: {
+  //   marginTop: 2,
+  //   paddingHorizontal: 5
+  // },
+  // menuButtonRegular: {
+  //   marginTop: 2,
+  //   paddingHorizontal: 5
+  // },
+  // conversationButton: {
+  //   marginTop: 2,
+  //   paddingHorizontal: 5
+  // },
 
-  menuButton: {
-    marginTop: 5,
-    paddingHorizontal: 5
-  },
   touchIdText: {
     color: '#2E3B4E',
     fontSize: 18,
@@ -47,4 +44,13 @@ var menuIcon = {
   name: 'md-menu',
   color: 'red'
 }
-exports.MenuIcon = menuIcon
+
+export const MenuIcon = menuIcon
+export const footerButtonObject = {
+  marginTop: 5,
+  paddingHorizontal: 5,
+  backgroundColor: 'transparent',
+  borderColor: 'transparent'
+}
+
+export const homeButtonObject = footerButtonObject

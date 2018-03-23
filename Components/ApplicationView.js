@@ -22,6 +22,7 @@ import HomePageMixin from './HomePageMixin'
 import NetworkInfoProvider from './NetworkInfoProvider'
 
 import platformStyles from '../styles/platform'
+import buttonStyles from '../styles/buttonStyles'
 import { makeResponsive } from 'react-native-orient'
 import debug from '../utils/debug'
 import ConversationsIcon from './ConversationsIcon'
@@ -184,11 +185,11 @@ class ApplicationView extends Component {
       icolor = '#7AAAc3'
       rmStyle = {backgroundColor: rmBg, opacity: 0.5, borderWidth: StyleSheet.hairlineWidth, borderColor: '#7AAAc3'}
     }
-    let homeStyle = {backgroundColor: '#fff', opacity: 0.9}
+
     let assignRM
     if (!isRM)
       assignRM = <TouchableOpacity onPress={() => this.assignRM()}>
-                    <View style={[platformStyles.menuButtonRegular, rmStyle]}>
+                    <View style={[buttonStyles.menuButton, rmStyle]}>
                       <Icon name={iconName} color={icolor} size={fontSize(30)}/>
                     </View>
                   </TouchableOpacity>
@@ -196,7 +197,7 @@ class ApplicationView extends Component {
     let home
     if (__DEV__)
        home = <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={{alignSelf: 'flex-start', paddingRight}}>
-                  <View style={[platformStyles.menuButtonRegular, homeStyle]}>
+                  <View style={[buttonStyles.homeButton]}>
                     <Icon name='ios-home' color='#7AAAc3' size={33}/>
                   </View>
                 </TouchableOpacity>
@@ -204,7 +205,7 @@ class ApplicationView extends Component {
                   <View style={styles.row}>
                     {home}
                     <TouchableOpacity onPress={this.openChat} style={{paddingRight}}>
-                      <View style={[platformStyles.conversationButton, {backgroundColor: bgcolor, borderColor: bgcolor, borderWidth: 1, opacity: 0.5}]}>
+                      <View style={[buttonStyles.conversationButton, {backgroundColor: bgcolor, borderColor: bgcolor, borderWidth: 1, opacity: 0.5}]}>
                         <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
                       </View>
                     </TouchableOpacity>

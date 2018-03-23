@@ -50,6 +50,7 @@ import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import platformStyles from '../styles/platform'
+import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
 
 class MessageView extends Component {
@@ -487,7 +488,7 @@ class MessageView extends Component {
     return (
         <View style={styles.footer}>
           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-            <View style={[platformStyles.menuButton, {opacity: 0.4}]}>
+            <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
               <Icon name={icon}  size={33}  color={color}/>
             </View>
           </TouchableOpacity>
