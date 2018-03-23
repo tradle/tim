@@ -6283,7 +6283,7 @@ var Store = Reflux.createStore({
     //     }
     //   });
     // }
-    if (isProfile  && !all && me.isEmployee) {
+    if (isProfile  &&  !all  &&  me.isEmployee) {
       let retPeople = []
       // Filter out the employees of other service providers from contact list
       // This will go away when thru-bot communications will deployed
@@ -6315,7 +6315,7 @@ var Store = Reflux.createStore({
         retOrgs.push(rr)
       })
       // Allow all providers in chooser
-      if (!params.prop)
+      if (!params.prop  &&  !all)
         result = retOrgs.filter((r) => r._isTest === isTest)
       // result = retOrgs
     }
@@ -10229,7 +10229,7 @@ var Store = Reflux.createStore({
       if (SERVICE_PROVIDERS.length)
         SERVICE_PROVIDERS.forEach((p) => this._getItem(p.org)._online = true)
       else {
-        let orgs = self.searchNotMessages({modelName: ORGANIZATION})
+        let orgs = self.searchNotMessages({modelName: ORGANIZATION, all: true})
         if (orgs.length)
           orgs.forEach((org) => {
             self._getItem(utils.getId(org))._online = false
