@@ -113,11 +113,11 @@ class VerificationRow extends Component {
       photo = <Image host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else if (isForm || isVerification)
       photo = <View style={styles.photo}>
-                <Icon name={model.icon || 'ios-paper-outline'} size={40} style={{marginTop: 8}} color={model.iconColor ? model.iconColor : '#cccccc'} />
+                <Icon name={model.icon || 'ios-paper-outline'} size={40} style={styles.photoIcon} color={model.iconColor ? model.iconColor : '#cccccc'} />
               </View>
     else if (isMyProduct)
       photo = <View style={styles.photo}>
-                <Icon name={model.icon || 'ios-ribbon-outline'} size={40} style={{marginTop: 8}} color={model.iconColor ? model.iconColor : '#cccccc'} />
+                <Icon name={model.icon || 'ios-ribbon-outline'} size={40} style={styles.photoIcon} color={model.iconColor ? model.iconColor : '#cccccc'} />
               </View>
     else if (ph)
       photo = <View style={{width: 70}} />
@@ -158,11 +158,11 @@ class VerificationRow extends Component {
              : (isForm)
                 ? translate('sentToOn', title)
                 : translate('verifiedByOn', title)
-      verifiedBy = <View style={{alignItems: 'flex-end', paddingRight: 5}}><Text style={styles.verifiedBy}>{by}</Text></View>
+      verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
     }
     else if (this.props.search  &&  listModel.id === FORM_REQUEST) {
       let by =  'Sent from ' + resource.from.organization.title
-      verifiedBy = <View style={{alignItems: 'flex-end', paddingRight: 5}}><Text style={styles.verifiedBy}>{by}</Text></View>
+      verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
     }
 
     let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
@@ -648,6 +648,7 @@ var styles = StyleSheet.create({
     color: '#cccccc',
     fontSize: 12,
   },
+
   cellImage: {
     height: 60,
     marginRight: 10,
@@ -699,6 +700,13 @@ var styles = StyleSheet.create({
   photo: {
     alignItems: 'center',
     width: 70
+  },
+  verifiedByView: {
+    alignItems: 'flex-end',
+    paddingRight: 5
+  },
+  photoIcon: {
+    marginTop: 8
   }
 });
 
