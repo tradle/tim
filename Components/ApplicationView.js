@@ -168,7 +168,6 @@ class ApplicationView extends Component {
 
     let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
     let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
-    let paddingRight = Platform.OS === 'android' ? 0 : 10
     let iconName = 'ios-person-add-outline'
     let icolor
     let rmStyle
@@ -192,7 +191,7 @@ class ApplicationView extends Component {
     let routes = navigator.getCurrentRoutes()
     let home
     if (__DEV__)
-       home = <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={{alignSelf: 'flex-start', paddingRight}}>
+       home = <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={styles.homeButton}>
                   <View style={[buttonStyles.homeButton]}>
                     <Icon name='ios-home' color='#7AAAc3' size={33}/>
                   </View>
@@ -200,8 +199,8 @@ class ApplicationView extends Component {
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
                     {home}
-                    <TouchableOpacity onPress={this.openChat} style={{paddingRight}}>
-                      <View style={[buttonStyles.conversationButton, {backgroundColor: bgcolor, borderColor: bgcolor, borderWidth: 1, opacity: 0.5}]}>
+                    <TouchableOpacity onPress={this.openChat} style={styles.openChatPadding}>
+                      <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
                         <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
                       </View>
                     </TouchableOpacity>
@@ -363,6 +362,9 @@ reactMixin(ApplicationView.prototype, HomePageMixin)
 ApplicationView = makeResponsive(ApplicationView)
 
 var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM }) {
+  let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
+  let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
+  let paddingRight = Platform.OS === 'android' ? 0 : 10
   return StyleSheet.create({
     row: {
       flex: 1,
@@ -404,6 +406,19 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
       opacity: 0.5,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: '#7AAAc3'
+    },
+    homeButton: {
+      alignSelf: 'flex-start',
+      paddingRight: paddingRight
+    },
+    openChatPadding: {
+      paddingRight: paddingRight
+    },
+    conversationButton: {
+      backgroundColor: bgcolor,
+      borderColor: bgcolor,
+      borderWidth: 1,
+      opacity: 0.5
     }
   })
 })
