@@ -98,7 +98,7 @@ class FormMessageRow extends Component {
     }
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-    var photoStyle = {};
+    var photoStyle
     var width = utils.getMessageWidth(FormMessageRow)
     if (application)
       width -= 50 // provider icon and padding
@@ -106,10 +106,13 @@ class FormMessageRow extends Component {
       if (inRow === 1) {
         var ww = Math.min(240, photoUrls[0].width)
         var hh = (ww / photoUrls[0].width) * photoUrls[0].height
-        photoStyle = [chatStyles.bigImage, {
+        photoStyle = {
+          borderRadius: 10,
+          margin: 1,
           width:  ww,
-          height: hh
-        }]
+          height: hh,
+          marginTop: -2
+        }
       }
       else if (inRow === 2)
         photoStyle = chatStyles.mediumImage;
@@ -133,7 +136,7 @@ class FormMessageRow extends Component {
               {date}
               {stub}
               <View style={photoListStyle}>
-                <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
+                <PhotoList photos={photoUrls} resource={resource} style={photoStyle} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
               </View>
               {sendStatus}
             </View>
