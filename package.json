@@ -265,6 +265,7 @@
     "react-native-exception-handler": false,
     "react-native-image-picker": false,
     "react-native-lazyload": "./web/shims/Lazyload",
+    "react-native-signature-pad": "react-signature-pad",
     "./utils/crashlytics.js": false,
     "./utils/errors.js": false,
     "./utils/keychain.js": false,

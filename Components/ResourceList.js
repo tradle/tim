@@ -1033,7 +1033,7 @@ class ResourceList extends Component {
           <View/>
           {employee}
           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-            <View style={[platformStyles.menuButtonNarrow, {opacity: 0.4}]}>
+            <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
               <Icon name={icon}  size={33}  color={color}/>
             </View>
           </TouchableOpacity>

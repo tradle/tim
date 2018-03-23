@@ -1,8 +1,17 @@
 'use strict';
 
 import StyleSheet from '../StyleSheet'
+import { circled } from './utils'
 
-module.exports = exports = StyleSheet.create({
+const footerButton = {
+  ...circled(50),
+  marginTop: -23,
+  shadowOpacity: 1,
+  shadowRadius: 5,
+  shadowColor: '#afafaf',
+}
+
+export default StyleSheet.create({
   container: {
     // backgroundColor: '#f7f7f7',
     marginTop: 64,
@@ -12,51 +21,10 @@ module.exports = exports = StyleSheet.create({
     marginTop: 10,
     fontSize: 17
   },
-  menuButtonNarrow: {
-    marginTop: -23,
-    paddingVertical: 6,
-    height: 45,
-    borderRadius: 24,
-    paddingHorizontal: 21,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
-  menuButton: {
-    marginTop: -23,
-    paddingVertical: 5,
-    paddingHorizontal: 13,
-    borderRadius: 24,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
-  conversationButton: {
-    marginTop: -20,
-    paddingVertical: 5,
-    // paddingHorizontal: 6,
-    borderRadius: 26,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    // backgroundColor: '#7AAAC3'
-  },
-  menuButtonRegular: {
-    marginTop: -20,
-    paddingVertical: 5,
-    paddingHorizontal: 11,
-    borderRadius: 26,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
+  // navBar: {
+  //   marginTop: 10,
+  //   padding: 3
+  // },
   touchIdText: {
     color: '#2E3B4E',
     fontSize: 18,
@@ -64,15 +32,18 @@ module.exports = exports = StyleSheet.create({
     marginLeft: 15,
     alignSelf: 'flex-start'
   }
-
 })
 
-var menuIcon = {
+export const footerButtonObject = footerButton
+export const homeButtonObject = {
+  ...footerButton,
+  backgroundColor: '#fff'
+}
+
+export const MenuIcon = {
   name: 'md-more',
   color: '#ffffff'
 }
-
-exports.MenuIcon = menuIcon
 
 // Object.defineProperty(exports, 'MB', {
 //   icon: 'md-more',

@@ -62,6 +62,7 @@ import PageView from './PageView'
 import { makeStylish } from './makeStylish'
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles, {MenuIcon} from '../styles/platform'
+import buttonStyles from '../styles/buttonStyles'
 import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
 
@@ -1183,7 +1184,7 @@ class MessageList extends Component {
       if (!utils.isRM(application)  ||  !this.hasAdditionalForms(application))
         return
     }
-    return  <View style={[platformStyles.menuButtonNarrow, {width: 47, borderRadius: 24, alignItems: 'center', opacity: 0.4}]}>
+    return  <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }

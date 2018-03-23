@@ -2,8 +2,7 @@ console.log('requiring PhotoCarousel.js')
 'use strict'
 
 import Carousel from 'react-native-carousel';
-var utils = require('../utils/utils');
-var constants = require('@tradle/constants');
+import constants from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'
 
 import {
@@ -13,6 +12,7 @@ import {
 } from 'react-native'
 
 import React, { Component } from 'react'
+import utils from '../utils/utils'
 
 class PhotoCarousel extends Component {
   static displayName = 'PhotoCarousel'
@@ -105,7 +105,7 @@ class PhotoCarousel extends Component {
   }
 }
 
-let createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions }) {
+const createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions }) {
   return StyleSheet.create({
     image: {
       width: dimensions.width,

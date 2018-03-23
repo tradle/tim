@@ -23,6 +23,7 @@ import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import platformStyles from '../styles/platform'
+import buttonStyles from '../styles/buttonStyles'
 import ImageInput from './ImageInput'
 
 class GridItemsList extends Component {
@@ -95,7 +96,7 @@ class GridItemsList extends Component {
             underlayColor='transparent'
             onPress={utils.isWeb() ? null : () => this._imageInput.showImagePicker()}
             onImage={this._onImage}>
-            <View style={platformStyles.menuButton}>
+            <View style={buttonStyles.menuButton}>
               <Icon name={icon}  size={33}  color={color} />
             </View>
           </ImageInput>
