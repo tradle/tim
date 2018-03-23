@@ -56,6 +56,7 @@ import {
 import PropTypes from 'prop-types';
 
 import platformStyles from '../styles/platform'
+import buttonStyles from '../styles/buttonStyles'
 import ENV from '../utils/env'
 import ConversationsIcon from './ConversationsIcon'
 
@@ -196,7 +197,7 @@ class HomePage extends Component {
     return (
         <View style={styles.footer}>
           <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-            <View style={platformStyles.menuButtonNarrow}>
+            <View style={buttonStyles.menuButton}>
               <Icon name={icon}  size={33}  color={color} />
             </View>
           </TouchableOpacity>

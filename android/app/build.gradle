@@ -125,6 +125,7 @@ android {
         // https://developer.android.com/training/articles/keystore.html
         // KeyPairGenerator for EC is supported on APIs 23+
         // minSdkVersion 23
+        // elliptic curve keys support
         minSdkVersion 19
         targetSdkVersion 23
         versionCode vbuild

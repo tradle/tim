@@ -51,6 +51,7 @@ import StyleSheet from '../StyleSheet'
 import HomePageMixin from './HomePageMixin'
 // import ActionSheet from './ActionSheet'
 import platformStyles from '../styles/platform'
+import buttonStyles from '../styles/buttonStyles'
 import { signIn } from '../utils/localAuth'
 import { makeResponsive } from 'react-native-orient'
 import Log from './Log'
@@ -331,7 +332,7 @@ class ResourceView extends Component {
     //                 </View>
     //               </TouchableOpacity>
     //               <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-    //                 <View style={[platformStyles.menuButtonRegular, {opacity: 0.5}]}>
+    //                 <View style={[buttonStyles.menuButton, {opacity: 0.5}]}>
     //                   <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(30)} />
     //                 </View>
     //               </TouchableOpacity>
@@ -341,7 +342,7 @@ class ResourceView extends Component {
     if (isIdentity) {
       footer = <View style={styles.footer}>
                 <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-                  <View style={[platformStyles.menuButtonRegular, {opacity: 0.5}]}>
+                  <View style={[buttonStyles.menuButton, {opacity: 0.5}]}>
                     <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(30)} />
                   </View>
                 </TouchableOpacity>

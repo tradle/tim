@@ -2,7 +2,7 @@
 
 import {StyleSheet} from 'react-native';
 
-module.exports = exports = StyleSheet.create({
+export default StyleSheet.create({
   container: {
     // backgroundColor: '#f7f7f7',
     marginTop: 64,
@@ -12,52 +12,6 @@ module.exports = exports = StyleSheet.create({
     marginTop: 5,
     fontSize: 17
   },
-  menuButtonNarrow: {
-    marginTop: -23,
-    paddingVertical: 5,
-    paddingHorizontal: 21,
-    height: 45,
-    justifyContent: 'center',
-    borderRadius: 24,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
-  menuButton: {
-    marginTop: -23,
-    paddingVertical: 5,
-    paddingHorizontal: 13,
-    borderRadius: 24,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
-  menuButtonRegular: {
-    marginTop: -20,
-    paddingVertical: 5,
-    paddingHorizontal: 13,
-    borderRadius: 24,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
-  conversationButton: {
-    marginTop: -20,
-    paddingVertical: 5,
-    paddingHorizontal: 2,
-    borderRadius: 24,
-    // shadowOffset:{width: 5, height: 5},
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
-  },
   touchIdText: {
     color: '#2E3B4E',
     fontSize: 18,
@@ -65,15 +19,13 @@ module.exports = exports = StyleSheet.create({
     marginLeft: 15,
     alignSelf: 'flex-start'
   }
-
 })
 
-var menuIcon = {
-  name: 'md-more',
-  color: '#ffffff'
-}
-
-exports.MenuIcon = menuIcon
+export {
+  MenuIcon,
+  footerButtonObject,
+  homeButtonObject
+} from './platform.ios'
 
 // Object.defineProperty(exports, 'MB', {
 //   icon: 'md-more',
