@@ -1080,11 +1080,8 @@ class NewResource extends Component {
       let items = []
       let arr = resource[bl.name]
       let n = Math.min(arr.length, 7)
-      for (let i=0; i<n; i++) {
-        items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()} onPress={() => {
-          this.openModal(arr[i])
-        }}/>)
-      }
+      for (let i=0; i<n; i++)
+        items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()}/>)
       itemsArray =
         <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
           <Text style={[styles.activePropTitle, {color: lcolor}]}>{translate(bl, blmodel)}</Text>
