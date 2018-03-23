@@ -85,7 +85,7 @@ class PhotoList extends Component {
     if (!imageStyle  ||  utils.isEmpty(imageStyle))
       imageStyle = this.getPhotoStyle(photos)
 
-    let inRow = this.props.numberInRow || Math.floor(utils.dimensions().width / imageStyle[0].width) - 1 // 2 is padding
+    let inRow = this.props.numberInRow || Math.floor(utils.dimensions(PhotoList).width / imageStyle.width) - 1 // 2 is padding
     let rows = []
     for (var i=0; i<len; i++) {
       let row = []
@@ -112,7 +112,7 @@ class PhotoList extends Component {
       source.isStatic = true;
 
     return (
-      <View style={[{margin: 1}, imageStyle[0]]} key={this.getNextKey()}>
+      <View style={[{margin: 1}, imageStyle]} key={this.getNextKey()}>
         <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
            <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
         </TouchableHighlight>
