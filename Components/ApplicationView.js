@@ -141,12 +141,16 @@ class ApplicationView extends Component {
   }
 
   render() {
-    let styles = createStyles()
-    let { forwardlink, isLoading, hasRM, isConnected } = this.state
+    let { resource, forwardlink, isLoading, hasRM, isConnected } = this.state
+
+    hasRM = hasRM  ||  resource.relationshipManager ||  resource.relationshipManagers
+    let isRM = hasRM  &&  utils.isRM(resource)
+    let styles = createStyles({ hasRM, isRM })
+
     let network = <NetworkInfoProvider connected={isConnected} resource={resource} />
     if (isLoading)
       return (
-              <View style={[platformStyles.container]}>
+              <View style={platformStyles.container}>
                 {network}
                 <Text style={styles.loading}>{'In progress...'}</Text>
                 <ActivityIndicator size='large' style={styles.indicator} />
@@ -155,7 +159,6 @@ class ApplicationView extends Component {
 
     let { navigator, bankStyle, currency, dimensions } = this.props
 
-    let resource = this.state.resource;
     let modelName = resource[TYPE];
     let model = utils.getModel(modelName)
 
@@ -167,23 +170,16 @@ class ApplicationView extends Component {
     let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
     let paddingRight = Platform.OS === 'android' ? 0 : 10
     let iconName = 'ios-person-add-outline'
-    let rmBg, icolor
-    hasRM = resource.relationshipManager ||  resource.relationshipManagers
-    let rmStyle, isRM
+    let icolor
+    let rmStyle
     if (hasRM) {
-      isRM = utils.isRM(resource)
       iconName = 'ios-person'
-      if (isRM)
-        rmBg = '#7AAAc3'
-      else
-        rmBg = '#CA9DF2'
       icolor = '#ffffff'
-      rmStyle = {backgroundColor: rmBg, opacity: 0.5}
+      rmStyle = styles.hasRM
     }
     else {
-      rmBg = '#fff'
       icolor = '#7AAAc3'
-      rmStyle = {backgroundColor: rmBg, opacity: 0.5, borderWidth: StyleSheet.hairlineWidth, borderColor: '#7AAAc3'}
+      rmStyle = styles.noRM
     }
 
     let assignRM
@@ -366,7 +362,7 @@ reactMixin(ApplicationView.prototype, ResourceMixin);
 reactMixin(ApplicationView.prototype, HomePageMixin)
 ApplicationView = makeResponsive(ApplicationView)
 
-var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions }) {
+var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM }) {
   return StyleSheet.create({
     row: {
       flex: 1,
@@ -398,6 +394,16 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions })
       alignSelf: 'center',
       backgroundColor: 'transparent',
       marginTop: 20
+    },
+    hasRM: {
+      backgroundColor: isRM && '#7AAAc3' || '#CA9DF2',
+      opacity: 0.5
+    },
+    noRM: {
+      backgroundColor: '#ffffff',
+      opacity: 0.5,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: '#7AAAc3'
     }
   })
 })

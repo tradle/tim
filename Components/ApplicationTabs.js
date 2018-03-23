@@ -54,10 +54,9 @@ class ApplicationTabs extends Component {
 
     let currentProp = forwardlink
     showDetails = !forwardlink  ||  showDetails
+    let styles = createStyles({bankStyle})
 
-    let bg = bankStyle ? bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
-
-    let currentMarker = <View style={{backgroundColor: bg, height: 4, marginTop: -5}} />
+    let currentMarker = <View style={styles.marker} />
 
     let itemProps = utils.getPropertiesWithAnnotation(model, 'items')
     if (itemProps)
@@ -68,7 +67,7 @@ class ApplicationTabs extends Component {
                        <TouchableOpacity onPress={this.showDetails.bind(this)} underlayColor='transparent'>
                          <View style={styles.item}>
                            <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
-                           <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
+                           <Text style={[buttonStyles.text, styles.tabText]}>{'Details'}</Text>
                          </View>
                        </TouchableOpacity>
                        {showCurrent}
@@ -124,7 +123,7 @@ class ApplicationTabs extends Component {
                  <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
                  {count}
                </View>
-               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
+               <Text style={[buttonStyles.text, styles.tabText]}>{propTitle}</Text>
              </View>
            </TouchableOpacity>
            {showCurrent}
@@ -152,7 +151,7 @@ class ApplicationTabs extends Component {
                     navigator={navigator} />
     }
     else if (resource.photos)
-      separator = <View style={{height: 2, backgroundColor: bg}} />
+      separator = <View style={styles.separator} />
 
     if (showDetails) {
       details = <ShowPropertiesView resource={resource}
@@ -163,7 +162,7 @@ class ApplicationTabs extends Component {
       if (!resource.draft  && utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
         details = <View style={styles.buttonsFooter}>
                    {details}
-                   <View style={{flexDirection: 'row', alignSelf: 'center'}}>
+                   <View style={styles.buttons}>
                     <TouchableOpacity onPress={this.props.approve.bind(this)}>
                     <View style={styles.approve}>
                       <Text style={styles.approveText}>{translate('Approve')}</Text>
@@ -182,10 +181,10 @@ class ApplicationTabs extends Component {
     if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails)
       return   <View>
                 {separator}
-                <View style={[buttonStyles.buttons, { borderBottomWidth: 0}]} key={'ShowRefList'}>
+                <View style={buttonStyles.buttonsNoBorder} key={'ShowRefList'}>
                   {refList}
                 </View>
-                {showDetails  &&  this.getAppStatus()}
+                {showDetails  &&  this.getAppStatus(styles)}
                 {children}
                 <View>
                   {flinkRL}
@@ -204,7 +203,7 @@ class ApplicationTabs extends Component {
   getRefResource(resource, prop) {
     this.showRefResource(resource, prop)
   }
-  getAppStatus() {
+  getAppStatus(styles) {
     let resource = this.props.resource
     let formTypes = []
     let progress = 0
@@ -240,81 +239,99 @@ reactMixin(ApplicationTabs.prototype, RowMixin);
 reactMixin(ApplicationTabs.prototype, ResourceMixin);
 ApplicationTabs = makeResponsive(ApplicationTabs)
 
-var styles = StyleSheet.create({
-  count: {
-    alignSelf: 'flex-start',
-    minWidth: 18,
-    marginLeft: -7,
-    marginTop: 0,
-    backgroundColor: appStyle.COUNTER_BG_COLOR,
-    paddingHorizontal: 3,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 9,
-    borderColor: appStyle.COUNTER_COLOR,
-    paddingVertical: 1
-  },
-  countText: {
-    fontSize: 12,
-    marginLeft: -7,
-    fontWeight: '600',
-    alignSelf: 'center',
-    color: appStyle.COUNTER_COLOR,
-  },
-  item: {
-    alignItems: 'center',
-    paddingTop: 10,
-    paddingBottom: 0
-  },
-  row: {
-    flexDirection: 'row'
-  },
-  command: {
-    fontSize: 20,
-    alignSelf: 'center',
-    color: '#555555'
-  },
-  progress: {
-    marginTop: 20,
-    marginBottom: 10,
-    justifyContent: 'center',
-    alignSelf: 'center'
-  },
-  approve: {
-    backgroundColor: '#7AAAC3',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: 150,
-    marginTop: 20,
-    alignSelf: 'center',
-    height: 40,
-    borderRadius: 15,
-    marginRight: 20
-  },
-  approveText: {
-    fontSize: 20,
-    color: '#ffffff',
-    alignSelf: 'center'
-  },
-  deny: {
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    width: 150,
-    marginTop: 20,
-    alignSelf: 'center',
-    height: 40,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#7AAAC3'
-  },
-  denyText: {
-    fontSize: 20,
-    color: '#7AAAC3',
-    alignSelf: 'center'
-  },
-  buttonsFooter: {
-    paddingBottom: 70
-  }
+var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, bankStyle,  }) {
+  let bg = bankStyle && bankStyle.myMessageBackgroundColor || appStyle.CURRENT_UNDERLINE_COLOR
+  return StyleSheet.create({
+    count: {
+      alignSelf: 'flex-start',
+      minWidth: 18,
+      marginLeft: -7,
+      marginTop: 0,
+      backgroundColor: appStyle.COUNTER_BG_COLOR,
+      paddingHorizontal: 3,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderRadius: 9,
+      borderColor: appStyle.COUNTER_COLOR,
+      paddingVertical: 1
+    },
+    countText: {
+      fontSize: 12,
+      fontWeight: '600',
+      alignSelf: 'center',
+      color: appStyle.COUNTER_COLOR,
+    },
+    item: {
+      alignItems: 'center',
+      paddingTop: 10,
+      paddingBottom: 0
+    },
+    row: {
+      flexDirection: 'row'
+    },
+    command: {
+      fontSize: 20,
+      alignSelf: 'center',
+      color: '#555555'
+    },
+    progress: {
+      marginTop: 20,
+      marginBottom: 10,
+      justifyContent: 'center',
+      alignSelf: 'center'
+    },
+    approve: {
+      backgroundColor: '#7AAAC3',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 150,
+      marginTop: 20,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 15,
+      marginRight: 20
+    },
+    approveText: {
+      fontSize: 20,
+      color: '#ffffff',
+      alignSelf: 'center'
+    },
+    deny: {
+      backgroundColor: '#fff',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 150,
+      marginTop: 20,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: '#7AAAC3'
+    },
+    denyText: {
+      fontSize: 20,
+      color: '#7AAAC3',
+      alignSelf: 'center'
+    },
+    buttonsFooter: {
+      paddingBottom: 70
+    },
+    separator: {
+      height: 2,
+      backgroundColor: bg
+    },
+    marker: {
+      backgroundColor: bg,
+      height: 4,
+      marginTop: -5
+    },
+    buttons: {
+      flexDirection: 'row',
+      alignSelf: 'center'
+    },
+    tabText: {
+      marginTop: Platform.OS === 'android' ? 3 : 0
+    },
+  })
 })
 
 module.exports = ApplicationTabs;
