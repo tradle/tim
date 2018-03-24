@@ -41,6 +41,7 @@ const {
 } = constants.TYPES
 
 class ApplicationTabs extends Component {
+  static displayName = 'ApplicationTabs';
   constructor(props) {
     super(props);
   }
@@ -159,7 +160,7 @@ class ApplicationTabs extends Component {
                                     currency={currency}
                                     excludedProperties={['photos']}
                                     navigator={navigator} />
-      if (!resource.draft  &&  utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
+      if (!resource.draft  && utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
         details = <View style={styles.buttonsFooter}>
                    {details}
                    <View style={styles.buttons}>
@@ -178,22 +179,19 @@ class ApplicationTabs extends Component {
       }
     }
 
-    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
-      const width = utils.getContentWidth(ApplicationTabs)
-      let style = {width, height: utils.dimensions(ApplicationTabs).height}
-      return  <View style={style}>
+    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails)
+      return   <View>
                 {separator}
-                <View style={[buttonStyles.buttonsNoBorder, {width, justifyContent: 'center', minHeight: refList &&  refList.length ? 70 : 0}]} key={'ApplicationTabs'}>
+                <View style={buttonStyles.buttonsNoBorder} key={'ApplicationTabs'}>
                   {refList}
                 </View>
                 {showDetails  &&  this.getAppStatus(styles)}
                 {children}
-                <View style={{margin: 1, flex: 1}}>
+                <View>
                   {flinkRL}
                   {details}
                 </View>
               </View>
-    }
 
     return children || <View/>
   }
@@ -296,7 +294,6 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     approveText: {
       fontSize: 20,
       color: '#ffffff',
-      paddingLeft: 10,
       alignSelf: 'center'
     },
     deny: {
@@ -314,7 +311,6 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     denyText: {
       fontSize: 20,
       color: '#7AAAC3',
-      paddingLeft: 10,
       alignSelf: 'center'
     },
     buttonsFooter: {
@@ -331,8 +327,7 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     },
     buttons: {
       flexDirection: 'row',
-      alignSelf: 'center',
-      marginTop: 100
+      alignSelf: 'center'
     },
     tabText: {
       marginTop: Platform.OS === 'android' ? 3 : 0
