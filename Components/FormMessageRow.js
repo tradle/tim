@@ -80,20 +80,21 @@ class FormMessageRow extends Component {
     let photoUrls = []
     let isMyMessage = this.isMyMessage()
     let isShared = this.isShared()
+    let isSharedContext
 
     if (photos) {
       photoUrls = photos
       // photos.forEach((p) => {
       //   photoUrls.push({url: utils.getImageUri(p.url)});
       // })
-      let isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
-      photoListStyle = {
-        flexDirection: 'row',
-        alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
-        marginLeft: isMyMessage || isShared ? 30 : isSharedContext || application ? 43 : 0, //(hasOwnerPhoto ? 45 : 10),
-        borderRadius: 10,
-        marginBottom: 3,
-      }
+      isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
+      // photoListStyle = {
+      //   flexDirection: 'row',
+      //   alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
+      //   marginLeft: isMyMessage || isShared ? 30 : isSharedContext || application ? 43 : 0, //(hasOwnerPhoto ? 45 : 10),
+      //   borderRadius: 10,
+      //   marginBottom: 3,
+      // }
     }
     let len = photoUrls.length;
     let inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
@@ -117,10 +118,11 @@ class FormMessageRow extends Component {
     let date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
+    let bg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
 
-    let width = Math.floor(utils.dimensions(FormMessageRow).width * 0.8)
-    let styles = createStyles({bankStyle, isMyMessage, isShared, width})
-    let stub = this.formStub(resource, to, styles, width)
+    let width = Math.floor(utils.dimensions(FormMessageRow).width * 0.8) // - (isSharedContext  ? 45 : 0))
+    let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
+    let stub = this.formStub(resource, to, styles)
     if (resource[TYPE] !== PRODUCT_REQUEST)
       stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
                {stub}
@@ -129,13 +131,13 @@ class FormMessageRow extends Component {
     return  <View style={styles.pageView}>
               {date}
               {stub}
-              <View style={photoListStyle}>
+              <View style={styles.photoListStyle}>
                 <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
               </View>
               {sendStatus}
             </View>
   }
-  formStub(resource, toChat, styles, width) {
+  formStub(resource, toChat, styles) {
     let hasSentTo
     if (!toChat)
       hasSentTo = true
@@ -151,16 +153,24 @@ class FormMessageRow extends Component {
     }
     let renderedRow = []
     let isMyMessage = this.isMyMessage()
+
     let isShared = this.isShared()
+    // let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
 
     let { bankStyle, application } = this.props
+    // if (application)
+    //   width -= 50 // provider icon and padding
 
+    // let width = Math.floor(utils.dimensions(FormMessageRow).width * 0.8) // - (isSharedContext  ? 45 : 0))
+    // let styles = createStyles({bankStyle, isMyMessage, isShared, width})
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let headerStyle = [
       chatStyles.verifiedHeader,
-      styles.moreHeader
+      // noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
+      {backgroundColor: isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg}, // opacity: isShared ? 0.5 : 1},
+      isMyMessage || isShared ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
     ]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
@@ -312,9 +322,11 @@ class FormMessageRow extends Component {
   }
 }
 
-var createStyles = utils.styleFactory(FormMessageRow, function ({ dimensions, bankStyle, isMyMessage, isShared, width }) {
+var createStyles = utils.styleFactory(FormMessageRow, function (params) {
+  let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
   let moreHeader = isMyMessage || isShared ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
   let bg = isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg
+  let pageBg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
   let w, h = 70
   if (dimensions.width > dimensions.height)
     w = Math.round((dimensions.width * 70)/(dimensions.height - 100))
@@ -324,10 +336,6 @@ var createStyles = utils.styleFactory(FormMessageRow, function ({ dimensions, ba
     myMsg: {
       justifyContent: 'flex-end',
       // color: '#ffffff'
-    },
-    pageView: {
-      margin: 1,
-      backgroundColor: bg
     },
     youSharedText: {
       color: '#ffffff',
@@ -356,7 +364,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function ({ dimensions, ba
       backgroundColor: 'transparent',
       flexDirection: 'row',
       margin: 1,
-      paddingRight: 10,
+      // paddingRight: 10,
     },
     headerStyle: {
       ...moreHeader,
@@ -369,6 +377,17 @@ var createStyles = utils.styleFactory(FormMessageRow, function ({ dimensions, ba
     title: {
       fontSize: 18,
       color: '#aaaaaa'
+    },
+    pageView: {
+      margin: 1,
+      ...pageBg
+    },
+    photoListStyle: {
+      flexDirection: 'row',
+      alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
+      marginLeft: isMyMessage || isShared ? 30 : isSharedContext || application ? 43 : 0, //(hasOwnerPhoto ? 45 : 10),
+      borderRadius: 10,
+      marginBottom: 3,
     }
   })
 });
