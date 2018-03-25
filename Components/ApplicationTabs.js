@@ -41,6 +41,7 @@ const {
 } = constants.TYPES
 
 class ApplicationTabs extends Component {
+  static displayName = 'ApplicationTabs'
   constructor(props) {
     super(props);
   }
@@ -239,7 +240,7 @@ reactMixin(ApplicationTabs.prototype, RowMixin);
 reactMixin(ApplicationTabs.prototype, ResourceMixin);
 ApplicationTabs = makeResponsive(ApplicationTabs)
 
-var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, bankStyle,  }) {
+var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, bankStyle  }) {
   let bg = bankStyle && bankStyle.myMessageBackgroundColor || appStyle.CURRENT_UNDERLINE_COLOR
   return StyleSheet.create({
     count: {
