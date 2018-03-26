@@ -313,22 +313,22 @@ class GridList extends Component {
         return
         // Actions.listModels({modelName})
       }
-      else { //if (isBacklink  &&  application) {
+      else if (isBacklink) { //  &&  application) {
         if (resource[prop.name]) {
           this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
           return
         }
       }
-      // else if (!isForwardlink) {
-      //   Actions.list({
-      //     modelName: modelName,
-      //     filterResource: resource,
-      //     search: true,
-      //     first: true,
-      //     limit: this.limit
-      //   })
-      //   return
-      // }
+      else if (!isForwardlink) {
+        Actions.list({
+          modelName: modelName,
+          filterResource: resource,
+          search: true,
+          first: true,
+          limit: this.limit
+        })
+        return
+      }
     }
     let me = utils.getMe()
     if (me  &&  me.isEmployee  &&  officialAccounts) {
