@@ -253,7 +253,7 @@ class GridRow extends Component {
       let refM = utils.getModel(ref)
       if (ref === MONEY) {
         style.push({alignSelf: 'flex-end', paddingRight: 10})
-        row = <Text style={style} key={this.getNextKey(resource)}>{resource[v].currency + resource[v]}</Text>
+        row = <Text style={style} key={this.getNextKey(resource)}>{resource[v].currency + resource[v].value}</Text>
       }
       else if (ref === PHOTO)
         row = <Image source={{uri: resource[v].url}} style={styles.thumb} />
@@ -296,8 +296,8 @@ class GridRow extends Component {
     if (resource[v]  &&  (typeof resource[v] != 'string')) {
       if (criteria)
         style.push({fontWeight: '600'})
-      if (properties[v].type === 'number')
-        style.push({alignSelf: 'flex-end', paddingRight: 10})
+      // if (properties[v].type === 'number')
+      //   style.push({alignSelf: 'flex-end', paddingRight: 10})
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[v] + ''}</Text></View>
     }
     if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') === 0  ||  resource[v].indexOf('https://') === 0))
