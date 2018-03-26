@@ -213,39 +213,39 @@ class GridRow extends Component {
     // else
     //   return row
   }
-  formatCol(prop) {
+  formatCol(pName) {
     let resource = this.props.resource
     let model = utils.getModel(resource[TYPE] || resource.id);
     let properties = model.properties;
     let isContact = resource[TYPE] === PROFILE;
-    let v = prop
+    let colProp = properties[pName]
     let backlink
-    if (properties[v].type === 'array') {
-      if (properties[v].items.backlink)
-        backlink = v;
+    if (colProp.type === 'array') {
+      if (colProp.items.backlink)
+        backlink = pName;
     }
 
-    if (properties[v].type === 'array')
+    if (colProp.type === 'array')
       return
 
-    if (!resource[v]  &&  !properties[v].displayAs)
+    if (!resource[pName]  &&  !colProp.displayAs)
       return
 
     let style = [styles.description]
-    if (isContact  &&  v === 'organization') {
+    if (isContact  &&  pName === 'organization') {
       style.push({alignSelf: 'flex-end', marginTop: 20})
       style.push(styles.verySmallLetters);
     }
-    if (properties[v].style)
-      style.push(properties[v].style);
-    let ref = properties[v].ref;
+    if (colProp.style)
+      style.push(colProp.style);
+    let ref = colProp.ref;
     let row
     let cellStyle = {paddingVertical: 5, paddingLeft: 7}
 
-    let criteria = this.props.search  &&  this.state.resource  &&  this.state.resource[v]
+    let criteria = this.props.search  &&  this.state.resource  &&  this.state.resource[pName]
 
     if (ref) {
-      if (!resource[v])
+      if (!resource[pName])
         return
       if (criteria)
         style.push({fontWeight: '600'})
@@ -253,15 +253,15 @@ class GridRow extends Component {
       let refM = utils.getModel(ref)
       if (ref === MONEY) {
         style.push({alignSelf: 'flex-end', paddingRight: 10})
-        row = <Text style={style} key={this.getNextKey(resource)}>{resource[v].currency + resource[v]}</Text>
+        row = <Text style={style} key={this.getNextKey(resource)}>{resource[pName].currency + resource[pName].value}</Text>
       }
       else if (ref === PHOTO)
-        row = <Image source={{uri: resource[v].url}} style={styles.thumb} />
+        row = <Image source={{uri: resource[pName].url}} style={styles.thumb} />
       else {
-        let title = utils.getDisplayName(resource[v])
+        let title = utils.getDisplayName(resource[pName])
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{title}</Text>
         if (refM.isInterface || refM.id === FORM  || refM.id === OBJECT) {
-          let resType = utils.getType(resource[v])
+          let resType = utils.getType(resource[pName])
           let resM = utils.getModel(resType)
           row = <View key={this.getNextKey(resource)}>
                   <Text style={styles.type}>{utils.makeModelTitle(resM)}</Text>
@@ -280,7 +280,7 @@ class GridRow extends Component {
       //               passProps: {
       //                 bankStyle: this.props.bankStyle,
       //                 search: this.props.search,
-      //                 resource: resource[v]
+      //                 resource: resource[pName]
       //               }
       //             });
       //             }}>
@@ -290,20 +290,21 @@ class GridRow extends Component {
       }
       return <View style={cellStyle}>{row}</View>
     }
-    if (properties[v].type === 'date')
-      return <View style={cellStyle}>{this.addDateProp(v)}</View>
+    if (colProp.type === 'date')
+      return <View style={cellStyle}>{this.addDateProp(pName)}</View>
 
-    if (resource[v]  &&  (typeof resource[v] != 'string')) {
+    if (resource[pName]  &&  (typeof resource[pName] != 'string')) {
       if (criteria)
         style.push({fontWeight: '600'})
-      if (properties[v].type === 'number')
-        style.push({alignSelf: 'flex-end', paddingRight: 10})
-      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[v] + ''}</Text></View>
-    }
-    if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') === 0  ||  resource[v].indexOf('https://') === 0))
-      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(this, resource)} key={this.getNextKey(resource)}>{resource[v]}</Text></View>
 
-    let val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
+      if (colProp.type === 'number')
+        style.push({alignSelf: 'flex-end', paddingRight: 10})
+      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[pName] + ''}</Text></View>
+    }
+    if (!backlink  &&  resource[pName]  && (resource[pName].indexOf('http://') === 0  ||  resource[pName].indexOf('https://') === 0))
+      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(this, resource)} key={this.getNextKey(resource)}>{resource[pName]}</Text></View>
+
+    let val = colProp.displayAs ? utils.templateIt(colProp, resource) : resource[pName];
     let msgParts = utils.splitMessage(val);
     if (msgParts.length <= 2)
       val = msgParts[0];
@@ -324,8 +325,8 @@ class GridRow extends Component {
       }
     }
     else {
-      if (this.props.isModel  &&  (v === 'form'  ||  v === 'product')) {
-        let m = utils.getModel(v)
+      if (this.props.isModel  &&  (pName === 'form'  ||  pName === 'product')) {
+        let m = utils.getModel(pName)
         if (m)
           val = utils.makeModelTitle(m)
       }
