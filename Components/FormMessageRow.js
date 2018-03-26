@@ -88,6 +88,7 @@ class FormMessageRow extends Component {
       //   photoUrls.push({url: utils.getImageUri(p.url)});
       // })
       isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
+      photoListStyle = styles.photoListStyle
       // photoListStyle = {
       //   flexDirection: 'row',
       //   alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
@@ -131,7 +132,7 @@ class FormMessageRow extends Component {
     return  <View style={styles.pageView}>
               {date}
               {stub}
-              <View style={styles.photoListStyle}>
+              <View style={photoListStyle}>
                 <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
               </View>
               {sendStatus}
