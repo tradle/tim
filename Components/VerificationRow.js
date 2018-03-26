@@ -113,14 +113,14 @@ class VerificationRow extends Component {
       photo = <Image host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else if (isForm || isVerification)
       photo = <View style={styles.photo}>
-                <Icon name={model.icon || 'ios-paper-outline'} size={40} style={{marginTop: 8}} color={model.iconColor ? model.iconColor : '#cccccc'} />
+                <Icon name={model.icon || 'ios-paper-outline'} size={40} style={styles.photoIconPlacement} color={model.iconColor ? model.iconColor : '#cccccc'} />
               </View>
     else if (isMyProduct)
       photo = <View style={styles.photo}>
-                <Icon name={model.icon || 'ios-ribbon-outline'} size={40} style={{marginTop: 8}} color={model.iconColor ? model.iconColor : '#cccccc'} />
+                <Icon name={model.icon || 'ios-ribbon-outline'} size={40} style={styles.photoIconPlacement} color={model.iconColor ? model.iconColor : '#cccccc'} />
               </View>
     else if (ph)
-      photo = <View style={{width: 70}} />
+      photo = <View style={styles.photoPlaceholder} />
 
     let verificationRequest = resource.document
                             ? utils.getModel(utils.getType(resource.document))
@@ -158,15 +158,15 @@ class VerificationRow extends Component {
              : (isForm)
                 ? translate('sentToOn', title)
                 : translate('verifiedByOn', title)
-      verifiedBy = <View style={{alignItems: 'flex-end', paddingRight: 5}}><Text style={styles.verifiedBy}>{by}</Text></View>
+      verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
     }
     else if (this.props.search  &&  listModel.id === FORM_REQUEST) {
       let by =  'Sent from ' + resource.from.organization.title
-      verifiedBy = <View style={{alignItems: 'flex-end', paddingRight: 5}}><Text style={styles.verifiedBy}>{by}</Text></View>
+      verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
     }
 
     let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
-    let date = !isBookmark &&  r  &&  <View style={{alignItems: 'flex-end'}}>
+    let date = !isBookmark &&  r  &&  <View style={styles.datePlacement}>
                         <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy h:MM')}</Text>
                       </View>
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
@@ -214,7 +214,7 @@ class VerificationRow extends Component {
           icon = 'ios-information-circle-outline'
           break
         }
-        titleComponent = <View style={{flexDirection: 'row'}}>
+        titleComponent = <View style={styles.titleView}>
                            <Icon color={color} size={25} name={icon} style={{marginTop: -4}}/>
                            <Text style={[styles.rTitle, {paddingLeft: 10}]}>{dn}</Text>
                          </View>
@@ -225,7 +225,7 @@ class VerificationRow extends Component {
 
     if (isVerification)
       titleComponent = <Text style={[styles.rTitle, {fontWeight: '600'}]}>{'Verification: '}
-                          <Text style={[styles.rTitle, {fontWeight: '400'}]}>{title}</Text>
+                          <Text style={styles.rTitle}>{title}</Text>
                         </Text>
     else if (isBookmark  &&  resource.message)
       titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
@@ -236,8 +236,8 @@ class VerificationRow extends Component {
 
     let supportingDocuments
     if (isForm  &&  resource._supportingDocuments  &&  resource._supportingDocuments.length)
-      supportingDocuments = <View style={{flexDirection: 'row', backgroundColor: '#fff', justifyContent: 'center', paddingTop: 10, paddingRight:5}}>
-                              <Icon name='ios-paper' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
+      supportingDocuments = <View style={styles.supportingDocsView}>
+                              <Icon name='ios-paper' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: 0}}/>
                               <View style={styles.count}>
                                 <Text style={styles.countText}>{resource._supportingDocuments.length}</Text>
                               </View>
@@ -248,9 +248,9 @@ class VerificationRow extends Component {
       if (utils.getId(resource.to.organization) !== utils.getId(parentResource)) {
         let img
         if (resource.to.photo)
-          sharedFrom = <View style={{flexDirection: 'row', height: 25}}>
-                        <Image source={{uri: utils.getImageUri(resource.to.photo)}}  style={[{height: 20, width: 20, alignSelf: 'center', opacity: 0.7}]} />
-                        <Text style={[styles.verifiedBy, {paddingLeft: 5, alignSelf: 'center'}]}>Shared from {resource.to.organization.title}</Text>
+          sharedFrom = <View style={styles.sharedView}>
+                        <Image source={{uri: utils.getImageUri(resource.to.photo)}}  style={styles.recipientPhoto} />
+                        <Text style={[styles.verifiedBy, styles.sharedFrom]}>Shared from {resource.to.organization.title}</Text>
                       </View>
         else
           sharedFrom = <Text style={styles.verifiedBy}>Shared from {resource.to.organization.title}</Text>
@@ -270,11 +270,12 @@ class VerificationRow extends Component {
                          </View>
 
     }
+    let verifiedByAndDateStyle = {marginTop: sharedFrom ? -3 : 3, flexDirection: 'row', justifyContent: 'flex-end'}
     let header =  <View style={styles.header} key={this.getNextKey()}>
                     <View style={styles.row}>
                       {photo}
                       <View style={styles.noImageBlock}>
-                        <View style={{flexDirection: 'row', justifyContent: 'space-between', minHeight: 40}}>
+                        <View style={styles.rowContent}>
                           <View style={styles.title}>
                             {titleComponent}
                             {description}
@@ -284,7 +285,7 @@ class VerificationRow extends Component {
                           {multiChooserIcon}
                         </View>
                           {sharedFrom}
-                        <View style={{marginTop: sharedFrom ? -3 : 3, flexDirection: 'row', justifyContent: 'flex-end'}}>
+                        <View style={verifiedByAndDateStyle}>
                           {verifiedBy}
                           {date}
                         </View>
@@ -304,7 +305,7 @@ class VerificationRow extends Component {
       if (this.props.search  &&  this.props.searchCriteria)
         this.formatFilteredResource(model, resource, renderedRows)
       let content = <TouchableOpacity onPress={onSelect.bind(this)}>
-                      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                      <View style={styles.rowSpace}>
                         {header}
                       </View>
                     </TouchableOpacity>
@@ -312,8 +313,8 @@ class VerificationRow extends Component {
         content = <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
                     {content}
                   </Swipeout>
-      row = <View style={{backgroundColor: '#fff'}} host={lazy}>
-             {content}
+      row = <View style={styles.contentBg} host={lazy}>
+              {content}
             </View>
     }
     // else {
@@ -603,6 +604,10 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 10
   },
+  rowSpace: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
   header: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -648,6 +653,7 @@ var styles = StyleSheet.create({
     color: '#cccccc',
     fontSize: 12,
   },
+
   cellImage: {
     height: 60,
     marginRight: 10,
@@ -699,6 +705,51 @@ var styles = StyleSheet.create({
   photo: {
     alignItems: 'center',
     width: 70
+  },
+  verifiedByView: {
+    alignItems: 'flex-end',
+    paddingRight: 5
+  },
+  photoIconPlacement: {
+    marginTop: 8
+  },
+  photoPlaceholder: {
+    width: 70
+  },
+  datePlacement: {
+    alignItems: 'flex-end'
+  },
+  rowContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    minHeight: 40
+  },
+  supportingDocsView: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    paddingTop: 10,
+    paddingRight:5
+  },
+  sharedView: {
+    flexDirection: 'row',
+    height: 25
+  },
+  recipientPhoto: {
+    height: 20,
+    width: 20,
+    alignSelf: 'center',
+    opacity: 0.7
+  },
+  sharedFrom: {
+    paddingLeft: 5,
+    alignSelf: 'center'
+  },
+  contentBg: {
+    backgroundColor: '#fff'
+  },
+  titleView: {
+    flexDirection: 'row'
   }
 });
 

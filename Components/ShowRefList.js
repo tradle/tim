@@ -47,7 +47,7 @@ class ShowRefList extends Component {
   }
   render() {
     var { resource, model, backlink, backlinkList, showDocuments, showDetails, bankStyle,
-          children, navigator, lazy, currency, application } = this.props
+          children, navigator, lazy, currency, application, search } = this.props
     model = model || utils.getModel(resource[TYPE]);
     var props = model.properties;
     let self = this
@@ -221,6 +221,7 @@ class ShowRefList extends Component {
                     lazy={lazy}
                     modelName={modelName}
                     application={application}
+                    search={search}
                     prop={currentBacklink}
                     sortProperty={utils.getModel(modelName).sortProperty}
                     resource={resource}

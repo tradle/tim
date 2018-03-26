@@ -476,9 +476,8 @@ var search = {
                 }
               }
             }`)
-            continue
           }
-          if (prop.inlined) {
+          else if (prop.inlined) {
             if (currentProp  &&  currentProp === prop)
               continue
             arr.push(this.addInlined(prop))

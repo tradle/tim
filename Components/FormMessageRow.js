@@ -74,27 +74,29 @@ class FormMessageRow extends Component {
   }
   render() {
     let { resource, to, bankStyle, application } = this.props
-    var model = utils.getModel(resource[TYPE])
+    let model = utils.getModel(resource[TYPE])
     let photos = utils.getResourcePhotos(model, resource)
-    var photoListStyle = {height: 3};
-    var photoUrls = []
-    var isMyMessage = this.isMyMessage()
+    let photoListStyle = {height: 3};
+    let photoUrls = []
+    let isMyMessage = this.isMyMessage()
     let isShared = this.isShared()
+    let isSharedContext
 
     if (photos) {
       photoUrls = photos
       // photos.forEach((p) => {
       //   photoUrls.push({url: utils.getImageUri(p.url)});
       // })
-      let isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
-      photoListStyle = {
-        flexDirection: 'row',
-        alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
-        borderRadius: 10,
-        marginBottom: 3,
-      }
-      if (isSharedContext || application)
-        photoListStyle.marginLeft = 40
+      isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
+      photoListStyle = styles.photoListStyle
+      // photoListStyle = {
+      //   flexDirection: 'row',
+      //   alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
+      //   borderRadius: 10,
+      //   marginBottom: 3,
+      // }
+      // if (isSharedContext || application)
+      //   photoListStyle.marginLeft = 40
     }
     var len = photoUrls.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
@@ -120,19 +122,20 @@ class FormMessageRow extends Component {
         photoStyle = chatStyles.image;
     }
     let sendStatus = this.getSendStatus()
-    var val = this.getTime(resource);
-    var date = val
+    let val = this.getTime(resource);
+    let date = val
              ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
              : <View />;
     let bg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
 
-    let stub = this.formStub(resource, to)
+    let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
+    let stub = this.formStub(resource, to, styles)
     if (resource[TYPE] !== PRODUCT_REQUEST)
       stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
                {stub}
              </TouchableHighlight>
 
-    return  <View style={[{margin: 1}, bg]}>
+    return  <View style={styles.pageView}>
               {date}
               {stub}
               <View style={photoListStyle}>
@@ -141,7 +144,7 @@ class FormMessageRow extends Component {
               {sendStatus}
             </View>
   }
-  formStub(resource, toChat) {
+  formStub(resource, toChat, styles) {
     let hasSentTo
     if (!toChat)
       hasSentTo = true
@@ -155,16 +158,8 @@ class FormMessageRow extends Component {
         }
       }
     }
-    let sentTo = hasSentTo
-               ? <View style={{padding: 5}}>
-                   <Text style={{color: '#7AAAC3', fontSize: 14, alignSelf: 'flex-end'}}>{translate('asSentTo', resource.to.organization.title)}</Text>
-                 </View>
-               : <View/>
-
     let renderedRow = []
     let isMyMessage = this.isMyMessage()
-    this.formatRow(isMyMessage || isShared, renderedRow)
-    let noContent = !hasSentTo &&  !renderedRow.length
 
     let isShared = this.isShared()
     // let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
@@ -174,14 +169,15 @@ class FormMessageRow extends Component {
     // if (application)
     //   width -= 50 // provider icon and padding
 
-    width = Math.min(width, 600)
-    let viewStyle = {
-      // width: width,
-      alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-      // marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
-      backgroundColor: 'transparent', //this.props.bankStyle.BACKGROUND_COLOR,
-      flexDirection: 'row',
-    }
+    // let viewStyle = {
+    //   // width: width,
+    //   alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
+    //   // marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
+    //   backgroundColor: 'transparent', //this.props.bankStyle.BACKGROUND_COLOR,
+    //   flexDirection: 'row',
+    // }
+    this.formatRow(isMyMessage || isShared, renderedRow, styles)
+    let noContent = !hasSentTo &&  !renderedRow.length
 
     let headerStyle = [
       chatStyles.verifiedHeader,
@@ -190,13 +186,7 @@ class FormMessageRow extends Component {
       isMyMessage || isShared ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
     ]
 
-    var st = {
-      margin: 1,
-      paddingRight: 10,
-      // flexDirection: 'row',
-      backgroundColor: 'transparent', // this.props.bankStyle.BACKGROUND_COLOR
-    }
-    var sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
+    let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
     let model = utils.getModel(resource[TYPE])
     if (noContent) {
       let prop = model.properties.time
@@ -206,18 +196,23 @@ class FormMessageRow extends Component {
         noContent = false
       }
     }
+    let sentTo
+    if (hasSentTo)
+      sentTo = <View style={styles.sentToView}>
+                 <Text style={styles.sentTo}>{translate('asSentTo', resource.to.organization.title)}</Text>
+               </View>
     let row = <View style={{paddingVertical: noContent ? 0 : 5}}>
                 {renderedRow}
                 {sentTo}
               </View>
     let contextId = this.getContextId(resource)
 
-    var ownerPhoto = this.getOwnerPhoto(isMyMessage)
-    var arrowIcon
+    let ownerPhoto = this.getOwnerPhoto(isMyMessage)
+    let arrowIcon
     if (!utils.isContext(resource))
       arrowIcon = <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
     return (
-      <View style={st, viewStyle} key={this.getNextKey()}>
+      <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
         <View style={[{flex:1, width: width}, chatStyles.verificationBody]}>
           <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}, noContent  &&  styles.noContentStyle]}>
@@ -233,22 +228,22 @@ class FormMessageRow extends Component {
     );
   }
 
-  formatRow(isMyMessage, renderedRow) {
-    var resource = this.props.resource;
-    var model = utils.getModel(resource[TYPE] || resource.id);
+  formatRow(isMyMessage, renderedRow, styles) {
+    let resource = this.props.resource;
+    let model = utils.getModel(resource[TYPE] || resource.id);
 
-    var viewCols = model.gridCols || model.viewCols;
+    let viewCols = model.gridCols || model.viewCols;
     if (!viewCols) {
       viewCols = model.required
       if (!viewCols)
         return
     }
-    var first = true;
+    let first = true;
 
-    var properties = model.properties;
-    var onPressCall;
+    let properties = model.properties;
+    let onPressCall;
 
-    var vCols = [];
+    let vCols = [];
     let isShared = this.isShared()
     if (viewCols)
       viewCols = utils.ungroup(model, viewCols)
@@ -279,7 +274,7 @@ class FormMessageRow extends Component {
         }
         return;
       }
-      var style = chatStyles.resourceTitle
+      let style = chatStyles.resourceTitle
       if (isMyMessage || isShared)
         style = [style, styles.myMsg];
 
@@ -289,24 +284,14 @@ class FormMessageRow extends Component {
         onPressCall = this.onPress;
         vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>);
       }
-      if (resource[v]  &&  properties[v].signature) {
-        let {width, height} = utils.dimensions(FormMessageRow)
-        let h = 70
-        let w
-        if (width > height)
-          w = (width * 70)/(height - 100)
-        else
-          w = (height * 70)/(width - 100)
-        w = Math.round(w)
-        vCols.push(<View style={{flexDirection: 'row'}} key={this.getNextKey()}>
-                      <View style={[styles.column, {flex: 1}]}>
-                        <Text style={[styles.descriptionG]}>{properties[v].title}</Text>
-                      </View>
-                      <View style={[styles.column, {paddingLeft: 3, flex: 3}]}>
-                       <Image style={{width: w, height: h}} source={{uri: resource[v]}}/>
-                     </View>
-                   </View>)
-      }
+      if (resource[v]  &&  properties[v].signature)
+        vCols.push(
+          <View key={this.getNextKey()}>
+            <Text style={styles.title}>{properties[v].title}</Text>
+            <Image style={styles.sig} source={{uri: resource[v]}}/>
+          </View>
+        )
+
       else if (!model.autoCreate) {
         let val
         if (properties[v].type === 'date')
@@ -350,20 +335,74 @@ class FormMessageRow extends Component {
   }
 }
 
-var styles = StyleSheet.create({
-  myMsg: {
-    justifyContent: 'flex-end',
-    // color: '#ffffff'
-  },
-  youSharedText: {
-    color: '#ffffff',
-    fontSize: 18
-  },
-  noContentStyle: {
-    marginBottom: -6,
-    borderBottomRightRadius: 10,
-    borderBottomLeftRadius: 10
-  }
+var createStyles = utils.styleFactory(FormMessageRow, function (params) {
+  let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
+  let moreHeader = isMyMessage || isShared ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
+  let bg = isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg
+  let pageBg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
+  let w, h = 70
+  if (dimensions.width > dimensions.height)
+    w = Math.round((dimensions.width * 70)/(dimensions.height - 100))
+  else
+    w = Math.round((dimensions.height * 70)/(dimensions.width - 100))
+  return StyleSheet.create({
+    myMsg: {
+      justifyContent: 'flex-end',
+      // color: '#ffffff'
+    },
+    youSharedText: {
+      color: '#ffffff',
+      fontSize: 18
+    },
+    noContentStyle: {
+      marginBottom: -6,
+      borderBottomRightRadius: 10,
+      borderBottomLeftRadius: 10
+    },
+    sentTo: {
+      color: '#7AAAC3',
+      fontSize: 14,
+      alignSelf: 'flex-end'
+    },
+    sentToView: {
+      padding: 5
+    },
+    row: {
+      flexDirection: 'row'
+    },
+    viewStyle: {
+      // width: width,
+      alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
+      // marginLeft: isMyMessage || isShared ? 30 : 0,
+      backgroundColor: 'transparent',
+      flexDirection: 'row',
+      // margin: 1,
+      // paddingRight: 10,
+    },
+    headerStyle: {
+      ...moreHeader,
+      backgroundColor: bg
+    },
+    sig: {
+      width: w,
+      height: h
+    },
+    title: {
+      fontSize: 18,
+      color: '#aaaaaa'
+    },
+    pageView: {
+      margin: 1,
+      ...pageBg
+    },
+    photoListStyle: {
+      flexDirection: 'row',
+      alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
+      borderRadius: 10,
+      marginBottom: 3,
+      marginLeft: isSharedContext || application ? 40 : 0
+    }
+  })
 });
 reactMixin(FormMessageRow.prototype, RowMixin);
 FormMessageRow = makeStylish(FormMessageRow)

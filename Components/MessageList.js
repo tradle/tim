@@ -815,10 +815,10 @@ class MessageList extends Component {
           //   </View>
           // )
 
-          content = <View style={{flex: 1}}>
+          content = <View style={styles.flex1}>
                       <View style={[platformStyles.container, bgStyle]}>
-                        <Text style={{fontSize: 17, alignSelf: 'center', marginTop: 80, color: '#629BCA'}}>{'Loading...'}</Text>
-                        <ActivityIndicator size='large' style={{alignSelf: 'center', backgroundColor: 'transparent', marginTop: 20}} />
+                        <Text style={styles.loading}>{'Loading...'}</Text>
+                        <ActivityIndicator size='large' style={styles.indicator} />
                       </View>
                       {menuBtn}
                     </View>
@@ -886,15 +886,13 @@ class MessageList extends Component {
     }
 
     let isOrg = !isAggregation  &&  resource  &&  resource[TYPE] === ORGANIZATION
-    let chooser
-    if (isOrg)
-      chooser =  <View style={{flex:1, marginTop: 8}}>
-                  <TouchableHighlight underlayColor='transparent' onPress={this.onAddNewPressed.bind(this, true)}>
-                    <Icon name={'ios-arrow-round-down'} size={25} style={styles.imageOutline} />
-                  </TouchableHighlight>
-                </View>
-    else
-      chooser = <View/>
+    // let chooser
+    // if (isOrg)
+    //   chooser =  <View style={{flex:1, marginTop: 8}}>
+    //               <TouchableHighlight underlayColor='transparent' onPress={this.onAddNewPressed.bind(this, true)}>
+    //                 <Icon name={'ios-arrow-round-down'} size={25} style={styles.imageOutline} />
+    //               </TouchableHighlight>
+    //             </View>
 
     let sepStyle = { height: 1,backgroundColor: 'transparent' }
     if (!allLoaded  && !navigator.isConnected  &&  isForgetting)
@@ -968,35 +966,35 @@ class MessageList extends Component {
     let hasSupportLine = utils.hasSupportLine(resource)
 
     if (hasSupportLine) {
-      let isOrg = this.props.resource[TYPE] === ORGANIZATION
-      if (this.state.isEmployee  &&  !isOrg) {
-        cancelIndex++
-        buttons.push({
-          index: 0,
-          title: translate('formChooser'),
-          callback: () => this.chooseFormForCustomer()
-        })
-      }
-      else {
-        if (!this.state.isEmployee) {
-          if (this.state.hasProducts) {
-            buttons.push({
-              index: cancelIndex,
-              title: translate('applyForProduct'),
-              callback: () => this.onChooseProduct()
-            })
-            cancelIndex++
-          }
-        }
-        if (ENV.allowForgetMe) {
-          buttons.push({
-            index: cancelIndex,
-            title: translate('forgetMe'),
-            callback: () => this.forgetMe()
-          })
-          cancelIndex++
-        }
-      }
+      // let isOrg = this.props.resource[TYPE] === ORGANIZATION
+      // if (this.state.isEmployee  &&  !isOrg) {
+      //   cancelIndex++
+      //   buttons.push({
+      //     index: 0,
+      //     title: translate('formChooser'),
+      //     callback: () => this.chooseFormForCustomer()
+      //   })
+      // }
+      // else {
+      //   if (!this.state.isEmployee) {
+      //     if (this.state.hasProducts) {
+      //       buttons.push({
+      //         index: cancelIndex,
+      //         title: translate('applyForProduct'),
+      //         callback: () => this.onChooseProduct()
+      //       })
+      //       cancelIndex++
+      //     }
+      //   }
+      //   if (ENV.allowForgetMe) {
+      //     buttons.push({
+      //       index: cancelIndex,
+      //       title: translate('forgetMe'),
+      //       callback: () => this.forgetMe()
+      //     })
+      //     cancelIndex++
+      //   }
+      // }
     }
     else if (ENV.allowForgetMe) {
       if (application)
@@ -1008,14 +1006,14 @@ class MessageList extends Component {
       })
       cancelIndex++
 
-      if (this.state.hasProducts) {
-        buttons.push({
-          index: cancelIndex,
-          title: translate('applyForProduct'),
-          callback: () => this.onChooseProduct()
-        })
-        cancelIndex++
-      }
+      // if (this.state.hasProducts) {
+      //   buttons.push({
+      //     index: cancelIndex,
+      //     title: translate('applyForProduct'),
+      //     callback: () => this.onChooseProduct()
+      //   })
+      //   cancelIndex++
+      // }
     }
     else
       return
@@ -1216,69 +1214,6 @@ class MessageList extends Component {
     evt = evt
   }
 
-  chooseFormForCustomer() {
-    if (!this.state.context) {
-      Alert.alert(translate('formListError'), translate('formListErrorDescription'))
-      return
-    }
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
-    let resource = this.props.resource
-    this.setState({show: false})
-    this.props.navigator.push({
-      title: translate(utils.getModel(FORM)),
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback: this.props.callback,
-        type: FORM,
-        context: this.state.context
-      },
-      // rightButtonTitle: 'ion|plus',
-      // onRightButtonPress: {
-      //   id: 4,
-      //   title: translate('newProduct'),
-      //   component: NewResource,
-      //   backButtonTitle: translate('back'),
-      //   // titleTextColor: '#999999',
-      //   rightButtonTitle: translate('done'),
-      //   passProps: {
-      //     model: utils.getModel('tradle.NewMessageModel'),
-      //     currency: resource.currency,
-      //     // callback: this.modelAdded.bind(this)
-      //   }
-      // }
-    });
-  }
-  onChooseProduct() {
-    if (this.props.isAggregation)
-      return
-    // let modelName = MESSAGE
-    // let model = utils.getModel(modelName);
-    // let isInterface = model.isInterface;
-    // if (!isInterface)
-    //   return;
-
-    let resource = this.props.resource
-    let currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
-      title: translate('iNeed'), //I need...',
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        products: this.props.resource.list,
-        callback: this.props.callback,
-        bankStyle: this.props.bankStyle
-      },
-    });
-  }
 
   forgetMe() {
     let resource = this.props.resource
@@ -1296,44 +1231,6 @@ class MessageList extends Component {
     )
   }
 
-  onAddNewPressed(sendForm) {
-    let { modelName, resource, navigator, callback } = this.props
-    if (modelName === MESSAGE)
-      return
-    let model = utils.getModel(modelName);
-    if (!model.isInterface)
-      return;
-
-    let currentRoutes = navigator.getCurrentRoutes();
-    navigator.push({
-      title: translate(utils.getModel(FINANCIAL_PRODUCT)),
-      id: 15,
-      component: ProductChooser,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        returnRoute: currentRoutes[currentRoutes.length - 1],
-        callback: callback,
-        type: PRODUCT_REQUEST
-      },
-      rightButtonTitle: 'ion|plus',
-      onRightButtonPress: {
-        id: 4,
-        title: translate('newProduct'),
-        component: NewResource,
-        backButtonTitle: 'Back',
-        // titleTextColor: '#999999',
-        rightButtonTitle: 'Done',
-        passProps: {
-          model: utils.getModel('tradle.NewMessageModel'),
-          currency: resource.currency,
-          country: resource.country,
-          // callback: this.modelAdded.bind(this)
-        }
-      }
-    });
-  }
   onSubmitEditing(msg) {
     let me = utils.getMe();
     let { resource, application, modelName } = this.props
@@ -1417,13 +1314,24 @@ var styles = StyleSheet.create({
     alignItems: 'stretch',
     justifyContent: 'flex-start',
   },
-  flexGrow: {
-    flexGrow: 1
+  flex1: {
+    flex: 1
   },
   bottom: {
     position: 'absolute',
     bottom: 30
-  }
+  },
+  loading: {
+    fontSize: 17,
+    alignSelf: 'center',
+    marginTop: 80,
+    color: '#629BCA'
+  },
+  indicator: {
+    alignSelf: 'center',
+    backgroundColor: 'transparent',
+    marginTop: 20
+  },
 });
 module.exports = MessageList;
 
@@ -1501,4 +1409,105 @@ module.exports = MessageList;
   //   });
   // }
       // 'Are you sure you want \'' + utils.getDisplayName(resource, utils.getModel(resource[TYPE]).properties) + '\' to forget you',
+  onAddNewPressed(sendForm) {
+    let { modelName, resource, navigator, callback } = this.props
+    if (modelName === MESSAGE)
+      return
+    let model = utils.getModel(modelName);
+    if (!model.isInterface)
+      return;
+
+    let currentRoutes = navigator.getCurrentRoutes();
+    navigator.push({
+      title: translate(utils.getModel(FINANCIAL_PRODUCT)),
+      id: 15,
+      component: ProductChooser,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        callback: callback,
+        type: PRODUCT_REQUEST
+      },
+      rightButtonTitle: 'ion|plus',
+      onRightButtonPress: {
+        id: 4,
+        title: translate('newProduct'),
+        component: NewResource,
+        backButtonTitle: 'Back',
+        // titleTextColor: '#999999',
+        rightButtonTitle: 'Done',
+        passProps: {
+          model: utils.getModel('tradle.NewMessageModel'),
+          currency: resource.currency,
+          country: resource.country,
+          // callback: this.modelAdded.bind(this)
+        }
+      }
+    });
+  }
+  chooseFormForCustomer() {
+    if (!this.state.context) {
+      Alert.alert(translate('formListError'), translate('formListErrorDescription'))
+      return
+    }
+    let currentRoutes = this.props.navigator.getCurrentRoutes();
+    let resource = this.props.resource
+    this.setState({show: false})
+    this.props.navigator.push({
+      title: translate(utils.getModel(FORM)),
+      id: 15,
+      component: ProductChooser,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        callback: this.props.callback,
+        type: FORM,
+        context: this.state.context
+      },
+      // rightButtonTitle: 'ion|plus',
+      // onRightButtonPress: {
+      //   id: 4,
+      //   title: translate('newProduct'),
+      //   component: NewResource,
+      //   backButtonTitle: translate('back'),
+      //   // titleTextColor: '#999999',
+      //   rightButtonTitle: translate('done'),
+      //   passProps: {
+      //     model: utils.getModel('tradle.NewMessageModel'),
+      //     currency: resource.currency,
+      //     // callback: this.modelAdded.bind(this)
+      //   }
+      // }
+    });
+  }
+  onChooseProduct() {
+    if (this.props.isAggregation)
+      return
+    // let modelName = MESSAGE
+    // let model = utils.getModel(modelName);
+    // let isInterface = model.isInterface;
+    // if (!isInterface)
+    //   return;
+
+    let resource = this.props.resource
+    let currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.props.navigator.push({
+      title: translate('iNeed'), //I need...',
+      id: 15,
+      component: ProductChooser,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: resource,
+        returnRoute: currentRoutes[currentRoutes.length - 1],
+        products: this.props.resource.list,
+        callback: this.props.callback,
+        bankStyle: this.props.bankStyle
+      },
+    });
+  }
 */

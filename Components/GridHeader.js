@@ -157,7 +157,7 @@ var styles = StyleSheet.create({
     borderBottomColor: '#7AAAC3'
   },
   gridHeader: {
-    backgroundColor: '#eeeeee'
+    backgroundColor: '#e7e7e7'
   },
 });
 

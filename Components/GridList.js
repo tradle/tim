@@ -220,8 +220,7 @@ class GridList extends Component {
     if (isBacklink) {
       // if (!props.resource['_' + props.prop.name + 'Count'])
       //   return
-      if (application) {
-        this.state.isLoading = false
+      if (application  ||  search) {
         if (resource[prop.name]) {
           this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
           return
@@ -318,22 +317,22 @@ class GridList extends Component {
         return
         // Actions.listModels({modelName})
       }
-      else if (isBacklink  &&  application) {
+      else { //if (isBacklink  &&  application) {
         if (resource[prop.name]) {
           this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
           return
         }
       }
-      else if (!isForwardlink) {
-        Actions.list({
-          modelName: modelName,
-          filterResource: resource,
-          search: true,
-          first: true,
-          limit: this.limit
-        })
-        return
-      }
+      // else if (!isForwardlink) {
+      //   Actions.list({
+      //     modelName: modelName,
+      //     filterResource: resource,
+      //     search: true,
+      //     first: true,
+      //     limit: this.limit
+      //   })
+      //   return
+      // }
     }
     let me = utils.getMe()
     if (me  &&  me.isEmployee  &&  officialAccounts) {
@@ -787,9 +786,9 @@ class GridList extends Component {
         component: MessageView,
         backButtonTitle: 'Back',
         passProps: {
-          resource: resource,
-          search: search,
-          application: application,
+          resource,
+          search,
+          application,
           bankStyle: bankStyle || defaultBankStyle
         }
       })

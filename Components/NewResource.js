@@ -439,8 +439,8 @@ class NewResource extends Component {
               if (!v.currency) {
                 if (resource[p].currency)
                   v.currency = resource[p].currency
-                else if (currency)
-                  v.currency = currency
+                // else if (currency)
+                //   v.currency = currency
                 else {
                   missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
                   return

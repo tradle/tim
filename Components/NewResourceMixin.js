@@ -578,6 +578,8 @@ var NewResourceMixin = {
       if (!this.floatingProps[prop.name])
         this.floatingProps[prop.name] = {}
       this.floatingProps[prop.name].value = value
+      if (!r[prop.name])
+        r[prop.name] = {}
       r[prop.name].value = value
     }
     else if (prop.type === 'boolean')  {

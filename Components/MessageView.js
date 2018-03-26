@@ -209,19 +209,20 @@ class MessageView extends Component {
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     let r = {};
+    let { resource, defaultPropertyValues, bankStyle, navigator } = this.props
     r[TYPE] = itemBl.items.ref
-    r[itemBl.items.backlink] = { id: utils.getId(this.props.resource) }
+    r[itemBl.items.backlink] = { id: utils.getId(resource) }
 
     // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
     //   r.relatedTo = this.props.resource.relatedTo;
     let me = utils.getMe()
     r.from = me
-    r.to = me
-    r._context = this.props.resource._context
+    r.to = me //resource.to
+    r._context = resource._context
     let model = utils.getModel(r[TYPE])
 
     let self = this
-    this.props.navigator.push({
+    navigator.push({
       title: model.title,
       id: 4,
       component: NewResource,
@@ -230,13 +231,13 @@ class MessageView extends Component {
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
-        bankStyle: this.state.bankStyle || this.props.bankStyle,
+        bankStyle: this.state.bankStyle || bankStyle,
         resource: r,
         doNotSend: true,
-        defaultPropertyValues: this.props.defaultPropertyValues,
+        defaultPropertyValues: defaultPropertyValues,
         currency: this.props.currency || this.state.currency,
         callback: (resource) => {
-          self.props.navigator.pop()
+          navigator.pop()
         }
       }
     })
@@ -371,6 +372,9 @@ class MessageView extends Component {
     }
     else if (photos.length === 1)
       mainPhoto = photos[0]
+    if (photos.length)
+      photos.splice(0, 1)
+
     let inRow = photos ? photos.length : 0
     if (inRow  &&  inRow > 4)
       inRow = 5;
