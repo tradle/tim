@@ -288,7 +288,7 @@ var search = {
     query += `pageInfo {\n endCursor\n}\n`
     query += `edges {\n node {\n`
 
-    let arr = this.getAllPropertiesForServerSearch({model, properties})
+    let arr = this.getAllPropertiesForServerSearch({model, properties, isList: true})
 
     query += `${arr.join('   \n')}`
     query += `\n}`   // close 'node'
@@ -427,7 +427,7 @@ console.log('endCursor: ', endCursor)
 
   },
   getAllPropertiesForServerSearch(params) {
-    let {model, inlined, properties, currentProp} = params
+    let {model, inlined, properties, currentProp, isList} = params
     let props = model.properties
     let arr
     if (utils.isInlined(model))
@@ -466,6 +466,8 @@ console.log('endCursor: ', endCursor)
         let iref = prop.items.ref
         if (iref) {
           if (prop.items.backlink  &&  !prop.inlined) {
+            if (isList)
+              continue
             arr.push(`${p} {
               edges {
                 node {
