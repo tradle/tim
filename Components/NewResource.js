@@ -402,7 +402,7 @@ class NewResource extends Component {
           json[p] = this.floatingProps[p]
       }
     }
-    let model = this.props.model
+    let { model, currency, originatingMessage, lensId, chat, doNotSend } = this.props
     let props = model.properties
     let required = utils.ungroup(model, model.required)
     if (!required) {
@@ -421,7 +421,7 @@ class NewResource extends Component {
     }
     let missedRequiredOrErrorValue = {}
     required.forEach((p) =>  {
-      let v = (typeof json[p] !== 'undefined') || json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
+      let v = (typeof json[p] !== 'undefined') || json[p] ? json[p] : (resource ? resource[p] : null); //resource[p];
       if (v) {
         if (typeof v === 'string'  &&  !v.length) {
           v = null
@@ -439,6 +439,8 @@ class NewResource extends Component {
               if (!v.currency) {
                 if (resource[p].currency)
                   v.currency = resource[p].currency
+                else if (currency)
+                  v.currency = currency
                 else {
                   missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
                   return
@@ -516,10 +518,9 @@ class NewResource extends Component {
       this.setState({submitted: false, disableEditing: true})
     let r = {}
     extend(true, r, resource)
-    json._context = r._context ||  (this.props.originatingMessage  &&  this.props.originatingMessage._context)
+    json._context = r._context ||  (originatingMessage  &&  originatingMessage._context)
 
     delete r.url
-    let lensId = this.props.lensId
     let params = {
       value: json,
       resource: r,
@@ -527,12 +528,12 @@ class NewResource extends Component {
       lens: lensId,
       isRegistration: this.state.isRegistration
     };
-    if (this.props.chat)
-      params.chat = this.props.chat
+    if (chat)
+      params.chat = chat
     if (!lensId  &&  this.floatingProps  &&  this.floatingProps._lens)
       params.lens = this.floatingProps._lens
 
-    params.doNotSend = this.props.doNotSend
+    params.doNotSend = doNotSend
     // HACK
     if (!resource.from  ||  !resource.to)
       Actions.addItem(params)
