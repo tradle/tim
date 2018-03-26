@@ -930,14 +930,12 @@ class TimHome extends Component {
     var version = !__DEV__ && this.renderVersion()
     var dev = __DEV__
             ? <View style={styles.dev} testID='welcome'>
-                <TouchableOpacity
-                    underlayColor='transparent' onPress={this.onReloadDBPressed.bind(this)}>
+                <TouchableOpacity onPress={this.onReloadDBPressed.bind(this)}>
                   <Text style={styles.text}>
                     Reload DB
                   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    underlayColor='transparent' onPress={this.onReloadModels.bind(this)}>
+                <TouchableOpacity onPress={this.onReloadModels.bind(this)}>
                   <Text style={styles.text}>
                     Reload Models
                   </Text>
@@ -954,7 +952,7 @@ class TimHome extends Component {
                     <FadeInView>
                       <TouchableOpacity  onPress={() => {
                         this.register(this.showFirstPage.bind(this))
-                        }} underlayColor='transparent'>
+                        }}>
                         <View style={styles.signIn}>
                           <Text style={styles.signInText}>{translate('This is my first Tradle device')}</Text>
                         </View>
@@ -963,7 +961,7 @@ class TimHome extends Component {
                     <FadeInView>
                       <TouchableOpacity  onPress={() => {
                         this.pairDevices(this.showFirstPage.bind(this))
-                        }} underlayColor='transparent'>
+                        }}>
                         <View style={[styles.signIn, styles.shadow]}>
                           <Text style={styles.pairDivicesText}>{translate('I have another Tradle device')}</Text>
                         </View>
@@ -978,7 +976,7 @@ class TimHome extends Component {
           <View style={styles.flexGrow} />
           { utils.getMe()
             ? <TouchableOpacity style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
-                  underlayColor='transparent' onPress={() => this._pressHandler()}>
+                  onPress={() => this._pressHandler()}>
                 <View style={styles.getStarted}>
                    <Text style={styles.getStartedText}>Get started</Text>
                 </View>
