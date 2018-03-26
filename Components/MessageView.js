@@ -88,11 +88,11 @@ class MessageView extends Component {
   }
   componentWillMount() {
     // if (this.props.resource.id)
-    let {resource, isReview, search} = this.props
+    let {resource, isReview, search, application} = this.props
     if (isReview)
       return
     if (resource.id) {
-      Actions.getItem({resource: resource, search: search})
+      Actions.getItem({resource, search, application})
       return
     }
     let m = utils.getModel(resource[TYPE])
@@ -111,7 +111,7 @@ class MessageView extends Component {
       }
     })
     // if (runGetItem)
-      Actions.getItem({resource: resource, search: search})
+      Actions.getItem({resource, search, application})
   }
 
   componentDidMount() {
@@ -124,7 +124,8 @@ class MessageView extends Component {
     }
     if (!params.resource)
       return
-    if (utils.getId(params.resource) !== utils.getId(this.props.resource))
+    let { bankStyle, application, resource } = this.props
+    if (utils.getId(params.resource) !== utils.getId(resource))
       return
     if (params.action === 'getItem') {
       let state = {
@@ -137,8 +138,8 @@ class MessageView extends Component {
         state.country = params.country
       if (params.style) {
         let style = {}
-        if (this.props.bankStyle)
-          _.extend(style, this.props.bankStyle)
+        if (bankStyle)
+          _.extend(style, bankStyle)
         else
           _.extend(style, defaultBankStyle)
         _.extend(style, params.style)
@@ -148,8 +149,9 @@ class MessageView extends Component {
     }
     else if (params.action === 'exploreBacklink') {
       if (params.backlink !== this.state.backlink || params.backlinkAdded) {
-        this.setState({backlink: params.backlink, backlinkList: params.list, showDetails: false, showDocuments: false})
-        Actions.getItem({resource: this.props.resource})
+        let r = params.resource || this.state.resource
+        this.setState({backlink: params.backlink, backlinkList: params.list || r[params.backlink], showDetails: false, showDocuments: false, resource: r})
+        Actions.getItem({resource: r, application, search: application !== null})
       }
     }
     else if (params.action === 'showDetails')
@@ -159,6 +161,8 @@ class MessageView extends Component {
   }
 
   renderActionSheet() {
+    if (this.props.application)
+      return
     let resource = this.state.resource;
     let m = utils.getModel(resource[TYPE])
     let bl = utils.getPropertiesWithAnnotation(m, 'items')
@@ -204,19 +208,20 @@ class MessageView extends Component {
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     let r = {};
+    let { resource, defaultPropertyValues, bankStyle, navigator } = this.props
     r[TYPE] = itemBl.items.ref
-    r[itemBl.items.backlink] = { id: utils.getId(this.props.resource) }
+    r[itemBl.items.backlink] = { id: utils.getId(resource) }
 
     // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
     //   r.relatedTo = this.props.resource.relatedTo;
     let me = utils.getMe()
     r.from = me
-    r.to = me
-    r._context = this.props.resource._context
+    r.to = me //resource.to
+    r._context = resource._context
     let model = utils.getModel(r[TYPE])
 
     let self = this
-    this.props.navigator.push({
+    navigator.push({
       title: model.title,
       id: 4,
       component: NewResource,
@@ -225,13 +230,13 @@ class MessageView extends Component {
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
-        bankStyle: this.state.bankStyle || this.props.bankStyle,
+        bankStyle: this.state.bankStyle || bankStyle,
         resource: r,
         doNotSend: true,
-        defaultPropertyValues: this.props.defaultPropertyValues,
+        defaultPropertyValues: defaultPropertyValues,
         currency: this.props.currency || this.state.currency,
         callback: (resource) => {
-          self.props.navigator.pop()
+          navigator.pop()
         }
       }
     })
@@ -345,7 +350,7 @@ class MessageView extends Component {
   render() {
     if (this.state.isLoading)
       return <View/>
-    let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification } = this.props
+    let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
     let resource = this.state.resource;
     let model = utils.getLensedModel(resource, lensId);
     let isVerification = model.id === VERIFICATION
@@ -402,6 +407,7 @@ class MessageView extends Component {
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
                                  model={model}
+                                 application={application}
                                  showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
                                  bankStyle={bankStyle}
