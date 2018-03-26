@@ -9228,10 +9228,10 @@ var Store = Reflux.createStore({
       // if (isMessage) {
         // if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
         //   return
-        application = ret.application
         let ret = await this.putMessageInDB(val, obj, batch, onMessage)
         if (ret) {
           noTrigger = ret.noTrigger
+          application = ret.application
           isRM = ret.isRM
         }
         if (type === VERIFICATION)
