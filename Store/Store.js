@@ -6168,6 +6168,12 @@ var Store = Reflux.createStore({
       rr.to = {id: myOrgRepId, title: utils.getDisplayName(me.organization)}
       break
     }
+    for (let p in rr) {
+      if (typeof rr[p] === 'object'  &&  rr[p].edges) {
+        rr[p] = rr[p].edges.map(r => this.convertToResource(r.node))
+        rr['_' + p + 'Count'] = rr[p].length
+      }
+    }
 
     // if (!rr._context  &&  rr[ROOT_HASH] !== rr[CUR_HASH]) {
     //   let origRid = utils.makeId(rr[TYPE], rr[ROOT_HASH])
@@ -9222,11 +9228,11 @@ var Store = Reflux.createStore({
       // if (isMessage) {
         // if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
         //   return
+        application = ret.application
         let ret = await this.putMessageInDB(val, obj, batch, onMessage)
         if (ret) {
           noTrigger = ret.noTrigger
           isRM = ret.isRM
-          application = ret.application
         }
         if (type === VERIFICATION)
           return
@@ -9768,13 +9774,15 @@ var Store = Reflux.createStore({
         // Update application row and view if on stack
         let applications = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {context: context.contextId}})
         let app = applications  &&  applications.list.length && applications.list[0]
-        if (app  &&  utils.isRM(app)) {
-          isRM = true
+        if (app) {
           application = app
-          if (context  &&  !app._context)
-            app._context = context
-          this.trigger({action: 'updateRow', resource: app, forceUpdate: true})
-          this.trigger({action: 'getItem', resource: app})
+          if (utils.isRM(app)) {
+            isRM = true
+            if (context  &&  !app._context)
+              app._context = context
+            this.trigger({action: 'updateRow', resource: app, forceUpdate: true})
+            this.trigger({action: 'getItem', resource: app})
+          }
         }
       }
       if (isMyProduct)
