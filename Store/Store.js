@@ -3756,45 +3756,7 @@ var Store = Reflux.createStore({
     // await this._loadedResourcesDefer.promise
     let rId = utils.getId(resource)
     if (search) {
-      let isApplication = resource[TYPE] === APPLICATION
-      let r = await this._getItemFromServer(rId)
-      let list
-      if (isApplication) {
-        if (forwardlink) {
-          let forwardlinkName = forwardlink.name
-          let m = this.getModel(resource[TYPE])
-          if (r[forwardlinkName]) {
-            // list = await this.getObjects(r[forwardlinkName], forwardlink)
-            if (forwardlink.items.ref !== VERIFIED_ITEM)
-              list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl))))
-            else
-              list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl.verification))))
-            r[forwardlinkName] = list
-          }
-        }
-        if (r.relationshipManager) {
-          let rmId = r.relationshipManager.id.replace(IDENTITY, PROFILE)
-          let rm = this._getItem(rmId)
-          if (rm)
-            r.relationshipManager.title = utils.getDisplayName(rm)
-            // r.relationshipManager = this.buildRef(rmProfile)
-        }
-      }
-      if (!r._context) {
-        // if (!resource._context)
-        //   debugger
-        r._context = resource._context
-      }
-
-      if (isApplication  &&  !r._context) {
-        let context = await this.getContext(r.context, r)
-        if (context)
-          r._context = context
-      }
-      let retParams = { resource: r, action: action || 'getItem', forwardlink: forwardlink}
-      if (list)
-        retParams.list = list
-      this.trigger(retParams)
+      await this.onGetItemFromServer(params)
       return
     }
     let r = this._getItem(rId)
@@ -3855,6 +3817,87 @@ var Store = Reflux.createStore({
       }
     }
     this.trigger(retParams);
+  },
+  async onGetItemFromServer(params) {
+    var {resource, action, noTrigger, search, backlink, forwardlink, application} = params
+    let isApplication = resource[TYPE] === APPLICATION
+    let rId = utils.getId(resource)
+    let r = await this._getItemFromServer(rId)
+    let list
+    let m = this.getModel(resource[TYPE])
+    if (isApplication) {
+      if (forwardlink) {
+        let forwardlinkName = forwardlink.name
+        if (r[forwardlinkName]) {
+          // list = await this.getObjects(r[forwardlinkName], forwardlink)
+          if (forwardlink.items.ref !== VERIFIED_ITEM)
+            list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl))))
+          else
+            list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl.verification))))
+          r[forwardlinkName] = list
+        }
+      }
+      if (r.relationshipManager) {
+        let rmId = r.relationshipManager.id.replace(IDENTITY, PROFILE)
+        let rm = this._getItem(rmId)
+        if (rm)
+          r.relationshipManager.title = utils.getDisplayName(rm)
+          // r.relationshipManager = this.buildRef(rmProfile)
+      }
+      if (!r._context) {
+        let context = await this.getContext(r.context, r)
+        if (context)
+          r._context = context
+      }
+    }
+    else if (application) {
+      // let forms = application.forms
+      // if (!forms  ||  !forms.length)
+      //   return
+      // let items = utils.getPropertiesWithAnnotation(m, 'items')
+      // let backlinks = {}
+      // for (let p in items) {
+      //   if (items[p].items.backlink)
+      //     backlinks[p] = items[p]
+      // }
+      // if (!utils.isEmpty(backlinks)) {
+      //   let hasBacklinks
+      //   forms.forEach(f => {
+      //     let t = utils.getType(f)
+      //     let tm = utils.getModel(t)
+      //     for (let p in backlinks) {
+      //       let bl = backlinks[p]
+      //       if (bl.items.ref === t  ||  utils.getModel(bl.items.ref).subClassOf === t) {
+      //         if (!r[p])
+      //           r[p] = []
+      //         r[p].push(f)
+      //         r['_' + p + 'Count'] = r[p].length
+      //         hasBacklinks = true
+      //       }
+      //     }
+      //   })
+      // }
+      if (!r._context) {
+        let context = await this.getContext(application.context, r)
+        if (context)
+          r._context = context
+      }
+    }
+    if (!r._context) {
+      // if (!resource._context)
+      //   debugger
+      r._context = resource._context
+    }
+
+    if (isApplication  &&  !r._context) {
+      let context = await this.getContext(r.context, r)
+      if (context)
+        r._context = context
+    }
+    let retParams = { resource: r, action: action || 'getItem', forwardlink: forwardlink}
+    if (list)
+      retParams.list = list
+    this.trigger(retParams)
   },
   async getObjects(list, prop) {
     let links
@@ -4652,8 +4695,9 @@ var Store = Reflux.createStore({
           let id = toR.organization ? utils.getId(toR.organization) : utils.getId(toR)
           self.addMessagesToChat(id, returnVal)
           org = toR.organization
+          org = self._getItem(utils.getId(org))
         }
-        org = self._getItem(utils.getId(org))
+        // org = self._getItem(utils.getId(org))
 
         let params;
 
@@ -9168,7 +9212,7 @@ var Store = Reflux.createStore({
     // val.permissionKey = obj.permissionKey
     var key = utils.getId(val)
     var batch = []
-    var representativeAddedTo, noTrigger
+    var representativeAddedTo, noTrigger, isRM, application
     // var isServiceMessage
     let isMessage = true
     if (model.id === IDENTITY)
@@ -9178,7 +9222,12 @@ var Store = Reflux.createStore({
       // if (isMessage) {
         // if (val[TYPE] === PRODUCT_LIST  &&  (!val.list || !val.list.length))
         //   return
-        noTrigger = await this.putMessageInDB(val, obj, batch, onMessage)
+        let ret = await this.putMessageInDB(val, obj, batch, onMessage)
+        if (ret) {
+          noTrigger = ret.noTrigger
+          isRM = ret.isRM
+          application = ret.application
+        }
         if (type === VERIFICATION)
           return
       // }
@@ -9301,6 +9350,16 @@ var Store = Reflux.createStore({
             extend(p, memPrefill)
           extend(p, prefill)
           val.prefill = p
+        }
+        else if (utils.isItem(model)) {
+          let props = model.properties
+          for (let p in props) {
+            if (utils.isContainerProp(val, props[p], model)) {
+              let cRes = application  &&  await this._getItemFromServer(val[p]) || this._getItem(val[p])
+              if (cRes )
+                this.trigger({action: 'getItem', resource: cRes, application})
+            }
+          }
         }
         this.trigger({action: 'addItem', resource: val})
         // if (from.organization  && this.isYuki(from.organization))
@@ -9663,7 +9722,7 @@ var Store = Reflux.createStore({
         r.to = isMyMessage ? val.from : this.buildRef(me)
         if (!r.time)
           r.time = new Date().getTime()
-        if (!m.interfaces  ||  m.interfaces.indexOf(ITEM) === -1)
+        if (!utils.isItem(m))
           r[IS_MESSAGE] = true
         r[NOT_CHAT_ITEM] = true
         if (context)
@@ -9693,7 +9752,7 @@ var Store = Reflux.createStore({
       Actions.hideModal()
     }
 
-    var noTrigger
+    var noTrigger, isRM, application
     var isModelsPack = type === MODELS_PACK
 
     if (isModelsPack) {
@@ -9710,6 +9769,8 @@ var Store = Reflux.createStore({
         let applications = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {context: context.contextId}})
         let app = applications  &&  applications.list.length && applications.list[0]
         if (app  &&  utils.isRM(app)) {
+          isRM = true
+          application = app
           if (context  &&  !app._context)
             app._context = context
           this.trigger({action: 'updateRow', resource: app, forceUpdate: true})
@@ -9841,7 +9902,7 @@ var Store = Reflux.createStore({
     //   // noTrigger = true
     // }
     // // }
-    return noTrigger
+    return { noTrigger, application, isRM }
 
     // async function switchToChatContext(context, to) {
     //   await self.searchServer({modelName: MESSAGE, to: self._getItem(to.organization ||  to), context: context, switchToContext: true})
