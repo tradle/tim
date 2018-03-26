@@ -216,16 +216,25 @@ class GridList extends Component {
     this.props.callback(orgs)
   }
   componentWillReceiveProps(props) {
-    let { resource, isBacklink, isForwardlink, search, forwardlink } = props
+    let { resource, isBacklink, prop, isForwardlink, search, forwardlink, application } = props
     if (isBacklink) {
       // if (!props.resource['_' + props.prop.name + 'Count'])
       //   return
-
+      if (application) {
+        this.state.isLoading = false
+        if (resource[prop.name]) {
+          this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
+          return
+        }
+      }
       this.state.dataSource = this.state.dataSource.cloneWithRows([])
       this.state.isLoading = true;
 
       let params = this.getParamsForBacklinkList(props)
-      Actions.list(params)
+      if (application)
+        Actions.getItem(params)
+      else
+        Actions.list(params)
       // else if (props.backlinkList.length)
       //   this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
       // else
@@ -253,15 +262,18 @@ class GridList extends Component {
       params.isAggregation = true;
     if (props.sortProperty)
       params.sortProperty = props.sortProperty;
-    if (props.prop)
-      params.prop = utils.getModel(props.resource[TYPE]).properties[props.prop.name];
-    if (params.prop) {
+    if (props.prop) {
       let m = utils.getModel(props.resource[TYPE])
+      params.prop = m.properties[props.prop.name];
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
         params.resource = props.resource
       else if (params.prop.items  &&  params.prop.items.backlink)
         params.to = props.resource
+      if (props.application) {
+        params.search = true
+        params.application = props.application
+      }
     }
     else
       params.to = props.resource
@@ -286,14 +298,15 @@ class GridList extends Component {
   }
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
-    let { chat, resource, navigator, officialAccounts, search, modelName, isModel, isBacklink, isForwardlink, forwardlink } = this.props
+    let { chat, resource, navigator, officialAccounts, search, application, prop,
+          modelName, isModel, isBacklink, isForwardlink, forwardlink } = this.props
     if (chat) {
       utils.onNextTransitionEnd(navigator, () => {
         Actions.listSharedWith(resource, chat)
       });
       return
     }
-    if (search) {
+    if (search  ||  application) {
       if (isModel) {
         let me = utils.getMe()
         if (me.isEmployee)
@@ -304,6 +317,12 @@ class GridList extends Component {
         }
         return
         // Actions.listModels({modelName})
+      }
+      else if (isBacklink  &&  application) {
+        if (resource[prop.name]) {
+          this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
+          return
+        }
       }
       else if (!isForwardlink) {
         Actions.list({
@@ -741,7 +760,7 @@ class GridList extends Component {
     navigator.push(route);
   }
   selectResourceFromServer(resource) {
-    let { modelName, search, bankStyle, navigator, currency } = this.props
+    let { modelName, search, bankStyle, navigator, currency, application } = this.props
     let model = utils.getModel(modelName);
     let isMessage = utils.isMessage(resource)
     if (isMessage) {
@@ -770,6 +789,7 @@ class GridList extends Component {
         passProps: {
           resource: resource,
           search: search,
+          application: application,
           bankStyle: bankStyle || defaultBankStyle
         }
       })
@@ -1311,7 +1331,8 @@ class GridList extends Component {
   render() {
     let content;
     let {isGrid, filter, dataSource, isLoading, refreshing, list, isConnected, allLoaded} = this.state
-    let { isChooser, modelName, isModel, isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = this.props
+    let { isChooser, modelName, isModel, application,
+          isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = this.props
     let model = utils.getModel(modelName);
     if (dataSource.getRowCount() === 0   &&
         utils.getMe()                    &&
@@ -1391,10 +1412,14 @@ class GridList extends Component {
     let loading
     if (isLoading  &&  !isModel) {
       let showLoadingIndicator = true
-      if (isBacklink  ||  isForwardlink) {
+      if (isBacklink  &&  application)
+        showLoadingIndicator = false
+      else if (isBacklink  ||  isForwardlink) {
         let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
-        if (!resource['_' + pName + 'Count']  &&  (!resource[pName]  || !resource[pName].length))
-          showLoadingIndicator = false
+        if (!resource['_' + pName + 'Count']) {
+          if (!resource[pName]  || !resource[pName].length)
+            showLoadingIndicator = false
+        }
       }
       if (showLoadingIndicator)
         loading = <View style={styles.loadingView}>

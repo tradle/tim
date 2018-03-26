@@ -289,14 +289,14 @@ var search = {
     query += `pageInfo {\n endCursor\n}\n`
     query += `edges {\n node {\n`
 
-    let arr = this.getAllPropertiesForServerSearch({model, properties})
+    let arr = this.getAllPropertiesForServerSearch({model, properties, isList: true})
 
     query += `${arr.join('   \n')}`
     query += `\n}`   // close 'node'
     query += `\n}`   // close 'edges'
     query += `\n}`   // close properties block
     query += `\n}`   // close query
-console.log('endCursor: ', endCursor)
+// console.log('endCursor: ', endCursor)
     try {
       let data = await client.query({
           fetchPolicy: 'network-only',
@@ -428,7 +428,7 @@ console.log('endCursor: ', endCursor)
 
   },
   getAllPropertiesForServerSearch(params) {
-    let {model, inlined, properties, currentProp} = params
+    let {model, inlined, properties, currentProp, isList} = params
     let props = model.properties
     let arr
     if (utils.isInlined(model))
@@ -466,8 +466,18 @@ console.log('endCursor: ', endCursor)
           continue
         let iref = prop.items.ref
         if (iref) {
-          if (prop.items.backlink)
+          if (prop.items.backlink  &&  !prop.inlined) {
+            if (isList)
+              continue
+            arr.push(`${p} {
+              edges {
+                node {
+                  ${this.getAllPropertiesForServerSearch({model: utils.getModel(iref)})}
+                }
+              }
+            }`)
             continue
+          }
           if (prop.inlined) {
             if (currentProp  &&  currentProp === prop)
               continue
