@@ -465,9 +465,16 @@ console.log('endCursor: ', endCursor)
           continue
         let iref = prop.items.ref
         if (iref) {
-          if (prop.items.backlink)
-            continue
-          if (prop.inlined) {
+          if (prop.items.backlink  &&  !prop.inlined) {
+            arr.push(`${p} {
+              edges {
+                node {
+                  ${this.getAllPropertiesForServerSearch({model: utils.getModel(iref)})}
+                }
+              }
+            }`)
+          }
+          else if (prop.inlined) {
             if (currentProp  &&  currentProp === prop)
               continue
             arr.push(this.addInlined(prop))
