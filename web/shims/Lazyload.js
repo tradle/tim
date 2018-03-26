@@ -6,9 +6,9 @@ import {
   ListView
 } from 'react-native'
 
-module.exports = {
-  LazyloadImage: Image,
-  LazyloadView: View,
-  LazyloadScrollView: ScrollView,
-  LazyloadListView: ListView
+export {
+  Image as LazyloadImage,
+  View as LazyloadView,
+  ScrollView as LazyloadScrollView,
+  ListView as LazyloadListView
 }
