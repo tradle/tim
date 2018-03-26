@@ -38,6 +38,7 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 class FormMessageRow extends Component {
+  static displayName = 'FormMessageRow'
   constructor(props) {
     super(props);
     this.onPress = this.onPress.bind(this)
