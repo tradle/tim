@@ -1,7 +1,7 @@
 import dateformat from 'dateformat'
 
 import { TYPE } from '@tradle/constants'
-import { translate } from '../utils/utils'
+import { translate, isWeb } from '../utils/utils'
 
 module.exports = function PhotoID ({ models }) {
   return {
@@ -11,7 +11,9 @@ module.exports = function PhotoID ({ models }) {
     }) {
       if (form[TYPE] !== 'tradle.PhotoID')
         return
-      if (!form.documentType  ||  !form.scanJson)
+      if (!form.documentType)
+        return
+      if (!isWeb()  &&  !form.scanJson)
         return
 
       const type = form[TYPE]
