@@ -372,7 +372,7 @@ class MessageView extends Component {
     }
     else if (photos.length === 1)
       mainPhoto = photos[0]
-    if (photos.length)
+    if (photos  &&  photos.length)
       photos.splice(0, 1)
 
     let inRow = photos ? photos.length : 0
