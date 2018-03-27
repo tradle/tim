@@ -9303,6 +9303,7 @@ var Store = Reflux.createStore({
         if (ret) {
           application = ret.application
           noTrigger = ret.noTrigger
+          application = ret.application
           isRM = ret.isRM
         }
         if (type === VERIFICATION)

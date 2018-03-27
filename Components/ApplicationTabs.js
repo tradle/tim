@@ -65,7 +65,7 @@ class ApplicationTabs extends Component {
 
     let showCurrent = showDetails ? currentMarker : null
     let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-                       <TouchableOpacity onPress={this.showDetails.bind(this)} underlayColor='transparent'>
+                       <TouchableOpacity onPress={this.showDetails.bind(this)}>
                          <View style={styles.item}>
                            <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
                            <Text style={[buttonStyles.text, styles.tabText]}>{'Details'}</Text>
@@ -118,7 +118,7 @@ class ApplicationTabs extends Component {
 
       refList.push(
         <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-           <TouchableOpacity onPress={this.exploreForwardlink.bind(this, resource, props[p])} underlayColor='transparent'>
+           <TouchableOpacity onPress={this.exploreForwardlink.bind(this, resource, props[p])}>
              <View style={[styles.item, {justifyContent: 'flex-start'}]}>
                <View style={styles.row}>
                  <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
