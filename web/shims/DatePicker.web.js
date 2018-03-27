@@ -49,11 +49,11 @@ export default class DatePickerAdapter extends Component {
   }
 }
 
-const styles = StyleSheet.create({
+const styles = {
   fix: {
   },
   hidden: {
     width: 0,
     height: 0
   }
-})
+}
