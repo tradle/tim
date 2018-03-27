@@ -77,27 +77,11 @@ class FormMessageRow extends Component {
     let { resource, to, bankStyle, application } = this.props
     let model = utils.getModel(resource[TYPE])
     let photos = utils.getResourcePhotos(model, resource)
-    let photoListStyle = {height: 3};
     let photoUrls = []
     let isMyMessage = this.isMyMessage()
     let isShared = this.isShared()
     let isSharedContext
 
-    if (photos) {
-      photoUrls = photos
-      // photos.forEach((p) => {
-      //   photoUrls.push({url: utils.getImageUri(p.url)});
-      // })
-      isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
-      photoListStyle = styles.photoListStyle
-      // photoListStyle = {
-      //   flexDirection: 'row',
-      //   alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
-      //   marginLeft: isMyMessage || isShared ? 30 : isSharedContext || application ? 43 : 0, //(hasOwnerPhoto ? 45 : 10),
-      //   borderRadius: 10,
-      //   marginBottom: 3,
-      // }
-    }
     let len = photoUrls.length;
     let inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     let photoStyle = {};
@@ -124,6 +108,22 @@ class FormMessageRow extends Component {
 
     let width = Math.floor(utils.dimensions(FormMessageRow).width * 0.8) // - (isSharedContext  ? 45 : 0))
     let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
+    let photoListStyle = {height: 3};
+    if (photos) {
+      photoUrls = photos
+      // photos.forEach((p) => {
+      //   photoUrls.push({url: utils.getImageUri(p.url)});
+      // })
+      isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
+      photoListStyle = styles.photoListStyle
+      // photoListStyle = {
+      //   flexDirection: 'row',
+      //   alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
+      //   marginLeft: isMyMessage || isShared ? 30 : isSharedContext || application ? 43 : 0, //(hasOwnerPhoto ? 45 : 10),
+      //   borderRadius: 10,
+      //   marginBottom: 3,
+      // }
+    }
     let stub = this.formStub(resource, to, styles)
     if (resource[TYPE] !== PRODUCT_REQUEST)
       stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
