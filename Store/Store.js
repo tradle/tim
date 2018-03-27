@@ -7288,6 +7288,8 @@ var Store = Reflux.createStore({
     .then((l) => {
       if (isBacklinkProp) {
         let l = list.filter((r) => {
+          if (!r._latest)
+            return false
           if (links.indexOf(r[CUR_HASH]) === -1)
             return false
           if (r[TYPE] === VERIFICATION) {
