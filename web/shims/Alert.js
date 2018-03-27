@@ -41,13 +41,15 @@ function alert (title, message, buttons) {
 
   const styles = exports.styles
   buttons = buttons.map(function (b, i) {
-    const style = buttons.length === 2 && i === 0 ? styles.cancel : styles.ok
+    const cancel = buttons.length === 2 && i === 0
+    const buttonStyle = cancel ? styles.cancel : styles.ok
+    const textStyle = cancel ? styles.cancelText : styles.okText
     return (
       <TouchableOpacity onPress={() => {
         remove()
         if (b.onPress) b.onPress()
-      }} style={[styles.button, style]}>
-        <Text>{b.text}</Text>
+      }} style={[styles.button, buttonStyle]}>
+        <Text style={textStyle}>{b.text}</Text>
       </TouchableOpacity>
     )
   })
@@ -133,7 +135,7 @@ const defaultStyles = StyleSheet.create({
     fontSize: 30
   },
   message: {
-    alignSelf: 'left',
+    alignSelf: 'flex-start',
     fontSize: 20
   },
   buttonsContainer: {
@@ -155,12 +157,15 @@ const defaultStyles = StyleSheet.create({
   cancel: {
     marginRight: 10
   },
+  cancelText: {},
   ok: {
     backgroundColor: '#77ADFC',
     borderColor: '#77ADFC',
     // colors from bootstrap:
     // backgroundColor: '#337ab7',
     // borderColor: '#337ab7',
+  },
+  okText: {
     color: '#ffffff'
   }
 })
