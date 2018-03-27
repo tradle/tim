@@ -39,8 +39,10 @@ class PhotoCarousel extends Component {
       for (let i=0; i<n; i++) {
         let photo = this.props.photos[i];
 
-        if (currentPhotoIndex == -1  &&  photo.url !== currentPhoto.url)
-          continue;
+        if (currentPhotoIndex == -1  &&  photo.url !== currentPhoto.url) {
+          if (n !== 1)
+            continue;
+        }
         if (currentPhotoIndex == -1)
           currentPhotoIndex = i;
         let key = r[constants.ROOT_HASH] + cnt++
