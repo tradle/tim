@@ -351,10 +351,11 @@ class MessageList extends Component {
     this.setState(state)
   }
   add(params) {
-    let { action, resource, to, productToForms, shareableResources, modelName, originatingMessage, application } = params
+    let { action, resource, to, productToForms, shareableResources } = params
     if (!utils.isMessage(resource))
       return
 
+    let { application, originatingMessage, modelName } = this.props
     let chatWith = this.props.resource
     let rtype = resource  &&  resource[TYPE]
     if (rtype === NEXT_FORM_REQUEST) {
