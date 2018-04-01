@@ -25,8 +25,9 @@ Markdown.renderer.link = props => {
   const { href } = markdown
   return (
     <TouchableOpacity onPress={() => {
-      if (parseUrl(href).host === deepLinkHost)
-        Actions.triggerDeepLink(href)
+      let host = parseUrl(href).host
+      if (host === deepLinkHost  ||  host.indexOf('localhost') !== -1)
+        Actions.openURL(href)
       else
         Linking.openURL(href)
       // props.passThroughProps.navigator.push({
