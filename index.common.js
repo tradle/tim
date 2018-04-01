@@ -811,17 +811,29 @@ var NavigationBarRouteMapper = {
       st.color = bankStyle.linkColor
 
     let style = [platformStyles.navBarText, styles.navBarTitleText, st]
+    let isPrefill
     if (route.titleTextColor)
       style.push({color: route.titleTextColor});
+    else {
+      let model
+      if (route.passProps.modelName)
+        model = utils.getModel(route.passProps.modelName)
+      else if (route.passProps.resource)
+        model = utils.getModel(route.passProps.resource[TYPE])
 
+      isPrefill = model  &&  utils.getPrefillProperty(model)
+    }
     let tArr = t.length > 1 ? [] : <View />
 
     for (let i=1; i<t.length; i++)
       tArr.push(<Text style={styles.arr} key={'index.common.js_' + i}>{this.makeTitle(t[i])}</Text>)
     let text
     if (logoNeedsText  ||  !uri) {
+      let tt = this.makeTitle(t[0])
+      if (isPrefill)
+        tt = 'Draft - ' + t
       text = <Text style={style}>
-               {this.makeTitle(t[0])}
+               {tt}
              </Text>
     }
 
