@@ -264,5 +264,6 @@
     "youAreAboutToShare": "You are about to share\n '{1}'\n documents",
     "nothingToShare": "Nothing to share",
     "importingData": "Importing {1} documents from {2}",
-    "reviewScannedProperties": "Please review and correct the scanned properties keeping their format"
+    "reviewScannedProperties": "Please review and correct the scanned properties keeping their format",
+    "pleaseClickOnAddButton": "Please click on PLUS button to add {1}"
 }
