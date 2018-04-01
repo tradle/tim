@@ -677,8 +677,12 @@ var utils = {
       if (p.charAt(0) === '_')
         continue
       if (!props[p].displayName) {
-        if (!displayName  &&  resourceModel  &&  resource[p]  &&  resourceModel.subClassOf === ENUM)
-          return resource[p];
+        if (!displayName  &&  resourceModel  &&  resource[p]) {
+          if (resourceModel.subClassOf === ENUM)
+            return resource[p]
+          else if (props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM)
+            return resource[p].title
+        }
         continue
       }
       let dn = this.getStringValueForProperty(resource, p, props)
@@ -1136,7 +1140,7 @@ var utils = {
         }
         else if (isBookmark  &&  p === 'bookmark')
           return
-        else if (properties[p]  &&  properties[p].ref  &&  this.isContainerProp(res, properties[p], m))
+        else if (properties[p]  &&  properties[p].ref  &&  this.isContainerProp(properties[p], m))
           res[p] = this.buildRef(res[p])
         else
           delete res[p]
@@ -1160,8 +1164,28 @@ var utils = {
 
     return res
   },
+  getContainerProp(itemModel) {
+    let refs = this.getPropertiesWithAnnotation(itemModel, 'ref')
+    if (!refs)
+      return
+    for (let p in refs) {
+      let r = refs[p]
+      let refModel = this.getModel(r.ref)
+      if (refModel.subClassOf === ENUM)
+        continue
 
-  isContainerProp(resource, prop, pModel) {
+      let itemsProps = this.getPropertiesWithAnnotation(refModel, 'items')
+      if (!itemsProps)
+        continue
+      for (let pr in itemsProps) {
+        let prop = itemsProps[pr]
+        if (prop.items.ref === itemModel.id)
+          return prop.items.backlink
+      }
+    }
+  },
+
+  isContainerProp(prop, pModel) {
     if (!prop.ref  ||  !prop.readOnly)
       return
     let refM = this.getModel(prop.ref)
@@ -1991,9 +2015,14 @@ var utils = {
     // if (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)
     //   return true
   },
-  isItem(model) {
-    if (typeof model === 'string')
-      model = this.getModel(model)
+  isItem(resource) {
+    let model
+    if (typeof resource === 'string')
+      model = this.getModel(resource)
+    else if (resource[TYPE])
+      model = this.getModel(resource[TYPE])
+    else
+      model = resource
     return model.interfaces  &&  model.interfaces.indexOf(ITEM) !== -1
   },
   isDocument(model) {
@@ -2242,10 +2271,16 @@ var utils = {
       if (p.indexOf('_group') !== -1  && props[p].list) {
         if (includeGroupProp)
           newArr.push(p)
-        props[p].list.forEach((pr) => newArr.push(pr))
+        props[p].list.forEach((pr) => {
+          if (newArr.indexOf(pr) === -1)
+            newArr.push(pr)
+        })
       }
       else if (props[p].group)
-        props[p].group.forEach((pr) => newArr.push(pr))
+        props[p].group.forEach((pr) => {
+          if (newArr.indexOf(pr) === -1)
+            newArr.push(pr)
+        })
       else
         newArr.push(p)
     })
@@ -2410,6 +2445,12 @@ var utils = {
     const prefix = connectEndpoint && connectEndpoint.clientIdPrefix || ''
     return `${prefix}${permalink}${provider.hash.slice(0, 6)}`
     // return new Buffer(`${permalink}${counterparty.slice(0, 6)}`, 'hex').toString('base64')
+  },
+  getPrefillProperty(model) {
+    let prefillProps = this.getPropertiesWithAnnotation(model, 'partial')
+    if (!prefillProps  ||  this.isEmpty(prefillProps))
+      return
+    return prefillProps[Object.keys(prefillProps)[0]]
   },
 
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
