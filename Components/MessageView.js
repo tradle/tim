@@ -152,7 +152,7 @@ class MessageView extends Component {
       if (params.backlink !== this.state.backlink || params.backlinkAdded) {
         let r = params.resource || this.state.resource
         this.setState({backlink: params.backlink, backlinkList: params.list || r[params.backlink], showDetails: false, showDocuments: false, resource: r})
-        Actions.getItem({resource: r, application, search: application !== null})
+        Actions.getItem({resource: r, application, search: application != null})
       }
     }
     else if (params.action === 'showDetails')
