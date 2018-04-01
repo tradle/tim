@@ -4712,7 +4712,11 @@ var Store = Reflux.createStore({
         self._setItem(returnValKey, returnVal)
         let org
         let isSavedItem = utils.isSavedItem(returnVal)
-        if (!isSavedItem) {
+        if (isSavedItem) {
+          let meId = utils.getMe()
+          self.addMessagesToChat(meId, returnVal)
+        }
+        else {
           let toR = self._getItem(utils.getId(returnVal.to))
           let id = toR.organization ? utils.getId(toR.organization) : utils.getId(toR)
           self.addMessagesToChat(id, returnVal)
