@@ -77,12 +77,11 @@ class FormMessageRow extends Component {
     let { resource, to, bankStyle, application } = this.props
     let model = utils.getModel(resource[TYPE])
     let photos = utils.getResourcePhotos(model, resource)
-    let photoUrls = []
     let isMyMessage = this.isMyMessage()
     let isShared = this.isShared()
     let isSharedContext
 
-    var len = photoUrls.length;
+    var len = photos  &&  photos.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     var photoStyle
     var width = utils.getMessageWidth(FormMessageRow)
@@ -90,8 +89,8 @@ class FormMessageRow extends Component {
       width -= 50 // provider icon and padding
     if (inRow > 0) {
       if (inRow === 1) {
-        var ww = Math.min(240, photoUrls[0].width)
-        var hh = (ww / photoUrls[0].width) * photoUrls[0].height
+        var ww = Math.min(240, photos[0].width)
+        var hh = (ww / photos[0].width) * photos[0].height
         photoStyle = {
           borderRadius: 10,
           margin: 1,
@@ -115,20 +114,8 @@ class FormMessageRow extends Component {
     let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
     let photoListStyle = {height: 3};
     if (photos) {
-      photoUrls = photos
-      // photos.forEach((p) => {
-      //   photoUrls.push({url: utils.getImageUri(p.url)});
-      // })
       isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
       photoListStyle = styles.photoListStyle
-      // photoListStyle = {
-      //   flexDirection: 'row',
-      //   alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
-      //   borderRadius: 10,
-      //   marginBottom: 3,
-      // }
-      // if (isSharedContext || application)
-      //   photoListStyle.marginLeft = 40
     }
     let stub = this.formStub(resource, to, styles)
     if (resource[TYPE] !== PRODUCT_REQUEST)
@@ -140,7 +127,7 @@ class FormMessageRow extends Component {
               {date}
               {stub}
               <View style={photoListStyle}>
-                <PhotoList photos={photoUrls} resource={resource} style={photoStyle} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
+                <PhotoList photos={photos} resource={resource} style={photoStyle} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
               </View>
               {sendStatus}
             </View>
