@@ -622,15 +622,19 @@ class MessageList extends Component {
 
     // Allow to edit resource that was not previously changed
     if (showEdit) {
-      route.rightButtonTitle = 'Edit'
-      route.onRightButtonPress = {
-        title: newTitle, //utils.getDisplayName(resource),
-        id: 4,
-        component: NewResource,
-        // titleTextColor: '#7AAAC3',
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Done',
-        passProps: {
+      let passProps
+      let prefill = utils.getPrefillProperty(model)
+      if (prefill) {
+        passProps = {
+          containerResource: r,
+          resource: r[prefill.name],
+          prop: prefill,
+          model: utils.getModel(r[prefill.name][TYPE]),
+          bankStyle: bankStyle
+        }
+      }
+      else {
+        passProps = {
           model: utils.getLensedModel(r, lensId),
           resource: r,
           lensId: lensId,
@@ -639,6 +643,17 @@ class MessageList extends Component {
           chat: resource,
           bankStyle: bankStyle
         }
+      }
+
+      route.rightButtonTitle = 'Edit'
+      route.onRightButtonPress = {
+        title: newTitle, //utils.getDisplayName(resource),
+        id: 4,
+        component: NewResource,
+        // titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
+        passProps
       }
     }
     if (isVerifier) {
