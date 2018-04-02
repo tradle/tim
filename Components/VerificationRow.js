@@ -3,29 +3,38 @@ console.log('requiring VerificationRow.js')
 
 import utils from '../utils/utils'
 var translate = utils.translate
-import constants from '@tradle/constants'
+
+import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
+import dateformat from 'dateformat'
+import Swipeout from 'react-native-swipeout'
+
 import reactMixin from 'react-mixin'
+import constants from '@tradle/constants'
 import RowMixin from './RowMixin'
 // import Accordion from 'react-native-accordion'
-import Swipeout from 'react-native-swipeout'
 import StyleSheet from '../StyleSheet'
-import dateformat from 'dateformat'
 import appStyle from '../styles/appStyle.json'
 
 var DEFAULT_CURRENCY_SYMBOL = '£'
 
 const ITEM = 'tradle.Item'
 const MY_PRODUCT = 'tradle.MyProduct'
-const FORM = 'tradle.Form'
 const FORM_REQUEST = 'tradle.FormRequest'
-const ORGANIZATION = 'tradle.Organization'
+const FORM_PREFILL = 'tradle.FormPrefill'
 const BOOKMARK = 'tradle.Bookmark'
-const ENUM = 'tradle.Enum'
-const PROFILE = constants.TYPES.PROFILE
 
-const TYPE = constants.TYPE
-const VERIFICATION = constants.TYPES.VERIFICATION
+const { TYPE } = constants
+const {
+  PROFILE,
+  VERIFICATION,
+  ORGANIZATION,
+  FORM,
+  ENUM,
+  MONEY,
+  SIMPLE_MESSAGE
+} = constants.TYPES
+
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
 const CONFIRMATION = 'tradle.Confirmation'
 const CHECK  = 'tradle.Check'
@@ -79,6 +88,8 @@ class VerificationRow extends Component {
     if (this.props.searchCriteria !== nextProps.searchCriteria)
       return true
     if (this.state.isChosen !== nextState.isChosen)
+      return true
+    if (!_.isEqual(this.props.resource, nextProps.resource))
       return true
     return false
   }
@@ -171,8 +182,14 @@ class VerificationRow extends Component {
                       </View>
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
     let title
-    if (isChooser  ||  utils.isItem(model))
+    if (isChooser)
       title = dn //utils.getDisplayName(resource, model.properties)
+    else if (utils.isItem(model))  {
+      if (model.id === FORM_PREFILL)
+        title = utils.makeModelTitle(resource.prefill[TYPE]) //utils.getDisplayName(resource, model.properties)
+      else
+        title = dn
+    }
     if (!title || !title.length) {
       if (listModel.id === FORM_REQUEST)
         title = utils.makeModelTitle(resource.form)
@@ -220,7 +237,7 @@ class VerificationRow extends Component {
                          </View>
       }
       else
-        titleComponent = <Text style={styles.description}>{dn}</Text>
+        titleComponent = <Text style={styles.rTitle}>{dn}</Text>
     }
 
     if (isVerification)
@@ -232,7 +249,7 @@ class VerificationRow extends Component {
     else if (!titleComponent)
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
     else
-      description = <Text style={[styles.description, {paddingLeft: 30}]}>{title}</Text>
+      description = <Text style={styles.description}>{title}</Text>
 
     let supportingDocuments
     if (isForm  &&  resource._supportingDocuments  &&  resource._supportingDocuments.length)
@@ -374,7 +391,7 @@ class VerificationRow extends Component {
     let noMessage = !resource.message  ||  !resource.message.length;
     let onPressCall;
 
-    let isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
+    let isSimpleMessage = model.id === SIMPLE_MESSAGE;
     let style = styles.resourceTitle
     let labelStyle = styles.resourceTitleL
     viewCols.forEach((v) => {
@@ -390,7 +407,7 @@ class VerificationRow extends Component {
       if (properties[v].ref) {
         if (resource[v]) {
           let val
-          if (properties[v].ref === constants.TYPES.MONEY) {
+          if (properties[v].ref === MONEY) {
             let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
             val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
           }
@@ -506,7 +523,7 @@ class VerificationRow extends Component {
       if (ref) {
         if (resource[v]) {
           let val
-          if (ref === constants.TYPES.MONEY) {
+          if (ref === MONEY) {
             let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
             val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
           }
@@ -777,7 +794,7 @@ module.exports = VerificationRow;
   //   var noMessage = !resource.message  ||  !resource.message.length;
   //   var onPressCall;
 
-  //   var isSimpleMessage = model.id === constants.TYPES.SIMPLE_MESSAGE;
+  //   var isSimpleMessage = model.id === SIMPLE_MESSAGE;
   //   var style = styles.resourceTitle
   //   var labelStyle = styles.resourceTitleL
   //   viewCols.forEach(function(v) {
@@ -793,7 +810,7 @@ module.exports = VerificationRow;
   //     if (properties[v].ref) {
   //       if (resource[v]) {
   //         let val
-  //         if (properties[v].ref === constants.TYPES.MONEY)
+  //         if (properties[v].ref === MONEY)
   //           val = utils.normalizeCurrencySymbol(resource[v].currency || CURRENCY_SYMBOL) + resource[v].value
   //         else if (resource[v].title)
   //           val = resource[v].title
