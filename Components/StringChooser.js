@@ -19,12 +19,13 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types'
 
-import SearchBar from './SearchBar'
-
-const FORM_REQUEST = 'tradle.FormRequest'
-const REMEDIATION = 'tradle.Remediation'
-
 class StringChooser extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    strings: PropTypes.array.isRequired,
+    bankStyle: PropTypes.object,
+    callback: PropTypes.func.isRequired
+  };
   constructor(props) {
     super(props);
     var dataSource =  new ListView.DataSource({
@@ -37,7 +38,8 @@ class StringChooser extends Component {
   }
 
   selectResource(modelId) {
-    this.props.navigator.pop();
+    if (!this.props.isReplace)
+      this.props.navigator.pop();
     this.props.callback(modelId)
   }
   renderRow(modelId)  {
