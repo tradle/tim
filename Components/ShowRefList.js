@@ -51,7 +51,6 @@ class ShowRefList extends Component {
           children, navigator, lazy, currency, application, search } = this.props
     model = model || utils.getModel(resource[TYPE]);
     var props = model.properties;
-    let self = this
     var refList = [];
     var isIdentity = model.id === PROFILE;
     var isOrg = model.id === ORGANIZATION;
@@ -71,6 +70,7 @@ class ShowRefList extends Component {
 
     let currentMarker = <View style={{backgroundColor: bg, height: 4, marginTop: -5}} />
 
+    let hasItemBacklinks = []
     let itemProps = utils.getPropertiesWithAnnotation(model, 'items')
     if (itemProps) {
       for (var p in itemProps) {
@@ -82,12 +82,17 @@ class ShowRefList extends Component {
           if (p === 'verifiedByMe'  &&  !me.organization)
             continue
         }
-        if (itemProps[p].items.backlink)
+        if (itemProps[p].items.backlink) {
+          if (itemProps[p].items.ref) {
+            let m = utils.getModel(itemProps[p].items.ref)
+            if (utils.isItem(m))
+              hasItemBacklinks.push(p)
+          }
           propsToShow.push(p)
+        }
       }
     }
     let isMessage = utils.isMessage(resource)
-
     // Show supporting docs
     if (isMessage) {
       let rId = utils.getId(resource)
@@ -127,7 +132,7 @@ class ShowRefList extends Component {
         return <View/>
     }
     else if (!isOrg  &&  !isIdentity  &&  hasPropsToShow) {
-      let showCurrent = showDetails ? currentMarker : null
+      let showCurrent = showDetails  ? currentMarker : null
       let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
                          <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
                            <View style={styles.item}>
@@ -139,7 +144,6 @@ class ShowRefList extends Component {
                          </TouchableHighlight>
                          {showCurrent}
                         </View>
-
       if (refList.length)
         refList.splice(0, 0, detailsTab)
       else
@@ -179,7 +183,7 @@ class ShowRefList extends Component {
                 </View>
       }
 
-      let showCurrent = currentBacklink  &&  currentBacklink.name === p ? currentMarker : null
+      let showCurrent = !showDetails  &&  currentBacklink  &&  currentBacklink.name === p ? currentMarker : null
 
       refList.push(
         <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
