@@ -1,4 +1,4 @@
-console.log('requiring StringChooser.js')
+console.log('requiring ShareResourceList.js')
 'use strict';
 
 import React, { Component } from 'react'
