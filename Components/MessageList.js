@@ -709,7 +709,7 @@ class MessageList extends Component {
       return  <VerificationMessageRow {...props} />
     }
 
-    if (model.subClassOf === FORM)
+    if (model.subClassOf === FORM || utils.isItem(model))
       return <FormMessageRow {...props} />
 
     props.isLast = rowId === this.state.list.length - 1
