@@ -673,40 +673,48 @@ var utils = {
     let props = model.properties
     let resourceModel = resource[TYPE] ? this.getModel(resource[TYPE]) : null
     var displayName = '';
+    let dnProps = this.getPropertiesWithAnnotation(resourceModel, 'displayName')
+    if (dnProps) {
+      for (let p in dnProps) {
+        let dn = this.getStringValueForProperty(resource, p, props)
+        if (dn)
+          displayName += displayName.length ? ' ' + dn : dn;
+      }
+    }
+    if (displayName.length  ||  !resourceModel)
+      return displayName
+
+    // Choose ENUM prop for display name
+    let refProps = this.getPropertiesWithAnnotation(resourceModel, 'ref')
     for (var p in props) {
       if (p.charAt(0) === '_')
         continue
-      if (!props[p].displayName) {
-        if (!displayName  &&  resourceModel  &&  resource[p]) {
-          if (resourceModel.subClassOf === ENUM)
-            return resource[p]
-          else if (props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM)
-            return resource[p].title
-        }
-        continue
-      }
+
+      if (resourceModel.subClassOf === ENUM)
+        return resource[p]
+      else if (props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM)
+        return resource[p].title
       let dn = this.getStringValueForProperty(resource, p, props)
       if (dn)
         displayName += displayName.length ? ' ' + dn : dn;
     }
-    if (!displayName.length  &&  resourceModel) {
-      let vCols = resourceModel.viewCols
-      if (!vCols) {
-        vCols = this.getViewCols(resourceModel)
-        if (!vCols)
-          return displayName
-      }
-      let excludeProps = []
-      if (this.isMessage(resourceModel))
-        excludeProps = ['from', 'to']
-      for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
-        let prop =  vCols[i]
-        if (props[prop].type === 'array' || props[prop].markdown)
-          continue
-        if ((!resource[prop]  &&  !props[prop].displayAs)  ||  excludeProps.indexOf[prop])
-          continue
-        displayName = this.getStringValueForProperty(resource, prop, resourceModel.properties)
-      }
+    if (displayName.length)
+      return displayName
+    // Construct display name from viewCols
+    let vCols = resourceModel.viewCols || this.getViewCols(resourceModel)
+    if (!vCols)
+      return displayName
+
+    let excludeProps = []
+    if (this.isMessage(resourceModel))
+      excludeProps = ['from', 'to']
+    for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
+      let prop =  vCols[i]
+      if (props[prop].type === 'array' || props[prop].markdown)
+        continue
+      if ((!resource[prop]  &&  !props[prop].displayAs)  ||  excludeProps.indexOf[prop])
+        continue
+      displayName = this.getStringValueForProperty(resource, prop, resourceModel.properties)
     }
     return displayName;
   },
@@ -2133,7 +2141,7 @@ var utils = {
       if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  this.getModel(p.ref).subClassOf === ENUM))
         return p
     }
-    return
+  return
   },
 
   isSealableModel: function (model) {
