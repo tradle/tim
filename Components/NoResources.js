@@ -12,36 +12,43 @@ import utils from '../utils/utils'
 import React, { Component } from 'react'
 
 class NoResources extends Component {
+  props: {
+    filter: PropTypes.string,
+    message: PropTypes.string,
+    icon: PropTypes.string,
+    iconColor: PropTypes.string,
+    iconSize: PropTypes.number,
+    iconStyle: PropTypes.object,
+    isLoading: PropTypes.boolean
+  };
   render() {
-    var noRes
-    if (this.props.message) {
-      let icon = this.props.icon
-      let message = this.props.message
+    let noRes
+    let { message, filter, icon, iconColor, iconStyle, iconSize, isLoading } = this.props
+    if (message) {
       if (!icon)
         noRes = <Text style={styles.NoResourcesTextBlue}>{message}</Text>
       else {
         let idx = message.indexOf('{icon}')
         noRes = <Text style={styles.NoResourcesTextBlue}>{message.substring(0, idx) + ' '}
-                  <View style={this.props.iconStyle || {}}>
-                    <Icon name={icon} color={this.props.iconColor || '#7AAAC2'} size={this.props.iconSize || 20} />
+                  <View style={iconStyle || {}}>
+                    <Icon name={icon} color={iconColor || '#7AAAC2'} size={iconSize || 20} />
                   </View>
                   <Text style={styles.NoResourcesTextBlue}>{' ' + message.substring(idx + 6)}</Text>
                 </Text>
       }
     }
-    else if (this.props.filter)
-      noRes = <Text style={styles.NoResourcesText}>{`No results for “${this.props.filter}”`}</Text>
-    else if (!this.props.isLoading)
+    else if (filter)
+      noRes = <Text style={styles.NoResourcesText}>{`No results for “${filter}”`}</Text>
+    else if (!isLoading)
       // If we're looking at the latest resources, aren't currently loading, and
       // still have no results, show a message
       noRes = <Text style={styles.NoResourcesText}>{'Empty list'}</Text>
-    else
-      return <View />
-    return (
-      <View style={[styles.container, styles.centerText]}>
-        {noRes}
-      </View>
-    );
+    if (noRes)
+      return (
+        <View style={[styles.container, styles.centerText]}>
+          {noRes}
+        </View>
+      );
   }
 
 }
