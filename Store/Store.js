@@ -3,7 +3,6 @@ console.log('requiring Store.js')
 
 import '../utils/perf'
 import path from 'path'
-import querystring from 'querystring'
 import { parse as parseURL } from 'url'
 import ReactNative, {
   Alert,
@@ -170,6 +169,7 @@ const FORM_ERROR          = 'tradle.FormError'
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const MY_EMPLOYEE_PASS    = 'tradle.MyEmployeeOnboarding'
 const FORM_REQUEST        = 'tradle.FormRequest'
+const FORM_PREFILL        = 'tradle.FormPrefill'
 const NEXT_FORM_REQUEST   = 'tradle.NextFormRequest'
 const PAIRING_REQUEST     = 'tradle.PairingRequest'
 const PAIRING_RESPONSE    = 'tradle.PairingResponse'
@@ -3824,7 +3824,7 @@ var Store = Reflux.createStore({
     let rId = utils.getId(resource)
     let r = await this._getItemFromServer(rId)
     let list
-    let m = this.getModel(resource[TYPE])
+    let m = this.getModel(r[TYPE])
     if (isApplication) {
       if (forwardlink) {
         let forwardlinkName = forwardlink.name
@@ -3917,6 +3917,22 @@ var Store = Reflux.createStore({
     let objects = await graphQL.getObjects(links, this.client)
     return objects.map((r) => this.convertToResource(r))
   },
+  async getItemFromDeepLink({type, link, permalink}) {
+    let resource
+    if (link  &&  permalink) {
+      let id = utils.makeId(type, link, permalink)
+      resource = this._getItem(id)
+      if (!resource)
+        resource = await this._getItemFromServer(id)
+    }
+    else {
+      let list = this.searchServer({modelName: type, filterResource: {permalink}, noTrigger: true})
+      if (list.length)
+        resource = list[0]
+    }
+    if (resource)
+      this.trigger({ resource, action: 'getItemFromDeepLink'})
+  },
   async getBacklinkResources(prop, res) {
     let items = prop.items
     if (!items  ||  !items.backlink)
@@ -3935,9 +3951,11 @@ var Store = Reflux.createStore({
     // var result = isMessage ? await this.searchMessages(params) : this.searchNotMessages(params)
     // if (isMessage) {
     let result = await this.searchMessages(params)
-    if (result  &&  result.length)
+    if (result  &&  result.length) {
       res['_' + prop.name + 'Count'] = result.length
-    // }
+      if (result[0][IS_MESSAGE])
+        return result.filter((r) => r._latest)
+    }
     return result
   },
   onExploreBacklink(resource, prop, backlinkAdded) {
@@ -4229,8 +4247,46 @@ var Store = Reflux.createStore({
     //   }
     // })
   },
-  onTriggerDeepLink(url) {
-    this.trigger({action: 'deepLink', url})
+  async onOpenURL(url) {
+    let URL = parseURL(url.replace('/#', ''))
+    let pathname = URL.pathname || URL.hostname
+    if (!pathname) {
+      Alert.alert('failed to parse URL')
+      return
+    }
+    pathname = pathname.replace(/^\//, '')
+
+    let query = URL.query
+    // if (!query) {
+    //   if (pathname === 'scan') {
+    //     this.trigger({action: pathname})
+    //     return
+    //   }
+    //   if (pathname !== 'conversations') //  &&  pathname !== 'profile')
+    //     return
+    // }
+
+    let qs = query && require('querystring').parse(query) || {}
+
+    switch(pathname) {
+    case 'chat':
+      this.onGetProvider(qs)
+      break
+    case 'conversations':
+    case 'scan':
+      this.trigger({action: pathname})
+      break
+    case 'r':
+      await this.getItemFromDeepLink(qs)
+      break
+    case 'applyForProduct':
+      await this.onApplyForProduct(qs)
+      break
+    case 'profile':
+      this.trigger({action: 'profile'})
+      break
+    }
+    // this.trigger({action: 'deepLink', url})
   },
   async onAddChatItem(params) {
     extend(params, {isMessage: true})
@@ -4449,7 +4505,7 @@ var Store = Reflux.createStore({
     if (!isRegistration) {
       for (let pr in props) {
         let prop = props[pr]
-        if (utils.isContainerProp(returnVal, prop, meta))
+        if (utils.isContainerProp(prop, meta))
           readOnlyBacklinks.push(prop)
       }
     }
@@ -4599,7 +4655,7 @@ var Store = Reflux.createStore({
       let isForm = rModel.subClassOf === FORM
       returnVal[IS_MESSAGE] = true
       let prevResId, prevResCached
-      if (!isNew  &&  isForm) {
+      if (!isNew) {
         let prevRes
         prevResId = utils.getId(returnVal)
         try {
@@ -4613,21 +4669,23 @@ var Store = Reflux.createStore({
           self.trigger({action: 'noChanges'})
           return
         }
-        let org = resource.to.organization
-        let orgId = utils.getId(org ? org : resource.to)
+        if (isForm) {
+          let org = resource.to.organization
+          let orgId = utils.getId(org ? org : resource.to)
 
-        let allFormRequests = await self.searchMessages({modelName: FORM_REQUEST, to: self._getItem(orgId)})
-        if (allFormRequests) {
-          // Check the current form request as fulfilled since there is going
-          // to be a fresh one after updating the resource
-          allFormRequests.forEach((r) => {
-            if (!r._documentCreated) {
-              r._documentCreated = true
-              self._getItem(r)._documentCreated = true
-              self.addVisualProps(r)
-              self.trigger({action: 'addItem', resource: r})
-            }
-          })
+          let allFormRequests = await self.searchMessages({modelName: FORM_REQUEST, to: self._getItem(orgId)})
+          if (allFormRequests) {
+            // Check the current form request as fulfilled since there is going
+            // to be a fresh one after updating the resource
+            allFormRequests.forEach((r) => {
+              if (!r._documentCreated) {
+                r._documentCreated = true
+                self._getItem(r)._documentCreated = true
+                self.addVisualProps(r)
+                self.trigger({action: 'addItem', resource: r})
+              }
+            })
+          }
         }
       }
       if (isNew  &&  isContext  &&  !returnVal.contextId)
@@ -4649,7 +4707,12 @@ var Store = Reflux.createStore({
       if (isNew) {
         for (let p in toChain) {
           let prop = properties[p]
-          if (prop  &&  prop.type === 'object' && prop.ref /*&&  !returnVal.id */ &&  !self.getModel(prop.ref).inlined)
+          let refM = prop.ref  &&  self.getModel(prop.ref)
+          if (prop                    &&
+              prop.type === 'object'  &&
+              prop.ref /*&&  !returnVal.id */ &&
+              !refM.inlined           &&
+              !prop.partial)
             toChain[p] = self.buildSendRef(returnVal[p])
         }
       }
@@ -4659,7 +4722,11 @@ var Store = Reflux.createStore({
           let prop = properties[p]
           if (!prop  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== 'time')
             delete toChain[p]
-          else if (prop  &&  prop.type === 'object' && prop.ref /*&&  !returnVal.id*/  &&  !self.getModel(prop.ref).inlined)
+          else if (prop  &&  prop.type === 'object' &&
+                   prop.ref /*&&  !returnVal.id*/   &&
+                   !self.getModel(prop.ref).inlined &&
+                   !prop.inlined                    &&
+                   !prop.partial)
             toChain[p] = self.buildSendRef(returnVal[p])
         }
       }
@@ -4690,7 +4757,11 @@ var Store = Reflux.createStore({
         self._setItem(returnValKey, returnVal)
         let org
         let isSavedItem = utils.isSavedItem(returnVal)
-        if (!isSavedItem) {
+        if (isSavedItem) {
+          let meId = utils.getMe()
+          self.addMessagesToChat(meId, returnVal)
+        }
+        else {
           let toR = self._getItem(utils.getId(returnVal.to))
           let id = toR.organization ? utils.getId(toR.organization) : utils.getId(toR)
           self.addMessagesToChat(id, returnVal)
@@ -4712,10 +4783,8 @@ var Store = Reflux.createStore({
           returnVal._sendStatus = sendStatus
           // if (isNew)
           self.addVisualProps(returnVal)
-          params = {
-            action: 'addItem',
-            resource: returnVal
-          }
+          if (!params)
+            params = { action: 'addItem', resource: returnVal }
         }
 
         let m = self.getModel(returnVal[TYPE])
@@ -4769,12 +4838,14 @@ var Store = Reflux.createStore({
             let topR = returnVal[prop.name]
             if (topR) {
               topR = self._getItem(topR)
-              let items = utils.getPropertiesWithAnnotation(self.getModel(topR[TYPE]), 'items')
-              for (let pName in items) {
-                if (items[pName].items.ref === returnVal[TYPE]) {
-                  if (!topR[pName])
-                    topR[pName] = []
-                  topR[pName].push(self.buildRef(returnVal))
+              if (topR) {
+                let items = utils.getPropertiesWithAnnotation(self.getModel(topR[TYPE]), 'items')
+                for (let pName in items) {
+                  if (items[pName].items.ref === returnVal[TYPE]) {
+                    if (!topR[pName])
+                      topR[pName] = []
+                    topR[pName].push(self.buildRef(returnVal))
+                  }
                 }
               }
             }
@@ -4826,10 +4897,12 @@ var Store = Reflux.createStore({
           prevResCached._latest = false
 
           let org = to.organization ? self._getItem(to.organization) : to
-
-          self.trigger({action: 'updateItem', resource: utils.clone(prevResCached), to: org})
+          let clonePrev = utils.clone(prevResCached)
+          self.trigger({action: 'getItem', resource: returnVal, to: org})
+          self.trigger({action: 'updateItem', resource: clonePrev, to: org})
           self.dbPut(prevResId, prevRes)
         }
+
         if (!isNew  ||  self.getModel(returnVal[TYPE]).subClassOf !== FORM)
           return
         let allFormRequests = await self.searchMessages({modelName: FORM_REQUEST, to: to})
@@ -5437,7 +5510,7 @@ var Store = Reflux.createStore({
   async getList(params) {
     let {modelName, first, prop, isAggregation, isChat} = params
     var meta = this.getModel(modelName)
-    let isMessage = modelName === MESSAGE || isChat // utils.isMessage(meta)
+    let isMessage = modelName === MESSAGE || isChat || utils.isItem(meta) // utils.isMessage(meta)
     // HACK for now
     if (!isMessage)
       isMessage = meta.subClassOf === FORM  ||  modelName === VERIFICATION
@@ -6876,10 +6949,11 @@ var Store = Reflux.createStore({
     if (chatTo) {
       // backlinks like myVerifications, myDocuments etc. on Profile
       var isForm = m.subClassOf === FORM
+      var isItem = utils.isItem(m)
       var isMyProduct = m.subClassOf === MY_PRODUCT
       let isContext = utils.isContext(m)
       let isDataClaim = m.id == DATA_CLAIM
-      if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isContext && !isDataClaim)
+      if ((!r.message  ||  r.message.trim().length === 0) && !r.photos &&  !isVerificationR  &&  !isForm  &&  !isMyProduct && !isContext && !isDataClaim  &&  !isItem)
         // check if this is verification resource
         return;
       // var fromID = utils.getId(r.from);
@@ -8268,7 +8342,7 @@ var Store = Reflux.createStore({
   getNonce() {
     return crypto.randomBytes(32).toString('hex')
   },
-  _putResourceInDB(params) {
+  async _putResourceInDB(params) {
     var {modelName, isRegistration, noTrigger, dhtKey, maxAttempts, lens} = params
     var value = params.resource
     // Cleanup null form values
@@ -8295,10 +8369,6 @@ var Store = Reflux.createStore({
           value[CUR_HASH] = 1
         }
       }
-      // if (!isNew  &&  (!value.urls  ||  (value.urls  &&  value.urls.indexOf(value.url) !== -1))) {
-      //   this.trigger({action: 'addItem', resource: value, error: 'The "' + props.url.title + '" was already added'})
-      //   return
-      // }
     }
     else if (isNew)
       value[CUR_HASH] = dhtKey //isNew ? dhtKey : value[ROOT_HASH]
@@ -8348,7 +8418,7 @@ var Store = Reflux.createStore({
     }
 
     if (value[TYPE] === SETTINGS)
-      return this.addSettings(value, maxAttempts ? maxAttempts : 1, true)
+      return await this.addSettings(value, maxAttempts ? maxAttempts : 1, true)
 
     let meId = utils.getId(me)
     if (isMessage  &&  isNew) {
@@ -8384,11 +8454,10 @@ var Store = Reflux.createStore({
     }
 
     let self = this
-    return db.batch(batch)
-    .then(() => {
-      return db.get(iKey)
-    })
-    .then((value) => {
+    try {
+      await db.batch(batch)
+      // let value = await db.get(iKey)
+
       if (isMessage) {
         let r = this.addVisualProps(value)
         if (r === value)
@@ -8406,10 +8475,6 @@ var Store = Reflux.createStore({
         else if (value._context  &&  utils.isReadOnlyChat(value._context))
           this.addMessagesToChat(utils.getId(value._context), value)
 
-      }
-      if (mid) {
-        this._setItem(MY_IDENTITIES, mid)
-        return
       }
       if (!isNew  &&  iKey === meId) {
         if (me.language || value.language) {
@@ -8436,21 +8501,16 @@ var Store = Reflux.createStore({
             if (urls.indexOf(sp.url) === -1)
               urls.push(sp.url)
           })
-          return this.getInfo({serverUrls: urls})
+          await this.getInfo({serverUrls: urls})
           // }
         }
       }
-    })
-    .then(() => {
+      let contact
       if (isMessage) { //  &&  value[TYPE] === NAME) {
-        let contact = this._getItem(value.from)
+        contact = this._getItem(value.from)
         if (!contact.bot)
-          return this.changeName(value, contact)
-        // if (this.changeName(value, contact))
-        //   this.trigger({action: 'addItem', resource: contact})
+          contact = await this.changeName(value, contact)
       }
-    })
-    .then((contact) => {
       if (contact)
         this.trigger({action: 'addItem', resource: contact})
 
@@ -8459,31 +8519,29 @@ var Store = Reflux.createStore({
       if (!noTrigger) {
         this.trigger(triggerParams);
       }
-      if (model.subClassOf === FORM) {
-        if (utils.isItem(model)) {
-          let {container, item} = getContainerProp(model)
-          if (value[container.name]) {
-            let cRes = this._getItem(utils.getId(value[container.name]))
-            this.onExploreBacklink(cRes, item, true)
-          }
+      // if (model.subClassOf === FORM) {
+      if (utils.isItem(model)) {
+        let {container, item} = getContainerProp(model)
+        if (value[container.name]) {
+          let iId = utils.getId(value[container.name])
+          let cRes = this._getItem(iId)
+          if (!cRes)
+            cRes = await this._getItemFromServer(iId)
+          this.onExploreBacklink(cRes, item, true)
         }
+      }
+      if (model.subClassOf === FORM) {
         // let mlist = this.searchMessages({modelName: FORM})
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
         this.trigger({action: 'list', modelName: ORGANIZATION, list: olist, forceUpdate: true})
       }
-      // else if (!isNew  &&  model.id === ORGANIZATION  &&  value._noTour  &&  !originalR._noTour) {
-      //   value._noSplash = true
-      //   this._noSplash.push(iKey)
-      //   this._setItem(iKey, value)
-      // }
-    })
-    .catch((err) => {
+    } catch(err)  {
       debugger
       if (!noTrigger) {
         this.trigger({action: 'addItem', error: err.message, resource: value})
       }
       err = err;
-    })
+    }
     function getContainerProp(model) {
       let props = model.properties
       let refProps = utils.getPropertiesWithAnnotation(model, 'ref')
@@ -9362,7 +9420,7 @@ var Store = Reflux.createStore({
         else if (utils.isItem(model)) {
           let props = model.properties
           for (let p in props) {
-            if (utils.isContainerProp(val, props[p], model)) {
+            if (utils.isContainerProp(props[p], model)) {
               let cRes = application  &&  await this._getItemFromServer(val[p]) || this._getItem(val[p])
               if (cRes )
                 this.trigger({action: 'getItem', resource: cRes, application})
