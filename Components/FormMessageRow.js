@@ -1,23 +1,22 @@
 console.log('requiring FormMessageRow.js')
 'use strict';
 
+import _ from 'lodash'
+import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons';
+import { makeResponsive } from 'react-native-orient'
+
 import utils from '../utils/utils'
 var translate = utils.translate
 import ArticleView from './ArticleView'
-import MessageView from './MessageView'
-import NewResource from './NewResource'
 import dateformat from 'dateformat'
 import PhotoList from './PhotoList'
-import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
 import RowMixin from './RowMixin'
-import equal from 'deep-equal'
-import { makeResponsive } from 'react-native-orient'
 import { makeStylish } from './makeStylish'
 
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
-import reactMixin from 'react-mixin'
 
 const MAX_PROPS_IN_FORM = 1
 const PHOTO = 'tradle.Photo'
@@ -58,7 +57,7 @@ class FormMessageRow extends Component {
     if (this.props.bankStyle !== nextProps.bankStyle)
       return true
     return utils.getId(resource) !== utils.getId(nextProps.resource) ||
-           !equal(to, nextProps.to)             ||
+           !_.isEqual(to, nextProps.to)             ||
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
            orientation != nextProps.orientation ||
            resource._sendStatus !== nextProps.resource._sendStatus ||
@@ -156,11 +155,11 @@ class FormMessageRow extends Component {
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
-    let backgroundColor
-    if (!resource._latest)
-      backgroundColor = '#B8D4FC'
-    else
-      backgroundColor = isMyMessage && bankStyle.myMessageBackgroundColor || bankStyle.sharedWithBg
+    // let backgroundColor
+    // if (!resource._latest)
+    //   backgroundColor = '#B8D4FC'
+    // else
+    let backgroundColor = isMyMessage && bankStyle.myMessageBackgroundColor || bankStyle.sharedWithBg
     let borderTopRightRadius = isMyMessage || isShared ? 0 : 10
     let borderTopLeftRadius = isMyMessage || isShared ? 10 : 0
 
