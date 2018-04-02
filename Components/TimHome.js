@@ -26,6 +26,7 @@ import NewResource from './NewResource'
 // import HomePage from './HomePage'
 import HomePageMixin from './HomePageMixin'
 import ResourceView from './ResourceView'
+import MessageView from './MessageView'
 import MessageList from './MessageList'
 import extend from 'extend'
 import utils, { translate } from '../utils/utils'
@@ -86,9 +87,6 @@ const SUBMIT_LOG_TEXT = {
   submitting: translate('submitting') + '...',
   submitted: translate('restartApp')
 }
-
-
-
 const isAndroid = Platform.OS === 'android'
 const FOOTER_TEXT_COLOR = ENV.splashContrastColor
 
@@ -144,17 +142,6 @@ class TimHome extends Component {
     //   this._handleConnectivityChange
     // );
   }
-  // async _checkConnectivity() {
-  //   try {
-  //     const isConnected = await NetInfo.isConnected.fetch()
-  //     const firstRoute = this.props.navigator.getCurrentRoutes()[0]
-  //     firstRoute.isConnected = isConnected
-  //   } catch (err) {
-  //     debug('failed to check connectivity', err)
-  //   }
-  // }
-
-
   async componentDidMount() {
     // this._checkConnectivity()
 
@@ -380,9 +367,9 @@ class TimHome extends Component {
     case 'applyForProduct':
       this.showChatPage({resource: provider, action: this.wasDeepLink ? 'push' : 'replace', showProfile: this.wasDeepLink})
       break
-    case 'deepLink':
+    case 'openURL':
       this.isDeepLink = true
-      await this._handleOpenURL({url})
+      Actions.openURL(url)
       break
     case 'getProvider':
       this.showChatPage({resource: provider, termsAccepted, showProfile: true})
@@ -390,6 +377,9 @@ class TimHome extends Component {
       //   provider: params.provider,
       //   action: 'chat'
       // })
+      return
+    case 'getItemFromDeepLink':
+      this.showResource(params)
       return
     case 'getForms':
       this.showChat(params)
@@ -522,6 +512,9 @@ class TimHome extends Component {
         //   url: this.state.url
         // })
         Actions.getProvider(this.state.qs)
+        break
+      case 'r':
+        Actions.getResourceFromLink(this.state.qs)
         break
       case 'applyForProduct':
         Actions.applyForProduct(this.state.qs)
@@ -706,6 +699,33 @@ class TimHome extends Component {
       navigator.replace(route)
     else
       navigator.push(route)
+  }
+  showResource({resource, bankStyle}) {
+    let component, id
+    if (utils.isMessage(resource)) {
+      component = MessageView
+      id = 5
+    }
+    else {
+      component = ResourceView
+      id = 3
+    }
+
+    let style = {}
+    extend(style, defaultBankStyle)
+    if (bankStyle)
+      extend(style, bankStyle)
+    this.props.navigator.push({
+      title: utils.getDisplayName(resource),
+      component: component,
+      id: id,
+      backButtonTitle: 'Back',
+      passProps: {
+        bankStyle: style,
+        resource,
+      }
+    })
+
   }
   showLandingPage(provider, landingPage) {
     let style = {}
@@ -1309,3 +1329,14 @@ module.exports = TimHome;
 //       onRightButtonPress: onEnd
 //     })
 //   }
+  // async _checkConnectivity() {
+  //   try {
+  //     const isConnected = await NetInfo.isConnected.fetch()
+  //     const firstRoute = this.props.navigator.getCurrentRoutes()[0]
+  //     firstRoute.isConnected = isConnected
+  //   } catch (err) {
+  //     debug('failed to check connectivity', err)
+  //   }
+  // }
+
+
