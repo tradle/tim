@@ -77,18 +77,17 @@ class FormMessageRow extends Component {
     let { resource, to, bankStyle, application } = this.props
     let model = utils.getModel(resource[TYPE])
     let photos = utils.getResourcePhotos(model, resource)
-    let photoUrls = []
     let isMyMessage = this.isMyMessage()
     let isShared = this.isShared()
     let isSharedContext
 
-    let len = photoUrls.length;
+    var len = photos  &&  photos.length;
     let inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     let photoStyle = {};
     if (inRow > 0) {
       if (inRow === 1) {
-        let ww = Math.min(240, photoUrls[0].width)
-        let hh = (ww / photoUrls[0].width) * photoUrls[0].height
+        let ww = Math.min(240, photos[0].width)
+        let hh = (ww / photos[0].width) * photos[0].height
         photoStyle = [chatStyles.bigImage, {
           width:  ww,
           height: hh
@@ -110,19 +109,8 @@ class FormMessageRow extends Component {
     let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
     let photoListStyle = {height: 3};
     if (photos) {
-      photoUrls = photos
-      // photos.forEach((p) => {
-      //   photoUrls.push({url: utils.getImageUri(p.url)});
-      // })
       isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
       photoListStyle = styles.photoListStyle
-      // photoListStyle = {
-      //   flexDirection: 'row',
-      //   alignSelf: isMyMessage || isShared ? 'flex-end' : 'flex-start',
-      //   marginLeft: isMyMessage || isShared ? 30 : isSharedContext || application ? 43 : 0, //(hasOwnerPhoto ? 45 : 10),
-      //   borderRadius: 10,
-      //   marginBottom: 3,
-      // }
     }
     let stub = this.formStub(resource, to, styles)
     if (resource[TYPE] !== PRODUCT_REQUEST)
@@ -134,7 +122,7 @@ class FormMessageRow extends Component {
               {date}
               {stub}
               <View style={photoListStyle}>
-                <PhotoList photos={photoUrls} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
+                <PhotoList photos={photos} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
               </View>
               {sendStatus}
             </View>
@@ -168,11 +156,17 @@ class FormMessageRow extends Component {
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
+    let backgroundColor
+    if (!resource._latest)
+      backgroundColor = '#B8D4FC'
+    else
+      backgroundColor = isMyMessage && bankStyle.myMessageBackgroundColor || bankStyle.sharedWithBg
+    let borderTopRightRadius = isMyMessage || isShared ? 0 : 10
+    let borderTopLeftRadius = isMyMessage || isShared ? 10 : 0
+
     let headerStyle = [
       chatStyles.verifiedHeader,
-      // noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
-      {backgroundColor: isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg}, // opacity: isShared ? 0.5 : 1},
-      isMyMessage || isShared ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
+      {backgroundColor, borderTopRightRadius, borderTopLeftRadius},
     ]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
@@ -200,12 +194,15 @@ class FormMessageRow extends Component {
     let arrowIcon
     if (!utils.isContext(resource))
       arrowIcon = <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
+
+    let prefillProp = utils.getPrefillProperty(model)
+    let headerTitle = translate(model) + (prefillProp  &&  ' - ' + translate(utils.getModel(resource[prefillProp.name][TYPE])) || ' ')
     return (
       <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
-        <View style={[{flex:1}, chatStyles.verificationBody]}>
+        <View style={[{flex:1, marginLeft: 10}, chatStyles.verificationBody]}>
           <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}, noContent  &&  styles.noContentStyle]}>
-            <Text style={chatStyles.verificationHeaderText}>{translate(model) + ' '}
+            <Text style={chatStyles.verificationHeaderText}>{headerTitle}
               {sealedStatus}
             </Text>
             {arrowIcon}
@@ -216,10 +213,14 @@ class FormMessageRow extends Component {
       </View>
     );
   }
-
   formatRow(isMyMessage, renderedRow, styles) {
     let resource = this.props.resource;
     let model = utils.getModel(resource[TYPE] || resource.id);
+    let prefillProp = utils.getPrefillProperty(model)
+    if (prefillProp) {
+      resource = resource[prefillProp.name]
+      model = utils.getModel(resource[TYPE])
+    }
 
     let viewCols = model.gridCols || model.viewCols;
     if (!viewCols) {
