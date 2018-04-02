@@ -638,18 +638,22 @@ class GridList extends Component {
     let { modelName, search, callback, bankStyle, navigator, currency } = this.props
     let isContact = modelName === PROFILE;
 
-    let isOrganization = modelName === ORGANIZATION;
+    let isOrganization = modelName === ORGANIZATION
     let isApplication = modelName === APPLICATION
+    let isBookmark = modelName === BOOKMARK
 
     let isResourceFromServer
     if (me.isEmployee) {
        // (!isApplication  &&  (search ||  (!isContact  &&  !isOrganization  &&  !callback)))
-      if (search)
-        isResourceFromServer = true
-      else if (utils.isMessage(resource)) {
-        let meId = utils.getId(me)
-        if (utils.getId(resource.from) !== meId  &&  utils.getId(resource.to) !== meId)
+      if (!isApplication) {
+        if (search  ||  isBookmark)
           isResourceFromServer = true
+        else if (utils.isMessage(resource)) {
+          let meId = utils.getId(me)
+          // DraftApplication
+          if (utils.getId(resource.from) !== meId  ||  utils.getId(resource.to) !== meId)
+            isResourceFromServer = true
+        }
       }
     }
     if (isResourceFromServer) {
