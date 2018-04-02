@@ -524,8 +524,7 @@ class MessageView extends Component {
       let ref = prop.items.ref
       if (!ref)
         continue
-      let m = utils.getModel(ref)
-      if (m.interfaces  &&  m.interfaces.indexOf(ITEM) !== -1)
+      if (utils.isItem(ref))
         items.push(prop)
     }
     return items
