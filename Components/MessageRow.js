@@ -70,7 +70,9 @@ const {
   // PRODUCT_LIST
 } = constants.TYPES
 const LIMIT = 20
-const MESSAGE_WITH_LINK_REGEX = /\[(?:[^\]]+)\]\(https?:\/\/[^)]+\)/ig
+const MESSAGE_WITH_LINK_REGEX = /(?:__|[*#])|\[(.*?)\]\(.*?\)/
+
+// const MESSAGE_WITH_LINK_REGEX = /\[(?:[^\]]+)\]\(https?:\/\/[^)]+\)/ig
 
 class MessageRow extends Component {
   static displayName = 'MessageRow';
