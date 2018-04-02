@@ -7,6 +7,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
 import constants from '@tradle/constants'
+
+var { TYPE } = constants
+var { PROFILE, ORGANIZATION } = constants.TYPES
+
 import Accordion from './Accordion'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils from '../utils/utils'
@@ -45,19 +49,22 @@ import React, { Component } from 'react'
 
 var ResourceMixin = {
   showRefResource(resource, prop) {
-    let id = utils.getId(resource)
-    // if (id !== this.state.propValue)
-    //   return;
     let type = utils.getType(resource)
     let model = utils.getModel(type);
     let title = utils.getDisplayName(resource);
+    let isMessageView
+    if (resource[TYPE])
+      isMessageView = utils.isMessage(resource)
+    else
+      isMessageView = (type !== ORGANIZATION  &&  type !== PROFILE)
+
     let {bankStyle, search, currency, country} = this.props
-    if (utils.isMessage(resource)) {
+    if (isMessageView) {
       this.props.navigator.push({
         id: 5,
         component: require('./MessageView'),
         backButtonTitle: translate('back'),
-        title: model.title,
+        title: utils.makeModelTitle(model),
         passProps: {
           bankStyle: bankStyle,
           resource: resource,
@@ -87,7 +94,7 @@ var ResourceMixin = {
   showResources(resource, prop) {
     this.props.navigator.push({
       id: 10,
-      title: translate(prop, utils.getModel(resource[constants.TYPE])),
+      title: translate(prop, utils.getModel(resource[TYPE])),
       titleTextColor: '#7AAAC3',
       backButtonTitle: translate('back'),
       component: require('./ResourceList'),
@@ -293,7 +300,7 @@ var ResourceMixin = {
               </View>
       }
       else {
-        if (modelName === APPLICATION  &&  pMeta.range  &&  pMeta.range)
+        if (pMeta.range === 'model')
           val = utils.makeModelTitle(val)
         val = <Text style={[styles.description]}>{val}</Text>;
       }
@@ -315,7 +322,7 @@ var ResourceMixin = {
     let {prop, json, isView, jsonRows, skipLabels, indent, isOnfido, isBreakdown} = params
     // let json = JSON.parse(jsonStr)
     // let jsonRows = []
-    let rType = this.props.resource[constants.TYPE]
+    let rType = this.props.resource[TYPE]
     let hideGroup = prop  &&  hideGroupInJSON[rType]
     let showCollapsed = ENV.showCollapsed  &&  ENV.showCollapsed[rType]
     skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
