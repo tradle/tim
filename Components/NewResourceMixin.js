@@ -110,7 +110,7 @@ var NewResourceMixin = {
   getFormFields(params) {
     let { currency, bankStyle, editCols, originatingMessage, search, errs, requestedProperties } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
-    let { component, formErrors, model, data } = params
+    let { component, formErrors, model, data, validationErrors } = params
 
     let meta = this.props.model  ||  this.props.metadata;
     let onSubmitEditing = this.onSavePressed
@@ -143,7 +143,7 @@ var NewResourceMixin = {
 
     let dModel = data  &&  utils.getModel(data[TYPE])
     if (!utils.isEmpty(data)) {
-      if (!meta.items && data[TYPE] !== meta.id) {
+      if (!meta.items && data[TYPE] !== meta.id && dModel.subClassOf !== meta.id) {
         let interfaces = meta.interfaces;
         if (!interfaces  ||  interfaces.indexOf(data[TYPE]) == -1)
            return;
@@ -216,6 +216,10 @@ var NewResourceMixin = {
     }
     let required = utils.ungroup(meta, meta.required)
     required = utils.arrayToObject(required);
+    if (validationErrors) {
+      formErrors = validationErrors
+      this.state.validationErrors = null
+    }
 
     let options = {fields: {}}
     let resource = this.state.resource
@@ -251,14 +255,14 @@ var NewResourceMixin = {
         if (resource[p] === this.props.resource[p])
           errMessage = errs[p]
       }
-      if (formErrors  &&  formErrors[p]) {
+      if (!validationErrors  &&  formErrors  &&  formErrors[p]) {
         if (resource[p] === this.props.resource[p])
           errMessage = formErrors[p]
         else
           delete formErrors[p]
       }
       if (!errMessage)
-         errMessage = translate('thisFieldIsRequired')
+        errMessage = translate('thisFieldIsRequired')
       options.fields[p] = {
         error: errMessage, //'This field is required',
         bufferDelay: 20, // to eliminate missed keystrokes
@@ -968,7 +972,7 @@ var NewResourceMixin = {
     // Especially for money type props
     if (!help)
       st.flex = 5
-
+    let autoCapitalize = this.state.isRegistration  ||  (prop.name !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     return (
       <View style={st}>
         <FloatLabel
@@ -976,7 +980,7 @@ var NewResourceMixin = {
           autoCorrect={false}
           multiline={multiline}
           editable={editable}
-          autoCapitalize={this.state.isRegistration  ||  (prop.name !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  (!prop.keyboard || prop.keyboard !== 'email-address')) ? 'sentences' : 'none'}
+          autoCapitalize={autoCapitalize}
           onFocus={this.inputFocused.bind(this, prop.name)}
           inputStyle={this.state.isRegistration ? styles.regInput : styles.textInput}
           style={[styles.formInput, {borderBottomColor: lcolor}]}
