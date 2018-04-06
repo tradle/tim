@@ -772,6 +772,8 @@ class GridList extends Component {
   selectResourceFromServer(resource) {
     let { modelName, search, bankStyle, navigator, currency, application } = this.props
     let model = utils.getModel(modelName);
+    let rType = resource[TYPE]
+    let rModel = utils.getModel(rType)
     let isMessage = utils.isMessage(resource)
     if (isMessage) {
       if (modelName === BOOKMARK) {
@@ -780,8 +782,6 @@ class GridList extends Component {
         uiUtils.showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
         return
       }
-      let rType = resource[TYPE]
-      let m = utils.getModel(rType)
       let isVerificationR  = rType === VERIFICATION
       let title
       if (isVerificationR) {
@@ -789,7 +789,7 @@ class GridList extends Component {
         title = utils.makeModelTitle(utils.getModel(type))
       }
       else
-        title = utils.makeModelTitle(m)
+        title = utils.makeModelTitle(rModel)
 
       navigator.push({
         title: title,
@@ -803,7 +803,8 @@ class GridList extends Component {
           bankStyle: bankStyle || defaultBankStyle
         }
       })
-      return
+      if (!utils.isMyMessage({resource}))
+        return
     }
     let title = utils.makeTitle(utils.getDisplayName(resource))
     navigator.push({
@@ -821,7 +822,7 @@ class GridList extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
-          model: model,
+          model: rModel,
           resource: resource,
           search: search,
           serverOffline: this.props.serverOffline,
@@ -895,7 +896,7 @@ class GridList extends Component {
       else {
         passProps = {
           model: utils.getModel(resource[TYPE]),
-          bankStyle: style,
+          bankStyle: style || defaultBankStyle,
           resource: me
         }
       }
@@ -1381,7 +1382,7 @@ class GridList extends Component {
     //               isLoading={isLoading}/>
     // }
     // else
-    let isEmptyItemsTab = prop &&  utils.isItem(model)  &&  this.state.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
+    let isEmptyItemsTab = prop &&  this.state.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
     if (isEmptyItemsTab) {
       content = <NoResources
                   message={translate('pleaseClickOnAddButton', utils.makeModelTitle(model))}
