@@ -175,29 +175,19 @@ class MessageView extends Component {
     if (utils.isEmpty(bl))
       return
 
-    let itemBl
+    let buttons = []
     for (let p in bl) {
       let l = bl[p]
-      if (!l.items.ref  ||  !l.items.backlink)
+      if (!l.items.ref  ||  !l.items.backlink  ||  !l.allowToAdd)
         continue
-      let pm = utils.getModel(l.items.ref)
-      if (utils.isItem(pm)) {
-        itemBl = l
-        break
-      }
+      // let pm = utils.getModel(l.items.ref)
+      buttons.push({
+          text: translate('addNew', l.title),
+          onPress: () => this.addNew(l)
+        })
     }
-    if (!itemBl)
+    if (!buttons.length)
       return
-    let buttons = []
-    if (itemBl.allowToAdd) {
-      buttons = [
-        {
-          text: translate('addNew', itemBl.title),
-          onPress: () => this.addNew(itemBl)
-        }
-      ]
-    }
-
     buttons.push({ text: translate('cancel') })
     return (
       <ActionSheet
@@ -261,7 +251,7 @@ class MessageView extends Component {
     // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
     //   r.relatedTo = this.props.resource.relatedTo;
     r.from = me
-    r.to = me //resource.to
+    r.to = utils.isItem(r) ? me : resource.to
     r._context = resource._context
     let model = utils.getModel(r[TYPE])
 
