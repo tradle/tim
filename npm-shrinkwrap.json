@@ -177,12 +177,19 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#0d367550f467fd25ef96bab5b977f096349fd73e"
+      "resolved": "git://github.com/tradle/models.git#8fbf5ba839b15ed68b7c47125389595953ce5657",
+      "dependencies": {
+        "@tradle/validate-model": {
+          "version": "5.8.1",
+          "from": "@tradle/validate-model@>=5.8.1 <6.0.0",
+          "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-5.8.1.tgz"
+        }
+      }
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
       "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#443671d8f93d33f17b166a5a97e21875ec09f18f"
+      "resolved": "git://github.com/tradle/models-cloud.git#9f31f86a2f2c00b5217704937754e28be3c63c56"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -247,9 +254,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "5.7.4",
-      "from": "@tradle/validate-model@>=5.7.4 <6.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-5.7.4.tgz"
+      "version": "5.8.1",
+      "from": "@tradle/validate-model@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-5.8.1.tgz"
     },
     "@tradle/validate-resource": {
       "version": "2.21.5",
@@ -2881,23 +2888,6 @@
       "from": "feed-indexer@1.3.0",
       "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.3.0.tgz",
       "dependencies": {
-        "isarray": {
-          "version": "0.0.1",
-          "from": "isarray@0.0.1",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
-        },
-        "level-change-processor": {
-          "version": "1.0.0",
-          "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
-          "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
-          "dependencies": {
-            "readable-stream": {
-              "version": "1.1.14",
-              "from": "readable-stream@^1.0.33",
-              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.14.tgz"
-            }
-          }
-        },
         "readable-stream": {
           "version": "2.3.5",
           "from": "readable-stream@>=2.1.4 <3.0.0",
@@ -4650,11 +4640,6 @@
       "from": "merkle-proofs@1.0.3",
       "resolved": "https://registry.npmjs.org/merkle-proofs/-/merkle-proofs-1.0.3.tgz",
       "dependencies": {
-        "merkle-tree-stream": {
-          "version": "3.0.3",
-          "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
-          "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
-        },
         "readable-stream": {
           "version": "2.3.5",
           "from": "readable-stream@>=2.1.0 <3.0.0",
@@ -4945,6 +4930,11 @@
       "version": "3.5.0",
       "from": "mqtt-packet@>=3.4.7 <4.0.0",
       "resolved": "https://registry.npmjs.org/mqtt-packet/-/mqtt-packet-3.5.0.tgz"
+    },
+    "mrz": {
+      "version": "3.1.0",
+      "from": "mrz@>=3.1.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/mrz/-/mrz-3.1.0.tgz"
     },
     "ms": {
       "version": "2.0.0",
@@ -5952,7 +5942,7 @@
     "react-native-accordion": {
       "version": "1.0.1",
       "from": "tradle/react-native-accordion#dev",
-      "resolved": "git://github.com/tradle/react-native-accordion.git#0c4dcaf267a7437afa16a6b4ae38f71c03b7dd3c"
+      "resolved": "git://github.com/tradle/react-native-accordion.git#e9e2a028a8f08ef2fedf4a7480598096939b2d5d"
     },
     "react-native-actionsheet": {
       "version": "2.3.0",
@@ -5970,7 +5960,9 @@
       "resolved": "git://github.com/tradle/react-native-app-intro.git#f774220db421109ecf627ec9883b742bd2722486"
     },
     "react-native-async-storage-rocks": {
-      "version": "2.0.0"
+      "version": "2.0.0",
+      "from": "react-native-async-storage-rocks@2.0.0",
+      "resolved": "https://registry.npmjs.org/react-native-async-storage-rocks/-/react-native-async-storage-rocks-2.0.0.tgz"
     },
     "react-native-async-storage-snappy": {
       "version": "1.1.0",
@@ -5979,8 +5971,8 @@
     },
     "react-native-blinkid": {
       "version": "1.1.0",
-      "from": "react-native-blinkid@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-blinkid/-/react-native-blinkid-1.1.0.tgz"
+      "from": "tradle/react-native-blinkid",
+      "resolved": "git://github.com/tradle/react-native-blinkid.git#3e5da0440f4cada45a9c57a24af8fe2eb800ceff"
     },
     "react-native-branch": {
       "version": "2.2.4",
