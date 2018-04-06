@@ -136,6 +136,7 @@ class NewResource extends Component {
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.inFocus !== nextState.inFocus                ||
            this.state.disableEditing !== nextState.disableEditing  ||
+           this.state.validationErrors !== nextState.validationErrors ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
@@ -199,7 +200,7 @@ class NewResource extends Component {
   }
 
   onAction(params) {
-    let { resource, action, error, requestedProperties, message } = params
+    let { resource, action, error, requestedProperties, message, validationErrors } = params
     let { navigator, prop, containerResource, callback, modelName, originatingMessage } = this.props
     if (action === 'languageChange') {
       navigator.popToTop()
@@ -258,6 +259,10 @@ class NewResource extends Component {
     }
     if (!resource  ||  (action !== 'addItem'  &&  action !== 'addMessage')) {
       return;
+    }
+    if (validationErrors) {
+      this.setState({validationErrors, submitted: false})
+      return
     }
     if (this.state.resource[TYPE] !== resource[TYPE]) {
       if (!prop  ||  !containerResource)
@@ -384,6 +389,7 @@ class NewResource extends Component {
 
     this.state.submitted = true
     this.state.noScroll = false
+    this.state.validationErrors = null
     let resource = this.state.resource;
 
     let value = this.refs.form  &&  this.refs.form.getValue() ||  resource
@@ -721,11 +727,15 @@ class NewResource extends Component {
         params.formErrors[r.name] = r.error
       })
     }
+    else if (this.state.validationErrors)
+      params.validationErrors = this.state.validationErrors
 
     let options = this.getFormFields(params);
     if (!options) {
       let contentSeparator = utils.getContentSeparator(bankStyle)
-      return <PageView style={platformStyles.container} separator={contentSeparator}>
+      let height = utils.dimensions(NewResource).height - 80
+
+      return <PageView style={[platformStyles.container, {height}]} separator={contentSeparator}>
                 <ShowPropertiesView resource={data}
                                     bankStyle={bankStyle}
                                     navigator={navigator} />
