@@ -188,7 +188,7 @@ class VerificationRow extends Component {
         else if (modelName === FORM)
           title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
         else
-          title = 'Submited by ' + resource.from.title
+          title = 'Submitted by ' + resource.from.title
       }
       else
         title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
