@@ -640,24 +640,25 @@ class GridList extends Component {
 
     let isOrganization = modelName === ORGANIZATION
     let isApplication = modelName === APPLICATION
-    let isBookmark = modelName === BOOKMARK
+    // let isBookmark = modelName === BOOKMARK
 
-    let isResourceFromServer
-    if (me.isEmployee) {
-       // (!isApplication  &&  (search ||  (!isContact  &&  !isOrganization  &&  !callback)))
-      if (!isApplication) {
-        if (search  ||  isBookmark)
-          isResourceFromServer = true
-        else if (utils.isMessage(resource)) {
-          let meId = utils.getId(me)
-          // DraftApplication
-          if (utils.getId(resource.from) !== meId  ||  utils.getId(resource.to) !== meId)
-            isResourceFromServer = true
-        }
-      }
-    }
-    if (isResourceFromServer) {
-      this.selectResourceFromServer(resource)
+    // let isResourceFromServer
+    // if (me.isEmployee) {
+    //    // (!isApplication  &&  (search ||  (!isContact  &&  !isOrganization  &&  !callback)))
+    //   if (!isApplication) {
+    //     if (search  ||  isBookmark)
+    //       isResourceFromServer = true
+    //     else if (utils.isMessage(resource)) {
+    //       let meId = utils.getId(me)
+    //       // DraftApplication
+    //       if (utils.getId(resource.from) !== meId  ||  utils.getId(resource.to) !== meId)
+    //         isResourceFromServer = true
+    //     }
+    //   }
+    // }
+    // if (isResourceFromServer  ||  utils.isMessage(resource)) {
+    if (!isApplication   &&   utils.isMessage(resource)) {
+      this.selectMessage(resource)
       return;
     }
     let { prop, officialAccounts } = this.props
@@ -769,7 +770,7 @@ class GridList extends Component {
 
     navigator.push(route);
   }
-  selectResourceFromServer(resource) {
+  selectMessage(resource) {
     let { modelName, search, bankStyle, navigator, currency, application } = this.props
     let model = utils.getModel(modelName);
     let rType = resource[TYPE]
@@ -791,7 +792,7 @@ class GridList extends Component {
       else
         title = utils.makeModelTitle(rModel)
 
-      navigator.push({
+      let route = {
         title: title,
         id: 5,
         component: MessageView,
@@ -802,9 +803,30 @@ class GridList extends Component {
           application,
           bankStyle: bankStyle || defaultBankStyle
         }
-      })
-      if (!utils.isMyMessage({resource}))
-        return
+      }
+      if (utils.isMyMessage({resource})) {
+        _.extend(route, {
+          rightButtonTitle: 'Edit',
+          onRightButtonPress: {
+            title: title,
+            id: 4,
+            component: NewResource,
+            titleTextColor: '#7AAAC3',
+            backButtonTitle: 'Back',
+            rightButtonTitle: 'Done',
+            passProps: {
+              model: rModel,
+              resource: resource,
+              search: search,
+              serverOffline: this.props.serverOffline,
+              bankStyle: bankStyle || defaultBankStyle
+            }
+          },
+
+        })
+      }
+      navigator.push(route)
+      return
     }
     let title = utils.makeTitle(utils.getDisplayName(resource))
     navigator.push({
@@ -1382,7 +1404,8 @@ class GridList extends Component {
     //               isLoading={isLoading}/>
     // }
     // else
-    let isEmptyItemsTab = prop &&  this.state.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
+    // let isEmptyItemsTab = prop &&  this.state.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
+    let isEmptyItemsTab = prop &&  prop.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
     if (isEmptyItemsTab) {
       content = <NoResources
                   message={translate('pleaseClickOnAddButton', utils.makeModelTitle(model))}
