@@ -73,7 +73,6 @@ import ENV from '../utils/env'
 // })
 
 // import AddressBook from 'NativeModules'.AddressBook;
-
 import tradle from '@tradle/engine'
 var myCustomIndexes
 // build indexes to enable searching by subClassOf
@@ -223,7 +222,9 @@ import monitorMissing from '../utils/missing'
 import identityUtils from '../utils/identity'
 import createNetworkAdapters from '../utils/network-adapters'
 import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
-import validateResource from '@tradle/validate-resource'
+
+import Errors from '@tradle/errors'
+import validateResource, { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
 // import tutils from '@tradle/utils'
 var isTest, originalMe;
@@ -4736,9 +4737,18 @@ var Store = Reflux.createStore({
       let key = utils.makeId(IDENTITY, to[ROOT_HASH])
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
+
       try {
         validateResource({resource: toChain, models: self.getModels(), ignoreReadOnly: true})
-
+      } catch (err) {
+        if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
+        // if (err.name === 'InvalidPropertyValue')
+          self.trigger({action: 'validationError', validationErrors: {[err.property]: translate('invalidPropertyValue')}})
+        else
+          self.trigger({action: 'validationError', error: err.message})
+        return
+      }
+      try {
         let data = await meDriver.createObject({object: toChain})
         let hash = data.link
         if (isNew)
@@ -7368,7 +7378,7 @@ var Store = Reflux.createStore({
       let contextIds = []
       let contexts = []
       let promisses = []
-      list.forEach((r) => {
+      list  &&  list.forEach((r) => {
         if (!r._context)  // FormRequest for ProductRequest
           return
         let cId = utils.getId(r._context)
@@ -8519,17 +8529,16 @@ var Store = Reflux.createStore({
       if (!noTrigger) {
         this.trigger(triggerParams);
       }
-      // if (model.subClassOf === FORM) {
-      if (utils.isItem(model)) {
-        let {container, item} = getContainerProp(model)
-        if (value[container.name]) {
-          let iId = utils.getId(value[container.name])
-          let cRes = this._getItem(iId)
-          if (!cRes)
-            cRes = await this._getItemFromServer(iId)
-          this.onExploreBacklink(cRes, item, true)
-        }
+      // if (utils.isItem(model)) {
+      let {container, item} = getContainerProp(model)
+      if (container  &&  value[container.name]) {
+        let iId = utils.getId(value[container.name])
+        let cRes = this._getItem(iId)
+        if (!cRes)
+          cRes = await this._getItemFromServer(iId)
+        this.onExploreBacklink(cRes, item, true)
       }
+      // }
       if (model.subClassOf === FORM) {
         // let mlist = this.searchMessages({modelName: FORM})
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
@@ -8553,10 +8562,11 @@ var Store = Reflux.createStore({
         let cProps = container.properties
         let containerBl = utils.getPropertiesWithAnnotation(container, 'items')
         for (let c in containerBl)  {
-          if (cProps[c].items.ref === model.id)
+          if (cProps[c].allowToAdd  &&  cProps[c].items.ref === model.id)
             return {container: props[p], item: cProps[c]}
         }
       }
+      return {container: null, item: null}
     }
   },
   addLastMessage(value, batch, sharedWith) {
