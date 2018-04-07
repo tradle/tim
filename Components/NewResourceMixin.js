@@ -1667,7 +1667,7 @@ var NewResourceMixin = {
 
     this.setState(state);
     if (!this.props.search) {
-      Actions.getRequestedProperties(r)
+      // Actions.getRequestedProperties(r)
       Actions.saveTemporary(r)
     }
   },
