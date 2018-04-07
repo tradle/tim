@@ -385,7 +385,8 @@ class MessageView extends Component {
     if (this.state.isLoading)
       return <View/>
     let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
-    let resource = this.state.resource;
+    let { backlink, bankStyle, resource } = this.state
+
     let model = utils.getLensedModel(resource, lensId);
     let isVerification = model.id === VERIFICATION
     let isVerificationTree = isVerification &&  (resource.method || resource.sources)
@@ -397,23 +398,25 @@ class MessageView extends Component {
     else
       date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
     let photos = resource.photos
-    let mainPhoto
-    if (!photos) {
-      photos = utils.getResourcePhotos(model, resource)
-      let mainPhotoProp = utils.getMainPhotoProperty(model)
-      mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
+    let mainPhoto, inRow
+
+    if (!backlink) {
+      if (!photos  ||  !photos.length) {
+        photos = utils.getResourcePhotos(model, resource)
+        let mainPhotoProp = utils.getMainPhotoProperty(model)
+        mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
+      }
+      else //if (photos.length === 1)
+        mainPhoto = photos[0]
+      // if (photos  &&  photos.length)
+      //   photos.splice(0, 1)
+
+      inRow = photos ? photos.length - 1 : 0
+      if (inRow  &&  inRow > 4)
+        inRow = 5;
     }
-    else if (photos.length === 1)
-      mainPhoto = photos[0]
-    if (photos  &&  photos.length)
-      photos.splice(0, 1)
-
-    let inRow = photos ? photos.length : 0
-    if (inRow  &&  inRow > 4)
-      inRow = 5;
-
     let propertySheet
-    let bankStyle = this.state.bankStyle || style
+    bankStyle = bankStyle || style
     let styles = createStyles({bankStyle})
     if (isVerificationTree)
       propertySheet = <VerificationView navigator={navigator}
@@ -421,9 +424,17 @@ class MessageView extends Component {
                                         bankStyle={bankStyle}
                                         currency={currency}
                                         showVerification={this.showVerification}/>
+    // Don't show photostrip on backlink tab
+    let photoList
+    if (!backlink && photos  &&  photos.length > 1) {
+      // Don't show the main photo in the strip
+      photoList = photos.slice()
+      photoList.splice(0, 1)
+    }
+
     let content = <View>
                     <View style={styles.photoListStyle}>
-                      <PhotoList photos={photos} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
+                      <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
                     </View>
                     <View style={styles.rowContainer}>
                       {msg}
@@ -440,8 +451,8 @@ class MessageView extends Component {
     else {
       let itemsBacklinks = this.getITEMBacklinks(model)
       actionPanel = <ShowRefList {...this.props}
-                                 backlink={this.state.backlink || (itemsBacklinks &&  itemsBacklinks[0])}
-                                 resource={this.state.resource}
+                                 backlink={backlink || (itemsBacklinks &&  itemsBacklinks[0])}
+                                 resource={resource}
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
                                  model={model}
