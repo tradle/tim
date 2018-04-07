@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+echo "removing react-native peer deps that prevent shrinkwrap from being written"
+./scripts/rm-rn-peerdeps.js
+
 npm run nodeify
 npm run installhooks
 npm run placesecrets
@@ -17,3 +20,4 @@ if [ -e node_modules/react-native-camera/ios/FaceDetector ]; then
   rm -rf node_modules/react-native-camera/ios/FaceDetector
 fi
 cp node_modules/react-native-camera/postinstall_project/projectWithoutFaceDetection.pbxproj node_modules/react-native-camera/ios/RNCamera.xcodeproj/project.pbxproj
+
