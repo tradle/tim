@@ -77,11 +77,23 @@ class PhotoView extends Component {
         nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
     }
     let {width, height} = utils.dimensions(PhotoView)
-    let image = {
-      width: width < height ? width : height,
-      height: Math.round(width < height ? height / 2.5 : width / 2),
-      // alignSelf: 'stretch'
+    let resizeMode = 'contain'
+    if (currentPhoto.width  &&  currentPhoto.height) {
+      if (width < height)
+        height = Math.round(height * width / currentPhoto.width)
+      else
+        width = Math.round(height * width / currentPhoto.height)
+      resizeMode = 'cover'
     }
+    else {
+      width = width < height ? width : height
+      height = Math.round(width < height ? height / 2.5 : width / 2)
+    }
+    let image = {
+      width,
+      height,
+    }
+
     let style={transform: [{scale: this.state.anim}]}
  // onPress={() => {
  //              Animated.spring(this.state.anim, {
@@ -114,7 +126,7 @@ class PhotoView extends Component {
       )
     }
     else
-      photoView = <Image resizeMode='contain' source={source} style={image} />
+      photoView = <Image resizeMode={resizeMode} source={source} style={image} />
 
     return (
           <Animated.View style={style}>
