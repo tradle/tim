@@ -86,8 +86,8 @@ class PhotoView extends Component {
       resizeMode = 'cover'
     }
     else {
-      width: utils.getContentWidth(PhotoView) + 2,
-      height: Math.floor(height / 2.5),
+      width = utils.getContentWidth(PhotoView) + 2
+      height = Math.floor(height / 2.5)
     }
     let image = {
       width,
