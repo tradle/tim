@@ -244,6 +244,10 @@ class NewResource extends Component {
         this.setState({isLoadingVideo: true})
         return;
     }
+    if (action === 'validationError') {
+      this.setState({validationErrors, submitted: false})
+      return
+    }
     if (!resource  &&  error &&  action === 'addItem') {
       this.state.submitted = false
       console.log('addItem: submitted = false')
@@ -259,10 +263,6 @@ class NewResource extends Component {
     }
     if (!resource  ||  (action !== 'addItem'  &&  action !== 'addMessage')) {
       return;
-    }
-    if (validationErrors) {
-      this.setState({validationErrors, submitted: false})
-      return
     }
     if (this.state.resource[TYPE] !== resource[TYPE]) {
       if (!prop  ||  !containerResource)
@@ -929,11 +929,18 @@ class NewResource extends Component {
                    <Text style={styles.errorsText}>{translate(this.state.message)}</Text>
                  </View>
       }
+      else if (params.validationErrors) {
+        errors = <View style={styles.errors}>
+                   <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
+                 </View>
+      }
+
       let contentSeparator = utils.getContentSeparator(bankStyle)
       return <PageView style={platformStyles.container} separator={contentSeparator}>
                {errors}
                {content}
               </PageView>
+
     }
     let title
     if (!isRegistration  &&  !bankStyle.logoNeedsText)
