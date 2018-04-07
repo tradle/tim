@@ -582,6 +582,58 @@ var utils = {
       return false
     return this.isInlined(this.getModel(m.subClassOf))
   },
+  isMyMessage({resource, to}) {
+    let r = resource
+
+    let fromId = utils.getId(r.from);
+    let toId = utils.getId(r.to);
+    let me = utils.getMe()
+    let meId = utils.getId(me)
+    if (fromId === meId)
+      return true;
+    if (toId === meId)
+      return false
+
+    if (me.isEmployee) {
+      if (r.from.organization  &&  me.organization.id !== r.from.organization.id)
+        return false
+      if (r._context) {
+        // check if the employee is the applicant
+        let cFrom = r._context.from
+        if (utils.getId(cFrom) === meId)
+          return true
+        if (cFrom.organization) {
+          if (cFrom.organization.id === me.organization.id)
+            return utils.getId(r._context.to) !== meId
+        }
+      }
+      let myOrgId = utils.getId(me.organization)
+      // bot -> bot
+      if (r.from.organization  &&
+          r.to.organization    &&
+          r.from.organization.id === r.to.organization.id  &&
+          r.from.organization.id === myOrgId) {
+        return false
+      }
+
+      if (r.from.organization) {
+        if (myOrgId === utils.getId(r.from.organization)) {
+          if (to  &&  utils.getId(to) === myOrgId)
+            return false
+          else
+            return true
+        }
+      }
+      if (r._context) {
+        if (r._context.from) {
+          let fOrg = r._context.from.organization
+          let applier = fOrg  &&  utils.getId(fOrg) === utils.getId(me.organization)
+          if (applier  &&  fOrg === utils.getId(r.from.organization))
+            return true
+        }
+      }
+    }
+  },
   getFontSize(fontSize) {
     // return fontSize
     let fontScale = PixelRatio.getFontScale()
@@ -673,7 +725,7 @@ var utils = {
     let props = model.properties
     let resourceModel = resource[TYPE] ? this.getModel(resource[TYPE]) : null
     var displayName = '';
-    let dnProps = this.getPropertiesWithAnnotation(resourceModel, 'displayName')
+    let dnProps = this.getPropertiesWithAnnotation(resourceModel ||  model, 'displayName')
     if (dnProps) {
       for (let p in dnProps) {
         let dn = this.getStringValueForProperty(resource, p, props)
@@ -685,15 +737,19 @@ var utils = {
       return displayName
 
     // Choose ENUM prop for display name
-    let refProps = this.getPropertiesWithAnnotation(resourceModel, 'ref')
-    for (var p in props) {
+    let refProps = this.getPropertiesWithAnnotation(resourceModel ||  model, 'ref')
+    for (var p in refProps) {
       if (p.charAt(0) === '_')
         continue
-
+      if (!resource[p])
+        continue
+      let prop = props[p]
       if (resourceModel.subClassOf === ENUM)
         return resource[p]
-      else if (props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM)
+      else if (prop.ref  &&  utils.getModel(prop.ref).subClassOf === ENUM)
         return resource[p].title
+      if (this.isContainerProp(prop, resourceModel))
+        continue
       let dn = this.getStringValueForProperty(resource, p, props)
       if (dn)
         displayName += displayName.length ? ' ' + dn : dn;
@@ -711,6 +767,8 @@ var utils = {
     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
       let prop =  vCols[i]
       if (props[prop].type === 'array' || props[prop].markdown)
+        continue
+      if (this.isContainerProp(prop, resourceModel))
         continue
       if ((!resource[prop]  &&  !props[prop].displayAs)  ||  excludeProps.indexOf[prop])
         continue
