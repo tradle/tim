@@ -57,8 +57,6 @@ var styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     justifyContent: 'center',
-    marginTop: 100,
-    maxWidth: 360,
     paddingHorizontal: 30
   },
   centerText: {
