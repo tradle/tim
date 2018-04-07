@@ -1,23 +1,22 @@
 console.log('requiring FormMessageRow.js')
 'use strict';
 
+import _ from 'lodash'
+import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons';
+import { makeResponsive } from 'react-native-orient'
+
 import utils from '../utils/utils'
 var translate = utils.translate
 import ArticleView from './ArticleView'
-import MessageView from './MessageView'
-import NewResource from './NewResource'
 import dateformat from 'dateformat'
 import PhotoList from './PhotoList'
-import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
 import RowMixin from './RowMixin'
-import equal from 'deep-equal'
-import { makeResponsive } from 'react-native-orient'
 import { makeStylish } from './makeStylish'
 
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
-import reactMixin from 'react-mixin'
 
 const MAX_PROPS_IN_FORM = 1
 const PHOTO = 'tradle.Photo'
@@ -58,7 +57,7 @@ class FormMessageRow extends Component {
     if (this.props.bankStyle !== nextProps.bankStyle)
       return true
     return utils.getId(resource) !== utils.getId(nextProps.resource) ||
-           !equal(to, nextProps.to)             ||
+           !_.isEqual(to, nextProps.to)             ||
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
            orientation != nextProps.orientation ||
            resource._sendStatus !== nextProps.resource._sendStatus ||
@@ -167,11 +166,17 @@ class FormMessageRow extends Component {
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
+    // let backgroundColor
+    // if (!resource._latest)
+    //   backgroundColor = '#B8D4FC'
+    // else
+    let backgroundColor = isMyMessage && bankStyle.myMessageBackgroundColor || bankStyle.sharedWithBg
+    let borderTopRightRadius = isMyMessage || isShared ? 0 : 10
+    let borderTopLeftRadius = isMyMessage || isShared ? 10 : 0
+
     let headerStyle = [
       chatStyles.verifiedHeader,
-      // noContent ? {borderBottomLeftRadius: 10, borderBottomRightRadius: 10} : {},
-      {backgroundColor: isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg}, // opacity: isShared ? 0.5 : 1},
-      isMyMessage || isShared ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
+      {backgroundColor, borderTopRightRadius, borderTopLeftRadius},
     ]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
@@ -199,12 +204,15 @@ class FormMessageRow extends Component {
     let arrowIcon
     if (!utils.isContext(resource))
       arrowIcon = <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
+
+    let prefillProp = utils.getPrefillProperty(model)
+    let headerTitle = translate(model) + (prefillProp  &&  ' - ' + translate(utils.getModel(resource[prefillProp.name][TYPE])) || ' ')
     return (
       <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
         <View style={[{flex:1, width: width}, chatStyles.verificationBody]}>
           <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}, noContent  &&  styles.noContentStyle]}>
-            <Text style={chatStyles.verificationHeaderText}>{translate(model) + ' '}
+            <Text style={chatStyles.verificationHeaderText}>{headerTitle}
               {sealedStatus}
             </Text>
             {arrowIcon}
@@ -215,10 +223,14 @@ class FormMessageRow extends Component {
       </View>
     );
   }
-
   formatRow(isMyMessage, renderedRow, styles) {
     let resource = this.props.resource;
     let model = utils.getModel(resource[TYPE] || resource.id);
+    let prefillProp = utils.getPrefillProperty(model)
+    if (prefillProp) {
+      resource = resource[prefillProp.name]
+      model = utils.getModel(resource[TYPE])
+    }
 
     let viewCols = model.gridCols || model.viewCols;
     if (!viewCols) {

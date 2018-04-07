@@ -12,7 +12,7 @@ import constants from '@tradle/constants'
 import ArticleView from './ArticleView'
 import PhotoList from './PhotoList'
 import PhotoView from './PhotoView'
-
+import StringChooser from './StringChooser'
 import ShowRefList from './ShowRefList'
 import VerificationView from './VerificationView'
 import NewResource from './NewResource'
@@ -22,12 +22,16 @@ import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
+import Navigator from './Navigator'
 
 const HELP_COLOR = 'blue'
 const PHOTO = 'tradle.Photo'
 const ITEM = 'tradle.Item'
+const FORM_PREFILL = 'tradle.FormPrefill'
 // import Prompt from 'react-native-prompt'
-const { TYPE } = constants
+const {
+  TYPE,
+} = constants
 const {
   VERIFICATION,
   ENUM,
@@ -69,7 +73,8 @@ class MessageView extends Component {
       isConnected: props.navigator.isConnected,
       promptVisible: false,
       isLoading: !props.resource[TYPE],
-      showDetails: true,
+      // showDetails: true,
+      showDetails: false,
       bankStyle: defaultBankStyle
     };
     let currentRoutes = props.navigator.getCurrentRoutes();
@@ -119,8 +124,9 @@ class MessageView extends Component {
     this.listenTo(Store, 'onAction');
   }
   onAction(params) {
-    if (params.action == 'connectivity') {
-      this.setState({isConnected: params.isConnected})
+    let { action, currency, style, country, backlink, isConnected } = params
+    if (action == 'connectivity') {
+      this.setState({isConnected: isConnected})
       return
     }
     if (!params.resource)
@@ -128,36 +134,36 @@ class MessageView extends Component {
     let { bankStyle, application, resource } = this.props
     if (utils.getId(params.resource) !== utils.getId(resource))
       return
-    if (params.action === 'getItem') {
+    if (action === 'getItem') {
       let state = {
         resource: params.resource,
         isLoading: false
       }
-      if (params.currency)
-        state.currency = params.currency
-      if (params.country)
-        state.country = params.country
-      if (params.style) {
-        let style = {}
+      if (currency)
+        state.currency = currency
+      if (country)
+        state.country = country
+      if (style) {
+        let styleMerged = {}
         if (bankStyle)
-          _.extend(style, bankStyle)
+          _.extend(styleMerged, bankStyle)
         else
-          _.extend(style, defaultBankStyle)
-        _.extend(style, params.style)
-        state.bankStyle = style
+          _.extend(styleMerged, defaultBankStyle)
+        _.extend(styleMerged, style)
+        state.bankStyle = styleMerged
       }
       this.setState(state)
     }
-    else if (params.action === 'exploreBacklink') {
-      if (params.backlink !== this.state.backlink || params.backlinkAdded) {
+    else if (action === 'exploreBacklink') {
+      if (backlink !== this.state.backlink || params.backlinkAdded) {
         let r = params.resource || this.state.resource
-        this.setState({backlink: params.backlink, backlinkList: params.list || r[params.backlink], showDetails: false, showDocuments: false, resource: r})
+        this.setState({backlink: backlink, backlinkList: params.list || r[backlink], showDetails: false, showDocuments: false, resource: r})
         Actions.getItem({resource: r, application, search: application != null})
       }
     }
-    else if (params.action === 'showDetails')
+    else if (action === 'showDetails')
       this.setState({showDetails: true, backlink: null, backlinkList: null, showDocuments: false})
-    else if (params.action === 'showDocuments')
+    else if (action === 'showDocuments')
       this.setState({showDocuments: true, backlink: null, backlinkList: params.list, showDetails: false})
   }
 
@@ -170,29 +176,19 @@ class MessageView extends Component {
     if (utils.isEmpty(bl))
       return
 
-    let itemBl
+    let buttons = []
     for (let p in bl) {
       let l = bl[p]
-      if (!l.items.ref  ||  !l.items.backlink)
+      if (!l.items.ref  ||  !l.items.backlink  ||  !l.allowToAdd)
         continue
-      let pm = utils.getModel(l.items.ref)
-      if (utils.isItem(pm)) {
-        itemBl = l
-        break
-      }
+      // let pm = utils.getModel(l.items.ref)
+      buttons.push({
+          text: translate('addNew', l.title),
+          onPress: () => this.addNew(l)
+        })
     }
-    if (!itemBl)
+    if (!buttons.length)
       return
-    let buttons = []
-    if (itemBl.allowToAdd) {
-      buttons = [
-        {
-          text: translate('addNew', itemBl.title),
-          onPress: () => this.addNew(itemBl)
-        }
-      ]
-    }
-
     buttons.push({ text: translate('cancel') })
     return (
       <ActionSheet
@@ -206,22 +202,60 @@ class MessageView extends Component {
 
   addNew(itemBl) {
     this.setState({hideMode: false})
+    let me = utils.getMe()
+
+    let { resource, defaultPropertyValues, bankStyle, navigator } = this.props
+    let ref = itemBl.items.ref
+    if (ref === FORM_PREFILL) {
+      let rmodel = utils.getModel(ref)
+      navigator.push({
+        title: translate('formChooser'),
+        id: 33,
+        component: StringChooser,
+        backButtonTitle: 'Back',
+        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+        passProps: {
+          strings:   utils.getModel(resource.requestFor).forms,
+          bankStyle: this.props.bankStyle,
+          isReplace: true,
+          callback:  (val) => {
+            let model = utils.getModel(val)
+            navigator.replace({
+              title: translate(model),
+              id: 4,
+              component: NewResource,
+              titleTextColor: '#7AAAC3',
+              backButtonTitle: 'Back',
+              rightButtonTitle: 'Done',
+              passProps: {
+                model: model,
+                prop: rmodel.properties.prefill,
+                bankStyle: this.state.bankStyle || bankStyle,
+                containerResource: {[TYPE]: FORM_PREFILL, draft: resource, from: me, to: resource.to},
+                resource: {[TYPE]: val },
+                currency: this.props.currency || this.state.currency,
+              }
+            })
+          }
+        }
+      });
+
+      return
+    }
+
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     let r = {};
-    let { resource, defaultPropertyValues, bankStyle, navigator } = this.props
     r[TYPE] = itemBl.items.ref
-    r[itemBl.items.backlink] = { id: utils.getId(resource) }
+    r[itemBl.items.backlink] = utils.buildRef(resource)
 
     // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
     //   r.relatedTo = this.props.resource.relatedTo;
-    let me = utils.getMe()
     r.from = me
-    r.to = me //resource.to
+    r.to = utils.isItem(r) ? me : resource.to
     r._context = resource._context
     let model = utils.getModel(r[TYPE])
 
-    let self = this
     navigator.push({
       title: model.title,
       id: 4,
@@ -233,6 +267,8 @@ class MessageView extends Component {
         model: model,
         bankStyle: this.state.bankStyle || bankStyle,
         resource: r,
+        prop: itemBl,
+        containerResource: resource,
         doNotSend: true,
         defaultPropertyValues: defaultPropertyValues,
         currency: this.props.currency || this.state.currency,
@@ -352,7 +388,8 @@ class MessageView extends Component {
     if (this.state.isLoading)
       return <View/>
     let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
-    let resource = this.state.resource;
+    let { backlink, bankStyle, resource } = this.state
+
     let model = utils.getLensedModel(resource, lensId);
     let isVerification = model.id === VERIFICATION
     let isVerificationTree = isVerification &&  (resource.method || resource.sources)
@@ -364,23 +401,25 @@ class MessageView extends Component {
     else
       date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
     let photos = resource.photos
-    let mainPhoto
-    if (!photos) {
-      photos = utils.getResourcePhotos(model, resource)
-      let mainPhotoProp = utils.getMainPhotoProperty(model)
-      mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
+    let mainPhoto, inRow
+
+    if (!backlink) {
+      if (!photos  ||  !photos.length) {
+        photos = utils.getResourcePhotos(model, resource)
+        let mainPhotoProp = utils.getMainPhotoProperty(model)
+        mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
+      }
+      else //if (photos.length === 1)
+        mainPhoto = photos[0]
+      // if (photos  &&  photos.length)
+      //   photos.splice(0, 1)
+
+      inRow = photos ? photos.length - 1 : 0
+      if (inRow  &&  inRow > 4)
+        inRow = 5;
     }
-    else if (photos.length === 1)
-      mainPhoto = photos[0]
-    if (photos  &&  photos.length)
-      photos.splice(0, 1)
-
-    let inRow = photos ? photos.length : 0
-    if (inRow  &&  inRow > 4)
-      inRow = 5;
-
     let propertySheet
-    let bankStyle = this.state.bankStyle || style
+    bankStyle = bankStyle || style
     let styles = createStyles({bankStyle})
     if (isVerificationTree)
       propertySheet = <VerificationView navigator={navigator}
@@ -388,9 +427,17 @@ class MessageView extends Component {
                                         bankStyle={bankStyle}
                                         currency={currency}
                                         showVerification={this.showVerification}/>
+    // Don't show photostrip on backlink tab
+    let photoList
+    if (!backlink && photos  &&  photos.length > 1) {
+      // Don't show the main photo in the strip
+      photoList = photos.slice()
+      photoList.splice(0, 1)
+    }
+
     let content = <View>
                     <View style={styles.photoListStyle}>
-                      <PhotoList photos={photos} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
+                      <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
                     </View>
                     <View style={styles.rowContainer}>
                       {msg}
@@ -405,9 +452,10 @@ class MessageView extends Component {
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
     else {
+      let itemsBacklinks = this.getITEMBacklinks(model)
       actionPanel = <ShowRefList {...this.props}
-                                 backlink={this.state.backlink}
-                                 resource={this.state.resource}
+                                 backlink={backlink || (itemsBacklinks &&  itemsBacklinks[0])}
+                                 resource={resource}
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
                                  model={model}
@@ -474,6 +522,20 @@ class MessageView extends Component {
       </PageView>
     );
   }
+  getITEMBacklinks(model) {
+    let itemsProps = utils.getPropertiesWithAnnotation(model, 'items')
+    let items = []
+    for (let p in itemsProps) {
+      let prop = itemsProps[p]
+      let ref = prop.items.ref
+      if (!ref)
+        continue
+      if (utils.isItem(ref))
+        items.push(prop)
+    }
+    return items
+  }
+
   onPageLayout(height, scrollDistance) {
     let scrollTo = height + scrollDistance - NAV_BAR_CONST
     if (this.refs.bigPhoto) {
@@ -533,7 +595,7 @@ class MessageView extends Component {
     let r = {
       [TYPE]: VERIFICATION,
       document: document,
-      from: utils.getMe(),
+      from: me,
       to: resource.to,
       _context: resource._context
     }

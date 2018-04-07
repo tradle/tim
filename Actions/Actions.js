@@ -71,7 +71,7 @@ var asyncActions = [
   'getDocuments',
   'hasTestProviders',
 
-  'triggerDeepLink'
+  'openURL'
 ]
 
 var syncActions = [

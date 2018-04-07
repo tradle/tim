@@ -47,3 +47,7 @@ async function errorHandler (e, isFatal) {
     )
   }
 }
+
+if (__DEV__) {
+  require('./track-rejections')
+}

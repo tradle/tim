@@ -154,7 +154,10 @@ class ResourceView extends Component {
         else if (action === 'addMessage'  &&  resource[TYPE] === 'tradle.ConfirmPackageRequest')
           Actions.getItem({resource: me})
       }
-      return
+      if (action !== 'getItem')
+        return
+      if (resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
+        return
     }
 
     switch (action) {
@@ -355,7 +358,7 @@ class ResourceView extends Component {
     else
       otherPhotoList = <PhotoList photos={photos} resource={this.props.resource} navigator={navigator} isView={true} numberInRow={photos.length > 4 ? 5 : photos.length} />
     let propertySheet
-    if (resource[TYPE] !== PROFILE  &&  !isOrg)
+    if (!actionPanel  &&  resource[TYPE] !== PROFILE  &&  !isOrg)
       propertySheet = <ShowPropertiesView resource={resource}
                         showRefResource={this.getRefResource.bind(this)}
                         currency={currency}

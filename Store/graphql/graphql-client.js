@@ -466,7 +466,7 @@ var search = {
           continue
         let iref = prop.items.ref
         if (iref) {
-          if (prop.items.backlink  &&  !prop.inlined) {
+          if (prop.items.backlink  &&  !prop.inlined  &&  !utils.getModel(iref).abstract) {
             if (isList)
               continue
             arr.push(`${p} {

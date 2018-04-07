@@ -63,6 +63,7 @@ import chatStyles from '../styles/chatStyles'
 
 const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
+const FORM_PREFILL = 'tradle.FormPrefill'
 
 var {
   TYPE,
@@ -227,7 +228,8 @@ class GridList extends Component {
         }
       }
       this.state.dataSource = this.state.dataSource.cloneWithRows([])
-      this.state.isLoading = true;
+      if (!_.isEqual(this.props.prop, props.prop))
+        this.state.isLoading = true;
 
       let params = this.getParamsForBacklinkList(props)
       if (application)
@@ -601,7 +603,7 @@ class GridList extends Component {
       return true
 
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
-      if (this.props.prop !== nextProps.prop)
+      if (this.props.prop.name !== nextProps.prop.name)
         return true
       if (this.props.backlinkList  &&  this.props.backlinkList.length !== nextProps.backlinkList.length)
         return true
@@ -641,12 +643,27 @@ class GridList extends Component {
     let { modelName, search, callback, bankStyle, navigator, currency } = this.props
     let isContact = modelName === PROFILE;
 
-    let isOrganization = modelName === ORGANIZATION;
+    let isOrganization = modelName === ORGANIZATION
     let isApplication = modelName === APPLICATION
+    // let isBookmark = modelName === BOOKMARK
 
-    let isResourceFromServer = !isApplication  &&  (search ||  (!isContact  &&  !isOrganization  &&  !callback))
-    if (isResourceFromServer) {
-      this.selectResourceFromServer(resource)
+    // let isResourceFromServer
+    // if (me.isEmployee) {
+    //    // (!isApplication  &&  (search ||  (!isContact  &&  !isOrganization  &&  !callback)))
+    //   if (!isApplication) {
+    //     if (search  ||  isBookmark)
+    //       isResourceFromServer = true
+    //     else if (utils.isMessage(resource)) {
+    //       let meId = utils.getId(me)
+    //       // DraftApplication
+    //       if (utils.getId(resource.from) !== meId  ||  utils.getId(resource.to) !== meId)
+    //         isResourceFromServer = true
+    //     }
+    //   }
+    // }
+    // if (isResourceFromServer  ||  utils.isMessage(resource)) {
+    if (!isApplication   &&   utils.isMessage(resource)) {
+      this.selectMessage(resource)
       return;
     }
     let { prop, officialAccounts } = this.props
@@ -758,9 +775,11 @@ class GridList extends Component {
 
     navigator.push(route);
   }
-  selectResourceFromServer(resource) {
+  selectMessage(resource) {
     let { modelName, search, bankStyle, navigator, currency, application } = this.props
     let model = utils.getModel(modelName);
+    let rType = resource[TYPE]
+    let rModel = utils.getModel(rType)
     let isMessage = utils.isMessage(resource)
     if (isMessage) {
       if (modelName === BOOKMARK) {
@@ -769,8 +788,6 @@ class GridList extends Component {
         uiUtils.showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
         return
       }
-      let rType = resource[TYPE]
-      let m = utils.getModel(rType)
       let isVerificationR  = rType === VERIFICATION
       let title
       if (isVerificationR) {
@@ -778,9 +795,9 @@ class GridList extends Component {
         title = utils.makeModelTitle(utils.getModel(type))
       }
       else
-        title = utils.makeModelTitle(m)
+        title = utils.makeModelTitle(rModel)
 
-      navigator.push({
+      let route = {
         title: title,
         id: 5,
         component: MessageView,
@@ -791,7 +808,29 @@ class GridList extends Component {
           application,
           bankStyle: bankStyle || defaultBankStyle
         }
-      })
+      }
+      if (utils.isMyMessage({resource})) {
+        _.extend(route, {
+          rightButtonTitle: 'Edit',
+          onRightButtonPress: {
+            title: title,
+            id: 4,
+            component: NewResource,
+            titleTextColor: '#7AAAC3',
+            backButtonTitle: 'Back',
+            rightButtonTitle: 'Done',
+            passProps: {
+              model: rModel,
+              resource: resource,
+              search: search,
+              serverOffline: this.props.serverOffline,
+              bankStyle: bankStyle || defaultBankStyle
+            }
+          },
+
+        })
+      }
+      navigator.push(route)
       return
     }
     let title = utils.makeTitle(utils.getDisplayName(resource))
@@ -810,7 +849,7 @@ class GridList extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
-          model: model,
+          model: rModel,
           resource: resource,
           search: search,
           serverOffline: this.props.serverOffline,
@@ -823,9 +862,18 @@ class GridList extends Component {
   }
 
   _selectResource(resource) {
-    let { modelName, style, currency, prop, navigator, returnRoute, callback } = this.props
+    let { modelName, style, currency, prop, navigator, returnRoute, callback, bankStyle } = this.props
     let model = utils.getModel(modelName);
-    let title = utils.getDisplayName(resource);
+    let title
+    let prefill = utils.getPrefillProperty(model)
+    if (prefill) {
+      let pm = utils.getModel(resource[prefill.name][TYPE])
+      if (pm)
+        title = utils.makeModelTitle(pm)
+    }
+    if (!title)
+      title = utils.getDisplayName(resource);
+
     let newTitle = title;
     if (title.length > 20) {
       let t = title.split(' ');
@@ -851,7 +899,7 @@ class GridList extends Component {
     }
     // Edit resource
     let me = utils.getMe();
-    if ((me || this.state.isRegistration) &&  prop) {
+    if (callback  &&  (me || this.state.isRegistration) &&  prop) {
       callback(prop, resource); // HACK for now
       if (returnRoute)
         navigator.popToRoute(returnRoute);
@@ -860,21 +908,35 @@ class GridList extends Component {
       return;
     }
     if (me                       &&
-       !model.isInterface  &&
+       !model.isInterface        &&
        (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
+      let passProps
+      if (prefill) {
+        passProps = {
+          containerResource: resource,
+          resource: resource.prefill,
+          prop: prefill,
+          model: utils.getModel(resource[prefill.name][TYPE]),
+          bankStyle: bankStyle || defaultBankStyle
+        }
+      }
+      else {
+        passProps = {
+          model: utils.getModel(resource[TYPE]),
+          bankStyle: style || defaultBankStyle,
+          resource: me
+        }
+      }
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
         title: 'Edit',
+        backButtonTitle: 'Back',
         id: 4,
         component: NewResource,
         rightButtonTitle: 'Done',
         titleTextColor: '#7AAAC3',
-        passProps: {
-          model: utils.getModel(resource[TYPE]),
-          bankStyle: style,
-          resource: me
-        }
-      };
+        passProps
+      }
     }
     navigator.push(route);
   }
@@ -1333,36 +1395,50 @@ class GridList extends Component {
     let { isChooser, modelName, isModel, application,
           isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = this.props
     let model = utils.getModel(modelName);
-    if (dataSource.getRowCount() === 0   &&
-        utils.getMe()                    &&
-        !utils.getMe().organization      &&
-        model.subClassOf !== ENUM        &&
-        !isChooser                       &&
-        modelName !== ORGANIZATION       &&
-        (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
+    let me = utils.getMe()
+    // if (dataSource.getRowCount() === 0   &&
+    //     me  &&  !me.isEmployee           &&
+    //     model.subClassOf !== ENUM        &&
+    //     !isChooser                       &&
+    //     modelName !== ORGANIZATION       &&
+    //     (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
+    //   content = <NoResources
+    //               filter={filter}
+    //               model={model}
+    //               isLoading={isLoading}/>
+    // }
+    // else
+    // let isEmptyItemsTab = prop &&  this.state.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
+    let isEmptyItemsTab = prop &&  prop.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
+    if (isEmptyItemsTab) {
       content = <NoResources
-                  filter={filter}
+                  message={translate('pleaseClickOnAddButton', utils.makeModelTitle(model))}
+                  icon={'md-add'}
+                  iconColor={'#ffffff'}
+                  iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
                   model={model}
                   isLoading={isLoading}/>
-    }
-    content = <ListView  onScroll={this.onScroll.bind(this)}
-      dataSource={dataSource}
-      renderHeader={this.renderHeader.bind(this)}
-      enableEmptySections={true}
-      renderRow={this.renderRow.bind(this)}
-      automaticallyAdjustContentInsets={false}
-      removeClippedSubviews={false}
-      keyboardDismissMode='on-drag'
-      keyboardShouldPersistTaps="always"
-      initialListSize={isModel ? 300 : 20}
-      pageSize={20}
-      canLoadMore={true}
-      renderScrollComponent={props => <InfiniteScrollView {...props} allLoaded={allLoaded}/>}
-      onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
-      scrollRenderAhead={10}
-      showsVerticalScrollIndicator={false} />;
 
-    let me = utils.getMe()
+    }
+    else {
+      content = <ListView  onScroll={this.onScroll.bind(this)}
+        dataSource={dataSource}
+        renderHeader={this.renderHeader.bind(this)}
+        enableEmptySections={true}
+        renderRow={this.renderRow.bind(this)}
+        automaticallyAdjustContentInsets={false}
+        removeClippedSubviews={false}
+        keyboardDismissMode='on-drag'
+        keyboardShouldPersistTaps="always"
+        initialListSize={isModel ? 300 : 20}
+        pageSize={20}
+        canLoadMore={true}
+        renderScrollComponent={props => <InfiniteScrollView {...props} allLoaded={allLoaded}/>}
+        onLoadMoreAsync={this._loadMoreContentAsync.bind(this)}
+        scrollRenderAhead={10}
+        showsVerticalScrollIndicator={false} />;
+    }
+
     let actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     let footer = actionSheet && this.renderFooter()
     let searchBar

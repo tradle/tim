@@ -9,6 +9,7 @@
     "theMinValueBiggerThenMaxValue": "The min value for the range should be smaller then the max value",
     "thePropertyWithMinMaxRangeError": "The property with [min-max] range can have only two numbers",
     "invalidProperty": "Invalid {1}",
+    "invalidPropertyValue": "Invalid value",
     "optional": "optional",
     "thisFieldIsRequired": "This field is required",
 
@@ -278,5 +279,7 @@
     "youAreAboutToShare": "You are about to share\n '{1}'\n documents",
     "nothingToShare": "Nothing to share",
     "importingData": "Importing {1} documents from {2}",
-    "reviewScannedProperties": "Please review and correct the scanned properties keeping their format"
+    "reviewScannedProperties": "Please review and correct the scanned properties keeping their format",
+    "pleaseClickOnAddButton": "Please click on {icon} button below to add {1}",
+    "validationErrors": "Please correct failed validation fields"
 }

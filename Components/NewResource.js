@@ -23,6 +23,12 @@ import rStyles from '../styles/registrationStyles'
 import NewResourceMixin from './NewResourceMixin'
 import equal from 'deep-equal'
 import constants from '@tradle/constants'
+
+var {
+  TYPE,
+  ROOT_HASH
+} = constants
+
 import termsAndConditions from '../termsAndConditions.json'
 import StyleSheet from '../StyleSheet'
 import ImageInput from './ImageInput'
@@ -67,6 +73,7 @@ const HAND_SIGNATURE = 'tradle.HandSignature'
 const DEFAULT_LINK_COLOR = '#a94442'
 var Form = t.form.Form;
 
+
 class NewResource extends Component {
   static displayName = 'NewResource';
   props: {
@@ -87,13 +94,13 @@ class NewResource extends Component {
     if (props.resource)
       r = utils.clone(props.resource) //extend(true, r, props.resource)
     else
-      r[constants.TYPE] = props.model.id
-    let isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[constants.ROOT_HASH]);
-
+      r[TYPE] = props.model.id
+    let isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
+    let isUploading = !isRegistration  &&  (!r[ROOT_HASH] || Object.keys(r).length === 2)
     this.state = {
       resource: r,
-      isUploading: !isRegistration  &&  (!r[constants.ROOT_HASH] || Object.keys(r).length === 2),
-      isRegistration: isRegistration,
+      isUploading,
+      isRegistration,
       isLoadingVideo: false,
       isPrefilled: this.props.isPrefilled,
       modal: {},
@@ -133,6 +140,7 @@ class NewResource extends Component {
            this.state.keyboardSpace !== nextState.keyboardSpace    ||
            this.state.inFocus !== nextState.inFocus                ||
            this.state.disableEditing !== nextState.disableEditing  ||
+           this.state.validationErrors !== nextState.validationErrors ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
           !equal(this.state.resource, nextState.resource)
 
@@ -147,7 +155,7 @@ class NewResource extends Component {
     // Profile gets changed every time there is a new photo added through for ex. Selfie
     if (utils.getId(utils.getMe()) === utils.getId(resource))
       Actions.getItem({resource: resource})
-    if (resource[constants.ROOT_HASH]) {
+    if (resource[ROOT_HASH]) {
       if (Object.keys(resource).length === 2)
         Actions.getItem({resource: resource})
     }
@@ -157,8 +165,12 @@ class NewResource extends Component {
         if (!utils.getModel(type).inlined)
           Actions.getItem({resource: resource})
       }
-      else if (this.state.isUploading)
-        Actions.getTemporary(resource[constants.TYPE])
+      else if (this.state.isUploading) {
+        if (this.props.containerResource)
+          this.state.isUploading = false
+        else
+          Actions.getTemporary(resource[TYPE])
+      }
     }
   }
 
@@ -205,9 +217,10 @@ class NewResource extends Component {
   }
 
   onAction(params) {
-    let { resource, action, error, requestedProperties, message } = params
+    let { resource, action, error, requestedProperties, message, validationErrors } = params
+    let { navigator, prop, containerResource, callback, modelName, originatingMessage } = this.props
     if (action === 'languageChange') {
-      this.props.navigator.popToTop()
+      navigator.popToTop()
       return
     }
     if (action === 'noChanges') {
@@ -227,7 +240,7 @@ class NewResource extends Component {
     }
     if (action === 'noAccessToServer') {
       this.setState({submitted: true, disableEditing: false})
-      this.props.navigator.pop()
+      navigator.pop()
       return
     }
     if (action === 'getTemporary') {
@@ -244,9 +257,13 @@ class NewResource extends Component {
     }
 
     if (action === 'runVideo'  && this.state.isRegistration) {
-      if (this.props.callback)
+      if (callback)
         this.setState({isLoadingVideo: true})
       return;
+    }
+    if (action === 'validationError') {
+      this.setState({validationErrors, submitted: false})
+      return
     }
     if (!resource  &&  error &&  action === 'addItem') {
       this.state.submitted = false
@@ -256,7 +273,7 @@ class NewResource extends Component {
       )
       let actionParams = {
         query: this.state.filter,
-        modelName: this.props.modelName,
+        modelName: modelName,
         to: this.props.resource,
       }
       return
@@ -264,10 +281,16 @@ class NewResource extends Component {
     if (!resource  ||  (action !== 'addItem'  &&  action !== 'addMessage')) {
       return;
     }
-    if (this.state.resource[constants.TYPE] !== resource[constants.TYPE])
+    if (this.state.resource[TYPE] !== resource[TYPE]) {
+      if (!prop  ||  !containerResource)
+        return
+      // FormPrefill case
+      if (containerResource[TYPE] === resource[TYPE])
+        navigator.pop()
       return
+    }
     if (error) {
-      if (resource[constants.TYPE] == this.state.resource[constants.TYPE])
+      if (resource[TYPE] == this.state.resource[TYPE])
         this.setState({err: error, resource: resource, isRegistration: this.state.isRegistration});
       console.log('addItem error: submitted = false')
       this.state.submitted = false
@@ -281,9 +304,9 @@ class NewResource extends Component {
       //   return
       // }
     }
-    if (this.props.callback) {
-      utils.onNextTransitionEnd(this.props.navigator, () => this.state.submitted = false)
-      this.props.callback(resource);
+    if (callback) {
+      utils.onNextTransitionEnd(navigator, () => this.state.submitted = false)
+      callback(resource);
       return;
     }
 
@@ -293,26 +316,26 @@ class NewResource extends Component {
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
     if (isMessage) {
-      if (this.props.originatingMessage  &&  resource[constants.ROOT_HASH] !== this.props.originatingMessage[constants.ROOT_HASH]) {
+      if (originatingMessage  &&  resource[ROOT_HASH] !== originatingMessage[ROOT_HASH]) {
         let params = {
           value: {_documentCreated: true, _document: utils.getId(resource)},
-          resource: this.props.originatingMessage,
-          meta: utils.getModel(this.props.originatingMessage[constants.TYPE])
+          resource: originatingMessage,
+          meta: utils.getModel(originatingMessage[TYPE])
         }
         Actions.addChatItem(params)
-        this.props.navigator.pop();
+        navigator.pop();
         return;
       }
     }
     let currentRoutes = self.props.navigator.getCurrentRoutes();
     let currentRoutesLength = currentRoutes.length;
     let navigateTo = (currentRoutesLength == 2)
-             ? this.props.navigator.replace
-             : this.props.navigator.replacePrevious
+             ? navigator.replace
+             : navigator.replacePrevious
     // Editing form originated from chat
     if (this.props.chat) {
-      let routes = this.props.navigator.getCurrentRoutes()
-      this.props.navigator.popToRoute(routes[routes.length - 3])
+      let routes = navigator.getCurrentRoutes()
+      navigator.popToRoute(routes[routes.length - 3])
       return
     }
     navigateTo({
@@ -330,7 +353,7 @@ class NewResource extends Component {
         backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
         passProps: {
-          model: self.props.model,
+          model: this.props.model,
           resource: resource,
           currency: this.props.currency,
           bankStyle: this.props.bankStyle
@@ -343,7 +366,7 @@ class NewResource extends Component {
       }
     });
     if (currentRoutesLength != 2)
-      this.props.navigator.pop();
+      navigator.pop();
 //     console.log('onAction: submitted = false')
 //     this.state.submitted = false
   }
@@ -383,6 +406,7 @@ class NewResource extends Component {
 
     this.state.submitted = true
     this.state.noScroll = false
+    this.state.validationErrors = null
     let resource = this.state.resource;
 
     let value = this.refs.form  &&  this.refs.form.getValue() ||  resource
@@ -394,7 +418,7 @@ class NewResource extends Component {
 
     // value is a tcomb Struct
     let json = utils.clone(value);
-    let isNew = !resource[constants.ROOT_HASH]
+    let isNew = !resource[ROOT_HASH]
     this.checkEnums(json, resource)
     if (this.floatingProps) {
       for (let p in this.floatingProps) {
@@ -402,7 +426,7 @@ class NewResource extends Component {
           json[p] = this.floatingProps[p]
       }
     }
-    let { model, currency, originatingMessage, lensId, chat, doNotSend } = this.props
+    let { model, currency, originatingMessage, lensId, chat, doNotSend, prop, containerResource } = this.props
     let props = model.properties
     let required = utils.ungroup(model, model.required)
     if (!required) {
@@ -420,8 +444,97 @@ class NewResource extends Component {
       }
     }
     let missedRequiredOrErrorValue = {}
+    let noRequiredValidation = containerResource && prop  && prop.partial
+    if (noRequiredValidation) {
+      // let err = this.validateProperties(json)
+      // for (let p in err)
+      //   missedRequiredOrErrorValue[p] = err[p]
+      containerResource[prop.name] = json
+      if (!json[TYPE])
+        json[TYPE] = resource[TYPE]
+      let params = {resource: containerResource}
+      if (!containerResource.from  ||  !containerResource.to)
+        Actions.addItem(params)
+      else
+        Actions.addChatItem(params)
+      return
+    }
+
+    this.checkRequired(json, required, missedRequiredOrErrorValue)
+
+    let err = this.validateProperties(json)
+    for (let p in err)
+      missedRequiredOrErrorValue[p] = err[p]
+
+    // if ('scanJson' in missedRequiredOrErrorValue) {
+    //   if (utils.isAndroid() || utils.isWeb()) {
+    //     delete missedRequiredOrErrorValue.scanJson
+    //     json.scanJson = { ocrNotSupported: true }
+    //   }
+    // }
+
+    if (!utils.isEmpty(missedRequiredOrErrorValue)) {
+      console.log('onSavePressed not all required: submitted = false')
+
+      this.state.submitted = false
+      let state = {
+        missedRequiredOrErrorValue: missedRequiredOrErrorValue
+      }
+      this.setState(state)
+      return;
+    }
+    if (!value)
+      debugger
+
+    // HACK: adding new server url action should disable keyboard on submission
+    if (resource[TYPE] === SETTINGS)
+      this.setState({submitted: false, disableEditing: true})
+
+    let r = {}
+    extend(true, r, resource)
+    json._context = r._context ||  (originatingMessage  &&  originatingMessage._context)
+
+    delete r.url
+    let params = {
+      value: json,
+      resource: r,
+      meta: model,
+      lens: lensId,
+      isRegistration: this.state.isRegistration
+    };
+    if (chat)
+      params.chat = chat
+    if (!lensId  &&  this.floatingProps  &&  this.floatingProps._lens)
+      params.lens = this.floatingProps._lens
+
+    params.doNotSend = doNotSend
+    // HACK
+    if (!resource.from  ||  !resource.to)
+      Actions.addItem(params)
+    else
+      Actions.addChatItem(params)
+  }
+  // HACK: the value for property of the type that is subClassOf Enum is set on resource
+  // and it is different from what tcomb sets in the text field
+  checkEnums(json, resource) {
+    let props = this.props.model.properties
+    for (let p in json) {
+      if (!props[p]  ||  !props[p].ref)
+        continue
+      let m = utils.getModel(props[p].ref)
+      if (m.subClassOf  &&  m.subClassOf === ENUM)
+        json[p] = resource[p]
+    }
+  }
+  checkRequired(json, required, missedRequiredOrErrorValue) {
+    let props = this.props.model.properties
+    let resource = this.state.resource
     required.forEach((p) =>  {
-      let v = (typeof json[p] !== 'undefined') || json[p] ? json[p] : (resource ? resource[p] : null); //resource[p];
+      let v
+      if (typeof json[p] !== 'undefined' || json[p])
+        v = json[p]
+      else if (resource)
+        v = resource[p]
       if (v) {
         if (typeof v === 'string'  &&  !v.length) {
           v = null
@@ -489,68 +602,6 @@ class NewResource extends Component {
       }
     })
 
-    let err = this.validateProperties(json)
-    for (let p in err)
-      missedRequiredOrErrorValue[p] = err[p]
-
-    // if ('scanJson' in missedRequiredOrErrorValue) {
-    //   if (utils.isAndroid() || utils.isWeb()) {
-    //     delete missedRequiredOrErrorValue.scanJson
-    //     json.scanJson = { ocrNotSupported: true }
-    //   }
-    // }
-
-    if (!utils.isEmpty(missedRequiredOrErrorValue)) {
-      console.log('onSavePressed not all required: submitted = false')
-
-      this.state.submitted = false
-      let state = {
-        missedRequiredOrErrorValue: missedRequiredOrErrorValue
-      }
-      this.setState(state)
-      return;
-    }
-    if (!value)
-      debugger
-
-    // HACK: adding new server url action should disable keyboard on submission
-    if (resource[constants.TYPE] === SETTINGS)
-      this.setState({submitted: false, disableEditing: true})
-    let r = {}
-    extend(true, r, resource)
-    json._context = r._context ||  (originatingMessage  &&  originatingMessage._context)
-
-    delete r.url
-    let params = {
-      value: json,
-      resource: r,
-      meta: model,
-      lens: lensId,
-      isRegistration: this.state.isRegistration
-    };
-    if (chat)
-      params.chat = chat
-    if (!lensId  &&  this.floatingProps  &&  this.floatingProps._lens)
-      params.lens = this.floatingProps._lens
-
-    params.doNotSend = doNotSend
-    // HACK
-    if (!resource.from  ||  !resource.to)
-      Actions.addItem(params)
-    else
-      Actions.addChatItem(params)
-  }
-  // HACK: the value for property of the type that is subClassOf Enum is set on resource
-  // and it is different from what tcomb sets in the text field
-  checkEnums(json, resource) {
-    let props = this.props.model.properties
-    for (let p in json) {
-      if (!props[p]  ||  !props[p].ref)
-        continue
-      let m = utils.getModel(props[p].ref)
-      if (m.subClassOf  &&  m.subClassOf === ENUM)
-        json[p] = resource[p]
-    }
   }
   addFormValues() {
     let value = this.refs.form.getValue();
@@ -558,7 +609,7 @@ class NewResource extends Component {
     let resource = this.state.resource;
     if (!resource) {
       resource = {};
-      resource[constants.TYPE] = this.props.model.id;
+      resource[TYPE] = this.props.model.id;
     }
     for (let p in json)
       if (!resource[p] && json[p])
@@ -570,7 +621,7 @@ class NewResource extends Component {
       return;
     let resource = this.addFormValues();
     if (this.props.model.properties[propName].items.ref)
-      item[constants.TYPE] = this.props.model.properties[propName].items.ref
+      item[TYPE] = this.props.model.properties[propName].items.ref
     let items = resource[propName];
     if (!items) {
       items = [];
@@ -687,17 +738,21 @@ class NewResource extends Component {
     let isRegistration = this.state.isRegistration
     if (isRegistration)
       params.isRegistration = true
-    if (originatingMessage  &&  originatingMessage[constants.TYPE] === FORM_ERROR) {
+    if (originatingMessage  &&  originatingMessage[TYPE] === FORM_ERROR) {
       params.formErrors = {}
       originatingMessage.errors.forEach((r) => {
         params.formErrors[r.name] = r.error
       })
     }
+    else if (this.state.validationErrors)
+      params.validationErrors = this.state.validationErrors
 
     let options = this.getFormFields(params);
     if (!options) {
       let contentSeparator = utils.getContentSeparator(bankStyle)
-      return <PageView style={platformStyles.container} separator={contentSeparator}>
+      let height = utils.dimensions(NewResource).height - 80
+
+      return <PageView style={[platformStyles.container, {height}]} separator={contentSeparator}>
                 <ShowPropertiesView resource={data}
                                     bankStyle={bankStyle}
                                     navigator={navigator} />
@@ -825,7 +880,7 @@ class NewResource extends Component {
                     </View>
 
     let formsToSign
-    if (resource[constants.TYPE] === HAND_SIGNATURE) {
+    if (resource[TYPE] === HAND_SIGNATURE) {
       let formList = resource.signatureFor.map((r) => (
           <TouchableOpacity onPress={() => this.showResource(r)} style={styles.formListItem} key={this.getNextKey()}>
           <View>
@@ -941,10 +996,17 @@ class NewResource extends Component {
                    <Text style={styles.errorsText}>{translate(this.state.message)}</Text>
                  </View>
       }
+      else if (params.validationErrors) {
+        errors = <View style={styles.errors}>
+                   <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
+                 </View>
+      }
+
       let contentSeparator = utils.getContentSeparator(bankStyle)
       return <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator}>
                {content}
               </PageView>
+
     }
     let title
     if (!isRegistration  &&  !bankStyle.logoNeedsText)
@@ -1051,7 +1113,7 @@ class NewResource extends Component {
     let model = (this.props.model  ||  this.props.metadata)
     if (!resource) {
       resource = {};
-      resource[constants.TYPE] = model.id;
+      resource[TYPE] = model.id;
     }
 
     let currentRoutes = this.props.navigator.getCurrentRoutes();
@@ -1103,7 +1165,7 @@ class NewResource extends Component {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
       counter = <View style={styles.itemsCounterEmpty}>{
                   isPhoto
-                    ? <Icon name='ios-camera-outline'  size={25} color={linkColor} />
+                    ? <Icon name='ios-camera-outline'  size={35} color={linkColor} />
                     : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={linkColor} />
                   }
                 </View>
@@ -1277,7 +1339,7 @@ class NewResource extends Component {
 
       time: new Date().getTime()
     }
-    value[constants.TYPE] = modelName;
+    value[TYPE] = modelName;
     if (this.props.context)
       value._context = this.props.context
 
@@ -1320,7 +1382,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       paddingLeft: 10
     },
     itemsCounterEmpty: {
-      paddingHorizontal: 5
+      paddingHorizontal: 5,
+      marginTop: -7
     },
     itemsCounter: {
       marginTop: 20,

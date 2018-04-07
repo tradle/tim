@@ -68,9 +68,10 @@ class ShowPropertiesView extends Component {
   }
 
   render() {
+    let viewCols = this.getViewCols()
     return (
       <View key={this.getNextKey()}>
-        {this.getViewCols()}
+        {viewCols}
       </View>
     );
   }
@@ -81,9 +82,11 @@ class ShowPropertiesView extends Component {
       return true
     if (this.state.promptVisible !== nextState.promptVisible)
       return true
-    if (!this.props.errorProps  ||  !nextProps.errorProps)
+    if (this.props.resource !== nextProps.resource)
       return true
-    return (this.props.errorProps != nextProps.errorProps) ? true : false
+    // if (!this.props.errorProps  ||  !nextProps.errorProps)
+    //   return true
+    return this.props.errorProps != nextProps.errorProps
   }
   getViewCols(resource, model) {
     if (!resource)
@@ -99,47 +102,21 @@ class ShowPropertiesView extends Component {
       vCols = utils.getEditCols(model)
       if (vCols)
         vCols = Object.keys(vCols)
-      // let exclude = ['from', 'to']
-      // if (vCols)
-      //   vCols = utils.clone(vCols)
-      // vCols = []
-      // for (var p in resource) {
-      //   if (p.charAt(0) === '_'  ||  !props[p])
-      //     continue
-      //   if (exclude.indexOf(p) === -1  && vCols.indexOf(p) === -1)
-      //     vCols.push(p)
-      // }
-
-      // vCols = utils.ungroup(model, vCols)
-      // let v = []
-      // vCols.forEach((p) => {
-      //   if (p.charAt(0) === '_'  ||  props[p].hidden) //  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
-      //     return
-      //   v.push(p)
-      //   // let idx = p.indexOf('_group')
-      //   // if (idx !== -1  &&  idx === p.length - 6)
-      //   //   props[p].list.forEach((p) => v.push(p))
-      // })
-      // vCols = v
     }
     else {
       vCols = model.viewCols
       if (vCols)
         vCols = utils.ungroup(model, vCols)
     }
-    // else {
-    //   let v = []
-    //   vCols.forEach((p) => {
-    //     if (p.charAt(0) === '_'  ||  props[p].hidden) //  ||  props[p].readOnly) //  ||  p.indexOf('_group') === p.length - 6)
-    //       return
-    //     v.push(p)
-    //     // let idx = p.indexOf('_group')
-    //     // if (idx !== -1  &&  idx === p.length - 6)
-    //     //   props[p].list.forEach((p) => v.push(p))
-    //   })
-    //   vCols = v
-
-    // }
+    // see if it is inlined resource like 'prefill' in tradle.FormPrefill and show all of the properties
+    if (!resource[ROOT_HASH]) {
+      if (!vCols)
+        vCols = []
+      for (let p in resource) {
+        if (p.charAt(0) !== '_'  && props[p]  &&  vCols.indexOf(p) === -1)
+          vCols.push(p)
+      }
+    }
 
     if (excludedProperties) {
       var mapped = [];
@@ -151,22 +128,9 @@ class ShowPropertiesView extends Component {
       excludedProperties = mapped;
     }
 
-    if (!vCols) {
+    if (!vCols)
       vCols = utils.getViewCols(model)
-      // vCols = [];
-      // for (var p in props) {
-      //   if (p != TYPE)
-      //     vCols.push(p)
-      // }
-      // // HACK
-      // if (utils.isMessage(resource)) {
-      //   if (!excludedProperties)
-      //     excludedProperties = []
-      //   excludedProperties.push('from')
-      //   excludedProperties.push('to')
-      // }
-    }
-    var isMessage = utils.isMessage(resource)
+    var isMessage = utils.isMessage(this.props.resource)
     if (!isMessage) {
       var len = vCols.length;
       for (var i=0; i<len; i++) {
@@ -180,8 +144,10 @@ class ShowPropertiesView extends Component {
     let self = this
     let isPartial = model.id === PARTIAL
     let isMethod = model.subClassOf === METHOD
+    let me = utils.getMe()
 
-    var viewCols = vCols.map((p) => {
+    var viewCols = []
+    vCols.forEach((p) => {
       if (excludedProperties  &&  excludedProperties.indexOf(p) !== -1)
         return;
       if (utils.isHidden(p, resource))
@@ -210,12 +176,14 @@ class ShowPropertiesView extends Component {
           val = utils.templateIt(pMeta, resource);
         else if (checkProperties) {
           if (p.indexOf('_group') === p.length - 6) {
-            return (<View style={{padding: 15}} key={this.getNextKey()}>
-                      <View style={{borderBottomColor: bankStyle.linkColor, borderBottomWidth: 1, paddingBottom: 5}}>
-                        <Text style={{fontSize: 22, color: bankStyle.linkColor}}>{translate(pMeta)}</Text>
-                      </View>
-                    </View>
-             );
+            viewCols.push(
+              <View style={{padding: 15}} key={this.getNextKey()}>
+                <View style={{borderBottomColor: bankStyle.linkColor, borderBottomWidth: 1, paddingBottom: 5}}>
+                  <Text style={{fontSize: 22, color: bankStyle.linkColor}}>{translate(pMeta)}</Text>
+                </View>
+              </View>
+            )
+            return
           }
           else
             val = NOT_SPECIFIED
@@ -228,10 +196,12 @@ class ShowPropertiesView extends Component {
       else if (pMeta.ref) {
         if (pMeta.ref === PHOTO) {
           if (vCols.length === 1  &&  resource.time)
-            return <View  key={this.getNextKey()} style={{padding: 10}}>
-                     <Text style={styles.title}>{translate('Date')}</Text>
-                     <Text style={[styles.title, styles.description]}>{dateformat(new Date(resource.time), 'mmm d, yyyy')}</Text>
-                   </View>
+            viewCols.push(
+              <View  key={this.getNextKey()} style={{padding: 10}}>
+                <Text style={styles.title}>{translate('Date')}</Text>
+                <Text style={[styles.title, styles.description]}>{dateformat(new Date(resource.time), 'mmm d, yyyy')}</Text>
+              </View>
+            )
           return
         }
         if (pMeta.ref == MONEY) {
@@ -242,13 +212,15 @@ class ShowPropertiesView extends Component {
         else if (pMeta.ref === IDENTITY) {
           let title = val.title
           if (!title)
-            title = val.id.split('_')[0] === utils.getMe()[ROOT_HASH] ? 'Me' : 'Not me'
+            title = val.id.split('_')[0] === me[ROOT_HASH] ? 'Me' : 'Not me'
           val = <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
         }
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
           if (!val[TYPE])
             val[TYPE] = pMeta.ref
-          return this.getViewCols(val, utils.getModel(val[TYPE]))
+          let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]))
+          pViewCols.forEach((v) => viewCols.push(v))
+          return
         }
         else if (pMeta.mainPhoto)
           return
@@ -317,14 +289,16 @@ class ShowPropertiesView extends Component {
             return
           if (utils.getModel(pMeta.items.ref).subClassOf === ENUM) {
             let values = val.map((v) => utils.getDisplayName(v)).join(', ')
-            return <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
-                     <View style={{paddingLeft: 10}}>
-                       <Text style={[styles.title]}>{pMeta.title}</Text>
-                       <Text style={[styles.description]}>{values}</Text>
-                     </View>
-                     {checkForCorrection}
-                  </View>
-
+            viewCols.push(
+              <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
+                 <View style={{paddingLeft: 10}}>
+                   <Text style={[styles.title]}>{pMeta.title}</Text>
+                   <Text style={[styles.description]}>{values}</Text>
+                 </View>
+                 {checkForCorrection}
+              </View>
+            )
+            return
           }
         }
         val = this.renderSimpleProp(val, pMeta, modelName, ShowPropertiesView)
@@ -339,7 +313,6 @@ class ShowPropertiesView extends Component {
         console.log(this.state.promptVisible)
       if (checkProperties)
         isDirectionRow = true
-               // <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
 
       let style = [styles.textContainer, {padding: 10}]
       if (isDirectionRow) {
@@ -350,16 +323,17 @@ class ShowPropertiesView extends Component {
       else
         style.push({flexDirection: 'column'})
 
-      return (<View key={this.getNextKey()}>
-               <View style={{width: utils.getContentWidth(ShowPropertiesView), flexDirection: isDirectionRow ? 'row' : 'column'}}>
-                 <View style={[style, {flexDirection: 'column'}]}>
-                   {title}
-                   {val}
-                 </View>
-                 {checkForCorrection}
-               </View>
+      viewCols.push(
+        <View key={this.getNextKey()}>
+           <View style={{width: utils.getContentWidth(ShowPropertiesView), flexDirection: isDirectionRow ? 'row' : 'column'}}>
+             <View style={[style, {flexDirection: 'column'}]}>
+               {title}
+               {val}
              </View>
-             );
+             {checkForCorrection}
+           </View>
+         </View>
+      )
     })
     let { txId, blockchain, networkName } = resource
     if (txId) { // || utils.isSealableModel(model)) {
