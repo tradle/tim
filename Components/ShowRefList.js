@@ -174,7 +174,7 @@ class ShowRefList extends Component {
         icon = 'ios-checkmark';
       let cnt = resource['_' + p + 'Count'] // &&  resource[p].length
       let count
-      if (cnt) {
+      if (cnt ) {
         hasBacklinks = true
         if (!currentBacklink  &&  !showDetails &&  !showDocuments)
           currentBacklink = props[p]
@@ -182,7 +182,8 @@ class ShowRefList extends Component {
                   <Text style={styles.countText}>{cnt}</Text>
                 </View>
       }
-
+      if (!hasBacklinks  &&  props[p].allowToAdd)
+        hasBacklinks = true
       let showCurrent = !showDetails  &&  currentBacklink  &&  currentBacklink.name === p ? currentMarker : null
 
       refList.push(
