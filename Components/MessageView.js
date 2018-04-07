@@ -246,7 +246,7 @@ class MessageView extends Component {
     // if to is passed then resources only of this container need to be returned
     let r = {};
     r[TYPE] = itemBl.items.ref
-    r[itemBl.items.backlink] = { id: utils.getId(resource) }
+    r[itemBl.items.backlink] = utils.buildRef(resource)
 
     // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
     //   r.relatedTo = this.props.resource.relatedTo;
@@ -266,6 +266,8 @@ class MessageView extends Component {
         model: model,
         bankStyle: this.state.bankStyle || bankStyle,
         resource: r,
+        prop: itemBl,
+        containerResource: resource,
         doNotSend: true,
         defaultPropertyValues: defaultPropertyValues,
         currency: this.props.currency || this.state.currency,
