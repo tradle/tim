@@ -39,8 +39,6 @@ const {
 } = constants.TYPES
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 
-import ActionSheet from './ActionSheet'
-
 import {
   // StyleSheet,
   ScrollView,
@@ -164,39 +162,6 @@ class MessageView extends Component {
       this.setState({showDetails: true, backlink: null, backlinkList: null, showDocuments: false})
     else if (action === 'showDocuments')
       this.setState({showDocuments: true, backlink: null, backlinkList: params.list, showDetails: false})
-  }
-
-  renderActionSheet() {
-    if (this.props.application)
-      return
-    let resource = this.state.resource;
-    let m = utils.getModel(resource[TYPE])
-    let bl = utils.getPropertiesWithAnnotation(m, 'items')
-    if (utils.isEmpty(bl))
-      return
-
-    let buttons = []
-    for (let p in bl) {
-      let l = bl[p]
-      if (!l.items.ref  ||  !l.items.backlink  ||  !l.allowToAdd)
-        continue
-      // let pm = utils.getModel(l.items.ref)
-      buttons.push({
-          text: translate('addNew', l.title),
-          onPress: () => this.addNew(l)
-        })
-    }
-    if (!buttons.length)
-      return
-    buttons.push({ text: translate('cancel') })
-    return (
-      <ActionSheet
-        ref={(o) => {
-          this.ActionSheet = o
-        }}
-        options={buttons}
-      />
-    )
   }
 
   addNew(itemBl) {
@@ -447,13 +412,16 @@ class MessageView extends Component {
                   </View>
 
     let checkProps = !isVerification && isVerifier /* && !utils.isReadOnlyChat(resource)*/ && this.onCheck
-    let actionPanel
+    let actionPanel, allowToAddBacklink
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
     else {
-      let itemsBacklinks = this.getITEMBacklinks(model)
+      let allowToAddBacklinks = utils.getPropertiesWithAnnotation(model, 'allowToAdd')
+      allowToAddBacklinks = allowToAddBacklinks  &&  Object.values(allowToAddBacklinks)
+      allowToAddBacklink = allowToAddBacklinks.length  &&  allowToAddBacklinks[0]
+
       actionPanel = <ShowRefList {...this.props}
-                                 backlink={backlink || (itemsBacklinks &&  itemsBacklinks[0])}
+                                 backlink={backlink || allowToAddBacklink}
                                  resource={resource}
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
@@ -494,9 +462,8 @@ class MessageView extends Component {
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
-    let actionSheet = this.renderActionSheet()
     let title = isVerification  ? this.makeViewTitle(model, styles) : null
-    let footer = actionSheet && this.renderFooter(styles)
+    let footer = this.renderFooter(backlink ||  allowToAddBacklink, styles)
     let contentSeparator = utils.getContentSeparator(bankStyle)
     let bigPhoto
     if (mainPhoto)
@@ -515,24 +482,9 @@ class MessageView extends Component {
       </ScrollView>
         {title}
         {footer}
-        {actionSheet}
       </PageView>
     );
   }
-  getITEMBacklinks(model) {
-    let itemsProps = utils.getPropertiesWithAnnotation(model, 'items')
-    let items = []
-    for (let p in itemsProps) {
-      let prop = itemsProps[p]
-      let ref = prop.items.ref
-      if (!ref)
-        continue
-      if (utils.isItem(ref))
-        items.push(prop)
-    }
-    return items
-  }
-
   onPageLayout(height, scrollDistance) {
     let scrollTo = height + scrollDistance - NAV_BAR_CONST
     if (this.refs.bigPhoto) {
@@ -553,12 +505,14 @@ class MessageView extends Component {
     return rTitle
   }
 
-  renderFooter(styles) {
+  renderFooter(backlink, styles) {
+    if (!backlink  ||  !backlink.allowToAdd)
+      return
     let icon = 'md-add' //Platform.OS === 'ios' ?  'md-more' : 'md-menu'
-    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     return (
         <View style={styles.footer}>
-          <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+          <TouchableOpacity onPress={() => this.addNew(backlink)}>
             <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
               <Icon name={icon}  size={33}  color={color}/>
             </View>
