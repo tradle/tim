@@ -783,12 +783,13 @@ class GridList extends Component {
         uiUtils.showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
         return
       }
-      let isVerificationR  = rType === VERIFICATION
       let title
-      if (isVerificationR) {
+      if (rType === VERIFICATION) {
         let type = utils.getType(resource.document)
         title = utils.makeModelTitle(utils.getModel(type))
       }
+      else if (rType === FORM_PREFILL)
+        title = utils.makeModelTitle(resource.prefill[TYPE])
       else
         title = utils.makeModelTitle(rModel)
 
