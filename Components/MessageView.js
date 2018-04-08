@@ -40,8 +40,6 @@ const {
 } = constants.TYPES
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 
-import ActionSheet from './ActionSheet'
-
 import {
   // StyleSheet,
   ScrollView,
@@ -165,40 +163,6 @@ class MessageView extends Component {
       this.setState({showDetails: true, backlink: null, backlinkList: null, showDocuments: false})
     else if (action === 'showDocuments')
       this.setState({showDocuments: true, backlink: null, backlinkList: params.list, showDetails: false})
-  }
-
-  renderActionSheet() {
-    return
-    if (this.props.application)
-      return
-    let resource = this.state.resource;
-    let m = utils.getModel(resource[TYPE])
-    let bl = utils.getPropertiesWithAnnotation(m, 'items')
-    if (utils.isEmpty(bl))
-      return
-
-    let buttons = []
-    for (let p in bl) {
-      let l = bl[p]
-      if (!l.items.ref  ||  !l.items.backlink  ||  !l.allowToAdd)
-        continue
-      // let pm = utils.getModel(l.items.ref)
-      buttons.push({
-          text: translate('addNew', l.title),
-          onPress: () => this.addNew(l)
-        })
-    }
-    if (!buttons.length)
-      return
-    buttons.push({ text: translate('cancel') })
-    return (
-      <ActionSheet
-        ref={(o) => {
-          this.ActionSheet = o
-        }}
-        options={buttons}
-      />
-    )
   }
 
   addNew(itemBl) {
@@ -499,10 +463,8 @@ class MessageView extends Component {
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
-    let actionSheet = this.renderActionSheet()
     let title = isVerification  ? this.makeViewTitle(model, styles) : null
     let footer = this.renderFooter(backlink ||  allowToAddBacklink, styles)
-    // let footer = actionSheet && this.renderFooter(styles)
     let contentSeparator = utils.getContentSeparator(bankStyle)
     let bigPhoto
     if (mainPhoto)
@@ -523,7 +485,6 @@ class MessageView extends Component {
       </ScrollView>
         {title}
         {footer}
-        {actionSheet}
       </PageView>
     );
   }
