@@ -417,8 +417,12 @@ class MessageView extends Component {
       actionPanel = content
     else {
       let allowToAddBacklinks = utils.getPropertiesWithAnnotation(model, 'allowToAdd')
-      allowToAddBacklinks = allowToAddBacklinks  &&  Object.values(allowToAddBacklinks)
-      allowToAddBacklink = allowToAddBacklinks.length  &&  allowToAddBacklinks[0]
+      for (let p in allowToAddBacklinks) {
+        if (allowToAddBacklinks[p].items) {
+          allowToAddBacklinks = allowToAddBacklinks[p]
+          break
+        }
+      }
 
       actionPanel = <ShowRefList {...this.props}
                                  backlink={backlink || allowToAddBacklink}
