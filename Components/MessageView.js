@@ -168,6 +168,7 @@ class MessageView extends Component {
   }
 
   renderActionSheet() {
+    return
     if (this.props.application)
       return
     let resource = this.state.resource;
@@ -448,13 +449,16 @@ class MessageView extends Component {
                   </View>
 
     let checkProps = !isVerification && isVerifier /* && !utils.isReadOnlyChat(resource)*/ && this.onCheck
-    let actionPanel
+    let actionPanel, allowToAddBacklink
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
     else {
-      let itemsBacklinks = this.getITEMBacklinks(model)
+      let allowToAddBacklinks = utils.getPropertiesWithAnnotation(model, 'allowToAdd')
+      allowToAddBacklinks = allowToAddBacklinks  &&  Object.values(allowToAddBacklinks)
+      allowToAddBacklink = allowToAddBacklinks.length  &&  allowToAddBacklinks[0]
+
       actionPanel = <ShowRefList {...this.props}
-                                 backlink={backlink || (itemsBacklinks &&  itemsBacklinks[0])}
+                                 backlink={backlink || allowToAddBacklink}
                                  resource={resource}
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
@@ -497,8 +501,8 @@ class MessageView extends Component {
     }
     let actionSheet = this.renderActionSheet()
     let title = isVerification  ? this.makeViewTitle(model, styles) : null
-    let footer = actionSheet && this.renderFooter(styles)
-    let width = utils.getContentWidth()
+    let footer = this.renderFooter(backlink ||  allowToAddBacklink, styles)
+    // let footer = actionSheet && this.renderFooter(styles)
     let contentSeparator = utils.getContentSeparator(bankStyle)
     let bigPhoto
     if (mainPhoto)
@@ -506,6 +510,7 @@ class MessageView extends Component {
                   <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
                  </View>
     let height = utils.dimensions(MessageView).height
+    let width = utils.getContentWidth()
     return (
       <PageView style={[platformStyles.container, {height, alignItems: 'center'}]} separator={contentSeparator}>
       <ScrollView
@@ -522,20 +527,6 @@ class MessageView extends Component {
       </PageView>
     );
   }
-  getITEMBacklinks(model) {
-    let itemsProps = utils.getPropertiesWithAnnotation(model, 'items')
-    let items = []
-    for (let p in itemsProps) {
-      let prop = itemsProps[p]
-      let ref = prop.items.ref
-      if (!ref)
-        continue
-      if (utils.isItem(ref))
-        items.push(prop)
-    }
-    return items
-  }
-
   onPageLayout(height, scrollDistance) {
     let scrollTo = height + scrollDistance - NAV_BAR_CONST
     if (this.refs.bigPhoto) {
@@ -556,12 +547,14 @@ class MessageView extends Component {
     return rTitle
   }
 
-  renderFooter(styles) {
+  renderFooter(backlink, styles) {
+    if (!backlink  ||  !backlink.allowToAdd)
+      return
     let icon = 'md-add' //Platform.OS === 'ios' ?  'md-more' : 'md-menu'
-    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     return (
         <View style={styles.footer}>
-          <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+          <TouchableOpacity onPress={() => this.addNew(backlink)}>
             <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
               <Icon name={icon}  size={33}  color={color}/>
             </View>
