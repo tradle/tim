@@ -195,7 +195,8 @@ class FormMessageRow extends Component {
       arrowIcon = <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
 
     let prefillProp = utils.getPrefillProperty(model)
-    let headerTitle = translate(model) + (prefillProp  &&  ' - ' + translate(utils.getModel(resource[prefillProp.name][TYPE])) || ' ')
+    let mTitle = prefillProp ? 'Draft' : translate(model)
+    let headerTitle = mTitle + (prefillProp  &&  ' - ' + translate(utils.getModel(resource[prefillProp.name][TYPE])) || ' ')
     return (
       <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
