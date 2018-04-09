@@ -232,7 +232,7 @@ class MessageView extends Component {
         bankStyle: this.state.bankStyle || bankStyle,
         resource: r,
         prop: itemBl,
-        containerResource: resource,
+        // containerResource: resource,
         doNotSend: true,
         defaultPropertyValues: defaultPropertyValues,
         currency: this.props.currency || this.state.currency,
