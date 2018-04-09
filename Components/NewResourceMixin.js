@@ -1379,9 +1379,20 @@ var NewResourceMixin = {
     }
     let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
     color = {color: this.state.isRegistration ? '#eeeeee' : val ? '#555555' :  '#AAAAAA'}
-    let propView = photoR
-                 ? <Image source={{uri: photoR.url}} style={styles.thumb} />
-                 : <Text style={[styles.input, fontSize, color]}>{label}</Text>
+    let propView
+    if (photoR)
+      propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
+    else {
+      let img = this.state[prop.name + '_photo']
+      if (img) {
+        propView = <View style={{flexDirection: 'row'}}>
+                      <Image source={{uri: img.url}} style={styles.thumb} />
+                      <Text style={[styles.input, fontSize, color]}>{' ' + label}</Text>
+                   </View>
+      }
+      else
+        propView = <Text style={[styles.input, fontSize, color]}>{label}</Text>
+    }
 
     let maxChars = (utils.dimensions(params.component).width - 20)/10
     if (maxChars < label.length)
