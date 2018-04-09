@@ -3755,11 +3755,17 @@ var Store = Reflux.createStore({
   async onGetItem(params) {
     var {resource, action, noTrigger, search, backlink, forwardlink} = params
     // await this._loadedResourcesDefer.promise
-    let rId = utils.getId(resource)
+
+    const resModel = this.getModel(utils.getType(resource))
+    if (!resModel) {
+      throw new Error(`missing model for ${res[TYPE]}`)
+    }
+
     if (search) {
       await this.onGetItemFromServer(params)
       return
     }
+    let rId = utils.getId(resource)
     let r = this._getItem(rId)
     var res = {};
     if (!r) {
@@ -3782,10 +3788,6 @@ var Store = Reflux.createStore({
 
     extend(res, r)
 
-    const resModel = this.getModel(res[TYPE])
-    if (!resModel) {
-      throw new Error(`missing model for ${res[TYPE]}`)
-    }
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
     var props = backlink ? [backlink] : resModel.properties;
@@ -3797,6 +3799,7 @@ var Store = Reflux.createStore({
       if (!items  ||  !items.backlink)
         continue;
       let blList = await this.getBacklinkResources(props[p], res)
+      res[p] = blList
     }
 
     if (noTrigger)
@@ -4033,24 +4036,25 @@ var Store = Reflux.createStore({
     return newResult;
   },
   getRefs(resource, foundRefs, props) {
-    var refProps = [];
+    let refProps = [];
     for (let p in resource) {
-      if (props[p] &&  props[p].type === 'object') {
-        var ref = props[p].ref;
-        if (ref  &&  resource[p]) {
-          // reference property could be set as a full resource (for char to have all info at hand when displaying the message)
-          // or resource id
-          let rValue = utils.getId(resource[p])
+      if (!props[p])
+        continue
+      if (props[p].type !== 'object')
+        continue
+      let ref = props[p].ref;
+      if (!ref  ||  !resource[p])
+        continue
+      // reference property could be set as a full resource (for char to have all info at hand when displaying the message)
+      // or resource id
+      let rValue = utils.getId(resource[p])
 
-          refProps[rValue] = p;
-          if (list[rValue]) {
-            var elm = {value: this._getItem(rValue), state: 'fulfilled'};
-            foundRefs.push(elm);
-          }
-        }
-      }
+      refProps[rValue] = p;
+      let value = this._getItem(rValue)
+      if (value)
+        foundRefs.push({value, state: 'fulfilled'})
     }
-    return refProps;
+    return refProps
   },
   onAddModelFromUrl(url) {
     let model, props;
@@ -4399,12 +4403,13 @@ var Store = Reflux.createStore({
               kres = await this._getItemFromServer(utils.getId(elm))
             debugger
           }
-          results.push(utils.clone(kres))
-          if (results.length) {
-            let r = results[0]
+          let r = _.cloneDeep(kres)
+          // results.push(r)
+          // if (results.length) {
+          //   // let r = results[0]
             extend(r, elm)
             foundRefs.push({value: r, state: 'fulfilled'})
-          }
+          // }
         }
       }
     }
@@ -6380,7 +6385,7 @@ var Store = Reflux.createStore({
           break
         continue;
       }
-      var fr = this.checkCriteria(r, query, searchProp)
+      var fr = this.checkCriteria({r, query, prop: searchProp})
       if (fr) {
         if (start  &&  foundRecs < start) {
           foundRecs++
@@ -6501,13 +6506,17 @@ var Store = Reflux.createStore({
     let result
     let enumList = enums[params.modelName]
     if (params.query)
-      return enumList.filter((r) => this.checkCriteria(r, params.query))
+      return enumList.filter((r) => this.checkCriteria({r, query: params.query}))
     else
       return enumList
   },
-  checkCriteria(r, query, prop) {
+  checkCriteria({r, query, prop, isChooser}) {
     if (!query)
       return r
+    if (isChooser) {
+      let dn = utils.getDisplayName(r)
+      return (dn.toLowerCase().indexOf(query.toLowerCase()) !== -1) ? r : null
+    }
     let rtype = r[TYPE]
     let rModel = this.getModel(rtype)
     let props = rModel.properties
@@ -6525,6 +6534,7 @@ var Store = Reflux.createStore({
         continue
       }
       else if (props[rr].type === 'date') {
+        continue
         if (!isNaN(r[rr])) {
           let d = new Date(r[rr]).toString()
           combinedValue += combinedValue ? ' ' + d : d
@@ -6830,7 +6840,7 @@ var Store = Reflux.createStore({
       await Promise.all(checked)
   },
   async handleOne(params) {
-    let { link, links, all, refsObj, refs, resource, to, prop, list, query } = params
+    let { link, links, all, refsObj, refs, resource, to, prop, list, query, isChooser } = params
     let rId = all[link]
     let r = this._getItem(rId)
     if (!r)
@@ -7017,7 +7027,7 @@ var Store = Reflux.createStore({
     return true
   },
   async checkAndFilter(params) {
-    let {r, foundResources, prop, query, filterOutForms} = params
+    let { r, foundResources, prop, query, filterOutForms, isChooser } = params
     if (!query) {
       if (!filterOutForms  ||  !(await this.doFilterOut({r, prop}))) {
         foundResources.push(this.fillMessage(r))
@@ -7027,7 +7037,7 @@ var Store = Reflux.createStore({
     let isVerificationR = r[TYPE] === VERIFICATION
     let isBookmark = r[TYPE] === BOOKMARK
     let checkVal = isVerificationR ? this._getItem(r.document) : r
-    let fr = this.checkCriteria(isBookmark ? r.bookmark : r, query)
+    let fr = this.checkCriteria({r: isBookmark ? r.bookmark : r, query, isChooser})
 
     if (fr) {
       // foundResources[key] = this.fillMessage(r);
@@ -7074,7 +7084,7 @@ var Store = Reflux.createStore({
     if (params.modelName === MESSAGE)
       return await this.searchAllMessages(params)
 
-    let {resource, query, modelName, prop, context, _readOnly, to, listView, isForgetting, lastId, limit} = params
+    let {resource, query, modelName, prop, context, _readOnly, to, listView, isForgetting, lastId, limit, isChooser} = params
 
     let model = this.getModel(modelName)
 
@@ -7296,7 +7306,7 @@ var Store = Reflux.createStore({
     let refsObj = {}
 
     return Promise.all(allLinks.map(link => {
-      return this.handleOne({ link, links, all, isForgetting, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to })
+      return this.handleOne({ link, links, all, isForgetting, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to, isChooser })
       // return handleOne(r)
     }))
     .then((l) => {
