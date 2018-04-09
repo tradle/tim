@@ -818,14 +818,17 @@ var NavigationBarRouteMapper = {
       if (route.passProps.modelName)
         model = utils.getModel(route.passProps.modelName)
       else if (route.passProps.resource)
-        model = utils.getModel(route.passProps.resource[TYPE])
+        model = utils.getModel(utils.getType(route.passProps.resource))
 
       isPrefill = model  &&  utils.getPrefillProperty(model)
     }
-    let tArr = t.length > 1 ? [] : <View />
+    let tArr
 
-    for (let i=1; i<t.length; i++)
+    for (let i=1; i<t.length; i++) {
+      if (!tArr)
+        tArr = []
       tArr.push(<Text style={styles.arr} key={'index.common.js_' + i}>{this.makeTitle(t[i])}</Text>)
+    }
     let text
     if (logoNeedsText  ||  !uri) {
       let tt = this.makeTitle(t[0])
@@ -840,9 +843,11 @@ var NavigationBarRouteMapper = {
       <View key={'index.common.js'}>
         <View style={{flexDirection: 'row'}}>
           {photo}
-          {text}
+          <View style={{flexDirection: 'column'}}>
+            {text}
+            {tArr}
+          </View>
         </View>
-        {tArr}
         {org}
       </View>
     );
@@ -934,7 +939,7 @@ var styles = StyleSheet.create({
     fontSize: 18
   },
   arr: {
-    marginTop: -3,
+    // marginTop: -3,
     color: '#2892C6',
     fontSize: 12,
     alignSelf: 'center'
