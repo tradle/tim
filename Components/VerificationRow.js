@@ -207,8 +207,17 @@ class VerificationRow extends Component {
         else
           title = 'Submitted by ' + resource.from.title
       }
-      else
-        title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
+      else {
+        let needModelType = true
+        if (dn) {
+          if (parentResource  &&  prop  &&  prop.items  &&  prop.items.ref) {
+            let pModel = utils.getModel(prop.items.ref)
+            if (!pModel.abstract)
+              needModelType = false
+          }
+        }
+        title = needModelType  &&  (verificationRequest.title || utils.makeModelTitle(verificationRequest))
+      }
     }
 
     let isCheck = model.subClassOf === CHECK
@@ -248,7 +257,7 @@ class VerificationRow extends Component {
       titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
     else if (!titleComponent)
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
-    else
+    else if (title)
       description = <Text style={styles.description}>{title}</Text>
 
     let supportingDocuments
