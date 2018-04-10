@@ -181,4 +181,35 @@ RCTLogFunction CrashlyticsReactLogFunction = ^(
 
 };
 
+// https://stackoverflow.com/questions/19792850/display-a-view-or-splash-screen-before-applicationdidenterbackground-to-avoid-a?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
+- (void)applicationWillResignActive:(UIApplication *)application
+{
+
+  UIImageView *imageView = [[UIImageView alloc] initWithFrame:self.window.bounds];
+
+  imageView.tag = 101;    // Give some decent tagvalue or keep a reference of imageView in self
+  //    imageView.backgroundColor = [UIColor redColor];
+  [imageView setImage:[UIImage imageNamed:@"splash1536x2048.png"]];
+  imageView.contentMode = UIViewContentModeScaleAspectFill;
+//  imageView.autoresizingMask =
+//  ( UIViewAutoresizingFlexibleBottomMargin
+//   | UIViewAutoresizingFlexibleHeight
+//   | UIViewAutoresizingFlexibleLeftMargin
+//   | UIViewAutoresizingFlexibleRightMargin
+//   | UIViewAutoresizingFlexibleTopMargin
+//   | UIViewAutoresizingFlexibleWidth );
+  
+  [UIApplication.sharedApplication.keyWindow.subviews.lastObject addSubview:imageView];
+  [application ignoreSnapshotOnNextApplicationLaunch];  // this doesn't appear to work, whether called here or `didFinishLaunchingWithOptions`, but seems prudent to include it
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application
+{
+  UIImageView *imageView = (UIImageView *)[UIApplication.sharedApplication.keyWindow.subviews.lastObject viewWithTag:101];   // search by the same tag value
+  [imageView removeFromSuperview];
+}
+
+- (void) ignoreSnapshotOnNextApplicationLaunch {}
+
 @end
