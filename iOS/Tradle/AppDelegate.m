@@ -26,6 +26,9 @@
 
 @implementation AppDelegate
 
+NSInteger const RNTradleSecurityOverlayTag = 101;
+NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   NSURL *jsCodeLocation;
@@ -185,28 +188,25 @@ RCTLogFunction CrashlyticsReactLogFunction = ^(
 
 - (void)applicationWillResignActive:(UIApplication *)application
 {
+  // adding overlay image here causes following issue:
+  // when applicationWillResignActive is called as a result of push notification opt-in dialog,
+  // applicationWillEnterForeground is never called after that
+}
 
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
   UIImageView *imageView = [[UIImageView alloc] initWithFrame:self.window.bounds];
-
-  imageView.tag = 101;    // Give some decent tagvalue or keep a reference of imageView in self
-  //    imageView.backgroundColor = [UIColor redColor];
-  [imageView setImage:[UIImage imageNamed:@"splash1536x2048.png"]];
+  imageView.tag = RNTradleSecurityOverlayTag;    // Give some decent tagvalue or keep a reference of imageView in self
+  [imageView setImage:[UIImage imageNamed:RNTradleSecurityOverlayImage]];
   imageView.contentMode = UIViewContentModeScaleAspectFill;
-//  imageView.autoresizingMask =
-//  ( UIViewAutoresizingFlexibleBottomMargin
-//   | UIViewAutoresizingFlexibleHeight
-//   | UIViewAutoresizingFlexibleLeftMargin
-//   | UIViewAutoresizingFlexibleRightMargin
-//   | UIViewAutoresizingFlexibleTopMargin
-//   | UIViewAutoresizingFlexibleWidth );
-  
   [UIApplication.sharedApplication.keyWindow.subviews.lastObject addSubview:imageView];
-  [application ignoreSnapshotOnNextApplicationLaunch];  // this doesn't appear to work, whether called here or `didFinishLaunchingWithOptions`, but seems prudent to include it
+  // this doesn't appear to work, whether called here or `didFinishLaunchingWithOptions`, but seems prudent to include it
+  [application ignoreSnapshotOnNextApplicationLaunch];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-  UIImageView *imageView = (UIImageView *)[UIApplication.sharedApplication.keyWindow.subviews.lastObject viewWithTag:101];   // search by the same tag value
+  UIImageView *imageView = (UIImageView *)[UIApplication.sharedApplication.keyWindow.subviews.lastObject viewWithTag:RNTradleSecurityOverlayTag];   // search by the same tag value
   [imageView removeFromSuperview];
 }
 
