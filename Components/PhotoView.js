@@ -1,13 +1,18 @@
 console.log('requiring PhotoView.js')
 'use strict';
 
-import utils from '../utils/utils'
-import Icon from 'react-native-vector-icons/Ionicons';
-import constants from '@tradle/constants'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
+import * as Animatable from 'react-native-animatable'
+import { makeResponsive } from 'react-native-orient'
+import _ from 'lodash'
 import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons';
+
+import utils from '../utils/utils'
+import constants from '@tradle/constants'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
 
-import equal from 'deep-equal'
 import {
   StyleSheet,
   Image,
@@ -19,11 +24,6 @@ import {
   Easing,
   TouchableHighlight,
 } from 'react-native'
-import PropTypes from 'prop-types'
-
-import React, { Component } from 'react'
-import * as Animatable from 'react-native-animatable'
-
 
 class PhotoView extends Component {
   constructor(props) {
@@ -42,11 +42,13 @@ class PhotoView extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    if (utils.resized(this.props, nextProps))
+      return true
     if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH] ||
         this.state.isModalOpen !== nextState.isModalOpen)
       return true
 
-    return !equal(this.props.resource.photos, nextProps.resource.photos)
+    return !_.isEqual(this.props.resource.photos, nextProps.resource.photos)
   }
   render() {
     var resource = this.props.resource;
@@ -187,6 +189,7 @@ class PhotoView extends Component {
 
 }
 reactMixin(PhotoView.prototype, PhotoCarouselMixin);
+PhotoView = makeResponsive(PhotoView)
 
 var styles = StyleSheet.create({
   photoBG: {
