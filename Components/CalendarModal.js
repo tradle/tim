@@ -77,7 +77,7 @@ module.exports = function createCalendarModal (props) {
             </Text>
           </View>
           <InfiniteCalendar
-            afterSelect={onSelect}
+            onSelect={onSelect}
             width={width}
             height={height}
             {...calendarProps}
@@ -95,9 +95,9 @@ module.exports = function createCalendarModal (props) {
     </Modal>
   )
 
-  function onSelect (moment) {
+  function onSelect (date) {
     // throw out timezone data
-    selectedDate = Date.UTC(moment.year(), moment.month(), moment.date())
+    selectedDate = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
   }
 }
 
