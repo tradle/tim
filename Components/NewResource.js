@@ -313,8 +313,8 @@ class NewResource extends Component {
     let currentRoutes = self.props.navigator.getCurrentRoutes();
     let currentRoutesLength = currentRoutes.length;
     let navigateTo = (currentRoutesLength == 2)
-             ? navigator.replace
-             : navigator.replacePrevious
+                   ? navigator.replace
+                   : navigator.replacePrevious
     // Editing form originated from chat
     if (this.props.chat) {
       let routes = navigator.getCurrentRoutes()
@@ -322,9 +322,9 @@ class NewResource extends Component {
       return
     }
     navigateTo({
-      id: 3,
+      id: isMessage ? 5 : 3,
       title: title,
-      component: ResourceView,
+      component: isMessage ? MessageView : ResourceView,
       titleTextColor: '#7AAAC3',
       rightButtonTitle: translate('edit'),
       backButtonTitle: translate('back'),
