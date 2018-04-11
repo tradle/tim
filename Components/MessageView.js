@@ -26,6 +26,7 @@ import Navigator from './Navigator'
 
 const PHOTO = 'tradle.Photo'
 const ITEM = 'tradle.Item'
+const DRAFT_APPLICATION = 'tradle.DraftApplication'
 const FORM_PREFILL = 'tradle.FormPrefill'
 // import Prompt from 'react-native-prompt'
 const {
@@ -128,7 +129,7 @@ class MessageView extends Component {
     }
     if (!params.resource)
       return
-    let { bankStyle, application, resource } = this.props
+    let { bankStyle, application, resource, search } = this.props
     if (utils.getId(params.resource) !== utils.getId(resource))
       return
     if (action === 'getItem') {
@@ -155,7 +156,7 @@ class MessageView extends Component {
       if (backlink !== this.state.backlink || params.backlinkAdded) {
         let r = params.resource || this.state.resource
         this.setState({backlink: backlink, backlinkList: params.list || r[backlink], showDetails: false, showDocuments: false, resource: r})
-        Actions.getItem({resource: r, application, search: application != null})
+        Actions.getItem({resource: r, application, search: search  ||  application != null})
       }
     }
     else if (action === 'showDetails')
@@ -168,7 +169,7 @@ class MessageView extends Component {
     this.setState({hideMode: false})
     let me = utils.getMe()
 
-    let { resource, defaultPropertyValues, bankStyle, navigator } = this.props
+    let { resource, defaultPropertyValues, bankStyle, navigator, search } = this.props
     let ref = itemBl.items.ref
     if (ref === FORM_PREFILL) {
       let rmodel = utils.getModel(ref)
@@ -232,6 +233,7 @@ class MessageView extends Component {
         bankStyle: this.state.bankStyle || bankStyle,
         resource: r,
         prop: itemBl,
+        search,
         // containerResource: resource,
         doNotSend: true,
         defaultPropertyValues: defaultPropertyValues,
@@ -416,20 +418,25 @@ class MessageView extends Component {
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
     else {
-      let allowToAddBacklinks = utils.getPropertiesWithAnnotation(model, 'allowToAdd')
+      // let isPrefill = model.id === FORM_PREFILL
+      // let m =  isPrefill ? utils.getModel(resource.prefill[TYPE]) : model
+      // let r = isPrefill ? resource.prefill : resource
+      let m = model, r = resource
+      let allowToAddBacklinks = utils.getPropertiesWithAnnotation(m, 'allowToAdd')
       for (let p in allowToAddBacklinks) {
         if (allowToAddBacklinks[p].items) {
           allowToAddBacklinks = allowToAddBacklinks[p]
           break
         }
       }
+                                 // parentResource={isPrefill && resource}
 
       actionPanel = <ShowRefList {...this.props}
                                  backlink={backlink || allowToAddBacklink}
-                                 resource={resource}
+                                 resource={r}
                                  backlinkList={this.state.backlinkList}
                                  showDetails={this.state.showDetails}
-                                 model={model}
+                                 model={m}
                                  application={application}
                                  showDocuments={this.state.showDocuments}
                                  errorProps={this.state.errorProps}
@@ -512,6 +519,13 @@ class MessageView extends Component {
   renderFooter(backlink, styles) {
     if (!backlink  ||  !backlink.allowToAdd)
       return
+    let me = utils.getMe()
+    let resource = this.props.resource
+
+    // Allow employee to add backlinks only to the resource he created
+    if (me  &&  me.isEmployee  &&  !utils.isMyMessage({resource})  &&  resource[TYPE] !== DRAFT_APPLICATION)
+      return
+
     let icon = 'md-add' //Platform.OS === 'ios' ?  'md-more' : 'md-menu'
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     return (
