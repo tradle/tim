@@ -178,7 +178,7 @@ class VerificationRow extends Component {
 
     let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
     let date = !isBookmark &&  r  &&  <View style={styles.datePlacement}>
-                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy h:MM')}</Text>
+                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy h:MM TT')}</Text>
                       </View>
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
     let title
@@ -204,8 +204,8 @@ class VerificationRow extends Component {
           title = resource.confirmationFor.title
         else if (modelName === FORM)
           title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
-        else
-          title = 'Submitted by ' + resource.from.title
+        // else
+        //   title = 'Submitted by ' + resource.from.title
       }
       else {
         let needModelType = true
