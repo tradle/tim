@@ -54,7 +54,7 @@ class ApplicationTabs extends Component {
     let propsToShow = []
 
     let currentProp = backlink
-    showDetails = backlink  ||  showDetails
+    showDetails = !backlink  ||  showDetails
     let styles = createStyles({bankStyle})
 
     let currentMarker = <View style={styles.marker} />
@@ -89,6 +89,9 @@ class ApplicationTabs extends Component {
     let hasCounts
 
     propsToShow.forEach((p) => {
+      // HACK
+      if (p === 'submissions')
+        return
       let ref = props[p].items.ref
       if (ENV.hideVerificationsInChat  && ref === VERIFICATION)
         return
