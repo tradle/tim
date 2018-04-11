@@ -484,11 +484,10 @@ var NewResourceMixin = {
 
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
-        let subModel = utils.getModel(ref);
         if (data  &&  data[p]) {
-          options.fields[p].value = data[p][TYPE]
-                                  ? utils.getId(data[p])
-                                  : data[p].id;
+          let vType = utils.getType(data[p])
+          let subModel = utils.getModel(vType)
+          options.fields[p].value = utils.getId(data[p])
           data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
         }
 
