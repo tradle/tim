@@ -86,7 +86,7 @@ class ApplicationView extends Component {
       currentRoutes[len - 1].onRightButtonPress = action.bind(this)
   }
   componentWillMount() {
-    let { resource, search, forwardlink } = this.props
+    let { resource, search, backlink } = this.props
 
     // if (resource.id  ||  resource[TYPE] === PROFILE  ||  resource[TYPE] === ORGANIZATION)
     // if (resource.id || !resource[constants.ROOT_HASH])
@@ -96,13 +96,13 @@ class ApplicationView extends Component {
       return
     if (m.subClassOf  &&  utils.getModel(m.subClassOf).inlined)
       return
-    Actions.getItem( {resource, search, forwardlink} )
+    Actions.getItem( {resource, search, backlink} )
   }
   componentDidMount() {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, error, to, forwardlink, application} = params
+    let {resource, action, error, to, backlink, application} = params
 
     let isMe = utils.isMe(this.props.resource)
     if (resource  &&  resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
@@ -115,13 +115,21 @@ class ApplicationView extends Component {
         isLoading: false
       })
       break
-    case 'exploreForwardlink':
-      if (forwardlink !== this.state.forwardlink)
-        this.setState({forwardlink: forwardlink, showDetails: false})
+    case 'exploreBacklink':
+      if (backlink !== this.state.backlink || params.backlinkAdded) {
+        if (backlink.items.backlink) {
+          let r = params.resource || this.state.resource
+          delete r[backlink.name]
+          this.setState({backlink: backlink, showDetails: false, showDocuments: false, resource: r})
+          Actions.getItem({resource: r, application, search: true, backlink: backlink})
+        }
+        else
+          this.setState({backlink: backlink, showDetails: false})
+      }
       break
     case 'showDetails':
-      if (this.state.forwardlink)
-        this.setState({showDetails: true, forwardlink: null})
+      if (this.state.backlink)
+        this.setState({showDetails: true, backlink: null})
       break
     case 'assignRM_Confirmed':
       if (application[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
@@ -137,11 +145,11 @@ class ApplicationView extends Component {
     return this.props.orientation !== nextProps.orientation    ||
            this.state.resource    !== nextState.resource       ||
            this.state.isLoading   !== nextState.isLoading      ||
-           this.state.forwardlink !== nextState.forwardlink
+           this.state.backlink    !== nextState.backlink
   }
 
   render() {
-    let { resource, forwardlink, isLoading, hasRM, isConnected } = this.state
+    let { resource, backlink, isLoading, hasRM, isConnected } = this.state
 
     hasRM = hasRM  ||  resource.relationshipManager ||  resource.relationshipManagers
     let isRM = hasRM  &&  utils.isRM(resource)
@@ -215,7 +223,7 @@ class ApplicationView extends Component {
                             resource={resource}
                             navigator={navigator}
                             currency={currency}
-                            forwardlink={forwardlink}
+                            backlink={backlink}
                             showDetails={this.state.showDetails}
                             approve={this.approve}
                             deny={this.deny}

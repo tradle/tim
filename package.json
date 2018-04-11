@@ -40,7 +40,7 @@
     "@tradle/ethereum-adapter-etherscan": "github:tradle/ethereum-adapter-etherscan",
     "@tradle/keeper": "^3.1.0",
     "@tradle/lens": "^1.1.1",
-    "@tradle/models": "github:tradle/models",
+    "@tradle/models": "github:tradle/models#backlinks",
     "@tradle/models-cloud": "github:tradle/models-cloud",
     "@tradle/models-corporate-onboarding": "github:tradle/models-corporate-onboarding",
     "@tradle/models-nz": "github:tradle/models-nz",
