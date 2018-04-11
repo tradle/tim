@@ -475,7 +475,7 @@ console.log('endCursor: ', endCursor)
         let iref = prop.items.ref
         if (iref) {
           if (prop.items.backlink  &&  !prop.inlined  &&  !utils.getModel(iref).abstract) {
-            if (isList)
+            if (isList  &&  !isApplication)
               continue
             arr.push(`${p} {
               edges {
