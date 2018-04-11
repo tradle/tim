@@ -46,15 +46,15 @@ class ApplicationTabs extends Component {
     super(props);
   }
   render() {
-    var { resource, bankStyle, children, navigator, lazy, showDetails, currency, forwardlink } = this.props
+    var { resource, bankStyle, children, navigator, lazy, showDetails, currency, backlink } = this.props
     var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
     var refList = [];
     var me = utils.getMe()
     let propsToShow = []
 
-    let currentProp = forwardlink
-    showDetails = !forwardlink  ||  showDetails
+    let currentProp = backlink
+    showDetails = backlink  ||  showDetails
     let styles = createStyles({bankStyle})
 
     let currentMarker = <View style={styles.marker} />
@@ -87,6 +87,7 @@ class ApplicationTabs extends Component {
       propsToShow = vCols
     }
     let hasCounts
+
     propsToShow.forEach((p) => {
       let ref = props[p].items.ref
       if (ENV.hideVerificationsInChat  && ref === VERIFICATION)
@@ -113,12 +114,10 @@ class ApplicationTabs extends Component {
                   <Text style={styles.countText}>{cnt}</Text>
                 </View>
       }
-
-      let showCurrent = forwardlink  &&  forwardlink.name === p ? currentMarker : null
-
+      let showCurrent = backlink  &&  backlink.name === p ? currentMarker : null
       refList.push(
         <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-           <TouchableOpacity onPress={this.exploreForwardlink.bind(this, resource, props[p])}>
+           <TouchableOpacity onPress={this.exploreBacklink.bind(this, resource, props[p])}>
              <View style={[styles.item, {justifyContent: 'flex-start'}]}>
                <View style={styles.row}>
                  <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
@@ -142,11 +141,11 @@ class ApplicationTabs extends Component {
       flinkRL = <GridList
                     lazy={lazy}
                     modelName={modelName}
-                    forwardlink={currentProp}
+                    prop={currentProp}
                     sortProperty={utils.getModel(modelName).sortProperty}
                     resource={resource}
                     search={true}
-                    isForwardlink={true}
+                    isBacklink={true}
                     application={resource}
                     listView={true}
                     navigator={navigator} />
@@ -195,8 +194,8 @@ class ApplicationTabs extends Component {
 
     return children || <View/>
   }
-  exploreForwardlink(resource, prop) {
-    Actions.exploreForwardlink(resource, prop)
+  exploreBacklink(resource, prop) {
+    Actions.exploreBacklink(resource, prop)
   }
   showDetails() {
     Actions.getDetails(this.props.resource)
