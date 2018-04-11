@@ -119,7 +119,7 @@
     "react-native-app-intro": "github:tradle/react-native-app-intro#dev",
     "react-native-async-storage-rocks": "^2.0.0",
     "react-native-async-storage-snappy": "1.1.0",
-    "react-native-blinkid": "^1.1.0",
+    "react-native-blinkid": "github:tradle/react-native-blinkid",
     "react-native-branch": "^2.2.4",
     "react-native-button": "^2.3.0",
     "react-native-camera": "^1.0.2",
