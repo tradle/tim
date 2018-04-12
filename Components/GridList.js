@@ -64,6 +64,7 @@ import chatStyles from '../styles/chatStyles'
 const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
 const FORM_PREFILL = 'tradle.FormPrefill'
+const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 
 const SEARCH_LIMIT = 10
 
@@ -177,7 +178,7 @@ class GridList extends Component {
       // bookmarksCount: 0,
       // hasTestProviders: false,
       resource: search  &&  resource,
-      isGrid:  !this.isSmallScreen  &&  !officialAccounts  && modelName !== FORM   && modelName !== MESSAGE  &&  !model.isInterface
+      isGrid:  !this.isSmallScreen  &&  !officialAccounts  && !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)

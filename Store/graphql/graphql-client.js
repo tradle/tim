@@ -95,9 +95,6 @@ var search = {
     let table = `rl_${modelName.replace(/\./g, '_')}`
     let model = utils.getModel(modelName)
     let versionId = model._versionId
-
-    // versionId = null
-
     let version = versionId ? '($modelsVersionId: String!)' : ''
     let query = `query ${version} {\n${table}\n`
     let props = model.properties
@@ -300,7 +297,6 @@ var search = {
     query += `\n}`   // close 'edges'
     query += `\n}`   // close properties block
     query += `\n}`   // close query
-// console.log('endCursor: ', endCursor)
     try {
       let data = await client.query({
           fetchPolicy: 'network-only',
