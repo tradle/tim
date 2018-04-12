@@ -225,7 +225,6 @@ class MessageRow extends Component {
       }
     }
     // HACK
-    var w = utils.dimensions().width
     let msgWidth = utils.getMessageWidth(MessageRow)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
     let sendStatus
