@@ -26,6 +26,9 @@
 
 @implementation AppDelegate
 
+NSInteger const RNTradleSecurityOverlayTag = 101;
+NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   NSURL *jsCodeLocation;
@@ -180,5 +183,33 @@ RCTLogFunction CrashlyticsReactLogFunction = ^(
 
 
 };
+
+// https://stackoverflow.com/questions/19792850/display-a-view-or-splash-screen-before-applicationdidenterbackground-to-avoid-a?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
+- (void)applicationWillResignActive:(UIApplication *)application
+{
+  // adding overlay image here causes following issue:
+  // when applicationWillResignActive is called as a result of push notification opt-in dialog,
+  // applicationWillEnterForeground is never called after that
+}
+
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
+  UIImageView *imageView = [[UIImageView alloc] initWithFrame:self.window.bounds];
+  imageView.tag = RNTradleSecurityOverlayTag;    // Give some decent tagvalue or keep a reference of imageView in self
+  [imageView setImage:[UIImage imageNamed:RNTradleSecurityOverlayImage]];
+  imageView.contentMode = UIViewContentModeScaleAspectFill;
+  [UIApplication.sharedApplication.keyWindow.subviews.lastObject addSubview:imageView];
+  // this doesn't appear to work, whether called here or `didFinishLaunchingWithOptions`, but seems prudent to include it
+  [application ignoreSnapshotOnNextApplicationLaunch];
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application
+{
+  UIImageView *imageView = (UIImageView *)[UIApplication.sharedApplication.keyWindow.subviews.lastObject viewWithTag:RNTradleSecurityOverlayTag];   // search by the same tag value
+  [imageView removeFromSuperview];
+}
+
+- (void) ignoreSnapshotOnNextApplicationLaunch {}
 
 @end

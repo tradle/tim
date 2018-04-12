@@ -13,4 +13,8 @@
 
 @property (nonatomic, strong) UIWindow *window;
 
+// Indicate the application should not use the snapshot on next launch, even if there is a valid state restoration archive.
+// This should only be called from methods invoked from State Preservation, else it is ignored.
+- (void)ignoreSnapshotOnNextApplicationLaunch NS_AVAILABLE_IOS(7_0);
+
 @end
