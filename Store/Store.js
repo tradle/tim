@@ -832,48 +832,6 @@ var Store = Reflux.createStore({
       })
     }
   },
-  // addModels() {
-  //   for (let id in voc) {
-  //     let m = voc[id]
-  //     // if (!m[ROOT_HASH])
-  //     //   m[ROOT_HASH] = sha(m);
-  //     storeUtils.parseOneModel(m)
-  //   }
-  // },
-
-  // parseOneModel(m) {
-  //   Aviva.preparseModel(m)
-  //   storeUtils.addNameAndTitleProps(m)
-  //   models[m.id] = {
-  //     key: m.id,
-  //     value: m
-  //   }
-  //   if (!m.properties[TYPE]) {
-  //     m.properties[TYPE] = {
-  //       type: 'string',
-  //       readOnly: true
-  //     }
-  //   }
-  //   if (!m.properties.time) {
-  //     m.properties.time = {
-  //       type: 'date',
-  //       readOnly: true,
-  //       title: 'Date'
-  //     }
-  //   }
-
-  //   // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
-  //   //   org.products.push(m.id)
-  //   if (utils.isEnum(m))
-  //     this.createEnumResources(m)
-
-  //   // if (utils.isMessage(m)) {
-  //   if (m.subClassOf === FORM) {
-  //     storeUtils.addVerificationsToFormModel(m)
-  //     storeUtils.addFromAndTo(m)
-  //   }
-  // },
-
   _handleConnectivityChange(isConnected) {
     if (isConnected === this.isConnected) return
 
@@ -3840,10 +3798,12 @@ var Store = Reflux.createStore({
         let linkName = link.name
         if (r[linkName]) {
           // list = await this.getObjects(r[forwardlinkName], forwardlink)
-          if (link.items.ref !== VERIFIED_ITEM)
-            list = await Promise.all(r[linkName].map((fl) => this._getItemFromServer(utils.getId(fl))))
-          else
-            list = await Promise.all(r[linkName].map((fl) => this._getItemFromServer(utils.getId(fl.verification))))
+          list = await this.getObjects(r[linkName], link)
+          // if (link.items.ref !== VERIFIED_ITEM)
+          //   list = await Promise.all(r[linkName].map((fl) => this._getItemFromServer(utils.getId(fl))))
+          // else
+          //   list = await Promise.all(r[linkName].map((fl) => this._getItemFromServer(utils.getId(fl.verification))))
+
           r[linkName] = list
         }
       }
@@ -3912,7 +3872,6 @@ var Store = Reflux.createStore({
   async getObjects(list, prop) {
     let links
     if (prop) {
-      let forwardlinkName = prop.name
       if (prop.items.ref !== VERIFIED_ITEM)
         links = list.map((fl) => fl.id.split('_')[2])
       else
@@ -10259,54 +10218,6 @@ var Store = Reflux.createStore({
     await this.dbPut(fromId, fr)
     return fr
   },
-  // if the last message showing was PRODUCT_LIST. No need to re-render
-  // addNameAndTitleProps(m, aprops) {
-  //   var mprops = aprops  ||  m.properties
-  //   for (let p in mprops) {
-  //     if (p.charAt(0) === '_')
-  //       continue
-  //     if (!mprops[p].name)
-  //       mprops[p].name = p
-  //     if (!mprops[p].title)
-  //       mprops[p].title = utils.makeLabel(p)
-  //     if (mprops[p].type === 'array') {
-  //       var aprops = mprops[p].items.properties
-  //       if (aprops)
-  //         this.addNameAndTitleProps(m, aprops)
-  //     }
-  //   }
-  // },
-  // addFromAndTo(m) {
-  //   if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
-  //     return
-  //   let properties = m.properties
-  //   if (properties.from  &&  properties.to)
-  //     return
-  //   properties.from = {
-  //     type: 'object',
-  //     ref: IDENTITY,
-  //     readOnly: true
-  //   }
-  //   properties.to = {
-  //     type: 'object',
-  //     ref: IDENTITY,
-  //     readOnly: true
-  //   }
-  // },
-  // addVerificationsToFormModel(m) {
-  //   if (m.subClassOf !== FORM  ||  m.verifications)
-  //     return
-  //   m.properties.verifications = {
-  //     type: 'array',
-  //     readOnly: true,
-  //     title: 'Verifications',
-  //     name: 'verifications',
-  //     items: {
-  //       backlink: 'document',
-  //       ref: VERIFICATION
-  //     }
-  //   }
-  // },
   loadMyResources() {
     //   this._loadedResourcesDefer.resolve()
     // return
@@ -14163,3 +14074,93 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 
   //   db.batch(batch)
   // },
+  // if the last message showing was PRODUCT_LIST. No need to re-render
+  // addNameAndTitleProps(m, aprops) {
+  //   var mprops = aprops  ||  m.properties
+  //   for (let p in mprops) {
+  //     if (p.charAt(0) === '_')
+  //       continue
+  //     if (!mprops[p].name)
+  //       mprops[p].name = p
+  //     if (!mprops[p].title)
+  //       mprops[p].title = utils.makeLabel(p)
+  //     if (mprops[p].type === 'array') {
+  //       var aprops = mprops[p].items.properties
+  //       if (aprops)
+  //         this.addNameAndTitleProps(m, aprops)
+  //     }
+  //   }
+  // },
+  // addFromAndTo(m) {
+  //   if (!m.interfaces  ||  m.interfaces.indexOf(MESSAGE) === -1)
+  //     return
+  //   let properties = m.properties
+  //   if (properties.from  &&  properties.to)
+  //     return
+  //   properties.from = {
+  //     type: 'object',
+  //     ref: IDENTITY,
+  //     readOnly: true
+  //   }
+  //   properties.to = {
+  //     type: 'object',
+  //     ref: IDENTITY,
+  //     readOnly: true
+  //   }
+  // },
+  // addVerificationsToFormModel(m) {
+  //   if (m.subClassOf !== FORM  ||  m.verifications)
+  //     return
+  //   m.properties.verifications = {
+  //     type: 'array',
+  //     readOnly: true,
+  //     title: 'Verifications',
+  //     name: 'verifications',
+  //     items: {
+  //       backlink: 'document',
+  //       ref: VERIFICATION
+  //     }
+  //   }
+  // },
+  // addModels() {
+  //   for (let id in voc) {
+  //     let m = voc[id]
+  //     // if (!m[ROOT_HASH])
+  //     //   m[ROOT_HASH] = sha(m);
+  //     storeUtils.parseOneModel(m)
+  //   }
+  // },
+
+  // parseOneModel(m) {
+  //   Aviva.preparseModel(m)
+  //   storeUtils.addNameAndTitleProps(m)
+  //   models[m.id] = {
+  //     key: m.id,
+  //     value: m
+  //   }
+  //   if (!m.properties[TYPE]) {
+  //     m.properties[TYPE] = {
+  //       type: 'string',
+  //       readOnly: true
+  //     }
+  //   }
+  //   if (!m.properties.time) {
+  //     m.properties.time = {
+  //       type: 'date',
+  //       readOnly: true,
+  //       title: 'Date'
+  //     }
+  //   }
+
+  //   // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
+  //   //   org.products.push(m.id)
+  //   if (utils.isEnum(m))
+  //     this.createEnumResources(m)
+
+  //   // if (utils.isMessage(m)) {
+  //   if (m.subClassOf === FORM) {
+  //     storeUtils.addVerificationsToFormModel(m)
+  //     storeUtils.addFromAndTo(m)
+  //   }
+  // },
+
