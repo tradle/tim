@@ -744,16 +744,18 @@ class TimHome extends Component {
     extend(style, defaultBankStyle)
     if (bankStyle)
       extend(style, bankStyle)
-    this.props.navigator.push({
-      title: utils.getDisplayName(resource),
-      component: component,
-      id: id,
+    let title = utils.getDisplayName(resource)
+    let route = {
+      title,
+      component,
+      id,
       backButtonTitle: 'Back',
       passProps: {
         bankStyle: style,
         resource,
       }
-    })
+    }
+    this.props.navigator.push(route)
 
   }
   showLandingPage(provider, landingPage) {

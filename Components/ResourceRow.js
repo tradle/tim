@@ -156,7 +156,7 @@ class ResourceRow extends Component {
   render() {
     let isModel = this.props.resource.type === MODEL
     let resource = (isModel && this.props.resource) || this.state.resource
-    let rType = resource[TYPE]
+    let rType = utils.getType(resource)
     if (rType !== APPLICATION  &&  this.state.application)
       resource = this.state.application
     let photo;
@@ -213,7 +213,7 @@ class ResourceRow extends Component {
                 </LinearGradient>
       }
       else  {
-        let model = utils.getModel(resource[TYPE]);
+        let model = utils.getModel(rType)
         let icon = model.icon;
         if (icon)
           photo = <View style={styles.cell}><Icon name={icon} size={35} color='#7AAAc3' style={styles.icon} /></View>
@@ -273,7 +273,7 @@ class ResourceRow extends Component {
                      </View>
     let textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
 
-    this.dateProp = utils.isContext(resource[TYPE]) ? 'time' : this.dateProp
+    this.dateProp = utils.isContext(rType) ? 'time' : this.dateProp
 
     let dateRow
     if (!this.isOfficialAccounts  &&  !this.props.isChooser  &&  this.dateProp  &&  resource[this.dateProp]) {
@@ -298,7 +298,7 @@ class ResourceRow extends Component {
     // Grey out if not loaded provider info yet
             // <ActivityIndicator hidden='true' color='#629BCA'/>
 
-    let isOpaque = resource[TYPE] === ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
+    let isOpaque = rType === ORGANIZATION && !resource.contacts  &&  !this.props.isChooser
     if (isOpaque)
       return (
         <View key={this.getNextKey()} style={[{opacity: 0.5}, styles.rowWrapper]}>
@@ -379,7 +379,8 @@ class ResourceRow extends Component {
   }
   formatRow(resource, style) {
     let self = this;
-    let model = utils.getModel(resource[TYPE] || resource.id);
+    let rtype = utils.getType(resource)
+    let model = utils.getModel(rtype);
     let viewCols = model.gridCols || model.viewCols;
     let renderedViewCols;
     if (!viewCols  &&  model.id !== APPLICATION) {
@@ -437,7 +438,7 @@ class ResourceRow extends Component {
 
     let isOfficialAccounts = this.props.isOfficialAccounts
     let color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
-    let isContact = resource[TYPE] === PROFILE;
+    let isContact = rtype === PROFILE;
     viewCols.forEach((v) => {
       if (v === this.dateProp)
         return;

@@ -20,6 +20,7 @@ const { MONEY, ENUM, ORGANIZATION, FORM, MESSAGE } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
+const APPLICATION = 'tradle.Application'
 
 var search = {
   initClient(meDriver, url) {
@@ -94,6 +95,9 @@ var search = {
     let table = `rl_${modelName.replace(/\./g, '_')}`
     let model = utils.getModel(modelName)
     let versionId = model._versionId
+
+    // versionId = null
+
     let version = versionId ? '($modelsVersionId: String!)' : ''
     let query = `query ${version} {\n${table}\n`
     let props = model.properties
@@ -430,6 +434,9 @@ var search = {
   getAllPropertiesForServerSearch(params) {
     let {model, inlined, properties, currentProp, isList} = params
     let props = model.properties
+
+    let isApplication = model.id === APPLICATION
+
     let arr
     if (utils.isInlined(model))
       arr = []
@@ -464,10 +471,12 @@ var search = {
         // HACK
         if (p === 'verifications')
           continue
+        if (isApplication  &&  p !== 'submissions')
+          continue
         let iref = prop.items.ref
         if (iref) {
           if (prop.items.backlink  &&  !prop.inlined  &&  !utils.getModel(iref).abstract) {
-            if (isList)
+            if (isList  &&  !isApplication)
               continue
             arr.push(`${p} {
               edges {

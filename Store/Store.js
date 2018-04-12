@@ -145,11 +145,13 @@ const {
  MONEY,
  SETTINGS,
 } = constants.TYPES
-const LENS = 'tradle.Lens'
-const SEAL = 'tradle.Seal'
+
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 
 // const SHARED_RESOURCE     = 'tradle.SharedResource'
+const LENS                = 'tradle.Lens'
+const SEAL                = 'tradle.Seal'
+const INTERSECTION        = 'tradle.Intersection'
 const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const INTRODUCTION        = 'tradle.Introduction'
 const PRODUCT_REQUEST     = 'tradle.ProductRequest'
@@ -190,9 +192,11 @@ const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
 const SHARE_REQUEST       = 'tradle.ShareRequest'
 const APPLICATION         = 'tradle.Application'
+const DRAFT_APPLICATION   = 'tradle.DraftApplication'
 const VERIFIED_ITEM       = 'tradle.VerifiedItem'
 const DATA_BUNDLE         = 'tradle.DataBundle'
 const DATA_CLAIM          = 'tradle.DataClaim'
+const CHECK               = 'tradle.Check'
 
 const MY_ENVIRONMENT      = 'environment.json'
 
@@ -350,6 +354,7 @@ const {
 const getEmployeeBookmarks = ({ me, botPermalink }) => {
   const createdByBot = [
     APPLICATION,
+    DRAFT_APPLICATION,
     VERIFICATION,
     SEAL,
     'tradle.SanctionsCheck',
@@ -3777,11 +3782,17 @@ var Store = Reflux.createStore({
   async onGetItem(params) {
     var {resource, action, noTrigger, search, backlink, forwardlink} = params
     // await this._loadedResourcesDefer.promise
-    let rId = utils.getId(resource)
+
+    const resModel = this.getModel(utils.getType(resource))
+    if (!resModel) {
+      throw new Error(`missing model for ${res[TYPE]}`)
+    }
+
     if (search) {
       await this.onGetItemFromServer(params)
       return
     }
+    let rId = utils.getId(resource)
     let r = this._getItem(rId)
     var res = {};
     if (!r) {
@@ -3804,13 +3815,9 @@ var Store = Reflux.createStore({
 
     extend(res, r)
 
-    const resModel = this.getModel(res[TYPE])
-    if (!resModel) {
-      throw new Error(`missing model for ${res[TYPE]}`)
-    }
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
-    var props = backlink ? [backlink] : resModel.properties;
+    var props = backlink ? {[backlink.name]: backlink} : resModel.properties;
 
     for (let p in props) {
       if (p.charAt(0) === '_'  ||  props[p].hidden)
@@ -3819,6 +3826,7 @@ var Store = Reflux.createStore({
       if (!items  ||  !items.backlink)
         continue;
       let blList = await this.getBacklinkResources(props[p], res)
+      res[p] = blList
     }
 
     if (noTrigger)
@@ -3849,15 +3857,16 @@ var Store = Reflux.createStore({
     let list
     let m = this.getModel(r[TYPE])
     if (isApplication) {
-      if (forwardlink) {
-        let forwardlinkName = forwardlink.name
-        if (r[forwardlinkName]) {
+      let link = forwardlink  ||  backlink
+      if (link) {
+        let linkName = link.name
+        if (r[linkName]) {
           // list = await this.getObjects(r[forwardlinkName], forwardlink)
-          if (forwardlink.items.ref !== VERIFIED_ITEM)
-            list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl))))
+          if (link.items.ref !== VERIFIED_ITEM)
+            list = await Promise.all(r[linkName].map((fl) => this._getItemFromServer(utils.getId(fl))))
           else
-            list = await Promise.all(r[forwardlinkName].map((fl) => this._getItemFromServer(utils.getId(fl.verification))))
-          r[forwardlinkName] = list
+            list = await Promise.all(r[linkName].map((fl) => this._getItemFromServer(utils.getId(fl.verification))))
+          r[linkName] = list
         }
       }
       if (r.relationshipManager) {
@@ -3917,7 +3926,7 @@ var Store = Reflux.createStore({
       if (context)
         r._context = context
     }
-    let retParams = { resource: r, action: action || 'getItem', forwardlink: forwardlink}
+    let retParams = { resource: r, action: action || 'getItem', forwardlink, backlink}
     if (list)
       retParams.list = list
     this.trigger(retParams)
@@ -4055,24 +4064,25 @@ var Store = Reflux.createStore({
     return newResult;
   },
   getRefs(resource, foundRefs, props) {
-    var refProps = [];
+    let refProps = [];
     for (let p in resource) {
-      if (props[p] &&  props[p].type === 'object') {
-        var ref = props[p].ref;
-        if (ref  &&  resource[p]) {
-          // reference property could be set as a full resource (for char to have all info at hand when displaying the message)
-          // or resource id
-          let rValue = utils.getId(resource[p])
+      if (!props[p])
+        continue
+      if (props[p].type !== 'object')
+        continue
+      let ref = props[p].ref;
+      if (!ref  ||  !resource[p])
+        continue
+      // reference property could be set as a full resource (for char to have all info at hand when displaying the message)
+      // or resource id
+      let rValue = utils.getId(resource[p])
 
-          refProps[rValue] = p;
-          if (list[rValue]) {
-            var elm = {value: this._getItem(rValue), state: 'fulfilled'};
-            foundRefs.push(elm);
-          }
-        }
-      }
+      refProps[rValue] = p;
+      let value = this._getItem(rValue)
+      if (value)
+        foundRefs.push({value, state: 'fulfilled'})
     }
-    return refProps;
+    return refProps
   },
   onAddModelFromUrl(url) {
     let model, props;
@@ -4421,12 +4431,13 @@ var Store = Reflux.createStore({
               kres = await this._getItemFromServer(utils.getId(elm))
             debugger
           }
-          results.push(utils.clone(kres))
-          if (results.length) {
-            let r = results[0]
+          let r = _.cloneDeep(kres)
+          // results.push(r)
+          // if (results.length) {
+          //   // let r = results[0]
             extend(r, elm)
             foundRefs.push({value: r, state: 'fulfilled'})
-          }
+          // }
         }
       }
     }
@@ -4953,18 +4964,19 @@ var Store = Reflux.createStore({
       }
 
     }
-    async function save (returnVal, noTrigger, lens) {
+    async function save(returnVal, noTrigger, lens) {
       let r = {
         modelName: returnVal[TYPE],
         resource: returnVal,
         dhtKey: returnVal[ROOT_HASH],
         isRegistration: isRegistration,
         noTrigger: noTrigger,
-        lens: lens
+        lens: lens,
+        prop: params.prop
       }
       if (params.maxAttempts)
         r.maxAttempts = params.maxAttempts
-      return self._putResourceInDB(r)
+      return await self._putResourceInDB(r)
     }
   },
   _makeIdentityStub(r) {
@@ -5592,7 +5604,7 @@ var Store = Reflux.createStore({
       isMessage = meta.subClassOf === FORM  ||  modelName === VERIFICATION
     // if (params.prop)
     //   debugger
-    if (params.search && me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION) {
+    if (params.search &&  me  &&  me.isEmployee  &&  meta.id !== PROFILE  &&  meta.id !== ORGANIZATION  &&  !utils.isEnum(meta)) {
       try {
         return await this.searchServer(params)
       } catch (error) {
@@ -6312,6 +6324,8 @@ var Store = Reflux.createStore({
       rr.from = {id: myOrgRepId, title: utils.getDisplayName(me.organization)}
       rr.to = {id: authorId, title: authorTitle}
       break
+    case APPLICATION:
+      this.organizeSubmissions(rr)
     default:
       rr.from = {id: authorId, title: authorTitle}
       rr.to = {id: myOrgRepId, title: utils.getDisplayName(me.organization)}
@@ -6337,6 +6351,46 @@ var Store = Reflux.createStore({
     this.addVisualProps(rr)
     return rr
   },
+
+  organizeSubmissions (application) {
+    const { submissions={} } = application
+    if (!submissions.edges ||  !submissions.edges.length)
+      return
+    let submissionStubs = submissions.edges.map(s => s.node.submission)
+    submissionStubs.forEach(sub => {
+      let m = this.getModel(utils.getType(sub))
+      let type = m.subClassOf || m.id
+      switch (type) {
+      case FORM:
+        if (m.id === PRODUCT_REQUEST)
+          return
+        if (!application.forms)
+          application.forms = []
+        application.forms.push(sub)
+        application._formsCount = application.forms.length
+        break
+      case CHECK:
+        if (!application.checks)
+          application.checks = []
+        application.checks.push(sub)
+        application._checksCount = application.checks.length
+        break
+      case VERIFICATION:
+        if (!application.verifications)
+          application.verifications = []
+        application.verifications.push(sub)
+        application._verificationsCount = application.verifications.length
+        break
+      case FORM_ERROR:
+        if (!application.editRequests)
+          application.editRequests = []
+        application.editRequests.push(sub)
+        application._editRequestsCount = application.editRequests.length
+      }
+    })
+    return application
+  },
+
   onListSharedWith(resource, chat) {
     let sharedWith = resource._sharedWith
     if (!sharedWith)
@@ -6446,7 +6500,7 @@ var Store = Reflux.createStore({
           break
         continue;
       }
-      var fr = this.checkCriteria(r, query, searchProp)
+      var fr = this.checkCriteria({r, query, prop: searchProp})
       if (fr) {
         if (start  &&  foundRecs < start) {
           foundRecs++
@@ -6567,13 +6621,17 @@ var Store = Reflux.createStore({
     let result
     let enumList = enums[params.modelName]
     if (params.query)
-      return enumList.filter((r) => this.checkCriteria(r, params.query))
+      return enumList.filter((r) => this.checkCriteria({r, query: params.query}))
     else
       return enumList
   },
-  checkCriteria(r, query, prop) {
+  checkCriteria({r, query, prop, isChooser}) {
     if (!query)
       return r
+    if (isChooser) {
+      let dn = utils.getDisplayName(r)
+      return (dn.toLowerCase().indexOf(query.toLowerCase()) !== -1) ? r : null
+    }
     let rtype = r[TYPE]
     let rModel = this.getModel(rtype)
     let props = rModel.properties
@@ -6591,6 +6649,7 @@ var Store = Reflux.createStore({
         continue
       }
       else if (props[rr].type === 'date') {
+        continue
         if (!isNaN(r[rr])) {
           let d = new Date(r[rr]).toString()
           combinedValue += combinedValue ? ' ' + d : d
@@ -6900,7 +6959,7 @@ var Store = Reflux.createStore({
       await Promise.all(checked)
   },
   async handleOne(params) {
-    let { link, links, all, refsObj, refs, resource, to, prop, list, query } = params
+    let { link, links, all, refsObj, refs, resource, to, prop, list, query, isChooser } = params
     let rId = all[link]
     let r = this._getItem(rId)
     if (!r)
@@ -6964,6 +7023,26 @@ var Store = Reflux.createStore({
         }
         if (query)
           checked = await this.checkAndFilter(params)
+      }
+      else if (isChooser  &&  resource  &&  prop) {
+        let rModel = this.getModel(resource[TYPE])
+
+        if (utils.isImplementing(rModel, INTERSECTION)) {
+          // If the intersection resource has a different property set to the value in the list, filter it out
+          // !!! in future should filter out all resources
+          // for which relationships were already created for this Entity
+          let refProps = utils.getPropertiesWithAnnotation(rModel, 'ref')
+          let doExclude
+          for (let p in refProps) {
+            if (p === prop.name  ||  !resource[p])
+              continue
+            if (resource[p].id === utils.getId(r))
+              doExclude = true
+          }
+          if (doExclude)
+            return
+        }
+        checked = await this.checkResource(params)
       }
       else
         checked = await this.checkResource(params)
@@ -7087,7 +7166,7 @@ var Store = Reflux.createStore({
     return true
   },
   async checkAndFilter(params) {
-    let {r, foundResources, prop, query, filterOutForms} = params
+    let { r, foundResources, prop, query, filterOutForms, isChooser } = params
     if (!query) {
       if (!filterOutForms  ||  !(await this.doFilterOut({r, prop}))) {
         foundResources.push(this.fillMessage(r))
@@ -7097,7 +7176,7 @@ var Store = Reflux.createStore({
     let isVerificationR = r[TYPE] === VERIFICATION
     let isBookmark = r[TYPE] === BOOKMARK
     let checkVal = isVerificationR ? this._getItem(r.document) : r
-    let fr = this.checkCriteria(isBookmark ? r.bookmark : r, query)
+    let fr = this.checkCriteria({r: isBookmark ? r.bookmark : r, query, isChooser})
 
     if (fr) {
       // foundResources[key] = this.fillMessage(r);
@@ -7144,7 +7223,7 @@ var Store = Reflux.createStore({
     if (params.modelName === MESSAGE)
       return await this.searchAllMessages(params)
 
-    let {resource, query, modelName, prop, context, _readOnly, to, listView, isForgetting, lastId, limit} = params
+    let {resource, query, modelName, prop, context, _readOnly, to, listView, isForgetting, lastId, limit, isChooser} = params
 
     let model = this.getModel(modelName)
 
@@ -7366,7 +7445,7 @@ var Store = Reflux.createStore({
     let refsObj = {}
 
     return Promise.all(allLinks.map(link => {
-      return this.handleOne({ link, links, all, isForgetting, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to })
+      return this.handleOne({ link, links, all, isForgetting, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to, isChooser })
       // return handleOne(r)
     }))
     .then((l) => {
@@ -8422,7 +8501,7 @@ var Store = Reflux.createStore({
     return crypto.randomBytes(32).toString('hex')
   },
   async _putResourceInDB(params) {
-    var {modelName, isRegistration, noTrigger, dhtKey, maxAttempts, lens} = params
+    var {modelName, isRegistration, noTrigger, dhtKey, maxAttempts, lens, prop} = params
     var value = params.resource
     // Cleanup null form values
     for (let p in value) {
@@ -8598,15 +8677,17 @@ var Store = Reflux.createStore({
         this.trigger(triggerParams);
       }
       // if (utils.isItem(model)) {
-      let {container, item} = getContainerProp(model)
-      if (container  &&  value[container.name]) {
-        let iId = utils.getId(value[container.name])
-        let cRes = this._getItem(iId)
-        if (!cRes)
-          cRes = await this._getItemFromServer(iId)
-        this.onExploreBacklink(cRes, item, true)
+      let cObj = getContainerProp(model)
+      if (cObj  &&  cObj.length === 1) {
+        let { container, item } = cObj[0]
+        if (container  &&  value[container.name]) {
+          let iId = utils.getId(value[container.name])
+          let cRes = this._getItem(iId)
+          if (!cRes)
+            cRes = await this._getItemFromServer(iId)
+          this.onExploreBacklink(cRes, item, true)
+        }
       }
-      // }
       if (model.subClassOf === FORM) {
         // let mlist = this.searchMessages({modelName: FORM})
         let olist = this.searchNotMessages({modelName: ORGANIZATION})
@@ -8622,6 +8703,7 @@ var Store = Reflux.createStore({
     function getContainerProp(model) {
       let props = model.properties
       let refProps = utils.getPropertiesWithAnnotation(model, 'ref')
+      let cObj = []
       for (let p in refProps) {
         let l = props[p]
         let container = self.getModel(l.ref)
@@ -8631,10 +8713,10 @@ var Store = Reflux.createStore({
         let containerBl = utils.getPropertiesWithAnnotation(container, 'items')
         for (let c in containerBl)  {
           if (cProps[c].allowToAdd  &&  cProps[c].items.ref === model.id)
-            return {container: props[p], item: cProps[c]}
+            cObj.push({container: props[p], item: cProps[c]})
         }
       }
-      return {container: null, item: null}
+      return cObj
     }
   },
   addLastMessage(value, batch, sharedWith) {
@@ -11449,7 +11531,9 @@ var Store = Reflux.createStore({
     const key = dotProp.get(env, keyPath)
     if (key && key !== dotProp.get(ENV, keyPath)) {
       dotProp.set(ENV, keyPath, key)
-      require('../Components/BlinkID').setLicenseKey(key)
+      let blinkId = require('../Components/BlinkID')
+      if (blinkId)
+        blinkId.setLicenseKey(key)
       ENV.dateModified = env.dateModified
     }
   },

@@ -2177,6 +2177,17 @@ var utils = {
     // if (m.interfaces && m.interfaces.indexOf(MESSAGE) !== -1)
     //   return true
   },
+  isImplementing(resource, interfaceType) {
+    let model
+    if (typeof resource === 'string')
+      model = this.getModel(resource)
+    else if (resource[TYPE])
+      model = this.getModel(resource[TYPE])
+    else
+      model = resource
+    return model.interfaces  &&  model.interfaces.indexOf(interfaceType) !== -1
+  },
+
   isItem(resource) {
     let model
     if (typeof resource === 'string')

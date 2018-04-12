@@ -612,8 +612,9 @@ class MessageList extends Component {
     }
     if (!title)
       title = translate(model) //translate(utils.makeModelTitle(model))
-
-    let newTitle = title;
+    let dn = utils.getDisplayName(r)
+    // let newTitle = title + (dn ? ' -- ' + dn : '');
+    let newTitle = (dn ? dn + ' -- '  : '') + title;
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier = application ? utils.isRM(application) : !verification && utils.isVerifier(r)
     let { resource, bankStyle, currency, country } = this.props

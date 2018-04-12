@@ -178,7 +178,7 @@ class VerificationRow extends Component {
 
     let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
     let date = !isBookmark &&  r  &&  <View style={styles.datePlacement}>
-                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy h:MM')}</Text>
+                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy h:MM TT')}</Text>
                       </View>
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
     let title
@@ -204,11 +204,20 @@ class VerificationRow extends Component {
           title = resource.confirmationFor.title
         else if (modelName === FORM)
           title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
-        else
-          title = 'Submitted by ' + resource.from.title
+        // else
+        //   title = 'Submitted by ' + resource.from.title
       }
-      else
-        title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
+      else {
+        let needModelType = true
+        if (dn) {
+          if (parentResource  &&  prop  &&  prop.items  &&  prop.items.ref) {
+            let pModel = utils.getModel(prop.items.ref)
+            if (!pModel.abstract)
+              needModelType = false
+          }
+        }
+        title = needModelType  &&  (verificationRequest.title || utils.makeModelTitle(verificationRequest))
+      }
     }
 
     let isCheck = model.subClassOf === CHECK
@@ -248,7 +257,7 @@ class VerificationRow extends Component {
       titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
     else if (!titleComponent)
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
-    else
+    else if (title)
       description = <Text style={styles.description}>{title}</Text>
 
     let supportingDocuments

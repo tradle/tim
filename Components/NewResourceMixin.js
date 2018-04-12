@@ -221,6 +221,10 @@ var NewResourceMixin = {
         if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
           eCols[p] = props[p]
       }
+      // filter out the backlink on which the adding resource was initiated
+      let prop = this.props.prop
+      if (prop  &&  prop.items  &&  prop.items.backlink  &&  eCols[prop.items.backlink])
+        delete eCols[prop.items.backlink]
     }
     let required = utils.ungroup(meta, meta.required)
     required = utils.arrayToObject(required);
@@ -489,11 +493,10 @@ var NewResourceMixin = {
 
         model[p] = maybe ? t.maybe(t.Str) : t.Str;
 
-        let subModel = utils.getModel(ref);
         if (data  &&  data[p]) {
-          options.fields[p].value = data[p][TYPE]
-                                  ? utils.getId(data[p])
-                                  : data[p].id;
+          let vType = utils.getType(data[p])
+          let subModel = utils.getModel(vType)
+          options.fields[p].value = utils.getId(data[p])
           data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
         }
 
@@ -1412,7 +1415,15 @@ var NewResourceMixin = {
         propView = <Icon name='ios-paper-outline' size={35} color={linkColor} />
       }
     } else {
-      propView = <Text style={[styles.input, fontSize, color]}>{label}</Text>
+      let img = this.state[prop.name + '_photo']
+      if (img) {
+        propView = <View style={{flexDirection: 'row'}}>
+                      <Image source={{uri: img.url}} style={styles.thumb} />
+                      <Text style={[styles.input, fontSize, color]}>{' ' + label}</Text>
+                   </View>
+      }
+      else
+        propView = <Text style={[styles.input, fontSize, color]}>{label}</Text>
     }
 
     let maxChars = (utils.dimensions(params.component).width - 20)/10

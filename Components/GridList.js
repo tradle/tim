@@ -65,6 +65,8 @@ const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
 const FORM_PREFILL = 'tradle.FormPrefill'
 
+const SEARCH_LIMIT = 10
+
 var {
   TYPE,
   ROOT_HASH,
@@ -89,6 +91,7 @@ var {
 
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION = 'tradle.Application'
+const DRAFT_APPLICATION = 'tradle.DraftApplication'
 const VERIFIED_ITEM = 'tradle.VerifiedItem'
 const PHOTO = 'tradle.Photo'
 
@@ -300,7 +303,7 @@ class GridList extends Component {
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
     let { chat, resource, navigator, officialAccounts, search, application, prop,
-          modelName, isModel, isBacklink, isForwardlink, forwardlink } = this.props
+          modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser } = this.props
     if (chat) {
       utils.onNextTransitionEnd(navigator, () => {
         Actions.listSharedWith(resource, chat)
@@ -321,6 +324,7 @@ class GridList extends Component {
       }
       else if (isBacklink) { //  &&  application) {
         if (resource[prop.name]) {
+          this.state.isLoading = false
           this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
           return
         }
@@ -348,6 +352,11 @@ class GridList extends Component {
       Actions.list(params)
     else if (isForwardlink)
       Actions.getItem({resource, search, action: 'list', forwardlink})
+    else if (isChooser) {
+      params.resource = resource
+      params.isChooser = true
+      Actions.list(params)
+    }
     else
       utils.onNextTransitionEnd(navigator, () => {
         Actions.list(params)
@@ -365,7 +374,7 @@ class GridList extends Component {
     let { action, error, list, resource, endCursor } = params
     if (error)
       return;
-    let { navigator, modelName, isModel, search, prop, forwardlink } = this.props
+    let { navigator, modelName, isModel, search, prop, forwardlink, isBacklink } = this.props
     if (action === 'connectivity') {
       this.setState({isConnected: params.isConnected})
       return
@@ -396,12 +405,15 @@ class GridList extends Component {
       if (action === 'addMessage'  &&  modelName !== PROFILE)
         return
       // this.state.isLoading = true;
-      Actions.list({
-        query: this.state.filter,
-        modelName: model.id,
-        to: this.props.resource,
-        sortProperty: model.sort
-      });
+      if (isBacklink)
+        Actions.exploreBacklink(this.props.resource, prop, true)
+      else
+        Actions.list({
+          query: this.state.filter,
+          modelName: model.id,
+          to: this.props.resource,
+          sortProperty: model.sort
+        });
 
       return;
     }
@@ -441,7 +453,7 @@ class GridList extends Component {
         navigator.push(route)
       return
     }
-    let { chat, isBacklink, isForwardlink, multiChooser, isChooser, sharingChat, isTest, lens } = this.props
+    let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, lens } = this.props
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
       if (!list) {
@@ -601,7 +613,6 @@ class GridList extends Component {
     }
     if (this.state.chosen !== nextState.chosen)
       return true
-
     if (this.props.isBacklink  &&  nextProps.isBacklink) {
       if (this.props.prop.name !== nextProps.prop.name)
         return true
@@ -645,6 +656,7 @@ class GridList extends Component {
 
     let isOrganization = modelName === ORGANIZATION
     let isApplication = modelName === APPLICATION
+    let isDraftApplication = modelName === DRAFT_APPLICATION
     // let isBookmark = modelName === BOOKMARK
 
     // let isResourceFromServer
@@ -662,7 +674,7 @@ class GridList extends Component {
     //   }
     // }
     // if (isResourceFromServer  ||  utils.isMessage(resource)) {
-    if (!isApplication   &&   utils.isMessage(resource)) {
+    if (!isApplication  &&  !isDraftApplication  &&   utils.isMessage(resource)) {
       this.selectMessage(resource)
       return;
     }
@@ -706,11 +718,11 @@ class GridList extends Component {
     else
       style = bankStyle
 
-    if (isApplication) {
+    if (isApplication  ||  isDraftApplication) {
       let route = {
         title: title,
-        id: 34,
-        component: ApplicationView,
+        id: isDraftApplication ? 5 : 34,
+        component: isDraftApplication ? MessageView : ApplicationView,
         // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
@@ -776,90 +788,78 @@ class GridList extends Component {
     navigator.push(route);
   }
   selectMessage(resource) {
-    let { modelName, search, bankStyle, navigator, currency, application } = this.props
+    let { modelName, search, bankStyle, navigator, currency, prop, returnRoute, callback, application, isBacklink } = this.props
     let model = utils.getModel(modelName);
     let rType = resource[TYPE]
     let rModel = utils.getModel(rType)
     let isMessage = utils.isMessage(resource)
-    if (isMessage) {
-      if (modelName === BOOKMARK) {
-        if (!bankStyle)
-          bankStyle = this.state.bankStyle
-        uiUtils.showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
-        return
-      }
-      let title
-      if (rType === VERIFICATION) {
-        let type = utils.getType(resource.document)
-        title = utils.makeModelTitle(utils.getModel(type))
-      }
-      else if (rType === FORM_PREFILL)
-        title = utils.makeModelTitle(resource.prefill[TYPE])
+    if (callback) {
+      callback(prop, resource); // HACK for now
+      if (returnRoute)
+        navigator.popToRoute(returnRoute);
       else
-        title = utils.makeModelTitle(rModel)
+        navigator.pop()
+      return;
+    }
 
-      let route = {
-        title: title,
-        id: 5,
-        component: MessageView,
-        backButtonTitle: 'Back',
-        passProps: {
-          resource,
-          search,
-          application,
-          bankStyle: bankStyle || defaultBankStyle
-        }
-      }
-      if (utils.isMyMessage({resource})) {
-        _.extend(route, {
-          rightButtonTitle: 'Edit',
-          onRightButtonPress: {
-            title: title,
-            id: 4,
-            component: NewResource,
-            titleTextColor: '#7AAAC3',
-            backButtonTitle: 'Back',
-            rightButtonTitle: 'Done',
-            passProps: {
-              model: rModel,
-              resource: resource,
-              search: search,
-              serverOffline: this.props.serverOffline,
-              bankStyle: bankStyle || defaultBankStyle
-            }
-          },
-
-        })
-      }
-      navigator.push(route)
+    if (modelName === BOOKMARK) {
+      if (!bankStyle)
+        bankStyle = this.state.bankStyle
+      uiUtils.showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
       return
     }
-    let title = utils.makeTitle(utils.getDisplayName(resource))
-    navigator.push({
-      title: title,
-      id: 3,
-      component: ResourceView,
-      // titleTextColor: '#7AAAC3',
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Edit',
-      onRightButtonPress: {
-        title: title,
-        id: 4,
-        component: NewResource,
-        titleTextColor: '#7AAAC3',
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Done',
-        passProps: {
-          model: rModel,
-          resource: resource,
-          search: search,
-          serverOffline: this.props.serverOffline,
-          bankStyle: bankStyle || defaultBankStyle
-        }
-      },
+    let title, isDraftApplication
+    if (rType === VERIFICATION) {
+      let type = utils.getType(resource.document)
+      title = utils.makeModelTitle(utils.getModel(type))
+    }
+    else if (rType === FORM_PREFILL) {
+      isDraftApplication = true
+      title = utils.makeModelTitle(resource.prefill[TYPE])
+    }
+    else
+      title = utils.makeModelTitle(rModel)
 
-      passProps: {resource: resource}
-    });
+    let dn = utils.getDisplayName(resource)
+    // let newTitle = title + (dn ? ' -- ' + dn : '');
+    let newTitle = (dn ? dn + ' -- '  : '') + title;
+
+    let route = {
+      title: newTitle,
+      id: 5,
+      component: MessageView,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource,
+        search,
+        application: application || (isDraftApplication  &&  this.props.resource),
+        bankStyle: bankStyle || defaultBankStyle
+      }
+    }
+    if (isBacklink)
+      route.passProps.backlink = prop
+    if (utils.isMyMessage({resource})) {
+      _.extend(route, {
+        rightButtonTitle: 'Edit',
+        onRightButtonPress: {
+          title: title,
+          id: 4,
+          component: NewResource,
+          titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
+          passProps: {
+            model: rModel,
+            resource: resource,
+            search: search,
+            serverOffline: this.props.serverOffline,
+            bankStyle: bankStyle || defaultBankStyle
+          }
+        },
+
+      })
+    }
+    navigator.push(route)
   }
 
   _selectResource(resource) {
@@ -1051,7 +1051,7 @@ class GridList extends Component {
     return mArr
   }
   onSearchChange(filter) {
-    let { search, isModel, modelName, listView, prop, resource } = this.props
+    let { search, isModel, modelName, listView, prop, resource, isChooser } = this.props
     this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     if (search  &&  isModel) {
       let mArr = this.filterModels(this.state.filter)
@@ -1060,12 +1060,13 @@ class GridList extends Component {
     }
     Actions.list({
       query: this.state.filter,
-      modelName: modelName,
-      to: resource,
-      prop: prop,
+      modelName,
+      [isChooser? 'resource' : 'to']: resource,
+      prop,
+      isChooser,
       first: true,
       limit: this.limit,
-      listView: listView
+      listView
     });
   }
 
@@ -1261,7 +1262,7 @@ class GridList extends Component {
     // let me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
-    let { isModel, modelName, prop, search, bookmark } = this.props
+    let { isModel, modelName, prop, search, bookmark, isBacklink } = this.props
     if (isModel) // || bookmark)
       return
     if (prop  &&  !prop.allowToAdd)
@@ -1279,12 +1280,19 @@ class GridList extends Component {
                  </View>
     else
       employee = <View/>
+    let isAdd = this.state.allowToAdd  &&  !search
+    let icon
+    if (isAdd)
+      icon = 'md-add'
+    else if (isBacklink)
+      return
+    else
+      icon = Platform.OS !== 'android' ?  'md-more' : 'md-menu'
 
-    let icon = Platform.OS !== 'android' ?  'md-more' : 'md-menu'
     let color = Platform.OS !== 'android' ? '#ffffff' : 'red'
     let menuBtn
     if (!bookmark  &&  !noMenuButton)
-      menuBtn = <TouchableOpacity onPress={() => this.ActionSheet.show()}>
+      menuBtn = <TouchableOpacity onPress={() => isAdd ? this.addNew() : this.ActionSheet.show()}>
                   <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
                     <Icon name={icon}  size={33}  color={color}/>
                   </View>
@@ -1324,41 +1332,42 @@ class GridList extends Component {
     this.props.navigator.push(route)
   }
   addNew() {
-    let model = utils.getModel(this.props.modelName);
+    let { modelName, prop, resource, isChooser, style, navigator } = this.props
+    let model = utils.getModel(modelName);
     let r;
     this.setState({hideMode: false})
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
-    if (this.props.resource) {
+    if (resource) {
       let props = model.properties;
       for (let p in props) {
-        let isBacklink = props[p].ref  &&  props[p].ref === this.props.resource[TYPE];
+        let isBacklink = props[p].ref  &&  props[p].ref === resource[TYPE];
         if (props[p].ref  &&  !isBacklink) {
           if (utils.getModel(props[p].ref).isInterface  &&  model.interfaces  &&  model.interfaces.indexOf(props[p].ref) !== -1)
             isBacklink = true;
         }
         if (isBacklink) {
           r = {};
-          r[TYPE] = this.props.modelName;
-          r[p] = { id: utils.getId(this.props.resource) };
+          r[TYPE] = modelName;
+          r[p] = { id: utils.getId(resource) };
 
-          if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
-            r.relatedTo = this.props.resource.relatedTo;
+          if (resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
+            r.relatedTo = resource.relatedTo;
         }
       }
     }
     // Setting some property like insured person. The value for it will be another form
     //
-    if (this.props.prop  &&  model.subClassOf === FORM) {
+    if (prop  &&  model.subClassOf === FORM) {
       if (!r)
         r = {}
-      r[TYPE] = this.props.prop.ref || this.props.prop.items.ref;
-      r.from = this.props.resource.from
-      r.to = this.props.resource.to
-      r._context = this.props.resource._context
+      r[TYPE] = prop.ref || prop.items.ref;
+      r.from = resource.from
+      r.to = resource.to
+      r._context = resource._context
     }
     let self = this
-    this.props.navigator.push({
+    navigator.push({
       title: model.title,
       id: 4,
       component: NewResource,
@@ -1367,9 +1376,15 @@ class GridList extends Component {
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
-        bankStyle: this.props.style,
-      resource: r,
+        bankStyle: style,
+        resource: r,
         callback: (resource) => {
+          if (self.props.callback)
+            self.props.callback(prop.name, resource)
+          if (self.props.returnRoute) {
+            self.props.navigator.popToRoute(self.props.returnRoute)
+            return
+          }
           self.props.navigator.pop()
           let l = []
 
@@ -1410,7 +1425,12 @@ class GridList extends Component {
     // }
     // else
     // let isEmptyItemsTab = prop &&  this.state.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
-    let isEmptyItemsTab = prop &&  prop.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
+    let isEmptyItemsTab
+    if (!isChooser  &&  prop &&  prop.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)) {
+      if (me  &&  (!me.isEmployee  ||  utils.isMyMessage({resource})))
+        isEmptyItemsTab = true
+    }
+
     if (isEmptyItemsTab) {
       content = <NoResources
                   message={translate('pleaseClickOnAddButton', utils.makeModelTitle(model))}
@@ -1450,12 +1470,13 @@ class GridList extends Component {
       if (!hasSearch  && !search) {
         hasSearch = !_readOnly  ||  !utils.isContext(modelName)
         if (hasSearch)
-          hasSearch = (dataSource && dataSource.getRowCount() > this.limit) || (filter  &&  filter.length)
+          hasSearch = (dataSource && dataSource.getRowCount() > SEARCH_LIMIT) || (filter  &&  filter.length)
       }
       if (hasSearch) {
         searchBar = <SearchBar
                       onChangeText={this.onSearchChange.bind(this)}
                       placeholder={translate('search')}
+                      showsCancelButtonWhileEditing={false}
                       showsCancelButton={false}
                       hideBackground={true}
                       bankStyle={this.props.bankStyle}
@@ -1542,7 +1563,8 @@ class GridList extends Component {
           onPress: () => this.addNew()
         }
       ]
-    } else {
+    }
+    else {
       if (!ENV.allowAddServer) return
 
       buttons = [
