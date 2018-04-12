@@ -1,4 +1,6 @@
 rootProject.name = 'Tradle'
+include ':blinkid-react-native'
+project(':blinkid-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/blinkid-react-native/src/android')
 include ':react-native-firebase'
 project(':react-native-firebase').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-firebase/android')
 include ':react-native-splash-screen'
@@ -21,8 +23,6 @@ include ':react-native-splash-screen'
 project(':react-native-splash-screen').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-splash-screen/android')
 include ':react-native-fabric'
 project(':react-native-fabric').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fabric/android')
-include ':react-native-blinkid'
-project(':react-native-blinkid').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-blinkid/android')
 include ':react-native-async-storage-snappy'
 project(':react-native-async-storage-snappy').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-async-storage-snappy/android')
 include ':react-native-local-auth'

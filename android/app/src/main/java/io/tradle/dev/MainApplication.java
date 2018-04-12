@@ -7,6 +7,7 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.microblink.reactnative.blinkid.BlinkIDReactPackage;
 // import com.instabug.reactlibrary.RNInstabugReactnativePackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -35,7 +36,7 @@ import io.branch.referral.Branch;
 import io.branch.rnbranch.RNBranchPackage;
 import io.invertase.firebase.RNFirebasePackage;
 import io.invertase.firebase.analytics.RNFirebaseAnalyticsPackage;
-import io.tradle.RNBlinkIDPackage;
+//import io.tradle.RNBlinkIDPackage;
 import io.tradle.react.LocalAuthPackage;
 import io.tradle.snappystorage.RNAsyncSnappyStoragePackage;
 
@@ -85,7 +86,8 @@ public class MainApplication extends Application implements ReactApplication {
         new OrientationPackage(),
         new ECCPackage(),
         new LocalAuthPackage(),
-        new RNBlinkIDPackage()
+        new BlinkIDReactPackage()
+//        new RNBlinkIDPackage()
 //        new RNPassportReaderPackage()
       );
 
