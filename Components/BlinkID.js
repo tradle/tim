@@ -3,31 +3,38 @@ import { Platform } from 'react-native'
 import PropTypes from 'prop-types'
 import withDefaults from 'lodash/defaults'
 import groupBy from 'lodash/groupBy'
+import getValues from 'lodash/values'
 // import BlinkID from 'react-native-blinkid'
-import { BlinkID, MRTDKeys, USDLKeys, EUDLKeys, MYKADKeys } from 'blinkid-react-native'
+import { BlinkID, MRTDKeys, USDLKeys, EUDLKeys, NZDLKeys, MYKADKeys } from 'blinkid-react-native'
 import validateResource from '@tradle/validate-resource'
 import { microblink } from '../utils/env'
 import { isSimulator } from '../utils/utils'
 
 const { sanitize } = validateResource.utils
+const recognizers = {
+  // scans documents with face image and returns document images
+  // BlinkID.RECOGNIZER_DOCUMENT_FACE,
+  // scans documents with MRZ (Machine Readable Zone)
+  mrtd: BlinkID.RECOGNIZER_MRTD,
+  // scans EUDL (EU Driver License)
+  eudl: BlinkID.RECOGNIZER_EUDL,
+  // scans USDL (US Driver License)
+  usdl: BlinkID.RECOGNIZER_USDL,
+  // scans NZDL (NZ Driver License)
+  nzdl: BlinkID.RECOGNIZER_NZDL,
+  // scans MyKad (Malaysian ID)
+  mykad: BlinkID.RECOGNIZER_MYKAD,
+  face: BlinkID.RECOGNIZER_DOCUMENT_FACE
+}
+
 const defaults = {
   enableBeep: true,
   useFrontCamera: false,
   shouldReturnFaceImage: true,
   shouldReturnCroppedImage: true,
+  shouldReturnSignatureImage: true,
   // shouldReturnSuccessfulImage: true,
-  recognizers: [
-    // scans documents with face image and returns document images
-    // BlinkID.RECOGNIZER_DOCUMENT_FACE,
-    // scans documents with MRZ (Machine Readable Zone)
-    BlinkID.RECOGNIZER_MRTD,
-    // scans USDL (US Driver License)
-    BlinkID.RECOGNIZER_USDL,
-    // scans EUDL (EU Driver License)
-    BlinkID.RECOGNIZER_EUDL,
-    // scans MyKad (Malaysian ID)
-    BlinkID.RECOGNIZER_MYKAD
-  ]
+  recognizers: getValues(recognizers)
 }
 
 let licenseKey
@@ -69,13 +76,6 @@ const scan = (function () {
 }());
 
 const dismiss = BlinkID && (BlinkID.dismiss || BlinkID.cancel)
-const recognizers = {
-  mrtd: BlinkID.RECOGNIZER_MRTD,
-  eudl: BlinkID.RECOGNIZER_EUDL,
-  usdl: BlinkID.RECOGNIZER_USDL,
-  mykad: BlinkID.RECOGNIZER_MYKAD,
-  face: BlinkID.RECOGNIZER_DOCUMENT_FACE
-}
 
 export default { scan, dismiss, recognizers, setLicenseKey }
 
@@ -106,6 +106,37 @@ function normalizeEUDLResult (result) {
 
   normalizeDates(result, parseEUDate)
   return result
+}
+
+function normalizeNZDLResult (result) {
+  // NewZealandDLAddress.Address:""
+  // NewZealandDLCardVersion.CardVersion:"453"
+  // NewZealandDLCardVersionNew.CardVersion:"453"
+  // NewZealandDLCardVersionOld.CardVersion:""
+  // NewZealandDLDonorIndicator.DonorIndicator:"1"
+  // NewZealandDLFirstNames.FirstName:"JOHN JACOB DEAN"
+  // NewZealandDLLicenseNumber.LicenseNumber:"AB123456"
+  // NewZealandDLLicenseNumberNew.LicenseNumber:"AB123456"
+  // NewZealandDLLicenseNumberOld.LicenseNumber:""
+  // NewZealandDLSurname.Surname:"SMITH"
+  // PaymentDataType:"NewZealandDLFront"
+  // documentClassification:"NewZealandDLFrontNew"
+
+  const personal = {
+    dateOfBirth: null, // don't know at this point
+    firstName: result[NZDLKeys.FirstName],
+    lastName: result[NZDLKeys.LastName],
+  }
+
+  const document = {
+    documentNumber: result[NZDLKeys.LicenseNumber],
+    cardVersion: result[NZDLKeys.CardVersion],
+    dateOfIssue: result[NZDLKeys.IssueDate],
+    dateOfExpiry: result[NZDLKeys.ExpiryDate],
+    isDonor: result[NZDLKeys.DonorIndicator] === '1'
+  }
+
+  return { personal, document }
 }
 
 function normalizeMRTDResult (result) {
@@ -326,5 +357,6 @@ function dateFromParts ({ day, month, year }) {
 const normalizers = {
   mrtd: normalizeMRTDResult,
   usdl: normalizeUSDLResult,
-  eudl: normalizeEUDLResult
+  eudl: normalizeEUDLResult,
+  nzdl: normalizeNZDLResult,
 }

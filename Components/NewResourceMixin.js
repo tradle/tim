@@ -631,6 +631,8 @@ var NewResourceMixin = {
       tooltip = translate('centerLicence')
       if (country.title === 'United States') {
         recognizers = [BlinkID.recognizers.usdl, BlinkID.recognizers.face]
+      } else if (country.title === 'New Zealand') {
+        recognizers = BlinkID.recognizers.nzdl
       } else {
         recognizers = BlinkID.recognizers.eudl
       }
@@ -710,7 +712,7 @@ var NewResourceMixin = {
 
 
     let dateOfExpiry
-    ;['mrtd', 'usdl', 'eudl'].some(docType => {
+    ;['mrtd', 'usdl', 'eudl', 'nzdl'].some(docType => {
       const scan = result[docType]
       if (!scan) return
 
