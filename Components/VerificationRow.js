@@ -96,7 +96,8 @@ class VerificationRow extends Component {
 
   render() {
     let {resource, isChooser, lazy, parentResource, onSelect, prop, modelName, multiChooser, bankStyle } = this.props
-    let model = utils.getModel(resource[TYPE]);
+    let rType = utils.getType(resource)
+    let model = utils.getModel(rType);
     let isMyProduct = model.subClassOf === MY_PRODUCT
     let isForm = model.subClassOf === FORM
     let isBookmark = model.id === BOOKMARK
@@ -135,7 +136,7 @@ class VerificationRow extends Component {
 
     let verificationRequest = resource.document
                             ? utils.getModel(utils.getType(resource.document))
-                            : utils.getModel(resource[TYPE]);
+                            : model
 
     let rows = [];
 
@@ -381,7 +382,8 @@ class VerificationRow extends Component {
   }
 
   formatFilteredResource(model, resource, renderedRows) {
-    let props = (utils.getModel(resource[TYPE] || resource.id)).properties
+    let rType = utils.getType(resource)
+    let props = utils.getModel(rType).properties
     let searchCriteria = this.props.searchCriteria
     let viewCols = []
     for (let p in searchCriteria) {
