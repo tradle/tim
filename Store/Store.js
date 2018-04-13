@@ -3789,7 +3789,20 @@ var Store = Reflux.createStore({
     var {resource, action, noTrigger, search, backlink, forwardlink, application} = params
     let isApplication = resource[TYPE] === APPLICATION
     let rId = utils.getId(resource)
-    let r = await this._getItemFromServer(rId)
+    let r
+    if (!isApplication  ||  resource.id  ||  (!backlink  &&  !forwardlink))
+      r = await this._getItemFromServer(rId)
+    else {
+      r = _.cloneDeep(resource)
+      let ref = utils.getModel(APPLICATION).properties.submissions.items.ref
+      let hash = r[CUR_HASH]
+      let l = await this.searchServer({modelName: ref, filterResource: {application: this.buildRef(r)}, noTrigger: true})
+      if (!l)
+        return
+      r.submissions = l.list
+      this.organizeSubmissions(r)
+    }
+
     let list
     let m = this.getModel(r[TYPE])
     if (isApplication) {
@@ -3870,21 +3883,45 @@ var Store = Reflux.createStore({
     this.trigger(retParams)
   },
   async getObjects(list, prop) {
+    if (!list.length)
+      return
     let links
     if (prop) {
       if (prop.items.ref !== VERIFIED_ITEM)
-        links = list.map((fl) => fl.id.split('_')[2])
+        links = list.map((fl) => fl[CUR_HASH] || fl.id.split('_')[2])
       else
         links = list.map((fl) => utils.getId(fl.verification).split('_')[2])
     }
     else
       links = Object.keys(list)
-      // links = list.map((r) => utils.getId(r).split('_')[2])
 
-    if (!links  ||  !links.length)
-      return
-    let objects = await graphQL.getObjects(links, this.client)
-    return objects.map((r) => this.convertToResource(r))
+    let newLinks = []
+    if (!this.cache) {
+      this.cache = new Cache({max: 500, maxAge: 1000 * 60 * 60})
+      newLinks = links
+    }
+    else {
+      let list = []
+      links.forEach((l) => {
+        let r = this.cache.get(l)
+        if (r)
+          list.push(r)
+        else
+          newLinks.push(l)
+      })
+      if (!newLinks.length)
+        return list
+    }
+
+    // links = list.map((r) => utils.getId(r).split('_')[2])
+
+    let objects = await graphQL.getObjects(newLinks, this.client)
+    objects.forEach((obj) => {
+      let r = this.convertToResource(obj)
+      this.cache.set(r[CUR_HASH], r)
+    })
+
+    return links.map(l => this.cache.get(l))
   },
   async getItemFromDeepLink({type, link, permalink}) {
     let resource
@@ -6246,10 +6283,26 @@ var Store = Reflux.createStore({
   },
 
   organizeSubmissions (application) {
-    const { submissions={} } = application
-    if (!submissions.edges ||  !submissions.edges.length)
+    const submissions = application.submissions
+    if (!submissions)
       return
-    let submissionStubs = submissions.edges.map(s => s.node.submission)
+    let submissionStubs
+    if (Array.isArray(submissions))
+      submissionStubs = submissions.map((sub) => sub.submission)
+    else {
+      const { submissions={} } = application
+      if (!submissions.edges ||  !submissions.edges.length)
+        return
+      submissionStubs = submissions.edges.map(s => s.node.submission)
+    }
+    if (application.forms)
+      application.forms = []
+    if (application.checks)
+      application.checks = []
+    if (application.verifications)
+      application.verifications = []
+    if (application.editRequests)
+      application.editRequests = []
     submissionStubs.forEach(sub => {
       let m = this.getModel(utils.getType(sub))
       let type = m.subClassOf || m.id
