@@ -495,9 +495,11 @@ var NewResourceMixin = {
 
         if (data  &&  data[p]) {
           let vType = utils.getType(data[p])
-          let subModel = utils.getModel(vType)
-          options.fields[p].value = utils.getId(data[p])
-          data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
+          if (vType) {
+            let subModel = utils.getModel(vType)
+            options.fields[p].value = utils.getId(data[p])
+            data[p] = utils.getDisplayName(data[p], subModel) || data[p].title;
+          }
         }
 
         options.fields[p].onFocus = chooser.bind(this, props[p], p)

@@ -1,7 +1,7 @@
 import dateformat from 'dateformat'
 
 import { TYPE } from '@tradle/constants'
-import { translate, isWeb } from '../utils/utils'
+import utils, { translate, isWeb } from '../utils/utils'
 
 module.exports = function PhotoID ({ models }) {
   return {
@@ -23,6 +23,20 @@ module.exports = function PhotoID ({ models }) {
       console.log('PhotoID: requesting additional properties for Driver Licence')
 
       let scan = form.scanJson
+
+      // cleanup the prefill from the previous scan if there was one
+      let props = model.properties
+
+      for (let p in props) {
+        let prop = props[p]
+        if (prop.list) { //p.indexOf('_group') !== -1) {
+          prop.list.forEach((pName) => {
+            if (pName.indexOf('_group') === -1)
+              delete form[pName]
+          })
+        }
+      }
+
       prefillValues(form, scan, model)
       // for (let p in originalModel.properties) {
       //   if (scan[p])
@@ -54,7 +68,7 @@ function prefillValues(form, values, model) {
   let props = model.properties
   let dateProps = ['dateOfExpiry', 'dateOfBirth', 'dateOfIssue']
   for (let p in values) {
-    let val = val
+    let val = values[p]
     if (typeof val === 'object')
       prefillValues(form, val, model)
     else if (dateProps.includes(p)) {//props[p].type === 'date') {

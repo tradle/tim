@@ -52,8 +52,8 @@ const scan = (function () {
     const image = result.images.cropped
     if (image) {
       result.image = {
-        base64: 'data:image/jpeg;base64,' + image.base64,
-        ...image
+        ...image,
+        base64: 'data:image/jpeg;base64,' + image.base64
       }
     }
 
@@ -78,6 +78,7 @@ const scan = (function () {
 const dismiss = BlinkID && (BlinkID.dismiss || BlinkID.cancel)
 
 export default { scan, dismiss, recognizers, setLicenseKey }
+export { scan, dismiss, recognizers, setLicenseKey }
 
 function normalizeEUDLResult (result) {
   result = {

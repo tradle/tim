@@ -467,7 +467,7 @@ class ResourceRow extends Component {
             row = <Text style={style} key={this.getNextKey()}>{(resource[v].currency || currencySymbol) + resource[v].value}</Text>
           }
           else
-            row = <Text style={style} key={self.getNextKey()}>{resource[v].title}</Text>
+            row = <Text style={style} key={this.getNextKey()}>{resource[v].title}</Text>
 
           vCols.push(row);
         }

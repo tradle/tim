@@ -682,7 +682,11 @@ var utils = {
   getType(r) {
     if (typeof r === 'string')
       return r.split('_')[0]
-    return r[TYPE] || this.getId(r).split('_')[0]
+    if (r[TYPE])
+      return r[TYPE]
+    let id = this.getId(r)
+    if (id)
+      return id.split('_')[0]
   },
   getProduct(r) {
     return r[TYPE] === PRODUCT_APPLICATION
