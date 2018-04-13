@@ -390,7 +390,7 @@ class ResourceRow extends Component {
         let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
         let productTitle = utils.makeModelTitle(p)
         return <View style={{flexDirection: 'row'}}>
-                <Text style={[styles.resourceTitle, {fontSize: 18}]} numberOfLines={2}>{resource.providerInfo.title}</Text>
+                <Text style={[styles.resourceTitle, {fontSize: 18}]}>{resource.providerInfo.title}</Text>
                 <Text style={[styles.resourceTitle, {fontSize: 18, paddingLeft: 7, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
               </View>
       }
@@ -399,10 +399,10 @@ class ResourceRow extends Component {
         if (model.subClassOf  &&  model.subClassOf === ENUM)
           vCols = utils.createAndTranslate(vCols, true)
 
-        return <Text style={styles.resourceTitle} numberOfLines={2}>{vCols}</Text>;
+        return <Text style={styles.resourceTitle}>{vCols}</Text>;
       }
       else
-        return <Text style={styles.resourceTitle} numberOfLines={2}>{model.title}</Text>;
+        return <Text style={styles.resourceTitle}>{model.title}</Text>;
     }
     // HACK
     else if (model.id === APPLICATION)
@@ -463,10 +463,10 @@ class ResourceRow extends Component {
           if (ref == MONEY) {
             let { currency } = this.props
             let currencySymbol = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
-            row = <Text style={style} numberOfLines={first ? 2 : 1} key={this.getNextKey()}>{(resource[v].currency || currencySymbol) + resource[v].value}</Text>
+            row = <Text style={style} key={this.getNextKey()}>{(resource[v].currency || currencySymbol) + resource[v].value}</Text>
           }
           else
-            row = <Text style={style} numberOfLines={first ? 2 : 1} key={this.getNextKey()}>{resource[v].title}</Text>
+            row = <Text style={style} key={this.getNextKey()}>{resource[v].title}</Text>
 
           vCols.push(row);
         }
