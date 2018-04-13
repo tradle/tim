@@ -119,7 +119,6 @@ class ApplicationView extends Component {
       if (backlink !== this.state.backlink || params.backlinkAdded) {
         if (backlink.items.backlink) {
           let r = params.resource || this.state.resource
-          delete r[backlink.name]
           this.setState({backlink: backlink, showDetails: false, showDocuments: false, resource: r})
           Actions.getItem({resource: r, application, search: true, backlink: backlink})
         }

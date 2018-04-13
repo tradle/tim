@@ -95,11 +95,11 @@ var propTypesMap = {
 
 const DEFAULT_LINK_COLOR = '#a94442'
 // import transform from 'tcomb-json-schema'
-var DEFAULT_BLINK_ID_OPTS = {
-  mrtd: { showFullDocument: true },
-  eudl: { showFullDocument: true },
-  usdl: {}
-}
+// var DEFAULT_BLINK_ID_OPTS = {
+//   mrtd: { showFullDocument: true },
+//   eudl: { showFullDocument: true },
+//   usdl: {}
+// }
 
 var NewResourceMixin = {
   onScroll(e) {
@@ -627,34 +627,37 @@ var NewResourceMixin = {
 
   async showBlinkIDScanner(prop) {
     const { documentType, country } = this.state.resource
-    let blinkIDOpts = {
-      quality: 0.2,
-      base64: true,
-      timeout: ENV.blinkIDScanTimeoutInternal
-    }
-
     const type = getDocumentTypeFromTitle(documentType.title)
+    let recognizers
+    let tooltip
     switch (type) {
     case 'passport':
-      blinkIDOpts.tooltip = translate('centerPassport')
+      tooltip = translate('centerPassport')
       // machine readable travel documents (passport)
-      blinkIDOpts.mrtd = DEFAULT_BLINK_ID_OPTS.mrtd
+      recognizers = BlinkID.recognizers.mrtd
       break
     case 'license':
-      blinkIDOpts.tooltip = translate('centerLicence')
+      tooltip = translate('centerLicence')
       if (country.title === 'United States') {
-        blinkIDOpts.usdl = DEFAULT_BLINK_ID_OPTS.usdl
+        recognizers = [BlinkID.recognizers.usdl, BlinkID.recognizers.face]
+      } else if (country.title === 'New Zealand') {
+        recognizers = BlinkID.recognizers.nzdl
       } else {
-        blinkIDOpts.eudl = DEFAULT_BLINK_ID_OPTS.eudl
+        recognizers = BlinkID.recognizers.eudl
       }
 
       break
     default:
-      blinkIDOpts = {
-        ...DEFAULT_BLINK_ID_OPTS,
-        ...blinkIDOpts,
-        tooltip: translate('centerID')
-      }
+      tooltip = translate('centerID')
+      break
+    }
+
+    const blinkIDOpts = {
+      quality: 0.2,
+      base64: true,
+      timeout: ENV.blinkIDScanTimeoutInternal,
+      tooltip,
+      recognizers: recognizers ? [].concat(recognizers) : BlinkID.recognizers
     }
 
     const promiseTimeout = new Promise((resolve, reject) => {
@@ -679,7 +682,7 @@ var NewResourceMixin = {
       const timedOut = !canceled && /time/i.test(err.message)
       if (!canceled && typeof BlinkID.dismiss === 'function') {
         // cancel programmatically
-        await BlinkID.dismiss()
+        BlinkID.dismiss()
       }
 
       // give the BlinkID view time to disappear
@@ -704,19 +707,21 @@ var NewResourceMixin = {
 
     // const tradleObj = utils.fromMicroBlink(result)
     const r = _.cloneDeep(this.state.resource)
-
-    r[prop] = {
-      url: result.image.base64,
-      width: result.image.width,
-      height: result.image.height
+    if (result.image) {
+      r[prop] = {
+        url: result.image.base64,
+        width: result.image.width,
+        height: result.image.height
+      }
     }
+
     let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
     if (docScannerProps  &&  docScannerProps.length)
       r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkid')
 
 
     let dateOfExpiry
-    ;['mrtd', 'usdl', 'eudl'].some(docType => {
+    ;['mrtd', 'usdl', 'eudl', 'nzdl'].some(docType => {
       const scan = result[docType]
       if (!scan) return
 

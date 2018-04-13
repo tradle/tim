@@ -23,6 +23,7 @@
 		43EDC8BAFC1D48CDB9B731A5 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = EEECD0C1934547049DA9F6AE /* libz.tbd */; };
 		49F0BED86B19964C65957BC3 /* Pods_Tradle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE68AEBC388C8832C7DF2962 /* Pods_Tradle.framework */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
+		730D64D0207EF60100358558 /* libBlinkIDReactNative.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 730D6460207EF5BC00358558 /* libBlinkIDReactNative.a */; };
 		73113FE5205F4AAF000C04F6 /* libRNSearchBar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73113FE4205F4AA7000C04F6 /* libRNSearchBar.a */; };
 		73113FFB205F4D55000C04F6 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73113FF8205F4B44000C04F6 /* libRCTBlob.a */; };
 		732B67862060213F00B16D6F /* libRNCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B67852060213500B16D6F /* libRNCamera.a */; };
@@ -52,7 +53,6 @@
 		7379FC471EDA619A0093535C /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64451ED9FF7C0056F4BF /* libRNECC.a */; };
 		7379FC481EDA619E0093535C /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64371ED9FF7C0056F4BF /* libRNDeviceInfo.a */; };
 		7379FC491EDA61A20093535C /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63E11ED9FF670056F4BF /* libCodePush.a */; };
-		7379FC4C1EDA61B60093535C /* libRNBlinkID.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63D91ED9FF670056F4BF /* libRNBlinkID.a */; };
 		7379FC4D1EDA61BB0093535C /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63BD1ED9FF670056F4BF /* libRCTAsyncRocksDBStorage.a */; };
 		73EC81B41EDA99280051FA02 /* GoogleToolboxForMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73EC81AE1EDA99280051FA02 /* GoogleToolboxForMac.framework */; };
 		73F1B89D205F5AA5004E96E2 /* libReactNativeExceptionHandler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 734DE31C1F6B8542009152AD /* libReactNativeExceptionHandler.a */; };
@@ -231,6 +231,13 @@
 			remoteGlobalIDString = 2D2A28201D9B03D100D4039D;
 			remoteInfo = "RCTAnimation-tvOS";
 		};
+		730D645F207EF5BC00358558 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A27CCA2B1E9E57A500BED675;
+			remoteInfo = BlinkIDReactNative;
+		};
 		73113F8F205F4A95000C04F6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 6B3FC1286FC44AFDBB86B8CD /* BVLinearGradient.xcodeproj */;
@@ -335,13 +342,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 73A4DFFE1E2E7C6900D0A660;
 			remoteInfo = RCTAsyncRocksDBStorage;
-		};
-		732B63D81ED9FF670056F4BF /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = AC5444F68B7E422F9E8B8AA4 /* RNBlinkID.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 73997FB21E302EBD008B8D47;
-			remoteInfo = RNBlinkID;
 		};
 		732B63E01ED9FF670056F4BF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -577,6 +577,7 @@
 		266D99AA90E74766BFCEC86B /* EvilIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = EvilIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/EvilIcons.ttf"; sourceTree = "<group>"; };
 		4A77A9E59FA34C10B19D120B /* RNImagePicker.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNImagePicker.xcodeproj; path = "../node_modules/react-native-image-picker/ios/RNImagePicker.xcodeproj"; sourceTree = "<group>"; };
 		4C80CE90233C4E8EAE48AFFF /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
+		4E8DE8CFD0754E1B9ADDBF1C /* libRNBlinkID.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNBlinkID.a; sourceTree = "<group>"; };
 		4F0141B0C05A4BCE906F6CF6 /* RNLocalAuth.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNLocalAuth.xcodeproj; path = "../node_modules/react-native-local-auth/RNLocalAuth.xcodeproj"; sourceTree = "<group>"; };
 		51E28E47C0474F6991410832 /* ReactNativeExceptionHandler.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeExceptionHandler.xcodeproj; path = "../node_modules/react-native-exception-handler/ios/ReactNativeExceptionHandler.xcodeproj"; sourceTree = "<group>"; };
 		5533C47B56414D49AC0BA942 /* CodePush.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = "../node_modules/react-native-code-push/ios/CodePush.xcodeproj"; sourceTree = "<group>"; };
@@ -625,11 +626,12 @@
 		9F50F06665224D87E3717432 /* Pods-Tradle.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Tradle.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Tradle/Pods-Tradle.debug.xcconfig"; sourceTree = "<group>"; };
 		A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		A4C66A6D1DDE4BC083E2095B /* libReactNativeExceptionHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libReactNativeExceptionHandler.a; sourceTree = "<group>"; };
-		AC5444F68B7E422F9E8B8AA4 /* RNBlinkID.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBlinkID.xcodeproj; path = "../node_modules/react-native-blinkid/ios/RNBlinkID.xcodeproj"; sourceTree = "<group>"; };
 		AE68AEBC388C8832C7DF2962 /* Pods_Tradle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Tradle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
+		B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = BlinkIDReactNative.xcodeproj; path = "../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative.xcodeproj"; sourceTree = "<group>"; };
 		BFC0C75130C445498FB831DE /* RNPasscodeStatus.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNPasscodeStatus.xcodeproj; path = "../node_modules/react-native-passcode-status/ios/RNPasscodeStatus.xcodeproj"; sourceTree = "<group>"; };
 		CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBranch.xcodeproj; path = "../node_modules/react-native-branch/ios/RNBranch.xcodeproj"; sourceTree = "<group>"; };
+		D0DAF985EAB8452CAF6683AC /* libBlinkIDReactNative.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libBlinkIDReactNative.a; sourceTree = "<group>"; };
 		E0957333521746DEB401A14A /* ReactNativeLocalization.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeLocalization.xcodeproj; path = "../node_modules/react-native-localization/ReactNativeLocalization.xcodeproj"; sourceTree = "<group>"; };
 		E512A7388D2D4884A7CD858B /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		E7C815980A204425819A0AD3 /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
@@ -664,7 +666,6 @@
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 				7379FC4D1EDA61BB0093535C /* libRCTAsyncRocksDBStorage.a in Frameworks */,
 				49F0BED86B19964C65957BC3 /* Pods_Tradle.framework in Frameworks */,
-				7379FC4C1EDA61B60093535C /* libRNBlinkID.a in Frameworks */,
 				43EDC8BAFC1D48CDB9B731A5 /* libz.tbd in Frameworks */,
 				7379FC491EDA61A20093535C /* libCodePush.a in Frameworks */,
 				7379FC481EDA619E0093535C /* libRNDeviceInfo.a in Frameworks */,
@@ -690,6 +691,7 @@
 				73113FFB205F4D55000C04F6 /* libRCTBlob.a in Frameworks */,
 				73F1B89F205F5ABD004E96E2 /* libTcpSockets.a in Frameworks */,
 				73F1B8A0205F5AC8004E96E2 /* libreact-native-branch.a in Frameworks */,
+				730D64D0207EF60100358558 /* libBlinkIDReactNative.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -837,6 +839,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		730D645C207EF5BB00358558 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				730D6460207EF5BC00358558 /* libBlinkIDReactNative.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		73113FE0205F4AA7000C04F6 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -850,14 +860,6 @@
 			children = (
 				73113FF8205F4B44000C04F6 /* libRCTBlob.a */,
 				73113FFA205F4B44000C04F6 /* libRCTBlob-tvOS.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		732B63B01ED9FF670056F4BF /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				732B63D91ED9FF670056F4BF /* libRNBlinkID.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1087,7 +1089,6 @@
 				00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */,
 				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
 				B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */,
-				AC5444F68B7E422F9E8B8AA4 /* RNBlinkID.xcodeproj */,
 				5533C47B56414D49AC0BA942 /* CodePush.xcodeproj */,
 				6DEDCC3A3AAC4B4ABEF08912 /* RNDeviceInfo.xcodeproj */,
 				025FE4A02ADE4DA2823A4C6D /* RNECC.xcodeproj */,
@@ -1108,6 +1109,7 @@
 				0F777F0159624A2AA6123F88 /* TcpSockets.xcodeproj */,
 				CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */,
 				6B75EECB744A4B5E9B111227 /* RNFirebase.xcodeproj */,
+				B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1152,6 +1154,8 @@
 				5538811E99ED47279BA0FA88 /* libTcpSockets.a */,
 				8B8FD5DD4E4F4FFB9581AD8E /* libreact-native-branch.a */,
 				59BCC33C56304833B09BF867 /* libRNFirebase.a */,
+				D0DAF985EAB8452CAF6683AC /* libBlinkIDReactNative.a */,
+				4E8DE8CFD0754E1B9ADDBF1C /* libRNBlinkID.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -1234,6 +1238,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = 730D645C207EF5BB00358558 /* Products */;
+					ProjectRef = B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */;
+				},
+				{
 					ProductGroup = 732B64551ED9FF7C0056F4BF /* Products */;
 					ProjectRef = 6B3FC1286FC44AFDBB86B8CD /* BVLinearGradient.xcodeproj */;
 				},
@@ -1312,10 +1320,6 @@
 				{
 					ProductGroup = 732B64101ED9FF7C0056F4BF /* Products */;
 					ProjectRef = E0957333521746DEB401A14A /* ReactNativeLocalization.xcodeproj */;
-				},
-				{
-					ProductGroup = 732B63B01ED9FF670056F4BF /* Products */;
-					ProjectRef = AC5444F68B7E422F9E8B8AA4 /* RNBlinkID.xcodeproj */;
 				},
 				{
 					ProductGroup = 734E534B1FB0F07E0099FE02 /* Products */;
@@ -1555,6 +1559,13 @@
 			remoteRef = 5E9157341DD0AC6500FF2AA8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		730D6460207EF5BC00358558 /* libBlinkIDReactNative.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libBlinkIDReactNative.a;
+			remoteRef = 730D645F207EF5BC00358558 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		73113F90205F4A95000C04F6 /* libBVLinearGradient.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1658,13 +1669,6 @@
 			fileType = archive.ar;
 			path = libRCTAsyncRocksDBStorage.a;
 			remoteRef = 732B63BC1ED9FF670056F4BF /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		732B63D91ED9FF670056F4BF /* libRNBlinkID.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNBlinkID.a;
-			remoteRef = 732B63D81ED9FF670056F4BF /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		732B63E11ED9FF670056F4BF /* libCodePush.a */ = {
@@ -2042,6 +2046,8 @@
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
+					"$(SRCROOT)/../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -2049,6 +2055,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/Tradle",
+					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);
@@ -2113,6 +2121,8 @@
 					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
+					"$(SRCROOT)/../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -2120,6 +2130,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/Tradle",
+					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 					"\"$(SRCROOT)/Tradle\"",
 				);

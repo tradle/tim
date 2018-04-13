@@ -278,7 +278,7 @@ class ResourceRow extends Component {
     let dateRow
     if (!this.isOfficialAccounts  &&  !this.props.isChooser  &&  this.dateProp  &&  resource[this.dateProp]) {
       let val = utils.formatDate(new Date(resource[this.dateProp]), true)
-      // let dateBlock = self.addDateProp(resource, dateProp, true);
+      // let dateBlock = this.addDateProp(resource, dateProp, true);
       dateRow = <View style={styles.dateRow}>
                   <Text style={styles.verySmallLetters}>{val}</Text>
                 </View>
@@ -378,11 +378,14 @@ class ResourceRow extends Component {
       this.props.onSelect({resource: this.state.resource})
   }
   formatRow(resource, style) {
-    let self = this;
+    if (!resource[TYPE])
+      return <View style={{minHeight: 60, justifyContent: 'center'}}><Text style={styles.resourceTitle}>{resource.title}</Text></View>
+
     let rtype = utils.getType(resource)
     let model = utils.getModel(rtype);
     let viewCols = model.gridCols || model.viewCols;
-    let renderedViewCols;
+    let renderedViewCols
+
     if (!viewCols  &&  model.id !== APPLICATION) {
       if (model.id === PARTIAL) {
         let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
@@ -461,7 +464,7 @@ class ResourceRow extends Component {
           if (ref == MONEY) {
             let { currency } = this.props
             let currencySymbol = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
-            row = <Text style={style} numberOfLines={first ? 2 : 1} key={self.getNextKey()}>{(resource[v].currency || currencySymbol) + resource[v].value}</Text>
+            row = <Text style={style} key={this.getNextKey()}>{(resource[v].currency || currencySymbol) + resource[v].value}</Text>
           }
           else
             row = <Text style={style} key={self.getNextKey()}>{resource[v].title}</Text>
@@ -472,16 +475,16 @@ class ResourceRow extends Component {
       }
       else if (properties[v].type === 'date') {
         if (!this.dateProp)
-          vCols.push(self.addDateProp(v));
+          vCols.push(this.addDateProp(v));
         else
           return;
       }
       else  {
         let row;
         if (resource[v]  &&  (typeof resource[v] != 'string'))
-          row = <Text style={style} key={self.getNextKey()}>{resource[v]}</Text>;
+          row = <Text style={style} key={this.getNextKey()}>{resource[v]}</Text>;
         else if (!backlink  &&  resource[v]  && (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0))
-          row = <Text style={style} onPress={self.onPress.bind(self)} key={self.getNextKey()}>{resource[v]}</Text>;
+          row = <Text style={style} onPress={this.onPress.bind(this)} key={this.getNextKey()}>{resource[v]}</Text>;
         else {
           let val = properties[v].displayAs ? utils.templateIt(properties[v], resource) : resource[v];
           let msgParts = utils.splitMessage(val);
@@ -524,8 +527,8 @@ class ResourceRow extends Component {
                   lastMessageTypeIcon = <Icon name={icon} size={14} color='#7AAAc3' style={{paddingLeft: 1, marginTop: 1}}/>
               }
             }
-            let w = utils.getContentWidth(ResourceRow) - 145
-            row = <View style={{flexDirection: 'row'}} key={self.getNextKey()}>
+            let w = utils.dimensions(ResourceRow).width - 145
+            row = <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
                     <Icon name='md-done-all' size={16} color={isMyLastMessage ? '#cccccc' : '#7AAAc3'} />
                     {lastMessageTypeIcon}
                     <Text style={[style, {width: w, paddingLeft: 2, color: '#aaaaaa'}]}>{val}</Text>
@@ -533,8 +536,8 @@ class ResourceRow extends Component {
           }
           else {
             if (resource._unread  &&  v === 'lastMessage')
-              style = [style, {color: appStyle.UNREAD_COLOR}]
-            row = <Text style={style} key={self.getNextKey()}>{val}</Text>;
+              style = [style, {color: UNREAD_COLOR}]
+            row = <Text style={style} key={this.getNextKey()}>{val}</Text>;
           }
         }
         vCols.push(row);

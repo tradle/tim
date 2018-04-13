@@ -1117,7 +1117,7 @@ class GridList extends Component {
     if (model.id === ORGANIZATION  &&  resource.name === 'Sandbox'  &&  resource._isTest)
       return this.renderTestProviders()
     let isApplication = modelName === APPLICATION
-    let isMessage = utils.isMessage(resource)  &&  !isApplication
+    let isMessage = utils.isMessage(resource)  &&  !isApplication  ||  utils.isStub(resource)
     if (isMessage  &&  resource !== model  &&  !isContext) //isVerification  || isForm || isMyProduct)
       return (<VerificationRow
                 lazy={lazy}
