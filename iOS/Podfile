@@ -2,7 +2,7 @@ platform :ios, '9.0'
 target 'Tradle' do
   use_frameworks!
 
-  pod 'PPBlinkID', '~> 2.9.0'
+  pod 'PPBlinkID', '~> 2.17.1'
   pod 'Firebase/Core'
 #  pod 'iProov', :git => 'https://github.com/iProov/iproov-ios-pod.git'
 #  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
