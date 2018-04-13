@@ -1156,6 +1156,9 @@ var utils = {
       ref.time = resource.time
     return ref
   },
+  isStub(resource) {
+    return !resource[TYPE]  &&  resource.id //  &&  resource.title
+  },
   hasSupportLine(resource) {
     let me = this.getMe()
     if (resource._hasSupportLine)
