@@ -1383,7 +1383,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     itemsCounterEmpty: {
       paddingHorizontal: 5,
-      marginTop: -7
+      // marginTop: -7
     },
     itemsCounter: {
       marginTop: 20,
