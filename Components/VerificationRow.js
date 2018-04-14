@@ -36,6 +36,7 @@ const {
 } = constants.TYPES
 
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
+const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const CONFIRMATION = 'tradle.Confirmation'
 const CHECK  = 'tradle.Check'
 const STATUS = 'tradle.Status'
@@ -101,6 +102,7 @@ class VerificationRow extends Component {
     let isMyProduct = model.subClassOf === MY_PRODUCT
     let isForm = model.subClassOf === FORM
     let isBookmark = model.id === BOOKMARK
+    let isApplicationSubmission = model.id === APPLICATION_SUBMISSION
     let isVerification = resource.document != null
     let r = isVerification ? resource.document : resource
 
@@ -196,6 +198,8 @@ class VerificationRow extends Component {
         title = utils.makeModelTitle(resource.form)
       else if (isBookmark)
         title = resource.message  ||  utils.makeModelTitle(resource.bookmark[TYPE])
+      else if (isApplicationSubmission)
+        title = utils.makeModelTitle(utils.getType(resource.submission))
       else if (this.props.search) {
         if (isVerification)
           title = verificationRequest.title
