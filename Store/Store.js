@@ -3796,7 +3796,7 @@ var Store = Reflux.createStore({
       r = _.cloneDeep(resource)
       let ref = utils.getModel(APPLICATION).properties.submissions.items.ref
       let hash = r[CUR_HASH]
-      let l = await this.searchServer({modelName: ref, filterResource: {application: this.buildRef(r)}, noTrigger: true})
+      let l = await this.searchServer({modelName: ref, filterResource: {application__permalink: r[ROOT_HASH]}, noTrigger: true})
       if (!l)
         return
       r.submissions = l.list
