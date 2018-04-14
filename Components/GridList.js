@@ -670,7 +670,7 @@ class GridList extends Component {
     //   }
     // }
     // if (isResourceFromServer  ||  utils.isMessage(resource)) {
-    if (!isApplication  &&  !isDraftApplication  &&   utils.isMessage(resource)) {
+    if (!isApplication  &&  !isDraftApplication  &&   utils.isMessage(resource)  ||  utils.isStub(resource)) {
       this.selectMessage(resource)
       return;
     }
@@ -786,7 +786,7 @@ class GridList extends Component {
   selectMessage(resource) {
     let { modelName, search, bankStyle, navigator, currency, prop, returnRoute, callback, application, isBacklink } = this.props
     let model = utils.getModel(modelName);
-    let rType = resource[TYPE]
+    let rType = utils.getType(resource)
     let rModel = utils.getModel(rType)
     let isMessage = utils.isMessage(resource)
     if (callback) {
@@ -806,8 +806,12 @@ class GridList extends Component {
     }
     let title, isDraftApplication
     if (rType === VERIFICATION) {
-      let type = utils.getType(resource.document)
-      title = utils.makeModelTitle(utils.getModel(type))
+      if (utils.isStub(resource))
+        title = resource.title
+      else {
+        let type = utils.getType(resource.document)
+        title = utils.makeModelTitle(utils.getModel(type))
+      }
     }
     else if (rType === FORM_PREFILL) {
       isDraftApplication = true
@@ -834,7 +838,7 @@ class GridList extends Component {
     }
     if (isBacklink)
       route.passProps.backlink = prop
-    if (utils.isMyMessage({resource})) {
+    if (!utils.isStub(resource)  &&  utils.isMyMessage({resource})) {
       _.extend(route, {
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
@@ -904,9 +908,10 @@ class GridList extends Component {
         navigator.pop()
       return;
     }
+    let rType = utils.getType(resource)
     if (me                       &&
        !model.isInterface        &&
-       (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
+       (resource[ROOT_HASH] === me[ROOT_HASH]  ||  rType !== PROFILE)) {
       let passProps
       if (prefill) {
         passProps = {
@@ -919,7 +924,7 @@ class GridList extends Component {
       }
       else {
         passProps = {
-          model: utils.getModel(resource[TYPE]),
+          model: utils.getModel(rType),
           bankStyle: style || defaultBankStyle,
           resource: me
         }
