@@ -923,7 +923,7 @@ var utils = {
       if (v)
         hasSetProps = true
       if (typeof v === 'object')
-        v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref).properties)
+        v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref))
       else if (props  &&  props[p].range  &&  props[p].range  === 'check')
         v = ''
       group.push(v)
