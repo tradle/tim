@@ -943,7 +943,8 @@ class GridList extends Component {
     navigator.push(route);
   }
   showRefResources(resource, prop) {
-    let props = utils.getModel(resource[TYPE]).properties;
+    let rType = utils.getType(resource)
+    let props = utils.getModel(rType).properties;
     let propJson = props[prop];
     let resourceTitle = utils.getDisplayName(resource);
     resourceTitle = utils.makeTitle(resourceTitle);
@@ -980,7 +981,7 @@ class GridList extends Component {
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
-            model: utils.getModel(resource[TYPE]),
+            model: utils.getModel(rType),
             bankStyle: style,
             resource: resource
           }
