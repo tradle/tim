@@ -149,6 +149,10 @@ var search = {
             else
               op.EQ += `\n   ${p}: "${val}",`
           }
+          else if (p.indexOf('__') !== -1) {
+            if (props[p.split('__')[0]])
+              op.EQ += `\n   ${p}: "${val}",`
+          }
           continue
         }
         else if (props[p].type === 'string') {
