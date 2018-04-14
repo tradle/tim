@@ -657,7 +657,6 @@
   },
   "tradle.BusinessInformation": {
     "_t": "tradle.BusinessInformation",
-    "actualAddress": "1 Mars Way",
     "companyEmail": "info@nordgreggle.com",
     "companyFax": "15555737",
     "companyName": "Nordgreggle",
@@ -666,7 +665,6 @@
       "id": "tradle.Country_US",
       "title": "United States"
     },
-    "numberOfEmployees": 20,
     "streetAddress": "1 Mars Way",
     "region": "CA",
     "photos": [
