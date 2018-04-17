@@ -236,11 +236,6 @@
       "from": "tradle/restore",
       "resolved": "git://github.com/tradle/restore.git#a783c0adc0fa52cdd8452d2ea11025f343e737eb"
     },
-    "@tradle/schema-graphql": {
-      "version": "1.0.0",
-      "from": "tradle/schema-graphql#backlinks",
-      "resolved": "git://github.com/tradle/schema-graphql.git#0b16b161671c9a2b243c59bd921ee95c75ac44cf"
-    },
     "@tradle/simple-wallet": {
       "version": "1.3.1",
       "from": "@tradle/simple-wallet@>=1.3.1 <2.0.0",
@@ -1158,7 +1153,7 @@
     "blinkid-react-native": {
       "version": "1.4.2",
       "from": "tradle/blinkid-react-native",
-      "resolved": "git://github.com/tradle/blinkid-react-native.git#08a7c3df0b7cd43fe901ef8f5a0bb7571ba76928"
+      "resolved": "git://github.com/tradle/blinkid-react-native.git#5e8538964aa6a62bb47c233630964f288429c891"
     },
     "block-stream": {
       "version": "0.0.9",
@@ -3248,25 +3243,10 @@
       "from": "graphql-anywhere@>=3.0.1 <4.0.0",
       "resolved": "https://registry.npmjs.org/graphql-anywhere/-/graphql-anywhere-3.1.0.tgz"
     },
-    "graphql-fields": {
-      "version": "1.0.2",
-      "from": "graphql-fields@>=1.0.2 <2.0.0",
-      "resolved": "https://registry.npmjs.org/graphql-fields/-/graphql-fields-1.0.2.tgz"
-    },
-    "graphql-relay": {
-      "version": "0.5.5",
-      "from": "graphql-relay@>=0.5.2 <0.6.0",
-      "resolved": "https://registry.npmjs.org/graphql-relay/-/graphql-relay-0.5.5.tgz"
-    },
     "graphql-tag": {
       "version": "2.8.0",
       "from": "graphql-tag@>=2.4.2 <3.0.0",
       "resolved": "https://registry.npmjs.org/graphql-tag/-/graphql-tag-2.8.0.tgz"
-    },
-    "graphql-type-json": {
-      "version": "0.1.4",
-      "from": "graphql-type-json@>=0.1.4 <0.2.0",
-      "resolved": "https://registry.npmjs.org/graphql-type-json/-/graphql-type-json-0.1.4.tgz"
     },
     "growl": {
       "version": "1.9.2",
