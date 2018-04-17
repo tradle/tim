@@ -200,6 +200,10 @@ class VerificationRow extends Component {
         title = resource.message  ||  utils.makeModelTitle(resource.bookmark[TYPE])
       else if (isApplicationSubmission)
         title = utils.makeModelTitle(utils.getType(resource.submission))
+      // Case for forms on Application. forms has a type og ApplicationSubmittion but the component
+      // received the submission itself
+      else if (rType !== modelName  &&  model.subClassOf !== modelName)
+        title = utils.makeModelTitle(model)
       else if (this.props.search) {
         if (isVerification)
           title = verificationRequest.title
