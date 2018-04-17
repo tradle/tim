@@ -88,13 +88,15 @@ class PhotoView extends Component {
           height = currentPhoto.height
           resizeMode = 'contain'
         }
-        else
+        else {
           height = Math.round(height * width / currentPhoto.width)
+          resizeMode = 'cover'
+        }
       }
-      else
+      else {
         width = Math.round(height * width / currentPhoto.height)
-      if (!resizeMode)
         resizeMode = 'cover'
+      }
     }
     else {
       width = width < height ? width : height
