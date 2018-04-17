@@ -131,8 +131,10 @@ class MessageView extends Component {
     if (!params.resource)
       return
     let { bankStyle, application, resource, search } = this.props
-    if (utils.getId(params.resource) !== utils.getId(resource))
-      return
+    if (utils.getId(params.resource) !== utils.getId(resource)) {
+      if (resource[TYPE] !== FORM_PREFILL  ||  !_.isEqual(resource.prefill, params.resource))
+        return
+    }
     if (action === 'getItem') {
       let state = {
         resource: params.resource,
@@ -170,7 +172,8 @@ class MessageView extends Component {
     this.setState({hideMode: false})
     let me = utils.getMe()
 
-    let { resource, defaultPropertyValues, bankStyle, navigator, search } = this.props
+    let { defaultPropertyValues, bankStyle, navigator, search } = this.props
+    let resource = this.state.resource
     let ref = itemBl.items.ref
     if (ref === FORM_PREFILL) {
       let rmodel = utils.getModel(ref)
@@ -211,9 +214,24 @@ class MessageView extends Component {
 
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
-    let r = {};
-    r[TYPE] = itemBl.items.ref
-    r[itemBl.items.backlink] = utils.buildRef(resource)
+    let r = {[TYPE]: ref};
+    let rType = resource[TYPE]
+    let rModel = utils.getModel(rType)
+
+    let blModel = utils.getModel(ref)
+    // let refProps = utils.getPropertiesWithAnnotation(blModel, 'ref')
+    // for (let p in refProps) {
+    //   let pref = refProps[p].ref
+    //   if (pref === rType  ||  rModel.subClassOf === pref) {
+    //     containerProp = p
+    //     break
+    //   }
+    // }
+
+    let refProps = utils.getPropertiesWithRef(rType, blModel)
+    let containerProp = refProps.filter(prop => prop.name === itemBl.items.backlink)[0].name
+
+    r[containerProp] = utils.buildRef(resource)
 
     // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
     //   r.relatedTo = this.props.resource.relatedTo;

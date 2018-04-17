@@ -150,9 +150,9 @@ var search = {
             else
               op.EQ += `\n   ${p}: "${val}",`
           }
-          else if (p.indexOf('__') !== -1) {
-            if (props[p.split('__')[0]])
-              op.EQ += `\n   ${p}: "${val}",`
+          else if (p.indexOf('.') !== -1  &&  props[p.split('.')[0]]) {
+            p = p.replace('.', '__')
+            op.EQ += `\n   ${p}: "${val}",`
           }
           continue
         }
@@ -494,7 +494,10 @@ var search = {
           else if (iref === model.id) {
             arr.push(
               `${p} {
-                id
+                ${TYPE}
+                _permalink
+                _link
+                _displayName
               }`
             )
           }
@@ -503,8 +506,10 @@ var search = {
           else
             arr.push(
               `${p} {
-                id
-                title
+                ${TYPE}
+                _permalink
+                _link
+                _displayName
               }`
             )
         }
@@ -570,8 +575,10 @@ var search = {
     }
     return (
       `${p} {
-        id
-        title
+        ${TYPE}
+        _permalink
+        _link
+        _displayName
       }`
     )
   },

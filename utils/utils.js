@@ -594,7 +594,8 @@ var utils = {
   },
   isMyMessage({resource, to}) {
     let r = resource
-
+    if (!r.from)
+      return false
     let fromId = utils.getId(r.from);
     let toId = utils.getId(r.to);
     let me = utils.getMe()
@@ -1941,9 +1942,11 @@ var utils = {
   getPropertiesWithRef(ref, model) {
     let props = this.getPropertiesWithAnnotation(model, 'ref')
     let rProps = []
-    for (let p in props)
-      if (props[p].ref === ref  ||  (props[p].items  &&  props[p].items.ref === ref))
+    for (let p in props) {
+      let pRef = props[p].ref  ||  (props[p].items  &&  props[p].items.ref)
+      if (pRef === ref  ||  model.subClassOf === pRef)
         rProps.push(props[p])
+    }
     return rProps
   },
   getPropertiesWithRange(range, model) {

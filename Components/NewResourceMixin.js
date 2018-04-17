@@ -221,10 +221,10 @@ var NewResourceMixin = {
         if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
           eCols[p] = props[p]
       }
-      // filter out the backlink on which the adding resource was initiated
-      let prop = this.props.prop
-      if (prop  &&  prop.items  &&  prop.items.backlink  &&  eCols[prop.items.backlink])
-        delete eCols[prop.items.backlink]
+      // // filter out the backlink on which the adding resource was initiated
+      // let prop = this.props.prop
+      // if (prop  &&  prop.items  &&  prop.items.backlink  &&  eCols[prop.items.backlink])
+      //   delete eCols[prop.items.backlink]
     }
     let required = utils.ungroup(meta, meta.required)
     required = utils.arrayToObject(required);
