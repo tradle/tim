@@ -470,7 +470,7 @@ var search = {
         // HACK
         if (p === 'verifications')
           continue
-        if (isApplication  &&  p !== 'submissions')
+        if (isApplication  &&  prop.items.backlink  &&  p !== 'submissions')
           continue
         let iref = prop.items.ref
         if (iref) {
@@ -490,16 +490,16 @@ var search = {
               continue
             arr.push(this.addInlined(prop))
           }
-          else if (iref === model.id) {
-            arr.push(
-              `${p} {
-                ${TYPE}
-                _permalink
-                _link
-                _displayName
-              }`
-            )
-          }
+          // else if (iref === model.id) {
+          //   arr.push(
+          //     `${p} {
+          //       ${TYPE}
+          //       _permalink
+          //       _link
+          //       _displayName
+          //     }`
+          //   )
+          // }
           // else if (prop.inlined)
           //   arr.push(this.addInlined(prop))
           else
