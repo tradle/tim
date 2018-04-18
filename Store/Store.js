@@ -3819,12 +3819,13 @@ var Store = Reflux.createStore({
           r[linkName] = list
         }
       }
-      if (r.relationshipManager) {
-        let rmId = r.relationshipManager.id.replace(IDENTITY, PROFILE)
-        let rm = this._getItem(rmId)
-        if (rm)
-          r.relationshipManager.title = utils.getDisplayName(rm)
-          // r.relationshipManager = this.buildRef(rmProfile)
+      if (r.relationshipManagers) {
+        r.relationshipManagers.forEach(relationshipManager => {
+          let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
+          let rm = this._getItem(rmId)
+          if (rm)
+            relationshipManager.title = utils.getDisplayName(rm)
+        })
       }
       if (!r._context) {
         let context = await this.getContext(r.context, r)
@@ -4888,7 +4889,6 @@ var Store = Reflux.createStore({
           }
           if (!appToUpdate._context)
             appToUpdate._context = returnVal._context
-          // appToUpdate.relationshipManager = self._makeIdentityStub(me)
 
           if (!appToUpdate.relationshipManagers)
             appToUpdate.relationshipManagers = []
@@ -5617,6 +5617,17 @@ var Store = Reflux.createStore({
             endCursor,
             isAggregation
           })
+      else {
+        retParams = {
+          action: !listView  &&  !prop && !_readOnly && modelName !== BOOKMARK ? 'messageList' : 'list',
+          list: result,
+          modelName,
+          isChat,
+          to,
+          isAggregation
+        }
+        this.trigger(retParams)
+      }
       return
     }
     if (isAggregation)
@@ -7011,6 +7022,10 @@ var Store = Reflux.createStore({
         continue
 
       let stub = resource[p]
+      if (Array.isArray(stub)) {
+        resource[p] = stub.map(s => s._link ?  this.makeStub(s) : s)
+        continue
+      }
       if (!stub[TYPE])
         continue
       let m = utils.getModel(stub[TYPE])
