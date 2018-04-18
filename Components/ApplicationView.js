@@ -133,8 +133,6 @@ class ApplicationView extends Component {
     case 'assignRM_Confirmed':
       if (application[ROOT_HASH] === this.props.resource[ROOT_HASH]) {
         Actions.hideModal()
-        // let r = utils.clone(this.props.resource)
-        // r.relationshipManager = application.relationshipManager
         this.setState({resource: application, isLoading: false})
       }
       break
@@ -150,7 +148,7 @@ class ApplicationView extends Component {
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected } = this.state
 
-    hasRM = hasRM  ||  resource.relationshipManager ||  resource.relationshipManagers
+    hasRM = hasRM  ||  resource.relationshipManagers
     let isRM = hasRM  &&  utils.isRM(resource)
     let styles = createStyles({ hasRM, isRM })
 
@@ -289,13 +287,6 @@ class ApplicationView extends Component {
         bankStyle: style,
       }
     }
-
-    // if (resource.relationshipManager) {
-    //   if (utils.getId(resource.relationshipManager).replace(IDENTITY, PROFILE) === utils.getId(me)  &&  !resource._approved  &&  !resource._denied) { //  &&  resource._appSubmitted  ) {
-    //     route.rightButtonTitle = 'Approve/Deny'
-    //     route.onRightButtonPress = () => this.approveDeny(resource)
-    //   }
-    // }
     navigator.push(route)
   }
   approve() {
