@@ -461,6 +461,8 @@ class GridList extends Component {
             Alert.alert('No resources were found for this criteria')
           this.setState({refreshing: false, isLoading: false})
         }
+        else if (prop  &&  prop.allowToAdd)
+          this.setState({isLoading: false})
         return
       }
       if (params.isTest  !== isTest)
@@ -1429,7 +1431,8 @@ class GridList extends Component {
     // else
     // let isEmptyItemsTab = prop &&  this.state.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
     let isEmptyItemsTab
-    if (!isChooser  &&  prop &&  prop.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)) {
+    // if (!isChooser  &&  prop &&  prop.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)) {
+    if (/*!isChooser  &&*/ !this.state.list  &&  prop &&  prop.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)) {
       if (me  &&  (!me.isEmployee  ||  utils.isMyMessage({resource})))
         isEmptyItemsTab = true
     }
