@@ -155,18 +155,7 @@ class FormMessageRow extends Component {
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
-    // let backgroundColor
-    // if (!resource._latest)
-    //   backgroundColor = '#B8D4FC'
-    // else
-    let backgroundColor = isMyMessage && bankStyle.myMessageBackgroundColor || bankStyle.sharedWithBg
-    let borderTopRightRadius = isMyMessage || isShared ? 0 : 10
-    let borderTopLeftRadius = isMyMessage || isShared ? 10 : 0
-
-    let headerStyle = [
-      chatStyles.verifiedHeader,
-      {backgroundColor, borderTopRightRadius, borderTopLeftRadius},
-    ]
+    let headerStyle = [chatStyles.verifiedHeader, styles.headerStyle]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
     let model = utils.getModel(resource[TYPE])
@@ -200,8 +189,8 @@ class FormMessageRow extends Component {
     return (
       <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
-        <View style={[{flex:1, marginLeft: 10}, chatStyles.verificationBody]}>
-          <View style={[headerStyle, {justifyContent: 'space-between', paddingLeft: 5, paddingRight: 7}, noContent  &&  styles.noContentStyle]}>
+        <View style={[{flex:1}, chatStyles.verificationBody]}>
+          <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
             <Text style={chatStyles.verificationHeaderText}>{headerTitle}
               {sealedStatus}
             </Text>
@@ -327,7 +316,9 @@ class FormMessageRow extends Component {
 
 var createStyles = utils.styleFactory(FormMessageRow, function (params) {
   let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
-  let moreHeader = isMyMessage || isShared ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 } : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
+  let moreHeader = isMyMessage || isShared
+                 ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }
+                 : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
   let bg = isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg
   let pageBg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
   let w, h = 70
@@ -371,6 +362,9 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
     },
     headerStyle: {
       ...moreHeader,
+      justifyContent: 'space-between',
+      paddingLeft: 5,
+      paddingRight: 7,
       backgroundColor: bg
     },
     sig: {
