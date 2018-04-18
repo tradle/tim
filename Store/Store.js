@@ -6100,7 +6100,7 @@ var Store = Reflux.createStore({
           let rr = this.convertMessageToResource(li.node, application)
           if (rr[TYPE] === FORM_REQUEST  &&  rr.form === PRODUCT_REQUEST) //  &&  rr._documentCreated)
             return
-          if (rr[TYPE] == NEXT_FORM_REQUEST  ||  rr[TYPE] === INTRODUCTION)
+          if (rr[TYPE] == NEXT_FORM_REQUEST  ||  rr[TYPE] === INTRODUCTION  ||  rr[TYPE] === MODELS_PACK)
             return
           if (rr[TYPE] === VERIFICATION  &&  !rr.document.title) {
             let docId = utils.getId(rr.document)
