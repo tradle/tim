@@ -1375,33 +1375,7 @@ var utils = {
     let myIdentity = this.getId(this.getMe()).replace(PROFILE, IDENTITY)
     if (application.relationshipManagers)
       return application.relationshipManagers.some((r) => this.getId(r) === myIdentity)
-    if (application.relationshipManager) {
-      let rmId = utils.getId(application.relationshipManager)
-      return rmId === myIdentity
-    }
   },
-  // isVerifier(resource, application) {
-  //   if (!this.isEmployee(resource))
-  //     return false
-  //   let me = this.getMe()
-  //   if (!me.isEmployee)
-  //     return false
-  //   let model = this.getModel(resource[TYPE])
-  //   if (model.subClassOf === FORM) {
-  //     return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
-  //            !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
-  //   }
-  //   if (model.id === VERIFICATION)
-  //     return  utils.getId(me) === utils.getId(resource.from)
-  // },
-  // measure(component, cb) {
-  //   let handle = typeof component === 'number'
-  //     ? component
-  //     : findNodeHandle(component)
-
-  //   RCTUIManager.measure(handle, cb)
-  // },
-
   scrollComponentIntoView (container, component) {
     const handle = platformUtils.getNode(component)
     let currentScrollOffset = container.getScrollOffset && container.getScrollOffset().y
@@ -2616,3 +2590,24 @@ function dateFromParts (parts) {
 }
 
 module.exports = utils;
+  // isVerifier(resource, application) {
+  //   if (!this.isEmployee(resource))
+  //     return false
+  //   let me = this.getMe()
+  //   if (!me.isEmployee)
+  //     return false
+  //   let model = this.getModel(resource[TYPE])
+  //   if (model.subClassOf === FORM) {
+  //     return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
+  //            !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
+  //   }
+  //   if (model.id === VERIFICATION)
+  //     return  utils.getId(me) === utils.getId(resource.from)
+  // },
+  // measure(component, cb) {
+  //   let handle = typeof component === 'number'
+  //     ? component
+  //     : findNodeHandle(component)
+
+  //   RCTUIManager.measure(handle, cb)
+  // },
