@@ -377,7 +377,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
         [TYPE]: id,
         _author: botPermalink
       },
-      from: me
+      from: utils.buildRef(me)
     }
   })
 
@@ -393,7 +393,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
         [TYPE]: id,
         _recipient: botPermalink
       },
-      to: me
+      to: utils.buildRef(me)
     }
   })
 
@@ -4315,7 +4315,7 @@ var Store = Reflux.createStore({
       return await this.onAddVerification({r: resource, notOneClickVerification: true, noTrigger: noTrigger, dontSend: resource[NOT_CHAT_ITEM]});
     }
     else if (meta.id === BOOKMARK)
-      resource.to = resource.from
+      resource.to = this.buildRef(resource.from)
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
@@ -4780,14 +4780,16 @@ var Store = Reflux.createStore({
 
         let params;
 
-        let sendStatus = (self.isConnected) ? SENDING : QUEUED
+        let isBookmark = returnVal[TYPE] === BOOKMARK
+        let sendStatus = self.isConnected ? SENDING : QUEUED
         if (returnVal[TYPE] === DATA_CLAIM) {
           // org = self._getItem(utils.getId(org))
           // Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})
           params = {action: 'getForms', to: org}
           // params = {action: 'showProfile', importingData: true}
         }
-        else {
+        // Bookmark is not sent
+        else if (!isBookmark) {
           returnVal._sendStatus = sendStatus
           // if (isNew)
           self.addVisualProps(returnVal)
@@ -4803,7 +4805,6 @@ var Store = Reflux.createStore({
           debugger
         }
 
-        let isBookmark = returnVal[TYPE] === BOOKMARK
         if (!isSavedItem  &&  !isBookmark) {
           // let sendParams = {link: hash }
           // if (me.isEmployee) {
