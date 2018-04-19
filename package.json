@@ -134,7 +134,7 @@
     "react-dom": "^16.2.0",
     "react-dropzone": "^3.13.4",
     "react-file-input": "github:mvayngrib/react-file-input",
-    "react-infinite-calendar": "^2.3.1",
+    "react-infinite-calendar": "github:tradle/react-infinite-calendar#dist",
     "react-mixin": "~1.2.2",
     "react-native-accordion": "github:tradle/react-native-accordion#dev",
     "react-native-actionsheet": "^2.3.0",
