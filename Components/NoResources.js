@@ -8,9 +8,9 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types';
 import Icon from 'react-native-vector-icons/Ionicons'
+
 import utils from '../utils/utils'
 import React, { Component } from 'react'
-
 class NoResources extends Component {
   props: {
     filter: PropTypes.string,
@@ -59,7 +59,8 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 100,
     maxWidth: 360,
-    paddingHorizontal: 30
+    paddingLeft: 30,
+    paddingRight:10
   },
   centerText: {
     alignItems: 'center',
