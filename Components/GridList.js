@@ -453,7 +453,7 @@ class GridList extends Component {
     let { chat, isForwardlink, multiChooser, isChooser, sharingChat, isTest, lens } = this.props
     if (action === 'list') {
       // First time connecting to server. No connection no providers yet loaded
-      if (!list) {
+      if (!list  ||  !list.length) {
         if (params.alert)
           Alert.alert(params.alert)
         else if (search  &&  !isModel) {
@@ -462,7 +462,7 @@ class GridList extends Component {
           this.setState({refreshing: false, isLoading: false})
         }
         else if (prop  &&  prop.allowToAdd)
-          this.setState({isLoading: false})
+          this.setState({isLoading: false, list: null})
         return
       }
       if (params.isTest  !== isTest)
