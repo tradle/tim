@@ -16,7 +16,18 @@ const Alert = {
   prompt
 }
 
+let _removeCurrent
+
+function removeCurrent () {
+  if (_removeCurrent) {
+    _removeCurrent()
+    _removeCurrent = null
+  }
+}
+
 function alert (title, message, buttons) {
+  if (removeCurrent) removeCurrent()
+
   if (!message) {
     message = title
     title = null
@@ -80,17 +91,27 @@ function alert (title, message, buttons) {
   )
 
   const remove = appendModal(modal)
+  _removeCurrent = remove
 }
 
 function appendModal (modal) {
   const el = document.createDocumentFragment()
-  ReactDOM.render(modal, el)
   const id = 'alert-' + Math.random()
-  el.firstChild.id = id
-  document.querySelector('body').appendChild(el)
+  ReactDOM.render(modal, el, (err, result) => {
+    if (err) {
+      console.error('failed to show Alert', err.stack)
+      return
+    }
+
+    el.firstChild.id = id
+    document.querySelector('body').appendChild(el)
+  })
+
   return function remove () {
     const child = document.getElementById(id)
-    child.parentNode.removeChild(child)
+    if (child) {
+      child.parentNode.removeChild(child)
+    }
   }
 }
 
