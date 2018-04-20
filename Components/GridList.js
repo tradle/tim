@@ -1490,7 +1490,7 @@ class GridList extends Component {
       }
     }
     let network
-    if (!isChooser) {
+    if (!isChooser  &&  !prop) {
       if (modelName === BOOKMARK  &&  list  &&  list.length) {
         let org = list[0].from.organization
         if (org)
