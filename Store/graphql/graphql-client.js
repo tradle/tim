@@ -20,6 +20,7 @@ const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
 const APPLICATION = 'tradle.Application'
+const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 
 var search = {
   initClient(meDriver, url) {
@@ -431,20 +432,22 @@ var search = {
 
   },
   getAllPropertiesForServerSearch(params) {
-    let {model, inlined, properties, currentProp, isList} = params
-    let props = model.properties
+    let {model, inlined, properties, currentProp, isList, backlink} = params
+    let props = backlink ? {[backlink.name]: backlink} : model.properties
 
     let isApplication = model.id === APPLICATION
 
     let arr
     if (utils.isInlined(model))
-      arr = []
+      arr = [TYPE, '_link', '_permalink']
     else {
       arr = ['_permalink', '_link', '_time', '_author', '_authorTitle', '_virtual', 'time']
       if (model.id !== PUB_KEY  &&  !inlined) {
         let newarr = arr.concat(TYPE, SIG)
         arr = newarr
       }
+      if (model.abstract)
+        return arr
       arr.push(`_seal {
                 txId,
                 blockchain,
@@ -470,11 +473,16 @@ var search = {
         // HACK
         if (p === 'verifications')
           continue
-        if (isApplication  &&  prop.items.backlink  &&  p !== 'submissions')
-          continue
+
+        if (isApplication) {
+          if (isList  &&  p !== 'relationshipManagers')
+            continue
+          if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
+            continue
+        }
         let iref = prop.items.ref
         if (iref) {
-          if (prop.items.backlink  &&  !prop.inlined  &&  !utils.getModel(iref).abstract) {
+          if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
             if (isList  &&  !isApplication)
               continue
             arr.push(`${p} {
@@ -606,7 +614,7 @@ var search = {
       )
     }
   },
-  async _getItem(id, client) {
+  async _getItem(id, client, backlink) {
     let parts = id.split('_')
 
     let modelName = parts[0]
@@ -620,7 +628,7 @@ var search = {
     let _permalink = parts[1]
     let query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
-    let arr = this.getAllPropertiesForServerSearch({model})
+    let arr = this.getAllPropertiesForServerSearch({model, backlink})
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {

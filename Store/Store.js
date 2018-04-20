@@ -185,7 +185,8 @@ const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 const TOUR                = 'tradle.Tour'
 const CURRENCY            = 'tradle.Currency'
-const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
+const APPLICATION_SUBMITTED  = 'tradle.ApplicationSubmitted'
+const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const PHOTO_ID            = 'tradle.PhotoID'
 const PERSONAL_INFO       = 'tradle.PersonalInfo'
 const ASSIGN_RM           = 'tradle.AssignRelationshipManager'
@@ -3792,14 +3793,33 @@ var Store = Reflux.createStore({
     if (!isApplication  ||  resource.id  ||  (!backlink  &&  !forwardlink))
       r = await this._getItemFromServer(rId)
     else {
-      r = _.cloneDeep(resource)
-      let ref = utils.getModel(APPLICATION).properties.submissions.items.ref
-      let hash = r[CUR_HASH]
-      let l = await this.searchServer({modelName: ref, filterResource: {'application._permalink': r[ROOT_HASH]}, noTrigger: true})
-      if (!l)
-        return
-      r.submissions = l.list
-      this.organizeSubmissions(r)
+      let prop
+      let blProp = backlink ||  forwardlink
+      if (blProp) {
+        let ref = blProp.items.ref
+        let submissions = utils.getModel(APPLICATION).properties.submissions
+        if (ref === APPLICATION_SUBMISSION)
+          prop = submissions
+        else
+          prop = blProp
+        let resourceWithBacklink = await this._getItemFromServer(rId, prop)
+        if (resourceWithBacklink  &&  resourceWithBacklink[prop.name]) {
+          r = _.cloneDeep(resource)
+          r[prop.name] = resourceWithBacklink[prop.name]
+          if (prop === submissions)
+            this.organizeSubmissions(resource)
+        }
+        else
+          r = resource
+      }
+      // r = _.cloneDeep(resource)
+      // let ref = utils.getModel(APPLICATION).properties.submissions.items.ref
+      // let hash = r[CUR_HASH]
+      // let l = await this.searchServer({modelName: ref, filterResource: {'application._permalink': r[ROOT_HASH]}, noTrigger: true})
+      // if (!l)
+      //   return
+      // r.submissions = l.list
+      // this.organizeSubmissions(r)
     }
 
     let list
@@ -6301,8 +6321,6 @@ var Store = Reflux.createStore({
     }
     if (application.forms)
       application.forms = []
-    if (application.checks)
-      application.checks = []
     if (application.verifications)
       application.verifications = []
     if (application.editRequests)
@@ -6319,12 +6337,6 @@ var Store = Reflux.createStore({
           application.forms = []
         application.forms.push(stub)
         application._formsCount = application.forms.length
-        break
-      case CHECK:
-        if (!application.checks)
-          application.checks = []
-        application.checks.push(stub)
-        application._checksCount = application.checks.length
         break
       case VERIFICATION:
         if (!application.verifications)
@@ -11404,7 +11416,7 @@ var Store = Reflux.createStore({
         return rr.value
     }
   },
-  async _getItemFromServer(id) {
+  async _getItemFromServer(id, backlink) {
     if (typeof id !== 'string')
       id = utils.getId(id)
     if (!this.client) {
@@ -11412,7 +11424,7 @@ var Store = Reflux.createStore({
       return
     }
     try {
-      let result = await graphQL._getItem(id, this.client)
+      let result = await graphQL._getItem(id, this.client, backlink)
       if (result) {
         return this.convertToResource(result)
       }
