@@ -40,6 +40,7 @@ const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const CONFIRMATION = 'tradle.Confirmation'
 const CHECK  = 'tradle.Check'
 const STATUS = 'tradle.Status'
+const INTERSECTION = 'tradle.Intersection'
 const IMAGE_PLACEHOLDER = utils.whitePixel
 
 import {
@@ -263,8 +264,12 @@ class VerificationRow extends Component {
                            <Text style={[styles.rTitle, {paddingLeft: 10}]}>{dn}</Text>
                          </View>
       }
-      else
+      else {
+        if (utils.isImplementing(modelName, INTERSECTION))
+          description = <Text style={isCheck ? styles.checkType : styles.description}>{title}</Text>
+
         titleComponent = <Text style={styles.rTitle}>{dn}</Text>
+      }
     }
 
     else if (isBookmark  &&  resource.message)
