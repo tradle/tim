@@ -625,31 +625,31 @@ class ResourceRow extends Component {
     if (aTitle)
       applicant = <Text style={styles.applicant}>{aTitle}</Text>
     let formsCount, progressBar
-    let formTypes = []
-    let progress = 0
-    if (m  &&  resource.forms) {
-      resource.forms.forEach((item) => {
-        let itype = utils.getType(item.id)
-        if (formTypes.indexOf(itype) === -1)
-          formTypes.push(itype)
-      })
-      progress = formTypes.length / m.forms.length
-    }
+    // let formTypes = []
+    // let progress = 0
+    // if (m  &&  resource.forms) {
+    //   resource.forms.forEach((item) => {
+    //     let itype = utils.getType(item.id)
+    //     if (formTypes.indexOf(itype) === -1)
+    //       formTypes.push(itype)
+    //   })
+    //   progress = formTypes.length / m.forms.length
+    // }
 
-    let progressColor = '#7AAAC3'
-    if (resource.status) {
-      switch (resource.status) {
-        case 'approved':
-          progressColor = '#A6D785'
-          break
-        case 'denied':
-          progressColor = '#EE3333'
-          break
-      }
-    }
-    progressBar = <View style={styles.progress}>
-                    <ProgressBar progress={progress} width={utils.dimensions().width - 30} color={progressColor} borderWidth={1} borderRadius={0} height={7} />
-                  </View>
+    // let progressColor = '#7AAAC3'
+    // if (resource.status) {
+    //   switch (resource.status) {
+    //     case 'approved':
+    //       progressColor = '#A6D785'
+    //       break
+    //     case 'denied':
+    //       progressColor = '#EE3333'
+    //       break
+    //   }
+    // }
+    // progressBar = <View style={styles.progress}>
+    //                 <ProgressBar progress={progress} width={utils.dimensions().width - 30} color={progressColor} borderWidth={1} borderRadius={0} height={7} />
+    //               </View>
     let draft
     if (resource.draft) {
       let width = utils.dimensions(ResourceRow).width
