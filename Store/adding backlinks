@@ -1,0 +1,24 @@
+adding backlinks
+  should be clarified if it is an addable backlink or not
+
+flow for draft application
+
+starts in chat
+apply for product
+Product request click leads to draft application wit the same context
+DraftApplication has only one backlink for now for FormPrefill
+
+FormPrefill is added through + icon
+
+click on + icon and choser of forms for application.requestFor product will appear
+choose the form and fill it out.
+On Submit FormPrefill will be created with prefill property set to just prefilled form
+
+
+
+create subsidiary - rename Business Information to Legal entity and check hierarchy
+opencorporates about subsidiaries, ubo,
+
+
+
+

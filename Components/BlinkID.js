@@ -32,7 +32,7 @@ const defaults = {
   useFrontCamera: false,
   shouldReturnFaceImage: true,
   shouldReturnCroppedImage: true,
-  shouldReturnSignatureImage: true,
+  // shouldReturnSignatureImage: true,
   // shouldReturnSuccessfulImage: true,
   recognizers: getValues(recognizers)
 }
@@ -124,7 +124,7 @@ function normalizeNZDLResult (result) {
   // documentClassification:"NewZealandDLFrontNew"
 
   const personal = {
-    dateOfBirth: null, // don't know at this point
+    dateOfBirth: result[NZDLKeys.DateOfBirth],
     firstName: result[NZDLKeys.FirstName],
     lastName: result[NZDLKeys.LastName],
   }
@@ -132,12 +132,16 @@ function normalizeNZDLResult (result) {
   const document = {
     documentNumber: result[NZDLKeys.LicenseNumber],
     cardVersion: result[NZDLKeys.CardVersion],
-    dateOfIssue: result[NZDLKeys.IssueDate],
-    dateOfExpiry: result[NZDLKeys.ExpiryDate],
+    // this is scanned incorrectly as dateOfBirth sometimes
+    // and is not present on most licenses' front sides
+    // dateOfIssue: result[NZDLKeys.DateOfIssue],
+    dateOfExpiry: result[NZDLKeys.DateOfExpiry],
     isDonor: result[NZDLKeys.DonorIndicator] === '1'
   }
 
-  return { personal, document }
+  result = { personal, document }
+  normalizeDates(result, parseNZDate)
+  return result
 }
 
 function normalizeMRTDResult (result) {
@@ -332,6 +336,11 @@ function parseMRTDDate (str) {
 
 function parseEUDate (str) {
   const [day, month, year] = str.split('.')
+  return dateFromParts({ day, month, year })
+}
+
+function parseNZDate (str) {
+  const [day, month, year] = str.split('-')
   return dateFromParts({ day, month, year })
 }
 

@@ -60,7 +60,6 @@
     "@tradle/multiqueue": "^2.3.1",
     "@tradle/protocol": "^3.0.0",
     "@tradle/restore": "github:tradle/restore",
-    "@tradle/schema-graphql": "github:tradle/schema-graphql#backlinks",
     "@tradle/validate-model": "github:tradle/validate-model",
     "@tradle/validate-resource": "github:tradle/validate-resource#stubs",
     "@tradle/yuki": "^1.4.0",

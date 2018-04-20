@@ -177,7 +177,8 @@ const MODELS_PACK         = 'tradle.ModelsPack'
 const STYLES_PACK         = 'tradle.StylesPack'
 const TOUR                = 'tradle.Tour'
 const CURRENCY            = 'tradle.Currency'
-const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
+const APPLICATION_SUBMITTED  = 'tradle.ApplicationSubmitted'
+const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const PHOTO_ID            = 'tradle.PhotoID'
 const PERSONAL_INFO       = 'tradle.PersonalInfo'
 const ASSIGN_RM           = 'tradle.AssignRelationshipManager'
@@ -368,7 +369,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
         [TYPE]: id,
         _author: botPermalink
       },
-      from: me
+      from: utils.buildRef(me)
     }
   })
 
@@ -384,7 +385,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
         [TYPE]: id,
         _recipient: botPermalink
       },
-      to: me
+      to: utils.buildRef(me)
     }
   })
 
@@ -3814,14 +3815,33 @@ var Store = Reflux.createStore({
     if (!isApplication  ||  resource.id  ||  (!backlink  &&  !forwardlink))
       r = await this._getItemFromServer(rId)
     else {
-      r = _.cloneDeep(resource)
-      let ref = utils.getModel(APPLICATION).properties.submissions.items.ref
-      let hash = r[CUR_HASH]
-      let l = await this.searchServer({modelName: ref, filterResource: {'application._permalink': r[ROOT_HASH]}, noTrigger: true})
-      if (!l)
-        return
-      r.submissions = l.list
-      this.organizeSubmissions(r)
+      let prop
+      let blProp = backlink ||  forwardlink
+      if (blProp) {
+        let ref = blProp.items.ref
+        let submissions = utils.getModel(APPLICATION).properties.submissions
+        if (ref === APPLICATION_SUBMISSION)
+          prop = submissions
+        else
+          prop = blProp
+        let resourceWithBacklink = await this._getItemFromServer(rId, prop)
+        if (resourceWithBacklink  &&  resourceWithBacklink[prop.name]) {
+          r = _.cloneDeep(resource)
+          r[prop.name] = resourceWithBacklink[prop.name]
+          if (prop === submissions)
+            this.organizeSubmissions(resource)
+        }
+        else
+          r = resource
+      }
+      // r = _.cloneDeep(resource)
+      // let ref = utils.getModel(APPLICATION).properties.submissions.items.ref
+      // let hash = r[CUR_HASH]
+      // let l = await this.searchServer({modelName: ref, filterResource: {'application._permalink': r[ROOT_HASH]}, noTrigger: true})
+      // if (!l)
+      //   return
+      // r.submissions = l.list
+      // this.organizeSubmissions(r)
     }
 
     let list
@@ -3841,12 +3861,13 @@ var Store = Reflux.createStore({
           r[linkName] = list
         }
       }
-      if (r.relationshipManager) {
-        let rmId = r.relationshipManager.id.replace(IDENTITY, PROFILE)
-        let rm = this._getItem(rmId)
-        if (rm)
-          r.relationshipManager.title = utils.getDisplayName(rm)
-          // r.relationshipManager = this.buildRef(rmProfile)
+      if (r.relationshipManagers) {
+        r.relationshipManagers.forEach(relationshipManager => {
+          let rmId = relationshipManager.id.replace(IDENTITY, PROFILE)
+          let rm = this._getItem(rmId)
+          if (rm)
+            relationshipManager.title = utils.getDisplayName(rm)
+        })
       }
       if (!r._context) {
         let context = await this.getContext(r.context, r)
@@ -4337,7 +4358,7 @@ var Store = Reflux.createStore({
       return await this.onAddVerification({r: resource, notOneClickVerification: true, noTrigger: noTrigger, dontSend: resource[NOT_CHAT_ITEM]});
     }
     else if (meta.id === BOOKMARK)
-      resource.to = resource.from
+      resource.to = this.buildRef(resource.from)
     // Check if the recipient is not one if the creators of this context.
     // If NOT send the message to the counterparty of the context
     let context = resource._context || value._context
@@ -4802,14 +4823,16 @@ var Store = Reflux.createStore({
 
         let params;
 
-        let sendStatus = (self.isConnected) ? SENDING : QUEUED
+        let isBookmark = returnVal[TYPE] === BOOKMARK
+        let sendStatus = self.isConnected ? SENDING : QUEUED
         if (returnVal[TYPE] === DATA_CLAIM) {
           // org = self._getItem(utils.getId(org))
           // Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})
           params = {action: 'getForms', to: org}
           // params = {action: 'showProfile', importingData: true}
         }
-        else {
+        // Bookmark is not sent
+        else if (!isBookmark) {
           returnVal._sendStatus = sendStatus
           // if (isNew)
           self.addVisualProps(returnVal)
@@ -4825,7 +4848,6 @@ var Store = Reflux.createStore({
           debugger
         }
 
-        let isBookmark = returnVal[TYPE] === BOOKMARK
         if (!isSavedItem  &&  !isBookmark) {
           // let sendParams = {link: hash }
           // if (me.isEmployee) {
@@ -4909,7 +4931,6 @@ var Store = Reflux.createStore({
           }
           if (!appToUpdate._context)
             appToUpdate._context = returnVal._context
-          // appToUpdate.relationshipManager = self._makeIdentityStub(me)
 
           if (!appToUpdate.relationshipManagers)
             appToUpdate.relationshipManagers = []
@@ -5682,6 +5703,17 @@ var Store = Reflux.createStore({
             endCursor,
             isAggregation
           })
+      else {
+        retParams = {
+          action: !listView  &&  !prop && !_readOnly && modelName !== BOOKMARK ? 'messageList' : 'list',
+          list: result,
+          modelName,
+          isChat,
+          to,
+          isAggregation
+        }
+        this.trigger(retParams)
+      }
       return
     }
     if (isAggregation)
@@ -6154,7 +6186,7 @@ var Store = Reflux.createStore({
           let rr = this.convertMessageToResource(li.node, application)
           if (rr[TYPE] === FORM_REQUEST  &&  rr.form === PRODUCT_REQUEST) //  &&  rr._documentCreated)
             return
-          if (rr[TYPE] == NEXT_FORM_REQUEST  ||  rr[TYPE] === INTRODUCTION)
+          if (rr[TYPE] == NEXT_FORM_REQUEST  ||  rr[TYPE] === INTRODUCTION  ||  rr[TYPE] === MODELS_PACK)
             return
           if (rr[TYPE] === VERIFICATION  &&  !rr.document.title) {
             let docId = utils.getId(rr.document)
@@ -6355,8 +6387,6 @@ var Store = Reflux.createStore({
     }
     if (application.forms)
       application.forms = []
-    if (application.checks)
-      application.checks = []
     if (application.verifications)
       application.verifications = []
     if (application.editRequests)
@@ -6373,12 +6403,6 @@ var Store = Reflux.createStore({
           application.forms = []
         application.forms.push(stub)
         application._formsCount = application.forms.length
-        break
-      case CHECK:
-        if (!application.checks)
-          application.checks = []
-        application.checks.push(stub)
-        application._checksCount = application.checks.length
         break
       case VERIFICATION:
         if (!application.verifications)
@@ -7080,6 +7104,10 @@ var Store = Reflux.createStore({
         continue
 
       let stub = resource[p]
+      if (Array.isArray(stub)) {
+        resource[p] = stub.map(s => s._link ?  this.makeStub(s) : s)
+        continue
+      }
       if (!stub[TYPE])
         continue
       let m = utils.getModel(stub[TYPE])
@@ -11459,7 +11487,7 @@ var Store = Reflux.createStore({
         return rr.value
     }
   },
-  async _getItemFromServer(id) {
+  async _getItemFromServer(id, backlink) {
     if (typeof id !== 'string')
       id = utils.getId(id)
     if (!this.client) {
@@ -11467,7 +11495,7 @@ var Store = Reflux.createStore({
       return
     }
     try {
-      let result = await graphQL._getItem(id, this.client)
+      let result = await graphQL._getItem(id, this.client, backlink)
       if (result)
         return this.convertToResource(result)
     }

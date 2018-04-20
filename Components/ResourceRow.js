@@ -600,8 +600,8 @@ class ResourceRow extends Component {
     // if (status !== 'Approved'  &&  status !== 'Denied') {
     let icolor
     let iname
-    let hasRM = resource.relationshipManager  ||  resource.relationshipManagers
-    if (hasRM &&  utils.isRM(resource)) {
+    let hasRM = resource.relationshipManagers
+    if (utils.isRM(resource)) {
       // iname = 'md-log-out'
       iname = 'ios-person-add'
       icolor = '#7AAAc3'
@@ -626,31 +626,31 @@ class ResourceRow extends Component {
     if (aTitle)
       applicant = <Text style={styles.applicant}>{aTitle}</Text>
     let formsCount, progressBar
-    let formTypes = []
-    let progress = 0
-    if (m  &&  resource.forms) {
-      resource.forms.forEach((item) => {
-        let itype = utils.getType(item.id)
-        if (formTypes.indexOf(itype) === -1)
-          formTypes.push(itype)
-      })
-      progress = formTypes.length / m.forms.length
-    }
+    // let formTypes = []
+    // let progress = 0
+    // if (m  &&  resource.forms) {
+    //   resource.forms.forEach((item) => {
+    //     let itype = utils.getType(item.id)
+    //     if (formTypes.indexOf(itype) === -1)
+    //       formTypes.push(itype)
+    //   })
+    //   progress = formTypes.length / m.forms.length
+    // }
 
-    let progressColor = '#7AAAC3'
-    if (resource.status) {
-      switch (resource.status) {
-        case 'approved':
-          progressColor = '#A6D785'
-          break
-        case 'denied':
-          progressColor = '#EE3333'
-          break
-      }
-    }
-    progressBar = <View style={styles.progress}>
-                    <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
-                  </View>
+    // let progressColor = '#7AAAC3'
+    // if (resource.status) {
+    //   switch (resource.status) {
+    //     case 'approved':
+    //       progressColor = '#A6D785'
+    //       break
+    //     case 'denied':
+    //       progressColor = '#EE3333'
+    //       break
+    //   }
+    // }
+    // progressBar = <View style={styles.progress}>
+    //                 <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
+    //               </View>
     let draft
     if (resource.draft) {
       draft = <View style={{position: 'absolute', top: 0, width: '100%'}}>

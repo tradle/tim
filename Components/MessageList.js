@@ -231,9 +231,7 @@ class MessageList extends Component {
 
     if (action === 'assignRM_Confirmed') {
       if (application[ROOT_HASH] === params.application[ROOT_HASH]) {
-        // Actions.list({modelName: MESSAGE, application: params.application, search: true})
         let r = utils.clone(application)
-        r.relationshipManager = params.application.relationshipManager
         this.setState({application: r})
       }
       return
@@ -595,13 +593,6 @@ class MessageList extends Component {
       return;
     let application = this.state.application || this.props.application
     let me = utils.getMe()
-    // if (application) {
-    //   if (!application.relationshipManager)
-    //     return
-    //   let relHash = utils.getId(application.relationshipManager).split('_')[1]
-    //   if (relHash !== me[ROOT_HASH])
-    //     return
-    // }
     let model = utils.getModel(r[TYPE]);
     let title //utils.getDisplayName(resource, model.properties);
 
@@ -637,15 +628,7 @@ class MessageList extends Component {
         isVerifier: isVerifier
       }
     }
-    // let showEdit = !isEmployee && !verification  &&  !r[PREV_HASH]  &&  model.subClassOf !== MY_PRODUCT  &&  !model.notEditable
     let showEdit = !model.notEditable  &&   r._latest  && !application && !verification  &&  model.subClassOf !== MY_PRODUCT
-    // if (showEdit  &&  isEmployee) {
-    //   let rm
-    //   if (!application  ||  !(rm = application.relationshipManager))
-    //     showEdit = false
-    //   else if (utils.getId(rm) !== utils.getId(utils.getMe()))
-    //     showEdit = false
-    // }
 
     // Allow to edit resource that was not previously changed
     if (showEdit) {
@@ -818,7 +801,7 @@ class MessageList extends Component {
       hideTextInput = !utils.hasSupportLine(resource)
     else if (application)
       hideTextInput = !utils.isRM(application)
-      // hideTextInput = !application.relationshipManager  ||  utils.getId(application.relationshipManager) !== utils.getId(utils.getMe())
+      // hideTextInput = !utils.isRM(application)
     // HACK for RM
     // hideTextInput = false
     let content

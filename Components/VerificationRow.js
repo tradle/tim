@@ -125,10 +125,14 @@ class VerificationRow extends Component {
     let hasPhoto = photo != null
     if (photo)
       photo = <Image host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
-    else if (isForm || isVerification)
+    else if (isForm || isVerification || (utils.isStub(resource)  &&  rType === VERIFICATION)) {
+      let icon = model.icon
+      if (!icon)
+        icon = isForm ? 'ios-paper-outline' : 'ios-checkmark-circle-outline'
       photo = <View style={styles.photo}>
-                <Icon name={model.icon || 'ios-paper-outline'} size={40} style={styles.photoIconPlacement} color={model.iconColor ? model.iconColor : '#cccccc'} />
+                <Icon name={icon} size={40} style={styles.photoIconPlacement} color={model.iconColor ? model.iconColor : '#cccccc'} />
               </View>
+    }
     else if (isMyProduct)
       photo = <View style={styles.photo}>
                 <Icon name={model.icon || 'ios-ribbon-outline'} size={40} style={styles.photoIconPlacement} color={model.iconColor ? model.iconColor : '#cccccc'} />
@@ -211,8 +215,8 @@ class VerificationRow extends Component {
           title = resource.application.title
         else if (model.id === CONFIRMATION)
           title = resource.confirmationFor.title
-        else if (modelName === FORM)
-          title = verificationRequest.title || utils.makeModelTitle(verificationRequest)
+        else if (utils.getModel(modelName).abstract)
+          title = utils.makeModelTitle(verificationRequest)
         // else
         //   title = 'Submitted by ' + resource.from.title
       }
@@ -232,17 +236,22 @@ class VerificationRow extends Component {
     let isCheck = model.subClassOf === CHECK
     let description
     let titleComponent
-    if (title !== dn)  {
+    if (isVerification) {
+      titleComponent = <Text style={[styles.rTitle, {fontWeight: '600'}]}>
+                          <Text style={styles.rTitle}>{dn}</Text>
+                        </Text>
+    }
+    else if (title !== dn)  {
       if (isCheck  &&  resource.status) {
         let color, icon
         switch (resource.status.title) {
           case 'Pass':
           color = 'green'
-          icon = 'md-checkmark'
+          icon = 'ios-checkmark'
           break
         case 'Fail':
           color = 'red'
-          icon = 'md-close'
+          icon = 'ios-close'
           break
         default:
           color = 'blue'
@@ -250,7 +259,7 @@ class VerificationRow extends Component {
           break
         }
         titleComponent = <View style={styles.titleView}>
-                           <Icon color={color} size={25} name={icon} style={{marginTop: -4}}/>
+                           <Icon color={color} size={35} name={icon} style={{marginTop: -4}}/>
                            <Text style={[styles.rTitle, {paddingLeft: 10}]}>{dn}</Text>
                          </View>
       }
@@ -258,16 +267,12 @@ class VerificationRow extends Component {
         titleComponent = <Text style={styles.rTitle}>{dn}</Text>
     }
 
-    if (isVerification)
-      titleComponent = <Text style={[styles.rTitle, {fontWeight: '600'}]}>{'Verification: '}
-                          <Text style={styles.rTitle}>{title}</Text>
-                        </Text>
     else if (isBookmark  &&  resource.message)
       titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
     else if (!titleComponent)
       titleComponent =  <Text style={styles.rTitle}>{title}</Text>
     else if (title)
-      description = <Text style={styles.description}>{title}</Text>
+      description = <Text style={isCheck ? styles.checkType : styles.description}>{title}</Text>
 
     let supportingDocuments
     if (isForm  &&  resource._supportingDocuments  &&  resource._supportingDocuments.length)
@@ -682,6 +687,11 @@ var styles = StyleSheet.create({
   description: {
     color: '#999999',
     fontSize: 16,
+  },
+  checkType: {
+    color: '#999999',
+    fontSize: 16,
+    marginLeft: 25
   },
   verifiedBy: {
     flex: 1,
