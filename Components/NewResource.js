@@ -1,6 +1,7 @@
 console.log('requiring NewResource.js')
 'use strict'
 
+import _ from 'lodash'
 import utils, { translate } from '../utils/utils'
 import NewItem from './NewItem'
 import ResourceList from './ResourceList'
@@ -22,6 +23,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import rStyles from '../styles/registrationStyles'
 import NewResourceMixin from './NewResourceMixin'
 import equal from 'deep-equal'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
 import constants from '@tradle/constants'
 
 var {
@@ -70,7 +72,6 @@ const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
 const SETTINGS = 'tradle.Settings'
 const HAND_SIGNATURE = 'tradle.HandSignature'
-const DEFAULT_LINK_COLOR = '#a94442'
 var Form = t.form.Form;
 
 
@@ -142,7 +143,7 @@ class NewResource extends Component {
            this.state.disableEditing !== nextState.disableEditing  ||
            this.state.validationErrors !== nextState.validationErrors ||
            // this.state.termsAccepted !== nextState.termsAccepted    ||
-          !equal(this.state.resource, nextState.resource)
+          !_.isEqual(this.state.resource, nextState.resource)
 
     if (!isUpdate)
       isUpdate = !utils.compare(this.props.resource, nextProps.resource)
@@ -707,7 +708,9 @@ class NewResource extends Component {
     let resource = this.state.resource;
 
     let meta =  this.props.model;
-    let { originatingMessage, setProperty, editCols, bankStyle, search } = this.props
+    let { originatingMessage, setProperty, editCols, search } = this.props
+    let bankStyle = this.props.bankStyle || defaultBankStyle
+
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
       this.state.resource[setProperty.name] = setProperty.value;
@@ -1142,8 +1145,8 @@ class NewResource extends Component {
     let blmodel = meta
     let lcolor = this.getLabelAndBorderColor(bl.name)
     let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
-    let { bankStyle } = this.props
-    let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
+    let bankStyle = this.props.bankStyle || defaultBankStyle
+    let linkColor = bankStyle.linkColor
 
     let counter, itemsArray
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
@@ -1236,9 +1239,9 @@ class NewResource extends Component {
     let lcolor = this.getLabelAndBorderColor(bl.name)
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
 
-    let { bankStyle } = this.props
+    let bankStyle = this.props.bankStyle || defaultBankStyle
 
-    let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
+    let linkColor = bankStyle.linkColor
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
       label += ' *'
@@ -1512,7 +1515,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       paddingBottom: 7
     },
     submit: {
-      backgroundColor: bankStyle && bankStyle.linkColor  ||  '#7AAAC3',
+      backgroundColor: bankStyle.linkColor,
       flexDirection: 'row',
       justifyContent: 'center',
       width: 340,
