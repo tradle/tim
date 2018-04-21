@@ -1147,13 +1147,16 @@ class NewResource extends Component {
 
     let counter, itemsArray
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+    let label = translate(bl, blmodel)
+    if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
+      label += ' *'
     if (count) {
       let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem)}</View>
 
       let separator = <View style={styles.separator}></View>
       let cstyle = count ? styles.activePropTitle : styles.noItemsText
       itemsArray = <View>
-                     <Text style={[cstyle, {color: lcolor}]}>{translate(bl, blmodel)}</Text>
+                     <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
                      {val}
                    </View>
 
@@ -1162,7 +1165,7 @@ class NewResource extends Component {
                 </View>
     }
     else {
-      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
+      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{label}</Text>
       counter = <View style={styles.itemsCounterEmpty}>{
                   isPhoto
                     ? <Icon name='ios-camera-outline'  size={35} color={linkColor} />
@@ -1236,6 +1239,9 @@ class NewResource extends Component {
     let { bankStyle } = this.props
 
     let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
+    let label = translate(bl, blmodel)
+    if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
+      label += ' *'
     if (count) {
       let items = []
       let arr = resource[bl.name]
@@ -1245,7 +1251,7 @@ class NewResource extends Component {
 
       itemsArray =
         <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
-          <Text style={[styles.activePropTitle, {color: lcolor}]}>{translate(bl, blmodel)}</Text>
+          <Text style={[styles.activePropTitle, {color: lcolor}]}>{label}</Text>
           <View style={styles.photoStripItems}>{items}</View>
         </View>
       counter =
@@ -1256,7 +1262,7 @@ class NewResource extends Component {
         </View>;
     }
     else {
-      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{translate(bl, blmodel)}</Text>
+      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{label}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>
                   <Icon name='ios-camera-outline'  size={35} color={linkColor} />
                 </View>
