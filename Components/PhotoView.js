@@ -79,27 +79,24 @@ class PhotoView extends Component {
     }
     let height = utils.dimensions(PhotoView).height
     let width = utils.getContentWidth(PhotoView)
-    let resizeMode = 'contain'
+    let resizeMode
     if (currentPhoto.width  &&  currentPhoto.height) {
-      if (width < height) {
+      if (currentPhoto.width  <  currentPhoto.height) {
         if (width > currentPhoto.width) {
           width = currentPhoto.width
           height = currentPhoto.height
           resizeMode = 'contain'
         }
-        else {
-          height = Math.round(height * width / currentPhoto.width)
-          resizeMode = 'cover'
-        }
       }
-      else {
-        width = Math.round(height * width / currentPhoto.height)
+      if (!resizeMode) {
+        height = Math.round(height * currentPhoto.width / currentPhoto.height)
         resizeMode = 'cover'
       }
     }
     else {
       width = utils.getContentWidth(PhotoView) + 2
       height = Math.floor(height / 2.5)
+      resizeMode = 'contain'
     }
     let image = {
       width,
