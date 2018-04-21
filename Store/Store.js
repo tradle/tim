@@ -8706,7 +8706,7 @@ var Store = Reflux.createStore({
       }
     }
     if (iKey === meId) {
-      if (!value.photos.length)
+      if (!value.photos  ||  !value.photos.length)
         value.photos = utils.clone(sampleProfile.photos)
     }
 
