@@ -35,16 +35,20 @@ class NetworkInfoProvider extends Component {
 
   render() {
     let { resource, online, isConnected, connected, serverOffline } = this.props
+    if (online)
+      return <View/>
+    let isOnline = typeof online === 'undefined'
     let isOrg = resource  &&  resource[TYPE] === ORGANIZATION
-    let isOnline = online || (typeof online === 'undefined')
     let providerOffline = resource  &&  isOrg  &&  !isOnline
+    if (!providerOffline)
+      return <View/>
+    if (connected  &&  !serverOffline)
+      return <View/>
     let dn = resource
            ? isConnected
                ? translate('learnMoreDescriptionTo', utils.getDisplayName(resource))
                : translate('learnMoreServerIsDown', utils.getDisplayName(resource))
            : translate('learnMoreDescription')
-    if (connected  &&  !providerOffline && !serverOffline)
-      return <View/>
 
     let msg = connected
             ? (providerOffline ? translate('providerIsOffline', utils.getDisplayName(resource)) : translate('serverIsUnreachable'))
