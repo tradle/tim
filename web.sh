@@ -19,7 +19,7 @@ sed -i '' "s/self\.opts/opts/g" node_modules/map-stream/index.js
 #   npm i --save buffer@3.6 && \
 #   cd $OLDPWD
 
-# rm -rf node_modules/webpack/node_modules/node-libs-browser
+rm -rf node_modules/webpack/node_modules/node-libs-browser
 # rm -rf node_modules/node-libs-browser/node_modules/crypto-browserify
 rm -rf node_modules/webpack/node_modules/crypto-browserify
 rm -rf node_modules/node-libs-browser/node_modules/create-ecdh
