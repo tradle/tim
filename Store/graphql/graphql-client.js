@@ -439,7 +439,7 @@ var search = {
 
     let arr
     if (utils.isInlined(model))
-      arr = [TYPE, '_link', '_permalink']
+      arr = [TYPE] //, '_link', '_permalink']
     else {
       arr = ['_permalink', '_link', '_time', '_author', '_authorTitle', '_virtual', 'time']
       if (model.id !== PUB_KEY  &&  !inlined) {
