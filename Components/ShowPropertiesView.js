@@ -94,6 +94,7 @@ class ShowPropertiesView extends Component {
       model = this.props.model  ||  utils.getModel(modelName);
     var vCols
 
+    let styles = createStyles({bankStyle})
     var props = model.properties;
     if (checkProperties) {
       vCols = utils.getEditCols(model)
@@ -175,8 +176,8 @@ class ShowPropertiesView extends Component {
           if (p.indexOf('_group') === p.length - 6) {
             viewCols.push(
               <View style={{padding: 15}} key={this.getNextKey()}>
-                <View style={{borderBottomColor: bankStyle.linkColor, borderBottomWidth: 1, paddingBottom: 5}}>
-                  <Text style={{fontSize: 22, color: bankStyle.linkColor}}>{translate(pMeta)}</Text>
+                <View style={styles.groupStyle}>
+                  <Text style={styles.groupStyleText}>{translate(pMeta)}</Text>
                 </View>
               </View>
             )
@@ -215,7 +216,7 @@ class ShowPropertiesView extends Component {
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
           if (!val[TYPE])
             val[TYPE] = pMeta.ref
-          let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]))
+          let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]), bankStyle)
           pViewCols.forEach((v) => viewCols.push(v))
           return
         }
@@ -340,7 +341,7 @@ class ShowPropertiesView extends Component {
                         <Text style={styles.bigTitle}>{translate('dataSecurity')}</Text>
                         <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
                       </View>
-                      <View style={{height: 1, marginTop: 5, marginBottom: 10, marginHorizontal: -10, alignSelf: 'stretch', backgroundColor: bankStyle.linkColor}} />
+                      <View style={styles.separator} />
                     </View>)
       if (blockchain === 'corda') {
         let description = 'You\'ll be able to verify this transaction when you launch your Corda node.'
@@ -367,7 +368,7 @@ class ShowPropertiesView extends Component {
             {
               BLOCKCHAIN_EXPLORERS.map((url, i) => {
                 url = url.replace('$TXID', txId)
-                return this.getBlockchainExplorerRow(url, i)
+                return this.getBlockchainExplorerRow(url, i, styles)
               })
             }
           </View>
@@ -376,7 +377,7 @@ class ShowPropertiesView extends Component {
         content = <View style={{paddingHorizontal: 10}}>
                      <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
                        <Text style={styles.content}>{description}
-                         <Text style={{color: bankStyle.linkColor, paddingHorizontal: 7}}> Learn more</Text>
+                         <Text style={styles.learnMode}> Learn more</Text>
                        </Text>
                      </TouchableOpacity>
                      {txs}
@@ -427,7 +428,7 @@ class ShowPropertiesView extends Component {
                 }}/>
            </View>
   }
-  getBlockchainExplorerRow(url, i) {
+  getBlockchainExplorerRow(url, i, styles) {
     const { bankStyle } = this.props
     return (
       <TouchableOpacity onPress={this.onPress.bind(this, url)} key={`url${i}`}>
@@ -441,64 +442,88 @@ class ShowPropertiesView extends Component {
 }
 reactMixin(ShowPropertiesView.prototype, RowMixin);
 reactMixin(ShowPropertiesView.prototype, ResourceMixin);
-var styles = StyleSheet.create({
-  textContainer: {
-    flex: 1,
-  },
-  row: {
-    justifyContent: 'space-between',
-    flexDirection: 'row'
-  },
-  content: {
-    color: '#9b9b9b',
-    fontSize: 16,
-    marginHorizontal: 7,
-    paddingBottom: 10
-  },
-  title: {
-    fontSize: 16,
-    // fontFamily: 'Avenir Next',
-    marginTop: 3,
-    marginBottom: 0,
-    marginHorizontal: 7,
-    color: '#9b9b9b'
-  },
-  linkTitle: {
-    fontSize: 18,
-    color: '#2892C6'
-  },
-  description: {
-    fontSize: 18,
-    marginVertical: 3,
-    marginHorizontal: 7,
-    color: '#2E3B4E',
-  },
-  dsTitle: {
-    width: 90,
-    fontSize: 16,
-    // fontFamily: 'Avenir Next',
-    marginTop: 3,
-    marginBottom: 0,
-    marginHorizontal: 7,
-    color: '#9b9b9b'
-  },
-  dsValue: {
-    fontSize: 18,
-    marginHorizontal: 7,
-    color: '#2E3B4E',
-  },
-  icon: {
-    width: 40,
-    height: 40
-  },
-  bigTitle: {
-    fontSize: 20,
-    // fontFamily: 'Avenir Next',
-    marginTop: 3,
-    marginBottom: 0,
-    marginHorizontal: 7,
-    color: '#7AAAC3'
-  }
-});
+
+var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions, bankStyle }) {
+  return StyleSheet.create({
+    textContainer: {
+      flex: 1,
+    },
+    row: {
+      justifyContent: 'space-between',
+      flexDirection: 'row'
+    },
+    content: {
+      color: '#9b9b9b',
+      fontSize: 16,
+      marginHorizontal: 7,
+      paddingBottom: 10
+    },
+    title: {
+      fontSize: 16,
+      // fontFamily: 'Avenir Next',
+      marginTop: 3,
+      marginBottom: 0,
+      marginHorizontal: 7,
+      color: '#9b9b9b'
+    },
+    linkTitle: {
+      fontSize: 18,
+      color: bankStyle.linkColor
+    },
+    description: {
+      fontSize: 18,
+      marginVertical: 3,
+      marginHorizontal: 7,
+      color: '#2E3B4E',
+    },
+    dsTitle: {
+      width: 90,
+      fontSize: 16,
+      // fontFamily: 'Avenir Next',
+      marginTop: 3,
+      marginBottom: 0,
+      marginHorizontal: 7,
+      color: '#9b9b9b'
+    },
+    dsValue: {
+      fontSize: 18,
+      marginHorizontal: 7,
+      color: '#2E3B4E',
+    },
+    icon: {
+      width: 40,
+      height: 40
+    },
+    bigTitle: {
+      fontSize: 20,
+      // fontFamily: 'Avenir Next',
+      marginTop: 3,
+      marginBottom: 0,
+      marginHorizontal: 7,
+      color: '#7AAAC3'
+    },
+    groupStyle: {
+      borderBottomColor: bankStyle.linkColor,
+      borderBottomWidth: 1,
+      paddingBottom: 5
+    },
+    groupStyleText: {
+      fontSize: 22,
+      color: bankStyle.linkColor
+    },
+    learnMode: {
+      color: bankStyle.linkColor,
+      paddingHorizontal: 7
+    },
+    separator: {
+      height: 1,
+      marginTop: 5,
+      marginBottom: 10,
+      marginHorizontal: -10,
+      alignSelf: 'stretch',
+      backgroundColor: bankStyle.linkColor
+    },
+  })
+})
 
 module.exports = ShowPropertiesView;
