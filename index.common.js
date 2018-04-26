@@ -808,6 +808,7 @@ var NavigationBarRouteMapper = {
     let bankStyle = route.passProps.bankStyle
     if (bankStyle)
       st.color = bankStyle.linkColor
+    let color = bankStyle  &&  bankStyle.linkColor || '#7AAAC3'
 
     let style = [platformStyles.navBarText, styles.navBarTitleText, st]
     let isPrefill
@@ -827,7 +828,7 @@ var NavigationBarRouteMapper = {
     for (let i=1; i<t.length; i++) {
       if (!tArr)
         tArr = []
-      tArr.push(<Text style={styles.arr} key={'index.common.js_' + i}>{this.makeTitle(t[i])}</Text>)
+      tArr.push(<Text style={[styles.arr, {color: color}]} key={'index.common.js_' + i}>{this.makeTitle(t[i])}</Text>)
     }
     let text
     if (logoNeedsText  ||  !uri) {
