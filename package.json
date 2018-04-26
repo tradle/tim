@@ -157,7 +157,7 @@
     "react-native-prompt": "github:tradle/react-native-prompt",
     "react-native-push-notification": "^3.0.0",
     "react-native-qrcode": "^0.2.6",
-    "react-native-randombytes": "^3.0.0",
+    "react-native-randombytes": "^3.1.0",
     "react-native-search-bar": "^3.4.0",
     "react-native-signature-pad": "github:tradle/react-native-signature-pad",
     "react-native-splash-screen": "^3.0.6",

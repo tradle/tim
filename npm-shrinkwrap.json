@@ -6269,9 +6269,9 @@
       "resolved": "https://registry.npmjs.org/react-native-qrcode/-/react-native-qrcode-0.2.6.tgz"
     },
     "react-native-randombytes": {
-      "version": "3.0.0",
-      "from": "react-native-randombytes@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-randombytes/-/react-native-randombytes-3.0.0.tgz"
+      "version": "3.1.0",
+      "from": "react-native-randombytes@latest",
+      "resolved": "https://registry.npmjs.org/react-native-randombytes/-/react-native-randombytes-3.1.0.tgz"
     },
     "react-native-scrollable-mixin": {
       "version": "1.0.1",
