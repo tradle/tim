@@ -398,7 +398,10 @@ var search = {
     let filter = ''
     if (filterResource) {
       for (let p in filterResource) {
-        filter += '             ' + p + ': ' + `"${filterResource[p]}"\n`
+        if (typeof filterResource[p] === 'boolean')
+          filter += '             ' + p + ': ' + `${filterResource[p]}\n`
+        else
+          filter += '             ' + p + ': ' + `"${filterResource[p]}"\n`
       }
     }
     eq += filter
