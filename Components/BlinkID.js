@@ -125,8 +125,8 @@ function normalizeNZDLResult (result) {
 
   const personal = {
     dateOfBirth: result[NZDLKeys.DateOfBirth],
-    firstName: result[NZDLKeys.FirstName],
-    lastName: result[NZDLKeys.LastName],
+    firstName: normalizeWhitespace(result[NZDLKeys.FirstName]),
+    lastName: normalizeWhitespace(result[NZDLKeys.LastName]),
   }
 
   const document = {
@@ -369,4 +369,11 @@ const normalizers = {
   usdl: normalizeUSDLResult,
   eudl: normalizeEUDLResult,
   nzdl: normalizeNZDLResult,
+}
+
+const normalizeWhitespace = str => {
+  if (!str) return str
+
+  // normalize spaces
+  return str.replace(/[\s]+/g, ' ').trim()
 }
