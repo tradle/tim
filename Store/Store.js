@@ -704,7 +704,13 @@ var Store = Reflux.createStore({
           obj[CUR_HASH] = obj[ROOT_HASH]
 
         await this.putInDb(obj, true)
-        this.trigger({ action: 'receivedMessage', msg: msg })
+        this.trigger({
+          action: 'receivedMessage',
+          msg: msg,
+          payloadType: payload[TYPE],
+          deepPayloadType: originalPayload[TYPE]
+        })
+
       } catch (err) {
         console.error('1. failed to process received message', err)
       }

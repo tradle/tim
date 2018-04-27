@@ -207,6 +207,9 @@ function createPusher (opts) {
       if (AppState.currentState === 'active') return unsubscribe()
       if (event.action !== 'receivedMessage') return
 
+      const { deepPayloadType } = event
+      if (ENV.SILENT_TYPES.includes(deepPayloadType)) return
+
       unsubscribe()
       showLocalNotification({ message: event.msg })
     })

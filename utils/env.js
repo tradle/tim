@@ -64,12 +64,14 @@ const merged = extend({
   LOCAL_TRADLE_SERVERS: [
     `http://${LOCAL_IP}:21012`,
     // `http://${LOCAL_IP}:21013`,
-    // slim
-    'https://zxoapug0li.execute-api.us-east-1.amazonaws.com/dev',
+    // hats
+    'https://yeu8qspq65.execute-api.us-east-1.amazonaws.com/dev',
+    // raylan
+    'https://zeior65ju0.execute-api.us-east-1.amazonaws.com/dev',
+    // friendly.io
+    'https://48kqixpqr6.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
     // 'https://xwkirqs1x0.execute-api.us-east-1.amazonaws.com/dev',
-    // // friendly.io
-    // 'https://mwv4egtz17.execute-api.us-east-1.amazonaws.com/dev',
     // // safere.io
     // 'https://xefpez2yf0.execute-api.us-east-1.amazonaws.com/dev',
     // // easybank.io
@@ -154,7 +156,13 @@ const merged = extend({
   paintContextIds: false,
   tradleAPIKey: null,
   tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/',
-  APP_URL
+  APP_URL,
+  SILENT_TYPES: [
+    'tradle.Seal',
+    'tradle.CustomerWaiting',
+    'tradle.ModelsPack',
+    'tradle.StylesPack',
+  ]
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
