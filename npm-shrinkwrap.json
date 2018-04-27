@@ -33,13 +33,13 @@
     },
     "@tradle/biz-plugins": {
       "version": "1.0.0",
-      "from": "tradle/biz-plugins#cloud",
-      "resolved": "git://github.com/tradle/biz-plugins.git#a5262cc0b57fa21c85b8ffff64cf204db1906a4a"
+      "from": "tradle/biz-plugins",
+      "resolved": "git://github.com/tradle/biz-plugins.git#1bd2beeb524d2e4bdaec44aff589bdf6284c642e"
     },
     "@tradle/build-resource": {
-      "version": "2.15.0",
-      "from": "tradle/build-resource#stubs",
-      "resolved": "git://github.com/tradle/build-resource.git#cc09c303ac148927982dc8f421d03e16065346ad"
+      "version": "3.0.0",
+      "from": "@tradle/build-resource@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/build-resource/-/build-resource-3.0.0.tgz"
     },
     "@tradle/cb-blockr": {
       "version": "3.2.1",
@@ -165,9 +165,9 @@
       }
     },
     "@tradle/lens": {
-      "version": "1.1.1",
-      "from": "@tradle/lens@>=1.1.1 <2.0.0",
-      "resolved": "http://registry.npmjs.org/@tradle/lens/-/lens-1.1.1.tgz"
+      "version": "1.3.0",
+      "from": "@tradle/lens@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/lens/-/lens-1.3.0.tgz"
     },
     "@tradle/merge-models": {
       "version": "2.1.0",
@@ -176,8 +176,8 @@
     },
     "@tradle/models": {
       "version": "4.10.10",
-      "from": "tradle/models#backlinks",
-      "resolved": "git://github.com/tradle/models.git#a58eaead46442a484c52a3487a84355247543c9d"
+      "from": "tradle/models",
+      "resolved": "git://github.com/tradle/models.git#a3670fa636440202a1d108e2453fdb8ad437e527"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -201,7 +201,7 @@
     },
     "@tradle/models-products-bot": {
       "version": "1.0.0",
-      "from": "tradle/models-products-bot#customeruid",
+      "from": "tradle/models-products-bot",
       "resolved": "git://github.com/tradle/models-products-bot.git#9b0b0b761f46cf089b7b43934068c434103ef042"
     },
     "@tradle/multiqueue": {
@@ -247,14 +247,14 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "5.9.0",
-      "from": "tradle/validate-model",
-      "resolved": "git://github.com/tradle/validate-model.git#6f42ae167e80aa5bd18ea5348c2c829d372c1eed"
+      "version": "6.0.1",
+      "from": "@tradle/validate-model@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-6.0.1.tgz"
     },
     "@tradle/validate-resource": {
-      "version": "2.22.0",
-      "from": "tradle/validate-resource#stubs",
-      "resolved": "git://github.com/tradle/validate-resource.git#3e4d4789ca811d96b78a27ca9c9cd2e9c3a02510",
+      "version": "3.0.0",
+      "from": "@tradle/validate-resource@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-3.0.0.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
@@ -264,9 +264,9 @@
       }
     },
     "@tradle/yuki": {
-      "version": "1.4.0",
+      "version": "1.5.0",
       "from": "@tradle/yuki@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.4.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/yuki/-/yuki-1.5.0.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
@@ -6269,9 +6269,9 @@
       "resolved": "https://registry.npmjs.org/react-native-qrcode/-/react-native-qrcode-0.2.6.tgz"
     },
     "react-native-randombytes": {
-      "version": "3.0.0",
-      "from": "react-native-randombytes@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-randombytes/-/react-native-randombytes-3.0.0.tgz"
+      "version": "3.1.0",
+      "from": "react-native-randombytes@latest",
+      "resolved": "https://registry.npmjs.org/react-native-randombytes/-/react-native-randombytes-3.1.0.tgz"
     },
     "react-native-scrollable-mixin": {
       "version": "1.0.1",
