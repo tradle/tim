@@ -71,6 +71,8 @@ var asyncActions = [
   'getDocuments',
   'hasTestProviders',
 
+  'listMultientry',
+
   'openURL'
 ]
 

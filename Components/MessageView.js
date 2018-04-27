@@ -74,7 +74,7 @@ class MessageView extends Component {
       isLoading: !props.resource[TYPE],
       // showDetails: true,
       showDetails: false,
-      bankStyle: defaultBankStyle
+      bankStyle: props.bankStyle || defaultBankStyle
     };
     let currentRoutes = props.navigator.getCurrentRoutes();
     let len = currentRoutes.length;

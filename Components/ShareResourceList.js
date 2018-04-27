@@ -4,12 +4,15 @@ console.log('requiring ShareResourceList.js')
 import React, { Component } from 'react'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
-import HomePageMixin from './HomePageMixin'
+import Reflux from 'reflux'
+import PropTypes from 'prop-types'
+
 import constants from '@tradle/constants'
 var {
   TYPE,
   ROOT_HASH
 } = constants
+import HomePageMixin from './HomePageMixin'
 import utils, { translate } from '../utils/utils'
 import ResourceRow from './ResourceRow'
 import GridRow from './GridRow'
@@ -19,6 +22,11 @@ import MessageView from './MessageView'
 import CustomIcon from '../styles/customicons'
 import StyleSheet from '../StyleSheet'
 import Actions from '../Actions/Actions'
+import SearchBar from './SearchBar'
+import platformStyles from '../styles/platform'
+
+import Store from '../Store/Store'
+
 
 import PageView from './PageView'
 import {
@@ -28,7 +36,6 @@ import {
   View,
   Alert
 } from 'react-native'
-import PropTypes from 'prop-types'
 
 class ShareResourceList extends Component {
   props: {
@@ -45,6 +52,7 @@ class ShareResourceList extends Component {
     });
     this.state = {
       dataSource: dataSource.cloneWithRows(props.list),
+      list: props.list,
       chosen: {}
     }
     this.share = this.share.bind(this)
@@ -52,9 +60,20 @@ class ShareResourceList extends Component {
     this.renderHeader = this.renderHeader.bind(this)
     this.shareChosen = this.shareChosen.bind(this)
   }
+  componentDidMount() {
+    this.listenTo(Store, 'onAction');
+  }
+  onAction(params) {
+    let { action, list } = params
+    if (action === 'multiEntryList'  &&  list)
+      this.setState({dataSource: this.state.dataSource.cloneWithRows(list), list})
+  }
   shouldComponentUpdate(nextProps, nextState) {
     if (this.state.chosen !== nextState.chosen)
       return true
+    if (this.state.list !== nextState.list)
+      return true
+
     return false
   }
   selectResource(resource) {
@@ -151,9 +170,18 @@ class ShareResourceList extends Component {
                      <Text style={[styles.shareText, {fontSize: 18}]}>{translate('ReviewAndShare')}</Text>
                    </View>
                  </TouchableOpacity>
+    let searchBar = <SearchBar
+                    onChangeText={this.onSearchChange.bind(this)}
+                    placeholder={translate('search')}
+                    showsCancelButtonWhileEditing={false}
+                    showsCancelButton={false}
+                    hideBackground={true}
+                    bankStyle={this.props.bankStyle}
+                    />
 
     return (
-      <PageView style={[styles.container, bgStyle]}>
+      <PageView style={[platformStyles.container, bgStyle]}>
+        {searchBar}
         {content}
         {submit}
       </PageView>
@@ -193,17 +221,30 @@ class ShareResourceList extends Component {
     //   Actions.share(chosen[r], to, formRequest)
     navigator.pop()
   }
+  onSearchChange(filter) {
+    let { search, isModel, modelName, listView, prop, formRequest, isChooser } = this.props
+    this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
+    if (search  &&  isModel) {
+      let mArr = this.filterModels(this.state.filter)
+      this.setState({dataSource: this.state.dataSource.cloneWithRows(mArr)})
+      return
+    }
+    Actions.listMultientry({
+      filter: this.state.filter,
+      formRequest,
+      to: formRequest.from,
+      first: true,
+      limit: 20
+    });
+  }
 }
+
+reactMixin(ShareResourceList.prototype, Reflux.ListenerMixin);
 reactMixin(ShareResourceList.prototype, HomePageMixin)
 ShareResourceList = makeResponsive(ShareResourceList)
 
 var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // backgroundColor: 'white',
-  },
   listview: {
-    marginTop: 64,
     borderWidth: 0,
     marginHorizontal: -1,
     borderBottomWidth: StyleSheet.hairlineWidth,

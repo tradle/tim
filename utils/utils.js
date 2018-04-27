@@ -803,7 +803,7 @@ var utils = {
           if (m)
             return this.makeModelTitle(m)
         }
-        return resource[p];
+        return resource[p] + (meta[p].units || '')
       }
       if (resource[p].title)
         return resource[p].title;
@@ -937,6 +937,8 @@ var utils = {
         v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref))
       else if (props  &&  props[p].range  &&  props[p].range  === 'check')
         v = ''
+      if (props[p].units)
+        v += props[p].units
       group.push(v)
     }
 

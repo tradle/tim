@@ -399,7 +399,10 @@ var search = {
     let filter = ''
     if (filterResource) {
       for (let p in filterResource) {
-        filter += '             ' + p + ': ' + `"${filterResource[p]}"\n`
+        if (typeof filterResource[p] === 'boolean')
+          filter += '             ' + p + ': ' + `${filterResource[p]}\n`
+        else
+          filter += '             ' + p + ': ' + `"${filterResource[p]}"\n`
       }
     }
     eq += filter
@@ -440,7 +443,7 @@ var search = {
 
     let arr
     if (utils.isInlined(model))
-      arr = [TYPE, '_link', '_permalink']
+      arr = [TYPE] //, '_link', '_permalink']
     else {
       arr = ['_permalink', '_link', '_time', '_author', '_authorTitle', '_virtual', 'time']
       if (model.id !== PUB_KEY  &&  !inlined) {
