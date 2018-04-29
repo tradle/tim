@@ -1337,7 +1337,7 @@ class GridList extends Component {
     this.props.navigator.push(route)
   }
   addNew() {
-    let { modelName, prop, resource, isChooser, style, navigator } = this.props
+    let { modelName, prop, resource, isChooser, bankStyle, navigator } = this.props
     let model = utils.getModel(modelName);
     let r;
     this.setState({hideMode: false})
@@ -1376,12 +1376,11 @@ class GridList extends Component {
       title: model.title,
       id: 4,
       component: NewResource,
-      titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
-        bankStyle: style,
+        bankStyle,
         resource: r,
         callback: (resource) => {
           if (self.props.callback)
