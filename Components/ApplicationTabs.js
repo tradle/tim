@@ -160,6 +160,7 @@ class ApplicationTabs extends Component {
       details = <ShowPropertiesView resource={resource}
                                     showRefResource={this.getRefResource.bind(this)}
                                     currency={currency}
+                                    bankStyle={bankStyle}
                                     excludedProperties={['photos']}
                                     navigator={navigator} />
       if (!resource.draft  && utils.isRM(resource)  &&  (resource.status !== 'approved' && resource.status !== 'denied')) {
