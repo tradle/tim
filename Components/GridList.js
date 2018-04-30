@@ -1518,7 +1518,7 @@ class GridList extends Component {
       if (showLoadingIndicator)
         loading = <View style={styles.loadingView}>
                     <View style={[platformStyles.container]}>
-                      <Text style={styles.loading}>{'Loading...'}</Text>
+                      <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{'Loading...'}</Text>
                       <ActivityIndicator size='large' style={styles.indicator} />
                     </View>
                   </View>

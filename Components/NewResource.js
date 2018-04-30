@@ -14,7 +14,6 @@ import ResourceMixin from './ResourceMixin'
 import ShowPropertiesView from './ShowPropertiesView'
 import PageView from './PageView'
 import t from 'tcomb-form-native'
-import extend from 'extend'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import Reflux from 'reflux'
@@ -202,7 +201,7 @@ class NewResource extends Component {
 
   onAction(params) {
     let { resource, action, error, requestedProperties, message, validationErrors } = params
-    let { navigator, prop, containerResource, callback, modelName, originatingMessage } = this.props
+    let { navigator, prop, containerResource, callback, modelName, originatingMessage, bankStyle, model, currency, chat } = this.props
     if (action === 'languageChange') {
       navigator.popToTop()
       return
@@ -229,8 +228,8 @@ class NewResource extends Component {
     }
     if (action === 'getTemporary') {
       let r = {}
-      extend(r, this.state.resource)
-      extend(r, resource)
+      _.extend(r, this.state.resource)
+      _.extend(r, resource)
 
       this.setState({
         resource: r,
@@ -317,7 +316,7 @@ class NewResource extends Component {
                    ? navigator.replace
                    : navigator.replacePrevious
     // Editing form originated from chat
-    if (this.props.chat) {
+    if (chat) {
       let routes = navigator.getCurrentRoutes()
       navigator.popToRoute(routes[routes.length - 3])
       return
@@ -337,16 +336,16 @@ class NewResource extends Component {
         backButtonTitle: translate('back'),
         titleTextColor: '#7AAAC3',
         passProps: {
-          model: this.props.model,
+          model: model,
           resource: resource,
-          currency: this.props.currency,
-          bankStyle: this.props.bankStyle
+          bankStyle: bankStyle,
+          currency: currency,
         }
       },
       passProps: {
         resource: resource,
-        currency: this.props.currency,
-        bankStyle: this.props.bankStyle
+        currency: currency,
+        bankStyle: bankStyle
       }
     });
     if (currentRoutesLength != 2)
@@ -475,7 +474,7 @@ class NewResource extends Component {
       this.setState({submitted: false, disableEditing: true})
 
     let r = {}
-    extend(true, r, resource)
+    _.extend(r, resource)
     json._context = r._context ||  (originatingMessage  &&  originatingMessage._context)
 
     delete r.url
@@ -630,9 +629,10 @@ class NewResource extends Component {
     //   this.showChoice(bl);
     //   return;
     // }
-    let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : this.props.model
+    let { bankStyle, currency, model, navigator } = this.props
+    let blmodel = bl.items.ref ? utils.getModel(bl.items.ref) : model
     if (bl.items.ref  &&  bl.allowToAdd) {
-      this.props.navigator.push({
+      navigator.push({
         id: 30,
         title: translate(bl, blmodel), // Add new ' + bl.title,
         backButtonTitle: translate('back'),
@@ -644,13 +644,13 @@ class NewResource extends Component {
           isChooser: true,
           prop: bl,
           callback: this.setChosenValue,
-          bankStyle: this.props.bankStyle,
-          currency: this.props.currency
+          bankStyle,
+          currency
         }
       });
       return
     }
-    this.props.navigator.push({
+    navigator.push({
       id: 6,
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
       backButtonTitle: translate('back'),
@@ -658,10 +658,11 @@ class NewResource extends Component {
       rightButtonTitle: translate('done'),
       passProps: {
         metadata: bl,
+        bankStyle,
         resource: this.state.resource,
-        parentMeta: this.props.model,
+        parentMeta: model,
         onAddItem: this.onAddItem,
-        currency: this.props.currency
+        currency
       }
     });
   }
@@ -700,7 +701,7 @@ class NewResource extends Component {
     let data = {};
     let model = {};
     let arrays = [];
-    extend(true, data, resource);
+    _.extend(data, resource);
     let isMessage = utils.isMessage(resource)
     let isFinancialProduct = isMessage  &&  meta.subClassOf && meta.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
     let showSendVerificationForm = false;
@@ -1294,7 +1295,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     itemsCounterEmpty: {
       paddingHorizontal: 5,
-      marginTop: -7
+      justifyContent: 'center'
+      // marginTop: -7
     },
     itemsCounter: {
       marginTop: 20,
