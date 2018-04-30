@@ -192,7 +192,6 @@ class MessageView extends Component {
               title: translate(model),
               id: 4,
               component: NewResource,
-              titleTextColor: '#7AAAC3',
               backButtonTitle: 'Back',
               rightButtonTitle: 'Done',
               passProps: {
@@ -243,12 +242,11 @@ class MessageView extends Component {
       title: model.title,
       id: 4,
       component: NewResource,
-      titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
-        bankStyle: this.state.bankStyle || bankStyle,
+        bankStyle: /*this.state.bankStyle ||*/ bankStyle,
         resource: r,
         prop: itemBl,
         search,
