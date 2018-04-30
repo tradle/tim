@@ -1214,7 +1214,13 @@ var NewResourceMixin = {
       )
   },
   getLabelAndBorderColor(prop) {
-    return this.state.isRegistration ? '#eeeeee' : this.state.inFocus === prop ? FOCUSED_LABEL_COLOR : '#b1b1b1'
+    let bankStyle = this.props.bankStyle
+    if (this.state.isRegistration)
+      return '#eeeeee'
+    if (this.state.inFocus === prop)
+      return bankStyle  &&  bankStyle.linkColor || '#757575'
+    else
+      return '#b1b1b1'
   },
   getDateRange(dateStr) {
     if (!dateStr)
@@ -1345,7 +1351,9 @@ var NewResourceMixin = {
     let val = resource && resource[params.prop]
     if (Array.isArray(val)  &&  !val.length)
       val = null
+    let isImmutable
     if (val) {
+      isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto) {
         label = prop.title
         if (!this.floatingProps)
@@ -1384,7 +1392,13 @@ var NewResourceMixin = {
       propLabel = <View/>
     }
     let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
-    color = {color: this.state.isRegistration ? '#eeeeee' : val ? '#555555' :  '#AAAAAA'}
+    if (this.state.isRegistration)
+      color = '#eeeeee'
+    else if (val)
+      color = '#757575'
+    else
+      color = '#AAAAAA'
+    color = {color}
     let propView
     if (photoR)
       propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
@@ -1397,7 +1411,7 @@ var NewResourceMixin = {
                    </View>
       }
       else
-        propView = <Text style={[styles.input, fontSize, color]}>{label}</Text>
+        propView = <Text style={[styles.input, fontSize, color, {backgroundColor: isImmutable ? '#f7f7f7' : 'transparent', width: utils.dimensions().width - 40}]}>{label}</Text>
     }
 
     let maxChars = (utils.dimensions(params.component).width - 20)/10
@@ -1412,16 +1426,19 @@ var NewResourceMixin = {
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
     let iconColor = this.state.isRegistration ? '#eeeeee' : linkColor
     let icon
-    if (isVideo)
-      icon = <Icon name='ios-play-outline' size={35}  color={linkColor} />
-    else if (isPhoto)
-      icon = <Icon name='ios-camera-outline' size={35}  color={linkColor} style={styles.photoIcon}/>
-    else if (!noChooser)
-      icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
-
+    if (!isImmutable) {
+      if (isVideo)
+        icon = <Icon name='ios-play-outline' size={35}  color={linkColor} />
+      else if (isPhoto)
+        icon = <Icon name='ios-camera-outline' size={35}  color={linkColor} style={styles.photoIcon}/>
+      else if (!noChooser)
+        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
+    }
     let content = <View  style={[styles.chooserContainer, {flexDirection: 'row'}]}>
                     {propView}
-                    {icon}
+                    <View style={{justifyContent: 'center', marginTop: 10}}>
+                      {icon}
+                    </View>
                   </View>
 
     let help = this.getHelp(prop)
@@ -1448,10 +1465,14 @@ var NewResourceMixin = {
                        {content}
                      </TouchableHighlight>
     }
-    else
-      actionItem = <TouchableHighlight underlayColor='transparent' onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
-                     {content}
-                   </TouchableHighlight>
+    else {
+      if (isImmutable)
+        actionItem = content
+      else
+        actionItem = <TouchableHighlight underlayColor='transparent' onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
+                       {content}
+                     </TouchableHighlight>
+    }
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
         {propLabel}
@@ -1788,12 +1809,13 @@ var NewResourceMixin = {
     let currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       title: enumProp.title,
-      titleTextColor: '#7AAAC3',
+      // titleTextColor: '#7AAAC3',
       id: 22,
       component: EnumList,
       backButtonTitle: 'Back',
       passProps: {
         prop:        prop,
+        bankStyle:   this.props.bankStyle,
         enumProp:    enumProp,
         resource:    resource,
         returnRoute: currentRoutes[currentRoutes.length - 1],
@@ -2080,9 +2102,9 @@ var styles= StyleSheet.create({
     top: -17,
   },
   photoIcon: {
-    position: 'absolute',
-    right: 5,
-    marginTop: 5
+    // position: 'absolute',
+    // right: 5,
+    // marginTop: 5
   },
   customIcon: {
     position: 'absolute',
