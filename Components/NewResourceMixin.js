@@ -1413,7 +1413,6 @@ var NewResourceMixin = {
       else
         propView = <Text style={[styles.input, fontSize, color, {backgroundColor: isImmutable ? '#f7f7f7' : 'transparent', width: utils.dimensions().width - 40}]}>{label}</Text>
     }
-
     let maxChars = (utils.dimensions(params.component).width - 20)/10
     if (maxChars < label.length)
       label = label.substring(0, maxChars - 3) + '...'
@@ -1709,7 +1708,7 @@ var NewResourceMixin = {
 
     this.setState(state);
     if (!this.props.search) {
-      // Actions.getRequestedProperties(r)
+      Actions.getRequestedProperties(r)
       Actions.saveTemporary(r)
     }
   },
@@ -2102,9 +2101,9 @@ var styles= StyleSheet.create({
     top: -17,
   },
   photoIcon: {
-    // position: 'absolute',
-    // right: 5,
-    // marginTop: 5
+    position: 'absolute',
+    right: 5,
+    marginTop: 5
   },
   customIcon: {
     position: 'absolute',
