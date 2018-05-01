@@ -60,6 +60,7 @@ import ENV from '../utils/env'
 import ConversationsIcon from './ConversationsIcon'
 import SearchBar from './SearchBar'
 import chatStyles from '../styles/chatStyles'
+import formDefaults from '../data/formDefaults'
 
 const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
@@ -1371,6 +1372,10 @@ class GridList extends Component {
       r.to = resource.to
       r._context = resource._context
     }
+
+    let isPrefilled = ENV.prefillForms && model.id in formDefaults
+    if (isPrefilled)
+      _.extend(r, formDefaults[model.id])
     let self = this
     navigator.push({
       title: model.title,
