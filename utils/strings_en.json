@@ -281,5 +281,6 @@
     "importingData": "Importing {1} documents from {2}",
     "reviewScannedProperties": "Please review and correct the scanned properties keeping their format",
     "pleaseClickOnAddButton": "Please click on {icon} button below to add {1}",
-    "validationErrors": "Please correct failed validation fields"
+    "validationErrors": "Please correct failed validation fields",
+    "createNew": "Create new {1}"
 }

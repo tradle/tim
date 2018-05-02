@@ -2,15 +2,17 @@ console.log('requiring ShowPropertiesView.js')
 'use strict';
 
 // import ArticleView from './ArticleView'
-import utils from '../utils/utils'
-var translate = utils.translate
-import constants from '@tradle/constants'
-import RowMixin from './RowMixin'
-import ResourceMixin from './ResourceMixin'
+import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
 import dateformat from 'dateformat'
+
+import constants from '@tradle/constants'
+import utils from '../utils/utils'
+var translate = utils.translate
+import RowMixin from './RowMixin'
+import ResourceMixin from './ResourceMixin'
 import Accordion from './Accordion'
-import Icon from 'react-native-vector-icons/Ionicons'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
@@ -97,7 +99,7 @@ class ShowPropertiesView extends Component {
       model = this.props.model  ||  utils.getModel(modelName);
     var vCols
 
-    let styles = createStyles({bankStyle})
+    let styles = createStyles({bankStyle: bankStyle || defaultBankStyle})
     var props = model.properties;
     if (checkProperties) {
       vCols = utils.getEditCols(model)

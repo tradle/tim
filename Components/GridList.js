@@ -60,6 +60,7 @@ import ENV from '../utils/env'
 import ConversationsIcon from './ConversationsIcon'
 import SearchBar from './SearchBar'
 import chatStyles from '../styles/chatStyles'
+import formDefaults from '../data/formDefaults'
 
 const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
@@ -1341,7 +1342,7 @@ class GridList extends Component {
     this.props.navigator.push(route)
   }
   addNew() {
-    let { modelName, prop, resource, isChooser, style, navigator } = this.props
+    let { modelName, prop, resource, isChooser, bankStyle, navigator } = this.props
     let model = utils.getModel(modelName);
     let r;
     this.setState({hideMode: false})
@@ -1375,17 +1376,20 @@ class GridList extends Component {
       r.to = resource.to
       r._context = resource._context
     }
+
+    let isPrefilled = ENV.prefillForms && model.id in formDefaults
+    if (isPrefilled)
+      _.extend(r, formDefaults[model.id])
     let self = this
     navigator.push({
       title: model.title,
       id: 4,
       component: NewResource,
-      titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
-        bankStyle: style,
+        bankStyle,
         resource: r,
         callback: (resource) => {
           if (self.props.callback)
@@ -1531,7 +1535,7 @@ class GridList extends Component {
       if (showLoadingIndicator)
         loading = <View style={styles.loadingView}>
                     <View style={[platformStyles.container]}>
-                      <Text style={styles.loading}>{'Loading...'}</Text>
+                      <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{'Loading...'}</Text>
                       <ActivityIndicator size='large' style={styles.indicator} />
                     </View>
                   </View>

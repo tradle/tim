@@ -1,13 +1,18 @@
 console.log('requiring FormRequestRow.js')
 'use strict';
 
+import _ from 'lodash'
+import { makeResponsive } from 'react-native-orient'
+import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons';
 const debug = require('debug')('tradle:app:FormRequestRow')
+
+import constants from '@tradle/constants'
+
 import utils from '../utils/utils'
 var translate = utils.translate
 import NewResource from './NewResource'
 import RemediationItemsList from './RemediationItemsList'
-import Icon from 'react-native-vector-icons/Ionicons';
-import constants from '@tradle/constants'
 import RowMixin from './RowMixin'
 import CameraView from './CameraView'
 import StringChooser from './StringChooser'
@@ -15,12 +20,11 @@ import ImageInput from './ImageInput'
 import ShareResourceList from './ShareResourceList'
 
 import CustomIcon from '../styles/customicons'
-import extend from 'extend'
-import equal from 'deep-equal'
 import formDefaults from '../data/formDefaults'
 import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
-import reactMixin from 'react-mixin'
+
+import { circled } from '../styles/utils'
 
 import chatStyles from '../styles/chatStyles'
 
@@ -53,8 +57,8 @@ import {
   Alert,
   View,
   Platform,
-  // Animated,
-  // Easing,
+  Animated,
+  Easing,
   processColor
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -62,22 +66,41 @@ import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 
 import ENV from '../utils/env'
-
 class FormRequestRow extends Component {
   constructor(props) {
     super(props);
     this.state = {}
+    this.zoomIn = new Animated.Value(1.5)
+    this.springValue = new Animated.Value(0.5)
+    this.spinValue = new Animated.Value(0)
   }
   // componentWillMount() {
   //   this.animatedValue = new Animated.Value(60)
   // }
-  // componentDidMount() {
-  //   Animated.timing(this.animatedValue, {
-  //     toValue: 35,
-  //     duration: 500,
-  //     easing: Easing.in(Easing.easy)
-  //   }).start()
-  // }
+  componentDidMount() {
+    Animated.timing(
+      this.spinValue,
+      {
+        toValue: 1,
+        duration: 800,
+        delay: 50,
+        easing: Easing.linear
+      }
+    ).start()
+    // Animated.spring(
+    //   this.springValue,
+    //   {
+    //     toValue: 1,
+    //     friction: 2
+    //   }
+    // ).start()
+     // Animated.timing(      // Uses easing functions
+     //   this.zoomIn,    // The value to drive
+     //   {toValue: 1,
+     //   duration: 1000}        // Configuration
+     // ).start();
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
     let {resource, to, orientation} = this.props
     if (this.props.sendStatus !== nextProps.sendStatus)
@@ -94,7 +117,7 @@ class FormRequestRow extends Component {
     //   return true
     // }
     if (rid !== utils.getId(nextProps.resource) ||  //!equal(resource, nextProps.resource)    ||
-        !equal(to, nextProps.to)                ||
+        !_.isEqual(to, nextProps.to)                ||
         utils.resized(this.props, nextProps))
       return true
     return false
@@ -122,9 +145,10 @@ class FormRequestRow extends Component {
     else
       linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
+    let styles = createStyles({bankStyle, isMyMessage, resource, application})
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     if (isFormRequest)
-      onPressCall = this.formRequest(resource, renderedRow, prop)
+      onPressCall = this.formRequest(resource, renderedRow, prop, styles)
     else {
       onPressCall = resource._documentCreated ? null : this.reviewFormsInContext.bind(this)
       let icon = <Icon style={{marginTop: 2, marginRight: 2, color: linkColor}} size={20} name={'ios-arrow-forward'} />
@@ -154,12 +178,6 @@ class FormRequestRow extends Component {
       renderedRow.push(msg)
     }
     let fromHash = resource.from.id;
-    let mstyle = {
-      borderColor: 'transparent',
-      backgroundColor: '#ffffff',
-      borderTopLeftRadius: 0
-    }
-
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date}>{val}</Text>
@@ -197,12 +215,11 @@ class FormRequestRow extends Component {
 
 
     let addStyle = message.length < 30
-                 ? [chatStyles.verificationBody, mstyle]
-                 : [chatStyles.verificationBody, styles.container, mstyle]
-    var mainStyle = { margin:1, backgroundColor: '#ffffff', whiteSpace: 'pre-wrap' }
+                 ? [chatStyles.verificationBody, styles.mstyle]
+                 : [chatStyles.verificationBody, styles.container, styles.mstyle]
     var shareables = !isFormRequest  || resource._documentCreated
                    ? null
-                   : this.showShareableResources(mainStyle, viewStyle.width);
+                   : this.showShareableResources(styles);
 
     let cellStyle
     if (addStyle)
@@ -214,18 +231,21 @@ class FormRequestRow extends Component {
     // Check if it is needed
     if (!isFormRequest || resource._documentCreated)
       msgStyle.minHeight = 35
-    if (this.isShared() && !isFormRequest)
+    if (this.isShared()  &&  !isFormRequest)
       share = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
               </View>
     let msgContent =  <View style={[viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
-                        <View style={[cellStyle, {backgroundColor: bankStyle.incomingMessageBgColor}, shareables ? styles.shareables : {}]}>
+                        <View style={{marginTop: 2}}>
+                          {ownerPhoto}
+                        </View>
+                        <View style={[cellStyle, {backgroundColor: bankStyle.incomingMessageBgColor}, shareables ? styles.shareablesArea : {}]}>
                           <View style={[styles.container, msgStyle]}>
                             {share}
                             {renderedRow}
-                         </View>
-                         {sealedStatus}
-                        </View>
+                           </View>
+                             {sealedStatus}
+                          </View>
                       </View>
 
     // onPressCall = prop  &&  !prop.allowPicturesFromLibrary ? this.showCamera({prop: prop}) : onPressCall
@@ -238,10 +258,9 @@ class FormRequestRow extends Component {
                       {msgContent}
                     </TouchableOpacity>
 
-    var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     let contextId = this.getContextId(resource)
     return (
-      <View style={[mainStyle, {margin:2, paddingVertical: 3, backgroundColor: bg}]}>
+      <View style={styles.formRequest}>
         {date}
         <View style={shareables ? {borderWidth: 1, width: viewStyle.width + 5, borderColor: '#dddddd', backgroundColor: bankStyle.incomingMessageBgColor, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
           <View style={chatStyles.row}>
@@ -294,7 +313,7 @@ class FormRequestRow extends Component {
     });
   }
 
-  showShareableResources(viewStyle, width) {
+  showShareableResources(styles) {
     let { resource, to, shareableResources, productToForms, bankStyle } = this.props
     if (!shareableResources) // || !this.props.resource.message)
       return null
@@ -322,7 +341,7 @@ class FormRequestRow extends Component {
         //   let meShare = this.formatMultiEntryShareable({context: c, verifications: contexts[c], model: formModel})
           let meverifications = multientryResources[t]
           if (meverifications.length > 1) {
-            let meShare = this.formatMultiEntryShareable({verifications: meverifications, model: formModel, multiChooser: true})
+            let meShare = this.formatMultiEntryShareable({verifications: meverifications, model: formModel, multiChooser: true, styles})
             vtt.push(meShare)
           }
         // }
@@ -346,6 +365,7 @@ class FormRequestRow extends Component {
           var doc = this.formatShareables({
             model: formModel,
             verification: r,
+            styles,
             // isAccordion: totalShareables > 1,
             providers: providers  &&  providers[document[ROOT_HASH]]
           })
@@ -379,21 +399,22 @@ class FormRequestRow extends Component {
               )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
-    let or
-    if (formModel.subClassOf === MY_PRODUCT)
-      or = <View style={{paddingVertical: 5}}>
-            <View style={{backgroundColor: bankStyle.verifiedBg, height: 1, flex: 1, alignSelf: 'stretch'}}/>
-          </View>
-    else {
-      let abStyle = {backgroundColor: bankStyle.verifiedBg, height: 1, flex: 5, alignSelf: 'center'}
-      or = <View style={styles.row}>
-            <View style={abStyle}/>
-            <View style={styles.assistentBox}>
-              <Text style={[styles.orText, {color: bankStyle.verifiedBg}]}>{'or share'}</Text>
-            </View>
-            <View style={abStyle}/>
-          </View>
-    }
+    // let w = utils.dimensions(FormRequestRow).width * 0.8 - 2
+    // let or
+    // if (formModel.subClassOf === MY_PRODUCT)
+    //   or = <View style={{paddingVertical: 5}}>
+    //         <View style={styles.myProductSeparator}/>
+    //       </View>
+    // else {
+    //   let abStyle = {backgroundColor: bankStyle.verifiedBg, height: 1, flex: 5, alignSelf: 'center'}
+    //   or = <View style={styles.row}>
+    //         <View style={abStyle}/>
+    //         <View style={styles.assistentBox}>
+    //           <Text style={[styles.orText, {color: bankStyle.verifiedBg}]}>{'or share'}</Text>
+    //         </View>
+    //         <View style={abStyle}/>
+    //       </View>
+    // }
     // if (!hasMultientry  &&  vtt.length > 3) {
     //   let documents = verifications[formModel.id].map((v) => v.document)
     //   let meShare = this.formatMultiEntryShareable({verifications: verifications[formModel.id], model: formModel, multiChooser: false})
@@ -401,11 +422,9 @@ class FormRequestRow extends Component {
     //   vtt.push(meShare)
     // }
 
-    let shareStyle = {marginTop: -10, width: width, backgroundColor: '#ffffff', borderBottomLeftRadius: 10, borderBottomRightRadius: 10}
     return (
-      <View style={[viewStyle, shareStyle]} key={this.getNextKey()}>
+      <View style={styles.shareable} key={this.getNextKey()}>
         <View style={styles.container}>
-          {or}
           <View style={styles.shareablesList}>
             {vtt}
           </View>
@@ -414,7 +433,7 @@ class FormRequestRow extends Component {
      );
   }
   formatShareables(params) {
-    let { model, verification, onPress, providers } = params
+    let { model, verification, onPress, providers, styles } = params
     let { bankStyle, resource, onSelect, to, share } = this.props
 
     let document = verification.document
@@ -430,11 +449,11 @@ class FormRequestRow extends Component {
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
     else
       msg = <View/>
-    let headerStyle = {paddingTop: 5, paddingLeft: 10}
+    let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8) - 50
+    let headerStyle = {paddingLeft: 10, width: msgWidth}
     let isShared = this.isShared(verification)
 
-    let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
-    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16, width: msgWidth - 100, color: '#555555'}]
+    let hs = /*isShared ? chatStyles.description :*/ {fontSize: 16, color: '#555555'}
     let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
     let headerContent = <View style={headerStyle}>
                           <Text style={hs}>{utils.getDisplayName(document)}</Text>
@@ -451,7 +470,7 @@ class FormRequestRow extends Component {
     let isItem = utils.isSavedItem(document)
     let verifiedBy
     if (verification  && (verification.organization || isItem)) {
-      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem)
+      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem, styles)
       if (onPress) {
       }
       else if (resource._documentCreated) {
@@ -463,7 +482,7 @@ class FormRequestRow extends Component {
                   </View>
       }
       else {
-        orgRow = <View style={[chatStyles.shareView]}>
+        orgRow = <View style={chatStyles.shareView}>
                    <TouchableOpacity onPress={onPress ? onPress : () =>
                             Alert.alert(
                               'Sharing ' + docTitle + ' ' + verifiedBy,
@@ -475,9 +494,12 @@ class FormRequestRow extends Component {
                           )}>
                     {shareView}
                    </TouchableOpacity>
-                   <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
-                     {orgView}
-                   </TouchableOpacity>
+                   <View>
+                     {headerContent}
+                     <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
+                       {orgView}
+                     </TouchableOpacity>
+                   </View>
                 </View>
       }
     }
@@ -490,11 +512,10 @@ class FormRequestRow extends Component {
 
     // let verifiedBy = verification && verification.organization ? verification.organization.title : ''
     return <View style={styles.container} key={this.getNextKey()}>
-             {header}
              {content}
            </View>
   }
-  getParts(verification, isItem) {
+  getParts(verification, isItem, styles) {
     let { resource, to, shareableResources } = this.props
     let document = verification.document
     let providers = shareableResources.providers
@@ -502,10 +523,25 @@ class FormRequestRow extends Component {
     let orgPhoto = !isItem  &&  verification.organization.photo
                  ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={styles.orgImage} />
                  : <View />
-    let shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: resource._documentCreated ? 0.3 : 1}]}>
-                      <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
-                      <Text style={chatStyles.shareText}>{translate('Share')}</Text>
-                    </View>
+    // let shareView = <View style={[chatStyles.shareButton, {marginHorizontal: 0, opacity: resource._documentCreated ? 0.3 : 1}]}>
+    //                   <CustomIcon name='tradle' style={{color: '#4982B1' }} size={32} />
+    //                   <Text style={chatStyles.shareText}>{translate('Share')}</Text>
+    //                 </View>
+
+    // let style={transform: [{scale: this.zoomIn}]}
+    // let style={transform: [{scale: this.springValue}]}
+    // let style={transform: [{scale: this.zoomOut}]}
+    const spin = this.spinValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '360deg']
+    })
+    let style = {transform: [{rotate: spin}]}
+    let shareView =  <Animated.View style={style}>
+                       <View style={styles.shareButton}>
+                         <Icon name='md-share' size={20} color='#ffffff'/>
+                       </View>
+                     </Animated.View>
+
     let orgTitle = to[TYPE] === ORGANIZATION
                  ? to.name
                  : (to.organization ? to.organization.title : null);
@@ -548,7 +584,7 @@ class FormRequestRow extends Component {
         verifiedBy = translate('issuedBy', verification.organization.title)
     }
     let orgView = <View style={styles.orgView}>
-                    <Text style={[chatStyles.description, {paddingRight: 5}]}>
+                    <Text style={chatStyles.description}>
                       {verifiedBy}
                     </Text>
                       {verification.dateVerified
@@ -562,7 +598,7 @@ class FormRequestRow extends Component {
   }
   formatMultiEntryShareable(params) {
     // let { model, verifications, onPress, context, providers } = params
-    let { model, verifications, onPress, providers, multiChooser } = params
+    let { model, verifications, onPress, providers, multiChooser, styles } = params
     let { bankStyle, resource, onSelect, to, share } = this.props
 
     let documents = verifications.map((v) => v.document)
@@ -583,7 +619,7 @@ class FormRequestRow extends Component {
     let isShared = this.isShared(verification)
 
     let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
-    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 16, width: msgWidth - 100, color: bankStyle.linkColor}]
+    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 14, width: msgWidth - 100, color: bankStyle.linkColor}]
     let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
 
     // let docRows = documents.map((d) => {
@@ -592,50 +628,57 @@ class FormRequestRow extends Component {
     //          </TouchableOpacity>
     // })
 
-    let orgRow = <View/>
+    let orgRow
     let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     let isItem = utils.isSavedItem(document)
     let verifiedBy
+    let headerContent = <View style={headerStyle}>
+                          <Text style={hs}>{translate('multientryToShare', documents.length)}</Text>
+                        </View>
+
     if (verification  && (verification.organization || isItem)) {
-      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem)
+      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem, styles)
       if (onPress) {
       }
       else if (resource._documentCreated) {
         orgRow =  <View style={chatStyles.shareView}>
                     {shareView}
+                    <View>
+                     {headerContent}
                     <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
                       {orgView}
                     </TouchableOpacity>
+                    </View>
                   </View>
       }
       else {
-        orgRow = <View style={[chatStyles.shareView]}>
+        orgRow = <View style={chatStyles.shareView}>
                    <TouchableOpacity underlayColor='transparent' onPress={this.showDocuments.bind(this, {documents, verifications, verifiedBy: verifiedBy || '', multiChooser: multiChooser})}>
                     {shareView}
                    </TouchableOpacity>
+                   <View>
+                   {headerContent}
                    <TouchableOpacity onPress={onSelect.bind(this, documents, verifications)}>
                      {orgView}
                    </TouchableOpacity>
+                   </View>
                 </View>
       }
     }
-    let headerContent = <View style={headerStyle}>
-                          <Text style={hs}>{translate('multientryToShare', documents.length)}</Text>
-                        </View>
 
-    let header = <TouchableOpacity onPress={this.showDocuments.bind(this, {documents, verifications, verifiedBy: verifiedBy || '', multiChooser: true})}>
-                   <View style={styles.header}>
-                     {headerContent}
-                     {arrow}
-                   </View>
-                 </TouchableOpacity>
+    // let header = <TouchableOpacity onPress={this.showDocuments.bind(this, {documents, verifications, verifiedBy: verifiedBy || '', multiChooser: true})}>
+    //                <View style={styles.header}>
+    //                  {headerContent}
+    //                  {arrow}
+    //                </View>
+    //              </TouchableOpacity>
     let content = <View style={{flex:1, paddingVertical: 3}}>
+                     {orgRow && <View style={styles.hr}/>}
                      {orgRow}
                    </View>
 
     // let verifiedBy = verification && verification.organization ? verification.organization.title : ''
     return <View style={styles.container} key={this.getNextKey()}>
-             {header}
              {content}
            </View>
   }
@@ -683,12 +726,12 @@ class FormRequestRow extends Component {
     var isPrefilled = resource.prefill
     // Prefill for testing and demoing
     if (isPrefilled)
-      extend(true, r, resource.prefill)
+      _.extend(true, r, resource.prefill)
     else {
       // isPrefilled = false
       isPrefilled = ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
-        extend(true, r, formDefaults[model.id])
+        _.extend(true, r, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
     }
     let rightButtonTitle = 'Done'
@@ -717,8 +760,8 @@ class FormRequestRow extends Component {
     });
   }
 
-  formRequest(resource, vCols, prop) {
-    const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
+  formRequest(resource, vCols, prop, styles) {
+    const { bankStyle, to, application, context, productToForms, chooseTrustedProvider, shareableResources } = this.props
     let message = resource.message
     let messagePart
     if (resource._documentCreated) {
@@ -780,19 +823,18 @@ class FormRequestRow extends Component {
     messagePart = null
     let msg
 
+    let paddingBottom = 0
+    if (shareableResources  &&
+        (!utils.isEmpty(shareableResources.multientryResources) ||  !utils.isEmpty(shareableResources.verifications)))
+      paddingBottom = 15
     if (sameFormRequestForm  &&  !resource._documentCreated) {
-      link = <View style={[chatStyles.rowContainer, styles.link]}>
-               <View style={[chatStyles.textContainer, styles.center]}>
-                 <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
-                   this.createNewResource(form, isMyMessage)
-                 }}>
-                   <View style={styles.multiEntryButton}>
-                     <Text style={styles.multiEntryText}>   {translate('addSameForm')}   </Text>
-                   </View>
-                 </TouchableOpacity>
+      message = 'Would you like to...'
+      link = <View style={{flex: 1, paddingBottom }}>
+               <View style={{flex: 1}}>
+                 {this.makeButtonLink(form, isMyMessage, styles)}
+                 <View style={styles.hr}/>
                  <TouchableOpacity onPress={() => {
                     Alert.alert(
-
                       translate('areYouSureAboutNextForm', translate(form)),
                       null,
                       [
@@ -801,20 +843,23 @@ class FormRequestRow extends Component {
                       ]
                     )
                  }}>
-                   <View style={styles.multiEntryButton}>
-                     <Text style={styles.multiEntryText}>   {translate('getNextForm')}   </Text>
-                   </View>
+                   <View style={styles.row}>
+                     <View style={styles.shareButton}>
+                       <Icon name='ios-arrow-forward' size={20} color='#ffffff'/>
+                     </View>
+                     <View style={{justifyContent: 'center'}}>
+                       <Text style={styles.addMore}>{translate('moveToTheNextForm')}</Text>
+                     </View>
+                    </View>
                 </TouchableOpacity>
               </View>
              </View>
     }
-    // else if (isMyMessage)
-    //   link = <Text style={[chatStyles.resourceTitle, color]}>{translate(form)}</Text>
     else {
       let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
       let notLink = resource._documentCreated  ||  isReadOnly
-      icon = <Icon  name={'ios-arrow-forward'} style={{color: linkColor}} size={20} />
+      icon = <Icon  name={'ios-arrow-forward'} color={linkColor} size={20} />
       if (!notLink) {
         if (resource.verifiers)
           onPressCall = chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
@@ -861,7 +906,7 @@ class FormRequestRow extends Component {
                    </View>
           }
           else {
-            msg = <View key={this.getNextKey()} style={styles.center}>
+            msg = <View key={this.getNextKey()}>
                   <TouchableOpacity onPress={() => form.id === PRODUCT_REQUEST ? this.productChooser(prop) : this.chooser(prop)}>
                     <View style={styles.message}>
                       <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
@@ -869,29 +914,32 @@ class FormRequestRow extends Component {
                     </View>
                   </TouchableOpacity>
                </View>
-            // const animatedStyle = {minHeight: this.animatedValue}
-            // msg = <View key={this.getNextKey()} style={{justifyContent: 'center'}}>
-            //       <TouchableOpacity onPress={() => this.chooser(prop)}>
-            //         <Animated.View style={[{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}, animatedStyle]}>
-            //           <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
-            //           {resource._documentCreated ? null : icon}
-            //         </Animated.View>
-            //       </TouchableOpacity>
-            //    </View>
           }
         }
       }
     }
 
     if (!msg) {
-      let mColor = resource._documentCreated
-                 ? bankStyle.incomingMessageOpaqueTextColor
-                 : bankStyle.incomingMessageTextColor
-      messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, color: mColor}]}>{str}</Text>
+      let mColor, addMore
+      if (resource._documentCreated)
+        mColor = bankStyle.incomingMessageOpaqueTextColor
+      else {
+        str = 'Would you like to...'
+        mColor = bankStyle.incomingMessageTextColor
+        if (!sameFormRequestForm) {
+          let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8)
+
+          addMore = <View style={{ paddingBottom, marginLeft: -5, width: msgWidth - 30}}>
+                      {this.makeButtonLink(form, isMyMessage, styles)}
+                    </View>
+        }
+
+      }
+      messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}]}>{str}</Text>
       msg = <View key={this.getNextKey()}>
-               <View style={styles.message}>
+               <View style={styles.messageLink}>
                  {messagePart}
-                 {resource._documentCreated ? null : icon}
+                 {addMore}
                </View>
                {link}
              </View>
@@ -916,7 +964,21 @@ class FormRequestRow extends Component {
       Actions.addChatItem(params)
     }
   }
+  makeButtonLink(form, isMyMessage, styles) {
+    return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
+             this.createNewResource(form, isMyMessage)
+           }}>
+             <View style={styles.row}>
+               <View style={styles.shareButton}>
+                 <Icon name='md-add' size={20} color='#ffffff'/>
+               </View>
+               <View style={{justifyContent: 'center'}}>
+                 <Text style={styles.addMore}>{translate('createNew', utils.makeModelTitle(form))}</Text>
+               </View>
+             </View>
+           </TouchableOpacity>
 
+  }
   reviewFormsInContext() {
     Alert.alert(
       translate('importDataPrompt'),
@@ -980,110 +1042,165 @@ function isMultientry(resource) {
   return  multiEntryForms && multiEntryForms.indexOf(form.id) !== -1 ? true : false
 }
 
-var styles = StyleSheet.create({
-  container: {
-    flex: 1
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-  assistentText: {
-    color: '#757575',
-    fontStyle: 'italic',
-    fontSize: 17
-  },
-  assistentBox: {
-    backgroundColor: 'transparent',
-    // marginTop: -8,
-    justifyContent: 'center',
-    // width: 30,
-    height: 30,
-    marginTop: 0,
-    alignSelf: 'center',
-    borderRadius: 15,
-    paddingHorizontal: 10
-  },
-  multiEntryButton:  {
-    borderRadius: 10,
-    borderColor: '#77ADFC',
-    borderWidth: 1,
-    padding: 10
-  },
-  multiEntryText: {
-    fontSize: 18
-  },
-  white18: {
-    color: '#ffffff',
-    fontSize: 18
-  },
-  header: {
-    marginRight: -4,
-    marginLeft: -1,
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-  shareables: {
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    backgroundColor: '#ffffff'
-  },
-  shareablesList: {
-    marginHorizontal: 0,
-    paddingRight: 3,
-    backgroundColor: '#ffffff'
-  },
-  orgView: {
-    maxWidth: utils.getMessageWidth(FormRequestRow) - 150,
-    marginLeft: 10,
-    flex: 1,
-    justifyContent: 'center'
-  },
-  orText: {
-    fontStyle: 'italic',
-    alignSelf: 'center',
-    color: '#ffffff',
-    fontSize: 16,
-  },
-  verifiedDate: {
-    fontSize: 12,
-    color: '#757575',
-    fontStyle: 'italic'
-  },
-  orgImage: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    marginTop: -5
-  },
-  thumbView: {
-    flexDirection: 'row',
-    minHeight: 35,
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#dddddd'
-  },
-  arrow: {
-    marginRight: 10,
-    marginTop: 5
-  },
-  link: {
-    paddingVertical: 10,
-    alignSelf: 'center'
-  },
-  center: {
-    justifyContent: 'center'
-  },
-  message: {
-    flexDirection: 'row',
-    minHeight: 35,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  }
-});
+var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, bankStyle }) {
+  let msgWidth = utils.getMessageWidth(FormRequestRow)
+  return StyleSheet.create({
+    container: {
+      flex: 1
+    },
+    row: {
+      flexDirection: 'row',
+      paddingHorizontal: 3,
+      paddingVertical: 5,
+      // justifyContent: 'space-between'
+    },
+    hr: {
+      backgroundColor: '#eeeeee',
+      height: 1,
+      marginHorizontal: -10,
+
+    },
+    assistentText: {
+      color: '#757575',
+      fontStyle: 'italic',
+      fontSize: 17
+    },
+    assistentBox: {
+      backgroundColor: 'transparent',
+      // marginTop: -8,
+      justifyContent: 'center',
+      // width: 30,
+      height: 30,
+      marginTop: 0,
+      alignSelf: 'center',
+      borderRadius: 15,
+      paddingHorizontal: 10
+    },
+    white18: {
+      color: '#ffffff',
+      fontSize: 18
+    },
+    header: {
+      marginRight: -4,
+      marginLeft: -1,
+      flexDirection: 'row',
+      justifyContent: 'space-between'
+    },
+    shareablesArea: {
+      borderBottomLeftRadius: 0,
+      borderBottomRightRadius: 0,
+      backgroundColor: '#ffffff'
+    },
+    shareablesList: {
+      marginHorizontal: 0,
+      paddingRight: 3,
+      backgroundColor: '#ffffff'
+    },
+    orgView: {
+      maxWidth: msgWidth - 150,
+      paddingLeft: 10,
+      marginRight: 10,
+      flex: 1,
+      justifyContent: 'center'
+    },
+    orText: {
+      fontStyle: 'italic',
+      alignSelf: 'center',
+      color: '#ffffff',
+      fontSize: 16,
+    },
+    verifiedDate: {
+      fontSize: 12,
+      color: '#757575',
+      fontStyle: 'italic'
+    },
+    orgImage: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      marginTop: -5
+    },
+    thumbView: {
+      flexDirection: 'row',
+      minHeight: 35,
+      alignItems: 'center',
+      justifyContent: 'space-between'
+    },
+    separator: {
+      height: 1,
+      backgroundColor: '#dddddd'
+    },
+    arrow: {
+      marginRight: 10,
+      marginTop: 5
+    },
+    link: {
+      paddingBottom: 15,
+    },
+    center: {
+      justifyContent: 'center'
+    },
+    messageLink: {
+      // flexDirection: 'row',
+      flex: 1,
+      // minHeight: 35,
+      paddingLeft: 5,
+      // alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    message: {
+      flexDirection: 'row',
+      // flex: 1,
+      minHeight: 35,
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    shareButton: {
+      ...circled(40),
+      backgroundColor: bankStyle.linkColor,
+      shadowOpacity: 0.7,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
+    },
+    myProductSeparator: {
+      backgroundColor: bankStyle.verifiedBg,
+      height: 1,
+      flex: 1,
+      alignSelf: 'stretch'
+    },
+    addMore: {
+      color: bankStyle.linkColor,
+      fontSize: 16,
+      paddingLeft: 10
+    },
+    next: {
+      color: '#555555',
+      fontSize: 16,
+      // paddingLeft: 10
+    },
+    mstyle: {
+      borderColor: 'transparent',
+      backgroundColor: '#ffffff',
+      borderTopLeftRadius: 0
+    },
+    shareable: {
+      margin: 1,
+      marginTop: -37,
+      whiteSpace: 'pre-wrap',
+      width: msgWidth - 2,
+      backgroundColor: '#ffffff',
+      borderBottomLeftRadius: 10,
+      borderBottomRightRadius: 10
+    },
+    formRequest: {
+      // backgroundColor: '#ffffff',
+      margin: 2,
+      paddingVertical: 3,
+      backgroundColor: bankStyle.backgroundImage && 'transparent' || bankStyle.backgroundColor
+    },
+  })
+})
 reactMixin(FormRequestRow.prototype, RowMixin)
+FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;

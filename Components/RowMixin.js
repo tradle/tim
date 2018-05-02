@@ -93,11 +93,15 @@ var RowMixin = {
     if (isVerification) {
       if (!isAggregation)
         style = [style, {borderWidth: BORDER_WIDTH, paddingVertical: 3, borderColor: bankStyle.verifiedBg, borderTopColor: '#eeeeee'}]
+      let title
+      if (!prop.displayName  &&  !prop.displayAs)
+        title =  <View style={styles.column}>
+                  <Text style={[styles.title, {color: '#333333'}]}>{propTitle}</Text>
+                </View>
+
       return (
         <View style={style} key={this.getNextKey()}>
-          <View style={styles.column}>
-            <Text style={[styles.title, {color: '#333333'}]}>{propTitle}</Text>
-          </View>
+          {title}
           <View style={styles.column}>
             <Text style={styles.title}>{val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')}</Text>
           </View>
@@ -113,11 +117,16 @@ var RowMixin = {
       let value = val + (prop.units &&  prop.units.charAt(0) !== '[' ? ' ' + prop.units : '')
       let ratio = value.length / propTitle.length
       let flexVal = (propTitle.length > value.length || ratio < 1.2) ? 1 : ratio < 1.5 ? 2 : 3
+
+      // let color =  isMyMessage && !isMyProduct ? {color: '#FFFFEE'} : {color: '#757575'}
+      let title
+      if (!prop.displayName  &&  !prop.displayAs)
+        title =  <View style={[styles.column, {flex: 1}]}>
+                  <Text style={[styles.descriptionG]}>{propTitle}</Text>
+                </View>
       return (
         <View style={style} key={this.getNextKey()}>
-          <View style={[styles.column, {flex: 1}]}>
-            <Text style={[styles.descriptionG]}>{propTitle}</Text>
-          </View>
+          {title}
           <View style={[styles.column, {paddingLeft: 3, flex: flexVal}]}>
             <Text style={styles.descriptionB}>{value}</Text>
           </View>

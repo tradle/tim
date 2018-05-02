@@ -227,6 +227,7 @@ class ShowRefList extends Component {
                     modelName={modelName}
                     application={application}
                     search={search}
+                    bankStyle={bankStyle}
                     prop={currentBacklink}
                     sortProperty={utils.getModel(modelName).sortProperty}
                     resource={resource}

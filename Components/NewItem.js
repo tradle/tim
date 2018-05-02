@@ -34,6 +34,7 @@ class NewItem extends Component {
     metadata: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     onAddItem: PropTypes.func,
+    bankStyle: PropTypes.object
   };
 
   constructor(props) {
@@ -46,8 +47,8 @@ class NewItem extends Component {
     // if (this.props.resource[this.props.metadata.name])
     //   this.state.data = this.props.resource[this.props.metadata.name]
 
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
-    var currentRoutesLength = currentRoutes.length;
+    let currentRoutes = this.props.navigator.getCurrentRoutes();
+    let currentRoutesLength = currentRoutes.length;
     // currentRoutes[currentRoutesLength - 1].onRightButtonPress = {
     //   stateChange: this.onSavePressed.bind(this)
     // };
@@ -62,7 +63,7 @@ class NewItem extends Component {
     if (this.state.submitted)
       return
     this.state.submitted = true
-    var value = this.refs.form.getValue();
+    let value = this.refs.form.getValue();
     if (!value)
       value = this.refs.form.refs.input.state.value;
     if (!value) {
@@ -72,17 +73,17 @@ class NewItem extends Component {
     }
 
     if (this.floatingProps) {
-      for (var p in this.floatingProps)
+      for (let p in this.floatingProps)
         value[p] = this.floatingProps[p]
     }
-    var propName = this.props.metadata.name;
-    var resource = this.props.resource
+    let propName = this.props.metadata.name;
+    let resource = this.props.resource
     // value is a tcomb Struct
-    var item = utils.clone(value);
-    var missedRequiredOrErrorValue = this.checkRequired(this.props.metadata, item, resource)
+    let item = utils.clone(value);
+    let missedRequiredOrErrorValue = this.checkRequired(this.props.metadata, item, resource)
     if (!utils.isEmpty(missedRequiredOrErrorValue)) {
       this.state.submitted = false
-      var state = {
+      let state = {
         missedRequiredOrErrorValue: missedRequiredOrErrorValue
       }
       this.setState(state)
@@ -91,10 +92,10 @@ class NewItem extends Component {
 
     if (this.props.metadata.items) {
       // HACK ref props of array type props reside on resource for now
-      var props = this.props.metadata.items.properties
+      let props = this.props.metadata.items.properties
       if (props) {
-        var rProps = utils.getModel(resource[constants.TYPE]).properties
-        for (var p in props) {
+        let rProps = utils.getModel(resource[constants.TYPE]).properties
+        for (let p in props) {
           if (p === propName)
             continue
           if (props[p].ref  &&  resource[p]  &&  !rProps[p]) {
@@ -116,8 +117,8 @@ class NewItem extends Component {
     if (utils.isEmpty(this.state.selectedAssets))
       this.props.onAddItem(propName, item);
     else {
-      for (var assetUri in this.state.selectedAssets) {
-        var newItem = {};
+      for (let assetUri in this.state.selectedAssets) {
+        let newItem = {};
         extend(newItem, item);
         newItem = {url: assetUri, title: 'photo'};
         this.props.onAddItem(propName, newItem);
@@ -127,24 +128,24 @@ class NewItem extends Component {
   }
 
   checkRequired(metadata, json, resource) {
-    var required = metadata.required;
+    let required = metadata.required;
     if (!required) {
       required = []
-      for (var p in metadata.items.properties) {
+      for (let p in metadata.items.properties) {
         if (p.charAt(0) !== '_')
           required.push(p)
       }
     }
-    var missedRequiredOrErrorValue = {}
+    let missedRequiredOrErrorValue = {}
     required.forEach((p) =>  {
-      var v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
+      let v = json[p] ? json[p] : (this.props.resource ? this.props.resource[p] : null); //resource[p];
       if (v) {
         if (typeof v === 'string'  &&  !v.length) {
           v = null
           delete json[p]
         }
         else if (typeof v === 'object'  &&  metadata.items.properties[p].ref == constants.TYPES.MONEY) {
-          var units = metadata.items.properties[p].units
+          let units = metadata.items.properties[p].units
           if (units)
             v = v.value
           else {
@@ -154,9 +155,9 @@ class NewItem extends Component {
           }
         }
       }
-      var isDate = Object.prototype.toString.call(v) === '[object Date]'
+      let isDate = Object.prototype.toString.call(v) === '[object Date]'
       if (!v  ||  (isDate  &&  isNaN(v.getTime())))  {
-        var prop = metadata
+        let prop = metadata
         if (prop.items  &&  prop.items.backlink)
           return
         if ((prop.ref) ||  isDate  ||  prop.items) {
@@ -171,8 +172,8 @@ class NewItem extends Component {
     return missedRequiredOrErrorValue
   }
   validateValues(prop, item) {
-    var required = prop.required;
-    var hasError;
+    let required = prop.required;
+    let hasError;
     this.state.options = {
       fields: {}
     };
@@ -191,17 +192,15 @@ class NewItem extends Component {
     return !hasError;
   }
   render() {
-    var props = this.props;
-    var err = props.err || this.state.err || '';
-    var errStyle = err ? styles.err : {'padding': 0, 'height': 0};
-    var error = err
-              ? <Text style={errStyle}>{err}</Text>
-              : <View />
+    let props = this.props;
+    let error
+    let err = props.err || this.state.err
+    if (err)
+      error =  <Text style={styles.err}>{err}</Text>
 
-
-    var meta =  props.metadata;
-    var model = {};
-    var params = {
+    let meta =  props.metadata;
+    let model = {};
+    let params = {
         meta: meta,
         model: model,
         onSubmitEditing: this.onSavePressed.bind(this),
@@ -210,13 +209,13 @@ class NewItem extends Component {
     if (this.state.data)
       params.data = this.state.data[0]
 
-    var options = this.getFormFields(params);
+    let options = this.getFormFields(params);
     options.auto = 'placeholders';
-    var Model = t.struct(model);
+    let Model = t.struct(model);
     if (this.state.options) {
-      for (var fieldName in this.state.options.fields) {
-        var fields = this.state.options.fields[fieldName]
-        for (var f in fields) {
+      for (let fieldName in this.state.options.fields) {
+        let fields = this.state.options.fields[fieldName]
+        for (let f in fields) {
           options.fields[fieldName][f] = fields[f];
         }
       }
@@ -237,7 +236,7 @@ class NewItem extends Component {
     );
   }
   onSelect(asset) {
-    var selectedAssets = this.state.selectedAssets;
+    let selectedAssets = this.state.selectedAssets;
     // unselect if was selected before
     if (selectedAssets[asset.node.image.uri])
       delete selectedAssets[asset.node.image.uri];

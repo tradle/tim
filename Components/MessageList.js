@@ -433,7 +433,8 @@ class MessageList extends Component {
     let currentContext
     if (utils.isContext(resource))
       currentContext = resource
-    else //if (rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
+    else if (resource._context  &&  resource._context[TYPE])
+    // else //if (rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
       currentContext = resource._context
     if (currentContext)
       state.currentContext = currentContext
@@ -498,6 +499,7 @@ class MessageList extends Component {
     this.setState({allContexts: false, limit: LIMIT})
     Actions.list({
       modelName: MESSAGE,
+      search: this.props.search,
       to: this.props.resource,
       context: context,
       switchToContext: context != null,
@@ -543,7 +545,6 @@ class MessageList extends Component {
       return true
     if (this.state.hasProducts !== nextState.hasProducts)
       return true
-
     if (nextState.productToForms) {
       if (!this.state.productToForms)
         return true
@@ -817,7 +818,7 @@ class MessageList extends Component {
 
           content = <View style={styles.flex1}>
                       <View style={[platformStyles.container, bgStyle]}>
-                        <Text style={styles.loading}>{'Loading...'}</Text>
+                        <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{'Loading...'}</Text>
                         <ActivityIndicator size='large' style={styles.indicator} />
                       </View>
                       {menuBtn}

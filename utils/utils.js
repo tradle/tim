@@ -1766,9 +1766,9 @@ var utils = {
 
     return (additionalParams) => {
       var key = Component.displayName
-      if (!stylesCache[key]) {
+      // if (!stylesCache[key]) {
         stylesCache[key] = {}
-      }
+      // }
 
       var subCache = stylesCache[key]
       var dimensions = getDimensions(Component)

@@ -198,6 +198,7 @@ const VERIFIED_ITEM       = 'tradle.VerifiedItem'
 const DATA_BUNDLE         = 'tradle.DataBundle'
 const DATA_CLAIM          = 'tradle.DataClaim'
 const CHECK               = 'tradle.Check'
+const LEGAL_ENTITY        = 'tradle.legal.LegalEntity'
 
 const MY_ENVIRONMENT      = 'environment.json'
 
@@ -642,7 +643,7 @@ var Store = Reflux.createStore({
     let objId = utils.getId({
       [TYPE]: objectinfo.type,
       [ROOT_HASH]: objectinfo.permalink,
-      [ROOT_HASH]: objectinfo.link,
+      [CUR_HASH]: objectinfo.link,
     })
     msgToObj[link] = objId
     if (msg.author === me[CUR_HASH])
@@ -3738,7 +3739,7 @@ var Store = Reflux.createStore({
   },
 
   async onGetItem(params) {
-    var {resource, action, noTrigger, search, backlink, forwardlink} = params
+    var {resource, action, noTrigger, search, backlink, backlinks, forwardlink} = params
     // await this._loadedResourcesDefer.promise
 
     const resModel = this.getModel(utils.getType(resource))
@@ -3746,10 +3747,9 @@ var Store = Reflux.createStore({
       throw new Error(`missing model for ${res[TYPE]}`)
     }
 
-    if (search) {
-      await this.onGetItemFromServer(params)
-      return
-    }
+    if (search)
+      return await this.onGetItemFromServer(params)
+
     let rId = utils.getId(resource)
     let r = this._getItem(rId)
     var res = {};
@@ -3781,7 +3781,7 @@ var Store = Reflux.createStore({
 
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
-    var props = backlink ? {[backlink.name]: backlink} : resModel.properties;
+    var props = backlinks || (backlink ? {[backlink.name]: backlink} : resModel.properties)
 
     for (let p in props) {
       if (p.charAt(0) === '_'  ||  props[p].hidden)
@@ -3794,7 +3794,7 @@ var Store = Reflux.createStore({
     }
 
     if (noTrigger)
-      return
+      return res
 
     let retParams = { resource: res, action: action || 'getItem'}
     if (utils.isMessage(res)) {
@@ -3812,6 +3812,7 @@ var Store = Reflux.createStore({
       }
     }
     this.trigger(retParams);
+    return res
   },
   async onGetItemFromServer(params) {
     var {resource, action, noTrigger, search, backlink, forwardlink, application} = params
@@ -3819,7 +3820,7 @@ var Store = Reflux.createStore({
     let rId = utils.getId(resource)
     let r
     if (!isApplication  ||  resource.id  ||  (!backlink  &&  !forwardlink))
-      r = await this._getItemFromServer(rId)
+      r = await this._getItemFromServer(rId, backlink)
     else {
       let prop
       let blProp = backlink ||  forwardlink
@@ -3929,6 +3930,7 @@ var Store = Reflux.createStore({
     if (list)
       retParams.list = list
     this.trigger(retParams)
+    return r
   },
   async getObjects(list, prop) {
     if (!list.length)
@@ -4703,7 +4705,13 @@ var Store = Reflux.createStore({
       let isForm = rModel.subClassOf === FORM
       returnVal[IS_MESSAGE] = true
       let prevResId, prevResCached
-      if (!isNew) {
+      if (isNew) {
+        if (rModel.id === PRODUCT_REQUEST)
+          await deactivateFormRequests()
+        if (isContext  &&  !returnVal.contextId)
+          returnVal.contextId = self.getNonce()
+      }
+      else {
         let prevRes
         prevResId = utils.getId(returnVal)
         try {
@@ -4717,27 +4725,10 @@ var Store = Reflux.createStore({
           self.trigger({action: 'noChanges'})
           return
         }
-        if (isForm) {
-          let org = resource.to.organization
-          let orgId = utils.getId(org ? org : resource.to)
-
-          let allFormRequests = await self.searchMessages({modelName: FORM_REQUEST, to: self._getItem(orgId)})
-          if (allFormRequests) {
-            // Check the current form request as fulfilled since there is going
-            // to be a fresh one after updating the resource
-            allFormRequests.forEach((r) => {
-              if (!r._documentCreated) {
-                r._documentCreated = true
-                self._getItem(r)._documentCreated = true
-                self.addVisualProps(r)
-                self.trigger({action: 'addItem', resource: r})
-              }
-            })
-          }
-        }
+        if (isForm)
+          await deactivateFormRequests()
       }
-      if (isNew  &&  isContext  &&  !returnVal.contextId)
-        returnVal.contextId = self.getNonce()
+
       let rId = utils.getId(returnVal.to)
       let to = self._getItem(rId)
       // let permalink = to[ROOT_HASH]
@@ -4978,6 +4969,26 @@ var Store = Reflux.createStore({
       }
 
     }
+    async function deactivateFormRequests() {
+      let org = returnVal.to.organization
+      let orgId = utils.getId(org ? org : returnVal.to)
+
+      let allFormRequests = await self.searchMessages({modelName: FORM_REQUEST, to: self._getItem(orgId)})
+      if (!allFormRequests)
+        return
+      // Check the current form request as fulfilled since there is going
+      // to be a fresh one after updating the resource
+      allFormRequests.forEach((r) => {
+        if (!r._documentCreated) {
+          r._documentCreated = true
+          self._getItem(r)._documentCreated = true
+          self.addVisualProps(r)
+          self.dbPut(utils.getId(r), r)
+          self.trigger({action: 'updateItem', resource: r})
+          // self.trigger({action: 'addItem', resource: r})
+        }
+      })
+    }
     async function save(returnVal, noTrigger, lens) {
       let r = {
         modelName: returnVal[TYPE],
@@ -5024,7 +5035,8 @@ var Store = Reflux.createStore({
       [TYPE]: PRODUCT_REQUEST,
       requestFor: product,
       from: me,
-      to: this.getRepresentative(org)
+      to: this.getRepresentative(org),
+      contextId
     }
     if (me)
       await this.insurePublishingIdentity(org)
@@ -5262,8 +5274,69 @@ var Store = Reflux.createStore({
         debugger
       })
     }
+    let document = resource.document
+    if (document  &&  document[TYPE] === LEGAL_ENTITY) {
+      let links = { [document[ROOT_HASH]]: document }
+      await this.getAllLinkedResources(document, links)
+      if (links) {
+        await this.shareAll(Object.values(links), shareWithList, originatingResource)
+        return
+      }
+    }
 
     await this.shareAll([resource.document || resource], shareWithList, originatingResource)
+  },
+
+  async getAllLinkedResources(resource, links) {
+    let model = utils.getModel(resource[TYPE])
+
+    if (utils.isImplementing(model, INTERSECTION)) {
+      let refs = utils.getPropertiesWithAnnotation(model, 'ref')
+      for (let p in refs) {
+        if (utils.isEnum(refs[p].ref))
+          continue
+        let value = resource[p]
+        if (!value)
+          continue
+
+        if (!links[this.getRootHash(value)]) {
+          if (!value[TYPE])
+            value = await this.onGetItem({resource: value, noTrigger: true})
+          links[this.getRootHash(value)] = value
+          let vType = utils.getType(value)
+          if (vType === LEGAL_ENTITY)
+            await this.getAllLinkedResources(value, links)
+        }
+      }
+      return
+    }
+
+    let backlinks = utils.getPropertiesWithAnnotation(model, 'items')
+
+    if (utils.isEmpty(backlinks))
+      return
+    let backlinksList = {}
+    for (let p in backlinks) {
+      if (backlinks[p].items.backlink)
+        backlinksList[p] = backlinks[p]
+    }
+    if (utils.isEmpty(backlinksList))
+      return
+
+    let rWithBl = await this.onGetItem({resource, backlinks: backlinksList, noTrigger: true})
+
+    for (let p in backlinksList) {
+      let rl = rWithBl[p]
+      if (!rl  ||  !rl.length)
+        continue
+      for (let i=0; i<rl.length; i++) {
+        let r = rl[i]
+        if (links[r[ROOT_HASH]])
+          continue
+        links[r[ROOT_HASH]] = r
+        await this.getAllLinkedResources(r, links)
+      }
+    }
   },
 
   async shareResources(resources, to, formRequest, shareBatchId) {
@@ -5776,12 +5849,12 @@ var Store = Reflux.createStore({
     //   retParams.requestedModelName = FORM
     // retParams.requestedModelName = modelName
     if (!isAggregation  &&  to  &&  !prop) {
-      if (to[TYPE] !== PROFILE  ||  !me.isEmployee) {
-        // // let to = list[utils.getId(to)].value
-        // // if (to  &&  to[TYPE] === ORGANIZATION)
-        // // entering the chat should clear customer's unread indicator
-        shareableResources = await this.getShareableResources({foundResources: result, to, context})
-      }
+      // if (to[TYPE] !== PROFILE  ||  !me.isEmployee) {
+      //   // // let to = list[utils.getId(to)].value
+      //   // // if (to  &&  to[TYPE] === ORGANIZATION)
+      //   // // entering the chat should clear customer's unread indicator
+      //   shareableResources = await this.getShareableResources({foundResources: result, to, context})
+      // }
       let toId = utils.getId(to)
       if (me.isEmployee  && to[TYPE] === PROFILE) {
         // debugger
@@ -5953,9 +6026,17 @@ var Store = Reflux.createStore({
       retParams.context = context
       if (switchToContext)
         retParams.switchToContext = switchToContext
+
+      if (to[TYPE] !== PROFILE  ||  !me.isEmployee) {
+        // // let to = list[utils.getId(to)].value
+        // // if (to  &&  to[TYPE] === ORGANIZATION)
+        // // entering the chat should clear customer's unread indicator
+        retParams.shareableResources = await this.getShareableResources({foundResources: result, to, context})
+      }
+
     }
-    if (shareableResources)
-      retParams.shareableResources = shareableResources
+    // if (shareableResources)
+    //   retParams.shareableResources = shareableResources
     if (prop)
       retParams.prop = prop
     if (gatherForms  &&  modelName === MESSAGE) {
@@ -6157,7 +6238,7 @@ var Store = Reflux.createStore({
       // recipient = myBot[ROOT_HASH]
       if (to)
         author = to[TYPE] === PROFILE ? to[ROOT_HASH] : this.getRepresentative(to)[ROOT_HASH]
-      else
+      else if (!context  &&  !contextId)
         author = myBot[ROOT_HASH]
     }
     let all = graphQL.getChat({
@@ -6268,7 +6349,10 @@ var Store = Reflux.createStore({
           style = SERVICE_PROVIDERS.filter((sp) => sp.org === applicantOrgId)[0].style
         }
       }
-      this.trigger({action: 'messageList', modelName, to: params.to, allLoaded: resourceCount < limit, list: chatItems, bankStyle: style, context, endCursor: newCursor, switchToContext, loadEarlierMessages})
+      let shareables
+      if (!application)
+        shareables = await this.getShareableResources({foundResources: chatItems, to, context: context})
+      this.trigger({action: 'messageList', shareableResources: shareables, modelName, to: params.to, allLoaded: resourceCount < limit, list: chatItems, bankStyle: style, context, endCursor: newCursor, switchToContext, loadEarlierMessages})
     }
     return {list: chatItems, endCursor: newCursor, resourceCount}
   },
@@ -7004,6 +7088,8 @@ var Store = Reflux.createStore({
     let rId = all[link]
     let r = this._getItem(rId)
     if (!r)
+      return
+    if (isChooser  &&  !r._latest)
       return
     let object
     try {
@@ -8013,39 +8099,44 @@ var Store = Reflux.createStore({
     }
     return resource;
   },
+  async onListMultientry({formRequest, to, context, filter}) {
+    let shareables = await this.getShareableResources({filter, foundResources: [formRequest], to, context: context  ||  formRequest.context})
+    let multientryResources = shareables.multientryResources
+    let list
+    if (multientryResources) {
+      // multientryResources
+      multientryResources = multientryResources[formRequest.form]
+      if (multientryResources)
+        list = multientryResources.map((r) => r.document)
+    }
+
+    this.trigger({action: 'multiEntryList', list})
+  },
   // Gathers resources that were created on this official account to figure out if the
   // customer has some other official accounts where he already submitted this information
   async getShareableResources(params) {
-    let {foundResources, to, context} = params
+    let {foundResources, to, context, filter} = params
     if (!foundResources)
       return
     if (me.isEmployee)
       return await this.getShareableResourcesForEmployee(params)
-    var verTypes = [];
+    var shareType, formRequest
     var meId = utils.getId(me)
     var simpleLinkMessages = {}
     var meId = utils.getId(utils.getMe())
 
     var hasVerifiers = []
     let formToProduct = {}
-    for (var i=0; i<foundResources.length; i++) {
+    for (var i=foundResources.length - 1; i>=0  &&  !shareType; i--) {
       var r = foundResources[i]
       if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
         continue;
       // documentCreated identifier is set when the document of this type was created
       // and we don't want to create it again from this same notification
-      if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated)
+      if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated  ||  r.form === PRODUCT_REQUEST)
         continue;
       if (utils.getId(r.to)  !==  meId)
         continue
-      // var msgParts = utils.splitMessage(r.message);
-      // // Case when the needed form was sent along with the message
-      // if (msgParts.length !== 2)
-      //   continue;
-      // Case when customer already has resource to SHARE on the screen but accidentally
-      // or otherwise clicked on PRODUCT list link. To avoid the multiple shares
-      // of the same resource with the same financial institution
-      // let rr = simpleLinkMessages[msgParts[1]]
       let rr = simpleLinkMessages[r.form]
       if (rr) {
         rr._documentCreated = true
@@ -8055,11 +8146,13 @@ var Store = Reflux.createStore({
       simpleLinkMessages[r.form] = r
       var msgModel = this.getModel(r.form);
 
-      if (msgModel  &&
+      if (!shareType                          &&
+          msgModel                            &&
           msgModel.subClassOf !== MY_PRODUCT  &&
           !msgModel.notShareable              &&
           !utils.isContext(msgModel)) {
-        verTypes.push(msgModel.id);
+        shareType = msgModel.id
+        formRequest = r
         formToProduct[msgModel.id] = r.product
         if (r.verifiers)
           hasVerifiers[msgModel.id] = r.verifiers
@@ -8112,10 +8205,10 @@ var Store = Reflux.createStore({
         this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
       })
     }
-    if (!verTypes.length)
+    if (!shareType)
       return {verifications: shareableResources}
     let toId = utils.getId(to)
-    let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {[TYPE]: verTypes}})
+    let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {[TYPE]: shareType}})
     // if (!l)
     //   return
     let verifiedShares = {}
@@ -8127,23 +8220,27 @@ var Store = Reflux.createStore({
     }
     // Allow sharing non-verified forms
     let curContext = context || await this.getCurrentContext(to)
+    if (hasVerifiers  &&  hasVerifiers[shareType])
+      return
+    let verModel = this.getModel(shareType)
+    let result = await this.searchSharables({modelName: shareType}) //, context: shareType === LEGAL_ENTITY ? formRequest._context : null})
     let promises = []
-    verTypes.forEach((verType) => {
-      if (hasVerifiers  &&  hasVerifiers[verType])
-        return
-      promises.push(this.searchSharables({modelName: verType}))
-    })
-    let result = await Promise.all(promises)
-    result.forEach((ll) => {
-      if (!ll)
-        return
+    if (result) {
+      if (shareType === LEGAL_ENTITY)
+        result.forEach((r) => promises.push(this.onGetItem({resource: r, noTrigger: true, backlink: verModel.properties.ownersOfThisEntity})))
 
-      ll.forEach((r) => {
+      if (promises.length)
+        result = await Promise.all(promises)
+      result.forEach((r) => {
         if (r.verificationsCount)
           return
         if (verifiedShares[utils.getId(r)])
           return
+        if (shareType === LEGAL_ENTITY  &&  r.ownersOfThisEntity  &&  r.ownersOfThisEntity.length)
+          return
         if (this.checkIfWasShared(r, to))
+          return
+        if (filter  &&  utils.getDisplayName(r).indexOf(filter) === -1)
           return
         if (!curContext  ||  (r._context  &&  utils.getId(curContext) !== utils.getId(r._context))) {
           let rr = {
@@ -8154,7 +8251,7 @@ var Store = Reflux.createStore({
           this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
         }
       })
-    })
+    }
     let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources, formToProduct)
     return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
     function checkOneVerification(val) {
@@ -8162,7 +8259,7 @@ var Store = Reflux.createStore({
 
       var doc = val.document
       var docType = utils.getType(doc) //(doc.id && doc.id.split('_')[0]) || doc[TYPE];
-      if (verTypes.indexOf(docType) === -1)
+      if (shareType  !== docType)
         return;
       // Filter out the verification from the same company
       // var fromId = utils.getId(val.from)
@@ -8214,28 +8311,34 @@ var Store = Reflux.createStore({
       if (appSubmitted  &&  appSubmitted.list  &&  appSubmitted.list.length)
         return
     }
-    var verTypes = [];
-    var meId = utils.getId(me)
-    var simpleLinkMessages = {}
-    var meId = utils.getId(me)
+    let shareType, formRequest
+    let simpleLinkMessages = {}
+    let meId = utils.getId(me)
     let repId, myRep
     if (me.isEmployee) {
       myRep = this.getRepresentative(me.organization)
       repId = myRep[ROOT_HASH]
     }
 
-    var hasVerifiers = []
+    let hasVerifiers = []
     let formToProduct = {}
-    var contexts = {}
+    let contexts = {}
     let toR = (to.organization  &&  this._getItem(to.organization)) || to
-    for (var i=0; i<foundResources.length; i++) {
-      var r = foundResources[i]
-      if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
+    let myBot = this.getRepresentative(me.organization)
+    let myBotId = utils.getId(myBot)
+    let contextToId = {}
+    for (let i=foundResources.length-1; i>=0; i--) {
+      let r = foundResources[i]
+      if (utils.getId(r.to) !== meId     &&
+          utils.getId(r.from) !== meId   &&
+          utils.getId(r.to) !== myBotId  &&
+          utils.getId(r.from) !== myBotId)
         continue;
-      if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated)
+
+      if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated  ||  r.form === PRODUCT_REQUEST)
         continue;
-      if (utils.getId(r.to)  !==  meId)
-        continue
+      // if (utils.getId(r.to)  !==  meId)
+      //   continue
       let rr = simpleLinkMessages[r.form]
       if (rr) {
         rr._documentCreated = true
@@ -8243,7 +8346,7 @@ var Store = Reflux.createStore({
         continue
       }
       simpleLinkMessages[r.form] = r
-      var msgModel = this.getModel(r.form);
+      let msgModel = this.getModel(r.form);
       if (msgModel  &&
           msgModel.subClassOf !== MY_PRODUCT  &&
           !msgModel.notShareable              &&
@@ -8251,68 +8354,91 @@ var Store = Reflux.createStore({
         let productModel = this.getModel(r.product)
         if (!productModel)
           continue
-        // let isMultiEntry = productModel.multiEntryForms && productModel.multiEntryForms.indexOf(r.form) !== -1
+
+        if (!r._context  &&  r[TYPE] === FORM_REQUEST) {
+          let c = contexts[r.context]
+          if (!c)
+            c = await this.getContext(r.context, r)
+          if (!c)
+            continue
+          contexts[utils.getId(c)] = c
+          r._context = c
+        }
 
         let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: r.form}, to: toR, search: me.isEmployee, context: r._context, noTrigger: true })
-        if (res  &&  res.list  && res.list.length) {
-          // let showShare
-          // if (isMultiEntry) {
-          //   res.forEach((mr) => {
-          //     if (r.context !== mr._context.contextId)
-          //       showShare = true
-          //   })
-          // }
-          // if (!showShare) {
-            // this._getItem(utils.getId(r))._documentCreated = true
-            // r._documentCreated = true
-            continue
-          // }
-        }
         contexts[utils.getId(r._context)] = r._context
-        verTypes.push(msgModel.id);
+
+        if (!shareType) {
+          shareType = msgModel.id
+          formRequest = r
+        }
         formToProduct[msgModel.id] = r.product
         if (r.verifiers)
           hasVerifiers[msgModel.id] = r.verifiers
       }
     }
-    var shareableResources = {};
-    var shareableResourcesRootToR = {}
-    var shareableResourcesRootToOrgs = {}
-
-    var isOrg = to  &&  to[TYPE] === ORGANIZATION
-    var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
-    var reps = isOrg ? this.getRepresentatives(org) : [utils.getId(to)]
-    var self = this
-    if (!verTypes.length)
+    if (!shareType)
       return {verifications: shareableResources}
+    let shareableResources = {};
+    let shareableResourcesRootToR = {}
+    let shareableResourcesRootToOrgs = {}
+
+    let isOrg = to  &&  to[TYPE] === ORGANIZATION
+    let org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
+    let reps = isOrg ? this.getRepresentatives(org) : [utils.getId(to)]
+    let self = this
 
     // Allow sharing non-verified forms
     // let context = await this.getCurrentContext(to)
     let typeToDocs = {}
     let docs = []
-    for (let i=0; i<verTypes.length; i++) {
-      let verType = verTypes[i]
-      if (hasVerifiers  &&  hasVerifiers[verType])
-        continue
-      var ll = await this.searchSharables({
-        modelName: verType,
-        filterResource: {_author: myRep[CUR_HASH]},
-        noTrigger: true,
-        // modelName: MESSAGE,
-        // to: myRep,
-        // filterResource: {_payloadType: verType},
-      })
-      if (!ll  ||  !ll.list  ||  !ll.list.length)
-        continue
 
-      typeToDocs[verType] = ll.list
-      ll.list.forEach((r) => {
-        let dId = utils.getId(r)
-        if (!contexts[dId])
-        // if (!this.checkIfWasShared(r, to))
-          docs.push(dId)
+    if (hasVerifiers  &&  hasVerifiers[shareType])
+      return
+    let ll = await this.searchSharables({
+      modelName: shareType,
+      filterResource: {_author: myRep[CUR_HASH]},
+      noTrigger: true,
+    })
+
+    if (!ll  ||  !ll.list  ||  !ll.list.length)
+      return
+
+    // Don't share forms from the same context
+    let submittedForms = await this.searchServer({
+      modelName: MESSAGE,
+      context: {contextId: formRequest.context},
+      noTrigger: true,
+      filterResource: {
+        _payloadType: shareType,
+        _inbound: false
+      }
+    })
+    let excludeForms = {}
+    if (submittedForms  &&  submittedForms.list)
+      submittedForms.list.forEach(r => excludeForms[utils.getId(r)] = r)
+
+    let formList =  ll.list.filter((r) => {
+      let dId = utils.getId(r)
+      if (excludeForms[dId])
+        return false
+      docs.push(dId)
+      return true
+    })
+    let promises = []
+    if (shareType === LEGAL_ENTITY) {
+      let m = this.getModel(LEGAL_ENTITY)
+      formList.forEach((r) => promises.push(this.onGetItem({resource: r, noTrigger: true, search: true, backlink: m.properties.ownersOfThisEntity})))
+      let result = await Promise.all(promises)
+      let l = {}
+      result.forEach(r => {
+        if (!r.ownersOfThisEntity  ||  !r.ownersOfThisEntity.length)
+          l[r[ROOT_HASH]] = r
       })
+      let filteredFormList = formList.filter((r) => l[r[ROOT_HASH]])
+      formList = filteredFormList
     }
+    typeToDocs[shareType] = formList
     if (!docs.length)
       return
 
@@ -8320,7 +8446,6 @@ var Store = Reflux.createStore({
     // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
     let result = await this.searchSharables({modelName: VERIFICATION, filterResource: {document: docs}, properties: ['document'], noTrigger: true,})
     let verifiedShares ={}
-    // let promises = []
     if (result  &&  result.list) {
       let rep
       if (me.isEmployee) {
@@ -8332,12 +8457,6 @@ var Store = Reflux.createStore({
       let l = result.list
       l.forEach((val) => {
         checkOneVerification(val, contextId)
-        // if (checkOneVerification(val, contextId)) {
-        //   if (!val._context) {
-        //     let vTo = val.to.id.split('_')
-        //     promises.push(this.searchServer({modelName: MESSAGE, to: val.to, filterResource: {_payloadType: VERIFICATION, object___link: val[CUR_HASH]}}))
-        //   }
-        // }
         verifiedShares[utils.getId(val.document)] = val
       })
     }
@@ -8353,20 +8472,8 @@ var Store = Reflux.createStore({
           organization: this._getItem(utils.getId(d.from)).organization
         }
         this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
-        // if (this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})) {
-        //   if (!d._context) {
-        //     let dTo = this._getItem(d.to)
-        //     promises.push(this.searchServer({modelName: MESSAGE, to: dTo, filterResource: {_payloadType: d[TYPE], object___link: d[CUR_HASH]}}))
-        //   }
-        // }
       })
     }
-    // if (promises.length) {
-    //   contexts = await Promise.all(promises)
-    //   contexts.forEach((c) => {
-    //     c = c
-    //   })
-    // }
 
     let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources, formToProduct)
     return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
@@ -8383,7 +8490,7 @@ var Store = Reflux.createStore({
 
       let doc = val.document
       let docType = utils.getType(doc) // (doc.id && doc.id.split('_')[0]) || doc[TYPE];
-      if (verTypes.indexOf(docType) === -1)
+      if (shareType !== docType)
         return;
       // Filter out the verification from the same company
       // let fromId = utils.getId(val.from)
@@ -8599,8 +8706,11 @@ var Store = Reflux.createStore({
       return await this.searchMessages(params)
     extend(params, {noTrigger: true, search: me.isEmployee})
     let model = this.getModel(modelName)
-    if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION)
+    if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION) {
+      // LEGAL ENTITY
+      // if (modelName === 'tradle.LegalEntity')
       return await this.searchServer(params)
+    }
   },
 
   getNonce() {
@@ -9477,6 +9587,7 @@ var Store = Reflux.createStore({
     if (val[TYPE] === SIMPLE_MESSAGE  &&  val.message === ALREADY_PUBLISHED_MESSAGE)
       return
 
+    this.rewriteStubs(val)
     val[ROOT_HASH] = val[ROOT_HASH]  ||  obj[ROOT_HASH]
     val[CUR_HASH] = obj[CUR_HASH]
 
@@ -9968,7 +10079,7 @@ var Store = Reflux.createStore({
 
       // Avoid doubling the number of forms
       if (context) {
-        isThirdPartySentRequest = utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
+        isThirdPartySentRequest = !isFormRequest  &&  utils.getId(from) !== utils.getId(context.from)  &&  utils.getId(from) !== utils.getId(context.to)
 
         if (isThirdPartySentRequest  &&  isVerification)
           isThirdPartySentRequest = utils.getId(to) !== utils.getId(context.from)  &&  utils.getId(to) !== utils.getId(context.to)
@@ -14903,3 +15014,358 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   }
   // },
 
+/*
+  async getShareableResources(params) {
+    let {foundResources, to, context, filter} = params
+    if (!foundResources)
+      return
+    if (me.isEmployee)
+      return await this.getShareableResourcesForEmployee(params)
+    var verTypes = [];
+    var meId = utils.getId(me)
+    var simpleLinkMessages = {}
+    var meId = utils.getId(utils.getMe())
+
+    var hasVerifiers = []
+    let formToProduct = {}
+    for (var i=0; i<foundResources.length; i++) {
+      var r = foundResources[i]
+      if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
+        continue;
+      // documentCreated identifier is set when the document of this type was created
+      // and we don't want to create it again from this same notification
+      if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated)
+        continue;
+      if (utils.getId(r.to)  !==  meId)
+        continue
+      // var msgParts = utils.splitMessage(r.message);
+      // // Case when the needed form was sent along with the message
+      // if (msgParts.length !== 2)
+      //   continue;
+      // Case when customer already has resource to SHARE on the screen but accidentally
+      // or otherwise clicked on PRODUCT list link. To avoid the multiple shares
+      // of the same resource with the same financial institution
+      // let rr = simpleLinkMessages[msgParts[1]]
+      let rr = simpleLinkMessages[r.form]
+      if (rr) {
+        rr._documentCreated = true
+        this._getItem(utils.getId(rr))._documentCreated = true
+        continue
+      }
+      simpleLinkMessages[r.form] = r
+      var msgModel = this.getModel(r.form);
+
+      if (msgModel  &&
+          msgModel.subClassOf !== MY_PRODUCT  &&
+          !msgModel.notShareable              &&
+          !utils.isContext(msgModel)) {
+        verTypes.push(msgModel.id);
+        formToProduct[msgModel.id] = r.product
+        if (r.verifiers)
+          hasVerifiers[msgModel.id] = r.verifiers
+      }
+    }
+    var shareableResources = {};
+    var shareableResourcesRootToR = {}
+    var shareableResourcesRootToOrgs = {}
+
+    var isOrg = to  &&  to[TYPE] === ORGANIZATION
+    var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
+    var reps = isOrg ? this.getRepresentatives(org) : [utils.getId(to)]
+    var self = this
+
+    var productsToShare = await this.searchSharables({modelName: MY_PRODUCT, to: utils.getMe(), strict: true })
+    if (productsToShare  &&   productsToShare.length) {
+      productsToShare.forEach((r) => {
+        let fromId = utils.getId(r.from)
+        if (r._sharedWith) {
+          let sw = r._sharedWith.filter((r) => {
+            if (reps.filter((rep) => {
+                    if (utils.getId(rep) === r.bankRepresentative)
+                      return true
+                  }).length)
+              return true
+          })
+          if (sw.length)
+            return
+        }
+        if (shareableResourcesRootToR[r[ROOT_HASH]]) {
+          let arr = shareableResources[r[TYPE]]
+          let skip
+          for (let i=0; i<arr.length  &&  !skip; i++) {
+            if (r[ROOT_HASH] === rr[ROOT_HASH]) {
+              if (r.time < rr.time)
+                skip = true
+              else
+                arr.splice(i, 1)
+            }
+          }
+          if (skip)
+            return
+        }
+        let rr = {
+          [TYPE]: VERIFICATION,
+          document: r,
+          organization: this._getItem(utils.getId(r.from)).organization
+        }
+
+        this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+      })
+    }
+    if (!verTypes.length)
+      return {verifications: shareableResources}
+    let toId = utils.getId(to)
+    let l = await this.searchSharables({modelName: VERIFICATION, filterResource: {[TYPE]: verTypes}})
+    // if (!l)
+    //   return
+    let verifiedShares = {}
+    if (l) {
+      l.forEach((val) => {
+        checkOneVerification(val)
+        verifiedShares[utils.getId(val.document)] = val
+      })
+    }
+    // Allow sharing non-verified forms
+    let curContext = context || await this.getCurrentContext(to)
+    let promises = []
+    verTypes.forEach((verType) => {
+      if (hasVerifiers  &&  hasVerifiers[verType])
+        return
+      promises.push(this.searchSharables({modelName: verType}))
+    })
+    let result = await Promise.all(promises)
+    result.forEach((ll) => {
+      if (!ll)
+        return
+
+      ll.forEach((r) => {
+        if (r.verificationsCount)
+          return
+        if (verifiedShares[utils.getId(r)])
+          return
+        if (this.checkIfWasShared(r, to))
+          return
+        if (filter  &&  utils.getDisplayName(r).indexOf(filter) === -1)
+          return
+        if (!curContext  ||  (r._context  &&  utils.getId(curContext) !== utils.getId(r._context))) {
+          let rr = {
+            [TYPE]: VERIFICATION,
+            document: r,
+            organization: this._getItem(utils.getId(r.to)).organization
+          }
+          this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+        }
+      })
+    })
+    let multientryResources = shareableResources  &&  this.getMultiEntriesToShare(shareableResources, formToProduct)
+    return {verifications: shareableResources, multientryResources: multientryResources, providers: shareableResourcesRootToOrgs}
+    function checkOneVerification(val) {
+      let id = utils.getId(val.to.id);
+
+      var doc = val.document
+      var docType = utils.getType(doc) //(doc.id && doc.id.split('_')[0]) || doc[TYPE];
+      if (verTypes.indexOf(docType) === -1)
+        return;
+      // Filter out the verification from the same company
+      // var fromId = utils.getId(val.from)
+      // var fromOrgId = utils.getId(self._getItem(fromId).organization)
+      // if (fromOrgId === toId)
+      //   return
+      var document = doc.id ? self._getItem(utils.getId(doc.id)) : doc;
+      if (!document  ||  document._inactive)
+        return;
+
+      if (self.checkIfWasShared(document, to))
+        return
+      // Check if there is at least one verification by the listed in FormRequest verifiers
+      if (hasVerifiers  &&  hasVerifiers[docType]) {
+        let verifiers = hasVerifiers[docType]
+        let foundVerifiedForm
+        verifiers.forEach((v) => {
+          let provider = SERVICE_PROVIDERS.filter((sp) => sp.id === v.id  &&  utils.urlsEqual(sp.url, v.url))
+          if (!provider.length)
+            return
+          let spReps = self.getRepresentatives(provider[0].org)
+          let sw = val._sharedWith.filter((r) => {
+            return spReps.some((rep) => utils.getId(rep) === r.bankRepresentative)
+          })
+          if (sw.length)
+            foundVerifiedForm = true
+        })
+        if (!foundVerifiedForm)
+          return
+      }
+
+      var value = {};
+      extend(value, val);
+      value.document = document;
+
+      self.addVisualProps(value)
+      self.addAndCheckShareable(value, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+    }
+  },
+  async getShareableResourcesForEmployee(params) {
+    let {foundResources, to, context} = params
+    if (!foundResources)
+      return
+    if (context) {
+      if (context._appSubmitted)
+        return
+      let appSubmitted = await this.searchServer({modelName: APPLICATION_SUBMITTED, filterResource: {context: context.contextId}, search: me.isEmployee, noTrigger: true })
+      if (appSubmitted  &&  appSubmitted.list  &&  appSubmitted.list.length)
+        return
+    }
+    var verTypes = [];
+    var meId = utils.getId(me)
+    var simpleLinkMessages = {}
+    var meId = utils.getId(me)
+    let repId, myRep
+    if (me.isEmployee) {
+      myRep = this.getRepresentative(me.organization)
+      repId = myRep[ROOT_HASH]
+    }
+
+    var hasVerifiers = []
+    let formToProduct = {}
+    var contexts = {}
+    let toR = (to.organization  &&  this._getItem(to.organization)) || to
+    for (var i=0; i<foundResources.length; i++) {
+      var r = foundResources[i]
+      if (me  &&  utils.getId(r.to) !== meId  &&  utils.getId(r.from) !== meId)
+        continue;
+      if (r[TYPE] !== FORM_REQUEST  ||  r._documentCreated)
+        continue;
+      if (utils.getId(r.to)  !==  meId)
+        continue
+      let rr = simpleLinkMessages[r.form]
+      if (rr) {
+        rr._documentCreated = true
+        this._getItem(utils.getId(rr))._documentCreated = true
+        continue
+      }
+      simpleLinkMessages[r.form] = r
+      var msgModel = this.getModel(r.form);
+      if (msgModel  &&
+          msgModel.subClassOf !== MY_PRODUCT  &&
+          !msgModel.notShareable              &&
+          !utils.isContext(msgModel)) {
+        let productModel = this.getModel(r.product)
+        if (!productModel)
+          continue
+        // let isMultiEntry = productModel.multiEntryForms && productModel.multiEntryForms.indexOf(r.form) !== -1
+
+        let res = await this.searchServer({modelName: MESSAGE, filterResource: {_payloadType: r.form}, to: toR, search: me.isEmployee, context: r._context, noTrigger: true })
+        if (res  &&  res.list  && res.list.length) {
+          // let showShare
+          // if (isMultiEntry) {
+          //   res.forEach((mr) => {
+          //     if (r.context !== mr._context.contextId)
+          //       showShare = true
+          //   })
+          // }
+          // if (!showShare) {
+            // this._getItem(utils.getId(r))._documentCreated = true
+            // r._documentCreated = true
+            continue
+          // }
+        }
+        contexts[utils.getId(r._context)] = r._context
+        verTypes.push(msgModel.id);
+        formToProduct[msgModel.id] = r.product
+        if (r.verifiers)
+          hasVerifiers[msgModel.id] = r.verifiers
+      }
+    }
+    var shareableResources = {};
+    var shareableResourcesRootToR = {}
+    var shareableResourcesRootToOrgs = {}
+
+    var isOrg = to  &&  to[TYPE] === ORGANIZATION
+    var org = isOrg ? to : (to.organization ? this._getItem(utils.getId(to.organization)) : null)
+    var reps = isOrg ? this.getRepresentatives(org) : [utils.getId(to)]
+    var self = this
+    if (!verTypes.length)
+      return {verifications: shareableResources}
+
+    // Allow sharing non-verified forms
+    // let context = await this.getCurrentContext(to)
+    let typeToDocs = {}
+    let docs = []
+    for (let i=0; i<verTypes.length; i++) {
+      let verType = verTypes[i]
+      if (hasVerifiers  &&  hasVerifiers[verType])
+        continue
+      var ll = await this.searchSharables({
+        modelName: verType,
+        filterResource: {_author: myRep[CUR_HASH]},
+        noTrigger: true,
+        // modelName: MESSAGE,
+        // to: myRep,
+        // filterResource: {_payloadType: verType},
+      })
+      if (!ll  ||  !ll.list  ||  !ll.list.length)
+        continue
+
+      typeToDocs[verType] = ll.list
+      ll.list.forEach((r) => {
+        let dId = utils.getId(r)
+        if (!contexts[dId])
+        // if (!this.checkIfWasShared(r, to))
+          docs.push(dId)
+      })
+    }
+    if (!docs.length)
+      return
+
+    let toId = utils.getId(to)
+    // let l = await this.searchMessages({modelName: VERIFICATION, search: me.isEmployee})
+    let result = await this.searchSharables({modelName: VERIFICATION, filterResource: {document: docs}, properties: ['document'], noTrigger: true,})
+    let verifiedShares ={}
+    // let promises = []
+    if (result  &&  result.list) {
+      let rep
+      if (me.isEmployee) {
+        let representative = this.getRepresentative(me.organization)
+        rep = utils.getId(representative)
+      }
+      let contextId = context && utils.getId(context)
+
+      let l = result.list
+      l.forEach((val) => {
+        checkOneVerification(val, contextId)
+        // if (checkOneVerification(val, contextId)) {
+        //   if (!val._context) {
+        //     let vTo = val.to.id.split('_')
+        //     promises.push(this.searchServer({modelName: MESSAGE, to: val.to, filterResource: {_payloadType: VERIFICATION, object___link: val[CUR_HASH]}}))
+        //   }
+        // }
+        verifiedShares[utils.getId(val.document)] = val
+      })
+    }
+    for (let t in typeToDocs) {
+      let list = typeToDocs[t]
+
+      list.forEach((d) => {
+        if (verifiedShares[utils.getId(d)])
+          return
+        let rr = {
+          [TYPE]: VERIFICATION,
+          document: d,
+          organization: this._getItem(utils.getId(d.from)).organization
+        }
+        this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})
+        // if (this.addAndCheckShareable(rr, to, {shareableResources, shareableResourcesRootToR, shareableResourcesRootToOrgs})) {
+        //   if (!d._context) {
+        //     let dTo = this._getItem(d.to)
+        //     promises.push(this.searchServer({modelName: MESSAGE, to: dTo, filterResource: {_payloadType: d[TYPE], object___link: d[CUR_HASH]}}))
+        //   }
+        // }
+      })
+    }
+    // if (promises.length) {
+    //   contexts = await Promise.all(promises)
+    //   contexts.forEach((c) => {
+    //     c = c
+    //   })
+    // }
+*/

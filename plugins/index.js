@@ -1,4 +1,5 @@
 
 module.exports = [
-  require('./PhotoID')
+  require('./PhotoID'),
+  require('./ControllingEntity')
 ]

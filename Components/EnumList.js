@@ -22,6 +22,7 @@ class EnumList extends Component {
     returnRoute: PropTypes.object,
     callback: PropTypes.func,
     prop: PropTypes.object.isRequired,
+    bankStyle: PropTypes.object,
     enumProp: PropTypes.object.isRequired
   };
   constructor(props) {
@@ -52,7 +53,7 @@ class EnumList extends Component {
           removeClippedSubviews={false}
           enableEmptySections={true}
           keyboardDismissMode='on-drag'
-          keyboardShouldPersistTaps="always"
+          keyboardShouldPersistTaps='always'
           initialListSize={200}
           pageSize={200}
           showsVerticalScrollIndicator={false} />;
