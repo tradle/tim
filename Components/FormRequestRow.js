@@ -1139,7 +1139,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     },
     addMore: {
       color: bankStyle.linkColor,
-      fontSize: 14,
+      fontSize: 16,
       paddingLeft: 10
     },
     next: {
