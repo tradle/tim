@@ -85,29 +85,30 @@ class PhotoView extends Component {
     let width = utils.getContentWidth(PhotoView)
     let screenHeight = height
     let resizeMode
-    if (currentPhoto.width  &&  currentPhoto.height) {
-      if (currentPhoto.width  <  currentPhoto.height) {
-        if (width > currentPhoto.width) {
-          width = currentPhoto.width
-          height = currentPhoto.height
-          resizeMode = 'contain'
-        }
-        else {
-          height = Math.round(height * currentPhoto.width / currentPhoto.height)
-          resizeMode = 'cover'
-        }
-      }
-      else {
-        height = Math.round(height * currentPhoto.height / currentPhoto.width)
-        resizeMode = 'cover'
-      }
-      height = Math.min(height, screenHeight / 2.5)
-    }
-    else {
+    let coverPhoto = utils.getPropertiesWithAnnotation(model, 'coverPhoto')
+    coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
+    if (coverPhoto  ||  !currentPhoto.width  ||  !currentPhoto.height) {
       width = utils.getContentWidth(PhotoView) + 2
       height = Math.floor(height / 2.5)
       resizeMode = 'contain'
     }
+    else if (currentPhoto.width  <  currentPhoto.height) {
+      if (width > currentPhoto.width) {
+        width = currentPhoto.width
+        // height = currentPhoto.height
+        height = Math.round(width * currentPhoto.height/ height)
+        resizeMode = 'contain'
+      }
+      else {
+        height = Math.round(height * currentPhoto.width / currentPhoto.height)
+        resizeMode = 'contain'
+      }
+    }
+    else {
+      height = Math.round(height * currentPhoto.height / currentPhoto.width)
+      resizeMode = 'cover'
+    }
+    height = Math.min(height, screenHeight / 2.5)
     let image = {
       width,
       height,
@@ -124,8 +125,6 @@ class PhotoView extends Component {
  //              this.shwCarousel(resource.photos[0])
  //          }}
     let photoView
-    let coverPhoto = utils.getPropertiesWithAnnotation(model, 'coverPhoto')
-    coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
     if (coverPhoto) {
       // let cpHeight = coverPhoto.height * width / coverPhoto.width
 
@@ -140,6 +139,7 @@ class PhotoView extends Component {
               // <Image resizeMode='cover' source={coverPhotoSource} style={{width: width, height: cpHeight}}>
 
       let fontSize = title.length < 15 ? 30 : 24
+
       photoView = (
         <ImageBackground resizeMode='cover' source={coverPhotoSource} style={image}>
           <View style={{height: 50, backgroundColor: '#000000', alignSelf: 'stretch', opacity: 0.2, position: 'absolute', left: 0, bottom: 0, width: width}} />
