@@ -49,6 +49,10 @@ class PhotoView extends Component {
     if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH] ||
         this.state.isModalOpen !== nextState.isModalOpen)
       return true
+    if (this.props.mainPhoto  &&  nextProps.mainPhoto)
+      return this.props.mainPhoto.url.split('?')[0] !== nextProps.mainPhoto.url.split('?')[0]
+    else if (this.props.resource.photos  && nextProps.resource.photos)
+      return this.props.resource.photos[0].url !== nextProps.resource.photos[0].url
 
     return !_.isEqual(this.props.resource.photos, nextProps.resource.photos)
   }
