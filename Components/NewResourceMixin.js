@@ -925,7 +925,7 @@ var NewResourceMixin = {
              ? ' ' + prop.units
              : ' (' + prop.units + ')'
     }
-    else if (!this.props.search  &&  required)
+    if (!this.props.search  &&  required)
       label += ' *'
     let lStyle = styles.labelStyle
 
