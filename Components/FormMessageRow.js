@@ -44,6 +44,8 @@ class FormMessageRow extends Component {
   }
   shouldComponentUpdate(nextProps, nextState) {
     let {resource, to, orientation, application} = this.props
+    if (resource._latest !== nextProps.resource._latest)
+      return true
     if (application) {
       let thisRM = utils.isRM(application)
       let nextRM = utils.isRM(nextProps.application)
@@ -200,8 +202,8 @@ class FormMessageRow extends Component {
     return (
       <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
-        <View style={[{flex:1, width: width}, chatStyles.verificationBody]}>
-          <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
+        <View style={[chatStyles.verificationBody, {flex: 1, width, borderColor: bankStyle.contextBackgroundColor}]}>
+           <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
             <Text style={chatStyles.verificationHeaderText}>{headerTitle}
               {sealedStatus}
             </Text>
@@ -352,7 +354,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       borderBottomLeftRadius: 10
     },
     sentTo: {
-      color: '#7AAAC3',
+      color: bankStyle.linkColor,
       fontSize: 14,
       alignSelf: 'flex-end'
     },

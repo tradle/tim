@@ -53,6 +53,8 @@ import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 class ShowPropertiesView extends Component {
+  static displayName = 'ShowPropertiesView';
+
   props: {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,

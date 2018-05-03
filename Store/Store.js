@@ -3160,7 +3160,7 @@ var Store = Reflux.createStore({
     else
       sendParams.object = toChain
 
-    to = to[ROOT_HASH] ? to : this._getItem(utils.getId(to))
+    to = utils.isStub(to) && this._getItem(utils.getId(to)) || to
     let provider, hash
     if (to[ROOT_HASH] === me[ROOT_HASH]) {
       provider = this._getItem(from)
@@ -3409,6 +3409,10 @@ var Store = Reflux.createStore({
     let appP = require('../plugins')
     appP.forEach(p => allPlugins.push(p))
 
+    let _context = r._context
+    if (utils.isStub(r._context))
+      _context = this._getItem(_context.id)
+
     // if (appPlugins)
     //   appPlugins.forEach(p => allPlugins.push(p))
     let context = this.getBizPluginsContext()
@@ -3420,7 +3424,7 @@ var Store = Reflux.createStore({
         continue
       moreInfo = plugin(context).validateForm.call(
           {models: {[rtype]: this.getModel(rtype)}},
-          {application: r._context, form: r}
+          {application: _context, form: r}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo
@@ -5155,7 +5159,7 @@ var Store = Reflux.createStore({
     let batch = []
     // Get the whole resources
     let documents = resources.map((d) => {
-      let document = d[ROOT_HASH] ? d : this._getItem(utils.getId(d))
+      let document = utils.isStub(d) &&  this._getItem(utils.getId(d)) || d
       if (!document._context)
         document._context = formResource._context
       return document

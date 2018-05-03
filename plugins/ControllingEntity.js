@@ -27,7 +27,7 @@ function getPropsForControllingEntity(form) {
   if (!typeOfControllingEntity)
     return {}
   let requestedProperties
-  let id = typeOfControllingEntity.id.split('_')[1]
+  let id = typeOfControllingEntity.id.split('_')[1].toLowerCase()
   switch (id) {
   case 'person':
     return {
@@ -51,22 +51,22 @@ function getPropsForOwnership(form) {
   if (!typeOfLegalEntity)
     return {}
   let requestedProperties
-  let id = typeOfLegalEntity.id.split('_')[1]
+  let id = typeOfLegalEntity.id.split('_')[1].toLowerCase()
   switch (id) {
   case 'subsidiary':
     return {
       requestedProperties: [
-        'percentageOfOwnership',
-        'owns',
-        'ownedBy'
+        {name: 'percentageOfOwnership'},
+        {name: 'owns'},
+        {name: 'ownedBy'}
       ]
     }
   case 'branch':
     form.percentageOfOwnership = 100
     return {
       requestedProperties: [
-        'owns',
-        'ownedBy'
+        {name: 'owns'},
+        {name: 'ownedBy'}
       ]
     }
   }

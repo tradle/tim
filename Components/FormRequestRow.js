@@ -68,6 +68,7 @@ import React, { Component } from 'react'
 import ENV from '../utils/env'
 class FormRequestRow extends Component {
   static displayName = 'FormRequestRow';
+
   constructor(props) {
     super(props);
     this.state = {}
@@ -200,6 +201,7 @@ class FormRequestRow extends Component {
       message = formTitle
 
     // let msgL = message.length * utils.getFontSize(18) + 35
+    // HACK
     let msgL = message.length * utils.getFontSize(7) + 35
     var viewStyle = {
       flexDirection: 'row',
