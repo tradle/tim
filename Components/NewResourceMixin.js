@@ -1377,7 +1377,7 @@ var NewResourceMixin = {
       else if (!noChooser)
         icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
     }
-    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row'}]}>
+    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
                     {propView}
                     <View style={{justifyContent: 'center', marginTop: 10}}>
                       {icon}
