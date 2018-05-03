@@ -67,6 +67,8 @@ import React, { Component } from 'react'
 
 import ENV from '../utils/env'
 class FormRequestRow extends Component {
+  static displayName = 'FormRequestRow';
+
   constructor(props) {
     super(props);
     this.state = {}
@@ -200,10 +202,11 @@ class FormRequestRow extends Component {
     // HACK
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
+    let msgL = message.length * utils.getFontSize(7) + 35
     var viewStyle = {
       flexDirection: 'row',
       borderTopRightRadius: 10,
-      width:  Math.min(msgWidth, message.length * utils.getFontSize(18) + 35),
+      width:  Math.min(msgWidth, msgL),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start'
     }
 
