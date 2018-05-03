@@ -67,6 +67,7 @@ import React, { Component } from 'react'
 
 import ENV from '../utils/env'
 class FormRequestRow extends Component {
+  static displayName = 'FormRequestRow';
   constructor(props) {
     super(props);
     this.state = {}
@@ -198,10 +199,12 @@ class FormRequestRow extends Component {
     if (formTitle.length > message.length)
       message = formTitle
 
+    // let msgL = message.length * utils.getFontSize(18) + 35
+    let msgL = message.length * utils.getFontSize(7) + 35
     var viewStyle = {
       flexDirection: 'row',
       borderTopRightRadius: 10,
-      width:  Math.min(msgWidth, message.length * utils.getFontSize(18) + 35),
+      width:  Math.min(msgWidth, msgL),
       alignSelf: isMyMessage ? 'flex-end' : 'flex-start'
     }
 
@@ -449,7 +452,7 @@ class FormRequestRow extends Component {
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
     else
       msg = <View/>
-    let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8) - 50
+    let msgWidth = utils.getMessageWidth(FormRequestRow) - 50
     let headerStyle = {paddingLeft: 10, width: msgWidth}
     let isShared = this.isShared(verification)
 
@@ -618,7 +621,7 @@ class FormRequestRow extends Component {
     let headerStyle = {paddingTop: 5, paddingLeft: 10}
     let isShared = this.isShared(verification)
 
-    let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
+    let msgWidth = utils.getMessageWidth(FormRequestRow) - 100
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 14, width: msgWidth - 100, color: bankStyle.linkColor}]
     let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
 
@@ -927,7 +930,7 @@ class FormRequestRow extends Component {
         str = 'Would you like to...'
         mColor = bankStyle.incomingMessageTextColor
         if (!sameFormRequestForm) {
-          let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8)
+          let msgWidth = utils.getMessageWidth(FormRequestRow)
 
           addMore = <View style={{ paddingBottom, marginLeft: -5, width: msgWidth - 30}}>
                       {this.makeButtonLink(form, isMyMessage, styles)}

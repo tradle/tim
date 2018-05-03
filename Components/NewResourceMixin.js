@@ -939,7 +939,7 @@ var NewResourceMixin = {
              ? ' ' + prop.units
              : ' (' + prop.units + ')'
     }
-    else if (!this.props.search  &&  required)
+    if (!this.props.search  &&  required)
       label += ' *'
     let lStyle = styles.labelStyle
 
@@ -2085,7 +2085,7 @@ var styles= StyleSheet.create({
   customIcon: {
     position: 'absolute',
     right: 0,
-    marginTop: 15
+    // marginTop: 15
   },
   dateInput: {
     flex: 1,
