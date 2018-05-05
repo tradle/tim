@@ -202,7 +202,7 @@ class FormRequestRow extends Component {
     // HACK
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    let msgL = message.length * utils.getFontSize(7) + 35
+    let msgL = message.length * utils.getFontSize(10) + 35
     var viewStyle = {
       flexDirection: 'row',
       borderTopRightRadius: 10,
