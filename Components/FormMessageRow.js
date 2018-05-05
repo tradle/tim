@@ -82,7 +82,7 @@ class FormMessageRow extends Component {
     let isShared = this.isShared()
     let isSharedContext
 
-    var len = photos  &&  photos.length;
+    let len = photos  &&  photos.length;
     let inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
     let photoStyle = {};
     if (inRow > 0) {
@@ -101,9 +101,7 @@ class FormMessageRow extends Component {
     }
     let sendStatus = this.getSendStatus()
     let val = this.getTime(resource);
-    let date = val
-             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
-             : <View />;
+    let date = val  &&  <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
     let bg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
 
     let width = Math.floor(utils.dimensions(FormMessageRow).width * 0.8) // - (isSharedContext  ? 45 : 0))
@@ -191,8 +189,9 @@ class FormMessageRow extends Component {
     return (
       <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
-           <View style={[chatStyles.verificationBody, {flex:1, borderColor: bankStyle.contextBackgroundColor}]}>          <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
-            <Text style={chatStyles.verificationHeaderText}>{headerTitle}
+        <View style={[{flex:1}, chatStyles.verificationBody]}>
+          <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
+           <Text style={chatStyles.verificationHeaderText}>{headerTitle}
               {sealedStatus}
             </Text>
             {arrowIcon}
@@ -229,7 +228,7 @@ class FormMessageRow extends Component {
       viewCols = utils.ungroup(model, viewCols)
 
     viewCols.forEach((v) => {
-      if (vCols.length > MAX_PROPS_IN_FORM)
+      if (vCols.length >= MAX_PROPS_IN_FORM)
         return
       if (properties[v].markdown)
         return
