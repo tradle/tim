@@ -37,7 +37,7 @@ function getPropsForControllingEntity(form) {
         {name: 'legalEntity'}
       ]
     }
-  case 'legalEntity':
+  case 'legalentity':
     return {
       requestedProperties: [
         {name: 'controllingLegalEntity'},
