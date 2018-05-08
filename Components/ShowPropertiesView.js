@@ -166,7 +166,16 @@ class ShowPropertiesView extends Component {
         let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
 
         let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido}
-        return this.showJson(params)
+        this.showJson(params)
+        if (jsonRows.length)
+          viewCols.push(
+            <View key={this.getNextKey()}>
+               <View style={isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}}>
+                 {jsonRows}
+               </View>
+             </View>
+             )
+        return
       }
       var isRef;
       var isItems
