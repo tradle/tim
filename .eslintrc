@@ -75,7 +75,8 @@
     "$Exports": false,
     "$FlowIssue": false,
     "$FlowFixMe": false,
-    "$FixMe": false
+    "$FixMe": false,
+    "URL": true
   },
 
   "rules": {
