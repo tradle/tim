@@ -569,7 +569,6 @@ class ResourceList extends Component {
           title: title,
           id: 3,
           component: ResourceView,
-          // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Edit',
           onRightButtonPress: {
@@ -1061,7 +1060,6 @@ class ResourceList extends Component {
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
       rightButtonTitle: 'Download',
       passProps: {
         bankStyle: this.props.style,
@@ -1110,13 +1108,12 @@ class ResourceList extends Component {
       title: model.title,
       id: 4,
       component: NewResource,
-      titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
         bankStyle: this.props.style,
-      resource: r,
+        resource: r,
         callback: (resource) => {
           self.props.navigator.pop()
           let l = []
@@ -1433,15 +1430,15 @@ class ResourceList extends Component {
     })
   }
   showBookmarks() {
-    let passProps = {modelName: BOOKMARK}
-    if (this.state.bankStyle)
-      passProps.bankStyle = this.state.bankStyle
     this.props.navigator.push({
       title: 'Bookmarks',
       id: 30,
       component: GridList,
       backButtonTitle: 'Back',
-      passProps,
+      passProps: {
+        modelName: BOOKMARK,
+        bankStyle: this.state.bankStyle
+      },
     })
   }
   showAllPartials() {
@@ -1452,8 +1449,8 @@ class ResourceList extends Component {
       component: ResourceList,
       backButtonTitle: 'Back',
       passProps: {
-        modelName: PARTIAL,
-        bankStyle: this.state.bankStyle || defaultBankStyle,
+        bankStyle: this.state.bankStyle,
+        modelName: PARTIAL
       },
     })
   }
@@ -1466,8 +1463,8 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       rightButtonTitle: 'Profile',
       passProps: {
-        bankStyle: this.state.bankStyle || defaultBankStyle,
         modelName: ORGANIZATION,
+        bankStyle: this.state.bankStyle,
         isTest: true,
         officialAccounts: true
       },

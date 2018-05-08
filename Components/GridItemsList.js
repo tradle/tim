@@ -108,23 +108,6 @@ class GridItemsList extends Component {
     )
   }
 
-  // renderActionSheet(buttons) {
-  //   if (utils.isWeb()) return
-
-  //   return (
-  //     <ActionSheet
-  //       ref={(o) => {
-  //         this.ActionSheet = o
-  //       }}
-  //       options={buttons}
-  //       cancelButtonIndex={buttons.length - 1}
-  //       onPress={(index) => {
-  //         if (index === 0) this._imageInput.showImagePicker()
-  //       }}
-  //     />
-  //   )
-  // }
-
       // returnIsVertical: true,
       // chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
   _onImage(item) {
@@ -180,4 +163,21 @@ module.exports = GridItemsList;
   //       break
   //     }
   //   });
+  // }
+
+  // renderActionSheet(buttons) {
+  //   if (utils.isWeb()) return
+
+  //   return (
+  //     <ActionSheet
+  //       ref={(o) => {
+  //         this.ActionSheet = o
+  //       }}
+  //       options={buttons}
+  //       cancelButtonIndex={buttons.length - 1}
+  //       onPress={(index) => {
+  //         if (index === 0) this._imageInput.showImagePicker()
+  //       }}
+  //     />
+  //   )
   // }
