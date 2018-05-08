@@ -1489,7 +1489,7 @@ class GridList extends Component {
                       showsCancelButtonWhileEditing={false}
                       showsCancelButton={false}
                       hideBackground={true}
-                      bankStyle={this.props.bankStyle}
+                      bankStyle={bankStyle}
                       />
       }
     }
@@ -1507,7 +1507,7 @@ class GridList extends Component {
     }
 
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
-    let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(this.props.bankStyle)
+    let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(bankStyle)
     let loading
     if (isLoading  &&  !isModel) {
       let showLoadingIndicator = true

@@ -1,12 +1,9 @@
 console.log('requiring GridItemsList.js')
 'use strict';
 
-import PhotoList from './PhotoList'
-import PageView from './PageView'
-import utils from '../utils/utils'
-var translate = utils.translate
+import React, { Component } from 'react'
 import ImagePicker from 'react-native-image-picker';
-import extend from 'extend'
+import _ from 'lodash'
 import equal from 'deep-equal'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
@@ -21,7 +18,10 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types'
 
-import React, { Component } from 'react'
+import PhotoList from './PhotoList'
+import PageView from './PageView'
+import utils from '../utils/utils'
+var translate = utils.translate
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import ImageInput from './ImageInput'
@@ -41,8 +41,8 @@ class GridItemsList extends Component {
       list: this.props.list,
       show: false
     };
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
-    var currentRoutesLength = currentRoutes.length;
+    let currentRoutes = props.navigator.getCurrentRoutes();
+    let currentRoutesLength = currentRoutes.length;
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = () => {
       props.callback(props.prop, this.state.list)
       props.navigator.popToRoute(props.returnRoute);
@@ -57,9 +57,9 @@ class GridItemsList extends Component {
            this.state.list.length != nextState.list.length
   }
   cancelItem(item) {
-    var list = [];
-    extend(list, this.state.list);
-    for (var i=0; i<list.length; i++) {
+    let list = [];
+    _.extend(list, this.state.list);
+    for (let i=0; i<list.length; i++) {
       if (equal(list[i], item)) {
         list.splice(i, 1);
         break;
@@ -76,9 +76,9 @@ class GridItemsList extends Component {
   }
 
   render() {
-    var m = utils.getModel(this.props.resource[constants.TYPE])
-    var prop = m.properties[this.props.prop]
-    // var buttons = [translate('addNew', prop.title), translate('cancel')]
+    let m = utils.getModel(this.props.resource[constants.TYPE])
+    let prop = m.properties[this.props.prop]
+    // let buttons = [translate('addNew', prop.title), translate('cancel')]
     let icon = Platform.OS === 'ios' ?  'md-add' : 'md-add'
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     // let actionSheet = this.renderActionSheet(buttons)
@@ -129,7 +129,7 @@ class GridItemsList extends Component {
     let l = []
     this.state.list.forEach((r) => {
       let lr = {}
-      extend(lr, r)
+      _.extend(lr, r)
       l.push(lr)
     })
     l.push(item)
@@ -165,7 +165,7 @@ var styles = StyleSheet.create({
 module.exports = GridItemsList;
 
   // showMenu() {
-  //   var m = utils.getModel(this.props.resource[constants.TYPE])
+  //   let m = utils.getModel(this.props.resource[constants.TYPE])
   //   var buttons = [translate('addNew', m.properties[this.props.prop].title), translate('cancel')]
   //   var self = this;
   //   ActionSheetIOS.showActionSheetWithOptions({
