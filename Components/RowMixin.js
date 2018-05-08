@@ -178,22 +178,22 @@ var RowMixin = {
     }
   },
   getTime(resource) {
-    if (!resource.time)
+    if (!resource._time)
       return
     let previousMessageTime = this.props.previousMessageTime;
     let showTime = !previousMessageTime  ||  this.props.isAggregation;
 
     if (!showTime)  {
       let prevDate = new Date(previousMessageTime);
-      let curDate = new Date(resource.time);
-      showTime = resource.time - previousMessageTime > SHOW_TIME_INTERVAL ||
+      let curDate = new Date(resource._time);
+      showTime = resource._time - previousMessageTime > SHOW_TIME_INTERVAL ||
                  prevDate.getDate()  !== curDate.getDate()    ||
                  prevDate.getMonth() !== curDate.getMonth()   ||
                  prevDate.getYear()  !== curDate.getYear()
     }
 
     if (showTime)
-      return utils.formatDate(resource.time);
+      return utils.formatDate(resource._time);
   },
   isMyMessage(to) {
     let { resource, isAggregation, application } = this.props

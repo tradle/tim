@@ -206,11 +206,11 @@ class ShowPropertiesView extends Component {
         val = utils.getDateValue(val)
       else if (pMeta.ref) {
         if (pMeta.ref === PHOTO) {
-          if (vCols.length === 1  &&  resource.time)
+          if (vCols.length === 1  &&  resource._time)
             viewCols.push(
               <View  key={this.getNextKey()} style={{padding: 10}}>
                 <Text style={styles.title}>{translate('Date')}</Text>
-                <Text style={[styles.title, styles.description]}>{dateformat(new Date(resource.time), 'mmm d, yyyy')}</Text>
+                <Text style={[styles.title, styles.description]}>{dateformat(new Date(resource._time), 'mmm d, yyyy')}</Text>
               </View>
             )
           return

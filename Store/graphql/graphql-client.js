@@ -367,7 +367,7 @@ var search = {
     let queryFooter = `
           }
           orderBy:{
-            property: time
+            property: _time
             desc: ${desc}
           }
         )
@@ -380,7 +380,7 @@ var search = {
               _inbound
               originalSender
               object
-              time
+              _time
               context
             }
           }
@@ -444,7 +444,7 @@ var search = {
     if (utils.isInlined(model))
       arr = [TYPE] //, '_link', '_permalink']
     else {
-      arr = ['_permalink', '_link', '_time', '_author', '_authorTitle', '_virtual', 'time']
+      arr = ['_permalink', '_link', '_time', '_author', '_authorTitle', '_time']
       if (model.id !== PUB_KEY  &&  !inlined) {
         let newarr = arr.concat(TYPE, SIG)
         arr = newarr
@@ -455,7 +455,7 @@ var search = {
                 txId,
                 blockchain,
                 network,
-                time
+                _time
               }`)
     }
     if (properties) {
@@ -466,7 +466,7 @@ var search = {
     for (let p in props) {
       if (p.charAt(0) === '_')
         continue
-      if (p === 'from' || p === 'to' || p === 'time'  ||  p.indexOf('_group') !== -1)
+      if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
         continue
       let prop = props[p]
       if (prop.displayAs)
@@ -730,7 +730,7 @@ module.exports = search
   //   let queryFooter = `
   //         }
   //         orderBy:{
-  //           property: time
+  //           property: _time
   //           desc:true
   //         }
   //       )
@@ -793,7 +793,7 @@ module.exports = search
   //   //           }
   //   //         },
   //   //         orderBy:{
-  //   //           property: time
+  //   //           property: _time
   //   //           desc:true
   //   //         }
   //   //       ) {
@@ -839,7 +839,7 @@ module.exports = search
   //       //       }
   //       //     },
   //       //     orderBy:{
-  //       //       property: time
+  //       //       property: _time
   //       //       desc:true
   //       //     }
   //       //   ) {
@@ -876,7 +876,7 @@ module.exports = search
   //     //   inbound = false
   //     //   outbound = true
   //     // }
-  //     // // result.sort((a, b) => a.time - b.time)
+  //     // // result.sort((a, b) => a._time - b._time)
   //     // return result
   //   } catch (err) {
   //     debugger

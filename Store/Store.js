@@ -1002,14 +1002,14 @@ var Store = Reflux.createStore({
 
         props.author = wrapper.author
         props.recipient = wrapper.recipient
-        props.timestamp = payload.time || wrapper.timestamp
+        props.timestamp = payload._time || wrapper.timestamp
         if (model.subClassOf) {
           props.subClassOf = model.subClassOf
           props.fromAndSubClassOf = wrapper.author + '!' + model.subClassOf
-          props.timeAndFromAndSubClassOf = payload.time + '!' + wrapper.author + '!' + model.subClassOf
+          props.timeAndFromAndSubClassOf = payload._time + '!' + wrapper.author + '!' + model.subClassOf
         }
-        props.typeAndTime = payload[TYPE] + '!' + (payload.time || wrapper.timestamp)
-        props.typeAndToAndTime = payload[TYPE] + '!' + wrapper.recipient + '!' + (payload.time || wrapper.timestamp)
+        props.typeAndTime = payload[TYPE] + '!' + (payload._time || wrapper.timestamp)
+        props.typeAndToAndTime = payload[TYPE] + '!' + wrapper.recipient + '!' + (payload._time || wrapper.timestamp)
 
         return props
       }
@@ -1426,7 +1426,7 @@ var Store = Reflux.createStore({
       if (id === ALL_MESSAGES)
         continue
       let arr = chatMessages[id]
-      arr.sort((a, b) => a.time - b.time)
+      arr.sort((a, b) => a._time - b._time)
       chatMessages[id] = this.filterChatMessages(arr, id)
     }
   },
@@ -2807,8 +2807,8 @@ var Store = Reflux.createStore({
     let m = this.getModel(r[TYPE])
     let isContext = utils.isContext(m) // r[TYPE] === PRODUCT_APPLICATION
     var props = m.properties;
-    if (!r.time)
-      r.time = new Date().getTime();
+    if (!r._time)
+      r._time = new Date().getTime();
     var toOrg
     // r.to could be a reference to a resource
     var to = this._getItem(r.to)
@@ -2862,7 +2862,7 @@ var Store = Reflux.createStore({
     let toChain = {
       [TYPE]: rr[TYPE],
       // [NONCE]: rr[NONCE],
-      time: r.time
+      time: r._time
     }
     if (rr.message)
       toChain.message = rr.message
@@ -3249,7 +3249,7 @@ var Store = Reflux.createStore({
   addMessagesToChat(id, r, isInit, timeShared) {
     if (r._documentCreated  &&  !isInit)
       return
-    if (!r.time  &&  !timeShared)
+    if (!r._time  &&  !timeShared)
       return
     // if (r.sharedWith) {
     //   if (r[TYPE] !== VERIFICATION) {
@@ -3305,7 +3305,7 @@ var Store = Reflux.createStore({
             idx = i
 
         if (idx !== -1) {
-          if (r.time === list[rid].value.time)
+          if (r._time === list[rid].value._time)
             return
           messages.splice(idx, 1)
         }
@@ -3315,7 +3315,7 @@ var Store = Reflux.createStore({
       messages = []
       chatMessages[id] = messages
     }
-    let stub = {id: utils.getId(r), time: timeShared ? timeShared : r.time}
+    let stub = {id: utils.getId(r), time: timeShared ? timeShared : r._time}
     messages.push(stub)
     let allIdx = allMessages.findIndex(({ id }) => id === rid)
     if (allIdx !== -1)
@@ -3491,7 +3491,7 @@ var Store = Reflux.createStore({
     //   }
     // }
 
-    let time = r && r.time || new Date().getTime()
+    let time = r && r._time || new Date().getTime()
     let self = this
     let fromId = utils.getId(r  &&  r.from || me)
     let from = this._getItem(fromId)
@@ -3531,12 +3531,12 @@ var Store = Reflux.createStore({
       if (me &&  me.isEmployee) {
         let rep = this.getRepresentative(me.organization)
         if (utils.getId(rep.organization) === utils.getId(r.from))
-          this.addSharedWith(r, rep, r.time)
+          this.addSharedWith(r, rep, r._time)
         else
-          this.addSharedWith(r, r.from, r.time)
+          this.addSharedWith(r, r.from, r._time)
       }
       else
-        this.addSharedWith(r, r.from, r.time)
+        this.addSharedWith(r, r.from, r._time)
     }
     var batch = [];
     key = utils.getId(r)
@@ -4105,7 +4105,7 @@ var Store = Reflux.createStore({
       var to = props.to;
       if (!to)
         err += '"to" is required. Should have {ref: "' + PROFILE + '"}';
-      var time = props.time;
+      var time = props._time;
       if (!time)
         err += '"time" is required';
 
@@ -4510,10 +4510,10 @@ var Store = Reflux.createStore({
       })
     }
     // var isMessage = utils.isMessage(meta)
-    if (isMessage  &&  !json._documentCreated  &&  (!isRemediation ||  !json.time))
-      json.time = new Date().getTime();
+    if (isMessage  &&  !json._documentCreated  &&  (!isRemediation ||  !json._time))
+      json._time = new Date().getTime();
     if (isNew  ||  !value._documentCreated) //(meta.id !== FORM_ERROR  &&  meta.id !== FORM_REQUEST  &&  !meta.id === FORM_ERROR))
-      resource.time = new Date().getTime();
+      resource._time = new Date().getTime();
 
     var returnVal
     if (!resource  ||  isNew)
@@ -4744,7 +4744,7 @@ var Store = Reflux.createStore({
         toChain[PREV_HASH] = returnVal[CUR_HASH]
         for (let p in toChain) {
           let prop = properties[p]
-          if (!prop  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== 'time')
+          if (!prop  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
             delete toChain[p]
           else if (prop  &&  prop.type === 'object' &&
                    prop.ref /*&&  !returnVal.id*/   &&
@@ -4755,7 +4755,7 @@ var Store = Reflux.createStore({
         }
       }
 
-      // toChain.time = returnVal.time
+      // toChain._time = returnVal._time
 
       let key = utils.makeId(IDENTITY, to[ROOT_HASH])
 
@@ -5236,7 +5236,7 @@ var Store = Reflux.createStore({
         let shareContext = utils.clone(msg)
         shareContext.from = this.buildRef(me)
         let time = new Date().getTime()
-        shareContext.time = time
+        shareContext._time = time
         shareContext._context = shareContext.context
         shareContext.to = utils.clone(resource.from)
         shareContext.message = translate('sharedWith', translate(this.getModel(resource.product)), listOfProviders)
@@ -5375,7 +5375,7 @@ var Store = Reflux.createStore({
     if (!resource._sharedWith) {
       resource._sharedWith = []
       if (!utils.isMyProduct(resource)  &&  !utils.isSavedItem(resource))
-        this.addSharedWith(resource, resource.to, resource.time, shareBatchId)
+        this.addSharedWith(resource, resource.to, resource._time, shareBatchId)
     }
     let time = new Date().getTime()
     this.addSharedWith(resource, to, time, shareBatchId, formRequest.lens)
@@ -5383,7 +5383,7 @@ var Store = Reflux.createStore({
     this.addMessagesToChat(orgId, resource, false, time)
 
     if (utils.isSavedItem(resource)) {
-      resource._creationTime = resource.time
+      resource._creationTime = resource._time
       resource._sentTime = new Date().getTime()
       let docId = utils.getId(resource)
       resource.to = to
@@ -5395,7 +5395,7 @@ var Store = Reflux.createStore({
   handleSharedVerification({resource, to, formRequest, shareBatchId, batch}) {
     if (!resource._sharedWith) {
       resource._sharedWith = []
-      this.addSharedWith(resource, resource.from, resource.time, shareBatchId)
+      this.addSharedWith(resource, resource.from, resource._time, shareBatchId)
     }
     let time = new Date().getTime()
     this.addSharedWith(resource, to, time, shareBatchId, formRequest.lens)
@@ -6222,8 +6222,8 @@ var Store = Reflux.createStore({
             if (docs  &&  docs.length)
               rr.document.title = utils.getDisplayName(docs[0])
           }
-          if (li.node.time)
-            rr.time = li.node.time
+          if (li.node._time)
+            rr._time = li.node._time
           if (!rr._context)
             rr._context = context
           if (typeof li.node._inbound != 'undefined') {
@@ -6254,11 +6254,11 @@ var Store = Reflux.createStore({
       }
     }
     // Filter out resources like Introduction
-    chatItems = chatItems.filter((r) => r.time)
+    chatItems = chatItems.filter((r) => r._time)
     chatItems = _.uniqBy(chatItems, CUR_HASH)
 
     chatItems.sort((a, b) => {
-      return a.time - b.time
+      return a._time - b._time
     })
     if (context) {
       let formTypes = []
@@ -6328,7 +6328,7 @@ var Store = Reflux.createStore({
       return r
     const m = this.getModel(r[TYPE])
     const props = m.properties
-    const toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, 'time']
+    const toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, '_time']
     let rr = pick(r, Object.keys(props).concat(toKeep))
 
     _.extend(rr, {
@@ -6355,8 +6355,8 @@ var Store = Reflux.createStore({
       _.extend(mr, rr)
       rr = mr
     }
-    if (!rr.time)
-      rr.time = r._time
+    if (!rr._time)
+      rr._time = r._time
 
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
@@ -6758,7 +6758,7 @@ var Store = Reflux.createStore({
 
     // var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, checkForSplash} = params
     var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop} = params
-// console.time('searchAllMessages')
+// console._time('searchAllMessages')
     var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
     var foundResources = [];
 
@@ -6905,7 +6905,7 @@ var Store = Reflux.createStore({
           sortedFR.push(fr)
       }
       foundResources = sortedFR
-      // foundResources.sort((a, b) => a.time - b.time)
+      // foundResources.sort((a, b) => a._time - b._time)
       let list = []
       let len = foundResources.length
       for (let i=0; i<len; i++) {
@@ -7295,7 +7295,7 @@ var Store = Reflux.createStore({
       let org = m.subClassOf === FORM ? this._getItem(utils.getId(r.to)) : this._getItem(utils.getId(r.from))
       let remMsg = await this.searchMessages({modelName: REMEDIATION_SIMPLE_MESSAGE, to: org})
       if (remMsg  &&  remMsg.length)
-        return r.time < remMsg[0].time + 30000
+        return r._time < remMsg[0]._time + 30000
 
       return true
     }
@@ -7462,12 +7462,12 @@ var Store = Reflux.createStore({
             addMessage = true
         }
         if (addMessage)
-          thisChatMessages.push({id: res.id, time: r.time})
+          thisChatMessages.push({id: res.id, time: r._time})
 
       })
 
       thisChatMessages.sort((a, b) => {
-        return a.time - b.time
+        return a._time - b._time
       })
     }
 
@@ -7609,7 +7609,7 @@ var Store = Reflux.createStore({
         this.addVisualProps(r)
       })
       // Minor hack before we intro sort property here
-      foundResources.sort((a, b) => a.time - b.time)
+      foundResources.sort((a, b) => a._time - b._time)
       let result = params._readOnly  &&  utils.isContext(modelName)
                  ? foundResources.filter((r) => utils.isReadOnlyChat(r)) //r._readOnly)
                  : foundResources
@@ -7680,7 +7680,7 @@ var Store = Reflux.createStore({
         let l = await Promise.all(promisses)
         l.forEach((r) => contexts.push(r))
       }
-      contexts.sort((a, b) => b.time - a.time)
+      contexts.sort((a, b) => b._time - a._time)
       this.trigger({action: 'allContexts', list: contexts, to: params.to})
     }
     else {
@@ -7924,9 +7924,9 @@ var Store = Reflux.createStore({
         })
         if (Object.keys(uniqueVerifications).length === forms.length) {
           if (verifications.length) {
-            verifications.sort((a, b) => a.time - b.time)
+            verifications.sort((a, b) => a._time - b._time)
 
-            owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1].time
+            owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1]._time
             if (!stats.completedApps[product])
               stats.completedApps[product] = 1
             else
@@ -8034,7 +8034,7 @@ var Store = Reflux.createStore({
         if (orgPhotos)
           ver.organization.photo = orgPhotos[0].url;
       }
-      // resource.time = ver.time;
+      // resource._time = ver._time;
     }
     return resource;
   },
@@ -8126,7 +8126,7 @@ var Store = Reflux.createStore({
           let skip
           for (let i=0; i<arr.length  &&  !skip; i++) {
             if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-              if (r.time < rr.time)
+              if (r._time < rr._time)
                 skip = true
               else
                 arr.splice(i, 1)
@@ -8573,7 +8573,7 @@ var Store = Reflux.createStore({
         let rr = arr[i].document
         if (r[ROOT_HASH] === rr[ROOT_HASH]) {
           // if (utils.getId(arr[i].from) === vFromId) {
-            if (r.time < rr.time) {
+            if (r._time < rr._time) {
               this.addSharedWithProvider(verification, shareables)
               return
             }
@@ -8688,13 +8688,13 @@ var Store = Reflux.createStore({
 
     let isInMyData = isMessage &&  utils.isSavedItem(value)
     var batch = [];
-    value.time = value.time || new Date().getTime();
+    value._time = value._time || new Date().getTime();
     let isForm = model.subClassOf === FORM
     if (isMessage) {
       if (/*isNew  &&*/  isForm  &&  !isInMyData) {
         if (!value._sharedWith)
           value._sharedWith = []
-        this.addSharedWith(value, value.to, value.time, value.time, lens)
+        this.addSharedWith(value, value.to, value._time, value._time, lens)
       }
       // if (isNew)
       //   this.addVisualProps(value)
@@ -8899,7 +8899,7 @@ var Store = Reflux.createStore({
         return
       dn = translate('sharedForm', translate(model), orgName)
       sharedWithOrg.lastMessage = dn
-      sharedWithOrg.lastMessageTime = value.time
+      sharedWithOrg.lastMessageTime = value._time
       sharedWithOrg.lastMessageType = messageType
       batch.push({type: 'put', key: utils.getId(sharedWithOrg), value: sharedWithOrg});
       this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
@@ -8953,7 +8953,7 @@ var Store = Reflux.createStore({
       r = from
       from.lastMessage = dn
     }
-    r.lastMessageTime = value.time;
+    r.lastMessageTime = value._time;
     r.lastMessageType = messageType
     batch.push({type: 'put', key: utils.getId(r), value: r});
     this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
@@ -9557,11 +9557,11 @@ var Store = Reflux.createStore({
     var from = this._getItem(fromId)
     var me = utils.getMe()
     if (utils.getId(me) === fromId)
-      val.time = val.time || obj.timestamp
+      val._time = val._time || obj.timestamp
     else {
-      val._sentTime = val.time || obj.timestamp
-      if (!val.time)
-        val.time = new Date().getTime()
+      val._sentTime = val._time || obj.timestamp
+      if (!val._time)
+        val._time = new Date().getTime()
     }
     // var from = list[PROFILE + '_' + obj.from[ROOT_HASH]].value
     var type = val[TYPE]
@@ -9920,8 +9920,8 @@ var Store = Reflux.createStore({
       if (inDB.verifications)
         val.verifications = inDB.verifications
       // if (val.txId  &&  !inDB.txId) {
-      //   val.time = inDB.time
-      //   val.sealedTime = val.time || obj.timestamp
+      //   val._time = inDB._time
+      //   val.sealedTime = val._time || obj.timestamp
       // }
     }
 
@@ -10100,8 +10100,8 @@ var Store = Reflux.createStore({
         let isMyMessage = r[TYPE] !== VERIFICATION  &&  m.subClassOf !== MY_PRODUCT
         r.from = isMyMessage ? this.buildRef(me) : val.from
         r.to = isMyMessage ? val.from : this.buildRef(me)
-        if (!r.time)
-          r.time = new Date().getTime()
+        if (!r._time)
+          r._time = new Date().getTime()
         if (!utils.isItem(m))
           r[IS_MESSAGE] = true
         r[NOT_CHAT_ITEM] = true
@@ -10180,8 +10180,8 @@ var Store = Reflux.createStore({
     if (type === SEAL)
       noTrigger = true
 
-    if (!val.time)
-      val.time = obj.timestamp
+    if (!val._time)
+      val._time = obj.timestamp
 
     // let isVerification = type === VERIFICATION  || (model  && model.subClassOf === VERIFICATION)
     if (isVerification) {
@@ -10486,7 +10486,7 @@ var Store = Reflux.createStore({
     // return
     const self = this;
     let myId
-    // console.time('dbStream')
+    // console._time('dbStream')
     var orgContacts = {}
     return utils.dangerousReadDB(db)
     .then((results) => {
@@ -11494,8 +11494,8 @@ var Store = Reflux.createStore({
     // if (!resource[TYPE] && resource.id)
     //   return resource
     // let ref = this.buildSendRef(resource, noValidation)
-    // if (resource.time)
-    //   ref.time = resource.time
+    // if (resource._time)
+    //   ref._time = resource._time
     // return ref
   },
   getRootHash(r) {
@@ -11849,7 +11849,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //     foundResources[key] = msg;
   //     if (!timeResourcePair)
   //       sharedWithTimePairs.push({
-  //         time: r.time,
+  //         time: r._time,
   //         resource: msg
   //       })
   //     else {
@@ -11861,7 +11861,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   }
 
   //   sharedWithTimePairs.sort(function(a, b) {
-  //     return a.time - b.time;
+  //     return a._time - b._time;
   //   });
 
   //   var result = []
@@ -12021,7 +12021,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //           value: {
   //             id: rid,
   //             title: utils.getDisplayName(val, this.getModel(obj[TYPE]).value.properties),
-  //             time: val.time
+  //             time: val._time
   //           }
   //         }
   //         if (val.photos)
@@ -12046,10 +12046,10 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //       })
   //     }
   //     result.sort(function(a, b) {
-  //       return a.time - b.time;
+  //       return a._time - b._time;
   //     });
   //     result.forEach(function(r) {
-  //       messages[utils.getId(r)] = r.time
+  //       messages[utils.getId(r)] = r._time
   //     })
   //     // var shareableResources;
   //     // if (!params.isAggregation  &&  params.to)
@@ -12129,8 +12129,8 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 //     for (let i=0; i<arr.length; i++) {
 //       let rr = arr[i].document
 //       if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-// // Alert.alert('rtime = ' + r.time + '; rrtime = ' + rr.time)
-//         if (r.time < rr.time)
+// // Alert.alert('rtime = ' + r._time + '; rrtime = ' + rr._time)
+//         if (r._time < rr._time)
 //           return false
 //         else
 //           arr.splice(i, 1)
@@ -12150,7 +12150,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
     var to = this._getItem(toId)
 
     r[NONCE] = r[NONCE]  ||  this.getNonce()
-    r.time = r.time || new Date().getTime();
+    r._time = r._time || new Date().getTime();
     let document = this._getItem(utils.getId(r.document))
     if (document._context)
       r._context = document._context
@@ -12166,7 +12166,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
       }
       delete toChain.from
       delete toChain.to
-      toChain.time = r.time
+      toChain._time = r._time
       sendParams = this.packMessage(r, toChain)
     }
     var key = IDENTITY + '_' + toRootHash
@@ -12198,7 +12198,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
         r.organization = from.organization;
       if (!r._sharedWith) {
         r._sharedWith = []
-        r._sharedWith.push(self.createSharedWith(utils.getId(r.from), r.time))
+        r._sharedWith.push(self.createSharedWith(utils.getId(r.from), r._time))
       }
       batch.push({type: 'put', key: key, value: r});
       newVerification = self.buildRef(r)
@@ -12569,9 +12569,9 @@ async function getAnalyticsUserId ({ promiseEngine }) {
           }
         })
         if (Object.keys(uniqueVerifications).length === forms.length) {
-          verifications.sort((a, b) => a.time - b.time)
+          verifications.sort((a, b) => a._time - b._time)
 
-          owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1].time
+          owners[pId][ownerId].completedApps[product] = verifications[verifications.length - 1]._time
           if (!stats.completedApps[product])
             stats.completedApps[product] = 1
           else
@@ -12727,7 +12727,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 //           for (let p of exclude)
 //             delete toChain[p]
 
-//           toChain.time = returnVal.time
+//           toChain._time = returnVal._time
 
 //           var key = IDENTITY + '_' + to[ROOT_HASH]
 
@@ -12981,7 +12981,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   let r = msgInfo.object
   //   r[ROOT_HASH] = msgInfo.permalnk || msgInfo.link
   //   r[CUR_HASH] = msgInfo.link
-  //   r.time = r.time || msgInfo.timestamp
+  //   r._time = r._time || msgInfo.timestamp
   //   let c = msgInfo.object.context
   //   if (c)
   //     r._context = [PRODUCT_APPLICATION, c].join('_')
@@ -12994,7 +12994,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //     let r = msgInfo.object
   //     r[ROOT_HASH] = msgInfo.permalnk || msgInfo.link
   //     r[CUR_HASH] = msgInfo.link
-  //     r.time = r.time || msgInfo.timestamp
+  //     r._time = r._time || msgInfo.timestamp
   //     let c = msgInfo.object.context
   //     if (c)
   //       r._context = [PRODUCT_APPLICATION, c].join('_')
@@ -13008,7 +13008,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   await this._loadedResourcesDefer.promise
   //   let {modelName, limit, startRec, sortProperty, asc, to, prop} = params
   //   let criteria = startRec || modelName + '_'
-  //   let time = startRec ? startRec.time : new Date(0).getTime()
+  //   let time = startRec ? startRec._time : new Date(0).getTime()
 
   //   // return await collect(db.createReadStream({ [prop]: criteria, end: modelName + '_\xff', limit: 10, keys: false }))
 
@@ -13048,7 +13048,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //     let recipient = [PROFILE, msgInfo.recipient].join('_')
   //     r[ROOT_HASH] = msgInfo.permalnk || msgInfo.link
   //     r[CUR_HASH] = msgInfo.link
-  //     r.time = r.time || msgInfo.timestamp
+  //     r._time = r._time || msgInfo.timestamp
   //     r._context = [PRODUCT_APPLICATION, msgInfo.object.context].join('_')
   //     r.from = { id:  author,  title: utils.getDisplayName(this._getItem(author))}
   //     r.to = { id: recipient, title: utils.getDisplayName(this._getItem(recipient)) }
@@ -13972,7 +13972,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
     //     let org = m.subClassOf === FORM ? self._getItem(utils.getId(r.to)) : self._getItem(utils.getId(r.from))
     //     let remMsg = await self.searchMessages({modelName: REMEDIATION_SIMPLE_MESSAGE, to: org})
     //     if (remMsg  &&  remMsg.length)
-    //       return r.time < remMsg[0].time + 30000
+    //       return r._time < remMsg[0]._time + 30000
 
     //     return true
     //   }
@@ -14090,7 +14090,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
 
   //   let exclude = ['__typename']
   //   for (let p in d) {
-  //     if (p === TYPE  ||  p === SIG  ||  p === 'time')
+  //     if (p === TYPE  ||  p === SIG  ||  p === '_time')
   //       continue
   //     if (d[PREV_HASH]  &&  (p === ROOT_HASH || p === PREV_HASH))
   //       continue
@@ -14415,8 +14415,8 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //       readOnly: true
   //     }
   //   }
-  //   if (!m.properties.time) {
-  //     m.properties.time = {
+  //   if (!m.properties._time) {
+  //     m.properties._time = {
   //       type: 'date',
   //       readOnly: true,
   //       title: 'Date'
@@ -14515,7 +14515,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
           let skip
           for (let i=0; i<arr.length  &&  !skip; i++) {
             if (r[ROOT_HASH] === rr[ROOT_HASH]) {
-              if (r.time < rr.time)
+              if (r._time < rr._time)
                 skip = true
               else
                 arr.splice(i, 1)

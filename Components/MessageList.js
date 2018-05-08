@@ -670,7 +670,7 @@ class MessageList extends Component {
     // import MessageRow from './MessageRow'
     let previousMessageTime = currentMessageTime;
     let isContext = utils.isContext(this.props.resource)
-    currentMessageTime = resource.time
+    currentMessageTime = resource._time
     let context = this.state.context
     if (isContext)
       context = this.props.resource

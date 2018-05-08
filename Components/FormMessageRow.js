@@ -160,7 +160,7 @@ class FormMessageRow extends Component {
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
     let model = utils.getModel(resource[TYPE])
     if (noContent) {
-      let prop = model.properties.time
+      let prop = model.properties._time
       if (prop  &&  resource[prop.name]) {
         let val = dateformat(new Date(resource[prop.name]), 'mmm d, yyyy')
         renderedRow = [this.getPropRow(prop, resource, val)]

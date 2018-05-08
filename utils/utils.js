@@ -397,7 +397,7 @@ var utils = {
     if (isInlined) return equal(r1, r2)
 
     let properties = this.getModel(r1[TYPE]).properties
-    let exclude = ['time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
+    let exclude = ['_time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
     for (var p in properties) {
       let prop = properties[p]
       if (!prop  ||  exclude.indexOf(p) !== -1)
@@ -1109,8 +1109,8 @@ var utils = {
     var lastAdditionalInfoTime, verifiedByMe
     if (resource.additionalInfo) {
       resource.additionalInfo.forEach(function(r) {
-        if (lastAdditionalInfoTime  &&  lastAdditionalInfoTime < r.time)
-          lastAdditionalInfoTime = r.time;
+        if (lastAdditionalInfoTime  &&  lastAdditionalInfoTime < r._time)
+          lastAdditionalInfoTime = r._time;
       });
     }
     /*
@@ -1119,7 +1119,7 @@ var utils = {
       if (!rh)
         rh = utils.getId(r.from).split('_')[1];
 
-      if (rh === me[ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r.time))
+      if (rh === me[ROOT_HASH]  &&  (!lastAdditionalInfoTime  ||  lastAdditionalInfoTime < r._time))
         verifiedByMe = true
     });
     */
@@ -1165,8 +1165,8 @@ var utils = {
       id: utils.getId(resource),
       title: resource.id ? resource.title : utils.getDisplayName(resource)
     }
-    if (resource.time)
-      ref.time = resource.time
+    if (resource._time)
+      ref._time = resource._time
     return ref
   },
   isStub(resource) {
@@ -1197,7 +1197,7 @@ var utils = {
     //   res = this.optimizeResource1(resource, doNotChangeOriginal)
     // else {
       var properties = m.properties
-      var exclude = ['from', 'to', 'time', 'sealedTime', 'txId', 'blockchain', 'networkName']
+      var exclude = ['from', 'to', '_time', 'sealedTime', 'txId', 'blockchain', 'networkName']
       let isVerification = m.id === VERIFICATION
       let isContext = this.isContext(m)
       let isFormRequest = m.id === FORM_REQUEST
