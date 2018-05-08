@@ -560,14 +560,12 @@ class ResourceList extends Component {
           title: title,
           id: 3,
           component: ResourceView,
-          // titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Edit',
           onRightButtonPress: {
             title: title,
             id: 4,
             component: NewResource,
-            titleTextColor: '#7AAAC3',
             backButtonTitle: 'Back',
             rightButtonTitle: 'Done',
             passProps: {
@@ -714,7 +712,6 @@ class ResourceList extends Component {
           title: title,
           id: 4,
           component: NewResource,
-          titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -732,7 +729,6 @@ class ResourceList extends Component {
         title: title,
         id: 3,
         component: ResourceView,
-        titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
           bankStyle: bankStyle,
@@ -791,7 +787,6 @@ class ResourceList extends Component {
         id: 4,
         component: NewResource,
         rightButtonTitle: 'Done',
-        titleTextColor: '#7AAAC3',
         passProps: {
           model: utils.getModel(resource[TYPE]),
           bankStyle: this.props.style,
@@ -816,7 +811,6 @@ class ResourceList extends Component {
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
       passProps: {
         resource: resource,
         prop: prop,
@@ -828,14 +822,12 @@ class ResourceList extends Component {
         title: resourceTitle,
         id: 3,
         component: ResourceView,
-        titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: resourceTitle,
           id: 4,
           component: NewResource,
-          titleTextColor: '#7AAAC3',
           backButtonTitle: 'Back',
           rightButtonTitle: 'Done',
           passProps: {
@@ -864,7 +856,6 @@ class ResourceList extends Component {
         title: 'Search ' + utils.makeModelTitle(model),
         id: 4,
         component: NewResource,
-        titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
@@ -1036,7 +1027,6 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       id: 4,
-      titleTextColor: '#7AAAC3',
       passProps: {
         model: model,
         bankStyle: this.props.style,
@@ -1056,7 +1046,6 @@ class ResourceList extends Component {
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
       passProps: {
         bankStyle: this.props.style,
         modelName: PRODUCT_REQUEST,
@@ -1104,13 +1093,12 @@ class ResourceList extends Component {
       title: model.title,
       id: 4,
       component: NewResource,
-      titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
         model: model,
         bankStyle: this.props.style,
-      resource: r,
+        resource: r,
         callback: (resource) => {
           self.props.navigator.pop()
           let l = []
@@ -1420,16 +1408,15 @@ class ResourceList extends Component {
     })
   }
   showBookmarks() {
-    let passProps = {modelName: BOOKMARK}
-    if (this.state.bankStyle)
-      passProps.bankStyle = this.state.bankStyle
     this.props.navigator.push({
       title: 'Bookmarks',
       id: 30,
       component: GridList,
       backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
-      passProps,
+      passProps: {
+        modelName: BOOKMARK,
+        bankStyle: this.state.bankStyle
+      },
     })
   }
   showAllPartials() {
@@ -1439,8 +1426,8 @@ class ResourceList extends Component {
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
       passProps: {
+        bankStyle: this.state.bankStyle,
         modelName: PARTIAL
       },
     })
@@ -1452,10 +1439,10 @@ class ResourceList extends Component {
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
       rightButtonTitle: 'Profile',
       passProps: {
         modelName: ORGANIZATION,
+        bankStyle: this.state.bankStyle,
         isTest: true,
         officialAccounts: true
       },
