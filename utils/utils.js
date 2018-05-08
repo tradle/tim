@@ -115,6 +115,7 @@ const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const MODEL = 'tradle.Model'
 const { parseStub } = validateResource.utils
 
 // import dictionaries from '@tradle/models'.dict
@@ -571,7 +572,7 @@ var utils = {
     if (typeof type === 'string')
       return this.getModel(type).subClassOf === subType
     if (type.type)  {
-      if (type.type === 'tradle.Model')
+      if (type.type === MODEL)
       return type.subClassOf === subType
     }
     return this.getModel(type[TYPE]).subClassOf === subType
@@ -1722,27 +1723,6 @@ var utils = {
   isWeb: ENV.isWeb,
   fetch: fetch,
   /* from react-native/Libraries/Utilities */
-  groupByEveryN: function groupByEveryN<T>(array: Array<T>, n: number): Array<Array<?T>> {
-    var result = [];
-    var temp = [];
-
-    for (var i = 0; i < array.length; ++i) {
-      if (i > 0 && i % n === 0) {
-        result.push(temp);
-        temp = [];
-      }
-      temp.push(array[i]);
-    }
-
-    if (temp.length > 0) {
-      while (temp.length !== n) {
-        temp.push(null);
-      }
-      result.push(temp);
-    }
-
-    return result;
-  },
 
   promiseThunky: function (fn) {
     let promise
@@ -1828,7 +1808,7 @@ var utils = {
   readFile: Platform.OS == 'web' && function readFile (file, cb) {
     var reader  = new FileReader();
     reader.addEventListener('load', function () {
-      cb(null, reader.result)
+      cb(null, reader.result, file)
     }, false)
 
     reader.addEventListener('error', cb)
@@ -1838,12 +1818,12 @@ var utils = {
   readImage: Platform.OS == 'web' && function readImage (file, cb) {
     utils.readFile(file, function (err, dataUrl) {
       const mime = utils.getMimeType({ dataUrl })
-      if (!/^image\//.test(mime)) {
+      // if (!/^image\//.test(mime)) {
         return cb(null, {
           url: dataUrl
-        })
+        }, file)
         // return cb(new Error('invalid format'))
-      }
+      // }
 
       const image = new window.Image()
       image.addEventListener('error', function (err) {
@@ -2766,4 +2746,25 @@ module.exports = utils;
   //     : findNodeHandle(component)
 
   //   RCTUIManager.measure(handle, cb)
+  // },
+  // groupByEveryN: function groupByEveryN<T>(array: Array<T>, n: number): Array<Array<?T>> {
+  //   var result = [];
+  //   var temp = [];
+
+  //   for (var i = 0; i < array.length; ++i) {
+  //     if (i > 0 && i % n === 0) {
+  //       result.push(temp);
+  //       temp = [];
+  //     }
+  //     temp.push(array[i]);
+  //   }
+
+  //   if (temp.length > 0) {
+  //     while (temp.length !== n) {
+  //       temp.push(null);
+  //     }
+  //     result.push(temp);
+  //   }
+
+  //   return result;
   // },
