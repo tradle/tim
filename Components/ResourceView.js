@@ -3,8 +3,11 @@ console.log('requiring ResourceView.js')
 
 import pick from 'object.pick'
 import extend from 'extend'
-import constants from '@tradle/constants'
 import ActionSheet from 'react-native-actionsheet'
+import Reflux from 'reflux'
+import reactMixin from 'react-mixin'
+import { makeResponsive } from 'react-native-orient'
+import Icon from 'react-native-vector-icons/Ionicons'
 import {
   // StyleSheet,
   // ScrollView,
@@ -15,17 +18,21 @@ import {
   TextInput,
   ListView,
   Dimensions,
+  Linking,
   Modal,
   Alert,
   TouchableOpacity,
 } from 'react-native'
 import PropTypes from 'prop-types'
+// import Linking from '../utils/linking'
 
 import {
   LazyloadScrollView,
 } from 'react-native-lazyload'
+var dataURLtoBlob = require('dataurl-to-blob');
 
 import React, { Component } from 'react'
+import constants from '@tradle/constants'
 import utils, {
   translate,
   getFontSize as fontSize
@@ -36,12 +43,9 @@ import PhotoView from './PhotoView'
 import PhotoList from './PhotoList'
 import ShowRefList from './ShowRefList'
 import PageView from './PageView'
-import Icon from 'react-native-vector-icons/Ionicons'
 import IdentitiesList from './IdentitiesList'
 import Actions from '../Actions/Actions'
-import Reflux from 'reflux'
 import Store from '../Store/Store'
-import reactMixin from 'react-mixin'
 import ResourceMixin from './ResourceMixin'
 import QRCode from './QRCode'
 import MessageList from './MessageList'
@@ -53,11 +57,11 @@ import HomePageMixin from './HomePageMixin'
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import { signIn } from '../utils/localAuth'
-import { makeResponsive } from 'react-native-orient'
 import Log from './Log'
 import debug from '../utils/debug'
 // import ConversationsIcon from './ConversationsIcon'
 import Navs from '../utils/navs'
+import ArticleView from './ArticleView'
 
 const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
@@ -292,7 +296,19 @@ class ResourceView extends Component {
     let me = utils.getMe()
     let actionPanel
     let isMe = utils.isMe(resource)
+    let attachmentsView
     if (me) {
+      if (resource.attachments  &&  resource.attachments.length) {
+        let attachments = []
+        attachments = resource.attachments.map((r) => {
+          return <TouchableOpacity onPress={this.showPdf.bind(this, r)} style={{maxWidth: 100}}>
+                   <Icon name='ios-paper-outline' size={30} color={bankStyle.linkColor} style={{paddingRight: 10}}/>
+                   <Text style={{fontSize: 10}}>{r.name}</Text>
+                 </TouchableOpacity>
+        })
+        attachmentsView = <View style={{flexDirection: 'row', minHeight: 50, padding: 10, paddingTop: 2}}>{attachments}</View>
+      }
+
       let noActionPanel = (isIdentity  &&  !isMe) || (isOrg  &&  application) // (me.organization  &&  utils.getId(me.organization) !== utils.getId(resource)))
       if (!noActionPanel  &&  utils.hasBacklinks(model))
        actionPanel = <ShowRefList lazy={this._lazyId}
@@ -387,6 +403,7 @@ class ResourceView extends Component {
             {photoView}
             {identityPhotoList}
           </View>
+          {attachmentsView}
           {actionPanel}
           <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
             <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
@@ -403,7 +420,12 @@ class ResourceView extends Component {
       </PageView>
      );
   }
-
+  showPdf(r) {
+    let blob = dataURLtoBlob(r.url)
+    let url = URL.createObjectURL(blob)
+    if (Linking.canOpenURL(url))
+      Linking.openURL(url)
+  }
   renderActionSheet() {
     let buttons = []
     let actions = []

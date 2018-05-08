@@ -243,7 +243,7 @@ class ShowPropertiesView extends Component {
           val = val.title
         else if (showRefResource) {
           // ex. property that is referencing to the Organization for the contact
-          var value = val[TYPE] ? utils.getDisplayName(val) : val.title;
+          var value = utils.getDisplayName(val)
           if (!value)
             value = utils.makeModelTitle(utils.getType(val))
           val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>

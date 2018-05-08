@@ -1,13 +1,15 @@
 console.log('requiring PhotoList.js')
 'use strict';
 
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons'
+import _ from 'lodash'
 import utils from '../utils/utils'
 import constants from '@tradle/constants'
-import reactMixin from 'react-mixin'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
 import RowMixin from './RowMixin'
-import equal from 'deep-equal'
-var cnt = 1000
 import {
   StyleSheet,
   Image,
@@ -20,18 +22,19 @@ import {
   TextInput,
   TouchableHighlight,
 } from 'react-native'
-import PropTypes from 'prop-types'
-
-import React, { Component } from 'react'
-// const MIN_WIDTH = 140
-export const MIN_WIDTH = 140
+const MIN_WIDTH = 140
+const PHOTO = 'tradle.Photo'
+const {
+  ROOT_HASH,
+  TYPE
+} = constants
 
 // import Animated from 'Animated'
 class PhotoList extends Component {
   static displayName = 'PhotoList'
   constructor(props) {
     super(props);
-    var dataSource = new ListView.DataSource({
+    let dataSource = new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2
     });
     this.state = {
@@ -61,18 +64,18 @@ class PhotoList extends Component {
 
   // }
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH])
+    if (this.props.resource[ROOT_HASH] !== nextProps.resource[ROOT_HASH])
       return true
 
-    return nextProps.forceUpdate  ||  !equal(this.props.resource.photos, nextProps.resource.photos)  ||
-           !equal(this.props.photos, nextProps.photos)
+    return nextProps.forceUpdate  ||  !_.isEqual(this.props.resource.photos, nextProps.resource.photos)  ||
+           !_.isEqual(this.props.photos, nextProps.photos)
   }
   render() {
-    var photos = this.props.photos;
+    let photos = this.props.photos;
     if (!photos ||  !photos.length) // || (photos.length === 1  &&  this.props.isView))
       return null;
 
-    var val = this.renderPhotoList(photos);
+    let val = this.renderPhotoList(photos);
     return (
        <View style={[styles.photoContainer, this.props.style ? {} : {marginHorizontal: 5}]} key={this.getNextKey()}>
          {val}
@@ -80,14 +83,49 @@ class PhotoList extends Component {
      );
   }
   renderPhotoList(photos) {
-    var imageStyle = this.props.style;
-    var len = photos.length
+    let imageStyle = this.props.style;
+    let len = photos.length
     if (!imageStyle  ||  utils.isEmpty(imageStyle))
       imageStyle = this.getPhotoStyle(photos)
 
     let inRow = this.props.numberInRow || Math.floor(utils.dimensions(PhotoList).width / imageStyle.width) - 1 // 2 is padding
     let rows = []
-    for (var i=0; i<len; i++) {
+
+    // cols.push(<Col sm={colSize} md={1} lg={1} style={[styles.col, {justifyContent: 'center'}]} key={key + '_check'}>
+    //             <View style={styles.multiChooser}>
+    //              <TouchableOpacity underlayColor='transparent' onPress={this.chooseToShare.bind(this)}>
+    //                <Icon name={this.state.isChosen ? 'ios-checkmark-circle-outline' : 'ios-radio-button-off'}  size={30}  color={bankStyle && bankStyle.linkColor  ||  '#7AAAC3'} />
+    //              </TouchableOpacity>
+    //            </View>
+    //          </Col>)
+
+
+    for (let i=0; i<len; i++) {
+      let row = []
+      for (let j = 0; j<inRow  &&  i < len; j++, i++)
+        row.push(this.renderRow(photos[i], imageStyle))
+
+      rows.push(<Row size={inRow} style={imageStyle} key={'row' + i} nowrap>
+                  {row}
+                </Row>)
+      i--
+    }
+    return (
+      <View style={{flexDirection: 'column', alignSelf: 'center'}}>
+        {rows}
+      </View>
+    );
+  }
+
+  renderPhotoList1(photos) {
+    let imageStyle = this.props.style;
+    let len = photos.length
+    if (!imageStyle  ||  utils.isEmpty(imageStyle))
+      imageStyle = this.getPhotoStyle(photos)
+
+    let inRow = this.props.numberInRow || Math.floor(utils.dimensions(PhotoList).width / imageStyle.width) - 1 // 2 is padding
+    let rows = []
+    for (let i=0; i<len; i++) {
       let row = []
       for (let j = 0; j<inRow  &&  i < len; j++, i++)
         row.push(this.renderRow(photos[i], imageStyle))
@@ -104,27 +142,59 @@ class PhotoList extends Component {
     );
   }
   renderRow(photo, imageStyle)  {
-    var uri = photo.url
+    let uri = photo.url
     if (!uri)
       return
-    var source = {uri: uri};
+    let source = {uri: uri};
     if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
       source.isStatic = true;
-
+    let item
+    if (photo[TYPE]  &&  photo[TYPE] !== PHOTO) {
+        item = <View style={[imageStyle, {alignItems: 'center'}]}>
+                 <Icon name='ios-paper-outline' size={50} color='#cccccc'/>
+                 <Text style={{fontSize: 10}}>{photo.name}</Text>
+               </View>
+    }
+    else
+      item = <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
     return (
       <View style={[{margin: 1}, imageStyle]} key={this.getNextKey()}>
         <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
-           <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
+           {item}
+        </TouchableHighlight>
+      </View>
+    )
+  }
+  renderRow1(photo, imageStyle)  {
+    let uri = photo.url
+    if (!uri)
+      return
+    let source = {uri: uri};
+    if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
+      source.isStatic = true;
+    let item
+    if (photo[TYPE]  &&  photo[TYPE] !== PHOTO) {
+        item = <View style={[imageStyle, {alignItems: 'center'}]}>
+                 <Icon name='ios-paper-outline' size={50} color='#cccccc'/>
+                 <Text style={{fontSize: 10}}>{photo.name}</Text>
+               </View>
+    }
+    else
+      item = <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
+    return (
+      <View style={[{margin: 1}, imageStyle]} key={this.getNextKey()}>
+        <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo)}>
+           {item}
         </TouchableHighlight>
       </View>
     )
   }
 
   getPhotoStyle(photos) {
-    var width = utils.dimensions(PhotoList).width
-    var d3 = Math.min((width / 3) - 5, 240)
-    var d4 = Math.min((width / 4) - 5, 190)
-    var d5 = Math.min((width / 5) - 5, MIN_WIDTH)
+    let width = utils.dimensions(PhotoList).width
+    let d3 = Math.min((width / 3) - 5, 240)
+    let d4 = Math.min((width / 4) - 5, 190)
+    let d5 = Math.min((width / 5) - 5, MIN_WIDTH)
     switch (photos.length) {
     case 1:
     case 2:

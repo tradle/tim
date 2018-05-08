@@ -546,7 +546,7 @@ class FormRequestRow extends Component {
     //                   <Text style={chatStyles.shareText}>{translate('Share')}</Text>
     //                 </View>
 
-    // let style={transform: [{scale: this.zoomIn}]}
+    // let zoomIn = {transform: [{scale: this.zoomIn}]}
     // let style={transform: [{scale: this.springValue}]}
     // let style={transform: [{scale: this.zoomOut}]}
     const spin = this.spinValue.interpolate({
@@ -744,12 +744,12 @@ class FormRequestRow extends Component {
     var isPrefilled = resource.prefill
     // Prefill for testing and demoing
     if (isPrefilled)
-      _.extend(true, r, resource.prefill)
+      _.extend(r, resource.prefill)
     else {
       // isPrefilled = false
       isPrefilled = ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
-        _.extend(true, r, formDefaults[model.id])
+        _.extend(r, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
     }
     let rightButtonTitle = 'Done'
@@ -997,9 +997,9 @@ class FormRequestRow extends Component {
            }}>
              <View style={styles.row}>
               <Animated.View style={zoomIn}>
-                 <View style={styles.shareButton}>
-                     <Icon name='md-add' size={20} color='#ffffff'/>
-                 </View>
+                <View style={styles.shareButton}>
+                  <Icon name='md-add' size={20} color='#ffffff'/>
+                </View>
               </Animated.View>
                <View style={{justifyContent: 'center'}}>
                  <Text style={styles.addMore}>{translate('createNew', utils.makeModelTitle(form))}</Text>

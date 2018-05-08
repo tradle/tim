@@ -580,14 +580,14 @@ class ResourceRow extends Component {
     // else
     if (resource.dateEvaluated) {
       // status = 'Denied'
-      dateEvaluated = <View style={{flexDirection: 'row'}}>
+      dateEvaluated = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
                         <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateEvaluated)}</Text>
                         <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateEvaluated)}</Text>
                       </View>
     }
     else if (resource.dateCompleted) {
       // status = 'Submitted'
-      dateCompleted = <View style={{flexDirection: 'row'}}>
+      dateCompleted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
                         <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateCompleted)}</Text>
                         <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateCompleted)}</Text>
                       </View>

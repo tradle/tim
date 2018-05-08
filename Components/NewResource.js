@@ -69,6 +69,7 @@ const BG_IMAGE = ENV.brandBackground
 const ENUM = 'tradle.Enum'
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
+const FILE = 'tradle.File'
 const SETTINGS = 'tradle.Settings'
 const HAND_SIGNATURE = 'tradle.HandSignature'
 var Form = t.form.Form;
@@ -620,8 +621,15 @@ class NewResource extends Component {
     if (!item)
       return;
     let resource = this.addFormValues();
-    if (this.props.model.properties[propName].items.ref)
+    if (this.props.model.properties[propName].items.ref) {
       item[TYPE] = this.props.model.properties[propName].items.ref
+      if (item.file) {
+        item.name = item.file.name
+        item.mimeType = item.file.mimeType
+        item.size = item.file.size
+        delete item.file
+      }
+    }
     let items = resource[propName];
     if (!items) {
       items = [];
@@ -798,7 +806,7 @@ class NewResource extends Component {
         let blmodel = meta
         itemsArray = null
         let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-        if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO))
+        if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO  ||  bl.items.ref === FILE))
           arrayItems.push(this.getPhotoItem(bl, styles))
         else
           arrayItems.push(this.getItem(bl, styles))
@@ -1145,6 +1153,7 @@ class NewResource extends Component {
     let meta = this.props.model
     let blmodel = meta
     let lcolor = this.getLabelAndBorderColor(bl.name)
+    let isFile = bl.items.ref === FILE
     let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
     let bankStyle = this.props.bankStyle || defaultBankStyle
     let linkColor = bankStyle.linkColor
@@ -1183,7 +1192,7 @@ class NewResource extends Component {
 
     let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
     let actionableItem
-    if (isPhoto)
+    if (isPhoto ||  isFile)
       actionableItem = <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
                         {itemsArray}
                       </ImageInput>
@@ -1206,7 +1215,7 @@ class NewResource extends Component {
                    count || utils.isWeb() ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}
                  ]
     let actionableCounter
-    if (isPhoto)
+    if (isPhoto  ||  isFile)
       actionableCounter = <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
                             {counter}
                           </ImageInput>
@@ -1241,18 +1250,30 @@ class NewResource extends Component {
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
 
     let bankStyle = this.props.bankStyle || defaultBankStyle
+    let isPhoto = bl.items.ref === PHOTO
 
     let linkColor = bankStyle.linkColor
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
       label += ' *'
+    let icon = isPhoto && 'ios-camera-outline'  ||  'md-add'
     if (count) {
       let items = []
       let arr = resource[bl.name]
       let n = Math.min(arr.length, utils.isWeb() ? utils.dimensions().width - 100 / 40 :  7)
-      for (let i=0; i<n; i++)
-        items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()}/>)
-
+      if (isPhoto) {
+        for (let i=0; i<n; i++)
+          items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()}/>)
+      }
+      else {
+        for (let i=0; i<n; i++) {
+          items.push(<View style={{maxWidth: 100}}>
+                       <Icon name='ios-paper-outline' size={40} color={bankStyle.linkColor}/>
+                       <Text style={{fontSize: 10}}>{arr[i].name}</Text>
+                      </View>
+          )
+        }
+      }
       itemsArray =
         <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
           <Text style={[styles.activePropTitle, {color: lcolor}]}>{label}</Text>
@@ -1260,15 +1281,15 @@ class NewResource extends Component {
         </View>
       counter =
         <View>
-          <View style={styles.itemsCounter}>
-            <Icon name='ios-camera-outline'  size={35} color={linkColor} />
+          <View style={[styles.itemsCounter]}>
+            <Icon name={icon}  size={isPhoto  &&  35 || 20} color={linkColor} />
           </View>
         </View>;
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{label}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>
-                  <Icon name='ios-camera-outline'  size={35} color={linkColor} />
+                  <Icon name={icon}  size={isPhoto && 35 || 20} color={linkColor} />
                 </View>
     }
     let title = translate(bl, blmodel) //.title || utils.makeLabel(p)
@@ -1286,6 +1307,14 @@ class NewResource extends Component {
                          onImage={item => this.onAddItem(bl.name, item)}>
                          {itemsArray}
                        </ImageInput>
+
+    let counterItem
+    counterItem = <ImageInput
+                      prop={bl}
+                      underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
+                      onImage={item => this.onAddItem(bl.name, item)}>
+                    {counter}
+                  </ImageInput>
 
     let istyle = [count ? styles.photoButton : styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
 
@@ -1393,10 +1422,11 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     itemsCounterEmpty: {
       paddingHorizontal: 5,
+      marginTop: 7
       // justifyContent: 'center'
     },
     itemsCounter: {
-      marginTop: 20,
+      marginTop: 22,
       paddingHorizontal: 5
     },
     itemButton: {

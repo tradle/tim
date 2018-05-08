@@ -19,6 +19,7 @@ import {
 } from '../utils/utils'
 
 import FileInput from 'react-file-input'
+const PHOTO = 'tradle.Photo'
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
@@ -65,6 +66,7 @@ class ImageInput extends Component {
   }
   renderImageFileInput() {
     const { prop, onImage } = this.props
+    let isPhoto = prop.items  &&  prop.items.ref === PHOTO || prop.ref === PHOTO
     return (
       <View style={{ width: 0, height: 0, opacity: 0 }}>
         <FileInput
@@ -72,16 +74,17 @@ class ImageInput extends Component {
           name={prop.name}
           placeholder={prop.title || prop.name}
           onChange={e => {
-            readImage(e.target.files[0], function (err, item) {
+            readImage(e.target.files[0], function (err, item, file) {
               if (err) return Alert.alert(translate('unableToProcessFile'), err.message)
 
-              if (!isImageDataURL(item.url)) {
+              if (isPhoto  &&  !isImageDataURL(item.url)) {
                 return Alert.alert(translate('unsupportedFormat'), translate('pleaseUploadImage'))
               }
 
               onImage({
                 ...item,
-                isVertical: true
+                isVertical: true,
+                file
               })
             })
           }} />
