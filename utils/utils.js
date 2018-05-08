@@ -2309,8 +2309,10 @@ var utils = {
     let object = message
     while (object[TYPE] === MESSAGE) {
       let key = object.recipientPubKey
-      if (!Buffer.isBuffer(key.pub)) {
-        key.pub = new Buffer(key.pub.data)
+      if (key) {
+        if (!Buffer.isBuffer(key.pub)) {
+          key.pub = new Buffer(key.pub.data)
+        }
       }
 
       object = object.object

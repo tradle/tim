@@ -660,7 +660,7 @@ var Store = Reflux.createStore({
       }
       obj.objectinfo = msg.objectinfo
       try {
-        const originalRecipient = await meDriver.addressBook.byPubKey(msg.object.object.recipientPubKey)
+        const originalRecipient = await meDriver.addressBook.byPermalink(msg.object.object._recipient)
         obj.to = {[ROOT_HASH]: originalRecipient.permalink}
         obj.parsed = {data: payload.object}
 
@@ -4740,6 +4740,7 @@ var Store = Reflux.createStore({
         }
       }
       else {
+        debugger
         toChain[PREV_HASH] = returnVal[CUR_HASH]
         for (let p in toChain) {
           let prop = properties[p]
@@ -9455,21 +9456,21 @@ var Store = Reflux.createStore({
     let v = utils.isMessage(value)  &&  value[TYPE] !== CONFIRM_PACKAGE_REQUEST ? utils.optimizeResource(value, true) : value
     batch.push({type: 'put', key: key, value: v})
   },
-  maybeWatchSeal(msg) {
-    const payload = msg.object.object
-    const type = payload[TYPE]
+  async maybeWatchSeal(msg) {
+    let target = msg.object.object
+    const type = target[TYPE]
     let model = this.getModel(type)
     if (!model) return
+
     const sup = model.subClassOf
     let link
     if (type === IDENTITY_PUBLISHING_REQUEST) {
-      link = protocol.linkString(payload.identity)
+      target = target.identity
     } else {
       switch (sup) {
       case FORM:
       case MY_PRODUCT:
       case VERIFICATION:
-        link = protocol.linkString(payload)
         break
       default:
         return
@@ -9477,27 +9478,27 @@ var Store = Reflux.createStore({
     }
 
     let otherGuy = msg.author === meDriver.permalink ? msg.recipient : msg.author
-    return meDriver.addressBook.lookupIdentity({ permalink: otherGuy })
-      .then(identityInfo => {
-        const chainPubKey = tradleUtils.chainPubKey(
-          identityInfo.object,
-          meDriver.network.blockchain
-        )
+    const identityInfo = await meDriver.addressBook.lookupIdentity({ permalink: otherGuy })
+    const chainPubKey = tradleUtils.chainPubKey(
+      identityInfo.object,
+      meDriver.network.blockchain
+    )
 
-        if (!chainPubKey) {
-          debug(`chain key not found in identity, can't add watch for seal`)
-          return
-        }
+    if (!chainPubKey) {
+      debug(`chain key not found in identity, can't add watch for seal`)
+      return
+    }
 
-        return meDriver.watchSeal({
-          link: link,
-          basePubKey: chainPubKey
-        })
+    try {
+      await meDriver.watchSeal({
+        object: target,
+        basePubKey: chainPubKey
       })
-      .catch((err) => {
-        debugger
-      })
+    } catch (err) {
+      debug('failed to add seal watch', err.stack)
+      debugger
       // .done()
+    }
 
     // meDriver.watchSeal({
     //   link: msg.link,
