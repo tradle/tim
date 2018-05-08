@@ -26,6 +26,8 @@ import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import ImageInput from './ImageInput'
 
+const PHOTO = 'tradle.Photo'
+
 class GridItemsList extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
@@ -78,6 +80,7 @@ class GridItemsList extends Component {
   render() {
     let m = utils.getModel(this.props.resource[constants.TYPE])
     let prop = m.properties[this.props.prop]
+    let isPhoto = prop.items.ref === PHOTO
     // let buttons = [translate('addNew', prop.title), translate('cancel')]
     let icon = Platform.OS === 'ios' ?  'md-add' : 'md-add'
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
@@ -106,23 +109,6 @@ class GridItemsList extends Component {
     )
   }
 
-  // renderActionSheet(buttons) {
-  //   if (utils.isWeb()) return
-
-  //   return (
-  //     <ActionSheet
-  //       ref={(o) => {
-  //         this.ActionSheet = o
-  //       }}
-  //       options={buttons}
-  //       cancelButtonIndex={buttons.length - 1}
-  //       onPress={(index) => {
-  //         if (index === 0) this._imageInput.showImagePicker()
-  //       }}
-  //     />
-  //   )
-  // }
-
       // returnIsVertical: true,
       // chooseFromLibraryButtonTitle: __DEV__ ? 'Choose from Library' : null
   _onImage(item) {
@@ -133,7 +119,7 @@ class GridItemsList extends Component {
       l.push(lr)
     })
     l.push(item)
-    this.props.onAddItem('photos', item);
+    this.props.onAddItem(this.props.prop, item);
     this.setState({list: l, forceUpdate: true})
     // this.setState({resouce: resource})
   }
@@ -178,4 +164,21 @@ module.exports = GridItemsList;
   //       break
   //     }
   //   });
+  // }
+
+  // renderActionSheet(buttons) {
+  //   if (utils.isWeb()) return
+
+  //   return (
+  //     <ActionSheet
+  //       ref={(o) => {
+  //         this.ActionSheet = o
+  //       }}
+  //       options={buttons}
+  //       cancelButtonIndex={buttons.length - 1}
+  //       onPress={(index) => {
+  //         if (index === 0) this._imageInput.showImagePicker()
+  //       }}
+  //     />
+  //   )
   // }
