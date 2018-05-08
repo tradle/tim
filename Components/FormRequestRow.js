@@ -72,8 +72,9 @@ class FormRequestRow extends Component {
   constructor(props) {
     super(props);
     this.state = {}
-    this.zoomIn = new Animated.Value(1.5)
-    this.springValue = new Animated.Value(0.5)
+    this.zoomIn = new Animated.Value(1)
+    this.zoomIn1 = new Animated.Value(0)
+    this.springValue = new Animated.Value(0)
     this.spinValue = new Animated.Value(0)
   }
   // componentWillMount() {
@@ -84,23 +85,37 @@ class FormRequestRow extends Component {
       this.spinValue,
       {
         toValue: 1,
-        duration: 800,
-        delay: 50,
+        duration: 700,
+        delay: 100,
         easing: Easing.linear
       }
     ).start()
-    // Animated.spring(
-    //   this.springValue,
-    //   {
-    //     toValue: 1,
-    //     friction: 2
-    //   }
-    // ).start()
-     // Animated.timing(      // Uses easing functions
-     //   this.zoomIn,    // The value to drive
-     //   {toValue: 1,
-     //   duration: 1000}        // Configuration
-     // ).start();
+    Animated.spring(
+      this.springValue,
+      {
+        toValue: 1,
+        bounceness: 100,
+        speed: 1,
+        // friction: 2
+      }
+    ).start()
+    Animated.timing(      // Uses easing functions
+      this.zoomIn,    // The value to drive
+      { toValue: 1,
+        delay: 500,
+        duration: 250,
+        easing: Easing.bounce
+      }        // Configuration
+    ).start();
+    Animated.timing(      // Uses easing functions
+      this.zoomIn1,    // The value to drive
+      {
+        toValue: 1,
+        delay: 700,
+        duration: 250,
+        easing: Easing.bounce
+      }        // Configuration
+    ).start();
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -819,6 +834,11 @@ class FormRequestRow extends Component {
       paddingBottom = 15
     if (sameFormRequestForm  &&  !resource._documentCreated) {
       message = 'Would you like to...'
+      let animStyle = {transform: [{scale: this.springValue}]}
+// this.springValue.interpolate({
+//   inputRange: [0, 1],
+//   outputRange: [0, 100],
+// });
       link = <View style={{flex: 1, paddingBottom }}>
                <View style={{flex: 1}}>
                  {this.makeButtonLink(form, isMyMessage, styles)}
@@ -834,9 +854,11 @@ class FormRequestRow extends Component {
                     )
                  }}>
                    <View style={styles.row}>
-                     <View style={styles.shareButton}>
-                       <Icon name='ios-arrow-forward' size={20} color='#ffffff'/>
-                     </View>
+                     <Animated.View style={animStyle}>
+                       <View style={styles.shareButton}>
+                         <Icon name='ios-arrow-forward' size={20} color='#ffffff'/>
+                       </View>
+                     </Animated.View>
                      <View style={{justifyContent: 'center'}}>
                        <Text style={styles.addMore}>{translate('moveToTheNextForm')}</Text>
                      </View>
@@ -942,13 +964,17 @@ class FormRequestRow extends Component {
     }
   }
   makeButtonLink(form, isMyMessage, styles) {
+    let zoomIn = {transform: [{scale: this.springValue}]}
+
     return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
              this.createNewResource(form, isMyMessage)
            }}>
              <View style={styles.row}>
-               <View style={styles.shareButton}>
-                 <Icon name='md-add' size={20} color='#ffffff'/>
-               </View>
+              <Animated.View style={zoomIn}>
+                 <View style={styles.shareButton}>
+                     <Icon name='md-add' size={20} color='#ffffff'/>
+                 </View>
+              </Animated.View>
                <View style={{justifyContent: 'center'}}>
                  <Text style={styles.addMore}>{translate('createNew', utils.makeModelTitle(form))}</Text>
                </View>
