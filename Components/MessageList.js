@@ -912,7 +912,7 @@ class MessageList extends Component {
       return (
         <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
           {network}
-          <ProgressInfo recipient={progressInfoR[ROOT_HASH]} />
+          <ProgressInfo recipient={progressInfoR[ROOT_HASH]} color={bankStyle.linkColor} />
           <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}
@@ -927,7 +927,7 @@ class MessageList extends Component {
       <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
         <ImageBackground source={{uri: bgImage}}  resizeMode='cover' style={image}>
           {network}
-          <ProgressInfo recipient={progressInfoR[ROOT_HASH]} />
+          <ProgressInfo recipient={progressInfoR[ROOT_HASH]} color={bankStyle.linkColor} />
           <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}

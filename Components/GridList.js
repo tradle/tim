@@ -1493,7 +1493,7 @@ class GridList extends Component {
                       showsCancelButtonWhileEditing={false}
                       showsCancelButton={false}
                       hideBackground={true}
-                      bankStyle={this.props.bankStyle}
+                      bankStyle={bankStyle}
                       />
       }
     }

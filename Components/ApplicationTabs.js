@@ -208,7 +208,7 @@ class ApplicationTabs extends Component {
     this.showRefResource(resource, prop)
   }
   getAppStatus(styles) {
-    let resource = this.props.resource
+    let { resource, bankStyle } = this.props
     let formTypes = []
     let progress = 0
     if (resource.forms) {
@@ -221,7 +221,7 @@ class ApplicationTabs extends Component {
 
       progress = formTypes.length / m.forms.length
     }
-    let progressColor = '#7AAAC3'
+    let progressColor = bankStyle.linkColor
     if (resource.status) {
       switch (resource.status) {
         case 'approved':

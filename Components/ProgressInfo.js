@@ -23,7 +23,8 @@ const { PERMALINK } = constants
 
 class ProgressInfo extends Component {
   static propTypes = {
-    recipient: PropTypes.string.isRequired
+    recipient: PropTypes.string.isRequired,
+    color: PropTypes.string.isRequired
   };
   constructor(props) {
     super(props)
@@ -82,7 +83,7 @@ class ProgressInfo extends Component {
 
     return (
       <View style={[styles.progress, { height: StyleSheet.hairlineWidth, backgroundColor: '#DCF3FF'}]}>
-        <ProgressBar progress={this.state.progress} width={utils.dimensions().width} color='#7AAAC3' borderWidth={0} height={3} />
+        <ProgressBar progress={this.state.progress} width={utils.dimensions().width} color={this.props.color} borderWidth={0} height={3} />
       </View>
     )
   }

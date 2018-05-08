@@ -84,7 +84,7 @@ class FormMessageRow extends Component {
 
     var len = photos  &&  photos.length;
     var inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-    var photoStyle
+    var photoStyle = {}
     var width = utils.getMessageWidth(FormMessageRow)
     if (application)
       width -= 50 // provider icon and padding
@@ -107,9 +107,7 @@ class FormMessageRow extends Component {
     }
     let sendStatus = this.getSendStatus()
     let val = this.getTime(resource);
-    let date = val
-             ? <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
-             : <View />;
+    let date = val  &&  <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
     let bg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
 
     let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
@@ -241,7 +239,7 @@ class FormMessageRow extends Component {
       viewCols = utils.ungroup(model, viewCols)
 
     viewCols.forEach((v) => {
-      if (vCols.length > MAX_PROPS_IN_FORM)
+      if (vCols.length >= MAX_PROPS_IN_FORM)
         return
       if (properties[v].markdown)
         return

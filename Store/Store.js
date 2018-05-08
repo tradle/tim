@@ -3438,7 +3438,7 @@ var Store = Reflux.createStore({
     // let moreInfo = plugin().validateForm({application: r._context, form: r})
     let rprops = {}
     let message
-    if (moreInfo) {
+    if (moreInfo  &&  moreInfo.requestedProperties) {
       moreInfo.requestedProperties.forEach((r) => {
         rprops[r.name] = r.message || ''
       })

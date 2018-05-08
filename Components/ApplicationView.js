@@ -171,8 +171,8 @@ class ApplicationView extends Component {
 
     let { width } = utils.dimensions(ApplicationView)
 
-    let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
-    let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
+    let bgcolor = Platform.OS === 'android' ? 'transparent' : bankStyle.linkColor
+    let color = Platform.OS !== 'android' ? '#ffffff' : bankStyle.linkColor
     let iconName = 'ios-person-add-outline'
     let icolor
     let rmStyle

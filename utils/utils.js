@@ -729,11 +729,17 @@ var utils = {
     if (Array.isArray(resource))
       return
     if (!model) {
-      if (!resource[TYPE]) {
-        if (resource.id   &&   resource.title)
-          return resource.title
-        if (resource.id)
-          return ""
+      if (this.isStub(resource)) {
+        if (!resource.title)
+          return ''
+        let rType = this.getType(resource)
+        let dnObj = this.getPropertiesWithAnnotation(utils.getModel(rType), 'displayName')
+        if (dnObj) {
+          let dnProps = Object.values(dnObj)
+          if (dnProps.length === 1  &&  dnProps[0].range === 'model')
+            return this.makeModelTitle(this.getModel(resource.title))
+        }
+        return resource.title
       }
       model = this.getModel(resource[TYPE])
     }
