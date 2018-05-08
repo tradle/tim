@@ -731,12 +731,12 @@ class FormRequestRow extends Component {
     var isPrefilled = resource.prefill
     // Prefill for testing and demoing
     if (isPrefilled)
-      _.extend(true, r, resource.prefill)
+      _.extend(r, resource.prefill)
     else {
       // isPrefilled = false
       isPrefilled = ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
-        _.extend(true, r, formDefaults[model.id])
+        _.extend(r, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
     }
     let rightButtonTitle = 'Done'
