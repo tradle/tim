@@ -115,7 +115,8 @@ class ResourceList extends Component {
       refreshing: false,
       hasPartials: false,
       hasBookmarks: false,
-      hasTestProviders: false
+      hasTestProviders: false,
+      bankStyle: props.bankStyle
     };
     // if (props.isBacklink  &&  props.backlinkList) {
     //   this.state.dataSource = dataSource.cloneWithRows(props.backlinkList)
@@ -870,7 +871,7 @@ class ResourceList extends Component {
           model: model,
           resource: resource,
           search: true,
-          bankStyle: this.props.bankStyle || defaultBankStyle,
+          bankStyle: this.state.bankStyle,
         }
       })
       // filter = filter.substring(idx + 1).trim()
@@ -961,7 +962,7 @@ class ResourceList extends Component {
         filter: '',
         modelName: MESSAGE,
         // currency: params.to.currency,
-        bankStyle: this.props.bankStyle || defaultBankStyle
+        bankStyle: this.state.bankStyle
       }
     }
     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
@@ -1188,7 +1189,7 @@ class ResourceList extends Component {
     if (!this.props.isChooser && this.props.officialAccounts && this.props.modelName === ORGANIZATION)
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
     let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
-    let contentSeparator = utils.getContentSeparator(this.props.bankStyle)
+    let contentSeparator = utils.getContentSeparator(this.state.bankStyle)
     let style = {backgroundColor: '#fff'}
     return (
       <PageView style={this.props.isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator}>
@@ -1400,9 +1401,9 @@ class ResourceList extends Component {
       id: 30,
       component: GridList,
       backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
       passProps: {
         modelName: MESSAGE,
+        bankStyle: this.state.bankStyle,
         isModel: true,
         search: true
       },
