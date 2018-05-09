@@ -6,6 +6,7 @@ import {
 import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment-cloud.json'
+import networks from './networks'
 
 // const DEV_PUSH_SERVER = 'https://push1.tradle.io'
 const LOCAL_IP = (function () {
@@ -136,7 +137,7 @@ const merged = extend({
   delayBetweenExpensiveTasks: 100,
   // blockchain start
   blockchainName: 'ethereum',
-  networkName: 'rinkeby',
+  networkName: networks.ethereum,
   // blockchain end
   appName: 'Tradle',
   navBarHeight: navBarHeight,
@@ -155,6 +156,8 @@ const merged = extend({
     'tradle.CustomerWaiting',
     'tradle.ModelsPack',
     'tradle.StylesPack',
+    'tradle.Introduction',
+    'tradle.SelfIntroduction',
   ]
 }, environment)
 

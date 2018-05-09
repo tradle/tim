@@ -9481,6 +9481,8 @@ var Store = Reflux.createStore({
       target = target.identity
     } else {
       switch (sup) {
+      case PRODUCT_REQUEST:
+        return
       case FORM:
       case MY_PRODUCT:
       case VERIFICATION:
@@ -9494,7 +9496,7 @@ var Store = Reflux.createStore({
     const identityInfo = await meDriver.addressBook.lookupIdentity({ permalink: otherGuy })
     const chainPubKey = tradleUtils.chainPubKey(
       identityInfo.object,
-      meDriver.network.blockchain
+      meDriver.network
     )
 
     if (!chainPubKey) {
