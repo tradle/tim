@@ -189,46 +189,5 @@ module.exports = PhotoList;
       </View>
     )
   }
-<<<<<<< Updated upstream
-
-  getPhotoStyle(photos) {
-    let width = utils.dimensions(PhotoList).width
-    let d3 = Math.min((width / 3) - 5, 240)
-    let d4 = Math.min((width / 4) - 5, 190)
-    let d5 = Math.min((width / 5) - 5, MIN_WIDTH)
-    switch (photos.length) {
-    case 1:
-    case 2:
-    case 3:
-      return {width: d3, height: d3};
-    case 4:
-      return {width: d4, height: d4};
-    default:
-    case 5:
-      return {width: d5, height: d5};
-    }
-  }
-}
-reactMixin(PhotoList.prototype, PhotoCarouselMixin);
-reactMixin(PhotoList.prototype, RowMixin);
-PhotoList = makeResponsive(PhotoList)
-
-var styles = StyleSheet.create({
-  photoContainer: {
-    paddingTop: 9,
-  },
-  thumbCommon: {
-    borderWidth: 0.5,
-    margin: 1,
-    borderColor: '#999999'
-  },
-  row: {
-    flexDirection: 'row',
-    flex: 1,
-  },
-})
-
-module.exports = PhotoList;
-=======
 */
 
