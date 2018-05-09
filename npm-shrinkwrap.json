@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "dependencies": {
     "@tradle/aws-client": {
-      "version": "1.7.0",
+      "version": "1.7.1",
       "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.7.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.7.1.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -39,7 +39,7 @@
     "@tradle/build-resource": {
       "version": "3.0.0",
       "from": "tradle/build-resource",
-      "resolved": "git://github.com/tradle/build-resource.git#19bcfb82303ed46d9f5b8d1cef6d525fb11d6942"
+      "resolved": "git://github.com/tradle/build-resource.git#fef6102a87f27444e0d195ac2d00fd39d15cc98c"
     },
     "@tradle/cb-blockr": {
       "version": "3.2.1",
@@ -177,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models#nonvirtual",
-      "resolved": "git://github.com/tradle/models.git#871d0aae7aa57df744372708945b4e3359602474"
+      "resolved": "git://github.com/tradle/models.git#9252fb8e156628b6c76b6b2d01d44d7c66ec49e0"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",

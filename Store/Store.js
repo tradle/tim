@@ -96,7 +96,13 @@ const NOT_CHAT_ITEM = '_notChatItem'
 import utils from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
-const sampleData = require('@tradle/models').data
+import { models as baseModels, data as sampleData } from '@tradle/models'
+
+const ObjectModel = baseModels['tradle.Object']
+const NON_VIRTUAL_OBJECT_PROPS = Object.keys(ObjectModel.properties).filter(p => {
+  return !ObjectModel.properties[p].virtual
+})
+
 const voc = require('./voc')
 
 import sampleProfile from '../data/sampleProfile.json'
@@ -4740,8 +4746,6 @@ var Store = Reflux.createStore({
         }
       }
       else {
-        debugger
-        toChain[PREV_HASH] = returnVal[CUR_HASH]
         for (let p in toChain) {
           let prop = properties[p]
           if (!prop  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
@@ -4753,6 +4757,15 @@ var Store = Reflux.createStore({
                    !prop.partial)
             toChain[p] = self.buildSendRef(returnVal[p])
         }
+
+        const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
+          _link: returnVal[CUR_HASH],
+          _permalink: returnVal[ROOT_HASH],
+          ...returnVal
+        })
+
+        _.extend(toChain, nextVersionScaffold)
+        _.extend(returnVal, nextVersionScaffold)
       }
 
       // toChain._time = returnVal._time
@@ -6328,8 +6341,8 @@ var Store = Reflux.createStore({
       return r
     const m = this.getModel(r[TYPE])
     const props = m.properties
-    const toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, '_time']
-    let rr = pick(r, Object.keys(props).concat(toKeep))
+    const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(props)
+    let rr = pick(r, toKeep)
 
     _.extend(rr, {
       [ROOT_HASH]: r._permalink,
@@ -6346,7 +6359,7 @@ var Store = Reflux.createStore({
 
     let lr = this._getItem(utils.getId(rr))
     if (lr) {
-      let rr = pick(r, Object.keys(props).concat(toKeep))
+      let rr = pick(r, toKeep)
       let mr = {}
 
       _.extend(mr, lr)
