@@ -50,17 +50,6 @@ class PhotoList extends Component {
       duration: 500}        // Configuration
     ).start();
   }
-  // componentDidMount() {
-  //  // this.state.bounceValue.setValue(1.5);     // Start large
-  //   Animated.spring(                          // Base: spring, decay, timing
-  //     this.state.bounceValue,                 // Animate `bounceValue`
-  //     {
-  //       toValue: 0.8,                         // Animate to smaller size
-  //       friction: 1,                          // Bouncier spring
-  //     }
-  //   ).start();                                // Start the animation
-
-  // }
   shouldComponentUpdate(nextProps, nextState) {
     if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH])
       return true
@@ -69,17 +58,17 @@ class PhotoList extends Component {
            !_.isEqual(this.props.photos, nextProps.photos)
   }
   render() {
-    var photos = this.props.photos;
+    var { photos, isView, style } = this.props
     if (!photos ||  !photos.length) // || (photos.length === 1  &&  this.props.isView))
       return null;
     // if (this.props.isView  &&  photos.length === 1  &&  Platform.OS !== 'web')
     //   return null
     var val = this.renderPhotoList(photos);
+    let addStyle = style && {}  ||  {marginHorizontal: 5}
+    if (isView)
+      addStyle.marginTop = -7
     return (
-       <View style={
-        [styles.photoContainer,
-         this.props.style ? {} : {marginHorizontal: 5}
-        ]} key={this.getNextKey() + '_photo'}>
+       <View style={[styles.photoContainer, addStyle]} key={this.getNextKey() + '_photo'}>
          {val}
        </View>
      );
@@ -125,6 +114,7 @@ class PhotoList extends Component {
     var uri = photo.url
     if (!uri)
       return
+    let { isView, callback } = this.props
     var source = {uri: uri};
     if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
       source.isStatic = true;
@@ -132,7 +122,7 @@ class PhotoList extends Component {
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
         <Animated.View style={[{margin: 1, transform: [{scale: this.state.anim}]}, imageStyle]}>
-          <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo, this.props.isView)}>
+          <TouchableHighlight underlayColor='transparent' onPress={callback ? callback.bind(this, photo) : this.showCarousel.bind(this, photo, this.props.isView)}>
              <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
           </TouchableHighlight>
         </Animated.View>
@@ -147,7 +137,7 @@ PhotoList = makeResponsive(PhotoList)
 
 var styles = StyleSheet.create({
   photoContainer: {
-    // paddingTop: 5,
+    paddingTop: 9,
   },
   thumbCommon: {
     borderWidth: 0.5,
@@ -232,4 +222,15 @@ module.exports = PhotoList;
   //       {photos}
   //     </View>
   //   );
+  // }
+  // componentDidMount() {
+  //  // this.state.bounceValue.setValue(1.5);     // Start large
+  //   Animated.spring(                          // Base: spring, decay, timing
+  //     this.state.bounceValue,                 // Animate `bounceValue`
+  //     {
+  //       toValue: 0.8,                         // Animate to smaller size
+  //       friction: 1,                          // Bouncier spring
+  //     }
+  //   ).start();                                // Start the animation
+
   // }
