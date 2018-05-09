@@ -83,11 +83,11 @@ class PhotoList extends Component {
     let inRow = this.props.numberInRow || Math.floor(width / w)
     let rows = []
     for (let i=0; i<len; ) {
-      let row = []
+      let cols = []
       for (let j = 0; j<inRow  &&  i < len; j++, i++)
-        row.push(this.renderRow(photos[i], imageStyle))
+        cols.push(this.renderCol(photos[i], imageStyle))
 
-      rows.push(<Row  size={inRow} key={this.getNextKey()}>{row}</Row>)
+      rows.push(<Row  size={inRow} key={this.getNextKey()}>{cols}</Row>)
     }
     return <View>{rows}</View>
   }
@@ -110,7 +110,7 @@ class PhotoList extends Component {
       return {width: d5, height: d5};
     }
   }
-  renderRow(photo, imageStyle)  {
+  renderCol(photo, imageStyle)  {
     let uri = photo.url
     if (!uri)
       return
