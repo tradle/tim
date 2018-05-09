@@ -184,10 +184,25 @@ class VerificationRow extends Component {
       verifiedBy = <View style={styles.verifiedByView}><Text style={styles.verifiedBy}>{by}</Text></View>
     }
 
-    let dateP = resource.dateVerified ? 'dateVerified' : resource.date ? 'date' : 'time'
-    let date = !isBookmark &&  r  &&  <View style={styles.datePlacement}>
-                        <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateformat(resource[dateP], 'mmm dS, yyyy h:MM TT')}</Text>
-                      </View>
+    let date
+    let isCheck = model.subClassOf === CHECK
+    let isStub = utils.isStub(resource)
+    if (!isStub  &&  !isBookmark  &&  r) {
+      let dateP
+      if (resource.dateVerified)
+        dateP = 'dateVerified'
+      else if (isCheck)
+        dateP = 'dateChecked'
+      if (!dateP)
+        dateP = resource.date && 'date' || 'time'
+      let dateVal = resource[dateP]
+      if (dateVal) {
+        let dateFormatted = dateformat(dateVal, 'UTC:mmm dS, yyyy h:MM TT')
+        date =  <View style={styles.datePlacement}>
+                  <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateFormatted}</Text>
+                </View>
+      }
+    }
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
     let title
     if (isChooser)
@@ -234,7 +249,6 @@ class VerificationRow extends Component {
       }
     }
 
-    let isCheck = model.subClassOf === CHECK
     let description
     let titleComponent
     if (isVerification) {
@@ -267,7 +281,9 @@ class VerificationRow extends Component {
       else {
         if (utils.isImplementing(modelName, INTERSECTION))
           description = <Text style={isCheck ? styles.checkType : styles.description}>{title}</Text>
-
+        //!!!
+        if (!dn)
+          title = dn
         titleComponent = <Text style={styles.rTitle}>{dn}</Text>
       }
     }
