@@ -34,7 +34,6 @@ import yukiConfig from '../yuki.json'
 
 import Reflux from 'reflux'
 import Actions from '../Actions/Actions'
-import extend from 'extend'
 import Debug from 'debug'
 
 import deepEqual from 'deep-equal'
@@ -613,8 +612,8 @@ var Store = Reflux.createStore({
 
       let rr = await this._keeper.get(r[ROOT_HASH])
       let res = {}
-      extend(res, rr)
-      extend(res, r)
+      _.extend(res, rr)
+      _.extend(res, r)
       this.addVisualProps(res)
       this.trigger({action: 'updateItem', sendStatus: SENT, resource: res})
       this.dbPut(objId, r)
@@ -916,8 +915,8 @@ var Store = Reflux.createStore({
     this._resolveWithMe(me)
   },
   onUpdateMe(params) {
-    let r = {}
-    extend(true, r, me, params)
+    let r = _.clone(me)
+    _.extend(r, params)
     this.setMe(r)
     let meId = utils.getId(r)
     this._setItem(meId, r)
@@ -2361,7 +2360,7 @@ var Store = Reflux.createStore({
     let json = await response.json()
     json = utils.normalizeGetInfoResponse(json)
     if (json.dictionary) {
-      extend(true, dictionary, json.dictionary)
+      _.extend(dictionary, json.dictionary)
       if (me) {
         me.dictionary = dictionary
         if (language)
@@ -2480,7 +2479,7 @@ var Store = Reflux.createStore({
     }
     else {
       org = {}
-      extend(org, sp.org)
+      _.extend(org, sp.org)
       if (sp.sandbox) {
         delete org.sandbox
         org._isTest = true
@@ -2537,7 +2536,7 @@ var Store = Reflux.createStore({
         [ROOT_HASH]:   hash,
         txId: sp.bot.txId
       }
-      extend(true, identity, sp.bot.pub)
+      _.extend(identity, sp.bot.pub)
       if (identity.name) {
         identity.firstName = identity.name.firstName
         identity.formatted = identity.name.formatted || identity.firstName
@@ -3756,10 +3755,10 @@ var Store = Reflux.createStore({
         if (me.isEmployee)
           kres = await this._getItemFromServer(rId)
       }
-      extend(res, kres)
+      _.extend(res, kres)
     }
 
-    extend(res, r)
+    _.extend(res, r)
 
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
@@ -4040,7 +4039,7 @@ var Store = Reflux.createStore({
     var foundRefs = [];
     var refProps = this.getRefs(resource, foundRefs, meta.properties);
     var newResource = {};
-    extend(newResource, resource);
+    _.extend(newResource, resource);
     for (var i=0; i<foundRefs.length; i++) {
      // foundRefs.forEach(function(val) {
        var val = foundRefs[i];
@@ -4320,7 +4319,7 @@ var Store = Reflux.createStore({
     // this.trigger({action: 'deepLink', url})
   },
   async onAddChatItem(params) {
-    extend(params, {isMessage: true})
+    _.extend(params, {isMessage: true})
     await this.onAddItem(params)
   },
   async onAddItem(params) {
@@ -4433,7 +4432,7 @@ var Store = Reflux.createStore({
           // results.push(r)
           // if (results.length) {
           //   // let r = results[0]
-            extend(r, elm)
+            _.extend(r, elm)
             foundRefs.push({value: r, state: 'fulfilled'})
           // }
         }
@@ -4521,7 +4520,7 @@ var Store = Reflux.createStore({
       returnVal = json
     else {
       returnVal = {};
-      extend(true, returnVal, resource);
+      _.extend(returnVal, resource);
       for (let p in json) {
         // Could be metadata property that is why it preceeds the next 'else'
         if (!returnVal[p])
@@ -4556,8 +4555,11 @@ var Store = Reflux.createStore({
     }
     let displayableProps = utils.getPropertiesWithAnnotation(meta, 'displayAs')
     if (displayableProps  &&  !utils.isEmpty(displayableProps)) {
-      for (let p in displayableProps)
-        returnVal[p] = utils.templateIt(props[p], returnVal)
+      for (let p in displayableProps) {
+        let pValue = utils.templateIt(props[p], returnVal)
+        if (pValue)
+          returnVal[p] = pValue
+      }
     }
 
     // if (!isRegistration) {
@@ -4659,7 +4661,7 @@ var Store = Reflux.createStore({
           // return new Promise(resolve => meDriver.objects.get(returnVal[CUR_HASH]))
           let res = await self._keeper.get(returnVal[CUR_HASH])
           let r = utils.clone(res)
-          extend(r, returnVal)
+          _.extend(r, returnVal)
           self._setItem(utils.getId(returnVal), returnVal)
           let params = {action: 'addItem', resource: r}
           // return self.disableOtherFormRequestsLikeThis(returnVal)
@@ -4702,7 +4704,7 @@ var Store = Reflux.createStore({
           prevRes = await self._getItemFromServer(utils.getId(returnVal))
         }
         prevResCached = self._getItem(prevResId)
-        extend(prevResCached, prevRes)
+        _.extend(prevResCached, prevRes)
         if (utils.compare(returnVal, prevResCached)) {
           self.trigger({action: 'noChanges'})
           return
@@ -4719,7 +4721,7 @@ var Store = Reflux.createStore({
       let exclude = ['to', 'from', 'verifications', CUR_HASH, 'idOld', '_message', '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', '_latest', '_outbound']
       // if (isNew)
       //   exclude.push(ROOT_HASH)
-      extend(toChain, returnVal)
+      _.extend(toChain, returnVal)
       for (let p of exclude)
         delete toChain[p]
 
@@ -5102,7 +5104,7 @@ var Store = Reflux.createStore({
 
     let kr = await this._keeper.get(r[CUR_HASH])
     let resource = utils.clone(r)
-    extend(resource, kr)
+    _.extend(resource, kr)
 
     this.addVisualProps(resource)
     this.trigger({action: 'addItem', context: formResource.context, resource: resource})
@@ -6061,7 +6063,7 @@ var Store = Reflux.createStore({
       }
     }
 
-    extend(params, {client: this.client, filterResource: filterResource, endCursor, noPaging: !endCursor})
+    _.extend(params, {client: this.client, filterResource: filterResource, endCursor, noPaging: !endCursor})
     let result = await graphQL.searchServer(params)
     if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger)
@@ -6328,7 +6330,7 @@ var Store = Reflux.createStore({
     const toKeep = [ROOT_HASH, CUR_HASH, TYPE, SIG, PREV_HASH, 'time']
     let rr = pick(r, Object.keys(props).concat(toKeep))
 
-    extend(rr, {
+    _.extend(rr, {
       [ROOT_HASH]: r._permalink,
       [CUR_HASH]: r._link,
       [TYPE]: r[TYPE],
@@ -6346,10 +6348,10 @@ var Store = Reflux.createStore({
       let rr = pick(r, Object.keys(props).concat(toKeep))
       let mr = {}
 
-      extend(mr, lr)
+      _.extend(mr, lr)
       delete mr._verifiedBy
 
-      extend(mr, rr)
+      _.extend(mr, rr)
       rr = mr
     }
     if (!rr.time)
@@ -6624,8 +6626,7 @@ var Store = Reflux.createStore({
       let retOrgs = []
       result.forEach((r) => {
         let orgId = utils.getId(r)
-        let rr = {}
-        extend(true, rr, r)
+        let rr = _.clone(r)
         if (this._noSplash  &&  this._noSplash.indexOf(utils.getId(rr)) !== -1)
           rr._noSplash = true
         retOrgs.push(rr)
@@ -6963,7 +6964,7 @@ var Store = Reflux.createStore({
       let rId = utils.getId(rr)
       let r = this._getItem(rId)
       this._setItem(rId, r)
-      extend(r, rr)
+      _.extend(r, rr)
 
       if (r._context  &&  !utils.isContext(r[TYPE])) {
         let rcontext = this.findContext(r._context)
@@ -7042,7 +7043,7 @@ var Store = Reflux.createStore({
 
     let obj = utils.clone(object)
     this.rewriteStubs(obj)
-    extend(r, obj)
+    _.extend(r, obj)
     this._setItem(rId, r)
     if (r._context  &&  !utils.isContext(r[TYPE])) {
       let rcontext = this.findContext(r._context)
@@ -7066,7 +7067,7 @@ var Store = Reflux.createStore({
 
     let checked
     try {
-      extend(params, { r })
+      _.extend(params, { r })
       let backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
       let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
       if (isBacklinkProp) {
@@ -7142,6 +7143,8 @@ var Store = Reflux.createStore({
         // newStub.id = [m.id, r.id].join('_')
         // newStub._displayName = m.enums.filter({id, title} => r.id === id)[0].title
       }
+      if (!stub._link)
+        continue
       resource[p] = this.makeStub(stub)
     }
   },
@@ -7231,7 +7234,7 @@ var Store = Reflux.createStore({
             if (Array.isArray(val))
               doc[p] = val.slice(0)
             else
-              doc[p] = extend(true, {}, val)
+              doc[p] = _.clone(val)
           }
           break
         default:
@@ -7648,7 +7651,7 @@ var Store = Reflux.createStore({
   // },
   async onGetAllContexts(params) {
     if (me.isEmployee) {
-      extend(params, {modelName: FORM_REQUEST})
+      _.extend(params, {modelName: FORM_REQUEST})
       let list = await this.searchMessages(params)
       let contextIds = []
       let contexts = []
@@ -7680,7 +7683,7 @@ var Store = Reflux.createStore({
       this.trigger({action: 'allContexts', list: contexts, to: params.to})
     }
     else {
-      extend(params, {modelName: PRODUCT_REQUEST})
+      _.extend(params, {modelName: PRODUCT_REQUEST})
       let list = await this.searchMessages(params)
       let l = list  &&  list.filter((r) => r._formsCount)
       this.trigger({action: 'allContexts', list: l, to: params.to})
@@ -8016,14 +8019,14 @@ var Store = Reflux.createStore({
     return r
 
     let resource = {};
-    extend(resource, r);
+    _.extend(resource, r);
     if (!r.verifications  ||  !r.verifications.length)
       return resource;
     for (var i=0; i<resource.verifications.length; i++) {
       var v = resource.verifications[i];
       var vId = utils.getId(v)
       var ver = {};
-      extend(ver, this._getItem(vId));
+      _.extend(ver, this._getItem(vId));
       resource.verifications[i] = ver;
       if (ver.organization  &&  !ver.organization.photos) {
         var orgPhotos = this._getItem(utils.getId(ver.organization.id)).photos;
@@ -8227,7 +8230,7 @@ var Store = Reflux.createStore({
       }
 
       var value = {};
-      extend(value, val);
+      _.extend(value, val);
       value.document = document;
 
       self.addVisualProps(value)
@@ -8464,7 +8467,7 @@ var Store = Reflux.createStore({
           return
       }
       let value = {};
-      extend(value, val);
+      _.extend(value, val);
       value.document = document;
 
       self.addVisualProps(value)
@@ -8639,7 +8642,7 @@ var Store = Reflux.createStore({
     let { modelName, search } = params
     if (!me.isEmployee)
       return await this.searchMessages(params)
-    extend(params, {noTrigger: true, search: me.isEmployee})
+    _.extend(params, {noTrigger: true, search: me.isEmployee})
     let model = this.getModel(modelName)
     if (me.isEmployee  &&  model.id !== PROFILE  &&  model.id !== ORGANIZATION) {
       // LEGAL ENTITY
@@ -8721,7 +8724,7 @@ var Store = Reflux.createStore({
 
     if (isRegistration) {
       let sample = utils.clone(sampleProfile)
-      extend(sample, value)
+      _.extend(sample, value)
       value = sample
       return this.registration(value)
     }
@@ -8794,7 +8797,7 @@ var Store = Reflux.createStore({
         }
 
         Object.assign(me, value)
-        // extend(true, me, value)
+        // extend(me, value)
         this.setMe(me)
         if (newLanguage) {
           let lang = this._getItem(utils.getId(me.language))
@@ -9056,7 +9059,7 @@ var Store = Reflux.createStore({
       [ROOT_HASH]: me[ROOT_HASH],
       [TYPE]: IDENTITY
     }
-    extend(true, identity, publishedIdentity)
+    _.extend(identity, publishedIdentity)
     var iKey = utils.getId(identity)
     if (me.language) {
       me.language = this._getItem(utils.getId(me.language))
@@ -9513,10 +9516,7 @@ var Store = Reflux.createStore({
   async _putInDb(obj, onMessage) {
     // defensive copy
     var self = this
-    var val = extend(true, {}, obj.parsed.data)
-    if (!val)
-      return
-
+    var val = _.clone(obj.parsed.data)
     if (val[TYPE] === INTRODUCTION)
       return
     if (val[TYPE] === SIMPLE_MESSAGE  &&  val.message === ALREADY_PUBLISHED_MESSAGE)
@@ -9726,8 +9726,8 @@ var Store = Reflux.createStore({
           }
           let p = {}
           if (memPrefill)
-            extend(p, memPrefill)
-          extend(p, prefill)
+            _.extend(p, memPrefill)
+          _.extend(p, prefill)
           val.prefill = p
         }
         else if (utils.isItem(model)) {
@@ -9775,7 +9775,7 @@ var Store = Reflux.createStore({
         profile[p] = val.location[p]
       delete val.location
     }
-    extend(true, profile, val)
+    _.extend(profile, val)
     profile[TYPE] = PROFILE
     delete profile.pubkeys
     delete profile.v
@@ -9786,8 +9786,8 @@ var Store = Reflux.createStore({
       v = me
     if (v)  {
       var vv = {}
-      extend(vv, v)
-      extend(vv, profile)
+      _.extend(vv, v)
+      _.extend(vv, profile)
       profile = vv
     }
     var org
@@ -9822,7 +9822,7 @@ var Store = Reflux.createStore({
           title: val.formatted || val.firstName
         }
         var oo = {}
-        extend(oo, org)
+        _.extend(oo, org)
         if (!oo.contacts)
           oo.contacts = []
         oo.contacts.push(representative)
@@ -10205,7 +10205,7 @@ var Store = Reflux.createStore({
     }
     if (list[key]) {
       let v = {}
-      extend(true, v, val)
+      _.extend(v, val)
       this._setItem(key, v)
     }
     if (!noTrigger) {
