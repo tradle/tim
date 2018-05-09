@@ -6,6 +6,7 @@ import {
 import DeviceInfo from 'react-native-device-info'
 import extend from 'xtend'
 import environment from '../environment.json'
+import networks from './networks'
 import locale from './locale'
 import browser from './browser'
 
@@ -140,7 +141,7 @@ const merged = extend({
   delayBetweenExpensiveTasks: 100,
   // blockchain start
   blockchainName: 'ethereum',
-  networkName: 'rinkeby',
+  networkName: networks.ethereum,
   // blockchain end
   appName: 'Tradle',
   ie: {
@@ -162,6 +163,8 @@ const merged = extend({
     'tradle.CustomerWaiting',
     'tradle.ModelsPack',
     'tradle.StylesPack',
+    'tradle.Introduction',
+    'tradle.SelfIntroduction',
   ]
 }, environment)
 

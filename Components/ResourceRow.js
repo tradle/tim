@@ -273,7 +273,7 @@ class ResourceRow extends Component {
                      </View>
     let textStyle = noImage ? [styles.textContainer, {marginVertical: 7}] : styles.textContainer;
 
-    this.dateProp = utils.isContext(rType) ? 'time' : this.dateProp
+    this.dateProp = utils.isContext(rType) ? '_time' : this.dateProp
 
     let dateRow
     if (!this.isOfficialAccounts  &&  !this.props.isChooser  &&  this.dateProp  &&  resource[this.dateProp]) {

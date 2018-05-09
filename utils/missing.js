@@ -50,9 +50,14 @@ function restoreMissingMessages ({ node, counterparty, url, receive }) {
 
         msgs.forEach(msg => {
           const { recipientPubKey } = msg
-          bufferizePubKey(recipientPubKey)
+          if (recipientPubKey) {
+            bufferizePubKey(recipientPubKey)
+          }
+
           if (msg.object[TYPE] === TYPES.MESSAGE) {
-            bufferizePubKey(msg.object.recipientPubKey)
+            if (msg.object.recipientPubKey) {
+              bufferizePubKey(msg.object.recipientPubKey)
+            }
           }
         })
 
@@ -122,8 +127,8 @@ async function getReceivePosition ({ node, queue, counterparty }) {
   while (seq >= 0) {
     try {
       const { link, message } = await queue.getItemAtSeq(seq)
-      const { time } = message
-      return { time, link }
+      const { _time } = message
+      return { time: _time, link }
     } catch (err) {
       debug(`failed to get item from queue at seq ${seq}`)
       try {
@@ -148,7 +153,6 @@ async function getReceivePosition ({ node, queue, counterparty }) {
 
   return null
 }
-
 
 function bufferizePubKey (key) {
   key.pub = new Buffer(key.pub.data)

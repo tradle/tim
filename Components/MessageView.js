@@ -377,7 +377,7 @@ class MessageView extends Component {
     let isVerification = model.id === VERIFICATION
     let isVerificationTree = isVerification &&  (resource.method || resource.sources)
     let isForm = model.subClassOf === FORM
-    let t = resource.dateVerified ? resource.dateVerified : resource.time
+    let t = resource.dateVerified ? resource.dateVerified : resource._time
     let date
     if (isForm  &&  t)
       date = utils.formatDate(new Date(t), true)

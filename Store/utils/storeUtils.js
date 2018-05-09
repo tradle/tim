@@ -39,9 +39,9 @@ var storeUtils = {
         readOnly: true
       }
     }
-    if (!m.properties.time) {
+    if (!m.properties._time) {
 
-      m.properties.time = {
+      m.properties._time = {
         type: 'date',
         readOnly: true,
         title: 'Date'
@@ -56,8 +56,8 @@ var storeUtils = {
     //   value: m
     // }
 
-    // if (!m.properties.time) {
-    //   m.properties.time = {
+    // if (!m.properties._time) {
+    //   m.properties._time = {
     //     type: 'date',
     //     readOnly: true,
     //     title: 'Date'
