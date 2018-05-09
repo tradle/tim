@@ -32,7 +32,7 @@ class PhotoList extends Component {
   static displayName = 'PhotoList'
   constructor(props) {
     super(props);
-    var dataSource = new ListView.DataSource({
+    let dataSource = new ListView.DataSource({
       rowHasChanged: (row1, row2) => row1 !== row2
     });
     this.state = {
@@ -58,12 +58,12 @@ class PhotoList extends Component {
            !_.isEqual(this.props.photos, nextProps.photos)
   }
   render() {
-    var { photos, isView, style } = this.props
+    let { photos, isView, style } = this.props
     if (!photos ||  !photos.length) // || (photos.length === 1  &&  this.props.isView))
       return null;
     // if (this.props.isView  &&  photos.length === 1  &&  Platform.OS !== 'web')
     //   return null
-    var val = this.renderPhotoList(photos);
+    let val = this.renderPhotoList(photos);
     let addStyle = style && {}  ||  {marginHorizontal: 5}
     if (isView)
       addStyle.marginTop = -7
@@ -82,7 +82,7 @@ class PhotoList extends Component {
     let w = imageStyle.width
     let inRow = this.props.numberInRow || Math.floor(width / w)
     let rows = []
-    for (var i=0; i<len; ) {
+    for (let i=0; i<len; ) {
       let row = []
       for (let j = 0; j<inRow  &&  i < len; j++, i++)
         row.push(this.renderRow(photos[i], imageStyle))
@@ -92,12 +92,12 @@ class PhotoList extends Component {
     return <View>{rows}</View>
   }
   getPhotoStyle(photos) {
-    var len = photos.length
-    var width = utils.dimensions().width
-    var d3 = Math.floor((width / 3) - 6)
-    var d4 = Math.floor((width / 4) - 5)
-    var d5 = Math.floor((width / 5) - 5)
-    // var w = Math.floor(d3)
+    let len = photos.length
+    let width = utils.dimensions().width
+    let d3 = Math.floor((width / 3) - 6)
+    let d4 = Math.floor((width / 4) - 5)
+    let d5 = Math.floor((width / 5) - 5)
+    // let w = Math.floor(d3)
     switch (photos.length) {
     case 1:
     case 2:
@@ -111,11 +111,11 @@ class PhotoList extends Component {
     }
   }
   renderRow(photo, imageStyle)  {
-    var uri = photo.url
+    let uri = photo.url
     if (!uri)
       return
     let { isView, callback } = this.props
-    var source = {uri: uri};
+    let source = {uri: uri};
     if (uri.indexOf('data') === 0  ||  uri.charAt(0) == '/')
       source.isStatic = true;
 
