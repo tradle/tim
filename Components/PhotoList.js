@@ -1,15 +1,19 @@
 console.log('requiring PhotoList.js')
 'use strict';
 
-import utils from '../utils/utils'
-import groupByEveryN from 'groupByEveryN'
-import constants from '@tradle/constants'
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons'
+import _ from 'lodash'
+import {Column as Col, Row} from 'react-native-flexbox-grid'
+import { makeResponsive } from 'react-native-orient'
+import constants from '@tradle/constants'
+
+import utils from '../utils/utils'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
 import RowMixin from './RowMixin'
 
-import equal from 'deep-equal'
-var cnt = 1000
 import {
   StyleSheet,
   Image,
@@ -22,9 +26,6 @@ import {
   TextInput,
   TouchableHighlight,
 } from 'react-native'
-import PropTypes from 'prop-types'
-
-import React, { Component } from 'react'
 
 // import Animated from 'Animated'
 class PhotoList extends Component {
@@ -64,8 +65,8 @@ class PhotoList extends Component {
     if (this.props.resource[constants.ROOT_HASH] !== nextProps.resource[constants.ROOT_HASH])
       return true
 
-    return nextProps.forceUpdate  ||  !equal(this.props.resource.photos, nextProps.resource.photos)  ||
-           !equal(this.props.photos, nextProps.photos)
+    return nextProps.forceUpdate  ||  !_.isEqual(this.props.resource.photos, nextProps.resource.photos)  ||
+           !_.isEqual(this.props.photos, nextProps.photos)
   }
   render() {
     var photos = this.props.photos;
@@ -83,49 +84,42 @@ class PhotoList extends Component {
        </View>
      );
   }
-  renderPhotoList(val) {
-    var imageStyle = this.props.style;
-    var len = val.length
-    var width = utils.dimensions().width
-    width = !imageStyle ? width : 0.8 * width
-    var d3 = (width / 3) - 5
-    var d4 = (width / 4) - 5
-    var d5 = (width / 5) - 5
-    var w = Math.floor(d3)
-    if (!imageStyle  ||  utils.isEmpty(imageStyle)) {
-      switch (len) {
-      case 1:
-      case 2:
-      case 3:
-        w = d3
-        break;
-      case 4:
-        w = d4
-        break;
-      default:
-      case 5:
-        w = d5
-        break;
-      }
-      w = Math.floor(w)
-      imageStyle = [{width: w, height: w}];
-    }
+  renderPhotoList(photos) {
+    let imageStyle = this.props.style;
+    let len = photos.length
+    if (!imageStyle  ||  utils.isEmpty(imageStyle))
+      imageStyle = this.getPhotoStyle(photos)
+    let width = utils.dimensions(PhotoList).width
+    let w = imageStyle.width
     let inRow = this.props.numberInRow || Math.floor(width / w)
     let rows = []
     for (var i=0; i<len; ) {
       let row = []
       for (let j = 0; j<inRow  &&  i < len; j++, i++)
-        row.push(this.renderRow(val[i], imageStyle))
+        row.push(this.renderRow(photos[i], imageStyle))
 
-      rows.push(<View style={{flexDirection: 'row'}} key={this.getNextKey()}>
-                  {row}
-                </View>)
+      rows.push(<Row  size={inRow} key={this.getNextKey()}>{row}</Row>)
     }
-    return (
-      <View style={{flexDirection: 'column'}}>
-        {rows}
-      </View>
-    );
+    return <View>{rows}</View>
+  }
+  getPhotoStyle(photos) {
+    var len = photos.length
+    var width = utils.dimensions().width
+    var d3 = Math.floor((width / 3) - 6)
+    var d4 = Math.floor((width / 4) - 5)
+    var d5 = Math.floor((width / 5) - 5)
+    // var w = Math.floor(d3)
+    switch (photos.length) {
+    case 1:
+    case 2:
+    case 3:
+      return {width: d3, height: d3};
+    case 4:
+      return {width: d4, height: d4};
+    default:
+    case 5:
+      return {width: d5, height: d5};
+    }
   }
   renderRow(photo, imageStyle)  {
     var uri = photo.url
@@ -136,21 +130,24 @@ class PhotoList extends Component {
       source.isStatic = true;
 
     return (
-      <Animated.View style={[{paddingTop: 2, margin: 1}, {transform: [{scale: this.state.anim}]},imageStyle[0]]} key={this.getNextKey() + '_photo'}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo, this.props.isView)}>
-           <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
-        </TouchableHighlight>
-      </Animated.View>
+      <Col size={1}  key={this.getNextKey() + '_photo'}>
+        <Animated.View style={[{margin: 1, transform: [{scale: this.state.anim}]}, imageStyle]}>
+          <TouchableHighlight underlayColor='transparent' onPress={this.props.callback ? this.props.callback.bind(this, photo) : this.showCarousel.bind(this, photo, this.props.isView)}>
+             <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
+          </TouchableHighlight>
+        </Animated.View>
+      </Col>
     )
   }
 
 }
 reactMixin(PhotoList.prototype, PhotoCarouselMixin);
 reactMixin(PhotoList.prototype, RowMixin);
+PhotoList = makeResponsive(PhotoList)
 
 var styles = StyleSheet.create({
   photoContainer: {
-    paddingTop: 5,
+    // paddingTop: 5,
   },
   thumbCommon: {
     borderWidth: 0.5,
