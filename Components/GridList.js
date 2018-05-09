@@ -4,7 +4,7 @@ console.log('requiring GridList.js')
 import React, { Component } from 'react'
 import {
   ListView,
-  RefreshControl,
+  // RefreshControl,
   Alert,
   TouchableOpacity,
   ActivityIndicator,
@@ -24,8 +24,6 @@ import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import InfiniteScrollView from 'react-native-infinite-scroll-view'
-import CustomIcon from '../styles/customicons'
-import {Column as Col, Row} from 'react-native-flexbox-grid'
 import NoResources from './NoResources'
 // import ResourceRow from './ResourceRow'
 import ResourceRow from './ResourceRow'
@@ -45,7 +43,6 @@ import utils, {
   translate
 } from '../utils/utils'
 import HomePageMixin from './HomePageMixin'
-import ArticleView from './ArticleView'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import buttonStyles from '../styles/buttonStyles'
@@ -57,12 +54,9 @@ import StyleSheet from '../StyleSheet'
 import { makeStylish } from './makeStylish'
 import platformStyles from '../styles/platform'
 import ENV from '../utils/env'
-import ConversationsIcon from './ConversationsIcon'
 import SearchBar from './SearchBar'
-import chatStyles from '../styles/chatStyles'
 import formDefaults from '../data/formDefaults'
 
-const PRODUCT_LIST = 'tradle.ProductList'
 const PARTIAL = 'tradle.Partial'
 const FORM_PREFILL = 'tradle.FormPrefill'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
@@ -88,7 +82,6 @@ var {
   SETTINGS,
   MONEY,
   MODEL,
-  INTRODUCTION
 } = constants.TYPES
 
 const CONFIRMATION = 'tradle.Confirmation'

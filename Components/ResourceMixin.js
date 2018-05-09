@@ -151,7 +151,7 @@ var ResourceMixin = {
           if (p == 'photos') {
             let photos = [];
             ret.push(
-               <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource}/>
+               <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
             );
             return
           }

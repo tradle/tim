@@ -63,6 +63,7 @@ const {
   ENUM,
   MONEY,
   SETTINGS,
+  FORM,
   IDENTITY
 } = constants.TYPES
 
@@ -1681,7 +1682,8 @@ var NewResourceMixin = {
 
     this.setState(state);
     if (!this.props.search) {
-      Actions.getRequestedProperties(r)
+      if (model.subClassOf === FORM)
+        Actions.getRequestedProperties(r)
       Actions.saveTemporary(r)
     }
   },
