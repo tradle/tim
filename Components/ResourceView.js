@@ -116,7 +116,7 @@ class ResourceView extends Component {
     // })
     this.state = {
       resource: resource,
-      isLoading:  resource[TYPE] && resource[TYPE] !== PROFILE ? false : true, //props.resource.id ? true : false,
+      isLoading:  true, //resource[TYPE] && resource[TYPE] !== PROFILE ? false : true, //props.resource.id ? true : false,
       isModalOpen: false,
       useTouchId: me && me.useTouchId,
       useGesturePassword: me && me.useGesturePassword,
@@ -136,8 +136,10 @@ class ResourceView extends Component {
     // if (resource.id || !resource[constants.ROOT_HASH])
     let rtype = utils.getType(resource)
     let m = utils.getModel(rtype)
-    if (utils.isInlined(m))
+    if (utils.isInlined(m)) {
+      this.state.isLoading = false
       return
+    }
     Actions.getItem( {resource, search, backlink, isMessage: true} )
   }
   componentDidMount() {
@@ -273,12 +275,12 @@ class ResourceView extends Component {
   }
 
   render() {
-    if (this.state.isLoading)
-      return <View/>
-
     let { navigator, bankStyle, currency, dimensions, application } = this.props
+    if (this.state.isLoading)
+      return this.showLoading({bankStyle, component: ResourceView})
+
     let { backlink, backlinkList, pairingData, isModalOpen } = this.state
-    let styles = createStyles()
+    let styles = createStyles({bankStyle})
 
     if (!bankStyle)
       bankStyle = defaultBankStyle
@@ -563,7 +565,7 @@ reactMixin(ResourceView.prototype, ResourceMixin);
 reactMixin(ResourceView.prototype, HomePageMixin)
 ResourceView = makeResponsive(ResourceView)
 
-var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
+var createStyles = utils.styleFactory(ResourceView, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
     modalBackgroundStyle: {
       backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -572,7 +574,11 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions }) {
       height: dimensions.height
     },
     photoBG: {
+      backgroundColor: '#f7f7f7',
       alignItems: 'center',
+      borderColor: bankStyle.linkColor,
+      borderTopWidth: 1,
+      borderBottomWidth: 1
     },
     conversationsRow: {
       flexDirection: 'row',

@@ -1,20 +1,30 @@
-console.log('requiring ResourceMixin.js')
-'use strict';
-
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
+import React, { Component } from 'react'
+import {
+  Text,
+  View,
+  Platform,
+  TouchableHighlight,
+  // StyleSheet,
+  ActivityIndicator,
+  Image,
+  Navigator
+} from 'react-native'
 
-import StyleSheet from '../StyleSheet'
-import PhotoList from './PhotoList'
 import constants from '@tradle/constants'
 
 var { TYPE } = constants
 var { PROFILE, ORGANIZATION } = constants.TYPES
 
+import StyleSheet from '../StyleSheet'
+import PhotoList from './PhotoList'
+import NetworkInfoProvider from './NetworkInfoProvider'
 import Accordion from './Accordion'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils from '../utils/utils'
 var translate = utils.translate
+import platformStyles from '../styles/platform'
 
 import ENV from '../utils/env'
 
@@ -34,19 +44,9 @@ const skipLabelsInJSON = {
 const hideGroupInJSON = {
   'tradle.PhotoID': ['address']
 }
-import {
-  Text,
-  View,
-  Platform,
-  TouchableHighlight,
-  // StyleSheet,
-  Image,
-  Navigator
-} from 'react-native'
-import PropTypes from 'prop-types'
 
 import Markdown from './Markdown'
-import React, { Component } from 'react'
+var component
 
 var ResourceMixin = {
   showRefResource(resource, prop) {
@@ -64,7 +64,7 @@ var ResourceMixin = {
       this.props.navigator.push({
         id: 5,
         component: require('./MessageView'),
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         title: utils.makeModelTitle(model),
         passProps: {
           bankStyle: bankStyle,
@@ -80,9 +80,8 @@ var ResourceMixin = {
         title: title,
         id: 3,
         component: require('./ResourceView'),
-        titleTextColor: '#7AAAC3',
         // rightButtonTitle: 'Edit',
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         passProps: {
           resource: resource,
           prop: prop,
@@ -96,7 +95,6 @@ var ResourceMixin = {
     this.props.navigator.push({
       id: 10,
       title: translate(prop, utils.getModel(resource[TYPE])),
-      titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
       component: require('./ResourceList'),
       passProps: {
@@ -104,6 +102,7 @@ var ResourceMixin = {
         filter: '',
         resource: resource,
         prop: prop,
+        bankStyle: this.props.bankStyle || defaultBankStyle,
         currency: this.props.currency
       }
     });
@@ -503,7 +502,41 @@ var ResourceMixin = {
     }
     return true
   },
+  showLoading(_component) {
+    if (!_component)
+      return
+    component = _component
+    let lstyles = createStyles({bankStyle: this.props.bankStyle})
+    let network = <NetworkInfoProvider connected={this.state.isConnected} resource={this.state.resource} />
+    return (<View style={lstyles.loadingIndicator}>
+              <View style={platformStyles.container}>
+                {network}
+                <Text style={lstyles.loading}>{'In progress...'}</Text>
+                <ActivityIndicator size='large' style={lstyles.indicator} />
+              </View>
+            </View>
+           )
+  }
 }
+
+var createStyles = utils.styleFactory(component || PhotoList, function ({ dimensions, bankStyle }) {
+  return StyleSheet.create({
+    loadingIndicator: {
+      alignSelf: 'center',
+      marginTop: dimensions.height - 200,
+    },
+    loading: {
+      fontSize: 17,
+      alignSelf: 'center',
+      color: bankStyle.linkColor
+    },
+    indicator: {
+      alignSelf: 'center',
+      backgroundColor: 'transparent',
+      marginTop: 20
+    },
+  })
+})
 
 var styles = StyleSheet.create({
   container: {

@@ -3343,7 +3343,7 @@ var Store = Reflux.createStore({
       messages = []
       chatMessages[id] = messages
     }
-    let stub = {id: utils.getId(r), time: timeShared ? timeShared : r._time}
+    let stub = {id: utils.getId(r), time: timeShared || r._time}
     messages.push(stub)
     let allIdx = allMessages.findIndex(({ id }) => id === rid)
     if (allIdx !== -1)
@@ -4280,7 +4280,6 @@ var Store = Reflux.createStore({
 
     this.onAddMessage({msg: {
       [TYPE]: REMEDIATION_SIMPLE_MESSAGE,
-      // [NONCE]: this.getNonce(),
       message: message,
       time: new Date().getTime(),
       _context: resource._context,
@@ -7550,7 +7549,7 @@ var Store = Reflux.createStore({
       })
 
       thisChatMessages.sort((a, b) => {
-        return a._time - b._time
+        return a.time - b.time
       })
     }
 

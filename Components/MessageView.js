@@ -71,7 +71,7 @@ class MessageView extends Component {
       resource: props.resource,
       isConnected: props.navigator.isConnected,
       promptVisible: false,
-      isLoading: !props.resource[TYPE],
+      isLoading: true, //!props.resource[TYPE],
       // showDetails: true,
       showDetails: false,
       bankStyle: props.bankStyle || defaultBankStyle
@@ -368,10 +368,10 @@ class MessageView extends Component {
     this.props.navigator.push(route);
   }
   render() {
-    if (this.state.isLoading)
-      return <View/>
-    let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
     let { backlink, bankStyle, resource } = this.state
+    if (this.state.isLoading)
+      return this.showLoading({bankStyle, component: MessageView})
+    let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
 
     let model = utils.getLensedModel(resource, lensId);
     let isVerification = model.id === VERIFICATION
@@ -418,16 +418,16 @@ class MessageView extends Component {
       photoList.splice(0, 1)
     }
 
-    let content = <View>
-                    <View style={styles.photoListStyle}>
+    let photoStrip = <View style={styles.photoListStyle}>
                       <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
                     </View>
-                    <View style={styles.rowContainer}>
-                      {msg}
-                      {propertySheet}
-                      {separator}
-                      {verificationTxID}
-                    </View>
+
+
+    let content = <View style={styles.rowContainer}>
+                    {msg}
+                    {propertySheet}
+                    {separator}
+                    {verificationTxID}
                   </View>
 
     let checkProps = !isVerification && isVerifier /* && !utils.isReadOnlyChat(resource)*/ && this.onCheck
@@ -496,7 +496,7 @@ class MessageView extends Component {
     let bigPhoto
     if (mainPhoto)
       bigPhoto = <View style={styles.photoBG} ref='bigPhoto'>
-                  <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
+                   <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
                  </View>
     let height = utils.dimensions(MessageView).height
     let width = utils.getContentWidth()
@@ -508,6 +508,7 @@ class MessageView extends Component {
         style={{width: width}}>
         {dateView}
         {bigPhoto}
+        {photoStrip}
         {actionPanel}
       </ScrollView>
         {title}
@@ -626,10 +627,14 @@ var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankS
     photoBG: {
       backgroundColor: '#f7f7f7',
       alignItems: 'center',
+      borderColor: bankStyle.linkColor,
+      borderTopWidth: 1,
+      borderBottomWidth: 1
     },
     photoListStyle: {
       flexDirection: 'row',
       alignSelf: 'center',
+      // paddingBottom: 4,
     },
     footer: {
       flexDirection: 'row',

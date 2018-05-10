@@ -87,16 +87,10 @@ class PhotoList extends Component {
       let cols = []
       for (let j = 0; j<inRow  &&  i < len; j++, i++)
         cols.push(this.renderCol(photos[i], imageStyle))
-      rows.push(<Row size={inRow} style={styles.row} key={this.getNextKey()}>
-                  {cols}
-                </Row>)
+      rows.push(<Row  size={inRow} key={this.getNextKey()}>{cols}</Row>)
       i--
     }
-    return (
-      <View style={styles.center}>
-        {rows}
-      </View>
-    );
+    return <View style={styles.center}>{rows}</View>
   }
   renderCol(photo, imageStyle)  {
     let uri = photo.url
