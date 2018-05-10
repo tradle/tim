@@ -47,7 +47,6 @@ import {
   Dimensions,
   Alert,
   TouchableOpacity,
-  ActivityIndicator
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -155,15 +154,7 @@ class ApplicationView extends Component {
 
     let network = <NetworkInfoProvider connected={isConnected} resource={resource} />
     if (isLoading)
-      return (<View style={styles.loadingIndicator}>
-                <View style={platformStyles.container}>
-                  {network}
-                  <Text style={styles.loading}>{'In progress...'}</Text>
-                  <ActivityIndicator size='large' style={styles.indicator} />
-                </View>
-              </View>
-             )
-
+      return this.showLoading({bankStyle, component: ApplicationView})
     let modelName = resource[TYPE];
     let model = utils.getModel(modelName)
 
@@ -383,20 +374,6 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
     conversationsIcon: {
       marginLeft: 9,
       marginRight: 9
-    },
-    loadingIndicator: {
-      alignSelf: 'center',
-      marginTop: dimensions.height - 200,
-    },
-     loading: {
-      fontSize: 17,
-      alignSelf: 'center',
-      color: bankStyle.linkColor
-    },
-    indicator: {
-      alignSelf: 'center',
-      backgroundColor: 'transparent',
-      marginTop: 20
     },
     hasRM: {
       backgroundColor: isRM && bankStyle.linkColor || '#CA9DF2',
