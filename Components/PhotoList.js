@@ -97,7 +97,7 @@ class PhotoList extends Component {
     let d3 = Math.floor((width / 3) - 6)
     let d4 = Math.floor((width / 4) - 5)
     let d5 = Math.floor((width / 5) - 5)
-    // let w = Math.floor(d3)
+    return  {width: d5, height: d5};
     switch (photos.length) {
     case 1:
     case 2:
@@ -138,6 +138,7 @@ PhotoList = makeResponsive(PhotoList)
 var styles = StyleSheet.create({
   photoContainer: {
     paddingTop: 9,
+    paddingBottom: 4
   },
   thumbCommon: {
     borderWidth: 0.5,
