@@ -5550,12 +5550,16 @@ var Store = Reflux.createStore({
     })
     .then(() => utils.restartApp())
   },
-  onReloadDB() {
+  async onReloadDB() {
     var self = this
 
-    var destroyTim = meDriver ? meDriver.destroy() : Q()
-    return destroyTim
-      .then(() => this.wipe())
+    const destroyTim = meDriver ? meDriver.destroy() : Promise.resolve()
+    await Promise.race([
+      destroyTim,
+      Promise.delay(5000)
+    ])
+
+    await this.wipe()
   },
   async autoRegister(noMeYet) {
     Analytics.sendEvent({
