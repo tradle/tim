@@ -1,12 +1,13 @@
 'use strict'
 
-import utils from '../../utils/utils'
+import omit from 'lodash/omit'
 import gql from 'graphql-tag'
 import deepEqual from 'deep-equal'
 import tradle, { utils as tradleUtils } from '@tradle/engine'
 import { ApolloClient, createNetworkInterface } from 'apollo-client'
 import constants from '@tradle/constants'
 import { print as printQuery } from 'graphql/language/printer'
+import utils from '../../utils/utils'
 const {
   TYPE,
   SIG,
@@ -48,11 +49,10 @@ var search = {
           query: printQuery(req.request.query)
         })
 
-        const { sig } = await meDriver.sign({
+        const result = await meDriver.sign({
           object: {
             [TYPE]: 'tradle.GraphQLQuery',
-            body,
-            // time: Date.now()
+            body
           }
         })
 
@@ -60,7 +60,7 @@ var search = {
           req.options.headers = {}
         }
 
-        req.options.headers['x-tradle-sig'] = sig
+        req.options.headers['x-tradle-auth'] = JSON.stringify(omit(result.object, ['body', TYPE]))
         next()
       }
     }])
