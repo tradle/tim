@@ -151,6 +151,7 @@ class ApplicationTabs extends Component {
                     isBacklink={true}
                     application={resource}
                     listView={true}
+                    bankStyle={bankStyle}
                     navigator={navigator} />
     }
     else if (resource.photos)
