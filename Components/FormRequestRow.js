@@ -991,10 +991,7 @@ class FormRequestRow extends Component {
   }
   makeButtonLink(form, isMyMessage, styles) {
     let zoomIn = {transform: [{scale: this.springValue}]}
-
-    return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
-             this.createNewResource(form, isMyMessage)
-           }}>
+    let content = (
              <View style={styles.row}>
               <Animated.View style={zoomIn}>
                 <View style={styles.shareButton}>
@@ -1005,6 +1002,12 @@ class FormRequestRow extends Component {
                  <Text style={styles.addMore}>{translate('createNew', utils.makeModelTitle(form))}</Text>
                </View>
              </View>
+      )
+    if (this.props.application)
+      return content
+    return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
+             this.createNewResource(form, isMyMessage)
+           }}>
            </TouchableOpacity>
 
   }

@@ -1457,7 +1457,7 @@ var Store = Reflux.createStore({
       if (id === ALL_MESSAGES)
         continue
       let arr = chatMessages[id]
-      arr.sort((a, b) => a._time - b._time)
+      arr.sort((a, b) => a.time - b.time)
       chatMessages[id] = this.filterChatMessages(arr, id)
     }
   },

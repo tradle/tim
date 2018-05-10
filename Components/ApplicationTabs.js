@@ -284,7 +284,7 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       alignSelf: 'center'
     },
     approve: {
-      backgroundColor: '#7AAAC3',
+      backgroundColor: bankStyle.linkColor,
       flexDirection: 'row',
       justifyContent: 'center',
       width: 250,
@@ -309,11 +309,11 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       height: 50,
       borderRadius: 15,
       borderWidth: 1,
-      borderColor: '#7AAAC3'
+      borderColor: bankStyle.linkColor
     },
     denyText: {
       fontSize: 20,
-      color: '#7AAAC3',
+      color: bankStyle.linkColor,
       alignSelf: 'center'
     },
     buttonsFooter: {
