@@ -6406,7 +6406,7 @@ var Store = Reflux.createStore({
     if (!r[TYPE])
       return r
     const m = this.getModel(r[TYPE])
-    const props = m.properties
+    const props = Object.keys(m.properties)
     const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(props)
     let rr = pick(r, toKeep)
 
