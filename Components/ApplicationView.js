@@ -147,22 +147,22 @@ class ApplicationView extends Component {
 
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected } = this.state
+    let { navigator, bankStyle, currency, dimensions } = this.props
 
     hasRM = hasRM  ||  resource.relationshipManagers
     let isRM = hasRM  &&  utils.isRM(resource)
-    let styles = createStyles({ hasRM, isRM })
+    let styles = createStyles({ hasRM, isRM, bankStyle })
 
     let network = <NetworkInfoProvider connected={isConnected} resource={resource} />
     if (isLoading)
-      return (
-              <View style={platformStyles.container}>
-                {network}
-                <Text style={styles.loading}>{'In progress...'}</Text>
-                <ActivityIndicator size='large' style={styles.indicator} />
+      return (<View style={styles.loadingIndicator}>
+                <View style={platformStyles.container}>
+                  {network}
+                  <Text style={styles.loading}>{'In progress...'}</Text>
+                  <ActivityIndicator size='large' style={styles.indicator} />
+                </View>
               </View>
              )
-
-    let { navigator, bankStyle, currency, dimensions } = this.props
 
     let modelName = resource[TYPE];
     let model = utils.getModel(modelName)
@@ -182,7 +182,7 @@ class ApplicationView extends Component {
       rmStyle = styles.hasRM
     }
     else {
-      icolor = '#7AAAc3'
+      icolor = bankStyle.linkColor
       rmStyle = styles.noRM
     }
 
@@ -198,7 +198,7 @@ class ApplicationView extends Component {
     if (__DEV__)
        home = <TouchableOpacity onPress={() => {navigator.jumpTo(routes[1])}} style={styles.homeButton}>
                   <View style={[buttonStyles.homeButton]}>
-                    <Icon name='ios-home' color='#7AAAc3' size={33}/>
+                    <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
                   </View>
                 </TouchableOpacity>
     let footer = <View style={styles.footer}>
@@ -359,9 +359,9 @@ reactMixin(ApplicationView.prototype, ResourceMixin);
 reactMixin(ApplicationView.prototype, HomePageMixin)
 ApplicationView = makeResponsive(ApplicationView)
 
-var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM }) {
-  let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
-  let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
+var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM, bankStyle }) {
+  let bgcolor = Platform.OS === 'android' ? 'transparent' : bankStyle.linkColor
+  let color = Platform.OS !== 'android' ? '#ffffff' : bankStyle.linkColor
   let paddingRight = Platform.OS === 'android' ? 0 : 10
   return StyleSheet.create({
     row: {
@@ -384,11 +384,14 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
       marginLeft: 9,
       marginRight: 9
     },
-    loading: {
+    loadingIndicator: {
+      alignSelf: 'center',
+      marginTop: dimensions.height - 200,
+    },
+     loading: {
       fontSize: 17,
       alignSelf: 'center',
-      marginTop: 80,
-      color: '#629BCA'
+      color: bankStyle.linkColor
     },
     indicator: {
       alignSelf: 'center',
@@ -396,14 +399,14 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
       marginTop: 20
     },
     hasRM: {
-      backgroundColor: isRM && '#7AAAc3' || '#CA9DF2',
+      backgroundColor: isRM && bankStyle.linkColor || '#CA9DF2',
       opacity: 0.5
     },
     noRM: {
       backgroundColor: '#ffffff',
       opacity: 0.5,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: '#7AAAc3'
+      borderColor: bankStyle.linkColor
     },
     homeButton: {
       alignSelf: 'flex-start',

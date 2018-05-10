@@ -283,7 +283,7 @@ class VerificationRow extends Component {
           description = <Text style={isCheck ? styles.checkType : styles.description}>{title}</Text>
         //!!!
         if (!dn)
-          title = dn
+          dn = title
         titleComponent = <Text style={styles.rTitle}>{dn}</Text>
       }
     }
