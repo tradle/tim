@@ -281,12 +281,7 @@ class FormRequestRow extends Component {
       <View style={styles.formRequest}>
         {date}
         <View style={shareables ? {borderWidth: 1, width: viewStyle.width + 5, borderColor: '#dddddd', backgroundColor: bankStyle.incomingMessageBgColor, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
-          <View style={chatStyles.row}>
-            <View style={{marginTop: 2}}>
-              {ownerPhoto}
-            </View>
-            {messageBody}
-          </View>
+          {messageBody}
           {sendStatus}
           {shareables}
         </View>
