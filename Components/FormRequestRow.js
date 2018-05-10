@@ -1003,6 +1003,7 @@ class FormRequestRow extends Component {
     return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
              this.createNewResource(form, isMyMessage)
            }}>
+             {content}
            </TouchableOpacity>
 
   }
