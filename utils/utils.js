@@ -1818,12 +1818,12 @@ var utils = {
   readImage: Platform.OS == 'web' && function readImage (file, cb) {
     utils.readFile(file, function (err, dataUrl) {
       const mime = utils.getMimeType({ dataUrl })
-      // if (!/^image\//.test(mime)) {
+      if (!/^image\//.test(mime)) {
         return cb(null, {
           url: dataUrl
         }, file)
         // return cb(new Error('invalid format'))
-      // }
+      }
 
       const image = new window.Image()
       image.addEventListener('error', function (err) {

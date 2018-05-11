@@ -623,10 +623,13 @@ class NewResource extends Component {
     let resource = this.addFormValues();
     if (this.props.model.properties[propName].items.ref) {
       item[TYPE] = this.props.model.properties[propName].items.ref
-      if (item.file) {
-        item.name = item.file.name
-        item.mimeType = item.file.mimeType
-        item.size = item.file.size
+      if (item.file)  {
+        if (item[TYPE] !== PHOTO) {
+          item.name = item.file.name
+          if (item.file.mimeType)
+            item.mimeType = item.file.mimeType
+          item.size = item.file.size
+        }
         delete item.file
       }
     }

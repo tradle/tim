@@ -77,8 +77,13 @@ class ImageInput extends Component {
             readImage(e.target.files[0], function (err, item, file) {
               if (err) return Alert.alert(translate('unableToProcessFile'), err.message)
 
-              if (isPhoto  &&  !isImageDataURL(item.url)) {
-                return Alert.alert(translate('unsupportedFormat'), translate('pleaseUploadImage'))
+              if (isPhoto) {
+                if (isImageDataURL(item.url))  {
+                  onImage({...item, isVertical: true})
+                  return
+                }
+                else
+                  return Alert.alert(translate('unsupportedFormat'), translate('pleaseUploadImage'))
               }
 
               onImage({
