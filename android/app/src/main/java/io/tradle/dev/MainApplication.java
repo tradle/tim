@@ -1,14 +1,14 @@
 package io.tradle.dev;
 
 import android.app.Application;
+import android.content.Context;
+import android.support.multidex.MultiDex;
 
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
-import com.microblink.reactnative.blinkid.BlinkIDReactPackage;
-// import com.instabug.reactlibrary.RNInstabugReactnativePackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -17,6 +17,7 @@ import com.github.yamill.orientation.OrientationPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.masteratul.exceptionhandler.ReactNativeExceptionHandlerPackage;
+import com.microblink.reactnative.blinkid.BlinkIDReactPackage;
 import com.microsoft.codepush.react.CodePush;
 import com.oblador.keychain.KeychainPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
@@ -36,9 +37,11 @@ import io.branch.referral.Branch;
 import io.branch.rnbranch.RNBranchPackage;
 import io.invertase.firebase.RNFirebasePackage;
 import io.invertase.firebase.analytics.RNFirebaseAnalyticsPackage;
-//import io.tradle.RNBlinkIDPackage;
 import io.tradle.react.LocalAuthPackage;
 import io.tradle.snappystorage.RNAsyncSnappyStoragePackage;
+
+// import com.instabug.reactlibrary.RNInstabugReactnativePackage;
+//import io.tradle.RNBlinkIDPackage;
 
 //import io.tradle.nfc.RNPassportReaderPackage;
 
@@ -107,6 +110,12 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public ReactNativeHost getReactNativeHost() {
       return mReactNativeHost;
+  }
+
+  @Override
+  protected void attachBaseContext(Context context) {
+    super.attachBaseContext(context);
+    MultiDex.install(this);
   }
 
   @Override

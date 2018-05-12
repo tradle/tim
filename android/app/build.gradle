@@ -113,7 +113,7 @@ android {
     // }
 
     compileSdkVersion 25
-    // buildToolsVersion "26.0.2"
+    buildToolsVersion "27.0.3"
 
     def vmajor = project.property('VERSION_MAJOR').toInteger()
     def vminor = project.property('VERSION_MINOR').toInteger()
@@ -257,18 +257,18 @@ dependencies {
     // compile ('com.google.android.gms:play-services-base:11.8.0') {
     //     force = true;
     // }
-    // compile ('com.google.android.gms:play-services-gcm:11.8.0') {
-    //     force = true;
-    // }
     // compile ('com.google.firebase:firebase-core:11.8.0') {
     //     force = true;
     // }
     // compile ('com.google.firebase:firebase-analytics:11.8.0') {
     //     force = true;
     // }
-    compile "com.google.android.gms:play-services-base:11.8.0"
     compile "com.google.firebase:firebase-core:11.8.0"
     compile "com.google.firebase:firebase-analytics:11.8.0"
+    compile "com.google.android.gms:play-services-base:11.8.0"
+    compile ('com.google.android.gms:play-services-gcm:11.8.0') {
+        force = true;
+    }
 
     compile project(':react-native-code-push')
     compile (project(':react-native-camera')) {
