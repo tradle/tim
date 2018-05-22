@@ -820,11 +820,8 @@ class FormRequestRow extends Component {
 
     if (!isReadOnly)
       isReadOnly = !switchToContext  && !context &&  (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context)) //this.props.context  &&  this.props.context._readOnly
-    let self = this
-    // let strName = sameFormRequestForm ? translate('addAnotherFormOrGetNext', translate(form)) : utils.getStringName(message)
-    // let str = messagePart ? messagePart : (strName ? utils.translate(strName) : message)
 
-    let str = messagePart ? messagePart : message
+    let actionMessage = messagePart || message
     messagePart = null
     let msg
 
@@ -841,7 +838,7 @@ class FormRequestRow extends Component {
 // });
       link = <View style={{flex: 1, paddingBottom }}>
                <View style={{flex: 1}}>
-                 {this.makeButtonLink(form, isMyMessage, styles)}
+                 {this.makeButtonLink(form, isMyMessage, styles, actionMessage, true)}
                  <View style={styles.hr}/>
                  <TouchableOpacity onPress={() => {
                     Alert.alert(
@@ -882,7 +879,7 @@ class FormRequestRow extends Component {
             msg = <View key={this.getNextKey()}>
                    <View style={styles.thumbView}>
                      <ImageInput prop={prop} style={styles.container} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                       <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
+                       <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{actionMessage}</Text>
                      </ImageInput>
                      {resource._documentCreated ? null : icon}
                    </View>
@@ -898,7 +895,7 @@ class FormRequestRow extends Component {
              msg = <View key={this.getNextKey()}>
                      <TouchableOpacity onPress={() => this.showIproovScanner(prop, prop.name)}>
                        <View style={styles.row}>
-                         <Text style={[chatStyles.resourceTitle, {flex: 1, color: mColor}]}>{str}</Text>
+                         <Text style={[chatStyles.resourceTitle, {flex: 1, color: mColor}]}>{actionMessage}</Text>
                          {resource._documentCreated ? null : icon}
                        </View>
                      </TouchableOpacity>
@@ -908,7 +905,7 @@ class FormRequestRow extends Component {
             msg = <View key={this.getNextKey()}>
                   <TouchableOpacity onPress={() => form.id === PRODUCT_REQUEST ? this.productChooser(prop) : this.chooser(prop)}>
                     <View style={styles.message}>
-                      <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{str}</Text>
+                      <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{actionMessage}</Text>
                       {resource._documentCreated ? null : icon}
                     </View>
                   </TouchableOpacity>
@@ -923,18 +920,18 @@ class FormRequestRow extends Component {
       if (resource._documentCreated)
         mColor = bankStyle.incomingMessageOpaqueTextColor
       else {
-        str = 'Would you like to...'
         mColor = bankStyle.incomingMessageTextColor
         if (!sameFormRequestForm) {
           let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8)
 
           addMore = <View style={{ paddingBottom, marginLeft: -5, width: msgWidth - 30}}>
-                      {this.makeButtonLink(form, isMyMessage, styles)}
+                      {this.makeButtonLink(form, isMyMessage, styles, actionMessage)}
                     </View>
+          actionMessage = null
         }
-
       }
-      messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}]}>{str}</Text>
+      if (actionMessage)
+        messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}]}>{actionMessage}</Text>
       msg = <View key={this.getNextKey()}>
                <View style={styles.messageLink}>
                  {messagePart}
@@ -963,8 +960,11 @@ class FormRequestRow extends Component {
       Actions.addChatItem(params)
     }
   }
-  makeButtonLink(form, isMyMessage, styles) {
+  makeButtonLink(form, isMyMessage, styles, msg, isAnother) {
     let zoomIn = {transform: [{scale: this.springValue}]}
+    if (!msg)
+      msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
+
     let content = (
              <View style={styles.row}>
               <Animated.View style={zoomIn}>
@@ -973,7 +973,7 @@ class FormRequestRow extends Component {
                  </View>
               </Animated.View>
                <View style={{justifyContent: 'center'}}>
-                 <Text style={styles.addMore}>{translate('createNew', utils.makeModelTitle(form))}</Text>
+                 <Text style={styles.addMore}>{msg}</Text>
                </View>
              </View>
       )
@@ -1173,7 +1173,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     addMore: {
       color: bankStyle.linkColor,
       fontSize: 16,
-      paddingLeft: 10
+      paddingHorizontal: 10
     },
     next: {
       color: '#555555',
