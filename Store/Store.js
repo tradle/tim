@@ -236,6 +236,8 @@ import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
 
 import Errors from '@tradle/errors'
 import validateResource, { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
+// @ts-ignore
+const { sanitize } = validateResource.utils
 
 // import tutils from '@tradle/utils'
 var isTest, originalMe;
@@ -4772,7 +4774,7 @@ var Store = Reflux.createStore({
       let key = utils.makeId(IDENTITY, to[ROOT_HASH])
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
-
+      toChain = sanitize(toChain).sanitized
       try {
         validateResource({resource: toChain, models: self.getModels(), ignoreReadOnly: true})
       } catch (err) {
