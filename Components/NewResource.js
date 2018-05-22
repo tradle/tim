@@ -236,7 +236,8 @@ class NewResource extends Component {
       return
     }
     if (action === 'formEdit') {
-      this.setState({requestedProperties: requestedProperties, resource: resource ||  this.state.resource, message: message })
+      if (utils.getId(this.state.resource) === utils.getId(resource))
+        this.setState({requestedProperties: requestedProperties, resource: resource ||  this.state.resource, message: message })
       return
     }
     if (action === 'noAccessToServer') {
@@ -770,6 +771,7 @@ class NewResource extends Component {
       return <PageView style={[platformStyles.container, {height}]} separator={contentSeparator}>
                 <ShowPropertiesView resource={data}
                                     bankStyle={bankStyle}
+                                    showRefResource={this.showRefResource.bind(this)}
                                     navigator={navigator} />
                 <TouchableOpacity onPress={this.onSavePressed}>
                   <View style={styles.submit}>
