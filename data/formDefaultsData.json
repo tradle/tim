@@ -570,16 +570,16 @@
       "width": 1094
     },
     "firstName": "SARAH MEREDYTH",
-    "birthData": "1976-11-03",
+    "birthData": 215827200000,
     "lastName": "MORGAN",
-    "dateOfIssue": "2013-01-19",
+    "dateOfIssue": 1358553600000,
     "country": {
       "id": "tradle.Country_GB",
       "title": "United Kingdom"
     },
     "documentNumber": "MORGA753116SM9IJ 35",
     "issuer": "DVLA",
-    "dateOfExpiry": "2023-01-18",
+    "dateOfExpiry": 1674000000000,
     "scanJson": {
       "personal": {
         "firstName": "SARAH MEREDYTH",
