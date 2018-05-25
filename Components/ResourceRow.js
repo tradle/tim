@@ -569,11 +569,12 @@ class ResourceRow extends Component {
     let props = model.properties
     // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
     let color, dateCompleted, dateEvaluated, dateStarted
-
-    dateStarted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
-                    <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
-                    <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
-                  </View>
+    if (resource.dateStarted) {
+      dateStarted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
+                      <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
+                      <Text style={{fontSize: 12, color: '#757575', paddingLeft: 8}}>{utils.formatDate(resource.dateStarted)}</Text>
+                    </View>
+    }
     // if (resource.certificate)
     //   status = 'Approved'
     // else
