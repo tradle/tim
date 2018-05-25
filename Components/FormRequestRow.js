@@ -945,7 +945,7 @@ class FormRequestRow extends Component {
         if (!sameFormRequestForm) {
           let msgWidth = utils.getMessageWidth(FormRequestRow)
 
-          addMore = <View style={{ paddingBottom, marginLeft: -5, width: msgWidth - 30}}>
+          addMore = <View style={{ paddingBottom, marginLeft: -5}}>
                       {this.makeButtonLink(form, isMyMessage, styles, actionMessage)}
                     </View>
           actionMessage = null
@@ -985,7 +985,7 @@ class FormRequestRow extends Component {
     let zoomIn = {transform: [{scale: this.springValue}]}
     if (!msg)
       msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
-
+    let width = utils.getMessageWidth(FormRequestRow) - 40
     let content = (
              <View style={styles.row}>
               <Animated.View style={zoomIn}>
@@ -993,7 +993,7 @@ class FormRequestRow extends Component {
                   <Icon name='md-add' size={20} color='#ffffff'/>
                 </View>
               </Animated.View>
-               <View style={{justifyContent: 'center'}}>
+               <View style={{justifyContent: 'center', width}}>
                  <Text style={styles.addMore}>{msg}</Text>
                </View>
              </View>
