@@ -4721,6 +4721,7 @@ var Store = Reflux.createStore({
         }
         prevResCached = self._getItem(prevResId)
         _.extend(prevResCached, prevRes)
+        self.rewriteStubs(prevResCached)
         if (utils.compare(returnVal, prevResCached)) {
           self.trigger({action: 'noChanges'})
           return
