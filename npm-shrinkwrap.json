@@ -182,7 +182,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#c260dc47cce9d2e7dea660a84264f57f3de1ceb3"
+      "resolved": "git://github.com/tradle/models.git#23a932dd33d08847fe09e934d33b95d107c43f20"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
