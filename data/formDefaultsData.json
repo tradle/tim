@@ -89,10 +89,6 @@
     "firstName": "Michael",
     "lastName": "Mann",
     "dateOfBirth": 212025600000,
-    "country": {
-      "id": "tradle.Country_US",
-      "title": "United States"
-    },
     "countryOfBirth": {
       "id": "tradle.Country_US",
       "title": "United States"
