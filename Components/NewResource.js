@@ -218,7 +218,7 @@ class NewResource extends Component {
       return
     }
     if (action === 'formEdit') {
-      if (utils.getId(this.state.resource) === utils.getId(resource))
+      if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource))
         this.setState({requestedProperties: requestedProperties, resource: resource ||  this.state.resource, message: message })
       return
     }
