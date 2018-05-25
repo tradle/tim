@@ -89,7 +89,14 @@
     "firstName": "Michael",
     "lastName": "Mann",
     "dateOfBirth": 212025600000,
-    "placeOfBirth": "New Jersey, US",
+    "country": {
+      "id": "tradle.Country_US",
+      "title": "United States"
+    },
+    "countryOfBirth": {
+      "id": "tradle.Country_US",
+      "title": "United States"
+    },
     "nationality": {
       "title": "American",
       "id": "tradle.Nationality_123"
@@ -107,11 +114,7 @@
           "title": "Mobile"
         }
       }
-    ],
-    "education": {
-      "title": "College",
-      "id": "tradle.EducationNL_123"
-    }
+    ]
   },
   "tradle.Collateral": {
     "_t": "tradle.Collateral",
@@ -761,5 +764,23 @@
     "street": "Thornfield Rd",
     "town": "Middlesbrough",
     "postcode": "TS5 5BY"
+  },
+  "tradle.Address": {
+    "_t": "tradle.Address",
+    "country": {
+      "id": "tradle.Country_589d4aad918e33dec42dd38b80cc73616556178c",
+      "title": "United Kingdom"
+    },
+    "region": "North Yorkshire",
+    "streetAddress": "96 Thornfield Rd",
+    "city": "Middlesbrough",
+    "postalCode": "TS5 5BY"
+  },
+  "tradle.pg.PersonalDetails": {
+    "_t": "tradle.pg.PersonalDetails",
+    "lastName": "Soni",
+    "firstName": "Moog",
+    "dateOfBirth": 355167404413,
+    "emailAddress": "moogsoni@mailinator.com"
   }
 }

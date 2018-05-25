@@ -36,6 +36,7 @@ const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const ITEM = 'tradle.Item'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const DEFAULT_MESSAGE = 'Would you like to...'
 
 const {
   TYPE,
@@ -253,7 +254,7 @@ class FormRequestRow extends Component {
       share = <View style={[chatStyles.verifiedHeader, {backgroundColor: bankStyle.sharedWithBg}]}>
                 <Text style={styles.white18}>{translate('youShared', resource.to.organization.title)}</Text>
               </View>
-    let msgContent =  <View style={[viewStyle, shareables ? {backgroundColor: '#ffffff', paddingBottom: 10} : {}]}>
+    let msgContent =  <View style={[viewStyle, shareables ? {backgroundColor: '#ffffff'} : {}]}>
                         <View style={{marginTop: 2}}>
                           {ownerPhoto}
                         </View>
@@ -460,8 +461,6 @@ class FormRequestRow extends Component {
     let msg;
     if (document.message  &&  docModel.subClassOf !== FORM)
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
-    else
-      msg = <View/>
     let msgWidth = utils.getMessageWidth(FormRequestRow) - 50
     let headerStyle = {paddingLeft: 10, width: msgWidth}
     let isShared = this.isShared(verification)
@@ -829,24 +828,20 @@ class FormRequestRow extends Component {
     if (!isReadOnly)
       isReadOnly = !switchToContext  && !context &&  (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context)) //this.props.context  &&  this.props.context._readOnly
 
-    let actionMessage = messagePart || message
+    let addMessage = messagePart || message
     messagePart = null
     let msg
 
-    let paddingBottom = 0
-    if (shareableResources  &&
-        (!utils.isEmpty(shareableResources.multientryResources) ||  !utils.isEmpty(shareableResources.verifications)))
-      paddingBottom = 15
-    if (sameFormRequestForm  &&  !resource._documentCreated) {
-      message = 'Would you like to...'
+    let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated
+    if (isRequestForNext) {
       let animStyle = {transform: [{scale: this.springValue}]}
 // this.springValue.interpolate({
 //   inputRange: [0, 1],
 //   outputRange: [0, 100],
 // });
-      link = <View style={{flex: 1, paddingBottom }}>
-               <View style={{flex: 1}}>
-                 {this.makeButtonLink(form, isMyMessage, styles, actionMessage, true)}
+      link = <View style={{flex: 1}}>
+               <View style={{flex: 1, paddingTop: 10}}>
+                 {this.makeButtonLink(form, isMyMessage, styles, addMessage, true)}
                  <View style={styles.hr}/>
                  <TouchableOpacity onPress={() => {
                     Alert.alert(
@@ -858,7 +853,7 @@ class FormRequestRow extends Component {
                       ]
                     )
                  }}>
-                   <View style={styles.row}>
+                   <View style={[styles.row, {paddingTop: 10}]}>
                      <Animated.View style={animStyle}>
                        <View style={styles.shareButton}>
                          <Icon name='ios-arrow-forward' size={20} color='#ffffff'/>
@@ -889,7 +884,7 @@ class FormRequestRow extends Component {
               msg = <View key={this.getNextKey()}>
                       <View style={styles.row}>
                         <TouchableOpacity style={styles.container} underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
-                          <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{actionMessage}</Text>
+                          <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{addMessage}</Text>
                         </TouchableOpacity>
                        {resource.documentCreated ? null : icon}
                       </View>
@@ -899,7 +894,7 @@ class FormRequestRow extends Component {
               msg = <View key={this.getNextKey()}>
                      <View style={styles.row}>
                        <ImageInput prop={prop} style={styles.container} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                         <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{actionMessage}</Text>
+                         <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
                        </ImageInput>
                        {resource.documentCreated ? null : icon}
                      </View>
@@ -916,17 +911,17 @@ class FormRequestRow extends Component {
              msg = <View key={this.getNextKey()}>
                      <TouchableOpacity onPress={() => this.showIproovScanner(prop, prop.name)}>
                        <View style={styles.row}>
-                         <Text style={[chatStyles.resourceTitle, {flex: 1, color: mColor}]}>{actionMessage}</Text>
+                         <Text style={[chatStyles.resourceTitle, {flex: 1, color: mColor}]}>{addMessage}</Text>
                          {resource._documentCreated ? null : icon}
                        </View>
                      </TouchableOpacity>
                    </View>
           }
-          else {
+          else if (form.id  === PRODUCT_REQUEST) {
             msg = <View key={this.getNextKey()}>
                   <TouchableOpacity onPress={() => form.id === PRODUCT_REQUEST ? this.productChooser(prop) : this.chooser(prop)}>
                     <View style={styles.message}>
-                      <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{actionMessage}</Text>
+                      <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
                       {resource._documentCreated ? null : icon}
                     </View>
                   </TouchableOpacity>
@@ -945,14 +940,19 @@ class FormRequestRow extends Component {
         if (!sameFormRequestForm) {
           let msgWidth = utils.getMessageWidth(FormRequestRow)
 
-          addMore = <View style={{ paddingBottom, marginLeft: -5}}>
-                      {this.makeButtonLink(form, isMyMessage, styles, actionMessage)}
+          addMore = <View style={{ marginLeft: -5}}>
+                      {this.makeButtonLink(form, isMyMessage, styles, addMessage)}
                     </View>
-          actionMessage = null
+          // if (!shareableResources)
+            addMessage = null
         }
       }
-      if (actionMessage)
-        messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}]}>{actionMessage}</Text>
+      if (addMessage) {
+        // if (isRequestForNext  ||  shareableResources)
+        //   addMessage = DEFAULT_MESSAGE
+        if (!isRequestForNext)
+          messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}, shareableResources && {paddingBottom: 15}]}>{addMessage}</Text>
+      }
       msg = <View key={this.getNextKey()}>
                <View style={styles.messageLink}>
                  {messagePart}
@@ -987,7 +987,7 @@ class FormRequestRow extends Component {
       msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
     let width = utils.getMessageWidth(FormRequestRow) - 40
     let content = (
-             <View style={styles.row}>
+             <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
               <Animated.View style={zoomIn}>
                 <View style={styles.shareButton}>
                   <Icon name='md-add' size={20} color='#ffffff'/>
@@ -1079,7 +1079,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     row: {
       flexDirection: 'row',
       paddingHorizontal: 3,
-      paddingVertical: 5,
+      // paddingVertical: 5,
       // justifyContent: 'space-between'
     },
     hr: {
@@ -1122,7 +1122,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     shareablesList: {
       marginHorizontal: 0,
       paddingRight: 3,
-      backgroundColor: '#ffffff'
+      // backgroundColor: '#ffffff'
     },
     orgView: {
       maxWidth: msgWidth - 150,
@@ -1190,32 +1190,33 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       shadowRadius: 5,
       shadowColor: '#afafaf',
     },
-    myProductSeparator: {
-      backgroundColor: bankStyle.verifiedBg,
-      height: 1,
-      flex: 1,
-      alignSelf: 'stretch'
-    },
+    // myProductSeparator: {
+    //   backgroundColor: bankStyle.verifiedBg,
+    //   height: 1,
+    //   flex: 1,
+    //   alignSelf: 'stretch'
+    // },
     addMore: {
-      color: bankStyle.linkColor,
-      fontSize: 16,
+      color: '#757575', // bankStyle.linkColor,
+      fontSize: 18,
       paddingHorizontal: 10
     },
-    next: {
-      color: '#555555',
-      fontSize: 16,
-      // paddingLeft: 10
-    },
+    // next: {
+    //   color: '#555555',
+    //   fontSize: 16,
+    //   // paddingLeft: 10
+    // },
     mstyle: {
       borderColor: 'transparent',
       backgroundColor: '#ffffff',
-      borderTopLeftRadius: 0
+      borderTopLeftRadius: 0,
+      paddingVertical: 10
     },
     shareable: {
       margin: 1,
-      marginTop: -37,
-      whiteSpace: 'pre-wrap',
-      width: msgWidth - 2,
+      // marginTop: -37,
+      marginTop: -5,
+      width: msgWidth - 100,
       backgroundColor: '#ffffff',
       borderBottomLeftRadius: 10,
       borderBottomRightRadius: 10
