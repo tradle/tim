@@ -194,6 +194,7 @@ const APPLICATION_SUBMITTED  = 'tradle.ApplicationSubmitted'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const PHOTO_ID            = 'tradle.PhotoID'
 const PERSONAL_INFO       = 'tradle.PersonalInfo'
+const BASIC_CONTACT_INFO  = 'tradle.BasicContactInfo'
 const ASSIGN_RM           = 'tradle.AssignRelationshipManager'
 const NAME                = 'tradle.Name'
 const APPLICANT           = 'tradle.OnfidoApplicant'
@@ -379,7 +380,7 @@ const {
 const getEmployeeBookmarks = ({ me, botPermalink }) => {
   const createdByBot = [
     APPLICATION,
-    DRAFT_APPLICATION,
+    // DRAFT_APPLICATION,
     VERIFICATION,
     SEAL,
     'tradle.SanctionsCheck',
@@ -10376,7 +10377,7 @@ var Store = Reflux.createStore({
         let toRep = self.getRepresentative(utils.getId(org))
         toRep = self._getItem(toRep)
         let result = []
-        let arr = [NAME, PERSONAL_INFO, APPLICANT]
+        let arr = [NAME, PERSONAL_INFO, APPLICANT, BASIC_CONTACT_INFO]
         for (let j=0; j<arr.length; j++) {
           let sr = await self.searchMessages({modelName: arr[j], to: org})
           if (sr)

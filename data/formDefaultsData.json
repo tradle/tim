@@ -90,15 +90,6 @@
     "lastName": "Mann",
     "dateOfBirth": 212025600000,
     "placeOfBirth": "New Jersey, US",
-    "houseNumber": "30",
-    "city": "New York",
-    "region": "New York",
-    "postalCode": "10023",
-    "country": {
-      "id": "tradle.Country_US",
-      "title": "United States"
-    },
-    "street": "Lincoln Center Plaza",
     "nationality": {
       "title": "American",
       "id": "tradle.Nationality_123"
