@@ -1367,8 +1367,9 @@ var NewResourceMixin = {
     let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
     if (this.state.isRegistration)
       color = '#eeeeee'
-    else if (val)
-      color = '#757575'
+    else if (val) {
+      color = isImmutable  ?  bankStyle.linkColor : '#757575'
+    }
     else
       color = '#AAAAAA'
     color = {color}
@@ -1385,11 +1386,12 @@ var NewResourceMixin = {
       if (img) {
         propView = <View style={{flexDirection: 'row'}}>
                       <Image source={{uri: img.url}} style={styles.thumb} />
-                      <Text style={[styles.input, fontSize, color]}>{' ' + label}</Text>
+                      <Text style={[styles.input, color]}>{' ' + label}</Text>
                    </View>
       }
-      else
-        propView = <Text style={[styles.input, fontSize, color, {backgroundColor: isImmutable ? '#f7f7f7' : 'transparent', width: utils.dimensions().width - 40}]}>{label}</Text>
+      else {
+        propView = <Text style={[styles.input, color, {width: utils.dimensions(params.component).width - 60}]}>{label}</Text>
+      }
     }
     let maxChars = (utils.dimensions(params.component).width - 20)/10
     if (maxChars < label.length)

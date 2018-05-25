@@ -283,5 +283,7 @@
     "pleaseClickOnAddButton": "Please click on {icon} button below to add {1}",
     "validationErrors": "Please correct failed validation fields",
     "createNew": "Fill out form \"{1}\"",
-    "createNext": "Fill out another form \"{1}\""
+    "createNext": "Fill out another form \"{1}\"",
+    "incompatibleVersion": "Reset Required",
+    "resetIsRequired": "Due to recent backwards incompatible changes, this update requires a hard reset of the app. Press OK to reset the app's identity and storage."
 }

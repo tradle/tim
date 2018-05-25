@@ -66,11 +66,11 @@ const merged = extend({
     `http://${LOCAL_IP}:21012`,
     // `http://${LOCAL_IP}:21013`,
     // hats
-    'https://yeu8qspq65.execute-api.us-east-1.amazonaws.com/dev',
+    'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
     // raylan
-    'https://zeior65ju0.execute-api.us-east-1.amazonaws.com/dev',
+    'https://ayycrsic06.execute-api.us-east-1.amazonaws.com/dev',
     // friendly.io
-    'https://48kqixpqr6.execute-api.us-east-1.amazonaws.com/dev',
+    'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
     // 'https://xwkirqs1x0.execute-api.us-east-1.amazonaws.com/dev',
     // // safere.io

@@ -32,6 +32,7 @@ const FORM_PREFILL = 'tradle.FormPrefill'
 // import Prompt from 'react-native-prompt'
 const {
   TYPE,
+  ROOT_HASH
 } = constants
 const {
   VERIFICATION,
@@ -132,8 +133,12 @@ class MessageView extends Component {
       return
     let { bankStyle, application, resource, search } = this.props
     if (utils.getId(params.resource) !== utils.getId(resource)) {
-      if (resource[TYPE] !== FORM_PREFILL  ||  !_.isEqual(resource.prefill, params.resource))
-        return
+      // if (resource[TYPE] !== FORM_PREFILL  ||  !_.isEqual(resource.prefill, params.resource))
+      //   return
+      if (params.resource[ROOT_HASH] !== resource[ROOT_HASH]) {
+        if (resource[TYPE] !== FORM_PREFILL  ||  !_.isEqual(resource.prefill, params.resource))
+          return
+      }
     }
     if (action === 'getItem') {
       let state = {

@@ -186,6 +186,7 @@ const APPLICATION_SUBMITTED  = 'tradle.ApplicationSubmitted'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 const PHOTO_ID            = 'tradle.PhotoID'
 const PERSONAL_INFO       = 'tradle.PersonalInfo'
+const BASIC_CONTACT_INFO  = 'tradle.BasicContactInfo'
 const ASSIGN_RM           = 'tradle.AssignRelationshipManager'
 const NAME                = 'tradle.Name'
 const APPLICANT           = 'tradle.OnfidoApplicant'
@@ -229,6 +230,13 @@ import Errors from '@tradle/errors'
 import validateResource, { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 // @ts-ignore
 const { sanitize } = validateResource.utils
+
+let VERSION
+try {
+  VERSION = require('../version')
+} catch (err) {
+  VERSION = {}
+}
 
 // import tutils from '@tradle/utils'
 var isTest, originalMe;
@@ -363,7 +371,7 @@ const {
 const getEmployeeBookmarks = ({ me, botPermalink }) => {
   const createdByBot = [
     APPLICATION,
-    DRAFT_APPLICATION,
+    // DRAFT_APPLICATION,
     VERIFICATION,
     SEAL,
     'tradle.SanctionsCheck',
@@ -565,6 +573,7 @@ var Store = Reflux.createStore({
     } catch(err)  {
       debug('Store.init ' + err.stack)
     }
+
     this._noSplash = []
     let doMonitor = true
     if (!me  &&  ENV.autoRegister) { //  &&  (ENV.registrationWithoutTermsAndConditions || !ENV.landingPage)) {
@@ -4734,6 +4743,7 @@ var Store = Reflux.createStore({
         }
         prevResCached = self._getItem(prevResId)
         _.extend(prevResCached, prevRes)
+        self.rewriteStubs(prevResCached)
         if (utils.compare(returnVal, prevResCached)) {
           self.trigger({action: 'noChanges'})
           return
@@ -5608,15 +5618,22 @@ var Store = Reflux.createStore({
     ])
     .then(() => AsyncStorage.getAllKeys())
     .then(keys => {
-      return new Promise(resolve => {
-        Alert.alert(
-          'AsyncStorage has ' + keys.length + ' keys',
-          'Press OK to restart',
-          [{ text: translate('ok'), onPress: resolve }]
-        )
-      })
+      if (__DEV__) {
+        return new Promise(resolve => {
+          Alert.alert(
+            'AsyncStorage has ' + keys.length + ' keys',
+            'Press OK to restart',
+            [{ text: translate('ok'), onPress: resolve }]
+          )
+        })
+      }
     })
     .then(() => utils.restartApp())
+    .then(() => {
+      return new Promise(resolve => {
+        // hang, just in case, to prevent any further processing from running
+      })
+    })
   },
   async onReloadDB() {
     var self = this
@@ -9345,9 +9362,31 @@ var Store = Reflux.createStore({
     }
   },
 
+  async maybeRequireFreshUser(identity) {
+    const { resetCheckpoint } = VERSION
+    if (!resetCheckpoint) return
+    if (resetCheckpoint > Date.now()) {
+      console.warn('reset checkpoint is bigger than current timestamp, ignoring')
+      return
+    }
+
+    if (resetCheckpoint > (identity._time || 0)) {
+      await new Promise(resolve => {
+        Alert.alert(
+          translate('incompatibleVersion'),
+          translate('resetIsRequired'),
+          [{ text: translate('ok'), onPress: resolve }]
+        )
+      })
+
+      await this.onReloadDB()
+    }
+  },
+
   // TODO: simplify getDriver to use this
-  loadIdentityAndKeys(me) {
+  async loadIdentityAndKeys(me) {
     var mePub = me[ROOT_HASH] ? this._getItem(utils.makeId(IDENTITY, me[ROOT_HASH])).pubkeys : me.pubkeys
+
     var mePriv
     var identity
     var allMyIdentities = this._getItem(MY_IDENTITIES)
@@ -9365,27 +9404,28 @@ var Store = Reflux.createStore({
       })
     }
 
+    if (identity) {
+      await this.maybeRequireFreshUser(identity)
+    }
+
     if (mePub) {
       const lookupKeys = Keychain
         ? Keychain.lookupKeys(mePub)
-        : Q.resolve(mePriv.map(k => tradleUtils.importKey(k)))
+        : Promise.resolve(mePriv.map(k => tradleUtils.importKey(k)))
 
-      return Q.all([
+      const [keys, encryptionKey] = await Promise.all([
         lookupKeys,
         utils.getPassword(ENCRYPTION_KEY)
       ])
-      .spread((keys, encryptionKey) => {
-        return { keys, encryptionKey, identity }
-      })
+
+      return { keys, encryptionKey, identity }
     }
 
-    return this.createNewIdentity()
-      .then(({ encryptionKey, identityInfo }) => {
-        return {
-          ...identityInfo,
-          encryptionKey
-        }
-      })
+    const { encryptionKey, identityInfo } = await this.createNewIdentity()
+    return {
+      ...identityInfo,
+      encryptionKey
+    }
   },
 
   getDriver(me) {
@@ -10410,7 +10450,7 @@ var Store = Reflux.createStore({
         let toRep = self.getRepresentative(utils.getId(org))
         toRep = self._getItem(toRep)
         let result = []
-        let arr = [NAME, PERSONAL_INFO, APPLICANT]
+        let arr = [NAME, PERSONAL_INFO, APPLICANT, BASIC_CONTACT_INFO]
         for (let j=0; j<arr.length; j++) {
           let sr = await self.searchMessages({modelName: arr[j], to: org})
           if (sr)
