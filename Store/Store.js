@@ -3153,7 +3153,8 @@ var Store = Reflux.createStore({
     else
       sendParams.object = toChain
 
-    to = utils.isStub(to) && this._getItem(utils.getId(to)) || to
+    if (typeof to === 'string'  ||  utils.isStub(to))
+      to = this._getItem(utils.getId(to))
     let provider, hash
     if (to[ROOT_HASH] === me[ROOT_HASH]) {
       provider = this._getItem(from)
@@ -3520,13 +3521,14 @@ var Store = Reflux.createStore({
     if (!dontSend) {
       result = await meDriver.createObject({object: {
                   [TYPE]: VERIFICATION,
-                  document: this.buildRef(document),
+                  document: this.buildSendRef(document),
                   time: time
                 }})
     }
 
     if (result) {
       r = utils.clone(result.object)
+      this.rewriteStubs(r)
       r[ROOT_HASH] = result.permalink
       r[CUR_HASH] = result.link
       r.from = this.buildRef(me, dontSend)
@@ -3540,7 +3542,8 @@ var Store = Reflux.createStore({
     // if (context)
     //   r._context = context
     if (!dontSend)
-      await this.sendMessageToContextOwners(result.object, to, context)
+      await this.sendMessageToContextOwners(r, to, context)
+      // await this.sendMessageToContextOwners(result.object, to, context)
 
     if (!r._sharedWith) {
       r._sharedWith = []
