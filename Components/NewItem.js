@@ -203,7 +203,7 @@ class NewItem extends Component {
     let params = {
         meta: meta,
         model: model,
-        onSubmitEditing: this.onSavePressed.bind(this),
+        // onSubmitEditing: this.onSavePressed.bind(this),
         component: NewItem
     };
     if (this.state.data)

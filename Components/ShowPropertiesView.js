@@ -158,8 +158,8 @@ class ShowPropertiesView extends Component {
       if (utils.isHidden(p, resource))
         return
       var pMeta = props[p];
-      if (pMeta.type === 'array'  &&  pMeta.items.ref  &&  !pMeta.inlined)
-        return
+      // if (pMeta.type === 'array'  &&  pMeta.items.ref  &&  !pMeta.inlined)
+      //   return
       var val = resource[p];
       if (pMeta.range === 'json') {
         if (!val)

@@ -1597,8 +1597,23 @@ var NewResourceMixin = {
     else if (isArray || isMultichooser) {
       let isEnum  = isArray ? utils.isEnum(prop.items.ref) : utils.isEnum(prop.ref)
       if (!prop.inlined  &&  prop.items  &&  prop.items.ref  &&  !isEnum) {
-        if (!Array.isArray(value))
-          value = [value]
+        if (!Array.isArray(value)) {
+          if (isArray) {
+            if (!resource[propName])
+              value = [value]
+            else {
+              let valueId = utils.getId(value)
+              let hasValue = resource[propName].some(r => utils.getId(r) === valueId)
+              if (!hasValue) {
+                let arr = _.cloneDeep(resource[propName]) || []
+                arr.push(value)
+                value = arr
+              }
+            }
+          }
+          else
+            value = [value]
+        }
 
         let v = value.map((vv) => {
           let val = utils.buildRef(vv)
