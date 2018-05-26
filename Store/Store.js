@@ -377,6 +377,15 @@ const {
   newFormRequestVerifiers
 } = require('../utils/faker')
 
+const disableBlockchainSync = node => {
+  // disable sync
+  if (node) {
+    node.sealwatch.sync = function () {
+      // hang
+    }
+  }
+}
+
 const getEmployeeBookmarks = ({ me, botPermalink }) => {
   const createdByBot = [
     APPLICATION,
@@ -1085,9 +1094,10 @@ var Store = Reflux.createStore({
     })
 
     // blockr.io has been shut down
-    // meDriver.sealwatch.sync = function () {
-    //   // hang
-    // }
+
+    if (me.isEmployee) {
+      disableBlockchainSync(meDriver)
+    }
 
     meDriver.setMaxListeners(0)
 
@@ -10422,6 +10432,7 @@ var Store = Reflux.createStore({
       }
       self._setItem(meId, me)
       await self.dbPut(meId, me)
+      disableBlockchainSync(meDriver)
     }
     async function modelsPackHandler() {
       // org.products = []
