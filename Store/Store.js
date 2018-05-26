@@ -1702,7 +1702,6 @@ var Store = Reflux.createStore({
         validateResource({
           models: this.getModels(),
           resource: opts.object,
-          ignoreReadOnly: true
         })
       } catch (err) {
         Alert.alert('Preventing send of invalid resource', err.message)
@@ -4826,7 +4825,7 @@ var Store = Reflux.createStore({
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       toChain = sanitize(toChain).sanitized
       try {
-        validateResource({resource: toChain, models: self.getModels(), ignoreReadOnly: true})
+        validateResource({ resource: toChain, models: self.getModels() })
       } catch (err) {
         if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
         // if (err.name === 'InvalidPropertyValue')
