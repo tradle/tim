@@ -101,7 +101,7 @@ class MessageView extends Component {
       return
     }
     let m = utils.getModel(resource[TYPE])
-    let vCols = m.viewCols
+    let vCols = utils.getViewCols(m)
     if (!vCols)
       return
     let props = m.properties
