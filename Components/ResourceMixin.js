@@ -113,8 +113,8 @@ var ResourceMixin = {
     let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
     let itemsMeta = pMeta.items.properties;
     let prop = pMeta
+    let ref = pMeta.items.ref;
     if (!itemsMeta) {
-      let ref = pMeta.items.ref;
       if (ref) {
         pMeta = utils.getModel(ref);
         itemsMeta = pMeta.properties;
@@ -169,58 +169,69 @@ var ResourceMixin = {
                      <Text style={styles.itemText}>{value}</Text>
                    </View>
 
-        ret.push(
-            <View style={styles.item} key={this.getNextKey()}>
-            {cancelItem
-              ? <View style={styles.row}>
-                  {item}
-                  <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
-                    <Icon name='ios-close-circle-outline' size={25} color={linkColor} />
-                  </TouchableHighlight>
-                </View>
-              : item
-            }
-            </View>
-        );
-      })
-      if (!ret.length  && v.title) {
-        let item = <View style={{flexDirection: 'row'}}>
-                    {v.photo
-                      ? <Image source={{uri: v.photo}} style={styles.thumb} />
-                      : <View />
-                    }
-                    <Text style={[styles.itemText, {color: cancelItem ? '#000000' : linkColor}]}>{v.title}</Text>
-                  </View>
+        if (cancelItem)
+          item = <View style={styles.row}>
+                   {item}
+                   <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                     <Icon name='ios-close-circle-outline' size={25} color={linkColor} />
+                   </TouchableHighlight>
+                 </View>
+
 
         ret.push(
-          <View style={{paddingBottom: 5}} key={this.getNextKey()}>
-           {cancelItem
-            ? <View style={styles.row}>
+            <View style={styles.item} key={this.getNextKey()}>
+              {item}
+            </View>
+        )
+      })
+      if (!ret.length  && v.title) {
+        let image = v.photo  &&  <Image source={{uri: v.photo}} style={styles.thumb} />
+        let color = cancelItem ? '#000000' : linkColor
+        let item = <View style={{flexDirection: 'row'}}>
+                    {image}
+                    <Text style={[styles.itemText, {color}]}>{v.title}</Text>
+                  </View>
+        if (cancelItem) {
+          item = <View style={styles.row}>
                {item}
                <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
-                 <Icon name='ios-close' size={25} color={linkColor} />
+                 <Icon name='md-close' size={20} color={linkColor} style={{marginTop: 5}} />
                </TouchableHighlight>
               </View>
-            : <TouchableHighlight underlayColor='transparent' onPress={() => {
-                navigator.push({
-                 title: v.title,
-                 id: 3,
-                 component: require('./ResourceView'),
-                 backButtonTitle: 'Back',
-                 passProps: {resource: v}
-                })
-              }}>
-             {item}
-             </TouchableHighlight>
-            }
+          }
+        else {
+          let isMessageView
+          if (resource._message)
+            isMessageView = true
+          else
+            isMessageView = (ref !== ORGANIZATION  &&  ref !== PROFILE)
+          let id = isMessageView && 5 || 3
+          let component = isMessageView && require('./MessageView') || require('./ResourceView')
+          item =  <TouchableHighlight underlayColor='transparent' onPress={() => {
+              navigator.push({
+               title: v.title,
+               id,
+               component,
+               backButtonTitle: 'Back',
+               bankStyle,
+               passProps: {resource: v}
+              })
+            }}>
+           {item}
+           </TouchableHighlight>
+        }
+
+        ret.push(
+          <View style={{justifyContent: 'center', paddingVertical: 5}} key={this.getNextKey()}>
+           {item}
          </View>
         );
       }
-
+      let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
       return (
         <View key={this.getNextKey()}>
            {ret}
-           {counter == cnt ? <View></View> : <View style={styles.itemSeparator}></View>}
+           {sep}
         </View>
       )
     });
@@ -234,16 +245,16 @@ var ResourceMixin = {
       let vCols = pMeta.viewCols;
       if (!vCols)
         vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
-      let cnt = val.length;
       val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
       let title = pMeta.title || utils.makeLabel(pMeta.name)
       const titleEl = <Text style={styles.title}>{title}</Text>
+      let icon
+      let cnt = val.length;
+      if (cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS)
+        icon = <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
       let header = <View style={{flexDirection: 'row'}}>
                     {titleEl}
-                    {cnt > 3  &&  modelName !== TERMS_AND_CONDITIONS
-                      ? <Icon name={'ios-arrow-down'} size={15} color='#7AAAC3' style={{position: 'absolute', right: 10, top: 10}}/>
-                      : <View />
-                    }
+                    {icon}
                   </View>
 
       let separator = <View style={styles.separator}></View>;
@@ -506,7 +517,7 @@ var ResourceMixin = {
     if (!_component)
       return
     component = _component
-    let lstyles = createStyles({bankStyle: this.props.bankStyle})
+    let lstyles = createStyles({bankStyle: this.props.bankStyle || this.state.bankStyle})
     let network = <NetworkInfoProvider connected={this.state.isConnected} resource={this.state.resource} />
     return (<View style={lstyles.loadingIndicator}>
               <View style={platformStyles.container}>
@@ -561,7 +572,7 @@ var styles = StyleSheet.create({
     // marginHorizontal: 15
   },
   item: {
-    paddingVertical: 7,
+    // paddingVertical: 7,
   },
   row: {
     flexDirection: 'row',
