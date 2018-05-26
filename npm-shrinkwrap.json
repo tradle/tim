@@ -192,7 +192,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#62abd172d8f38b6ed5f5976977a5f7308d236363"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#0d77e00e626bb48bad827df8af44fb7f1e51bf1b"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -3497,7 +3497,7 @@
     },
     "immutable": {
       "version": "3.7.6",
-      "from": "immutable@~3.7.6",
+      "from": "immutable@>=3.7.6 <3.8.0",
       "resolved": "https://registry.npmjs.org/immutable/-/immutable-3.7.6.tgz"
     },
     "imurmurhash": {
@@ -5037,7 +5037,7 @@
     },
     "nkey-ecdsa": {
       "version": "1.1.0",
-      "from": "nkey-ecdsa@latest",
+      "from": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz",
       "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz"
     },
     "nkey-ethereum": {
@@ -6467,7 +6467,7 @@
     },
     "rebound": {
       "version": "0.0.13",
-      "from": "rebound@^0.0.13",
+      "from": "rebound@>=0.0.13 <0.0.14",
       "resolved": "https://registry.npmjs.org/rebound/-/rebound-0.0.13.tgz"
     },
     "recast": {
