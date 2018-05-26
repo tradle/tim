@@ -4766,31 +4766,57 @@ var Store = Reflux.createStore({
 
       let properties = rModel.properties
 
-      if (isNew) {
-        for (let p in toChain) {
-          let prop = properties[p]
-          let refM = prop.ref  &&  self.getModel(prop.ref)
-          if (prop                    &&
-              prop.type === 'object'  &&
-              prop.ref /*&&  !returnVal.id */ &&
-              !refM.inlined           &&
-              !prop.partial)
-            toChain[p] = self.buildSendRef(returnVal[p])
-        }
-      }
-      else {
-        for (let p in toChain) {
-          let prop = properties[p]
-          if (!prop  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
-            delete toChain[p]
-          else if (prop  &&  prop.type === 'object' &&
-                   prop.ref /*&&  !returnVal.id*/   &&
-                   !self.getModel(prop.ref).inlined &&
-                   !prop.inlined                    &&
-                   !prop.partial)
-            toChain[p] = self.buildSendRef(returnVal[p])
-        }
+      self.rewriteStubs(toChain)
+      let keepProps = [TYPE, ROOT_HASH, CUR_HASH, PREV_HASH, '_time']
+      // if (isNew) {
 
+      for (let p in toChain) {
+        let prop = properties[p]
+
+        if (!isNew  &&  !prop  &&  !keepProps.includes(p)) // !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
+          delete toChain[p]
+        if (!prop  ||  prop.partial)
+          continue
+        let isObject = prop.type === 'object'
+        let isArray = prop.type === 'array'
+
+        let ref = prop.ref  ||  isArray  &&  prop.items.ref
+
+        if (!ref)
+          continue
+
+        let refM = self.getModel(ref)
+        if (!refM  ||  refM.inlined)
+          continue
+
+        if (isObject)
+          toChain[p] = self.buildSendRef(returnVal[p])
+        else
+          toChain[p] = returnVal[p].map(v => self.buildSendRef(v))
+      }
+      // else {
+      //   for (let p in toChain) {
+      //     let prop = properties[p]
+      //     if (!prop  && p !== TYPE && p !== ROOT_HASH && p !== PREV_HASH  &&  p !== '_time')
+      //       delete toChain[p]
+      //     else if (prop  &&  prop.type === 'object' &&
+      //              prop.ref /*&&  !returnVal.id*/   &&
+      //              !self.getModel(prop.ref).inlined &&
+      //              !prop.inlined                    &&
+      //              !prop.partial)
+      //       toChain[p] = self.buildSendRef(returnVal[p])
+      //   }
+
+      //   const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
+      //     _link: returnVal[CUR_HASH],
+      //     _permalink: returnVal[ROOT_HASH],
+      //     ...returnVal
+      //   })
+
+      //   _.extend(toChain, nextVersionScaffold)
+      //   _.extend(returnVal, nextVersionScaffold)
+      // }
+      if (!isNew) {
         const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
           _link: returnVal[CUR_HASH],
           _permalink: returnVal[ROOT_HASH],
@@ -4800,6 +4826,7 @@ var Store = Reflux.createStore({
         _.extend(toChain, nextVersionScaffold)
         _.extend(returnVal, nextVersionScaffold)
       }
+      // }
 
       // toChain._time = returnVal._time
 
