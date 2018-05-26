@@ -24,6 +24,7 @@ import NewResourceMixin from './NewResourceMixin'
 import equal from 'deep-equal'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import constants from '@tradle/constants'
+import { circled } from '../styles/utils'
 
 var {
   TYPE,
@@ -1054,52 +1055,50 @@ class NewResource extends Component {
     let meta = this.props.model
     let blmodel = meta
     let lcolor = this.getLabelAndBorderColor(bl.name)
-    let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
     let bankStyle = this.props.bankStyle || defaultBankStyle
     let linkColor = bankStyle.linkColor
 
-    let counter, itemsArray
+    let actionableItem, itemsArray
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
       label += ' *'
+    let width = utils.dimensions(NewResource).width - 40
     if (count) {
       let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem)}</View>
 
-      let separator = <View style={styles.separator}></View>
-      let cstyle = count ? styles.activePropTitle : styles.noItemsText
-      itemsArray = <View>
-                     <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
-                     {val}
-                   </View>
+      let cstyle = styles.activePropTitle
+      actionableItem = <View style={{width}}>
+                         <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)} style={styles.items}>
+                           <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
+                           <View style={styles.addButton}>
+                             <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff'/>
+                           </View>
+                         </TouchableOpacity>
+                         {val}
+                       </View>
 
-      counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
-                  <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color={linkColor} />
-                </View>
     }
     else {
-      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{label}</Text>
-      counter = <View style={styles.itemsCounterEmpty}>{
-                  isPhoto
-                    ? <Icon name='ios-camera-outline'  size={35} color={linkColor} />
-                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={linkColor} />
-                  }
-                </View>
+      let acStyle = [{flex: 1, position: 'absolute', right: 0, width, paddingBottom: 3}, count ? {paddingTop: 0} : {paddingBottom: 7}]
+      actionableItem = <TouchableOpacity style={acStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
+                         <View style={styles.items}>
+                           <Text style={styles.noItemsText}>{label}</Text>
+                           <View style={styles.addButton}>
+                              <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
+                           </View>
+                         </View>
+                       </TouchableOpacity>
     }
     let err = this.state.missedRequiredOrErrorValue
             ? this.state.missedRequiredOrErrorValue[bl.name]
             : null
 
-    let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-    let actionableItem
-    if (isPhoto)
-      actionableItem = <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
-                        {itemsArray}
-                      </ImageInput>
-    else
-      actionableItem = <TouchableOpacity style={aiStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
-                        {itemsArray}
-                      </TouchableOpacity>
+    // let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
+    // let actionableItem = <View style={aiStyle}>{itemsArray}</View>
+      // actionableItem = <TouchableOpacity style={aiStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
+      //                   {itemsArray}
+      //                 </TouchableOpacity>
 
     let istyle = [styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
     if (err)
@@ -1111,25 +1110,18 @@ class NewResource extends Component {
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
     istyle = StyleSheet.flatten(istyle)
-    let acStyle = [{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]
-    let actionableCounter
-    if (isPhoto)
-      actionableCounter = <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
-                            {counter}
-                          </ImageInput>
-    else
-      actionableCounter = <TouchableOpacity style={acStyle}
-                              onPress={this.onNewPressed.bind(this, bl, meta)}>
-                            {counter}
-                          </TouchableOpacity>
+    // let acStyle = [{flex: 1, justifyContent: 'center'}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]
+    // let acStyle = [{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {paddingBottom: 7}]
+    // let actionableCounter
+    // if (!count)
+    //   actionableCounter = <TouchableOpacity style={acStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
+    //                         {counter}
+    //                       </TouchableOpacity>
     let error = this.getErrorView({prop: bl})
     return (
       <View key={this.getNextKey()}>
         <View style={istyle} ref={bl.name}>
-          <View style={styles.items}>
-            {actionableItem}
-            {actionableCounter}
-          </View>
+          {actionableItem}
         </View>
         {error}
         {this.getHelp(bl)}
@@ -1161,7 +1153,7 @@ class NewResource extends Component {
       itemsArray =
         <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
           <Text style={[styles.activePropTitle, {color: lcolor}]}>{label}</Text>
-          <View style={styles.photoStripItems}>{items}</View>
+          <View style={styles.row}>{items}</View>
         </View>
       counter =
         <View>
@@ -1192,7 +1184,7 @@ class NewResource extends Component {
                          {itemsArray}
                        </ImageInput>
 
-    let istyle = [count ? styles.photoButton : styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
+    let istyle = [count && styles.photoButton || styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
 
     return (
       <View key={this.getNextKey()}>
@@ -1222,50 +1214,6 @@ class NewResource extends Component {
     properties.forEach((p) => {
       this.state.resource[p] = value[p];
     })
-  }
-
-  onSubmitEditing(msg) {
-    msg = msg ? msg : this.state.userInput;
-    let assets = this.state.selectedAssets;
-    let isNoAssets = utils.isEmpty(assets);
-    if (!msg  &&  isNoAssets)
-      return;
-    let me = utils.getMe();
-    let resource = {from: utils.getMe(), to: this.props.resource.to};
-    let model = this.props.model;
-
-    let toName = utils.getDisplayName(resource.to);
-    let meName = utils.getDisplayName(me);
-    let modelName = constants.TYPES.SIMPLE_MESSAGE;
-    let value = {
-      message: msg
-              ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
-              : '',
-
-      from: {
-        id: utils.getId(me),
-        title: meName
-      },
-      to: {
-        id: utils.getId(resource),
-        title: toName
-      },
-
-      time: new Date().getTime()
-    }
-    value[TYPE] = modelName;
-    if (this.props.context)
-      value._context = this.props.context
-
-    if (!isNoAssets) {
-      let photos = [];
-      for (let assetUri in assets)
-        photos.push({url: assetUri, title: 'photo'});
-
-      value.photos = photos;
-    }
-    this.setState({userInput: '', selectedAssets: {}});
-    Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName));
   }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
@@ -1375,7 +1323,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     activePropTitle: {
       fontSize: 12,
-      marginTop: 20,
+      // paddingTop: 20,
       paddingBottom: 5,
       // marginBottom: 5,
       color: '#bbbbbb'
@@ -1383,7 +1331,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     photoStrip: {
       paddingBottom: 5
     },
-    photoStripItems: {
+    row: {
       flexDirection: 'row'
     },
     logo: {
@@ -1422,7 +1370,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     itemsWithCount: {
       flex: 7,
-      paddingTop: 15
+      // paddingTop: 15
     },
     itemsWithoutCount: {
       flex: 7,
@@ -1490,7 +1438,15 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     arrayItems: {
       marginTop: isRegistration ? 0 : -10,
       paddingBottom: 20
-    }
+    },
+    addButton: {
+      ...circled(30),
+      backgroundColor: bankStyle.linkColor,
+      shadowOpacity: 0.7,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
+    },
+
   })
 })
 module.exports = NewResource;
@@ -1518,4 +1474,47 @@ module.exports = NewResource;
   //     };
   //     self.onAddItem('photos', item);
   //   });
+  // }
+  // onSubmitEditing(msg) {
+  //   msg = msg ? msg : this.state.userInput;
+  //   let assets = this.state.selectedAssets;
+  //   let isNoAssets = utils.isEmpty(assets);
+  //   if (!msg  &&  isNoAssets)
+  //     return;
+  //   let me = utils.getMe();
+  //   let resource = {from: utils.getMe(), to: this.props.resource.to};
+  //   let model = this.props.model;
+
+  //   let toName = utils.getDisplayName(resource.to);
+  //   let meName = utils.getDisplayName(me);
+  //   let modelName = constants.TYPES.SIMPLE_MESSAGE;
+  //   let value = {
+  //     message: msg
+  //             ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
+  //             : '',
+
+  //     from: {
+  //       id: utils.getId(me),
+  //       title: meName
+  //     },
+  //     to: {
+  //       id: utils.getId(resource),
+  //       title: toName
+  //     },
+
+  //     time: new Date().getTime()
+  //   }
+  //   value[TYPE] = modelName;
+  //   if (this.props.context)
+  //     value._context = this.props.context
+
+  //   if (!isNoAssets) {
+  //     let photos = [];
+  //     for (let assetUri in assets)
+  //       photos.push({url: assetUri, title: 'photo'});
+
+  //     value.photos = photos;
+  //   }
+  //   this.setState({userInput: '', selectedAssets: {}});
+  //   Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName));
   // }
