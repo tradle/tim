@@ -1152,7 +1152,7 @@ class NewResource extends Component {
         items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()}/>)
       itemsArray =
         <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
-          <Text style={[styles.activePropTitle, {color: lcolor}]}>{label}</Text>
+          <Text style={[styles.activePropTitle, {paddingTop: 20, color: lcolor}]}>{label}</Text>
           <View style={styles.row}>{items}</View>
         </View>
       counter =
@@ -1370,7 +1370,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     itemsWithCount: {
       flex: 7,
-      // paddingTop: 15
+      paddingTop: 15
     },
     itemsWithoutCount: {
       flex: 7,
