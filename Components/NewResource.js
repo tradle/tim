@@ -1069,10 +1069,12 @@ class NewResource extends Component {
 
       let cstyle = styles.activePropTitle
       actionableItem = <View style={{width}}>
-                         <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)} style={styles.items}>
-                           <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
-                           <View style={styles.addButton}>
-                             <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff'/>
+                         <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
+                           <View style={styles.items}>
+                             <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
+                             <View style={styles.addButton}>
+                               <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff'/>
+                             </View>
                            </View>
                          </TouchableOpacity>
                          {val}
@@ -1320,6 +1322,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     items: {
       flexDirection: 'row',
       justifyContent: 'space-between',
+      // minHeight: 30
     },
     activePropTitle: {
       fontSize: 12,
