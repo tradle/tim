@@ -170,12 +170,12 @@ var ResourceMixin = {
                    </View>
 
         if (cancelItem)
-          item = <View style={styles.row}>
-                   {item}
-                   <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+          item = <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                   <View style={styles.row}>
+                     {item}
                      <Icon name='ios-close-circle-outline' size={25} color={linkColor} />
-                   </TouchableHighlight>
-                 </View>
+                   </View>
+                 </TouchableHighlight>
 
 
         ret.push(
@@ -192,12 +192,12 @@ var ResourceMixin = {
                     <Text style={[styles.itemText, {color}]}>{v.title}</Text>
                   </View>
         if (cancelItem) {
-          item = <View style={styles.row}>
-               {item}
-               <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
-                 <Icon name='md-close' size={20} color={linkColor} style={{marginTop: 5}} />
-               </TouchableHighlight>
-              </View>
+          item = <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+                   <View style={styles.row}>
+                     {item}
+                     <Icon name='md-close' size={20} color={linkColor} style={{marginTop: 5}} />
+                   </View>
+                 </TouchableHighlight>
           }
         else {
           let isMessageView
