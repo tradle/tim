@@ -642,7 +642,6 @@
         "_t": "tradle.Photo"
       }
     ],
-    "time": 1482522508802,
     "_z": "e99ac1a702d6f225c62956a88279c86db07ac18c563155a730f19a04b62c43d0"
   },
   "tradle.BusinessInformation": {
@@ -667,8 +666,7 @@
     ],
     "registrationDate": 1390089600000,
     "registrationNumber": "8392053802",
-    "taxIdNumber": "58-3583828",
-    "time": 1487034723629
+    "taxIdNumber": "58-3583828"
   },
   "tradle.SalesData": {
     "_t": "tradle.SalesData",
@@ -686,7 +684,6 @@
       "currency": "€",
       "value": 1000
     },
-    "time": 1487035116882,
     "volumeOfChargebacks": {
       "currency": "€",
       "value": 10000
