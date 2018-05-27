@@ -1,7 +1,7 @@
 console.log('requiring identity.js')
 import Q from 'q'
 import { utils as tradleUtils } from '@tradle/engine'
-import { useKeychain, blockchainName, networkName, isWeb } from './env'
+import { useKeychain, isWeb } from './env'
 import allNetworks from './networks'
 
 const Keychain = useKeychain !== false && !isWeb() && require('./keychain')
