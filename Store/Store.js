@@ -5607,7 +5607,7 @@ var Store = Reflux.createStore({
     this.trigger({action: 'models', list: retModels})
   },
 
-  wipe() {
+  wipe(opts) {
     return Q.all([
       AsyncStorage.clear(),
       utils.resetPasswords()
@@ -5631,7 +5631,7 @@ var Store = Reflux.createStore({
       })
     })
   },
-  async onReloadDB() {
+  async onReloadDB(opts) {
     var self = this
 
     const destroyTim = meDriver ? meDriver.destroy() : Promise.resolve()
@@ -5640,7 +5640,7 @@ var Store = Reflux.createStore({
       Promise.delay(5000)
     ])
 
-    await this.wipe()
+    await this.wipe(opts)
   },
   async autoRegister(noMeYet) {
     Analytics.sendEvent({
