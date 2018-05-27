@@ -64,7 +64,9 @@ const merged = extend({
   LOCAL_IP: LOCAL_IP,
   LOCAL_TRADLE_SERVERS: [
     `http://${LOCAL_IP}:21012`,
-    // `http://${LOCAL_IP}:21013`,
+    // // silly
+    // 'https://if9ikxe9lk.execute-api.ap-southeast-2.amazonaws.com/dev',
+    // // `http://${LOCAL_IP}:21013`,
     // hats
     'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
     // raylan
@@ -139,10 +141,6 @@ const merged = extend({
   splashContrastColor: 'tradle',
   brandBackground: 'tradle',
   delayBetweenExpensiveTasks: 100,
-  // blockchain start
-  blockchainName: 'ethereum',
-  networkName: networks.ethereum,
-  // blockchain end
   appName: 'Tradle',
   ie: {
     min: 11
@@ -158,6 +156,7 @@ const merged = extend({
   tradleAPIKey: null,
   tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/',
   APP_URL,
+  resetCheckpoint: new Date('2018-05-27').getTime(),
   SILENT_TYPES: [
     'tradle.Seal',
     'tradle.CustomerWaiting',

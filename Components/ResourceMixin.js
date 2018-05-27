@@ -165,7 +165,7 @@ var ResourceMixin = {
         if (!value)
           return
         let item = <View>
-                     <Text style={itemMeta.skipLabel ? {height: 0} : [styles.itemText, {color: '#878787', fontSize: 16}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
+                     <Text style={itemMeta.skipLabel ? {height: 0} : [styles.itemText, {fontSize: 16}]}>{itemMeta.skipLabel ? '' : itemMeta.title || utils.makeLabel(p)}</Text>
                      <Text style={styles.itemText}>{value}</Text>
                    </View>
 
@@ -186,16 +186,16 @@ var ResourceMixin = {
       })
       if (!ret.length  && v.title) {
         let image = v.photo  &&  <Image source={{uri: v.photo}} style={styles.thumb} />
-        let color = cancelItem ? '#000000' : linkColor
-        let item = <View style={{flexDirection: 'row'}}>
+        let color = cancelItem ? '#757575' : linkColor
+        let item = <View style={{flexDirection: 'row', paddingVertical: 7}}>
                     {image}
                     <Text style={[styles.itemText, {color}]}>{v.title}</Text>
                   </View>
         if (cancelItem) {
-          item = <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+          item = <TouchableHighlight underlayColor='transparent' key={this.getNextKey()} onPress={cancelItem.bind(this, prop, v)}>
                    <View style={styles.row}>
                      {item}
-                     <Icon name='md-close' size={20} color={linkColor} style={{marginTop: 5}} />
+                     <Icon name='md-close' size={20} color={linkColor} style={{marginTop: 12}} />
                    </View>
                  </TouchableHighlight>
           }
@@ -207,7 +207,7 @@ var ResourceMixin = {
             isMessageView = (ref !== ORGANIZATION  &&  ref !== PROFILE)
           let id = isMessageView && 5 || 3
           let component = isMessageView && require('./MessageView') || require('./ResourceView')
-          item =  <TouchableHighlight underlayColor='transparent' onPress={() => {
+          item =  <TouchableHighlight underlayColor='transparent' key={this.getNextKey()} onPress={() => {
               navigator.push({
                title: v.title,
                id,
@@ -217,15 +217,15 @@ var ResourceMixin = {
                passProps: {resource: v}
               })
             }}>
-           {item}
+             {item}
            </TouchableHighlight>
         }
-
-        ret.push(
-          <View style={{justifyContent: 'center', paddingVertical: 5}} key={this.getNextKey()}>
-           {item}
-         </View>
-        );
+        ret.push(item)
+        // ret.push(
+        //   <View style={{justifyContent: 'center', paddingVertical: 5}} key={this.getNextKey()}>
+        //    {item}
+        //  </View>
+        // );
       }
       let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
       return (
@@ -564,7 +564,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 0,
     // marginHorizontal: 7,
-    color: '#000000',
+    color: '#757575',
   },
   itemSeparator: {
     height: 1,

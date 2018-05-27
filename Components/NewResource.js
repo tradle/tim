@@ -1281,8 +1281,8 @@ class NewResource extends Component {
       }
       itemsArray =
         <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
-          <Text style={[styles.activePropTitle, {color: lcolor}]}>{label}</Text>
-          <View style={styles.photoStripItems}>{items}</View>
+          <Text style={[styles.activePropTitle, {paddingTop: 20, color: lcolor}]}>{label}</Text>
+          <View style={styles.row}>{items}</View>
         </View>
       counter =
         <View>
@@ -1493,6 +1493,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     items: {
       flexDirection: 'row',
       justifyContent: 'space-between',
+      // minHeight: 30
     },
     activePropTitle: {
       fontSize: 12,
