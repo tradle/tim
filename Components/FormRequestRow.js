@@ -950,8 +950,9 @@ class FormRequestRow extends Component {
       if (addMessage) {
         // if (isRequestForNext  ||  shareableResources)
         //   addMessage = DEFAULT_MESSAGE
+        let hasSharables = shareableResources  &&  (!utils.isEmpty(shareableResources.multientryResources)  ||  !utils.isEmpty(shareableResources.verifications))
         if (!isRequestForNext)
-          messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}, shareableResources && {paddingBottom: 15}]}>{addMessage}</Text>
+          messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}, hasSharables && {paddingBottom: 15}]}>{addMessage}</Text>
       }
       msg = <View key={this.getNextKey()}>
                <View style={styles.messageLink}>

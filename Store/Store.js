@@ -167,7 +167,6 @@ const FORM_ERROR          = 'tradle.FormError'
 const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const MY_EMPLOYEE_PASS    = 'tradle.MyEmployeeOnboarding'
 const FORM_REQUEST        = 'tradle.FormRequest'
-const FORM_PREFILL        = 'tradle.FormPrefill'
 const NEXT_FORM_REQUEST   = 'tradle.NextFormRequest'
 const PAIRING_REQUEST     = 'tradle.PairingRequest'
 const PAIRING_RESPONSE    = 'tradle.PairingResponse'
@@ -199,7 +198,8 @@ const SELFIE              = 'tradle.Selfie'
 const BOOKMARK            = 'tradle.Bookmark'
 const SHARE_REQUEST       = 'tradle.ShareRequest'
 const APPLICATION         = 'tradle.Application'
-const DRAFT_APPLICATION   = 'tradle.DraftApplication'
+// const DRAFT_APPLICATION   = 'tradle.DraftApplication'
+// const FORM_PREFILL        = 'tradle.FormPrefill'
 const VERIFIED_ITEM       = 'tradle.VerifiedItem'
 const DATA_BUNDLE         = 'tradle.DataBundle'
 const DATA_CLAIM          = 'tradle.DataClaim'
@@ -645,7 +645,7 @@ var Store = Reflux.createStore({
       r._sendStatus = SENT
       r._sentTime = new Date().getTime()
 
-      let rr = await this._keeper.get(r[ROOT_HASH])
+      let rr = await this._keeper.get(r[CUR_HASH])
       let res = {}
       _.extend(res, rr)
       _.extend(res, r)
@@ -5038,10 +5038,10 @@ var Store = Reflux.createStore({
           prevResCached._latest = false
 
           let org = to.organization ? self._getItem(to.organization) : to
-          let clonePrev = utils.clone(prevResCached)
-          self.trigger({action: 'getItem', resource: returnVal, to: org})
-          self.trigger({action: 'updateItem', resource: clonePrev, to: org})
-          self.dbPut(prevResId, prevRes)
+          // Draft project
+          // self.trigger({action: 'getItem', resource: returnVal, to: org})
+          self.trigger({action: 'updateItem', resource: prevResCached, to: org})
+          self.dbPut(prevResId, prevResCached)
         }
 
         if (!isNew  ||  self.getModel(returnVal[TYPE]).subClassOf !== FORM)
@@ -5645,15 +5645,15 @@ var Store = Reflux.createStore({
     this.trigger({action: 'models', list: retModels})
   },
 
-  wipe() {
-    if (utils.isWeb()) {
-      return this.wipeWeb()
+  wipe(opts) {
+    if (utils.isWeb(opts)) {
+      return this.wipeWeb(opts)
     } else {
-      return this.wipeMobile()
+      return this.wipeMobile(opts)
     }
   },
 
-  async wipeWeb() {
+  async wipeWeb(opts) {
     if (global.localStorage) {
       global.localStorage.clear()
       global.localStorage.userWipedDevice = true
@@ -5662,18 +5662,19 @@ var Store = Reflux.createStore({
     if (global.sessionStorage) global.sessionStorage.clear()
     if (leveldown.destroyAll) await leveldown.destroyAll()
 
-
-    await new Promise(resolve => {
-      Alert.alert(
-        'Press OK to restart',
-        [{ text: translate('ok'), onPress: resolve }]
-      )
-    })
+    // if (!opts.silent) {
+    //   await new Promise(resolve => {
+    //     Alert.alert(
+    //       'Press OK to restart',
+    //       [{ text: translate('ok'), onPress: resolve }]
+    //     )
+    //   })
+    // }
 
     utils.restartApp()
   },
 
-  wipeMobile() {
+  wipeMobile(opts) {
     return Q.all([
       AsyncStorage.clear(),
       utils.resetPasswords()
@@ -5697,7 +5698,7 @@ var Store = Reflux.createStore({
       })
     })
   },
-  async onReloadDB() {
+  async onReloadDB(opts) {
     var self = this
 
     const destroyTim = meDriver ? meDriver.destroy() : Promise.resolve()
@@ -5706,7 +5707,7 @@ var Store = Reflux.createStore({
       Promise.delay(5000)
     ])
 
-    await this.wipe()
+    await this.wipe(opts)
   },
   async autoRegister(noMeYet) {
     Analytics.sendEvent({

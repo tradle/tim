@@ -937,12 +937,12 @@ class NewResource extends Component {
                    </View>
                  </TouchableOpacity>
       else
-        submit  = <TouchableOpacity onPress={this.onSavePressed}>
-                    <View style={styles.submit}>
-                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
-                      <Text style={styles.submitText}>{translate('Submit')}</Text>
-                    </View>
-                  </TouchableOpacity>
+        submit = <TouchableOpacity onPress={this.onSavePressed}>
+                   <View style={styles.submit}>
+                     <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
+                     <Text style={styles.submitText}>{translate('Submit')}</Text>
+                   </View>
+                 </TouchableOpacity>
 
     }
     let contentStyle = {backgroundColor: 'transparent', width: width, alignSelf: 'center', paddingTop:10}
@@ -1292,7 +1292,7 @@ class NewResource extends Component {
         </View>;
     }
     else {
-      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{label}</Text>
+      itemsArray = <Text style={styles.noItemsText}>{label}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>
                   <Icon name={icon}  size={isPhoto && 35 || 20} color={linkColor} />
                 </View>
@@ -1549,7 +1549,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     itemsWithoutCount: {
       flex: 7,
       paddingTop: 15,
-      paddingBottom: 7
+      // paddingBottom: 10
     },
     submit: {
       backgroundColor: bankStyle.linkColor,
