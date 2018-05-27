@@ -2295,7 +2295,6 @@ var Store = Reflux.createStore({
         basePubKey,
         link,
         headerHash,
-        basePubKey,
         txId,
         address,
       })
