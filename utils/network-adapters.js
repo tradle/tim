@@ -1,17 +1,23 @@
-console.log('requiring network-adapters.js')
-
-module.exports = function createNetworkAdapters ({ blockchainName, networkName }) {
-  const adapter = getAdapterImplementation(blockchainName)
-  return adapter(networkName)
+module.exports = function createNetworkAdapters ({ blockchain, networkName }) {
+  const adapter = getAdapterImplementation(blockchain)
+  try {
+    return adapter(networkName)
+  } catch (err) {
+    console.warn(`unsupported network: ${networkName}`, err.message)
+  }
 }
 
-function getAdapterImplementation (blockchainName) {
-  switch (blockchainName) {
+function getAdapterImplementation (blockchain) {
+  switch (blockchain) {
     case 'bitcoin':
       return require('./bitcoin')
     case 'ethereum':
       return require('./ethereum')
+    case 'corda':
+      return {}
     default:
-      throw new Error(`unknown blockchain: ${blockchainName}`)
+      console.warn(`unknown blockchain: ${blockchain}`)
+      return null
+      // throw new Error(`unknown blockchain: ${blockchain}`)
   }
 }
