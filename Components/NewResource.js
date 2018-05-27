@@ -784,7 +784,7 @@ class NewResource extends Component {
         let blmodel = meta
         itemsArray = null
         let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-        if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO))
+        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO))
           arrayItems.push(this.getPhotoItem(bl, styles))
         else
           arrayItems.push(this.getItem(bl, styles))
@@ -883,12 +883,12 @@ class NewResource extends Component {
                    </View>
                  </TouchableOpacity>
       else
-        submit  = <TouchableOpacity onPress={this.onSavePressed}>
-                    <View style={styles.submit}>
-                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
-                      <Text style={styles.submitText}>{translate('Submit')}</Text>
-                    </View>
-                  </TouchableOpacity>
+        submit = <TouchableOpacity onPress={this.onSavePressed}>
+                   <View style={styles.submit}>
+                     <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
+                     <Text style={styles.submitText}>{translate('Submit')}</Text>
+                   </View>
+                 </TouchableOpacity>
 
     }
     let content =
@@ -1165,7 +1165,7 @@ class NewResource extends Component {
         </View>;
     }
     else {
-      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{label}</Text>
+      itemsArray = <Text style={styles.noItemsText}>{label}</Text>
       counter = <View style={[styles.itemsCounterEmpty]}>
                   <Icon name='ios-camera-outline'  size={35} color={linkColor} />
                 </View>
@@ -1187,6 +1187,8 @@ class NewResource extends Component {
                        </ImageInput>
 
     let istyle = [count && styles.photoButton || styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
+    if (!count)
+      istyle.push({height: 70})
 
     return (
       <View key={this.getNextKey()}>
@@ -1247,8 +1249,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     itemsCounterEmpty: {
       paddingHorizontal: 5,
-      justifyContent: 'center'
-      // marginTop: -7
+      justifyContent: 'center',
+      marginTop: -5
     },
     itemsCounter: {
       marginTop: 20,
@@ -1378,7 +1380,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     itemsWithoutCount: {
       flex: 7,
       paddingTop: 15,
-      paddingBottom: 7
+      // paddingBottom: 10
     },
     submit: {
       backgroundColor: bankStyle.linkColor,
