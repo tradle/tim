@@ -17,7 +17,7 @@
     "@tradle/bitcoin-adapter": {
       "version": "1.0.0",
       "from": "tradle/bitcoin-adapter",
-      "resolved": "git://github.com/tradle/bitcoin-adapter.git#2b323a4b30eeedb5db188b2899963579f0ecf759"
+      "resolved": "git://github.com/tradle/bitcoin-adapter.git#b1d6f09e1ff9acd865d71a5945938cbe50d1fa99"
     },
     "@tradle/bitcoinjs-lib": {
       "version": "1.6.0",
@@ -62,9 +62,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.0.1.tgz"
     },
     "@tradle/engine": {
-      "version": "6.0.0",
+      "version": "7.0.0",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-6.0.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-7.0.0.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
@@ -103,11 +103,6 @@
             }
           }
         },
-        "lodash": {
-          "version": "4.17.10",
-          "from": "lodash@>=4.17.10 <5.0.0",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.10.tgz"
-        },
         "map-stream": {
           "version": "0.0.7",
           "from": "map-stream@0.0.7",
@@ -123,7 +118,7 @@
     "@tradle/ethereum-adapter-etherscan": {
       "version": "1.0.0",
       "from": "tradle/ethereum-adapter-etherscan",
-      "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#7f6b10539b53379b9ddc2671c65df329b1a8b587"
+      "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#120f00fd357eab408bf48ef6fcbab9bf9a147a96"
     },
     "@tradle/iot-message": {
       "version": "3.0.0",
@@ -182,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#23a932dd33d08847fe09e934d33b95d107c43f20"
+      "resolved": "git://github.com/tradle/models.git#6ce8b8f8e387b1af403b6012c22331aaa11c2283"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -192,7 +187,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#0d77e00e626bb48bad827df8af44fb7f1e51bf1b"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#62abd172d8f38b6ed5f5976977a5f7308d236363"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -3497,7 +3492,7 @@
     },
     "immutable": {
       "version": "3.7.6",
-      "from": "immutable@>=3.7.6 <3.8.0",
+      "from": "immutable@~3.7.6",
       "resolved": "https://registry.npmjs.org/immutable/-/immutable-3.7.6.tgz"
     },
     "imurmurhash": {
@@ -4371,9 +4366,9 @@
       }
     },
     "lodash": {
-      "version": "4.17.5",
-      "from": "lodash@>=4.17.4 <5.0.0",
-      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.5.tgz"
+      "version": "4.17.10",
+      "from": "lodash@>=4.17.0 <5.0.0",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.10.tgz"
     },
     "lodash-es": {
       "version": "4.17.7",
@@ -5037,7 +5032,7 @@
     },
     "nkey-ecdsa": {
       "version": "1.1.0",
-      "from": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz",
+      "from": "nkey-ecdsa@latest",
       "resolved": "https://registry.npmjs.org/nkey-ecdsa/-/nkey-ecdsa-1.1.0.tgz"
     },
     "nkey-ethereum": {
@@ -6467,7 +6462,7 @@
     },
     "rebound": {
       "version": "0.0.13",
-      "from": "rebound@>=0.0.13 <0.0.14",
+      "from": "rebound@^0.0.13",
       "resolved": "https://registry.npmjs.org/rebound/-/rebound-0.0.13.tgz"
     },
     "recast": {

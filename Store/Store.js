@@ -232,20 +232,13 @@ import { loadOrCreate as loadYuki } from './yuki'
 import Aviva from '../utils/aviva'
 import monitorMissing from '../utils/missing'
 import identityUtils from '../utils/identity'
-import createNetworkAdapters from '../utils/network-adapters'
+import getBlockchainAdapter from '../utils/network-adapters'
 import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
 
 import Errors from '@tradle/errors'
 import validateResource, { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 // @ts-ignore
 const { sanitize } = validateResource.utils
-
-let VERSION
-try {
-  VERSION = require('../version')
-} catch (err) {
-  VERSION = {}
-}
 
 // import tutils from '@tradle/utils'
 var isTest, originalMe;
@@ -376,6 +369,15 @@ const {
   randomDoc,
   newFormRequestVerifiers
 } = require('../utils/faker')
+
+const disableBlockchainSync = node => {
+  // disable sync
+  if (node) {
+    node.sealwatch.sync = function () {
+      // hang
+    }
+  }
+}
 
 const getEmployeeBookmarks = ({ me, botPermalink }) => {
   const createdByBot = [
@@ -636,7 +638,7 @@ var Store = Reflux.createStore({
       this.dbPut(objId, r)
     }
     let msg = await meDriver.objects.get(link)
-    this.maybeWatchSeal(msg)
+    // this.maybeWatchSeal(msg)
   },
   async newObject (msg) {
     let {objectinfo, link} = msg
@@ -655,7 +657,7 @@ var Store = Reflux.createStore({
 
     msg.object = utils.clone(obj)
 
-    this.maybeWatchSeal(msg)
+    // this.maybeWatchSeal(msg)
 
     const payload = msg.object.object
     const originalPayload = payload[TYPE] === MESSAGE ? payload.object : payload
@@ -670,7 +672,7 @@ var Store = Reflux.createStore({
       try {
         const saved = await meDriver.saveObject({ object: originalPayload })
         obj.from = {[ROOT_HASH]: saved.author}
-        debug('newObject (unwrapped):', originalPayload[TYPE], saved)
+        debug('newObject (unwrapped):', originalPayload[TYPE])
       } catch (err) {
         if (err.type !== 'exists') throw err
         obj.from = {[ROOT_HASH]: msg.objectinfo.author}
@@ -716,7 +718,6 @@ var Store = Reflux.createStore({
 
       return
     }
-    debug('newObject:', originalPayload[TYPE], msg)
 
     if (payload[TYPE] === VERIFICATION && payload.sources) {
       const sourceToAuthor = await lookupSourceAuthors(meDriver, payload.sources)
@@ -1052,7 +1053,6 @@ var Store = Reflux.createStore({
       max: 100
     })
 
-    const networkAdapters = createNetworkAdapters(ENV)
     const { wsClients, restoreMonitors, identifierProp } = driverInfo
 
     // let whitelist = driverInfo.whitelist
@@ -1063,7 +1063,7 @@ var Store = Reflux.createStore({
     //     console.log('tradle is at', addrs)
 
     meDriver = new tradle.node({
-      ...networkAdapters,
+      getBlockchainAdapter,
       name: 'me',
       dir: TIM_PATH_PREFIX,
       identity: identity,
@@ -1085,9 +1085,10 @@ var Store = Reflux.createStore({
     })
 
     // blockr.io has been shut down
-    // meDriver.sealwatch.sync = function () {
-    //   // hang
-    // }
+
+    if (me && me.isEmployee) {
+      disableBlockchainSync(meDriver)
+    }
 
     meDriver.setMaxListeners(0)
 
@@ -1692,7 +1693,6 @@ var Store = Reflux.createStore({
         validateResource({
           models: this.getModels(),
           resource: opts.object,
-          ignoreReadOnly: true
         })
       } catch (err) {
         Alert.alert('Preventing send of invalid resource', err.message)
@@ -2260,22 +2260,54 @@ var Store = Reflux.createStore({
 
   async receiveSeal(seal) {
     const node = await this._enginePromise
-    await promisify(node.actions.readSeal)({
+    const adapter = getBlockchainAdapter({
       blockchain: seal.blockchain,
-      networkName: seal.network,
-      link: seal.link,
+      networkName: seal.network
+    })
+
+    if (!adapter) {
+      debug(`can't process seal, don't have blockchain adapter`, JSON.stringify(seal))
+      debugger
+      return
+    }
+
+    let { basePubKey, blockchain, network, headerHash, link, address, txId } = seal
+    if (basePubKey) {
+      const { pub } = basePubKey
+      basePubKey = {
+        pub: new Buffer(pub, 'hex'),
+        curve: adapter.curve || 'secp256k1'
+      }
+    } else {
       // hack to make actions validator happy
-      basePubKey: {
+      basePubKey = {
         pub: new Buffer(0),
         curve: 'secp256k1'
-      },
-      sealAddress: seal.address || '<n/a>',
-      txId: seal.txId,
-      // confirmations claimed by the server
-      // are not to be trusted
-      confirmations: 0,
-      addresses: seal.address ? [seal.address] : []
-    })
+      }
+    }
+
+    try {
+      await node.watchSeal({
+        chain: {
+          blockchain,
+          networkName: seal.network
+        },
+        basePubKey,
+        link,
+        headerHash,
+        txId,
+        address,
+      })
+
+      node.sealwatch.sync()
+    } catch (err) {
+      if (err.type !== 'exists') {
+        debugger
+        throw err
+      }
+    }
+
+    // await promisify(node.actions.readSeal)(action)
   },
 
   setProviderOnlineStatus(permalink, online) {
@@ -4816,7 +4848,7 @@ var Store = Reflux.createStore({
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
       toChain = sanitize(toChain).sanitized
       try {
-        validateResource({resource: toChain, models: self.getModels(), ignoreReadOnly: true})
+        validateResource({ resource: toChain, models: self.getModels() })
       } catch (err) {
         if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
         // if (err.name === 'InvalidPropertyValue')
@@ -9324,7 +9356,7 @@ var Store = Reflux.createStore({
   },
 
   async maybeRequireFreshUser(identity) {
-    const { resetCheckpoint } = VERSION
+    const { resetCheckpoint } = ENV
     if (!resetCheckpoint) return
     if (resetCheckpoint > Date.now()) {
       console.warn('reset checkpoint is bigger than current timestamp, ignoring')
@@ -9581,6 +9613,10 @@ var Store = Reflux.createStore({
 
     try {
       await meDriver.watchSeal({
+        chain: {
+          blockchain: chainPubKey.type,
+          networkName: chainPubKey.networkName
+        },
         object: target,
         basePubKey: chainPubKey
       })
@@ -10422,6 +10458,7 @@ var Store = Reflux.createStore({
       }
       self._setItem(meId, me)
       await self.dbPut(meId, me)
+      disableBlockchainSync(meDriver)
     }
     async function modelsPackHandler() {
       // org.products = []
