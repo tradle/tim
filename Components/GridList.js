@@ -229,8 +229,14 @@ class GridList extends Component {
       if (!_.isEqual(this.props.prop, props.prop))
         this.state.isLoading = true;
 
-      let params = this.getParamsForBacklinkList(props)
-      Actions.list(params)
+      if (application) {
+        let params = this.getParamsForApplicationBacklinks(props)
+        Actions.getItem(params)
+      }
+      else {
+        let params = this.getParamsForBacklinkList(props)
+        Actions.list(params)
+      }
       // else if (props.backlinkList.length)
       //   this.state.dataSource = this.state.dataSource.cloneWithRows(props.backlinkList)
       // else
@@ -247,34 +253,59 @@ class GridList extends Component {
     }
   }
   getParamsForBacklinkList(props) {
+    let { modelName, _readOnly, sortProperty,
+          resource, prop, application, isAggregation, isChooser, listView } = props
     let params = {
-      modelName: props.modelName,
+      modelName: modelName,
       // limit: 10
     };
-    if (props._readOnly)
+    if (_readOnly)
       params._readOnly = true
 
-    if (props.isAggregation)
+    if (isAggregation)
       params.isAggregation = true;
-    if (props.sortProperty)
-      params.sortProperty = props.sortProperty;
-    if (props.prop) {
-      let m = utils.getModel(props.resource[TYPE])
-      params.prop = m.properties[props.prop.name];
+    if (sortProperty)
+      params.sortProperty = sortProperty;
+    if (prop) {
+      let m = utils.getModel(resource[TYPE])
+      params.prop = m.properties[prop.name];
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
-        params.resource = props.resource
+        params.resource = resource
       else if (params.prop.items  &&  params.prop.items.backlink)
-        params.to = props.resource
-      if (props.application) {
+        params.to = resource
+      if (application) {
         params.search = true
-        params.application = props.application
+        params.application = application
       }
     }
     else
-      params.to = props.resource
-    params.isChat =  !props.isChooser
-    params.listView = props.listView
+      params.to = resource
+    params.isChat =  !isChooser
+    params.listView = listView
+    return params
+  }
+  getParamsForApplicationBacklinks(props) {
+    let { sortProperty, isBacklink, resource, prop, application } = props
+    let params = {
+      resource
+    }
+
+    if (sortProperty)
+      params.sortProperty = sortProperty;
+    if (!prop)
+      return params
+
+    let m = utils.getModel(resource[TYPE])
+    // case when for example clicking on 'Verifications' on Form page
+    if (isBacklink) {
+      params.backlink = prop
+      params.to = resource
+    }
+    if (application) {
+      params.search = true
+      params.application = application
+    }
     return params
   }
   componentWillUnmount() {
@@ -801,12 +832,13 @@ class GridList extends Component {
       return
     }
     let title, isDraftApplication
+    let isStub = utils.isStub(resource)
     if (rType === VERIFICATION) {
-      if (utils.isStub(resource))
-        title = resource.title
+      if (isStub)
+        title = utils.makeModelTitle(utils.getType(resource))
       else {
         let type = utils.getType(resource.document)
-        title = utils.makeModelTitle(utils.getModel(type))
+        title = 'Verification - ' + utils.makeModelTitle(utils.getModel(type))
       }
     }
     else if (rType === FORM_PREFILL) {
