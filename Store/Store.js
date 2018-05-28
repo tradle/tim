@@ -6586,7 +6586,7 @@ var Store = Reflux.createStore({
   convertInlineRefs(ref, rr, isArray) {
     let pm = this.getModel(ref)
     if (pm.abstract  ||  pm.subClassOf === ENUM)
-      return
+      return rr
     let props = pm.properties
     for (let p in rr) {
       if (!props[p]  ||  !rr[p][TYPE])
@@ -9466,7 +9466,7 @@ var Store = Reflux.createStore({
   async maybeRequireFreshUser(identity) {
     const { resetCheckpoint } = ENV
     if (!resetCheckpoint) return
-    if (resetCheckpoint > Date.now()) {
+    if (!__DEV__ && resetCheckpoint > Date.now()) {
       console.warn('reset checkpoint is bigger than current timestamp, ignoring')
       return
     }

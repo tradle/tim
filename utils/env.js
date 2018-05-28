@@ -68,17 +68,17 @@ const merged = extend({
     // 'https://4uxjw2j0cc.execute-api.ap-southeast-2.amazonaws.com/dev',
     // // `http://${LOCAL_IP}:21013`,
     // hats
-    'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
-    // raylan
-    'https://ayycrsic06.execute-api.us-east-1.amazonaws.com/dev',
-    // friendly.io
-    'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
+    // 'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
+    // // raylan
+    // 'https://ayycrsic06.execute-api.us-east-1.amazonaws.com/dev',
+    // // friendly.io
+    // 'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
     // 'https://xwkirqs1x0.execute-api.us-east-1.amazonaws.com/dev',
     // // safere.io
     // 'https://xefpez2yf0.execute-api.us-east-1.amazonaws.com/dev',
     // // easybank.io
-    // 'https://dxceehvttl.execute-api.us-east-1.amazonaws.com/dev',
+    // 'https://m6rpwdztvk.execute-api.us-east-1.amazonaws.com/dev',
     // // perpetualguardian.co.nz
     // 'https://hkooibqf60.execute-api.us-east-1.amazonaws.com/dev',
     // // r3.com

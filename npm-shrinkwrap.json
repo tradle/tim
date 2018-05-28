@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "dependencies": {
     "@tradle/aws-client": {
-      "version": "1.7.1",
+      "version": "1.8.0",
       "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.7.1.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.8.0.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -57,9 +57,9 @@
       "resolved": "git://github.com/tradle/custom-models.git#304de4e217114f0c503784ea8e111f0afa829a73"
     },
     "@tradle/embed": {
-      "version": "1.0.1",
-      "from": "@tradle/embed@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.0.1.tgz"
+      "version": "1.1.0",
+      "from": "@tradle/embed@>=1.1.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.0.tgz"
     },
     "@tradle/engine": {
       "version": "7.0.1",
