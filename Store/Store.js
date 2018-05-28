@@ -149,6 +149,7 @@ const {
  FORGOT_YOU,
  MONEY,
  SETTINGS,
+ ENUM
 } = constants.TYPES
 
 const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
@@ -6491,8 +6492,8 @@ var Store = Reflux.createStore({
     if (!r[TYPE])
       return r
     const m = this.getModel(r[TYPE])
-    const props = Object.keys(m.properties)
-    const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(props)
+    const propNames = Object.keys(m.properties)
+    const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
     let rr = pick(r, toKeep)
 
     _.extend(rr, {
@@ -6500,13 +6501,6 @@ var Store = Reflux.createStore({
       [CUR_HASH]: r._link,
       [TYPE]: r[TYPE],
     })
-    let seal = r._seal
-    if (seal) {
-      rr.txId = seal.txId
-      rr.sealedTime = seal.timestamp
-      rr.blockchain = seal.blockchain
-      rr.networkName = seal.network
-    }
 
     let lr = this._getItem(utils.getId(rr))
     if (lr) {
@@ -6521,6 +6515,14 @@ var Store = Reflux.createStore({
     }
     if (!rr._time)
       rr._time = r._time
+
+    let seal = r._seal
+    if (seal) {
+      rr.txId = seal.txId
+      rr.sealedTime = seal.timestamp
+      rr.blockchain = seal.blockchain
+      rr.networkName = seal.network
+    }
 
     let authorId = utils.makeId(PROFILE, r._author)
     let author = this._getItem(authorId)
@@ -6545,12 +6547,27 @@ var Store = Reflux.createStore({
       rr.to = {id: myOrgRepId, title: utils.getDisplayName(me.organization)}
       break
     }
+    let props = m.properties
     for (let p in rr) {
-      if (typeof rr[p] === 'object'  &&  rr[p].edges) {
+      if (typeof rr[p] !== 'object')
+        continue
+      if (rr[p].edges) {
         rr[p] = rr[p].edges.map(r => this.convertToResource(r.node))
         rr['_' + p + 'Count'] = rr[p].length
       }
+      else if (props[p]  &&  props[p].inlined) {
+        if (props[p].type === 'object'  &&  props[p].ref)
+          this.convertInlineRefs(props[p].ref, rr[p])
+        else if (props[p].type === 'array'  &&  props[p].items.ref)
+          rr[p] = rr[p].map(v => this.convertInlineRefs(props[p].items.ref, v))
+      }
     }
+    // for (let p in rr) {
+    //   if (typeof rr[p] === 'object'  &&  rr[p].edges) {
+    //     rr[p] = rr[p].edges.map(r => this.convertToResource(r.node))
+    //     rr['_' + p + 'Count'] = rr[p].length
+    //   }
+    // }
 
     // if (!rr._context  &&  rr[ROOT_HASH] !== rr[CUR_HASH]) {
     //   let origRid = utils.makeId(rr[TYPE], rr[ROOT_HASH])
@@ -6564,6 +6581,27 @@ var Store = Reflux.createStore({
     rr[IS_MESSAGE] = true
     this.rewriteStubs(rr)
     this.addVisualProps(rr)
+    return rr
+  },
+  convertInlineRefs(ref, rr, isArray) {
+    let pm = this.getModel(ref)
+    if (pm.abstract  ||  pm.subClassOf === ENUM)
+      return
+    let props = pm.properties
+    for (let p in rr) {
+      if (!props[p]  ||  !rr[p][TYPE])
+        continue
+      let m = this.getModel(rr[p][TYPE])
+      if (m.subClassOf === ENUM)
+        continue
+      rr[p] = this.makeStub(rr[p])
+    }
+    if (rr._author) {
+      let authorId = utils.makeId(PROFILE, rr._author)
+      let author = this._getItem(authorId)
+      let authorTitle = rr._authorTitle || (author && author.organization &&  utils.getDisplayName(author.organization))
+      rr.from = {id: authorId, title: authorTitle}
+    }
     return rr
   },
 
@@ -7749,7 +7787,7 @@ var Store = Reflux.createStore({
     .then((l) => {
       if (isBacklinkProp) {
         let l = list.filter((r) => {
-          if (!r._latest)
+          if (r.hasOwnProperty('_latest')  &&  !r._latest)
             return false
           if (links.indexOf(r[CUR_HASH]) === -1)
             return false

@@ -65,7 +65,7 @@ const merged = extend({
   LOCAL_TRADLE_SERVERS: [
     `http://${LOCAL_IP}:21012`,
     // // silly
-    // 'https://if9ikxe9lk.execute-api.ap-southeast-2.amazonaws.com/dev',
+    // 'https://4uxjw2j0cc.execute-api.ap-southeast-2.amazonaws.com/dev',
     // // `http://${LOCAL_IP}:21013`,
     // hats
     'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',

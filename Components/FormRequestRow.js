@@ -950,9 +950,8 @@ class FormRequestRow extends Component {
       if (addMessage) {
         // if (isRequestForNext  ||  shareableResources)
         //   addMessage = DEFAULT_MESSAGE
-        let hasSharables = shareableResources  &&  (!utils.isEmpty(shareableResources.multientryResources)  ||  !utils.isEmpty(shareableResources.verifications))
         if (!isRequestForNext)
-          messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}, hasSharables && {paddingBottom: 15}]}>{addMessage}</Text>
+          messagePart = <Text style={[chatStyles.resourceTitle, {flex: 1, alignSelf: 'flex-start', color: mColor}, this.hasSharables() && {paddingBottom: 15}]}>{addMessage}</Text>
       }
       msg = <View key={this.getNextKey()}>
                <View style={styles.messageLink}>
@@ -981,6 +980,19 @@ class FormRequestRow extends Component {
       }
       Actions.addChatItem(params)
     }
+  }
+  hasSharables() {
+    let shareableResources = this.props.shareableResources
+    if (!shareableResources)
+      return
+    let rtype = this.props.resource[TYPE]
+    let multientryResources = shareableResources.multientryResources
+    if (!utils.isEmpty(multientryResources)  &&  multientryResources[rtype])
+      return true
+
+    let verifications = utils.isEmpty(shareableResources.verifications)
+    if (!utils.isEmpty(verifications)  &&  verifications[rtype])
+      return true
   }
   makeButtonLink(form, isMyMessage, styles, msg, isAnother) {
     let zoomIn = {transform: [{scale: this.springValue}]}
@@ -1217,7 +1229,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       margin: 1,
       // marginTop: -37,
       marginTop: -5,
-      width: msgWidth - 100,
+      width: msgWidth - 115,
       backgroundColor: '#ffffff',
       borderBottomLeftRadius: 10,
       borderBottomRightRadius: 10
