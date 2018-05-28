@@ -3892,7 +3892,7 @@ var Store = Reflux.createStore({
           r = _.cloneDeep(resource)
           r[prop.name] = resourceWithBacklink[prop.name]
           if (prop === submissions)
-            this.organizeSubmissions(resource)
+            this.organizeSubmissions(r)
         }
         else
           r = resource
@@ -10392,7 +10392,8 @@ var Store = Reflux.createStore({
             if (context  &&  !app._context)
               app._context = context
             this.trigger({action: 'updateRow', resource: app, forceUpdate: true})
-            this.trigger({action: 'getItem', resource: app})
+            await this.onGetItem({resource: app, backlink: this.getModel(APPLICATION).properties.submissions, search: true})
+            // this.trigger({action: 'getItem', resource: app})
           }
         }
       }
