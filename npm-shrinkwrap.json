@@ -62,9 +62,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.0.1.tgz"
     },
     "@tradle/engine": {
-      "version": "7.0.0",
+      "version": "7.0.1",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-7.0.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-7.0.1.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
@@ -197,7 +197,7 @@
     "@tradle/models-onfido": {
       "version": "1.0.0",
       "from": "tradle/models-onfido",
-      "resolved": "git://github.com/tradle/models-onfido.git#3fa01658407699daf4bdd83f64b4ee4022d1bb3d"
+      "resolved": "git://github.com/tradle/models-onfido.git#7f3bc80646f5e31b3355109f26201561d16e464e"
     },
     "@tradle/models-products-bot": {
       "version": "1.0.0",
