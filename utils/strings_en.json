@@ -271,5 +271,9 @@
     "createNew": "Fill out form \"{1}\"",
     "createNext": "Fill out another form \"{1}\"",
     "incompatibleVersion": "Reset Required",
-    "resetIsRequired": "Due to recent backwards incompatible changes, this update requires a hard reset of the app. Press OK to reset the app's identity and storage."
+    "resetIsRequired": "Due to recent backwards incompatible changes, this update requires a hard reset of the app. Press OK to reset the app's identity and storage.",
+    "updateAppTitle": "App Update Available",
+    "updateAppMessage": "Update now, or shall I remind you later?",
+    "updateNow": "Update Now",
+    "later": "Later"
 }

@@ -2824,22 +2824,23 @@ var Store = Reflux.createStore({
 
     return match
   },
-  onStart() {
+  async onStart() {
     this.triggerBusy()
     var self = this;
-    Q.all([
+    const [hasTouchID] = await Promise.all([
       LocalAuth.hasTouchID(),
       this.ready
     ])
-    .spread(hasTouchID => {
-      // isLoaded = true
-      self.trigger({
-        action: 'start',
-        models: models,
-        me: me,
-        hasTouchID
-      });
-    })
+
+    // isLoaded = true
+    self.trigger({
+      action: 'start',
+      models: models,
+      me: me,
+      hasTouchID
+    });
+
+    await this.maybeRequestUpdate()
   },
   onSetPreferences(preferences) {
     this.preferences = preferences
@@ -9411,6 +9412,39 @@ var Store = Reflux.createStore({
       })
 
       await this.onReloadDB()
+    }
+  },
+
+  async maybeRequestUpdate() {
+    if (__DEV__) return
+
+    let isLatest
+    try {
+      isLatest = await utils.isLatestVersion()
+    } catch (err) {
+      debug('failed to check if latest version', err.message)
+      return
+    }
+
+    if (isLatest) return
+
+    const willUpdate = await new Promise(resolve => {
+      Alert.alert(
+        translate('updateAppTitle'),
+        translate('updateAppMessage'),
+        [
+          { text: translate('later'), onPress: () => resolve(false) },
+          { text: translate('updateNow'), onPress: () => resolve(true) }
+        ],
+      )
+    })
+
+    if (!willUpdate) return
+
+    try {
+      utils.openInAppStore()
+    } catch (err) {
+      debug('failed to open app store', err.message)
     }
   },
 
