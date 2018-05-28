@@ -338,7 +338,7 @@ class MessageView extends Component {
   }
 
   getRefResource(resource, prop) {
-    let model = utils.getModel(this.props.resource[TYPE]);
+    let model = utils.getModel(utils.getType(resource));
 
     this.state.prop = prop;
     // this.state.propValue = utils.getId(resource.id);
