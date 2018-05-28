@@ -6519,7 +6519,7 @@ var Store = Reflux.createStore({
   convertInlineRefs(ref, rr, isArray) {
     let pm = this.getModel(ref)
     if (pm.abstract  ||  pm.subClassOf === ENUM)
-      return
+      return rr
     let props = pm.properties
     for (let p in rr) {
       if (!props[p]  ||  !rr[p][TYPE])
