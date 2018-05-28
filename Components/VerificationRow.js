@@ -198,9 +198,7 @@ class VerificationRow extends Component {
       let dateVal = resource[dateP]
       if (dateVal) {
         let dateFormatted = dateformat(dateVal, 'UTC:mmm dS, yyyy h:MM TT')
-        date =  <View style={styles.datePlacement}>
-                  <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateFormatted}</Text>
-                </View>
+        date = <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateFormatted}</Text>
       }
     }
     let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
@@ -252,7 +250,7 @@ class VerificationRow extends Component {
     let description
     let titleComponent
     if (isVerification) {
-      titleComponent = <Text style={[styles.rTitle, {fontWeight: '600'}]}>
+      titleComponent = <Text style={styles.rTitle}>
                           <Text style={styles.rTitle}>{dn}</Text>
                         </Text>
     }
@@ -331,7 +329,7 @@ class VerificationRow extends Component {
                          </View>
 
     }
-    let verifiedByAndDateStyle = {marginTop: sharedFrom ? -3 : 3, flexDirection: 'row', justifyContent: 'flex-end'}
+    let verifiedByAndDateStyle = {marginTop: -3, flexDirection: utils.isWeb() ? 'row' : 'column' }
     let header =  <View style={styles.header} key={this.getNextKey()}>
                     <View style={styles.row}>
                       {photo}
@@ -345,7 +343,7 @@ class VerificationRow extends Component {
                           {supportingDocuments}
                           {multiChooserIcon}
                         </View>
-                          {sharedFrom}
+                        {sharedFrom}
                         <View style={verifiedByAndDateStyle}>
                           {verifiedBy}
                           {date}
@@ -366,9 +364,7 @@ class VerificationRow extends Component {
       if (this.props.search  &&  this.props.searchCriteria)
         this.formatFilteredResource(model, resource, renderedRows)
       let content = <TouchableOpacity onPress={onSelect.bind(this)}>
-                      <View style={styles.rowSpace}>
-                        {header}
-                      </View>
+                      {header}
                     </TouchableOpacity>
       if (!isVerification)
         content = <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
@@ -666,15 +662,12 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 10
   },
-  rowSpace: {
-    flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
   header: {
     flex: 1,
     backgroundColor: '#ffffff',
     borderBottomColor: '#f0f0f0',
-    borderBottomWidth: 1
+    borderBottomWidth: 1,
+    paddingBottom: 5
   },
   rTitle: {
     // flex: 1,
@@ -774,7 +767,7 @@ var styles = StyleSheet.create({
     width: 70
   },
   verifiedByView: {
-    alignItems: 'flex-end',
+    // alignItems: 'flex-end',
     paddingRight: 5
   },
   photoIconPlacement: {
@@ -782,9 +775,6 @@ var styles = StyleSheet.create({
   },
   photoPlaceholder: {
     width: 70
-  },
-  datePlacement: {
-    alignItems: 'flex-end'
   },
   rowContent: {
     flexDirection: 'row',

@@ -156,7 +156,7 @@ class MessageRow extends Component {
       // }
       let isDataBundle = resource[TYPE] === DATA_BUNDLE
       if (isMyMessage  &&  !isSimpleMessage  &&  !isDataBundle) {
-        let st = {backgroundColor: bankStyle.contextBackgroundColor}
+        let st = {backgroundColor: bankStyle.contextBackgroundColor, borderColor: bankStyle.linkColor}
         addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       }
     }
