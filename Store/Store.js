@@ -9396,7 +9396,7 @@ var Store = Reflux.createStore({
   async maybeRequireFreshUser(identity) {
     const { resetCheckpoint } = ENV
     if (!resetCheckpoint) return
-    if (resetCheckpoint > Date.now()) {
+    if (!__DEV__ && resetCheckpoint > Date.now()) {
       console.warn('reset checkpoint is bigger than current timestamp, ignoring')
       return
     }
