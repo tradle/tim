@@ -5,10 +5,10 @@ import withDefaults from 'lodash/defaults'
 import groupBy from 'lodash/groupBy'
 import getValues from 'lodash/values'
 // import BlinkID from 'react-native-blinkid'
-import { BlinkID, MRTDKeys, USDLKeys, EUDLKeys, NZDLKeys, MYKADKeys } from 'blinkid-react-native'
+import { BlinkID, MRTDKeys, USDLKeys, EUDLKeys, NZDLFrontKeys as NZDLKeys, MYKADKeys } from 'blinkid-react-native'
 import validateResource from '@tradle/validate-resource'
 import { microblink } from '../utils/env'
-import { isSimulator } from '../utils/utils'
+import { isSimulator, keyByValue } from '../utils/utils'
 
 const { sanitize } = validateResource.utils
 const recognizers = {
@@ -21,7 +21,7 @@ const recognizers = {
   // scans USDL (US Driver License)
   usdl: BlinkID.RECOGNIZER_USDL,
   // scans NZDL (NZ Driver License)
-  nzdl: BlinkID.RECOGNIZER_NZDL,
+  nzdl: BlinkID.RECOGNIZER_NZDL_FRONT,
   // scans MyKad (Malaysian ID)
   mykad: BlinkID.RECOGNIZER_MYKAD,
   face: BlinkID.RECOGNIZER_DOCUMENT_FACE
@@ -48,37 +48,37 @@ const scan = (function () {
   if (!licenseKey) return
 
   return async (opts) => {
+    const recognizer = [].concat(opts.recognizers).find(r => {
+      return r !== recognizers.face // face is a secondary recognizer
+    })
+
+    const type = keyByValue(recognizers, recognizer)
     const result = await BlinkID.scan(licenseKey, withDefaults(opts, defaults))
-    return postProcessResult(result)
+    return postProcessResult({ type, result: result.resultList[0] })
   }
 }());
 
-const postProcessResult = ({ resultList }) => {
+const postProcessResult = ({ type, result }) => {
   const ret = {}
-  for (const item of resultList) {
-    const type = item.resultType.toLowerCase().replace(/\s+result$/, '')
-    ret[type] = item.fields
-    const images = {
-      face: item.resultImageFace,
-      successful: item.successful || item.resultImageSuccessful,
-      signature: item.resultImageSignature,
-      document: item.resultImageDocument
-    }
+  let photoId = result.fields
 
-    ret.images = images
-
-    const image = images.document
-    ret.image = {
-      ...image,
-      base64: 'data:image/jpeg;base64,' + image.base64
-    }
+  const normalize = normalizers[type]
+  if (normalize) {
+    photoId = normalize(photoId)
   }
 
-  for (let p in ret) {
-    let normalize = normalizers[p]
-    if (normalize) {
-      ret[p] = normalize(ret[p])
-    }
+  ret[type] = photoId
+  ret.images = {
+    face: result.resultImageFace,
+    successful: result.successful || result.resultImageSuccessful,
+    signature: result.resultImageSignature,
+    document: result.resultImageDocument
+  }
+
+  const image = ret.images.document
+  ret.image = {
+    ...image,
+    base64: 'data:image/jpeg;base64,' + image.base64
   }
 
   return sanitize(ret).sanitized
@@ -134,8 +134,8 @@ function normalizeNZDLResult (result) {
 
   const personal = {
     dateOfBirth: result[NZDLKeys.DateOfBirth],
-    firstName: normalizeWhitespace(result[NZDLKeys.FirstName]),
-    lastName: normalizeWhitespace(result[NZDLKeys.LastName]),
+    firstName: normalizeWhitespace(result[NZDLKeys.FirstNames]),
+    lastName: normalizeWhitespace(result[NZDLKeys.Surname]),
   }
 
   const document = {
@@ -143,8 +143,8 @@ function normalizeNZDLResult (result) {
     cardVersion: result[NZDLKeys.CardVersion],
     // this is scanned incorrectly as dateOfBirth sometimes
     // and is not present on most licenses' front sides
-    // dateOfIssue: result[NZDLKeys.DateOfIssue],
-    dateOfExpiry: result[NZDLKeys.DateOfExpiry],
+    // dateOfIssue: result[NZDLKeys.IssueDate],
+    dateOfExpiry: result[NZDLKeys.ExpiryDate],
     isDonor: result[NZDLKeys.DonorIndicator] === '1'
   }
 
