@@ -5647,7 +5647,7 @@ var Store = Reflux.createStore({
     }
   },
 
-  async wipeWeb(opts) {
+  async wipeWeb(opts={}) {
     if (global.localStorage) {
       global.localStorage.clear()
       global.localStorage.userWipedDevice = true
@@ -5656,14 +5656,14 @@ var Store = Reflux.createStore({
     if (global.sessionStorage) global.sessionStorage.clear()
     if (leveldown.destroyAll) await leveldown.destroyAll()
 
-    // if (!opts.silent) {
-    //   await new Promise(resolve => {
-    //     Alert.alert(
-    //       'Press OK to restart',
-    //       [{ text: translate('ok'), onPress: resolve }]
-    //     )
-    //   })
-    // }
+    if (!opts.silent) {
+      await new Promise(resolve => {
+        Alert.alert(
+          'Press OK to restart',
+          [{ text: translate('ok'), onPress: resolve }]
+        )
+      })
+    }
 
     utils.restartApp()
   },
@@ -9473,7 +9473,7 @@ var Store = Reflux.createStore({
         )
       })
 
-      await this.onReloadDB()
+      await this.onReloadDB({ silent: true })
     }
   },
 
