@@ -2,6 +2,7 @@ import dateformat from 'dateformat'
 
 import { TYPE } from '@tradle/constants'
 import utils, { translate, isWeb } from '../utils/utils'
+const COUNTRY = 'tradle.Country'
 
 module.exports = function PhotoID ({ models }) {
   return {
@@ -23,7 +24,24 @@ module.exports = function PhotoID ({ models }) {
       console.log('PhotoID: requesting additional properties for Driver Licence')
 
       let scan = form.scanJson
+      let isLicence = form.documentType.title.indexOf('Licence') !== -1
 
+      if (isLicence) {
+        let countryCCA = scan.document  &&  scan.document.country
+        if (countryCCA) {
+          let countryModel = utils.getModel(COUNTRY)
+          // let countryId = form.country.id.split('_')[1]
+          let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
+          if (country.id !== form.country.id.split('_')[1]) {
+            delete form.scanJson
+            delete form.scan
+            return {
+              message: translate('Please scan your document'),
+              requestedProperties: []
+            }
+          }
+        }
+      }
       // cleanup the prefill from the previous scan if there was one
       let props = model.properties
 
@@ -38,22 +56,23 @@ module.exports = function PhotoID ({ models }) {
       }
 
       prefillValues(form, scan, model)
+
       // for (let p in originalModel.properties) {
       //   if (scan[p])
       //     form[p] = scan[p]
       // }
       let requestedProperties
-      if (form.documentType.title.indexOf('Passport') !== -1) {
-        requestedProperties = [
-          {name: 'personalPassport_group'},
-          {name: 'documentPassport_group'}
-        ]
-      }
-      else {
+      if (isLicence) {
         requestedProperties = [
           {name: 'personal_group'},
           {name: 'address_group'},
           {name: 'document_group'}
+        ]
+      }
+      else {
+        requestedProperties = [
+          {name: 'personalPassport_group'},
+          {name: 'documentPassport_group'}
         ]
       }
 
@@ -67,14 +86,23 @@ module.exports = function PhotoID ({ models }) {
 function prefillValues(form, values, model) {
   let props = model.properties
   // let dateProps = ['dateOfExpiry', 'dateOfBirth', 'dateOfIssue']
+  let exclude = [ 'country' ]
   for (let p in values) {
+    if (exclude.includes(p))
+      continue
     let val = values[p]
     if (typeof val === 'object')
       prefillValues(form, val, model)
+    else if (!props[p]) {
+      if (p === 'birthData') {
+        let parts = val.split(' ')
+        form.dateOfBirth = new Date(parts[0]).getTime()
+      }
+    }
     else if (props[p].type === 'date') { //dateProps.includes(p)) {//props[p].type === 'date') {
       // form[p] = Number(val)
       if (typeof val === 'string') {
-        form[p] = formatDate(val, 'yyyy-mm-dd')
+        form[p] = new Date(val).getTime() //formatDate(val, 'yyyy-mm-dd')
         val = formatDate(val, 'mmm dS, yyyy')
       }
     }
@@ -84,10 +112,11 @@ function prefillValues(form, values, model) {
       form[p] = val
     }
   }
-  if (form.birthData) {
-    let parts = form.birthData.split(' ')
-    form.birthData = formatDate(parts[0], 'mmm dS, yyyy')
-  }
+
+  // if (form.birthData) {
+  //   let parts = form.birthData.split(' ')
+  //   form.birthData = formatDate(parts[0], 'mmm dS, yyyy')
+  // }
 }
 function formatDate (date, format) {
   if (typeof date === 'string')
