@@ -31,7 +31,7 @@ const defaults = {
   enableBeep: true,
   useFrontCamera: false,
   shouldReturnFaceImage: true,
-  shouldReturnCroppedImage: true,
+  shouldReturnDocumentImage: true,
   // shouldReturnSignatureImage: true,
   // shouldReturnSuccessfulImage: true,
   recognizers: getValues(recognizers)
@@ -49,31 +49,40 @@ const scan = (function () {
 
   return async (opts) => {
     const result = await BlinkID.scan(licenseKey, withDefaults(opts, defaults))
-    const image = result.images.cropped
-    if (image) {
-      result.image = {
-        ...image,
-        base64: 'data:image/jpeg;base64,' + image.base64
-      }
-    }
-
-    for (const item of result.resultList) {
-      const type = item.resultType.toLowerCase().replace(/\s+result$/, '')
-      result[type] = item.fields
-    }
-
-    delete result.resultList
-
-    for (let p in result) {
-      let normalize = normalizers[p]
-      if (normalize) {
-        result[p] = normalize(result[p])
-      }
-    }
-
-    return sanitize(result).sanitized
+    return postProcessResult(result)
   }
 }());
+
+const postProcessResult = ({ resultList }) => {
+  const ret = {}
+  for (const item of resultList) {
+    const type = item.resultType.toLowerCase().replace(/\s+result$/, '')
+    ret[type] = item.fields
+    const images = {
+      face: item.resultImageFace,
+      successful: item.successful || item.resultImageSuccessful,
+      signature: item.resultImageSignature,
+      document: item.resultImageDocument
+    }
+
+    ret.images = images
+
+    const image = images.document
+    ret.image = {
+      ...image,
+      base64: 'data:image/jpeg;base64,' + image.base64
+    }
+  }
+
+  for (let p in ret) {
+    let normalize = normalizers[p]
+    if (normalize) {
+      ret[p] = normalize(ret[p])
+    }
+  }
+
+  return sanitize(ret).sanitized
+}
 
 const dismiss = BlinkID && (BlinkID.dismiss || BlinkID.cancel)
 

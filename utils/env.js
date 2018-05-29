@@ -50,9 +50,14 @@ const navBarHeight = Platform.select({
 })
 // LOCAL_TRADLE_SERVER: `http://${LOCAL_IP}:44444`,
 
+const idInAppStore = Platform.select({
+  ios: '1227944773'
+})
+
 const bundleId = DeviceInfo.getBundleId()
 const APP_URL = Platform.select({
-  ios: `https://itunes.apple.com/us/app/${bundleId}`,
+  // ios: `itms-apps://itunes.apple.com/us/app/tradle/id${idInAppStore}?mt=8`,
+  ios: `https://itunes.apple.com/us/app/tradle/id${idInAppStore}?mt=8`,
   android: `https://play.google.com/store/apps/details?id=${bundleId}`,
   web: 'https://app.tradle.io'
 })

@@ -142,6 +142,27 @@ var defaultPropertyValues = {}
 var hidePropertyInEdit = {}
 
 const IS_URL_REGEX = /^https?:\/\//
+const getVersionInAppStore = Platform.select({
+  ios: async () => {
+    const bundleId = DeviceInfo.getBundleId()
+    const qs = querystring.stringify({ bundleId })
+    const res = await utils.fetchWithBackoff(`http://itunes.apple.com/lookup?${qs}`)
+    const json = await res.json()
+    if (json.resultCount < 0) throw new Error('app not found')
+
+    return json.results[0].version
+  },
+
+  // android: async() => {
+  //   const res = await fetch(ENV.APP_URL)
+  //   const html = await res.text()
+  //   return html.match(/Current Version.*?([\d.]+)/)[1]
+  // }
+
+  default: async () => {
+    throw new Error('not supported')
+  }
+})
 
 var utils = {
   isEmpty(obj) {
@@ -2511,18 +2532,15 @@ var utils = {
     return await res.json()
   },
 
+  getVersionInAppStore,
+
+  getInstalledVersion() {
+    return DeviceInfo.getVersion()
+  },
+
   async isLatestVersion() {
-    // no way to detect
-    if (!utils.isIOS()) return true
-
-    const bundleId = DeviceInfo.getBundleId()
-    const qs = querystring.stringify({ bundleId })
-    const res = await utils.fetchWithBackoff(`http://itunes.apple.com/lookup?${qs}`)
-    const json = await res.json()
-    if (json.resultCount < 0) throw new Error('app not found')
-
-    const appVersion = json.results[0].version
-    return appVersion !== DeviceInfo.getVersion()
+    const storeVersion = await getVersionInAppStore()
+    return storeVersion === utils.getInstalledVersion()
   },
 
   openInAppStore() {
