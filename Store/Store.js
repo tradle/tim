@@ -1753,7 +1753,9 @@ var Store = Reflux.createStore({
     }
   },
 
-  addContactIdentity({ identity, permalink }) {
+  async addContactIdentity({ identity, permalink }) {
+    this.validateResource(identity)
+
     if (!permalink) permalink = utils.getPermalink(identity)
     if (!(permalink in this._identityPromises)) {
       this._identityPromises[permalink] = this._enginePromise
@@ -1762,7 +1764,7 @@ var Store = Reflux.createStore({
 
     // if meDriver is not available, don't lock everything up
     // add identity as soon as engine is available
-    return meDriver ? this._identityPromises[permalink] : Promise.resolve()
+    if (meDriver) await this._identityPromises[permalink]
   },
 
   onSetProviderStyle(stylePack) {
@@ -2506,7 +2508,12 @@ var Store = Reflux.createStore({
 
     // promises.push(self.addInfo(sp, originalUrl, newServer))
   },
-  addInfo(sp, url, newServer) {
+  async addInfo(sp, url, newServer) {
+    // TODO: evaluate security of this
+    await this.addContactIdentity({
+      identity: sp.bot.pub
+    })
+
     var okey
     if (sp.org) {
       if (!sp.org[ROOT_HASH])
@@ -2619,35 +2626,21 @@ var Store = Reflux.createStore({
     //   titile: list[pkey].formatted
     // })
 
-    var promises = [
-      // TODO: evaluate the security of this
-      this.addContactIdentity({
-        identity: sp.bot.pub
-      })
-    ]
-
     if (batch.length)
-      promises.push(db.batch(batch))
+      await db.batch(batch)
 
-    return Q.allSettled(promises)
-    .then(() => {
-      const common = {
-        hash,
-        txId: sp.bot.txId,
-        aws: sp.aws,
-        connectEndpoint: sp.connectEndpoint
-      }
+    const common = {
+      hash,
+      txId: sp.bot.txId,
+      aws: sp.aws,
+      connectEndpoint: sp.connectEndpoint
+    }
 
-      if (!sp.isEmployee)
-        return { ...common, id: sp.id, url }
+    if (!sp.isEmployee)
+      return { ...common, id: sp.id, url }
 
-      let orgSp = SERVICE_PROVIDERS.filter((r) => utils.getId(r.org) === okey)[0]
-      return { ...common, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
-    })
-    .catch(err => {
-      debugger
-      throw err
-    })
+    let orgSp = SERVICE_PROVIDERS.filter((r) => utils.getId(r.org) === okey)[0]
+    return { ...common, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
   },
   resetForEmployee(me, org) {
     if (!me  ||  !me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(org))
@@ -11601,6 +11594,14 @@ var Store = Reflux.createStore({
   getLens(id) {
     return lenses[id]
   },
+
+  validateResource(resource) {
+    validateResource({
+      models: this.getModels(),
+      resource
+    })
+  },
+
   loadDB() {
     const self = this
     if (utils.isEmpty(models))
