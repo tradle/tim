@@ -1153,7 +1153,7 @@
     "blinkid-react-native": {
       "version": "2.0.0",
       "from": "tradle/blinkid-react-native#dev",
-      "resolved": "git://github.com/tradle/blinkid-react-native.git#15255e7839532da23981ad8fd29d8894fa42067f"
+      "resolved": "git://github.com/tradle/blinkid-react-native.git#13a09deb26371814c5236c002c08006b4967e8ba"
     },
     "block-stream": {
       "version": "0.0.9",
