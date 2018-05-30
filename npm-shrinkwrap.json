@@ -57,9 +57,9 @@
       "resolved": "git://github.com/tradle/custom-models.git#0a30103cd7fb48bea33ee53ac4de9586ead7515d"
     },
     "@tradle/embed": {
-      "version": "1.1.0",
+      "version": "1.1.1",
       "from": "@tradle/embed@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.0.tgz"
+      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.1.tgz"
     },
     "@tradle/engine": {
       "version": "7.0.1",
