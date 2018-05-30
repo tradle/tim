@@ -76,9 +76,11 @@ const postProcessResult = ({ type, result }) => {
   }
 
   const image = ret.images.document
-  ret.image = {
-    ...image,
-    base64: 'data:image/jpeg;base64,' + image.base64
+  if (image) {
+    ret.image = {
+      ...image,
+      base64: 'data:image/jpeg;base64,' + image.base64
+    }
   }
 
   return sanitize(ret).sanitized

@@ -177,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#6ce8b8f8e387b1af403b6012c22331aaa11c2283"
+      "resolved": "git://github.com/tradle/models.git#678662816782bd5a834077a83a9297fcf83423aa"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -252,9 +252,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.0.0.tgz"
     },
     "@tradle/validate-resource": {
-      "version": "4.0.0",
+      "version": "4.1.0",
       "from": "@tradle/validate-resource@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-4.0.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-4.1.0.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
@@ -1153,7 +1153,7 @@
     "blinkid-react-native": {
       "version": "2.0.0",
       "from": "tradle/blinkid-react-native#dev",
-      "resolved": "git://github.com/tradle/blinkid-react-native.git#15255e7839532da23981ad8fd29d8894fa42067f"
+      "resolved": "git://github.com/tradle/blinkid-react-native.git#13a09deb26371814c5236c002c08006b4967e8ba"
     },
     "block-stream": {
       "version": "0.0.9",
