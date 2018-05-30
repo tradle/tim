@@ -53,7 +53,8 @@ var search = {
         const result = await meDriver.sign({
           object: {
             [TYPE]: 'tradle.GraphQLQuery',
-            body
+            body,
+            _time: Date.now()
           }
         })
 

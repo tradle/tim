@@ -210,9 +210,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/multiqueue/-/multiqueue-2.3.1.tgz"
     },
     "@tradle/protocol": {
-      "version": "4.0.0",
+      "version": "4.0.2",
       "from": "@tradle/protocol@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-4.0.0.tgz"
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-4.0.2.tgz"
     },
     "@tradle/restore": {
       "version": "1.0.0",
@@ -235,9 +235,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.0.0.tgz"
     },
     "@tradle/validate-resource": {
-      "version": "4.1.0",
+      "version": "4.2.1",
       "from": "@tradle/validate-resource@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-4.1.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-4.2.1.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
