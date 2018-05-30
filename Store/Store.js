@@ -1754,7 +1754,12 @@ var Store = Reflux.createStore({
   },
 
   async addContactIdentity({ identity, permalink }) {
-    this.validateResource(identity)
+    try {
+      this.validateResource(identity)
+    } catch (err) {
+      debug('received invalid identity', err.message)
+      throw err
+    }
 
     if (!permalink) permalink = utils.getPermalink(identity)
     if (!(permalink in this._identityPromises)) {
