@@ -24,9 +24,12 @@ class PhotoCarousel extends Component {
   }
   render() {
     let photoUrls = [];
-    let currentPhoto = this.props.currentPhoto || (this.props.photos && this.props.photos[0])
+    let rPhotos = this.props.photos
+    let currentPhoto = this.props.currentPhoto || (rPhotos.length  &&  rPhotos[0])
     let currentPhotoIndex = -1;
-    let n = this.props.photos && this.props.photos.length || 1;
+    if (!rPhotos)
+      rPhotos = [currentPhoto]
+    let n = rPhotos.length
 
     let model = utils.getModel(this.props.resource[constants.TYPE]);
     let isVertical = currentPhoto.isVertical
@@ -35,9 +38,10 @@ class PhotoCarousel extends Component {
     let styles = createStyles()
     let photos = []
     let {width, height} = utils.dimensions(PhotoCarousel)
+
     for (let j=0; j<2; j++) {
       for (let i=0; i<n; i++) {
-        let photo = this.props.photos[i];
+        let photo = rPhotos[i];
 
         if (currentPhotoIndex === -1  &&  photo.url !== currentPhoto.url) {
           if (n !== 1)
