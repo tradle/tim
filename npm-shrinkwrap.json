@@ -1072,11 +1072,6 @@
         }
       }
     },
-    "blinkid-react-native": {
-      "version": "2.0.0",
-      "from": "tradle/blinkid-react-native#dev",
-      "resolved": "git://github.com/tradle/blinkid-react-native.git#13a09deb26371814c5236c002c08006b4967e8ba"
-    },
     "bluebird": {
       "version": "2.11.0",
       "from": "bluebird@2.11.0",
