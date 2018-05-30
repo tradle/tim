@@ -13,7 +13,7 @@ if (platform !== 'ios' && platform !== 'android') {
 if (!stage) {
   // yes, this is ridiculous, need to do some dev ops
   // to configure things right
-  stage = platform === 'ios' ? 'Staging' : 'Production'
+  stage = platform === 'Production'
 }
 
 if (stage !== 'Staging' && stage !== 'Production') {

@@ -54,7 +54,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#304de4e217114f0c503784ea8e111f0afa829a73"
+      "resolved": "git://github.com/tradle/custom-models.git#0a30103cd7fb48bea33ee53ac4de9586ead7515d"
     },
     "@tradle/embed": {
       "version": "1.1.0",
@@ -177,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#6ce8b8f8e387b1af403b6012c22331aaa11c2283"
+      "resolved": "git://github.com/tradle/models.git#e44ee1e08920acabc6b4111d89b5a923d3bf9fcf"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -187,22 +187,22 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#62abd172d8f38b6ed5f5976977a5f7308d236363"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#0d77e00e626bb48bad827df8af44fb7f1e51bf1b"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
       "from": "tradle/models-nz",
-      "resolved": "git://github.com/tradle/models-nz.git#3d35e1cce18132e1037136e2f871a6c87f195f7a"
+      "resolved": "git://github.com/tradle/models-nz.git#b6a052a0e97f0a35cbb7095c0a1a13672fe3ab4f"
     },
     "@tradle/models-onfido": {
       "version": "1.0.0",
       "from": "tradle/models-onfido",
-      "resolved": "git://github.com/tradle/models-onfido.git#7f3bc80646f5e31b3355109f26201561d16e464e"
+      "resolved": "git://github.com/tradle/models-onfido.git#ca851003279b569b74be08199ca0a36110a9c67b"
     },
     "@tradle/models-products-bot": {
       "version": "1.0.0",
       "from": "tradle/models-products-bot",
-      "resolved": "git://github.com/tradle/models-products-bot.git#9b0b0b761f46cf089b7b43934068c434103ef042"
+      "resolved": "git://github.com/tradle/models-products-bot.git#8a5beb61c2da34ece4a1dd674f541f673524cd51"
     },
     "@tradle/multiqueue": {
       "version": "2.3.1",
@@ -235,9 +235,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.0.0.tgz"
     },
     "@tradle/validate-resource": {
-      "version": "4.0.0",
+      "version": "4.1.0",
       "from": "@tradle/validate-resource@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-4.0.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-resource/-/validate-resource-4.1.0.tgz",
       "dependencies": {
         "debug": {
           "version": "3.1.0",
@@ -1075,7 +1075,7 @@
     "blinkid-react-native": {
       "version": "2.0.0",
       "from": "tradle/blinkid-react-native#dev",
-      "resolved": "git://github.com/tradle/blinkid-react-native.git#15255e7839532da23981ad8fd29d8894fa42067f"
+      "resolved": "git://github.com/tradle/blinkid-react-native.git#13a09deb26371814c5236c002c08006b4967e8ba"
     },
     "bluebird": {
       "version": "2.11.0",

@@ -35,7 +35,8 @@ import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import Strings from './strings'
-import { id } from '@tradle/build-resource'
+import { id, calcLinks } from '@tradle/build-resource'
+
 import Lens from '@tradle/lens'
 
 // import Orientation from 'react-native-orientation'
@@ -700,7 +701,7 @@ var utils = {
   makeId(type, permalink, link) {
     let model = this.getModel(type)
     link = link || permalink
-    return id({model, permalink, link})
+    return this.buildId({model, permalink, link})
   },
   getType(r) {
     if (typeof r === 'string')
@@ -1591,6 +1592,29 @@ var utils = {
     let timezone = DeviceInfo.getTimezone()
     return DeviceInfo.getModel() === 'Simulator' || DeviceInfo.isEmulator()
   },
+
+  buildId ({ model, resource, type, link, permalink }) {
+    if (resource  &&  !(link && permalink)) {
+      if (!resource[SIG]) {
+        throw new Error(`expected resource with type "${resource[TYPE]}" to have a signature`)
+      }
+
+      const links = calcLinks(resource)
+      link = links.link
+      permalink = links.permalink
+    }
+
+    if (!(link && permalink)) {
+      throw new Error('expected "link" and "permalink"')
+    }
+
+    if (!type) {
+      if (resource) type = resource[TYPE]
+      else if (model) type = model.id
+    }
+    return `${type}_${permalink}_${link}`
+  },
+
   toOldStyleWrapper: function (wrapper) {
     if (!wrapper.permalink) return wrapper
 

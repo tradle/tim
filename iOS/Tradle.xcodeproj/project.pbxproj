@@ -511,6 +511,13 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNFirebase;
 		};
+		736E5A7F20BC95DD00C62331 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 163CDE4E2087CAD3001065FB;
+			remoteInfo = "RNRandomBytes-tvOS";
+		};
 		7379F8051EDA17D90093535C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7379F7F11EDA17D80093535C /* RCTPushNotification.xcodeproj */;
@@ -893,6 +900,7 @@
 			isa = PBXGroup;
 			children = (
 				732B643D1ED9FF7C0056F4BF /* libRNRandomBytes.a */,
+				736E5A8020BC95DD00C62331 /* libRNRandomBytes-tvOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1832,6 +1840,13 @@
 			remoteRef = 73523B7920603F4D00AAE739 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		736E5A8020BC95DD00C62331 /* libRNRandomBytes-tvOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libRNRandomBytes-tvOS.a";
+			remoteRef = 736E5A7F20BC95DD00C62331 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		7379F8061EDA17D90093535C /* libRCTPushNotification.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1902,7 +1917,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\nif [ \"$CONFIGURATION\" == \"Release\" ]; then\n  export NODE_BINARY=node\n  ../scripts/install-ios-app.sh\n  PATH=$(bash -l -c 'echo $PATH') ../scripts/save-release.sh\nfi";
+			shellScript = "set -euo pipefail\nif [ \"$CONFIGURATION\" != \"Debug\" ]; then\n  export NODE_BINARY=node\n  ../scripts/install-ios-app.sh\n  PATH=$(bash -l -c 'echo $PATH') ../scripts/save-release.sh\nfi";
 		};
 		611C8F29BAD860EA59E76678 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1973,7 +1988,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -2018,16 +2033,18 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CODE_PUSH_KEY = "";
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "";
 				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 94V7783F74;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)/Branch.framework/Headers",
 				);
@@ -2095,14 +2112,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 94V7783F74;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 					"$(PROJECT_DIR)/Branch.framework/Headers",
 				);

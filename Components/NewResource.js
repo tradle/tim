@@ -218,7 +218,7 @@ class NewResource extends Component {
   }
 
   onAction(params) {
-    let { resource, action, error, requestedProperties, message, validationErrors } = params
+    let { resource, action, error, requestedProperties, deleteProperties, message, validationErrors } = params
     let { navigator, prop, containerResource, callback, modelName, originatingMessage, bankStyle, model, currency, chat } = this.props
     if (action === 'languageChange') {
       navigator.popToTop()
@@ -236,8 +236,15 @@ class NewResource extends Component {
       return
     }
     if (action === 'formEdit') {
-      if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource))
-        this.setState({requestedProperties: requestedProperties, resource: resource ||  this.state.resource, message: message })
+      if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource)) {
+        let r = resource ||  this.state.resource
+        if (deleteProperties  &&  this.floatingProps)
+          deleteProperties.forEach(p => {
+            delete this.floatingProps[p]
+            delete r[p]
+          })
+        this.setState({requestedProperties: requestedProperties, resource: r, message: message })
+      }
       return
     }
     if (action === 'noAccessToServer') {
@@ -846,9 +853,9 @@ class NewResource extends Component {
     let jsonProps = utils.getPropertiesWithRange('json', meta)
     let jsons = []
     if (jsonProps  &&  jsonProps.length) {
-      let hidden = meta.properties.hidden
+      let hidden = meta.hidden
       jsonProps.forEach((prop) => {
-        if (hidden  &&  hidden.indexOf(prop.name) !== -1)
+        if (prop.hidden  ||  (hidden  &&  hidden.includes(prop.name)))
           return
         let val = this.state.resource[prop.name]
         if (val) {

@@ -1778,7 +1778,9 @@ var Store = Reflux.createStore({
     }
   },
 
-  addContactIdentity({ identity, permalink }) {
+  async addContactIdentity({ identity, permalink }) {
+    this.validateResource(identity)
+
     if (!permalink) permalink = utils.getPermalink(identity)
     if (!(permalink in this._identityPromises)) {
       this._identityPromises[permalink] = this._enginePromise
@@ -1787,7 +1789,7 @@ var Store = Reflux.createStore({
 
     // if meDriver is not available, don't lock everything up
     // add identity as soon as engine is available
-    return meDriver ? this._identityPromises[permalink] : Promise.resolve()
+    if (meDriver) await this._identityPromises[permalink]
   },
 
   onSetProviderStyle(stylePack) {
@@ -2531,7 +2533,12 @@ var Store = Reflux.createStore({
 
     // promises.push(self.addInfo(sp, originalUrl, newServer))
   },
-  addInfo(sp, url, newServer) {
+  async addInfo(sp, url, newServer) {
+    // TODO: evaluate security of this
+    await this.addContactIdentity({
+      identity: sp.bot.pub
+    })
+
     var okey
     if (sp.org) {
       if (!sp.org[ROOT_HASH])
@@ -2644,35 +2651,21 @@ var Store = Reflux.createStore({
     //   titile: list[pkey].formatted
     // })
 
-    var promises = [
-      // TODO: evaluate the security of this
-      this.addContactIdentity({
-        identity: sp.bot.pub
-      })
-    ]
-
     if (batch.length)
-      promises.push(db.batch(batch))
+      await db.batch(batch)
 
-    return Q.allSettled(promises)
-    .then(() => {
-      const common = {
-        hash,
-        txId: sp.bot.txId,
-        aws: sp.aws,
-        connectEndpoint: sp.connectEndpoint
-      }
+    const common = {
+      hash,
+      txId: sp.bot.txId,
+      aws: sp.aws,
+      connectEndpoint: sp.connectEndpoint
+    }
 
-      if (!sp.isEmployee)
-        return { ...common, id: sp.id, url }
+    if (!sp.isEmployee)
+      return { ...common, id: sp.id, url }
 
-      let orgSp = SERVICE_PROVIDERS.filter((r) => utils.getId(r.org) === okey)[0]
-      return { ...common, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
-    })
-    .catch(err => {
-      debugger
-      throw err
-    })
+    let orgSp = SERVICE_PROVIDERS.filter((r) => utils.getId(r.org) === okey)[0]
+    return { ...common, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
   },
   resetForEmployee(me, org) {
     if (!me  ||  !me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(org))
@@ -3451,8 +3444,8 @@ var Store = Reflux.createStore({
 
     return orgRep
   },
-  async onGetRequestedProperties(r, noTrigger) {
-    let rtype = r[TYPE]
+  async onGetRequestedProperties({resource, currentResource, noTrigger}) {
+    let rtype = resource[TYPE]
     if (!plugins.length  &&  !appPlugins.length)
       return
 
@@ -3460,8 +3453,8 @@ var Store = Reflux.createStore({
     let appP = require('../plugins')
     appP.forEach(p => allPlugins.push(p))
 
-    let _context = r._context
-    if (utils.isStub(r._context))
+    let _context = resource._context
+    if (utils.isStub(resource._context))
       _context = this._getItem(_context.id)
 
     // if (appPlugins)
@@ -3475,7 +3468,7 @@ var Store = Reflux.createStore({
         continue
       moreInfo = plugin(context).validateForm.call(
           {models: {[rtype]: this.getModel(rtype)}},
-          {application: _context, form: r}
+          {application: _context, form: resource, currentResource: currentResource}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo
@@ -3486,23 +3479,22 @@ var Store = Reflux.createStore({
       this.trigger({action: 'formEdit', requestedProperties: {}})
       return
     }
-    // let moreInfo = plugin().validateForm({application: r._context, form: r})
+    // let moreInfo = plugin().validateForm({application: resource._context, form: r})
     let rprops = {}
-    let message
-    if (moreInfo  &&  moreInfo.requestedProperties) {
-      moreInfo.requestedProperties.forEach((r) => {
-        rprops[r.name] = r.message || ''
-      })
-      if (moreInfo.message) {
-        if (message)
-          message += '; ' + moreInfo.message
-        else
-          message = moreInfo.message
+    let message, deleteProperties, notRequired
+    if (moreInfo) {
+      deleteProperties = moreInfo.deleteProperties
+      message = moreInfo.message
+      let requestedProperties = moreInfo.requestedProperties
+      if (requestedProperties) {
+        requestedProperties.forEach((r) => {
+          rprops[r.name] = r.message || ''
+        })
       }
-
     }
+
     if (!noTrigger)
-      this.trigger({action: 'formEdit', requestedProperties: rprops, resource: r, message: message})
+      this.trigger({action: 'formEdit', requestedProperties: rprops, resource, message, deleteProperties})
     return rprops
     // return rprops
   },
@@ -4240,8 +4232,8 @@ var Store = Reflux.createStore({
     //   if (type === SETTINGS)
     //     r.url = SERVICE_PROVIDERS_BASE_URL || SERVICE_PROVIDERS_BASE_URL_DEFAULT
     // }
-    let requestedProperties = r  &&  await this.onGetRequestedProperties(r, true)
-    this.trigger({action: 'getTemporary', resource: r, requestedProperties: requestedProperties})
+    let requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
+    this.trigger({action: 'getTemporary', resource: r, requestedProperties})
   },
 
   async onAddAll(resource, to, message) {
@@ -11673,6 +11665,14 @@ var Store = Reflux.createStore({
   getLens(id) {
     return lenses[id]
   },
+
+  validateResource(resource) {
+    validateResource({
+      models: this.getModels(),
+      resource
+    })
+  },
+
   loadDB() {
     const self = this
     if (utils.isEmpty(models))
