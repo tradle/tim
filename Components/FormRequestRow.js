@@ -999,6 +999,16 @@ class FormRequestRow extends Component {
     if (!msg)
       msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
     let width = utils.getMessageWidth(FormRequestRow) - 40
+    let application = this.props.application
+    if (application) {
+      return (
+         <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
+           <View style={{justifyContent: 'center', width}}>
+             <Text style={styles.addMore}>{msg}</Text>
+           </View>
+         </View>
+      )
+    }
     let content = (
              <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
               <Animated.View style={zoomIn}>
@@ -1010,9 +1020,7 @@ class FormRequestRow extends Component {
                  <Text style={styles.addMore}>{msg}</Text>
                </View>
              </View>
-      )
-    if (this.props.application)
-      return content
+    )
     return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
              this.createNewResource(form, isMyMessage)
            }}>
