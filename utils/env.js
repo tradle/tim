@@ -169,6 +169,8 @@ const merged = extend({
     'tradle.StylesPack',
     'tradle.Introduction',
     'tradle.SelfIntroduction',
+    'tradle.IdentityPublished',
+    'tradle.AssignRelationshipManager',
   ]
 }, environment)
 
