@@ -122,7 +122,7 @@ class PhotoView extends Component {
  //                tension: 1, // Slow
  //                friction: 100,  // Oscillate a lot
  //              }).start();
- //              this.shwCarousel(resource.photos[0])
+ //              this.showCarousel(resource.photos[0])
  //          }}
     let photoView
     let coverPhoto = utils.getPropertiesWithAnnotation(model, 'coverPhoto')
@@ -132,8 +132,6 @@ class PhotoView extends Component {
       var coverPhotoSource = { uri: coverPhotoUri, cache: 'force-cache' }
       if (coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0)
         coverPhotoSource.isStatic = true
-      // else if (coverPhotoUri.indexOf('..') === 0)
-      //   coverPhotoSource = require(coverPhotoUri)
 
       var title = utils.getDisplayName(this.props.resource)
       let fontSize = title.length < 15 ? 30 : 24
@@ -155,45 +153,7 @@ class PhotoView extends Component {
             </TouchableHighlight>
           </Animated.View>
     )
-            // {this.props.children}
-    // return (
-    //       <Animated.View style={style}>
-    //         <TouchableHighlight underlayColor='transparent' onPress={this.openModal.bind(this)}>
-    //           <Image resizeMode='cover' source={source} style={image} />
-    //         </TouchableHighlight>
-    //     <Modal style={{width: width, height: height}} animationType={'fade'} visible={this.state.isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-    //       <TouchableHighlight  onPress={() => this.closeModal()} underlayColor='transparent'>
-    //         <View style={styles.modalBackgroundStyle}>
-    //           {this.shwCarousel(resource.photos[0])}
-    //         </View>
-    //       </TouchableHighlight>
-    //     </Modal>
-    //       </Animated.View>
-    // )
   }
-  /*
-  shwCarousel(currentPhoto) {
-    var photoUrls = [];
-    // var currentPhoto = this.props.currentPhoto || this.props.photos[0];
-    var currentPhotoIndex = -1;
-
-    for (var i=0; i<this.props.resource.photos.length; i++) {
-      var photo = this.props.resource.photos[i];
-
-      if (currentPhotoIndex === -1  &&  photo.url === currentPhoto.url)
-        currentPhotoIndex = i;
-      photoUrls.push(photo.url)
-    }
-    return (
-      <Gallery
-        style={{flex: 1}}
-        images={photoUrls}
-        initialPage={currentPhotoIndex}
-      />
-    );
-
-  }
-  */
   openModal() {
     this.setState({isModalOpen: true});
   }
