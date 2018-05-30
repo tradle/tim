@@ -672,7 +672,7 @@ var NewResourceMixin = {
 
     let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
     if (docScannerProps  &&  docScannerProps.length)
-      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkid')
+      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
 
 
     let dateOfExpiry
@@ -719,7 +719,7 @@ var NewResourceMixin = {
     this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
     this.setState({ resource })
     if (!this.props.search) {
-      Actions.getRequestedProperties(resource)
+      Actions.getRequestedProperties({resource})
       Actions.saveTemporary(resource)
     }
   },
@@ -1553,6 +1553,7 @@ var NewResourceMixin = {
     let isMultichooser = this.props.search  &&  prop.ref  &&  utils.isEnum(prop.ref)
     let isArray = prop.type === 'array'
 
+    let currentR = _.cloneDeep(resource)
     // clause for the items properies - need to redesign
     if (this.props.metadata  &&  this.props.metadata.type === 'array') {
       if (isEnum)
@@ -1668,7 +1669,7 @@ var NewResourceMixin = {
     this.setState(state);
     if (!this.props.search) {
       if (model.subClassOf === FORM)
-        Actions.getRequestedProperties(r)
+        Actions.getRequestedProperties({resource: r, currentResource: currentR})
       Actions.saveTemporary(r)
     }
   },

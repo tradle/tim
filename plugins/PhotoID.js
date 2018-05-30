@@ -8,7 +8,8 @@ module.exports = function PhotoID ({ models }) {
   return {
     validateForm: function validateForm ({
       application,
-      form
+      form,
+      currentResource
     }) {
       if (form[TYPE] !== 'tradle.PhotoID')
         return
@@ -17,64 +18,32 @@ module.exports = function PhotoID ({ models }) {
       if (!isWeb()  &&  !form.scanJson)
         return
 
-      const type = form[TYPE]
-      const model = models[type]
+      let scan = form.scanJson
+      const model = models[form[TYPE]]
 
-      const ret = {}
+      // Check if there is a need to clean the form
+      if (currentResource) {
+        if (currentResource.documentType.id !== form.documentType.id  ||
+            currentResource.country.id !== form.country.id)
+          return cleanupValues(form, scan, model)
+      }
+
       console.log('PhotoID: requesting additional properties for Driver Licence')
 
-      let scan = form.scanJson
       let isLicence = form.documentType.title.indexOf('Licence') !== -1
 
-      if (isLicence) {
-        let countryCCA = scan.document  &&  scan.document.country
-        if (countryCCA) {
-          let countryModel = utils.getModel(COUNTRY)
-          // let countryId = form.country.id.split('_')[1]
-          let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
-          if (country.id !== form.country.id.split('_')[1]) {
-            delete form.scanJson
-            delete form.scan
-            return {
-              message: translate('Please scan your document'),
-              requestedProperties: []
-            }
-          }
-        }
+      let { document } = scan
+      let countryCCA = document && (isLicence && document.country || document.issuer)
+      if (countryCCA) {
+        let countryModel = utils.getModel(COUNTRY)
+        // let countryId = form.country.id.split('_')[1]
+        let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
+        if (country.id !== form.country.id.split('_')[1])
+          cleanupValues(form, scan, model)
       }
-      // cleanup the prefill from the previous scan if there was one
-      let props = model.properties
-
-      for (let p in props) {
-        let prop = props[p]
-        if (prop.list) { //p.indexOf('_group') !== -1) {
-          prop.list.forEach((pName) => {
-            if (pName.indexOf('_group') === -1)
-              delete form[pName]
-          })
-        }
-      }
-
       prefillValues(form, scan, model)
 
-      // for (let p in originalModel.properties) {
-      //   if (scan[p])
-      //     form[p] = scan[p]
-      // }
-      let requestedProperties
-      if (isLicence) {
-        requestedProperties = [
-          {name: 'personal_group'},
-          {name: 'address_group'},
-          {name: 'document_group'}
-        ]
-      }
-      else {
-        requestedProperties = [
-          {name: 'personalPassport_group'},
-          {name: 'documentPassport_group'}
-        ]
-      }
+      let requestedProperties  = getRequestedProps(scan, model, isLicence)
 
       return {
         message: translate('reviewScannedProperties'),
@@ -86,7 +55,11 @@ module.exports = function PhotoID ({ models }) {
 function prefillValues(form, values, model) {
   let props = model.properties
   // let dateProps = ['dateOfExpiry', 'dateOfBirth', 'dateOfIssue']
+  // Check if this is a new scan
   let exclude = [ 'country' ]
+  for (let p in values)
+    if (form[p])
+      return false
   for (let p in values) {
     if (exclude.includes(p))
       continue
@@ -99,28 +72,54 @@ function prefillValues(form, values, model) {
         form.dateOfBirth = new Date(parts[0]).getTime()
       }
     }
-    else if (props[p].type === 'date') { //dateProps.includes(p)) {//props[p].type === 'date') {
-      // form[p] = Number(val)
-      if (typeof val === 'string') {
-        form[p] = new Date(val).getTime() //formatDate(val, 'yyyy-mm-dd')
-        val = formatDate(val, 'mmm dS, yyyy')
-      }
-    }
-    else {
-      if (!props[p])
-        continue
+    else if (props[p].type === 'date'  &&  typeof val === 'string')
+      form[p] = new Date(val).getTime() //formatDate(val, 'yyyy-mm-dd')
+    else
       form[p] = val
-    }
   }
+}
+function getRequestedProps(values, model, isLicence) {
+  if (!values)
+    return
+  let props = model.properties
+  let requestedProperties  = []
 
-  // if (form.birthData) {
-  //   let parts = form.birthData.split(' ')
-  //   form.birthData = formatDate(parts[0], 'mmm dS, yyyy')
-  // }
+  for (let p in values) {
+    let val = values[p]
+    if (typeof val === 'object')
+      getRequestedProps(val, model, isLicence, requestedProperties)
+    else if (props[p])
+      requestedProperties.push({name: p})
+  }
+  if (!isLicence  &&  !requestedProperties.find(p => p.name === 'dateOfIssue'))
+    requestedProperties.push({name: 'dateOfIssue'})
+  return requestedProperties
 }
-function formatDate (date, format) {
-  if (typeof date === 'string')
-    return dateformat(date, format)
-  return dateformat(new Date(date), 'UTC:' + format)
+function cleanupValues(form, values, model) {
+  let props = model.properties
+  let exclude = [ 'country' ]
+  for (let p in values) {
+    if (exclude.includes(p))
+      continue
+    let val = values[p]
+    if (typeof val === 'object')
+      cleanupValues(form, val, model)
+    else if (!props[p]) {
+      if (p === 'birthData')
+        delete form[p]
+    }
+    else
+      delete form[p]
+  }
+  return {
+    message: translate('Please scan your document'),
+    deleteProperties: ['scan', 'scanJson'],
+    requestedProperties: []
+  }
 }
+// function formatDate (date, format) {
+//   if (typeof date === 'string')
+//     return dateformat(date, format)
+//   return dateformat(new Date(date), 'UTC:' + format)
+// }
 

@@ -3429,8 +3429,8 @@ var Store = Reflux.createStore({
 
     return orgRep
   },
-  async onGetRequestedProperties(r, noTrigger) {
-    let rtype = r[TYPE]
+  async onGetRequestedProperties({resource, currentResource, noTrigger}) {
+    let rtype = resource[TYPE]
     if (!plugins.length  &&  !appPlugins.length)
       return
 
@@ -3438,8 +3438,8 @@ var Store = Reflux.createStore({
     let appP = require('../plugins')
     appP.forEach(p => allPlugins.push(p))
 
-    let _context = r._context
-    if (utils.isStub(r._context))
+    let _context = resource._context
+    if (utils.isStub(resource._context))
       _context = this._getItem(_context.id)
 
     // if (appPlugins)
@@ -3453,7 +3453,7 @@ var Store = Reflux.createStore({
         continue
       moreInfo = plugin(context).validateForm.call(
           {models: {[rtype]: this.getModel(rtype)}},
-          {application: _context, form: r}
+          {application: _context, form: resource, currentResource: currentResource}
       )
       if (moreInfo  &&  utils.isPromise(moreInfo))
         moreInfo = await moreInfo
@@ -3464,23 +3464,22 @@ var Store = Reflux.createStore({
       this.trigger({action: 'formEdit', requestedProperties: {}})
       return
     }
-    // let moreInfo = plugin().validateForm({application: r._context, form: r})
+    // let moreInfo = plugin().validateForm({application: resource._context, form: r})
     let rprops = {}
-    let message
-    if (moreInfo  &&  moreInfo.requestedProperties) {
-      moreInfo.requestedProperties.forEach((r) => {
-        rprops[r.name] = r.message || ''
-      })
-      if (moreInfo.message) {
-        if (message)
-          message += '; ' + moreInfo.message
-        else
-          message = moreInfo.message
+    let message, deleteProperties, notRequired
+    if (moreInfo) {
+      deleteProperties = moreInfo.deleteProperties
+      message = moreInfo.message
+      let requestedProperties = moreInfo.requestedProperties
+      if (requestedProperties) {
+        requestedProperties.forEach((r) => {
+          rprops[r.name] = r.message || ''
+        })
       }
-
     }
+
     if (!noTrigger)
-      this.trigger({action: 'formEdit', requestedProperties: rprops, resource: r, message: message})
+      this.trigger({action: 'formEdit', requestedProperties: rprops, resource, message, deleteProperties})
     return rprops
     // return rprops
   },
@@ -4218,8 +4217,8 @@ var Store = Reflux.createStore({
     //   if (type === SETTINGS)
     //     r.url = SERVICE_PROVIDERS_BASE_URL || SERVICE_PROVIDERS_BASE_URL_DEFAULT
     // }
-    let requestedProperties = r  &&  await this.onGetRequestedProperties(r, true)
-    this.trigger({action: 'getTemporary', resource: r, requestedProperties: requestedProperties})
+    let requestedProperties = r  &&  await this.onGetRequestedProperties({resource: r, noTrigger: true})
+    this.trigger({action: 'getTemporary', resource: r, requestedProperties})
   },
 
   async onAddAll(resource, to, message) {
