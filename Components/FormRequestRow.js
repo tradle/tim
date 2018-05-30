@@ -733,7 +733,7 @@ class FormRequestRow extends Component {
       _.extend(r, resource.prefill)
     else {
       // isPrefilled = false
-      isPrefilled = ENV.prefillForms && model.id in formDefaults
+      isPrefilled = /*utils.isSimulator() && */ ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
         _.extend(r, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
@@ -977,25 +977,29 @@ class FormRequestRow extends Component {
     let zoomIn = {transform: [{scale: this.springValue}]}
     if (!msg)
       msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
-
-    let content = (
+    let application = this.props.application
+    if (application) {
+      return (
+         <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
+           <View style={{justifyContent: 'center'}}>
+             <Text style={styles.addMore}>{msg}</Text>
+           </View>
+         </View>
+      )
+    }
+    return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
+             this.createNewResource(form, isMyMessage)
+           }}>
              <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
               <Animated.View style={zoomIn}>
-                 <View style={styles.shareButton}>
-                     <Icon name='md-add' size={20} color='#ffffff'/>
-                 </View>
+                <View style={styles.shareButton}>
+                  <Icon name='md-add' size={20} color='#ffffff'/>
+                </View>
               </Animated.View>
                <View style={{justifyContent: 'center'}}>
                  <Text style={styles.addMore}>{msg}</Text>
                </View>
              </View>
-      )
-    if (this.props.application)
-      return content
-    return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
-             this.createNewResource(form, isMyMessage)
-           }}>
-             {content}
            </TouchableOpacity>
 
   }
