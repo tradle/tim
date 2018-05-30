@@ -201,7 +201,14 @@ class VerificationRow extends Component {
         date = <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateFormatted}</Text>
       }
     }
-    let dn = isVerification ?  utils.getDisplayName(resource.document) : utils.getDisplayName(resource)
+    let dn
+    if (isVerification) {
+      dn = utils.getDisplayName(resource.document)
+      if (!dn)
+        dn = utils.makeModelTitle(utils.getType(resource.document))
+    }
+    else
+      dn = utils.getDisplayName(resource)
     let title
     if (isChooser)
       title = dn //utils.getDisplayName(resource, model.properties)
