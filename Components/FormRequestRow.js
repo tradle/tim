@@ -1138,7 +1138,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       // backgroundColor: '#ffffff'
     },
     orgView: {
-      maxWidth: msgWidth - 150,
+      // maxWidth: msgWidth - 150,
       paddingLeft: 10,
       marginRight: 10,
       flex: 1,
@@ -1229,7 +1229,8 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       margin: 1,
       // marginTop: -37,
       marginTop: -5,
-      width: msgWidth - 115,
+      flex: 1,
+      // width: msgWidth - 155,
       backgroundColor: '#ffffff',
       borderBottomLeftRadius: 10,
       borderBottomRightRadius: 10
