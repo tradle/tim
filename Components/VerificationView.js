@@ -102,13 +102,14 @@ class VerificationView extends Component {
   }
   showMethod(r) {
     let m = utils.getModel(utils.getType(r.method))
-    this.props.navigator.push({
+    let { bankStyle, navigator } = this.props
+    navigator.push({
       title: utils.makeModelTitle(m),
       id: 3,
       component: ResourceView,
       // titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
-      passProps: {resource: r.method}
+      passProps: {resource: r.method, bankStyle}
     })
   }
   onPress(url, event) {
