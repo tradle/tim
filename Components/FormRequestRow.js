@@ -741,7 +741,7 @@ class FormRequestRow extends Component {
       _.extend(r, resource.prefill)
     else {
       // isPrefilled = false
-      isPrefilled = ENV.prefillForms && model.id in formDefaults
+      isPrefilled = /*utils.isSimulator() && */ ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
         _.extend(r, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
@@ -1009,7 +1009,9 @@ class FormRequestRow extends Component {
          </View>
       )
     }
-    let content = (
+    return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
+             this.createNewResource(form, isMyMessage)
+           }}>
              <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
               <Animated.View style={zoomIn}>
                 <View style={styles.shareButton}>
@@ -1020,11 +1022,6 @@ class FormRequestRow extends Component {
                  <Text style={styles.addMore}>{msg}</Text>
                </View>
              </View>
-    )
-    return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
-             this.createNewResource(form, isMyMessage)
-           }}>
-             {content}
            </TouchableOpacity>
 
   }
