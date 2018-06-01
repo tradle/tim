@@ -5591,7 +5591,7 @@ var Store = Reflux.createStore({
       },
       {
         text: 'OK',
-        onPress: () => Actions.reloadDB()
+        onPress: () => Actions.reloadDB({ silent: true })
       }
     ])
   },
