@@ -5,9 +5,6 @@ import Actions from '../../Actions/Actions'
 import ENV from '../../utils/env'
 
 const { TYPE } = constants
-const IGNORE_TYPES = [
-  'tradle.CustomerWaiting'
-]
 
 const notificationsSupported = 'Notification' in global && ENV.registerForPushNotifications
 if (notificationsSupported) requestPermissions()
@@ -35,7 +32,7 @@ emitter.init = function (opts) {
     // embedded messages are an extra layer deep
     const obj = msg.object.object || msg.object
     const type = obj[TYPE]
-    if (IGNORE_TYPES.indexOf(type) !== -1) return
+    if (ENV.SILENT_TYPES.indexOf(type) !== -1) return
 
     // TODO: show logo of msg sender
     const n = new Notification('You have a message waiting!', {
