@@ -466,14 +466,7 @@ var Store = Reflux.createStore({
         action: 'app_open'
       }))
 
-    if (Platform.OS !== 'web') {
-      db.get(MY_ENVIRONMENT)
-        .then(env => {
-          this.updateEnvironmentInMemory(env)
-        }, err => {
-          // this is fine, environment is not stored initially
-        })
-    }
+    this._envPromise = this.loadEnv()
     this.cache = new Cache({max: 500, maxAge: 1000 * 60 * 60})
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
@@ -9391,25 +9384,21 @@ var Store = Reflux.createStore({
     }
   },
 
-  async maybeRequireFreshUser(identity) {
-    const { resetCheckpoint } = ENV
-    if (!resetCheckpoint) return
-    if (!__DEV__ && resetCheckpoint > Date.now()) {
-      console.warn('reset checkpoint is bigger than current timestamp, ignoring')
-      return
-    }
+  async maybeRequireFreshUser() {
+    const { previous, current } = await this._envPromise
+    const { resetCheckpoint=0 } = current
+    const previousResetCheckpoint = previous.resetCheckpoint || 0
+    if (resetCheckpoint <= previousResetCheckpoint) return
 
-    if (resetCheckpoint > (identity._time || 0)) {
-      await new Promise(resolve => {
-        Alert.alert(
-          translate('incompatibleVersion'),
-          translate('resetIsRequired'),
-          [{ text: translate('ok'), onPress: resolve }]
-        )
-      })
+    await new Promise(resolve => {
+      Alert.alert(
+        translate('incompatibleVersion'),
+        translate('resetIsRequired'),
+        [{ text: translate('ok'), onPress: resolve }]
+      )
+    })
 
-      await this.onReloadDB()
-    }
+    await this.onReloadDB()
   },
 
   async maybeRequestUpdate() {
@@ -9467,7 +9456,7 @@ var Store = Reflux.createStore({
     }
 
     if (identity) {
-      await this.maybeRequireFreshUser(identity)
+      await this.maybeRequireFreshUser()
     }
 
     if (mePub) {
@@ -11833,11 +11822,31 @@ var Store = Reflux.createStore({
   onHideModal() {
     this.trigger({ action: 'hideModal' })
   },
+
+  // ENVIRONMENT VARS
+
+  async loadEnv() {
+    let previous
+    try {
+      previous = await db.get(MY_ENVIRONMENT)
+      // some props like api keys may have been updated
+      this.updateEnvironmentInMemory(previous)
+    } catch (err) {
+      // this is fine, environment is not stored initially
+      previous = {}
+    }
+
+    const current = ENV
+    await db.put(MY_ENVIRONMENT, current)
+    return { previous, current }
+  },
+
   async onUpdateEnvironment(env) {
     env.dateModified = Date.now()
     this.updateEnvironmentInMemory(env)
     await db.put(MY_ENVIRONMENT, ENV)
   },
+
   updateEnvironmentInMemory(env) {
     if (env.dateModified < ENV.dateModified) {
       debug('not updating ENV from storage, stored ENV is out of date')
