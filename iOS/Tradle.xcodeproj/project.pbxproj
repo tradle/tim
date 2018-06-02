@@ -54,6 +54,7 @@
 		7379FC481EDA619E0093535C /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64371ED9FF7C0056F4BF /* libRNDeviceInfo.a */; };
 		7379FC491EDA61A20093535C /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63E11ED9FF670056F4BF /* libCodePush.a */; };
 		7379FC4D1EDA61BB0093535C /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63BD1ED9FF670056F4BF /* libRCTAsyncRocksDBStorage.a */; };
+		73BDD36320C2DBBD00FD92A1 /* staging.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */; };
 		73EC81B41EDA99280051FA02 /* GoogleToolboxForMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73EC81AE1EDA99280051FA02 /* GoogleToolboxForMac.framework */; };
 		73F1B89D205F5AA5004E96E2 /* libReactNativeExceptionHandler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 734DE31C1F6B8542009152AD /* libReactNativeExceptionHandler.a */; };
 		73F1B89E205F5AAE004E96E2 /* libRNOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 734DE3311F6B8542009152AD /* libRNOS.a */; };
@@ -607,6 +608,7 @@
 		7379F84B1EDA19630093535C /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Tradle/Launch Screen.storyboard"; sourceTree = "<group>"; };
 		7379FAD01EDA5AEC0093535C /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		7379FAD11EDA5AEC0093535C /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
+		73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = staging.xcconfig; sourceTree = "<group>"; };
 		73EC81A91EDA99280051FA02 /* FirebaseCoreDiagnostics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseCoreDiagnostics.framework; sourceTree = "<group>"; };
 		73EC81AA1EDA99280051FA02 /* FirebaseAnalytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseAnalytics.framework; sourceTree = "<group>"; };
 		73EC81AB1EDA99280051FA02 /* FirebaseCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseCore.framework; sourceTree = "<group>"; };
@@ -770,6 +772,7 @@
 		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
+				73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */,
 				73EC81B51EDA994A0051FA02 /* Firebase.h */,
 				7379F84B1EDA19630093535C /* Launch Screen.storyboard */,
 				7379F7CE1EDA14030093535C /* splash1536x2048.png */,
@@ -1891,6 +1894,7 @@
 			files = (
 				13B07FBF1A68108700A75B9A /* Assets.xcassets in Resources */,
 				73F1D0971EDA10EE00D4AB5B /* release.xcconfig in Resources */,
+				73BDD36320C2DBBD00FD92A1 /* staging.xcconfig in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 				7379F84E1EDA19630093535C /* Launch Screen.storyboard in Resources */,
 				73F1D0981EDA10EE00D4AB5B /* tradle.ttf in Resources */,
@@ -2181,6 +2185,118 @@
 			};
 			name = Release;
 		};
+		73BDD2B420C2D87A00FD92A1 /* Staging */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/Release$(EFFECTIVE_PLATFORM_NAME)";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Staging;
+		};
+		73BDD2B520C2D87A00FD92A1 /* Staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "";
+				DEVELOPMENT_TEAM = 94V7783F74;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					$PROJECT_DIR,
+					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
+					"$(PROJECT_DIR)/Branch.framework/Headers",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/../node_modules/react-native-async-storage-rocks/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
+					"$(SRCROOT)/../node_modules/react-native-camera/ios",
+					"$(SRCROOT)/../node_modules/react-native-code-push/ios/CodePush/**",
+					"$(SRCROOT)/../node_modules/react-native-device-info/RNDeviceInfo",
+					"$(SRCROOT)/../node_modules/react-native-ecc/ios",
+					"$(SRCROOT)/../node_modules/react-native-fabric/ios/SMXCrashlytics",
+					"$(SRCROOT)/../node_modules/react-native-firebase-analytics/ios",
+					"$(SRCROOT)/../node_modules/react-native-image-picker/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-keychain/RNKeychainManager",
+					"$(SRCROOT)/../node_modules/react-native-linear-gradient/BVLinearGradient",
+					"$(SRCROOT)/../node_modules/react-native-local-auth",
+					"$(SRCROOT)/../node_modules/react-native-localization",
+					"$(SRCROOT)/../node_modules/react-native-orientation/iOS/RCTOrientation/**",
+					"$(SRCROOT)/../node_modules/react-native-passcode-status/ios",
+					"$(SRCROOT)/../node_modules/react-native-randombytes",
+					"$(SRCROOT)/../node_modules/react-native-search-bar/**",
+					"$(SRCROOT)/../node_modules/react-native-splash-screen/ios",
+					"$(SRCROOT)/../node_modules/react-native-udp/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-vector-icons/RNVectorIconsManager",
+					"$(SRCROOT)/../node_modules/react-native-video",
+					"$(SRCROOT)/../node_modules/react-native-exception-handler/ios",
+					"$(SRCROOT)/../node_modules/react-native-os/ios",
+					"$(SRCROOT)/../node_modules/react-native-tcp/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
+					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
+					"$(SRCROOT)/../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative",
+					"$(SRCROOT)/../node_modules/react-native-blinkid/ios",
+				);
+				INFOPLIST_FILE = Tradle/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SRCROOT)/Tradle",
+					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
+					"\"$(SRCROOT)/Tradle\"",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+					"-lc++",
+					"-all_load",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
+				PRODUCT_NAME = Tradle;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "";
+			};
+			name = Staging;
+		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2265,6 +2381,7 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
+				73BDD2B520C2D87A00FD92A1 /* Staging */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2274,6 +2391,7 @@
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
+				73BDD2B420C2D87A00FD92A1 /* Staging */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
