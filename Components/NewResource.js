@@ -154,7 +154,9 @@ class NewResource extends Component {
       Actions.getItem({resource: resource})
     if (resource[ROOT_HASH]) {
       if (Object.keys(resource).length === 2)
-        Actions.getItem({resource: resource})
+        Actions.getItem({resource})
+      else
+        Actions.getRequestedProperties({resource})
     }
     else {
      if (resource.id) {
@@ -216,6 +218,7 @@ class NewResource extends Component {
         resource: resource,
         isUploading: false
       })
+      Actions.getRequestedProperties({resource})
       return
     }
     if (action === 'formEdit') {
