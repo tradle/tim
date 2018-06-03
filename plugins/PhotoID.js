@@ -44,7 +44,7 @@ module.exports = function PhotoID ({ models }) {
       prefillValues(form, scan, model)
 
       let requestedProperties = []
-      getRequestedProps(scan, model, isLicence, requestedProperties)
+      getRequestedProps(scan, model, isLicence, requestedProperties, form)
 
       return {
         message: translate('reviewScannedProperties'),
@@ -79,7 +79,7 @@ function prefillValues(form, values, model) {
       form[p] = val
   }
 }
-function getRequestedProps(values, model, isLicence, requestedProperties) {
+function getRequestedProps(values, model, isLicence, requestedProperties, form) {
   if (!values)
     return
   let props = model.properties
@@ -87,14 +87,16 @@ function getRequestedProps(values, model, isLicence, requestedProperties) {
   for (let p in values) {
     let val = values[p]
     if (typeof val === 'object')
-      getRequestedProps(val, model, isLicence, requestedProperties)
+      getRequestedProps(val, model, isLicence, requestedProperties, form)
     else if (props[p])
       requestedProperties.push({name: p})
   }
   if (!isLicence  &&  !requestedProperties.find(p => p.name === 'dateOfIssue'))
     requestedProperties.push({name: 'dateOfIssue'})
-  // if (!requestedProperties.find(p => p.name === 'dateOfBirth'))
-  //   requestedProperties.push({name: 'dateOfBirth'})
+  if (!requestedProperties.find(p => p.name === 'dateOfBirth')) {
+    if (form.dateOfBirth)
+      requestedProperties.push({name: 'dateOfBirth'})
+  }
 }
 function cleanupValues(form, values, model) {
   let props = model.properties
