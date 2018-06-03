@@ -3,6 +3,7 @@ import dateformat from 'dateformat'
 import { TYPE } from '@tradle/constants'
 import utils, { translate, isWeb } from '../utils/utils'
 const COUNTRY = 'tradle.Country'
+const PHOTO_ID = 'tradle.PhotoID'
 
 module.exports = function PhotoID ({ models }) {
   return {
@@ -11,13 +12,12 @@ module.exports = function PhotoID ({ models }) {
       form,
       currentResource
     }) {
-      if (form[TYPE] !== 'tradle.PhotoID')
+      if (form[TYPE] !== PHOTO_ID)
         return
       if (!form.documentType)
         return
       if (!isWeb()  &&  !form.scanJson)
         return
-
       let scan = form.scanJson
       const model = models[form[TYPE]]
 
@@ -60,7 +60,7 @@ function prefillValues(form, values, model) {
   let exclude = [ 'country' ]
   for (let p in values)
     if (form[p])
-      return false
+      exclude.push(p)
   for (let p in values) {
     if (exclude.includes(p))
       continue
@@ -93,6 +93,8 @@ function getRequestedProps(values, model, isLicence, requestedProperties) {
   }
   if (!isLicence  &&  !requestedProperties.find(p => p.name === 'dateOfIssue'))
     requestedProperties.push({name: 'dateOfIssue'})
+  // if (!requestedProperties.find(p => p.name === 'dateOfBirth'))
+  //   requestedProperties.push({name: 'dateOfBirth'})
 }
 function cleanupValues(form, values, model) {
   let props = model.properties
