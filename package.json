@@ -74,6 +74,7 @@
     "cachedown": "github:mvayngrib/cachedown#bb59815",
     "clone": "2.1.1",
     "co": "4.6.0",
+    "compare-versions": "^3.2.1",
     "create-ecdh": "github:mvayngrib/createECDH#b5e05e40",
     "dateformat": "^1.0.12",
     "debounce": "^1.0.0",
