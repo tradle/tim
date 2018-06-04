@@ -463,10 +463,15 @@ class FormRequestRow extends Component {
                           <Text style={hs}>{utils.getDisplayName(document)}</Text>
                         </View>
 
-    let header = <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
+    // headerContent = <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
+    //                <View style={styles.header}>
+    //                  {headerContent}
+    //                  {arrow}
+    //                </View>
+    //              </TouchableOpacity>
+    headerContent = <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
                    <View style={styles.header}>
                      {headerContent}
-                     {arrow}
                    </View>
                  </TouchableOpacity>
     let orgRow = <View/>
@@ -733,7 +738,7 @@ class FormRequestRow extends Component {
       _.extend(r, resource.prefill)
     else {
       // isPrefilled = false
-      isPrefilled = /*utils.isSimulator() && */ ENV.prefillForms && model.id in formDefaults
+      isPrefilled = utils.isSimulator() &&  ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
         _.extend(r, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
