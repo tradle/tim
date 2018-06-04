@@ -233,11 +233,12 @@ class GridList extends Component {
         if (prop.name === this.props.prop.name) {
           if (!application[prop.name]  &&  !this.props.application[prop.name])
             return
-          this.state.dataSource = this.state.dataSource.cloneWithRows(application[prop.name])
+          let rows = (!application[prop.name]  &&  [])  ||  application[prop.name]
+          this.state.dataSource = this.state.dataSource.cloneWithRows(rows)
           return
         }
 
-        if (!application[prop.name]  ||  !application[prop.name].length)
+        if (!application[prop.name])
           this.state.dataSource = this.state.dataSource.cloneWithRows([])
         else {
           this.state.dataSource = this.state.dataSource.cloneWithRows(application[prop.name])
