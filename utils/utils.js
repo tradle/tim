@@ -2459,7 +2459,8 @@ var utils = {
 
   async isLatestVersion() {
     const storeVersion = await getVersionInAppStore()
-    return compareVersions(storeVersion, utils.getInstalledVersion()) > 0
+    // check if installed version is >= store version
+    return compareVersions(utils.getInstalledVersion(), storeVersion) >= 0
   },
 
   openInAppStore() {
