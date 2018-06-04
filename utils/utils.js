@@ -759,8 +759,10 @@ var utils = {
         let dnObj = this.getPropertiesWithAnnotation(utils.getModel(rType), 'displayName')
         if (dnObj) {
           let dnProps = Object.values(dnObj)
-          if (dnProps.length === 1  &&  dnProps[0].range === 'model')
-            return this.makeModelTitle(this.getModel(resource.title))
+          if (dnProps.length === 1  &&  dnProps[0].range === 'model') {
+            let m = this.getModel(resource.title)
+            return m && this.makeModelTitle(m) || resource.title
+          }
         }
         return resource.title
       }
