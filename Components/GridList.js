@@ -230,8 +230,20 @@ class GridList extends Component {
         this.state.isLoading = true;
 
       if (application) {
-        let params = this.getParamsForApplicationBacklinks(props)
-        Actions.getItem(params)
+        if (prop.name === this.props.prop.name) {
+          if (!application[prop.name]  &&  !this.props.application[prop.name])
+            return
+          this.state.dataSource = this.state.dataSource.cloneWithRows(application[prop.name])
+          return
+        }
+
+        if (!application[prop.name]  ||  !application[prop.name].length)
+          this.state.dataSource = this.state.dataSource.cloneWithRows([])
+        else {
+          this.state.dataSource = this.state.dataSource.cloneWithRows(application[prop.name])
+          // let params = this.getParamsForApplicationBacklinks(props)
+          // Actions.getItem(params)
+        }
       }
       else {
         let params = this.getParamsForBacklinkList(props)
@@ -317,6 +329,10 @@ class GridList extends Component {
       return
 
     const { target } = event.nativeEvent
+    if (!target) {
+      debugger
+      return
+    }
     const currentOffset = target.scrollTop
     this.contentHeight = target.scrollHeight
     let delta = currentOffset - (this.offset || 0)
