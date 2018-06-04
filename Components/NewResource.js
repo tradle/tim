@@ -167,8 +167,10 @@ class NewResource extends Component {
       else if (this.state.isUploading) {
         if (this.props.containerResource)
           this.state.isUploading = false
-        else
+        else {
           Actions.getTemporary(resource[TYPE])
+          Actions.getRequestedProperties({resource})
+        }
       }
     }
   }
