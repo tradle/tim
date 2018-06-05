@@ -2329,12 +2329,12 @@ var utils = {
       }
     })
   },
-  isOnePropForm(resource) {
+  getEditableProperties(resource) {
     let type = resource[TYPE]
     let isFormRequest = type === FORM_REQUEST
     let isFormError = type === FORM_ERROR
     if (!isFormRequest  &&  !isFormError)
-      return
+      return []
     let ftype = isFormRequest
               ? resource.form
               : utils.getType(resource.prefill)
@@ -2350,15 +2350,15 @@ var utils = {
     }
 
     if (eCols.length === 1) {
-      let p = eCols[0]
+      let ep = eCols[0]
       if (ftype === IPROOV_SELFIE)
-        return p
+        return [ep]
       if (ftype === PRODUCT_REQUEST)
-        return p
-      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  this.getModel(p.ref).subClassOf === ENUM))
-        return p
+        return [ep]
+      if (ep  &&  ep.type === 'object'  &&  (ep.ref === PHOTO ||  this.getModel(ep.ref).subClassOf === ENUM))
+        return [ep]
     }
-  return
+    return []
   },
 
   isSealableModel: function (model) {

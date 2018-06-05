@@ -275,12 +275,16 @@ class VerificationRow extends Component {
           break
         default:
           color = 'blue'
-          icon = 'ios-information-circle-outline'
+          icon = 'ios-information-outline'
           break
         }
         titleComponent = <View style={styles.titleView}>
-                           <Icon color={color} size={35} name={icon} style={{marginTop: -4}}/>
-                           <Text style={[styles.rTitle, {paddingLeft: 10}]}>{dn}</Text>
+                           <View style={{alignItems: 'center', width: 30}}>
+                             <Icon color={color} size={35} name={icon} />
+                           </View>
+                           <View style={{justifyContent: 'center'}}>
+                             <Text style={styles.rTitle}>{dn}</Text>
+                           </View>
                          </View>
       }
       else {
@@ -336,7 +340,7 @@ class VerificationRow extends Component {
                          </View>
 
     }
-    let verifiedByAndDateStyle = {marginTop: -3, flexDirection: utils.isWeb() ? 'row' : 'column' }
+    let verifiedByAndDateStyle = {marginTop: -3, flexDirection: 'row', justifyContent: 'flex-end'}
     let header =  <View style={styles.header} key={this.getNextKey()}>
                     <View style={styles.row}>
                       {photo}

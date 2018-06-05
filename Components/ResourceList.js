@@ -1,6 +1,25 @@
 console.log('requiring ResourceList.js')
 'use strict';
 
+import React, { Component } from 'react'
+import {
+  ListView,
+  RefreshControl,
+  Alert,
+  TouchableOpacity,
+  Image,
+  StatusBar,
+  View,
+  Text,
+  Platform
+} from 'react-native'
+import PropTypes from 'prop-types';
+import Reflux from 'reflux'
+import Icon from 'react-native-vector-icons/Ionicons';
+import { makeResponsive } from 'react-native-orient'
+import reactMixin from 'react-mixin'
+import _ from 'lodash'
+
 import NoResources from './NoResources'
 import ResourceRow from './ResourceRow'
 import ResourceView from './ResourceView'
@@ -16,14 +35,10 @@ import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
 import utils from '../utils/utils'
 var translate = utils.translate
-import reactMixin from 'react-mixin'
 import HomePageMixin from './HomePageMixin'
-import extend from 'extend'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
-import Reflux from 'reflux'
 import constants from '@tradle/constants'
-import Icon from 'react-native-vector-icons/Ionicons';
 import buttonStyles from '../styles/buttonStyles'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
@@ -32,11 +47,10 @@ import appStyle from '../styles/appStyle.json'
 import StyleSheet from '../StyleSheet'
 
 import { makeStylish } from './makeStylish'
-import { makeResponsive } from 'react-native-orient'
-import StatusBar from './StatusBar'
-
-var Debug = require('debug')
-var debug = Debug('tradle:app:messageList')
+import platformStyles from '../styles/platform'
+import ENV from '../utils/env'
+import SearchBar from './SearchBar'
+import ConversationsIcon from './ConversationsIcon'
 
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PARTIAL = 'tradle.Partial'
@@ -47,24 +61,6 @@ const LIMIT = 10
 const SCAN_QR_CODE_VIEW = 16
 
 const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
-
-import React, { Component } from 'react'
-import {
-  ListView,
-  RefreshControl,
-  Alert,
-  TouchableOpacity,
-  Image,
-  View,
-  Text,
-  Platform
-} from 'react-native'
-import PropTypes from 'prop-types';
-
-import platformStyles from '../styles/platform'
-import ENV from '../utils/env'
-import SearchBar from './SearchBar'
-import ConversationsIcon from './ConversationsIcon'
 
 const {
   MESSAGE,
@@ -299,6 +295,20 @@ class ResourceList extends Component {
         return
       if (action === 'addMessage'  &&  modelName !== PROFILE)
         return
+      let resource = params.resource
+      if (resource._inactive  &&  modelName === ORGANIZATION) {
+        let r
+        if (resource._isTest)
+          r = this.state.testProviders.find(r => r[ROOT_HASH] === resource[ROOT_HASH])
+        else
+          r = this.state.list.find(r => r[ROOT_HASH] === resource[ROOT_HASH])
+
+        if (r) {
+          let l = this.state.list.filter(r => r[ROOT_HASH] !== resource[ROOT_HASH])
+          this.setState({list: l, dataSource: this.state.dataSource.cloneWithRows(l)})
+          return
+        }
+      }
       // this.state.isLoading = true;
       Actions.list({
         query: this.state.filter,
@@ -458,7 +468,7 @@ class ResourceList extends Component {
     // }
     if (this.props.isBacklink  &&  params.prop !== this.props.prop)
       return
-    extend(state, {
+    _.extend(state, {
       forceUpdate: params.forceUpdate,
       dictionary: params.dictionary,
     })
@@ -979,7 +989,7 @@ class ResourceList extends Component {
     return (
       <View>
         <View style={styles.testProvidersRow} key={'testProviders_1'}>
-          <TouchableOpacity onPress={this.showTestProviders.bind(this)}>
+          <TouchableOpacity  testID='Sandbox' onPress={this.showTestProviders.bind(this)}>
             <View style={styles.row}>
               <Icon name='ios-pulse-outline' size={utils.getFontSize(45)} color={appStyle.TEST_PROVIDERS_ROW_FG_COLOR} style={[styles.cellImage, {paddingLeft: 5}]} />
               <View style={styles.textContainer}>
@@ -1120,7 +1130,7 @@ class ResourceList extends Component {
 
           self.state.list.forEach((r) => {
             let rr = {}
-            extend(rr, r)
+            _.extend(rr, r)
             l.push(rr)
           })
           l.push(resource)
@@ -1229,15 +1239,15 @@ class ResourceList extends Component {
       ]
     } else {
       if (!ENV.allowAddServer) return
-
+      let hideText = this.state.hideMode ? 'cancelHideResource' : 'hideResource'
       buttons = [
         {
           text: translate('addServerUrl'),
           onPress: this.onSettingsPressed
         },
         {
-          text: translate('hideResource', translate(utils.getModel(this.props.modelName))),
-          onPress: () => this.setState({hideMode: true})
+          text: translate(hideText, translate(utils.makeModelTitle(this.props.modelName, true))),
+          onPress: () => this.setState({hideMode: !this.state.hideMode, dataSource: this.state.dataSource.cloneWithRows(utils.clone(this.state.list))})
         },
         {
           text: translate('scanQRcode'),
@@ -1269,7 +1279,7 @@ class ResourceList extends Component {
           let r = utils.clone(resource)
           r._inactive = true
           Actions.addItem({resource: resource, value: r, meta: utils.getModel(resource[TYPE])})
-          this.setState({hideMode: false})
+          // this.setState({hideMode: false})
         }},
       ]
     )
@@ -1476,7 +1486,6 @@ reactMixin(ResourceList.prototype, HomePageMixin)
 ResourceList = makeStylish(ResourceList)
 ResourceList = makeResponsive(ResourceList)
 
-
 // TODO: use utils.normalizeBoxShadow
 var PRETTY_ROW_SHADOW = utils.isWeb()
 ? {
@@ -1582,16 +1591,6 @@ var styles = StyleSheet.create({
     height: 50,
     marginRight: 10,
     width: 50,
-  },
-  menuButton: {
-    marginTop: -23,
-    paddingVertical: 5,
-    paddingHorizontal: 21,
-    borderRadius: 24,
-    shadowOpacity: 1,
-    shadowRadius: 5,
-    shadowColor: '#afafaf',
-    backgroundColor: 'red'
   },
   sharedContext: {
     position: 'absolute',

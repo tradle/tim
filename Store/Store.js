@@ -3578,7 +3578,11 @@ var Store = Reflux.createStore({
       r[ROOT_HASH] = result.permalink
       r[CUR_HASH] = result.link
       r.from = this.buildRef(me, dontSend)
-      r.to = this.buildRef(this._getItem(to[0]))
+      let toR = this._getItem(to[0])
+      if (!toR)
+        debugger
+      // HACK
+      r.to = toR  &&  this.buildRef(toR) || {id: to[0]}
       r[IS_MESSAGE] = true
       r._context = context
     }
@@ -9072,7 +9076,7 @@ var Store = Reflux.createStore({
   },
   addLastMessage(value, batch, sharedWith) {
     let model = this.getModel(value[TYPE])
-    if (model.id === CUSTOMER_WAITING || model.id === SELF_INTRODUCTION)
+    if (model.id === CUSTOMER_WAITING || model.id === SELF_INTRODUCTION  ||  model.id === SEAL)
       return
     if (model.id === SIMPLE_MESSAGE  &&  value.message  && value.message === ALREADY_PUBLISHED_MESSAGE)
       return
