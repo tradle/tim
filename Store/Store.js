@@ -9078,6 +9078,7 @@ var Store = Reflux.createStore({
     let model = this.getModel(value[TYPE])
     if (model.id === CUSTOMER_WAITING || model.id === SELF_INTRODUCTION  ||  model.id === SEAL)
       return
+
     if (model.id === SIMPLE_MESSAGE  &&  value.message  && value.message === ALREADY_PUBLISHED_MESSAGE)
       return
     if (value._context  &&  utils.isReadOnlyChat(value._context))

@@ -748,7 +748,7 @@ class FormRequestRow extends Component {
       _.extend(r, resource.prefill)
     else {
       // isPrefilled = false
-      isPrefilled = utils.isSimulator() &&  ENV.prefillForms && model.id in formDefaults
+      isPrefilled = /* utils.isSimulator() &&*/  ENV.prefillForms && model.id in formDefaults
       if (isPrefilled)
         _.extend(r, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
