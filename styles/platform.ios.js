@@ -34,7 +34,12 @@ export default StyleSheet.create({
   }
 })
 
-export const footerButtonObject = footerButton
+export const menuButtonObject = {
+  ...footerButton,
+  backgroundColor: 'red'
+}
+
+export const conversationButtonObject = menuButtonObject
 export const homeButtonObject = {
   ...footerButton,
   backgroundColor: '#fff'
