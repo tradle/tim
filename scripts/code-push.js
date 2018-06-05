@@ -5,15 +5,9 @@
 const fs = require('fs')
 const proc = require('child_process')
 const argv = require('minimist')(process.argv.slice(2))
-let { platform, stage } = argv
+let { platform, stage='Staging' } = argv
 if (platform !== 'ios' && platform !== 'android') {
   throw new Error('expected --platform "ios" or "android"')
-}
-
-if (!stage) {
-  // yes, this is ridiculous, need to do some dev ops
-  // to configure things right
-  stage = platform === 'Production'
 }
 
 if (stage !== 'Staging' && stage !== 'Production') {

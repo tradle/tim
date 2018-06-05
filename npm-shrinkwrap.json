@@ -54,7 +54,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#0a30103cd7fb48bea33ee53ac4de9586ead7515d"
+      "resolved": "git://github.com/tradle/custom-models.git#118d2315badc674929a3d138d7dfe9e548a9deab"
     },
     "@tradle/embed": {
       "version": "1.1.1",
@@ -177,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#e44ee1e08920acabc6b4111d89b5a923d3bf9fcf"
+      "resolved": "git://github.com/tradle/models.git#c99afc8ddbaa1a25a43b2f3520e75fcee3495efa"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -187,7 +187,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#0d77e00e626bb48bad827df8af44fb7f1e51bf1b"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#401bda1f28d24ffe64f0418017f85bf9aac507f0"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -1572,6 +1572,11 @@
           "resolved": "https://registry.npmjs.org/recast/-/recast-0.11.23.tgz"
         }
       }
+    },
+    "compare-versions": {
+      "version": "3.2.1",
+      "from": "https://registry.npmjs.org/compare-versions/-/compare-versions-3.2.1.tgz",
+      "resolved": "https://registry.npmjs.org/compare-versions/-/compare-versions-3.2.1.tgz"
     },
     "component-emitter": {
       "version": "1.2.1",

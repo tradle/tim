@@ -68,18 +68,12 @@ platform :ios do
     scan
   end
 
-  desc "Build the app"
-  lane :dryrun do
-    match
-    gym_prod
-  end
-
-  lane :gym_prod do
-    sign_manual
+  lane :gymit do
     gym(
-      scheme: 'Release',
-      workspace: ENV['WORKSPACE'],
-      export_method: 'app-store'
+      scheme: ENV['SCHEME'],
+      configuration: ENV['CONFIGURATION'],
+      export_method: 'app-store',
+      workspace: ENV['WORKSPACE']
     )
   end
 
@@ -88,7 +82,8 @@ platform :ios do
   lane :beta_testflight do |values|
     sign_manual
     match(type: 'appstore')
-    gym_prod
+    gymit
+
     # build_app(
     #   workspace: ENV['WORKSPACE'],
     #   scheme: 'Release',
@@ -103,8 +98,7 @@ platform :ios do
     match(type: 'appstore')
 
     # snapshot
-    gym_prod
-
+    gymit
     deliverit
     # frameit
   end

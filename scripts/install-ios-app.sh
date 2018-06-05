@@ -10,12 +10,25 @@
 # This script is supposed to be invoked as part of Xcode build process
 # and relies on environment variables (including PWD) set by Xcode
 
+if [[ "$SKIP_BUNDLING" ]]; then
+  echo "SKIP_BUNDLING enabled; skipping."
+  exit 0;
+fi
+
 case "$CONFIGURATION" in
-  Debug)
-    # Speed up build times by skipping the creation of the offline package for debug
-    # builds on the simulator since the packager is supposed to be running anyways.
-    echo "Skipping bundling in Dev mode"
-    exit 0;
+  *Debug*)
+    if [[ "$PLATFORM_NAME" == *simulator ]]; then
+      if [[ "$FORCE_BUNDLING" ]]; then
+        echo "FORCE_BUNDLING enabled; continuing to bundle."
+      else
+        echo "Skipping bundling in Debug for the Simulator (since the packager bundles for you). Use the FORCE_BUNDLING flag to change this behavior."
+        exit 0;
+      fi
+    else
+      echo "Bundling for physical device. Use the SKIP_BUNDLING flag to change this behavior."
+    fi
+
+    DEV=true
     ;;
   "")
     echo "$0 must be invoked by Xcode"
@@ -36,7 +49,11 @@ cd "${REACT_NATIVE_DIR}"/../..
 [ -z "$NVM_DIR" ] && export NVM_DIR="$HOME/.nvm"
 
 # Define entry file
-ENTRY_FILE=${1:-index.ios.js}
+if [[ -s "index.ios.js" ]]; then
+  ENTRY_FILE=${1:-index.ios.js}
+else
+  ENTRY_FILE=${1:-index.js}
+fi
 
 if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
   . "$HOME/.nvm/nvm.sh"
@@ -50,6 +67,16 @@ if [[ -x "$HOME/.nodenv/bin/nodenv" ]]; then
 fi
 
 [ -z "$NODE_BINARY" ] && export NODE_BINARY="node"
+
+[ -z "$CLI_PATH" ] && export CLI_PATH="$REACT_NATIVE_DIR/local-cli/cli.js"
+
+[ -z "$BUNDLE_COMMAND" ] && BUNDLE_COMMAND="bundle"
+
+if [[ -z "$BUNDLE_CONFIG" ]]; then
+  CONFIG_ARG=""
+else
+  CONFIG_ARG="--config $(pwd)/$BUNDLE_CONFIG"
+fi
 
 nodejs_not_found()
 {
@@ -72,16 +99,22 @@ if [[ "$CONFIGURATION" = "Debug" && ! "$PLATFORM_NAME" == *simulator ]]; then
   PLIST=$TARGET_BUILD_DIR/$INFOPLIST_PATH
   IP=$(ipconfig getifaddr en0)
   if [ -z "$IP" ]; then
-    IP=$(ifconfig | grep 'inet ' | grep -v 127.0.0.1 | cut -d\   -f2  | awk 'NR==1{print $1}')
+    IP=$(ifconfig | grep 'inet ' | grep -v ' 127.' | cut -d\   -f2  | awk 'NR==1{print $1}')
   fi
+
+  if [ -z ${DISABLE_XIP+x} ]; then
+    IP="$IP.xip.io"
+  fi
+
   $PLISTBUDDY -c "Add NSAppTransportSecurity:NSExceptionDomains:localhost:NSTemporaryExceptionAllowsInsecureHTTPLoads bool true" "$PLIST"
-  $PLISTBUDDY -c "Add NSAppTransportSecurity:NSExceptionDomains:$IP.xip.io:NSTemporaryExceptionAllowsInsecureHTTPLoads bool true" "$PLIST"
-  echo "$IP.xip.io" > "$DEST/ip.txt"
+  $PLISTBUDDY -c "Add NSAppTransportSecurity:NSExceptionDomains:$IP:NSTemporaryExceptionAllowsInsecureHTTPLoads bool true" "$PLIST"
+  echo "$IP" > "$DEST/ip.txt"
 fi
 
 BUNDLE_FILE="$DEST/main.jsbundle"
 
-$NODE_BINARY "$REACT_NATIVE_DIR/local-cli/cli.js" bundle \
+$NODE_BINARY $CLI_PATH $BUNDLE_COMMAND \
+  $CONFIG_ARG \
   --entry-file "$ENTRY_FILE" \
   --platform ios \
   --dev $DEV \
@@ -90,7 +123,7 @@ $NODE_BINARY "$REACT_NATIVE_DIR/local-cli/cli.js" bundle \
   --sourcemap-output "$BUNDLE_FILE.map" \
   --assets-dest "$DEST"
 
-if [[ ! $DEV && ! -f "$BUNDLE_FILE" ]]; then
+if [[ $DEV != true && ! -f "$BUNDLE_FILE" ]]; then
   echo "error: File $BUNDLE_FILE does not exist. This must be a bug with" >&2
   echo "React Native, please report it here: https://github.com/facebook/react-native/issues"
   exit 2

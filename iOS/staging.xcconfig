@@ -1,0 +1,10 @@
+//
+//  staging.xcconfig
+//  Tradle
+//
+//  Created by Mark Vayngrib on 4/30/17.
+//  Copyright © 2017 Tradle. All rights reserved.
+//
+
+#include "./Pods/Target Support Files/Pods-Tradle/Pods-Tradle.staging.xcconfig"
+#include "./fastlane/.env.staging"
