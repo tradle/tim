@@ -5582,6 +5582,11 @@
       "resolved": "https://registry.npmjs.org/proxy-addr/-/proxy-addr-2.0.3.tgz",
       "dev": true
     },
+    "proxy-from-env": {
+      "version": "1.0.0",
+      "from": "proxy-from-env@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.0.0.tgz"
+    },
     "prr": {
       "version": "1.0.1",
       "from": "prr@>=1.0.1 <1.1.0",
@@ -6465,6 +6470,11 @@
     "safer-buffer": {
       "version": "2.1.2",
       "from": "safer-buffer@>=2.1.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
+    },
+    "safer-buffer": {
+      "version": "2.1.2",
+      "from": "safer-buffer@>=2.1.2 <3.0.0",
       "resolved": "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
     },
     "sane": {
