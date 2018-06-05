@@ -22,6 +22,7 @@ import DeviceInfo from 'react-native-device-info'
 import PushNotifications from 'react-native-push-notification'
 import Keychain from 'react-native-keychain'
 import { getDimensions, getOrientation } from 'react-native-orient'
+import compareVersions from 'compare-versions'
 import validateResource from '@tradle/validate-resource'
 
 import AsyncStorage from '../Store/Storage'
@@ -2460,7 +2461,8 @@ var utils = {
 
   async isLatestVersion() {
     const storeVersion = await getVersionInAppStore()
-    return storeVersion === utils.getInstalledVersion()
+    // check if installed version is >= store version
+    return compareVersions(utils.getInstalledVersion(), storeVersion) >= 0
   },
 
   openInAppStore() {

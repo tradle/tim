@@ -69,14 +69,12 @@ const merged = extend({
     // // `http://${LOCAL_IP}:21013`,
     // hats
     // 'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
-    // // raylan
-    // 'https://ayycrsic06.execute-api.us-east-1.amazonaws.com/dev',
     // // friendly.io
     // 'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
-    // 'https://xwkirqs1x0.execute-api.us-east-1.amazonaws.com/dev',
+    // 'https://t22ju1ga5c.execute-api.us-east-1.amazonaws.com/dev',
     // // safere.io
-    // 'https://xefpez2yf0.execute-api.us-east-1.amazonaws.com/dev',
+    // 'https://a87crkepec.execute-api.us-east-1.amazonaws.com/dev',
     // // easybank.io
     // 'https://m6rpwdztvk.execute-api.us-east-1.amazonaws.com/dev',
     // // perpetualguardian.co.nz
@@ -153,7 +151,7 @@ const merged = extend({
   tradleAPIKey: null,
   tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/',
   APP_URL,
-  resetCheckpoint: new Date('2018-05-27').getTime(),
+  resetCheckpoint: 1,
   SILENT_TYPES: [
     'tradle.Seal',
     'tradle.CustomerWaiting',
