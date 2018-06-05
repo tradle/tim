@@ -73,7 +73,7 @@ class VerificationView extends Component {
       vTree.push(<TouchableOpacity onPress={() => this.showMethod(resource)} key={this.getNextKey()}>
                   <View style={{backgroundColor: bankStyle.verifiedBg, paddingVertical: 10, flexDirection: 'row', justifyContent: 'center'}}>
                     <Icon name='ios-add-circle-outline' size={25} color={bankStyle.verifiedTextColor} style={{ marginTop: 2, justifyContent:'center', paddingRight: 3, paddingLeft: 10 * (currentLayer + 1)}} />
-                    <View style={{justifyContent: 'center', flexDirection: 'column', paddingLeft: 5, width: utils.dimensions(VerificationView).width - 50}}>
+                    <View style={{justifyContent: 'center', flexDirection: 'column', paddingLeft: 5, width: utils.getContentWidth(VerificationView) - 50}}>
                       <Text style={{color: bankStyle.verifiedTextColor, fontSize: 18}}>{displayName}</Text>
                     </View>
                   </View>
