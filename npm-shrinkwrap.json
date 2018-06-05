@@ -54,7 +54,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#1291eee03bf9e4aab7b822186228f4450b3553dd"
+      "resolved": "git://github.com/tradle/custom-models.git#118d2315badc674929a3d138d7dfe9e548a9deab"
     },
     "@tradle/embed": {
       "version": "1.1.1",
@@ -1575,7 +1575,7 @@
     },
     "compare-versions": {
       "version": "3.2.1",
-      "from": "compare-versions@latest",
+      "from": "https://registry.npmjs.org/compare-versions/-/compare-versions-3.2.1.tgz",
       "resolved": "https://registry.npmjs.org/compare-versions/-/compare-versions-3.2.1.tgz"
     },
     "component-emitter": {
@@ -5582,11 +5582,6 @@
       "resolved": "https://registry.npmjs.org/proxy-addr/-/proxy-addr-2.0.3.tgz",
       "dev": true
     },
-    "proxy-from-env": {
-      "version": "1.0.0",
-      "from": "proxy-from-env@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/proxy-from-env/-/proxy-from-env-1.0.0.tgz"
-    },
     "prr": {
       "version": "1.0.1",
       "from": "prr@>=1.0.1 <1.1.0",
@@ -6470,11 +6465,6 @@
     "safer-buffer": {
       "version": "2.1.2",
       "from": "safer-buffer@>=2.1.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
-    },
-    "safer-buffer": {
-      "version": "2.1.2",
-      "from": "safer-buffer@>=2.1.2 <3.0.0",
       "resolved": "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
     },
     "sane": {
