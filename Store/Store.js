@@ -4464,7 +4464,12 @@ var Store = Reflux.createStore({
         // debugger
       }
       else {
-        if (!utils.isMessage(elm))
+        // HACK for scanned Identity
+        if (!elm) {
+          if (ref === IDENTITY)
+            foundRefs.push({value: resource[p], state: 'fulfilled'})
+        }
+        else if (!utils.isMessage(elm))
           foundRefs.push({value: elm, state: 'fulfilled'})
         else {
           let kres
@@ -5110,6 +5115,18 @@ var Store = Reflux.createStore({
     await this.onAddChatItem({resource, noTrigger: true,  })
     this.trigger({ action: 'applyForProduct', provider: org })
   },
+  async onGetIdentity({ permalink, link, firstName, lastName }) {
+    let identityId = utils.makeId(IDENTITY, permalink, link)
+    let profile = {
+      [TYPE]: PROFILE,
+      [ROOT_HASH]: permalink,
+      [CUR_HASH]: link,
+      firstName
+    }
+    await db.put(utils.getId(profile), profile)
+    this.trigger({action: 'getIdentity', identity: {id: identityId, title: firstName}})
+  },
+
   async onAddApp({ url, permalink, noTrigger, addSettings }) {
     try {
       await this.getInfo({serverUrls: [url], retry: false}) //, hash: permalink })
@@ -11198,6 +11215,7 @@ var Store = Reflux.createStore({
       debugger
     })
   },
+
   // Devices one
   // onGenPairingData() {
   //   if (!SERVICE_PROVIDERS.length) {

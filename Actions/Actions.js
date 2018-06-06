@@ -73,6 +73,7 @@ var asyncActions = [
 
   'listMultientry',
 
+  'getIdentity',
   'openURL'
 ]
 
