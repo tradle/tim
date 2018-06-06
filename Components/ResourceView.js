@@ -4,6 +4,7 @@ console.log('requiring ResourceView.js')
 import pick from 'object.pick'
 import extend from 'extend'
 import constants from '@tradle/constants'
+import QR from '@tradle/qr-schema'
 import ActionSheet from 'react-native-actionsheet'
 import {
   // StyleSheet,
@@ -81,7 +82,8 @@ const {
 
 const {
   TYPE,
-  ROOT_HASH
+  ROOT_HASH,
+  CUR_HASH
 } = constants
 const AUTH_PROPS = ['useTouchId', 'useGesturePassword']
 
@@ -302,6 +304,7 @@ class ResourceView extends Component {
                                   currency={currency}
                                   bankStyle={bankStyle}
                                   backlink={backlink}
+                                  showQR={this.openModal.bind(this)}
                                   backlinkList={backlinkList}/>
         // actionPanel = <ShowRefList showQR={this.openModal.bind(this)} {...this.props} backlink={backlink} backlinkList={back
     }
@@ -313,11 +316,39 @@ class ResourceView extends Component {
                  <QRCode inline={true} content={pairingData} dimension={w} />
                </View>
     }
-    else if (isMe  &&  me.isEmployee  &&  me.organization && me.organization.url) {
+    else if (isMe) {
       w = Math.floor((width / 3) * 2)
-      qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                 <QRCode inline={true} content={TALK_TO_EMPLOYEE + ';' + me.organization.url + ';' + utils.getId(me.organization).split('_')[1] + ';' + me[ROOT_HASH]} dimension={w} />
-               </View>
+      if (me.isEmployee  &&  me.organization && me.organization.url) {
+        let parts = utils.getId(me.organization).split('_')
+        let qr = QR.toHex({
+          schema: 'OrgProfile',
+          data: {
+            permalink: me[ROOT_HASH],
+            link: me[CUR_HASH],
+            orgPermalink: parts[1],
+            orgLink: parts[2],
+            name: me.organization.title,
+          }
+        })
+        qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
+                   <QRCode inline={true} content={qr} dimension={w} />
+                 </View>
+      }
+      else {
+        let qr = QR.toHex({
+          schema: 'Profile',
+          data: {
+            permalink: me[ROOT_HASH],
+            link: me[CUR_HASH],
+            firstName: me.firstName,
+            lastName: me.lastName
+          }
+        })
+
+        qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
+                   <QRCode inline={true} content={qr} dimension={w} />
+                 </View>
+      }
     }
     else
       qrcode = <View />
@@ -497,7 +528,7 @@ class ResourceView extends Component {
       Actions.genPairingData()
       return
     case SCAN_QR_CODE:
-      this.scanFormsQRCode(true)
+      this.scanFormsQRCode({isView: true})
       return
     case VIEW_DEBUG_LOG:
       this.props.navigator.push({
