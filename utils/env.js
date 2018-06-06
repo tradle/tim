@@ -113,6 +113,7 @@ const merged = extend({
   autoOptInTouchId: false,
   autoRegister: false,
   requireSoftPIN: false,
+  allowWipe: true,
   locale: {
     language: DeviceInfo.getDeviceLocale(),
     country: DeviceInfo.getDeviceCountry()

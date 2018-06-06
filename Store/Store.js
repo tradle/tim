@@ -5616,6 +5616,23 @@ if (!res[SIG]  &&  res._message)
   onReloadModels() {
     this.loadModels()
   },
+  onRequestWipe(opts={}) {
+    if (opts.confirmed) {
+      Actions.reloadDB()
+      return
+    }
+
+    Alert.alert(translate('areYouSureAboutWipe'), '', [
+      {
+        text: 'Cancel',
+        onPress: () => {}
+      },
+      {
+        text: 'OK',
+        onPress: () => Actions.reloadDB({ silent: true })
+      }
+    ])
+  },
   async onGetModels(providerId) {
     let provider = this._getItem(providerId)
     let modelPacks = await this.searchMessages({modelName: MODELS_PACK})

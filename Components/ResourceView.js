@@ -69,6 +69,7 @@ const USE_GESTURE_PASSWORD = 2
 const CHANGE_GESTURE_PASSWORD = 3
 const PAIR_DEVICES = 4
 const VIEW_DEBUG_LOG = 5
+const WIPE_DEVICE = 6
 const MY_PRODUCT = 'tradle.MyProduct'
 
 const {
@@ -468,12 +469,19 @@ class ResourceView extends Component {
     buttons.push(translate('pairDevices'))
     actions.push(PAIR_DEVICES)
 
-    buttons.push(translate('viewDebugLog'))
-    actions.push(VIEW_DEBUG_LOG)
     if (ENV.homePageScanQRCodePrompt) {
       buttons.push(translate('scanQRcode'))
       actions.push(SCAN_QR_CODE)
     }
+
+    if (ENV.allowWipe) {
+      buttons.push(translate('wipeDevice'))
+      actions.push(WIPE_DEVICE)
+    }
+
+    buttons.push(translate('viewDebugLog'))
+    actions.push(VIEW_DEBUG_LOG)
+
     buttons.push(translate('cancel'))
     return(
         <ActionSheet
@@ -540,6 +548,9 @@ class ResourceView extends Component {
         onRightButtonPress: utils.submitLog
       })
 
+      return
+    case WIPE_DEVICE:
+      Actions.requestWipe()
       return
     }
   }
