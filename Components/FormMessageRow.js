@@ -289,7 +289,7 @@ class FormMessageRow extends Component {
           val = resource[v] ? dateformat(new Date(resource[v]), 'mmm d, yyyy') : null
         else if (properties[v].displayAs)
           val = utils.templateIt(properties[v], resource)
-        else if (model.id === PRODUCT_REQUEST  &&  v === 'requestFor')
+        else if (properties[v].range === 'model')
           val = utils.makeModelTitle(utils.getModel(resource[v]))
         else
           val = properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
