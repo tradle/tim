@@ -284,6 +284,7 @@ class VerificationRow extends Component {
                            </View>
                            <View style={{justifyContent: 'center'}}>
                              <Text style={styles.rTitle}>{dn}</Text>
+                             <Text style={styles.checkDescription}>{utils.makeModelTitle(resource[TYPE])}</Text>
                            </View>
                          </View>
       }
@@ -734,6 +735,11 @@ var styles = StyleSheet.create({
   verySmallLetters: {
     fontSize: 12,
     color: '#b4c3cb'
+  },
+  checkDescription: {
+    fontSize: 14,
+    paddingTop: 3,
+    color: '#aaaaaa'
   },
   refPropertyRow: {
     flexDirection: 'row',
