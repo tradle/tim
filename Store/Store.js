@@ -8826,7 +8826,7 @@ var Store = Reflux.createStore({
 
     var isMessage = utils.isMessage(value)
     var originalR = list[utils.getId(value)]
-    var isNew = value[ROOT_HASH] === value[CUR_HASH] || (!isMessage  &&  !originalR)
+    var isNew = (isMessage  &&  value[ROOT_HASH] === value[CUR_HASH]) || (!isMessage  &&  !originalR)
     if (value[TYPE] === SETTINGS) {
       if (isNew) {
         if (SERVICE_PROVIDERS_BASE_URL_DEFAULTS.includes(value.url))
