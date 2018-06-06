@@ -32,7 +32,7 @@
     "push:android:prod": "./scripts/code-push.js --platform android --stage Production"
   },
   "dependencies": {
-    "@tradle/aws-client": "^1.8.0",
+    "@tradle/aws-client": "^1.8.1",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
     "@tradle/biz-plugins": "github:tradle/biz-plugins",
     "@tradle/build-resource": "^4.0.1",

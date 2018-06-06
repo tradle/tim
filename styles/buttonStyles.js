@@ -12,8 +12,9 @@ import { circled } from './utils'
 import * as platformButtons from './platform'
 
 const {
-  footerButtonObject={},
-  homeButtonObject={}
+  menuButtonObject,
+  conversationButtonObject,
+  homeButtonObject={},
 } = platformButtons
 
 var FONT_SIZE = 12;
@@ -100,11 +101,8 @@ var buttonStyles = Object.freeze({
     fontFamily: 'Avenir Next',
     fontSize: utils.getFontSize(FONT_SIZE_1)
   },
-  menuButton: {
-    ...footerButtonObject,
-    backgroundColor: 'red'
-  },
-  conversationButton: footerButtonObject,
+  menuButton: menuButtonObject,
+  conversationButton: conversationButtonObject,
   homeButton: {
     ...homeButtonObject,
     opacity: 0.9

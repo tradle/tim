@@ -35,3 +35,4 @@ react-native bundle \
   --bundle-output "$BUNDLE_FILE" \
   --sourcemap-output "$BUNDLE_FILE.map" \
   --assets-dest "$DEST"
+

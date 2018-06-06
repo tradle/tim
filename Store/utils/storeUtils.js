@@ -1,5 +1,6 @@
 'use strict'
 
+import voc from '../voc'
 import utils from '../../utils/utils'
 const Aviva = require('../../utils/aviva')
 var sha = require('stable-sha1');
@@ -12,9 +13,9 @@ const {
   ROOT_HASH,
   CUR_HASH
 } = constants
-const voc = require('../voc')
 
 const { MONEY, ENUM, ORGANIZATION, FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
+const ObjectModel = voc['tradle.Object']
 
 var storeUtils = {
   addModels({models, enums}) {
@@ -35,16 +36,13 @@ var storeUtils = {
 
     if (!m.properties[TYPE]) {
       m.properties[TYPE] = {
-        type: 'string',
-        readOnly: true
+        ...ObjectModel.properties[TYPE]
       }
     }
-    if (!m.properties._time) {
 
+    if (!m.properties._time) {
       m.properties._time = {
-        type: 'date',
-        readOnly: true,
-        title: 'Date'
+        ...ObjectModel.properties._time
       }
     }
   },
