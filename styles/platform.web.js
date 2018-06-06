@@ -24,7 +24,9 @@ export default StyleSheet.create({
 export {
   MenuIcon,
   footerButtonObject,
-  homeButtonObject
+  homeButtonObject,
+  menuButtonObject,
+  conversationButtonObject
 } from './platform.ios'
 
 // Object.defineProperty(exports, 'MB', {
