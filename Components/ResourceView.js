@@ -334,22 +334,23 @@ class ResourceView extends Component {
                </View>
     }
     else if (isMe) {
-      w = Math.floor((width / 3) * 2)
+      w = Math.min(Math.floor((width / 3) * 2), 300)
       if (me.isEmployee  &&  me.organization && me.organization.url) {
-        let parts = utils.getId(me.organization).split('_')
-        let qr = QR.toHex({
-          schema: 'OrgProfile',
-          data: {
-            permalink: me[ROOT_HASH],
-            link: me[CUR_HASH],
-            orgPermalink: parts[1],
-            orgLink: parts[2],
-            name: me.organization.title,
-          }
-        })
-        qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
-                   <QRCode inline={true} content={qr} dimension={w} />
-                 </View>
+        // let parts = utils.getId(me.organization).split('_')
+        // let qr = QR.toHex({
+        //   schema: 'OrgProfile',
+        //   data: {
+        //     permalink: me[ROOT_HASH],
+        //     link: me[CUR_HASH],
+        //     orgPermalink: parts[1],
+        //     orgLink: parts[2],
+        //     name: me.organization.title,
+        //   }
+        // })
+        // qrcode = <View style={styles.qrcode} onPress={()=> this.setState({isModalOpen: true})}>
+        //            <QRCode inline={true} content={qr} dimension={w} />
+        //          </View>
+        qrcode = <View />
       }
       else {
         let qr = QR.toHex({
