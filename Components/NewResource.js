@@ -11,6 +11,7 @@ import PhotoView from './PhotoView'
 import ResourceView from './ResourceView'
 import MessageView from './MessageView'
 import ResourceMixin from './ResourceMixin'
+import HomePageMixin from './HomePageMixin'
 import ShowPropertiesView from './ShowPropertiesView'
 import PageView from './PageView'
 import t from 'tcomb-form-native'
@@ -1413,6 +1414,7 @@ class NewResource extends Component {
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 reactMixin(NewResource.prototype, NewResourceMixin);
 reactMixin(NewResource.prototype, ResourceMixin);
+reactMixin(NewResource.prototype, HomePageMixin);
 NewResource = makeResponsive(NewResource)
 
 var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankStyle, isRegistration }) {

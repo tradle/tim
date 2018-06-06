@@ -26,6 +26,7 @@ import EnumList from './EnumList'
 import FloatLabel from 'react-native-floating-labels'
 import Icon from 'react-native-vector-icons/Ionicons'
 import moment from 'moment'
+import QRCodeScanner from './QRCodeScanner'
 
 import constants from '@tradle/constants'
 
@@ -37,7 +38,6 @@ import utils, {
 import CameraView from './CameraView'
 import SignatureView from './SignatureView'
 import StyleSheet from '../StyleSheet'
-import QRCodeScanner from './QRCodeScanner'
 import driverLicenseParser from '../utils/driverLicenseParser'
 import focusUri from '../video/Focus1.mp4'
 
@@ -1297,23 +1297,23 @@ var NewResourceMixin = {
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let resource = /*this.props.resource ||*/ this.state.resource
-    let label, style
-    let propLabel
     let { model, bankStyle, metadata, country, search } = this.props
     let isItem = metadata != null
-    let prop
+    let props
     if (model)
-      prop = model.properties[params.prop]
+      props = model.properties
     else if (metadata.items.properties)
-      prop = metadata.items.properties[params.prop]
+      props = metadata.items.properties
     else
-      prop = utils.getModel(metadata.items.ref).properties[params.prop]
-
+      props = utils.getModel(metadata.items.ref).properties
+    let prop = props[params.prop]
     let lcolor = this.getLabelAndBorderColor(params.prop)
 
     let color = {color: lcolor}
     let isVideo = prop.name === 'video'
     let isPhoto = prop.name === 'photos'  ||  prop.ref === PHOTO
+    let isIdentity = prop.ref === IDENTITY
+
     let noChooser
     let required = model  &&  utils.ungroup(model.required)
     if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(prop.name)) {
@@ -1324,7 +1324,7 @@ var NewResourceMixin = {
     let val = resource && resource[params.prop]
     if (Array.isArray(val)  &&  !val.length)
       val = null
-    let isImmutable
+    let label, style, propLabel, isImmutable
     if (val) {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto) {
@@ -1409,6 +1409,8 @@ var NewResourceMixin = {
         icon = <Icon name='ios-play-outline' size={35}  color={linkColor} />
       else if (isPhoto)
         icon = <Icon name='ios-camera-outline' size={35}  color={linkColor} style={styles.photoIcon}/>
+      else if (isIdentity)
+        icon = <Icon name='ios-qr-scanner' size={35}  color={linkColor} style={styles.photoIcon}/>
       else if (!noChooser)
         icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
     }
@@ -1421,7 +1423,11 @@ var NewResourceMixin = {
 
     let help = this.getHelp(prop)
     let actionItem
-    if (isVideo ||  isPhoto) {
+    if (isIdentity)
+       actionItem = <TouchableHighlight onPress={() => this.scanQRAndSet(prop)}>
+                      {content}
+                    </TouchableHighlight>
+    else if (isVideo ||  isPhoto) {
       // HACK
       const isScan = params.prop === 'scan'
       let useImageInput
@@ -1459,6 +1465,15 @@ var NewResourceMixin = {
         {help}
       </View>
     );
+  },
+  async scanQRAndSet(prop) {
+    const result = await this.scanFormsQRCode()
+    let {permalink, firstName} = result.data
+    this.setChosenValue(prop.name, {
+      id: utils.makeId(IDENTITY, permalink),
+      title: firstName
+    })
+    debugger
   },
   onSetMediaProperty(propName, item) {
     if (!item)
@@ -1569,6 +1584,19 @@ var NewResourceMixin = {
     this.props.navigator.pop()
   },
   // setting chosen from the list property on the resource like for ex. Organization on Contact
+  // setChosenValues(props) {
+  //   Object.keys(props).map(propName => {
+  //     const value = props[propName]
+  //     this._setChosenValue(propName, value)
+  //   })
+
+  //   this.setState(sttate);
+  //   if (!this.props.search) {
+  //     if (model.subClassOf === FORM)
+  //       Actions.getRequestedProperties({resource: r, currentResource: currentR})
+  //     Actions.saveTemporary(r)
+  //   }
+  // },
   setChosenValue(propName, value) {
     let resource = _.cloneDeep(this.state.resource)
     if (typeof propName === 'object')

@@ -59,6 +59,7 @@
     "@tradle/models-products-bot": "github:tradle/models-products-bot",
     "@tradle/multiqueue": "^2.3.1",
     "@tradle/protocol": "^4.0.2",
+    "@tradle/qr-schema": "^1.11.0",
     "@tradle/restore": "github:tradle/restore",
     "@tradle/validate-model": "^7.0.0",
     "@tradle/validate-resource": "^4.3.0",
@@ -78,7 +79,7 @@
     "cachedown": "github:mvayngrib/cachedown#bb59815",
     "clone": "2.1.1",
     "co": "4.6.0",
-    "compare-versions": "^3.2.1",
+    "compare-versions": "https://registry.npmjs.org/compare-versions/-/compare-versions-3.2.1.tgz",
     "create-ecdh": "github:mvayngrib/createECDH#b5e05e40",
     "crypto-browserify": "^3.11.0",
     "dataurl-to-blob": "0.0.1",
@@ -240,7 +241,6 @@
     "webpack-validator": "^2.2.8"
   },
   "browser": {
-    "@tradle/qr-schema": false,
     "asyncstorage-down": "level-js",
     "react-native-async-storage-rocks": false,
     "react-native-async-storage-snappy": false,

@@ -14,7 +14,7 @@ if (stage !== 'Staging' && stage !== 'Production') {
   throw new Error('expected --stage "Staging" or "Production"')
 }
 
-const { getReleaseDir, getVersion } = require('./build-utils')
+const { getReleaseDir, getVersion } = require('../build-utils')
 const releaseDir = getReleaseDir({ platform })
 if (!fs.existsSync(releaseDir)) {
   throw new Error(`expected to find release dir: ${releaseDir}`)

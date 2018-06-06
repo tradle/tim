@@ -30,25 +30,36 @@ const {
 const {
   PROFILE,
   ORGANIZATION,
-  MESSAGE
+  MESSAGE,
+  IDENTITY
 } = constants.TYPES
 
 const DATA_CLAIM = 'tradle.DataClaim'
 const APPLICATION = 'tradle.Application'
 
 var HomePageMixin = {
-  scanFormsQRCode(isView) {
-    this.setState({hideMode: false})
-    this.props.navigator.push({
-      title: 'Scan QR Code',
-      id: 16,
-      component: QRCodeScanner,
-      titleTintColor: '#eeeeee',
-      backButtonTitle: 'Cancel',
-      // rightButtonTitle: 'ion|ios-reverse-camera',
-      passProps: {
-        onread: this.onread.bind(this, isView)
-      }
+  scanFormsQRCode(opts) {
+    return new Promise((resolve, reject) => {
+      this.setState({hideMode: false})
+      this.props.navigator.push({
+        title: 'Scan QR Code',
+        id: 16,
+        component: QRCodeScanner,
+        titleTintColor: '#eeeeee',
+        backButtonTitle: 'Cancel',
+        // rightButtonTitle: 'ion|ios-reverse-camera',
+        passProps: {
+          onread: async (result) => {
+            try {
+              resolve(qrCodeDecoder.fromHex(result.data))
+            } catch (err) {
+              reject(err)
+            } finally {
+              this.props.navigator.pop()
+            }
+          }
+        }
+      })
     })
   },
 
@@ -57,11 +68,22 @@ var HomePageMixin = {
       translate('error'),
       translate('unknownQRCodeFormat')
     )
-
     this.props.navigator.pop()
   },
 
-  async onread(isView, result) {
+  async onread(params, result) {
+    let {isView, callback, prop} = params
+    // HACK
+    // if (result.data.indexOf('10;') === 0) {
+    //   let parts = result.data.split(';')
+    //   Actions.getIdentity({ hash: parts[1], name: parts[2] })
+    //   this.props.navigator.pop()
+    //   callback(prop, {
+    //      id: utils.makeId(IDENTITY, parts[1]),
+    //      title: parts[2]
+    //   })
+    //   return
+    // }
     try {
       result = qrCodeDecoder.fromHex(result.data)
     } catch (err) {
@@ -74,6 +96,14 @@ var HomePageMixin = {
     // post to server request for the forms that were filled on the web
     let me = utils.getMe()
     switch (schema) {
+    case 'Profile':
+      Actions.getIdentity(data)
+      this.props.navigator.pop()
+      callback(null, {
+         id: utils.makeId(IDENTITY, data.permalink),
+         title: data.firstName
+      })
+      break
     case 'ImportData':
       let r = {
         _t: 'tradle.DataClaim',
