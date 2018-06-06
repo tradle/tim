@@ -634,6 +634,7 @@ var Store = Reflux.createStore({
       let res = {}
       _.extend(res, rr)
       _.extend(res, r)
+      this.rewriteStubs(res)
       this.addVisualProps(res)
       this.trigger({action: 'updateItem', sendStatus: SENT, resource: res})
       this.dbPut(objId, r)
