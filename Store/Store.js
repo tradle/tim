@@ -213,6 +213,13 @@ const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 
 import AWSClient from '@tradle/aws-client'
+
+// increase timeouts
+AWSClient.CLOSE_TIMEOUT = 2000
+AWSClient.SEND_TIMEOUT = 10000
+AWSClient.CATCH_UP_TIMEOUT = 10000
+AWSClient.CONNECT_TIMEOUT = 10000
+
 import map from 'map-stream'
 import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet

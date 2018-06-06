@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "dependencies": {
     "@tradle/aws-client": {
-      "version": "1.8.0",
+      "version": "1.8.1",
       "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.8.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-1.8.1.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -57,9 +57,9 @@
       "resolved": "git://github.com/tradle/custom-models.git#118d2315badc674929a3d138d7dfe9e548a9deab"
     },
     "@tradle/embed": {
-      "version": "1.1.1",
-      "from": "@tradle/embed@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.1.tgz"
+      "version": "1.1.2",
+      "from": "@tradle/embed@>=1.1.2 <2.0.0",
+      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.2.tgz"
     },
     "@tradle/engine": {
       "version": "7.0.1",
@@ -6936,9 +6936,9 @@
       "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-1.0.4.tgz"
     },
     "strong-data-uri": {
-      "version": "1.0.5",
+      "version": "1.0.6",
       "from": "strong-data-uri@>=1.0.4 <2.0.0",
-      "resolved": "https://registry.npmjs.org/strong-data-uri/-/strong-data-uri-1.0.5.tgz"
+      "resolved": "https://registry.npmjs.org/strong-data-uri/-/strong-data-uri-1.0.6.tgz"
     },
     "style-loader": {
       "version": "0.13.2",

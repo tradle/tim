@@ -40,17 +40,20 @@ export default StyleSheet.create({
     alignSelf: 'flex-start'
   }
 })
-var menuIcon = {
+
+const menuIcon = {
   name: 'md-menu',
   color: 'red'
 }
 
-export const MenuIcon = menuIcon
-export const footerButtonObject = {
+const footerButton = {
   marginTop: 5,
   paddingHorizontal: 5,
   backgroundColor: 'transparent',
   borderColor: 'transparent'
 }
 
-export const homeButtonObject = footerButtonObject
+export const MenuIcon = menuIcon
+export const menuButtonObject = footerButton
+export const homeButtonObject = footerButton
+export const conversationButtonObject = footerButton
