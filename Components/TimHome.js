@@ -993,7 +993,7 @@ class TimHome extends Component {
 
     return (
       <View style={styles.container}>
-        <BackgroundImage source={BG_IMAGE} />
+        <BackgroundImage testID="homeBG" source={BG_IMAGE} />
         <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
           <View style={styles.flexGrow} />
           { utils.getMe()
