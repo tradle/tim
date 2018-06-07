@@ -1,3 +1,4 @@
+import defaults from 'lodash/defaults'
 import React from 'react'
 import {
   View,
@@ -35,15 +36,14 @@ module.exports = function createCalendarModal (props) {
   const locale = calendarProps.locale || getDefaultLocaleForDisplay(display)
 
   // sensible defaults
-  calendarProps = {
+  calendarProps = defaults(calendarProps, {
     display,
     locale,
     theme: defaultTheme,
     showTodayHelper: false,
     selectedDate: new Date(),
     minDate: DEFAULT_MIN_DATE,
-    ...calendarProps
-  }
+  })
 
   // don't render dates outside allowed range
   if (calendarProps.minDate) {
