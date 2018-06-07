@@ -6561,7 +6561,7 @@ var Store = Reflux.createStore({
       rr.to = {id: authorId, title: authorTitle}
       break
     case APPLICATION:
-      this.organizeSubmissions(rr)
+      // this.organizeSubmissions(rr)
     default:
       rr.from = {id: authorId, title: authorTitle}
       rr.to = {id: myOrgRepId, title: utils.getDisplayName(me.organization)}
@@ -6600,6 +6600,9 @@ var Store = Reflux.createStore({
     // }
     rr[IS_MESSAGE] = true
     this.rewriteStubs(rr)
+    if (m.id === APPLICATION) {
+      this.organizeSubmissions(rr)
+    }
     this.addVisualProps(rr)
     return rr
   },
