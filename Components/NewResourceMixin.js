@@ -1423,7 +1423,7 @@ var NewResourceMixin = {
 
     let help = this.getHelp(prop)
     let actionItem
-    if (isIdentity)
+    if (isIdentity && !utils.isWeb())
        actionItem = <TouchableHighlight onPress={() => this.scanQRAndSet(prop)}>
                       {content}
                     </TouchableHighlight>
