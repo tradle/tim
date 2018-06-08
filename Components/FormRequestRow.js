@@ -18,6 +18,7 @@ import CameraView from './CameraView'
 import StringChooser from './StringChooser'
 import ImageInput from './ImageInput'
 import ShareResourceList from './ShareResourceList'
+import ResourceList from './ResourceList'
 
 import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
@@ -877,9 +878,27 @@ class FormRequestRow extends Component {
     else {
       let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
-      let notLink = resource._documentCreated  ||  isReadOnly
+      let notLink = resource._documentCreated  ||  isReadOnly  ||  resource.form === PRODUCT_REQUEST
       icon = <Icon  name={'ios-arrow-forward'} color={linkColor} size={20} />
-      if (!notLink) {
+      if (notLink) {
+        if (form.id  === PRODUCT_REQUEST) {
+          const rotateX = this.spinValue.interpolate({
+            inputRange: [0, 0.5, 1],
+            outputRange: ['0deg', '180deg', '0deg']
+          })
+          // addMessage = 'You can choose the product by clicking on a red  menu button'
+          let style = {transform: [{rotate: rotateX}]}
+          msg = <View style={[styles.message, {width: 200}]}  key={this.getNextKey()}>
+                  <Animated.View style={style}>
+                    <View style={[styles.shareButton, {backgroundColor: '#007EFF', marginRight: 10}]}>
+                      <Icon name='md-information' size={35} color='#ffffff' />
+                    </View>
+                  </Animated.View>
+                  <Text style={[chatStyles.resourceTitle, {color: '#757575'}]}>{addMessage}</Text>
+                </View>
+        }
+      }
+      else {
         if (resource.verifiers)
           onPressCall = chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
         else if (!prop)
@@ -923,16 +942,6 @@ class FormRequestRow extends Component {
                        </View>
                      </TouchableOpacity>
                    </View>
-          }
-          else if (form.id  === PRODUCT_REQUEST) {
-            msg = <View key={this.getNextKey()}>
-                  <TouchableOpacity onPress={() => form.id === PRODUCT_REQUEST ? this.productChooser(prop) : this.chooser(prop)}>
-                    <View style={styles.message}>
-                      <Text style={[chatStyles.resourceTitle, {color: bankStyle.incomingMessageTextColor}, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
-                      {resource._documentCreated ? null : icon}
-                    </View>
-                  </TouchableOpacity>
-               </View>
           }
         }
       }
@@ -1002,7 +1011,6 @@ class FormRequestRow extends Component {
       return true
   }
   makeButtonLink(form, isMyMessage, styles, msg, isAnother) {
-    let zoomIn = {transform: [{scale: this.springValue}]}
     if (!msg)
       msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
     let width = utils.getMessageWidth(FormRequestRow) - 40
@@ -1016,6 +1024,7 @@ class FormRequestRow extends Component {
          </View>
       )
     }
+    let zoomIn = {transform: [{scale: this.springValue}]}
     return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
              this.createNewResource(form, isMyMessage)
            }}>
@@ -1065,25 +1074,40 @@ class FormRequestRow extends Component {
     // this.props.navigator.pop()
   }
 
-  // showCamera(prop) {
-  //   this.props.navigator.push({
-  //     title: 'Take a pic',
-  //     backButtonTitle: 'Back',
-  //     id: 12,
-  //     component: CameraView,
-  //     sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-  //     passProps: {
-  //       onTakePic: this.onTakePic.bind(this, prop)
-  //     }
-  //   });
-  // }
+  chooser(prop) {
+    let oResource = this.props.resource
+    let model = utils.getModel(oResource.form)
+    let resource = {
+      [TYPE]: model.id,
+      from: utils.getMe(),
+      to: oResource.from
+    }
+    if (oResource._context)
+      resource._context = oResource._context
 
-  // onTakePic(prop, data) {
-  //   if (!data)
-  //     return
-  //   utils.onTakePic(prop, data, this.props.resource)
-  //   this.props.navigator.pop()
-  // }
+    var propRef = prop.ref
+    var m = utils.getModel(propRef);
+    var currentRoutes = this.props.navigator.getCurrentRoutes();
+    this.props.navigator.push({
+      title: translate(prop), //m.title,
+      // titleTextColor: '#7AAAC3',
+      id: 10,
+      component: ResourceList,
+      backButtonTitle: 'Back',
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        isChooser:      true,
+        prop:           prop,
+        modelName:      propRef,
+        resource:       resource,
+        returnRoute:    currentRoutes[currentRoutes.length - 1],
+        callback:       (prop, val) => {
+          resource[prop.name] = utils.buildRef(val)
+          Actions.addChatItem({resource: resource, disableFormRequest: oResource})
+        },
+      }
+    });
+  }
 }
 
 function isMultientry(resource) {
@@ -1205,8 +1229,10 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       flexDirection: 'row',
       // flex: 1,
       minHeight: 35,
+      paddingLeft: 5,
+      // justifyContent: 'center'
       alignItems: 'center',
-      justifyContent: 'space-between',
+      // justifyContent: 'space-between',
     },
     shareButton: {
       ...circled(40),
