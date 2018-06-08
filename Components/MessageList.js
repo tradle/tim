@@ -174,6 +174,8 @@ class MessageList extends Component {
 
     StatusBar.setHidden(false);
     utils.onNextTransitionEnd(navigator, () => Actions.list(params));
+    if (!application)
+      Actions.getProductList({ resource })
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
@@ -206,7 +208,10 @@ class MessageList extends Component {
       return
     }
     let { application, modelName, bankStyle, navigator } = this.props
-
+    if (action === 'productList') {
+      this.setState({productList: params.resource})
+      return
+    }
     if (action === 'assignRM_Confirmed') {
       if (application[ROOT_HASH] === params.application[ROOT_HASH]) {
         let r = utils.clone(application)
@@ -497,6 +502,8 @@ class MessageList extends Component {
     if (this.state.list.length !== nextState.list.length)
       return true
     if (this.state.application !== nextState.application)
+      return true
+    if (this.state.productList !== nextState.productList)
       return true
     // if (!this.state.isConnected && !this.state.list  && !nextState.list && this.state.isLoading === nextState.isLoading)
     //   return false
@@ -929,6 +936,12 @@ class MessageList extends Component {
       })
       return buttons
     }
+    if (this.state.productList)
+      buttons.push({
+        index: 0,
+        title: translate('applyForProduct'),
+        callback: () => this.productChooser()
+      })
     let me = utils.getMe()
     let hasSupportLine = utils.hasSupportLine(resource)
 
@@ -1235,6 +1248,33 @@ class MessageList extends Component {
         bankStyle:  this.props.bankStyle
       }
     })
+  }
+  productChooser() {
+    let prop = utils.getModel(PRODUCT_REQUEST).properties.requestFor
+    let oResource = this.state.productList
+    let model = utils.getModel(oResource.form)
+    let resource = {
+      [TYPE]: model.id,
+      from: utils.getMe(),
+      to: oResource.from
+    }
+    if (oResource._context)
+      resource._context = oResource._context
+    this.props.navigator.push({
+      title: translate(prop),
+      id: 33,
+      component: StringChooser,
+      backButtonTitle: 'Back',
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        strings:   oResource.chooser.oneOf,
+        bankStyle: this.props.bankStyle,
+        callback:  (val) => {
+          resource[prop.name] = val
+          Actions.addChatItem({resource: resource, disableFormRequest: oResource})
+        },
+      }
+    });
   }
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);

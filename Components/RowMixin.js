@@ -398,40 +398,6 @@ var RowMixin = {
       this.setState({isChosen: true})
       this.props.chosen[id] = resource
     }
-  },
-  chooser(prop) {
-    let oResource = this.props.resource
-    let model = utils.getModel(oResource.form)
-    let resource = {
-      [TYPE]: model.id,
-      from: utils.getMe(),
-      to: oResource.from
-    }
-    if (oResource._context)
-      resource._context = oResource._context
-
-    var propRef = prop.ref
-    var m = utils.getModel(propRef);
-    var currentRoutes = this.props.navigator.getCurrentRoutes();
-    this.props.navigator.push({
-      title: translate(prop), //m.title,
-      // titleTextColor: '#7AAAC3',
-      id: 10,
-      component: ResourceList,
-      backButtonTitle: 'Back',
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        isChooser:      true,
-        prop:           prop,
-        modelName:      propRef,
-        resource:       resource,
-        returnRoute:    currentRoutes[currentRoutes.length - 1],
-        callback:       (prop, val) => {
-          resource[prop.name] = utils.buildRef(val)
-          Actions.addChatItem({resource: resource, disableFormRequest: oResource})
-        },
-      }
-    });
   }
 }
 

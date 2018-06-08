@@ -5123,7 +5123,7 @@ var Store = Reflux.createStore({
     await this.onAddChatItem({resource, noTrigger: true,  })
     this.trigger({ action: 'applyForProduct', provider: org })
   },
-  async onGetIdentity({ permalink, link, firstName, lastName }) {
+  async onGetIdentity({prop, permalink, link, firstName, lastName }) {
     let identityId = utils.makeId(IDENTITY, permalink, link)
     let profile = {
       [TYPE]: PROFILE,
@@ -5132,9 +5132,40 @@ var Store = Reflux.createStore({
       firstName
     }
     await db.put(utils.getId(profile), profile)
-    this.trigger({action: 'getIdentity', identity: {id: identityId, title: firstName}})
+    this.trigger({action: 'formEdit', prop, value: {id: identityId, title: firstName}})
   },
+  async onGetProductList({resource}) {
+    if (resource[TYPE] !== ORGANIZATION) {
+      let org = resource.organization
+      if (!org)
+        return
+      resource = this._getItem(org)
+    }
+    let orgId = utils.getId(resource)
+    let messages = chatMessages[utils.getId(resource)]
+    if (!messages)
+      return
+    let rIdx = _.findLastIndex(messages, (r) => {
+      if (utils.getType(r) === FORM_REQUEST) {
+        if (this._getItem(r).form === PRODUCT_REQUEST)
+          return true
+      }
+      return false
+    })
+    if (rIdx === -1)
+      return
+    let pl = this._getItem(messages[rIdx])
+    try {
+      let kr = await this._keeper.get(pl[CUR_HASH])
+      let productListR = utils.clone(kr)
+      _.extend(productListR, pl)
+      this.trigger({action: 'productList', resource: productListR, to: resource})
+    } catch (err) {
+      debug('Store.onGetProductList: ' + err.stack)
+      return
+    }
 
+  },
   async onAddApp({ url, permalink, noTrigger, addSettings }) {
     try {
       await this.getInfo({serverUrls: [url], retry: false}) //, hash: permalink })
@@ -9918,15 +9949,21 @@ var Store = Reflux.createStore({
         })
         return
       }
-      if (val[TYPE] === FORM_REQUEST  &&  !utils.isContext(val.form)) {
-        var fid = this._getItem(val.from)
-        let productToForms = await this.gatherForms(fid, val._context)
-        if (val._context)
-          val._context = this.findContext(val._context)
-        let shareables
-        if (!me.isEmployee  ||  !from.organization  ||  utils.getId(from.organization) !== utils.getId(me.organization))
-          shareables = await this.getShareableResources({foundResources: [val], to: val.from, context: val._context})
-        this.trigger({action: 'addItem', resource: val, shareableResources: shareables, productToForms: productToForms})
+      if (val[TYPE] === FORM_REQUEST) {
+        if (utils.isContext(val.form)) {
+          this.onGetProductList({resource: val.from})
+          this.trigger({action: 'addItem', resource: val})
+        }
+        else {
+          var fid = this._getItem(val.from)
+          let productToForms = await this.gatherForms(fid, val._context)
+          if (val._context)
+            val._context = this.findContext(val._context)
+          let shareables
+          if (!me.isEmployee  ||  !from.organization  ||  utils.getId(from.organization) !== utils.getId(me.organization))
+            shareables = await this.getShareableResources({foundResources: [val], to: val.from, context: val._context})
+          this.trigger({action: 'addItem', resource: val, shareableResources: shareables, productToForms: productToForms})
+        }
       }
       else {
         if (val[TYPE] === FORM_ERROR  &&  val.prefill.id) {
