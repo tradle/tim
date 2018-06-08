@@ -728,8 +728,10 @@ class MessageList extends Component {
 
     if (model.id === FORM_ERROR)
       return <FormErrorRow {...props} />
-    else if (model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST)
+    else if (model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST) {
+      _.extend(props, {productChooser: this.productChooser})
       return <FormRequestRow {...props} />
+    }
     else if (model.id === TOUR)
       return <TourRow {...props} />
     else
