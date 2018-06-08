@@ -880,14 +880,14 @@ class FormRequestRow extends Component {
           })
           // addMessage = 'You can choose the product by clicking on a red  menu button'
           let style = {transform: [{rotate: rotateX}]}
-          msg = <View style={[styles.message, {width: 200}]}  key={this.getNextKey()}>
+          msg = <TouchableOpacity onPress={() => this.productChooser(prop)} style={styles.message}  key={this.getNextKey()}>
                   <Animated.View style={style}>
                     <View style={[styles.shareButton, {backgroundColor: '#007EFF', marginRight: 10}]}>
                       <Icon name='md-information' size={35} color='#ffffff' />
                     </View>
                   </Animated.View>
                   <Text style={[chatStyles.resourceTitle, {color: '#757575'}]}>{addMessage}</Text>
-                </View>
+                </TouchableOpacity>
         }
       }
       else {
