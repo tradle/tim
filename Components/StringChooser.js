@@ -59,7 +59,7 @@ class StringChooser extends Component {
   }
   render() {
     var content =
-      <ListView ref='listview' style={styles.listview}
+      <ListView ref='listview' style={platformStyles.container}
         dataSource={this.state.dataSource}
         removeClippedSubviews={false}
         initialListSize={100}
@@ -82,15 +82,14 @@ class StringChooser extends Component {
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor: 'white',
   },
-  listview: {
-    marginTop: 64,
-    borderWidth: 0,
-    marginHorizontal: -1,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#ffffff',
-  },
+  // listview: {
+  //   marginTop: 64,
+  //   borderWidth: 0,
+  //   marginHorizontal: -1,
+  //   borderBottomWidth: StyleSheet.hairlineWidth,
+  //   borderColor: '#ffffff',
+  // },
 });
 
 module.exports = StringChooser;
