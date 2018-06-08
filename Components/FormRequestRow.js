@@ -870,7 +870,7 @@ class FormRequestRow extends Component {
     else {
       let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
-      let notLink = resource._documentCreated  ||  isReadOnly
+      let notLink = resource._documentCreated  ||  isReadOnly  ||  resource.form === PRODUCT_REQUEST
       icon = <Icon  name={'ios-arrow-forward'} color={linkColor} size={20} />
       if (notLink) {
         if (form.id  === PRODUCT_REQUEST) {
