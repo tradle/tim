@@ -303,32 +303,6 @@ class FormRequestRow extends Component {
     //   </View>
     // )
   }
-  productChooser(prop) {
-    let oResource = this.props.resource
-    let model = utils.getModel(oResource.form)
-    let resource = {
-      [TYPE]: model.id,
-      from: utils.getMe(),
-      to: oResource.from
-    }
-    if (oResource._context)
-      resource._context = oResource._context
-    this.props.navigator.push({
-      title: translate(prop),
-      id: 33,
-      component: StringChooser,
-      backButtonTitle: 'Back',
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        strings:   oResource.chooser.oneOf,
-        bankStyle: this.props.bankStyle,
-        callback:  (val) => {
-          resource[prop.name] = val
-          Actions.addChatItem({resource: resource, disableFormRequest: oResource})
-        },
-      }
-    });
-  }
 
   showShareableResources(styles) {
     let { resource, to, shareableResources, productToForms, bankStyle } = this.props
@@ -888,14 +862,14 @@ class FormRequestRow extends Component {
           })
           // addMessage = 'You can choose the product by clicking on a red  menu button'
           let style = {transform: [{rotate: rotateX}]}
-          msg = <View style={[styles.message, {width: 200}]}  key={this.getNextKey()}>
+          msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={styles.message}  key={this.getNextKey()}>
                   <Animated.View style={style}>
                     <View style={[styles.shareButton, {backgroundColor: '#007EFF', marginRight: 10}]}>
                       <Icon name='md-information' size={35} color='#ffffff' />
                     </View>
                   </Animated.View>
                   <Text style={[chatStyles.resourceTitle, {color: '#757575'}]}>{addMessage}</Text>
-                </View>
+                </TouchableOpacity>
         }
       }
       else {
