@@ -815,6 +815,7 @@ class FormRequestRow extends Component {
     let msg
 
     let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated
+    let msgWidth = utils.getMessageWidth(FormRequestRow)
     if (isRequestForNext) {
       let animStyle = {transform: [{scale: this.springValue}]}
 // this.springValue.interpolate({
@@ -868,7 +869,7 @@ class FormRequestRow extends Component {
                       <Icon name='md-information' size={35} color='#ffffff' />
                     </View>
                   </Animated.View>
-                  <Text style={[chatStyles.resourceTitle, {color: '#757575'}]}>{addMessage}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: '#757575', width: msgWidth - 70}]}>{addMessage}</Text>
                 </TouchableOpacity>
         }
       }
@@ -928,8 +929,6 @@ class FormRequestRow extends Component {
       else {
         mColor = bankStyle.incomingMessageTextColor
         if (!sameFormRequestForm) {
-          let msgWidth = utils.getMessageWidth(FormRequestRow)
-
           addMore = <View style={{ marginLeft: -5}}>
                       {this.makeButtonLink(form, isMyMessage, styles, addMessage)}
                     </View>
