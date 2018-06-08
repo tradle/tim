@@ -1436,11 +1436,12 @@ var NewResourceMixin = {
   },
   async scanQRAndSet(prop) {
     const result = await this.scanFormsQRCode()
-    let {permalink, firstName} = result.data
-    this.setChosenValue(prop.name, {
-      id: utils.makeId(IDENTITY, permalink),
-      title: firstName
-    })
+    let {permalink, link, firstName, lastName} = result.data
+    // this.setChosenValue(prop.name, {
+    //   id: utils.makeId(IDENTITY, permalink),
+    //   title: firstName
+    // })
+    Actions.getIdentity({prop, ...result.data })
     debugger
   },
   onSetMediaProperty(propName, item) {

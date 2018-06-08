@@ -226,13 +226,24 @@ class NewResource extends Component {
     }
     if (action === 'formEdit') {
       if (!resource  ||  utils.getId(this.state.resource) === utils.getId(resource)) {
-        let r = resource ||  this.state.resource
-        if (deleteProperties  &&  this.floatingProps)
-          deleteProperties.forEach(p => {
-            delete this.floatingProps[p]
-            delete r[p]
-          })
-        this.setState({requestedProperties: requestedProperties, resource: r, message: message })
+        if (requestedProperties) {
+          let r = resource ||  this.state.resource
+          if (deleteProperties  &&  this.floatingProps)
+            deleteProperties.forEach(p => {
+              delete this.floatingProps[p]
+              delete r[p]
+            })
+          this.setState({requestedProperties: requestedProperties, resource: r, message: message })
+        }
+        else if (params.prop  &&  params.value) {
+          let r = utils.clone(this.props.resource)
+          let pName = params.prop.name
+          r[pName] = params.value
+          if (!this.floatingProps)
+            this.floatingProps = {}
+          this.floatingProps[pName] = params.value
+          this.setState({resource: r})
+        }
       }
       return
     }
@@ -856,7 +867,7 @@ class NewResource extends Component {
                     </View>
 
     let formsToSign
-    if (resource[TYPE] === HAND_SIGNATURE) {
+    if (resource[TYPE] === HAND_SIGNATURE  &&  resource.signatureFor) {
       let formList = resource.signatureFor.map((r) => (
           <TouchableOpacity onPress={() => this.showResource(r)} style={styles.formListItem} key={this.getNextKey()}>
           <View>
