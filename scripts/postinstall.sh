@@ -21,3 +21,4 @@ if [ -e node_modules/react-native-camera/ios/FaceDetector ]; then
 fi
 cp node_modules/react-native-camera/postinstall_project/projectWithoutFaceDetection.pbxproj node_modules/react-native-camera/ios/RNCamera.xcodeproj/project.pbxproj
 
+npm run fix:staging

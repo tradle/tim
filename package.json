@@ -32,7 +32,8 @@
     "push:ios:staging": "./scripts/code-push.js --platform ios --stage Staging",
     "push:ios:prod": "./scripts/code-push.js --platform ios --stage Production",
     "push:android:staging": "./scripts/code-push.js --platform android --stage Staging",
-    "push:android:prod": "./scripts/code-push.js --platform android --stage Production"
+    "push:android:prod": "./scripts/code-push.js --platform android --stage Production",
+    "fix:staging": "node ./scripts/fix-staging.js"
   },
   "dependencies": {
     "@tradle/aws-client": "^1.8.1",
@@ -242,7 +243,9 @@
     "husky": "^0.13.2",
     "mocha": "https://registry.npmjs.org/mocha/-/mocha-3.5.3.tgz",
     "rn-nodeify": "github:tradle/rn-nodeify#dev",
-    "source-map": "^0.5.3"
+    "source-map": "^0.5.3",
+    "write-file-atomic": "https://registry.npmjs.org/write-file-atomic/-/write-file-atomic-1.3.4.tgz",
+    "xcode": "https://registry.npmjs.org/xcode/-/xcode-0.9.3.tgz"
   },
   "react-native": {
     "q": "bluebird-q",
