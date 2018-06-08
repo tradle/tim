@@ -1,7 +1,11 @@
 'use strict';
 
+import DeviceInfo from 'react-native-device-info'
 import StyleSheet from '../StyleSheet'
 import { circled } from './utils'
+
+const deviceID = DeviceInfo.getDeviceId()
+const isIphone10 = deviceID  &&  deviceID.indexOf('iPhone10') === 0
 
 const footerButton = {
   ...circled(50),
@@ -14,12 +18,15 @@ const footerButton = {
 export default StyleSheet.create({
   container: {
     // backgroundColor: '#f7f7f7',
-    marginTop: 64,
+    marginTop: isIphone10  &&  74  || 64,
     flex: 1,
   },
   navBarText: {
     marginTop: 10,
     fontSize: 17
+  },
+  deviceAdjustments: {
+    marginTop: isIphone10 && 10 || 0
   },
   // navBar: {
   //   marginTop: 10,

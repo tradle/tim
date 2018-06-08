@@ -14,7 +14,8 @@ export default StyleSheet.create({
   //   marginTop: 10,
   //   fontSize: 17
   // },
-
+  deviceAdjustments: {
+  },
   navBarText: {
     marginTop: 15,
     fontSize: 17,
