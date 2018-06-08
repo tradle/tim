@@ -878,14 +878,15 @@ class FormRequestRow extends Component {
             inputRange: [0, 0.5, 1],
             outputRange: ['0deg', '180deg', '0deg']
           })
+          // addMessage = 'You can choose the product by clicking on a red  menu button'
           let style = {transform: [{rotate: rotateX}]}
-          msg = <View style={styles.message}  key={this.getNextKey()}>
+          msg = <View style={[styles.message, {width: 200}]}  key={this.getNextKey()}>
                   <Animated.View style={style}>
                     <View style={[styles.shareButton, {backgroundColor: '#007EFF', marginRight: 10}]}>
                       <Icon name='md-information' size={35} color='#ffffff' />
                     </View>
                   </Animated.View>
-                  <Text style={chatStyles.resourceTitle}>{addMessage}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: '#757575'}]}>{addMessage}</Text>
                 </View>
         }
       }
