@@ -841,6 +841,7 @@ class MessageList extends Component {
         customStyle={customStyle}
         enableEmptySections={true}
         autoFocus={false}
+        placeholder={translate('typeMessage')}
         textRef={'chat'}
         renderCustomMessage={this.renderRow}
         handleSend={this.onSubmitEditing}
