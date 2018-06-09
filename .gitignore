@@ -90,7 +90,6 @@ avivaPrivateConf.json
 avivaPublicConf.json
 common-environment.json
 defaultPublicConf.json
-e2e/
 iOS/Tradle/Dev.plist
 iOS/Tradle/Tradle-Info.plist
 img/splash600x800.png
