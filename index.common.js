@@ -858,7 +858,7 @@ var NavigationBarRouteMapper = {
 
     return (
       <View key={'index.common.js'}>
-        <View style={[{flexDirection: 'row'}, platformStyles.navBarMargin]}>
+        <View style={{flexDirection: 'row'}}>
           {photo}
           <View style={{flexDirection: 'column'}}>
             {text}

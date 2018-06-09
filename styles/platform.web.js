@@ -12,6 +12,16 @@ export default StyleSheet.create({
     marginTop: 5,
     fontSize: 17
   },
+  navBarLeftButton: {
+    paddingLeft: 20,
+    paddingRight: 25,
+    marginTop: 0
+  },
+  navBarRightButton: {
+    paddingLeft: 25,
+    paddingRight: 20,
+    marginTop: 5
+  },
   touchIdText: {
     color: '#2E3B4E',
     fontSize: 18,
