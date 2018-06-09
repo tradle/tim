@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const findit = require('findit')
 const finder = findit(path.resolve(process.cwd(), 'node_modules'))
+const rootPkgJson = require('../package.json')
 const prettify = obj => JSON.stringify(obj, null, 2)
 const rethrow = err => {
   if (err) throw err
@@ -22,6 +23,11 @@ const hackPeerDeps = file => {
   if (peerDependencies.react && /(?:recompose|reflux)\/package.json$/.test(file)) {
     console.log(`removing "react" from ${file} peerDependencies`)
     delete peerDependencies.react
+    changed = true
+  }
+
+  if (pkgJson.name === 'webpack') {
+    pkgJson.dependencies['node-libs-browser'] = rootPkgJson.dependencies['node-libs-browser']
     changed = true
   }
 

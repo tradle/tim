@@ -133,7 +133,7 @@
     "q": "^1.4.1",
     "querystring-es3": "^0.2.1",
     "react": "16.2.0",
-    "react-dom": "^16.2.0",
+    "react-dom": "16.3.2",
     "react-dropzone": "^3.13.4",
     "react-file-input": "github:mvayngrib/react-file-input",
     "react-infinite-calendar": "github:tradle/react-infinite-calendar#dist",
