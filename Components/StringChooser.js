@@ -58,8 +58,8 @@ class StringChooser extends Component {
       );
   }
   render() {
-    var content =
-      <ListView ref='listview' style={platformStyles.container}
+    let content =
+      <ListView ref='listview'
         dataSource={this.state.dataSource}
         removeClippedSubviews={false}
         initialListSize={100}
@@ -69,14 +69,16 @@ class StringChooser extends Component {
         keyboardDismissMode='on-drag'
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false} />;
-    var bgStyle
-    if (this.props.bankStyle  &&  this.props.bankStyle.backgroundColor)
-      bgStyle = {backgroundColor: this.props.bankStyle.backgroundColor}
+    let bgStyle
+    let { bankStyle } = this.props
+    if (bankStyle  &&  bankStyle.backgroundColor)
+      bgStyle = {backgroundColor: bankStyle.backgroundColor}
     else
       bgStyle = {backgroundColor: '#ffffff'}
       // <View style={[styles.container, bgStyle]}>
+    let contentSeparator = utils.getContentSeparator(bankStyle)
     return (
-      <PageView style={[styles.container, bgStyle, platformStyles.navBarMargin]}>
+      <PageView style={[platformStyles.container, bgStyle]} separator={contentSeparator} bankStyle={bankStyle}>
         {content}
       </PageView>
     );
