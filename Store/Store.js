@@ -7306,7 +7306,8 @@ var Store = Reflux.createStore({
     }
   },
   rewriteStubs(resource) {
-    let props = this.getModel(resource[TYPE]).properties
+    let type = resource[TYPE]
+    let props = this.getModel(type).properties
     for (let p in resource) {
       if (!props[p])
         continue
@@ -7333,6 +7334,10 @@ var Store = Reflux.createStore({
       if (!stub._link)
         continue
       resource[p] = this.makeStub(stub)
+    }
+    if (type === FORM_REQUEST  ||  type === FORM_ERROR) {
+      if (resource.prefill)
+        this.rewriteStubs(resource.prefill)
     }
   },
   addLink(links, r) {
@@ -10454,10 +10459,6 @@ var Store = Reflux.createStore({
           this.trigger({action: 'addItem', resource: changeFr})
       }
       this.addLastMessage(val, batch)
-    }
-    if (isFormRequest  ||  type === FORM_ERROR) {
-      if (val.prefill)
-        this.rewriteStubs(val.prefill)
     }
     if (list[key]) {
       let v = {}
