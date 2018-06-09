@@ -788,11 +788,11 @@ class NewResource extends Component {
       params.validationErrors = this.state.validationErrors
 
     let options = this.getFormFields(params);
+    let contentSeparator = utils.getContentSeparator(bankStyle)
     if (!options) {
-      let contentSeparator = utils.getContentSeparator(bankStyle)
       let height = utils.dimensions(NewResource).height - 80
 
-      return <PageView style={[platformStyles.container, {height}]} separator={contentSeparator}>
+      return <PageView style={[platformStyles.container, {height}]} separator={contentSeparator} bankStyle={bankStyle}>
                 <ShowPropertiesView resource={data}
                                     bankStyle={bankStyle}
                                     showRefResource={this.showRefResource.bind(this)}
@@ -1006,7 +1006,6 @@ class NewResource extends Component {
     })
     if (droppable) {
       const prop = properties[droppable]
-      let contentSeparator = utils.getContentSeparator(bankStyle)
       // return (
       return (
         <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator}>
@@ -1043,8 +1042,8 @@ class NewResource extends Component {
                  </View>
       }
 
-      let contentSeparator = utils.getContentSeparator(bankStyle)
-      return <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator}>
+      return <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator} bankStyle={bankStyle}>
+               {errors}
                {content}
               </PageView>
 

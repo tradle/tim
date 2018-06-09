@@ -506,16 +506,16 @@ class MessageView extends Component {
     let height = utils.dimensions(MessageView).height
     let width = utils.getContentWidth()
     return (
-      <PageView style={[platformStyles.container, {height, alignItems: 'center'}]} separator={contentSeparator}>
-      <ScrollView
-        ref='messageView'
-        keyboardShouldPersistTaps="always"
-        style={{width: width}}>
-        {dateView}
-        {bigPhoto}
-        {photoStrip}
-        {actionPanel}
-      </ScrollView>
+      <PageView style={[platformStyles.container, {height, alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
+        <ScrollView
+          ref='messageView'
+          keyboardShouldPersistTaps="always"
+          style={{width: width}}>
+          {dateView}
+          {bigPhoto}
+          {photoStrip}
+          {actionPanel}
+        </ScrollView>
         {title}
         {footer}
       </PageView>

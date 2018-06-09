@@ -2,7 +2,7 @@ console.log('requiring StringChooser.js')
 'use strict';
 
 import React, { Component } from 'react'
-import equal from 'deep-equal'
+import _ from 'lodash'
 import constants from '@tradle/constants'
 import StringRow from './StringRow'
 import utils, { translate } from '../utils/utils'
@@ -58,8 +58,8 @@ class StringChooser extends Component {
       );
   }
   render() {
-    var content =
-      <ListView ref='listview' style={platformStyles.container}
+    let content =
+      <ListView ref='listview'
         dataSource={this.state.dataSource}
         removeClippedSubviews={false}
         initialListSize={100}
@@ -69,10 +69,16 @@ class StringChooser extends Component {
         keyboardDismissMode='on-drag'
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false} />;
-    var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.backgroundColor ? {backgroundColor: this.props.bankStyle.backgroundColor} : {backgroundColor: '#ffffff'}
+    let bgStyle
+    let { bankStyle } = this.props
+    if (bankStyle  &&  bankStyle.backgroundColor)
+      bgStyle = {backgroundColor: bankStyle.backgroundColor}
+    else
+      bgStyle = {backgroundColor: '#ffffff'}
       // <View style={[styles.container, bgStyle]}>
+    let contentSeparator = utils.getContentSeparator(bankStyle)
     return (
-      <PageView style={[styles.container, bgStyle]}>
+      <PageView style={[platformStyles.container, bgStyle]} separator={contentSeparator} bankStyle={bankStyle}>
         {content}
       </PageView>
     );

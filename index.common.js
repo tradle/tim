@@ -639,7 +639,7 @@ var NavigationBarRouteMapper = {
       <TouchableOpacity
         hitSlop={HIT_SLOP}
         onPress={route.passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
-        <View style={styles.navBarLeftButton}>
+        <View style={platformStyles.navBarLeftButton}>
           {status}
           {title}
         </View>
@@ -767,7 +767,7 @@ var NavigationBarRouteMapper = {
                     navigator.push(route.onRightButtonPress)
                }
         }>
-        <View style={[styles.navBarRightButton, route.help ? {paddingLeft: 5} : {paddingLeft: 25}]}>
+        <View style={[platformStyles.navBarRightButton, route.help ? {paddingLeft: 5} : {paddingLeft: 25}]}>
           {title}
         </View>
       </TouchableOpacity>
@@ -858,7 +858,7 @@ var NavigationBarRouteMapper = {
 
     return (
       <View key={'index.common.js'}>
-        <View style={{flexDirection: 'row'}}>
+        <View style={[{flexDirection: 'row'}, platformStyles.navBarMargin]}>
           {photo}
           <View style={{flexDirection: 'column'}}>
             {text}
@@ -939,16 +939,6 @@ var styles = StyleSheet.create({
     color: '#555555',
     fontWeight: '400',
     fontSize: utils.getFontSize(20),
-  },
-  navBarLeftButton: {
-    paddingLeft: 20,
-    paddingRight: 25,
-    marginTop: 0
-  },
-  navBarRightButton: {
-    paddingLeft: 25,
-    paddingRight: 10,
-    marginTop: 5
   },
   navBarButtonText: {
     color: '#7AAAC3',

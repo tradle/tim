@@ -10532,6 +10532,10 @@ var Store = Reflux.createStore({
       }
       this.addLastMessage(val, batch)
     }
+    if (isFormRequest  ||  type === FORM_ERROR) {
+      if (val.prefill)
+        this.rewriteStubs(val.prefill)
+    }
     if (list[key]) {
       let v = {}
       _.extend(v, val)

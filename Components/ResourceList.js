@@ -1209,7 +1209,8 @@ class ResourceList extends Component {
     else
       style = platformStyles.container
     return (
-      <PageView style={style} separator={contentSeparator}>
+      // <PageView style={style} separator={contentSeparator}>
+      <PageView style={this.props.isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
         {network}
         {searchBar}
         <View style={styles.separator} />

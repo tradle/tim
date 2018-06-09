@@ -1550,7 +1550,6 @@ class GridList extends Component {
     }
 
     // let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
-    let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(this.props.bankStyle)
     let style
     if (this.props.isBacklink)
       style = {}
@@ -1580,8 +1579,9 @@ class GridList extends Component {
                   </View>
     }
 
+    let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(this.props.bankStyle)
     return (
-      <PageView style={isBacklink || isForwardlink  ? {flex: 1} : platformStyles.container} separator={contentSeparator}>
+      <PageView style={isBacklink || isForwardlink ? {flex: 1} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && contentSeparator} bankStyle={bankStyle}>
         {network}
         {searchBar}
         <View style={styles.separator} />
