@@ -504,7 +504,7 @@ class MessageView extends Component {
                  </View>
     let height = utils.dimensions(MessageView).height - 80
     return (
-      <PageView style={[platformStyles.container, {height}]} separator={contentSeparator}>
+      <PageView style={[platformStyles.container, {height}]} separator={contentSeparator} bankStyle={bankStyle} >
       <ScrollView
         ref='messageView'
         keyboardShouldPersistTaps="always">

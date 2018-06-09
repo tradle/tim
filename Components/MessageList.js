@@ -886,7 +886,7 @@ class MessageList extends Component {
     let progressInfoR = resource || application
     if (!bgImage)
       return (
-        <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
+        <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
           {network}
           <ProgressInfo recipient={progressInfoR[ROOT_HASH]} color={bankStyle.linkColor} />
           <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
@@ -900,7 +900,7 @@ class MessageList extends Component {
     let image = { width, height }
 
     return (
-      <PageView style={[platformStyles.container, bgStyle]} separator={separator}>
+      <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
         <ImageBackground source={{uri: bgImage}}  resizeMode='cover' style={image}>
           {network}
           <ProgressInfo recipient={progressInfoR[ROOT_HASH]} color={bankStyle.linkColor} />

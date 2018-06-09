@@ -2271,8 +2271,8 @@ var utils = {
     let separator = {}
     if (bankStyle) {
       if (bankStyle.navBarBorderColor) {
-        separator.borderTopColor = bankStyle.navBarBorderColor
-        separator.borderTopWidth = bankStyle.navBarBorderWidth ||  StyleSheet.hairlineWidth
+        separator.borderBottomColor = bankStyle.navBarBorderColor
+        separator.borderBottomWidth = bankStyle.navBarBorderWidth ||  StyleSheet.hairlineWidth
       }
     }
     return separator

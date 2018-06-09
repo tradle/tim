@@ -622,7 +622,7 @@ var NavigationBarRouteMapper = {
       <TouchableOpacity
         hitSlop={HIT_SLOP}
         onPress={route.passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
-        <View style={styles.navBarLeftButton}>
+        <View style={platformStyles.navBarLeftButton}>
           {status}
           {title}
         </View>
@@ -749,7 +749,7 @@ var NavigationBarRouteMapper = {
                     navigator.push(route.onRightButtonPress)
                }
         }>
-        <View style={[styles.navBarRightButton, route.help ? {paddingLeft: 3} : {paddingLeft: 25}]}>
+        <View style={[platformStyles.navBarRightButton, route.help ? {paddingLeft: 3} : {paddingLeft: 25}]}>
           {title}
         </View>
       </TouchableOpacity>
@@ -800,7 +800,7 @@ var NavigationBarRouteMapper = {
           width = photoObj.width > photoObj.height ? LOGO_HEIGHT * (photoObj.width/photoObj.height) : LOGO_HEIGHT
         else
           width = 149
-        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {width: width}, utils.isAndroid() ? {marginTop: 18} : {}]} />
+        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {width: width, marginTop: utils.isAndroid() ? 18 : 0}]} />
       }
     }
     let t = route.title.split(' -- ')
@@ -842,7 +842,7 @@ var NavigationBarRouteMapper = {
 
     return (
       <View key={'index.common.js'}>
-        <View style={{flexDirection: 'row'}}>
+        <View style={[{flexDirection: 'row'}, platformStyles.navBarTitle]}>
           {photo}
           <View style={{flexDirection: 'column'}}>
             {text}
@@ -924,16 +924,6 @@ var styles = StyleSheet.create({
     color: '#555555',
     fontWeight: '400',
     fontSize: 20,
-  },
-  navBarLeftButton: {
-    paddingLeft: 10,
-    paddingRight: 25,
-    marginTop: 5
-  },
-  navBarRightButton: {
-    paddingLeft: 25,
-    paddingRight: 10,
-    marginTop: 7
   },
   navBarButtonText: {
     color: '#7AAAC3',

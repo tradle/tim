@@ -14,11 +14,23 @@ export default StyleSheet.create({
   //   marginTop: 10,
   //   fontSize: 17
   // },
-  deviceAdjustments: {
+  navBarSeparator: {
+  },
+  navBarMargin: {
   },
   navBarText: {
-    marginTop: 15,
     fontSize: 17,
+    marginTop: 15,
+  },
+  navBarLeftButton: {
+    paddingLeft: 10,
+    paddingRight: 25,
+    marginTop: 5
+  },
+  navBarRightButton: {
+    paddingLeft: 25,
+    paddingRight: 10,
+    marginTop: 7
   },
   // menuButtonNarrow: {
   //   marginTop: 2,

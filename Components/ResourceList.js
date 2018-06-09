@@ -1195,7 +1195,7 @@ class ResourceList extends Component {
     let contentSeparator = utils.getContentSeparator(this.state.bankStyle)
     let style = {backgroundColor: '#fff'}
     return (
-      <PageView style={this.props.isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator}>
+      <PageView style={this.props.isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
         {network}
         {searchBar}
         <View style={styles.separator} />

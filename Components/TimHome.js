@@ -13,7 +13,7 @@ import {
   // NetInfo,
   ScrollView,
   // Linking,
-  StatusBar,
+  // StatusBar,
   Modal,
   Alert,
   Platform
@@ -997,7 +997,7 @@ class TimHome extends Component {
         <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
           <View style={styles.flexGrow} />
           { utils.getMe()
-            ? <TouchableOpacity style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
+            ? <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
                   onPress={() => this._pressHandler()}>
                 <View style={styles.getStarted}>
                    <Text style={styles.getStartedText}>Get started</Text>

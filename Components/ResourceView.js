@@ -411,9 +411,9 @@ class ResourceView extends Component {
         mainPhoto = photos[0]
       photoView = <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
     }
-
+    let contentSeparator = utils.getContentSeparator(bankStyle)
     return (
-      <PageView style={platformStyles.container}>
+      <PageView style={platformStyles.container} bankStyle={bankStyle} separator={contentSeparator}>
         <ScrollView  ref='this' name={this._lazyId} style={{backgroundColor: '#fff'}}>
           <View style={styles.photoBG}>
             {photoView}

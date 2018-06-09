@@ -2,7 +2,7 @@ console.log('requiring StringChooser.js')
 'use strict';
 
 import React, { Component } from 'react'
-import equal from 'deep-equal'
+import _ from 'lodash'
 import constants from '@tradle/constants'
 import StringRow from './StringRow'
 import utils, { translate } from '../utils/utils'
@@ -69,10 +69,14 @@ class StringChooser extends Component {
         keyboardDismissMode='on-drag'
         keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false} />;
-    var bgStyle = this.props.bankStyle  &&  this.props.bankStyle.backgroundColor ? {backgroundColor: this.props.bankStyle.backgroundColor} : {backgroundColor: '#ffffff'}
+    var bgStyle
+    if (this.props.bankStyle  &&  this.props.bankStyle.backgroundColor)
+      bgStyle = {backgroundColor: this.props.bankStyle.backgroundColor}
+    else
+      bgStyle = {backgroundColor: '#ffffff'}
       // <View style={[styles.container, bgStyle]}>
     return (
-      <PageView style={[styles.container, bgStyle]}>
+      <PageView style={[styles.container, bgStyle, platformStyles.navBarMargin]}>
         {content}
       </PageView>
     );

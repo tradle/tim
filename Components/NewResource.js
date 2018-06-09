@@ -765,7 +765,7 @@ class NewResource extends Component {
       let contentSeparator = utils.getContentSeparator(bankStyle)
       let height = utils.dimensions(NewResource).height - 80
 
-      return <PageView style={[platformStyles.container, {height}]} separator={contentSeparator}>
+      return <PageView style={[platformStyles.container, {height}]} separator={contentSeparator} bankStyle={bankStyle}>
                 <ShowPropertiesView resource={data}
                                     bankStyle={bankStyle}
                                     showRefResource={this.showRefResource.bind(this)}
@@ -967,7 +967,7 @@ class NewResource extends Component {
       }
 
       let contentSeparator = utils.getContentSeparator(bankStyle)
-      return <PageView style={platformStyles.container} separator={contentSeparator}>
+      return <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
                {errors}
                {content}
               </PageView>

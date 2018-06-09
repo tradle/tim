@@ -17,17 +17,30 @@ const footerButton = {
 
 export default StyleSheet.create({
   container: {
-    // backgroundColor: '#f7f7f7',
-    marginTop: isIphone10  &&  74  || 64,
+    marginTop: 64,
     flex: 1,
+  },
+  navBarSeparator: {
+    height: isIphone10 ? 10 : 0
+  },
+  navBarMargin: {
+    marginTop: isIphone10 ? 10 : 0,
   },
   navBarText: {
     marginTop: 10,
     fontSize: 17
   },
-  deviceAdjustments: {
-    marginTop: isIphone10 && 10 || 0
+  navBarLeftButton: {
+    paddingLeft: 10,
+    paddingRight: 25,
+    marginTop: isIphone10 ? 15 : 5
   },
+  navBarRightButton: {
+    paddingLeft: 25,
+    paddingRight: 10,
+    marginTop: isIphone10 ? 17 : 7
+  },
+
   // navBar: {
   //   marginTop: 10,
   //   padding: 3
