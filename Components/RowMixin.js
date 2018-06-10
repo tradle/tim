@@ -7,11 +7,7 @@ import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomIcon from '../styles/customicons'
 import CameraView from './CameraView'
-import StyleSheet from '../StyleSheet'
-import chatStyles from '../styles/chatStyles'
-import ResourceList from './ResourceList'
 var cnt = 0;
-
 import {
   Text,
   View,

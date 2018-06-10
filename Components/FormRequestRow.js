@@ -900,7 +900,6 @@ class FormRequestRow extends Component {
                        </ImageInput>
                        {resource.documentCreated ? null : icon}
                      </View>
-
                    </View>
             }
           }

@@ -6060,7 +6060,7 @@
     "react-signature-pad": {
       "version": "0.0.6",
       "from": "tradle/react-signature-pad",
-      "resolved": "git://github.com/tradle/react-signature-pad.git#77f9b85ffe68c444d1746f1604eb93e3fda1c63a"
+      "resolved": "git://github.com/tradle/react-signature-pad.git#3f59f8084811dcb76fef9d642d215f652a730b1f"
     },
     "react-timer-mixin": {
       "version": "0.13.3",
