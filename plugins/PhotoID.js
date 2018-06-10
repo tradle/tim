@@ -91,8 +91,8 @@ function getRequestedProps(values, model, isLicence, requestedProperties, form) 
     else if (props[p])
       requestedProperties.push({name: p})
   }
-  if (!isLicence  &&  !requestedProperties.find(p => p.name === 'dateOfIssue'))
-    requestedProperties.push({name: 'dateOfIssue'})
+  // if (!isLicence  &&  !requestedProperties.find(p => p.name === 'dateOfIssue'))
+  //   requestedProperties.push({name: 'dateOfIssue'})
   if (!requestedProperties.find(p => p.name === 'dateOfBirth')) {
     if (form.dateOfBirth)
       requestedProperties.push({name: 'dateOfBirth'})
