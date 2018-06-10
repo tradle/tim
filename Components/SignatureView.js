@@ -30,12 +30,8 @@ class SignatureView extends Component {
 
   constructor(props) {
     super(props);
-    let {value} = props
+    const { value } = props
     this.state = { value }
-    var currentRoutes = this.props.navigator.getCurrentRoutes()
-    var currentRoutesLength = currentRoutes.length
-    currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.done.bind(this)
-
     this.scrollviewProps = {
       automaticallyAdjustContentInsets:true,
       scrollEventThrottle: 50,
@@ -44,13 +40,13 @@ class SignatureView extends Component {
   }
   done() {
     let {onSignature} = this.props
-    onSignature(this.state.value)
+    onSignature(this.getSignature())
   }
   onScroll(e) {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let {style} = this.props
+    let {sigViewStyle} = this.props
     let {width, height} = utils.dimensions(SignatureView)
     return (
       <PageView style={platformStyles.container}>
@@ -67,6 +63,9 @@ class SignatureView extends Component {
   onChangeText(value) {
     // let val = format(value, this.props.resource)
     this.setState({ value })
+  }
+  getSignature() {
+    return { ...this.state.value }
   }
 }
 

@@ -289,7 +289,7 @@ class VerificationRow extends Component {
                          </View>
       }
       else {
-        if (utils.isImplementing(modelName, INTERSECTION))
+        if (utils.isImplementing(modelName, INTERSECTION)  ||  dn)
           description = <Text style={isCheck ? styles.checkType : styles.description}>{title}</Text>
         //!!!
         if (!dn)

@@ -909,7 +909,8 @@ var NewResourceMixin = {
   },
 
   showSignatureView(prop) {
-    const { navigator } = this.props
+    const { navigator, bankStyle } = this.props
+    let sigView
     navigator.push({
       title: translate(prop), //m.title,
       // titleTextColor: '#7AAAC3',
@@ -917,16 +918,40 @@ var NewResourceMixin = {
       component: SignatureView,
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
+      onRightButtonPress: () => {
+        const sig = sigView.getSignature()
+        navigator.pop()
+        this.onChangeText(prop, sig.url)
+      },
       passProps: {
-        value:          this.state.resource[prop.name] || '',
-        style:          this.props.bankStyle,
-        onSignature:    ({ url, width, height }) => {
-          navigator.pop()
-          this.onChangeText(prop, url)
-        }
+        ref: ref => {
+          sigView = ref
+        },
+        bankStyle,
+        sigViewStyle: bankStyle
       }
     })
   },
+
+  // showSignatureView(prop) {
+  //   const { navigator } = this.props
+  //   navigator.push({
+  //     title: translate(prop), //m.title,
+  //     // titleTextColor: '#7AAAC3',
+  //     id: 32,
+  //     component: SignatureView,
+  //     backButtonTitle: 'Back',
+  //     rightButtonTitle: 'Done',
+  //     passProps: {
+  //       value:          this.state.resource[prop.name] || '',
+  //       style:          this.props.bankStyle,
+  //       onSignature:    ({ url, width, height }) => {
+  //         navigator.pop()
+  //         this.onChangeText(prop, url)
+  //       }
+  //     }
+  //   })
+  // },
 
   myTextInputTemplate(params) {
     let {prop, required, model, editable, keyboard, value} = params
