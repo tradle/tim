@@ -6425,6 +6425,10 @@ var Store = Reflux.createStore({
       if (!response) // ||  !Array.isArray(response))
         continue
       let list = response.edges
+      // HACK
+      let filteredList = list.filter(r => r.node.object[TYPE] !== MODELS_PACK)
+      list = filteredList
+
       if (list  &&  list.length) {
         list.forEach(li => {
         // for (let i=0; i<result.length; i++) {
