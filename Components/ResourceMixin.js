@@ -285,18 +285,6 @@ var ResourceMixin = {
         val = <Text style={styles.description}>{val}</Text>;
       else if (typeof val === 'boolean')
         val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
-      else if (pMeta.type !== 'object'  &&  (typeof val === 'string')  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
-        val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
-      // else if (modelName === TERMS_AND_CONDITIONS) {
-      //   val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
-      else if (pMeta.markdown) {
-        // markdownStyles.color = bankStyle.linkColor
-        val = <View style={styles.container}>
-                <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle)}>
-                  {val}
-                </Markdown>
-              </View>
-      }
       else if (pMeta.signature) {
         let {width, height} = utils.dimensions(component)
         let h = 70
@@ -308,6 +296,18 @@ var ResourceMixin = {
         w = Math.round(w)
         val = <View style={styles.container}>
                 <Image style={{width: w, height: h}} source={{uri: val}}/>
+              </View>
+      }
+      else if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
+        val = <Text onPress={this.onPress.bind(this, val)} style={[styles.description, {color: '#7AAAC3'}]}>{val}</Text>;
+      // else if (modelName === TERMS_AND_CONDITIONS) {
+      //   val = <Text style={[styles.description, {flexWrap: 'wrap'}]}>{val}</Text>;
+      else if (pMeta.markdown) {
+        // markdownStyles.color = bankStyle.linkColor
+        val = <View style={styles.container}>
+                <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle)}>
+                  {val}
+                </Markdown>
               </View>
       }
       else {
