@@ -803,14 +803,15 @@ var utils = {
     if (this.isMessage(resourceModel))
       excludeProps = ['from', 'to']
     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
-      let prop =  vCols[i]
-      if (props[prop].type === 'array' || props[prop].markdown)
+      let p =  vCols[i]
+      let prop = props[p]
+      if (prop.type === 'array' || prop.markdown  ||  prop.signature)
         continue
-      if (this.isContainerProp(prop, resourceModel))
+      if (this.isContainerProp(p, resourceModel))
         continue
-      if ((!resource[prop]  &&  !props[prop].displayAs)  ||  excludeProps.indexOf[prop])
+      if ((!resource[p]  &&  !prop.displayAs)  ||  excludeProps.indexOf[p])
         continue
-      displayName = this.getStringValueForProperty(resource, prop, resourceModel.properties)
+      displayName = this.getStringValueForProperty(resource, p, resourceModel.properties)
     }
     return displayName;
   },
