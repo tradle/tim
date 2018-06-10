@@ -257,20 +257,14 @@ class FormMessageRow extends Component {
       if (isMyMessage || isShared)
         style = [style, styles.myMsg];
 
-      if (resource[v]                      &&
+      if (resource[v]  &&  properties[v].signature)
+        return
+      else if (resource[v]                 &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         onPressCall = this.onPress;
         vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>);
       }
-      if (resource[v]  &&  properties[v].signature)
-        vCols.push(
-          <View key={this.getNextKey()}>
-            <Text style={styles.title}>{properties[v].title}</Text>
-            <Image style={styles.sig} source={{uri: resource[v]}}/>
-          </View>
-        )
-
       else if (!model.autoCreate) {
         let val
         if (properties[v].type === 'date')
@@ -321,11 +315,6 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
                  : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
   let bg = isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg
   let pageBg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
-  let w, h = 70
-  if (dimensions.width > dimensions.height)
-    w = Math.round((dimensions.width * 70)/(dimensions.height - 100))
-  else
-    w = Math.round((dimensions.height * 70)/(dimensions.width - 100))
   return StyleSheet.create({
     myMsg: {
       justifyContent: 'flex-end',
@@ -366,10 +355,6 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       paddingLeft: 5,
       paddingRight: 7,
       backgroundColor: bg
-    },
-    sig: {
-      width: w,
-      height: h
     },
     title: {
       fontSize: 18,
