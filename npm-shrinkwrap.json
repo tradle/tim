@@ -6151,7 +6151,7 @@
     "react-native-signature-pad": {
       "version": "0.0.8",
       "from": "tradle/react-native-signature-pad",
-      "resolved": "git://github.com/tradle/react-native-signature-pad.git#f1c05555a1c67c28aaf17a868d482b91386b94ea"
+      "resolved": "git://github.com/tradle/react-native-signature-pad.git#11847231e3f239214b6dceebbd314b447105660f"
     },
     "react-native-splash-screen": {
       "version": "3.0.7",
