@@ -6,6 +6,7 @@ import React from 'react'
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomIcon from '../styles/customicons'
+import StyleSheet from '../StyleSheet'
 import CameraView from './CameraView'
 var cnt = 0;
 import {
