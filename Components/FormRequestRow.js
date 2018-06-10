@@ -920,13 +920,15 @@ class FormRequestRow extends Component {
                    </View>
           }
           else if (prop.signature) {
-             msg = <View key={this.getNextKey()}>
-                     <TouchableOpacity onPress={() => this.showSignatureView(prop)}>
-                       <View style={styles.row}>
-                         <Text style={[chatStyles.resourceTitle, {flex: 1}]}>{addMessage}</Text>
-                       </View>
-                     </TouchableOpacity>
-                   </View>
+            msg = <View key={this.getNextKey()}>
+                    <View style={styles.messageLink}>
+                      <TouchableOpacity onPress={() => this.showSignatureView(prop)}>
+                        <View style={{ marginLeft: -5, width: msgWidth - 30}}>
+                          {this.makeButtonLink(form, isMyMessage, styles, addMessage)}
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
           }
         }
       }

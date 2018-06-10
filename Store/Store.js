@@ -9141,7 +9141,9 @@ var Store = Reflux.createStore({
   },
   addLastMessage(value, batch, sharedWith) {
     let model = this.getModel(value[TYPE])
-    if (model.id === CUSTOMER_WAITING || model.id === SELF_INTRODUCTION  ||  model.id === SEAL)
+
+    let exclude = [CUSTOMER_WAITING, SELF_INTRODUCTION, SEAL, MODELS_PACK, STYLES_PACK]
+    if (exclude.includes(model.id))
       return
 
     if (model.id === SIMPLE_MESSAGE  &&  value.message  && value.message === ALREADY_PUBLISHED_MESSAGE)
