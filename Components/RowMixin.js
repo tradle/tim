@@ -3,16 +3,8 @@ console.log('requiring RowMixin.js')
 
 const debug = require('debug')('tradle:app:RowMixin')
 import React from 'react'
-import utils from '../utils/utils'
-var translate = utils.translate
-import constants from '@tradle/constants'
-import Actions from '../Actions/Actions'
+import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
-import CustomIcon from '../styles/customicons'
-import StyleSheet from '../StyleSheet'
-import chatStyles from '../styles/chatStyles'
-import ResourceList from './ResourceList'
-var cnt = 0;
 import {
   Text,
   View,
@@ -21,8 +13,17 @@ import {
   Image,
 } from 'react-native'
 import PropTypes from 'prop-types';
-
 import { coroutine as co } from 'bluebird'
+
+import utils from '../utils/utils'
+var translate = utils.translate
+import constants from '@tradle/constants'
+import Actions from '../Actions/Actions'
+import CustomIcon from '../styles/customicons'
+import StyleSheet from '../StyleSheet'
+import chatStyles from '../styles/chatStyles'
+import ResourceList from './ResourceList'
+var cnt = 0;
 import Navigator from './Navigator'
 import ENV from '../utils/env'
 import IProov from '../utils/iproov'
@@ -306,6 +307,26 @@ var RowMixin = {
     return <View style={{width: msgWidth}}>
              {view}
            </View>
+  },
+  onSetSignatureProperty(prop, item) {
+    if (!item)
+      return;
+
+    let formRequest = this.props.resource
+    let resource = formRequest.prefill  ||  {}
+    _.extend(resource, {
+        [TYPE]: formRequest.form,
+        [prop.name]: item,
+        _context: formRequest._context,
+        from: utils.getMe(),
+        to: formRequest.from
+      }
+    )
+
+    Actions.addChatItem({
+      disableFormRequest: formRequest,
+      resource
+    })
   },
 
   onSetMediaProperty(propName, item) {
