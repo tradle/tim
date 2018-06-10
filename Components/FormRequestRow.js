@@ -781,6 +781,7 @@ class FormRequestRow extends Component {
     let sameFormRequestForm
     let isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let { product } = resource
+    let isMyProduct = utils.getModel(resource.form).subClassOf === MY_PRODUCT
     if (!resource._documentCreated  &&  product) {
       let multiEntryForms = utils.getModel(product).multiEntryForms
       if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
@@ -794,7 +795,7 @@ class FormRequestRow extends Component {
           // onPressCall = this.getNextFormAlert.bind(this)
         }
       }
-      if (!sameFormRequestForm)
+      if (!sameFormRequestForm  &&  !isMyProduct)
         onPressCall = this.createNewResource.bind(this, form, isMyMessage);
     }
 
@@ -825,7 +826,7 @@ class FormRequestRow extends Component {
 // });
        link = <View style={{flex: 1}}>
                <View style={{flex: 1, paddingTop: 10}}>
-                 {this.makeButtonLink(form, isMyMessage, styles, addMessage, true)}
+                 {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, isAnother: true})}
                  <View style={styles.hr}/>
                  <TouchableOpacity onPress={() => {
                     Alert.alert(
@@ -854,7 +855,7 @@ class FormRequestRow extends Component {
     else {
       let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
-      let notLink = resource._documentCreated  ||  isReadOnly  ||  resource.form === PRODUCT_REQUEST
+      let notLink = resource._documentCreated  ||  isReadOnly  ||  isMyProduct  || resource.form === PRODUCT_REQUEST
       icon = <Icon  name={'ios-arrow-forward'} color={linkColor} size={20} />
       if (notLink) {
         if (form.id  === PRODUCT_REQUEST) {
@@ -872,6 +873,11 @@ class FormRequestRow extends Component {
                   </Animated.View>
                   <Text style={[chatStyles.resourceTitle, {color: '#757575', width: msgWidth - 70}]}>{addMessage}</Text>
                 </TouchableOpacity>
+        }
+        else if (isMyProduct) {
+          msg = <View style={{justifyContent: 'center'}} key={this.getNextKey()}>
+                  <Text style={styles.addMore}>{addMessage}</Text>
+                </View>
         }
       }
       else {
@@ -922,11 +928,7 @@ class FormRequestRow extends Component {
           else if (prop.signature) {
             msg = <View key={this.getNextKey()}>
                     <View style={styles.messageLink}>
-                      <TouchableOpacity onPress={() => this.showSignatureView(prop)}>
-                        <View style={{ marginLeft: -5, width: msgWidth - 30}}>
-                          {this.makeButtonLink(form, isMyMessage, styles, addMessage)}
-                        </View>
-                      </TouchableOpacity>
+                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.showSignatureView.bind(this, prop)})}
                     </View>
                   </View>
           }
@@ -942,7 +944,7 @@ class FormRequestRow extends Component {
         mColor = bankStyle.incomingMessageTextColor
         if (!sameFormRequestForm) {
           addMore = <View style={{ marginLeft: -5}}>
-                      {this.makeButtonLink(form, isMyMessage, styles, addMessage)}
+                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage})}
                     </View>
           // if (!shareableResources)
             addMessage = null
@@ -995,7 +997,7 @@ class FormRequestRow extends Component {
     if (!utils.isEmpty(verifications)  &&  verifications[rtype])
       return true
   }
-  makeButtonLink(form, isMyMessage, styles, msg, isAnother) {
+  makeButtonLink({form, isMyMessage, styles, msg, isAnother, onPress}) {
     if (!msg)
       msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
     let width = utils.getMessageWidth(FormRequestRow) - 40
@@ -1010,9 +1012,7 @@ class FormRequestRow extends Component {
       )
     }
     let zoomIn = {transform: [{scale: this.springValue}]}
-    return <TouchableOpacity style={{paddingRight: 15}} onPress={() => {
-             this.createNewResource(form, isMyMessage)
-           }}>
+    return <TouchableOpacity style={{paddingRight: 15}} onPress={onPress || this.createNewResource.bind(this, form, isMyMessage)}>
              <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
               <Animated.View style={zoomIn}>
                 <View style={styles.shareButton}>
