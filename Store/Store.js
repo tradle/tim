@@ -6358,6 +6358,9 @@ var Store = Reflux.createStore({
       if (!response) // ||  !Array.isArray(response))
         continue
       let list = response.edges
+      // HACK
+      let filteredList = list.filter(r => r.node.object[TYPE] !== MODELS_PACK)
+      list = filteredList
       if (list  &&  list.length) {
         list.forEach(li => {
         // for (let i=0; i<result.length; i++) {
@@ -9866,8 +9869,9 @@ var Store = Reflux.createStore({
       // else
       //   this.dbBatchPut(key, val, batch)
     }
-    if (model.subClassOf === MY_PRODUCT)
-      val._sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
+    // ??? Does not work when sharing MyProduct for another product; like CertifiedID for PersonalAccount
+    // if (model.subClassOf === MY_PRODUCT)
+    //   val._sharedWith = [this.createSharedWith(utils.getId(val.from.id), new Date().getTime())]
 
     self._mergeItem(key, val)
 
