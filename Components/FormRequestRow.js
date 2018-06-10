@@ -26,6 +26,7 @@ import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
 
 import { circled } from '../styles/utils'
+import SignatureView from './SignatureView'
 
 import chatStyles from '../styles/chatStyles'
 
@@ -800,7 +801,7 @@ class FormRequestRow extends Component {
     let color = isMyMessage
               ? {color: '#AFBBA8'}
               : {color: '#2892C6'}
-    let link, icon
+    let icon
     let isReadOnlyContext = context  &&  utils.isReadOnlyChat(context)
     let me = utils.getMe()
     let switchToContext = me.isEmployee  &&  context  &&  resource.product  && context.to.organization  &&  context.to.organization.id === me.organization.id
@@ -812,7 +813,7 @@ class FormRequestRow extends Component {
 
     let addMessage = messagePart || message
     messagePart = null
-    let msg
+    let msg, link
 
     let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated
     let msgWidth = utils.getMessageWidth(FormRequestRow)
@@ -822,7 +823,7 @@ class FormRequestRow extends Component {
 //   inputRange: [0, 1],
 //   outputRange: [0, 100],
 // });
-      link = <View style={{flex: 1}}>
+       link = <View style={{flex: 1}}>
                <View style={{flex: 1, paddingTop: 10}}>
                  {this.makeButtonLink(form, isMyMessage, styles, addMessage, true)}
                  <View style={styles.hr}/>
@@ -899,6 +900,7 @@ class FormRequestRow extends Component {
                        </ImageInput>
                        {resource.documentCreated ? null : icon}
                      </View>
+
                    </View>
             }
           }
@@ -914,6 +916,15 @@ class FormRequestRow extends Component {
                        <View style={styles.row}>
                          <Text style={[chatStyles.resourceTitle, {flex: 1, color: mColor}]}>{addMessage}</Text>
                          {resource._documentCreated ? null : icon}
+                       </View>
+                     </TouchableOpacity>
+                   </View>
+          }
+          else if (prop.signature) {
+             msg = <View key={this.getNextKey()}>
+                     <TouchableOpacity onPress={() => this.showSignatureView(prop)}>
+                       <View style={styles.row}>
+                         <Text style={[chatStyles.resourceTitle, {flex: 1}]}>{addMessage}</Text>
                        </View>
                      </TouchableOpacity>
                    </View>
@@ -1080,6 +1091,30 @@ class FormRequestRow extends Component {
         },
       }
     });
+  }
+  showSignatureView(prop) {
+    const { navigator, bankStyle } = this.props
+    let sigView
+    navigator.push({
+      title: translate(prop), //m.title,
+      // titleTextColor: '#7AAAC3',
+      id: 32,
+      component: SignatureView,
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      onRightButtonPress: () => {
+        const sig = sigView.getSignature()
+        navigator.pop()
+        this.onSetSignatureProperty(prop, sig.url)
+      },
+      passProps: {
+        ref: ref => {
+          sigView = ref
+        },
+        bankStyle,
+        sigViewStyle: bankStyle
+      }
+    })
   }
 }
 

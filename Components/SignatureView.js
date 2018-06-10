@@ -24,22 +24,14 @@ import SignaturePad from 'react-native-signature-pad'
 class SignatureView extends Component {
   props: {
     navigator: PropTypes.object.isRequired,
-    resource: PropTypes.object.isRequired,
-    prop: PropTypes.object.isRequired,
-    callback: PropTypes.func,
+    onSignature: PropTypes.func,
     returnRoute: PropTypes.object,
   };
 
   constructor(props) {
     super(props);
-    let {resource, prop} = props
-    this.state = {
-      value: resource[prop.name] || ''
-    }
-    var currentRoutes = this.props.navigator.getCurrentRoutes()
-    var currentRoutesLength = currentRoutes.length
-    currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.done.bind(this)
-
+    const { value } = props
+    this.state = { value }
     this.scrollviewProps = {
       automaticallyAdjustContentInsets:true,
       scrollEventThrottle: 50,
@@ -47,15 +39,14 @@ class SignatureView extends Component {
     };
   }
   done() {
-    let {navigator, callback, prop} = this.props
-    navigator.pop()
-    callback(prop, this.state.value)
+    let {onSignature} = this.props
+    onSignature(this.getSignature())
   }
   onScroll(e) {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let {bankStyle, resource} = this.props
+    let {sigViewStyle} = this.props
     let {width, height} = utils.dimensions(SignatureView)
     return (
       <PageView style={platformStyles.container}>
@@ -69,9 +60,12 @@ class SignatureView extends Component {
       </PageView>
     )
   }
-  onChangeText({base64DataUrl}) {
+  onChangeText(value) {
     // let val = format(value, this.props.resource)
-    this.setState({value: base64DataUrl})
+    this.setState({ value })
+  }
+  getSignature() {
+    return { ...this.state.value }
   }
 }
 

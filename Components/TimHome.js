@@ -623,17 +623,6 @@ class TimHome extends Component {
       if (utils.getId(currentRoute.passProps.resource) === utils.getId(resource))
         return
     }
-    // if (!action) {
-    //   var msg = {
-    //     message: translate('customerWaiting', me.firstName),
-    //     _t: CUSTOMER_WAITING,
-    //     from: me,
-    //     to: resource,
-    //     time: new Date().getTime()
-    //   }
-
-    //   utils.onNextTransitionEnd(navigator, () => Actions.addMessage({msg: msg, isWelcome: true}))
-    // }
     let style = {}
     extend(style, defaultBankStyle)
     if (resource.style)
@@ -642,58 +631,6 @@ class TimHome extends Component {
 
     if (this.showTourOrSplash({resource, showProfile, termsAccepted, action: action || 'push', callback: this.showChatPage.bind(this)}))
       return
-    // let resource = resource
-    // if (resource._tour  &&  !resource._noTour) {
-    //     StatusBar.setHidden(true)
-    //     navigator.push({
-    //       title: "",
-    //       component: TourPage,
-    //       id: 35,
-    //       backButtonTitle: null,
-    //       // backButtonTitle: __DEV__ ? 'Back' : null,
-    //       passProps: {
-    //         bankStyle: style,
-    //         noTransitions: true,
-    //         tour: resource._tour,
-    //         callback: () => {
-    //           resource._noTour = true
-    //           resource._noSplash = true
-    //           Actions.addItem({resource: resource})
-    //           // resource._noSplash = true
-    //           this.showChatPage(resource, termsAccepted, 'replace')
-    //         }
-    //       }
-    //     })
-    //     return
-    //   }
-    //   if (!resource._noSplash)  {
-    //     StatusBar.setHidden(true)
-    //     let splashscreen = resource.style  &&  resource.style.splashscreen
-    //     if (splashscreen) {
-    //       let resolvePromise
-    //       let promise = new Promise(resolve => {
-    //         navigator.push({
-    //           title: "",
-    //           component: SplashPage,
-    //           id: 36,
-    //           backButtonTitle: null,
-    //           passProps: {
-    //             splashscreen: splashscreen
-    //           }
-    //         })
-    //         resolvePromise = resolve
-    //       })
-    //       // return
-    //       setTimeout(() => {
-    //         resolvePromise()
-    //         resource._noSplash = true
-    //         Actions.addItem({resource: resource})
-    //         this.showChatPage(resource, termsAccepted, 'replace')
-    //       }, 2000)
-    //       return
-    //     }
-    //   }
-    // }
 
     let route = {
       title: resource.name,
