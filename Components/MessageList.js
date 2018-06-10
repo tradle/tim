@@ -24,7 +24,7 @@ import _ from 'lodash'
 import TimerMixin from 'react-timer-mixin'
 import Reflux from 'reflux'
 import clone from 'clone'
-import constants from '@tradle/constants'
+import DeviceInfo from 'react-native-device-info'
 import GiftedMessenger from 'react-native-gifted-messenger'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
@@ -32,6 +32,7 @@ import ActionSheet from 'react-native-actionsheet'
 import { makeResponsive } from 'react-native-orient'
 import debounce from 'debounce'
 
+import constants from '@tradle/constants'
 import Navigator from './Navigator'
 import MessageView from './MessageView'
 import MessageRow from './MessageRow'
@@ -49,6 +50,7 @@ import VerifierChooser from './VerifierChooser'
 import ResourceList from './ResourceList'
 import ChatContext from './ChatContext'
 import ContextChooser from './ContextChooser'
+import NewResourceMixin from './NewResourceMixin'
 import utils, {
   translate
 } from '../utils/utils'
@@ -626,27 +628,35 @@ class MessageList extends Component {
         }
       }
       else {
-        passProps = {
-          model: utils.getLensedModel(r, lensId),
-          resource: r,
-          lensId: lensId,
-          currency: resource.currency || this.props.currency,
-          country: resource.country,
-          chat: resource,
-          bankStyle: bankStyle
-        }
+        let editProps = utils.getEditableProperties(r)
+        // let prop = editProps.length === 1  &&  editProps[0]
+        // if (prop  &&  prop.signature) {
+        //   route.onRightButtonPress = this.showSignatureView.bind(this, prop, r)
+        // }
+        // else {
+          passProps = {
+            model: utils.getLensedModel(r, lensId),
+            resource: r,
+            lensId: lensId,
+            currency: resource.currency || this.props.currency,
+            country: resource.country,
+            chat: resource,
+            bankStyle: bankStyle
+          }
+        // }
       }
 
       route.rightButtonTitle = 'Edit'
-      route.onRightButtonPress = {
-        title: newTitle, //utils.getDisplayName(resource),
-        id: 4,
-        component: NewResource,
-        // titleTextColor: '#7AAAC3',
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Done',
-        passProps
-      }
+      if (!route.onRightButtonPress)
+        route.onRightButtonPress = {
+          title: newTitle, //utils.getDisplayName(resource),
+          id: 4,
+          component: NewResource,
+          // titleTextColor: '#7AAAC3',
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
+          passProps
+        }
     }
     if (isVerifier) {
       route.rightButtonTitle = 'Done' //ribbon-b|ios-close'
@@ -832,6 +842,8 @@ class MessageList extends Component {
         maxHeight -= 10
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       // Hide TextInput for shared context since it is read-only
+      const deviceID = DeviceInfo.getDeviceId()
+      const isIphone10 = deviceID  &&  deviceID.indexOf('iPhone10') === 0
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={loadEarlierMessages}
@@ -849,6 +861,7 @@ class MessageList extends Component {
         handleSend={this.onSubmitEditing}
         submitOnReturn={true}
         underlineColorAndroid='transparent'
+        textInputHeight={isIphone10 ? 60 : 45}
         menu={this.generateMenu}
         keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
@@ -1282,6 +1295,7 @@ class MessageList extends Component {
 }
 reactMixin(MessageList.prototype, Reflux.ListenerMixin);
 reactMixin(MessageList.prototype, TimerMixin)
+reactMixin(MessageList.prototype, NewResourceMixin);
 MessageList = makeResponsive(MessageList)
 MessageList = makeStylish(MessageList)
 
