@@ -1069,7 +1069,8 @@ class FormRequestRow extends Component {
     });
   }
   showSignatureView(prop) {
-    let { resource, bankStyle, navigator } = this.props
+    const { navigator, bankStyle } = this.props
+    let sigView
     navigator.push({
       title: translate(prop), //m.title,
       // titleTextColor: '#7AAAC3',
@@ -1077,11 +1078,17 @@ class FormRequestRow extends Component {
       component: SignatureView,
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
+      onRightButtonPress: () => {
+        const sig = sigView.getSignature()
+        navigator.pop()
+        this.onSetSignatureProperty(prop, sig.url)
+      },
       passProps: {
-        prop,
-        resource: resource.prefill ||  {[TYPE]: resource.form },
-        bankStyle:      bankStyle,
-        callback:       this.onSetSignatureProperty.bind(this)
+        ref: ref => {
+          sigView = ref
+        },
+        bankStyle,
+        sigViewStyle: bankStyle
       }
     })
   }
