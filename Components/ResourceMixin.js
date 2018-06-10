@@ -184,12 +184,14 @@ var ResourceMixin = {
             </View>
         )
       })
-      if (!ret.length  && v.title) {
+      if (!ret.length) {
+        let vTitle = v.title  ||  utils.makeModelTitle(utils.getType(v))
+
         let image = v.photo  &&  <Image source={{uri: v.photo}} style={styles.thumb} />
         let color = cancelItem ? '#757575' : linkColor
         let item = <View style={{flexDirection: 'row', paddingVertical: 7}}>
                     {image}
-                    <Text style={[styles.itemText, {color}]}>{v.title}</Text>
+                    <Text style={[styles.itemText, {color}]}>{vTitle}</Text>
                   </View>
         if (cancelItem) {
           item = <TouchableHighlight underlayColor='transparent' key={this.getNextKey()} onPress={cancelItem.bind(this, prop, v)}>
@@ -207,18 +209,18 @@ var ResourceMixin = {
             isMessageView = (ref !== ORGANIZATION  &&  ref !== PROFILE)
           let id = isMessageView && 5 || 3
           let component = isMessageView && require('./MessageView') || require('./ResourceView')
-          item =  <TouchableHighlight underlayColor='transparent' key={this.getNextKey()} onPress={() => {
-              navigator.push({
-               title: v.title,
-               id,
-               component,
-               backButtonTitle: 'Back',
-               bankStyle,
-               passProps: {resource: v}
-              })
-            }}>
-             {item}
-           </TouchableHighlight>
+          item =  <TouchableHighlight underlayColor='transparent' style={{paddingVertical: 5}} key={this.getNextKey()} onPress={() => {
+                    navigator.push({
+                     title: vTitle,
+                     id,
+                     component,
+                     backButtonTitle: 'Back',
+                     bankStyle,
+                     passProps: {resource: v}
+                    })
+                  }}>
+                   {item}
+                 </TouchableHighlight>
         }
         ret.push(item)
         // ret.push(
@@ -227,6 +229,7 @@ var ResourceMixin = {
         //  </View>
         // );
       }
+
       let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
       return (
         <View key={this.getNextKey()}>
@@ -287,15 +290,15 @@ var ResourceMixin = {
         val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
       else if (pMeta.signature) {
         let {width, height} = utils.dimensions(component)
-        let h = 70
-        let w
-        if (width > height)
-          w = (width * 70)/(height - 100)
-        else
-          w = (height * 70)/(width - 100)
-        w = Math.round(w)
+        let h = 200
+        let w = width - 40
+        // if (width > height)
+        //   w = (width * 70)/(height - 100)
+        // else
+        //   w = (height * 70)/(width - 100)
+        // w = Math.round(w)
         val = <View style={styles.container}>
-                <Image style={{width: w, height: h}} source={{uri: val}}/>
+                <Image style={{maxWidth: w, height: h}} source={{uri: val}} resizeMode='contain'/>
               </View>
       }
       else if (typeof val === 'string'  &&  pMeta.type !== 'object'  &&  (val.indexOf('http://') == 0  ||  val.indexOf('https://') === 0))
