@@ -3041,7 +3041,7 @@ var Store = Reflux.createStore({
         if (!status/* || !self.isConnected*/)
           return
         publishRequestSent[orgId] = true
-        if (!status.watches.link  &&  !status.link) {
+        if (!status.watches.link  &&  !status.link  &&  !me.isEmployee) {
           if (isCustomerWaiting)
             noCustomerWaiting = true
           return self.publishMyIdentity(orgRep)
