@@ -1829,7 +1829,8 @@ var Store = Reflux.createStore({
       clientId: utils.getIotClientId({
         permalink: node.permalink,
         provider
-      })
+      }),
+      retryOnSend: 3 // then give up and re-queue
     })
 
     const checkMissing = (() => {
