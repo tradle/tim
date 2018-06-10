@@ -895,7 +895,8 @@ var NewResourceMixin = {
   },
 
   showSignatureView(prop) {
-    this.props.navigator.push({
+    const { navigator } = this.props
+    navigator.push({
       title: translate(prop), //m.title,
       // titleTextColor: '#7AAAC3',
       id: 32,
@@ -903,10 +904,12 @@ var NewResourceMixin = {
       backButtonTitle: 'Back',
       rightButtonTitle: 'Done',
       passProps: {
-        prop:           prop,
-        resource:       this.state.resource,
-        bankStyle:      this.props.bankStyle,
-        callback:       this.onChangeText.bind(this)
+        value:          this.state.resource[prop.name] || '',
+        style:          this.props.bankStyle,
+        onSignature:    ({ url, width, height }) => {
+          navigator.pop()
+          this.onChangeText(prop, url)
+        }
       }
     })
   },
