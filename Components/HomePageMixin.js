@@ -71,76 +71,6 @@ var HomePageMixin = {
     this.props.navigator.pop()
   },
 
-  async onread(params, result) {
-    let {isView, callback, prop} = params
-    // HACK
-    // if (result.data.indexOf('10;') === 0) {
-    //   let parts = result.data.split(';')
-    //   Actions.getIdentity({ hash: parts[1], name: parts[2] })
-    //   this.props.navigator.pop()
-    //   callback(prop, {
-    //      id: utils.makeId(IDENTITY, parts[1]),
-    //      title: parts[2]
-    //   })
-    //   return
-    // }
-    try {
-      result = qrCodeDecoder.fromHex(result.data)
-    } catch (err) {
-      debug('failed to parse qrcode', result.data)
-      this.onUnknownQRCode()
-      return
-    }
-
-    const { schema, data } = result
-    // post to server request for the forms that were filled on the web
-    let me = utils.getMe()
-    switch (schema) {
-    case 'Profile':
-      Actions.getIdentity(data)
-      this.props.navigator.pop()
-      callback(null, {
-         id: utils.makeId(IDENTITY, data.permalink),
-         title: data.firstName
-      })
-      break
-    case 'ImportData':
-      let r = {
-        _t: 'tradle.DataClaim',
-        claimId: data.dataHash,
-        from: {
-          id: utils.getId(me),
-          title: utils.getDisplayName(me)
-        },
-        to: {
-          id: utils.makeId(PROFILE, data.provider)
-        }
-      }
-      Actions.addChatItem({
-        resource: r,
-        value: r,
-        provider: {
-          url: data.host,
-          hash: data.provider
-        },
-        meta: utils.getModel(DATA_CLAIM),
-        disableAutoResponse: true})
-      break
-    // case TALK_TO_EMPLOYEEE:
-    //   Actions.getEmployeeInfo(data.substring(code.length + 1))
-    //   break
-    case 'AddProvider':
-      Actions.addApp({ url: data.host, permalink: data.provider })
-      break
-    case 'ApplyForProduct':
-      Actions.applyForProduct(data)
-      break
-    default:
-      // keep scanning
-      this.onUnknownQRCode()
-      break
-    }
-  },
   mergeStyle(newStyle) {
     let style = {}
     _.extend(style, defaultBankStyle)
@@ -323,7 +253,79 @@ var HomePageMixin = {
     if (this.props.search)
       _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
     Actions.list(params)
-  }
+  },
 }
 
 module.exports = HomePageMixin;
+/*
+  async onread(params, result) {
+    let {isView, callback, prop} = params
+    // HACK
+    // if (result.data.indexOf('10;') === 0) {
+    //   let parts = result.data.split(';')
+    //   Actions.getIdentity({ hash: parts[1], name: parts[2] })
+    //   this.props.navigator.pop()
+    //   callback(prop, {
+    //      id: utils.makeId(IDENTITY, parts[1]),
+    //      title: parts[2]
+    //   })
+    //   return
+    // }
+    try {
+      result = qrCodeDecoder.fromHex(result.data)
+    } catch (err) {
+      debug('failed to parse qrcode', result.data)
+      this.onUnknownQRCode()
+      return
+    }
+
+    const { schema, data } = result
+    // post to server request for the forms that were filled on the web
+    let me = utils.getMe()
+    switch (schema) {
+    case 'Profile':
+      Actions.getIdentity(data)
+      this.props.navigator.pop()
+      callback(null, {
+         id: utils.makeId(IDENTITY, data.permalink),
+         title: data.firstName
+      })
+      break
+    case 'ImportData':
+      let r = {
+        _t: 'tradle.DataClaim',
+        claimId: data.dataHash,
+        from: {
+          id: utils.getId(me),
+          title: utils.getDisplayName(me)
+        },
+        to: {
+          id: utils.makeId(PROFILE, data.provider)
+        }
+      }
+      Actions.addChatItem({
+        resource: r,
+        value: r,
+        provider: {
+          url: data.host,
+          hash: data.provider
+        },
+        meta: utils.getModel(DATA_CLAIM),
+        disableAutoResponse: true})
+      break
+    // case TALK_TO_EMPLOYEEE:
+    //   Actions.getEmployeeInfo(data.substring(code.length + 1))
+    //   break
+    case 'AddProvider':
+      Actions.addApp({ url: data.host, permalink: data.provider })
+      break
+    case 'ApplyForProduct':
+      Actions.applyForProduct(data)
+      break
+    default:
+      // keep scanning
+      this.onUnknownQRCode()
+      break
+    }
+  },
+*/

@@ -923,17 +923,19 @@ var utils = {
     let vCols = []
     if (viewCols) {
       viewCols.forEach((p) => {
+        let prop = properties[p]
         let idx = p.indexOf('_group')
-        if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
+        if (idx === -1  ||  !prop.list || prop.title.toLowerCase() !== p)
           vCols.push(p)
 
-        if (idx !== -1  &&  properties[p].list)
-          properties[p].list.forEach((p) => vCols.push(p))
+        if (idx !== -1  &&  prop.list)
+          prop.list.forEach((p) => vCols.push(p))
         // eCols[p] = props[p]
       })
     }
     for (let p in properties) {
-      if (!vCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden  &&  p.indexOf('_group') !== p.length - 6)
+      let prop = properties[p]
+      if (!vCols[p]  &&  !prop.readOnly  &&  !prop.hidden  &&  p.indexOf('_group') !== p.length - 6  &&  !prop.signature)
         vCols.push(p)
     }
     return vCols
@@ -2356,6 +2358,8 @@ var utils = {
       if (ftype === PRODUCT_REQUEST)
         return [ep]
       if (ep  &&  ep.type === 'object'  &&  (ep.ref === PHOTO ||  this.getModel(ep.ref).subClassOf === ENUM))
+        return [ep]
+      if (ep.signature)
         return [ep]
     }
     return []

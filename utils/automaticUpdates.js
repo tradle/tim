@@ -55,7 +55,14 @@ async function install (opts={}) {
     await utils.promiseDelay(delay)
   }
 
-  await AsyncStorage.removeItem(CODE_UPDATE_KEY)
+  Actions.hideModal()
+
+  // give modal time to hide
+  await Promise.all([
+    utils.promiseDelay(100),
+    AsyncStorage.removeItem(CODE_UPDATE_KEY)
+  ])
+
   CodePush.restartApp()
   return true
 }
