@@ -27,8 +27,8 @@ import Navigator from './Navigator'
 const HELP_COLOR = 'blue'
 const PHOTO = 'tradle.Photo'
 const ITEM = 'tradle.Item'
-const DRAFT_APPLICATION = 'tradle.DraftApplication'
-const FORM_PREFILL = 'tradle.FormPrefill'
+// const DRAFT_APPLICATION = 'tradle.DraftApplication'
+// const FORM_PREFILL = 'tradle.FormPrefill'
 // import Prompt from 'react-native-prompt'
 const {
   TYPE,
@@ -132,14 +132,8 @@ class MessageView extends Component {
     if (!params.resource)
       return
     let { bankStyle, application, resource, search } = this.props
-    if (utils.getId(params.resource) !== utils.getId(resource)) {
-      // if (resource[TYPE] !== FORM_PREFILL  ||  !_.isEqual(resource.prefill, params.resource))
-      //   return
-      if (params.resource[ROOT_HASH] !== resource[ROOT_HASH]) {
-        if (resource[TYPE] !== FORM_PREFILL  ||  !_.isEqual(resource.prefill, params.resource))
-          return
-      }
-    }
+    if (utils.getId(params.resource) !== utils.getId(resource))
+      return
     if (action === 'getItem') {
       let state = {
         resource: params.resource,
@@ -180,42 +174,6 @@ class MessageView extends Component {
     let { defaultPropertyValues, bankStyle, navigator, search } = this.props
     let resource = this.state.resource
     let ref = itemBl.items.ref
-    if (ref === FORM_PREFILL) {
-      let rmodel = utils.getModel(ref)
-      navigator.push({
-        title: translate('formChooser'),
-        id: 33,
-        component: StringChooser,
-        backButtonTitle: 'Back',
-        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-        passProps: {
-          strings:   utils.getModel(resource.requestFor).forms,
-          bankStyle: this.props.bankStyle,
-          isReplace: true,
-          callback:  (val) => {
-            let model = utils.getModel(val)
-            navigator.replace({
-              title: translate(model),
-              id: 4,
-              component: NewResource,
-              backButtonTitle: 'Back',
-              rightButtonTitle: 'Done',
-              passProps: {
-                model: model,
-                prop: rmodel.properties.prefill,
-                bankStyle: this.state.bankStyle || bankStyle,
-                containerResource: {[TYPE]: FORM_PREFILL, draft: resource, from: me, to: resource.to},
-                resource: {[TYPE]: val },
-                currency: this.props.currency || this.state.currency,
-              }
-            })
-          }
-        }
-      });
-
-      return
-    }
-
     // resource if present is a container resource as for example subreddit for posts or post for comments
     // if to is passed then resources only of this container need to be returned
     let r = {[TYPE]: ref};
@@ -440,9 +398,6 @@ class MessageView extends Component {
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
     else {
-      // let isPrefill = model.id === FORM_PREFILL
-      // let m =  isPrefill ? utils.getModel(resource.prefill[TYPE]) : model
-      // let r = isPrefill ? resource.prefill : resource
       let m = model, r = resource
       let allowToAddBacklinks = utils.getPropertiesWithAnnotation(m, 'allowToAdd')
       for (let p in allowToAddBacklinks) {
@@ -548,7 +503,7 @@ class MessageView extends Component {
     let resource = this.props.resource
 
     // Allow employee to add backlinks only to the resource he created
-    if (me  &&  me.isEmployee  &&  !utils.isMyMessage({resource})  &&  resource[TYPE] !== DRAFT_APPLICATION)
+    if (me  &&  me.isEmployee  &&  !utils.isMyMessage({resource})) //  &&  resource[TYPE] !== DRAFT_APPLICATION)
       return
 
     let icon = 'md-add' //Platform.OS === 'ios' ?  'md-more' : 'md-menu'
@@ -713,3 +668,99 @@ var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankS
 })
 
 module.exports = MessageView;
+/* Draft variant
+  addNew(itemBl) {
+    this.setState({hideMode: false})
+    let me = utils.getMe()
+
+    let { defaultPropertyValues, bankStyle, navigator, search } = this.props
+    let resource = this.state.resource
+    let ref = itemBl.items.ref
+    if (ref === FORM_PREFILL) {
+      let rmodel = utils.getModel(ref)
+      navigator.push({
+        title: translate('formChooser'),
+        id: 33,
+        component: StringChooser,
+        backButtonTitle: 'Back',
+        sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+        passProps: {
+          strings:   utils.getModel(resource.requestFor).forms,
+          bankStyle: this.props.bankStyle,
+          isReplace: true,
+          callback:  (val) => {
+            let model = utils.getModel(val)
+            navigator.replace({
+              title: translate(model),
+              id: 4,
+              component: NewResource,
+              backButtonTitle: 'Back',
+              rightButtonTitle: 'Done',
+              passProps: {
+                model: model,
+                prop: rmodel.properties.prefill,
+                bankStyle: this.state.bankStyle || bankStyle,
+                containerResource: {[TYPE]: FORM_PREFILL, draft: resource, from: me, to: resource.to},
+                resource: {[TYPE]: val },
+                currency: this.props.currency || this.state.currency,
+              }
+            })
+          }
+        }
+      });
+
+      return
+    }
+
+    // resource if present is a container resource as for example subreddit for posts or post for comments
+    // if to is passed then resources only of this container need to be returned
+    let r = {[TYPE]: ref};
+    let rType = resource[TYPE]
+    let rModel = utils.getModel(rType)
+
+    let blModel = utils.getModel(ref)
+    // let refProps = utils.getPropertiesWithAnnotation(blModel, 'ref')
+    // for (let p in refProps) {
+    //   let pref = refProps[p].ref
+    //   if (pref === rType  ||  rModel.subClassOf === pref) {
+    //     containerProp = p
+    //     break
+    //   }
+    // }
+
+    let refProps = utils.getPropertiesWithRef(rType, blModel)
+    let containerProp = refProps.filter(prop => prop.name === itemBl.items.backlink)[0].name
+
+    r[containerProp] = utils.buildRef(resource)
+
+    // if (this.props.resource.relatedTo  &&  props.relatedTo) // HACK for now for main container
+    //   r.relatedTo = this.props.resource.relatedTo;
+    r.from = me
+    r.to = utils.isItem(r) ? me : resource.to
+    r._context = resource._context
+    let model = utils.getModel(r[TYPE])
+
+    navigator.push({
+      title: model.title,
+      id: 4,
+      component: NewResource,
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      passProps: {
+        model: model,
+        bankStyle: bankStyle,
+        resource: r,
+        prop: itemBl,
+        search,
+        // containerResource: resource,
+        doNotSend: true,
+        defaultPropertyValues: defaultPropertyValues,
+        currency: this.props.currency || this.state.currency,
+        callback: (resource) => {
+          navigator.pop()
+        }
+      }
+    })
+  }
+
+*/
