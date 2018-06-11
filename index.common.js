@@ -662,10 +662,10 @@ var NavigationBarRouteMapper = {
     case 'Accept':
       if (!icon) {
         icon = 'ios-send'
-        iconSize = 32
+        iconSize = 28
         viewStyle = isAndroid ? {paddingTop: 10} : {}
       }
-      style = {marginTop: isAndroid ? 2 : 0}
+      style = {marginTop: isAndroid ? 2 : -2}
       // style = {marginTop: 5, transform: [
       //     {rotate: '45deg'}
       //   ]}
@@ -685,7 +685,7 @@ var NavigationBarRouteMapper = {
       break
     case 'Edit':
       iconSize = 28
-      style = {marginRight: -4, marginTop: isAndroid ? 12 : 2}
+      style = {marginRight: -4, marginTop: isAndroid ? 12 : -2}
       // style = {marginTop: 2, marginRight: -4}
       icon = 'ios-create-outline'
       break
@@ -697,7 +697,7 @@ var NavigationBarRouteMapper = {
     if (icon)  {
       title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={iconColor} style={[styles.icon, style]} />
       if (isSubmit)
-        title = <View style={[styles.submit, {backgroundColor: bankStyle ? bankStyle.linkColor : '#7AAAC3'}]}>
+        title = <View style={[styles.submit, {backgroundColor: bankStyle ? bankStyle.linkColor : '#7AAAC3', justifyContent: 'center'}]}>
                   {title}
                 </View>
     }
@@ -941,8 +941,8 @@ var styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: StyleSheet.hairlineWidth,
     paddingRight: 10,
-    paddingLeft:15,
-    paddingBottom: 5
+    paddingLeft: 15,
+    // paddingBottom: 5
   }
 });
 
