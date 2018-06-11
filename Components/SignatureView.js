@@ -53,8 +53,8 @@ class SignatureView extends Component {
         <View style={{
           flex: 1,
           maxHeight: Math.min(width / 2, 200),
-          padding:10,
-          backgroundColor: '#ddd',
+          borderColor: '#ddd',
+          borderWidth: 10,
           margin: 5
         }}>
           <SignaturePad onError={this._signaturePadError}

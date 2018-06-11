@@ -321,9 +321,10 @@ class FormMessageRow extends Component {
 
 var createStyles = utils.styleFactory(FormMessageRow, function (params) {
   let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
-  let moreHeader = isMyMessage || isShared
-                 ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }
-                 : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
+  let moreHeader = {borderTopRightRadius: 10, borderTopLeftRadius: 10 }
+  // let moreHeader = isMyMessage || isShared
+  //                ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }
+  //                : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
   let bg = isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg
   let pageBg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
   return StyleSheet.create({
