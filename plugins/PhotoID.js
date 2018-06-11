@@ -1,4 +1,5 @@
 import dateformat from 'dateformat'
+import _ from 'lodash'
 
 import { TYPE } from '@tradle/constants'
 import utils, { translate, isWeb } from '../utils/utils'
@@ -41,10 +42,29 @@ module.exports = function PhotoID ({ models }) {
         if (country.id !== form.country.id.split('_')[1])
           cleanupValues(form, scan, model)
       }
-      prefillValues(form, scan, model)
+      let errors = prefillValues(form, scan, model)
 
       let requestedProperties = []
       getRequestedProps(scan, model, isLicence, requestedProperties, form)
+
+      if (form.dateOfExpiry) {
+        if (form.dateOfExpiry < new Date().getTime()) {
+          let ret = cleanupValues(form, scan, model)
+          ret.message += '. The document has expired'
+            return ret
+        }
+      }
+      if (form.dateOfBirth) {
+        let isLicence = form.documentType.title.indexOf('Licence') !== -1
+        if (isLicence) {
+          let age = new Date().getYear() - new Date(form.dateOfBirth).getYear()
+          if (age < 18) {
+            let ret = cleanupValues(form, scan, model)
+            ret.message += '. The document has invalid date of birth'
+            return ret
+          }
+        }
+      }
 
       return {
         message: translate('reviewScannedProperties'),
@@ -63,6 +83,8 @@ function prefillValues(form, values, model) {
       exclude.push(p)
   for (let p in values) {
     if (exclude.includes(p))
+      continue
+    if (form[p])
       continue
     let val = values[p]
     if (typeof val === 'object')
@@ -94,8 +116,9 @@ function getRequestedProps(values, model, isLicence, requestedProperties, form) 
   // if (!isLicence  &&  !requestedProperties.find(p => p.name === 'dateOfIssue'))
   //   requestedProperties.push({name: 'dateOfIssue'})
   if (!requestedProperties.find(p => p.name === 'dateOfBirth')) {
-    if (form.dateOfBirth)
+    if (form.dateOfBirth) {
       requestedProperties.push({name: 'dateOfBirth'})
+    }
   }
 }
 function cleanupValues(form, values, model) {
