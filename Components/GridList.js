@@ -121,8 +121,6 @@ var excludeFromBrowsing = [
   PROFILE
 ]
 
-const sandboxDesc = 'In the Sandbox, learn how to use the app with simulated service providers. Try getting a digital passport from the Identity Authority, then opening a company at the Chamber of Commerce, then getting that company a business account at Hipster Bank.'
-
 var cnt = 0
 
 class GridList extends Component {
@@ -1297,7 +1295,7 @@ class GridList extends Component {
           </TouchableOpacity>
         </View>
         <View style={styles.testProvidersContainer}>
-          <Text style={styles.testProvidersDescription}>{sandboxDesc}</Text>
+          <Text style={styles.testProvidersDescription}>{ENV.sandboxDescription}</Text>
         </View>
       </View>
     )
