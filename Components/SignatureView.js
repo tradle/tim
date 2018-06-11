@@ -39,23 +39,28 @@ class SignatureView extends Component {
     };
   }
   done() {
-    let {onSignature} = this.props
-    onSignature(this.getSignature())
+    this.props.onSignature(this.getSignature())
   }
   onScroll(e) {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
     let {sigViewStyle} = this.props
-    let {width, height} = utils.dimensions(SignatureView)
+    const { width, height } = utils.dimensions(SignatureView)
     return (
       <PageView style={platformStyles.container}>
-        <View style={{flex: 1}}>
-        <Text style={{fontSize: 24, padding: 10, alignSelf: 'center', color: '#aaaaaa'}}>Please sign here</Text>
+        <Text style={styles.instructions}>Please sign inside the grey box</Text>
+        <View style={{
+          flex: 1,
+          maxHeight: Math.min(width / 2, 200),
+          padding:10,
+          backgroundColor: '#ddd',
+          margin: 5
+        }}>
           <SignaturePad onError={this._signaturePadError}
-                        lockToLandscape={true}
+                        lockToLandscape={false}
                         onChange={this.onChangeText.bind(this)}
-                        style={{flex: 1, backgroundColor: 'white'}}/>
+                        style={{flex: 1, backgroundColor: 'white', padding: 20}}/>
         </View>
       </PageView>
     )
@@ -70,10 +75,16 @@ class SignatureView extends Component {
 }
 
 var styles = StyleSheet.create({
+  instructions: {
+    fontSize: 24,
+    padding: 10,
+    alignSelf: 'center',
+    color: '#aaaaaa'
+  },
   container: {
     flex: 1,
     paddingHorizontal: 10,
   },
 })
-SignatureView.orientation = 'LANDSCAPE'
+
 module.exports = SignatureView;
