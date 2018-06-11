@@ -408,6 +408,9 @@ class FormRequestRow extends Component {
 
     return (
       <View style={styles.shareable} key={this.getNextKey()}>
+        <View style={{padding: 10, backgroundColor: '#efefef', marginHorizontal: -1}}>
+          <Text style={styles.assistentText}>{`Good news! You already have ${vtt.length}. To share tap icon below.`}</Text>
+        </View>
         <View style={styles.container}>
           <View style={styles.shareablesList}>
             {vtt}
@@ -503,7 +506,7 @@ class FormRequestRow extends Component {
            </View>
   }
   getParts(verification, isItem, styles) {
-    let { resource, to, shareableResources } = this.props
+    let { resource, to, shareableResources, bankStyle } = this.props
     let document = verification.document
     let providers = shareableResources.providers
     let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
@@ -525,7 +528,7 @@ class FormRequestRow extends Component {
     let style = {transform: [{rotate: spin}]}
     let shareView =  <Animated.View style={style}>
                        <View style={styles.shareButton}>
-                         <Icon name='md-share' size={20} color='#ffffff'/>
+                         <Icon name='md-share' size={20} color='#fff'/>
                        </View>
                      </Animated.View>
 
@@ -832,8 +835,8 @@ class FormRequestRow extends Component {
                  }}>
                    <View style={[styles.row, {paddingTop: 10}]}>
                      <Animated.View style={animStyle}>
-                       <View style={styles.shareButton}>
-                         <Icon name='ios-arrow-forward' size={20} color='#ffffff'/>
+                       <View style={styles.addButton}>
+                         <Icon name='ios-arrow-forward' size={20} color={bankStyle.linkColor}/>
                        </View>
                      </Animated.View>
                      <View style={{justifyContent: 'center'}}>
@@ -859,7 +862,7 @@ class FormRequestRow extends Component {
           let style = {transform: [{rotate: rotateX}]}
           msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={styles.message}  key={this.getNextKey()}>
                   <Animated.View style={style}>
-                    <View style={[styles.shareButton, {backgroundColor: '#007EFF', marginRight: 10}]}>
+                    <View style={[styles.addButton, {backgroundColor: '#007EFF', marginRight: 10}]}>
                       <Icon name='md-information' size={35} color='#ffffff' />
                     </View>
                   </Animated.View>
@@ -979,7 +982,7 @@ class FormRequestRow extends Component {
   makeButtonLink({form, isMyMessage, styles, msg, isAnother, onPress}) {
     if (!msg)
       msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
-    let application = this.props.application
+    let { application, bankStyle } = this.props
     if (application) {
       return (
          <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
@@ -993,8 +996,8 @@ class FormRequestRow extends Component {
     return <TouchableOpacity style={{paddingRight: 15}} onPress={onPress || this.createNewResource.bind(this, form, isMyMessage)}>
              <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
               <Animated.View style={zoomIn}>
-                <View style={styles.shareButton}>
-                  <Icon name='md-add' size={20} color='#ffffff'/>
+                <View style={styles.addButton}>
+                  <Icon name='md-add' size={20} color={bankStyle.linkColor}/>
                 </View>
               </Animated.View>
                <View style={{justifyContent: 'center'}}>
@@ -1126,19 +1129,20 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     assistentText: {
       color: '#757575',
       fontStyle: 'italic',
-      fontSize: 17
+      fontSize: 17,
+      alignSelf: 'center'
     },
-    assistentBox: {
-      backgroundColor: 'transparent',
-      // marginTop: -8,
-      justifyContent: 'center',
-      // width: 30,
-      height: 30,
-      marginTop: 0,
-      alignSelf: 'center',
-      borderRadius: 15,
-      paddingHorizontal: 10
-    },
+    // assistentBox: {
+    //   backgroundColor: 'transparent',
+    //   // marginTop: -8,
+    //   justifyContent: 'center',
+    //   // width: 30,
+    //   height: 30,
+    //   marginTop: 0,
+    //   alignSelf: 'center',
+    //   borderRadius: 15,
+    //   paddingHorizontal: 10
+    // },
     // multiEntryButton:  {
     //   // borderRadius: 10,
     //   ...circled(40),
@@ -1169,6 +1173,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       backgroundColor: '#ffffff'
     },
     shareablesList: {
+      paddingTop: 3,
       marginHorizontal: 0,
       paddingRight: 3,
       // backgroundColor: '#ffffff'
@@ -1180,12 +1185,12 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       flex: 1,
       justifyContent: 'center'
     },
-    orText: {
-      fontStyle: 'italic',
-      alignSelf: 'center',
-      color: '#ffffff',
-      fontSize: 16,
-    },
+    // orText: {
+    //   fontStyle: 'italic',
+    //   alignSelf: 'center',
+    //   color: '#aaaaaa',
+    //   fontSize: 16,
+    // },
     verifiedDate: {
       fontSize: 12,
       color: '#757575',
@@ -1205,6 +1210,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     },
     separator: {
       height: 1,
+      paddingBottom: 3,
       backgroundColor: '#dddddd'
     },
     arrow: {
@@ -1238,8 +1244,18 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       ...circled(40),
       backgroundColor: bankStyle.linkColor,
       shadowOpacity: 0.7,
+      opacity: 0.9,
       shadowRadius: 5,
       shadowColor: '#afafaf',
+    },
+    addButton: {
+      ...circled(40),
+      backgroundColor: '#eeeeee',
+      shadowOpacity: 0.7,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
+      borderColor: bankStyle.linkColor,
+      borderWidth: StyleSheet.hairlineWidth,
     },
     // myProductSeparator: {
     //   backgroundColor: bankStyle.verifiedBg,
@@ -1267,7 +1283,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       margin: 1,
       // marginTop: -37,
       marginTop: -5,
-      width: msgWidth - 115,
+      // width: msgWidth - 115,
       backgroundColor: '#ffffff',
       borderBottomLeftRadius: 10,
       borderBottomRightRadius: 10
