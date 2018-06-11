@@ -6612,6 +6612,8 @@ var Store = Reflux.createStore({
       application.verifications = []
     if (application.editRequests)
       application.editRequests = []
+    if (application.products)
+      application.products = []
     submissionStubs.forEach(sub => {
       let m = this.getModel(utils.getType(sub))
       let type = m.subClassOf || m.id
@@ -6636,6 +6638,12 @@ var Store = Reflux.createStore({
           application.editRequests = []
         application.editRequests.push(stub)
         application._editRequestsCount = application.editRequests.length
+        break
+      case MY_PRODUCT:
+        if (!application.products)
+          application.products = []
+        application.products.push(stub)
+        application._productsCount = application.products.length
       }
     })
     return application

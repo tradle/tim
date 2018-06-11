@@ -111,7 +111,7 @@ class VerificationRow extends Component {
     let ph = utils.getMainPhotoProperty(listModel)
 
     let photo
-    if (r  &&  isMyProduct)
+    if (r  &&  isMyProduct  &&  !utils.isStub(r))
       photo = resource.from.photo
     else {
       let docModel = utils.getModel(utils.getType(r))
