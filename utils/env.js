@@ -169,7 +169,8 @@ const merged = extend({
     'tradle.SelfIntroduction',
     'tradle.IdentityPublished',
     'tradle.AssignRelationshipManager',
-  ]
+  ],
+  sandboxDescription: 'In the Sandbox, learn how to use the app with simulated service providers.'
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]
