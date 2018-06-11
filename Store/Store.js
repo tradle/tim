@@ -3439,7 +3439,7 @@ var Store = Reflux.createStore({
     appP.forEach(p => allPlugins.push(p))
 
     let _context = resource._context
-    if (utils.isStub(resource._context))
+    if (_context  &&   utils.isStub(_context))
       _context = this._getItem(_context.id)
 
     // if (appPlugins)
@@ -4745,6 +4745,8 @@ var Store = Reflux.createStore({
         returnVal._outbound = true
         returnVal._latest = true
       }
+      else if (!returnVal[SIG])
+        debugger
       let rModel = self.getModel(returnVal[TYPE])
       let isContext = utils.isContext(rModel)
       let isForm = rModel.subClassOf === FORM
