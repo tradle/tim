@@ -21,10 +21,10 @@ export default StyleSheet.create({
     flex: 1,
   },
   navBarSeparator: {
-    height: isIphone10 ? 10 : 0
+    height: isIphone10 ? 15 : 0
   },
   navBarMargin: {
-    marginTop: isIphone10 ? 10 : 0,
+    marginTop: isIphone10 ? 15 : 0,
   },
   navBarText: {
     marginTop: 10,
@@ -33,12 +33,12 @@ export default StyleSheet.create({
   navBarLeftButton: {
     paddingLeft: 10,
     paddingRight: 25,
-    marginTop: isIphone10 ? 15 : 5
+    marginTop: isIphone10 ? 20 : 5
   },
   navBarRightButton: {
     paddingLeft: 25,
     paddingRight: 10,
-    marginTop: isIphone10 ? 17 : 7
+    marginTop: isIphone10 ? 22 : 7
   },
 
   // navBar: {

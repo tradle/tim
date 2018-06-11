@@ -166,7 +166,7 @@ class FormMessageRow extends Component {
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
-    let headerStyle = [chatStyles.verifiedHeader, styles.headerStyle]
+    let headerStyle = [chatStyles.verifiedHeader, styles.headerStyle, {opacity: 0.5}]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
     let model = utils.getModel(resource[TYPE])
