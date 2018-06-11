@@ -139,7 +139,7 @@ class PhotoView extends Component {
         <ImageBackground resizeMode='cover' source={coverPhotoSource} style={image}>
           <View style={{height: 50, backgroundColor: '#000000', alignSelf: 'stretch', opacity: 0.2, position: 'absolute', left: 0, bottom: 0, width: width}} />
           <Image resizeMode={resizeMode} source={source} style={{width: 80, height: 80, /*borderWidth: 2, borderColor: '#ffffff',*/ position: 'absolute', left: 10, bottom: 10}} />
-          <Text style={{fontSize: fontSize, color: '#ffffff', position: 'absolute', left: 100, bottom: 10}}>{title}</Text>
+          <Text style={{fontSize: fontSize, color: '#ffffff', position: 'absolute', left: 95, bottom: 10}}>{title}</Text>
         </ImageBackground>
       )
     }
