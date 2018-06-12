@@ -222,7 +222,7 @@ class FormRequestRow extends Component {
     // HACK
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
 
-    let msgL = message.length * utils.getFontSize(10) + 35
+    let msgL = this.hasSharables() ? msgWidth : message.length * utils.getFontSize(10) + 35
     var viewStyle = {
       flexDirection: 'row',
       borderTopRightRadius: 10,
@@ -1298,7 +1298,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       margin: 1,
       // marginTop: -37,
       marginTop: -5,
-      // width: msgWidth - 115,
+      width: msgWidth - 115,
       backgroundColor: '#ffffff',
       borderBottomLeftRadius: 10,
       borderBottomRightRadius: 10
