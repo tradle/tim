@@ -413,11 +413,11 @@ class FormRequestRow extends Component {
     //   vtt = []
     //   vtt.push(meShare)
     // }
-
+    let offerToShare = `Good news! You already have ${vtt.length}. To share tap icon below.`
     return (
       <View style={styles.shareable} key={this.getNextKey()}>
         <View style={{padding: 10, backgroundColor: '#efefef', marginHorizontal: -1}}>
-          <Text style={styles.assistentText}>{`Good news! You already have ${vtt.length}. To share tap icon below.`}</Text>
+          <Text style={styles.assistentText}>{offerToShare}</Text>
         </View>
         <View style={styles.container}>
           <View style={styles.shareablesList}>
@@ -819,10 +819,13 @@ class FormRequestRow extends Component {
     messagePart = null
     let msg, link
 
+    let hasSharables = this.hasSharables()
+
     let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated
     let msgWidth = utils.getMessageWidth(FormRequestRow)
     if (isRequestForNext) {
       let animStyle = {transform: [{scale: this.springValue}]}
+
 // this.springValue.interpolate({
 //   inputRange: [0, 1],
 //   outputRange: [0, 100],
@@ -843,8 +846,8 @@ class FormRequestRow extends Component {
                  }}>
                    <View style={[styles.row, {paddingTop: 10}]}>
                      <Animated.View style={animStyle}>
-                       <View style={styles.addButton}>
-                         <Icon name='ios-arrow-forward' size={20} color={bankStyle.linkColor}/>
+                       <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
+                         <Icon name='ios-arrow-forward' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
                        </View>
                      </Animated.View>
                      <View style={{justifyContent: 'center'}}>
@@ -991,12 +994,12 @@ class FormRequestRow extends Component {
     let shareableResources = this.props.shareableResources
     if (!shareableResources)
       return
-    let rtype = this.props.resource[TYPE]
+    let rtype = this.props.resource.form
     let multientryResources = shareableResources.multientryResources
     if (!utils.isEmpty(multientryResources)  &&  multientryResources[rtype])
       return true
 
-    let verifications = utils.isEmpty(shareableResources.verifications)
+    let verifications = shareableResources.verifications
     if (!utils.isEmpty(verifications)  &&  verifications[rtype])
       return true
   }
@@ -1015,11 +1018,12 @@ class FormRequestRow extends Component {
       )
     }
     let zoomIn = {transform: [{scale: this.springValue}]}
+    let hasSharables = this.hasSharables()
     return <TouchableOpacity style={{paddingRight: 15}} onPress={onPress || this.createNewResource.bind(this, form, isMyMessage)}>
              <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
               <Animated.View style={zoomIn}>
-                <View style={styles.addButton}>
-                  <Icon name='md-add' size={20} color={bankStyle.linkColor}/>
+                <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
+                  <Icon name='md-add' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
                 </View>
               </Animated.View>
                <View style={{justifyContent: 'center', width}}>
