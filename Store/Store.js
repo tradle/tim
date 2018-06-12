@@ -3838,7 +3838,8 @@ var Store = Reflux.createStore({
     }
 
     _.extend(res, r)
-
+if (!res[SIG]  &&  res._message)
+  debugger
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
     var props = backlinks || (backlink ? {[backlink.name]: backlink} : resModel.properties)
