@@ -101,12 +101,12 @@ class PhotoView extends Component {
       }
       else {
         height = Math.round(height * currentPhoto.height / currentPhoto.width)
-        resizeMode = 'cover'
+        resizeMode = 'contain'
       }
     }
     else {
       height = Math.round(height * currentPhoto.height / currentPhoto.width)
-      resizeMode = utils.isWeb() ? 'contain' : 'cover'
+      resizeMode = 'contain'
     }
     height = Math.min(height, screenHeight / 2.5)
     let image = {
