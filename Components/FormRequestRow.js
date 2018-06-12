@@ -220,7 +220,7 @@ class FormRequestRow extends Component {
     if (formTitle.length > message.length)
       message = formTitle
 
-    let msgL = message.length * utils.getFontSize(10) + 35
+    let msgL = this.hasSharables() ? msgWidth : message.length * utils.getFontSize(10) + 35
     var viewStyle = {
       flexDirection: 'row',
       borderTopRightRadius: 10,
