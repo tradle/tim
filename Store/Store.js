@@ -3816,7 +3816,8 @@ var Store = Reflux.createStore({
     }
 
     _.extend(res, r)
-
+if (!res[SIG]  &&  res._message)
+  debugger
 // if (res[TYPE] === FORM_ERROR)
 //   debugger
     var props = backlinks || (backlink ? {[backlink.name]: backlink} : resModel.properties)
@@ -7350,7 +7351,7 @@ var Store = Reflux.createStore({
       resource[p] = this.makeStub(stub)
     }
     if (type === FORM_REQUEST  ||  type === FORM_ERROR) {
-      if (resource.prefill)
+      if (resource.prefill  &&  !utils.isStub(resource.prefill))
         this.rewriteStubs(resource.prefill)
     }
   },
