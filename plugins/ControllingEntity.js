@@ -10,6 +10,8 @@ module.exports = function LegalEntity ({ models }) {
       application,
       form
     }) {
+      if (!application) return
+
       if (application.requestFor !== LEGAL_ENTITY_PRODUCT)
         return
       const type = form[TYPE]
