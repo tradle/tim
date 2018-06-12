@@ -11,8 +11,8 @@ var verificationStyles = Object.freeze({
     flexDirection: 'row',
     paddingVertical: 5,
     // paddingHorizontal: 7,
-    marginHorizontal: -8,
-    marginTop: -6,
+    marginHorizontal: -7,
+    marginTop: -5,
     justifyContent: 'center'
   },
   verificationHeaderText: {
