@@ -39,7 +39,7 @@ const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const ITEM = 'tradle.Item'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const DEFAULT_MESSAGE = 'Would you like to...'
-
+const numbers = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
 const {
   TYPE,
   ROOT_HASH
@@ -405,7 +405,12 @@ class FormRequestRow extends Component {
     //   vtt = []
     //   vtt.push(meShare)
     // }
-    let offerToShare = `Good news! You already have ${vtt.length}. To share tap icon below.`
+    let number = numbers[vtt.length]
+    let offerToShare
+    if (number)
+      offerToShare = `Good news! You already have ${number}. To share tap icon below.`
+    else
+      offerToShare = `Good news! You already have quite a few. To share tap icon below.`
     return (
       <View style={styles.shareable} key={this.getNextKey()}>
         <View style={{padding: 10, backgroundColor: '#efefef', marginHorizontal: -1}}>
@@ -440,8 +445,14 @@ class FormRequestRow extends Component {
 
     let hs = /*isShared ? chatStyles.description :*/ {fontSize: 16, color: '#555555'}
     let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
+
+    let displayName
+    if (docModel.subClassOf === MY_PRODUCT)
+      displayName = utils.makeModelTitle(docModel)
+    else
+      displayName = utils.getDisplayName(document)
     let headerContent = <View style={headerStyle}>
-                          <Text style={hs}>{utils.getDisplayName(document)}</Text>
+                          <Text style={hs}>{displayName}</Text>
                         </View>
 
     // headerContent = <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
