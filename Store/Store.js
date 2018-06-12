@@ -7424,7 +7424,7 @@ var Store = Reflux.createStore({
       resource[p] = this.makeStub(stub)
     }
     if (type === FORM_REQUEST  ||  type === FORM_ERROR) {
-      if (resource.prefill)
+      if (resource.prefill  &&  !utils.isStub(resource.prefill))
         this.rewriteStubs(resource.prefill)
     }
   },
