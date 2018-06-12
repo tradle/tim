@@ -47,8 +47,9 @@ class SignatureView extends Component {
   render() {
     let {sigViewStyle} = this.props
     const { width, height } = utils.dimensions(SignatureView)
+    let separator = utils.getContentSeparator(sigViewStyle)
     return (
-      <PageView style={platformStyles.container}>
+      <PageView style={platformStyles.container} separator={separator} bankStyle={sigViewStyle}>
         <Text style={styles.instructions}>Please sign inside the grey box</Text>
         <View style={{
           flex: 1,
