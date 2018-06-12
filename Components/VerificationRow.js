@@ -207,6 +207,8 @@ class VerificationRow extends Component {
       if (!dn)
         dn = utils.makeModelTitle(utils.getType(resource.document))
     }
+    else if (isMyProduct)
+      dn = utils.makeModelTitle(rType)
     else
       dn = utils.getDisplayName(resource)
     let title
@@ -289,12 +291,23 @@ class VerificationRow extends Component {
                          </View>
       }
       else {
-        if (utils.isImplementing(modelName, INTERSECTION)  ||  dn)
-          description = <Text style={isCheck ? styles.checkType : styles.description}>{title}</Text>
+        if (utils.isImplementing(modelName, INTERSECTION)  ||  dn) {
+          if (title) {
+            let style
+            if (isCheck)
+              style = styles.checkType
+            else if (dn)
+              style = styles.description
+            else
+              style = styles.rTitle
+            description = <Text style={style}>{title}</Text>
+          }
+        }
         //!!!
-        if (!dn)
-          dn = title
-        titleComponent = <Text style={styles.rTitle}>{dn}</Text>
+        // if (!dn)
+        //   dn = title
+        if (dn)
+          titleComponent = <Text style={styles.rTitle}>{dn}</Text>
       }
     }
 
