@@ -7966,7 +7966,7 @@ var Store = Reflux.createStore({
       _.extend(params, {modelName: PRODUCT_REQUEST})
       let list = await this.searchMessages(params)
       let l = list  &&  list.filter((r) => r._formsCount)
-      this.trigger({action: 'allContexts', list: l, to: params.to})
+      this.trigger({action: 'allContexts', list: l.length && l || list, to: params.to})
     }
   },
   onHasPartials() {
