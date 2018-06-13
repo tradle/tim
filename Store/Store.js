@@ -10732,6 +10732,8 @@ if (!res[SIG]  &&  res._message)
     }
     else {
       let properties = val.scanJson.properties
+      if (!properties)
+        return
       firstName = properties.first_name
       lastName = properties.last_name
     }
