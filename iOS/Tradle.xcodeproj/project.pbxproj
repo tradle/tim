@@ -67,6 +67,7 @@
 		73F1D0981EDA10EE00D4AB5B /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73F1D0941EDA10EE00D4AB5B /* tradle.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8C736C6F8FA64018866A2A0C /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 09E311D0387D4764923D9B71 /* Ionicons.ttf */; };
+		9B2795FA20D17F44000E7A07 /* libRNCardIO.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2795EA20D17E95000E7A07 /* libRNCardIO.a */; };
 		DCFA2F9E52F04D73AD1335E2 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = 1447D734074D4C7BBD023C62 /* branch.json */; };
 /* End PBXBuildFile section */
 
@@ -554,6 +555,13 @@
 			remoteGlobalIDString = 58B5119B1A9E6C1200147676;
 			remoteInfo = RCTText;
 		};
+		9B2795E920D17E95000E7A07 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNCardIO;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -631,6 +639,7 @@
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		8B8FD5DD4E4F4FFB9581AD8E /* libreact-native-branch.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libreact-native-branch.a"; sourceTree = "<group>"; };
 		97F331FA96224F67B61B074E /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
+		9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
 		A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		A4C66A6D1DDE4BC083E2095B /* libReactNativeExceptionHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libReactNativeExceptionHandler.a; sourceTree = "<group>"; };
 		B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
@@ -698,6 +707,7 @@
 				73F1B89F205F5ABD004E96E2 /* libTcpSockets.a in Frameworks */,
 				73F1B8A0205F5AC8004E96E2 /* libreact-native-branch.a in Frameworks */,
 				730D64D0207EF60100358558 /* libBlinkIDReactNative.a in Frameworks */,
+				9B2795FA20D17F44000E7A07 /* libRNCardIO.a in Frameworks */,
 				05A33D4FE7B6B35C160C0F13 /* Pods_Tradle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1081,6 +1091,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */,
 				73EF39B420CC7071009EDE8B /* RNDeviceInfo.xcodeproj */,
 				732B67802060213500B16D6F /* RNCamera.xcodeproj */,
 				73F1B858205F5A89004E96E2 /* RCTAsyncRocksDBStorage.xcodeproj */,
@@ -1151,6 +1162,14 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* Tradle.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9B2795B420D17E94000E7A07 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9B2795EA20D17E95000E7A07 /* libRNCardIO.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1335,6 +1354,10 @@
 				{
 					ProductGroup = 732B67812060213500B16D6F /* Products */;
 					ProjectRef = 732B67802060213500B16D6F /* RNCamera.xcodeproj */;
+				},
+				{
+					ProductGroup = 9B2795B420D17E94000E7A07 /* Products */;
+					ProjectRef = 9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */;
 				},
 				{
 					ProductGroup = 73EF39B520CC7071009EDE8B /* Products */;
@@ -1879,6 +1902,13 @@
 			fileType = archive.ar;
 			path = libRCTText.a;
 			remoteRef = 832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		9B2795EA20D17E95000E7A07 /* libRNCardIO.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNCardIO.a;
+			remoteRef = 9B2795E920D17E95000E7A07 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
