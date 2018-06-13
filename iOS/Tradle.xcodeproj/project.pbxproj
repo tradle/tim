@@ -12,7 +12,6 @@
 		00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302C01ABCB91800DB3ED1 /* libRCTImage.a */; };
 		00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302DC1ABCB9D200DB3ED1 /* libRCTNetwork.a */; };
 		00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */; };
-		05A33D4FE7B6B35C160C0F13 /* Pods_Tradle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBE126693569E691BD46F547 /* Pods_Tradle.framework */; };
 		133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78C398B91ACF4ADC00677621 /* libRCTLinking.a */; };
 		139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139105C11AF99BAD00B5F7CC /* libRCTSettings.a */; };
 		139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139FDEF41B06529B00C62182 /* libRCTWebSocket.a */; };
@@ -21,6 +20,7 @@
 		13B07FBF1A68108700A75B9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Assets.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
+		1B6C319A28EA8EA2AC935AF5 /* Pods_Tradle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A996C95D73C126D60C908C12 /* Pods_Tradle.framework */; };
 		43EDC8BAFC1D48CDB9B731A5 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = EEECD0C1934547049DA9F6AE /* libz.tbd */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		730D64D0207EF60100358558 /* libBlinkIDReactNative.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 730D6460207EF5BC00358558 /* libBlinkIDReactNative.a */; };
@@ -53,6 +53,7 @@
 		7379FC471EDA619A0093535C /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64451ED9FF7C0056F4BF /* libRNECC.a */; };
 		7379FC491EDA61A20093535C /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63E11ED9FF670056F4BF /* libCodePush.a */; };
 		7379FC4D1EDA61BB0093535C /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63BD1ED9FF670056F4BF /* libRCTAsyncRocksDBStorage.a */; };
+		73834C3820D1B462000C9AFC /* libRNCardIO.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73834C3720D1B44F000C9AFC /* libRNCardIO.a */; };
 		73BDD36320C2DBBD00FD92A1 /* staging.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */; };
 		73EC81B41EDA99280051FA02 /* GoogleToolboxForMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73EC81AE1EDA99280051FA02 /* GoogleToolboxForMac.framework */; };
 		73EF39BD20CC7077009EDE8B /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73EF39BA20CC7071009EDE8B /* libRNDeviceInfo.a */; };
@@ -520,6 +521,13 @@
 			remoteGlobalIDString = 3D05745F1DE6004600184BB4;
 			remoteInfo = "RCTPushNotification-tvOS";
 		};
+		73834C3620D1B44F000C9AFC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EA429A9B07F944E893CD5380 /* RNCardIO.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNCardIO;
+		};
 		73EF39B920CC7071009EDE8B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 73EF39B420CC7071009EDE8B /* RNDeviceInfo.xcodeproj */;
@@ -642,18 +650,20 @@
 		9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
 		A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		A4C66A6D1DDE4BC083E2095B /* libReactNativeExceptionHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libReactNativeExceptionHandler.a; sourceTree = "<group>"; };
+		A996C95D73C126D60C908C12 /* Pods_Tradle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Tradle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
 		B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = BlinkIDReactNative.xcodeproj; path = "../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative.xcodeproj"; sourceTree = "<group>"; };
 		BFC0C75130C445498FB831DE /* RNPasscodeStatus.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNPasscodeStatus.xcodeproj; path = "../node_modules/react-native-passcode-status/ios/RNPasscodeStatus.xcodeproj"; sourceTree = "<group>"; };
 		CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBranch.xcodeproj; path = "../node_modules/react-native-branch/ios/RNBranch.xcodeproj"; sourceTree = "<group>"; };
 		D0DAF985EAB8452CAF6683AC /* libBlinkIDReactNative.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libBlinkIDReactNative.a; sourceTree = "<group>"; };
 		E0957333521746DEB401A14A /* ReactNativeLocalization.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = ReactNativeLocalization.xcodeproj; path = "../node_modules/react-native-localization/ReactNativeLocalization.xcodeproj"; sourceTree = "<group>"; };
+		E0A5EEFD26554B2886E344D8 /* libRNCardIO.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNCardIO.a; sourceTree = "<group>"; };
 		E512A7388D2D4884A7CD858B /* FontAwesome.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome.ttf"; sourceTree = "<group>"; };
 		E7C815980A204425819A0AD3 /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
+		EA429A9B07F944E893CD5380 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
 		EEECD0C1934547049DA9F6AE /* libz.tbd */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		F6E750ACC045476CA7BFCB04 /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		FB3FA568ECEA411EA02FA34B /* SMXCrashlytics.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = SMXCrashlytics.xcodeproj; path = "../node_modules/react-native-fabric/ios/SMXCrashlytics.xcodeproj"; sourceTree = "<group>"; };
-		FBE126693569E691BD46F547 /* Pods_Tradle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Tradle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -707,8 +717,8 @@
 				73F1B89F205F5ABD004E96E2 /* libTcpSockets.a in Frameworks */,
 				73F1B8A0205F5AC8004E96E2 /* libreact-native-branch.a in Frameworks */,
 				730D64D0207EF60100358558 /* libBlinkIDReactNative.a in Frameworks */,
-				9B2795FA20D17F44000E7A07 /* libRNCardIO.a in Frameworks */,
-				05A33D4FE7B6B35C160C0F13 /* Pods_Tradle.framework in Frameworks */,
+				73834C3820D1B462000C9AFC /* libRNCardIO.a in Frameworks */,
+				1B6C319A28EA8EA2AC935AF5 /* Pods_Tradle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -826,6 +836,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		209BF41E41315E453E58158C /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		2677092A1F0C806BF108543A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -843,7 +860,7 @@
 				7379FAD11EDA5AEC0093535C /* Fabric.framework */,
 				732B9D4C1EDA8A4C00FF957D /* AssetsLibrary.framework */,
 				EEECD0C1934547049DA9F6AE /* libz.tbd */,
-				FBE126693569E691BD46F547 /* Pods_Tradle.framework */,
+				A996C95D73C126D60C908C12 /* Pods_Tradle.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1062,6 +1079,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		73834C3320D1B44F000C9AFC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				73834C3720D1B44F000C9AFC /* libRNCardIO.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		73EF39B520CC7071009EDE8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1130,6 +1155,7 @@
 				CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */,
 				6B75EECB744A4B5E9B111227 /* RNFirebase.xcodeproj */,
 				B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */,
+				EA429A9B07F944E893CD5380 /* RNCardIO.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1152,7 +1178,7 @@
 				2677092A1F0C806BF108543A /* Frameworks */,
 				AB0700E270F64F0AB32A72E0 /* Resources */,
 				9BEAADF51FAA3D3A004D61E5 /* Recovered References */,
-				E5460909B74F131B24F56E44 /* Pods */,
+				209BF41E41315E453E58158C /* Pods */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -1184,6 +1210,7 @@
 				59BCC33C56304833B09BF867 /* libRNFirebase.a */,
 				D0DAF985EAB8452CAF6683AC /* libBlinkIDReactNative.a */,
 				4E8DE8CFD0754E1B9ADDBF1C /* libRNBlinkID.a */,
+				E0A5EEFD26554B2886E344D8 /* libRNCardIO.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -1203,13 +1230,6 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		E5460909B74F131B24F56E44 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1217,14 +1237,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Tradle" */;
 			buildPhases = (
-				58A6074DB65D440DBBEAB972 /* [CP] Check Pods Manifest.lock */,
+				742C4D1FD9B1776D88308FAE /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				7379F7D01EDA14430093535C /* Fabric / Crashlytics */,
-				1CFA738141C0B4A401A0B294 /* [CP] Embed Pods Frameworks */,
-				6BEBD8D7FD8B957F084E3310 /* [CP] Copy Pods Resources */,
+				7B0DB4A3AE630DB80EF45204 /* [CP] Embed Pods Frameworks */,
+				144B8F5F1DBB8E6ACAA84B26 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1356,8 +1376,8 @@
 					ProjectRef = 732B67802060213500B16D6F /* RNCamera.xcodeproj */;
 				},
 				{
-					ProductGroup = 9B2795B420D17E94000E7A07 /* Products */;
-					ProjectRef = 9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */;
+					ProductGroup = 73834C3320D1B44F000C9AFC /* Products */;
+					ProjectRef = EA429A9B07F944E893CD5380 /* RNCardIO.xcodeproj */;
 				},
 				{
 					ProductGroup = 73EF39B520CC7071009EDE8B /* Products */;
@@ -1869,6 +1889,13 @@
 			remoteRef = 7379F8071EDA17D90093535C /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		73834C3720D1B44F000C9AFC /* libRNCardIO.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNCardIO.a;
+			remoteRef = 73834C3620D1B44F000C9AFC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		73EF39BA20CC7071009EDE8B /* libRNDeviceInfo.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1949,47 +1976,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -euo pipefail\nif [ \"$CONFIGURATION\" != \"Debug\" ]; then\n  export NODE_BINARY=node\n  ../scripts/install-ios-app.sh\n  PATH=$(bash -l -c 'echo $PATH') ../scripts/save-release.sh\nfi";
 		};
-		1CFA738141C0B4A401A0B294 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
-				"${PODS_ROOT}/PPBlinkID/MicroBlink.framework",
-				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MicroBlink.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		58A6074DB65D440DBBEAB972 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Tradle-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		6BEBD8D7FD8B957F084E3310 /* [CP] Copy Pods Resources */ = {
+		144B8F5F1DBB8E6ACAA84B26 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2020,6 +2007,46 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ \"$CONFIGURATION\" == \"Release\" ]; then\n  ../scripts/fabric-prod.sh\nfi";
+		};
+		742C4D1FD9B1776D88308FAE /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Tradle-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7B0DB4A3AE630DB80EF45204 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
+				"${PODS_ROOT}/PPBlinkID/MicroBlink.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MicroBlink.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2074,7 +2101,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2106,6 +2133,7 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative",
+					"$(SRCROOT)/../node_modules/react-native-awesome-card-io/ios/**",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -2145,7 +2173,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2177,6 +2205,7 @@
 					"$(SRCROOT)/../node_modules/react-native-branch/ios/**",
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative",
+					"$(SRCROOT)/../node_modules/react-native-awesome-card-io/ios/**",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -2253,7 +2282,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2286,6 +2315,7 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative",
 					"$(REACT_HEADERS_PATH)",
+					"$(SRCROOT)/../node_modules/react-native-awesome-card-io/ios/**",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;

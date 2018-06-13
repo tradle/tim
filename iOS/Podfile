@@ -1,5 +1,7 @@
 platform :ios, '9.0'
 target 'Tradle' do
+
+  # otherwise get errors like: 'duplicate symbol _GTMNSDataZlibRemainingBytesKey in: ...libGoogleToolboxForMac.a'
   use_frameworks!
 
   pod 'PPBlinkID', '~> 2.17.3'
