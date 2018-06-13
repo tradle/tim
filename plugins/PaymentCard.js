@@ -1,6 +1,6 @@
 import { TYPE } from '@tradle/constants'
 import { translate } from '../utils/utils'
-const PAYMENT_CARD = 'tradle.PaymentCard'
+const PAYMENT_CARD = 'tradle.CreditCard'
 
 module.exports = function PaymentCard ({ models }) {
   return {
@@ -16,19 +16,25 @@ module.exports = function PaymentCard ({ models }) {
       if (!scanned)
         return
 
-      let properties = models[PAYMENT_CARD]
+      let model = models[PAYMENT_CARD]
+      let properties = model.properties
       let requestedProperties = []
-      for (let p in form)
+      for (let p in form) {
         if (properties[p])
           requestedProperties.push({name: p})
+      }
+      model.required.forEach(p => {
+        if (!form[p]  &&  !properties[p].readOnly)
+          requestedProperties.push({name: p})
+      })
 
       let d = new Date()
-      let currentYear = d.getYear() - 100
+      let currentYear = d.getFullYear()
       let msg
-      if (currentYear < form.expiryYear)
+      if (currentYear > form.expiryYear)
         msg = 'The card has expired'
       else if (currentYear === form.expiryYear) {
-        if (d.getMonth() < form.expiryMonth)
+        if (d.getMonth() > form.expiryMonth)
           msg = 'The card has expired'
       }
       return {

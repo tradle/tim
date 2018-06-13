@@ -15,8 +15,10 @@ import {
   DatePickerAndroid,
 } from 'react-native'
 import PropTypes from 'prop-types';
+import { CardIOModule } from 'react-native-awesome-card-io';
 
 import SwitchSelector from 'react-native-switch-selector'
+import { CardIOView, CardIOUtilities } from 'react-native-awesome-card-io';
 import format from 'string-template'
 import t from 'tcomb-form-native'
 import _ from 'lodash'
@@ -28,6 +30,8 @@ import moment from 'moment'
 import QRCodeScanner from './QRCodeScanner'
 
 import constants from '@tradle/constants'
+import validateResource, { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
+const { sanitize } = validateResource.utils
 
 import Navigator from './Navigator'
 import GridList from './GridList'
@@ -731,16 +735,24 @@ var NewResourceMixin = {
     //     translate('noScanningOnAndroid')
     //   )
     // }
-
-    if (params.prop === 'scan')  {
-      if (this.state.resource.documentType  &&  this.state.resource.country) {
-        this.showBlinkIDScanner(params.prop)
+    let props = this.props.model.properties
+    let scanner = props[params.prop].scanner
+    if (scanner) {
+      if (scanner === 'id-document') {
+        if (params.prop === 'scan')  {
+          if (this.state.resource.documentType  &&  this.state.resource.country) {
+            this.showBlinkIDScanner(params.prop)
+          }
+          else
+            Alert.alert('Please choose country and document type first')
+          return
+        }
       }
-      else
-        Alert.alert('Please choose country and document type first')
-      return
+      else if (scanner === 'payment-card') {
+        this.scanCard(params.prop)
+        return
+      }
     }
-
     this.props.navigator.push({
       title: 'Take a pic',
       backButtonTitle: 'Back',
@@ -751,6 +763,53 @@ var NewResourceMixin = {
         onTakePic: this.onTakePic.bind(this, params)
       }
     });
+  },
+  async scanCard(prop) {
+    let cardJson
+    try {
+      const card = await CardIOModule.scanCard({
+        hideCardIOLogo: true,
+        suppressManualEntry: true,
+        // suppressConfirmation: true,
+        // scanExpiry: true,
+        requireExpiry: true,
+        requireCVV: true,
+        // requirePostalCode: true,
+        requireCardholderName: true,
+        keepStatusBarStyle: true,
+        suppressScannedCardImage: true,
+        scanInstructions: 'Frame FRONT of card.\nBonus: get all the edges to light up',
+        detectionMode: CardIOUtilities.IMAGE_AND_NUMBER
+      })
+      cardJson = utils.clone(card)
+    } catch (err) {
+      // user canceled
+      return
+    }
+
+    let resource = this.state.resource
+    let r = utils.clone(resource)
+    let props = utils.getModel(utils.getType(r)).properties
+    if (!this.floatingProps) this.floatingProps = {}
+    for (let p in cardJson) {
+      if (cardJson[p]  &&  props[p]) {
+        r[p] = cardJson[p]
+        this.floatingProps[p] = cardJson[p]
+      }
+    }
+    // this.floatingProps[prop] = resource[prop]
+    cardJson = sanitize(cardJson).sanitized
+    for (let p in cardJson)
+      if (!cardJson[p])
+        delete cardJson[p]
+    this.floatingProps[prop + 'Json'] = cardJson
+    r[prop + 'Json'] = cardJson
+    this.setState({ r })
+    if (!this.props.search) {
+      Actions.getRequestedProperties({resource: r})
+      Actions.saveTemporary(r)
+    }
+    // Alert.alert(JSON.stringify(card, null, 2))
   },
 
   onTakePic(params, data) {
@@ -1307,6 +1366,8 @@ var NewResourceMixin = {
     else
       props = utils.getModel(metadata.items.ref).properties
     let prop = props[params.prop]
+    // if (this.state.inFocus  &&  this.state.inFocus !== prop.name)
+    //   return <View/>
     let lcolor = this.getLabelAndBorderColor(params.prop)
 
     let color = {color: lcolor}
@@ -1430,7 +1491,7 @@ var NewResourceMixin = {
       if (utils.isWeb()) {
         useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
       } else {
-        useImageInput = !isScan || !BlinkID
+        useImageInput = !isScan || (!BlinkID  &&  !prop.scanner)
       }
 
       if (useImageInput) {
