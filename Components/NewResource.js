@@ -2,44 +2,14 @@ console.log('requiring NewResource.js')
 'use strict'
 
 import _ from 'lodash'
-import utils, { translate } from '../utils/utils'
-import NewItem from './NewItem'
-import ResourceList from './ResourceList'
-import GridList from './GridList'
-import GridItemsList from './GridItemsList'
-import PhotoView from './PhotoView'
-import ResourceView from './ResourceView'
-import MessageView from './MessageView'
-import ResourceMixin from './ResourceMixin'
-import HomePageMixin from './HomePageMixin'
-import ShowPropertiesView from './ShowPropertiesView'
-import PageView from './PageView'
-import t from 'tcomb-form-native'
-import Actions from '../Actions/Actions'
-import Store from '../Store/Store'
+import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
 import Reflux from 'reflux'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons'
-import rStyles from '../styles/registrationStyles'
-import NewResourceMixin from './NewResourceMixin'
-import equal from 'deep-equal'
-import defaultBankStyle from '../styles/defaultBankStyle.json'
-import constants from '@tradle/constants'
-import { circled } from '../styles/utils'
-
-var {
-  TYPE,
-  ROOT_HASH
-} = constants
-
-import termsAndConditions from '../termsAndConditions.json'
-import StyleSheet from '../StyleSheet'
+import t from 'tcomb-form-native'
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
-import ImageInput from './ImageInput'
-import chatStyles from '../styles/chatStyles'
-import TextInputState from 'TextInputState'
-import CustomIcon from '../styles/customicons'
-import stylesheet from '../styles/styles'
+import { makeResponsive } from 'react-native-orient'
+import React, { Component } from 'react'
 import Native, {
   // StyleSheet,
   View,
@@ -55,10 +25,41 @@ import Native, {
 } from 'react-native'
 import PropTypes from 'prop-types';
 
-import React, { Component } from 'react'
+import utils, { translate } from '../utils/utils'
+import NewItem from './NewItem'
+import ResourceList from './ResourceList'
+import GridList from './GridList'
+import GridItemsList from './GridItemsList'
+import PhotoView from './PhotoView'
+import ResourceView from './ResourceView'
+import MessageView from './MessageView'
+import ResourceMixin from './ResourceMixin'
+import HomePageMixin from './HomePageMixin'
+import ShowPropertiesView from './ShowPropertiesView'
+import PageView from './PageView'
+import Actions from '../Actions/Actions'
+import Store from '../Store/Store'
+import rStyles from '../styles/registrationStyles'
+import NewResourceMixin from './NewResourceMixin'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import constants from '@tradle/constants'
+import { circled } from '../styles/utils'
+
+var {
+  TYPE,
+  ROOT_HASH
+} = constants
+
+import termsAndConditions from '../termsAndConditions.json'
+import StyleSheet from '../StyleSheet'
+import ImageInput from './ImageInput'
+import chatStyles from '../styles/chatStyles'
+import TextInputState from 'TextInputState'
+import CustomIcon from '../styles/customicons'
+import stylesheet from '../styles/styles'
+
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
-import { makeResponsive } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
 
@@ -173,6 +174,9 @@ class NewResource extends Component {
           Actions.getRequestedProperties({resource})
         }
       }
+    }
+    if (Platform.OS === 'ios') {
+      CardIOUtilities.preload();
     }
   }
 
@@ -1035,7 +1039,7 @@ class NewResource extends Component {
   cancelItem(pMeta, item) {
     let list = this.state.resource[pMeta.name];
     for (let i=0; i<list.length; i++) {
-      if (equal(list[i], item)) {
+      if (_.isEqual(list[i], item)) {
         list.splice(i, 1);
         this.setState({
           resource: this.state.resource,
