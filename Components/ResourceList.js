@@ -993,7 +993,7 @@ class ResourceList extends Component {
           </TouchableOpacity>
         </View>
         <View style={{padding: 10, backgroundColor: 'transparent'}}>
-          <Text style={styles.testProvidersDescription}>{ENV.sandboxDescription}</Text>
+          <Text style={styles.testProvidersDescription}>{translate('sandboxDescription')}</Text>
         </View>
       </View>
     )

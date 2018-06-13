@@ -225,9 +225,9 @@
     "scanningFailedTryAgain": "Scanning was unsuccessful. Could you please try again?",
     "documentNotScanning": "Oops, something went wrong!",
     "retryScanning": "Was that a {1}? I couldn't tell. Please try again?\n\nFor best results, use landscape mode, avoid glare, and be sure to position the document within the frame shown.",
-    "centerPassport": "Centre passport photo page in frame",
-    "centerLicence": "Centre licence in frame",
-    "centerID": "Centre ID in frame",
+    "centerPassport": "Center passport photo page in frame",
+    "centerLicence": "Center licence in frame",
+    "centerID": "Center ID in frame",
     "dataSecurity": "Data Security",
     "noAccessToServer": "Server is not accessible. Try later.",
     "next": "Next",
@@ -276,5 +276,6 @@
     "updateAppTitle": "App Update Available",
     "updateAppMessage": "Update now, or shall I remind you later?",
     "updateNow": "Update Now",
-    "later": "Later"
+    "later": "Later",
+    "sandboxDescription": "In the Sandbox, learn how to use the app with simulated service providers."
 }

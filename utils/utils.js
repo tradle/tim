@@ -1816,7 +1816,6 @@ var utils = {
   resized: function (props, nextProps) {
     return props.orientation !== nextProps.orientation
   },
-  imageQuality: 0.2,
   restartApp: function () {
     return NativeModules.CodePush.restartApp(false)
   },

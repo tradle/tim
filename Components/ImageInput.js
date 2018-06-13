@@ -15,6 +15,7 @@ import PropTypes from 'prop-types'
 import ImagePicker from 'react-native-image-picker'
 import utils from '../utils/utils'
 import extend from 'extend'
+import ENV from '../utils/env'
 const debug = require('debug')('tradle:app:ImageInput')
 
 const imageInputPropTypes = {
@@ -59,7 +60,21 @@ class ImageInput extends Component {
   }
   async _doShowImagePicker () {
     const { prop, onImage } = this.props
-    let options = {returnIsVertical: true, quality: utils.imageQuality, cameraType: this.props.prop.cameraType || 'back'}
+    let options = {
+      returnIsVertical: true,
+      quality: this.props.quality || ENV.imageQuality,
+      cameraType: this.props.prop.cameraType || 'back',
+      // due to out-of-memory issues
+      maxWidth: 1536,
+      maxHeight: 1536,
+      storageOptions: {
+        skipBackup: true,
+        store: false
+      },
+      // not needed for jpeg
+      fixOrientation: false
+    }
+
     let action
     if (utils.isIOS() && utils.isSimulator())
       action = 'launchImageLibrary'
