@@ -246,7 +246,7 @@ class NewResource extends Component {
           this.setState({requestedProperties: requestedProperties, resource: r, message: message })
         }
         else if (params.prop  &&  params.value) {
-          let r = utils.clone(this.props.resource)
+          let r = utils.clone(this.state.resource)
           let pName = params.prop.name
           r[pName] = params.value
           if (!this.floatingProps)
