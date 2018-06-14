@@ -5,6 +5,7 @@ import _ from 'lodash'
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons';
+import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
 const debug = require('debug')('tradle:app:FormRequestRow')
 
 import constants from '@tradle/constants'
@@ -80,9 +81,21 @@ class FormRequestRow extends Component {
     this.springValue = new Animated.Value(0)
     this.spinValue = new Animated.Value(0)
   }
-  // componentWillMount() {
+  componentWillMount() {
+    if (Platform.OS !== 'ios')
+      return
+    let resource = this.props.resource
+    if (resource[TYPE] !== FORM_REQUEST)
+      return
+    let m = utils.getModel(resource.form)
+    let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
+    if (scannedProps) {
+      let p = Object.keys(scannedProps)
+      if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
+        CardIOUtilities.preload();
+    }
   //   this.animatedValue = new Animated.Value(60)
-  // }
+  }
   componentDidMount() {
     Animated.timing(
       this.spinValue,
@@ -895,7 +908,14 @@ class FormRequestRow extends Component {
         else if (!prop)
           onPressCall = this.createNewResource.bind(this, form, isMyMessage)
         else {
-          if (prop.ref == PHOTO) {
+          if (prop.scanner === 'payment-card') {
+             msg = <View key={this.getNextKey()}>
+                      <View style={styles.messageLink}>
+                        {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.scanCard.bind(this, prop)})}
+                      </View>
+                   </View>
+          }
+          else if (prop.ref == PHOTO) {
             msg = <View key={this.getNextKey()}>
                    <View style={styles.thumbView}>
                      <ImageInput prop={prop} style={styles.container} onImage={item => this.onSetMediaProperty(prop.name, item)}>
@@ -1022,6 +1042,48 @@ class FormRequestRow extends Component {
            </TouchableOpacity>
 
   }
+  async scanCard(prop) {
+    if (utils.isWeb())
+      return
+
+    let cardJson
+    try {
+      const card = await CardIOModule.scanCard({
+        hideCardIOLogo: true,
+        suppressManualEntry: true,
+        // suppressConfirmation: true,
+        // scanExpiry: true,
+        requireExpiry: true,
+        requireCVV: true,
+        // requirePostalCode: true,
+        requireCardholderName: true,
+        keepStatusBarStyle: true,
+        suppressScannedCardImage: true,
+        scanInstructions: 'Frame FRONT of card.\nBonus: get all the edges to light up',
+        detectionMode: CardIOUtilities.IMAGE_AND_NUMBER
+      })
+      cardJson = utils.clone(card)
+    } catch (err) {
+      // user canceled
+      return
+    }
+
+    let resource = this.props.resource
+    let r = { [TYPE]: resource.form, to: resource.from, from: utils.getMe() }
+    let props = utils.getModel(r[TYPE]).properties
+    for (let p in cardJson) {
+      if (cardJson[p]  &&  props[p])
+        r[p] = cardJson[p]
+    }
+    for (let p in cardJson)
+      if (!cardJson[p])
+        delete cardJson[p]
+    r[prop.name + 'Json'] = cardJson
+    this.setState({ r })
+
+    Actions.addChatItem({resource: r, disableFormRequest: resource})
+  }
+
   reviewFormsInContext() {
     Alert.alert(
       translate('importDataPrompt'),
@@ -1281,7 +1343,8 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     addMore: {
       color: '#757575', // bankStyle.linkColor,
       fontSize: 18,
-      paddingHorizontal: 10
+      paddingHorizontal: 10,
+      width: msgWidth - 50
     },
     // next: {
     //   color: '#555555',

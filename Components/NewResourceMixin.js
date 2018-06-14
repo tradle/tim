@@ -749,7 +749,8 @@ var NewResourceMixin = {
         }
       }
       else if (scanner === 'payment-card') {
-        this.scanCard(params.prop)
+        if (!utils.isWeb())
+          this.scanCard(params.prop)
         return
       }
     }
