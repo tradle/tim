@@ -876,38 +876,27 @@ var utils = {
   getEditCols(model) {
     let { editCols, properties } = model
     let eCols = {}
-    if (editCols) {
-      editCols.forEach((p) => {
-        if (properties[p].readOnly)
-          return
-        let idx = p.indexOf('_group')
-        if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
-          eCols[p] = properties[p]
-
-        if (idx !== -1  &&  properties[p].list)
-          properties[p].list.forEach((p) => eCols[p] = properties[p])
-      })
+    let isWeb = utils.isWeb()
+    if (!editCols) {
+      let viewCols = this.getViewCols(model)
+      if (viewCols)
+         viewCols.forEach((p) => eCols[p] = properties[p])
       return eCols
     }
-    let viewCols = this.getViewCols(model)
-    if (viewCols)
-       viewCols.forEach((p) => eCols[p] = properties[p])
-    // if (viewCols) {
-    //   viewCols.forEach((p) => {
-    //     let idx = p.indexOf('_group')
-    //     if (idx === -1  ||  !properties[p].list || properties[p].title.toLowerCase() !== p)
-    //       eCols[p] = properties[p]
+    editCols.forEach((p) => {
+      if (properties[p].readOnly)
+        return
+      if (isWeb  &&  properties[p].scanner)
+        return
+      let idx = p.indexOf('_group')
+      if (idx === -1                          ||
+          !properties[p].list                 ||
+          properties[p].title.toLowerCase() !== p)
+        eCols[p] = properties[p]
 
-    //     if (idx !== -1  &&  properties[p].list)
-    //       properties[p].list.forEach((p) => eCols[p] = properties[p])
-    //     // eCols[p] = props[p]
-    //   })
-    // }
-    // // ViewCols on top
-    // for (let p in properties) {
-    //   if (!eCols[p]  &&  !properties[p].readOnly  &&  !properties[p].hidden  &&  p.indexOf('_group') !== p.length - 6)
-    //     eCols[p] = properties[p]
-    // }
+      if (idx !== -1  &&  properties[p].list)
+        properties[p].list.forEach((p) => eCols[p] = properties[p])
+    })
     return eCols
   },
   getViewCols(model) {
@@ -2229,11 +2218,15 @@ var utils = {
     let type = resource[TYPE]
     let isFormRequest = type === FORM_REQUEST
     let isFormError = type === FORM_ERROR
-    if (!isFormRequest  &&  !isFormError)
-      return []
-    let ftype = isFormRequest
-              ? resource.form
-              : utils.getType(resource.prefill)
+    // if (!isFormRequest  &&  !isFormError)
+    //   return []
+    let ftype
+    if (isFormRequest)
+      ftype = resource.form
+    else if (isFormError)
+      ftype = utils.getType(resource.prefill)
+    else
+      ftype = resource[TYPE]
     const model = this.getModel(ftype)
     const props = model.properties
     let eCols = []
