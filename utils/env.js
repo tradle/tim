@@ -94,7 +94,8 @@ const merged = extend({
     return Platform.OS === 'web'
   },
   allowAddServer: true,
-  allowForgetMe: true,
+  allowForgetMe: false,
+  allowWipe: false,
   get prefillForms() {
     if (typeof PREFILL_FORMS === 'boolean') return PREFILL_FORMS
 
@@ -113,7 +114,6 @@ const merged = extend({
   autoOptInTouchId: false,
   autoRegister: false,
   requireSoftPIN: false,
-  allowWipe: true,
   locale: {
     language: DeviceInfo.getDeviceLocale(),
     country: DeviceInfo.getDeviceCountry()
