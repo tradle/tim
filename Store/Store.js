@@ -3324,8 +3324,10 @@ var Store = Reflux.createStore({
     }
     let messages = chatMessages[id]
     let allMessages = chatMessages[ALL_MESSAGES]
+    let noMessages
     if (!allMessages) {
       allMessages = []
+      noMessages = true
       chatMessages[ALL_MESSAGES] = allMessages
     }
     else if (!isInit) {
@@ -3334,7 +3336,7 @@ var Store = Reflux.createStore({
         Actions.showModal({title: 'Connecting to ' + this._getItem(id).name, showIndicator: true})
       // request for remediation failed
       else if (r[TYPE] === SIMPLE_MESSAGE) {
-        if (utils.getType(allMessages[allMessages.length - 1].id) === DATA_CLAIM)
+        if (!noMessages  &&  utils.getType(allMessages[allMessages.length - 1].id) === DATA_CLAIM)
           Actions.hideModal()
       }
     }
