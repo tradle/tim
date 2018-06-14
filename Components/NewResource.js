@@ -2,41 +2,14 @@ console.log('requiring NewResource.js')
 'use strict'
 
 import _ from 'lodash'
-import utils, { translate } from '../utils/utils'
-import NewItem from './NewItem'
-import ResourceList from './ResourceList'
-import GridList from './GridList'
-import GridItemsList from './GridItemsList'
-import PhotoView from './PhotoView'
-import ResourceView from './ResourceView'
-import MessageView from './MessageView'
-import ResourceMixin from './ResourceMixin'
-import HomePageMixin from './HomePageMixin'
-import ShowPropertiesView from './ShowPropertiesView'
-import PageView from './PageView'
-import t from 'tcomb-form-native'
-import Actions from '../Actions/Actions'
-import Store from '../Store/Store'
+import { CardIOUtilities } from 'react-native-awesome-card-io';
 import Reflux from 'reflux'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons'
-import rStyles from '../styles/registrationStyles'
-import NewResourceMixin from './NewResourceMixin'
-import equal from 'deep-equal'
-import defaultBankStyle from '../styles/defaultBankStyle.json'
-import constants from '@tradle/constants'
-
-var {
-  TYPE,
-  ROOT_HASH
-} = constants
-
-import termsAndConditions from '../termsAndConditions.json'
-import StyleSheet from '../StyleSheet'
-import ImageInput from './ImageInput'
-import chatStyles from '../styles/chatStyles'
-import CustomIcon from '../styles/customicons'
-import stylesheet from '../styles/styles'
+import t from 'tcomb-form-native'
+import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
+import { makeResponsive } from 'react-native-orient'
+import React, { Component } from 'react'
 import Native, {
   // StyleSheet,
   View,
@@ -52,15 +25,44 @@ import Native, {
 } from 'react-native'
 import PropTypes from 'prop-types';
 
+import utils, { translate } from '../utils/utils'
+import NewItem from './NewItem'
+import ResourceList from './ResourceList'
+import GridList from './GridList'
+import GridItemsList from './GridItemsList'
+import PhotoView from './PhotoView'
+import ResourceView from './ResourceView'
+import MessageView from './MessageView'
+import ResourceMixin from './ResourceMixin'
+import HomePageMixin from './HomePageMixin'
+import ShowPropertiesView from './ShowPropertiesView'
+import PageView from './PageView'
+import Actions from '../Actions/Actions'
+import Store from '../Store/Store'
+import rStyles from '../styles/registrationStyles'
+import NewResourceMixin from './NewResourceMixin'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import constants from '@tradle/constants'
+
+var {
+  TYPE,
+  ROOT_HASH
+} = constants
+
+import termsAndConditions from '../termsAndConditions.json'
+import StyleSheet from '../StyleSheet'
+import ImageInput from './ImageInput'
+import chatStyles from '../styles/chatStyles'
+import CustomIcon from '../styles/customicons'
+import stylesheet from '../styles/styles'
+
 var Keyboard
 if (Platform.OS !== 'web') {
   Keyboard = require('Keyboard')
 }
 
-import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
-import { makeResponsive } from 'react-native-orient'
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
 import DropPage from './DropPage'
@@ -178,6 +180,15 @@ class NewResource extends Component {
         }
       }
     }
+    if (Platform.OS === 'ios') {
+      let m = utils.getModel(utils.getType(resource))
+      let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
+      if (scannedProps) {
+        let p = Object.keys(scannedProps)
+        if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
+          CardIOUtilities.preload();
+      }
+    }
   }
 
   componentDidMount() {
@@ -253,7 +264,8 @@ class NewResource extends Component {
           this.setState({requestedProperties: requestedProperties, resource: r, message: message })
         }
         else if (params.prop  &&  params.value) {
-          let r = utils.clone(this.props.resource)
+          // set scanned qrCode prop
+          let r = utils.clone(this.state.resource)
           let pName = params.prop.name
           r[pName] = params.value
           if (!this.floatingProps)
@@ -1137,7 +1149,7 @@ class NewResource extends Component {
   cancelItem(pMeta, item) {
     let list = this.state.resource[pMeta.name];
     for (let i=0; i<list.length; i++) {
-      if (equal(list[i], item)) {
+      if (_.isEqual(list[i], item)) {
         list.splice(i, 1);
         this.setState({
           resource: this.state.resource,

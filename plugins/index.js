@@ -1,5 +1,6 @@
 
 module.exports = [
   require('./PhotoID'),
-  require('./ControllingEntity')
+  require('./ControllingEntity'),
+  require('./PaymentCard')
 ]

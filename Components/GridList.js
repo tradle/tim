@@ -1300,7 +1300,7 @@ class GridList extends Component {
           </TouchableOpacity>
         </View>
         <View style={styles.testProvidersContainer}>
-          <Text style={styles.testProvidersDescription}>{ENV.sandboxDescription}</Text>
+          <Text style={styles.testProvidersDescription}>{translate('sandboxDescription')}</Text>
         </View>
       </View>
     )

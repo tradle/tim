@@ -3347,8 +3347,10 @@ var Store = Reflux.createStore({
     }
     let messages = chatMessages[id]
     let allMessages = chatMessages[ALL_MESSAGES]
+    let noMessages
     if (!allMessages) {
       allMessages = []
+      noMessages = true
       chatMessages[ALL_MESSAGES] = allMessages
     }
     else if (!isInit) {
@@ -3357,7 +3359,7 @@ var Store = Reflux.createStore({
         Actions.showModal({title: 'Connecting to ' + this._getItem(id).name, showIndicator: true})
       // request for remediation failed
       else if (r[TYPE] === SIMPLE_MESSAGE) {
-        if (utils.getType(allMessages[allMessages.length - 1].id) === DATA_CLAIM)
+        if (!noMessages  &&  utils.getType(allMessages[allMessages.length - 1].id) === DATA_CLAIM)
           Actions.hideModal()
       }
     }
@@ -10808,6 +10810,8 @@ if (!res[SIG]  &&  res._message)
     }
     else {
       let properties = val.scanJson.properties
+      if (!properties)
+        return
       firstName = properties.first_name
       lastName = properties.last_name
     }
@@ -11327,6 +11331,7 @@ if (!res[SIG]  &&  res._message)
         return
       // var result = this.searchMessages({to: resource, modelName: MESSAGE});
       msg[ROOT_HASH] = results[0].object.permalink
+      msg[CUR_HASH] = results[0].object.link
       msg.message = translate('inProgress')
       // reverse to and from to display as from assistent
       let pid = utils.makeId(PROFILE, results[0].message.recipient)

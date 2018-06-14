@@ -9,6 +9,7 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.cardio.RNCardIOPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -65,6 +66,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+            new RNCardIOPackage(),
         new RNFirebasePackage(),
         new RNFirebaseAnalyticsPackage(),
         new SplashScreenReactPackage(),

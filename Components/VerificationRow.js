@@ -263,44 +263,57 @@ class VerificationRow extends Component {
                           <Text style={styles.rTitle}>{dn}</Text>
                         </Text>
     }
-    else if (title !== dn)  {
-      if (isCheck  &&  resource.status) {
-        let color, icon
-        switch (resource.status.title) {
-          case 'Pass':
-          color = 'green'
-          icon = 'ios-checkmark'
-          break
-        case 'Fail':
-          color = 'red'
-          icon = 'ios-close'
-          break
-        default:
-          color = 'blue'
-          icon = 'ios-information-outline'
-          break
+    else if (title != dn)  {
+      if (isCheck) {
+        if (resource.status) {
+          let color, icon
+          switch (resource.status.title) {
+            case 'Pass':
+            color = 'green'
+            icon = 'ios-checkmark'
+            break
+          case 'Fail':
+            color = 'red'
+            icon = 'ios-close'
+            break
+          default:
+            color = 'blue'
+            icon = 'ios-information-outline'
+            break
+          }
+          titleComponent = <View style={styles.titleView}>
+                             <View style={{alignItems: 'center', width: 30}}>
+                               <Icon color={color} size={35} name={icon} />
+                             </View>
+                             <View style={{justifyContent: 'center'}}>
+                               <Text style={styles.rTitle}>{dn}</Text>
+                               <Text style={styles.checkDescription}>{resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
+                             </View>
+                           </View>
         }
-        titleComponent = <View style={styles.titleView}>
-                           <View style={{alignItems: 'center', width: 30}}>
-                             <Icon color={color} size={35} name={icon} />
-                           </View>
-                           <View style={{justifyContent: 'center'}}>
-                             <Text style={styles.rTitle}>{dn}</Text>
-                             <Text style={styles.checkDescription}>{utils.makeModelTitle(resource[TYPE])}</Text>
-                           </View>
-                         </View>
+        else {
+          if (title  &&  dn) {
+            titleComponent = <View style={{justifyContent: 'center'}}>
+                               <Text style={styles.rTitle}>{dn}</Text>
+                               <Text style={styles.checkDescription}>{resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
+                             </View>
+
+          }
+          else {
+            titleComponent = <Text style={styles.rTitle}>{dn || title}</Text>
+          }
+        }
       }
       else {
-        if (utils.isImplementing(modelName, INTERSECTION)  ||  dn) {
+        if (utils.isImplementing(modelName, INTERSECTION)) {
           if (title) {
             let style
-            if (isCheck)
-              style = styles.checkType
-            else if (dn)
+            if (dn)
               style = styles.description
             else
               style = styles.rTitle
-            description = <Text style={style}>{title}</Text>
+            if (title !== dn)
+              description = <Text style={style}>{title}</Text>
           }
         }
         //!!!
@@ -310,7 +323,6 @@ class VerificationRow extends Component {
           titleComponent = <Text style={styles.rTitle}>{dn}</Text>
       }
     }
-
     else if (isBookmark  &&  resource.message)
       titleComponent =  <Text style={[styles.rTitle, {paddingVertical: 10}]}>{title}</Text>
     else if (!titleComponent)

@@ -247,9 +247,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/spender/-/spender-1.2.1.tgz"
     },
     "@tradle/validate-model": {
-      "version": "7.0.0",
-      "from": "@tradle/validate-model@>=7.0.0 <8.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.0.0.tgz"
+      "version": "7.1.0",
+      "from": "@tradle/validate-model@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/validate-model/-/validate-model-7.1.0.tgz"
     },
     "@tradle/validate-resource": {
       "version": "4.3.0",

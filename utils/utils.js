@@ -1835,7 +1835,6 @@ var utils = {
           props.width !== nextProps.width              ||
           props.height !== nextProps.height
   },
-  imageQuality: 0.2,
   restartApp: function () {
     if (utils.isWeb()) {
       window.location.reload()
