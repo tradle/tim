@@ -221,6 +221,7 @@ repositories {
 }
 
 dependencies {
+    compile project(':react-native-awesome-card-io')
     compile project(':blinkid-react-native')
     compile(project(':react-native-firebase')) {
         transitive = false
