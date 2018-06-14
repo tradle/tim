@@ -246,6 +246,7 @@ class NewResource extends Component {
           this.setState({requestedProperties: requestedProperties, resource: r, message: message })
         }
         else if (params.prop  &&  params.value) {
+          // set scanned qrCode prop
           let r = utils.clone(this.state.resource)
           let pName = params.prop.name
           r[pName] = params.value
