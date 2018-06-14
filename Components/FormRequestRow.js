@@ -917,11 +917,13 @@ class FormRequestRow extends Component {
           onPressCall = this.createNewResource.bind(this, form, isMyMessage)
         else {
           if (prop.scanner === 'payment-card') {
-             msg = <View key={this.getNextKey()}>
+            if (!utils.isWeb()) {
+              msg = <View key={this.getNextKey()}>
                       <View style={styles.messageLink}>
                         {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.scanCard.bind(this, prop)})}
                       </View>
-                   </View>
+                    </View>
+            }
           }
           else if (prop.ref == PHOTO) {
             // TODO: re-use logic from NewResourceMixin
@@ -1065,9 +1067,6 @@ class FormRequestRow extends Component {
 
   }
   async scanCard(prop) {
-    if (utils.isWeb())
-      return
-
     let cardJson
     try {
       const card = await CardIOModule.scanCard({

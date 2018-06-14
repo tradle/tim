@@ -12,8 +12,8 @@ module.exports = function LegalEntity ({ models }) {
     }) {
       if (!application) return
 
-      if (application.requestFor !== LEGAL_ENTITY_PRODUCT)
-        return
+      // if (application.requestFor !== LEGAL_ENTITY_PRODUCT)
+      //   return
       const type = form[TYPE]
       switch (type) {
       case CONTROLLING_ENTITY:

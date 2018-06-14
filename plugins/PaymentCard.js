@@ -1,5 +1,5 @@
 import { TYPE } from '@tradle/constants'
-import { translate } from '../utils/utils'
+import utils, { translate } from '../utils/utils'
 const PAYMENT_CARD = 'tradle.CreditCard'
 
 module.exports = function PaymentCard ({ models }) {
@@ -12,13 +12,21 @@ module.exports = function PaymentCard ({ models }) {
       if (form[TYPE] !== PAYMENT_CARD)
         return
 
+      let requestedProperties = []
+      let model = models[PAYMENT_CARD]
+      let properties = model.properties
+      if (utils.isWeb()) {
+        for (let p in properties) {
+          if (p.charAt(0) !== '_'  &&  !properties[p].scanner)
+            requestedProperties.push({name: p})
+        }
+        return { requestedProperties }
+      }
+
       let scanned = form.scanJson
       if (!scanned)
         return
 
-      let model = models[PAYMENT_CARD]
-      let properties = model.properties
-      let requestedProperties = []
       for (let p in form) {
         if (properties[p])
           requestedProperties.push({name: p})
