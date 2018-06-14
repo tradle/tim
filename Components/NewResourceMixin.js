@@ -15,10 +15,9 @@ import {
   DatePickerAndroid,
 } from 'react-native'
 import PropTypes from 'prop-types';
-import { CardIOModule } from 'react-native-awesome-card-io';
 
 import SwitchSelector from 'react-native-switch-selector'
-import { CardIOView, CardIOUtilities } from 'react-native-awesome-card-io';
+import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
 import format from 'string-template'
 import t from 'tcomb-form-native'
 import _ from 'lodash'
@@ -30,7 +29,7 @@ import moment from 'moment'
 import QRCodeScanner from './QRCodeScanner'
 
 import constants from '@tradle/constants'
-import validateResource, { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
+import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
 
 import Navigator from './Navigator'
@@ -41,8 +40,8 @@ import utils, {
 import CameraView from './CameraView'
 import SignatureView from './SignatureView'
 import StyleSheet from '../StyleSheet'
-import driverLicenseParser from '../utils/driverLicenseParser'
-import focusUri from '../video/Focus1.mp4'
+// import driverLicenseParser from '../utils/driverLicenseParser'
+// import focusUri from '../video/Focus1.mp4'
 
 // import VideoPlayer from './VideoPlayer'
 // import omit from 'object.omit'
@@ -772,7 +771,7 @@ var NewResourceMixin = {
         hideCardIOLogo: true,
         suppressManualEntry: true,
         // suppressConfirmation: true,
-        // scanExpiry: true,
+        scanExpiry: true,
         requireExpiry: true,
         requireCVV: true,
         // requirePostalCode: true,
