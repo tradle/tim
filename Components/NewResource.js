@@ -2,7 +2,7 @@ console.log('requiring NewResource.js')
 'use strict'
 
 import _ from 'lodash'
-import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
+import { CardIOUtilities } from 'react-native-awesome-card-io';
 import Reflux from 'reflux'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -176,7 +176,13 @@ class NewResource extends Component {
       }
     }
     if (Platform.OS === 'ios') {
-      CardIOUtilities.preload();
+      let m = utils.getModel(utils.getType(resource))
+      let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
+      if (scannedProps) {
+        let p = Object.keys(scannedProps)
+        if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
+          CardIOUtilities.preload();
+      }
     }
   }
 
