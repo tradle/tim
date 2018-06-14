@@ -7,7 +7,6 @@ import Reflux from 'reflux'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons'
 import t from 'tcomb-form-native'
-import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
 import Native, {
