@@ -805,10 +805,12 @@ var NewResourceMixin = {
     this.floatingProps[prop + 'Json'] = cardJson
     r[prop + 'Json'] = cardJson
     this.setState({ r })
-    if (!this.props.search) {
-      Actions.getRequestedProperties({resource: r})
-      Actions.saveTemporary(r)
-    }
+    Actions.addChatItem({resource: r, disableFormRequest: this.props.originatingMessage})
+    // this.props.navigator.pop()
+    // if (!this.props.search) {
+    //   Actions.getRequestedProperties({resource: r})
+    //   Actions.saveTemporary(r)
+    // }
     // Alert.alert(JSON.stringify(card, null, 2))
   },
 
