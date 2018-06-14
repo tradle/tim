@@ -11253,6 +11253,7 @@ if (!res[SIG]  &&  res._message)
         return
       // var result = this.searchMessages({to: resource, modelName: MESSAGE});
       msg[ROOT_HASH] = results[0].object.permalink
+      msg[CUR_HASH] = results[0].object.link
       msg.message = translate('inProgress')
       // reverse to and from to display as from assistent
       let pid = utils.makeId(PROFILE, results[0].message.recipient)
