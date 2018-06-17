@@ -886,7 +886,7 @@ var utils = {
     editCols.forEach((p) => {
       if (properties[p].readOnly)
         return
-      if (isWeb  &&  properties[p].scanner)
+      if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
         return
       let idx = p.indexOf('_group')
       if (idx === -1                          ||
