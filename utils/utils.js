@@ -899,6 +899,16 @@ var utils = {
     })
     return eCols
   },
+  hasPaymentCardScannerProperty(type) {
+    let m = this.getModel(type)
+    let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
+    if (scannedProps)  {
+      let p = Object.keys(scannedProps)
+      if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
+        return true
+    }
+    return false
+  },
   getViewCols(model) {
     let { viewCols, properties } = model
     let vCols = []
