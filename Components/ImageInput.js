@@ -65,14 +65,14 @@ class ImageInput extends Component {
       quality: this.props.quality || ENV.imageQuality,
       cameraType: this.props.prop.cameraType || 'back',
       // due to out-of-memory issues
-      maxWidth: 1536,
-      maxHeight: 1536,
+      // maxWidth: 1536,
+      // maxHeight: 1536,
       storageOptions: {
         skipBackup: true,
         store: false
       },
       // not needed for jpeg
-      fixOrientation: false
+      // fixOrientation: false
     }
 
     let action
