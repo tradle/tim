@@ -75,7 +75,8 @@ var asyncActions = [
   'listMultientry',
 
   'getIdentity',
-  'openURL'
+  'openURL',
+  'requestWipe',
 ]
 
 var syncActions = [

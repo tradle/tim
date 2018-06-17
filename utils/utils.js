@@ -895,7 +895,7 @@ var utils = {
     editCols.forEach((p) => {
       if (properties[p].readOnly)
         return
-      if (isWeb  &&  properties[p].scanner)
+      if (isWeb  &&  properties[p].scanner  &&  properties[p].scanner !== 'id-document')
         return
       let idx = p.indexOf('_group')
       if (idx === -1                          ||
@@ -907,6 +907,16 @@ var utils = {
         properties[p].list.forEach((p) => eCols[p] = properties[p])
     })
     return eCols
+  },
+  hasPaymentCardScannerProperty(type) {
+    let m = this.getModel(type)
+    let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
+    if (scannedProps)  {
+      let p = Object.keys(scannedProps)
+      if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
+        return true
+    }
+    return false
   },
   getViewCols(model) {
     let { viewCols, properties } = model

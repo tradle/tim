@@ -87,13 +87,9 @@ class FormRequestRow extends Component {
     let resource = this.props.resource
     if (resource[TYPE] !== FORM_REQUEST)
       return
-    let m = utils.getModel(resource.form)
-    let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
-    if (scannedProps) {
-      let p = Object.keys(scannedProps)
-      if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
-        CardIOUtilities.preload();
-    }
+
+    if (utils.hasPaymentCardScannerProperty(utils.getType(resource.form)))
+      CardIOUtilities.preload();
   //   this.animatedValue = new Animated.Value(60)
   }
   componentDidMount() {
@@ -745,9 +741,15 @@ class FormRequestRow extends Component {
     // if (resource[TYPE] !== FORM_REQUEST)
     //   resource.message = resource.message;
     // resource[TYPE] = model.id;
-    var isPrefilled = resource.prefill
+
     // Prefill for testing and demoing
-    if (isPrefilled)
+    let isPrefilled
+    if (ENV.prefillForms && model.id in formDefaults) {
+      _.extend(r, formDefaults[model.id])
+      isPrefilled = true
+    }
+
+    if (resource.prefill) {
       _.extend(r, resource.prefill)
     else {
       // isPrefilled = false
@@ -756,6 +758,7 @@ class FormRequestRow extends Component {
         _.extend(r, formDefaults[model.id])
         // console.log(JSON.stringify(resource, 0, 2))
     }
+
     let rightButtonTitle = 'Done'
     if (isMyMessage) {
       let me = utils.getMe()

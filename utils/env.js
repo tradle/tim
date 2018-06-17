@@ -100,7 +100,8 @@ const merged = extend({
     return Platform.OS === 'web'
   },
   allowAddServer: true,
-  allowForgetMe: true,
+  allowForgetMe: false,
+  allowWipe: false,
   get prefillForms() {
     if (typeof PREFILL_FORMS === 'boolean') return PREFILL_FORMS
 

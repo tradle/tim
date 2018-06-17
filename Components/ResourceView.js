@@ -492,17 +492,18 @@ class ResourceView extends Component {
     buttons.push(translate('pairDevices'))
     actions.push(PAIR_DEVICES)
 
-    buttons.push(translate('viewDebugLog'))
-    actions.push(VIEW_DEBUG_LOG)
-    if (utils.isWeb()) {
-      buttons.push(translate('wipeDevice'))
-      actions.push(WIPE_DEVICE)
-    }
-
     if (ENV.homePageScanQRCodePrompt) {
       buttons.push(translate('scanQRcode'))
       actions.push(SCAN_QR_CODE)
     }
+
+    if (ENV.allowWipe) {
+      buttons.push(translate('wipeDevice'))
+      actions.push(WIPE_DEVICE)
+    }
+
+    buttons.push(translate('viewDebugLog'))
+    actions.push(VIEW_DEBUG_LOG)
 
     buttons.push(translate('cancel'))
     return(

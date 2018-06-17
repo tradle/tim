@@ -1563,7 +1563,6 @@ var NewResourceMixin = {
     //   title: firstName
     // })
     Actions.getIdentity({prop, ...result.data })
-    debugger
   },
   onSetMediaProperty(propName, item) {
     if (!item)

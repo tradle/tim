@@ -2,7 +2,7 @@ import dateformat from 'dateformat'
 import _ from 'lodash'
 
 import { TYPE } from '@tradle/constants'
-import utils, { translate, isWeb } from '../utils/utils'
+import utils, { translate, isWeb, isSimulator } from '../utils/utils'
 const COUNTRY = 'tradle.Country'
 const PHOTO_ID = 'tradle.PhotoID'
 
@@ -17,36 +17,36 @@ module.exports = function PhotoID ({ models }) {
         return
       if (!form.documentType)
         return
-      if (!isWeb()  &&  !form.scanJson)
+
+      if (!isWeb()  &&  !isSimulator()  &&  !form.scanJson)
         return
+
       let scan = form.scanJson
       const model = models[form[TYPE]]
-
       // Check if there is a need to clean the form
-      if (currentResource) {
-        if (currentResource.documentType.id !== form.documentType.id  ||
-            currentResource.country.id !== form.country.id)
+      if (scan  &&  currentResource) {
+        if ((currentResource.documentType  &&  currentResource.documentType.id !== form.documentType.id)  ||
+            (currentResource.country  &&  currentResource.country.id !== form.country.id))
           return cleanupValues(form, scan, model)
       }
 
       console.log('PhotoID: requesting additional properties for Driver Licence')
 
       let isLicence = form.documentType.title.indexOf('Licence') !== -1
+      if (scan) {
+        let { document } = scan
 
-      let { document } = scan
-      let countryCCA = document && (isLicence && document.country || document.issuer)
-      if (countryCCA) {
-        let countryModel = utils.getModel(COUNTRY)
-        // let countryId = form.country.id.split('_')[1]
-        let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
-        if (country.id !== form.country.id.split('_')[1])
-          cleanupValues(form, scan, model)
+        let countryCCA = document && (isLicence && document.country || document.issuer)
+        if (countryCCA) {
+          let countryModel = utils.getModel(COUNTRY)
+          // let countryId = form.country.id.split('_')[1]
+          let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
+          if (country.id !== form.country.id.split('_')[1])
+            cleanupValues(form, scan, model)
+        }
+        let errors = prefillValues(form, scan, model)
       }
-      let errors = prefillValues(form, scan, model)
-
-      let requestedProperties = []
-      getRequestedProps(scan, model, isLicence, requestedProperties, form)
-
+      let requestedProperties = getRequestedProps({scan, model, form})
       if (form.dateOfExpiry) {
         if (form.dateOfExpiry < new Date().getTime()) {
           let ret = cleanupValues(form, scan, model)
@@ -65,7 +65,6 @@ module.exports = function PhotoID ({ models }) {
           }
         }
       }
-
       return {
         message: translate('reviewScannedProperties'),
         requestedProperties
@@ -101,15 +100,23 @@ function prefillValues(form, values, model) {
       form[p] = val
   }
 }
-function getRequestedProps(values, model, isLicence, requestedProperties, form) {
-  if (!values)
-    return
+function getRequestedProps({scan, model, requestedProperties, form}) {
+  if (!requestedProperties)
+    requestedProperties = []
+  if (!scan) {
+    let isLicence = form.documentType.title.indexOf('Licence') !== -1
+    if (isLicence)
+      requestedProperties = [{name: 'personalPassport_group'}, {name: 'documentPassport_group'}]
+    else
+      requestedProperties = [{name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
+    return requestedProperties
+  }
   let props = model.properties
 
-  for (let p in values) {
-    let val = values[p]
+  for (let p in scan) {
+    let val = scan[p]
     if (typeof val === 'object')
-      getRequestedProps(val, model, isLicence, requestedProperties, form)
+      getRequestedProps({scan: val, model, requestedProperties, form})
     else if (props[p])
       requestedProperties.push({name: p})
   }
@@ -120,6 +127,7 @@ function getRequestedProps(values, model, isLicence, requestedProperties, form) 
       requestedProperties.push({name: 'dateOfBirth'})
     }
   }
+  return requestedProperties
 }
 function cleanupValues(form, values, model) {
   let props = model.properties
@@ -137,10 +145,20 @@ function cleanupValues(form, values, model) {
     else
       delete form[p]
   }
+  let requestedProperties
+  if (!values  &&  (isWeb()  ||  isSimulator())) {
+    let isLicence = form.documentType.title.indexOf('Licence') !== -1
+    if (isLicence)
+      requestedProperties = [{name: 'personalPassport_group'}, {name: 'documentPassport_group'}]
+    else
+      requestedProperties = [{name: 'scanLicence_group'}]
+  }
+  else
+    requestedProperties = []
   return {
     message: translate('Please scan your document'),
     deleteProperties: ['scan', 'scanJson'],
-    requestedProperties: []
+    requestedProperties
   }
 }
 // function formatDate (date, format) {
