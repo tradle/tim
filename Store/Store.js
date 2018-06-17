@@ -6655,7 +6655,7 @@ if (!res[SIG]  &&  res._message)
       if (!props[p]  ||  !rr[p][TYPE])
         continue
       let m = this.getModel(rr[p][TYPE])
-      if (m.subClassOf === ENUM)
+      if (m.subClassOf === ENUM  ||  props[p].inlined)
         continue
       rr[p] = this.makeStub(rr[p])
     }
