@@ -87,13 +87,9 @@ class FormRequestRow extends Component {
     let resource = this.props.resource
     if (resource[TYPE] !== FORM_REQUEST)
       return
-    let m = utils.getModel(resource.form)
-    let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
-    if (scannedProps) {
-      let p = Object.keys(scannedProps)
-      if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
-        CardIOUtilities.preload();
-    }
+
+    if (utils.hasPaymentCardScannerProperty(utils.getType(resource.form)))
+      CardIOUtilities.preload();
   //   this.animatedValue = new Animated.Value(60)
   }
   componentDidMount() {
