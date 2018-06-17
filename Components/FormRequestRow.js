@@ -733,17 +733,19 @@ class FormRequestRow extends Component {
     // if (resource[TYPE] !== FORM_REQUEST)
     //   resource.message = resource.message;
     // resource[TYPE] = model.id;
-    var isPrefilled = resource.prefill
+
     // Prefill for testing and demoing
-    if (isPrefilled)
-      _.extend(r, resource.prefill)
-    else {
-      // isPrefilled = false
-      isPrefilled = utils.isSimulator() &&  ENV.prefillForms && model.id in formDefaults
-      if (isPrefilled)
-        _.extend(r, formDefaults[model.id])
-        // console.log(JSON.stringify(resource, 0, 2))
+    let isPrefilled
+    if (ENV.prefillForms && model.id in formDefaults) {
+      _.extend(r, formDefaults[model.id])
+      isPrefilled = true
     }
+
+    if (resource.prefill) {
+      _.extend(r, resource.prefill)
+      isPrefilled = true
+    }
+
     let rightButtonTitle = 'Done'
     if (isMyMessage) {
       let me = utils.getMe()

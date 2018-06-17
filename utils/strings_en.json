@@ -158,6 +158,7 @@
     "acceptTermsAndConditions": "View terms and conditions",
     "acceptingTermsAndConditions": "By pressing OK, you accept the Terms and Conditions",
     "viewTerms": "Please view the Terms and Conditions",
+    "areYouSureAboutWipe": "This action is irreversible. You will lose all your data and private keys. Are you sure you want to proceed?",
     "irrefutableProofs": "Irrefutable proofs",
     "independentBlockchainViewer": "Independent blockchain viewer",
     "contextsFor": "Contexts for",
