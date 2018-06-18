@@ -302,7 +302,8 @@ class GridRow extends Component {
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[pName] + ''}</Text></View>
     }
     if (!backlink  &&  resource[pName]  && (resource[pName].indexOf('http://') === 0  ||  resource[pName].indexOf('https://') === 0))
-      return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(this, resource)} key={this.getNextKey(resource)}>{resource[pName]}</Text></View>
+      // return <View style={cellStyle}><Text style={style} onPress={this.onPress.bind(this, resource)} key={this.getNextKey(resource)}>{resource[pName]}</Text></View>
+      return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{resource[pName]}</Text></View>
 
     let val = colProp.displayAs ? utils.templateIt(colProp, resource) : resource[pName];
     let msgParts = utils.splitMessage(val);

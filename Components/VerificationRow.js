@@ -1,16 +1,19 @@
 console.log('requiring VerificationRow.js')
 'use strict';
 
-import utils from '../utils/utils'
-var translate = utils.translate
-
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
 import dateformat from 'dateformat'
 import Swipeout from 'react-native-swipeout'
 
 import reactMixin from 'react-mixin'
+
 import constants from '@tradle/constants'
+
+import utils from '../utils/utils'
+var translate = utils.translate
+import { circled } from '../styles/utils'
+
 import RowMixin from './RowMixin'
 // import Accordion from 'react-native-accordion'
 import StyleSheet from '../StyleSheet'
@@ -282,10 +285,10 @@ class VerificationRow extends Component {
             break
           }
           titleComponent = <View style={styles.titleView}>
-                             <View style={{alignItems: 'center', width: 30}}>
-                               <Icon color={color} size={35} name={icon} />
+                             <View style={[styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]}>
+                               <Icon color='#ffffff' size={30} name={icon} />
                              </View>
-                             <View style={{justifyContent: 'center'}}>
+                             <View style={{justifyContent: 'center', paddingLeft: 5}}>
                                <Text style={styles.rTitle}>{dn}</Text>
                                <Text style={styles.checkDescription}>{resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
                              </View>
@@ -849,7 +852,14 @@ var styles = StyleSheet.create({
   },
   titleView: {
     flexDirection: 'row'
-  }
+  },
+  checkButton: {
+    ...circled(30),
+    shadowOpacity: 0.7,
+    opacity: 0.9,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
+  },
 });
 
 module.exports = VerificationRow;
