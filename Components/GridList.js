@@ -329,7 +329,7 @@ class GridList extends Component {
 
     const { target } = event.nativeEvent
     if (!target) {
-      debugger
+      // debugger
       return
     }
     const currentOffset = target.scrollTop
