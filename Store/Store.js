@@ -86,7 +86,9 @@ const {
   SEQ,
   ROOT_HASH,
   CUR_HASH,
-  PREV_HASH
+  PREV_HASH,
+  ORG,
+  ORG_SIG,
 } = tradle.constants
 
 // const MSG_LINK = '_msg'
@@ -1710,6 +1712,25 @@ var Store = Reflux.createStore({
     }
   },
 
+  _maybePrepForEmployerBot(object) {
+    const org = this.getMyEmployerBotPermalink()
+    if (org) {
+      delete object[ORG_SIG]
+      object[ORG] = org
+    }
+  },
+
+  async createObject(object) {
+    const node = await this._enginePromise
+    const me = utils.getMe()
+    if (me.isEmployee) {
+      object = _.clone(object)
+      this._maybePrepForEmployerBot(object)
+    }
+
+    return node.createObject({ object })
+  },
+
   async meDriverSend(sendParams) {
     await this._preSendCheck(sendParams)
     await this.maybeWaitForIdentity(sendParams.to)
@@ -1730,6 +1751,10 @@ var Store = Reflux.createStore({
     // give animations a chance to animate
     if (method === 'sign' || method === 'send' || method === 'signAndSend') {
       await this._preSendCheck(...args)
+    }
+
+    if (method === 'sign' || method === 'signAndSend') {
+      this._maybePrepForEmployerBot(args[0].object)
     }
 
     // give animations a chance to animate
@@ -3554,11 +3579,11 @@ var Store = Reflux.createStore({
     let result
 
     if (!dontSend) {
-      result = await meDriver.createObject({object: {
+      result = await self.createObject({
                   [TYPE]: VERIFICATION,
                   document: this.buildSendRef(document),
                   time: time
-                }})
+                })
     }
 
     if (result) {
@@ -4873,7 +4898,7 @@ if (!res[SIG]  &&  res._message)
         return
       }
       try {
-        let data = await meDriver.createObject({object: toChain})
+        let data = await self.createObject(toChain)
         let hash = data.link
         if (isNew)
           returnVal[ROOT_HASH] = hash
@@ -5375,7 +5400,7 @@ if (!res[SIG]  &&  res._message)
                   ?  this.getRepresentative(originatingResource)[ROOT_HASH]
                   :  originatingResource[ROOT_HASH]
 
-      return meDriver.createObject({ object: msg })
+      return this.createObject(msg)
       .then((data) => {
         let shareContext = utils.clone(msg)
         shareContext.from = this.buildRef(me)
