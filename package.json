@@ -143,7 +143,6 @@
     "react-native-actionsheet": "^2.3.0",
     "react-native-animatable": "github:oblador/react-native-animatable#d72c092",
     "react-native-app-intro": "github:tradle/react-native-app-intro#dev",
-    "react-native-awesome-card-io": "^0.7.0",
     "react-native-button": "^2.3.0",
     "react-native-carousel": "github:tradle/react-native-carousel",
     "react-native-collapsible": "^0.10.0",
