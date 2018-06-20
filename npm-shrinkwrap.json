@@ -47,9 +47,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/cb-blockr/-/cb-blockr-3.2.1.tgz"
     },
     "@tradle/constants": {
-      "version": "2.3.2",
-      "from": "@tradle/constants@>=2.3.2 <3.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-2.3.2.tgz"
+      "version": "2.4.0",
+      "from": "@tradle/constants@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-2.4.0.tgz"
     },
     "@tradle/custom-models": {
       "version": "4.10.10",
@@ -177,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#d12623c7bca7f05d98b00962bff9bb3b66b6a0ba"
+      "resolved": "git://github.com/tradle/models.git#bd123bcf7b8beab8c5a2f8b4de550291c8b84613"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -210,9 +210,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/multiqueue/-/multiqueue-2.3.1.tgz"
     },
     "@tradle/protocol": {
-      "version": "4.0.2",
-      "from": "@tradle/protocol@>=4.0.2 <5.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-4.0.2.tgz"
+      "version": "4.2.0",
+      "from": "@tradle/protocol@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-4.2.0.tgz"
     },
     "@tradle/qr-schema": {
       "version": "1.11.0",

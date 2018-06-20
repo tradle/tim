@@ -709,13 +709,7 @@ var Store = Reflux.createStore({
           obj[CUR_HASH] = obj[ROOT_HASH]
 
         await this.putInDb(obj, true)
-        this.trigger({
-          action: 'receivedMessage',
-          msg: msg,
-          payloadType: payload[TYPE],
-          deepPayloadType: originalPayload[TYPE]
-        })
-
+        this.triggerReceivedMessage(msg)
       } catch (err) {
         console.error('1. failed to process received message', err)
       }
@@ -783,12 +777,24 @@ var Store = Reflux.createStore({
       await this.putInDb(old, true)
       if (payload[TYPE] === PARTIAL)
         this.onGetAllPartials(payload)
-      this.trigger({ action: 'receivedMessage', msg: msg })
+      this.triggerReceivedMessage(msg)
     } catch (err) {
       debugger
       console.error('2. failed to process received message', err)
     }
   },
+
+  triggerReceivedMessage(msg) {
+    const payload = msg.object.object
+    const deepPayload = payload[TYPE] === MESSAGE ? payload.object : payload
+    this.trigger({
+      action: 'receivedMessage',
+      msg,
+      payloadType: payload[TYPE],
+      deepPayloadType: deepPayload[TYPE]
+    })
+  },
+
   async getObject(link, noBody) {
     try {
       let obj = await meDriver.objects.get(link)
@@ -1596,45 +1602,31 @@ var Store = Reflux.createStore({
     let newServer = params.newServer
     let maxAttempts = params.maxAttempts
     debug('fetching provider info from', serverUrls)
-    return Q.all(serverUrls.map(url => {
-      return this.getServiceProviders({url: url, hash: params.hash, retry: retry, id: id, newServer: newServer})
-        .then(results => {
-          // var httpClient = driverInfo.httpClient
-          var wsClients = driverInfo.wsClients
-          // var whitelist = driverInfo.whitelist
-          var tlsKey = driverInfo.tlsKey
-          // if (!httpClient) {
-          //   httpClient = new HttpClient()
-          //   driverInfo.httpClient = httpClient
-          //   meDriver.ready().then(function () {
-          //     var myHash = meDriver.myRootHash()
-          //     httpClient.setRootHash(myHash)
-          //   })
+    await Q.allSettled(serverUrls.map(async (url) => {
+      let providers
+      try {
+        providers = await this.getServiceProviders({url: url, hash: params.hash, retry: retry, id: id, newServer: newServer})
+      } catch (err) {
+        Errors.rethrow(err, 'developer')
 
-          //   httpClient.on('message', function () {
-          //     meDriver.receiveMsg.apply(meDriver, arguments)
-          //   })
-          // }
-          if (utils.getMe())
-            results.forEach(provider => {
-              this.addProvider(provider)
-              Push.subscribe(provider.hash)
-                .catch(err => console.log('failed to register for push notifications'))
-            })
-          if (!this.client  &&  me.isEmployee  &&  SERVICE_PROVIDERS)
-            this.client = graphQL.initClient(meDriver, me.organization.url)
-        })
-        .catch(err => {
-          if (err instanceof TypeError || err instanceof ReferenceError) {
-            throw err
-          }
+        // only forgive individual errors for batch getInfo
+        if (id || maxAttempts > 0) throw err
 
-          // forgive individual errors for batch getInfo
-          if (id || maxAttempts > 0) throw err
-        })
-        .then(() => meDriver)
+        return []
+      }
+
+      if (utils.getMe()) {
+        providers.forEach(provider => this.addProvider(provider))
+      }
+
+      // TODO: this doesn't belong here
+      if (!this.client  &&  me.isEmployee  &&  SERVICE_PROVIDERS)
+        this.client = graphQL.initClient(meDriver, me.organization.url)
+
+      // don't wait for this
+      this.subscribeForPushNotifications(providers.map(p => p.hash))
+      return providers
     }))
-    // Not the best way to
   },
   addYuki() {
     const sp =  utils.clone(yukiConfig)
@@ -5641,22 +5633,39 @@ if (!res[SIG]  &&  res._message)
   onReloadModels() {
     this.loadModels()
   },
-  onRequestWipe(opts={}) {
+  async onRequestWipe(opts={}) {
     if (opts.confirmed) {
       Actions.reloadDB()
       return
     }
 
-    Alert.alert(translate('areYouSureAboutWipe'), '', [
-      {
-        text: 'Cancel',
-        onPress: () => {}
-      },
-      {
-        text: 'OK',
-        onPress: () => Actions.reloadDB({ silent: true })
-      }
-    ])
+    const ok = await new Promise(resolve => {
+      Alert.alert(translate('areYouSureAboutWipe'), '', [
+        {
+          text: 'Cancel',
+          onPress: () => resolve(false)
+        },
+        {
+          text: 'OK',
+          onPress: () => resolve(true)
+        }
+      ])
+    })
+
+    if (!ok) return
+
+    try {
+      await this.forceReauth()
+    } catch (err) {
+      debug('refusing to wipe', err)
+      return
+    }
+
+    Actions.reloadDB({ silent: true })
+  },
+  async forceReauth() {
+    this.onSetAuthenticated(false)
+    await LocalAuth.signIn()
   },
   async onGetModels(providerId) {
     let provider = this._getItem(providerId)
@@ -9676,6 +9685,35 @@ if (!res[SIG]  &&  res._message)
     await utils.promiseDelay(1000)
     Push.register()
   },
+  subscribeForPushNotifications(providers) {
+    const current = this.getMyPushNotificationSubscriptions()
+    const added = _.difference(providers, current)
+    if (!added.length) return
+
+    return Promise.all(added.map(async hash => {
+      try {
+        await Push.subscribe(hash)
+        return hash
+      } catch (err) {
+        console.log(`failed to subscribe for push notifications from ${hash}`, err.message)
+      }
+    }))
+    .then(results => {
+      // in case "me" changed while we were subscribing
+      const current = this.getMyPushNotificationSubscriptions()
+      const successful = _.difference(results.filter(r => r), current)
+      if (successful.length) {
+        const pushSubscriptions = current.concat(successful)
+        return this.onUpdateMe({ pushSubscriptions })
+      }
+    })
+  },
+  isRegisteredForPushNotifications() {
+    return utils.getMe().registeredForPushNotifications
+  },
+  getMyPushNotificationSubscriptions() {
+    return utils.getMe().pushSubscriptions || []
+  },
   async createNewIdentity() {
     const encryptionKey = crypto.randomBytes(32).toString('hex')
     // const globalSalt = crypto.randomBytes(32).toString('hex')
@@ -9883,7 +9921,7 @@ if (!res[SIG]  &&  res._message)
     }
     if (onMessage  &&  val[TYPE] === FORGOT_YOU) {
       // this.trigger({action: 'messageList', to: me})
-      this.forgotYou(from)
+      await this.forgotYou(from)
       return
     }
     var isConfirmation
