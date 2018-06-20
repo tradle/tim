@@ -4846,6 +4846,8 @@ if (!res[SIG]  &&  res._message)
       //   _.extend(returnVal, nextVersionScaffold)
       // }
       if (!isNew) {
+        if (!returnVal[SIG]) debugger
+
         const nextVersionScaffold = mcbuilder.scaffoldNextVersion({
           _link: returnVal[CUR_HASH],
           _permalink: returnVal[ROOT_HASH],
@@ -6237,20 +6239,20 @@ if (!res[SIG]  &&  res._message)
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
     if (me.isEmployee) {
-      if (application  &&  (!filterResource  ||  !filterResource._author)) {
+      if (application  &&  (!filterResource  ||  !filterResource._org)) {
         let applicant = this._getItem(applicantId)
         if (applicant  &&  applicant.organization) {
           if (!filterResource)
             filterResource = {[TYPE]: modelName}
-          filterResource._author = myBot[ROOT_HASH]
+          filterResource._org = myBot[ROOT_HASH]
         }
       }
       if (modelName === APPLICATION) {
         if (!filterResource || !Object.keys(filterResource).length)
           filterResource = {[TYPE]: modelName}
         filterResource.archived = false
-        if (!filterResource._author  &&  !filterResource.context)
-          filterResource._author = myBot[ROOT_HASH]
+        if (!filterResource._org  &&  !filterResource.context)
+          filterResource._org = myBot[ROOT_HASH]
       }
     }
 
@@ -6356,7 +6358,7 @@ if (!res[SIG]  &&  res._message)
       context = await this.searchServer({
         modelName: PRODUCT_REQUEST,
         noTrigger: true,
-        filterResource: {contextId: contextId, _author: myBot[ROOT_HASH]}
+        filterResource: {contextId: contextId, _org: myBot[ROOT_HASH]}
       })
       context = context  &&  context.list  &&  context.list.length  &&  context.list[0]
     }
@@ -8579,7 +8581,7 @@ if (!res[SIG]  &&  res._message)
       return
     let ll = await this.searchSharables({
       modelName: shareType,
-      filterResource: {_author: myRep[CUR_HASH]},
+      filterResource: {_org: myRep[CUR_HASH]},
       noTrigger: true,
     })
 
@@ -15091,7 +15093,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
         continue
       var ll = await this.searchSharables({
         modelName: verType,
-        filterResource: {_author: myRep[CUR_HASH]},
+        filterResource: {_org: myRep[CUR_HASH]},
         noTrigger: true,
         // modelName: MESSAGE,
         // to: myRep,
