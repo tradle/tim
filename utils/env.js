@@ -172,7 +172,7 @@ const merged = extend({
     'tradle.AssignRelationshipManager',
   ],
   // JPEG compression
-  imageQuality: 0.6,
+  imageQuality: 0.2,
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]

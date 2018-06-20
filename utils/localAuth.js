@@ -32,6 +32,8 @@ const ForgivableTouchIDErrors = [
   'RCTTouchIDNotSupported'
 ]
 
+const isForgivableTouchIDError = err => ForgivableTouchIDErrors.includes(err.name)
+
 // const FallbackToPasswordErrors = [
 //   'LAErrorUserCancel',
 //   'LAErrorSystemCancel'
@@ -71,7 +73,8 @@ module.exports = {
   setPassword,
   signIn,
   hasTouchID,
-  deviceAuth
+  deviceAuth,
+  isForgivableTouchIDError,
 }
 
 /**
@@ -115,7 +118,7 @@ async function deviceAuth (opts) {
       }
     }
 
-    if (ForgivableTouchIDErrors.indexOf(err.name) !== -1) {
+    if (!isForgivableTouchIDError(err)) {
       throw err
     }
   } finally {

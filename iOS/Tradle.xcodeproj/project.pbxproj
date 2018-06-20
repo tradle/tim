@@ -68,7 +68,6 @@
 		73F1D0981EDA10EE00D4AB5B /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73F1D0941EDA10EE00D4AB5B /* tradle.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8C736C6F8FA64018866A2A0C /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 09E311D0387D4764923D9B71 /* Ionicons.ttf */; };
-		9B2795FA20D17F44000E7A07 /* libRNCardIO.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B2795EA20D17E95000E7A07 /* libRNCardIO.a */; };
 		DCFA2F9E52F04D73AD1335E2 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = 1447D734074D4C7BBD023C62 /* branch.json */; };
 /* End PBXBuildFile section */
 
@@ -528,6 +527,13 @@
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNCardIO;
 		};
+		73834CE420D1E0EE000C9AFC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNCardIO;
+		};
 		73EF39B920CC7071009EDE8B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 73EF39B420CC7071009EDE8B /* RNDeviceInfo.xcodeproj */;
@@ -562,13 +568,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 58B5119B1A9E6C1200147676;
 			remoteInfo = RCTText;
-		};
-		9B2795E920D17E95000E7A07 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RNCardIO;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -1087,6 +1086,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		73834CAE20D1E0ED000C9AFC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				73834CE520D1E0EE000C9AFC /* libRNCardIO.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		73EF39B520CC7071009EDE8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1188,14 +1195,6 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* Tradle.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		9B2795B420D17E94000E7A07 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9B2795EA20D17E95000E7A07 /* libRNCardIO.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1378,6 +1377,10 @@
 				{
 					ProductGroup = 73834C3320D1B44F000C9AFC /* Products */;
 					ProjectRef = EA429A9B07F944E893CD5380 /* RNCardIO.xcodeproj */;
+				},
+				{
+					ProductGroup = 73834CAE20D1E0ED000C9AFC /* Products */;
+					ProjectRef = 9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */;
 				},
 				{
 					ProductGroup = 73EF39B520CC7071009EDE8B /* Products */;
@@ -1896,6 +1899,13 @@
 			remoteRef = 73834C3620D1B44F000C9AFC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		73834CE520D1E0EE000C9AFC /* libRNCardIO.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNCardIO.a;
+			remoteRef = 73834CE420D1E0EE000C9AFC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		73EF39BA20CC7071009EDE8B /* libRNDeviceInfo.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1929,13 +1939,6 @@
 			fileType = archive.ar;
 			path = libRCTText.a;
 			remoteRef = 832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		9B2795EA20D17E95000E7A07 /* libRNCardIO.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNCardIO.a;
-			remoteRef = 9B2795E920D17E95000E7A07 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -2101,7 +2104,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2173,7 +2176,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2282,7 +2285,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
