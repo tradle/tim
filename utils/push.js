@@ -131,7 +131,11 @@ function createPusher (opts) {
     }
 
     registered = true
-    Actions.updateMe({ registeredForPushNotifications: true })
+    Actions.updateMe({
+      pushNotificationsAllowed: true,
+      registeredForPushNotifications: true
+    })
+
     onRegistered()
   }
 
@@ -199,9 +203,17 @@ function createPusher (opts) {
       if (author) return onLocalNotification(data)
     }
 
-    if (unread) return
+    // if (unread) {
+    //   // debug('already have unread notifications, not ')
+    //   return
+    // }
 
-    Actions.updateMe({ unreadPushNotifications: unread + 1 })
+    // Actions.updateMe({ unreadPushNotifications: unread + 1 })
+    //
+    // show 1, because receiving a push notification
+    // doesn't actually mean there's a message to be received,
+    // as "poking" clients is something any tradle mycloud can do
+    Actions.updateMe({ unreadPushNotifications: 1 })
 
     const unsubscribe = Store.listen(function (event) {
       if (AppState.currentState === 'active') return unsubscribe()
