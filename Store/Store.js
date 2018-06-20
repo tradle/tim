@@ -395,29 +395,13 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
       message: utils.makeModelTitle(model, true),
       bookmark: {
         [TYPE]: id,
-        _author: botPermalink
+        _org: botPermalink
       },
       from: utils.buildRef(me)
     }
   })
 
-  const createdByCustomers = [
-    // 'tradle.BusinessInformation',
-    // 'tradle.PersonalInfo'
-  ].map(id => {
-    const model = utils.getModel(id)
-    return {
-      [TYPE]: BOOKMARK,
-      message: utils.makeModelTitle(model, false),
-      bookmark: {
-        [TYPE]: id,
-        _recipient: botPermalink
-      },
-      to: utils.buildRef(me)
-    }
-  })
-
-  return createdByBot.concat(createdByCustomers)
+  return createdByBot
 }
 
 // var Store = Reflux.createStore(timeFunctions({
