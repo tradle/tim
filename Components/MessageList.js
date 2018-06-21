@@ -932,94 +932,46 @@ class MessageList extends Component {
   }
 
   getActionSheetItems() {
-    let { resource, application } = this.props
+    const { resource, application } = this.props
+    const buttons = []
+    const push = btn => buttons.push({ ...btn, index: buttons.length })
 
-    let buttons = []
-    let cancelIndex = 1
     if (application) {
       if (!utils.isRM(application)  ||  !this.hasAdditionalForms(application))
         return
-        cancelIndex++
-      buttons.push({
-        index: 0,
+
+      push({
         title: translate('formChooser'),
         callback: () => this.chooseFormForApplication()
       })
-      buttons.push({
-        index: cancelIndex,
+
+      push({
         title: translate('cancel'),
         callback: () => {}
       })
+
       return buttons
     }
-    if (this.state.productList)
-      buttons.push({
-        index: 0,
+
+    if (this.state.productList) {
+      push({
         title: translate('applyForProduct'),
         callback: () => this.productChooser()
       })
-    let me = utils.getMe()
-    let hasSupportLine = utils.hasSupportLine(resource)
-
-    if (hasSupportLine) {
-      // let isOrg = this.props.resource[TYPE] === ORGANIZATION
-      // if (this.state.isEmployee  &&  !isOrg) {
-      //   cancelIndex++
-      //   buttons.push({
-      //     index: 0,
-      //     title: translate('formChooser'),
-      //     callback: () => this.chooseFormForCustomer()
-      //   })
-      // }
-      // else {
-      //   if (!this.state.isEmployee) {
-      //     if (this.state.hasProducts) {
-      //       buttons.push({
-      //         index: cancelIndex,
-      //         title: translate('applyForProduct'),
-      //         callback: () => this.onChooseProduct()
-      //       })
-      //       cancelIndex++
-      //     }
-      //   }
-      //   if (ENV.allowForgetMe) {
-      //     buttons.push({
-      //       index: cancelIndex,
-      //       title: translate('forgetMe'),
-      //       callback: () => this.forgetMe()
-      //     })
-      //     cancelIndex++
-      //   }
-      // }
     }
-    else if (ENV.allowForgetMe) {
-      if (application)
-        return
-      buttons.push({
-        index: cancelIndex,
+
+    if (ENV.allowForgetMe && !application) {
+      push({
         title: translate('forgetMe'),
         callback: () => this.forgetMe()
       })
-      cancelIndex++
-
-      // if (this.state.hasProducts) {
-      //   buttons.push({
-      //     index: cancelIndex,
-      //     title: translate('applyForProduct'),
-      //     callback: () => this.onChooseProduct()
-      //   })
-      //   cancelIndex++
-      // }
     }
-    else
-      return
 
-
-    buttons.push({
-      index: cancelIndex,
+    push({
       title: translate('cancel'),
       callback: () => {}
     })
+
     return buttons
   }
   chooseFormForApplication() {
