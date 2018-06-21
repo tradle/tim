@@ -261,6 +261,8 @@ class VerificationRow extends Component {
 
     let description
     let titleComponent
+    if (title !== dn  &&  !title  &&  !dn)
+      title = dn
     if (isVerification) {
       titleComponent = <Text style={styles.rTitle}>
                           <Text style={styles.rTitle}>{dn}</Text>
@@ -308,7 +310,7 @@ class VerificationRow extends Component {
         }
       }
       else {
-        if (utils.isImplementing(modelName, INTERSECTION)) {
+        if (utils.isImplementing(modelName, INTERSECTION)  ||  !dn) {
           if (title) {
             let style
             if (dn)
