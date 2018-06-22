@@ -200,7 +200,7 @@ class VerificationRow extends Component {
         dateP = resource.date && 'date' || 'time'
       let dateVal = resource[dateP]
       if (dateVal) {
-        let dateFormatted = dateformat(dateVal, 'UTC:mmm dS, yyyy h:MM TT')
+        let dateFormatted = dateformat(dateVal, 'mmm dS, yyyy h:MM TT')
         date = <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateFormatted}</Text>
       }
     }
