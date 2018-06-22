@@ -33,10 +33,10 @@ class CameraView extends Component {
                 <Image source={{isStatic: true, url: 'data:image/jpeg;base64,' + data.base64}} style={{width, height: height - 60}} />
                 <View style={{flexDirection: 'row', width, justifyContent: 'center'}}>
                    <TouchableOpacity onPress={() => this.setState({data: null})}>
-                     <Text style={styles.cancel}>Cancel</Text>
+                     <Text style={styles.cancel}>Re-take</Text>
                    </TouchableOpacity>
                    <TouchableOpacity onPress={() => this.onTakePic({...data})}>
-                     <Text style={styles.useIt}>Use it</Text>
+                     <Text style={styles.useIt}>Use photo</Text>
                     </TouchableOpacity>
                 </View>
               </View>
@@ -54,12 +54,16 @@ class CameraView extends Component {
             flashMode={RNCamera.Constants.FlashMode.auto}
             type={this.state.cameraType}>
           </RNCamera>
-          <View style={{backgroundColor: '#000000', paddingTop: 3, height: 90, alignSelf: 'stretch'}}>
+          <View style={styles.footer}>
+            <Text style={styles.currentAction}>PHOTO</Text>
             <TouchableOpacity onPress={this._takePicture.bind(this)}>
                <Icon name='ios-radio-button-on'  size={85}  color='#eeeeee'  style={styles.icon}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={this._switchCamera.bind(this)} style={{position: 'absolute', right: 20, bottom: 10}}>
+            <TouchableOpacity onPress={this._switchCamera.bind(this)} style={styles.right}>
               <Icon name='ios-reverse-camera-outline' size={50} color='#eeeeee' />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => this.props.navigator.pop()} style={styles.left}>
+              <Text style={{fontSize: 20, color: '#ffffff'}}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -78,7 +82,12 @@ class CameraView extends Component {
   async _takePicture() {
     let data
     try {
-      data = await this.camera.takePictureAsync({base64: true, mirrorImage: true, quality: 0.5})
+      data = await this.camera.takePictureAsync({
+        base64: true,
+        mirrorImage: true,
+        quality: 0.5,
+        forceUpOrientation: true
+      })
       this.setState({ data })
     } catch (err) {
       console.error(err)
@@ -110,9 +119,19 @@ var styles = StyleSheet.create({
     alignSelf: 'stretch',
     backgroundColor: 'transparent',
   },
+  footer: {
+    backgroundColor: '#000000',
+    paddingTop: 10,
+    height: 120,
+    alignSelf: 'stretch',
+    alignItems: 'center'
+  },
+  currentAction: {
+    fontSize: 14,
+    color: 'orange',
+    alignSelf: 'center'
+  },
   icon: {
-    width: 85,
-    height: 85,
     marginTop: 2,
     alignSelf: 'center',
   },
@@ -134,6 +153,16 @@ var styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 20,
   },
+  right: {
+    position: 'absolute',
+    right: 20,
+    bottom: 10
+  },
+  left: {
+    position: 'absolute',
+    left: 20,
+    bottom: 30
+  }
 });
 
 module.exports = CameraView;
