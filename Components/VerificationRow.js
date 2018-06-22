@@ -292,7 +292,7 @@ class VerificationRow extends Component {
                              </View>
                              <View style={{justifyContent: 'center', paddingLeft: 5}}>
                                <Text style={styles.rTitle}>{dn}</Text>
-                               <Text style={styles.checkDescription}>{resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
+                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
                              </View>
                            </View>
         }
@@ -300,7 +300,7 @@ class VerificationRow extends Component {
           if (title  &&  dn) {
             titleComponent = <View style={{justifyContent: 'center'}}>
                                <Text style={styles.rTitle}>{dn}</Text>
-                               <Text style={styles.checkDescription}>{resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
+                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
                              </View>
 
           }
