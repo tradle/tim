@@ -258,7 +258,8 @@ class ApplicationView extends Component {
     let resource = this.state.resource || this.props.resource
     let me = utils.getMe()
     let title
-    if (resource.applicant.title)
+    let name = resource.applicantName || resource.applicant.title
+    if (name)
       title = resource.applicant.title  + '  →  ' + me.organization.title
     else
       title = me.organization.title
