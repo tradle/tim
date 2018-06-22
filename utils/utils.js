@@ -905,9 +905,9 @@ var utils = {
     if (scannedProps)  {
       let p = Object.keys(scannedProps)
       if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
-        return true
+        return m.properties[p[0]]
     }
-    return false
+    return null
   },
   getViewCols(model) {
     let { viewCols, properties } = model
