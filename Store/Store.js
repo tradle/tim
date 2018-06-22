@@ -6554,7 +6554,7 @@ if (!res[SIG]  &&  res._message)
       rr.networkName = seal.network
     }
 
-    let authorId = utils.makeId(PROFILE, r._author)
+    let authorId = utils.makeId(PROFILE, r._org  ||  r._author)
     let author = this._getItem(authorId)
     let authorTitle = r._authorTitle || (author && author.organization &&  utils.getDisplayName(author.organization))
     let myOrgRep = this.getRepresentative(me.organization)
