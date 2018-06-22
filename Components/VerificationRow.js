@@ -200,7 +200,7 @@ class VerificationRow extends Component {
         dateP = resource.date && 'date' || 'time'
       let dateVal = resource[dateP]
       if (dateVal) {
-        let dateFormatted = dateformat(dateVal, 'UTC:mmm dS, yyyy h:MM TT')
+        let dateFormatted = dateformat(dateVal, 'mmm dS, yyyy h:MM TT')
         date = <Text style={styles.verySmallLetters} key={this.getNextKey()}>{dateFormatted}</Text>
       }
     }
@@ -261,6 +261,8 @@ class VerificationRow extends Component {
 
     let description
     let titleComponent
+    if (title !== dn  &&  !title  &&  !dn)
+      title = dn
     if (isVerification) {
       titleComponent = <Text style={styles.rTitle}>
                           <Text style={styles.rTitle}>{dn}</Text>
@@ -290,7 +292,7 @@ class VerificationRow extends Component {
                              </View>
                              <View style={{justifyContent: 'center', paddingLeft: 5}}>
                                <Text style={styles.rTitle}>{dn}</Text>
-                               <Text style={styles.checkDescription}>{resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
+                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
                              </View>
                            </View>
         }
@@ -298,7 +300,7 @@ class VerificationRow extends Component {
           if (title  &&  dn) {
             titleComponent = <View style={{justifyContent: 'center'}}>
                                <Text style={styles.rTitle}>{dn}</Text>
-                               <Text style={styles.checkDescription}>{resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
+                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
                              </View>
 
           }
@@ -308,7 +310,7 @@ class VerificationRow extends Component {
         }
       }
       else {
-        if (utils.isImplementing(modelName, INTERSECTION)) {
+        if (utils.isImplementing(modelName, INTERSECTION)  ||  !dn) {
           if (title) {
             let style
             if (dn)
