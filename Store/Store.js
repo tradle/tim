@@ -977,7 +977,10 @@ var Store = Reflux.createStore({
       start: Date.now()
     }
 
-    debug(`busy with ${this.busyWith.name}`)
+    if (reason) {
+      debug(`busy with ${this.busyWith.name}`)
+    }
+
     this.triggerBusy()
   },
 
