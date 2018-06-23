@@ -1170,7 +1170,7 @@ class MessageList extends Component {
   }
   hasAdditionalForms(application) {
     let m = utils.getModel(application.requestFor)
-    return m.additionalForms !== null
+    return m.additionalForms != null
   }
   onLoadEarlierMessages(oldestMessage = {}, callback = () => {}) {
     if (this.state.allLoaded)
