@@ -260,7 +260,7 @@ class ApplicationView extends Component {
     let title
     let name = resource.applicantName || resource.applicant.title
     if (name)
-      title = resource.applicant.title  + '  →  ' + me.organization.title
+      title = name  + '  →  ' + me.organization.title
     else
       title = me.organization.title
     let style = resource.style ? this.mergeStyle(resource.style) : bankStyle
