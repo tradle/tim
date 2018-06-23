@@ -659,7 +659,8 @@ var Store = Reflux.createStore({
       let obj = msg.object
       try {
         const saved = await meDriver.saveObject({ object: originalPayload })
-        obj.from = {[ROOT_HASH]: saved.author}
+        // save object as if it came from BOT
+        obj.from = {[ROOT_HASH]: saved.object  &&  saved.object._org  || saved.author}
         debug('newObject (unwrapped):', originalPayload[TYPE])
       } catch (err) {
         if (err.type !== 'exists') throw err
