@@ -2299,7 +2299,6 @@ var Store = Reflux.createStore({
   },
 
   async requestIdentity(params) {
-    debugger
     const identity = await this.gql('getIdentity', params)
     await this.addContactAndIdentity({ identity })
   },
