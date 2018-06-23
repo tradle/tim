@@ -290,7 +290,7 @@ class VerificationRow extends Component {
                              <View style={[styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]}>
                                <Icon color='#ffffff' size={30} name={icon} />
                              </View>
-                             <View style={{justifyContent: 'center', paddingLeft: 5}}>
+                             <View style={{justifyContent: 'center', paddingLeft: 10}}>
                                <Text style={styles.rTitle}>{dn}</Text>
                                <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
                              </View>
@@ -409,7 +409,7 @@ class VerificationRow extends Component {
                       {header}
                     </TouchableOpacity>
       if (!isVerification)
-        content = <Swipeout right={[{text: 'Revoke', backgroundColor: 'red', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
+        content = <Swipeout right={[{text: 'Revoke', backgroundColor: '#EE504F', onPress: this.revokeDocument.bind(this)}]} autoClose={true} scroll={(event) => this._allowScroll(event)}>
                     {content}
                   </Swipeout>
       row = <View style={styles.contentBg} host={lazy}>
