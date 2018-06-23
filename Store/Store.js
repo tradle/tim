@@ -571,23 +571,7 @@ var Store = Reflux.createStore({
   },
   monitorLog() {
     let self = this
-    const logProcessor = createProcessor({
-      feed: meDriver.changes,
-      // db to store pointer to latest processed log position
-      db: level('./whatever-path-to-log-state.db'),
-      worker: co(function* (data, cb) {
-        // debugger
-        try {
-          yield process(data)
-        } catch (err) {
-          debugger
-          debug('failed to process entry', data, err)
-        } finally {
-          cb()
-        }
-      })
-    })
-    async function process(data) {
+    const process = this.wrapWithIdentityFetcher(async (data) => {
       const { value } = data
       switch (value.topic) {
       case 'sent':
@@ -603,7 +587,23 @@ var Store = Reflux.createStore({
         debugger
         console.log(data)
       }
-    }      // worker: (event, cb) => {
+    })
+
+    const logProcessor = createProcessor({
+      feed: meDriver.changes,
+      // db to store pointer to latest processed log position
+      db: level('./whatever-path-to-log-state.db'),
+      worker: async (data, cb) => {
+        // debugger
+        try {
+          await process(data)
+        } catch (err) {
+          debug('failed to process entry', data, err)
+        } finally {
+          cb()
+        }
+      }
+    })
   },
   async sent(link) {
     let objId = msgToObj[link]
@@ -777,6 +777,28 @@ var Store = Reflux.createStore({
       payloadType: payload[TYPE],
       deepPayloadType: deepPayload[TYPE]
     })
+  },
+
+  isEmployeeMode() {
+    const me = utils.getMe()
+    return me && me.isEmployee
+  },
+
+  wrapWithIdentityFetcher(fn) {
+    const self = this
+    return async function (...args) {
+      try {
+        return await fn.apply(this, args)
+      } catch (err) {
+        if (!self.isEmployeeMode() || err.type !== 'unknownidentity') throw err
+
+        await self.requestIdentity({
+          [err.property]: err.value
+        })
+
+        return await fn.apply(this, args)
+      }
+    }
   },
 
   async getObject(link, noBody) {
@@ -2066,15 +2088,17 @@ var Store = Reflux.createStore({
     throw new Error('override me')
   },
 
-  async receiveIntroduction({ identifier, msg, org }) {
+  async receiveIntroduction({ identifier, msg }) {
     const { wsClients } = driverInfo
     const payload = msg.object
     const { identity } = payload
     const permalink = utils.getPermalink(identity)
     await this.addContactIdentity({ identity, permalink })
     await this.addContact(payload, permalink, msg.forPartials || msg.forContext)
-    const url = wsClients.getBaseUrl({ identifier })
-    await this.addToSettings({hash: permalink, url: url})
+    if (identifier) {
+      const url = wsClients.getBaseUrl({ identifier })
+      await this.addToSettings({hash: permalink, url: url})
+    }
   },
 
   receiveSelfIntroduction({ identifier, msg }) {
@@ -2099,8 +2123,10 @@ var Store = Reflux.createStore({
         onPress: async () => {
           await this.addContactIdentity({ identity: payload.identity })
           await this.addContact(payload, rootHash)
-          const url = wsClients.getBaseUrl({ identifier })
-          this.addToSettings({hash: rootHash, url: url})
+          if (identifier) {
+            const url = wsClients.getBaseUrl({ identifier })
+            this.addToSettings({hash: rootHash, url: url})
+          }
         }},
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},
       ]
@@ -2153,22 +2179,32 @@ var Store = Reflux.createStore({
       }
 
       const payload = msg.object
-      const type = payload[TYPE]
-      const nestedType = type === MESSAGE ? payload[TYPE] : type
-      debug(`receiving ${nestedType}`)
+      const isNested = payload[TYPE] === MESSAGE
+      const originalPayload = isNested ? payload.object : payload
+      const originalMsg = isNested ? payload : msg
+      debug(`receiving ${originalPayload[TYPE]}`)
       let pid = utils.makeId(PROFILE, from)
       let org = this._getItem(pid).organization
       progressUpdate = willAnnounceProgress && {
         recipient: this._getItem(org)
       }
-      switch (type) {
+      switch (originalPayload[TYPE]) {
+      // because INTRODUCTION, SELF_INTRODUCTION carry the identities
+      // required for their own validation, they need to be handled earlier
       case INTRODUCTION:
-        await this.receiveIntroduction({ msg, org, identifier })
+        await this.receiveIntroduction({
+          identifier: isNested ? null : identifier,
+          msg: originalMsg
+        })
         break
       case SELF_INTRODUCTION:
-        await this.receiveSelfIntroduction({ msg, org, identifier })
+        await this.receiveSelfIntroduction({
+          identifier: isNested ? null : identifier,
+          msg: originalMsg
+        })
         break
       case SEAL:
+        // TODO: this should run in 'newobject' processing
         await this.receiveSeal(msg.object)
       default:
         break
@@ -2235,8 +2271,7 @@ var Store = Reflux.createStore({
         progressUpdate = null
         try {
           await this.requestIdentity({
-            url: wsClients.getFullUrl({ identifier }),
-            identifier: err.value
+            [err.property]: err.value
           })
 
           await this.receive({ ...opts, isRetry: true })
@@ -2259,15 +2294,18 @@ var Store = Reflux.createStore({
     }
   },
 
-  async requestIdentity({ url, identifier }) {
-    const response = await utils.fetchWithTimeout(`${url}/identity/${identifier}`, {}, 5000)
-    if (response.status > 300) {
-      throw new Error('status code: ' + response.status)
-    }
+  gql(method, params) {
+    return graphQL[method]({ ...params, client: this.client })
+  },
 
-    const result = await response.json()
-    const identity = result.object
-    const permalink = utils.getPermalink(identity)
+  async requestIdentity(params) {
+    debugger
+    const identity = await this.gql('getIdentity', params)
+    await this.addContactAndIdentity({ identity })
+  },
+
+  async addContactAndIdentity({ identity, permalink, profile={} }) {
+    if (!permalink) permalink = utils.getPermalink(identity)
     await this.addContactIdentity({ identity, permalink })
     await this.addContact({ identity, profile: {} }, permalink)
   },
