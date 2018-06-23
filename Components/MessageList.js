@@ -1214,6 +1214,8 @@ class MessageList extends Component {
   }
 
   onSubmitEditing(msg) {
+    if (!msg  ||  !msg.trim())
+      return
     let me = utils.getMe();
     let { resource, application, modelName } = this.props
 
@@ -1221,11 +1223,15 @@ class MessageList extends Component {
 
     let toName = utils.getDisplayName(resource);
     let meName = utils.getDisplayName(me);
+    let message
+    if (modelName === MESSAGE  ||  model.isInterface)
+      message = msg
+    else
+      message = '[' + this.state.userInput + '](' + modelName + ')'
+
     let value = {
       [TYPE]: SIMPLE_MESSAGE,
-      message: msg
-              ? modelName === MESSAGE  ||  model.isInterface? msg : '[' + this.state.userInput + '](' + modelName + ')'
-              : '',
+      message,
       from: me,
       to: resource,
       _context: this.state.currentContext || this.state.context
