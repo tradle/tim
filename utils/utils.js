@@ -36,7 +36,7 @@ import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import Strings from './strings'
-import { id, calcLinks } from '@tradle/build-resource'
+import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 
 import Lens from '@tradle/lens'
 
@@ -117,8 +117,7 @@ const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
-const MODEL = 'tradle.Model'
-const { parseStub } = validateResource.utils
+const { parseStub, sanitize } = validateResource.utils
 
 // import dictionaries from '@tradle/models'.dict
 var dictionary //= dictionaries[Strings.language]
@@ -257,6 +256,9 @@ var utils = {
   },
   splitCamelCase(str) {
     return str.split(/(?=[A-Z])/g)
+  },
+  sanitize(resource) {
+    return sanitize(resource).sanitized
   },
   getRequestedFormType(resource) {
     if (resource[TYPE] === FORM_REQUEST) {
@@ -595,7 +597,7 @@ var utils = {
     if (typeof type === 'string')
       return this.getModel(type).subClassOf === subType
     if (type.type)  {
-      if (type.type === MODEL)
+      if (type.type === 'tradle.Model')
       return type.subClassOf === subType
     }
     return this.getModel(type[TYPE]).subClassOf === subType
@@ -703,6 +705,9 @@ var utils = {
     let model = this.getModel(type)
     link = link || permalink
     return this.buildId({model, permalink, link})
+  },
+  makePermId(type, permalink) {
+    return `${type}_${permalink}`
   },
   getType(r) {
     if (typeof r === 'string')
@@ -1619,6 +1624,8 @@ var utils = {
     }
     return `${type}_${permalink}_${link}`
   },
+
+  omitVirtual,
 
   toOldStyleWrapper: function (wrapper) {
     if (!wrapper.permalink) return wrapper
