@@ -1,6 +1,8 @@
 'use strict'
 
 import omit from 'lodash/omit'
+import isEmpty from 'lodash/isEmpty'
+import getPropertyAtPath from 'lodash/get'
 import gql from 'graphql-tag'
 import deepEqual from 'deep-equal'
 import tradle, { utils as tradleUtils } from '@tradle/engine'
@@ -88,7 +90,7 @@ var search = {
 
   async searchServer(params) {
     let self = this
-    let {client, modelName, filterResource, sortProperty, asc, limit, endCursor, direction, first, properties} = params
+    let {client, modelName, filterResource, sortProperty, asc, limit, endCursor, direction, properties, select} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -295,9 +297,11 @@ var search = {
     query += `pageInfo {\n endCursor\n}\n`
     query += `edges {\n node {\n`
 
-    let arr = this.getAllPropertiesForServerSearch({model, properties, isList: true})
+    if (!select) {
+      select = this.getAllPropertiesForServerSearch({model, properties, isList: true})
+    }
 
-    query += `${arr.join('   \n')}`
+    query += `${select.join('   \n')}`
     query += `\n}`   // close 'node'
     query += `\n}`   // close 'edges'
     query += `\n}`   // close properties block
@@ -648,6 +652,8 @@ var search = {
       debugger
     }
   },
+  // TODO: rename _getItem to getItem
+  getItem: (...args) => search._getItem(...args),
   async getObjects(links, client) {
     let table = 'rl_objects'
     let query = `
@@ -671,8 +677,46 @@ var search = {
       console.log('graphQL._getItem', err)
       debugger
     }
+  },
+  getIdentity: async ({ client, _permalink, _link, pub }) => {
+    if (_link) return search.getIdentityByLink({ client, link: _link })
+    if (!pub) throw new Error('querying identities by _permalink is not supported at this time')
+
+    // if (_permalink) {
+    //   const id = _link ? utils.makeId('tradle.Identity', _permalink, _link) : utils.makePermId('tradle.Identity', _permalink)
+    //   const result = await search._getItem(id, client)
+    //   return neuter(result)
+    // }
+
+    const list = await search.searchServer({
+      client,
+      filterResource: { pub },
+      select: ['link'],
+      modelName: 'tradle.PubKey',
+      noTrigger: true,
+      limit: 1
+    })
+
+    if (list) {
+      const pubKeyMapping = getFirstNode(list)
+      if (pubKeyMapping) {
+        return search.getIdentityByLink({ link: pubKeyMapping.link, client })
+      }
+    }
+
+    throw new Error(`identity not found with pub: ${pub}`)
+  },
+  getIdentityByLink: async ({ link, client }) => {
+    const results = await search.getObjects([link], client)
+    if (isEmpty(results)) throw new Error(`identity not found with link: ${link}`)
+
+    return results[0]
   }
 }
+
+const neuter = obj => utils.omitVirtual(utils.sanitize(obj))
+const getFirstNode = result => getPropertyAtPath(result, ['edges', '0', 'node'])
+
 module.exports = search
   // addEndCursor(params, query) {
   //   let {modelName, filterResource, limit, direction, first, noPaging} = params
