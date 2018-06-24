@@ -24,7 +24,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const SENT = 'Sent'
 
 const { IDENTITY, ENUM, VERIFICATION } = constants.TYPES
-var { TYPE } = constants
+var { TYPE, SIG } = constants
 import {
   // StyleSheet,
   Text,
@@ -108,7 +108,6 @@ class FormMessageRow extends Component {
     let sendStatus = this.getSendStatus()
     let val = this.getTime(resource);
     let date = val  &&  <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
-    let bg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
 
     let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
     let photoListStyle = {height: 3};
@@ -117,7 +116,7 @@ class FormMessageRow extends Component {
       photoListStyle = styles.photoListStyle
     }
     let stub = this.formStub(resource, to, styles)
-    if (resource[TYPE] !== PRODUCT_REQUEST)
+    if (resource[TYPE] !== PRODUCT_REQUEST  &&  resource[SIG])
       stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
                {stub}
              </TouchableHighlight>
@@ -166,7 +165,8 @@ class FormMessageRow extends Component {
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
-    let headerStyle = [chatStyles.verifiedHeader, styles.headerStyle, {opacity: 0.5}]
+    let notSigned = !resource[SIG]
+    let headerStyle = [chatStyles.verifiedHeader, styles.headerStyle, {opacity: notSigned ? 0.2 : 0.5}]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
     let model = utils.getModel(resource[TYPE])
