@@ -105,15 +105,14 @@ class FormMessageRow extends Component {
 
     let width = Math.floor(utils.dimensions(FormMessageRow).width * 0.8) // - (isSharedContext  ? 45 : 0))
 
-    let notSigned = !resource[SIG]
-    let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application, notSigned})
+    let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
     let photoListStyle = {height: 3};
     if (photos) {
       isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
       photoListStyle = styles.photoListStyle
     }
     let stub = this.formStub(resource, to, styles)
-    if (resource[TYPE] !== PRODUCT_REQUEST  &&  !notSigned)
+    if (resource[TYPE] !== PRODUCT_REQUEST  &&  resource[SIG])
       stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
                {stub}
              </TouchableHighlight>
@@ -156,7 +155,8 @@ class FormMessageRow extends Component {
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 
-    let headerStyle = [chatStyles.verifiedHeader, styles.headerStyle, {opacity: 0.5}]
+    let notSigned = !resource[SIG]
+    let headerStyle = [chatStyles.verifiedHeader, styles.headerStyle, {opacity: notSigned ? 0.2 : 0.5}]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
     let model = utils.getModel(resource[TYPE])
@@ -310,7 +310,7 @@ class FormMessageRow extends Component {
 }
 
 var createStyles = utils.styleFactory(FormMessageRow, function (params) {
-  let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application, notSigned } = params
+  let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
   let moreHeader = {borderTopRightRadius: 10, borderTopLeftRadius: 10 }
   // let moreHeader = isMyMessage || isShared
   //                ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }
@@ -356,7 +356,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       justifyContent: 'space-between',
       paddingLeft: 5,
       paddingRight: 7,
-      backgroundColor: notSigned ? '#cccccc' : bg
+      backgroundColor: bg
     },
     title: {
       fontSize: 18,
