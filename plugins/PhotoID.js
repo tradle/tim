@@ -114,7 +114,7 @@ function getRequestedProps({scan, model, requestedProperties, form}) {
     if (isLicence)
       requestedProperties = [{name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
     else
-      requestedProperties = [{name: 'personalPassport_group'}, {name: 'document_group'}]
+      requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
     return requestedProperties
   }
   let props = model.properties
@@ -155,9 +155,9 @@ function cleanupValues(form, values, model) {
   if (!values  &&  (isWeb()  ||  isSimulator())) {
     let isLicence = form.documentType.title.indexOf('Licence') !== -1
     if (isLicence)
-      requestedProperties = [{name: 'scanLicence_group'}]
+      requestedProperties = [{name: 'personal_group'}, {name: 'document_group'}, {name: 'address_group'}]
     else
-      requestedProperties = [{name: 'personalPassport_group'}, {name: 'document_group'}]
+      requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
   }
   else
     requestedProperties = []
