@@ -314,7 +314,7 @@ class GridRow extends Component {
       for (let i=0; i<msgParts.length - 1; i++)
         val += msgParts[i];
     }
-    val = val.replace(/\*/g, '')
+    val = val  &&  val.replace(/\*/g, '')  ||  utils.getDisplayName(resource)
     if (criteria) {
       if (criteria.indexOf('*') === -1) {
         style.push({fontWeight: '600'})
