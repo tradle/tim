@@ -3314,7 +3314,7 @@ var Store = Reflux.createStore({
       if (SERVICE_PROVIDERS.length) {
         arr = SERVICE_PROVIDERS.filter((sp) => {
           let reps = this.getRepresentatives(sp.org)
-          let talkingToBot = reps.forEach((r) => {
+          let talkingToBot = reps.filter((r) => {
             return r[ROOT_HASH] === hash ? true : false
           })
           return talkingToBot  &&  talkingToBot.length ? true : false
@@ -3901,8 +3901,10 @@ var Store = Reflux.createStore({
         this.rewriteStubs(kres)
       }
       catch (err) {
-        if (me.isEmployee)
-          kres = await this._getItemFromServer(rId)
+        if (me.isEmployee) {
+          return await this.onGetItemFromServer(params)
+          // kres = await this._getItemFromServer(rId)
+        }
       }
       _.extend(res, kres)
     }
