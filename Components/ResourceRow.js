@@ -320,7 +320,7 @@ class ResourceRow extends Component {
     let action
     if (isOfficialAccounts  &&  !this.props.hideMode  &&  resource._formsCount) {
       action = <View style={styles.actionView}>
-                <TouchableHighlight underlayColor='transparent' onPress={this.showResourceView.bind(this)}>
+                <TouchableHighlight underlayColor='transparent' onPress={this.showProviderView.bind(this)}>
                 <View style={textStyle}>
                   <View style={{flexDirection: 'row'}}>
                     <Icon name='ios-paper-outline' color={appStyle.ROW_ICON_COLOR} size={30} style={{marginTop: Platform.OS === 'ios' ? 0 : 0}}/>
@@ -351,7 +351,7 @@ class ResourceRow extends Component {
                   </View>
     return content
   }
-  showResourceView() {
+  showProviderView() {
     let resource = this.props.resource
     let title = utils.getDisplayName(resource)
     let route = {
@@ -360,7 +360,10 @@ class ResourceRow extends Component {
       component: ResourceView,
       // titleTextColor: '#7AAAC3',
       backButtonTitle: 'Back',
-      passProps: {resource: resource}
+      passProps: {
+        resource: resource,
+        bankStyle: resource.style  || defaultBankStyle,
+      }
     }
     this.props.navigator.push(route)
   }
