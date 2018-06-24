@@ -586,7 +586,9 @@ var NavigationBarRouteMapper = {
 
     let bankStyle = route.passProps.bankStyle
     let color = '#7AAAC3'
-    if (bankStyle  &&  bankStyle.linkColor)
+    if (route.id === 12) // Camera view
+      color = '#ffffff'
+    else if (bankStyle  &&  bankStyle.linkColor)
       color = bankStyle.linkColor
 
     let previousRoute = navState.routeStack[index - 1];
@@ -655,7 +657,7 @@ var NavigationBarRouteMapper = {
       isSubmit = true
       if (route.passProps.isChooser) {
         icon = 'md-checkmark'
-        iconSize = 30
+        iconSize = 25
       }
       // if (route.passProps.bankStyle  &&  route.passProps.bankStyle.submitBarInFooter)
       //   return
@@ -806,9 +808,14 @@ var NavigationBarRouteMapper = {
     let t = route.title.split(' -- ')
     let st = t.length > 1 ? {marginTop: 2} : {}
     let bankStyle = route.passProps.bankStyle
-    if (bankStyle)
-      st.color = bankStyle.linkColor
-    let color = bankStyle  &&  bankStyle.linkColor || '#7AAAC3'
+    let color
+
+    if (route.id === 12)  // Camera view
+      st.color = color = '#ffffff'
+    else if (bankStyle)
+      st.color = color = bankStyle.linkColor
+    else
+      color = '#7AAAC3'
 
     let style = [platformStyles.navBarText, styles.navBarTitleText, st]
     let isPrefill
