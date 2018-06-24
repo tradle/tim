@@ -3312,13 +3312,15 @@ var Store = Reflux.createStore({
     if (isEmployee) {
       let arr
       if (SERVICE_PROVIDERS.length) {
-        arr = SERVICE_PROVIDERS.filter((sp) => {
-          let reps = this.getRepresentatives(sp.org)
-          let talkingToBot = reps.filter((r) => {
-            return r[ROOT_HASH] === hash ? true : false
-          })
-          return talkingToBot  &&  talkingToBot.length ? true : false
-        })
+        // debugger
+        // let myRepHash = this.getRepresentative(me.organization)[ROOT_HASH]
+        // arr = SERVICE_PROVIDERS.filter((sp) => {
+        //   let reps = this.getRepresentatives(sp.org)
+        //   let talkingToBot = reps.filter((r) => {
+        //     return r[ROOT_HASH] === hash  &&  hash !== myRepHash ? true : false
+        //   })
+        //   return talkingToBot  &&  talkingToBot.length ? true : false
+        // })
       }
       else  {
         if (!to.bot)
