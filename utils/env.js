@@ -68,7 +68,7 @@ const merged = extend({
   accessGroup: '94V7783F74.io.tradle.dev',
   LOCAL_IP: LOCAL_IP,
   LOCAL_TRADLE_SERVERS: [
-    `http://${LOCAL_IP}:21012`,
+    // `http://${LOCAL_IP}:21012`,
     // // silly
     // 'https://4uxjw2j0cc.execute-api.ap-southeast-2.amazonaws.com/dev',
     // // `http://${LOCAL_IP}:21013`,
@@ -102,6 +102,7 @@ const merged = extend({
   allowAddServer: true,
   allowForgetMe: false,
   allowWipe: false,
+  allowPairDevices: false,
   get prefillForms() {
     if (typeof PREFILL_FORMS === 'boolean') return PREFILL_FORMS
 
