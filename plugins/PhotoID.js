@@ -26,8 +26,12 @@ module.exports = function PhotoID ({ models }) {
       // Check if there is a need to clean the form
       if (scan  &&  currentResource) {
         if ((currentResource.documentType  &&  currentResource.documentType.id !== form.documentType.id)  ||
-            (currentResource.country  &&  currentResource.country.id !== form.country.id))
-          return cleanupValues(form, scan, model)
+            (currentResource.country  &&  currentResource.country.id !== form.country.id)) {
+          let requestedProperties = cleanupValues(form, scan, model)
+          if (!isWeb)
+            return requestedProperties
+          scan = null
+        }
       }
 
       console.log('PhotoID: requesting additional properties for Driver Licence')
@@ -41,8 +45,10 @@ module.exports = function PhotoID ({ models }) {
           let countryModel = utils.getModel(COUNTRY)
           // let countryId = form.country.id.split('_')[1]
           let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
-          if (country.id !== form.country.id.split('_')[1])
+          if (!country  ||  country.id !== form.country.id.split('_')[1]) {
             cleanupValues(form, scan, model)
+            scan = null
+          }
         }
         let errors = prefillValues(form, scan, model)
       }
@@ -106,9 +112,9 @@ function getRequestedProps({scan, model, requestedProperties, form}) {
   if (!scan) {
     let isLicence = form.documentType.title.indexOf('Licence') !== -1
     if (isLicence)
-      requestedProperties = [{name: 'personalPassport_group'}, {name: 'documentPassport_group'}]
-    else
       requestedProperties = [{name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
+    else
+      requestedProperties = [{name: 'personalPassport_group'}, {name: 'documentPassport_group'}]
     return requestedProperties
   }
   let props = model.properties
