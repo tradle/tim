@@ -95,7 +95,7 @@ const merged = extend({
   },
   allowAddServer: true,
   allowForgetMe: false,
-  allowWipe: false,
+  allowWipe: true,
   allowPairDevices: false,
   get prefillForms() {
     if (typeof PREFILL_FORMS === 'boolean') return PREFILL_FORMS
