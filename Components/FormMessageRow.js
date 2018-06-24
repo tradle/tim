@@ -24,7 +24,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const SENT = 'Sent'
 
 const { IDENTITY, ENUM, VERIFICATION } = constants.TYPES
-var { TYPE } = constants
+var { TYPE, SIG } = constants
 import {
   // StyleSheet,
   Text,
@@ -102,17 +102,18 @@ class FormMessageRow extends Component {
     let sendStatus = this.getSendStatus()
     let val = this.getTime(resource);
     let date = val  &&  <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
-    let bg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
 
     let width = Math.floor(utils.dimensions(FormMessageRow).width * 0.8) // - (isSharedContext  ? 45 : 0))
-    let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
+
+    let notSigned = !resource[SIG]
+    let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application, notSigned})
     let photoListStyle = {height: 3};
     if (photos) {
       isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
       photoListStyle = styles.photoListStyle
     }
     let stub = this.formStub(resource, to, styles)
-    if (resource[TYPE] !== PRODUCT_REQUEST)
+    if (resource[TYPE] !== PRODUCT_REQUEST  &&  !notSigned)
       stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
                {stub}
              </TouchableHighlight>
@@ -309,7 +310,7 @@ class FormMessageRow extends Component {
 }
 
 var createStyles = utils.styleFactory(FormMessageRow, function (params) {
-  let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
+  let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application, notSigned } = params
   let moreHeader = {borderTopRightRadius: 10, borderTopLeftRadius: 10 }
   // let moreHeader = isMyMessage || isShared
   //                ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }
@@ -355,7 +356,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       justifyContent: 'space-between',
       paddingLeft: 5,
       paddingRight: 7,
-      backgroundColor: bg
+      backgroundColor: notSigned ? '#cccccc' : bg
     },
     title: {
       fontSize: 18,
