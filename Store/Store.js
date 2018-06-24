@@ -2310,7 +2310,33 @@ var Store = Reflux.createStore({
     await this.addContact({ identity, profile: {} }, permalink)
   },
 
+  async receiveCordaSeal(seal) {
+    const node = await this._enginePromise
+    return await Q.nfcall(node.actions.readSeal, {
+      blockchain: seal.blockchain,
+      networkName: seal.network,
+      link: seal.link,
+      // hack to make actions validator happy
+      basePubKey: {
+        pub: new Buffer(0),
+        curve: 'secp256k1'
+      },
+      sealAddress: seal.address || '<n/a>',
+      txId: seal.txId,
+      headerHash: seal.headerHash,
+      prevHeaderHash: seal.prevHeaderHash,
+      // confirmations claimed by the server
+      // are not to be trusted
+      confirmations: 0,
+      addresses: seal.address ? [seal.address] : []
+    })
+  },
+
   async receiveSeal(seal) {
+    if (seal.blockchain === 'corda') {
+      return this.receiveCordaSeal(seal)
+    }
+
     const node = await this._enginePromise
     const adapter = getBlockchainAdapter({
       blockchain: seal.blockchain,
