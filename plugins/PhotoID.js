@@ -155,7 +155,7 @@ function cleanupValues(form, values, model) {
   if (!values  &&  (isWeb()  ||  isSimulator())) {
     let isLicence = form.documentType.title.indexOf('Licence') !== -1
     if (isLicence)
-      requestedProperties = [{name: 'personalPassport_group'}, {name: 'documentPassport_group'}]
+      requestedProperties = [{name: 'personalPassport_group'}, {name: 'document_group'}]
     else
       requestedProperties = [{name: 'scanLicence_group'}]
   }
