@@ -114,7 +114,7 @@ function getRequestedProps({scan, model, requestedProperties, form}) {
     if (isLicence)
       requestedProperties = [{name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
     else
-      requestedProperties = [{name: 'personalPassport_group'}, {name: 'documentPassport_group'}]
+      requestedProperties = [{name: 'personalPassport_group'}, {name: 'document_group'}]
     return requestedProperties
   }
   let props = model.properties
