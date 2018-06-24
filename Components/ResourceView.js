@@ -466,8 +466,10 @@ class ResourceView extends Component {
       actions.push(CHANGE_GESTURE_PASSWORD)
     }
 
-    buttons.push(translate('pairDevices'))
-    actions.push(PAIR_DEVICES)
+    if (ENV.allowPairDevices) {
+      buttons.push(translate('pairDevices'))
+      actions.push(PAIR_DEVICES)
+    }
 
     if (ENV.homePageScanQRCodePrompt) {
       buttons.push(translate('scanQRcode'))
