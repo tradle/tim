@@ -1608,6 +1608,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       height: 45,
       justifyContent: 'center',
       backgroundColor: '#990000',
+      width: utils.getContentWidth(NewResource) - 40,
       alignItems: 'center'
     },
     errorsText: {
