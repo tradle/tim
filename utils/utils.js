@@ -534,7 +534,8 @@ var utils = {
     if (parts.length === 1)
       return label
     // keep abbreviations intact
-    let newLabel = parts.reduce((sum, cur) => sum + (cur.length === 1 ? cur : ' ' + cur))
+    // let newLabel = parts.reduce((sum, cur) => sum + (cur.length === 1 ? cur : ' ' + cur))
+    let newLabel = parts.reduce((sum, cur) => sum + (' ' + cur)).trim()
     return newLabel
   },
   arrayToObject(arr) {
