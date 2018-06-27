@@ -10,6 +10,7 @@ import t from 'tcomb-form-native'
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
+import SignatureView from './SignatureView'
 import Native, {
   // StyleSheet,
   View,
@@ -41,6 +42,7 @@ import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import rStyles from '../styles/registrationStyles'
 import NewResourceMixin from './NewResourceMixin'
+import OnePropFormMixin from './OnePropFormMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import constants from '@tradle/constants'
 import { circled } from '../styles/utils'
@@ -119,7 +121,16 @@ class NewResource extends Component {
     currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.props.search
             ? this.getSearchResult.bind(this)
             : this.onSavePressed
-
+    // HACK
+    let editProps = utils.getEditableProperties(r)
+    if (editProps.length  &&  editProps.length === 1) {
+      let eProp = editProps[0]
+      if (eProp.signature) {
+        currentRoutes[currentRoutesLength - 1].onRightButtonPress = () => {
+          this.onSetSignatureProperty(eProp, this.refs.sigView.getSignature().url)
+        }
+      }
+    }
     this.scrollviewProps = {
       automaticallyAdjustContentInsets:true,
       scrollEventThrottle: 50,
@@ -176,13 +187,8 @@ class NewResource extends Component {
       }
     }
     if (Platform.OS === 'ios') {
-      let m = utils.getModel(utils.getType(resource))
-      let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
-      if (scannedProps) {
-        let p = Object.keys(scannedProps)
-        if (p.length  &&  scannedProps[p[0]].scanner === 'payment-card')
-          CardIOUtilities.preload();
-      }
+      if (utils.hasPaymentCardScannerProperty(utils.getType(resource)))
+        CardIOUtilities.preload();
     }
   }
 
@@ -728,9 +734,26 @@ class NewResource extends Component {
     let parentBG = {backgroundColor: '#7AAAC3'};
     let resource = this.state.resource;
 
+    let bankStyle = this.props.bankStyle || defaultBankStyle
+    let editProps = utils.getEditableProperties(resource)
+    if (editProps.length) {
+      let eProp = editProps[0]
+      if (eProp.signature) {
+        return  <View style={{flex: 1}}>
+                   <SignatureView ref='sigView' bankStyle={bankStyle}  sigViewStyle={bankStyle} />
+                 </View>
+        // ref: ref => {
+        //   sigView = ref
+        // },
+        // bankStyle,
+        // sigViewStyle: bankStyle
+
+        // return this.showSignatureView(eProp)
+      }
+    }
+
     let meta =  this.props.model;
     let { originatingMessage, setProperty, editCols, search } = this.props
-    let bankStyle = this.props.bankStyle || defaultBankStyle
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -1259,6 +1282,7 @@ reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 reactMixin(NewResource.prototype, NewResourceMixin);
 reactMixin(NewResource.prototype, ResourceMixin);
 reactMixin(NewResource.prototype, HomePageMixin);
+reactMixin(NewResource.prototype, OnePropFormMixin);
 NewResource = makeResponsive(NewResource)
 
 var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankStyle, isRegistration }) {
@@ -1440,6 +1464,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       height: 45,
       justifyContent: 'center',
       backgroundColor: '#990000',
+      alignSelf: 'stretch',
       alignItems: 'center'
     },
     errorsText: {
