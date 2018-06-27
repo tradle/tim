@@ -5,11 +5,11 @@ import {
   Text,
   View,
   Platform,
-  TouchableHighlight,
   // StyleSheet,
   ActivityIndicator,
   Image,
-  Navigator
+  Navigator,
+  TouchableOpacity
 } from 'react-native'
 
 import constants from '@tradle/constants'
@@ -33,6 +33,10 @@ const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const ENUM = 'tradle.Enum'
 const APPLICATION = 'tradle.Application'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
+const BLOCKCHAIN_EXPLORERS = [
+  'https://rinkeby.etherscan.io/tx/0x$TXID',
+  // 'https://etherchain.org/tx/0x$TXID' // doesn't support rinkeby testnet
+]
 
 // var tada = []
 var skip
@@ -170,12 +174,12 @@ var ResourceMixin = {
                    </View>
 
         if (cancelItem)
-          item = <TouchableHighlight underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
+          item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                    <View style={styles.row}>
                      {item}
                      <Icon name='ios-close-circle-outline' size={25} color={linkColor} />
                    </View>
-                 </TouchableHighlight>
+                 </TouchableOpacity>
 
 
         ret.push(
@@ -194,12 +198,12 @@ var ResourceMixin = {
                     <Text style={[styles.itemText, {color}]}>{vTitle}</Text>
                   </View>
         if (cancelItem) {
-          item = <TouchableHighlight underlayColor='transparent' key={this.getNextKey()} onPress={cancelItem.bind(this, prop, v)}>
+          item = <TouchableOpacity underlayColor='transparent' key={this.getNextKey()} onPress={cancelItem.bind(this, prop, v)}>
                    <View style={styles.row}>
                      {item}
                      <Icon name='md-close' size={20} color={linkColor} style={{marginTop: 12}} />
                    </View>
-                 </TouchableHighlight>
+                 </TouchableOpacity>
           }
         else {
           let isMessageView
@@ -209,7 +213,7 @@ var ResourceMixin = {
             isMessageView = (ref !== ORGANIZATION  &&  ref !== PROFILE)
           let id = isMessageView && 5 || 3
           let component = isMessageView && require('./MessageView') || require('./ResourceView')
-          item =  <TouchableHighlight underlayColor='transparent' style={{paddingVertical: 5}} key={this.getNextKey()} onPress={() => {
+          item =  <TouchableOpacity underlayColor='transparent' style={{paddingVertical: 5}} key={this.getNextKey()} onPress={() => {
                     navigator.push({
                      title: vTitle,
                      id,
@@ -220,7 +224,7 @@ var ResourceMixin = {
                     })
                   }}>
                    {item}
-                 </TouchableHighlight>
+                 </TouchableOpacity>
         }
         ret.push(item)
         // ret.push(
@@ -530,6 +534,76 @@ var ResourceMixin = {
               </View>
             </View>
            )
+  },
+
+  addDataSecurity(resource) {
+    let { txId, blockchain, networkName } = resource
+    let { bankStyle, onPageLayout } = this.props
+    let content
+
+    let lstyles = createStyles({bankStyle})
+
+    let header = (<View style={{padding: 10}} key={this.getNextKey()}>
+                    <View style={[styles.textContainer, styles.row]}>
+                      <Text style={lstyles.bigTitle}>{translate('dataSecurity')}</Text>
+                      <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
+                    </View>
+                    <View style={styles.separator} />
+                  </View>)
+    if (blockchain === 'corda') {
+      let description = 'You\'ll be able to verify this transaction when you launch your Corda node.'
+      content = <View style={{paddingHorizontal: 10}}>
+                 <View style={{flexDirection: 'row', paddingVertical: 3}}>
+                   <Text style={styles.dsTitle}>Blockchain: </Text>
+                   <Text style={styles.dsValue}>{blockchain}</Text>
+                 </View>
+                 <View style={{flexDirection: 'row'}}>
+                   <Text style={styles.dsTitle}>Network: </Text>
+                   <Text style={styles.dsValue}>{networkName}</Text>
+                 </View>
+                 <View>
+                   <Text style={styles.title}>TxID: </Text>
+                   <Text style={styles.dsValue}>{txId}</Text>
+                 </View>
+                 <Text style={[styles.content, {marginTop: 20}]}>{description}</Text>
+                </View>
+    }
+    else {
+      let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
+      let txs = (
+        <View>
+          {
+            BLOCKCHAIN_EXPLORERS.map((url, i) => {
+              url = url.replace('$TXID', txId)
+              return this.getBlockchainExplorerRow(url, i, styles)
+            })
+          }
+        </View>
+      )
+
+      content = <View style={{paddingHorizontal: 10}}>
+                   <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
+                     <Text style={styles.content}>{description}
+                       <Text style={lstyles.learnMore}> Learn more</Text>
+                     </Text>
+                   </TouchableOpacity>
+                   {txs}
+                  </View>
+    }
+    let self = this
+    let row = <Accordion
+                sections={['txId']}
+                onPress={() => {
+                  self.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
+                    if (h  &&  y > pY)
+                      onPageLayout(pY, h)
+                  })
+                }}
+                header={header}
+                content={content}
+                underlayColor='transparent'
+                easing='easeIn' />
+    return row
   }
 }
 
@@ -549,10 +623,25 @@ var createStyles = utils.styleFactory(component || PhotoList, function ({ dimens
       backgroundColor: 'transparent',
       marginTop: 20
     },
+    learnMore: {
+      color: bankStyle.linkColor,
+      paddingHorizontal: 7
+    },
+    bigTitle: {
+      fontSize: 20,
+      // fontFamily: 'Avenir Next',
+      color: bankStyle.linkColor,
+      marginTop: 3,
+      marginBottom: 0,
+      marginHorizontal: 7
+    },
   })
 })
 
 var styles = StyleSheet.create({
+  textContainer: {
+    flex: 1
+  },
   container: {
     margin: 10,
     flex: 1
@@ -573,6 +662,14 @@ var styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#eeeeee',
     // marginHorizontal: 15
+  },
+  separator: {
+    height: 1,
+    marginTop: 5,
+    marginBottom: 10,
+    marginHorizontal: -10,
+    alignSelf: 'stretch',
+    backgroundColor: '#eeeeee'
   },
   item: {
     // paddingVertical: 7,
@@ -605,9 +702,30 @@ var styles = StyleSheet.create({
   bigTitle: {
     fontSize: 20,
     // fontFamily: 'Avenir Next',
+    // color: '#7AAAC3',
     marginTop: 3,
     marginBottom: 0,
     marginHorizontal: 7
+  },
+  dsTitle: {
+    width: 90,
+    fontSize: 16,
+    // fontFamily: 'Avenir Next',
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7,
+    color: '#9b9b9b'
+  },
+  dsValue: {
+    fontSize: 18,
+    marginHorizontal: 7,
+    color: '#2E3B4E',
+  },
+  content: {
+    color: '#9b9b9b',
+    fontSize: 16,
+    marginHorizontal: 7,
+    paddingBottom: 10
   },
 
 })
