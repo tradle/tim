@@ -790,7 +790,7 @@ var NavigationBarRouteMapper = {
       photoObj = to.photos  &&  to.photos[0]
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
-    let logoNeedsText = bankStyle.logoNeedsText
+    let logoNeedsText = bankStyle  &&  bankStyle.logoNeedsText
     if (!logoNeedsText  &&  resource) {
       if (route.id !== 7)  { // ArticleView
         if (route.id !== MESSAGE_LIST)
