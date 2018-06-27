@@ -32,7 +32,6 @@ const SHOW_TIME_INTERVAL = 60000
 const DEFAULT_CURRENCY_SYMBOL = '£'
 const SENT = 'Sent'
 
-
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
@@ -79,10 +78,8 @@ var RowMixin = {
       else {
         let m = utils.getModel(prop.ref)
         if (m.subClassOf === ENUM) {
-          if (typeof val === 'string')
-            val = utils.createAndTranslate(val)
-          else
-            val = utils.createAndTranslate(val.title)
+          let tVal = (typeof val === 'string') && val || val.title
+          val = translate(tVal)
         }
       }
     }
@@ -307,26 +304,6 @@ var RowMixin = {
     return <View style={{width: msgWidth}}>
              {view}
            </View>
-  },
-  onSetSignatureProperty(prop, item) {
-    if (!item)
-      return;
-
-    let formRequest = this.props.resource
-    let resource = formRequest.prefill  ||  {}
-    _.extend(resource, {
-        [TYPE]: formRequest.form,
-        [prop.name]: item,
-        _context: formRequest._context,
-        from: utils.getMe(),
-        to: formRequest.from
-      }
-    )
-
-    Actions.addChatItem({
-      disableFormRequest: formRequest,
-      resource
-    })
   },
 
   onSetMediaProperty(propName, item) {
@@ -786,3 +763,29 @@ module.exports = RowMixin;
   //   }
   //   return row;
   // }
+  // onSetSignatureProperty(prop, item) {
+  //   if (!item)
+  //     return;
+
+  //   let resource = this.props.resource
+
+  //   let formRequest
+  //   if (resource[TYPE] === FORM_REQUEST) {
+  //     formRequest = resource
+  //     resource = formRequest.prefill  ||  {}
+  //   }
+  //   // Form request for new resource
+  //   if (formRequest)
+  //     _.extend(resource, {
+  //         [TYPE]: formRequest.form,
+  //         _context: formRequest._context,
+  //         from: utils.getMe(),
+  //         to: formRequest.from
+  //       }
+  //     )
+  //   resource[prop.name] = item
+  //   let params = {resource}
+  //   if (formRequest)
+  //     params.disableFormRequest = formRequest
+  //   Actions.addChatItem(params)
+  // },
