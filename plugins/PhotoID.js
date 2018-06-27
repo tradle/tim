@@ -102,8 +102,17 @@ function prefillValues(form, values, model) {
     }
     else if (props[p].type === 'date'  &&  typeof val === 'string')
       form[p] = new Date(val).getTime() //formatDate(val, 'yyyy-mm-dd')
-    else
-      form[p] = val
+    else {
+      let ref = props[p].ref
+      // Need checking
+      if (ref  &&  utils.isEnum(ref)) {
+        let valL = ref + '_' + val.toLowerCase()
+        let enumValue = utils.getModel(ref).enum.find(r => r.id === valL)
+        form[p] = enumValue
+      }
+      else
+        form[p] = val
+    }
   }
 }
 function getRequestedProps({scan, model, requestedProperties, form}) {
@@ -151,6 +160,8 @@ function cleanupValues(form, values, model) {
     else
       delete form[p]
   }
+  delete form.scan
+  delete form.scanJson
   let requestedProperties
   if (!values  &&  (isWeb()  ||  isSimulator())) {
     let isLicence = form.documentType.title.indexOf('Licence') !== -1
@@ -163,7 +174,7 @@ function cleanupValues(form, values, model) {
     requestedProperties = []
   return {
     message: translate('Please scan your document'),
-    deleteProperties: ['scan', 'scanJson'],
+    // deleteProperties: ['scan', 'scanJson'],
     requestedProperties
   }
 }
