@@ -3778,7 +3778,7 @@ var Store = Reflux.createStore({
             docs.push(v.document)
         }
         else if (v.sources)
-          self.getDocs(v.sources, rId, docs)
+          getDocs(v.sources, rId, docs)
       })
     }
   },
