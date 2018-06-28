@@ -217,13 +217,14 @@ class GridList extends Component {
     if (isBacklink) {
       // if (!props.resource['_' + props.prop.name + 'Count'])
       //   return
-      if (application  ||  search) {
+       // if (application  ||  search  ||  (utils.getMe().isEmployee  &&  !utils.isMyMessage({resource}))) {
         if (resource[prop.name]) {
           this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
           return
         }
-      }
-      this.state.dataSource = this.state.dataSource.cloneWithRows([])
+      // }
+      else
+        this.state.dataSource = this.state.dataSource.cloneWithRows([])
       if (!_.isEqual(this.props.prop, props.prop))
         this.state.isLoading = true;
 
