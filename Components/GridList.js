@@ -1478,14 +1478,23 @@ class GridList extends Component {
     }
 
     if (isEmptyItemsTab) {
-      content = <NoResources
-                  message={translate('pleaseClickOnAddButton', utils.makeModelTitle(model))}
-                  icon={'md-add'}
-                  iconColor={'#ffffff'}
-                  iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
-                  model={model}
-                  isLoading={isLoading}/>
-
+      // content = <NoResources
+      //             message={translate('pleaseClickOnAddButton', utils.makeModelTitle(model))}
+      //             icon={'md-add'}
+      //             iconColor={'#ffffff'}
+      //             iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
+      //             model={model}
+      //             isLoading={isLoading}/>
+      let height = utils.dimensions(GridList).height + 100
+      content = <View style={{justifyContent: 'flex-end', height}}>
+                  <NoResources
+                    message={translate('pleaseClickOnAddButton', prop && prop.title || utils.makeModelTitle(model))}
+                    iconColor={'#ffffff'}
+                    iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
+                    model={model}
+                    isLoading={isLoading}>
+                  </NoResources>
+                </View>
     }
     else {
       content = <ListView  onScroll={isModel ? () => {} : this.onScroll.bind(this)}
