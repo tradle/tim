@@ -591,10 +591,10 @@ var ResourceMixin = {
                   </View>
     }
     let self = this
-    let row = <Accordion
+    return <Accordion
                 sections={['txId']}
                 onPress={() => {
-                  self.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
+                  this.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
                     if (h  &&  y > pY)
                       onPageLayout(pY, h)
                   })
@@ -603,7 +603,14 @@ var ResourceMixin = {
                 content={content}
                 underlayColor='transparent'
                 easing='easeIn' />
-    return row
+  },
+  getBlockchainExplorerRow(url, i, styles) {
+    const { bankStyle } = this.props
+    return (
+      <TouchableOpacity onPress={this.onPress.bind(this, url)} key={`url${i}`}>
+        <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' ' + (i+1)}</Text>
+      </TouchableOpacity>
+    )
   }
 }
 
