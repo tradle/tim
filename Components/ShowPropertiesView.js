@@ -380,14 +380,6 @@ class ShowPropertiesView extends Component {
                 }}/>
            </View>
   }
-  getBlockchainExplorerRow(url, i, styles) {
-    const { bankStyle } = this.props
-    return (
-      <TouchableOpacity onPress={this.onPress.bind(this, url)} key={`url${i}`}>
-        <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' ' + (i+1)}</Text>
-      </TouchableOpacity>
-    )
-  }
   onPress(url, event) {
     Linking.openURL(url)
   }
