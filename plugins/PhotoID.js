@@ -106,9 +106,20 @@ function prefillValues(form, values, model) {
       let ref = props[p].ref
       // Need checking
       if (ref  &&  utils.isEnum(ref)) {
-        let valL = ref + '_' + val.toLowerCase()
-        let enumValue = utils.getModel(ref).enum.find(r => r.id === valL)
-        form[p] = enumValue
+        if (ref === 'tradle.Sex') {
+
+          let v = val.toLowerCase().charAt(0) === 'm'  &&  'Male'  ||  'Female'
+          let enumValue = utils.getModel(ref).enum.find(r => r.id === v)
+
+          form[p] = {
+            id: ref + '_' + enumValue.id,
+            title: enumValue.title
+          }
+        }
+
+        // let valL = ref + '_' + val.toLowerCase()
+        // let enumValue = utils.getModel(ref).enum.find(r => r.id === valL)
+        // form[p] = enumValue
       }
       else
         form[p] = val
