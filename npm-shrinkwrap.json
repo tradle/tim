@@ -6159,9 +6159,9 @@
       "resolved": "git://github.com/tradle/react-native-signature-pad.git#11847231e3f239214b6dceebbd314b447105660f"
     },
     "react-native-splash-screen": {
-      "version": "3.0.7",
-      "from": "react-native-splash-screen@>=3.0.6 <4.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-splash-screen/-/react-native-splash-screen-3.0.7.tgz"
+      "version": "3.0.9",
+      "from": "react-native-splash-screen@latest",
+      "resolved": "https://registry.npmjs.org/react-native-splash-screen/-/react-native-splash-screen-3.0.9.tgz"
     },
     "react-native-swipeout": {
       "version": "2.3.3",
