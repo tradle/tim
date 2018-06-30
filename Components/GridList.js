@@ -763,7 +763,8 @@ class GridList extends Component {
         passProps: {
           resource: resource,
           search: search,
-          bankStyle: style
+          bankStyle: style,
+          application: resource
         }
       }
       navigator.push(route)
@@ -876,8 +877,47 @@ class GridList extends Component {
         bankStyle: bankStyle || defaultBankStyle
       }
     }
-    if (isBacklink)
+    if (isBacklink) {
+      if (application  &&  utils.isRM(application)) {
+        let editView
+        _.extend(route.passProps, {
+          ref: ref => {
+            editView = ref
+          }
+        })
+        _.extend(route, {
+          rightButtonTitle: 'VerifyOrCorrect',
+          onRightButtonPress: () => {
+            if (editView.state.isVerifier)
+              Actions.verifyOrCorrect({ resource: editView.props.resource })
+            else
+              editView.setState({isVerifier: true})
+          }
+        })
+        // _.extend(route, {
+        //   rightButtonTitle: 'Edit',
+        //   onRightButtonPress: {
+        //     title: newTitle,
+        //     id: 5,
+        //     backButtonTitle: 'Back',
+        //     component: MessageView,
+        //     rightButtonTitle:'Done', //ribbon-b|ios-close'
+        //     help: translate('verifierHelp'),  // will show in alert when clicked on help icon in navbar
+        //     // application = application
+        //     passProps: {
+        //       bankStyle,
+        //       resource,
+        //       // lensId: lensId,
+        //       application,
+        //       currency: resource.currency || this.props.resource.currency,
+        //       country: resource.country,
+        //       isVerifier: true
+        //     }
+        //   }
+        // })
+      }
       route.passProps.backlink = prop
+    }
     if (!utils.isStub(resource)  &&  utils.isMyMessage({resource})) {
       _.extend(route, {
         rightButtonTitle: 'Edit',
@@ -896,7 +936,6 @@ class GridList extends Component {
             bankStyle: bankStyle || defaultBankStyle
           }
         },
-
       })
     }
     navigator.push(route)

@@ -102,6 +102,7 @@ const REMEDIATION = 29
 const LOGO_HEIGHT = 27
 const TOUR_PAGE = 35
 const AVIVA_INTRO_VIEW = 50
+const VERIFY_OR_CORRECT = 'VerifyOrCorrect'
 
 import platformStyles from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
@@ -653,6 +654,7 @@ var NavigationBarRouteMapper = {
     let viewStyle = {}
     switch (rbTitle) {
     case 'Done':
+    case VERIFY_OR_CORRECT:
       iconColor = '#fff'
       isSubmit = true
       if (route.passProps.isChooser) {

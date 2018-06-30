@@ -66,7 +66,8 @@ class ShowPropertiesView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      promptVisible: null
+      promptVisible: null,
+      uncheck: null
     }
   }
 
@@ -83,7 +84,11 @@ class ShowPropertiesView extends Component {
     // Prompt for employee to write a correction message
     if (this.state.promptVisible !== nextState.promptVisible)
       return true
+    if (this.state.uncheck !== nextState.uncheck)
+      return true
     if (this.props.resource !== nextProps.resource)
+      return true
+    if (this.props.isVerifier !== nextProps.isVerifier)
       return true
     // if (!this.props.errorProps  ||  !nextProps.errorProps)
     //   return true
@@ -365,7 +370,12 @@ class ShowPropertiesView extends Component {
 
     return <View>
               <TouchableOpacity underlayColor='transparent' onPress={() => {
-                this.setState({promptVisible: pMeta})
+                if (errorProps  &&  errorProps[p]) {
+                  delete errorProps[p]
+                  this.setState({promptVisible: null, uncheck: p})
+                }
+                else
+                  this.setState({promptVisible: pMeta})
               }}>
                 <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'deeppink' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
               </TouchableOpacity>
