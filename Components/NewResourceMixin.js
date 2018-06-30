@@ -1357,7 +1357,8 @@ var NewResourceMixin = {
         // let m = utils.getId(resource[params.prop]).split('_')[0]
         label = utils.getDisplayName(resource[params.prop], rModel)
         if (!label) {
-          if ((prop.items || search)  &&  utils.isEnum(rModel)) {
+          // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
+          if (utils.isEnum(rModel)  &&  Array.isArray(resource[params.prop])) {
             label = ''
             resource[params.prop].forEach((r) => {
               let title = utils.getDisplayName(r)
