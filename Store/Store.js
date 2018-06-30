@@ -1803,6 +1803,9 @@ var Store = Reflux.createStore({
   onSetProviderStyle(stylePack) {
     // const style = utils.interpretStylesPack(stylePack)
   },
+  onVerifyOrCorrect({resource}) {
+    this.trigger({action: 'verifyOrCorrect', resource})
+  },
   addToSettings(provider) {
     let r = this._getItem(SETTINGS + '_1')
     if (!r.hashToUrl)
@@ -3865,8 +3868,9 @@ var Store = Reflux.createStore({
     var res = {};
     if (!r) {
       if (me.isEmployee) {
-        res = await this._getItemFromServer(rId)
-        r = pick(res, TYPE)
+        return await this.onGetItemFromServer(params)
+        // res = await this._getItemFromServer(rId)
+        // r = pick(res, TYPE)
       }
     }
     if (utils.isMessage(r)) {
@@ -3932,8 +3936,22 @@ if (!res[SIG]  &&  res._message)
     let isApplication = resource[TYPE] === APPLICATION
     let rId = utils.getId(resource)
     let r
-    if (!isApplication  ||  resource.id  ||  (!backlink  &&  !forwardlink))
+    if (!isApplication  ||  resource.id  ||  (!backlink  &&  !forwardlink)) {
       r = await this._getItemFromServer(rId, backlink)
+      // Check if there are verifications
+      if (!noTrigger                 &&
+          application                &&
+          application.verifications  &&
+          utils.getModel(r[TYPE]).subClassOf === FORM) {
+        let hashes = application.verifications.map(r => this.getRootHash(r))
+        // let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r, _link: [hashes]}, noTrigger: true})
+        let l = await this.searchServer({modelName: VERIFICATION, filterResource: {document: r}, noTrigger: true})
+        if (l) {
+          r.verifications = l.list
+          r._verificationsCount = l.list.length
+        }
+      }
+    }
     else {
       let prop
       let blProp = backlink ||  forwardlink
