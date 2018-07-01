@@ -38,11 +38,18 @@ export default class DatePickerAdapter extends Component {
     const { date, customStyles } = this.props
     const dateString = date ? dateformat(date, 'mmm dS, yyyy') : this.props.placeholder
     const textStyle = customStyles && customStyles.placeholderText
+    // return (
+    //   <TouchableHighlight underlayColor="transparent" style={this.props.style} onPress={() => this.onPress()}>
+    //     <View>
+    //       <Text style={textStyle}>{dateString}</Text>
+    //       <input style={styles.hidden} type="text" onFocus={() => this.onPress()} />
+    //     </View>
+    //   </TouchableHighlight>
+    // )
     return (
       <TouchableHighlight underlayColor="transparent" style={this.props.style} onPress={() => this.onPress()}>
         <View>
           <Text style={textStyle}>{dateString}</Text>
-          <input style={styles.hidden} type="text" onFocus={() => this.onPress()} />
         </View>
       </TouchableHighlight>
     )
