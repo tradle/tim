@@ -842,8 +842,10 @@ var NewResourceMixin = {
     let bankStyle = this.props.bankStyle
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
     return (
+      <View style={{paddingVertical: 10}}>
       <View style={[styles.divider, {borderBottomColor: linkColor, paddingVertical: 5}]}>
         <Text style={[styles.dividerText, {color: linkColor}]}>{label}</Text>
+      </View>
       </View>
     );
   },
@@ -1246,10 +1248,10 @@ var NewResourceMixin = {
 
     return (
       <View key={this.getNextKey()} ref={prop.name}>
-        <View style={[st, { paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10, justifyContent: 'flex-end'}]}>
+        <View style={[st, { paddingBottom: 10, justifyContent: 'flex-end'}]}>
           {propLabel}
           <DatePicker
-            style={[styles.datePicker, {width: utils.dimensions(component).width - 30, paddingBottom: 3}]}
+            style={[styles.datePicker, {width: utils.dimensions(component).width - 30, paddingBottom: 10}]}
             mode="date"
             placeholder={value}
             format={format}
@@ -1427,7 +1429,8 @@ var NewResourceMixin = {
         // let m = utils.getId(resource[params.prop]).split('_')[0]
         label = utils.getDisplayName(resource[params.prop], rModel)
         if (!label) {
-          if ((prop.items || search)  &&  utils.isEnum(rModel)) {
+          // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
+          if (utils.isEnum(rModel)  &&  Array.isArray(resource[params.prop])) {
             label = ''
             resource[params.prop].forEach((r) => {
               let title = utils.getDisplayName(r)
@@ -1527,7 +1530,7 @@ var NewResourceMixin = {
       }
 
       if (useImageInput) {
-        let aiStyle = {flex: 7, paddingTop: 15, paddingBottom: help ? 0 : 7}
+        let aiStyle = {flex: 7, paddingTop: resource[prop.name] &&  10 || 0, paddingBottom: help ? 0 : 7}
         let m = utils.getModel(prop.ref)
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
                        {content}
