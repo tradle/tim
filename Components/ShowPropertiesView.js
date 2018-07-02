@@ -62,12 +62,13 @@ class ShowPropertiesView extends Component {
     currency: PropTypes.string,
     bankStyle: PropTypes.object,
     errorProps: PropTypes.object,
-    excludedProperties: PropTypes.array
+    excludedProperties: PropTypes.Array
   };
   constructor(props) {
     super(props);
     this.state = {
-      promptVisible: null
+      promptVisible: null,
+      uncheck: null
     }
   }
 
@@ -86,7 +87,11 @@ class ShowPropertiesView extends Component {
       return true
     if (this.state.promptVisible !== nextState.promptVisible)
       return true
+    if (this.state.uncheck !== nextState.uncheck)
+      return true
     if (this.props.resource !== nextProps.resource)
+      return true
+    if (this.props.isVerifier !== nextProps.isVerifier)
       return true
     // if (!this.props.errorProps  ||  !nextProps.errorProps)
     //   return true
@@ -351,72 +356,11 @@ class ShowPropertiesView extends Component {
     })
     let { txId, blockchain, networkName } = resource
     if (txId) { // || utils.isSealableModel(model)) {
-      let content
-      let header = (<View style={{padding: 10}} key={this.getNextKey()}>
-                      <View style={[styles.textContainer, styles.row]}>
-                        <Text style={styles.bigTitle}>{translate('dataSecurity')}</Text>
-                        <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
-                      </View>
-                      <View style={styles.separator} />
-                    </View>)
-      if (blockchain === 'corda') {
-        let description = 'You\'ll be able to verify this transaction when you launch your Corda node.'
-        content = <View style={{paddingHorizontal: 10}}>
-                   <View style={{flexDirection: 'row', paddingVertical: 3}}>
-                     <Text style={styles.dsTitle}>Blockchain: </Text>
-                     <Text style={styles.dsValue}>{blockchain}</Text>
-                   </View>
-                   <View style={{flexDirection: 'row'}}>
-                     <Text style={styles.dsTitle}>Network: </Text>
-                     <Text style={styles.dsValue}>{networkName}</Text>
-                   </View>
-                   <View>
-                     <Text style={styles.title}>TxID: </Text>
-                     <Text style={styles.dsValue}>{txId}</Text>
-                   </View>
-                   <Text style={[styles.content, {marginTop: 20}]}>{description}</Text>
-                  </View>
-      }
-      else {
-        let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
-        let txs = (
-          <View>
-            {
-              BLOCKCHAIN_EXPLORERS.map((url, i) => {
-                url = url.replace('$TXID', txId)
-                return this.getBlockchainExplorerRow(url, i, styles)
-              })
-            }
-          </View>
-        )
-
-        content = <View style={{paddingHorizontal: 10}}>
-                     <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
-                       <Text style={styles.content}>{description}
-                         <Text style={styles.learnMode}> Learn more</Text>
-                       </Text>
-                     </TouchableOpacity>
-                     {txs}
-                    </View>
-      }
-      let self = this
-      let row = <Accordion
-                  sections={['txId']}
-                  onPress={() => {
-                    self.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
-                      if (h  &&  y > pY)
-                        onPageLayout(pY, h)
-                    })
-                  }}
-                  header={header}
-                  content={content}
-                  underlayColor='transparent'
-                  easing='easeIn' />
-      viewCols.push(
-          <View key={this.getNextKey()} ref='propertySheet'>
-            {row}
-          </View>
-        )
+    viewCols.push(
+        <View key={this.getNextKey()} ref='propertySheet'>
+          {this.addDataSecurity(resource)}
+        </View>
+      )
     }
     return viewCols;
   }
@@ -429,7 +373,12 @@ class ShowPropertiesView extends Component {
 
     return <View>
               <TouchableOpacity underlayColor='transparent' onPress={() => {
-                this.setState({promptVisible: pMeta})
+                if (errorProps  &&  errorProps[p]) {
+                  delete errorProps[p]
+                  this.setState({promptVisible: null, uncheck: p})
+                }
+                else
+                  this.setState({promptVisible: pMeta})
               }}>
                 <Icon key={p} name={errorProps && errorProps[p] ? 'ios-close-circle' : 'ios-radio-button-off'} size={30} color={this.props.errorProps && errorProps[p] ? 'deeppink' : bankStyle.linkColor} style={{marginTop: 10, marginRight: 10}}/>
               </TouchableOpacity>
@@ -443,14 +392,6 @@ class ShowPropertiesView extends Component {
                   this.props.checkProperties(this.state.promptVisible, value)
                 }}/>
            </View>
-  }
-  getBlockchainExplorerRow(url, i, styles) {
-    const { bankStyle } = this.props
-    return (
-      <TouchableOpacity onPress={this.onPress.bind(this, url)} key={`url${i}`}>
-        <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' ' + (i+1)}</Text>
-      </TouchableOpacity>
-    )
   }
   onPress(url, event) {
     Linking.openURL(url)
@@ -468,12 +409,6 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
     row: {
       justifyContent: 'space-between',
       flexDirection: 'row'
-    },
-    content: {
-      color: '#9b9b9b',
-      fontSize: 16,
-      marginHorizontal: 7,
-      paddingBottom: 10
     },
     title: {
       fontSize: 16,
@@ -493,31 +428,9 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
       marginHorizontal: 7,
       color: '#2E3B4E',
     },
-    dsTitle: {
-      width: 90,
-      fontSize: 16,
-      // fontFamily: 'Avenir Next',
-      marginTop: 3,
-      marginBottom: 0,
-      marginHorizontal: 7,
-      color: '#9b9b9b'
-    },
-    dsValue: {
-      fontSize: 18,
-      marginHorizontal: 7,
-      color: '#2E3B4E',
-    },
     icon: {
       width: 40,
       height: 40
-    },
-    bigTitle: {
-      fontSize: 20,
-      // fontFamily: 'Avenir Next',
-      marginTop: 3,
-      marginBottom: 0,
-      marginHorizontal: 7,
-      color: '#7AAAC3'
     },
     groupStyle: {
       borderBottomColor: bankStyle.linkColor,
@@ -528,19 +441,114 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
       fontSize: 22,
       color: bankStyle.linkColor
     },
-    learnMode: {
-      color: bankStyle.linkColor,
-      paddingHorizontal: 7
-    },
-    separator: {
-      height: 1,
-      marginTop: 5,
-      marginBottom: 10,
-      marginHorizontal: -10,
-      alignSelf: 'stretch',
-      backgroundColor: bankStyle.linkColor
+    bigTitle: {
+      fontSize: 20,
+      // fontFamily: 'Avenir Next',
+      marginTop: 3,
+      marginBottom: 0,
+      marginHorizontal: 7,
+      color: '#7AAAC3'
     },
   })
 })
 
 module.exports = ShowPropertiesView;
+
+// let content
+// let header = (<View style={{padding: 10}} key={this.getNextKey()}>
+//                 <View style={[styles.textContainer, styles.row]}>
+//                   <Text style={styles.bigTitle}>{translate('dataSecurity')}</Text>
+//                   <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
+//                 </View>
+//                 <View style={styles.separator} />
+//               </View>)
+// if (blockchain === 'corda') {
+//   let description = 'You\'ll be able to verify this transaction when you launch your Corda node.'
+//   content = <View style={{paddingHorizontal: 10}}>
+//              <View style={{flexDirection: 'row', paddingVertical: 3}}>
+//                <Text style={styles.dsTitle}>Blockchain: </Text>
+//                <Text style={styles.dsValue}>{blockchain}</Text>
+//              </View>
+//              <View style={{flexDirection: 'row'}}>
+//                <Text style={styles.dsTitle}>Network: </Text>
+//                <Text style={styles.dsValue}>{networkName}</Text>
+//              </View>
+//              <View>
+//                <Text style={styles.title}>TxID: </Text>
+//                <Text style={styles.dsValue}>{txId}</Text>
+//              </View>
+//              <Text style={[styles.content, {marginTop: 20}]}>{description}</Text>
+//             </View>
+// }
+// else {
+//   let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
+//   let txs = (
+//     <View>
+//       {
+//         BLOCKCHAIN_EXPLORERS.map((url, i) => {
+//           url = url.replace('$TXID', txId)
+//           return this.getBlockchainExplorerRow(url, i, styles)
+//         })
+//       }
+//     </View>
+//   )
+
+//   content = <View style={{paddingHorizontal: 10}}>
+//                <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
+//                  <Text style={styles.content}>{description}
+//                    <Text style={styles.learnMode}> Learn more</Text>
+//                  </Text>
+//                </TouchableOpacity>
+//                {txs}
+//               </View>
+// }
+// let self = this
+// let row = <Accordion
+//             sections={['txId']}
+//             onPress={() => {
+//               self.refs.propertySheet.measure((x,y,w,h,pX,pY) => {
+//                 if (h  &&  y > pY)
+//                   onPageLayout(pY, h)
+//               })
+//             }}
+//             header={header}
+//             content={content}
+//             underlayColor='transparent'
+//             easing='easeIn' />
+// viewCols.push(
+//     <View key={this.getNextKey()} ref='propertySheet'>
+//       {row}
+//     </View>
+//   )
+// learnMode: {
+//   color: bankStyle.linkColor,
+//   paddingHorizontal: 7
+// },
+// separator: {
+//   height: 1,
+//   marginTop: 5,
+//   marginBottom: 10,
+//   marginHorizontal: -10,
+//   alignSelf: 'stretch',
+//   backgroundColor: bankStyle.linkColor
+// },
+// dsTitle: {
+//   width: 90,
+//   fontSize: 16,
+//   // fontFamily: 'Avenir Next',
+//   marginTop: 3,
+//   marginBottom: 0,
+//   marginHorizontal: 7,
+//   color: '#9b9b9b'
+// },
+// dsValue: {
+//   fontSize: 18,
+//   marginHorizontal: 7,
+//   color: '#2E3B4E',
+// },
+// content: {
+//   color: '#9b9b9b',
+//   fontSize: 16,
+//   marginHorizontal: 7,
+//   paddingBottom: 10
+// },

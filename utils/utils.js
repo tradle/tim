@@ -542,7 +542,8 @@ var utils = {
     if (parts.length === 1)
       return label
     // keep abbreviations intact
-    let newLabel = parts.reduce((sum, cur) => sum + (cur.length === 1 ? cur : ' ' + cur))
+    // let newLabel = parts.reduce((sum, cur) => sum + (cur.length === 1 ? cur : ' ' + cur))
+    let newLabel = parts.reduce((sum, cur) => sum + (' ' + cur)).trim()
     return newLabel
   },
   arrayToObject(arr) {
@@ -875,7 +876,7 @@ var utils = {
   },
   getDateValue(value) {
     let valueMoment = moment.utc(value)
-    let format = 'MMMM Do, YYYY h:MM LT'
+    let format = 'MMMM Do, YYYY h:MMA'
     return valueMoment && valueMoment.format(format)
   },
   getPropStringValue(prop, resource) {

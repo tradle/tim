@@ -53,12 +53,20 @@ class VerificationView extends Component {
       verifier = resource.from.organization.title
     else
       verifier = resource.from.title
+    let dataSecurity
+    if (resource.txId) {
+      this.addDataSecurity(resource)
+      dataSecurity = <View ref='propertySheet' style={{marginTop: 20}}>
+                       {this.addDataSecurity(resource)}
+                     </View>
+    }
     return (
        <View style={{width: utils.getContentWidth(VerificationView)}}>
         <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.verifiedHeaderColor}]}>
           <Text style={[styles.description, {color: this.props.bankStyle.verifiedHeaderTextColor, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
         </View>
         {this.renderVerification(resource, utils.getModel(constants.TYPES.VERIFICATION), vTree, 0, 0)}
+        {dataSecurity}
       </View>
     );
   }

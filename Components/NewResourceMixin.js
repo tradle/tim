@@ -77,6 +77,7 @@ const {
 
 const COUNTRY = 'tradle.Country'
 const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
+const INTERSECTION = 'tradle.Intersection'
 
 const PHOTO = 'tradle.Photo'
 const YEAR = 3600 * 1000 * 24 * 365
@@ -736,7 +737,7 @@ var NewResourceMixin = {
     }
   },
 
-  showCamera(params) {
+  showCameraView(params) {
     // if (utils.isAndroid()) {
     //   return Alert.alert(
     //     translate('oops') + '!',
@@ -769,7 +770,7 @@ var NewResourceMixin = {
       component: CameraView,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
-        onTakePic: this.onTakePic.bind(this, params.prop)
+        onTakePic: this.onTakePicture.bind(this, params)
       }
     });
   },
@@ -823,15 +824,15 @@ var NewResourceMixin = {
     // Alert.alert(JSON.stringify(card, null, 2))
   },
 
-  onTakePic(prop, data) {
+  onTakePicture(params, data) {
     if (!data)
       return
     if (utils.isOnePropForm(this.props.resource))
-      utils.onTakePic(prop, data, this.props.originatingMessage)
+      utils.onTakePic(params.prop, data, this.props.originatingMessage)
     else {
       data.url = data.data
       delete data.data
-      this.setChosenValue(prop, data)
+      this.setChosenValue(params.prop, data)
     }
 
     this.props.navigator.pop()
@@ -963,56 +964,11 @@ var NewResourceMixin = {
     }
 
     return <View style={st}>
-             <TouchableOpacity onPress={this.showSignatureView.bind(this, prop)}>
+             <TouchableOpacity onPress={this.showSignatureView.bind(this, prop, this.onChangeText.bind.this(prop))}>
                {sig}
              </TouchableOpacity>
           </View>
   },
-
-  showSignatureView(prop) {
-    const { navigator, bankStyle } = this.props
-    let sigView
-    navigator.push({
-      title: translate(prop), //m.title,
-      // titleTextColor: '#7AAAC3',
-      id: 32,
-      component: SignatureView,
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
-      onRightButtonPress: () => {
-        const sig = sigView.getSignature()
-        navigator.pop()
-        this.onChangeText(prop, sig.url)
-      },
-      passProps: {
-        ref: ref => {
-          sigView = ref
-        },
-        bankStyle,
-        sigViewStyle: bankStyle
-      }
-    })
-  },
-
-  // showSignatureView(prop) {
-  //   const { navigator } = this.props
-  //   navigator.push({
-  //     title: translate(prop), //m.title,
-  //     // titleTextColor: '#7AAAC3',
-  //     id: 32,
-  //     component: SignatureView,
-  //     backButtonTitle: 'Back',
-  //     rightButtonTitle: 'Done',
-  //     passProps: {
-  //       value:          this.state.resource[prop.name] || '',
-  //       style:          this.props.bankStyle,
-  //       onSignature:    ({ url, width, height }) => {
-  //         navigator.pop()
-  //         this.onChangeText(prop, url)
-  //       }
-  //     }
-  //   })
-  // },
 
   myTextInputTemplate(params) {
     let {prop, required, model, editable, keyboard, value} = params
@@ -1526,7 +1482,7 @@ var NewResourceMixin = {
       if (utils.isWeb()) {
         useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
       } else {
-        useImageInput = !isScan || (!BlinkID  &&  !prop.scanner)
+        useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
       }
 
       if (useImageInput) {
@@ -1537,7 +1493,7 @@ var NewResourceMixin = {
                      </ImageInput>
       }
       else
-        actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.showCamera.bind(this, params)}>
+        actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.showCameraView.bind(this, params)}>
                        {content}
                      </TouchableHighlight>
     }
@@ -1822,7 +1778,8 @@ var NewResourceMixin = {
     if (!this.props.search) {
       if (model.subClassOf === FORM)
         Actions.getRequestedProperties({resource: r, currentResource: currentR})
-      Actions.saveTemporary(r)
+      if (!utils.isImplementing(r, INTERSECTION))
+        Actions.saveTemporary(r)
     }
   },
 
@@ -2344,3 +2301,47 @@ function getDocumentTypeFromTitle (title='') {
 }
 
 module.exports = NewResourceMixin
+  // showSignatureView1(prop) {
+  //   const { navigator, bankStyle } = this.props
+  //   let sigView
+  //   navigator.push({
+  //     title: translate(prop), //m.title,
+  //     // titleTextColor: '#7AAAC3',
+  //     id: 32,
+  //     component: SignatureView,
+  //     backButtonTitle: 'Back',
+  //     rightButtonTitle: 'Done',
+  //     onRightButtonPress: () => {
+  //       const sig = sigView.getSignature()
+  //       navigator.pop()
+  //       this.onChangeText(prop, sig.url)
+  //     },
+  //     passProps: {
+  //       ref: ref => {
+  //         sigView = ref
+  //       },
+  //       bankStyle,
+  //       sigViewStyle: bankStyle
+  //     }
+  //   })
+  // },
+
+  // showSignatureView(prop) {
+  //   const { navigator } = this.props
+  //   navigator.push({
+  //     title: translate(prop), //m.title,
+  //     // titleTextColor: '#7AAAC3',
+  //     id: 32,
+  //     component: SignatureView,
+  //     backButtonTitle: 'Back',
+  //     rightButtonTitle: 'Done',
+  //     passProps: {
+  //       value:          this.state.resource[prop.name] || '',
+  //       style:          this.props.bankStyle,
+  //       onSignature:    ({ url, width, height }) => {
+  //         navigator.pop()
+  //         this.onChangeText(prop, url)
+  //       }
+  //     }
+  //   })
+  // },

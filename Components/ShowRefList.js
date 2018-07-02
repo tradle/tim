@@ -1,7 +1,6 @@
 console.log('requiring ShowRefList.js')
 'use strict';
 
-import constants from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'
 import {
   View,
@@ -14,12 +13,15 @@ import {
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
+import ScrollableTabView from 'react-native-scrollable-tab-view'
+import Icon from 'react-native-vector-icons/Ionicons'
+
 import GridList from './GridList'
 import utils, {
   translate
 } from '../utils/utils'
 
-import Icon from 'react-native-vector-icons/Ionicons'
+import constants from '@tradle/constants'
 import buttonStyles from '../styles/buttonStyles'
 import appStyle from '../styles/appStyle.json'
 import reactMixin from 'react-mixin'
@@ -28,7 +30,7 @@ import ResourceMixin from './ResourceMixin'
 import ShowPropertiesView from './ShowPropertiesView'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
-
+import BacklinksTabBar from './BacklinksTabBar'
 const {
   TYPE,
   ROOT_HASH
@@ -51,19 +53,16 @@ class ShowRefList extends Component {
     model = model || utils.getModel(resource[TYPE]);
     var props = model.properties;
     var refList = [];
-    var isIdentity = model.id === PROFILE;
+    var isProfile = model.id === PROFILE;
     var isOrg = model.id === ORGANIZATION;
     var me = utils.getMe()
-    var isMe = isIdentity ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
+    var isMe = isProfile ? resource[ROOT_HASH] === me[ROOT_HASH] : true;
     // The profile page for the device owner has 2 more profile specific links: add new PROFILE and switch PROFILE
     let propsToShow = []
 
     let currentBacklink = backlink
     let hasPropsToShow = this.hasPropsToShow(resource)
-    showDetails = !isIdentity  &&  !isOrg  &&  !showDocuments  &&  (showDetails || !backlink)  && hasPropsToShow
-    // showDetails = !isIdentity  &&  !showDocuments  &&  (showDetails || !backlink)
-    // if (showDetails  &&  isOrg)
-    //   showDetails = false
+    showDetails = !isProfile  &&  !isOrg  &&  !showDocuments  &&  (showDetails || !backlink)  && hasPropsToShow
 
     let bg = bankStyle ? bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
 
@@ -75,7 +74,7 @@ class ShowRefList extends Component {
       for (var p in itemProps) {
         if (itemProps[p].hidden)
           continue
-        if (isIdentity) {
+        if (isProfile) {
           if (!isMe  &&  itemProps[p].allowRoles  &&  itemProps[p].allowRoles === 'me')
             continue;
           if (p === 'verifiedByMe'  &&  !me.organization)
@@ -92,6 +91,8 @@ class ShowRefList extends Component {
       }
     }
     let isMessage = utils.isMessage(resource)
+    this.tabDetail = {}
+    let moreIconsIdx = 0
     // Show supporting docs
     if (isMessage) {
       let rId = utils.getId(resource)
@@ -107,42 +108,17 @@ class ShowRefList extends Component {
         this.getDocs(resource.verifications, rId, docs)
       }
       if (docs  &&  docs.length) {
-        let count = <View style={styles.count}>
-                      <Text style={styles.countText}>{docs.length}</Text>
-                    </View>
-        let showCurrent = showDocuments ? currentMarker : null
-        refList.push(
-          <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-           <TouchableHighlight onPress={() => this.showDocs(docs)} underlayColor='transparent'>
-             <View style={styles.item}>
-               <View style={styles.row}>
-                 <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
-                 {count}
-               </View>
-               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Documents'}</Text>
-             </View>
-           </TouchableHighlight>
-           {showCurrent}
-          </View>)
+        this.tabDetail.Documents = {icon: 'ios-paper-outline', action: this.showDocs.bind(this, docs)}
+        refList.push(<View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()} tabLabel='Documents'/>)
       }
     }
     if (!propsToShow.length) {
       if (!showDetails)
         return <View/>
     }
-    else if (!isOrg  &&  !isIdentity  &&  hasPropsToShow) {
-      let showCurrent = showDetails  ? currentMarker : null
-      let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-                         <TouchableHighlight onPress={this.showDetails.bind(this)} underlayColor='transparent'>
-                           <View style={styles.item}>
-                             <View style={styles.row}>
-                               <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
-                             </View>
-                             <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{'Details'}</Text>
-                           </View>
-                         </TouchableHighlight>
-                         {showCurrent}
-                        </View>
+    else if (!isOrg  &&  !isProfile  &&  hasPropsToShow) {
+      this.tabDetail.Details = {icon: 'ios-paper-outline', action: this.showDetails.bind(this)}
+      let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()} tabLabel='Details' />
       if (refList.length)
         refList.splice(0, 0, detailsTab)
       else
@@ -172,47 +148,16 @@ class ShowRefList extends Component {
       if (!icon)
         icon = 'ios-checkmark';
       let cnt = resource['_' + p + 'Count'] // &&  resource[p].length
-      let count
-      if (cnt ) {
-        hasBacklinks = true
-        if (!currentBacklink  &&  !showDetails &&  !showDocuments)
-          currentBacklink = props[p]
-        count = <View style={styles.count}>
-                  <Text style={styles.countText}>{cnt}</Text>
-                </View>
-      }
       if (!hasBacklinks  &&  props[p].allowToAdd)
         hasBacklinks = true
-      let showCurrent = !showDetails  &&  currentBacklink  &&  currentBacklink.name === p ? currentMarker : null
-
-      refList.push(
-        <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-           <TouchableHighlight onPress={this.exploreBacklink.bind(this, resource, props[p])} underlayColor='transparent'>
-             <View style={styles.item}>
-               <View style={styles.row}>
-                 <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
-                 {count}
-               </View>
-               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{propTitle}</Text>
-             </View>
-           </TouchableHighlight>
-           {showCurrent}
-         </View>
-        );
+      this.tabDetail[propTitle] = { icon, action: this.exploreBacklink.bind(this, resource, props[p]), count: cnt }
+      refList.push(<View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()} tabLabel={propTitle}/>)
     })
-    const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
-    if (showQR) {
-      refList.push(
-        <View style={buttonStyles.container} key={this.getNextKey()}>
-           <TouchableHighlight onPress={this.props.showQR.bind(this)} underlayColor='transparent'>
-             <View style={styles.item}>
-               <Icon name={'ios-qr-scanner'}  size={utils.getFontSize(30)}  color='#757575' />
-               <Text style={[buttonStyles.text, Platform.OS === 'android' ? {marginTop: 3} : {marginTop: 0}]}>{translate('showQR')}</Text>
-             </View>
-           </TouchableHighlight>
-         </View>
-        )
-
+    const showQR = true //ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
+    if (showQR  &&  this.props.showQR) {
+      let tabName = translate('showQR')
+      this.tabDetail[tabName] = { icon: 'ios-qr-scanner', action: this.props.showQR.bind(this) }
+      refList.push(<View style={buttonStyles.container} key={this.getNextKey()} tabLabel={tabName}/>)
     }
     if (!hasBacklinks  &&  !showDocuments) {
       if (showDetails)
@@ -256,17 +201,29 @@ class ShowRefList extends Component {
                 </View>
     }
 
-    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails) {
-      // let style = {width: utils.getContentWidth(ShowRefList), utils.dimensions(ShowRefList).height}
-      let style = {width: utils.getContentWidth(ShowRefList)}
-      // Height is not working for long raw data like Centix check
-      if (!showDetails  &&  utils.isWeb())
-        style.height = utils.dimensions(ShowRefList).height
-      return <View style={style}>
+    let refListTabs
+    if (refList) {
+      // refListTabs = <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
+      //                 {refList}
+      //               </View>
+
+      refListTabs = <ScrollableTabView
+                      renderTabBar={() =>
+                        <BacklinksTabBar
+                          tabDetail={this.tabDetail}
+                          backgroundColor={appStyle.TAB_COLOR}
+                          activeTextColor='#757575'
+                          textStyle={buttonStyles.text}
+                          inactiveTextColor='#757575'
+                          tabsUnderlineColor={bg}/>
+                      }>
+                      {refList}
+                    </ScrollableTabView>
+    }
+    if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails)
+      return   <View>
                 {separator}
-                <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0, minHeight: refList &&  refList.length ? 70 : 0}]} key={'ShowRefList'}>
-                  {refList}
-                </View>
+                {refListTabs}
                 {children}
                 {comment}
                 <View style={{margin: 1, flex: 1}}>
@@ -274,7 +231,6 @@ class ShowRefList extends Component {
                   {details}
                 </View>
               </View>
-    }
 
     return children || <View/>
   }
@@ -331,31 +287,10 @@ reactMixin(ShowRefList.prototype, RowMixin);
 ShowRefList = makeResponsive(ShowRefList)
 
 var styles = StyleSheet.create({
-  count: {
-    alignSelf: 'flex-start',
-    minWidth: 18,
-    marginLeft: -7,
-    marginTop: 0,
-    backgroundColor: appStyle.COUNTER_BG_COLOR,
-    paddingHorizontal: 3,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 9,
-    borderColor: appStyle.COUNTER_COLOR,
-    paddingVertical: 1
-  },
-  countText: {
-    fontSize: 12,
-    fontWeight: '600',
-    alignSelf: 'center',
-    color: appStyle.COUNTER_COLOR,
-  },
   item: {
     alignItems: 'center',
     paddingTop: 10,
     paddingBottom: 0
-  },
-  row: {
-    flexDirection: 'row'
   },
   commandView: {
     justifyContent: 'center',

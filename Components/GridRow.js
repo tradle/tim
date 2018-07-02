@@ -215,9 +215,10 @@ class GridRow extends Component {
   }
   formatCol(pName) {
     let resource = this.props.resource
-    let model = utils.getModel(resource[TYPE] || resource.id);
+    let rtype = utils.getType(resource)
+    let model = utils.getModel(rtype || resource.id);
     let properties = model.properties;
-    let isContact = resource[TYPE] === PROFILE;
+    let isContact = rtype === PROFILE;
     let colProp = properties[pName]
     let backlink
     if (colProp.type === 'array') {

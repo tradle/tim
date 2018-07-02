@@ -217,7 +217,7 @@ class GridList extends Component {
     if (isBacklink) {
       // if (!props.resource['_' + props.prop.name + 'Count'])
       //   return
-      // if (application  ||  search  ||  (utils.getMe().isEmployee  &&  !utils.isMyMessage({resource}))) {
+       // if (application  ||  search  ||  (utils.getMe().isEmployee  &&  !utils.isMyMessage({resource}))) {
         if (resource[prop.name]) {
           this.state.dataSource = this.state.dataSource.cloneWithRows(resource[prop.name])
           return
@@ -769,7 +769,8 @@ class GridList extends Component {
         passProps: {
           resource: resource,
           search: search,
-          bankStyle: style
+          bankStyle: style,
+          application: resource
         }
       }
       navigator.push(route)
@@ -882,8 +883,47 @@ class GridList extends Component {
         bankStyle: bankStyle || defaultBankStyle
       }
     }
-    if (isBacklink)
+    if (isBacklink) {
+      if (application  &&  utils.isRM(application)) {
+        let editView
+        _.extend(route.passProps, {
+          ref: ref => {
+            editView = ref
+          }
+        })
+        _.extend(route, {
+          rightButtonTitle: 'VerifyOrCorrect',
+          onRightButtonPress: () => {
+            if (editView.state.isVerifier)
+              Actions.verifyOrCorrect({ resource: editView.props.resource })
+            else
+              editView.setState({isVerifier: true})
+          }
+        })
+        // _.extend(route, {
+        //   rightButtonTitle: 'Edit',
+        //   onRightButtonPress: {
+        //     title: newTitle,
+        //     id: 5,
+        //     backButtonTitle: 'Back',
+        //     component: MessageView,
+        //     rightButtonTitle:'Done', //ribbon-b|ios-close'
+        //     help: translate('verifierHelp'),  // will show in alert when clicked on help icon in navbar
+        //     // application = application
+        //     passProps: {
+        //       bankStyle,
+        //       resource,
+        //       // lensId: lensId,
+        //       application,
+        //       currency: resource.currency || this.props.resource.currency,
+        //       country: resource.country,
+        //       isVerifier: true
+        //     }
+        //   }
+        // })
+      }
       route.passProps.backlink = prop
+    }
     if (!utils.isStub(resource)  &&  utils.isMyMessage({resource})) {
       _.extend(route, {
         rightButtonTitle: 'Edit',
@@ -902,7 +942,6 @@ class GridList extends Component {
             bankStyle: bankStyle || defaultBankStyle
           }
         },
-
       })
     }
     navigator.push(route)
@@ -1484,14 +1523,23 @@ class GridList extends Component {
     }
 
     if (isEmptyItemsTab) {
-      content = <NoResources
-                  message={translate('pleaseClickOnAddButton', utils.makeModelTitle(model))}
-                  icon={'md-add'}
-                  iconColor={'#ffffff'}
-                  iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
-                  model={model}
-                  isLoading={isLoading}/>
-
+      // content = <NoResources
+      //             message={translate('pleaseClickOnAddButton', utils.makeModelTitle(model))}
+      //             icon={'md-add'}
+      //             iconColor={'#ffffff'}
+      //             iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
+      //             model={model}
+      //             isLoading={isLoading}/>
+      let height = utils.dimensions(GridList).height + 100
+      content = <View style={{justifyContent: 'flex-end', height}}>
+                  <NoResources
+                    message={translate('pleaseClickOnAddButton', prop && prop.title || utils.makeModelTitle(model))}
+                    iconColor={'#ffffff'}
+                    iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
+                    model={model}
+                    isLoading={isLoading}>
+                  </NoResources>
+                </View>
     }
     else {
       content = <ListView  onScroll={this.onScroll.bind(this)}

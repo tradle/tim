@@ -213,11 +213,11 @@ var search = {
           if (Array.isArray(val)) {
             if (!val.length)
               continue
-            let s = `${p}__id: [`
+            let s = `${p}___permalink: [`
             val.forEach((r, i) => {
               if (i)
                 s += ', '
-              s += `"${utils.getId(r)}"`
+              s += `"${r[ROOT_HASH]}"`
             })
             s += ']'
             inClause.push(s)
@@ -230,7 +230,7 @@ var search = {
                 addEqualsOrGreaterOrLesserNumber(value, op, props[p])
             }
             else {
-              op.EQ += `\n   ${p}__id: "${val.id}",`
+              op.EQ += `\n   ${p}___permalink: "${val[ROOT_HASH]}",`
             }
           }
         }
@@ -238,11 +238,11 @@ var search = {
           if (props[p].items.ref) {
             if (!val.length)
               continue
-            let s = `${p}__id: [`
+            let s = `${p}___permalink: [`
             val.forEach((r, i) => {
               if (i)
                 s += ', '
-              s += `"${utils.getId(r)}"`
+              s += `"${r[ROOT_HASH]}"`
             })
             s += ']'
             inClause.push(s)

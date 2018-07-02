@@ -25,15 +25,20 @@ class NoResources extends Component {
     let noRes
     let { message, filter, icon, iconColor, iconStyle, iconSize, isLoading } = this.props
     if (message) {
-      if (!icon)
+      let idx = message.indexOf('{icon}')
+      if (!icon  &&  idx === -1)
         noRes = <Text style={styles.NoResourcesTextBlue}>{message}</Text>
       else {
-        let idx = message.indexOf('{icon}')
-        noRes = <Text style={styles.NoResourcesTextBlue}>{message.substring(0, idx) + ' '}
-                  <View style={iconStyle || {}}>
+        let iconComponent = icon  &&  <View style={iconStyle || {}}>
                     <Icon name={icon} color={iconColor || '#7AAAC2'} size={iconSize || 20} />
                   </View>
-                  <Text style={styles.NoResourcesTextBlue}>{' ' + message.substring(idx + 6)}</Text>
+        let msg1 = message.substring(0, idx).trim()
+        let msg2 = message.substring(idx + 6)
+        if (!icon)
+          msg2 = msg2.trim()
+        noRes = <Text style={styles.NoResourcesTextBlue}>{msg1 + ' '}
+                  {iconComponent}
+                  <Text style={styles.NoResourcesTextBlue}>{msg2}</Text>
                 </Text>
       }
     }
@@ -47,6 +52,7 @@ class NoResources extends Component {
       return (
         <View style={[styles.container, styles.centerText]}>
           {noRes}
+          {this.props.children}
         </View>
       );
   }

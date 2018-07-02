@@ -203,8 +203,9 @@ class ApplicationView extends Component {
                     {assignRM}
                   </View>
                 </View>
+    let contentSeparator = utils.getContentSeparator(bankStyle)
     return (
-      <PageView style={platformStyles.container}>
+      <PageView style={platformStyles.container} separator={contentSeparator} bankStyle={bankStyle}>
         <ScrollView  ref='this' style={{width: utils.getContentWidth(ApplicationView), alignSelf: 'center'}} name={this._lazyId}>
         {network}
           <ApplicationTabs  lazy={this._lazyId}

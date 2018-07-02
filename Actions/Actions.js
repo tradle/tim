@@ -77,6 +77,7 @@ var asyncActions = [
   'getIdentity',
   'openURL',
   'requestWipe',
+  'verifyOrCorrect'
 ]
 
 var syncActions = [

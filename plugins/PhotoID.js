@@ -102,8 +102,28 @@ function prefillValues(form, values, model) {
     }
     else if (props[p].type === 'date'  &&  typeof val === 'string')
       form[p] = new Date(val).getTime() //formatDate(val, 'yyyy-mm-dd')
-    else
-      form[p] = val
+    else {
+      let ref = props[p].ref
+      // Need checking
+      if (ref  &&  utils.isEnum(ref)) {
+        if (ref === 'tradle.Sex') {
+
+          let v = val.toLowerCase().charAt(0) === 'm'  &&  'Male'  ||  'Female'
+          let enumValue = utils.getModel(ref).enum.find(r => r.id === v)
+
+          form[p] = {
+            id: ref + '_' + enumValue.id,
+            title: enumValue.title
+          }
+        }
+
+        // let valL = ref + '_' + val.toLowerCase()
+        // let enumValue = utils.getModel(ref).enum.find(r => r.id === valL)
+        // form[p] = enumValue
+      }
+      else
+        form[p] = val
+    }
   }
 }
 function getRequestedProps({scan, model, requestedProperties, form}) {

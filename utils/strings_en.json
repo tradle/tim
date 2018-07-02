@@ -281,7 +281,7 @@
     "nothingToShare": "Nothing to share",
     "importingData": "Importing {1} documents from {2}",
     "reviewScannedProperties": "Please review and correct the data below",
-    "pleaseClickOnAddButton": "Please click on {icon} button below to add {1}",
+    "pleaseClickOnAddButton": "Please click on '+' below to add '{1}'",
     "validationErrors": "Please correct failed validation fields",
     "createNew": "Fill out form \"{1}\"",
     "createNext": "Fill out another form \"{1}\"",
@@ -291,5 +291,6 @@
     "updateAppMessage": "Update now, or shall I remind you later?",
     "updateNow": "Update Now",
     "later": "Later",
-    "sandboxDescription": "In the Sandbox, learn how to use the app with simulated service providers."
+    "sandboxDescription": "In the Sandbox, learn how to use the app with simulated service providers.",
+    "creationDate": "Date created"
 }

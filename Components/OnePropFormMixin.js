@@ -5,48 +5,77 @@ import React from 'react'
 import {
   Alert,
 } from 'react-native'
-import constants from '@tradle/constants'
+import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
+const debug = require('debug')('tradle:app:OnePropForm')
 import _ from 'lodash'
+
+import constants from '@tradle/constants'
 import utils from '../utils/utils'
+const translate = utils.translate
 import Actions from '../Actions/Actions'
 import CameraView from './CameraView'
+import SignatureView from './SignatureView'
 import Navigator from './Navigator'
 
 var {
   TYPE
 } = constants
 
-const debug = require('debug')('tradle:app:OnePropForm')
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 
 var OnePropFormMixin = {
-  // onSetSignatureProperty(prop, item) {
-  //   if (!item)
-  //     return;
+  onSetSignatureProperty(prop, item) {
+    if (!item)
+      return;
 
-  //   let resource = this.props.resource
+    let resource = this.props.resource
 
-  //   let formRequest
-  //   if (resource[TYPE] === FORM_REQUEST) {
-  //     formRequest = resource
-  //     resource = formRequest.prefill  ||  {}
-  //   }
-  //   // Form request for new resource
-  //   if (formRequest)
-  //     _.extend(resource, {
-  //         [TYPE]: formRequest.form,
-  //         _context: formRequest._context,
-  //         from: utils.getMe(),
-  //         to: formRequest.from
-  //       }
-  //     )
-  //   resource[prop.name] = item
-  //   let params = {resource}
-  //   if (formRequest)
-  //     params.disableFormRequest = formRequest
-  //   Actions.addChatItem(params)
-  // },
+    let formRequest
+    if (resource[TYPE] === FORM_REQUEST) {
+      formRequest = resource
+      resource = formRequest.prefill  ||  {}
+    }
+    // Form request for new resource
+    if (formRequest)
+      _.extend(resource, {
+          [TYPE]: formRequest.form,
+          _context: formRequest._context,
+          from: utils.getMe(),
+          to: formRequest.from
+        }
+      )
+    resource[prop.name] = item
+    let params = {resource}
+    if (formRequest)
+      params.disableFormRequest = formRequest
+    Actions.addChatItem(params)
+  },
+  showSignatureView(prop, onSet) {
+    const { navigator, bankStyle } = this.props
+    let sigView
+    navigator.push({
+      title: translate(prop), //m.title,
+      // titleTextColor: '#7AAAC3',
+      id: 32,
+      component: SignatureView,
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      onRightButtonPress: () => {
+        const sig = sigView.getSignature()
+        navigator.pop()
+        onSet(prop, sig.url)
+      },
+      passProps: {
+        ref: ref => {
+          sigView = ref
+        },
+        bankStyle,
+        sigViewStyle: bankStyle
+      }
+    })
+  },
+
   showCamera(params) {
     let { prop } = params
     // if (utils.isAndroid()) {
@@ -113,6 +142,43 @@ var OnePropFormMixin = {
 
     this.props.navigator.pop();
   },
+  async scanPaymentCard(prop) {
+    let cardJson
+    try {
+      const card = await CardIOModule.scanCard({
+        hideCardIOLogo: true,
+        suppressManualEntry: true,
+        // suppressConfirmation: true,
+        // scanExpiry: true,
+        requireExpiry: true,
+        requireCVV: true,
+        // requirePostalCode: true,
+        requireCardholderName: true,
+        keepStatusBarStyle: true,
+        suppressScannedCardImage: true,
+        scanInstructions: 'Frame FRONT of card.\nBonus: get all the edges to light up',
+        detectionMode: CardIOUtilities.IMAGE_AND_NUMBER
+      })
+      cardJson = utils.clone(card)
+    } catch (err) {
+      // user canceled
+      return
+    }
 
+    let resource = this.props.resource
+    let r = { [TYPE]: resource.form, to: resource.from, from: utils.getMe() }
+    let props = utils.getModel(r[TYPE]).properties
+    for (let p in cardJson) {
+      if (cardJson[p]  &&  props[p])
+        r[p] = cardJson[p]
+    }
+    for (let p in cardJson)
+      if (!cardJson[p])
+        delete cardJson[p]
+    r[prop.name + 'Json'] = cardJson
+    this.setState({ r })
+
+    Actions.addChatItem({resource: r, disableFormRequest: resource})
+  },
 }
 module.exports = OnePropFormMixin;

@@ -54,7 +54,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#76c024f23be3a87c4a6d1276719ce8f814ba665d"
+      "resolved": "git://github.com/tradle/custom-models.git#d247e0fb4e0b4028a128e4bfbfa9487857370bee"
     },
     "@tradle/embed": {
       "version": "1.1.2",
@@ -177,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#72ced17fc385f3d9183ed29f6ebd4eda7439ed88"
+      "resolved": "git://github.com/tradle/models.git#dabe1db79f5ca5639f6514c8663137b315c28a2c"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -187,7 +187,7 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#401bda1f28d24ffe64f0418017f85bf9aac507f0"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#cc7aa429a926cc471ef8e91725d5835fc0e97aa3"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -2622,23 +2622,6 @@
       "from": "feed-indexer@1.3.0",
       "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.3.0.tgz",
       "dependencies": {
-        "isarray": {
-          "version": "0.0.1",
-          "from": "isarray@0.0.1",
-          "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
-        },
-        "level-change-processor": {
-          "version": "1.0.0",
-          "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
-          "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
-          "dependencies": {
-            "readable-stream": {
-              "version": "1.1.14",
-              "from": "readable-stream@^1.0.33",
-              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.14.tgz"
-            }
-          }
-        },
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@>=2.1.4 <3.0.0",
@@ -4357,11 +4340,6 @@
       "from": "merkle-proofs@1.0.3",
       "resolved": "https://registry.npmjs.org/merkle-proofs/-/merkle-proofs-1.0.3.tgz",
       "dependencies": {
-        "merkle-tree-stream": {
-          "version": "3.0.3",
-          "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
-          "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
-        },
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@>=2.1.0 <3.0.0",
@@ -5955,7 +5933,7 @@
     "react-native-gifted-messenger": {
       "version": "0.0.16",
       "from": "pgmemk/react-native-gifted-messenger#dev",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#7f97008bbd6420f6ca7a35c3ad71599e24a80ca0"
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#70bcfb15b93fb1919ce6b228a7042a1bc77bb468"
     },
     "react-native-gifted-spinner": {
       "version": "0.1.0",

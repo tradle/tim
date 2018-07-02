@@ -1,11 +1,25 @@
 console.log('requiring FormRequestRow.js')
 'use strict';
 
+import {
+  Image,
+  // StyleSheet,
+  Text,
+  TouchableOpacity,
+  Alert,
+  View,
+  Platform,
+  Animated,
+  Easing,
+  processColor
+} from 'react-native'
+import PropTypes from 'prop-types'
+import React, { Component } from 'react'
 import _ from 'lodash'
+import { CardIOUtilities } from 'react-native-awesome-card-io';
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons';
-import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
 const debug = require('debug')('tradle:app:FormRequestRow')
 
 import constants from '@tradle/constants'
@@ -15,11 +29,11 @@ var translate = utils.translate
 import NewResource from './NewResource'
 import RemediationItemsList from './RemediationItemsList'
 import RowMixin from './RowMixin'
-import CameraView from './CameraView'
 import StringChooser from './StringChooser'
 import ImageInput from './ImageInput'
 import ShareResourceList from './ShareResourceList'
 import ResourceList from './ResourceList'
+import OnePropFormMixin from './OnePropFormMixin'
 
 import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
@@ -53,21 +67,6 @@ const {
 } = constants.TYPES
 
 import Navigator from './Navigator'
-import {
-  Image,
-  // StyleSheet,
-  Text,
-  TouchableOpacity,
-  Alert,
-  View,
-  Platform,
-  Animated,
-  Easing,
-  processColor
-} from 'react-native'
-import PropTypes from 'prop-types'
-
-import React, { Component } from 'react'
 
 import ENV from '../utils/env'
 class FormRequestRow extends Component {
@@ -169,6 +168,15 @@ class FormRequestRow extends Component {
 
     let props = utils.getEditableProperties(resource)
     let prop = props.length === 1  &&  props[0]
+    if (!prop  &&  isFormRequest) {
+      let formModel = utils.getModel(resource.form)
+      let editCols = formModel.editCols
+      if (editCols  &&  editCols.length === 1) {
+        let p = formModel.properties[editCols[0]]
+        if (p.scanner  &&  p.scanner === 'payment-card')
+          prop = p
+      }
+    }
 
     let linkColor
     if (application)
@@ -925,7 +933,7 @@ class FormRequestRow extends Component {
             if (!utils.isWeb()) {
               msg = <View key={this.getNextKey()}>
                       <View style={styles.messageLink}>
-                        {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.scanCard.bind(this, prop)})}
+                        {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.scanPaymentCard.bind(this, prop)})}
                       </View>
                     </View>
             }
@@ -951,6 +959,31 @@ class FormRequestRow extends Component {
                        {resource.documentCreated ? null : icon}
                      </View>
                    </View>
+
+            // let useImageInput
+            // const isScan = prop.scanner //  &&  prop.scanner === 'id-document'
+            // if (utils.isWeb())
+            //   useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
+            // else
+            //   useImageInput = utils.isSimulator()  ||  prop.allowPicturesFromLibrary  ||  !isScan
+
+            // let actionItem
+            // if (useImageInput) {
+            //   actionItem = <ImageInput prop={prop} style={styles.container} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+            //                  <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
+            //                </ImageInput>
+            // }
+            // else
+            //   actionItem = <TouchableOpacity underlayColor='transparent' onPress={() => this.showCamera({prop: prop})}>
+            //                  <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
+            //                </TouchableOpacity>
+
+
+            // msg = <View key={this.getNextKey()}>
+            //        <View style={styles.thumbView}>
+            //          {actionItem}
+            //          {resource._documentCreated ? null : icon}
+            //       </View>
             }
           }
           else if (form.id === IPROOV_SELFIE) {
@@ -972,7 +1005,7 @@ class FormRequestRow extends Component {
           else if (prop.signature) {
             msg = <View key={this.getNextKey()}>
                     <View style={styles.messageLink}>
-                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.showSignatureView.bind(this, prop)})}
+                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.showSignatureView.bind(this, prop, this.onSetSignatureProperty.bind(this))})}
                     </View>
                   </View>
           }
@@ -1071,44 +1104,6 @@ class FormRequestRow extends Component {
            </TouchableOpacity>
 
   }
-  async scanCard(prop) {
-    let cardJson
-    try {
-      const card = await CardIOModule.scanCard({
-        hideCardIOLogo: true,
-        suppressManualEntry: true,
-        // suppressConfirmation: true,
-        // scanExpiry: true,
-        requireExpiry: true,
-        requireCVV: true,
-        // requirePostalCode: true,
-        requireCardholderName: true,
-        keepStatusBarStyle: true,
-        suppressScannedCardImage: true,
-        scanInstructions: 'Frame FRONT of card.\nBonus: get all the edges to light up',
-        detectionMode: CardIOUtilities.IMAGE_AND_NUMBER
-      })
-      cardJson = utils.clone(card)
-    } catch (err) {
-      // user canceled
-      return
-    }
-
-    let resource = this.props.resource
-    let r = { [TYPE]: resource.form, to: resource.from, from: utils.getMe() }
-    let props = utils.getModel(r[TYPE]).properties
-    for (let p in cardJson) {
-      if (cardJson[p]  &&  props[p])
-        r[p] = cardJson[p]
-    }
-    for (let p in cardJson)
-      if (!cardJson[p])
-        delete cardJson[p]
-    r[prop.name + 'Json'] = cardJson
-    this.setState({ r })
-
-    Actions.addChatItem({resource: r, disableFormRequest: resource})
-  }
 
   reviewFormsInContext() {
     Alert.alert(
@@ -1177,7 +1172,7 @@ class FormRequestRow extends Component {
       }
     });
   }
-  showSignatureView(prop) {
+  showSignatureView1(prop) {
     const { navigator, bankStyle } = this.props
     let sigView
     navigator.push({
@@ -1378,6 +1373,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
   })
 })
 reactMixin(FormRequestRow.prototype, RowMixin)
+reactMixin(FormRequestRow.prototype, OnePropFormMixin)
 FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;

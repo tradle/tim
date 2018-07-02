@@ -13,6 +13,8 @@ import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
+import ScrollableTabView from 'react-native-scrollable-tab-view'
+
 import ProgressBar from './ProgressBar'
 import constants from '@tradle/constants'
 import utils, {
@@ -25,6 +27,7 @@ import reactMixin from 'react-mixin'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import ShowPropertiesView from './ShowPropertiesView'
+import BacklinksTabBar from './BacklinksTabBar'
 import Actions from '../Actions/Actions'
 import ENV from '../utils/env'
 import GridList from './GridList'
@@ -63,18 +66,23 @@ class ApplicationTabs extends Component {
     if (itemProps)
       propsToShow = Object.keys(itemProps)
 
-    let showCurrent = showDetails ? currentMarker : null
-    let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-                       <TouchableOpacity onPress={this.showDetails.bind(this)}>
-                         <View style={styles.item}>
-                           <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
-                           <Text style={[buttonStyles.text, styles.tabText]}>{'Details'}</Text>
-                         </View>
-                       </TouchableOpacity>
-                       {showCurrent}
-                      </View>
+    this.tabDetail = {}
 
-    refList.push(detailsTab)
+    let showCurrent = showDetails ? currentMarker : null
+
+    this.tabDetail.Details = {icon: 'ios-paper-outline', action: this.showDetails.bind(this)}
+    refList.push(<View key={this.getNextKey()} tabLabel='Details' />)
+    // let detailsTab = <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
+    //                    <TouchableOpacity onPress={this.showDetails.bind(this)}>
+    //                      <View style={styles.item}>
+    //                        <Icon name='ios-paper-outline'  size={utils.getFontSize(30)}  color='#757575' />
+    //                        <Text style={[buttonStyles.text, styles.tabText]}>{'Details'}</Text>
+    //                      </View>
+    //                    </TouchableOpacity>
+    //                    {showCurrent}
+    //                   </View>
+
+    // refList.push(detailsTab)
 
     let vCols = model.viewCols.filter((p) => !props[p].hidden  &&  props[p].items)
     if (vCols) {
@@ -108,30 +116,34 @@ class ApplicationTabs extends Component {
           icon = 'ios-checkmark-circle-outline';
       }
       let cnt = resource['_' + p + 'Count'] || (resource[p] &&  resource[p].length)
-      let count
+      // let count
       if (cnt) {
         hasCounts = true
-        if (!currentProp  &&  !showDetails)
-          currentProp = props[p]
-        count = <View style={styles.count}>
-                  <Text style={styles.countText}>{cnt}</Text>
-                </View>
+      //   if (!currentProp  &&  !showDetails)
+      //     currentProp = props[p]
+      //   count = <View style={styles.count}>
+      //             <Text style={styles.countText}>{cnt}</Text>
+      //           </View>
       }
-      let showCurrent = backlink  &&  backlink.name === p ? currentMarker : null
-      refList.push(
-        <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
-           <TouchableOpacity onPress={this.exploreBacklink.bind(this, resource, props[p])}>
-             <View style={[styles.item, {justifyContent: 'flex-start'}]}>
-               <View style={styles.row}>
-                 <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
-                 {count}
-               </View>
-               <Text style={[buttonStyles.text, styles.tabText]}>{propTitle}</Text>
-             </View>
-           </TouchableOpacity>
-           {showCurrent}
-         </View>
-        );
+      // let showCurrent = backlink  &&  backlink.name === p ? currentMarker : null
+
+      this.tabDetail[propTitle] = { icon, action: this.exploreBacklink.bind(this, resource, props[p]), count: cnt }
+      refList.push(<View key={this.getNextKey()} tabLabel={propTitle}/>)
+
+      // refList.push(
+      //   <View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()}>
+      //      <TouchableOpacity onPress={this.exploreBacklink.bind(this, resource, props[p])}>
+      //        <View style={[styles.item, {justifyContent: 'flex-start'}]}>
+      //          <View style={styles.row}>
+      //            <Icon name={icon}  size={utils.getFontSize(30)}  color='#757575' />
+      //            {count}
+      //          </View>
+      //          <Text style={[buttonStyles.text, styles.tabText]}>{propTitle}</Text>
+      //        </View>
+      //      </TouchableOpacity>
+      //      {showCurrent}
+      //    </View>
+      //   );
     })
     if (!hasCounts) {
       if (showDetails)
@@ -182,13 +194,32 @@ class ApplicationTabs extends Component {
                   </View>
       }
     }
+    let refListTabs
+    if (refList) {
+      // refListTabs = <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
+      //                 {refList}
+      //               </View>
 
+      refListTabs = <ScrollableTabView
+                      renderTabBar={() =>
+                        <BacklinksTabBar
+                          tabDetail={this.tabDetail}
+                          backgroundColor={appStyle.TAB_COLOR}
+                          activeTextColor='#757575'
+                          inactiveTextColor='#757575'
+                          tabsUnderlineColor={'#7AAAC3'}/>
+                      }>
+                      {refList}
+                    </ScrollableTabView>
+    }
+
+//                <View style={buttonStyles.buttonsNoBorder} key={'ShowRefList'}>
+//                  {refList}
+//                </View>
     if ((refList  &&  refList.length)  ||  !propsToShow.length  ||  showDetails)
       return   <View>
                 {separator}
-                <View style={buttonStyles.buttonsNoBorder} key={'ApplicationTabs'}>
-                  {refList}
-                </View>
+                {refListTabs}
                 {showDetails  &&  this.getAppStatus(styles)}
                 {children}
                 <View>

@@ -108,6 +108,7 @@ const REMEDIATION = 29
 const LOGO_HEIGHT = 27
 const TOUR_PAGE = 35
 const AVIVA_INTRO_VIEW = 50
+const VERIFY_OR_CORRECT = 'VerifyOrCorrect'
 
 import platformStyles from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
@@ -670,6 +671,7 @@ var NavigationBarRouteMapper = {
     let viewStyle = {}
     switch (rbTitle) {
     case 'Done':
+    case VERIFY_OR_CORRECT:
       iconColor = '#fff'
       isSubmit = true
       if (route.passProps.isChooser) {
@@ -781,49 +783,66 @@ var NavigationBarRouteMapper = {
     if (!route.title)
       return <View/>
     let org;
-    if (route.passProps.modelName                       &&
-        route.passProps.modelName === 'tradle.Message'  &&
-        route.passProps.resource                        &&
-        route.passProps.resource.organization           &&
-        route.passProps.resource[TYPE] === PROFILE)
+    let { modelName, resource, bankStyle, to } = route.passProps
+    if (modelName                       &&
+        modelName === 'tradle.Message'  &&
+        resource                        &&
+        resource.organization           &&
+        resource[TYPE] === PROFILE)
           // if (route.passProps.resource.organization  &&  route.passProps.resource.organization.photo)
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
           // if (route.passProps.resource.organization)
-      org = <Text style={style}> - {route.passProps.resource.organization.title}</Text>
+      org = <Text style={style}> - {resource.organization.title}</Text>
     else
       org = <View />;
     let photo, uri
     let photoObj
-    if (route.passProps.bankStyle)
-      photoObj = route.passProps.bankStyle.logo
+    if (bankStyle)
+      photoObj = bankStyle.logo
 
     if (!photoObj)
       photoObj = route.id === MESSAGE_LIST        &&
-                 route.passProps.resource.photos  &&
-                 route.passProps.resource.photos[0]
+                 resource.photos  &&
+                 resource.photos[0]
     if (photoObj)
       uri = utils.getImageUri(photoObj.url);
     else if (route.id === REMEDIATION) {
-      photoObj = route.passProps.to.photos  &&  route.passProps.to.photos[0]
+      photoObj = to.photos  &&  to.photos[0]
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
-    let logoNeedsText = (!route.passProps.resource  &&  route.id !== 7) ||
-                        // route.passProps.resource[TYPE] !== ORGANIZATION ||
-                        !route.passProps.bankStyle ||
-                        route.passProps.bankStyle.logoNeedsText
-    if (uri) {
-      if (logoNeedsText)
-        photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 18} : {}]} />
-      else {
-        let width
-        if (photoObj.width  &&  photoObj.height)
-          width = photoObj.width > photoObj.height ? LOGO_HEIGHT * (photoObj.width/photoObj.height) : LOGO_HEIGHT
-        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width: width}, utils.isAndroid() ? {marginTop: 23} : {}]} />
+    let logoNeedsText = bankStyle  &&  bankStyle.logoNeedsText
+    if (!logoNeedsText  &&  resource) {
+      if (route.id !== 7)  { // ArticleView
+        if (route.id !== MESSAGE_LIST)
+          logoNeedsText = true
+        else {
+          let me = utils.getMe()
+          if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
+            logoNeedsText = true
+        }
       }
     }
+    if (uri) {
+      let width
+      // if (photoObj.width  &&  photoObj.height)
+      //   width = photoObj.width > photoObj.height ? LOGO_HEIGHT * (photoObj.width/photoObj.height) : LOGO_HEIGHT
+      // else
+        width = LOGO_HEIGHT
+      if (logoNeedsText)
+      //   photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 18} : {}]} />
+      // else {
+      //   let width
+      //   if (photoObj.width  &&  photoObj.height)
+      //     width = photoObj.width > photoObj.height ? LOGO_HEIGHT * (photoObj.width/photoObj.height) : LOGO_HEIGHT
+      //   photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width: width}, utils.isAndroid() ? {marginTop: 23} : {}]} />
+      // }
+        photo = <Image source={{uri: uri}} style={[styles.msgImage, {resizeMode: 'contain', width, marginTop: utils.isAndroid() && 18 || 8}]} />
+      else
+        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width, marginTop: utils.isAndroid() && 23 || 8}]} />
+    }
+
     let t = route.title.split(' -- ')
     let st = t.length > 1 ? {marginTop: 2} : {}
-    let bankStyle = route.passProps.bankStyle
     let color
 
     if (route.id === 12)  // Camera view
@@ -834,27 +853,25 @@ var NavigationBarRouteMapper = {
       color = '#7AAAC3'
 
     let style = [platformStyles.navBarText, styles.navBarTitleText, st]
-    let isPrefill
-    if (route.titleTextColor)
-      style.push({color: route.titleTextColor});
-    else {
-      let model
-      if (route.passProps.modelName)
-        model = utils.getModel(route.passProps.modelName)
-      else if (route.passProps.resource)
-        model = utils.getModel(utils.getType(route.passProps.resource))
-
-      isPrefill = model  &&  utils.getPrefillProperty(model)
-    }
-    let tArr
-
-    for (let i=1; i<t.length; i++) {
-      if (!tArr)
-        tArr = []
-      tArr.push(<Text style={[styles.arr, {color: color}]} key={'index.common.js_' + i}>{this.makeTitle(t[i])}</Text>)
-    }
-    let text
+    let text, tArr
     if (logoNeedsText  ||  !uri) {
+      let isPrefill
+      if (route.titleTextColor)
+        style.push({color: route.titleTextColor});
+      else {
+        let model
+        if (modelName)
+          model = utils.getModel(modelName)
+        else if (resource)
+          model = utils.getModel(utils.getType(resource))
+
+        isPrefill = model  &&  utils.getPrefillProperty(model)
+      }
+      for (let i=1; i<t.length; i++) {
+        if (!tArr)
+          tArr = []
+        tArr.push(<Text style={[styles.arr, {color: color}]} key={'index.common.js_' + i}>{this.makeTitle(t[i])}</Text>)
+      }
       let tt = this.makeTitle(t[0])
       if (isPrefill)
         tt = 'Draft - ' + t

@@ -71,7 +71,7 @@ class MessageView extends Component {
     this.state = {
       resource: props.resource,
       isConnected: props.navigator.isConnected,
-      promptVisible: false,
+      // promptVisible: false,
       isLoading: true, //!props.resource[TYPE],
       // showDetails: true,
       showDetails: false,
@@ -134,7 +134,11 @@ class MessageView extends Component {
     let { bankStyle, application, resource, search } = this.props
     if (utils.getId(params.resource) !== utils.getId(resource))
       return
-    if (action === 'getItem') {
+    if (action === 'verifyOrCorrect') {
+      this.verifyOrCreateError()
+      return
+    }
+     if (action === 'getItem') {
       let state = {
         resource: params.resource,
         isLoading: false
@@ -226,7 +230,8 @@ class MessageView extends Component {
   }
 
   verifyOrCreateError() {
-    let { resource, application } = this.props
+    let { application } = this.props
+    let { resource } = this.state
     let model = utils.getModel(resource[TYPE])
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
@@ -338,7 +343,7 @@ class MessageView extends Component {
 
     let model = utils.getLensedModel(resource, lensId);
     let isVerification = model.id === VERIFICATION
-    let isVerificationTree = isVerification &&  (resource.method || resource.sources)
+    let isVerificationTree = isVerification &&  (resource.method || (resource.sources  &&  resource.sources.length))
     let isForm = model.subClassOf === FORM
     let t = resource.dateVerified ? resource.dateVerified : resource._time
     let date
@@ -419,6 +424,7 @@ class MessageView extends Component {
                                  errorProps={this.state.errorProps}
                                  bankStyle={bankStyle}
                                  onPageLayout={this.onPageLayout}
+                                 isVerifier={isVerifier}
                                  showRefResource={this.getRefResource}
                                  defaultPropertyValues={defaultPropertyValues}
                                  checkProperties={checkProps} >
@@ -446,7 +452,7 @@ class MessageView extends Component {
     let dateView
     if (isVerificationTree || isForm) {
       dateView = <View style={styles.band}>
-                  <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('Date')}</Text>
+                  <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('creationDate')}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
