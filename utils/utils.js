@@ -868,7 +868,7 @@ var utils = {
   },
   getDateValue(value) {
     let valueMoment = moment.utc(value)
-    let format = 'MMMM Do, YYYY h:MM A'
+    let format = 'MMMM Do, YYYY h:MMA'
     return valueMoment && valueMoment.format(format)
   },
   getPropStringValue(prop, resource) {
