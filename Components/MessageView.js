@@ -342,7 +342,7 @@ class MessageView extends Component {
 
     let model = utils.getLensedModel(resource, lensId);
     let isVerification = model.id === VERIFICATION
-    let isVerificationTree = isVerification &&  (resource.method || resource.sources)
+    let isVerificationTree = isVerification &&  (resource.method || (resource.sources  &&  resource.sources.length))
     let isForm = model.subClassOf === FORM
     let t = resource.dateVerified ? resource.dateVerified : resource._time
     let date
@@ -451,7 +451,7 @@ class MessageView extends Component {
     let dateView
     if (isVerificationTree || isForm) {
       dateView = <View style={styles.band}>
-                  <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('Date')}</Text>
+                  <Text style={styles.dateLabel}>{isVerificationTree ? translate(model.properties.dateVerified, model) : translate('creationDate')}</Text>
                   <Text style={styles.dateValue}>{date}</Text>
                 </View>
     }
