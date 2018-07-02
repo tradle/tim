@@ -203,9 +203,6 @@ class ShowRefList extends Component {
                 </View>
     }
 
-                <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
-                  {refList}
-                </View>
     let refListTabs
     if (refList) {
       // refListTabs = <View style={[buttonStyles.buttons, {justifyContent: 'center', borderBottomWidth: 0}]} key={'ShowRefList'}>
