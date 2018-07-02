@@ -4132,8 +4132,10 @@ if (!res[SIG]  &&  res._message)
     let result = await this.searchMessages(params)
     if (result  &&  result.length) {
       res['_' + prop.name + 'Count'] = result.length
-      if (result[0][IS_MESSAGE])
-        return result.filter((r) => r._latest)
+      if (result[0][IS_MESSAGE]) {
+        let latest = result.filter((r) => r._latest)
+        return latest.length && latest || result
+      }
     }
     return result
   },
@@ -6348,7 +6350,7 @@ if (!res[SIG]  &&  res._message)
     _.extend(params, {client: this.client, filterResource: filterResource, endCursor, noPaging: !endCursor})
     let result = await graphQL.searchServer(params)
     if (!result  ||  !result.edges  ||  !result.edges.length) {
-      if (!noTrigger)
+      if (!noTrigger  &&  (!params.prop  ||  !params.prop.items  ||  !params.prop.items.backlink))
         this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
       return
     }
