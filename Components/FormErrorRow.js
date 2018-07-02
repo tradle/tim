@@ -126,7 +126,7 @@ class FormErrorRow extends Component {
         let icon = <Icon style={{marginTop: 2, marginRight: 2, color: isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor}} size={20} name={'ios-arrow-forward'} />
         messageBody = <View key={this.getNextKey()}>
                 <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                  <TouchableHighlight style={{flex: 1}} underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
+                  <TouchableHighlight style={{flex: 1}} underlayColor='transparent' onPress={this.showCamera.bind(this, {prop})}>
                     <View style={cellStyle}>
                       {renderedRow}
                     </View>

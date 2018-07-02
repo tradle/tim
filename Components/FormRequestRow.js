@@ -943,7 +943,7 @@ class FormRequestRow extends Component {
             if (utils.isWeb() && ENV.canUseWebcam) {
               msg = <View key={this.getNextKey()}>
                       <View style={styles.row}>
-                        <TouchableOpacity style={styles.container} underlayColor='transparent' onPress={this.showCamera.bind(this, prop)}>
+                        <TouchableOpacity style={styles.container} underlayColor='transparent' onPress={this.showCamera.bind(this, {prop})}>
                           <Text style={[chatStyles.resourceTitle, resource.documentCreated ? {color: '#aaaaaa'} : {}]}>{addMessage}</Text>
                         </TouchableOpacity>
                        {resource.documentCreated ? null : icon}
