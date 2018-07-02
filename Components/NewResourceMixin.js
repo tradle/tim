@@ -827,7 +827,9 @@ var NewResourceMixin = {
   onTakePicture(params, data) {
     if (!data)
       return
-    if (utils.isOnePropForm(this.props.resource))
+    let editProps = utils.getEditableProperties(this.props.resource)
+    if (editProps.length  &&  editProps.length === 1)
+    // if (utils.isOnePropForm(this.props.resource))
       utils.onTakePic(params.prop, data, this.props.originatingMessage)
     else {
       data.url = data.data

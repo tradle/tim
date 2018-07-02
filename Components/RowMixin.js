@@ -254,57 +254,6 @@ var RowMixin = {
            </View>
   },
 
-  isOnePropForm() {
-    const resource = this.props.resource;
-    let type = resource[TYPE]
-    let isFormRequest = type === FORM_REQUEST
-    let isFormError = type === FORM_ERROR
-    if (!isFormRequest  &&  !isFormError)
-      return
-    let ftype = isFormRequest
-              ? resource.form
-              : utils.getType(resource.prefill)
-    const model = utils.getModel(ftype).value
-    const props = model.properties
-    let eCols = []
-    for (let p in props) {
-      let prop = props[p]
-      if (!prop.readOnly  &&
-        !prop.hidden      &&
-        !prop.list )
-        eCols.push(props[p])
-    }
-
-    if (eCols.length === 1) {
-      let p = eCols[0]
-      if (ftype === IPROOV_SELFIE)
-        return p
-      if (ftype === PRODUCT_REQUEST)
-        return p
-      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
-        return p
-    }
-    return
-  },
-  showCamera(prop) {
-    this.props.navigator.push({
-      title: 'Take a pic',
-      backButtonTitle: 'Back',
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        onTakePic: this.onTakePic.bind(this, prop)
-      }
-    });
-  },
-
-  onTakePic(prop, data) {
-    if (!data)
-      return
-    utils.onTakePic(prop, data, this.props.resource)
-    this.props.navigator.pop()
-  },
   onSetMediaProperty(propName, item) {
     if (!item)
       return;
@@ -454,19 +403,6 @@ var styles = StyleSheet.create({
   column: {
     flex: 1,
     flexDirection: 'column'
-  },
-  orgView: {
-    maxWidth: utils.getMessageWidth() - 150,
-    paddingLeft: 3,
-    marginRight: 10,
-    flex: 1,
-    justifyContent: 'center'
-  },
-  header: {
-    fontSize: 18,
-    marginTop: 2,
-    color: '#757575'
-    // paddingRight: 10
   },
   sentStatus: {
     fontSize: 12,
@@ -801,3 +737,37 @@ module.exports = RowMixin;
   //     params.disableFormRequest = formRequest
   //   Actions.addChatItem(params)
   // },
+/*
+  isOnePropForm() {
+    const resource = this.props.resource;
+    let type = resource[TYPE]
+    let isFormRequest = type === FORM_REQUEST
+    let isFormError = type === FORM_ERROR
+    if (!isFormRequest  &&  !isFormError)
+      return
+    let ftype = isFormRequest
+              ? resource.form
+              : utils.getType(resource.prefill)
+    const model = utils.getModel(ftype).value
+    const props = model.properties
+    let eCols = []
+    for (let p in props) {
+      let prop = props[p]
+      if (!prop.readOnly  &&
+        !prop.hidden      &&
+        !prop.list )
+        eCols.push(props[p])
+    }
+
+    if (eCols.length === 1) {
+      let p = eCols[0]
+      if (ftype === IPROOV_SELFIE)
+        return p
+      if (ftype === PRODUCT_REQUEST)
+        return p
+      if (p  &&  p.type === 'object'  &&  (p.ref === PHOTO ||  utils.getModel(p.ref).value.subClassOf === ENUM))
+        return p
+    }
+    return
+  },
+*/

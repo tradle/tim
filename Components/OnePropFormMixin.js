@@ -117,11 +117,11 @@ var OnePropFormMixin = {
       }
     });
   },
-  onTakePic(params, data) {
-    if (!data)
+  onTakePic(params, photo) {
+    if (!photo)
       return
     let { prop } = params
-    let { width, height, base64 } = data
+    let { width, height, data } = photo
 
     let resource = this.props.resource
     let isFormError = resource[TYPE] === FORM_ERROR
@@ -132,7 +132,7 @@ var OnePropFormMixin = {
         [prop.name]: {
           width,
           height,
-          url: 'data:image/jpeg;base64,' + base64
+          url: data
         },
         _context: resource._context,
         from: utils.getMe(),
