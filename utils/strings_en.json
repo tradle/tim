@@ -278,5 +278,6 @@
     "updateAppMessage": "Update now, or shall I remind you later?",
     "updateNow": "Update Now",
     "later": "Later",
-    "sandboxDescription": "In the Sandbox, learn how to use the app with simulated service providers."
+    "sandboxDescription": "In the Sandbox, learn how to use the app with simulated service providers.",
+    "creationDate": "Date created"
 }
