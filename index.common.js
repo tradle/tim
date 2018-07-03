@@ -828,17 +828,22 @@ var NavigationBarRouteMapper = {
       //   width = photoObj.width > photoObj.height ? LOGO_HEIGHT * (photoObj.width/photoObj.height) : LOGO_HEIGHT
       // else
         width = LOGO_HEIGHT
-      if (logoNeedsText)
-      //   photo = <Image source={{uri: uri}} style={[styles.msgImage, utils.isAndroid() ? {marginTop: 18} : {}]} />
-      // else {
-      //   let width
-      //   if (photoObj.width  &&  photoObj.height)
-      //     width = photoObj.width > photoObj.height ? LOGO_HEIGHT * (photoObj.width/photoObj.height) : LOGO_HEIGHT
-      //   photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width: width}, utils.isAndroid() ? {marginTop: 23} : {}]} />
-      // }
-        photo = <Image source={{uri: uri}} style={[styles.msgImage, {resizeMode: 'contain', width, marginTop: utils.isAndroid() && 18 || 8}]} />
+
+      let marginTop
+      if (utils.isWeb())
+        marginTop = 2
       else
-        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width, marginTop: utils.isAndroid() && 23 || 8}]} />
+        marginTop = 8
+      if (logoNeedsText) {
+        if (utils.isAndroid())
+          marginTop = 18
+        photo = <Image source={{uri: uri}} style={[styles.msgImage, {resizeMode: 'contain', width, marginTop}]} />
+      }
+      else {
+        if (utils.isAndroid())
+          marginTop = 23
+        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width, marginTop}]} />
+      }
     }
 
     let t = route.title.split(' -- ')
