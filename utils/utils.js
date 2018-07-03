@@ -2456,24 +2456,26 @@ var utils = {
     hidePropertyInEdit[this.getId(provider)] = provider._hidePropertyInEdit
   },
   isHidden(p, resource) {
-    let modelName = resource[TYPE]
-    if (!this.isMessage(this.getModel(modelName)))
-      return
+    let modelName = this.getType(resource)
+    let model = this.getModel(modelName)
+    let props = model.properties
+    if (!this.isMessage(resource)  ||  !resource.from)
+      return props[p].hidden  ||  (model.hidden  &&  model.hidden.indexOf(p) !== -1)
     // Check if the resource is one of the remedition resources
     // and in a reviewing after scan process - there are no from or to in it
-    let isReview = !resource.from
-    if (isReview)
-      return
+    // let isReview = !resource.from
+    // if (isReview)
+    //   return
     let meId = this.getId(me)
     let provider = (utils.getId(resource.from) === meId) ? resource.to.organization : resource.from.organization
-    if (!provider)
-      return
-
-    let hiddenProps = hidePropertyInEdit[utils.getId(provider)]
-    if (hiddenProps) {
-      hiddenProps = hiddenProps[modelName]
-      return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
+    if (provider) {
+      let hiddenProps = hidePropertyInEdit[utils.getId(provider)]
+      if (hiddenProps) {
+        hiddenProps = hiddenProps[modelName]
+        return hiddenProps  &&  hiddenProps.indexOf(p) !== -1
+      }
     }
+    return props[p].hidden  ||  (model.hidden  &&  model.hidden.indexOf(p) !== -1)
   },
 
   parseMessageFromDB(message) {
