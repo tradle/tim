@@ -123,17 +123,17 @@ class PhotoList extends Component {
     let d4 = Math.min((width / 4) - 5, 190)
     let d5 = Math.min((width / 5) - 5, MIN_WIDTH)
     // return {width: d5, height: d5};
-    switch (photos.length) {
-    case 1:
-    case 2:
-    case 3:
-      return {width: d3, height: d3};
-    case 4:
-      return {width: d4, height: d4};
-    default:
-    case 5:
+    // switch (photos.length) {
+    // case 1:
+    // case 2:
+    // case 3:
+    //   return {width: d3, height: d3};
+    // case 4:
+    //   return {width: d4, height: d4};
+    // default:
+    // case 5:
       return {width: d5, height: d5};
-    }
+    // }
   }
 }
 reactMixin(PhotoList.prototype, PhotoCarouselMixin);
@@ -142,7 +142,7 @@ PhotoList = makeResponsive(PhotoList)
 
 var styles = StyleSheet.create({
   photoContainer: {
-    paddingTop: 5,
+    // paddingTop: 5,
   },
   thumbCommon: {
     borderWidth: 0.5,
