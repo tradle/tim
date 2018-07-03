@@ -826,7 +826,7 @@ class NewResource extends Component {
       itemsMeta = utils.getItemsMeta(meta);
 
     let self = this;
-    let arrayItems = [];
+    let arrayItems
     let itemsArray
     if (!search) {
       for (let p in itemsMeta) {
@@ -834,7 +834,8 @@ class NewResource extends Component {
         if (bl.icon === 'ios-telephone-outline') {
           bl.icon = 'ios-call-outline'
         }
-
+        if (!arrayItems)
+          arrayItems = []
         if (bl.readOnly  ||  bl.items.backlink) {
           arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
           continue
@@ -859,21 +860,21 @@ class NewResource extends Component {
     options.auto = 'placeholders';
     options.tintColor = 'red'
     let photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
-    let button = isRegistration
-               ? <View>
-                   <TouchableOpacity style={styles.thumbButton}
-                      onPress={this.state.termsAccepted ? this.onSavePressed : this.showTermsAndConditions}>
-                      <View style={styles.getStarted}>
-                         <Text style={styles.getStartedText}>ENTER</Text>
-                      </View>
-                   </TouchableOpacity>
-                 </View>
-               : <View style={styles.noRegistrationButton} />
+    let button
+    if (isRegistration)
+      button = <View>
+                 <TouchableOpacity style={styles.thumbButton}
+                    onPress={this.state.termsAccepted ? this.onSavePressed : this.showTermsAndConditions}>
+                    <View style={styles.getStarted}>
+                       <Text style={styles.getStartedText}>ENTER</Text>
+                    </View>
+                 </TouchableOpacity>
+               </View>
     let formStyle = isRegistration
                   ? {justifyContent: 'center', flex: 1, height: height - (height > 1000 ? 0 : isRegistration ? 50 : 100)}
                   : styles.noRegistration
     let jsonProps = utils.getPropertiesWithRange('json', meta)
-    let jsons = []
+    let jsons
     if (jsonProps  &&  jsonProps.length) {
       let hidden = meta.hidden
       jsonProps.forEach((prop) => {
@@ -882,6 +883,8 @@ class NewResource extends Component {
         let val = this.state.resource[prop.name]
         if (val) {
           let params = {prop: prop, json: val, jsonRows: [], isView: true}
+          if (!jsons)
+            jsons = []
           jsons.push(this.showJson(params))
         }
       })
@@ -949,6 +952,11 @@ class NewResource extends Component {
                  </TouchableOpacity>
 
     }
+    if (arrayItems) {
+      arrayItems = <View style={styles.arrayItems}>
+                     {arrayItems}
+                   </View>
+    }
     let content =
       <ScrollView style={styles.scroll}
                   ref='scrollView' {...this.scrollviewProps}
@@ -967,9 +975,7 @@ class NewResource extends Component {
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
             {formsToSign}
             {button}
-            <View style={styles.arrayItems}>
-              {arrayItems}
-            </View>
+            {arrayItems}
             {jsons}
             {loadingVideo}
           </View>
@@ -1007,16 +1013,15 @@ class NewResource extends Component {
               </PageView>
 
     }
-    let title
-    if (!isRegistration  &&  !bankStyle.logoNeedsText)
-      title = <View style={styles.logoNeedsText}>
-                {translate(meta)}
-              </View>
+    // let title
+    // if (!isRegistration  &&  !bankStyle.logoNeedsText)
+    //   title = <View style={styles.logoNeedsText}>
+    //             {translate(meta)}
+    //           </View>
 
-    if (isRegistration)
-      title = <View style={styles.logo}>
-                <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
-              </View>
+    let title = <View style={styles.logo}>
+                  <CustomIcon name='tradle' size={40} color='#ffffff' style={{padding: 10}}/>
+                </View>
 
 
     return (
