@@ -460,7 +460,7 @@ class MessageView extends Component {
     let footer = this.renderFooter(backlink ||  allowToAddBacklink, styles)
     let contentSeparator = utils.getContentSeparator(bankStyle)
     let bigPhoto
-    if (mainPhoto)
+    if (mainPhoto  &&  !checkProps)
       bigPhoto = <View style={styles.photoBG} ref='bigPhoto'>
                    <PhotoView resource={resource} mainPhoto={mainPhoto} navigator={navigator}/>
                  </View>
