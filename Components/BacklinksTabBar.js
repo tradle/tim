@@ -196,7 +196,7 @@ const BacklinksTabBar = createReactClass({
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         directionalLockEnabled={true}
-        bounces={false}
+        bounces={true}
         scrollsToTop={false}
       >
         <View
