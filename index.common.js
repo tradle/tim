@@ -37,7 +37,7 @@ const {
 // import './utils/perf'
 
 // see issue: https://github.com/facebook/react-native/issues/6227
-var NativeAppEventEmitter = require('RCTNativeAppEventEmitter')
+import NativeAppEventEmitter from 'RCTNativeAppEventEmitter'
 
 // require('react-native-level')
 import Debug from './utils/debug'
@@ -46,52 +46,52 @@ var debug = Debug('tradle:app')
 // require('regenerator/runtime') // support es7.asyncFunctions
 // import './utils/crypto'
 // require('./timmy')
-var ResourceList = require('./Components/ResourceList');
-var VerifierChooser = require('./Components/VerifierChooser')
-var ShareResourceList = require('./Components/ShareResourceList')
+import ResourceList from './Components/ResourceList'
+import VerifierChooser from './Components/VerifierChooser'
+import ShareResourceList from './Components/ShareResourceList'
 // var VideoPlayer = require('./Components/VideoPlayer')
-var EnumList = require('./Components/EnumList')
-var GridList = require('./Components/GridList');
-var TimHome = require('./Components/TimHome');
-var MarkdownPropertyEdit = require('./Components/MarkdownPropertyEdit')
-var SignatureView = require('./Components/SignatureView')
-var AvivaIntroView = require('./Components/AvivaIntroView')
-var TourPage = require('./Components/TourPage')
-var SplashPage = require('./Components/SplashPage')
+import EnumList from './Components/EnumList'
+import GridList from './Components/GridList'
+import TimHome from './Components/TimHome'
+import MarkdownPropertyEdit from './Components/MarkdownPropertyEdit'
+import SignatureView from './Components/SignatureView'
+import AvivaIntroView from './Components/AvivaIntroView'
+import TourPage from './Components/TourPage'
+import SplashPage from './Components/SplashPage'
 
-var PasswordCheck = require('./Components/PasswordCheck');
-var LockScreen = require('./Components/LockScreen')
-var TouchIDOptIn = require('./Components/TouchIDOptIn');
-var NewResource = require('./Components/NewResource');
-var NewItem = require('./Components/NewItem');
-var RemediationItemsList = require('./Components/RemediationItemsList')
-var GridItemsList = require('./Components/GridItemsList')
-var ResourceView = require('./Components/ResourceView');
-var ApplicationView = require('./Components/ApplicationView')
-var MessageView = require('./Components/MessageView');
-var MessageList = require('./Components/MessageList');
-var ArticleView = require('./Components/ArticleView');
-var IdentitiesList = require('./Components/IdentitiesList');
-var SupervisoryViewPerProvider = require('./Components/SupervisoryViewPerProvider')
-var SupervisoryView = require('./Components/SupervisoryView')
-var ProductChooser = require('./Components/ProductChooser')
-var StringChooser = require('./Components/StringChooser')
-var ContextChooser = require('./Components/ContextChooser')
-var CameraView = require('./Components/CameraView');
-var PhotoCarousel = require('./Components/PhotoCarousel');
-var QRCode = require('./Components/QRCode')
-var QRCodeScanner = require('./Components/QRCodeScanner')
+import PasswordCheck from './Components/PasswordCheck'
+import LockScreen from './Components/LockScreen'
+import TouchIDOptIn from './Components/TouchIDOptIn'
+import NewResource from './Components/NewResource'
+import NewItem from './Components/NewItem'
+import RemediationItemsList from './Components/RemediationItemsList'
+import GridItemsList from './Components/GridItemsList'
+import ResourceView from './Components/ResourceView'
+import ApplicationView from './Components/ApplicationView'
+import MessageView from './Components/MessageView'
+import MessageList from './Components/MessageList'
+import ArticleView from './Components/ArticleView'
+import IdentitiesList from './Components/IdentitiesList'
+import SupervisoryViewPerProvider from './Components/SupervisoryViewPerProvider'
+import SupervisoryView from './Components/SupervisoryView'
+import ProductChooser from './Components/ProductChooser'
+import StringChooser from './Components/StringChooser'
+import ContextChooser from './Components/ContextChooser'
+import CameraView from './Components/CameraView'
+import PhotoCarousel from './Components/PhotoCarousel'
+import QRCode from './Components/QRCode'
+import QRCodeScanner from './Components/QRCodeScanner'
 import Log from './Components/Log'
 import HomePageMixin from './Components/HomePageMixin'
 
-var utils = require('./utils/utils');
+import utils from './utils/utils'
 var translate = utils.translate
 
-var Actions = require('./Actions/Actions');
+import Actions from './Actions/Actions'
 import * as AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
 import Store from './Store/Store'
-var StyleSheet = require('./StyleSheet')
+import StyleSheet from './StyleSheet'
 
 const TIM_HOME = 1
 const NEW_RESOURCE = 4
