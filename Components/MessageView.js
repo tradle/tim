@@ -1,46 +1,7 @@
 console.log('requiring MessageView.js')
 'use strict';
 
-import Reflux from 'reflux'
-import reactMixin from 'react-mixin'
-import _ from 'lodash'
-import Icon from 'react-native-vector-icons/Ionicons';
-import { makeResponsive } from 'react-native-orient'
-
-import utils, { translate } from '../utils/utils'
-import constants from '@tradle/constants'
-import ArticleView from './ArticleView'
-import PhotoList from './PhotoList'
-import PhotoView from './PhotoView'
-import StringChooser from './StringChooser'
-import ShowRefList from './ShowRefList'
-import VerificationView from './VerificationView'
-import NewResource from './NewResource'
-import PageView from './PageView'
-import Actions from '../Actions/Actions'
-import Store from '../Store/Store'
-import ResourceMixin from './ResourceMixin'
-import NetworkInfoProvider from './NetworkInfoProvider'
-import defaultBankStyle from '../styles/defaultBankStyle.json'
-import Navigator from './Navigator'
-
-const PHOTO = 'tradle.Photo'
-const ITEM = 'tradle.Item'
-// const DRAFT_APPLICATION = 'tradle.DraftApplication'
-// const FORM_PREFILL = 'tradle.FormPrefill'
-// import Prompt from 'react-native-prompt'
-const {
-  TYPE,
-  ROOT_HASH
-} = constants
-const {
-  VERIFICATION,
-  ENUM,
-  MONEY,
-  FORM
-} = constants.TYPES
-const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
-
+import React, { Component } from 'react'
 import {
   // StyleSheet,
   ScrollView,
@@ -51,11 +12,49 @@ import {
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
+import Reflux from 'reflux'
+import reactMixin from 'react-mixin'
+import _ from 'lodash'
+import Icon from 'react-native-vector-icons/Ionicons';
+import { makeResponsive } from 'react-native-orient'
 
-import React, { Component } from 'react'
+import constants from '@tradle/constants'
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+const {
+  VERIFICATION,
+  ENUM,
+  MONEY,
+  FORM
+} = constants.TYPES
+
+import utils, { translate } from '../utils/utils'
+import ArticleView from './ArticleView'
+import PhotoList from './PhotoList'
+import PhotoView from './PhotoView'
+// import StringChooser from './StringChooser'
+import ShowRefList from './ShowRefList'
+import VerificationView from './VerificationView'
+import NewResource from './NewResource'
+import PageView from './PageView'
+import Actions from '../Actions/Actions'
+import Store from '../Store/Store'
+import ResourceMixin from './ResourceMixin'
+import NetworkInfoProvider from './NetworkInfoProvider'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import Navigator from './Navigator'
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
+
+const PHOTO = 'tradle.Photo'
+const ITEM = 'tradle.Item'
+// const DRAFT_APPLICATION = 'tradle.DraftApplication'
+// const FORM_PREFILL = 'tradle.FormPrefill'
+// import Prompt from 'react-native-prompt'
+const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 
 class MessageView extends Component {
   static displayName = 'MessageView';

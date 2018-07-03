@@ -11,13 +11,14 @@ import {
   Alert
 } from 'react-native'
 import PropTypes from 'prop-types'
-
 import ImagePicker from 'react-native-image-picker'
-import utils from '../utils/utils'
-import extend from 'extend'
-import ENV from '../utils/env'
+import _ from 'lodash'
 const debug = require('debug')('tradle:app:ImageInput')
 
+import utils from '../utils/utils'
+import ENV from '../utils/env'
+
+const BASE64_PREFIX = 'data:image/jpeg;base64,'
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
   prop: PropTypes.string.isRequired,
@@ -82,7 +83,7 @@ class ImageInput extends Component {
       action = 'launchCamera'
     else {
       action = 'showImagePicker'
-      extend(options, {
+      _.extend(options, {
         chooseFromLibraryButtonTitle: 'Choose from Library',
         takePhotoButtonTitle: 'Take Photo…',
       })
@@ -104,7 +105,7 @@ class ImageInput extends Component {
       }
 
       onImage({
-        url: 'data:image/jpeg;base64,' + response.data,
+        url: BASE64_PREFIX + response.data,
         isVertical: response.isVertical,
         width: response.width,
         height: response.height

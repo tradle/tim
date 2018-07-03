@@ -10,7 +10,8 @@ import t from 'tcomb-form-native'
 import dismissKeyboard from 'react-native/Libraries/Utilities/dismissKeyboard'
 import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
-import SignatureView from './SignatureView'
+const debug = require('debug')('NewResource')
+
 import Native, {
   // StyleSheet,
   View,
@@ -25,6 +26,22 @@ import Native, {
   Animated
 } from 'react-native'
 import PropTypes from 'prop-types';
+
+import constants from '@tradle/constants'
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+
+const {
+  SETTINGS,
+  ENUM,
+  PROFILE,
+  FINANCIAL_PRODUCT,
+  SIMPLE_MESSAGE,
+  ORGANIZATION,
+  MONEY
+} = constants.TYPES
 
 import utils, { translate } from '../utils/utils'
 import NewItem from './NewItem'
@@ -44,14 +61,8 @@ import rStyles from '../styles/registrationStyles'
 import NewResourceMixin from './NewResourceMixin'
 import OnePropFormMixin from './OnePropFormMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import constants from '@tradle/constants'
 import { circled } from '../styles/utils'
-
-var {
-  TYPE,
-  ROOT_HASH
-} = constants
-
+import SignatureView from './SignatureView'
 import termsAndConditions from '../termsAndConditions.json'
 import StyleSheet from '../StyleSheet'
 import ImageInput from './ImageInput'
@@ -65,12 +76,9 @@ import platformStyles from '../styles/platform'
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
 
-const debug = require('debug')('NewResource')
 const BG_IMAGE = ENV.brandBackground
-const ENUM = 'tradle.Enum'
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
-const SETTINGS = 'tradle.Settings'
 const HAND_SIGNATURE = 'tradle.HandSignature'
 var Form = t.form.Form;
 
@@ -96,7 +104,7 @@ class NewResource extends Component {
       r = utils.clone(props.resource) //extend(true, r, props.resource)
     else
       r[TYPE] = props.model.id
-    let isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
+    let isRegistration = !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
     let isUploading = !isRegistration  &&  (!r[ROOT_HASH] || Object.keys(r).length === 2)
     this.state = {
       resource: r,
@@ -409,7 +417,7 @@ class NewResource extends Component {
       rightButtonTitle: translate('Done'),
       passProps: {
         message: translate('chooseCompaniesToShareChangesWith'),
-        modelName: constants.TYPES.ORGANIZATION,
+        modelName: ORGANIZATION,
         to: this.state.resource.to,
         resource: this.props.resource,
         callback:  this.shareWith.bind(this, newResource),
@@ -570,7 +578,7 @@ class NewResource extends Component {
           let ref = props[p].ref
           if (ref) {
             let rModel = utils.getModel(ref)
-            if (ref === constants.TYPES.MONEY) {
+            if (ref === MONEY) {
               if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
                 missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
                 return
@@ -763,7 +771,7 @@ class NewResource extends Component {
     let arrays = [];
     _.extend(data, resource);
     let isMessage = utils.isMessage(resource)
-    let isFinancialProduct = isMessage  &&  meta.subClassOf && meta.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
+    let isFinancialProduct = isMessage  &&  meta.subClassOf && meta.subClassOf === FINANCIAL_PRODUCT
     let showSendVerificationForm = false;
     let formToDisplay;
     if (isMessage) {
@@ -1558,7 +1566,7 @@ module.exports = NewResource;
 
   //   let toName = utils.getDisplayName(resource.to);
   //   let meName = utils.getDisplayName(me);
-  //   let modelName = constants.TYPES.SIMPLE_MESSAGE;
+  //   let modelName = SIMPLE_MESSAGE;
   //   let value = {
   //     message: msg
   //             ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'

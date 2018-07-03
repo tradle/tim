@@ -16,7 +16,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
 var TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
-const ENUM = 'tradle.Enum'
+
 const PHOTO = 'tradle.Photo'
 const METHOD = 'tradle.Method'
 const PARTIAL = 'tradle.Partial'
@@ -27,7 +27,8 @@ const {
 } = constants
 const {
   IDENTITY,
-  MONEY
+  MONEY,
+  ENUM
 } = constants.TYPES
 
 const BLOCKCHAIN_EXPLORERS = [

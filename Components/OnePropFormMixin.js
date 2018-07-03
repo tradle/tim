@@ -2,14 +2,16 @@ console.log('requiring OnePropFormMixin.js')
 'use strict';
 
 import React from 'react'
-import {
-  Alert,
-} from 'react-native'
-import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
+import { Alert } from 'react-native'
+import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io'
 const debug = require('debug')('tradle:app:OnePropForm')
 import _ from 'lodash'
 
 import constants from '@tradle/constants'
+var {
+  TYPE
+} = constants
+
 import utils from '../utils/utils'
 const translate = utils.translate
 import Actions from '../Actions/Actions'
@@ -17,10 +19,7 @@ import CameraView from './CameraView'
 import SignatureView from './SignatureView'
 import Navigator from './Navigator'
 
-var {
-  TYPE
-} = constants
-
+const BASE64_PREFIX = 'data:image/jpeg;base64,'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 
@@ -117,11 +116,11 @@ var OnePropFormMixin = {
       }
     });
   },
-  onTakePic(params, data) {
-    if (!data)
+  onTakePic(params, photo) {
+    if (!photo)
       return
     let { prop } = params
-    let { width, height, base64 } = data
+    let { width, height, base64 } = photo
 
     let resource = this.props.resource
     let isFormError = resource[TYPE] === FORM_ERROR
@@ -132,7 +131,7 @@ var OnePropFormMixin = {
         [prop.name]: {
           width,
           height,
-          url: 'data:image/jpeg;base64,' + base64
+          url: BASE64_PREFIX + base64
         },
         _context: resource._context,
         from: utils.getMe(),
