@@ -154,7 +154,7 @@ class ShowRefList extends Component {
       this.tabDetail[propTitle] = { icon, action: this.exploreBacklink.bind(this, resource, props[p]), count: cnt }
       refList.push(<View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()} tabLabel={propTitle}/>)
     })
-    const showQR = true //ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
+    const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
     if (showQR  &&  this.props.showQR) {
       let tabName = translate('showQR')
       this.tabDetail[tabName] = { icon: 'ios-qr-scanner', action: this.props.showQR.bind(this) }
