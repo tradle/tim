@@ -22,11 +22,11 @@ import format from 'string-template'
 import t from 'tcomb-form-native'
 import _ from 'lodash'
 import dateformat from 'dateformat'
-import EnumList from './EnumList'
 import FloatLabel from 'react-native-floating-labels'
 import Icon from 'react-native-vector-icons/Ionicons'
 import moment from 'moment'
-import QRCodeScanner from './QRCodeScanner'
+import DatePicker from 'react-native-datepicker'
+const debug = require('debug')('tradle:app:blinkid')
 
 import constants from '@tradle/constants'
 import validateResource from '@tradle/validate-resource'
@@ -38,6 +38,7 @@ import utils, {
   translate
 } from '../utils/utils'
 import CameraView from './CameraView'
+import EnumList from './EnumList'
 import SignatureView from './SignatureView'
 import StyleSheet from '../StyleSheet'
 // import driverLicenseParser from '../utils/driverLicenseParser'
@@ -47,7 +48,6 @@ import StyleSheet from '../StyleSheet'
 // import omit from 'object.omit'
 // import pick from 'object.pick'
 import ENV from '../utils/env'
-import DatePicker from 'react-native-datepicker'
 import ImageInput from './ImageInput'
 import Analytics from '../utils/analytics'
 
@@ -58,7 +58,6 @@ import MarkdownPropertyEdit from './MarkdownPropertyEdit'
 import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
 
-const debug = require('debug')('tradle:app:blinkid')
 const DEFAULT_CURRENCY_SYMBOL = '£';
 
 const {
