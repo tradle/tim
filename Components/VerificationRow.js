@@ -278,6 +278,7 @@ class VerificationRow extends Component {
             icon = 'ios-checkmark'
             break
           case 'Fail':
+          case 'Error':
             color = 'red'
             icon = 'ios-close'
             break
