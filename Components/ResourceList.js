@@ -481,6 +481,8 @@ class ResourceList extends Component {
   addTestProvidersRow(l) {
     if (!l  ||  !this.props.officialAccounts || this.props.modelName !== ORGANIZATION)
       return l
+    if (l  &&  l.some(r => r.name === 'Sandbox'))
+      return utils.clone(l)
     l.push({
       [TYPE]: ORGANIZATION,
       name: 'Sandbox',
@@ -1233,7 +1235,7 @@ class ResourceList extends Component {
         },
         {
           text: translate('scanQRcode'),
-          onPress: () => this.scanFormsQRCode()
+          onPress: () => this.scanQRAndProcess()
         }
       ]
     }
@@ -1248,6 +1250,14 @@ class ResourceList extends Component {
       />
     )
   }
+  async scanQRAndProcess(prop) {
+    const result = await this.scanFormsQRCode()
+    if (result  &&  result.data) {
+      let { host, provider } = result.data
+      Actions.addApp({ url: host, permalink: provider })
+    }
+  }
+
   hideResource(resource) {
     Alert.alert(
       translate('areYouSureYouWantToDelete', translate(resource.name)),
