@@ -596,13 +596,6 @@ var NavigationBarRouteMapper = {
     let lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
     if (!lbTitle)
       return null;
-    let style = [platformStyles.navBarText];
-    if (route.tintColor)
-      style.push({color: route.tintColor});
-    else {
-      style.push(styles.navBarButtonText);
-      style.push({color: color});
-    }
     let iconIdx = lbTitle.indexOf('|')
     let icon
     if (iconIdx !== -1)
@@ -612,6 +605,15 @@ var NavigationBarRouteMapper = {
     else if (lbTitle === 'Profile')
       icon = 'md-person'
 
+    let style = [platformStyles.navBarText];
+    if (route.tintColor)
+      style.push({color: route.tintColor});
+    else {
+      style.push(styles.navBarButtonText);
+      style.push({color: color});
+    }
+    if (!icon)
+      style.push({marginTop: 6})
     let title = icon
               ? <Icon name={icon} size={utils.getFontSize(30)} color={color} style={styles.icon}/>
               : <Text style={style}>
