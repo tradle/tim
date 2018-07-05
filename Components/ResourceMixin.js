@@ -357,15 +357,21 @@ var ResourceMixin = {
     if (prop) {
       let cols = []
       let state
+      let icon
+      if (showCollapsed  &&  showCollapsed === prop.name)
+        icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={{position: 'absolute', top: 15, right: 20}} />
       if (isOnfido) {
         let color = json.result === 'clear' ? 'green' : 'red'
         cols.push(<Col sm={1} md={1} lg={1} style={{paddingVertical: 5, backgroundColor: bg}} key={this.getNextKey()}>
                     <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
+                    {icon}
                   </Col>)
       }
       let style = {opacity: 0.7, ...backlinksBg}
+
       cols.push(<Col sm={1} md={1} lg={1} style={style} key={this.getNextKey()}>
                  <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{translate(prop)}</Text>
+                 {!isOnfido  &&  icon}
                </Col>)
       let colSize = state ? 2 : 1
       jsonRows.push(<Row size={colSize} style={styles.gridRow} key={this.getNextKey()} nowrap>
@@ -391,8 +397,6 @@ var ResourceMixin = {
           val = <Text style={[styles.title, {flex: 1, color: bankStyle.linkColor}]} onPress={() => Linking.openURL(jVal)}>{jVal}</Text>
         else
           val = <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{jVal}</Text>
-
-
         jsonRows.push(<Row size={2} style={styles.gridRow} key={this.getNextKey()} nowrap>
                         <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
                           {label}
@@ -475,7 +479,7 @@ var ResourceMixin = {
         else if (isOnfido)
           isBreakdown = true
 
-        let params = {json: jVal, isView, jsonRows: arr, skipLabels, indent: indent + 1, isOnfido, isBreakdown}
+        let params = {json: jVal, isView, jsonRows, skipLabels, indent: indent + 1, isOnfido, isBreakdown}
         this.showJson(params)
         continue
       }
@@ -483,23 +487,16 @@ var ResourceMixin = {
     if (!prop)
       return
 
-    if (showCollapsed) {
-      for (let i=0; i<jsonRows.length; i++) {
-        if (Array.isArray(jsonRows[i])) {
-          let arr = jsonRows[i]
-          let header = arr[0]
-          arr.splice(0, 1)
-          let content = <View>{arr}</View>
-          let row =  <Accordion
-                       sections={[utils.makeLabel(showCollapsed)]}
-                       header={header}
-                       style={{alignSelf: 'stretch'}}
-                       content={<View>{arr}</View>}
-                       underlayColor='transparent'
-                       easing='easeOutQuad' />
-          jsonRows.splice(i, 1, row)
-        }
-      }
+    if (showCollapsed  &&  showCollapsed == prop.name) {
+      let header = jsonRows[0]
+      let content = jsonRows.splice(1)
+      return <Accordion key={this.getNextKey()}
+               sections={[utils.makeLabel(showCollapsed)]}
+               header={header}
+               style={{alignSelf: 'stretch'}}
+               content={content}
+               underlayColor='transparent'
+               easing='easeOutQuad' />
     }
     return jsonRows
   },
@@ -731,7 +728,7 @@ var styles = StyleSheet.create({
   gridRow: {
     borderBottomColor: '#f5f5f5',
     paddingVertical: 5,
-    paddingRight: 7,
+    // paddingRight: 7,
     borderBottomWidth: 1
   },
 
