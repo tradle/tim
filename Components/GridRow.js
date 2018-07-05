@@ -17,16 +17,15 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
-
 import {Column as Col, Row} from 'react-native-flexbox-grid'
+
 import ResourceView from './ResourceView'
 import MessageView from './MessageView'
 import RowMixin from './RowMixin'
 import PageView from './PageView'
 import ArticleView from './ArticleView'
-import utils, {
-  translate
-} from '../utils/utils'
+import utils, { translate } from '../utils/utils'
+import { circled } from '../styles/utils'
 import Store from '../Store/Store'
 import StyleSheet from '../StyleSheet'
 
@@ -261,7 +260,22 @@ class GridRow extends Component {
       else {
         let title = utils.getDisplayName(resource[pName])
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{title}</Text>
-        if (refM.isInterface || refM.id === FORM  || refM.id === OBJECT) {
+        if (refM.subClassOf === ENUM) {
+          let eVal = refM.enum.find(r => r.id === this.getEnumID(resource[pName].id))
+          if (eVal) {
+            let { icon, color } = eVal
+            if (icon)
+              row = <View key={this.getNextKey(resource)} style={styles.row}>
+                      <View style={[styles.button, {alignItems: 'center', backgroundColor: color}]}>
+                        <Icon name={icon} color='#ffffff' size={25}/>
+                      </View>
+                      <View style={{paddingLeft: 5, justifyContent: 'center'}}>
+                        {row}
+                      </View>
+                    </View>
+          }
+        }
+        else if (refM.isInterface || refM.id === FORM  || refM.id === OBJECT) {
           let resType = utils.getType(resource[pName])
           let resM = utils.getModel(resType)
           row = <View key={this.getNextKey(resource)}>
@@ -361,6 +375,9 @@ class GridRow extends Component {
       parts.push(<Text style={style} key={this.getNextKey(resource)}>{val.substring(idx)}</Text>)
     return parts
   }
+  getEnumID(id) {
+    return id.split('_')[1]
+  }
 }
 reactMixin(GridRow.prototype, Reflux.ListenerMixin);
 reactMixin(GridRow.prototype, RowMixin)
@@ -397,6 +414,13 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginRight: 10,
     backgroundColor: 'transparent'
+  },
+  button: {
+    ...circled(25),
+    shadowOpacity: 0.7,
+    opacity: 0.9,
+    shadowRadius: 5,
+    shadowColor: '#afafaf',
   },
 });
 
