@@ -448,14 +448,11 @@ var ResourceMixin = {
           })
           continue
         }
-        let arr, arrow
-        if (showCollapsed  &&  showCollapsed === p) {
-          arr = []
-          jsonRows.push(arr)
+        // HACK for Onfido
+        let arrow
+        if (showCollapsed  &&  showCollapsed === p)
           arrow = <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
-        }
-        else
-          arr = jsonRows
+
         // HACK for Onfido
         if (p !== 'breakdown') {
           let result
