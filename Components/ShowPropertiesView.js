@@ -47,6 +47,7 @@ import {
   View,
   Text,
   TextInput,
+  ScrollView,
   TouchableOpacity,
   Linking
 } from 'react-native'
@@ -76,12 +77,19 @@ class ShowPropertiesView extends Component {
   render() {
     let viewCols = this.getViewCols()
     return (
-      <View key={this.getNextKey()}>
+      <View style={{paddingBottom: 100}} key={this.getNextKey()}>
         {viewCols}
       </View>
     );
+    // return (
+    //   <ScrollView ref={(scroll) => {this.scroll = scroll}} style={{paddingBottom: 100}} key={this.getNextKey}>
+    //     {viewCols}
+    //   </ScrollView>
+    // );
   }
-
+  // scrollToBottom() {
+  //   this.scroll.scrollToEnd()
+  // }
   shouldComponentUpdate(nextProps, nextState) {
     // Prompt for employee to write a correction message
     if (utils.resized(this.props, nextProps))
@@ -174,13 +182,16 @@ class ShowPropertiesView extends Component {
 
         let isOnfido = isMethod  &&  resource.api  &&  resource.api.name === 'onfido'
 
-        let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido}
-        this.showJson(params)
-        if (jsonRows.length)
+        let params = {prop: pMeta, json: val, isView: true, jsonRows, isOnfido}
+        // let params = {prop: pMeta, json: val, isView: true, jsonRows: jsonRows, isOnfido: isOnfido, scrollToBottom: this.scrollToBottom.bind(this)}
+        let jVal = this.showJson(params)
+        if (jVal   &&  typeof !Array.isArray(jVal))
+          viewCols.push(jVal)
+        else if (jVal.length)
           viewCols.push(
             <View key={this.getNextKey()}>
                <View style={isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}}>
-                 {jsonRows}
+                 {jVal}
                </View>
              </View>
              )
