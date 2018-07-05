@@ -1,4 +1,6 @@
 console.log('requiring CameraView.js')
+
+import React, { Component } from 'react'
 import {
   AppRegistry,
   StyleSheet,
@@ -11,9 +13,9 @@ import PropTypes from 'prop-types'
 // import Camera from 'react-native-camera'
 import { RNCamera } from 'react-native-camera'
 import Icon from 'react-native-vector-icons/Ionicons'
-import utils from '../utils/utils'
 
-import React, { Component } from 'react'
+import utils from '../utils/utils'
+const BASE64_PREFIX = 'data:image/jpeg;base64,'
 
 class CameraView extends Component {
   constructor(props) {
@@ -30,7 +32,7 @@ class CameraView extends Component {
     if (data) {
       let { width, height } = utils.dimensions()
       return <View style={[styles.container, {backgroundColor: '#000'}]}>
-                <Image source={{isStatic: true, url: 'data:image/jpeg;base64,' + data.base64}} style={{width, height: height - 60}} />
+                <Image source={{isStatic: true, url: utils.BASE_64_PREFIX + data.base64}} style={{width, height: height - 60}} />
                 <View style={{flexDirection: 'row', width, justifyContent: 'center'}}>
                    <TouchableOpacity onPress={() => this.setState({data: null})}>
                      <Text style={styles.cancel}>Re-take</Text>

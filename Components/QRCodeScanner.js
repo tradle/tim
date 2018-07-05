@@ -14,7 +14,6 @@ var ICON_BORDER_COLOR = '#D7E6ED'
 import Icon from 'react-native-vector-icons/Ionicons'
 var Dir = Camera.constants.Type
 
-
 class QRCodeScanner extends Component {
   static displayName = 'QRCodeScanner';
   constructor(props) {
@@ -49,7 +48,7 @@ class QRCodeScanner extends Component {
           }}
         type={this.state.cameraType}>
         <TouchableHighlight onPress={this._switchCamera.bind(this)} style={styles.flip}>
-          <Icon name='ios-reverse-camera' size={25} color='#eeeeee' style={styles.icon} />
+          <Icon name='ios-reverse-camera' size={30} color='#eeeeee' />
         </TouchableHighlight>
       </Camera>
     )
@@ -75,17 +74,13 @@ class QRCodeScanner extends Component {
 var styles = {
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  icon: {
-    width: 30,
-    height: 30
+    // justifyContent: 'center',
+    // alignItems: 'center',
+    // backgroundColor: 'transparent',
   },
   flip: {
     position: 'absolute',
-    top: 30,
+    top: 40,
     right: 10
   }
 }

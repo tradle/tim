@@ -9,7 +9,8 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import t from 'tcomb-form-native'
 import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
-import SignatureView from './SignatureView'
+const debug = require('debug')('NewResource')
+
 import Native, {
   // StyleSheet,
   View,
@@ -24,6 +25,22 @@ import Native, {
   Animated
 } from 'react-native'
 import PropTypes from 'prop-types';
+
+import constants from '@tradle/constants'
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+
+const {
+  SETTINGS,
+  ENUM,
+  PROFILE,
+  FINANCIAL_PRODUCT,
+  SIMPLE_MESSAGE,
+  ORGANIZATION,
+  MONEY
+} = constants.TYPES
 
 import utils, { translate } from '../utils/utils'
 import NewItem from './NewItem'
@@ -43,13 +60,8 @@ import rStyles from '../styles/registrationStyles'
 import NewResourceMixin from './NewResourceMixin'
 import OnePropFormMixin from './OnePropFormMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import constants from '@tradle/constants'
-
-var {
-  TYPE,
-  ROOT_HASH
-} = constants
-
+import { circled } from '../styles/utils'
+import SignatureView from './SignatureView'
 import termsAndConditions from '../termsAndConditions.json'
 import StyleSheet from '../StyleSheet'
 import ImageInput from './ImageInput'
@@ -68,13 +80,10 @@ import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
 import DropPage from './DropPage'
 
-const debug = require('debug')('NewResource')
 const BG_IMAGE = ENV.brandBackground
-const ENUM = 'tradle.Enum'
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
 const FILE = 'tradle.File'
-const SETTINGS = 'tradle.Settings'
 const HAND_SIGNATURE = 'tradle.HandSignature'
 var Form = t.form.Form;
 
@@ -100,7 +109,7 @@ class NewResource extends Component {
       r = utils.clone(props.resource) //extend(true, r, props.resource)
     else
       r[TYPE] = props.model.id
-    let isRegistration = !utils.getMe()  && this.props.model.id === constants.TYPES.PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
+    let isRegistration = !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH]);
     let isUploading = !isRegistration  &&  (!r[ROOT_HASH] || Object.keys(r).length === 2)
     this.state = {
       resource: r,
@@ -426,7 +435,7 @@ class NewResource extends Component {
       rightButtonTitle: 'Done',
       passProps: {
         message: translate('chooseCompaniesToShareChangesWith'),
-        modelName: constants.TYPES.ORGANIZATION,
+        modelName: ORGANIZATION,
         to: this.state.resource.to,
         resource: this.props.resource,
         callback:  this.shareWith.bind(this, newResource),
@@ -587,7 +596,7 @@ class NewResource extends Component {
           let ref = props[p].ref
           if (ref) {
             let rModel = utils.getModel(ref)
-            if (ref === constants.TYPES.MONEY) {
+            if (ref === MONEY) {
               if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
                 missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
                 return
@@ -790,7 +799,7 @@ class NewResource extends Component {
     let arrays = [];
     _.extend(data, resource);
     let isMessage = utils.isMessage(resource)
-    let isFinancialProduct = isMessage  &&  meta.subClassOf && meta.subClassOf === constants.TYPES.FINANCIAL_PRODUCT
+    let isFinancialProduct = isMessage  &&  meta.subClassOf && meta.subClassOf === FINANCIAL_PRODUCT
     let showSendVerificationForm = false;
     let formToDisplay;
     if (isMessage) {
@@ -1412,50 +1421,6 @@ class NewResource extends Component {
       this.state.resource[p] = value[p];
     })
   }
-
-  onSubmitEditing(msg) {
-    msg = msg ? msg : this.state.userInput;
-    let assets = this.state.selectedAssets;
-    let isNoAssets = utils.isEmpty(assets);
-    if (!msg  &&  isNoAssets)
-      return;
-    let me = utils.getMe();
-    let resource = {from: utils.getMe(), to: this.props.resource.to};
-    let model = this.props.model;
-
-    let toName = utils.getDisplayName(resource.to);
-    let meName = utils.getDisplayName(me);
-    let modelName = constants.TYPES.SIMPLE_MESSAGE;
-    let value = {
-      message: msg
-              ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
-              : '',
-
-      from: {
-        id: utils.getId(me),
-        title: meName
-      },
-      to: {
-        id: utils.getId(resource),
-        title: toName
-      },
-
-      time: new Date().getTime()
-    }
-    value[TYPE] = modelName;
-    if (this.props.context)
-      value._context = this.props.context
-
-    if (!isNoAssets) {
-      let photos = [];
-      for (let assetUri in assets)
-        photos.push({url: assetUri, title: 'photo'});
-
-      value.photos = photos;
-    }
-    this.setState({userInput: '', selectedAssets: {}});
-    Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName));
-  }
 }
 reactMixin(NewResource.prototype, Reflux.ListenerMixin);
 reactMixin(NewResource.prototype, NewResourceMixin);
@@ -1871,4 +1836,47 @@ module.exports = NewResource;
   //     };
   //     self.onAddItem('photos', item);
   //   });
+  // }
+  // onSubmitEditing(msg) {
+  //   msg = msg ? msg : this.state.userInput;
+  //   let assets = this.state.selectedAssets;
+  //   let isNoAssets = utils.isEmpty(assets);
+  //   if (!msg  &&  isNoAssets)
+  //     return;
+  //   let me = utils.getMe();
+  //   let resource = {from: utils.getMe(), to: this.props.resource.to};
+  //   let model = this.props.model;
+
+  //   let toName = utils.getDisplayName(resource.to);
+  //   let meName = utils.getDisplayName(me);
+  //   let modelName = SIMPLE_MESSAGE;
+  //   let value = {
+  //     message: msg
+  //             ?  model.isInterface ? msg : '[' + msg + '](' + model.id + ')'
+  //             : '',
+
+  //     from: {
+  //       id: utils.getId(me),
+  //       title: meName
+  //     },
+  //     to: {
+  //       id: utils.getId(resource),
+  //       title: toName
+  //     },
+
+  //     time: new Date().getTime()
+  //   }
+  //   value[TYPE] = modelName;
+  //   if (this.props.context)
+  //     value._context = this.props.context
+
+  //   if (!isNoAssets) {
+  //     let photos = [];
+  //     for (let assetUri in assets)
+  //       photos.push({url: assetUri, title: 'photo'});
+
+  //     value.photos = photos;
+  //   }
+  //   this.setState({userInput: '', selectedAssets: {}});
+  //   Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName));
   // }

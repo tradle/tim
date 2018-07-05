@@ -1,45 +1,7 @@
 console.log('requiring ApplicationView.js')
 'use strict';
 
-import utils, {
-  getFontSize as fontSize,
-  translate
-} from '../utils/utils'
-import ApplicationTabs from './ApplicationTabs'
-import PageView from './PageView'
-import Icon from 'react-native-vector-icons/Ionicons'
-import Actions from '../Actions/Actions'
-import Reflux from 'reflux'
-import Store from '../Store/Store'
-import reactMixin from 'react-mixin'
-import ResourceMixin from './ResourceMixin'
-import MessageList from './MessageList'
-import ENV from '../utils/env'
-import StyleSheet from '../StyleSheet'
-import extend from 'extend'
-import constants from '@tradle/constants'
-import HomePageMixin from './HomePageMixin'
-import NetworkInfoProvider from './NetworkInfoProvider'
-
-import platformStyles from '../styles/platform'
-import buttonStyles from '../styles/buttonStyles'
-import { makeResponsive } from 'react-native-orient'
-import debug from '../utils/debug'
-import ConversationsIcon from './ConversationsIcon'
-
-const ASSIGN_RM = 'tradle.AssignRelationshipManager'
-const DENIAL = 'tradle.ApplicationDenial'
-const APPROVAL = 'tradle.ApplicationApproval'
-
-const {
-  TYPE,
-  ROOT_HASH
-} = constants
-const {
-  PROFILE,
-  IDENTITY,
-  MESSAGE
-} = constants.TYPES
+import React, { Component } from 'react'
 import {
   View,
   Text,
@@ -49,17 +11,51 @@ import {
   TouchableOpacity,
 } from 'react-native'
 import PropTypes from 'prop-types'
+import { LazyloadScrollView } from 'react-native-lazyload'
+import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons'
+import { makeResponsive } from 'react-native-orient'
 
-import {
-  LazyloadScrollView,
-} from 'react-native-lazyload'
+import constants from '@tradle/constants'
+const {
+  TYPE,
+  ROOT_HASH
+} = constants
+const {
+  PROFILE,
+  IDENTITY,
+  MESSAGE
+} = constants.TYPES
+
+import utils, {
+  getFontSize as fontSize,
+  translate
+} from '../utils/utils'
+import ApplicationTabs from './ApplicationTabs'
+import PageView from './PageView'
+import Actions from '../Actions/Actions'
+import Reflux from 'reflux'
+import Store from '../Store/Store'
+import ResourceMixin from './ResourceMixin'
+import MessageList from './MessageList'
+import ENV from '../utils/env'
+import StyleSheet from '../StyleSheet'
+import HomePageMixin from './HomePageMixin'
+import NetworkInfoProvider from './NetworkInfoProvider'
+
+import platformStyles from '../styles/platform'
+import buttonStyles from '../styles/buttonStyles'
+import debug from '../utils/debug'
+import ConversationsIcon from './ConversationsIcon'
+
+const ASSIGN_RM = 'tradle.AssignRelationshipManager'
+const DENIAL = 'tradle.ApplicationDenial'
+const APPROVAL = 'tradle.ApplicationApproval'
+const APPLICATION = 'tradle.Application'
 
 const ScrollView = LazyloadScrollView
 const LAZY_ID = 'lazyload-list'
-const APPLICATION = 'tradle.Application'
 let INSTANCE_ID = 0
-
-import React, { Component } from 'react'
 
 class ApplicationView extends Component {
   static displayName = 'ApplicationView';
@@ -119,7 +115,7 @@ class ApplicationView extends Component {
         if (backlink.items.backlink) {
           let r = params.resource || this.state.resource
           this.setState({backlink: backlink, showDetails: false, showDocuments: false}) //, resource: r})
-          Actions.getItem({resource: r, application, search: true, backlink: backlink})
+          Actions.getItem({resource: r, application: resource, search: true, backlink: backlink})
         }
         else
           this.setState({backlink: backlink, showDetails: false})

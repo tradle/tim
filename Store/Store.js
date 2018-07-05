@@ -5320,8 +5320,11 @@ if (!res[SIG]  &&  res._message)
       this.addSettings(newProvider)
     else
       this.addToSettings(newProvider)
-    if (!noTrigger)
+    if (!noTrigger) {
       this.trigger({ action: 'addApp' })
+      let isTest = this._getItem(newProvider.org)._isTest
+      await this.getList({action: 'list', modelName: ORGANIZATION, isTest})
+    }
     return newProvider
   },
 

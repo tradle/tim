@@ -226,7 +226,7 @@ var HomePageMixin = {
       return
     let vCols = []
     gridCols.forEach((v) => {
-      if (/*!props[v].readOnly &&*/ !props[v].list  &&  props[v].range !== 'json')
+      if (/*!props[v].readOnly &&*/ !props[v].list  &&  props[v].range !== 'json' && props[v].range !== 'url')
         vCols.push(v)
     })
     // if (vCols.length === 7)

@@ -212,7 +212,6 @@ class ShowRefList extends Component {
            </TouchableHighlight>
          </View>
         )
-
     }
     if (!hasBacklinks  &&  !showDocuments) {
       if (showDetails)

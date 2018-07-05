@@ -77,11 +77,9 @@ var {
 } = constants.TYPES
 // import Progress from 'react-native-progress'
 
-
 const BOOKMARK = 'tradle.Bookmark'
 
 const BG_IMAGE = ENV.splashBackground
-const PASSWORD_ITEM_KEY = 'app-password'
 const SUBMIT_LOG_TEXT = {
   submit: translate('submitLog'),
   submitting: translate('submitting') + '...',
