@@ -24,8 +24,7 @@ import PhotoList from './PhotoList'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import Accordion from './Accordion'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import utils from '../utils/utils'
-var translate = utils.translate
+import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
 
 import ENV from '../utils/env'
@@ -361,14 +360,15 @@ var ResourceMixin = {
       if (isOnfido) {
         let color = json.result === 'clear' ? 'green' : 'red'
         cols.push(<Col sm={1} md={1} lg={1} style={{paddingVertical: 5, backgroundColor: bg}} key={this.getNextKey()}>
-                  <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
-                </Col>)
+                    <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
+                  </Col>)
       }
       let style = {opacity: 0.7, ...backlinksBg}
-      cols.pus(<Col sm={1} md={1} lg={1} style={style}>
+      cols.push(<Col sm={1} md={1} lg={1} style={style} key={this.getNextKey()}>
                  <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{translate(prop)}</Text>
                </Col>)
-      jsonRows.push(<Row size={state ? 2 : 1} style={styles.gridRow} key={this.getNextKey()} nowrap>
+      let colSize = state ? 2 : 1
+      jsonRows.push(<Row size={colSize} style={styles.gridRow} key={this.getNextKey()} nowrap>
                       {cols}
                     </Row>)
 
@@ -727,6 +727,12 @@ var styles = StyleSheet.create({
     fontSize: 16,
     marginHorizontal: 7,
     paddingBottom: 10
+  },
+  gridRow: {
+    borderBottomColor: '#f5f5f5',
+    paddingVertical: 5,
+    paddingRight: 7,
+    borderBottomWidth: 1
   },
 
 })
