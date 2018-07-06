@@ -490,7 +490,6 @@ var ResourceMixin = {
       return <Accordion key={this.getNextKey()}
                sections={[utils.makeLabel(showCollapsed)]}
                header={header}
-               style={{alignSelf: 'stretch'}}
                content={content}
                underlayColor='transparent'
                easing='easeOutQuad' />
