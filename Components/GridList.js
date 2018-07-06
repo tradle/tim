@@ -1344,7 +1344,7 @@ class GridList extends Component {
     // let me = utils.getMe();
     // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
     //   return <View />;
-    let { isModel, modelName, prop, search, bookmark, isBacklink } = this.props
+    let { isModel, modelName, prop, search, bookmark, isBacklink, bankStyle } = this.props
     if (isModel) // || bookmark)
       return
     if (prop  &&  !prop.allowToAdd)
@@ -1358,7 +1358,7 @@ class GridList extends Component {
     let employee
     if (me.isEmployee)
       employee = <View style={styles.center}>
-                   <Text style={styles.employee}>{me.firstName + '@' + me.organization.title}</Text>
+                   <Text style={[styles.employee, {color: bankStyle.linkColor}]}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
     else
       employee = <View/>
@@ -1613,7 +1613,8 @@ class GridList extends Component {
                   </View>
     }
 
-    let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(bankStyle)
+    // let contentSeparator = search ? {borderTopColor: '#eee', borderTopWidth: StyleSheet.hairlineWidth} : utils.getContentSeparator(bankStyle)
+    let contentSeparator = utils.getContentSeparator(bankStyle)
     return (
       <PageView style={isBacklink || isForwardlink ? {} : platformStyles.container} separator={!isBacklink && !isForwardlink && !isEmptyItemsTab && contentSeparator} bankStyle={bankStyle}>
         {network}
@@ -1852,7 +1853,6 @@ var styles = StyleSheet.create({
   },
   employee: {
     fontSize: 18,
-    color: '#7AAAC3'
   },
   loading: {
     fontSize: 17,
