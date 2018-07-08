@@ -14,7 +14,7 @@ import {
   PermissionsAndroid,
   StyleSheet
 } from 'react-native'
-
+import _ from 'lodash'
 import Camera from 'react-native-camera'
 import querystring from 'querystring'
 import traverse from 'traverse'
@@ -30,7 +30,6 @@ import t from 'tcomb-form-native'
 import moment from 'moment'
 import dateformat from 'dateformat'
 import Backoff from 'backoff'
-import _ from 'lodash'
 import levelErrors from 'levelup/lib/errors'
 import Cache from 'lru-cache'
 import mutexify from 'mutexify'
@@ -39,6 +38,7 @@ const debug = require('debug')('tradle:app:utils')
 
 import validateResource from '@tradle/validate-resource'
 const { parseStub, sanitize } = validateResource.utils
+import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 import Lens from '@tradle/lens'
 import tradle, {
   protocol,
@@ -57,7 +57,6 @@ import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import Strings from './strings'
-import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 
 // import Orientation from 'react-native-orientation'
 
@@ -89,9 +88,9 @@ var {
   SIMPLE_MESSAGE,
   PROFILE,
   IDENTITY,
-  CUSTOMER_WAITING,
+  ENUM,
   MESSAGE,
-  ENUM
+  CUSTOMER_WAITING
 } = constants.TYPES
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
