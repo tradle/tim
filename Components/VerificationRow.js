@@ -271,26 +271,34 @@ class VerificationRow extends Component {
     else if (title != dn)  {
       if (isCheck) {
         if (resource.status) {
-          let color, icon
-          switch (resource.status.title) {
-            case 'Pass':
-            color = 'green'
-            icon = 'ios-checkmark'
-            break
-          case 'Fail':
-          case 'Error':
-            color = 'red'
-            icon = 'ios-close'
-            break
-          default:
-            color = 'blue'
-            icon = 'ios-information-outline'
-            break
+          let statusId = this.getEnumID(resource.status.id)
+          let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
+          let checkIcon
+          if (statusM) {
+            const { icon, color } = statusM
+            if (icon) {
+              checkIcon = <View style={[styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]}>
+                            <Icon color='#ffffff' size={30} name={icon} />
+                          </View>
+            }
           }
+          // switch (resource.status.title) {
+          //   case 'Pass':
+          //   color = 'green'
+          //   icon = 'ios-checkmark'
+          //   break
+          // case 'Fail':
+          // case 'Error':
+          //   color = 'red'
+          //   icon = 'ios-close'
+          //   break
+          // default:
+          //   color = 'blue'
+          //   icon = 'ios-information-outline'
+          //   break
+          // }
           titleComponent = <View style={styles.titleView}>
-                             <View style={[styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]}>
-                               <Icon color='#ffffff' size={30} name={icon} />
-                             </View>
+                             {checkIcon}
                              <View style={{justifyContent: 'center', paddingLeft: 10}}>
                                <Text style={styles.rTitle}>{dn}</Text>
                                <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
