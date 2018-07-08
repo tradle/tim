@@ -375,9 +375,6 @@ class GridRow extends Component {
       parts.push(<Text style={style} key={this.getNextKey(resource)}>{val.substring(idx)}</Text>)
     return parts
   }
-  getEnumID(id) {
-    return id.split('_')[1]
-  }
 }
 reactMixin(GridRow.prototype, Reflux.ListenerMixin);
 reactMixin(GridRow.prototype, RowMixin)
