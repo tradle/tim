@@ -822,7 +822,9 @@ var NavigationBarRouteMapper = {
       // else
         width = LOGO_HEIGHT
       let marginTop
-      if (utils.isAndroid())
+      if (utils.isWeb())
+        marginTop = 2
+      else if (utils.isAndroid())
         marginTop = logoNeedsText ? 18 : 23
       else
         marginTop = t.length > 1 ? 0 : 8
