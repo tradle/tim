@@ -5,7 +5,6 @@ import React from 'react'
 import {
   Text,
   View,
-  TouchableHighlight,
   TouchableOpacity,
   Platform,
   Image,
@@ -1110,7 +1109,7 @@ var NewResourceMixin = {
     let switchView = {paddingVertical: 15, width: switchWidth, alignSelf: 'flex-end'}
     return (
       <View style={styles.bottom10} key={this.getNextKey()} ref={prop.name}>
-        <TouchableHighlight underlayColor='transparent' onPress={
+        <TouchableOpacity onPress={
           this.onChangeText.bind(this, prop, value)
         }>
           <View style={styles.booleanContainer}>
@@ -1121,7 +1120,7 @@ var NewResourceMixin = {
               </View>
             </View>
           </View>
-        </TouchableHighlight>
+        </TouchableOpacity>
         {this.getErrorView(params)}
         {help}
       </View>
@@ -1231,8 +1230,7 @@ var NewResourceMixin = {
         return (new Date().getTime() + DAY)
       }
     }
-    let number = parts[0]
-    let measure = parts[1]
+    let [number, measure] = parts
     let beforeAfter = parts.length === 3 ? parts[2] : 'before'
     let coef
     switch (measure) {
@@ -1439,9 +1437,9 @@ var NewResourceMixin = {
     let help = this.getHelp(prop)
     let actionItem
     if (isIdentity)
-       actionItem = <TouchableHighlight onPress={() => this.scanQRAndSet(prop)}>
+       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
                       {content}
-                    </TouchableHighlight>
+                    </TouchableOpacity>
     else if (isVideo ||  isPhoto) {
       // HACK
       const isScan = params.prop === 'scan'
@@ -1460,17 +1458,17 @@ var NewResourceMixin = {
                      </ImageInput>
       }
       else
-        actionItem = <TouchableHighlight underlayColor='transparent' onPress={this.showCameraView.bind(this, params)}>
+        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, params)}>
                        {content}
-                     </TouchableHighlight>
+                     </TouchableOpacity>
     }
     else {
       if (isImmutable)
         actionItem = content
       else
-        actionItem = <TouchableHighlight underlayColor='transparent' onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
+        actionItem = <TouchableOpacity onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
                        {content}
-                     </TouchableHighlight>
+                     </TouchableOpacity>
     }
     return (
       <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
@@ -1820,7 +1818,7 @@ var NewResourceMixin = {
     // let help = this.getHelp(prop, true)
     return (
       <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
-        <TouchableHighlight underlayColor='transparent' onPress={this.enumChooser.bind(this, prop, enumProp)}>
+        <TouchableOpacity onPress={this.enumChooser.bind(this, prop, enumProp)}>
           <View>
             <View style={styles.chooserContentStyle}>
               <Text style={styles.enumText}>{value}</Text>
@@ -1828,7 +1826,7 @@ var NewResourceMixin = {
             </View>
            {error}
           </View>
-        </TouchableHighlight>
+        </TouchableOpacity>
       </View>
     );
   },

@@ -351,9 +351,9 @@ var ResourceMixin = {
     skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
 
     // let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
-    let bg = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
+    let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
-    let backlinksBg = {backgroundColor: bg, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
+    let backlinksBg = {backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
     if (prop) {
       let cols = []
       let state
@@ -362,7 +362,7 @@ var ResourceMixin = {
         icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={{position: 'absolute', top: 15, right: 20}} />
       if (isOnfido) {
         let color = json.result === 'clear' ? 'green' : 'red'
-        cols.push(<Col sm={1} md={1} lg={1} style={{paddingVertical: 5, backgroundColor: bg}} key={this.getNextKey()}>
+        cols.push(<Col sm={1} md={1} lg={1} style={{paddingVertical: 5, backgroundColor}} key={this.getNextKey()}>
                     <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
                     {icon}
                   </Col>)
@@ -485,8 +485,7 @@ var ResourceMixin = {
       return
 
     if (showCollapsed  &&  showCollapsed == prop.name) {
-      let header = jsonRows[0]
-      let content = jsonRows.splice(1)
+      let [header, ...content] = jsonRows
       return <Accordion key={this.getNextKey()}
                sections={[utils.makeLabel(showCollapsed)]}
                header={header}
