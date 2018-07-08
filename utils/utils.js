@@ -23,7 +23,28 @@ import PushNotifications from 'react-native-push-notification'
 import Keychain from 'react-native-keychain'
 import { getDimensions, getOrientation } from 'react-native-orient'
 import compareVersions from 'compare-versions'
+import crypto from 'crypto'
+import Q from 'q'
+// import collect from 'stream-collector'
+import t from 'tcomb-form-native'
+import moment from 'moment'
+import dateformat from 'dateformat'
+import Backoff from 'backoff'
+import _ from 'lodash'
+import levelErrors from 'levelup/lib/errors'
+import Cache from 'lru-cache'
+import mutexify from 'mutexify'
+const Promise = require('bluebird')
+const debug = require('debug')('tradle:app:utils')
+
 import validateResource from '@tradle/validate-resource'
+const { parseStub, sanitize } = validateResource.utils
+import Lens from '@tradle/lens'
+import tradle, {
+  protocol,
+  utils as tradleUtils
+} from '@tradle/engine'
+import constants from '@tradle/constants'
 
 import AsyncStorage from '../Store/Storage'
 import Store from '../Store/Store'
@@ -36,35 +57,10 @@ import locker from './locker'
 import Strings from './strings'
 import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 
-import Lens from '@tradle/lens'
-
 // import Orientation from 'react-native-orientation'
 
 // var orientation = Orientation.getInitialOrientation()
 // Orientation.addOrientationListener(o => orientation = o)
-
-import crypto from 'crypto'
-import Q from 'q'
-import collect from 'stream-collector'
-import typeforce from 'typeforce'
-import t from 'tcomb-form-native'
-import equal from 'deep-equal'
-import moment from 'moment'
-import dateformat from 'dateformat'
-import Backoff from 'backoff'
-import _ from 'lodash'
-import levelErrors from 'levelup/lib/errors'
-import Cache from 'lru-cache'
-import mutexify from 'mutexify'
-import tradle, {
-  protocol,
-  utils as tradleUtils
-} from '@tradle/engine'
-
-import constants from '@tradle/constants'
-
-const Promise = require('bluebird')
-const debug = require('debug')('tradle:app:utils')
 
 const IS_MESSAGE = '_message'
 var strMap = {
@@ -91,13 +87,14 @@ var {
   SIMPLE_MESSAGE,
   PROFILE,
   IDENTITY,
-  CUSTOMER_WAITING
+  CUSTOMER_WAITING,
+  MESSAGE,
+  ENUM
 } = constants.TYPES
 
 const PRODUCT_APPLICATION = 'tradle.ProductApplication'
 
 const MY_PRODUCT = 'tradle.MyProduct'
-const MESSAGE = 'tradle.Message'
 const ITEM = 'tradle.Item'
 const DOCUMENT = 'tradle.Document'
 
@@ -105,7 +102,6 @@ const FORM_ERROR = 'tradle.FormError'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PHOTO = 'tradle.Photo'
 const PASSWORD_ENC = 'hex'
-const ENUM = 'tradle.Enum'
 const STYLES_PACK = 'tradle.StylesPack'
 const CONTEXT = 'tradle.Context'
 const MSG_LINK = '_msg'
@@ -113,17 +109,10 @@ const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
-const { parseStub, sanitize } = validateResource.utils
 
 // import dictionaries from '@tradle/models'.dict
 var dictionary //= dictionaries[Strings.language]
 
-var propTypesMap = {
-  'string': t.Str,
-  'boolean': t.Bool,
-  'date': t.Dat,
-  'number': t.Num
-};
 var models, me
 var lenses = {}  //, modelsForStub;
 var BACKOFF_DEFAULTS = {
@@ -422,7 +411,7 @@ var utils = {
     if (!r1 || !r2)
       return (r1 || r2) ? false : true
 
-    if (isInlined) return equal(r1, r2)
+    if (isInlined) return _.isEqual(r1, r2)
 
     let properties = this.getModel(r1[TYPE]).properties
     let exclude = ['_time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
@@ -437,7 +426,7 @@ var utils = {
           return false
         if (r1[p].length !== r2[p].length)
           return false
-        if (!r1[p].some((r) => r2[p].some((rr2) => equal(r, rr2))))
+        if (!r1[p].some((r) => r2[p].some((rr2) => _.isEqual(r, rr2))))
           return false
       }
       else if (typeof r1[p] === 'object') {
@@ -2110,7 +2099,7 @@ var utils = {
     let match
     try {
       match = await node.addressBook.byPermalink(permalink)
-      if (equal(match.object, identity)) return
+      if (_.isEqual(match.object, identity)) return
     } catch (err) {
       // oh well, I guess we have to do things the long way
     }
