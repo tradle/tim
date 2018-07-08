@@ -8,7 +8,6 @@ import {
 import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
-import utils from '../utils/utils'
 import platformStyles from '../styles/platform'
 
 class PageView extends Component {
@@ -16,15 +15,15 @@ class PageView extends Component {
     super(props)
   }
   render() {
-    let { bankStyle, separator, style } = this.props
+    let { bankStyle, separator, style, children } = this.props
     let platformSeparator
-    if (this.props.bankStyle  &&  separator)
+    if (bankStyle  &&  separator)
       platformSeparator = <View style={[{backgroundColor: bankStyle.navBarBackgroundColor}, separator || styles.separator, platformStyles.navBarSeparator]}/>
 
     return (
       <View style={[style]}>
         {platformSeparator}
-        {this.props.children}
+        {children}
       </View>
     )
   }

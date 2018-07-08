@@ -867,33 +867,33 @@ class FormRequestRow extends Component {
 //   inputRange: [0, 1],
 //   outputRange: [0, 100],
 // });
-       link = <View style={{flex: 1}}>
-               <View style={{flex: 1, paddingTop: 10}}>
-                 {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, isAnother: true})}
-                 <View style={styles.hr}/>
-                 <TouchableOpacity onPress={() => {
-                    Alert.alert(
-                      translate('areYouSureAboutNextForm', translate(form)),
-                      null,
-                      [
-                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                        {text: translate('Ok'), onPress: onOK.bind(this)},
-                      ]
-                    )
-                 }}>
-                   <View style={[styles.row, {paddingTop: 10}]}>
-                     <Animated.View style={animStyle}>
-                       <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
-                         <Icon name='ios-arrow-forward' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
-                       </View>
-                     </Animated.View>
-                     <View style={{justifyContent: 'center'}}>
-                       <Text style={styles.addMore}>{translate('moveToTheNextForm')}</Text>
+     link = <View style={{flex: 1}}>
+             <View style={{flex: 1, paddingTop: 10}}>
+               {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, isAnother: true})}
+               <View style={styles.hr}/>
+               <TouchableOpacity onPress={() => {
+                  Alert.alert(
+                    translate('areYouSureAboutNextForm', translate(form)),
+                    null,
+                    [
+                      {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                      {text: translate('Ok'), onPress: onOK.bind(this)},
+                    ]
+                  )
+               }}>
+                 <View style={[styles.row, {paddingTop: 10}]}>
+                   <Animated.View style={animStyle}>
+                     <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
+                       <Icon name='ios-arrow-forward' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
                      </View>
-                    </View>
-                </TouchableOpacity>
-              </View>
-             </View>
+                   </Animated.View>
+                   <View style={{justifyContent: 'center'}}>
+                     <Text style={styles.addMore}>{translate('moveToTheNextForm')}</Text>
+                   </View>
+                  </View>
+              </TouchableOpacity>
+            </View>
+           </View>
     }
     else {
       let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
@@ -914,7 +914,7 @@ class FormRequestRow extends Component {
                       <Icon name='md-information' size={35} color='#ffffff' />
                     </View>
                   </Animated.View>
-                  <Text style={[chatStyles.resourceTitle, {color: '#757575', width: msgWidth - 70}]}>{addMessage}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: '#757575', width: msgWidth - 80}]}>{addMessage}</Text>
                 </TouchableOpacity>
         }
         else if (isMyProduct) {
@@ -1309,7 +1309,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       flexDirection: 'row',
       // flex: 1,
       minHeight: 35,
-      paddingLeft: 5,
+      // paddingLeft: 5,
       // justifyContent: 'center'
       alignItems: 'center',
       // justifyContent: 'space-between',

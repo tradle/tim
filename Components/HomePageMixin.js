@@ -105,11 +105,10 @@ var HomePageMixin = {
       id: 10,
       component: ResourceList,
       backButtonTitle: 'Back',
-      titleTextColor: '#7AAAC3',
       passProps: {
         officialAccounts: true,
         serverOffline: this.state.serverOffline,
-        bankStyle: this.props.bankStyle,
+        bankStyle: this.state.bankStyle  ||  this.props.bankStyle,
         modelName: ORGANIZATION
       }
     })

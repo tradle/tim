@@ -752,7 +752,7 @@ class ResourceList extends Component {
         component: ResourceView,
         backButtonTitle: 'Back',
         passProps: {
-          bankStyle: bankStyle,
+          bankStyle: style,
           resource: resource,
           currency: currency
         }
@@ -1028,7 +1028,7 @@ class ResourceList extends Component {
     let employee
     if (me.isEmployee)
       employee = <View style={{justifyContent: 'center'}}>
-                   <Text style={{fontSize: 18, paddingLeft: 20, color: '#7AAAC3'}}>{me.firstName + '@' + me.organization.title}</Text>
+                   <Text style={{fontSize: 18, paddingLeft: 20, color: this.state.bankStyle.linkColor}}>{me.firstName + '@' + me.organization.title}</Text>
                  </View>
     else
       employee = <View/>
@@ -1149,13 +1149,14 @@ class ResourceList extends Component {
   }
   render() {
     let content;
-    let model = utils.getModel(this.props.modelName);
+    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly, backlinkList } = this.props
+    let model = utils.getModel(modelName);
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
         !utils.getMe().organization                 &&
         !utils.isEnum(model)                        &&
-        !this.props.isChooser                       &&
-        this.props.modelName !== ORGANIZATION) {
+        !isChooser                       &&
+        modelName !== ORGANIZATION) {
       content = <NoResources
                   filter={this.state.filter}
                   model={model}
@@ -1187,7 +1188,7 @@ class ResourceList extends Component {
     let footer = actionSheet && this.renderFooter()
     let searchBar
     if (SearchBar) {
-      if (!this.props._readOnly  ||  !utils.isContext(this.props.modelName)) {
+      if (!_readOnly  ||  !utils.isContext(modelName)) {
         if ((this.state.list && this.state.list.length > 10) || (this.state.filter  &&  this.state.filter.length)) {
           searchBar = (
             <SearchBar
@@ -1201,9 +1202,9 @@ class ResourceList extends Component {
       }
     }
     let network
-    if (!this.props.isChooser && this.props.officialAccounts && this.props.modelName === ORGANIZATION)
+    if (!isChooser && officialAccounts && modelName === ORGANIZATION)
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-    let hasSearchBar = this.props.isBacklink && this.props.backlinkList && this.props.backlinkList.length > 10
+    let hasSearchBar = isBacklink && backlinkList && backlinkList.length > 10
     let contentSeparator = utils.getContentSeparator(this.state.bankStyle)
     let style
     if (this.props.isBacklink)
@@ -1212,7 +1213,7 @@ class ResourceList extends Component {
       style = platformStyles.container
     return (
       // <PageView style={style} separator={contentSeparator}>
-      <PageView style={this.props.isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
+      <PageView style={isBacklink ? {style} : [platformStyles.container, style]} separator={contentSeparator} bankStyle={this.state.bankStyle}>
         {network}
         {searchBar}
         <View style={styles.separator} />
