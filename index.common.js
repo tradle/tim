@@ -100,14 +100,18 @@ import Store from './Store/Store'
 import StyleSheet from './StyleSheet'
 
 const TIM_HOME = 1
+const RESOURCE_VIEW = 3
 const NEW_RESOURCE = 4
-const MESSAGE_LIST = 11
 const MESSAGE_VIEW = 5
+const ARTICLE_VIEW = 7
+const MESSAGE_LIST = 11
+const CAMERA_VIEW = 12
 const PASSWORD_CHECK = 20
 const REMEDIATION = 29
-const LOGO_HEIGHT = 27
 const TOUR_PAGE = 35
 const AVIVA_INTRO_VIEW = 50
+
+const LOGO_HEIGHT = 27
 const VERIFY_OR_CORRECT = 'VerifyOrCorrect'
 
 import platformStyles from './styles/platform'
@@ -488,7 +492,7 @@ class TiMApp extends Component {
     //               returnRoute={props.returnRoute}
     //               sendForm={props.sendForm}
     //               callback={props.callback} />;
-    case 3:
+    case RESOURCE_VIEW:
       return <ResourceView navigator={nav} {...props } />
     case NEW_RESOURCE: // 4
       return <NewResource navigator={nav} {...props } />
@@ -496,7 +500,7 @@ class TiMApp extends Component {
       return <MessageView navigator={nav} {...props} />
     case 6:
       return <NewItem navigator={nav} {...props} />
-    case 7:
+    case ARTICLE_VIEW:
       return <ArticleView navigator={nav} {...props} />;
     case 8:
       return <IdentitiesList navigator={nav}
@@ -603,7 +607,7 @@ var NavigationBarRouteMapper = {
 
     let bankStyle = route.passProps.bankStyle
     let color = '#7AAAC3'
-    if (route.id === 12) // Camera view
+    if (route.id === CAMERA_VIEW) // Camera view
       color = '#ffffff'
     else if (bankStyle  &&  bankStyle.linkColor)
       color = bankStyle.linkColor
@@ -798,12 +802,14 @@ var NavigationBarRouteMapper = {
       org = <View />;
     let photo, uri
     let photoObj
+    // let noLogo = route.id === RESOURCE_VIEW  &&  route.passProps.resource[TYPE] === PROFILE
+    // if (!noLogo) {
     if (bankStyle)
       photoObj = bankStyle.logo
 
     if (!photoObj)
-      photoObj = route.id === MESSAGE_LIST        &&
-                 resource.photos  &&
+      photoObj = route.id === MESSAGE_LIST  &&
+                 resource.photos            &&
                  resource.photos[0]
     if (photoObj)
       uri = utils.getImageUri(photoObj.url);
@@ -813,7 +819,7 @@ var NavigationBarRouteMapper = {
     }
     let logoNeedsText = bankStyle  &&  bankStyle.logoNeedsText
     if (!logoNeedsText  &&  resource) {
-      if (route.id !== 7)  { // ArticleView
+      if (route.id !== ARTICLE_VIEW)  { // ArticleView
         if (route.id !== MESSAGE_LIST)
           logoNeedsText = true
         else {
@@ -823,6 +829,9 @@ var NavigationBarRouteMapper = {
         }
       }
     }
+    let t = route.title.split(' -- ')
+    let st = t.length > 1 ? {marginTop: 2} : {}
+    let color
     if (uri) {
       let width
       // if (photoObj.width  &&  photoObj.height)
@@ -833,32 +842,25 @@ var NavigationBarRouteMapper = {
       let marginTop
       if (utils.isWeb())
         marginTop = 2
+      else if (utils.isAndroid())
+        marginTop = logoNeedsText ? 18 : 23
       else
-        marginTop = 8
-      if (logoNeedsText) {
-        if (utils.isAndroid())
-          marginTop = 18
+        marginTop = t.length > 1 ? 0 : 8
+
+      if (logoNeedsText)
         photo = <Image source={{uri: uri}} style={[styles.msgImage, {resizeMode: 'contain', width, marginTop}]} />
-      }
-      else {
-        if (utils.isAndroid())
-          marginTop = 23
+      else
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width, marginTop}]} />
-      }
     }
 
-    let t = route.title.split(' -- ')
-    let st = t.length > 1 ? {marginTop: 2} : {}
-    let color
-
-    if (route.id === 12)  // Camera view
+    if (route.id === CAMERA_VIEW)  // Camera view
       st.color = color = '#ffffff'
     else if (bankStyle)
       st.color = color = bankStyle.linkColor
     else
       color = '#7AAAC3'
 
-    let style = [platformStyles.navBarText, styles.navBarTitleText, st]
+    let style = [platformStyles.navBarText, t.length === 1 && styles.navBarTitleText || styles.navBarTitleText1, st]
     let text, tArr
     if (logoNeedsText  ||  !uri) {
       let isPrefill
@@ -969,6 +971,11 @@ var styles = StyleSheet.create({
     color: '#555555',
     fontWeight: '400',
     fontSize: utils.getFontSize(20),
+  },
+  navBarTitleText1: {
+    color: '#555555',
+    fontWeight: '400',
+    fontSize: 18,
   },
   navBarButtonText: {
     color: '#7AAAC3',

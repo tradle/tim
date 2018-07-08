@@ -19,6 +19,7 @@ import {
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
+import _ from 'lodash'
 
 import ResourceList from './ResourceList'
 // import VideoPlayer from './VideoPlayer'
@@ -453,19 +454,29 @@ class TimHome extends Component {
   }
 
   showContacts(action) {
+    let me = utils.getMe();
+    let bankStyle = {}
+    _.extend(bankStyle, defaultBankStyle)
+    if (me.isEmployee  &&  me.organization.style)
+      _.extend(bankStyle, me.organization.style)
     let passProps = {
         filter: '',
         modelName: this.props.modelName,
         sortProperty: 'lastMessageTime',
         officialAccounts: true,
-        bankStyle: defaultBankStyle
+        bankStyle
       };
-    let me = utils.getMe();
     Actions.getAllSharedContexts()
     Actions.hasPartials()
     Actions.hasBookmarks()
     // return
-    this.props.navigator[action]({
+    let { navigator } = this.props
+    let profileTitle
+    if (me.organization)
+      profileTitle = me.organization.title
+    else
+      profileTitle = utils.getDisplayName(me)
+    navigator[action]({
       // sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       id: 10,
       title: translate('officialAccounts'),
@@ -474,12 +485,17 @@ class TimHome extends Component {
       component: ResourceList,
       rightButtonTitle: 'Profile',
       passProps: passProps,
-      onRightButtonPress: {
-        title: utils.getDisplayName(me) + (me.organization ? ' -- ' + me.organization.title : ''),
+      onRightButtonPress: () => navigator.push({
+        title: profileTitle, //utils.getDisplayName(me) + (me.organization ? ' -- ' + me.organization.title : ''),
         id: 3,
         component: ResourceView,
         backButtonTitle: 'Back',
         // titleTextColor: '#7AAAC3',
+        passProps: {
+          bankStyle,
+          backlink: utils.getModel(me[TYPE]).properties.myForms,
+          resource: me
+        },
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: me.firstName,
@@ -491,15 +507,10 @@ class TimHome extends Component {
           passProps: {
             model: utils.getModel(me[TYPE]),
             resource: me,
-            bankStyle: defaultBankStyle
+            bankStyle
           }
         },
-        passProps: {
-          bankStyle: defaultBankStyle,
-          backlink: utils.getModel(me[TYPE]).properties.myForms,
-          resource: me
-        }
-      }
+      })
     });
   }
   showFirstPage(noResetNavStack) {

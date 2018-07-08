@@ -353,7 +353,7 @@ var ResourceMixin = {
     // let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
     let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
-    let backlinksBg = {backgroundColor, paddingHorizontal: 10, marginHorizontal: isView && 0 || -10}
+    let backlinksBg = {backgroundColor, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
     if (prop) {
       let cols = []
       let state
@@ -485,7 +485,7 @@ var ResourceMixin = {
       return
 
     if (showCollapsed  &&  showCollapsed == prop.name) {
-      const [header, ...content] = jsonRows
+      let [header, ...content] = jsonRows
       return <Accordion key={this.getNextKey()}
                sections={[utils.makeLabel(showCollapsed)]}
                header={

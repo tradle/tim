@@ -954,14 +954,19 @@ var Store = Reflux.createStore({
   },
   setMe(newMe) {
     me = newMe
-    if (SERVICE_PROVIDERS.length  &&  me.organization  &&  !me.organization.url) {
-      let orgId = utils.getId(me.organization)
-      let o = SERVICE_PROVIDERS.filter((r) => {
-        return r.org == orgId ? true : false
-      })
-      if (o && o.length) {
-        if (o[0].url)
-          me.organization.url = o[0].url
+    if (me.isEmployee) {
+      let org = this._getItem(me.organization)
+      if (org.style)
+        me.organization.style = org.style
+      if (SERVICE_PROVIDERS.length  &&  !me.organization.url) {
+        let orgId = utils.getId(org)
+        let o = SERVICE_PROVIDERS.filter((r) => {
+          return r.org == orgId ? true : false
+        })
+        if (o && o.length) {
+          if (o[0].url)
+            me.organization.url = o[0].url
+        }
       }
     }
     utils.setMe(me)
@@ -11042,6 +11047,9 @@ if (!res[SIG]  &&  res._message)
 
         self._setItem(data.key, data.value)
       })
+      // Set some props from provider
+      if (me  &&  me.isEmployee)
+        this.setMe(me)
       var sameContactList = {}
       for (let p in orgContacts) {
         if (!list[p])
