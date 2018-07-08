@@ -94,10 +94,8 @@ class FormMessageRow extends Component {
         var hh = (ww / photos[0].width) * photos[0].height
         photoStyle = {
           borderRadius: 10,
-          margin: 1,
           width:  ww,
-          height: hh,
-          marginTop: -2
+          height: hh
         }
       }
       else if (inRow === 2)
