@@ -344,6 +344,9 @@ var RowMixin = {
       this.setState({isChosen: true})
       this.props.chosen[id] = resource
     }
+  },
+  getEnumID(id) {
+    return id.split('_')[1]
   }
 }
 

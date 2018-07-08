@@ -49,6 +49,13 @@ const skipLabelsInJSON = {
 const hideGroupInJSON = {
   'tradle.PhotoID': ['address']
 }
+const showCollapsedMap = {
+  'tradle.PhotoID': 'scanJson',
+  'tradle.SanctionsCheck': 'rawData',
+  'tradle.CentrixCheck': 'rawData',
+  'tradle.CorporationExistsCheck': 'rawData',
+  'tradle.documentChecker.Check': 'rawData'
+}
 
 import Markdown from './Markdown'
 var component
@@ -347,7 +354,7 @@ var ResourceMixin = {
     let rType = resource[TYPE]
 
     let hideGroup = prop  &&  hideGroupInJSON[rType]
-    let showCollapsed = ENV.showCollapsed  &&  ENV.showCollapsed[rType]
+    let showCollapsed = showCollapsedMap  &&  showCollapsedMap[rType]
     skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
 
     // let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
