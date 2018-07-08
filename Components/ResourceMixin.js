@@ -351,9 +351,9 @@ var ResourceMixin = {
     skipLabels = !skipLabels  &&  prop  &&  skipLabelsInJSON[rType]  &&  skipLabelsInJSON[rType][prop]
 
     // let bg = isView ? bankStyle.myMessageBackgroundColor : bankStyle.verifiedHeaderColor
-    let bg = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
+    let backgroundColor = isView ? bankStyle.linkColor : bankStyle.verifiedHeaderColor
     let color = isView ? '#ffffff' : bankStyle.verifiedHeaderTextColor
-    let backlinksBg = {backgroundColor: bg, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 10, marginHorizontal: isView ? 0 : -10}
+    let backlinksBg = {backgroundColor, paddingHorizontal: 10, marginHorizontal: isView && 0 || -10}
     if (prop) {
       let cols = []
       let state
@@ -362,7 +362,7 @@ var ResourceMixin = {
         icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={{position: 'absolute', top: 15, right: 20}} />
       if (isOnfido) {
         let color = json.result === 'clear' ? 'green' : 'red'
-        cols.push(<Col sm={1} md={1} lg={1} style={{paddingVertical: 5, backgroundColor: bg}} key={this.getNextKey()}>
+        cols.push(<Col sm={1} md={1} lg={1} style={{paddingVertical: 5, backgroundColor}} key={this.getNextKey()}>
                     <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
                     {icon}
                   </Col>)
@@ -374,7 +374,7 @@ var ResourceMixin = {
                  {!isOnfido  &&  icon}
                </Col>)
       let colSize = state ? 2 : 1
-      jsonRows.push(<Row size={colSize} style={styles.gridRow} key={this.getNextKey()} nowrap>
+      jsonRows.push(<Row size={colSize} style={styles.gridRow} key={this.getNextKey()}>
                       {cols}
                     </Row>)
 
@@ -397,7 +397,7 @@ var ResourceMixin = {
           val = <Text style={[styles.title, {flex: 1, color: bankStyle.linkColor}]} onPress={() => Linking.openURL(jVal)}>{jVal}</Text>
         else
           val = <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{jVal}</Text>
-        jsonRows.push(<Row size={2} style={styles.gridRow} key={this.getNextKey()} nowrap>
+        jsonRows.push(<Row size={2} style={styles.gridRow} key={this.getNextKey()}>
                         <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
                           {label}
                           </Col>
@@ -461,14 +461,14 @@ var ResourceMixin = {
             result = <Text style={[textStyle, color]}>{jVal.result}</Text>
           }
           jsonRows.push(<Row size={2} style={{paddingVertical: 5}} key={this.getNextKey()}>
-                         <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
-                           <Text style={textStyle}>{utils.makeLabel(p)}</Text>
-                         </Col>
-                         <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
-                           {result}
-                           {arrow}
-                         </Col>
-                       </Row>)
+                          <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
+                            <Text style={textStyle}>{utils.makeLabel(p)}</Text>
+                          </Col>
+                          <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
+                            {result}
+                            {arrow}
+                          </Col>
+                        </Row>)
 
           if (isBreakdown  &&  jVal.properties)
             continue
@@ -485,11 +485,12 @@ var ResourceMixin = {
       return
 
     if (showCollapsed  &&  showCollapsed == prop.name) {
-      let header = jsonRows[0]
-      let content = jsonRows.splice(1)
+      const [header, ...content] = jsonRows
       return <Accordion key={this.getNextKey()}
                sections={[utils.makeLabel(showCollapsed)]}
-               header={header}
+               header={
+                <View>{header}</View>
+               }
                content={content}
                underlayColor='transparent'
                easing='easeOutQuad' />
