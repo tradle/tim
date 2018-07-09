@@ -1014,15 +1014,16 @@ class ResourceList extends Component {
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
       return <View />
     let icon, color, backgroundColor
+    let isAndroid = utils.isAndroid()
     if (this.state.hideMode) {
       icon = 'md-checkmark'
-      color = Platform.OS === 'ios' ? '#ffffff' : 'green'
-      backgroundColor = Platform.OS === 'ios' ? 'green' : '#ffffff'
+      color = isAndroid ? 'green' : '#ffffff'
+      backgroundColor = isAndroid ? '#ffffff' : 'green'
     }
     else {
-      icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
-      color = Platform.OS === 'ios' ? '#ffffff' : 'red'
-      backgroundColor = Platform.OS === 'ios' ? 'red' : '#ffffff'
+      icon = isAndroid ?  'md-menu' : 'md-more'
+      color = isAndroid ? 'red' : '#ffffff'
+      backgroundColor = isAndroid ? '#ffffff' : 'red'
     }
 
     let employee
