@@ -1013,8 +1013,18 @@ class ResourceList extends Component {
 
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
       return <View />
-    let icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
-    let color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+    let icon, color, backgroundColor
+    if (this.state.hideMode) {
+      icon = 'md-checkmark'
+      color = Platform.OS === 'ios' ? '#ffffff' : 'green'
+      backgroundColor = Platform.OS === 'ios' ? 'green' : '#ffffff'
+    }
+    else {
+      icon = Platform.OS === 'ios' ?  'md-more' : 'md-menu'
+      color = Platform.OS === 'ios' ? '#ffffff' : 'red'
+      backgroundColor = Platform.OS === 'ios' ? 'red' : '#ffffff'
+    }
+
     let employee
     if (me.isEmployee)
       employee = <View style={{justifyContent: 'center'}}>
@@ -1023,8 +1033,8 @@ class ResourceList extends Component {
     return (
         <View style={styles.footer}>
           {employee}
-          <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-            <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
+          <TouchableOpacity onPress={() => this.state.hideMode ? this.setState({hideMode: false}) : this.ActionSheet.show()}>
+            <View style={[buttonStyles.menuButton, {opacity: 0.4, backgroundColor}]}>
               <Icon name={icon}  size={33}  color={color}/>
             </View>
           </TouchableOpacity>
@@ -1171,7 +1181,7 @@ class ResourceList extends Component {
     }
     let me = utils.getMe()
     let actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
-    let footer = actionSheet && this.renderFooter()
+    let footer = (actionSheet || this.state.hideMode) && this.renderFooter()
     let searchBar
     if (SearchBar) {
       if (!_readOnly  ||  !utils.isContext(modelName)) {
@@ -1214,6 +1224,8 @@ class ResourceList extends Component {
     // });
   }
   renderActionSheet() {
+    if (this.state.hideMode)
+      return
     let buttons
     if (this.state.allowToAdd) {
       if (this.props.isBacklink)
