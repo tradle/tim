@@ -1022,9 +1022,19 @@ class ResourceList extends Component {
 
     if (this.props.prop  &&  !this.props.prop.allowToAdd)
       return <View />
+    let icon, color, backgroundColor
+    let isAndroid = utils.isAndroid()
+    if (this.state.hideMode) {
+      icon = 'md-checkmark'
+      color = isAndroid ? 'green' : '#ffffff'
+      backgroundColor = isAndroid ? '#ffffff' : 'green'
+    }
+    else {
+      icon = isAndroid ?  'md-menu' : 'md-more'
+      color = isAndroid ? 'red' : '#ffffff'
+      backgroundColor = isAndroid ? '#ffffff' : 'red'
+    }
 
-    let icon = Platform.OS === 'android' ? 'md-menu' : 'md-more'
-    let color = Platform.OS === 'android' ? 'red' : '#ffffff'
     let employee
     if (me.isEmployee)
       employee = <View style={{justifyContent: 'center'}}>
@@ -1036,8 +1046,8 @@ class ResourceList extends Component {
         <View style={[styles.footer, {justifyContent: 'space-between'}]}>
           <View/>
           {employee}
-          <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-            <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
+          <TouchableOpacity onPress={() => this.state.hideMode ? this.setState({hideMode: false}) : this.ActionSheet.show()}>
+            <View style={[buttonStyles.menuButton, {opacity: 0.4, backgroundColor}]}>
               <Icon name={icon}  size={33}  color={color}/>
             </View>
           </TouchableOpacity>
@@ -1185,7 +1195,7 @@ class ResourceList extends Component {
     }
     let me = utils.getMe()
     let actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
-    let footer = actionSheet && this.renderFooter()
+    let footer = (actionSheet || this.state.hideMode) && this.renderFooter()
     let searchBar
     if (SearchBar) {
       if (!_readOnly  ||  !utils.isContext(modelName)) {
@@ -1231,6 +1241,8 @@ class ResourceList extends Component {
     // });
   }
   renderActionSheet() {
+    if (this.state.hideMode)
+      return
     let buttons
     if (this.state.allowToAdd) {
       if (this.props.isBacklink)
