@@ -129,7 +129,7 @@ class VerificationRow extends Component {
     let hasPhoto = photo != null
     if (photo)
       photo = <Image host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
-    else if (isForm || isVerification || (utils.isStub(resource)  &&  rType === VERIFICATION)) {
+    else if (model.icon  ||  isForm) {
       let icon = model.icon
       if (!icon)
         icon = isForm ? 'ios-paper-outline' : 'ios-checkmark-circle-outline'
