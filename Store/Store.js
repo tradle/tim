@@ -3971,8 +3971,8 @@ if (!res[SIG]  &&  res._message)
         if (resourceWithBacklink  &&  resourceWithBacklink[prop.name]) {
           r = _.cloneDeep(resource)
           r[prop.name] = resourceWithBacklink[prop.name]
-          if (prop === submissions)
-            this.organizeSubmissions(r)
+          // if (prop === submissions)
+          //   this.organizeSubmissions(r)
         }
         else
           r = resource
@@ -9507,7 +9507,7 @@ if (!res[SIG]  &&  res._message)
         }
         if (attempts === maxAttempts) {
           console.log('No access to the server: ' + v)
-          this.trigger({action: 'noAccessToServer', utl: v})
+          this.trigger({action: 'noAccessToServer', url: v})
           return
         }
         attempts++
