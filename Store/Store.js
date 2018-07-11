@@ -938,7 +938,7 @@ var Store = Reflux.createStore({
     me = newMe
     if (me.isEmployee) {
       let org = this._getItem(me.organization)
-      if (org.style)
+      if (org  &&  org.style)
         me.organization.style = org.style
       if (SERVICE_PROVIDERS.length  &&  !me.organization.url) {
         let orgId = utils.getId(org)
@@ -1617,7 +1617,7 @@ var Store = Reflux.createStore({
     let newServer = params.newServer
     let maxAttempts = params.maxAttempts
     debug('fetching provider info from', serverUrls)
-    await Q.allSettled(serverUrls.map(async (url) => {
+    return await Q.allSettled(serverUrls.map(async (url) => {
       let providers
       try {
         providers = await this.getServiceProviders({url: url, hash: params.hash, retry: retry, id: id, newServer: newServer})
@@ -6367,6 +6367,7 @@ if (!res[SIG]  &&  res._message)
         // if (result.edges.length < limit)
         //   cursor.endCursor = null
     let list = result.edges.map((r) => this.convertToResource(r.node))
+    /*
     if (me.isEmployee  &&  modelName === APPLICATION) {
       let contexts
       let contextIds = list
@@ -6420,7 +6421,7 @@ if (!res[SIG]  &&  res._message)
         })
       }
     }
-
+    */
     if (!noTrigger)
       this.trigger({action: 'list', list, endCursor: newCursor, resource: filterResource, direction, first})
     return {list, endCursor: newCursor}
@@ -7021,13 +7022,32 @@ if (!res[SIG]  &&  res._message)
 
     return result;
   },
+  // getEnum(params) {
+  //   let result
+  //   let enumList = enums[params.modelName]
+  //   if (params.query)
+  //     return enumList.filter((r) => this.checkCriteria({r, query: params.query}))
+  //   else
+  //     return enumList
+  // },
   getEnum(params) {
+    const { modelName, limit, query, lastId } = params
     let result
-    let enumList = enums[params.modelName]
-    if (params.query)
-      return enumList.filter((r) => this.checkCriteria({r, query: params.query}))
+    let enumList = enums[modelName]
+    if (query)
+      return enumList.filter((r) => this.checkCriteria({r, query}))
+
+    let lim = limit || 20
+    let lastIdx
+    if (lastId)
+      lastIdx = _.findIndex(enumList, (item) => utils.getId(item) === lastId) + 1
+
     else
-      return enumList
+      lastIdx = 0
+    let ret = []
+    for (let i=lastIdx, j=0; i<enumList.length  &&  j<lim; i++, j++)
+      ret.push(enumList[i])
+    return ret
   },
   checkCriteria({r, query, prop, isChooser}) {
     if (!query)
@@ -9476,18 +9496,21 @@ if (!res[SIG]  &&  res._message)
   //     let maxWait = 60000
       while (true) {
         try {
-          yield this.getInfo({serverUrls: [v], retry: false, id: value.id, hash: value.hash, newServer: true, maxAttempts: maxAttempts})
-          gotInfo = true
-          break;
+          let result = yield this.getInfo({serverUrls: [v], retry: false, id: value.id, hash: value.hash, newServer: true, maxAttempts: maxAttempts})
+          debugger
+          if (result[0].state === 'fulfilled') {
+            gotInfo = true
+            break;
+          }
         }
         catch (err) {
-          if (attempts === maxAttempts) {
-            console.log('No access to the server: ' + v)
-            this.trigger({action: 'noAccessToServer'})
-            return
-          }
-          attempts++
         }
+        if (attempts === maxAttempts) {
+          console.log('No access to the server: ' + v)
+          this.trigger({action: 'noAccessToServer', utl: v})
+          return
+        }
+        attempts++
       }
     }
     if (!gotInfo)
