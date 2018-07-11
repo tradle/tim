@@ -1274,7 +1274,7 @@ class GridList extends Component {
     //   return
     // debugger
     let { list=[], order, sortProperty, endCursor, prevEndCursor } = this.state
-    if (endCursor === prevEndCursor)
+    if (endCursor === prevEndCursor  &&  utils.getModel(this.props.modelName).subClassOf !== ENUM)
       return
     let { modelName, search, resource } = this.props
     this.state.refreshing = true
