@@ -54,7 +54,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#d247e0fb4e0b4028a128e4bfbfa9487857370bee"
+      "resolved": "git://github.com/tradle/custom-models.git#192d15c0ab3609cf6d5821fd7a3b8985bfebeda5"
     },
     "@tradle/embed": {
       "version": "1.1.2",
@@ -177,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#dabe1db79f5ca5639f6514c8663137b315c28a2c"
+      "resolved": "git://github.com/tradle/models.git#cb714206d453ef900a7de42dee899297e9844942"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -2879,6 +2879,23 @@
       "from": "feed-indexer@1.3.0",
       "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.3.0.tgz",
       "dependencies": {
+        "isarray": {
+          "version": "0.0.1",
+          "from": "isarray@0.0.1",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
+        },
+        "level-change-processor": {
+          "version": "1.0.0",
+          "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
+          "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
+          "dependencies": {
+            "readable-stream": {
+              "version": "1.1.14",
+              "from": "readable-stream@^1.0.33",
+              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.14.tgz"
+            }
+          }
+        },
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@>=2.1.4 <3.0.0",
@@ -4520,6 +4537,11 @@
       "from": "merkle-proofs@1.0.3",
       "resolved": "https://registry.npmjs.org/merkle-proofs/-/merkle-proofs-1.0.3.tgz",
       "dependencies": {
+        "merkle-tree-stream": {
+          "version": "3.0.3",
+          "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
+          "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
+        },
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@>=2.1.0 <3.0.0",
@@ -5700,6 +5722,12 @@
       "resolved": "https://registry.npmjs.org/rc/-/rc-1.2.7.tgz",
       "optional": true,
       "dependencies": {
+        "minimist": {
+          "version": "1.2.0",
+          "from": "minimist@1.2.0",
+          "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz",
+          "optional": true
+        },
         "strip-json-comments": {
           "version": "2.0.1",
           "from": "strip-json-comments@>=2.0.1 <2.1.0",
@@ -6013,7 +6041,7 @@
     "react-native-gifted-messenger": {
       "version": "0.0.16",
       "from": "pgmemk/react-native-gifted-messenger#dev",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#70bcfb15b93fb1919ce6b228a7042a1bc77bb468"
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#7f97008bbd6420f6ca7a35c3ad71599e24a80ca0"
     },
     "react-native-gifted-spinner": {
       "version": "0.1.0",
@@ -6120,6 +6148,11 @@
       "from": "react-native-scrollable-mixin@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/react-native-scrollable-mixin/-/react-native-scrollable-mixin-1.0.1.tgz"
     },
+    "react-native-scrollable-tab-view": {
+      "version": "0.8.0",
+      "from": "react-native-scrollable-tab-view@>=0.8.0 <0.9.0",
+      "resolved": "https://registry.npmjs.org/react-native-scrollable-tab-view/-/react-native-scrollable-tab-view-0.8.0.tgz"
+    },
     "react-native-search-bar": {
       "version": "3.4.2",
       "from": "react-native-search-bar@>=3.4.0 <4.0.0",
@@ -6128,7 +6161,7 @@
     "react-native-signature-pad": {
       "version": "0.0.8",
       "from": "tradle/react-native-signature-pad",
-      "resolved": "git://github.com/tradle/react-native-signature-pad.git#11847231e3f239214b6dceebbd314b447105660f"
+      "resolved": "git://github.com/tradle/react-native-signature-pad.git#948baea1292d6e71fe7f5d7746f543f391c72cbf"
     },
     "react-native-splash-screen": {
       "version": "3.0.9",
