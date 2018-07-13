@@ -14,6 +14,7 @@ import {
   View,
   Text,
   ScrollView,
+  TouchableOpacity
 } from 'react-native'
 import PropTypes from 'prop-types';
 
@@ -45,9 +46,10 @@ class SignatureView extends Component {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let {sigViewStyle} = this.props
+    let { sigViewStyle } = this.props
     const { width, height } = utils.dimensions(SignatureView)
     let separator = utils.getContentSeparator(sigViewStyle)
+    let styles = createStyles({sigViewStyle})
     return (
       <PageView style={platformStyles.container} separator={separator} bankStyle={sigViewStyle}>
         <Text style={styles.instructions}>Please sign inside the grey box</Text>
@@ -58,10 +60,19 @@ class SignatureView extends Component {
           borderWidth: 10,
           margin: 5
         }}>
-          <SignaturePad onError={this._signaturePadError}
+          <SignaturePad ref='sigpad'
+                        onError={this._signaturePadError}
                         lockToLandscape={false}
                         onChange={this.onChangeText.bind(this)}
                         style={{flex: 1, backgroundColor: 'white', padding: 20}}/>
+        </View>
+        <View style={styles.buttons}>
+          <TouchableOpacity onPress={() => this.done()} style={styles.submit}>
+            <Text style={styles.submitText}>Submit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => this.refs.sigpad.clear()} style={styles.clear}>
+            <Text style={styles.clearText}>Clear</Text>
+          </TouchableOpacity>
         </View>
       </PageView>
     )
@@ -75,17 +86,68 @@ class SignatureView extends Component {
   }
 }
 
-var styles = StyleSheet.create({
-  instructions: {
-    fontSize: 24,
-    padding: 10,
-    alignSelf: 'center',
-    color: '#aaaaaa'
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 10,
-  },
+var createStyles = utils.styleFactory(SignatureView, function ({ dimensions, sigViewStyle  }) {
+  return StyleSheet.create({
+    instructions: {
+      fontSize: 24,
+      padding: 10,
+      alignSelf: 'center',
+      color: '#aaaaaa'
+    },
+    submitButton: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: 340,
+      marginTop: 20,
+      // marginBottom: 50,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 5,
+      // marginHorizontal: 20
+    },
+
+    container: {
+      flex: 1,
+      paddingHorizontal: 10,
+    },
+    submit: {
+      backgroundColor: sigViewStyle.linkColor,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: '40%',
+      marginTop: 20,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 15,
+      marginRight: 20
+    },
+    submitText: {
+      fontSize: 20,
+      color: '#ffffff',
+      alignSelf: 'center'
+    },
+    clear: {
+      backgroundColor: '#fff',
+      flexDirection: 'row',
+      justifyContent: 'center',
+      width: '40%',
+      marginTop: 20,
+      alignSelf: 'center',
+      height: 40,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: sigViewStyle.linkColor
+    },
+    clearText: {
+      fontSize: 20,
+      color: sigViewStyle.linkColor,
+      alignSelf: 'center'
+    },
+    buttons: {
+      flexDirection: 'row',
+      alignSelf: 'center'
+    },
+  })
 })
 
 module.exports = SignatureView;

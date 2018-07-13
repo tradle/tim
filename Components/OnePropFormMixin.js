@@ -70,6 +70,7 @@ var OnePropFormMixin = {
           sigView = ref
         },
         bankStyle,
+        onSignature: this.onSetSignatureProperty.bind(this, prop),
         sigViewStyle: bankStyle
       }
     })
