@@ -764,7 +764,7 @@ class NewResource extends Component {
     }
 
     let meta =  this.props.model;
-    let { originatingMessage, setProperty, editCols, search } = this.props
+    let { originatingMessage, setProperty, editCols, search, exploreData } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -942,12 +942,13 @@ class NewResource extends Component {
     // StatusBar.setHidden(true);
     let submit
     if (!isRegistration) {
+      let onPress = exploreData ? this.getSearchResult.bind(this) : this.onSavePressed
       if (this.state.err) {
         Alert.alert(this.state.err)
         this.state.err = null
       }
       if (bankStyle  &&  bankStyle.submitBarInFooter)
-        submit = <TouchableOpacity onPress={this.onSavePressed}>
+        submit = <TouchableOpacity onPress={onPress}>
                    <View style={styles.submitBarInFooter}>
                      <View style={styles.bar}>
                        <Text style={styles.submitBarInFooterText}>{translate('next')}</Text>
@@ -955,7 +956,7 @@ class NewResource extends Component {
                    </View>
                  </TouchableOpacity>
       else
-        submit = <TouchableOpacity onPress={this.onSavePressed}>
+        submit = <TouchableOpacity onPress={onPress}>
                    <View style={styles.submitButton}>
                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                      <Text style={styles.submitText}>{translate('Submit')}</Text>
