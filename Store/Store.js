@@ -247,9 +247,6 @@ import mcbuilder, { buildResourceStub, enumValue } from '@tradle/build-resource'
 
 import Errors from '@tradle/errors'
 import validateResource, { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
-// @ts-ignore
-const { sanitize } = validateResource.utils
-
 // import tutils from '@tradle/utils'
 var isTest, originalMe;
 var currentEmployees = {}
@@ -4960,7 +4957,7 @@ if (!res[SIG]  &&  res._message)
       let key = utils.makeId(IDENTITY, to[ROOT_HASH])
 
       // let sendParams = self.packMessage(toChain, returnVal.from, returnVal.to, returnVal._context)
-      toChain = sanitize(toChain).sanitized
+      toChain = utils.sanitize(toChain)
       try {
         validateResource({ resource: toChain, models: self.getModels() })
       } catch (err) {
@@ -12026,7 +12023,7 @@ if (!res[SIG]  &&  res._message)
       return
     }
     try {
-      let result = await graphQL._getItem(id, this.client, backlink)
+      let result = await graphQL.getItem(id, this.client, backlink)
       if (result) {
         return this.convertToResource(result)
       }
