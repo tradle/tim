@@ -66,7 +66,7 @@ var ResourceMixin = {
     let model = utils.getModel(type);
     let title = utils.getDisplayName(resource);
     let isMessageView
-    if (resource[TYPE])
+    if (!utils.isStub(resource))
       isMessageView = utils.isMessage(resource)
     else
       isMessageView = (type !== ORGANIZATION  &&  type !== PROFILE)
@@ -77,7 +77,7 @@ var ResourceMixin = {
         id: 5,
         component: require('./MessageView'),
         backButtonTitle: 'Back',
-        title: utils.makeModelTitle(model),
+        title: title + ' -- ' + utils.makeModelTitle(model),
         passProps: {
           bankStyle: bankStyle,
           resource: resource,
