@@ -748,7 +748,10 @@ class NewResource extends Component {
       let eProp = editProps[0]
       if (eProp.signature) {
         return  <View style={{flex: 1}}>
-                   <SignatureView ref='sigView' bankStyle={bankStyle}  sigViewStyle={bankStyle} />
+                   <SignatureView ref={ref => {this.sigView = ref}} bankStyle={bankStyle}  sigViewStyle={bankStyle} onSignature={() => {
+                      // this.props.navigator.pop()
+                      this.onSetSignatureProperty(eProp, this.sigView.getSignature().url)
+                    }} />
                  </View>
         // ref: ref => {
         //   sigView = ref
@@ -813,7 +816,7 @@ class NewResource extends Component {
                                     showRefResource={this.showRefResource.bind(this)}
                                     navigator={navigator} />
                 <TouchableOpacity onPress={this.onSavePressed}>
-                  <View style={styles.submit}>
+                  <View style={styles.submitButton}>
                     <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                     <Text style={styles.submitText}>{translate('Submit')}</Text>
                   </View>
@@ -943,7 +946,7 @@ class NewResource extends Component {
         Alert.alert(this.state.err)
         this.state.err = null
       }
-      if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
+      if (bankStyle  &&  bankStyle.submitBarInFooter)
         submit = <TouchableOpacity onPress={this.onSavePressed}>
                    <View style={styles.submitBarInFooter}>
                      <View style={styles.bar}>
@@ -953,7 +956,7 @@ class NewResource extends Component {
                  </TouchableOpacity>
       else
         submit = <TouchableOpacity onPress={this.onSavePressed}>
-                   <View style={styles.submit}>
+                   <View style={styles.submitButton}>
                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                      <Text style={styles.submitText}>{translate('Submit')}</Text>
                    </View>
@@ -989,7 +992,9 @@ class NewResource extends Component {
           </View>
         </View>
         {wait}
-        {submit}
+        <View style={styles.submit}>
+          {submit}
+        </View>
       </ScrollView>
 
     if (!isRegistration) {
@@ -1224,34 +1229,27 @@ class NewResource extends Component {
       for (let i=0; i<n; i++)
         items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()}/>)
       itemsArray =
-        <View style={[styles.photoStrip, count ? {marginTop: -25} : {marginTop: 0}]}>
-          <Text style={[styles.activePropTitle, {paddingTop: 20, color: lcolor}]}>{label}</Text>
+        <View style={styles.photoStrip}>
+          <Text style={[styles.activePropTitle, {paddingBottom: 10, color: lcolor}]}>{label}</Text>
           <View style={styles.row}>{items}</View>
         </View>
-      counter =
-        <View>
-          <View style={styles.itemsCounter}>
-            <Icon name='ios-camera-outline'  size={35} color={linkColor} />
-          </View>
-        </View>;
     }
     else {
       itemsArray = <Text style={styles.noItemsText}>{label}</Text>
-      counter = <View style={[styles.itemsCounterEmpty]}>
-                  <Icon name='ios-camera-outline'  size={35} color={linkColor} />
-                </View>
     }
+    counter = <Icon name='ios-camera-outline'  size={25} color={linkColor} />
     let title = translate(bl, blmodel) //.title || utils.makeLabel(p)
     let error = this.getErrorView({prop: bl})
     let actionableItem
     if (count)
-      actionableItem = <TouchableOpacity style={styles.itemsWithCount} onPress={this.showItems.bind(this, bl, meta)}>
+      actionableItem = <TouchableOpacity
+                          style={styles.pics}
+                          onPress={this.showItems.bind(this, bl, meta)}>
                          {itemsArray}
                        </TouchableOpacity>
     else
       actionableItem = <ImageInput
                          prop={bl}
-                         style={styles.itemsWithoutCount}
                          underlayColor='transparent'
                          onImage={item => this.onAddItem(bl.name, item)}>
                          {itemsArray}
@@ -1268,7 +1266,8 @@ class NewResource extends Component {
             {actionableItem}
             <ImageInput
                 prop={bl}
-                underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
+                underlayColor='transparent'
+                style={styles.actionIcon}
                 onImage={item => this.onAddItem(bl.name, item)}>
               {counter}
             </ImageInput>
@@ -1320,14 +1319,21 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       // alignSelf: 'center',
       paddingLeft: 10
     },
-    itemsCounterEmpty: {
-      paddingHorizontal: 5,
-      justifyContent: 'center',
-      marginTop: -5
-    },
-    itemsCounter: {
-      marginTop: 20,
-      paddingHorizontal: 5
+    // itemsCounterEmpty: {
+    //   paddingHorizontal: 5,
+    //   justifyContent: 'center',
+    //   marginTop: -5
+    // },
+    // itemsCounter: {
+      // marginTop: 40,
+      // justifyContent: 'flex-end',
+      // paddingHorizontal: 5
+    // },
+    actionIcon: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      alignItems: 'flex-end',
+      paddingRight: 5
     },
     itemButton: {
       height: 60,
@@ -1407,7 +1413,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       color: '#bbbbbb'
     },
     photoStrip: {
-      paddingBottom: 5
+      paddingBottom: 5,
+      marginTop: 0
     },
     row: {
       flexDirection: 'row'
@@ -1446,26 +1453,24 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       paddingHorizontal: 10,
       justifyContent: 'center'
     },
-    itemsWithCount: {
-      flex: 7,
-      paddingTop: 15
-    },
-    itemsWithoutCount: {
-      flex: 7,
-      paddingTop: 15,
-      // paddingBottom: 10
+    pics: {
+      paddingTop: 10
     },
     submit: {
+      width: 340,
+      alignSelf: 'center'
+    },
+    submitButton: {
       backgroundColor: bankStyle.linkColor,
       flexDirection: 'row',
       justifyContent: 'center',
       width: 340,
       marginTop: 20,
-      marginBottom: 50,
+      // marginBottom: 50,
       alignSelf: 'center',
       height: 40,
       borderRadius: 5,
-      marginHorizontal: 20
+      // marginHorizontal: 20
     },
     submitText: {
       fontSize: 20,
@@ -1525,6 +1530,15 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       shadowRadius: 5,
       shadowColor: '#afafaf',
     },
+    // itemsWithCount: {
+    //   flex: 7,
+    //   paddingTop: 15
+    // },
+    // itemsWithoutCount: {
+    //   flex: 7,
+    //   paddingTop: 15,
+    //   // paddingBottom: 10
+    // },
 
   })
 })
