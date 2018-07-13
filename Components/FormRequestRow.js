@@ -1051,7 +1051,7 @@ class FormRequestRow extends Component {
          </View>
       )
     }
-    let zoomIn = {transform: [{scale: this.springValue}]}
+    let zoomIn = {justifyContent: 'center', transform: [{scale: this.springValue}]}
     let hasSharables = this.hasSharables()
     return <TouchableOpacity style={{paddingRight: 15}} onPress={onPress || this.createNewResource.bind(this, form, isMyMessage)}>
              <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
