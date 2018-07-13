@@ -70,7 +70,7 @@ class MessageView extends Component {
       resource: props.resource,
       isConnected: props.navigator.isConnected,
       // promptVisible: false,
-      isLoading: true, //!props.resource[TYPE],
+      isLoading: utils.isStub(props.resource),
       // showDetails: true,
       showDetails: false,
       bankStyle: props.bankStyle || defaultBankStyle
@@ -130,7 +130,7 @@ class MessageView extends Component {
     if (!params.resource)
       return
     let { bankStyle, application, resource, search } = this.props
-    if (utils.getId(params.resource) !== utils.getId(resource))
+    if (params.resource[ROOT_HASH] !== utils.getRootHash(resource))
       return
     if (action === 'verifyOrCorrect') {
       this.verifyOrCreateError()
@@ -337,9 +337,12 @@ class MessageView extends Component {
     let { backlink, bankStyle, resource } = this.state
     if (this.state.isLoading)
       return this.showLoading({bankStyle, component: MessageView})
-    let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
+    let { lensId, style, search, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
 
-    let model = utils.getLensedModel(resource, lensId);
+    let rModel = utils.getModel(utils.getType(resource))
+    let isWrapper = utils.getPrefillProperty(rModel)
+    let model = isWrapper ? rModel : utils.getLensedModel(resource, lensId);
+    // let model = search ? rModel : utils.getLensedModel(resource, lensId);
     let isVerification = model.id === VERIFICATION
     let isVerificationTree = isVerification &&  (resource.method || (resource.sources  &&  resource.sources.length))
     let isForm = model.subClassOf === FORM
