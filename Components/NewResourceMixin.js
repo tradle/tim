@@ -28,8 +28,6 @@ import DatePicker from 'react-native-datepicker'
 const debug = require('debug')('tradle:app:blinkid')
 
 import constants from '@tradle/constants'
-import validateResource from '@tradle/validate-resource'
-const { sanitize } = validateResource.utils
 
 import Navigator from './Navigator'
 import GridList from './GridList'
@@ -108,7 +106,7 @@ var NewResourceMixin = {
     return { ...this._contentOffset }
   },
   getFormFields(params) {
-    let { currency, bankStyle, editCols, originatingMessage, search, errs, requestedProperties } = this.props
+    let { currency, bankStyle, editCols, originatingMessage, search, exploreData, errs, requestedProperties } = this.props
     let CURRENCY_SYMBOL = currency && currency.symbol ||  DEFAULT_CURRENCY_SYMBOL
     let { component, formErrors, model, data, validationErrors } = params
 
@@ -161,6 +159,16 @@ var NewResourceMixin = {
           meta.required.forEach((p) => eCols[p] = props[p])
         else
           eCols = props
+      }
+      else if (exploreData) {
+        let exclude = ['time', 'context', 'lens']
+        let prefillProp = utils.getPrefillProperty(meta)
+        if (prefillProp)
+          exclude.push(prefillProp.name)
+        for (let p in props) {
+          if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  exclude.indexOf(p) === -1)
+            eCols[p] = props[p]
+        }
       }
       // else
       //   eCols = Object.values(eCols)
@@ -797,7 +805,7 @@ var NewResourceMixin = {
       }
     }
     // this.floatingProps[prop] = resource[prop]
-    cardJson = sanitize(cardJson).sanitized
+    cardJson = utils.sanitize(cardJson)
     for (let p in cardJson)
       if (!cardJson[p])
         delete cardJson[p]
@@ -1419,11 +1427,11 @@ var NewResourceMixin = {
     let icon
     if (!isImmutable) {
       if (isVideo)
-        icon = <Icon name='ios-play-outline' size={35}  color={linkColor} />
+        icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
       else if (isPhoto)
-        icon = <Icon name='ios-camera-outline' size={35}  color={linkColor} style={styles.photoIcon}/>
+        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={styles.photoIcon}/>
       else if (isIdentity)
-        icon = <Icon name='ios-qr-scanner' size={35}  color={linkColor} style={styles.photoIcon}/>
+        icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={styles.photoIcon}/>
       else if (!noChooser)
         icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
     }
@@ -2052,7 +2060,7 @@ var styles= StyleSheet.create({
   },
   chooserContainer: {
     minHeight: 45,
-    marginTop: 20,
+    marginTop: 10,
     borderColor: '#ffffff',
     // borderBottomColor: '#cccccc',
     // borderBottomWidth: 1,

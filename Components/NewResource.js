@@ -111,7 +111,7 @@ class NewResource extends Component {
       isUploading,
       isRegistration,
       isLoadingVideo: false,
-      isPrefilled: this.props.isPrefilled,
+      isPrefilled: props.isPrefilled,
       modal: {},
       termsAccepted: isRegistration ? false : true
     }
@@ -130,7 +130,7 @@ class NewResource extends Component {
             ? this.getSearchResult.bind(this)
             : this.onSavePressed
     // HACK
-    let editProps = utils.getEditableProperties(r)
+    let editProps = !props.exploreData  &&  utils.getEditableProperties(r)
     if (editProps.length  &&  editProps.length === 1) {
       let eProp = editProps[0]
       if (eProp.signature) {
@@ -194,7 +194,7 @@ class NewResource extends Component {
         }
       }
     }
-    if (Platform.OS === 'ios') {
+    if (!this.props.exploreData  &&  Platform.OS === 'ios') {
       if (utils.hasPaymentCardScannerProperty(utils.getType(resource)))
         CardIOUtilities.preload();
     }
@@ -725,14 +725,20 @@ class NewResource extends Component {
         value = {}
     }
     this.checkEnums(value, this.state.resource)
-    let currentRoutes = this.props.navigator.getCurrentRoutes()
+
+    const { navigator, searchWithFilter, model } = this.props
+    let currentRoutes = navigator.getCurrentRoutes()
     let currentRoutesLength = currentRoutes.length
 
     // HACK: set filtering resource for right button on RL so that next
     // time filter shows in the form
-    currentRoutes[currentRoutesLength - 2].onRightButtonPress.passProps.resource = value
-    this.props.navigator.pop()
-    this.props.searchWithFilter(value)
+
+    let val = utils.sanitize(value)
+    if (!val[TYPE])
+      val[TYPE] = model.id
+    searchWithFilter(val)
+    currentRoutes[currentRoutesLength - 2].onRightButtonPress.passProps.resource = val
+    navigator.pop()
   }
 
   render() {
