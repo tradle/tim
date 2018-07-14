@@ -54,7 +54,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#d247e0fb4e0b4028a128e4bfbfa9487857370bee"
+      "resolved": "git://github.com/tradle/custom-models.git#192d15c0ab3609cf6d5821fd7a3b8985bfebeda5"
     },
     "@tradle/embed": {
       "version": "1.1.2",
@@ -177,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#dabe1db79f5ca5639f6514c8663137b315c28a2c"
+      "resolved": "git://github.com/tradle/models.git#cb714206d453ef900a7de42dee899297e9844942"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -5774,13 +5774,6 @@
       "dev": true,
       "optional": true,
       "dependencies": {
-        "minimist": {
-          "version": "1.2.0",
-          "from": "minimist@1.2.0",
-          "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz",
-          "dev": true,
-          "optional": true
-        },
         "strip-json-comments": {
           "version": "2.0.1",
           "from": "strip-json-comments@>=2.0.1 <2.1.0",
@@ -5984,6 +5977,11 @@
       "version": "1.0.1",
       "from": "react-native-scrollable-mixin@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/react-native-scrollable-mixin/-/react-native-scrollable-mixin-1.0.1.tgz"
+    },
+    "react-native-scrollable-tab-view": {
+      "version": "0.8.0",
+      "from": "../react-native-scrollable-tab-view",
+      "resolved": "file:../react-native-scrollable-tab-view"
     },
     "react-native-swipeout": {
       "version": "2.3.3",
