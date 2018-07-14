@@ -37,7 +37,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('tradle:app:utils')
 
 import validateResource from '@tradle/validate-resource'
-const { parseStub, sanitize } = validateResource.utils
+const { sanitize } = validateResource.utils
 import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 import Lens from '@tradle/lens'
 import tradle, {
@@ -247,7 +247,12 @@ var utils = {
     return str.split(/(?=[A-Z])/g)
   },
   sanitize(resource) {
-    return sanitize(resource).sanitized
+    let r =  sanitize(resource).sanitized
+    for (let p in r) {
+      if (!r[p])
+        delete r[p]
+    }
+    return r
   },
   getRequestedFormType(resource) {
     if (resource[TYPE] === FORM_REQUEST) {
@@ -258,12 +263,30 @@ var utils = {
       const type = resource.prefill && resource.prefill[TYPE]
       if (type) return type
 
-      return parseStub(resource.prefill).type
+      return this._parseStub(resource.prefill).type
     }
 
     return resource[TYPE]
 
     // throw new Error('expected tradle.FormRequest or tradle.FormError')
+  },
+  _parseStub (stub) {
+    const { id, title, type, link, permalink, _t, _link, _permalink } = stub
+    if (type && link && permalink) {
+      return _.pick(stub, ['type', 'link', 'permalink', 'title'])
+    }
+
+    if (_t && _link && _permalink) {
+      return { type: _t, link: _link, permalink: _permalink }
+    }
+
+    const parsedId = this._parseId(id)
+    parsedId.title = title
+    return parsedId
+  },
+  _parseId (id) {
+    const [type, permalink, link] = id.split('_')
+    return { type, permalink, link }
   },
   getLensedModel(fr, lensId) {
     const form = utils.getRequestedFormType(fr)
@@ -1203,7 +1226,7 @@ var utils = {
     return ref
   },
   isStub(resource) {
-    return !resource[TYPE]  &&  resource.id //  &&  resource.title
+    return !resource[ROOT_HASH]  &&  resource.id //  &&  resource.title
   },
   hasSupportLine(resource) {
     let me = this.getMe()
@@ -2328,7 +2351,7 @@ var utils = {
     })
   },
   getEditableProperties(resource) {
-    let type = resource[TYPE]
+    let type = this.getType(resource)
     let isFormRequest = type === FORM_REQUEST
     let isFormError = type === FORM_ERROR
     // if (!isFormRequest  &&  !isFormError)
@@ -2336,10 +2359,13 @@ var utils = {
     let ftype
     if (isFormRequest)
       ftype = resource.form
-    else if (isFormError)
-      ftype = utils.getType(resource.prefill)
+    // else if (isFormError) {
+    //   if (!resource.prefill)
+    //     return []
+    //   ftype = utils.getType(resource.prefill)
+    // }
     else
-      ftype = resource[TYPE]
+      ftype = type
     const model = this.getModel(ftype)
     const props = model.properties
     let eCols = []
@@ -2682,6 +2708,9 @@ var utils = {
     if (!prefillProps  ||  this.isEmpty(prefillProps))
       return
     return prefillProps[Object.keys(prefillProps)[0]]
+  },
+  getRootHash(r) {
+    return r[ROOT_HASH] ? r[ROOT_HASH] : r.id.split('_')[1]
   },
 
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {

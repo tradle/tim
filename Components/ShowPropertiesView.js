@@ -110,9 +110,11 @@ class ShowPropertiesView extends Component {
     if (!resource)
       resource = this.props.resource
     let { checkProperties, excludedProperties, bankStyle, currency, showRefResource, onPageLayout } = this.props
-    var modelName = resource[TYPE];
+    var modelName = utils.getType(resource)
     if (!model)
-      model = this.props.model  ||  utils.getModel(modelName);
+      model = this.props.model  ||  utils.getModel(modelName)
+    if (model.id !== modelName  &&  utils.getModel(modelName).subClassOf !== model.id)
+      model = utils.getModel(modelName)
     var vCols
 
     let styles = createStyles({bankStyle: bankStyle || defaultBankStyle})
@@ -247,11 +249,20 @@ class ShowPropertiesView extends Component {
           val = <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
         }
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
-          if (!val[TYPE])
-            val[TYPE] = pMeta.ref
-          let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]), bankStyle)
-          pViewCols.forEach((v) => viewCols.push(v))
-          return
+          if (utils.isStub(val)) {
+            val[TYPE] = utils.getType(val.id)
+            val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
+                    <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
+                  </TouchableOpacity>
+            isRef = true
+          }
+          else {
+            if (!val[TYPE])
+              val[TYPE] = pMeta.ref
+            let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]), bankStyle)
+            pViewCols.forEach((v) => viewCols.push(v))
+          }
+          // return
         }
         else if (pMeta.mainPhoto)
           return

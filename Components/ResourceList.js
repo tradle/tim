@@ -1449,7 +1449,8 @@ class ResourceList extends Component {
         modelName: MESSAGE,
         bankStyle: this.state.bankStyle,
         isModel: true,
-        search: true
+        search: true,
+        exploreData: true
       },
     })
   }

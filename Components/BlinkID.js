@@ -6,11 +6,9 @@ import groupBy from 'lodash/groupBy'
 import getValues from 'lodash/values'
 // import BlinkID from 'react-native-blinkid'
 import { BlinkID, MRTDKeys, USDLKeys, EUDLKeys, NZDLFrontKeys as NZDLKeys, MYKADKeys } from 'blinkid-react-native'
-import validateResource from '@tradle/validate-resource'
 import { microblink } from '../utils/env'
-import { isSimulator, keyByValue } from '../utils/utils'
+import { isSimulator, keyByValue, sanitize } from '../utils/utils'
 
-const { sanitize } = validateResource.utils
 const recognizers = {
   // scans documents with face image and returns document images
   // BlinkID.RECOGNIZER_DOCUMENT_FACE,
@@ -83,7 +81,7 @@ const postProcessResult = ({ type, result }) => {
     }
   }
 
-  return sanitize(ret).sanitized
+  return sanitize(ret)
 }
 
 const dismiss = BlinkID && (BlinkID.dismiss || BlinkID.cancel)

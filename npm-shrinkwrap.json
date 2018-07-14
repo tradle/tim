@@ -2622,6 +2622,23 @@
       "from": "feed-indexer@1.3.0",
       "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.3.0.tgz",
       "dependencies": {
+        "isarray": {
+          "version": "0.0.1",
+          "from": "isarray@0.0.1",
+          "resolved": "https://registry.npmjs.org/isarray/-/isarray-0.0.1.tgz"
+        },
+        "level-change-processor": {
+          "version": "1.0.0",
+          "from": "git+https://github.com/mvayngrib/level-change-processor.git#7100404",
+          "resolved": "git+https://github.com/mvayngrib/level-change-processor.git#7100404cfc465fd2428cf5f7e11f03fe241bd56b",
+          "dependencies": {
+            "readable-stream": {
+              "version": "1.1.14",
+              "from": "readable-stream@^1.0.33",
+              "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.1.14.tgz"
+            }
+          }
+        },
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@>=2.1.4 <3.0.0",
@@ -4340,6 +4357,11 @@
       "from": "merkle-proofs@1.0.3",
       "resolved": "https://registry.npmjs.org/merkle-proofs/-/merkle-proofs-1.0.3.tgz",
       "dependencies": {
+        "merkle-tree-stream": {
+          "version": "3.0.3",
+          "from": "git+https://github.com/mvayngrib/merkle-tree-stream.git#finalize",
+          "resolved": "git+https://github.com/mvayngrib/merkle-tree-stream.git#ef1abd6b566a410f8cdc7190f0966b97f403e290"
+        },
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@>=2.1.0 <3.0.0",
@@ -5774,6 +5796,12 @@
       "dev": true,
       "optional": true,
       "dependencies": {
+        "minimist": {
+          "version": "1.2.0",
+          "from": "minimist@1.2.0",
+          "resolved": "https://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz",
+          "optional": true
+        },
         "strip-json-comments": {
           "version": "2.0.1",
           "from": "strip-json-comments@>=2.0.1 <2.1.0",
@@ -5926,7 +5954,7 @@
     "react-native-gifted-messenger": {
       "version": "0.0.16",
       "from": "pgmemk/react-native-gifted-messenger#dev",
-      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#70bcfb15b93fb1919ce6b228a7042a1bc77bb468"
+      "resolved": "git://github.com/pgmemk/react-native-gifted-messenger.git#7f97008bbd6420f6ca7a35c3ad71599e24a80ca0"
     },
     "react-native-gifted-spinner": {
       "version": "0.1.0",

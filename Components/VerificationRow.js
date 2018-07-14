@@ -545,7 +545,7 @@ class VerificationRow extends Component {
           idx += criteria.length
           if (idx < val.length)
             parts.push(<Text style={style} key={this.getNextKey()}>{val.substring(idx)}</Text>)
-          row = <Text key={this.getNextKey()}>
+          row = <Text key={this.getNextKey()} style={{width: '70%'}}>
                   {parts}
                 </Text>
         }
@@ -736,7 +736,7 @@ var styles = StyleSheet.create({
     paddingVertical: 3
   },
   resourceTitle: {
-    flex: 1,
+    // flex: 1,
     fontSize: 16,
     fontWeight: '400',
     // marginBottom: 2,

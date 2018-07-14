@@ -15,7 +15,7 @@ import {
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
-
+import debounce from 'p-debounce'
 import Reflux from 'reflux'
 import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -24,6 +24,7 @@ import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import InfiniteScrollView from 'react-native-infinite-scroll-view'
+
 import NoResources from './NoResources'
 // import ResourceRow from './ResourceRow'
 import ResourceRow from './ResourceRow'
@@ -48,7 +49,6 @@ import Actions from '../Actions/Actions'
 import buttonStyles from '../styles/buttonStyles'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import debounce from 'p-debounce'
 import appStyle from '../styles/appStyle.json'
 import StyleSheet from '../StyleSheet'
 import { makeStylish } from './makeStylish'
@@ -58,7 +58,7 @@ import SearchBar from './SearchBar'
 import formDefaults from '../data/formDefaults'
 
 const PARTIAL = 'tradle.Partial'
-const FORM_PREFILL = 'tradle.FormPrefill'
+const FORM_ERROR = 'tradle.FormError'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
 
 const SEARCH_LIMIT = 10
@@ -86,7 +86,6 @@ var {
 
 const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION = 'tradle.Application'
-const DRAFT_APPLICATION = 'tradle.DraftApplication'
 const VERIFIED_ITEM = 'tradle.VerifiedItem'
 const PHOTO = 'tradle.Photo'
 
@@ -697,25 +696,7 @@ class GridList extends Component {
 
     let isOrganization = modelName === ORGANIZATION
     let isApplication = modelName === APPLICATION
-    let isDraftApplication = modelName === DRAFT_APPLICATION
-    // let isBookmark = modelName === BOOKMARK
-
-    // let isResourceFromServer
-    // if (me.isEmployee) {
-    //    // (!isApplication  &&  (search ||  (!isContact  &&  !isOrganization  &&  !callback)))
-    //   if (!isApplication) {
-    //     if (search  ||  isBookmark)
-    //       isResourceFromServer = true
-    //     else if (utils.isMessage(resource)) {
-    //       let meId = utils.getId(me)
-    //       // DraftApplication
-    //       if (utils.getId(resource.from) !== meId  ||  utils.getId(resource.to) !== meId)
-    //         isResourceFromServer = true
-    //     }
-    //   }
-    // }
-    // if (isResourceFromServer  ||  utils.isMessage(resource)) {
-    if (!isApplication  &&  !isDraftApplication  &&   utils.isMessage(resource)  ||  utils.isStub(resource)) {
+    if (!isApplication  &&   utils.isMessage(resource)  ||  utils.isStub(resource)) {
       this.selectMessage(resource)
       return;
     }
@@ -758,12 +739,11 @@ class GridList extends Component {
       style = this.mergeStyle(resource.style)
     else
       style = bankStyle
-
-    if (isApplication  ||  isDraftApplication) {
+    if (isApplication) {
       let route = {
         title: title,
-        id: isDraftApplication ? 5 : 34,
-        component: isDraftApplication ? MessageView : ApplicationView,
+        id: 34,
+        component: ApplicationView,
         // titleTextColor: '#7AAAC3',
         backButtonTitle: 'Back',
         passProps: {
@@ -831,10 +811,6 @@ class GridList extends Component {
   }
   selectMessage(resource) {
     let { modelName, search, bankStyle, navigator, currency, prop, returnRoute, callback, application, isBacklink } = this.props
-    let model = utils.getModel(modelName);
-    let rType = utils.getType(resource)
-    let rModel = utils.getModel(rType)
-    let isMessage = utils.isMessage(resource)
     if (callback) {
       callback(prop, resource); // HACK for now
       if (returnRoute)
@@ -850,8 +826,15 @@ class GridList extends Component {
       uiUtils.showBookmarks({resource, searchFunction: this.searchWithFilter.bind(this), navigator, bankStyle, currency})
       return
     }
-    let title, isDraftApplication
+    let model = utils.getModel(modelName);
+    let rType = utils.getType(resource)
+    let rModel = utils.getModel(rType)
+    let isMessage = utils.isMessage(resource)
+    let title
     let isStub = utils.isStub(resource)
+    let isFormError = rType === FORM_ERROR
+    let isForm = rModel.subClassOf === FORM
+
     if (rType === VERIFICATION) {
       if (isStub)
         title = utils.makeModelTitle(utils.getType(resource))
@@ -860,14 +843,16 @@ class GridList extends Component {
         title = 'Verification - ' + utils.makeModelTitle(utils.getModel(type))
       }
     }
-    else if (rType === FORM_PREFILL) {
-      isDraftApplication = true
-      title = utils.makeModelTitle(resource.prefill[TYPE])
-    }
     else
       title = utils.makeModelTitle(rModel)
 
-    let dn = utils.getDisplayName(resource)
+    let dn
+    if (isFormError) {
+      if (!isStub)
+        dn = utils.makeModelTitle(utils.getType(resource.prefill))
+    }
+    else
+      dn = utils.getDisplayName(resource)
     // let newTitle = title + (dn ? ' -- ' + dn : '');
     let newTitle = (dn ? dn + ' -- '  : '') + title;
 
@@ -879,27 +864,30 @@ class GridList extends Component {
       passProps: {
         resource,
         search,
-        application: application || (isDraftApplication  &&  this.props.resource),
+        application: application,
         bankStyle: bankStyle || defaultBankStyle
       }
     }
+    let isRM = utils.isRM(application)
     if (isBacklink) {
-      if (application  &&  utils.isRM(application)) {
+      if (application  &&  isRM) {
         let editView
         _.extend(route.passProps, {
           ref: ref => {
             editView = ref
           }
         })
-        _.extend(route, {
-          rightButtonTitle: 'VerifyOrCorrect',
-          onRightButtonPress: () => {
-            if (editView.state.isVerifier)
-              Actions.verifyOrCorrect({ resource: editView.props.resource })
-            else
-              editView.setState({isVerifier: true})
-          }
-        })
+        if (isForm) {
+          _.extend(route, {
+            rightButtonTitle: 'VerifyOrCorrect',
+            onRightButtonPress: () => {
+              if (editView.state.isVerifier)
+                Actions.verifyOrCorrect({ resource: editView.props.resource })
+              else
+                editView.setState({isVerifier: true})
+            }
+          })
+        }
         // _.extend(route, {
         //   rightButtonTitle: 'Edit',
         //   onRightButtonPress: {
@@ -924,7 +912,8 @@ class GridList extends Component {
       }
       route.passProps.backlink = prop
     }
-    if (!utils.isStub(resource)  &&  utils.isMyMessage({resource})) {
+    let canEdit //= isFormError  &&   isRM
+    if (!isStub  ||  canEdit  ||  utils.isMyMessage({resource})) {
       _.extend(route, {
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
@@ -937,7 +926,7 @@ class GridList extends Component {
           passProps: {
             model: rModel,
             resource: resource,
-            search: search,
+            search: !isBacklink  &&  search,
             serverOffline: this.props.serverOffline,
             bankStyle: bankStyle || defaultBankStyle
           }
@@ -1083,7 +1072,7 @@ class GridList extends Component {
 
 
   selectModel(model) {
-    let { navigator, bankStyle, currency } = this.props
+    let { navigator, bankStyle, currency, exploreData } = this.props
     navigator.push({
       id: 30,
       title: translate('searchSomething', utils.makeModelTitle(model)),
@@ -1095,6 +1084,7 @@ class GridList extends Component {
         bankStyle: bankStyle,
         currency: currency,
         limit: 20,
+        exploreData,
         search: true
       },
       rightButtonTitle: 'Search',
@@ -1107,9 +1097,10 @@ class GridList extends Component {
         rightButtonTitle: 'Done',
         passProps: {
           model: Store.getAugmentedModel(model),
-          resource: this.state.resource,
+          resource: {[TYPE]: model.id},
           searchWithFilter: this.searchWithFilter.bind(this),
           search: true,
+          exploreData,
           bankStyle: bankStyle || defaultBankStyle,
         }
       }
@@ -1489,8 +1480,6 @@ class GridList extends Component {
             list: l,
             dataSource: self.state.dataSource.cloneWithRows(l)
           })
-          // this.props.navigator.jumpTo(routes[routes.length - 2])
-          // routes[routes.length - 2].passProps.callback(resource)
         }
       }
     })
@@ -1502,34 +1491,14 @@ class GridList extends Component {
           isBacklink, isForwardlink, resource, prop, forwardlink, bankStyle } = this.props
     let model = utils.getModel(modelName);
     let me = utils.getMe()
-    // if (dataSource.getRowCount() === 0   &&
-    //     me  &&  !me.isEmployee           &&
-    //     model.subClassOf !== ENUM        &&
-    //     !isChooser                       &&
-    //     modelName !== ORGANIZATION       &&
-    //     (!model.subClassOf  ||  model.subClassOf !== ENUM)) {
-    //   content = <NoResources
-    //               filter={filter}
-    //               model={model}
-    //               isLoading={isLoading}/>
-    // }
-    // else
-    // let isEmptyItemsTab = prop &&  this.state.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)
+
     let isEmptyItemsTab
-    // if (!isChooser  &&  prop &&  prop.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)) {
     if (/*!isChooser  &&*/ !this.state.list  &&  prop &&  prop.allowToAdd  &&  (!resource[prop.name] ||  !resource[prop.name].length)) {
       if (me  &&  (!me.isEmployee  ||  utils.isMyMessage({resource})))
         isEmptyItemsTab = true
     }
 
     if (isEmptyItemsTab) {
-      // content = <NoResources
-      //             message={translate('pleaseClickOnAddButton', utils.makeModelTitle(model))}
-      //             icon={'md-add'}
-      //             iconColor={'#ffffff'}
-      //             iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
-      //             model={model}
-      //             isLoading={isLoading}/>
       let height = utils.dimensions(GridList).height + 100
       content = <View style={{justifyContent: 'flex-end', height}}>
                   <NoResources

@@ -116,7 +116,7 @@ class NewResource extends Component {
       isUploading,
       isRegistration,
       isLoadingVideo: false,
-      isPrefilled: this.props.isPrefilled,
+      isPrefilled: props.isPrefilled,
       modal: {},
       termsAccepted: isRegistration ? false : true
     }
@@ -135,7 +135,7 @@ class NewResource extends Component {
             ? this.getSearchResult.bind(this)
             : this.onSavePressed
     // HACK
-    let editProps = utils.getEditableProperties(r)
+    let editProps = !props.exploreData  &&  utils.getEditableProperties(r)
     if (editProps.length  &&  editProps.length === 1) {
       let eProp = editProps[0]
       if (eProp.signature) {
@@ -199,7 +199,7 @@ class NewResource extends Component {
         }
       }
     }
-    if (Platform.OS === 'ios') {
+    if (!this.props.exploreData  &&  Platform.OS === 'ios') {
       if (utils.hasPaymentCardScannerProperty(utils.getType(resource)))
         CardIOUtilities.preload();
     }
@@ -753,14 +753,20 @@ class NewResource extends Component {
         value = {}
     }
     this.checkEnums(value, this.state.resource)
-    let currentRoutes = this.props.navigator.getCurrentRoutes()
+
+    const { navigator, searchWithFilter, model } = this.props
+    let currentRoutes = navigator.getCurrentRoutes()
     let currentRoutesLength = currentRoutes.length
 
     // HACK: set filtering resource for right button on RL so that next
     // time filter shows in the form
-    currentRoutes[currentRoutesLength - 2].onRightButtonPress.passProps.resource = value
-    this.props.navigator.pop()
-    this.props.searchWithFilter(value)
+
+    let val = utils.sanitize(value)
+    if (!val[TYPE])
+      val[TYPE] = model.id
+    searchWithFilter(val)
+    currentRoutes[currentRoutesLength - 2].onRightButtonPress.passProps.resource = val
+    navigator.pop()
   }
 
   render() {
@@ -776,7 +782,10 @@ class NewResource extends Component {
       let eProp = editProps[0]
       if (eProp.signature) {
         return  <View style={{flex: 1}}>
-                   <SignatureView ref='sigView' bankStyle={bankStyle}  sigViewStyle={bankStyle} />
+                   <SignatureView ref={ref => {this.sigView = ref}} bankStyle={bankStyle}  sigViewStyle={bankStyle} onSignature={() => {
+                      // this.props.navigator.pop()
+                      this.onSetSignatureProperty(eProp, this.sigView.getSignature().url)
+                    }} />
                  </View>
         // ref: ref => {
         //   sigView = ref
@@ -789,7 +798,7 @@ class NewResource extends Component {
     }
 
     let meta =  this.props.model;
-    let { originatingMessage, setProperty, editCols, search } = this.props
+    let { originatingMessage, setProperty, editCols, search, exploreData } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -841,7 +850,7 @@ class NewResource extends Component {
                                     showRefResource={this.showRefResource.bind(this)}
                                     navigator={navigator} />
                 <TouchableOpacity onPress={this.onSavePressed}>
-                  <View style={styles.submit}>
+                  <View style={styles.submitButton}>
                     <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                     <Text style={styles.submitText}>{translate('Submit')}</Text>
                   </View>
@@ -991,12 +1000,13 @@ class NewResource extends Component {
     // StatusBar.setHidden(true);
     let submit
     if (!isRegistration) {
+      let onPress = exploreData ? this.getSearchResult.bind(this) : this.onSavePressed
       if (this.state.err) {
         Alert.alert(this.state.err)
         this.state.err = null
       }
-      if (!isRegistration  &&  bankStyle  &&  bankStyle.submitBarInFooter)
-        submit = <TouchableOpacity onPress={this.onSavePressed}>
+      if (bankStyle  &&  bankStyle.submitBarInFooter)
+        submit = <TouchableOpacity onPress={onPress}>
                    <View style={styles.submitBarInFooter}>
                      <View style={styles.bar}>
                        <Text style={styles.submitBarInFooterText}>{translate('next')}</Text>
@@ -1004,8 +1014,8 @@ class NewResource extends Component {
                    </View>
                  </TouchableOpacity>
       else
-        submit = <TouchableOpacity onPress={this.onSavePressed}>
-                   <View style={styles.submit}>
+        submit = <TouchableOpacity onPress={onPress}>
+                   <View style={styles.submitButton}>
                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                      <Text style={styles.submitText}>{translate('Submit')}</Text>
                    </View>
@@ -1034,7 +1044,9 @@ class NewResource extends Component {
           </View>
         </View>
         {wait}
-        {submit}
+        <View style={styles.submit}>
+          {submit}
+        </View>
       </ScrollView>
 
 
@@ -1329,53 +1341,36 @@ class NewResource extends Component {
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
       label += ' *'
-    let icon = isPhoto && 'ios-camera-outline'  ||  'md-add'
     if (count) {
       let items = []
       let arr = resource[bl.name]
       let n = Math.min(arr.length, utils.isWeb() ? utils.dimensions().width - 100 / 40 :  7)
-      if (isPhoto) {
-        for (let i=0; i<n; i++)
-          items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()}/>)
-      }
-      else {
-        for (let i=0; i<n; i++) {
-          items.push(<View style={{maxWidth: 100}}>
-                       <Icon name='ios-paper-outline' size={40} color={bankStyle.linkColor}/>
-                       <Text style={{fontSize: 10}}>{arr[i].name}</Text>
-                      </View>
-          )
-        }
-      }
+
+      for (let i=0; i<n; i++)
+        items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()}/>)
+
       itemsArray =
         <View style={[styles.photoStrip, {marginTop: count && -25 || 0, paddingBottom: 5}]}>
           <Text style={[styles.activePropTitle, {color: lcolor}]}>{label}</Text>
           <View style={styles.row}>{items}</View>
         </View>
-      counter =
-        <View>
-          <View style={[styles.itemsCounter]}>
-            <Icon name={icon}  size={isPhoto  &&  35 || 20} color={linkColor} />
-          </View>
-        </View>;
     }
     else {
       itemsArray = <Text style={styles.noItemsText}>{label}</Text>
-      counter = <View style={[styles.itemsCounterEmpty]}>
-                  <Icon name={icon}  size={isPhoto && 35 || 20} color={linkColor} />
-                </View>
     }
+    counter = <Icon name='ios-camera-outline'  size={25} color={linkColor} />
     let title = translate(bl, blmodel) //.title || utils.makeLabel(p)
     let error = this.getErrorView({prop: bl})
     let actionableItem
     if (count)
-      actionableItem = <TouchableOpacity style={styles.itemsWithCount} onPress={this.showItems.bind(this, bl, meta)}>
+      actionableItem = <TouchableOpacity
+                          style={styles.pics}
+                          onPress={this.showItems.bind(this, bl, meta)}>
                          {itemsArray}
                        </TouchableOpacity>
     else
       actionableItem = <ImageInput
                          prop={bl}
-                         style={styles.itemsWithoutCount}
                          underlayColor='transparent'
                          onImage={item => this.onAddItem(bl.name, item)}>
                          {itemsArray}
@@ -1398,7 +1393,8 @@ class NewResource extends Component {
             {actionableItem}
             <ImageInput
                 prop={bl}
-                underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
+                underlayColor='transparent'
+                style={styles.actionIcon}
                 onImage={item => this.onAddItem(bl.name, item)}>
               {counter}
             </ImageInput>
@@ -1451,14 +1447,21 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       // alignSelf: 'center',
       paddingLeft: 10
     },
-    itemsCounterEmpty: {
-      paddingHorizontal: 5,
-      marginTop: 7
-      // justifyContent: 'center'
-    },
-    itemsCounter: {
-      marginTop: 22,
-      paddingHorizontal: 5
+    // itemsCounterEmpty: {
+    //   paddingHorizontal: 5,
+    //   justifyContent: 'center',
+    //   marginTop: -5
+    // },
+    // itemsCounter: {
+      // marginTop: 40,
+      // justifyContent: 'flex-end',
+      // paddingHorizontal: 5
+    // },
+    actionIcon: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      alignItems: 'flex-end',
+      paddingRight: 5
     },
     itemButton: {
       height: 60,
@@ -1529,7 +1532,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       color: '#bbbbbb'
     },
     photoStrip: {
-      paddingBottom: 5
+      paddingBottom: 5,
+      marginTop: 0
     },
     row: {
       flexDirection: 'row'
@@ -1568,26 +1572,25 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       paddingHorizontal: 10,
       justifyContent: 'center'
     },
-    itemsWithCount: {
-      flex: 7,
-      paddingTop: 15
-    },
-    itemsWithoutCount: {
-      flex: 7,
-      paddingTop: 15,
-      // paddingBottom: 10
+    pics: {
+      paddingTop: 10,
+      width: '90%'
     },
     submit: {
+      width: 340,
+      alignSelf: 'center'
+    },
+    submitButton: {
       backgroundColor: bankStyle.linkColor,
       flexDirection: 'row',
       justifyContent: 'center',
       width: 340,
       marginTop: 20,
-      marginBottom: 50,
+      // marginBottom: 50,
       alignSelf: 'center',
       height: 40,
       borderRadius: 5,
-      marginHorizontal: 20
+      // marginHorizontal: 20
     },
     submitText: {
       fontSize: 20,
@@ -1639,7 +1642,23 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     arrayItems: {
       marginTop: isRegistration ? 0 : -10,
       paddingBottom: 20
-    }
+    },
+    addButton: {
+      ...circled(30),
+      backgroundColor: bankStyle.linkColor,
+      shadowOpacity: 0.7,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
+    },
+    // itemsWithCount: {
+    //   flex: 7,
+    //   paddingTop: 15
+    // },
+    // itemsWithoutCount: {
+    //   flex: 7,
+    //   paddingTop: 15,
+    //   // paddingBottom: 10
+    // },
   })
 })
 module.exports = NewResource;

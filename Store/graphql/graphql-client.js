@@ -299,7 +299,7 @@ var search = {
     query += `edges {\n node {\n`
 
     if (!select) {
-      select = this.getAllPropertiesForServerSearch({model, properties, isList: true})
+      select = this.getSearchProperties({model, properties, isList: true})
     }
 
     query += `${select.join('   \n')}`
@@ -440,7 +440,7 @@ var search = {
     }
 
   },
-  getAllPropertiesForServerSearch(params) {
+  getSearchProperties(params) {
     let {model, inlined, properties, currentProp, isList, backlink} = params
     let props = backlink ? {[backlink.name]: backlink} : model.properties
 
@@ -469,88 +469,99 @@ var search = {
       properties.forEach((p) => newProps[p] = props[p])
       props = newProps
     }
-    for (let p in props) {
-      if (p.charAt(0) === '_')
-        continue
-      if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
-        continue
-      let prop = props[p]
-      if (prop.displayAs)
-        continue
-      let ptype = prop.type
-      if (ptype === 'array') {
-        // HACK
-        if (p === 'verifications')
-          continue
+    return this.addProps({...params, props, model, arr})
+    // for (let p in props) {
+    //   if (p.charAt(0) === '_')
+    //     continue
+    //   if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
+    //     continue
+    //   let prop = props[p]
+    //   if (prop.displayAs)
+    //     continue
+    //   let ptype = prop.type
+    //   if (ptype === 'array') {
+    //     // HACK
+    //     if (p === 'verifications')
+    //       continue
 
-        if (isApplication) {
-          if (isList  &&  p !== 'relationshipManagers')
-            continue
-          if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
-            continue
-        }
-        let iref = prop.items.ref
-        if (iref) {
-          if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
-            if (isList  &&  !isApplication)
-              continue
-            arr.push(`${p} {
-              edges {
-                node {
-                  ${this.getAllPropertiesForServerSearch({model: utils.getModel(iref)})}
-                }
-              }
-            }`)
-          }
-          else if (prop.inlined) {
-            if (currentProp  &&  currentProp === prop)
-              continue
-            arr.push(this.addInlined(prop))
-          }
-          // else if (iref === model.id) {
-          //   arr.push(
-          //     `${p} {
-          //       ${TYPE}
-          //       _permalink
-          //       _link
-          //       _displayName
-          //     }`
-          //   )
-          // }
-          // else if (prop.inlined)
-          //   arr.push(this.addInlined(prop))
-          else
-            arr.push(
-              `${p} {
-                ${TYPE}
-                _permalink
-                _link
-                _displayName
-              }`
-            )
-        }
+    //     if (isApplication) {
+    //       if (isList  &&  p !== 'relationshipManagers')
+    //         continue
+    //       if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
+    //         continue
+    //     }
+    //     let iref = prop.items.ref
+    //     if (iref) {
+    //       if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
+    //         if (isList  &&  !isApplication)
+    //           continue
+    //         arr.push(`${p} {
+    //           edges {
+    //             node {
+    //               ${this.getSearchProperties({model: utils.getModel(iref)})}
+    //             }
+    //           }
+    //         }`)
+    //       }
+    //       else if (prop.inlined) {
+    //         if (currentProp  &&  currentProp === prop)
+    //           continue
+    //         arr.push(this.addInlined(prop))
+    //       }
+    //       // else if (iref === model.id) {
+    //       //   arr.push(
+    //       //     `${p} {
+    //       //       ${TYPE}
+    //       //       _permalink
+    //       //       _link
+    //       //       _displayName
+    //       //     }`
+    //       //   )
+    //       // }
+    //       // else if (prop.inlined)
+    //       //   arr.push(this.addInlined(prop))
+    //       else
+    //         arr.push(
+    //           `${p} {
+    //             ${TYPE}
+    //             _permalink
+    //             _link
+    //             _displayName
+    //           }`
+    //         )
+    //     }
+    //     else {
+    //       let aprops = prop.items.properties
+    //       if (aprops) {
 
-        continue
-      }
-      if (ptype !== 'object') {
-        arr.push(p)
-        continue
-      }
-      let ref = prop.ref
-      if (!ref) {
-        if (prop.range === 'json')
-          arr.push(p)
-        continue
-      }
-      if (ref === ORGANIZATION)
-        continue
+    //       }
+    //     }
 
-      if (prop.inlined)
-        arr.push(this.addInlined(prop))
-      else
-        arr.push(this.addRef(prop))
-    }
-    return arr
+    //     continue
+    //   }
+    //   if (ptype !== 'object') {
+    //     arr.push(p)
+    //     continue
+    //   }
+    //   let ref = prop.ref
+    //   if (!ref) {
+    //     if (prop.range === 'json')
+    //       arr.push(p)
+    //     continue
+    //   }
+    //   if (ref === ORGANIZATION)
+    //     continue
+
+    //   if (prop.inlined)
+    //     arr.push(this.addInlined(prop))
+    //   else {
+    //     // HACK
+    //     let add = (model.id !== 'tradle.PhotoID'  ||  prop.name !== 'sex') &&  (model.id !== 'tradle.FormError'  ||  prop.name !== 'status')
+    //     if (add)
+    //       arr.push(this.addRef(prop))
+    //   }
+    // }
+    // return arr
   },
   addRef(prop) {
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
@@ -586,7 +597,7 @@ var search = {
     }
     if (m.id === PHOTO) {
       return (
-        `${p} {${this.getAllPropertiesForServerSearch({model: m})}}`
+        `${p} {${this.getSearchProperties({model: m})}}`
       )
     }
     return (
@@ -597,6 +608,105 @@ var search = {
         _displayName
       }`
     )
+  },
+  addProps({isList, backlink, props, currentProp, arr, model}) {
+    if (!arr)
+      arr = []
+    let isApplication = model  &&  model.id === APPLICATION
+    for (let p in props) {
+      if (p.charAt(0) === '_')
+        continue
+      if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
+        continue
+      let prop = props[p]
+      if (prop.displayAs)
+        continue
+      let ptype = prop.type
+      if (ptype === 'array') {
+        // HACK
+        if (p === 'verifications')
+          continue
+
+        if (isApplication) {
+          if (isList  &&  p !== 'relationshipManagers')
+            continue
+          if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
+            continue
+        }
+        let iref = prop.items.ref
+        if (iref) {
+          if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
+            if (isList  &&  !isApplication)
+              continue
+            arr.push(`${p} {
+              edges {
+                node {
+                  ${this.getSearchProperties({model: utils.getModel(iref)})}
+                }
+              }
+            }`)
+          }
+          else if (prop.inlined) {
+            if (currentProp  &&  currentProp === prop)
+              continue
+            arr.push(this.addInlined(prop))
+          }
+          // else if (iref === model.id) {
+          //   arr.push(
+          //     `${p} {
+          //       ${TYPE}
+          //       _permalink
+          //       _link
+          //       _displayName
+          //     }`
+          //   )
+          // }
+          // else if (prop.inlined)
+          //   arr.push(this.addInlined(prop))
+          else
+            arr.push(
+              `${p} {
+                ${TYPE}
+                _permalink
+                _link
+                _displayName
+              }`
+            )
+        }
+        else {
+          let allProps = this.addProps({isList, props: prop.items.properties})
+          arr.push(
+            `${p} {
+              ${allProps.toString().replace(/,/g, '\n')}
+            }`
+          )
+        }
+        continue
+      }
+      if (ptype !== 'object') {
+        arr.push(p)
+        continue
+      }
+      let ref = prop.ref
+      if (!ref) {
+        if (prop.range === 'json')
+          arr.push(p)
+        continue
+      }
+      if (ref === ORGANIZATION)
+        continue
+
+      if (prop.inlined)
+        arr.push(this.addInlined(prop))
+      else {
+        arr.push(this.addRef(prop))
+        // HACK
+        // let add = model  &&  (model.id !== 'tradle.PhotoID'  ||  prop.name !== 'sex') &&  (model.id !== 'tradle.FormError'  ||  prop.name !== 'status')
+        // if (add)
+          // arr.push(this.addRef(prop))
+      }
+    }
+    return arr
   },
   addInlined(prop) {
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
@@ -615,7 +725,7 @@ var search = {
       )
     }
     else {
-      let allProps = this.getAllPropertiesForServerSearch({model: refM, inlined: true, currentProp: prop})
+      let allProps = this.getSearchProperties({model: refM, inlined: true, currentProp: prop})
       return (
         `${p} {
           ${allProps.toString().replace(/,/g, '\n')}
@@ -623,7 +733,7 @@ var search = {
       )
     }
   },
-  async _getItem(id, client, backlink) {
+  async getItem(id, client, backlink) {
     let parts = id.split('_')
 
     let modelName = parts[0]
@@ -637,7 +747,7 @@ var search = {
     let _permalink = parts[1]
     let query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
-    let arr = this.getAllPropertiesForServerSearch({model, backlink})
+    let arr = this.getSearchProperties({model, backlink})
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
@@ -654,7 +764,7 @@ var search = {
     }
   },
   // TODO: rename _getItem to getItem
-  getItem: (...args) => search._getItem(...args),
+  // getItem: (...args) => search._getItem(...args),
   async getObjects(links, client) {
     let table = 'rl_objects'
     let query = `

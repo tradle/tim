@@ -863,7 +863,6 @@ var NavigationBarRouteMapper = {
     let style = [platformStyles.navBarText, t.length === 1 && styles.navBarTitleText || styles.navBarTitleText1, st]
     let text, tArr
     if (logoNeedsText  ||  !uri) {
-      let isPrefill
       if (route.titleTextColor)
         style.push({color: route.titleTextColor});
       else {
@@ -872,8 +871,6 @@ var NavigationBarRouteMapper = {
           model = utils.getModel(modelName)
         else if (resource)
           model = utils.getModel(utils.getType(resource))
-
-        isPrefill = model  &&  utils.getPrefillProperty(model)
       }
       for (let i=1; i<t.length; i++) {
         if (!tArr)
@@ -881,8 +878,6 @@ var NavigationBarRouteMapper = {
         tArr.push(<Text style={[styles.arr, {color: color}]} key={'index.common.js_' + i}>{this.makeTitle(t[i])}</Text>)
       }
       let tt = this.makeTitle(t[0])
-      if (isPrefill)
-        tt = 'Draft - ' + t
       text = <Text style={style}>
                {tt}
              </Text>
