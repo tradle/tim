@@ -942,7 +942,7 @@ var styles = StyleSheet.create({
   icon: {
     width: 25,
     height: 25,
-    marginTop: utils.isAndroid() ? 12 : 0
+    marginTop: utils.isAndroid() ? 10 : 0
   },
   row: {
     flexDirection: 'row'
