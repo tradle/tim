@@ -24,11 +24,11 @@ export default StyleSheet.create({
   },
   navBarLeftButton: {
     paddingLeft: 10,
-    paddingRight: 25,
+    // paddingRight: 25,
     marginTop: 5
   },
   navBarRightButton: {
-    paddingLeft: 25,
+    // paddingLeft: 25,
     paddingRight: 10,
     marginTop: 7
   },
