@@ -849,7 +849,7 @@ class NewResource extends Component {
                                     bankStyle={bankStyle}
                                     showRefResource={this.showRefResource.bind(this)}
                                     navigator={navigator} />
-                <TouchableOpacity onPress={this.onSavePressed}>
+                <TouchableOpacity onPress={this.onSavePressed} style={{paddingBottom: 30}}>
                   <View style={styles.submitButton}>
                     <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                     <Text style={styles.submitText}>{translate('Submit')}</Text>
@@ -1014,7 +1014,7 @@ class NewResource extends Component {
                    </View>
                  </TouchableOpacity>
       else
-        submit = <TouchableOpacity onPress={onPress}>
+        submit = <TouchableOpacity onPress={onPress} style={{paddingBottom: 30}}>
                    <View style={styles.submitButton}>
                      <Icon name='ios-send' color='#fff' size={30} style={styles.sendIcon}/>
                      <Text style={styles.submitText}>{translate('Submit')}</Text>

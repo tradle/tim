@@ -33,13 +33,13 @@ class SearchBar extends Component {
 
 var styles = StyleSheet.create({
   searchBarInput: {
-    height: Platform.OS === 'android' ? 32 : 32,
+    height: Platform.OS === 'android' ? 40 : 32,
     alignSelf: 'stretch',
     justifyContent: 'center',
     paddingVertical: 7,
     // marginHorizontal: -5,
     fontSize: 20,
-    paddingLeft: 5,
+    // paddingLeft: 5,
     // fontWeight: '600',
     backgroundColor: '#ffffff',
     // borderRadius: 5,

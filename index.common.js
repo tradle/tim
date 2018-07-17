@@ -679,17 +679,16 @@ var NavigationBarRouteMapper = {
     case VERIFY_OR_CORRECT:
       iconColor = '#fff'
       isSubmit = true
-      if (route.passProps.isChooser) {
+      if (route.passProps.isChooser)
         icon = 'md-checkmark'
-        iconSize = 25
-      }
       // if (route.passProps.bankStyle  &&  route.passProps.bankStyle.submitBarInFooter)
       //   return
     case 'Accept':
       if (!icon) {
         icon = 'ios-send'
         iconSize = 28
-        viewStyle = isAndroid ? {paddingTop: 10} : {}
+        if (isAndroid)
+          viewStyle = {paddingTop: 10}
       }
       style = {marginTop: isAndroid ? 2 : -2}
       // style = {marginTop: 5, transform: [
@@ -843,7 +842,7 @@ var NavigationBarRouteMapper = {
       if (utils.isWeb())
         marginTop = 2
       else if (utils.isAndroid())
-        marginTop = logoNeedsText ? 18 : 23
+        marginTop = t.length > 1 ? 2 : 18 //logoNeedsText ? 18 : 23
       else
         marginTop = t.length > 1 ? 0 : 8
 
@@ -872,15 +871,25 @@ var NavigationBarRouteMapper = {
         else if (resource)
           model = utils.getModel(utils.getType(resource))
       }
+      let tstyle = {flexDirection: 'row'}
+      if (utils.isAndroid()) {
+        let { width } = utils.dimensions(route.component)
+        tstyle.width = width - 150
+      }
+      else
+        tstyle.marginRight = 10
       for (let i=1; i<t.length; i++) {
         if (!tArr)
           tArr = []
-        tArr.push(<Text style={[styles.arr, {color: color}]} key={'index.common.js_' + i}>{this.makeTitle(t[i])}</Text>)
+        tArr.push(<View style={tstyle} key={'index.common.js_' + i}>
+                    <Text style={[styles.arr, {color: color}]} numberOfLines={1}>{this.makeTitle(t[i])}</Text>
+                  </View>
+                  )
       }
       let tt = this.makeTitle(t[0])
-      text = <Text style={style}>
-               {tt}
-             </Text>
+      text = <View style={tstyle} key={'index.common.js_0'}>
+               <Text style={style} numberOfLines={1}>{tt}</Text>
+             </View>
     }
 
     return (
@@ -907,22 +916,22 @@ var NavigationBarRouteMapper = {
 
   },
   makeTitle(title, component) {
-    if (Platform.OS === 'web')
+    // if (Platform.OS === 'web')
       return title
-    let { width } = utils.dimensions(component)
+  //   let { width } = utils.dimensions(component)
 
-    let tWidth = width * 0.8
-    let numberOfCharsInWidth = tWidth / utils.getFontSize(12)
-    if (title.length < numberOfCharsInWidth)
-      return title
-    title = title.substring(0, numberOfCharsInWidth)
-    let i = title.length - 1
-    for (; i>=0; i--) {
-      let ch  = title.charAt(i)
-      if (ch === ' '  ||  ch !== ','  ||  ch === ':'  ||  ch === ';')
-        break
-    }
-    return (i === 0 ? title : title.substring(0, i))  + '...'
+  //   let tWidth = width * 0.8
+  //   let numberOfCharsInWidth = tWidth / utils.getFontSize(12)
+  //   if (title.length < numberOfCharsInWidth)
+  //     return title
+  //   title = title.substring(0, numberOfCharsInWidth)
+  //   let i = title.length - 1
+  //   for (; i>=0; i--) {
+  //     let ch  = title.charAt(i)
+  //     if (ch === ' '  ||  ch !== ','  ||  ch === ':'  ||  ch === ';')
+  //       break
+  //   }
+  //   return (i === 0 ? title : title.substring(0, i))  + '...'
   }
 
 };

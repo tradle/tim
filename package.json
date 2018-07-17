@@ -159,7 +159,7 @@
     "react-native-prompt": "github:tradle/react-native-prompt",
     "react-native-push-notification": "^3.0.0",
     "react-native-qrcode": "^0.2.6",
-    "react-native-scrollable-tab-view": "^0.8.0",
+    "react-native-scrollable-tab-view": "github:compojoom/react-native-scrollable-tab-view#fixes_android",
     "react-native-swipeout": "^2.3.3",
     "react-native-switch-selector": "^1.0.7",
     "react-native-vector-icons": "^4.1.1",

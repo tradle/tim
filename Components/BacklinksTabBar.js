@@ -204,11 +204,13 @@ const BacklinksTabBar = createReactClass({
           ref={'tabContainer'}
           onLayout={this.onTabContainerLayout}
         >
-          {this.props.tabs.map((name, page) => {
-            const isTabActive = this.props.activeTab === page;
-            const renderTab = this.props.renderTab || this.renderTab;
-            return renderTab(name, page, isTabActive, this.props.goToPage, this.measureTab.bind(this, page));
-          })}
+          {
+            this.props.tabs.map((name, page) => {
+              const isTabActive = this.props.activeTab === page;
+              const renderTab = this.props.renderTab || this.renderTab;
+              return renderTab(name, page, isTabActive, this.props.goToPage, this.measureTab.bind(this, page));
+            })
+          }
           <Animated.View style={[tabUnderlineStyle, dynamicTabUnderline, this.props.underlineStyle, ]} />
         </View>
       </ScrollView>
@@ -243,6 +245,7 @@ module.exports = BacklinksTabBar;
 const styles = StyleSheet.create({
   tab: {
     height: 49,
+    marginTop: 5,
     alignItems: 'center',
     justifyContent: 'center',
     paddingLeft: 20,
@@ -252,7 +255,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   container: {
-    // height: 60,
+    // height: 80,
     borderWidth: 1,
     borderTopWidth: 0,
     borderLeftWidth: 0,
@@ -267,13 +270,13 @@ const styles = StyleSheet.create({
   },
   count: {
     alignSelf: 'flex-start',
-    minWidth: 18,
+    minWidth: 20,
     marginLeft: -7,
     marginTop: 0,
     backgroundColor: appStyle.COUNTER_BG_COLOR,
     paddingHorizontal: 3,
     borderWidth: StyleSheet.hairlineWidth,
-    borderRadius: 9,
+    borderRadius: 10,
     borderColor: appStyle.COUNTER_COLOR,
     paddingVertical: 1
   },

@@ -9687,10 +9687,17 @@ if (!res[SIG]  &&  res._message)
     const previousResetCheckpoint = previous.resetCheckpoint || 0
     if (resetCheckpoint <= previousResetCheckpoint) return
 
+    await this.requireFreshUser({
+      title: translate('resetRequired'),
+      message: translate('incompatibleVersion')
+    })
+  },
+
+  async requireFreshUser({ title, message }) {
     await new Promise(resolve => {
       Alert.alert(
-        translate('incompatibleVersion'),
-        translate('resetIsRequired'),
+        title,
+        message,
         [{ text: translate('ok'), onPress: resolve }]
       )
     })
@@ -9765,6 +9772,13 @@ if (!res[SIG]  &&  res._message)
         lookupKeys,
         utils.getPassword(ENCRYPTION_KEY)
       ])
+
+      if (!encryptionKey) {
+        await this.requireFreshUser({
+          title: translate('resetRequired'),
+          message: translate('storageCorrupted')
+        })
+      }
 
       return { keys, encryptionKey, identity }
     }

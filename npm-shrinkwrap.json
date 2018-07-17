@@ -6008,8 +6008,8 @@
     },
     "react-native-scrollable-tab-view": {
       "version": "0.8.0",
-      "from": "../react-native-scrollable-tab-view",
-      "resolved": "file:../react-native-scrollable-tab-view"
+      "from": "react-native-scrollable-tab-view@>=0.8.0 <0.9.0",
+      "resolved": "https://registry.npmjs.org/react-native-scrollable-tab-view/-/react-native-scrollable-tab-view-0.8.0.tgz"
     },
     "react-native-swipeout": {
       "version": "2.3.3",

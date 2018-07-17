@@ -1467,13 +1467,11 @@ var NewResourceMixin = {
       else if (isIdentity)
         icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={styles.photoIcon}/>
       else if (!noChooser)
-        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={[styles.icon1, styles.customIcon]} />
+        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={styles.customIcon} />
     }
     let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
                     {propView}
-                    <View style={{justifyContent: 'center', marginTop: 10}}>
-                      {icon}
-                    </View>
+                    {icon}
                   </View>
 
     let help = this.getHelp(prop)
@@ -1864,7 +1862,7 @@ var NewResourceMixin = {
           <View>
             <View style={styles.chooserContentStyle}>
               <Text style={styles.enumText}>{value}</Text>
-              <Icon name='ios-arrow-down'  size={15}  color={linkColor}  style={[styles.icon1, styles.enumProp]} />
+              <Icon name='ios-arrow-down'  size={15}  color={linkColor}  style={[styles.arrowIcon, styles.enumProp]} />
             </View>
            {error}
           </View>
@@ -2065,10 +2063,10 @@ var styles= StyleSheet.create({
   labelStyle: {
     paddingLeft: 0,
   },
-  icon1: {
+  arrowIcon: {
     width: 15,
     height: 15,
-    marginVertical: 2
+    // marginVertical: 2
   },
   booleanContainer: {
     minHeight: 45,
@@ -2269,7 +2267,7 @@ var styles= StyleSheet.create({
     flex: 1
   },
   help: {
-    backgroundColor: '#f7f7f7',
+    backgroundColor: utils.isAndroid() ? '#efefef' : '#f7f7f7',
     marginHorizontal: 10,
     paddingHorizontal: 5,
     borderBottomWidth: 1,
