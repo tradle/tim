@@ -960,7 +960,7 @@ var styles = StyleSheet.create({
   icon: {
     width: 25,
     height: 30,
-    marginTop: Platform.OS === 'web' ? 0 : Platform.OS === 'android' ? 15 : 0
+    marginTop: Platform.OS === 'web' ? 0 : Platform.OS === 'android' ? 10 : 0
   },
   row: {
     flexDirection: 'row'

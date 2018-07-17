@@ -2,7 +2,7 @@ console.log('requiring QRCode.js')
 import {
   StyleSheet,
   View,
-  InteractionManager
+  // InteractionManager
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -15,13 +15,13 @@ var DEFAULT_DIM = 370
 import React, { Component } from 'react'
 
 class QRCodeView extends Component {
-  constructor(props) {
-    super(props)
+  // constructor(props) {
+  //   super(props)
 
-    this.state = {
-      renderPlaceholderOnly: true
-    }
-  }
+  //   this.state = {
+  //     renderPlaceholderOnly: true
+  //   }
+  // }
   propTypes: {
     content: PropTypes.string.isRequired,
     dimension: PropTypes.number,
@@ -35,22 +35,21 @@ class QRCodeView extends Component {
     fgColor: 'black',
     fullScreen: false
   };
-  componentDidMount() {
-    InteractionManager.runAfterInteractions(() => {
-      this.setState({
-        renderPlaceholderOnly: false
-      });
-    });
-  }
+  // componentDidMount() {
+  //   InteractionManager.runAfterInteractions(() => {
+  //     this.setState({
+  //       renderPlaceholderOnly: false
+  //     });
+  //   });
+  // }
   render() {
     var code
-    if (this.state.renderPlaceholderOnly) {
-      return <ActivityIndicator hidden='true' size='large' style={this.state.style} />
-    }
+    // if (this.state.renderPlaceholderOnly) {
+    //   return <ActivityIndicator hidden='true' size='large' style={this.state.style} />
+    // }
 
     var code = <QRCode
       value={this.props.content}
-      style={this.state.style}
       size={this.props.dimension}
       bgColor={this.props.bgColor}
       fgColor={this.props.fgColor}

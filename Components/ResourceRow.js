@@ -602,6 +602,8 @@ class ResourceRow extends Component {
     //             </View>
     // }
     // if (status !== 'Approved'  &&  status !== 'Denied') {
+    let aTitle = resource.applicantName || resource.applicant.title
+    let applicant = aTitle  &&  <Text style={styles.applicant}>{aTitle}</Text>
     let icolor
     let iname
     let hasRM = resource.relationshipManagers
@@ -622,13 +624,9 @@ class ResourceRow extends Component {
     }
     let icon = <Icon name={iname} size={30} color={icolor} style={{alignSelf: 'flex-end'}}/>
 
-    let rmIcon = <View style={{flexDirection: 'column', justifyContent: 'center'}}>
+    let rmIcon = <View style={{flexDirection: 'column', justifyContent: 'center', marginTop: aTitle && -15 || 0}}>
                    {icon}
                  </View>
-    let aTitle = resource.applicantName || resource.applicant.title
-    let applicant
-    if (aTitle)
-      applicant = <Text style={styles.applicant}>{aTitle}</Text>
     let formsCount, progressBar
     // let formTypes = []
     // let progress = 0
@@ -670,11 +668,11 @@ class ResourceRow extends Component {
                 </View>
                 {applicant}
               </View>
-              <View style={{justifyContent: 'flex-end', marginTop: -30}}>
+              <View style={{marginTop: -30, alignItems: 'flex-end'}}>
                 {rmIcon}
                 {dateStarted}
-                {dateCompleted}
                 {dateEvaluated}
+                {dateCompleted}
               </View>
               {progressBar}
             </View>
@@ -758,6 +756,7 @@ var styles = StyleSheet.create({
   applicant: {
     color: '#999999',
     fontSize: 16,
+    paddingTop: 3
   },
   row: {
     backgroundColor: '#ffffff',
