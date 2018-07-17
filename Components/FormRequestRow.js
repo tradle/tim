@@ -256,9 +256,9 @@ class FormRequestRow extends Component {
                      : <View />
 
 
-    let addStyle = message.length < 30
-                 ? [chatStyles.verificationBody, styles.mstyle]
-                 : [chatStyles.verificationBody, styles.container, styles.mstyle]
+    let addStyle = [chatStyles.verificationBody, styles.mstyle]
+    if (message.length < 30)
+      addStyle.push(styles.container)
     var shareables = !isFormRequest  || resource._documentCreated
                    ? null
                    : this.showShareableResources(styles);
@@ -852,33 +852,33 @@ class FormRequestRow extends Component {
 //   inputRange: [0, 1],
 //   outputRange: [0, 100],
 // });
-     link = <View style={{flex: 1}}>
-             <View style={{flex: 1, paddingTop: 10}}>
-               {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, isAnother: true})}
-               <View style={styles.hr}/>
-               <TouchableOpacity onPress={() => {
-                  Alert.alert(
-                    translate('areYouSureAboutNextForm', translate(form)),
-                    null,
-                    [
-                      {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                      {text: translate('Ok'), onPress: onOK.bind(this)},
-                    ]
-                  )
-               }}>
-                 <View style={[styles.row, {paddingTop: 10}]}>
-                   <Animated.View style={animStyle}>
-                     <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
-                       <Icon name='ios-arrow-forward' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
+       link = <View style={{flex: 1}}>
+               <View style={{flex: 1, paddingTop: 10}}>
+                 {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, isAnother: true})}
+                 <View style={styles.hr}/>
+                 <TouchableOpacity onPress={() => {
+                    Alert.alert(
+                      translate('areYouSureAboutNextForm', translate(form)),
+                      null,
+                      [
+                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+                        {text: translate('Ok'), onPress: onOK.bind(this)},
+                      ]
+                    )
+                 }}>
+                   <View style={[styles.row, {paddingTop: 10}]}>
+                     <Animated.View style={animStyle}>
+                       <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
+                         <Icon name='ios-arrow-forward' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
+                       </View>
+                     </Animated.View>
+                     <View style={{justifyContent: 'center'}}>
+                       <Text style={styles.addMore}>{translate('moveToTheNextForm')}</Text>
                      </View>
-                   </Animated.View>
-                   <View style={{justifyContent: 'center'}}>
-                     <Text style={styles.addMore}>{translate('moveToTheNextForm')}</Text>
-                   </View>
-                  </View>
-              </TouchableOpacity>
-            </View>
-           </View>
+                    </View>
+                </TouchableOpacity>
+              </View>
+             </View>
     }
     else {
       let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
@@ -984,7 +984,7 @@ class FormRequestRow extends Component {
       else {
         mColor = bankStyle.incomingMessageTextColor
         if (!sameFormRequestForm) {
-          addMore = <View style={{ marginLeft: -5, width: msgWidth - 30}}>
+          addMore = <View style={{ marginLeft: -5 }}>
                       {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage})}
                     </View>
           // if (!shareableResources)
