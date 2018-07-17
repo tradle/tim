@@ -301,6 +301,8 @@ var utils = {
       return Store.getAugmentedModel(model)
 
     let lens = Store.getLens(lensId)
+    if (!lens)
+      return Store.getAugmentedModel(model)
 
     let merged = Lens.merge({ models: this.getModels(), model, lens })
     // let m = _.cloneDeep(merged)
