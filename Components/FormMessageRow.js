@@ -156,7 +156,8 @@ class FormMessageRow extends Component {
     let noContent = !hasSentTo &&  !renderedRow.length
 
     let notSigned = !resource[SIG]
-    let headerStyle = [chatStyles.verifiedHeader, styles.headerStyle, {opacity: notSigned ? 0.2 : 0.5}]
+
+    let headerStyle = [chatStyles.verifiedHeader, notSigned && styles.notSignedHeaderStyle || styles.headerStyle]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
     let model = utils.getModel(resource[TYPE])
@@ -182,7 +183,7 @@ class FormMessageRow extends Component {
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
     let arrowIcon
     if (!utils.isContext(resource))
-      arrowIcon = <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'}/>
+      arrowIcon = <Icon color='#EBFCFF' size={20} name={'ios-arrow-forward'} />
 
     let prefillProp = utils.getPrefillProperty(model)
     let mTitle = prefillProp ? 'Draft' : translate(model)
@@ -192,7 +193,7 @@ class FormMessageRow extends Component {
         {ownerPhoto}
         <View style={[{flex:1}, chatStyles.verificationBody]}>
           <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
-           <Text style={chatStyles.verificationHeaderText}>{headerTitle}
+           <Text style={[chatStyles.verificationHeaderText, {width: '97%'}]}>{headerTitle}
               {sealedStatus}
             </Text>
             {arrowIcon}
@@ -316,6 +317,10 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
   //                ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }
   //                : {borderTopRightRadius: 10, borderTopLeftRadius: 0 }
   let bg = isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg
+  let rgb = utils.hexToRgb(bg)
+  rgb = Object.values(rgb).join(',')
+  let signedBg = `rgba(${rgb},0.5)`
+  let notSignedBg = `rgba(${rgb},0.2)`
   let pageBg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
   return StyleSheet.create({
     myMsg: {
@@ -356,7 +361,14 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       justifyContent: 'space-between',
       paddingLeft: 5,
       paddingRight: 7,
-      backgroundColor: bg
+      backgroundColor: signedBg
+    },
+    notSignedHeaderStyle: {
+      ...moreHeader,
+      justifyContent: 'space-between',
+      paddingLeft: 5,
+      paddingRight: 7,
+      backgroundColor: notSignedBg
     },
     title: {
       fontSize: 18,
