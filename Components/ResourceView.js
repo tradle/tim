@@ -25,6 +25,9 @@ import {
 var dataURLtoBlob = require('dataurl-to-blob');
 
 import React, { Component } from 'react'
+import Reflux from 'reflux'
+import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons'
 
 import constants from '@tradle/constants'
 import QR from '@tradle/qr-schema'
