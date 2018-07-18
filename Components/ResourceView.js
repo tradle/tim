@@ -4,25 +4,14 @@ console.log('requiring ResourceView.js')
 import pick from 'object.pick'
 import _ from 'lodash'
 import { makeResponsive } from 'react-native-orient'
-
-import constants from '@tradle/constants'
-import QR from '@tradle/qr-schema'
 import ActionSheet from 'react-native-actionsheet'
-import Reflux from 'reflux'
-import reactMixin from 'react-mixin'
-import { makeResponsive } from 'react-native-orient'
-import Icon from 'react-native-vector-icons/Ionicons'
+
 import {
-  // StyleSheet,
-  // ScrollView,
   Image,
   View,
   Text,
   Platform,
   TextInput,
-  ListView,
-  Dimensions,
-  Linking,
   Modal,
   Alert,
   TouchableOpacity,
@@ -36,6 +25,10 @@ import {
 var dataURLtoBlob = require('dataurl-to-blob');
 
 import React, { Component } from 'react'
+
+import constants from '@tradle/constants'
+import QR from '@tradle/qr-schema'
+
 import utils, {
   translate,
   getFontSize as fontSize
@@ -61,7 +54,7 @@ import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import { signIn } from '../utils/localAuth'
 import Log from './Log'
-import debug from '../utils/debug'
+// import debug from '../utils/debug'
 // import ConversationsIcon from './ConversationsIcon'
 import Navs from '../utils/navs'
 import ArticleView from './ArticleView'
@@ -220,7 +213,7 @@ class ResourceView extends Component {
       let style = {}
       _.extend(style, defaultBankStyle)
       if (to.style)
-        style = extend(style, to.style)
+        style = _.extend(style, to.style)
       this.props.navigator.replace({
         component: MessageList,
         title: utils.getDisplayName(to),
