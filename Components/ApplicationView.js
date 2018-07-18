@@ -158,14 +158,15 @@ class ApplicationView extends Component {
 
     let { width } = utils.dimensions(ApplicationView)
 
-    let bgcolor = Platform.OS === 'android' ? 'transparent' : bankStyle.linkColor
-    let color = Platform.OS !== 'android' ? '#ffffff' : bankStyle.linkColor
+    let isAndroid = utils.isAndroid()
+    let bgcolor = isAndroid ? 'transparent' : bankStyle.linkColor
+    let color = isAndroid ? bankStyle.linkColor : '#ffffff'
     let iconName = 'ios-person-add-outline'
     let icolor
     let rmStyle
     if (hasRM) {
       iconName = 'ios-person'
-      icolor = '#ffffff'
+      icolor =  isAndroid && (isRM && bankStyle.linkColor || '#CA9DF2') || '#ffffff'
       rmStyle = styles.hasRM
     }
     else {
@@ -349,8 +350,9 @@ reactMixin(ApplicationView.prototype, HomePageMixin)
 ApplicationView = makeResponsive(ApplicationView)
 
 var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM, bankStyle }) {
-  let bgcolor = Platform.OS === 'android' ? 'transparent' : bankStyle.linkColor
-  let color = Platform.OS !== 'android' ? '#ffffff' : bankStyle.linkColor
+  let isAndroid = Platform.OS === 'android'
+  let bgcolor = isAndroid && 'transparent' || bankStyle.linkColor
+  let color = isAndroid &&  '#ffffff' || bankStyle.linkColor
   let paddingRight = Platform.OS === 'android' ? 0 : 10
   return StyleSheet.create({
     row: {
@@ -374,14 +376,14 @@ var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, h
       marginRight: 9
     },
     hasRM: {
-      backgroundColor: isRM && bankStyle.linkColor || '#CA9DF2',
-      opacity: 0.5
+      backgroundColor: isAndroid  ?  'transparent' :  (isRM  &&  bankStyle.linkColor || '#CA9DF2'),
+      opacity: isAndroid ? 1 : 0.5
     },
     noRM: {
-      backgroundColor: '#ffffff',
+      backgroundColor: isAndroid && 'transparent' || '#ffffff',
       opacity: 0.5,
       borderWidth: StyleSheet.hairlineWidth,
-      borderColor: bankStyle.linkColor
+      borderColor: bgcolor
     },
     homeButton: {
       alignSelf: 'flex-start',
