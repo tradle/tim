@@ -303,9 +303,20 @@ class ResourceList extends Component {
           return
         }
       }
+      if (params.addProvider) {
+        if (this.props.isTest) {
+          if (resource._isTest)
+            navigator.pop()
+        }
+        else {
+          if (!resource._isTest)
+            navigator.pop()
+        }
+      }
       // this.state.isLoading = true;
       Actions.list({
         query: this.state.filter,
+        isTest: this.props.isTest,
         modelName: model.id,
         to: this.props.resource,
         sortProperty: model.sort
