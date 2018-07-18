@@ -19,7 +19,7 @@ const {
   PREV_HASH
 } = constants
 
-const { MONEY, ENUM, ORGANIZATION, FORM, MESSAGE } = constants.TYPES
+const { MONEY, ENUM, ORGANIZATION, FORM, MESSAGE, MODEL } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
@@ -470,98 +470,6 @@ var search = {
       props = newProps
     }
     return this.addProps({...params, props, model, arr})
-    // for (let p in props) {
-    //   if (p.charAt(0) === '_')
-    //     continue
-    //   if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
-    //     continue
-    //   let prop = props[p]
-    //   if (prop.displayAs)
-    //     continue
-    //   let ptype = prop.type
-    //   if (ptype === 'array') {
-    //     // HACK
-    //     if (p === 'verifications')
-    //       continue
-
-    //     if (isApplication) {
-    //       if (isList  &&  p !== 'relationshipManagers')
-    //         continue
-    //       if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
-    //         continue
-    //     }
-    //     let iref = prop.items.ref
-    //     if (iref) {
-    //       if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
-    //         if (isList  &&  !isApplication)
-    //           continue
-    //         arr.push(`${p} {
-    //           edges {
-    //             node {
-    //               ${this.getSearchProperties({model: utils.getModel(iref)})}
-    //             }
-    //           }
-    //         }`)
-    //       }
-    //       else if (prop.inlined) {
-    //         if (currentProp  &&  currentProp === prop)
-    //           continue
-    //         arr.push(this.addInlined(prop))
-    //       }
-    //       // else if (iref === model.id) {
-    //       //   arr.push(
-    //       //     `${p} {
-    //       //       ${TYPE}
-    //       //       _permalink
-    //       //       _link
-    //       //       _displayName
-    //       //     }`
-    //       //   )
-    //       // }
-    //       // else if (prop.inlined)
-    //       //   arr.push(this.addInlined(prop))
-    //       else
-    //         arr.push(
-    //           `${p} {
-    //             ${TYPE}
-    //             _permalink
-    //             _link
-    //             _displayName
-    //           }`
-    //         )
-    //     }
-    //     else {
-    //       let aprops = prop.items.properties
-    //       if (aprops) {
-
-    //       }
-    //     }
-
-    //     continue
-    //   }
-    //   if (ptype !== 'object') {
-    //     arr.push(p)
-    //     continue
-    //   }
-    //   let ref = prop.ref
-    //   if (!ref) {
-    //     if (prop.range === 'json')
-    //       arr.push(p)
-    //     continue
-    //   }
-    //   if (ref === ORGANIZATION)
-    //     continue
-
-    //   if (prop.inlined)
-    //     arr.push(this.addInlined(prop))
-    //   else {
-    //     // HACK
-    //     let add = (model.id !== 'tradle.PhotoID'  ||  prop.name !== 'sex') &&  (model.id !== 'tradle.FormError'  ||  prop.name !== 'status')
-    //     if (add)
-    //       arr.push(this.addRef(prop))
-    //   }
-    // }
-    // return arr
   },
   addRef(prop) {
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
@@ -700,10 +608,10 @@ var search = {
         arr.push(this.addInlined(prop))
       else {
         arr.push(this.addRef(prop))
-        // HACK
+        // // HACK
         // let add = model  &&  (model.id !== 'tradle.PhotoID'  ||  prop.name !== 'sex') &&  (model.id !== 'tradle.FormError'  ||  prop.name !== 'status')
         // if (add)
-          // arr.push(this.addRef(prop))
+        //   arr.push(this.addRef(prop))
       }
     }
     return arr
@@ -711,6 +619,8 @@ var search = {
   addInlined(prop) {
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
     let p = prop.name
+    if (ref === MODEL)
+      return `${p}`
     let refM = utils.getModel(ref)
     if (prop.range === 'json')
       return p

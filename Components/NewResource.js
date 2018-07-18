@@ -1043,10 +1043,10 @@ class NewResource extends Component {
             {loadingVideo}
           </View>
         </View>
-        {wait}
         <View style={styles.submit}>
           {submit}
         </View>
+        {wait}
       </ScrollView>
 
 

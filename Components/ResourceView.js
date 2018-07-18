@@ -2,7 +2,9 @@ console.log('requiring ResourceView.js')
 'use strict';
 
 import pick from 'object.pick'
-import extend from 'extend'
+import _ from 'lodash'
+import { makeResponsive } from 'react-native-orient'
+
 import constants from '@tradle/constants'
 import QR from '@tradle/qr-schema'
 import ActionSheet from 'react-native-actionsheet'
@@ -216,7 +218,7 @@ class ResourceView extends Component {
       let routes = this.props.navigator.getCurrentRoutes()
       // this.props.navigator.jumpTo(routes[1])
       let style = {}
-      extend(style, defaultBankStyle)
+      _.extend(style, defaultBankStyle)
       if (to.style)
         style = extend(style, to.style)
       this.props.navigator.replace({
@@ -291,7 +293,7 @@ class ResourceView extends Component {
     let model = utils.getModel(modelName);
     let photos = [];
     if (resource.photos  &&  resource.photos.length > 1) {
-      extend(photos, resource.photos);
+      _.extend(photos, resource.photos);
       // photos.splice(0, 1);
     }
 
@@ -440,7 +442,7 @@ class ResourceView extends Component {
           {attachmentsView}
           {actionPanel}
           <Modal animationType={'fade'} visible={isModalOpen} transparent={true} onRequestClose={() => this.closeModal()}>
-            <TouchableOpacity  onPress={() => this.closeModal()} underlayColor='transparent'>
+            <TouchableOpacity  onPress={() => this.closeModal()}>
               <View style={styles.modalBackgroundStyle}>
                 {qrcode}
               </View>
@@ -655,82 +657,3 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions, bank
 })
 
 module.exports = ResourceView;
-  // renderActionSheet() {
-  //   let buttons = []
-
-  //   if (ENV.requireDeviceLocalAuth) {
-  //     if (utils.isIOS()) {
-  //       // when both auth methods are available, give the choice to disable one
-  //       buttons.push({
-  //         text: translate('useTouchId') + (this.state.useTouchId ? ' ✓' : ''),
-  //         onPress: this.changePreferences(USE_TOUCH_ID)
-  //       })
-  //       buttons.push({
-  //         text: translate('useGesturePassword') + (this.state.useGesturePassword ? ' ✓' : ''),
-  //         onPress: this.changePreferences(USE_GESTURE_PASSWORD)
-  //       })
-  //     }
-  //   }
-
-  //   if (this.state.useGesturePassword || !utils.isIOS()) {
-  //     buttons.push({
-  //       text: translate('changeGesturePassword'),
-  //       onPress: this.changePreferences(CHANGE_GESTURE_PASSWORD)
-  //     })
-  //   }
-  //   buttons.push({
-  //     text: translate('pairDevices'),
-  //     onPress: this.changePreferences(PAIR_DEVICES)
-  //   })
-  //   buttons.push({
-  //     text: translate('viewDebugLog'),
-  //     onPress: this.changePreferences(VIEW_DEBUG_LOG)
-  //   })
-  //   if (!ENV.homePageScanQRCodePrompt) {
-  //     buttons.push({
-  //       text: translate('scanQRcode'),
-  //       onPress: this.changePreferences(SCAN_QR_CODE)
-  //     })
-  //   }
-  //   buttons.push({ text: translate('cancel') })
-  //   return (
-  //     <ActionSheet
-  //       ref={(o) => {
-  //         this.ActionSheet = o
-  //       }}
-  //       options={buttons}
-  //     />
-  //   )
-  // }
-  // onResourceUpdate(params) {
-    // var resource = params.resource;
-    // let me = utils.getMe()
-    // if (resource[ROOT_HASH] === me[ROOT_HASH])
-    // Actions.getItem(me)
-    // else
-    // if (resource  &&  this.props.resource[ROOT_HASH] === resource[ROOT_HASH]) {
-    //   var me = utils.getMe();
-    //   if (resource[ROOT_HASH] === me[ROOT_HASH])
-    //     utils.setMe(resource);
-      // this.setState({resource: resource});
-    // }
-  // }
-  // renderRow(resource) {
-  //      return <ShowRefList lazy={this._lazyId}
-  //               resource={this.state.resource}
-  //               navigator={this.props.navigator}
-  //               currency={this.props.currency}
-  //               bankStyle={this.props.bankStyle}
-  //               backlink={this.state.backlink}
-  //               backlinkList={this.state.backlinkList}/>
-  // }
-    // return (
-    //   <PageView style={platformStyles.container}>
-    //     <View style={styles.photoBG}>
-    //       {photoView}
-    //       {identityPhotoList}
-    //     </View>
-    //     {actionPanel}
-    //   </PageView>
-    //  );
-
