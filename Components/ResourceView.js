@@ -14,6 +14,7 @@ import {
   TextInput,
   Modal,
   Alert,
+  Linking,
   TouchableOpacity,
 } from 'react-native'
 import PropTypes from 'prop-types'
