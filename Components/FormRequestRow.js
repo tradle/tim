@@ -237,7 +237,7 @@ class FormRequestRow extends Component {
     if (formTitle.length > message.length)
       message = formTitle
     // HACK
-    let msgL = this.hasSharables() ? msgWidth : message.length * utils.getFontSize(18)
+    let msgL = this.hasSharables() ? msgWidth : message.length * utils.getFontSize(16)
     var viewStyle = {
       flexDirection: 'row',
       borderTopRightRadius: 10,
@@ -892,11 +892,11 @@ class FormRequestRow extends Component {
           let style = {transform: [{rotate: rotateX}]}
           msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={styles.message}  key={this.getNextKey()}>
                   <Animated.View style={style}>
-                    <View style={[styles.addButton, {backgroundColor: '#007EFF', marginRight: 10}]}>
+                    <View style={[styles.addButton, {backgroundColor: '#007EFF', marginRight: 7}]}>
                       <Icon name='md-information' size={35} color='#ffffff' />
                     </View>
                   </Animated.View>
-                  <Text style={[chatStyles.resourceTitle, {color: '#757575', width: msgWidth - 80}]}>{addMessage}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: '#757575', width: msgWidth - 60}]}>{addMessage}</Text>
                 </TouchableOpacity>
         }
         else if (isMyProduct) {
@@ -931,11 +931,9 @@ class FormRequestRow extends Component {
               useImageInput = utils.isSimulator()  ||  prop.allowPicturesFromLibrary  ||  !isScan
 
             let actionItem
-            if (useImageInput) {
-              actionItem = <ImageInput prop={prop} style={styles.container} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                             <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
-                           </ImageInput>
-            }
+                             // <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
+            if (useImageInput)
+              actionItem = this.makeButtonLink({form, isMyMessage, prop, styles, msg: addMessage, onPress: (item) => this.onSetMediaProperty(prop.name, item), useImageInput})
             else
               actionItem = <TouchableOpacity underlayColor='transparent' onPress={() => this.showCamera({prop: prop})}>
                              <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
@@ -945,7 +943,7 @@ class FormRequestRow extends Component {
             msg = <View key={this.getNextKey()}>
                    <View style={styles.thumbView}>
                      {actionItem}
-                     {resource._documentCreated ? null : icon}
+                     {resource._documentCreated ||  useImageInput ? null : icon}
                    </View>
                  </View>
           }
@@ -1037,7 +1035,7 @@ class FormRequestRow extends Component {
     if (!utils.isEmpty(verifications)  &&  verifications[rtype])
       return true
   }
-  makeButtonLink({form, isMyMessage, styles, msg, isAnother, onPress}) {
+  makeButtonLink({form, prop, isMyMessage, styles, msg, isAnother, onPress, useImageInput}) {
     if (!msg)
       msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
     let { application, bankStyle } = this.props
@@ -1052,17 +1050,23 @@ class FormRequestRow extends Component {
     }
     let zoomIn = {justifyContent: 'center', transform: [{scale: this.springValue}]}
     let hasSharables = this.hasSharables()
+    let content = <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
+                    <Animated.View style={zoomIn}>
+                      <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
+                        <Icon name='md-add' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
+                      </View>
+                    </Animated.View>
+                     <View style={{justifyContent: 'center'}}>
+                       <Text style={styles.addMore}>{msg}</Text>
+                     </View>
+                   </View>
+    if (useImageInput)
+      return <ImageInput prop={prop} style={styles.container} onImage={onPress}>
+               {content}
+             </ImageInput>
+
     return <TouchableOpacity style={{paddingRight: 15}} onPress={onPress || this.createNewResource.bind(this, form, isMyMessage)}>
-             <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
-              <Animated.View style={zoomIn}>
-                <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
-                  <Icon name='md-add' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
-                </View>
-              </Animated.View>
-               <View style={{justifyContent: 'center'}}>
-                 <Text style={styles.addMore}>{msg}</Text>
-               </View>
-             </View>
+             {content}
            </TouchableOpacity>
 
   }
