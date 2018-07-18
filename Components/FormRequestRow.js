@@ -236,8 +236,8 @@ class FormRequestRow extends Component {
     let formTitle = isFormRequest ? translate(resource.form) : 'Forms'
     if (formTitle.length > message.length)
       message = formTitle
-
-    let msgL = this.hasSharables() ? msgWidth : message.length * utils.getFontSize(10) + 35
+    // HACK
+    let msgL = this.hasSharables() ? msgWidth : message.length * utils.getFontSize(18)
     var viewStyle = {
       flexDirection: 'row',
       borderTopRightRadius: 10,
@@ -899,7 +899,6 @@ class FormRequestRow extends Component {
       let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
       let notLink = resource._documentCreated  ||  isReadOnly  ||  isMyProduct  || resource.form === PRODUCT_REQUEST
-      icon = <Icon  name={'ios-arrow-forward'} color={linkColor} size={20} />
       if (notLink) {
         if (form.id  === PRODUCT_REQUEST) {
           const rotateX = this.spinValue.interpolate({
@@ -929,6 +928,8 @@ class FormRequestRow extends Component {
         else if (!prop)
           onPressCall = this.createNewResource.bind(this, form, isMyMessage)
         else {
+          icon = <Icon  name={'ios-arrow-forward'} color={linkColor} size={20} style={styles.arrowForward}/>
+
           if (prop.scanner === 'payment-card') {
             if (!utils.isWeb()) {
               msg = <View key={this.getNextKey()}>
@@ -1290,6 +1291,9 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     arrow: {
       marginRight: 10,
       marginTop: 5
+    },
+    arrowForward: {
+      paddingLeft: 5
     },
     link: {
       paddingBottom: 15,
