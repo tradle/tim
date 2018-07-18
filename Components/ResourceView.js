@@ -4,20 +4,14 @@ console.log('requiring ResourceView.js')
 import pick from 'object.pick'
 import _ from 'lodash'
 import { makeResponsive } from 'react-native-orient'
-
-import constants from '@tradle/constants'
-import QR from '@tradle/qr-schema'
 import ActionSheet from 'react-native-actionsheet'
+
 import {
-  // StyleSheet,
-  // ScrollView,
   Image,
   View,
   Text,
   Platform,
   TextInput,
-  ListView,
-  Dimensions,
   Modal,
   Alert,
   TouchableOpacity,
@@ -29,6 +23,13 @@ import {
 } from 'react-native-lazyload'
 
 import React, { Component } from 'react'
+import Reflux from 'reflux'
+import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons'
+
+import constants from '@tradle/constants'
+import QR from '@tradle/qr-schema'
+
 import utils, {
   translate,
   getFontSize as fontSize
@@ -39,12 +40,9 @@ import PhotoView from './PhotoView'
 import PhotoList from './PhotoList'
 import ShowRefList from './ShowRefList'
 import PageView from './PageView'
-import Icon from 'react-native-vector-icons/Ionicons'
 import IdentitiesList from './IdentitiesList'
 import Actions from '../Actions/Actions'
-import Reflux from 'reflux'
 import Store from '../Store/Store'
-import reactMixin from 'react-mixin'
 import ResourceMixin from './ResourceMixin'
 import QRCode from './QRCode'
 import MessageList from './MessageList'
@@ -57,7 +55,7 @@ import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import { signIn } from '../utils/localAuth'
 import Log from './Log'
-import debug from '../utils/debug'
+// import debug from '../utils/debug'
 // import ConversationsIcon from './ConversationsIcon'
 import Navs from '../utils/navs'
 
