@@ -5980,8 +5980,8 @@
     },
     "react-native-scrollable-tab-view": {
       "version": "0.8.0",
-      "from": "compojoom/react-native-scrollable-tab-view#fixes_android",
-      "resolved": "git://github.com/compojoom/react-native-scrollable-tab-view.git#ade702c7f35b1899444ff6a450730ae990000a26"
+      "from": "tradle/react-native-scrollable-tab-view#fixes_android",
+      "resolved": "git://github.com/tradle/react-native-scrollable-tab-view.git#ade702c7f35b1899444ff6a450730ae990000a26"
     },
     "react-native-swipeout": {
       "version": "2.3.3",
