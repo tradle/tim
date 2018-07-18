@@ -3240,6 +3240,10 @@ var Store = Reflux.createStore({
       // self.addMessagesToChat(orgId, rr)
       return db.batch(batch)
     })
+    .then(() => {
+      if (me.isEmployee)
+        return this.getModelsPack(to)
+    })
     .catch((err) => {
       debugger
     })
@@ -3248,7 +3252,27 @@ var Store = Reflux.createStore({
         cb(rr)
     })
   },
+  async getModelsPack(to) {
+    let type = utils.getType(to)
 
+    if (type === ORGANIZATION)
+      to = this.getRepresentative(to)
+    let { list } = await this.searchServer({
+      modelName: MODELS_PACK,
+      noTrigger: true,
+      limit: 1,
+      filterResource: {_org: utils.getRootHash(to)}
+    })
+
+    if (!list  ||  !list.length)
+      return
+    let batch = []
+
+    await this.modelsPackHandler({val: list[0], batch})
+    this.dbBatchPut(utils.getId(list[0]), list[0], batch)
+    await db.batch(batch)
+    this.addMessagesToChat(utils.getId(to), list[0])
+  },
   packMessage(toChain, from, to, context) {
     var sendParams = {}
     if (toChain[CUR_HASH]) {
@@ -6685,7 +6709,7 @@ if (!res[SIG]  &&  res._message)
       else if (props[p]  &&  props[p].inlined) {
         if (props[p].type === 'object'  &&  props[p].ref)
           this.convertInlineRefs(props[p].ref, rr[p])
-        else if (props[p].type === 'array'  &&  props[p].items.ref)
+        else if (props[p].type === 'array'  &&  props[p].items.ref  &&  props[p].items.ref !== MODEL)
           rr[p] = rr[p].map(v => this.convertInlineRefs(props[p].items.ref, v))
       }
     }
@@ -9494,7 +9518,6 @@ if (!res[SIG]  &&  res._message)
       while (true) {
         try {
           let result = yield this.getInfo({serverUrls: [v], retry: false, id: value.id, hash: value.hash, newServer: true, maxAttempts: maxAttempts})
-          debugger
           if (result[0].state === 'fulfilled') {
             gotInfo = true
             break;
@@ -9569,9 +9592,12 @@ if (!res[SIG]  &&  res._message)
       value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
       self._setItem(key, value)
     }
-    value = self._getItem(key)
-    self.trigger({action: 'addItem', resource: value})
-    return self.dbPut(key, value)
+    let newProvider = SERVICE_PROVIDERS.find(sp => {
+                        if (sp.url  &&  utils.urlsEqual(sp.url, value.url))
+                          return sp
+                      })
+    self.trigger({action: 'addItem', resource: this._getItem(newProvider.org), addProvider: true})
+    return self.dbPut(key, self._getItem(key))
   }),
   forgetAndReset() {
     var orgs = this.searchNotMessages({modelName: ORGANIZATION})
@@ -10611,7 +10637,7 @@ if (!res[SIG]  &&  res._message)
 
     if (isModelsPack) {
       noTrigger = true
-      let stopHere = await modelsPackHandler()
+      let stopHere = await this.modelsPackHandler(val, batch, org)
       if (stopHere)
         return
       this.addMessagesToChat(utils.getId(fOrg), val)
@@ -10809,69 +10835,71 @@ if (!res[SIG]  &&  res._message)
       await self.dbPut(meId, me)
       disableBlockchainSync(meDriver)
     }
-    async function modelsPackHandler() {
-      // org.products = []
-      let pList = val.models || []
-      pList.forEach((m) => {
-        if (!self.getModel(m.id))
-          self._emitter.emit('model:' + m.id)
-        m._versionId = val.versionId
-
-        storeUtils.parseOneModel(m, models, enums)
-        batch.push({type: 'put', key: m.id, value: m})
-      })
-      utils.setModels(self.getModels())
-      // utils.setModels(models)
-
-      if (val.lenses) {
-        val.lenses.forEach((l) => {
-          batch.push({type: 'put', key: l.id, value: l})
-          lenses[l.id] = l
-        })
-      }
-      await db.batch(batch)
-      // let orgId = utils.getId(org)
-      // list[orgId].value = org
-      // self.dbBatchPut(utils.getId(org), org, batch)
-      // self.trigger({action: 'getItem', resource: org})
-      // noTrigger = hasNoTrigger(orgId)
-      if (!self.preferences  ||  self.preferences.firstPage !== 'chat' ||  !ENV.autoRegister)
-        return
-        // ENV.autoRegister                &&
-        // org.products.length === 1) {
-      let meRef = self.buildRef(utils.getMe())
-      let pa = await self.searchMessages({modelName: PRODUCT_REQUEST})
-      let product = org.products[0]
-      let hasThisProductApp
-      if (pa  &&  pa.some((r) => r.requestFor === product))
-        return true
-      if (org._greeting) {
-        let msg = {
-          [TYPE]: SIMPLE_MESSAGE,
-          [ROOT_HASH]: val.from.title.replace(' ', '_') + '_1',
-          message: translate(org._greeting),
-          time: new Date().getTime(),
-          from: val.from,
-          to: meRef
-        }
-        let msgId = utils.getId(msg)
-        self._setItem(msgId, msg)
-        self.addMessagesToChat(utils.getId(org), msg)
-        self.trigger({action: 'addMessage', resource: msg})
-        db.put(msgId, msg)
-      }
-      self.onAddMessage({
-        msg: {
-          [TYPE]: PRODUCT_REQUEST,
-          requestFor: product,
-          from: meRef,
-          to: val.from
-        }
-      })
-      return true
-    }
-
   },
+  async modelsPackHandler({val, batch, org}) {
+    // org.products = []
+    let pList = val.models || []
+    pList.forEach((m) => {
+      if (!this.getModel(m.id))
+        this._emitter.emit('model:' + m.id)
+      m._versionId = val.versionId
+
+      storeUtils.parseOneModel(m, models, enums)
+      batch.push({type: 'put', key: m.id, value: m})
+    })
+    utils.setModels(this.getModels())
+    // utils.setModels(models)
+
+    if (val.lenses) {
+      val.lenses.forEach((l) => {
+        batch.push({type: 'put', key: l.id, value: l})
+        lenses[l.id] = l
+      })
+    }
+    await db.batch(batch)
+    if (!org)
+      return true
+    // let orgId = utils.getId(org)
+    // list[orgId].value = org
+    // this.dbBatchPut(utils.getId(org), org, batch)
+    // this.trigger({action: 'getItem', resource: org})
+    // noTrigger = hasNoTrigger(orgId)
+    if (!this.preferences  ||  this.preferences.firstPage !== 'chat' ||  !ENV.autoRegister)
+      return
+      // ENV.autoRegister                &&
+      // org.products.length === 1) {
+    let meRef = this.buildRef(utils.getMe())
+    let pa = await this.searchMessages({modelName: PRODUCT_REQUEST})
+    let product = org.products[0]
+    let hasThisProductApp
+    if (pa  &&  pa.some((r) => r.requestFor === product))
+      return true
+    if (org._greeting) {
+      let msg = {
+        [TYPE]: SIMPLE_MESSAGE,
+        [ROOT_HASH]: val.from.title.replace(' ', '_') + '_1',
+        message: translate(org._greeting),
+        time: new Date().getTime(),
+        from: val.from,
+        to: meRef
+      }
+      let msgId = utils.getId(msg)
+      this._setItem(msgId, msg)
+      this.addMessagesToChat(utils.getId(org), msg)
+      this.trigger({action: 'addMessage', resource: msg})
+      db.put(msgId, msg)
+    }
+    this.onAddMessage({
+      msg: {
+        [TYPE]: PRODUCT_REQUEST,
+        requestFor: product,
+        from: meRef,
+        to: val.from
+      }
+    })
+    return true
+  },
+
   async getContext(contextId, val) {
     let context
     if (me.isEmployee) {
