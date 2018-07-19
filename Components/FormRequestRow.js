@@ -922,7 +922,7 @@ class FormRequestRow extends Component {
                     </View>
             }
           }
-          else if (prop.ref == PHOTO) {
+          else if (prop.ref === PHOTO) {
             let useImageInput
             const isScan = prop.scanner //  &&  prop.scanner === 'id-document'
             if (utils.isWeb())
