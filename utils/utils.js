@@ -363,16 +363,16 @@ var utils = {
   getLensId(resource, provider) {
     if (!resource._sharedWith)
       return
+    if (provider[TYPE] !== ORGANIZATION)
+      return resource._lens
     let lens
-    if (provider[TYPE] === ORGANIZATION) {
-      provider.contacts.forEach(c => {
-        resource._sharedWith.forEach(s => {
-          if (s.bankRepresentative === c.id)
-            lens = s.lens
-        })
+    provider.contacts.forEach(c => {
+      resource._sharedWith.forEach(s => {
+        if (s.bankRepresentative === c.id)
+          lens = s.lens
       })
-    }
-    return lens
+    })
+    return lens || resource._lens
   },
   getModel(modelName) {
     return Store.getModel(modelName)
