@@ -124,7 +124,7 @@
     "react-mixin": "~1.2.2",
     "react-native": "^0.53.3",
     "react-native-accordion": "github:tradle/react-native-accordion#dev",
-    "react-native-actionsheet": "^2.3.0",
+    "react-native-actionsheet": "^2.4.2",
     "react-native-animatable": "^0.6.1",
     "react-native-app-intro": "github:tradle/react-native-app-intro#dev",
     "react-native-async-storage-rocks": "^2.0.0",
