@@ -545,6 +545,8 @@ class NewResource extends Component {
     let r = {}
     _.extend(r, resource)
     json._context = r._context ||  (originatingMessage  &&  originatingMessage._context)
+    if (originatingMessage  &&  originatingMessage.lens)
+      json._lens = originatingMessage.lens
 
     delete r.url
     let params = {

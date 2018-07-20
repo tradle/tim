@@ -279,7 +279,7 @@ class GridList extends Component {
       params.sortProperty = sortProperty;
     if (prop) {
       let m = utils.getModel(resource[TYPE])
-      params.prop = m.properties[prop.name];
+      params.prop = prop // m.properties[prop.name];
       // case when for example clicking on 'Verifications' on Form page
       if (m.interfaces)
         params.resource = resource

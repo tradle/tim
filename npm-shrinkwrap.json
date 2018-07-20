@@ -5868,7 +5868,7 @@
     },
     "react-native-actionsheet": {
       "version": "2.4.2",
-      "from": "react-native-actionsheet@>=2.3.0 <3.0.0",
+      "from": "https://registry.npmjs.org/react-native-actionsheet/-/react-native-actionsheet-2.4.2.tgz",
       "resolved": "https://registry.npmjs.org/react-native-actionsheet/-/react-native-actionsheet-2.4.2.tgz"
     },
     "react-native-animatable": {

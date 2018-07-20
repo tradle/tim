@@ -47,6 +47,7 @@ import StyleSheet from '../StyleSheet'
 // import pick from 'object.pick'
 import ENV from '../utils/env'
 import ImageInput from './ImageInput'
+import MyCustomTemplate from './MyCustomTemplate'
 import Analytics from '../utils/analytics'
 
 import BlinkID from './BlinkID'
@@ -743,43 +744,6 @@ var NewResourceMixin = {
     }
   },
 
-  showCameraView(params) {
-    // if (utils.isAndroid()) {
-    //   return Alert.alert(
-    //     translate('oops') + '!',
-    //     translate('noScanningOnAndroid')
-    //   )
-    // }
-    let props = this.props.model.properties
-    let scanner = props[params.prop].scanner
-    if (scanner) {
-      if (scanner === 'id-document') {
-        if (params.prop === 'scan')  {
-          if (this.state.resource.documentType  &&  this.state.resource.country) {
-            this.showBlinkIDScanner(params.prop)
-          }
-          else
-            Alert.alert('Please choose country and document type first')
-          return
-        }
-      }
-      else if (scanner === 'payment-card') {
-        if (!utils.isWeb())
-          this.scanCard(params.prop)
-        return
-      }
-    }
-    this.props.navigator.push({
-      title: 'Take a pic',
-      backButtonTitle: 'Back',
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        onTakePic: this.onTakePicture.bind(this, params)
-      }
-    });
-  },
   async scanCard(prop) {
     let cardJson
     try {
@@ -828,22 +792,6 @@ var NewResourceMixin = {
     //   Actions.saveTemporary(r)
     // }
     // Alert.alert(JSON.stringify(card, null, 2))
-  },
-
-  onTakePicture(params, data) {
-    if (!data)
-      return
-    let editProps = utils.getEditableProperties(this.props.resource)
-    if (editProps.length  &&  editProps.length === 1)
-    // if (utils.isOnePropForm(this.props.resource))
-      utils.onTakePic(params.prop, data, this.props.originatingMessage)
-    else {
-      data.url = data.data
-      delete data.data
-      this.setChosenValue(params.prop, data)
-    }
-
-    this.props.navigator.pop()
   },
 
   myTextTemplate(params) {
@@ -1346,9 +1294,9 @@ var NewResourceMixin = {
   // },
 
   myCustomTemplate(params) {
-    let labelStyle = styles.labelClean
-    let textStyle = styles.labelDirty
-    let resource = /*this.props.resource ||*/ this.state.resource
+    if (!this.floatingProps)
+      this.floatingProps = {}
+    let p = params.prop
     let { model, bankStyle, metadata, country, search } = this.props
     let isItem = metadata != null
     let props
@@ -1359,165 +1307,27 @@ var NewResourceMixin = {
     else
       props = utils.getModel(metadata.items.ref).properties
     let prop = props[params.prop]
-    // if (this.state.inFocus  &&  this.state.inFocus !== prop.name)
-    //   return <View/>
-    let lcolor = this.getLabelAndBorderColor(params.prop)
 
-    let color = {color: lcolor}
-    let isVideo = prop.name === 'video'
-    let isPhoto = prop.name === 'photos'  ||  prop.ref === PHOTO
-    let isIdentity = prop.ref === IDENTITY
-
-    let noChooser
-    let required = model  &&  utils.ungroup(model.required)
-    if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(prop.name)) {
-      // Don't overwrite default country on provider
-      if (resource  &&  !resource[prop.name])
-        resource[prop.name] = country
-    }
-    let val = resource && resource[params.prop]
-    if (Array.isArray(val)  &&  !val.length)
-      val = null
-    let label, style, propLabel, isImmutable
-    if (val) {
-      isImmutable = prop.immutable  &&  resource[ROOT_HASH]
-      if (isPhoto) {
-        label = prop.title
-        if (!this.floatingProps)
-          this.floatingProps = {}
-        this.floatingProps[prop.name] = resource[params.prop]
-      }
-      else {
-        let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
-        // let m = utils.getId(resource[params.prop]).split('_')[0]
-        label = utils.getDisplayName(resource[params.prop], rModel)
-        if (!label) {
-          // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
-          if (utils.isEnum(rModel)  &&  Array.isArray(resource[params.prop])) {
-            label = ''
-            resource[params.prop].forEach((r) => {
-              let title = utils.getDisplayName(r)
-              label += label ? ', ' + title : title
-            })
-          }
-          else
-            label = resource[params.prop].title
-        }
-        if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
-          if (!label)
-            label = resource[params.prop]
-          label = utils.createAndTranslate(label, true)
-        }
-      }
-      style = textStyle
-      propLabel = <Text style={[styles.labelDirty, color]}>{params.label}</Text>
-    }
-    else {
-      label = params.label
-      if (!search  &&  params.required)
-        label += ' *'
-      style = [labelStyle, color]
-      propLabel = <View/>
-    }
-    let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
-    if (this.state.isRegistration)
-      color = '#eeeeee'
-    else if (val) {
-      color = isImmutable  ?  bankStyle.linkColor : '#757575'
-    }
-    else
-      color = '#AAAAAA'
-    color = {color}
-    let propView
-    let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
-    if (photoR) {
-      if (utils.isImageDataURL(photoR.url)) {
-        propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
-      } else {
-        propView = <Icon name='ios-paper-outline' size={35} color={linkColor} />
-      }
-    } else {
-      let img = this.state[prop.name + '_photo']
-      if (img) {
-        propView = <View style={{flexDirection: 'row'}}>
-                      <Image source={{uri: img.url}} style={styles.thumb} />
-                      <Text style={[styles.input, color]}>{' ' + label}</Text>
-                   </View>
-      }
-      else {
-        propView = <Text style={[styles.input, color, {width: utils.dimensions(params.component).width - 60}]}>{label}</Text>
-      }
-    }
-    let maxChars = (utils.dimensions(params.component).width - 20)/10
-    if (maxChars < label.length)
-      label = label.substring(0, maxChars - 3) + '...'
-    if (this.state.isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[prop.name])
-      label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
-
-      // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
-    let fontSize = styles.font20 //this.state.isRegistration ? styles.font20 : styles.font18
-    // let fontSize = styles.font18 //this.state.isRegistration ? styles.font20 : styles.font18
-    let iconColor = this.state.isRegistration ? '#eeeeee' : linkColor
-    let icon
-    if (!isImmutable) {
-      if (isVideo)
-        icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
-      else if (isPhoto)
-        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={styles.photoIcon}/>
-      else if (isIdentity)
-        icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={styles.photoIcon}/>
-      else if (!noChooser)
-        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={styles.customIcon} />
-    }
-    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
-                    {propView}
-                    {icon}
-                  </View>
-
-    let help = this.getHelp(prop)
-    let actionItem
-    if (isIdentity && !utils.isWeb())
-       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
-                      {content}
-                    </TouchableOpacity>
-    else if (isVideo ||  isPhoto) {
-      // HACK
-      const isScan = params.prop === 'scan'
-      let useImageInput
-      if (utils.isWeb()) {
-        useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
-      } else {
-        useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
-      }
-
-      if (useImageInput) {
-        let aiStyle = {flex: 7, paddingTop: resource[prop.name] &&  10 || 0, paddingBottom: help ? 0 : 7}
-        let m = utils.getModel(prop.ref)
-        actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                       {content}
-                     </ImageInput>
-      }
-      else
-        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, params)}>
-                       {content}
-                     </TouchableOpacity>
-    }
-    else {
-      if (isImmutable)
-        actionItem = content
-      else
-        actionItem = <TouchableOpacity onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
-                       {content}
-                     </TouchableOpacity>
-    }
-    return (
-      <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
-        {propLabel}
-        {actionItem}
-        {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
-        {help}
-      </View>
-    );
+    return <MyCustomTemplate {...this.props}
+                             navigator={this.props.navigator}
+                             state={this.state}
+                             resource={this.state.resource}
+                             inFocus={this.state.inFocus}
+                             photo={this.state[prop.name + '_photo']}
+                             params={params}
+                             isRegistration={this.state.isRegistration}
+                             floatingProps={this.floatingProps}
+                             missedRequiredOrErrorValue={this.state.missedRequiredOrErrorValue}
+                             addFormValues={this.addFormValues.bind(this)}
+                             onChange={this.setState.bind(this)}
+                             styles={styles}
+                             chooser={this.chooser.bind(this, prop, prop.name)}
+                             getHelp={this.getHelp.bind(this)}
+                             getNextKey={this.getNextKey.bind(this)}
+                             getLabelAndBorderColor={this.getLabelAndBorderColor.bind(this)} />
+  },
+  setOnChange(state) {
+    this.setState(state)
   },
   async scanQRAndSet(prop) {
     const result = await this.scanFormsQRCode()
@@ -1527,27 +1337,6 @@ var NewResourceMixin = {
     //   title: firstName
     // })
     Actions.getIdentity({prop, ...result.data })
-  },
-  onSetMediaProperty(propName, item) {
-    if (!item)
-      return;
-    let resource = this.addFormValues();
-    const props = this.props.model.properties
-    if (props[propName].ref)
-      item[TYPE] = props[propName].ref
-    if (this.state.missedRequiredOrErrorValue)
-      delete this.state.missedRequiredOrErrorValue[propName]
-    let r = _.cloneDeep(this.state.resource)
-    r[propName] = item
-    if (!this.floatingProps)
-      this.floatingProps = {}
-    this.floatingProps[propName] = item
-
-    this.setState({
-      resource: r,
-      prop: propName,
-      inFocus: propName
-    });
   },
   setDefaultValue(prop, data, isHidden) {
     let p = prop.name
@@ -2350,3 +2139,253 @@ module.exports = NewResourceMixin
   //     }
   //   })
   // },
+/*
+  myCustomTemplate(params) {
+    let labelStyle = styles.labelClean
+    let textStyle = styles.labelDirty
+    let resource = this.state.resource
+    let { model, bankStyle, metadata, country, search } = this.props
+    let isItem = metadata != null
+    let props
+    if (model)
+      props = model.properties
+    else if (metadata.items.properties)
+      props = metadata.items.properties
+    else
+      props = utils.getModel(metadata.items.ref).properties
+    let prop = props[params.prop]
+    // if (this.state.inFocus  &&  this.state.inFocus !== prop.name)
+    //   return <View/>
+    let lcolor = this.getLabelAndBorderColor(params.prop)
+
+    let color = {color: lcolor}
+    let isVideo = prop.name === 'video'
+    let isPhoto = prop.name === 'photos'  ||  prop.ref === PHOTO
+    let isIdentity = prop.ref === IDENTITY
+
+    let noChooser
+    let required = model  &&  utils.ungroup(model.required)
+    if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(prop.name)) {
+      // Don't overwrite default country on provider
+      if (resource  &&  !resource[prop.name])
+        resource[prop.name] = country
+    }
+    let val = resource && resource[params.prop]
+    if (Array.isArray(val)  &&  !val.length)
+      val = null
+    let label, style, propLabel, isImmutable
+    if (val) {
+      isImmutable = prop.immutable  &&  resource[ROOT_HASH]
+      if (isPhoto) {
+        label = prop.title
+        if (!this.floatingProps)
+          this.floatingProps = {}
+        this.floatingProps[prop.name] = resource[params.prop]
+      }
+      else {
+        let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
+        // let m = utils.getId(resource[params.prop]).split('_')[0]
+        label = utils.getDisplayName(resource[params.prop], rModel)
+        if (!label) {
+          // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
+          if (utils.isEnum(rModel)  &&  Array.isArray(resource[params.prop])) {
+            label = ''
+            resource[params.prop].forEach((r) => {
+              let title = utils.getDisplayName(r)
+              label += label ? ', ' + title : title
+            })
+          }
+          else
+            label = resource[params.prop].title
+        }
+        if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
+          if (!label)
+            label = resource[params.prop]
+          label = utils.createAndTranslate(label, true)
+        }
+      }
+      style = textStyle
+      propLabel = <Text style={[styles.labelDirty, color]}>{params.label}</Text>
+    }
+    else {
+      label = params.label
+      if (!search  &&  params.required)
+        label += ' *'
+      style = [labelStyle, color]
+      propLabel = <View/>
+    }
+    let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
+    if (this.state.isRegistration)
+      color = '#eeeeee'
+    else if (val) {
+      color = isImmutable  ?  bankStyle.linkColor : '#757575'
+    }
+    else
+      color = '#AAAAAA'
+    color = {color}
+    let propView
+    let linkColor = bankStyle && bankStyle.linkColor || DEFAULT_LINK_COLOR
+    if (photoR) {
+      if (utils.isImageDataURL(photoR.url)) {
+        propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
+      } else {
+        propView = <Icon name='ios-paper-outline' size={35} color={linkColor} />
+      }
+    } else {
+      let img = this.state[prop.name + '_photo']
+      if (img) {
+        propView = <View style={{flexDirection: 'row'}}>
+                      <Image source={{uri: img.url}} style={styles.thumb} />
+                      <Text style={[styles.input, color]}>{' ' + label}</Text>
+                   </View>
+      }
+      else {
+        propView = <Text style={[styles.input, color, {width: utils.dimensions(params.component).width - 60}]}>{label}</Text>
+      }
+    }
+    let maxChars = (utils.dimensions(params.component).width - 20)/10
+    if (maxChars < label.length)
+      label = label.substring(0, maxChars - 3) + '...'
+    if (this.state.isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[prop.name])
+      label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
+
+      // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
+    let fontSize = styles.font20 //this.state.isRegistration ? styles.font20 : styles.font18
+    // let fontSize = styles.font18 //this.state.isRegistration ? styles.font20 : styles.font18
+    let iconColor = this.state.isRegistration ? '#eeeeee' : linkColor
+    let icon
+    if (!isImmutable) {
+      if (isVideo)
+        icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
+      else if (isPhoto)
+        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={styles.photoIcon}/>
+      else if (isIdentity)
+        icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={styles.photoIcon}/>
+      else if (!noChooser)
+        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={styles.customIcon} />
+    }
+    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+                    {propView}
+                    {icon}
+                  </View>
+
+    let help = this.getHelp(prop)
+    let actionItem
+    if (isIdentity && !utils.isWeb())
+       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
+                      {content}
+                    </TouchableOpacity>
+    else if (isVideo ||  isPhoto) {
+      // HACK
+      const isScan = params.prop === 'scan'
+      let useImageInput
+      if (utils.isWeb()) {
+        useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
+      } else {
+        useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
+      }
+
+      if (useImageInput) {
+        let aiStyle = {flex: 7, paddingTop: resource[prop.name] &&  10 || 0, paddingBottom: help ? 0 : 7}
+        let m = utils.getModel(prop.ref)
+        actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+                       {content}
+                     </ImageInput>
+      }
+      else
+        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, params)}>
+                       {content}
+                     </TouchableOpacity>
+    }
+    else {
+      if (isImmutable)
+        actionItem = content
+      else
+        actionItem = <TouchableOpacity onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
+                       {content}
+                     </TouchableOpacity>
+    }
+    return (
+      <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
+        {propLabel}
+        {actionItem}
+        {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
+        {help}
+      </View>
+    );
+  },
+  onSetMediaProperty(propName, item) {
+    if (!item)
+      return;
+    let resource = this.addFormValues();
+    const props = this.props.model.properties
+    if (props[propName].ref)
+      item[TYPE] = props[propName].ref
+    if (this.state.missedRequiredOrErrorValue)
+      delete this.state.missedRequiredOrErrorValue[propName]
+    let r = _.cloneDeep(this.state.resource)
+    r[propName] = item
+    if (!this.floatingProps)
+      this.floatingProps = {}
+    this.floatingProps[propName] = item
+
+    this.setState({
+      resource: r,
+      prop: propName,
+      inFocus: propName
+    });
+  },
+  showCameraView(params) {
+    // if (utils.isAndroid()) {
+    //   return Alert.alert(
+    //     translate('oops') + '!',
+    //     translate('noScanningOnAndroid')
+    //   )
+    // }
+    let props = this.props.model.properties
+    let scanner = props[params.prop].scanner
+    if (scanner) {
+      if (scanner === 'id-document') {
+        if (params.prop === 'scan')  {
+          if (this.state.resource.documentType  &&  this.state.resource.country) {
+            this.showBlinkIDScanner(params.prop)
+          }
+          else
+            Alert.alert('Please choose country and document type first')
+          return
+        }
+      }
+      else if (scanner === 'payment-card') {
+        if (!utils.isWeb())
+          this.scanCard(params.prop)
+        return
+      }
+    }
+    this.props.navigator.push({
+      title: 'Take a pic',
+      backButtonTitle: 'Back',
+      id: 12,
+      component: CameraView,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        onTakePic: this.onTakePicture.bind(this, params)
+      }
+    });
+  },
+  onTakePicture(params, data) {
+    if (!data)
+      return
+    let editProps = utils.getEditableProperties(this.props.resource)
+    if (editProps.length  &&  editProps.length === 1)
+    // if (utils.isOnePropForm(this.props.resource))
+      utils.onTakePic(params.prop, data, this.props.originatingMessage)
+    else {
+      data.url = data.data
+      delete data.data
+      this.setChosenValue(params.prop, data)
+    }
+
+    this.props.navigator.pop()
+  },
+
+*/

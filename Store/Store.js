@@ -91,6 +91,23 @@ const {
   ORG_SIG,
 } = tradle.constants
 
+const excludeWhenSignAndSend = [
+  'to',
+  'from',
+  'verifications',
+  CUR_HASH,
+  'idOld',
+  '_message',
+  '_sharedWith',
+  '_sendStatus',
+  '_context',
+  '_online',
+  '_termsAccepted',
+  '_latest',
+  '_outbound',
+  '_lens'
+]
+
 // const MSG_LINK = '_msg'
 const IS_MESSAGE = '_message'
 const NOT_CHAT_ITEM = '_notChatItem'
@@ -4923,14 +4940,12 @@ if (!res[SIG]  &&  res._message)
       let rId = utils.getId(returnVal.to)
       let to = self._getItem(rId)
       // let permalink = to[ROOT_HASH]
-      let toChain = {}
 
-      let exclude = ['to', 'from', 'verifications', CUR_HASH, 'idOld', '_message', '_sharedWith', '_sendStatus', '_context', '_online',  '_termsAccepted', '_latest', '_outbound']
       // if (isNew)
       //   exclude.push(ROOT_HASH)
-      _.extend(toChain, returnVal)
-      for (let p of exclude)
-        delete toChain[p]
+      let toChain = _.omit(returnVal, excludeWhenSignAndSend)
+      // for (let p of exclude)
+      //   delete toChain[p]
 
       let properties = rModel.properties
 
@@ -7105,11 +7120,13 @@ if (!res[SIG]  &&  res._message)
   //     return enumList
   // },
   getEnum(params) {
-    const { modelName, limit, query, lastId } = params
+    const { modelName, limit, query, lastId, prop } = params
     let result
     let enumList = enums[modelName]
     if (query)
       return enumList.filter((r) => this.checkCriteria({r, query}))
+    if (prop.limit  ||  prop.pin)
+      return utils.applyLens({prop, list: enumList})
 
     let lim = limit || 20
     let lastIdx
@@ -10697,7 +10714,7 @@ if (!res[SIG]  &&  res._message)
     var isModelsPack = type === MODELS_PACK
     if (isModelsPack) {
       noTrigger = true
-      let stopHere = await this.modelsPackHandler(val, batch, org)
+      let stopHere = await this.modelsPackHandler({val, batch, org})
       if (stopHere)
         return
       this.addMessagesToChat(utils.getId(fOrg), val)
