@@ -742,7 +742,7 @@ class FormRequestRow extends Component {
 
     // Prefill for testing and demoing
     let isPrefilled
-    if (ENV.prefillForms && model.id in formDefaults) {
+    if (ENV.prefillForms  &&  model.id in formDefaults) {
       _.extend(r, formDefaults[model.id])
       isPrefilled = true
     }
@@ -922,6 +922,13 @@ class FormRequestRow extends Component {
                     </View>
             }
           }
+          else if (prop.signature) {
+            msg = <View key={this.getNextKey()}>
+                    <View style={styles.messageLink}>
+                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.showSignatureView.bind(this, prop, this.onSetSignatureProperty.bind(this))})}
+                    </View>
+                  </View>
+          }
           else if (prop.ref === PHOTO) {
             let useImageInput
             const isScan = prop.scanner //  &&  prop.scanner === 'id-document'
@@ -962,13 +969,6 @@ class FormRequestRow extends Component {
                        </View>
                      </TouchableOpacity>
                    </View>
-          }
-          else if (prop.signature) {
-            msg = <View key={this.getNextKey()}>
-                    <View style={styles.messageLink}>
-                      {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.showSignatureView.bind(this, prop, this.onSetSignatureProperty.bind(this))})}
-                    </View>
-                  </View>
           }
         }
       }
@@ -1136,30 +1136,6 @@ class FormRequestRow extends Component {
         },
       }
     });
-  }
-  showSignatureView1(prop) {
-    const { navigator, bankStyle } = this.props
-    let sigView
-    navigator.push({
-      title: translate(prop), //m.title,
-      // titleTextColor: '#7AAAC3',
-      id: 32,
-      component: SignatureView,
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
-      onRightButtonPress: () => {
-        const sig = sigView.getSignature()
-        navigator.pop()
-        this.onSetSignatureProperty(prop, sig.url)
-      },
-      passProps: {
-        ref: ref => {
-          sigView = ref
-        },
-        bankStyle,
-        sigViewStyle: bankStyle
-      }
-    })
   }
 }
 
@@ -1369,3 +1345,29 @@ reactMixin(FormRequestRow.prototype, OnePropFormMixin)
 FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;
+/*
+  showSignatureView1(prop) {
+    const { navigator, bankStyle } = this.props
+    let sigView
+    navigator.push({
+      title: translate(prop), //m.title,
+      // titleTextColor: '#7AAAC3',
+      id: 32,
+      component: SignatureView,
+      backButtonTitle: 'Back',
+      rightButtonTitle: 'Done',
+      onRightButtonPress: () => {
+        const sig = sigView.getSignature()
+        navigator.pop()
+        this.onSetSignatureProperty(prop, sig.url)
+      },
+      passProps: {
+        ref: ref => {
+          sigView = ref
+        },
+        bankStyle,
+        sigViewStyle: bankStyle
+      }
+    })
+  }
+*/

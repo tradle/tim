@@ -135,7 +135,7 @@ class NewResource extends Component {
       let eProp = editProps[0]
       if (eProp.signature) {
         currentRoutes[currentRoutesLength - 1].onRightButtonPress = () => {
-          this.onSetSignatureProperty(eProp, this.refs.sigView.getSignature().url)
+          this.onSetSignatureProperty(eProp, this.refs.sigView.getSignature())
         }
       }
     }
@@ -758,7 +758,7 @@ class NewResource extends Component {
         return  <View style={{flex: 1}}>
                    <SignatureView ref={ref => {this.sigView = ref}} bankStyle={bankStyle}  sigViewStyle={bankStyle} onSignature={() => {
                       // this.props.navigator.pop()
-                      this.onSetSignatureProperty(eProp, this.sigView.getSignature().url)
+                      this.onSetSignatureProperty(eProp, this.sigView.getSignature())
                     }} />
                  </View>
         // ref: ref => {
@@ -1204,14 +1204,13 @@ class NewResource extends Component {
     //   actionableCounter = <TouchableOpacity style={acStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
     //                         {counter}
     //                       </TouchableOpacity>
-    let error = this.getErrorView({prop: bl})
     return (
       <View key={this.getNextKey()}>
         <View style={istyle} ref={bl.name}>
           {actionableItem}
         </View>
-        {error}
-        {this.getHelp(bl)}
+        {this.paintError({prop: bl})}
+        {this.paintHelp(bl)}
       </View>
     );
   }
@@ -1248,7 +1247,6 @@ class NewResource extends Component {
     }
     counter = <Icon name='ios-camera-outline'  size={25} color={linkColor} />
     let title = translate(bl, blmodel) //.title || utils.makeLabel(p)
-    let error = this.getErrorView({prop: bl})
     let actionableItem
     if (count)
       actionableItem = <TouchableOpacity
@@ -1282,8 +1280,8 @@ class NewResource extends Component {
             </ImageInput>
           </View>
         </View>
-        {error}
-        {this.getHelp(bl)}
+        {this.paintError({prop: bl})}
+        {this.paintHelp(bl)}
       </View>
     );
   }
