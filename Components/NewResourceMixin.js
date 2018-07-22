@@ -16,7 +16,7 @@ import {
 import PropTypes from 'prop-types';
 
 import SwitchSelector from 'react-native-switch-selector'
-import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
+// import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
 import format from 'string-template'
 import t from 'tcomb-form-native'
 import _ from 'lodash'
@@ -34,9 +34,9 @@ import GridList from './GridList'
 import utils, {
   translate
 } from '../utils/utils'
-import CameraView from './CameraView'
+// import CameraView from './CameraView'
 import EnumList from './EnumList'
-import SignatureView from './SignatureView'
+// import SignatureView from './SignatureView'
 import StyleSheet from '../StyleSheet'
 // import driverLicenseParser from '../utils/driverLicenseParser'
 // import focusUri from '../video/Focus1.mp4'
@@ -46,9 +46,10 @@ import StyleSheet from '../StyleSheet'
 // import pick from 'object.pick'
 import ENV from '../utils/env'
 import ImageInput from './ImageInput'
+import RefPropertyEditor from './RefPropertyEditor'
 import Analytics from '../utils/analytics'
 
-import BlinkID from './BlinkID'
+// import BlinkID from './BlinkID'
 
 // import Anyline from './Anyline'
 import MarkdownPropertyEdit from './MarkdownPropertyEdit'
@@ -490,7 +491,7 @@ var NewResourceMixin = {
           }
         }
 
-        options.fields[p].onFocus = chooser.bind(this, props[p], p)
+        // options.fields[p].onFocus = chooser.bind(this, props[p], p)
         options.fields[p].template = this.myCustomTemplate.bind(this, {
             label: label,
             prop:  p,
@@ -590,248 +591,6 @@ var NewResourceMixin = {
     })
   },
 
-  async showBlinkIDScanner(prop) {
-    const { documentType, country } = this.state.resource
-    const type = getDocumentTypeFromTitle(documentType.title)
-    let recognizers
-    let tooltip
-    switch (type) {
-    case 'passport':
-      tooltip = translate('centerPassport')
-      // machine readable travel documents (passport)
-      recognizers = BlinkID.recognizers.mrtd
-      break
-    case 'license':
-      tooltip = translate('centerLicence')
-      if (country.title === 'United States') {
-        recognizers = [BlinkID.recognizers.usdl, BlinkID.recognizers.face]
-      } else if (country.title === 'New Zealand') {
-        recognizers = BlinkID.recognizers.nzdl
-      } else {
-        recognizers = BlinkID.recognizers.eudl
-      }
-
-      break
-    default:
-      tooltip = translate('centerID')
-      break
-    }
-
-    const blinkIDOpts = {
-      quality: 0.2,
-      base64: true,
-      timeout: ENV.blinkIDScanTimeoutInternal,
-      tooltip,
-      recognizers: recognizers ? [].concat(recognizers) : BlinkID.recognizers
-    }
-
-    const promiseTimeout = new Promise((resolve, reject) => {
-      setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
-    })
-
-    Analytics.sendEvent({
-      category: 'widget',
-      action: 'scan_document',
-      label: `blinkid:${type}`
-    })
-
-    let result
-    try {
-      result = await Promise.race([
-        BlinkID.scan(blinkIDOpts),
-        promiseTimeout
-      ])
-    } catch (err) {
-      debug('scan failed:', err.message)
-      const canceled = /canceled/i.test(err.message)
-      const timedOut = !canceled && /time/i.test(err.message)
-      if (!canceled && typeof BlinkID.dismiss === 'function') {
-        // cancel programmatically
-        BlinkID.dismiss()
-      }
-
-      // give the BlinkID view time to disappear
-      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
-      await utils.promiseDelay(800)
-      debug('BlinkID scan failed', err.stack)
-
-      // if (canceled || timedOut) {
-      //   return Alert.alert(
-      //     translate('documentNotScanning', documentType.title),
-      //     translate('retryScanning', documentType.title.toLowerCase())
-      //   )
-      // }
-
-      if (canceled) return
-
-      return Alert.alert(
-        translate('documentNotScanning'),
-        translate('retryScanning', documentType.title)
-      )
-    }
-
-    // const tradleObj = utils.fromMicroBlink(result)
-    const r = _.cloneDeep(this.state.resource)
-    if (result.image) {
-      r[prop] = {
-        url: result.image.base64,
-        width: result.image.width,
-        height: result.image.height
-      }
-    }
-
-    let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
-    if (docScannerProps  &&  docScannerProps.length)
-      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
-
-
-    let dateOfExpiry
-    ;['mrtd', 'usdl', 'eudl', 'nzdl'].some(docType => {
-      const scan = result[docType]
-      if (!scan) return
-
-      const { personal, document } = scan
-      // if (personal.dateOfBirth) {
-      //   personal.dateOfBirth = formatDate(personal.dateOfBirth)
-      // }
-
-      if (document.dateOfExpiry) {
-        dateOfExpiry = document.dateOfExpiry
-        // document.dateOfExpiry = formatDate(document.dateOfExpiry)
-      }
-
-      // if (document.dateOfIssue) {
-      //   document.dateOfIssue = formatDate(document.dateOfIssue)
-      // }
-
-      r[prop + 'Json'] = scan
-      return
-    })
-
-    if (dateOfExpiry && dateOfExpiry < Date.now()) {
-      // give the BlinkID view time to disappear
-      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
-      await utils.promiseDelay(800)
-      Alert.alert(
-        translate('documentExpiredTitle'),
-        translate('documentExpiredMessage')
-      )
-
-      return
-    }
-
-    this.afterScan(r, prop)
-  },
-
-  afterScan(resource, prop) {
-    if (!this.floatingProps) this.floatingProps = {}
-    this.floatingProps[prop] = resource[prop]
-    this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
-    this.setState({ resource })
-    if (!this.props.search) {
-      Actions.getRequestedProperties({resource})
-      Actions.saveTemporary(resource)
-    }
-  },
-
-  showCameraView(params) {
-    // if (utils.isAndroid()) {
-    //   return Alert.alert(
-    //     translate('oops') + '!',
-    //     translate('noScanningOnAndroid')
-    //   )
-    // }
-    let props = this.props.model.properties
-    let scanner = props[params.prop].scanner
-    if (scanner) {
-      if (scanner === 'id-document') {
-        if (params.prop === 'scan')  {
-          if (this.state.resource.documentType  &&  this.state.resource.country) {
-            this.showBlinkIDScanner(params.prop)
-          }
-          else
-            Alert.alert('Please choose country and document type first')
-          return
-        }
-      }
-      else if (scanner === 'payment-card') {
-        if (!utils.isWeb())
-          this.scanCard(params.prop)
-        return
-      }
-    }
-    this.props.navigator.push({
-      title: 'Take a pic',
-      backButtonTitle: 'Back',
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        onTakePic: this.onTakePicture.bind(this, params)
-      }
-    });
-  },
-  async scanCard(prop) {
-    let cardJson
-    try {
-      const card = await CardIOModule.scanCard({
-        hideCardIOLogo: true,
-        suppressManualEntry: true,
-        // suppressConfirmation: true,
-        scanExpiry: true,
-        requireExpiry: true,
-        requireCVV: true,
-        // requirePostalCode: true,
-        requireCardholderName: true,
-        keepStatusBarStyle: true,
-        suppressScannedCardImage: true,
-        scanInstructions: 'Frame FRONT of card.\nBonus: get all the edges to light up',
-        detectionMode: CardIOUtilities.IMAGE_AND_NUMBER
-      })
-      cardJson = utils.clone(card)
-    } catch (err) {
-      // user canceled
-      return
-    }
-
-    let resource = this.state.resource
-    let r = utils.clone(resource)
-    let props = utils.getModel(utils.getType(r)).properties
-    if (!this.floatingProps) this.floatingProps = {}
-    for (let p in cardJson) {
-      if (cardJson[p]  &&  props[p]) {
-        r[p] = cardJson[p]
-        this.floatingProps[p] = cardJson[p]
-      }
-    }
-    // this.floatingProps[prop] = resource[prop]
-    cardJson = utils.sanitize(cardJson)
-    for (let p in cardJson)
-      if (!cardJson[p])
-        delete cardJson[p]
-    this.floatingProps[prop + 'Json'] = cardJson
-    r[prop + 'Json'] = cardJson
-    this.setState({ r })
-    Actions.addChatItem({resource: r, disableFormRequest: this.props.originatingMessage})
-    // this.props.navigator.pop()
-    // if (!this.props.search) {
-    //   Actions.getRequestedProperties({resource: r})
-    //   Actions.saveTemporary(r)
-    // }
-    // Alert.alert(JSON.stringify(card, null, 2))
-  },
-
-  onTakePicture(params, data) {
-    if (!data)
-      return
-    this.props.resource.video = data
-    if (!this.floatingProps)
-      this.floatingProps = {}
-
-    this.floatingProps.video = data
-    this.props.navigator.pop();
-  },
-
   myTextTemplate(params) {
     let label = translate(params.prop, params.model)
     let bankStyle = this.props.bankStyle
@@ -860,7 +619,7 @@ var NewResourceMixin = {
     let lStyle = [styles.labelStyle, { color: lcolor, fontSize: 20}]
     let vStyle = { height: 45, marginTop: 10, paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between', margin: 10}
     let multiline = prop.maxLength > 100
-    let help = prop.ref !== MONEY  && this.getHelp(prop)
+    let help = prop.ref !== MONEY  && this.paintHelp(prop)
     let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
@@ -924,7 +683,7 @@ var NewResourceMixin = {
     }
     let lcolor = hasValue ? '#555555' : this.getLabelAndBorderColor(prop.name)
 
-    let help = this.getHelp(prop)
+    let help = this.paintHelp(prop)
     let st = {paddingBottom: 10}
     if (!help)
       st.flex = 5
@@ -990,7 +749,7 @@ var NewResourceMixin = {
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
     let multiline = prop.maxLength > 100
-    let help = prop.ref !== MONEY  && this.getHelp(prop)
+    let help = prop.ref !== MONEY  && this.paintHelp(prop)
     let st = {paddingBottom: 10}
     // Especially for money type props
     if (!help)
@@ -1014,12 +773,12 @@ var NewResourceMixin = {
           underlineColorAndroid='transparent'
         >{label}
         </FloatLabel>
-        {this.getErrorView(params)}
+        {this.paintError(params)}
         {help}
       </View>
     );
   },
-  getHelp(prop) {
+  paintHelp(prop) {
     if (!prop.description)
       return <View style={styles.help}/>
 
@@ -1039,15 +798,14 @@ var NewResourceMixin = {
     //   )
   },
 
-  getErrorView(params) {
-    let error
+  paintError(params) {
     if (params.noError)
       return
     let {missedRequiredOrErrorValue, isRegistration} = this.state
     let {prop} = params
     let err = missedRequiredOrErrorValue
             ? missedRequiredOrErrorValue[prop.name]
-             : null
+            : null
     if (!err) {
       if (params.errors  &&  params.errors[prop.name])
         err = params.errors[params.prop.name]
@@ -1098,7 +856,7 @@ var NewResourceMixin = {
       doWrap = false
     }
 
-    let help = this.getHelp(prop)
+    let help = this.paintHelp(prop)
 
     const options = [
         { value: 'true', customIcon: <Icon size={30} color='#000' name='ios-checkmark' />},
@@ -1129,7 +887,7 @@ var NewResourceMixin = {
             </View>
           </View>
         </TouchableOpacity>
-        {this.getErrorView(params)}
+        {this.paintError(params)}
         {help}
       </View>
     )
@@ -1183,7 +941,7 @@ var NewResourceMixin = {
     }
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
 
-    let help = this.getHelp(prop)
+    let help = this.paintHelp(prop)
     return (
       <View key={this.getNextKey()} ref={prop.name}>
         <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
@@ -1213,7 +971,7 @@ var NewResourceMixin = {
           />
         {help}
         </View>
-        {this.getErrorView(params)}
+        {this.paintError(params)}
        </View>
       )
   },
@@ -1309,18 +1067,11 @@ var NewResourceMixin = {
     else if (this.state.inFocus !== refName)
       this.setState({inFocus: refName})
   },
-  // scrollDown (){
-  //   if (this.refs  &&  this.refs.scrollView) {
-  //      this.refs.scrollView.scrollTo(Dimensions.get('window').height * 2/3);
-  //   }
-  // },
 
   myCustomTemplate(params) {
-    let labelStyle = styles.labelClean
-    let textStyle = styles.labelDirty
-    let resource = /*this.props.resource ||*/ this.state.resource
+    if (!this.floatingProps)
+      this.floatingProps = {}
     let { model, bankStyle, metadata, country, search } = this.props
-    let isItem = metadata != null
     let props
     if (model)
       props = model.properties
@@ -1328,192 +1079,30 @@ var NewResourceMixin = {
       props = metadata.items.properties
     else
       props = utils.getModel(metadata.items.ref).properties
-    let prop = props[params.prop]
-    // if (this.state.inFocus  &&  this.state.inFocus !== prop.name)
-    //   return <View/>
-    let lcolor = this.getLabelAndBorderColor(params.prop)
-
-    let color = {color: lcolor}
-    let isVideo = prop.name === 'video'
-    let isPhoto = prop.name === 'photos'  ||  prop.ref === PHOTO
-    let isIdentity = prop.ref === IDENTITY
-
-    let noChooser
-    let required = model  &&  utils.ungroup(model.required)
-    if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(prop.name)) {
-      // Don't overwrite default country on provider
-      if (resource  &&  !resource[prop.name])
-        resource[prop.name] = country
-    }
-    let val = resource && resource[params.prop]
-    if (Array.isArray(val)  &&  !val.length)
-      val = null
-    let label, style, propLabel, isImmutable
-    if (val) {
-      isImmutable = prop.immutable  &&  resource[ROOT_HASH]
-      if (isPhoto) {
-        label = prop.title
-        if (!this.floatingProps)
-          this.floatingProps = {}
-        this.floatingProps[prop.name] = resource[params.prop]
-      }
-      else {
-        let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
-        // let m = utils.getId(resource[params.prop]).split('_')[0]
-        label = utils.getDisplayName(resource[params.prop], rModel)
-        if (!label) {
-          // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
-          if (utils.isEnum(rModel)  &&  Array.isArray(resource[params.prop])) {
-            label = ''
-            resource[params.prop].forEach((r) => {
-              let title = utils.getDisplayName(r)
-              label += label ? ', ' + title : title
-            })
-          }
-          else
-            label = resource[params.prop].title
-        }
-        if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
-          if (!label)
-            label = resource[params.prop]
-          label = utils.createAndTranslate(label, true)
-        }
-      }
-      style = textStyle
-      propLabel = <Text style={[styles.labelDirty, color]}>{params.label}</Text>
-    }
-    else {
-      label = params.label
-      if (!search  &&  params.required)
-        label += ' *'
-      style = [labelStyle, color]
-      propLabel = <View/>
-    }
-    let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
-    if (this.state.isRegistration)
-      color = '#eeeeee'
-    else if (val) {
-      color = isImmutable  ?  bankStyle.linkColor : '#757575'
-    }
+    let pName = params.prop
+    let prop = props[pName]
+    let isMedia = pName === 'video' ||  pName === 'photos'  ||  prop.ref === PHOTO
+    let onChange
+    if (isMedia)
+      onChange = this.setState.bind(this)
     else
-      color = '#AAAAAA'
-    color = {color}
-    let propView
-    if (photoR)
-      propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
-    else {
-      let img = this.state[prop.name + '_photo']
-      if (img) {
-        propView = <View style={{flexDirection: 'row'}}>
-                      <Image source={{uri: img.url}} style={styles.thumb} />
-                      <Text style={[styles.input, color]}>{' ' + label}</Text>
-                   </View>
-      }
-      else {
-        propView = <Text style={[styles.input, color, {width: utils.dimensions(params.component).width - 60}]}>{label}</Text>
-      }
-    }
-    let maxChars = (utils.dimensions(params.component).width - 20)/10
-    if (maxChars < label.length)
-      label = label.substring(0, maxChars - 3) + '...'
-    if (this.state.isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[prop.name])
-      label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
+      onChange = this.setChosenValue.bind(this)
+    let error = this.state.missedRequiredOrErrorValue  &&  this.state.missedRequiredOrErrorValue[prop.name]
+    if (!error  &&  params.errors  &&  params.errors[prop.name])
+      error = params.errors[params.prop.name]
 
-      // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
-    let fontSize = styles.font20 //this.state.isRegistration ? styles.font20 : styles.font18
-    // let fontSize = styles.font18 //this.state.isRegistration ? styles.font20 : styles.font18
-    let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
-    let iconColor = this.state.isRegistration ? '#eeeeee' : linkColor
-    let icon
-    if (!isImmutable) {
-      if (isVideo)
-        icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
-      else if (isPhoto)
-        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={styles.photoIcon}/>
-      else if (isIdentity)
-        icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={styles.photoIcon}/>
-      else if (!noChooser)
-        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={styles.customIcon} />
-    }
-    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
-                    {propView}
-                    {icon}
-                  </View>
-
-    let help = this.getHelp(prop)
-    let actionItem
-    if (isIdentity)
-       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
-                      {content}
-                    </TouchableOpacity>
-    else if (isVideo ||  isPhoto) {
-      // HACK
-      const isScan = params.prop === 'scan'
-      let useImageInput
-      if (utils.isWeb()) {
-        useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
-      } else {
-        useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
-      }
-
-      if (useImageInput) {
-        let aiStyle = {flex: 7, paddingTop: 15, paddingBottom: help ? 0 : 7}
-        let m = utils.getModel(prop.ref)
-        actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                       {content}
-                     </ImageInput>
-      }
-      else
-        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, params)}>
-                       {content}
-                     </TouchableOpacity>
-    }
-    else {
-      if (isImmutable)
-        actionItem = content
-      else
-        actionItem = <TouchableOpacity onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
-                       {content}
-                     </TouchableOpacity>
-    }
-    return (
-      <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
-        {propLabel}
-        {actionItem}
-        {this.getErrorView({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
-        {help}
-      </View>
-    );
-  },
-  async scanQRAndSet(prop) {
-    const result = await this.scanFormsQRCode()
-    let {permalink, link, firstName, lastName} = result.data
-    // this.setChosenValue(prop.name, {
-    //   id: utils.makeId(IDENTITY, permalink),
-    //   title: firstName
-    // })
-    Actions.getIdentity({prop, ...result.data })
-  },
-  onSetMediaProperty(propName, item) {
-    if (!item)
-      return;
-    let resource = this.addFormValues();
-    const props = this.props.model.properties
-    if (props[propName].ref)
-      item[TYPE] = props[propName].ref
-    if (this.state.missedRequiredOrErrorValue)
-      delete this.state.missedRequiredOrErrorValue[propName]
-    let r = _.cloneDeep(this.state.resource)
-    r[propName] = item
-    if (!this.floatingProps)
-      this.floatingProps = {}
-    this.floatingProps[propName] = item
-
-    this.setState({
-      resource: r,
-      prop: propName,
-      inFocus: propName
-    });
+    return <RefPropertyEditor {...this.props}
+                             resource={this.state.resource}
+                             onChange={onChange}
+                             prop={prop}
+                             photo={this.state[pName + '_photo']}
+                             component={params.component}
+                             error={error}
+                             inFocus={this.state.inFocus}
+                             floatingProps={this.floatingProps}
+                             paintHelp={this.paintHelp.bind(this)}
+                             paintError={this.paintError.bind(this)}
+                             styles={styles}/>
   },
   setDefaultValue(prop, data, isHidden) {
     let p = prop.name
@@ -1546,81 +1135,11 @@ var NewResourceMixin = {
   hasError(errors, propName) {
     return (errors && errors[propName]) || this.state.missedRequiredOrErrorValue &&  this.state.missedRequiredOrErrorValue[propName]
   },
-  chooser(prop, propName,event) {
-    let { resource, isRegistration } = this.state
-    let { model, metadata, bankStyle, search, navigator, originatingMessage } = this.props
-    model = model  ||  metadata
-    if (!resource) {
-      resource = {};
-      resource[TYPE] = model.id;
-    }
-
-    let isFinancialProduct = model.subClassOf  &&  model.subClassOf == constants.TYPES.FINANCIAL_PRODUCT
-    let value = this.refs.form.input;
-
-    let filter = event.nativeEvent.text;
-    let propRef = prop.ref || prop.items.ref
-    let m = utils.getModel(propRef);
-    let currentRoutes = navigator.getCurrentRoutes();
-
-    if (originatingMessage) {
-      let pmodel = utils.getLensedModel(originatingMessage)
-      prop = pmodel.properties[propName]
-    }
-
-    let route = {
-      title: translate(prop), //m.title,
-      id:  30,
-      component: GridList,
-      backButtonTitle: 'Back',
-      sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
-      passProps: {
-        filter:         filter,
-        isChooser:      true,
-        prop:           prop,
-        modelName:      propRef,
-        resource:       resource,
-        search:         search,
-        isRegistration: isRegistration,
-        bankStyle:      bankStyle,
-        returnRoute:    currentRoutes[currentRoutes.length - 1],
-        callback:       this.setChosenValue.bind(this)
-      }
-    }
-    if ((search  ||  prop.type === 'array')  && utils.isEnum(m)) {
-      route.passProps.multiChooser = true
-      route.rightButtonTitle = 'Done'
-      route.passProps.onDone = this.multiChooser.bind(this, prop)
-    }
-
-    navigator.push(route)
-  },
-  multiChooser(prop, values) {
-    let vArr = []
-    for (let v in values)
-      vArr.push(values[v])
-    this.setChosenValue(prop.name, vArr)
-    this.props.navigator.pop()
-  },
-  // setting chosen from the list property on the resource like for ex. Organization on Contact
-  // setChosenValues(props) {
-  //   Object.keys(props).map(propName => {
-  //     const value = props[propName]
-  //     this._setChosenValue(propName, value)
-  //   })
-
-  //   this.setState(sttate);
-  //   if (!this.props.search) {
-  //     if (model.subClassOf === FORM)
-  //       Actions.getRequestedProperties({resource: r, currentResource: currentR})
-  //     Actions.saveTemporary(r)
-  //   }
-  // },
   setChosenValue(propName, value) {
     let resource = _.cloneDeep(this.state.resource)
     if (typeof propName === 'object')
       propName = propName.name
-
+// debugger
     let setItemCount
     let isItem = this.props.metadata != null
     let model = this.props.model
@@ -1795,8 +1314,8 @@ var NewResourceMixin = {
                   })
         }
       </View>
-      {this.getErrorView({prop})}
-      {this.getHelp(prop)}
+      {this.paintError({prop})}
+      {this.paintHelp(prop)}
       </View>
     );
   },
@@ -1821,7 +1340,7 @@ var NewResourceMixin = {
     let value = prop ? params.value : this.state.resource[enumProp.name]
     let bankStyle = this.props.bankStyle
     let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
-    // let help = this.getHelp(prop, true)
+    // let help = this.paintHelp(prop, true)
     return (
       <View style={[styles.chooserContainer, styles.enumElement]} key={this.getNextKey()} ref={enumProp.name}>
         <TouchableOpacity onPress={this.enumChooser.bind(this, prop, enumProp)}>
@@ -2143,8 +1662,8 @@ var styles= StyleSheet.create({
   },
   photoIcon: {
     position: 'absolute',
-    right: 5,
-    marginTop: 5
+    right: 0,
+    marginTop: 15
   },
   customIcon: {
     marginTop: 20,
@@ -2305,4 +1824,522 @@ module.exports = NewResourceMixin
   //       }
   //     }
   //   })
+  // },
+  // scrollDown (){
+  //   if (this.refs  &&  this.refs.scrollView) {
+  //      this.refs.scrollView.scrollTo(Dimensions.get('window').height * 2/3);
+  //   }
+  // },
+/*
+  async showBlinkIDScanner(prop) {
+    const { documentType, country } = this.state.resource
+    const type = getDocumentTypeFromTitle(documentType.title)
+    let recognizers
+    let tooltip
+    switch (type) {
+    case 'passport':
+      tooltip = translate('centerPassport')
+      // machine readable travel documents (passport)
+      recognizers = BlinkID.recognizers.mrtd
+      break
+    case 'license':
+      tooltip = translate('centerLicence')
+      if (country.title === 'United States') {
+        recognizers = [BlinkID.recognizers.usdl, BlinkID.recognizers.face]
+      } else if (country.title === 'New Zealand') {
+        recognizers = BlinkID.recognizers.nzdl
+      } else {
+        recognizers = BlinkID.recognizers.eudl
+      }
+
+      break
+    default:
+      tooltip = translate('centerID')
+      break
+    }
+
+    const blinkIDOpts = {
+      quality: 0.2,
+      base64: true,
+      timeout: ENV.blinkIDScanTimeoutInternal,
+      tooltip,
+      recognizers: recognizers ? [].concat(recognizers) : BlinkID.recognizers
+    }
+
+    const promiseTimeout = new Promise((resolve, reject) => {
+      setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
+    })
+
+    Analytics.sendEvent({
+      category: 'widget',
+      action: 'scan_document',
+      label: `blinkid:${type}`
+    })
+
+    let result
+    try {
+      result = await Promise.race([
+        BlinkID.scan(blinkIDOpts),
+        promiseTimeout
+      ])
+    } catch (err) {
+      debug('scan failed:', err.message)
+      const canceled = /canceled/i.test(err.message)
+      const timedOut = !canceled && /time/i.test(err.message)
+      if (!canceled && typeof BlinkID.dismiss === 'function') {
+        // cancel programmatically
+        BlinkID.dismiss()
+      }
+
+      // give the BlinkID view time to disappear
+      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
+      await utils.promiseDelay(800)
+      debug('BlinkID scan failed', err.stack)
+
+      // if (canceled || timedOut) {
+      //   return Alert.alert(
+      //     translate('documentNotScanning', documentType.title),
+      //     translate('retryScanning', documentType.title.toLowerCase())
+      //   )
+      // }
+
+      if (canceled) return
+
+      return Alert.alert(
+        translate('documentNotScanning'),
+        translate('retryScanning', documentType.title)
+      )
+    }
+
+    // const tradleObj = utils.fromMicroBlink(result)
+    const r = _.cloneDeep(this.state.resource)
+    if (result.image) {
+      r[prop] = {
+        url: result.image.base64,
+        width: result.image.width,
+        height: result.image.height
+      }
+    }
+
+    let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
+    if (docScannerProps  &&  docScannerProps.length)
+      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
+
+
+    let dateOfExpiry
+    ;['mrtd', 'usdl', 'eudl', 'nzdl'].some(docType => {
+      const scan = result[docType]
+      if (!scan) return
+
+      const { personal, document } = scan
+      // if (personal.dateOfBirth) {
+      //   personal.dateOfBirth = formatDate(personal.dateOfBirth)
+      // }
+
+      if (document.dateOfExpiry) {
+        dateOfExpiry = document.dateOfExpiry
+        // document.dateOfExpiry = formatDate(document.dateOfExpiry)
+      }
+
+      // if (document.dateOfIssue) {
+      //   document.dateOfIssue = formatDate(document.dateOfIssue)
+      // }
+
+      r[prop + 'Json'] = scan
+      return
+    })
+
+    if (dateOfExpiry && dateOfExpiry < Date.now()) {
+      // give the BlinkID view time to disappear
+      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
+      await utils.promiseDelay(800)
+      Alert.alert(
+        translate('documentExpiredTitle'),
+        translate('documentExpiredMessage')
+      )
+
+      return
+    }
+
+    this.afterScan(r, prop)
+  },
+
+  afterScan(resource, prop) {
+    if (!this.floatingProps) this.floatingProps = {}
+    this.floatingProps[prop] = resource[prop]
+    this.floatingProps[prop + 'Json'] = resource[prop + 'Json']
+    this.setState({ resource })
+    if (!this.props.search) {
+      Actions.getRequestedProperties({resource})
+      Actions.saveTemporary(resource)
+    }
+  },
+
+  showCameraView(params) {
+    // if (utils.isAndroid()) {
+    //   return Alert.alert(
+    //     translate('oops') + '!',
+    //     translate('noScanningOnAndroid')
+    //   )
+    // }
+    let props = this.props.model.properties
+    let scanner = props[params.prop].scanner
+    if (scanner) {
+      if (scanner === 'id-document') {
+        if (params.prop === 'scan')  {
+          if (this.state.resource.documentType  &&  this.state.resource.country) {
+            this.showBlinkIDScanner(params.prop)
+          }
+          else
+            Alert.alert('Please choose country and document type first')
+          return
+        }
+      }
+      else if (scanner === 'payment-card') {
+        if (!utils.isWeb())
+          this.scanCard(params.prop)
+        return
+      }
+    }
+    this.props.navigator.push({
+      title: 'Take a pic',
+      backButtonTitle: 'Back',
+      id: 12,
+      component: CameraView,
+      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+      passProps: {
+        onTakePic: this.onTakePicture.bind(this, params)
+      }
+    });
+  },
+  async scanCard(prop) {
+    let cardJson
+    try {
+      const card = await CardIOModule.scanCard({
+        hideCardIOLogo: true,
+        suppressManualEntry: true,
+        // suppressConfirmation: true,
+        scanExpiry: true,
+        requireExpiry: true,
+        requireCVV: true,
+        // requirePostalCode: true,
+        requireCardholderName: true,
+        keepStatusBarStyle: true,
+        suppressScannedCardImage: true,
+        scanInstructions: 'Frame FRONT of card.\nBonus: get all the edges to light up',
+        detectionMode: CardIOUtilities.IMAGE_AND_NUMBER
+      })
+      cardJson = utils.clone(card)
+    } catch (err) {
+      // user canceled
+      return
+    }
+
+    let resource = this.state.resource
+    let r = utils.clone(resource)
+    let props = utils.getModel(utils.getType(r)).properties
+    if (!this.floatingProps) this.floatingProps = {}
+    for (let p in cardJson) {
+      if (cardJson[p]  &&  props[p]) {
+        r[p] = cardJson[p]
+        this.floatingProps[p] = cardJson[p]
+      }
+    }
+    // this.floatingProps[prop] = resource[prop]
+    cardJson = utils.sanitize(cardJson)
+    for (let p in cardJson)
+      if (!cardJson[p])
+        delete cardJson[p]
+    this.floatingProps[prop + 'Json'] = cardJson
+    r[prop + 'Json'] = cardJson
+    this.setState({ r })
+    Actions.addChatItem({resource: r, disableFormRequest: this.props.originatingMessage})
+    // this.props.navigator.pop()
+    // if (!this.props.search) {
+    //   Actions.getRequestedProperties({resource: r})
+    //   Actions.saveTemporary(r)
+    // }
+    // Alert.alert(JSON.stringify(card, null, 2))
+  },
+
+  onTakePicture(params, data) {
+    if (!data)
+      return
+    this.props.resource.video = data
+    if (!this.floatingProps)
+      this.floatingProps = {}
+
+    this.floatingProps.video = data
+    this.props.navigator.pop();
+  },
+  myCustomTemplate1(params) {
+    let labelStyle = styles.labelClean
+    let textStyle = styles.labelDirty
+    let resource = *this.props.resource ||* this.state.resource
+    let { model, bankStyle, metadata, country, search } = this.props
+    let isItem = metadata != null
+    let props
+    if (model)
+      props = model.properties
+    else if (metadata.items.properties)
+      props = metadata.items.properties
+    else
+      props = utils.getModel(metadata.items.ref).properties
+    let prop = props[params.prop]
+    // if (this.state.inFocus  &&  this.state.inFocus !== prop.name)
+    //   return <View/>
+    let lcolor = this.getLabelAndBorderColor(params.prop)
+
+    let color = {color: lcolor}
+    let isVideo = prop.name === 'video'
+    let isPhoto = prop.name === 'photos'  ||  prop.ref === PHOTO
+    let isIdentity = prop.ref === IDENTITY
+
+    let noChooser
+    let required = model  &&  utils.ungroup(model.required)
+    if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(prop.name)) {
+      // Don't overwrite default country on provider
+      if (resource  &&  !resource[prop.name])
+        resource[prop.name] = country
+    }
+    let val = resource && resource[params.prop]
+    if (Array.isArray(val)  &&  !val.length)
+      val = null
+    let label, style, propLabel, isImmutable
+    if (val) {
+      isImmutable = prop.immutable  &&  resource[ROOT_HASH]
+      if (isPhoto) {
+        label = prop.title
+        if (!this.floatingProps)
+          this.floatingProps = {}
+        this.floatingProps[prop.name] = resource[params.prop]
+      }
+      else {
+        let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
+        // let m = utils.getId(resource[params.prop]).split('_')[0]
+        label = utils.getDisplayName(resource[params.prop], rModel)
+        if (!label) {
+          // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
+          if (utils.isEnum(rModel)  &&  Array.isArray(resource[params.prop])) {
+            label = ''
+            resource[params.prop].forEach((r) => {
+              let title = utils.getDisplayName(r)
+              label += label ? ', ' + title : title
+            })
+          }
+          else
+            label = resource[params.prop].title
+        }
+        if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
+          if (!label)
+            label = resource[params.prop]
+          label = utils.createAndTranslate(label, true)
+        }
+      }
+      style = textStyle
+      propLabel = <Text style={[styles.labelDirty, color]}>{params.label}</Text>
+    }
+    else {
+      label = params.label
+      if (!search  &&  params.required)
+        label += ' *'
+      style = [labelStyle, color]
+      propLabel = <View/>
+    }
+    let photoR = isPhoto && (this.state[prop.name + '_photo'] || this.state.resource[prop.name])
+    if (this.state.isRegistration)
+      color = '#eeeeee'
+    else if (val) {
+      color = isImmutable  ?  bankStyle.linkColor : '#757575'
+    }
+    else
+      color = '#AAAAAA'
+    color = {color}
+    let propView
+    if (photoR)
+      propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
+    else {
+      let img = this.state[prop.name + '_photo']
+      if (img) {
+        propView = <View style={{flexDirection: 'row'}}>
+                      <Image source={{uri: img.url}} style={styles.thumb} />
+                      <Text style={[styles.input, color]}>{' ' + label}</Text>
+                   </View>
+      }
+      else {
+        propView = <Text style={[styles.input, color, {width: utils.dimensions(params.component).width - 60}]}>{label}</Text>
+      }
+    }
+    let maxChars = (utils.dimensions(params.component).width - 20)/10
+    if (maxChars < label.length)
+      label = label.substring(0, maxChars - 3) + '...'
+    if (this.state.isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[prop.name])
+      label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
+
+      // <View key={this.getNextKey()} style={this.hasError(params) ? {paddingBottom: 0} : {paddingBottom: 10}} ref={prop.name}>
+    let fontSize = styles.font20 //this.state.isRegistration ? styles.font20 : styles.font18
+    // let fontSize = styles.font18 //this.state.isRegistration ? styles.font20 : styles.font18
+    let linkColor = (bankStyle && bankStyle.linkColor) || DEFAULT_LINK_COLOR
+    let iconColor = this.state.isRegistration ? '#eeeeee' : linkColor
+    let icon
+    if (!isImmutable) {
+      if (isVideo)
+        icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
+      else if (isPhoto)
+        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={styles.photoIcon}/>
+      else if (isIdentity)
+        icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={styles.photoIcon}/>
+      else if (!noChooser)
+        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={styles.customIcon} />
+    }
+    let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
+                    {propView}
+                    {icon}
+                  </View>
+
+    let help = this.paintHelp(prop)
+    let actionItem
+    if (isIdentity)
+       actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
+                      {content}
+                    </TouchableOpacity>
+    else if (isVideo ||  isPhoto) {
+      // HACK
+      const isScan = params.prop === 'scan'
+      let useImageInput
+      if (utils.isWeb()) {
+        useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
+      } else {
+        useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
+      }
+
+      if (useImageInput) {
+        let aiStyle = {flex: 7, paddingTop: 15, paddingBottom: help ? 0 : 7}
+        let m = utils.getModel(prop.ref)
+        actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+                       {content}
+                     </ImageInput>
+      }
+      else
+        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, params)}>
+                       {content}
+                     </TouchableOpacity>
+    }
+    else {
+      if (isImmutable)
+        actionItem = content
+      else
+        actionItem = <TouchableOpacity onPress={noChooser ? () => {} : this.chooser.bind(this, prop, params.prop)}>
+                       {content}
+                     </TouchableOpacity>
+    }
+    return (
+      <View key={this.getNextKey()} style={{paddingBottom: this.hasError(params.errors, prop.name) ? 0 : 10, margin: 0}} ref={prop.name}>
+        {propLabel}
+        {actionItem}
+        {this.paintError({noError: params.noError, errors: params.errors, prop: prop, paddingBottom: 0})}
+        {help}
+      </View>
+    );
+  },
+  async scanQRAndSet(prop) {
+    const result = await this.scanFormsQRCode()
+    let {permalink, link, firstName, lastName} = result.data
+    // this.setChosenValue(prop.name, {
+    //   id: utils.makeId(IDENTITY, permalink),
+    //   title: firstName
+    // })
+    Actions.getIdentity({prop, ...result.data })
+  },
+  onSetMediaProperty(propName, item) {
+    if (!item)
+      return;
+    let resource = this.addFormValues();
+    const props = this.props.model.properties
+    if (props[propName].ref)
+      item[TYPE] = props[propName].ref
+    if (this.state.missedRequiredOrErrorValue)
+      delete this.state.missedRequiredOrErrorValue[propName]
+    let r = _.cloneDeep(this.state.resource)
+    r[propName] = item
+    if (!this.floatingProps)
+      this.floatingProps = {}
+    this.floatingProps[propName] = item
+
+    this.setState({
+      resource: r,
+      prop: propName,
+      inFocus: propName
+    });
+  },
+  multiChooser(prop, values) {
+    let vArr = []
+    for (let v in values)
+      vArr.push(values[v])
+    this.setChosenValue(prop.name, vArr)
+    this.props.navigator.pop()
+  },
+  chooser(prop, propName,event) {
+    let { resource, isRegistration } = this.state
+    let { model, metadata, bankStyle, search, navigator, originatingMessage } = this.props
+    model = model  ||  metadata
+    if (!resource) {
+      resource = {};
+      resource[TYPE] = model.id;
+    }
+
+    let isFinancialProduct = model.subClassOf  &&  model.subClassOf == constants.TYPES.FINANCIAL_PRODUCT
+    let value = this.refs.form.input;
+
+    let filter = event.nativeEvent.text;
+    let propRef = prop.ref || prop.items.ref
+    let m = utils.getModel(propRef);
+    let currentRoutes = navigator.getCurrentRoutes();
+
+    if (originatingMessage) {
+      let pmodel = utils.getLensedModel(originatingMessage)
+      prop = pmodel.properties[propName]
+    }
+
+    let route = {
+      title: translate(prop), //m.title,
+      id:  30,
+      component: GridList,
+      backButtonTitle: 'Back',
+      sceneConfig: isFinancialProduct ? Navigator.SceneConfigs.FloatFromBottom : Navigator.SceneConfigs.FloatFromRight,
+      passProps: {
+        filter:         filter,
+        isChooser:      true,
+        prop:           prop,
+        modelName:      propRef,
+        resource:       resource,
+        search:         search,
+        isRegistration: isRegistration,
+        bankStyle:      bankStyle,
+        returnRoute:    currentRoutes[currentRoutes.length - 1],
+        callback:       this.setChosenValue.bind(this)
+      }
+    }
+    if ((search  ||  prop.type === 'array')  && utils.isEnum(m)) {
+      route.passProps.multiChooser = true
+      route.rightButtonTitle = 'Done'
+      route.passProps.onDone = this.multiChooser.bind(this, prop)
+    }
+
+    navigator.push(route)
+  },
+*/
+  // setting chosen from the list property on the resource like for ex. Organization on Contact
+  // setChosenValues(props) {
+  //   Object.keys(props).map(propName => {
+  //     const value = props[propName]
+  //     this._setChosenValue(propName, value)
+  //   })
+
+  //   this.setState(sttate);
+  //   if (!this.props.search) {
+  //     if (model.subClassOf === FORM)
+  //       Actions.getRequestedProperties({resource: r, currentResource: currentR})
+  //     Actions.saveTemporary(r)
+  //   }
   // },
