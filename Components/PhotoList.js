@@ -76,7 +76,7 @@ class PhotoList extends Component {
   renderPhotoList(photos) {
     let imageStyle = this.props.style;
     let len = photos.length
-    if (!imageStyle  ||  utils.isEmpty(imageStyle))
+    if (!imageStyle  ||  !imageStyle.width)
       imageStyle = this.getPhotoStyle(photos)
     let width = utils.dimensions(PhotoList).width
     let w = imageStyle.width
