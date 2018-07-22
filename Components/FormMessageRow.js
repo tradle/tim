@@ -87,18 +87,22 @@ class FormMessageRow extends Component {
     let photoStyle = {};
     if (inRow > 0) {
       if (inRow === 1) {
-        let ww = Math.min(240, photos[0].width)
-        let hh = (ww / photos[0].width) * photos[0].height
-        photoStyle = [chatStyles.bigImage, {
-          width:  ww,
-          height: hh
-        }]
+        let photo = photos[0]
+        if (photo.width  &&  photo.height) {
+          let ww = Math.min(240, photos[0].width)
+          let hh = (ww / photos[0].width) * photos[0].height
+          photoStyle = [chatStyles.bigImage, {
+            width:  ww,
+            height: hh
+          }]
+        }
       }
       else if (inRow === 2)
         photoStyle = chatStyles.mediumImage;
       else
         photoStyle = chatStyles.image;
     }
+    photoStyle = StyleSheet.flatten([photoStyle, {marginTop: -5}])
     let sendStatus = this.getSendStatus()
     let val = this.getTime(resource);
     let date = val  &&  <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
@@ -121,7 +125,7 @@ class FormMessageRow extends Component {
               {date}
               {stub}
               <View style={photoListStyle}>
-                <PhotoList photos={photos} resource={resource} style={[photoStyle, {marginTop: -5}]} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
+                <PhotoList photos={photos} resource={resource} style={photoStyle} navigator={this.props.navigator} numberInRow={inRow} chat={to} />
               </View>
               {sendStatus}
             </View>
