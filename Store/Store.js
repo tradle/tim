@@ -7072,7 +7072,7 @@ if (!res[SIG]  &&  res._message)
     let enumList = enums[modelName]
     if (query)
       return enumList.filter((r) => this.checkCriteria({r, query}))
-    if (prop.limit  ||  prop.pin)
+    if (prop  &&  (prop.limit  ||  prop.pin))
       return utils.applyLens({prop, list: enumList})
 
     let lim = limit || 20
