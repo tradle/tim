@@ -33,7 +33,9 @@
     "push:ios:prod": "./scripts/code-push.js --platform ios --stage Production",
     "push:android:staging": "./scripts/code-push.js --platform android --stage Staging",
     "push:android:prod": "./scripts/code-push.js --platform android --stage Production",
-    "fix:staging": "node ./scripts/fix-staging.js"
+    "fix:staging": "node ./scripts/fix-staging.js",
+    "build:codepush:android": "./scripts/release-android.sh",
+    "build:codepush:ios": "echo 'ERROR: PLEASE BUILD IN XCODE FOR NOW'"
   },
   "dependencies": {
     "@tradle/aws-client": "^1.8.1",
@@ -134,7 +136,7 @@
     "react-native-button": "^2.3.0",
     "react-native-camera": "^1.0.2",
     "react-native-carousel": "^0.11.0",
-    "react-native-code-push": "^5.3.2",
+    "react-native-code-push": "^5.4.0",
     "react-native-collapsible": "^0.10.0",
     "react-native-crypto": "^2.1.0",
     "react-native-datepicker": "github:pgmemk/react-native-datepicker#dev",

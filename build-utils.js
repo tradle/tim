@@ -69,6 +69,6 @@ function getAndroidVersion () {
     })
 
   const { VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_BUILD } = props
-  const fourPartVersion = `${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}.${VERSION_BUILD}`
-  return fourPartVersion
+  const semver = `${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}`
+  return semver
 }
