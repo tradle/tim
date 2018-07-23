@@ -90,12 +90,14 @@ class FormMessageRow extends Component {
       width -= 50 // provider icon and padding
     if (inRow > 0) {
       if (inRow === 1) {
-        var ww = Math.min(240, photos[0].width)
-        var hh = (ww / photos[0].width) * photos[0].height
-        photoStyle = {
-          borderRadius: 10,
-          width:  ww,
-          height: hh
+        let photo = photos[0]
+        if (photo.width  &&  photo.height) {
+          let ww = Math.min(240, photos[0].width)
+          let hh = (ww / photos[0].width) * photos[0].height
+          photoStyle = [chatStyles.bigImage, {
+            width:  ww,
+            height: hh
+          }]
         }
       }
       else if (inRow === 2)
@@ -103,6 +105,7 @@ class FormMessageRow extends Component {
       else
         photoStyle = chatStyles.image;
     }
+    photoStyle = StyleSheet.flatten(photoStyle)
     let sendStatus = this.getSendStatus()
     let val = this.getTime(resource);
     let date = val  &&  <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>

@@ -78,7 +78,7 @@ class PhotoList extends Component {
   renderPhotoList(photos) {
     let imageStyle = this.props.style;
     let len = photos.length
-    if (!imageStyle  ||  utils.isEmpty(imageStyle))
+    if (!imageStyle  ||  !imageStyle.width)
       imageStyle = this.getPhotoStyle(photos)
 
     let inRow = this.props.numberInRow || Math.floor(utils.getContentWidth(PhotoList) / imageStyle.width) //- 1 // 2 is padding
