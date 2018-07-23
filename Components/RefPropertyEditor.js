@@ -526,6 +526,8 @@ class RefPropertyEditor extends Component {
     }
     if ((search  ||  prop.type === 'array')  && utils.isEnum(m)) {
       route.passProps.multiChooser = true
+      if (resource[propName])
+        route.passProps.pin = resource[propName]
       route.rightButtonTitle = 'Done'
       route.passProps.onDone = this.multiChooser.bind(this, prop)
     }

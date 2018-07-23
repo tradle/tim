@@ -52,6 +52,7 @@ import ENV from './env'
 
 import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
+// import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import Strings from './strings'
@@ -311,12 +312,12 @@ var utils = {
     //   props[p].name = p
     return Store.getAugmentedModel(merged)
   },
-  applyLens({prop, value, list}) {
-    let pin = prop.pin
+  applyLens({prop, values, list }) {
+    let pin = prop.pin  ||  values
     let limit = prop.limit
     if (!pin  &&  !limit)
       return list
-    let isEnum = this.isEnum(prop.ref)
+    let isEnum = this.isEnum(prop.ref  ||  prop.items.ref)
     if (isEnum) {
       if (limit  &&  limit.length) {
         let limitMap = {}
@@ -2714,4 +2715,38 @@ module.exports = utils;
   //     : findNodeHandle(component)
 
   //   RCTUIManager.measure(handle, cb)
+  // },
+  // used on web
+  // onTakePic(prop, data, formRequest) {
+  //   if (!data)
+  //     return
+  //   // Disable FormRequest
+  //   let isFormRequest = formRequest  && formRequest[TYPE] === FORM_REQUEST
+  //   let isFormError = formRequest  && formRequest[TYPE] === FORM_ERROR
+
+  //   if (isFormRequest) {
+  //     var params = {
+  //       value: {_documentCreated: true},
+  //       doneWithMultiEntry: true,
+  //       resource: formRequest,
+  //       meta: utils.getModel(formRequest[TYPE]).value
+  //     }
+  //     Actions.addChatItem(params)
+  //   }
+  //   let photo = {
+  //     url: data.data,
+  //     height: data.height,
+  //     width: data.width
+  //   }
+  //   let propName = (typeof prop === 'string') ? prop : prop.name
+  //   Actions.addChatItem({
+  //     disableFormRequest: isFormRequest || isFormError ? formRequest : null,
+  //     resource: {
+  //       [TYPE]: isFormRequest ? formRequest.form : formRequest.prefill[TYPE],
+  //       [propName]: photo,
+  //       _context: formRequest._context,
+  //       from: utils.getMe(),
+  //       to: formRequest.from  // FormRequest.from
+  //     }
+  //   })
   // },
