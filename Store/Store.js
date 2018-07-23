@@ -3307,11 +3307,12 @@ var Store = Reflux.createStore({
     if (!list  ||  !list.length)
       return
     let batch = []
-
-    await this.modelsPackHandler({val: list[0], batch})
-    this.dbBatchPut(utils.getId(list[0]), list[0], batch)
+    let r = list[0]
+    r[NOT_CHAT_ITEM] = true
+    await this.modelsPackHandler({val: r, batch})
+    this.dbBatchPut(utils.getId(r), r, batch)
     await db.batch(batch)
-    this.addMessagesToChat(utils.getId(to), list[0])
+    this.addMessagesToChat(utils.getId(to), r)
   },
   packMessage(toChain, from, to, context) {
     var sendParams = {}
@@ -10714,6 +10715,7 @@ if (!res[SIG]  &&  res._message)
     var isModelsPack = type === MODELS_PACK
     if (isModelsPack) {
       noTrigger = true
+      val[NOT_CHAT_ITEM] = true
       let stopHere = await this.modelsPackHandler({val, batch, org})
       if (stopHere)
         return
