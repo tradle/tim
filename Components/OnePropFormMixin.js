@@ -44,6 +44,8 @@ var OnePropFormMixin = {
           to: formRequest.from
         }
       )
+    if (!resource[prop.name])
+      this.props.navigator.pop()
     resource[prop.name] = item
     let params = {resource}
     if (formRequest)
