@@ -105,7 +105,7 @@ class FormErrorRow extends Component {
     let props = utils.getEditableProperties(resource)
     let prop = props.length === 1  &&  props[0]
     // HACK
-    let msgWidth = utils.dimensions(FormErrorRow).width * 0.8
+    let msgWidth = utils.getMessageWidth(FormErrorRow)
 
     let width =  message ? Math.min(msgWidth, message.length * utils.getFontSize(18) + 40) : msgWidth
     if (!isMyMessage)

@@ -107,7 +107,7 @@ class FormMessageRow extends Component {
     let val = this.getTime(resource);
     let date = val  &&  <Text style={chatStyles.date} numberOfLines={1}>{val}</Text>
 
-    let width = Math.floor(utils.dimensions(FormMessageRow).width * 0.8) // - (isSharedContext  ? 45 : 0))
+    let width = utils.getMessageWidth(FormMessageRow) // - (isSharedContext  ? 45 : 0))
 
     let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
     let photoListStyle = {height: 3};
@@ -154,7 +154,7 @@ class FormMessageRow extends Component {
     // if (application)
     //   width -= 50 // provider icon and padding
 
-    // let width = Math.floor(utils.dimensions(FormMessageRow).width * 0.8) // - (isSharedContext  ? 45 : 0))
+    // let width = utils.getMessageWidth(FormMessageRow) // - (isSharedContext  ? 45 : 0))
     // let styles = createStyles({bankStyle, isMyMessage, isShared, width})
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length

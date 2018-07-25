@@ -185,7 +185,7 @@ class FormRequestRow extends Component {
       linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
 
     let styles = createStyles({bankStyle, isMyMessage, resource, application})
-    let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8)
+    let msgWidth = utils.getMessageWidth(FormRequestRow)
     if (isFormRequest)
       onPressCall = this.formRequest(resource, renderedRow, prop, styles)
     else {
@@ -398,7 +398,7 @@ class FormRequestRow extends Component {
               )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
-    // let w = utils.dimensions(FormRequestRow).width * 0.8 - 2
+    // let w = utils.getMessageWidth(FormRequestRow)
     // let or
     // if (formModel.subClassOf === MY_PRODUCT)
     //   or = <View style={{paddingVertical: 5}}>
@@ -454,7 +454,7 @@ class FormRequestRow extends Component {
     let msg;
     if (document.message  &&  docModel.subClassOf !== FORM)
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
-    let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8) - 50
+    let msgWidth = utils.getMessageWidth(FormRequestRow) - 50
     let headerStyle = {paddingLeft: 10, width: msgWidth}
     let isShared = this.isShared(verification)
 
@@ -634,7 +634,7 @@ class FormRequestRow extends Component {
     let headerStyle = {paddingTop: 5, paddingLeft: 10}
     let isShared = this.isShared(verification)
 
-    let msgWidth = Math.floor(utils.dimensions(FormRequestRow) * 0.8) - 100
+    let msgWidth = utils.getMessageWidth(FormRequestRow) - 100
     let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 14, width: msgWidth - 100, color: bankStyle.linkColor}]
     let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
 
@@ -842,7 +842,7 @@ class FormRequestRow extends Component {
     let hasSharables = this.hasSharables()
 
     let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated
-    let msgWidth = Math.floor(utils.dimensions(FormRequestRow).width * 0.8)
+    let msgWidth = utils.getMessageWidth(FormRequestRow)
     if (isRequestForNext) {
       let animStyle = {transform: [{scale: this.springValue}]}
 
@@ -1149,7 +1149,7 @@ function isMultientry(resource) {
 }
 
 var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, bankStyle }) {
-  let msgWidth = Math.floor(dimensions.width * 0.8)
+  let msgWidth = utils.getMessageWidth(FormRequestRow)
   return StyleSheet.create({
     container: {
       flex: 1

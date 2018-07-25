@@ -110,7 +110,6 @@ const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
-
 // import dictionaries from '@tradle/models'.dict
 var dictionary //= dictionaries[Strings.language]
 
@@ -2618,7 +2617,10 @@ var utils = {
   getRootHash(r) {
     return r[ROOT_HASH] ? r[ROOT_HASH] : r.id.split('_')[1]
   },
-
+  getMessageWidth(component) {
+    let width = component ? this.dimensions(component).width : this.dimensions().width
+    return Math.floor(width * 0.8)
+  },
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
   //   if (utils.isWeb()) {
   //     const { width=0, height=0 } = shadowOffset

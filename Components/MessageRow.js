@@ -225,8 +225,7 @@ class MessageRow extends Component {
       }
     }
     // HACK
-    let w = utils.dimensions(MessageRow).width
-    let msgWidth = w * 0.8
+    let msgWidth = utils.getMessageWidth(MessageRow)
     let numberOfCharsInWidth = msgWidth / utils.getFontSize(10)
     let sendStatus
     let longMessage = isSimpleMessage  &&  message ? numberOfCharsInWidth < message.length : false
@@ -401,14 +400,14 @@ class MessageRow extends Component {
     let model = utils.getModel(resource[TYPE] || resource.id);
 
     let isReadOnlyChat = to[TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
-
+    let width = utils.getMessageWidth(MessageRow)
     if (utils.isContext(model)) {
       let msgModel = utils.getModel(resource.product)
       let str = !navigator.isConnected  &&  isLast
               ? translate('noConnectionForNewProduct', utils.getMe().firstName, translate(msgModel))
               : translate('newProductMsg', translate(msgModel))
       let color = isMyMessage ? bankStyle.contextTextColor : '#757575'
-      let maxWidth = Math.floor(0.8 * utils.dimensions().width) - (isReadOnlyChat ? 90 : 40) // message width - icon size and all the paddings
+      let maxWidth = width - (isReadOnlyChat ? 90 : 40) // message width - icon size and all the paddings
       let msg = !navigator.isConnected  &&  isLast
               ? <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: color}]}>{str}</Text>
@@ -522,7 +521,7 @@ class MessageRow extends Component {
     }
 
     if (model.id === SHARE_CONTEXT) {
-      let w = Math.floor(0.8 * utils.dimensions().width) - 40 // message width - icon size and all the paddings
+      let w = width - 40 // message width - icon size and all the paddings
       let msg = <View key={this.getNextKey()}>
                   <View style={styles.row}>
                     <View style={{flexDirection: 'column', width: w}}>
@@ -597,7 +596,7 @@ class MessageRow extends Component {
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         if (resource[v].trim().indexOf(' ') === -1) {
           let {width, height} = utils.dimensions(MessageRow)
-          vCols.push(<WebView key={this.getNextKey()} style={{width: width * 0.8, height: 150}}
+          vCols.push(<WebView key={this.getNextKey()} style={{width, height: 150}}
              source={{uri: resource[v]}}
              startInLoadingState={true}
              automaticallyAdjustContentInsets={false} />)
@@ -732,7 +731,7 @@ class MessageRow extends Component {
           let params = { resource, message: resource[v], bankStyle, noLink: true }
           let row
           if  (this.messageHasLink(resource[v]))
-            row = <View style={{maxWidth: utils.dimensions().width * 0.8}}  key={this.getNextKey()}>
+            row = <View style={{maxWidth: width}}  key={this.getNextKey()}>
                     <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle, false, isMyMessage, true)} passThroughProps={{navigator, bankStyle}}>
                       {resource[v]}
                     </Markdown>
@@ -743,7 +742,7 @@ class MessageRow extends Component {
           if (typeof row === 'string') {
             if (this.isUrl(resource[v])) {
               let {width, height} = utils.dimensions(MessageRow)
-              vCols.push(<WebView key={this.getNextKey()} style={{width: width * 0.8, height: 150}}
+              vCols.push(<WebView key={this.getNextKey()} style={{width, height: 150}}
                  source={{uri: resource[v]}}
                  startInLoadingState={true}
                  automaticallyAdjustContentInsets={false} />)
