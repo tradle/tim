@@ -1312,7 +1312,7 @@ class NewResource extends Component {
                             {counter}
                           </TouchableOpacity>
 
-    let error = this.getErrorView({prop: bl})
+    let error = this.paintError({prop: bl})
     return (
       <View key={this.getNextKey()}>
         <View style={istyle} ref={bl.name}>
