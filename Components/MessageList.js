@@ -870,8 +870,7 @@ class MessageList extends Component {
       var marginLeft = 10
       // way ScrollView is implemented with position:absolute disrespects the confines of the screen width
       var marginRight = 10
-      let width = utils.dimensions().width
-      width = utils.getContentWidth(MessageList)
+      let width = utils.getContentWidth(MessageList)
       let alignSelf = 'center'
 
       // Hide TextInput for shared context since it is read-only
