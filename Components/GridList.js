@@ -341,7 +341,7 @@ class GridList extends Component {
   componentWillMount() {
     // debounce(this._loadMoreContentAsync.bind(this), 1000)
     let { chat, resource, navigator, officialAccounts, search, application, prop,
-          modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser } = this.props
+          modelName, isModel, isBacklink, isForwardlink, forwardlink, isChooser, multiChooser } = this.props
     if (chat) {
       utils.onNextTransitionEnd(navigator, () => {
         Actions.listSharedWith(resource, chat)
@@ -391,6 +391,8 @@ class GridList extends Component {
     else if (isForwardlink)
       Actions.getItem({resource, search, action: 'list', forwardlink})
     else if (isChooser) {
+      if (multiChooser)
+        params.pin = resource[prop.name]
       params.resource = resource
       params.isChooser = true
       Actions.list(params)

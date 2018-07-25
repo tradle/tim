@@ -7121,14 +7121,17 @@ if (!res[SIG]  &&  res._message)
   //     return enumList
   // },
   getEnum(params) {
-    const { modelName, limit, query, lastId, prop } = params
+    const { modelName, limit, query, lastId, prop, pin } = params
     let result
     let enumList = enums[modelName]
     if (query)
       return enumList.filter((r) => this.checkCriteria({r, query}))
-    if (prop  &&  (prop.limit  ||  prop.pin))
-      return utils.applyLens({prop, list: enumList})
-
+    if (prop) {
+      if (prop.limit  ||  prop.pin)
+        return utils.applyLens({prop, list: enumList})
+      else if (pin)
+        return utils.applyLens({prop, list: enumList, values: pin.map(v => v.id.split('_')[1])})
+    }
     let lim = limit || 20
     let lastIdx
     if (lastId)

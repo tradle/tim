@@ -408,7 +408,7 @@ class FormRequestRow extends Component {
               )
             : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
 
-    // let w = utils.dimensions(FormRequestRow).width * 0.8 - 2
+    // let w = utils.getMessageWidth(FormRequestRow)
     // let or
     // if (formModel.subClassOf === MY_PRODUCT)
     //   or = <View style={{paddingVertical: 5}}>

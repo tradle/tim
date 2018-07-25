@@ -1356,7 +1356,7 @@ class ResourceList extends Component {
       search = <View style={styles.searchRow}>
           <TouchableOpacity onPress={this.showSearch.bind(this)}>
             <View style={styles.row}>
-              <Icon name='ios-search' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingHorizontal: 5, marginRight: 5}]} />
+              <Icon name='ios-search' size={45} color='#246624' style={[styles.cellImage, {paddingHorizontal: 5, marginRight: 5}]} />
               <View style={styles.textContainer}>
                 <Text style={styles.resourceTitle}>{translate('Explore data')}</Text>
               </View>
@@ -1382,7 +1382,7 @@ class ResourceList extends Component {
             <View style={styles.statisticsRow}>
               <TouchableOpacity onPress={this.showPartials.bind(this)}>
                 <View style={styles.row}>
-                  <Icon name='ios-stats-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <Icon name='ios-stats-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
                   </View>
@@ -1392,7 +1392,7 @@ class ResourceList extends Component {
             <View style={styles.partialsRow}>
               <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
                 <View style={styles.row}>
-                  <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <Icon name='ios-apps-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
                   </View>
@@ -1407,7 +1407,7 @@ class ResourceList extends Component {
             <View style={styles.bookmarksRow}>
               <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
                 <View style={styles.row}>
-                  <Icon name='ios-apps-outline' size={utils.getFontSize(45)} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
+                  <Icon name='ios-apps-outline' size={45} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
                   <View style={styles.textContainer}>
                     <Text style={styles.resourceTitle}>{translate('Bookmarks')}</Text>
                   </View>
@@ -1424,7 +1424,7 @@ class ResourceList extends Component {
           <View style={styles.sharedContextRow}>
             <TouchableOpacity onPress={this.showContexts.bind(this)}>
               <View style={styles.row}>
-                <Icon name='md-share' size={utils.getFontSize(45)} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                <Icon name='md-share' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
                 <View style={styles.textContainer}>
                   <Text style={styles.resourceTitle}>{translate('sharedContext')}</Text>
                 </View>

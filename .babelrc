@@ -61,7 +61,7 @@
         'transform-react-jsx',
         ['transform-regenerator', {
           asyncGenerators: true, // true by default
-          generators: true, // true by default
+          generators: false, // true by default
           async: true // true by default
         }],
         ['transform-async-to-module-method', {

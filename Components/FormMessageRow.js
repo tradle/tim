@@ -156,13 +156,6 @@ class FormMessageRow extends Component {
     // if (application)
     //   width -= 50 // provider icon and padding
 
-    // let viewStyle = {
-    //   // width: width,
-    //   alignSelf: isMyMessage ? 'flex-end' : 'flex-start',
-    //   // marginLeft: isMyMessage ? 30 : 0, //(hasOwnerPhoto ? 45 : 10),
-    //   backgroundColor: 'transparent', //this.props.bankStyle.BACKGROUND_COLOR,
-    //   flexDirection: 'row',
-    // }
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
 

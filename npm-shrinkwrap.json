@@ -5879,7 +5879,7 @@
     "react-native-app-intro": {
       "version": "1.1.5",
       "from": "tradle/react-native-app-intro#dev",
-      "resolved": "git://github.com/tradle/react-native-app-intro.git#f774220db421109ecf627ec9883b742bd2722486"
+      "resolved": "git://github.com/tradle/react-native-app-intro.git#bab39954c66acb101f196cfb750454482e2c98ca"
     },
     "react-native-button": {
       "version": "2.3.0",

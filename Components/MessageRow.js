@@ -403,7 +403,7 @@ class MessageRow extends Component {
     let model = utils.getModel(resource[TYPE] || resource.id);
 
     let isReadOnlyChat = to[TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
-
+    let width = utils.getMessageWidth(MessageRow)
     if (utils.isContext(model)) {
       let msgModel = utils.getModel(resource.product)
       let str = !navigator.isConnected  &&  isLast
@@ -732,7 +732,7 @@ class MessageRow extends Component {
           let params = { resource, message: resource[v], bankStyle, noLink: true }
           let row
           if  (this.messageHasLink(resource[v]))
-            row = <View style={{maxWidth: utils.dimensions().width * 0.8}}  key={this.getNextKey()}>
+            row = <View style={{maxWidth: width}}  key={this.getNextKey()}>
                     <Markdown markdownStyles={utils.getMarkdownStyles(bankStyle, false, isMyMessage, true)} passThroughProps={{navigator, bankStyle}}>
                       {resource[v]}
                     </Markdown>
