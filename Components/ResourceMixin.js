@@ -65,6 +65,11 @@ var ResourceMixin = {
     let type = utils.getType(resource)
     let model = utils.getModel(type);
     let title = utils.getDisplayName(resource);
+    let modelTitle = utils.makeModelTitle(model)
+    if (title  &&  title.length)
+      title = title + ' -- ' + modelTitle
+    else
+      title = modelTitle
     let isMessageView
     if (!utils.isStub(resource))
       isMessageView = utils.isMessage(resource)
@@ -77,7 +82,7 @@ var ResourceMixin = {
         id: 5,
         component: require('./MessageView'),
         backButtonTitle: 'Back',
-        title: title + ' -- ' + utils.makeModelTitle(model),
+        title,
         passProps: {
           bankStyle: bankStyle,
           resource: resource,

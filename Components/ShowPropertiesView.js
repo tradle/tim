@@ -260,7 +260,14 @@ class ShowPropertiesView extends Component {
             if (!val[TYPE])
               val[TYPE] = pMeta.ref
             let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]), bankStyle)
-            pViewCols.forEach((v) => viewCols.push(v))
+            if (pViewCols.length)
+              pViewCols.forEach((v) => viewCols.push(v))
+            else {
+              val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
+                      <Text style={[styles.title, styles.linkTitle]}>{utils.getDisplayName(val)}</Text>
+                    </TouchableOpacity>
+              isRef = true
+            }
           }
           // return
         }
