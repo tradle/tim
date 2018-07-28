@@ -280,5 +280,6 @@
     "updateNow": "Update Now",
     "later": "Later",
     "sandboxDescription": "In the Sandbox, learn how to use the app with simulated service providers.",
-    "creationDate": "Date created"
+    "creationDate": "Date created",
+    "cancelItem": "You are about to cancel {1}. Please tap OK to confirm"
 }
