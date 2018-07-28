@@ -1094,6 +1094,20 @@ class NewResource extends Component {
   }
 
   cancelItem(pMeta, item) {
+    let dn = ''
+    let ref = pMeta.items.ref
+    if (ref)
+      dn = utils.makeModelTitle(ref)
+    Alert.alert(
+      translate('cancelItem', dn),
+      null,
+      [
+        {text: 'Cancel', onPress: () => console.log('Canceled!')},
+        {text: 'Ok', onPress: () => this.doCancel(pMeta, item)},
+      ]
+    )
+  }
+  doCancel(pMeta, item) {
     let list = this.state.resource[pMeta.name];
     for (let i=0; i<list.length; i++) {
       if (_.isEqual(list[i], item)) {
@@ -1150,8 +1164,6 @@ class NewResource extends Component {
       label += ' *'
     let width = utils.dimensions(NewResource).width - 40
     if (count) {
-      let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem)}</View>
-
       let cstyle = styles.activePropTitle
       actionableItem = <View style={{width}}>
                          <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
@@ -1162,20 +1174,22 @@ class NewResource extends Component {
                              </View>
                            </View>
                          </TouchableOpacity>
-                         {val}
+                         {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem})}
                        </View>
 
     }
     else {
-      let acStyle = [{flex: 1, position: 'absolute', right: 0, width, paddingBottom: 3}, count ? {paddingTop: 0} : {paddingBottom: 7}]
-      actionableItem = <TouchableOpacity style={acStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
-                         <View style={styles.items}>
+      // let acStyle = [{flex: 1, position: 'absolute', right: 0, width, paddingBottom: 3}, count ? {paddingTop: 0} : {paddingBottom: 7}]
+      actionableItem = <View style={{width}}>
+                       <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
+                         <View style={[styles.items, {paddingBottom: 5}]}>
                            <Text style={styles.noItemsText}>{label}</Text>
                            <View style={styles.addButton}>
                               <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
                            </View>
                          </View>
                        </TouchableOpacity>
+                       </View>
     }
     let err = this.state.missedRequiredOrErrorValue
             ? this.state.missedRequiredOrErrorValue[bl.name]
