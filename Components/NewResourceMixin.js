@@ -251,7 +251,7 @@ var NewResourceMixin = {
       if (isReadOnly  &&  !search  &&  !showReadOnly) //  &&  (type === 'date'  ||  !data  ||  !data[p]))
         continue;
       this.setDefaultValue(props[p], data, true)
-      if (utils.isHidden(p, resource)) {
+      if (!this.props.metadata  && utils.isHidden(p, resource)) {
         // if (!resource[p])
         //   this.setDefaultValue(p, resource, true)
         continue
@@ -1716,9 +1716,9 @@ var styles= StyleSheet.create({
     backgroundColor: 'transparent',
     // marginLeft: 10
   },
-  font18: {
-    fontSize: 18,
-  },
+  // font18: {
+  //   fontSize: 18,
+  // },
   font20: {
     fontSize: 20,
   },

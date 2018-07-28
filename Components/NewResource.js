@@ -1194,6 +1194,20 @@ class NewResource extends Component {
   }
 
   cancelItem(pMeta, item) {
+    let dn = ''
+    let ref = pMeta.items.ref
+    if (ref)
+      dn = utils.makeModelTitle(ref)
+    Alert.alert(
+      translate('cancelItem', dn),
+      null,
+      [
+        {text: 'Cancel', onPress: () => console.log('Canceled!')},
+        {text: 'Ok', onPress: () => this.doCancel(pMeta, item)},
+      ]
+    )
+  }
+  doCancel(pMeta, item) {
     let list = this.state.resource[pMeta.name];
     for (let i=0; i<list.length; i++) {
       if (_.isEqual(list[i], item)) {
@@ -1251,13 +1265,10 @@ class NewResource extends Component {
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
       label += ' *'
     if (count) {
-      let val = <View>{this.renderItems(resource[bl.name], bl, this.cancelItem)}</View>
-
-      let separator = <View style={styles.separator}></View>
       let cstyle = count ? styles.activePropTitle : styles.noItemsText
       itemsArray = <View>
                      <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
-                     {val}
+                     {this.renderItems(resource[bl.name], bl, this.cancelItem)}
                    </View>
 
       counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>

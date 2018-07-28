@@ -12,6 +12,12 @@ import PageView from './PageView'
 import reactMixin from 'react-mixin'
 import platformStyles from '../styles/platform'
 import { makeResponsive } from 'react-native-orient'
+const {
+  TYPE
+} = constants
+const {
+  MONEY
+} = constants.TYPES
 
 var Form = t.form.Form;
 Form.stylesheet = myStyles;
@@ -94,7 +100,7 @@ class NewItem extends Component {
       // HACK ref props of array type props reside on resource for now
       let props = this.props.metadata.items.properties
       if (props) {
-        let rProps = utils.getModel(resource[constants.TYPE]).properties
+        let rProps = utils.getModel(resource[TYPE]).properties
         for (let p in props) {
           if (p === propName)
             continue
@@ -112,7 +118,7 @@ class NewItem extends Component {
     }
 
     // if (this.props.metadata.items.backlink)
-    //   item[this.props.metadata.items.backlink] = this.props.resource[constants.TYPE] + '_' + this.props.resource[constants.ROOT_HASH];
+    //   item[this.props.metadata.items.backlink] = this.props.resource[TYPE] + '_' + this.props.resource[ROOT_HASH];
 
     if (utils.isEmpty(this.state.selectedAssets))
       this.props.onAddItem(propName, item);
@@ -144,7 +150,7 @@ class NewItem extends Component {
           v = null
           delete json[p]
         }
-        else if (typeof v === 'object'  &&  metadata.items.properties[p].ref == constants.TYPES.MONEY) {
+        else if (typeof v === 'object'  &&  metadata.items.properties[p].ref == MONEY) {
           let units = metadata.items.properties[p].units
           if (units)
             v = v.value
@@ -192,22 +198,28 @@ class NewItem extends Component {
     return !hasError;
   }
   render() {
-    let props = this.props;
+    let {err, metadata} = this.props;
     let error
-    let err = props.err || this.state.err
+    err = err || this.state.err
     if (err)
       error =  <Text style={styles.err}>{err}</Text>
 
-    let meta =  props.metadata;
     let model = {};
     let params = {
-        meta: meta,
+        meta: metadata,
         model: model,
         // onSubmitEditing: this.onSavePressed.bind(this),
         component: NewItem
     };
     if (this.state.data)
       params.data = this.state.data[0]
+    else if (this.floatingProps  &&  !utils.isEmpty(this.floatingProps)) {
+      if (metadata.items.ref) {
+        params.data = {[TYPE]: metadata.items.ref}
+        for (let p in this.floatingProps)
+          params.data[p] = this.floatingProps[p]
+      }
+    }
 
     let options = this.getFormFields(params);
     options.auto = 'placeholders';

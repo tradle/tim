@@ -125,20 +125,20 @@ var ResourceMixin = {
     });
   },
 
-  renderItems(val, pMeta, cancelItem) {
+  renderItems({value, prop, cancelItem, component}) {
     let { bankStyle, navigator, resource } = this.props
     let linkColor = (bankStyle  &&  bankStyle.linkColor) || '#7AAAC3'
-    let itemsMeta = pMeta.items.properties;
-    let prop = pMeta
-    let ref = pMeta.items.ref;
+    let itemsMeta = prop.items.properties;
+    let pModel
+    let ref = prop.items.ref;
     if (!itemsMeta) {
       if (ref) {
-        pMeta = utils.getModel(ref);
-        itemsMeta = pMeta.properties;
+        pModel = utils.getModel(ref);
+        itemsMeta = pModel.properties;
       }
     }
     let counter = 0;
-    let vCols = pMeta.viewCols;
+    let vCols = pModel  &&  pModel.viewCols;
     if (!vCols) {
       vCols = [];
       for (let p in itemsMeta) {
@@ -146,8 +146,8 @@ var ResourceMixin = {
           vCols.push(p);
       }
     }
-    let cnt = val.length;
-    return val.map((v) => {
+    let cnt = value.length;
+    return value.map((v) => {
       let ret = [];
       counter++;
       vCols.forEach((p) =>  {
@@ -158,7 +158,7 @@ var ResourceMixin = {
           return
         let value;
         if (itemMeta.displayAs)
-          value = utils.templateIt(itemMeta, v, pMeta)
+          value = utils.templateIt(itemMeta, v, pModel)
         else if (itemMeta.type === 'date')
           value = utils.formatDate(v[p]);
         else if (itemMeta.type === 'boolean')
@@ -196,7 +196,7 @@ var ResourceMixin = {
 
 
         ret.push(
-            <View style={styles.item} key={this.getNextKey()}>
+            <View key={this.getNextKey()}>
               {item}
             </View>
         )
@@ -249,7 +249,7 @@ var ResourceMixin = {
 
       let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
       return (
-        <View key={this.getNextKey()}>
+        <View key={this.getNextKey()} style={styles.item} >
            {ret}
            {sep}
         </View>
@@ -265,7 +265,7 @@ var ResourceMixin = {
       let vCols = pMeta.viewCols;
       if (!vCols)
         vCols = pMeta.items.ref  &&  utils.getModel(pMeta.items.ref).viewCols
-      val = <View style={{marginHorizontal: 7}}>{this.renderItems(val, pMeta)}</View>
+      val = <View style={{marginHorizontal: 7}}>{this.renderItems({value: val, prop: pMeta, component})}</View>
       let title = pMeta.title || utils.makeLabel(pMeta.name)
       const titleEl = <Text style={styles.title}>{title}</Text>
       let icon
@@ -667,6 +667,7 @@ var styles = StyleSheet.create({
   },
   itemSeparator: {
     height: 1,
+    marginTop: 5,
     backgroundColor: '#eeeeee',
     // marginHorizontal: 15
   },
@@ -679,7 +680,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#eeeeee'
   },
   item: {
-    // paddingVertical: 7,
+    paddingTop: 7,
   },
   row: {
     flexDirection: 'row',
