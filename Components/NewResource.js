@@ -1268,19 +1268,21 @@ class NewResource extends Component {
       let cstyle = count ? styles.activePropTitle : styles.noItemsText
       itemsArray = <View>
                      <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
-                     {this.renderItems(resource[bl.name], bl, this.cancelItem)}
+                     {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem})}
                    </View>
 
-      counter = <View style={[styles.itemsCounterEmpty, {paddingBottom: 10, marginTop: 15}]}>
-                  <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color={linkColor} />
+      counter = <View style={{marginTop: 10}}>
+                  <View style={styles.addButton}>
+                    <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff' />
+                  </View>
                 </View>
     }
     else {
       itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{label}</Text>
-      counter = <View style={styles.itemsCounterEmpty}>{
+      counter = <View style={styles.addButton}>{
                   isPhoto
                     ? <Icon name='ios-camera-outline'  size={35} color={linkColor} />
-                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color={linkColor} />
+                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
                   }
                 </View>
     }

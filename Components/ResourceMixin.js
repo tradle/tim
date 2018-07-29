@@ -188,7 +188,7 @@ var ResourceMixin = {
 
         if (cancelItem)
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
-                   <View style={styles.row}>
+                   <View style={[styles.row, {width: utils.getContentWidth(component) - 45}]}>
                      {item}
                      <Icon name='ios-close-circle-outline' size={25} color={linkColor} style={{marginTop: Platform.OS === 'web' ? -5 : 0, paddingLeft: 10}}/>
                    </View>
@@ -206,13 +206,13 @@ var ResourceMixin = {
 
         let image = v.photo  &&  <Image source={{uri: v.photo}} style={styles.thumb} />
         let color = cancelItem ? '#757575' : linkColor
-        let item = <View style={{flexDirection: 'row', paddingVertical: 7}}>
+        let item = <View style={{flexDirection: 'row'}}>
                     {image}
                     <Text style={[styles.itemText, {color}]}>{vTitle}</Text>
                   </View>
         if (cancelItem) {
           item = <TouchableOpacity underlayColor='transparent' key={this.getNextKey()} onPress={cancelItem.bind(this, prop, v)}>
-                   <View style={styles.row}>
+                   <View style={[styles.row, {paddingVertical: 7}]}>
                      {item}
                      <Icon name='md-close' size={20} color={linkColor} style={{marginTop: 12}} />
                    </View>
@@ -249,7 +249,7 @@ var ResourceMixin = {
 
       let sep = counter !== cnt  &&  <View style={styles.itemSeparator}></View>
       return (
-        <View key={this.getNextKey()} style={styles.item} >
+        <View key={this.getNextKey()} style={{paddingVertical: 10}} >
            {ret}
            {sep}
         </View>
@@ -667,7 +667,7 @@ var styles = StyleSheet.create({
   },
   itemSeparator: {
     height: 1,
-    marginTop: 5,
+    marginTop: 7,
     backgroundColor: '#eeeeee',
     // marginHorizontal: 15
   },
