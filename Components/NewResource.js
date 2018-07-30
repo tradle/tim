@@ -1170,7 +1170,7 @@ class NewResource extends Component {
                            <View style={styles.items}>
                              <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
                              <View style={styles.addButton}>
-                               <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff'/>
+                               <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff' style={{marginTop: 2}}/>
                              </View>
                            </View>
                          </TouchableOpacity>
@@ -1545,10 +1545,10 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       paddingBottom: 20
     },
     addButton: {
-      ...circled(30),
+      ...circled(25),
       backgroundColor: bankStyle.linkColor,
-      shadowOpacity: 0.7,
-      shadowRadius: 5,
+      // shadowOpacity: 0.7,
+      // shadowRadius: 5,
       shadowColor: '#afafaf',
     },
     // itemsWithCount: {
