@@ -188,7 +188,7 @@ var ResourceMixin = {
 
         if (cancelItem)
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
-                   <View style={[styles.row, {width: utils.getContentWidth(component) - 45}]}>
+                   <View style={[styles.row, {width: utils.getContentWidth(component) - 40}]}>
                      {item}
                      <Icon name='ios-close-circle-outline' size={25} color={linkColor} style={{paddingLeft: 10}}/>
                    </View>
