@@ -190,7 +190,7 @@ var ResourceMixin = {
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                    <View style={[styles.row, {width: utils.getContentWidth(component) - 45}]}>
                      {item}
-                     <Icon name='ios-close-circle-outline' size={25} color={linkColor} style={{marginTop: Platform.OS === 'web' ? -5 : 0, paddingLeft: 10}}/>
+                     <Icon name='ios-close-circle-outline' size={25} color={linkColor} style={{paddingLeft: 10}}/>
                    </View>
                  </TouchableOpacity>
 
@@ -206,13 +206,13 @@ var ResourceMixin = {
 
         let image = v.photo  &&  <Image source={{uri: v.photo}} style={styles.thumb} />
         let color = cancelItem ? '#757575' : linkColor
-        let item = <View style={{flexDirection: 'row'}}>
+        let item = <View style={{flexDirection: 'row', paddingVertical: 10}}>
                     {image}
                     <Text style={[styles.itemText, {color}]}>{vTitle}</Text>
                   </View>
         if (cancelItem) {
           item = <TouchableOpacity underlayColor='transparent' key={this.getNextKey()} onPress={cancelItem.bind(this, prop, v)}>
-                   <View style={[styles.row, {paddingVertical: 7}]}>
+                   <View style={styles.row}>
                      {item}
                      <Icon name='md-close' size={20} color={linkColor} style={{marginTop: 12}} />
                    </View>

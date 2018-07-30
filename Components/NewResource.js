@@ -1254,52 +1254,52 @@ class NewResource extends Component {
     let meta = this.props.model
     let blmodel = meta
     let lcolor = this.getLabelAndBorderColor(bl.name)
-    let isFile = bl.items.ref === FILE
-    let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
     let bankStyle = this.props.bankStyle || defaultBankStyle
     let linkColor = bankStyle.linkColor
 
-    let counter, itemsArray
+    let actionableItem, itemsArray
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
       label += ' *'
+    let width = utils.dimensions(NewResource).width - 40
     if (count) {
-      let cstyle = count ? styles.activePropTitle : styles.noItemsText
-      itemsArray = <View>
-                     <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
-                     {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem})}
-                   </View>
+      let cstyle = styles.activePropTitle
+      actionableItem = <View style={{width}}>
+                         <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
+                           <View style={styles.items}>
+                             <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
+                             <View style={styles.addButton}>
+                               <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff'/>
+                             </View>
+                           </View>
+                         </TouchableOpacity>
+                         {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem})}
+                       </View>
 
-      counter = <View style={{marginTop: 10}}>
-                  <View style={styles.addButton}>
-                    <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff' />
-                  </View>
-                </View>
     }
     else {
-      itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{label}</Text>
-      counter = <View style={styles.addButton}>{
-                  isPhoto
-                    ? <Icon name='ios-camera-outline'  size={35} color={linkColor} />
-                    : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
-                  }
-                </View>
+      // let acStyle = [{flex: 1, position: 'absolute', right: 0, width, paddingBottom: 3}, count ? {paddingTop: 0} : {paddingBottom: 7}]
+      actionableItem = <View style={{width}}>
+                       <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
+                         <View style={[styles.items, {paddingBottom: 5}]}>
+                           <Text style={styles.noItemsText}>{label}</Text>
+                           <View style={styles.addButton}>
+                              <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
+                           </View>
+                         </View>
+                       </TouchableOpacity>
+                       </View>
     }
     let err = this.state.missedRequiredOrErrorValue
             ? this.state.missedRequiredOrErrorValue[bl.name]
             : null
 
-    let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-    let actionableItem
-    if (isPhoto ||  isFile)
-      actionableItem = <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
-                        {itemsArray}
-                      </ImageInput>
-    else
-      actionableItem = <TouchableOpacity style={aiStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
-                        {itemsArray}
-                      </TouchableOpacity>
+    // let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
+    // let actionableItem = <View style={aiStyle}>{itemsArray}</View>
+      // actionableItem = <TouchableOpacity style={aiStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
+      //                   {itemsArray}
+      //                 </TouchableOpacity>
 
     let istyle = [styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
     if (err)
@@ -1307,32 +1307,21 @@ class NewResource extends Component {
     else if (!count)
       istyle.push({paddingBottom: 0, height: 70})
     else {
-      let height = resource[bl.name].photo ? 55 : 45
+      let height = 55 //resource[bl.name].photo ? 55 : 45
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
     istyle = StyleSheet.flatten(istyle)
-    let acStyle = [{flex: 1, position: 'absolute', right: 0},
-                   count || utils.isWeb() ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}
-                 ]
-    let actionableCounter
-    if (isPhoto  ||  isFile)
-      actionableCounter = <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
-                            {counter}
-                          </ImageInput>
-    else
-      actionableCounter = <TouchableOpacity style={acStyle}
-                              onPress={this.onNewPressed.bind(this, bl, meta)}>
-                            {counter}
-                          </TouchableOpacity>
-
-    let error = this.paintError({prop: bl})
+    // let acStyle = [{flex: 1, justifyContent: 'center'}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]
+    // let acStyle = [{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {paddingBottom: 7}]
+    // let actionableCounter
+    // if (!count)
+    //   actionableCounter = <TouchableOpacity style={acStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
+    //                         {counter}
+    //                       </TouchableOpacity>
     return (
       <View key={this.getNextKey()}>
         <View style={istyle} ref={bl.name}>
-          <View style={styles.items}>
-            {actionableItem}
-            {actionableCounter}
-          </View>
+          {actionableItem}
         </View>
         {this.paintError({prop: bl})}
         {this.paintHelp(bl)}
@@ -1540,7 +1529,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     activePropTitle: {
       fontSize: 12,
-      marginTop: 20,
+      // marginTop: 20,
       paddingBottom: 5,
       // marginBottom: 5,
       color: '#bbbbbb'
@@ -1912,4 +1901,96 @@ module.exports = NewResource;
   //   }
   //   this.setState({userInput: '', selectedAssets: {}});
   //   Actions.addMessage({msg: value}); //, this.state.resource, utils.getModel(modelName));
+  // }
+  // getItem1(bl, styles) {
+  //   let resource = this.state.resource
+  //   if (utils.isHidden(bl.name, resource))
+  //     return
+  //   let meta = this.props.model
+  //   let blmodel = meta
+  //   let lcolor = this.getLabelAndBorderColor(bl.name)
+  //   let isFile = bl.items.ref === FILE
+  //   let isPhoto = bl.name === 'photos' || bl.items.ref === PHOTO
+  //   let bankStyle = this.props.bankStyle || defaultBankStyle
+  //   let linkColor = bankStyle.linkColor
+
+  //   let counter, itemsArray
+  //   let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+  //   let label = translate(bl, blmodel)
+  //   if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
+  //     label += ' *'
+  //   if (count) {
+  //     let cstyle = count ? styles.activePropTitle : styles.noItemsText
+  //     itemsArray = <View>
+  //                    <Text style={[cstyle, {color: lcolor}]}>{label}</Text>
+  //                    {this.renderItems({value: resource[bl.name], prop: bl, cancelItem: this.cancelItem})}
+  //                  </View>
+
+  //     counter = <View style={{marginTop: 15}}>
+  //                 <View style={styles.addButton}>
+  //                   <Icon name={bl.icon || 'md-add'} size={bl.icon ? 25 : 20}  color='#ffffff' />
+  //                 </View>
+  //               </View>
+  //   }
+  //   else {
+  //     itemsArray = <Text style={count ? styles.itemsText : styles.noItemsText}>{label}</Text>
+  //     counter = <View style={styles.addButton}>{
+  //                 isPhoto
+  //                   ? <Icon name='ios-camera-outline'  size={35} color={linkColor} />
+  //                   : <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
+  //                 }
+  //               </View>
+  //   }
+  //   let err = this.state.missedRequiredOrErrorValue
+  //           ? this.state.missedRequiredOrErrorValue[bl.name]
+  //           : null
+
+  //   let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
+  //   let actionableItem
+  //   if (isPhoto ||  isFile)
+  //     actionableItem = <ImageInput prop={bl} style={aiStyle} onImage={item => this.onAddItem(bl.name, item)}>
+  //                       {itemsArray}
+  //                     </ImageInput>
+  //   else
+  //     actionableItem = <TouchableOpacity style={aiStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
+  //                       {itemsArray}
+  //                     </TouchableOpacity>
+
+  //   let istyle = [styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
+  //   if (err)
+  //     istyle.push({marginBottom: 10})
+  //   else if (!count)
+  //     istyle.push({paddingBottom: 0, height: 70})
+  //   else {
+  //     let height = resource[bl.name].photo ? 55 : 45
+  //     istyle.push({paddingBottom: 0, height: count * height + 35})
+  //   }
+  //   istyle = StyleSheet.flatten(istyle)
+  //   let acStyle = [{flex: 1, position: 'absolute', right: 0},
+  //                  count || utils.isWeb() ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}
+  //                ]
+  //   let actionableCounter
+  //   if (isPhoto  ||  isFile)
+  //     actionableCounter = <ImageInput prop={bl} style={acStyle} onImage={item => this.onAddItem(bl.name, item)}>
+  //                           {counter}
+  //                         </ImageInput>
+  //   else
+  //     actionableCounter = <TouchableOpacity style={acStyle}
+  //                             onPress={this.onNewPressed.bind(this, bl, meta)}>
+  //                           {counter}
+  //                         </TouchableOpacity>
+
+  //   let error = this.paintError({prop: bl})
+  //   return (
+  //     <View key={this.getNextKey()}>
+  //       <View style={istyle} ref={bl.name}>
+  //         <View style={styles.items}>
+  //           {actionableItem}
+  //           {actionableCounter}
+  //         </View>
+  //       </View>
+  //       {this.paintError({prop: bl})}
+  //       {this.paintHelp(bl)}
+  //     </View>
+  //   );
   // }
