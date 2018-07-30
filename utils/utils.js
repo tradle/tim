@@ -2417,6 +2417,7 @@ var utils = {
       if (bankStyle.navBarBorderColor) {
         separator.borderBottomColor = bankStyle.navBarBorderColor
         separator.borderBottomWidth = bankStyle.navBarBorderWidth ||  StyleSheet.hairlineWidth
+        separator.width = this.dimensions().width
       }
     }
     return separator

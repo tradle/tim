@@ -1024,7 +1024,7 @@ class NewResource extends Component {
                  </TouchableOpacity>
 
     }
-    let contentStyle = {backgroundColor: 'transparent', width: width, alignSelf: 'center', paddingTop:10}
+    let contentStyle = {backgroundColor: 'transparent', width, alignSelf: 'center', paddingTop: 10}
     if (arrayItems) {
       arrayItems = <View style={styles.arrayItems}>
                      {arrayItems}
@@ -1068,7 +1068,7 @@ class NewResource extends Component {
       const prop = properties[droppable]
       // return (
       return (
-        <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator}>
+        <PageView style={[platformStyles.container, {backgroundColor: 'transparent'}]} separator={contentSeparator}>
           <DropPage
             accept="image/*"
             multiple={prop.type === 'array'}
@@ -1101,7 +1101,8 @@ class NewResource extends Component {
                    <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
                  </View>
       }
-
+      // HACK for web otherwise does not get displyed
+      contentSeparator.width = utils.dimensions().width
       return <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator} bankStyle={bankStyle}>
                {errors}
                {content}
@@ -1566,10 +1567,10 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       borderBottomColor: '#eeeeee',
       borderBottomWidth: 1
     },
-    scroll: {
-      backgroundColor: 'transparent',
-      paddingTop:10
-    },
+    // scroll: {
+    //   backgroundColor: 'transparent',
+    //   paddingTop:10
+    // },
     bar: {
       backgroundColor: 'transparent',
       paddingHorizontal: 10,
