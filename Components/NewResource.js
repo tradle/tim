@@ -1263,7 +1263,7 @@ class NewResource extends Component {
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
       label += ' *'
-    let width = utils.dimensions(NewResource).width - 40
+    let width = utils.getContentWidth(NewResource) - 40
     if (count) {
       let cstyle = styles.activePropTitle
       actionableItem = <View style={{width}}>
@@ -1648,7 +1648,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       paddingBottom: 20
     },
     addButton: {
-      ...circled(30),
+      ...circled(25),
       backgroundColor: bankStyle.linkColor,
       shadowOpacity: 0.7,
       shadowRadius: 5,
