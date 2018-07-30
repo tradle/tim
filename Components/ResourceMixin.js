@@ -190,7 +190,7 @@ var ResourceMixin = {
           item = <TouchableOpacity underlayColor='transparent' onPress={cancelItem.bind(this, prop, v)}>
                    <View style={[styles.row, {width: utils.getContentWidth(component) - 40}]}>
                      {item}
-                     <Icon name='ios-close-circle-outline' size={25} color={linkColor} style={{paddingLeft: 10}}/>
+                     <Icon name='ios-close-circle-outline' size={28} color={linkColor} />
                    </View>
                  </TouchableOpacity>
 
@@ -685,7 +685,7 @@ var styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginRight: 3
+    // marginRight: 3
   },
   title: {
     fontSize: 16,

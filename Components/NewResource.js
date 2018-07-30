@@ -1650,8 +1650,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     addButton: {
       ...circled(25),
       backgroundColor: bankStyle.linkColor,
-      shadowOpacity: 0.7,
-      shadowRadius: 5,
+      // shadowOpacity: 0.7,
+      // shadowRadius: 5,
       shadowColor: '#afafaf',
     },
     // itemsWithCount: {
