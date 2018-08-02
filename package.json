@@ -35,7 +35,8 @@
     "push:android:prod": "./scripts/code-push.js --platform android --stage Production",
     "fix:staging": "node ./scripts/fix-staging.js",
     "build:codepush:android": "./scripts/release-android.sh",
-    "build:codepush:ios": "echo 'ERROR: PLEASE BUILD IN XCODE FOR NOW'"
+    "build:codepush:ios": "echo 'ERROR: PLEASE BUILD IN XCODE FOR NOW'",
+    "pushenv": "./scripts/pushenv.sh"
   },
   "dependencies": {
     "@tradle/aws-client": "^1.9.0",
