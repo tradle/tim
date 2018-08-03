@@ -1813,34 +1813,35 @@ var utils = {
     return getDimensions(Component)
   },
   styleFactory(Component, create) {
-    if (!Component.displayName) throw new Error('component must have "displayName"')
+    // if (!Component.displayName) throw new Error('component must have "displayName"')
 
     return (additionalParams) => {
-      var key = Component.displayName
+      // var key = Component.displayName
       // if (!stylesCache[key]) {
-        stylesCache[key] = {}
+        // stylesCache[key] = {}
       // }
 
       var orientation = getOrientation(Component)
-      var subCache = stylesCache[key]
-      if (!subCache[orientation]) {
-        var dimensions = getDimensions(Component)
-        var { width, height } = dimensions
-        var switchWidthHeight = (
-          (orientation === 'PORTRAIT' && width > height) ||
-          (orientation === 'LANDSCAPE' && width < height)
-        )
+      // var subCache = stylesCache[key]
+      // if (!subCache[orientation]) {
+      var dimensions = getDimensions(Component)
+      var { width, height } = dimensions
+      var switchWidthHeight = (
+        (orientation === 'PORTRAIT' && width > height) ||
+        (orientation === 'LANDSCAPE' && width < height)
+      )
 
-        if (switchWidthHeight) {
-          dimensions = { width: height, height: width }
-        }
-        let params = { dimensions }
-        if (additionalParams)
-          _.extend(params, additionalParams)
-        subCache[orientation] = create(params)
+      if (switchWidthHeight) {
+        dimensions = { width: height, height: width }
       }
+      let params = { dimensions }
+      if (additionalParams)
+        _.extend(params, additionalParams)
+      return create(params)
+        // subCache[orientation] = create(params)
+      // }
 
-      return subCache[orientation]
+      // return subCache[orientation]
     }
   },
   resized: function (props, nextProps) {
