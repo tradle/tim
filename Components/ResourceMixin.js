@@ -373,7 +373,7 @@ var ResourceMixin = {
       if (showCollapsed  &&  showCollapsed === prop.name)
         icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={{position: 'absolute', top: 15, right: 20}} />
       if (isOnfido) {
-        let color = json.result === 'clear' ? 'green' : 'red'
+        let color = json.result === 'clear' ? '#f1ffe7' : 'red'
         cols.push(<Col sm={1} md={1} lg={1} style={{paddingVertical: 5, backgroundColor}} key={this.getNextKey()}>
                     <Text style={[styles.bigTitle, {color: color, alignSelf: 'center'}]}>{json.result}</Text>
                     {icon}
