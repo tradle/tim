@@ -177,7 +177,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#0301189e131b58001f92b8f6886110443ffda71e"
+      "resolved": "git://github.com/tradle/models.git#cb98e82bc0bcb95621ed38b321741863514f450c"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -5830,9 +5830,9 @@
       "resolved": "https://registry.npmjs.org/react-native-carousel/-/react-native-carousel-0.11.0.tgz"
     },
     "react-native-code-push": {
-      "version": "5.4.0",
-      "from": "react-native-code-push@latest",
-      "resolved": "https://registry.npmjs.org/react-native-code-push/-/react-native-code-push-5.4.0.tgz",
+      "version": "5.3.4",
+      "from": "react-native-code-push@5.3.4",
+      "resolved": "https://registry.npmjs.org/react-native-code-push/-/react-native-code-push-5.3.4.tgz",
       "dependencies": {
         "ansi-escapes": {
           "version": "1.4.0",
