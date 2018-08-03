@@ -658,9 +658,9 @@
       "optional": true
     },
     "@yarnpkg/lockfile": {
-      "version": "1.0.1",
+      "version": "1.0.2",
       "from": "@yarnpkg/lockfile@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@yarnpkg/lockfile/-/lockfile-1.0.1.tgz",
+      "resolved": "https://registry.npmjs.org/@yarnpkg/lockfile/-/lockfile-1.0.2.tgz",
       "dev": true
     },
     "abbrev": {
@@ -6663,7 +6663,7 @@
     "rn-nodeify": {
       "version": "8.2.0",
       "from": "tradle/rn-nodeify#dev",
-      "resolved": "git://github.com/tradle/rn-nodeify.git#d0be8ec6ac6461146579a48e7c909ef335814d8f",
+      "resolved": "git://github.com/tradle/rn-nodeify.git#f223a6a51a637bd2f6d30abd3526c6f214ada2db",
       "dev": true,
       "dependencies": {
         "fs-extra": {
