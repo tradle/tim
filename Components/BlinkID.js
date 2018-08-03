@@ -22,7 +22,8 @@ const recognizers = {
   nzdl: BlinkID.RECOGNIZER_NZDL_FRONT,
   // scans MyKad (Malaysian ID)
   mykad: BlinkID.RECOGNIZER_MYKAD,
-  face: BlinkID.RECOGNIZER_DOCUMENT_FACE
+  face: BlinkID.RECOGNIZER_DOCUMENT_FACE,
+  barcode: BlinkID.RECOGNIZER_PDF417,
 }
 
 const defaults = {
