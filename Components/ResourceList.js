@@ -532,6 +532,12 @@ class ResourceList extends Component {
       return true
     if (this.state.hasTestProviders !== nextState.hasTestProviders)
       return true
+    else if (this.state.testProviders  ||  nextState.testProviders) {
+      if (!this.state.testProviders  ||  !nextState.testProviders)
+        return true
+      if (this.state.testProviders.length  !==  nextState.testProviders.length)
+        return true
+    }
     if (nextState.isConnected !== this.state.isConnected)
       return true
     if (this.state.newStyles !== nextState.newStyles)
