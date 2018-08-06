@@ -1286,7 +1286,7 @@ class NewResource extends Component {
                          <View style={[styles.items, {paddingBottom: 5}]}>
                            <Text style={styles.noItemsText}>{label}</Text>
                            <View style={styles.addButton}>
-                              <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
+                              <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' style={{marginTop: 2}}/>
                            </View>
                          </View>
                        </TouchableOpacity>

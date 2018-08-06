@@ -70,7 +70,7 @@ class VerificationView extends Component {
     if (!dtitle)
       dtitle = utils.makeModelTitle(utils.getType(resource.document))
 
-    let details = <View style={{paddingVertical: 5, paddingHorizontal: 10}}>
+    let details = <View style={styles.document}>
                     <Text style={styles.ptitle}>{dprop.title}</Text>
                     <TouchableOpacity onPress={() => this.showRefResource(resource.document, dprop)}>
                       <Text style={styles.pvalue}>{dtitle}</Text>
@@ -363,6 +363,10 @@ return StyleSheet.create({
     marginHorizontal: 7,
     color: bankStyle.linkColor,
   },
+  document: {
+    paddingVertical: 5,
+    paddingHorizontal: 10
+  }
 })
 })
 module.exports = VerificationView
