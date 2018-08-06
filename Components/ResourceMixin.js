@@ -23,6 +23,7 @@ import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import Accordion from './Accordion'
+import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
@@ -150,12 +151,15 @@ var ResourceMixin = {
     return value.map((v) => {
       let ret = [];
       counter++;
+      let displayName
       vCols.forEach((p) =>  {
         let itemMeta = itemsMeta[p];
         if (!v[p]  &&  !itemMeta.displayAs)
           return
-        if (itemMeta.displayName)
+        if (itemMeta.displayName) {
+          displayName = v[p]
           return
+        }
         let value;
         if (itemMeta.displayAs)
           value = utils.templateIt(itemMeta, v, pModel)
@@ -202,7 +206,7 @@ var ResourceMixin = {
         )
       })
       if (!ret.length) {
-        let vTitle = v.title  ||  utils.makeModelTitle(utils.getType(v))
+        let vTitle = displayName || v.title  ||  utils.makeModelTitle(utils.getType(v))
 
         let image = v.photo  &&  <Image source={{uri: v.photo}} style={styles.thumb} />
         let color = cancelItem ? '#757575' : linkColor
@@ -522,16 +526,22 @@ var ResourceMixin = {
     if (!_component)
       return
     component = _component
-    let lstyles = createStyles({bankStyle: this.props.bankStyle || this.state.bankStyle})
+    let bankStyle = this.props.bankStyle || this.state.bankStyle
+    let contentSeparator = utils.getContentSeparator(bankStyle)
+
+    let lstyles = createStyles({bankStyle})
     let network = <NetworkInfoProvider connected={this.state.isConnected} resource={this.state.resource} />
-    return (<View style={lstyles.loadingIndicator}>
-              <View style={platformStyles.container}>
-                {network}
-                <Text style={lstyles.loading}>{'In progress...'}</Text>
-                <ActivityIndicator size='large' style={lstyles.indicator} />
-              </View>
-            </View>
-           )
+    return (
+      <PageView style={[platformStyles.container, {alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
+        <View style={lstyles.loadingIndicator}>
+          <View style={platformStyles.container}>
+            {network}
+            <Text style={lstyles.loading}>{'In progress...'}</Text>
+            <ActivityIndicator size='large' style={lstyles.indicator} />
+          </View>
+        </View>
+      </PageView>
+    )
   },
 
   addDataSecurity(resource) {
