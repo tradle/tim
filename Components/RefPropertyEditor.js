@@ -145,7 +145,7 @@ class RefPropertyEditor extends Component {
       if (utils.isImageDataURL(photoR.url)) {
         propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
       } else {
-        propView = <Icon name='ios-paper-outline' size={35} color={linkColor} />
+        propView = <Icon name='ios-paper-outline' size={40} color={linkColor} />
       }
     }
     else {

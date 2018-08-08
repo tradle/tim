@@ -1355,7 +1355,7 @@ class NewResource extends Component {
         items.push(<Image resizeMode='cover' style={styles.thumb} source={{uri: arr[i].url}}  key={this.getNextKey()}/>)
 
       itemsArray =
-        <View style={[styles.photoStrip, {marginTop: count && -25 || 0, paddingBottom: 5}]}>
+        <View style={[styles.photoStrip, {paddingBottom: 5}]}>
           <Text style={[styles.activePropTitle, {color: lcolor}]}>{label}</Text>
           <View style={styles.row}>{items}</View>
         </View>
@@ -1463,7 +1463,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     // },
     actionIcon: {
       flex: 1,
-      justifyContent: 'flex-end',
+      justifyContent: 'center',
+      // justifyContent: 'flex-end',
       alignItems: 'flex-end',
       paddingRight: 5
     },
