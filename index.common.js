@@ -619,7 +619,7 @@ var NavigationBarRouteMapper = {
     if (!icon)
       style.push({marginTop: 6})
     let title = icon
-              ? <Icon name={icon} size={utils.getFontSize(30)} color={color} style={styles.icon}/>
+              ? <Icon name={icon} size={30} color={color} style={styles.icon}/>
               : <Text style={style}>
                   {lbTitle}
                 </Text>
@@ -853,13 +853,7 @@ var NavigationBarRouteMapper = {
         else if (resource)
           model = utils.getModel(utils.getType(resource))
       }
-      let tstyle = {flexDirection: 'row'}
-      if (utils.isAndroid()) {
-        let { width } = utils.dimensions(route.component)
-        tstyle.width = width - 150
-      }
-      else
-        tstyle.marginRight = 10
+      let tstyle = {alignSelf: 'center'}
       for (let i=1; i<t.length; i++) {
         if (!tArr)
           tArr = []
@@ -868,9 +862,13 @@ var NavigationBarRouteMapper = {
                   </View>
                   )
       }
+      if (utils.isAndroid()) {
+        let { width } = utils.dimensions(route.component)
+        tstyle.width = width - 150
+      }
       let tt = this.makeTitle(t[0])
       text = <View style={tstyle} key={'index.common.js_0'}>
-               <Text style={style} numberOfLines={1}>{tt}</Text>
+               <Text numberOfLines={1} style={style}>{tt}</Text>
              </View>
     }
 
@@ -971,7 +969,7 @@ var styles = StyleSheet.create({
     // marginTop: -3,
     color: '#2892C6',
     fontSize: 12,
-    alignSelf: 'center'
+    // alignSelf: 'center'
   },
   submit: {
     backgroundColor: '#7AAAC3',
