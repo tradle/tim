@@ -907,7 +907,7 @@ class FormRequestRow extends Component {
           })
           // addMessage = 'You can choose the product by clicking on a red  menu button'
           let style = {transform: [{rotate: rotateX}]}
-          msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={[styles.message, {paddingVertical: 5}]}  key={this.getNextKey()}>
+          msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={[styles.message, {paddingVertical: utils.isAndroid() ? 5 : 0}]}  key={this.getNextKey()}>
                   <Animated.View style={style}>
                     <View style={[styles.addButton, {backgroundColor: '#007EFF', marginRight: 7}]}>
                       <Icon name='md-information' size={35} color='#ffffff' />

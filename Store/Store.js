@@ -3498,7 +3498,8 @@ var Store = Reflux.createStore({
           if (messages[i].id === rid)
             idx = i
         if (idx !== -1) {
-          if (r._time === list[rid].value._time)
+          let lr = list[rid]
+          if (lr  &&  r._time === lr.value._time)
             return
           messages.splice(idx, 1)
         }
@@ -6443,17 +6444,18 @@ if (!res[SIG]  &&  res._message)
     }
 
     _.extend(params, {client: this.client, filterResource: filterResource, endCursor, noPaging: !endCursor})
+    let list
     let result = await graphQL.searchServer(params)
     if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger  &&  (!params.prop  ||  !params.prop.items  ||  !params.prop.items.backlink))
         this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
-      return
+      return { list }
     }
 
     let newCursor = limit  &&  result.pageInfo  &&  result.pageInfo.endCursor
         // if (result.edges.length < limit)
         //   cursor.endCursor = null
-    let list = result.edges.map((r) => this.convertToResource(r.node))
+    list = result.edges.map((r) => this.convertToResource(r.node))
     /*
     if (me.isEmployee  &&  modelName === APPLICATION) {
       let contexts
@@ -6528,14 +6530,14 @@ if (!res[SIG]  &&  res._message)
       if (!application.context)
         application = await this._getItemFromServer(application)
       contextId = application.context
-      var params = {
-        client: this.client,
-        author: me[ROOT_HASH],
-        context: contextId,
-        filterResource: {_payloadType: VERIFICATION}
-      }
+      // var params = {
+      //   client: this.client,
+      //   author: me[ROOT_HASH],
+      //   context: contextId,
+      //   filterResource: {_payloadType: VERIFICATION}
+      // }
 
-      importedVerification = graphQL.getChat(params)
+      // importedVerification = graphQL.getChat(params)
     }
     else if (context)
       contextId = context.contextId
@@ -6551,15 +6553,22 @@ if (!res[SIG]  &&  res._message)
     }
     let author //, recipient
     if (application) {
-      author = applicant  &&  this.getRootHash(applicant) // (applicant[ROOT_HASH] || applicantId.split('_')[1])
-      // recipient = myBot[ROOT_HASH]
+      // author = applicant  &&  this.getRootHash(applicant) // (applicant[ROOT_HASH] || applicantId.split('_')[1])
+      // // recipient = myBot[ROOT_HASH]
     }
     else {
       // recipient = myBot[ROOT_HASH]
-      if (to)
-        author = to[TYPE] === PROFILE ? to[ROOT_HASH] : this.getRepresentative(to)[ROOT_HASH]
-      else if (!context  &&  !contextId)
-        author = myBot[ROOT_HASH]
+      let addAuthor = true
+      if (me.isEmployee  &&  context  &&  context.from.organization)  {
+        if (utils.getId(context.from.organization) === me.organization.id)
+          addAuthor = false
+      }
+      if (addAuthor) {
+        if (to)
+          author = to[TYPE] === PROFILE ? to[ROOT_HASH] : this.getRepresentative(to)[ROOT_HASH]
+        else if (!context  &&  !contextId)
+          author = myBot[ROOT_HASH]
+      }
     }
     let all = graphQL.getChat({
       client: this.client,
@@ -6709,6 +6718,11 @@ if (!res[SIG]  &&  res._message)
     if (!r[TYPE])
       return r
     const m = this.getModel(r[TYPE])
+    if (!m) {
+      debug(`model with id ${r[TYPE]} not found`)
+      return r
+    }
+
     const propNames = Object.keys(m.properties)
     const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
     let rr = pick(r, toKeep)
