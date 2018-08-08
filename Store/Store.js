@@ -3476,7 +3476,8 @@ var Store = Reflux.createStore({
             idx = i
 
         if (idx !== -1) {
-          if (r._time === list[rid].value._time)
+          let lr = list[rid]
+          if (lr  &&  r._time === lr.value._time)
             return
           messages.splice(idx, 1)
         }
@@ -6393,17 +6394,18 @@ if (!res[SIG]  &&  res._message)
     }
 
     _.extend(params, {client: this.client, filterResource: filterResource, endCursor, noPaging: !endCursor})
+    let list
     let result = await graphQL.searchServer(params)
     if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger  &&  (!params.prop  ||  !params.prop.items  ||  !params.prop.items.backlink))
         this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
-      return
+      return { list }
     }
 
     let newCursor = limit  &&  result.pageInfo  &&  result.pageInfo.endCursor
         // if (result.edges.length < limit)
         //   cursor.endCursor = null
-    let list = result.edges.map((r) => this.convertToResource(r.node))
+    list = result.edges.map((r) => this.convertToResource(r.node))
     /*
     if (me.isEmployee  &&  modelName === APPLICATION) {
       let contexts
