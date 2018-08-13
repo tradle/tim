@@ -12,6 +12,7 @@ import constants from '@tradle/constants'
 
 import utils from '../utils/utils'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
+import chatStyles from '../styles/chatStyles'
 import RowMixin from './RowMixin'
 
 import {
@@ -93,13 +94,17 @@ class PhotoList extends Component {
   }
   getPhotoStyle(photos) {
     let len = photos.length
+
     let width = utils.dimensions().width
+    let d1 = Math.floor(width / 3) * 2
+    d1 = Math.min(d1, 240)
     let d3 = Math.floor((width / 3) - 6)
     let d4 = Math.floor((width / 4) - 5)
     let d5 = Math.floor((width / 5) - 5)
-    return  {width: d5, height: d5};
-    switch (photos.length) {
+    // return  {width: d5, height: d5};
+    switch (len) {
     case 1:
+      return {width: d1, height: d1 / 1.5};
     case 2:
     case 3:
       return {width: d3, height: d3};
@@ -141,7 +146,8 @@ var styles = StyleSheet.create({
     paddingBottom: 4
   },
   thumbCommon: {
-    borderWidth: 0.5,
+    borderWidth: .5,
+    borderRadius: 10,
     margin: 1,
     borderColor: '#999999'
   }
