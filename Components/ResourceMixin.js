@@ -17,7 +17,7 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import constants from '@tradle/constants'
 
 var { TYPE } = constants
-var { PROFILE, ORGANIZATION } = constants.TYPES
+var { PROFILE, ORGANIZATION, VERIFICATION } = constants.TYPES
 
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
@@ -27,6 +27,7 @@ import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
+import Actions from '../Actions/Actions'
 
 import ENV from '../utils/env'
 
@@ -113,7 +114,7 @@ var ResourceMixin = {
     this.props.navigator.push({
       id: 10,
       title: translate(prop, utils.getModel(resource[TYPE])),
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: require('./ResourceList'),
       passProps: {
         modelName: prop.items.ref,
@@ -522,17 +523,19 @@ var ResourceMixin = {
     }
     return true
   },
-  showLoading(_component) {
-    if (!_component)
+  showLoading(params) {
+    if (!params.component)
       return
-    component = _component
+
+    component = params.component
+    let style = params.style || {}
     let bankStyle = this.props.bankStyle || this.state.bankStyle
     let contentSeparator = utils.getContentSeparator(bankStyle)
 
     let lstyles = createStyles({bankStyle})
     let network = <NetworkInfoProvider connected={this.state.isConnected} resource={this.state.resource} />
     return (
-      <PageView style={[platformStyles.container, {alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
+      <PageView style={[platformStyles.container, style, {alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
         <View style={lstyles.loadingIndicator}>
           <View style={platformStyles.container}>
             {network}
@@ -614,19 +617,20 @@ var ResourceMixin = {
   },
   getBlockchainExplorerRow(url, i, styles) {
     const { bankStyle } = this.props
+    let key = `url${i}`
     return (
-      <TouchableOpacity onPress={this.onPress.bind(this, url)} key={`url${i}`}>
+      <TouchableOpacity onPress={this.onPress.bind(this, url)} key={key}>
         <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' ' + (i+1)}</Text>
       </TouchableOpacity>
     )
-  }
+  },
 }
 
 var createStyles = utils.styleFactory(component || PhotoList, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
     loadingIndicator: {
       alignSelf: 'center',
-      marginTop: dimensions.height - 200,
+      marginTop: dimensions.height - 300,
     },
     loading: {
       fontSize: 17,
