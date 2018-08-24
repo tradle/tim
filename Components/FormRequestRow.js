@@ -751,7 +751,6 @@ class FormRequestRow extends Component {
       _.extend(r, resource.prefill)
       isPrefilled = true
     }
-
     let rightButtonTitle = 'Done'
     if (isMyMessage) {
       let me = utils.getMe()
@@ -835,7 +834,7 @@ class FormRequestRow extends Component {
     if (!isReadOnly)
       isReadOnly = !switchToContext  && !context &&  (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context)) //this.props.context  &&  this.props.context._readOnly
 
-    let addMessage = messagePart || message
+    let addMessage = messagePart || translate(message)
     messagePart = null
     let msg, link
 

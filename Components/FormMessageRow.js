@@ -6,8 +6,7 @@ import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons';
 import { makeResponsive } from 'react-native-orient'
 
-import utils from '../utils/utils'
-var translate = utils.translate
+import utils, { translate } from '../utils/utils'
 import ArticleView from './ArticleView'
 import dateformat from 'dateformat'
 import PhotoList from './PhotoList'
@@ -252,6 +251,7 @@ class FormMessageRow extends Component {
       if (utils.isHidden(v, resource))
         return
       let ref = properties[v].ref
+          // debugger
       if (ref) {
         if (resource[v]  &&  ref !== PHOTO  &&  ref !== IDENTITY) {
           vCols.push(this.getPropRow(properties[v], resource, resource[v].title || resource[v]))
@@ -279,7 +279,7 @@ class FormMessageRow extends Component {
         else if (properties[v].displayAs)
           val = utils.templateIt(properties[v], resource)
         else if (properties[v].range === 'model')
-          val = utils.makeModelTitle(utils.getModel(resource[v]))
+          val = translate(utils.getModel(resource[v]))//utils.makeModelTitle(utils.getModel(resource[v]))
         else
           val = properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
 
