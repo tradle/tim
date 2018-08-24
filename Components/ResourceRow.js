@@ -397,12 +397,13 @@ class ResourceRow extends Component {
                 <Text style={[styles.resourceTitle, {fontSize: 18, paddingLeft: 7, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
               </View>
       }
-      let vCols = utils.getDisplayName(resource);
-      if (vCols && vCols.length) {
+      let dn = utils.getDisplayName(resource);
+      if (dn && dn.length) {
         if (model.subClassOf  &&  model.subClassOf === ENUM)
-          vCols = utils.createAndTranslate(vCols, true)
+          dn = utils.translateEnum(resource)
+          // dn = utils.createAndTranslate(dn, true)
 
-        return <Text style={styles.resourceTitle}>{vCols}</Text>;
+        return <Text style={styles.resourceTitle}>{dn}</Text>;
       }
       else
         return <Text style={styles.resourceTitle}>{model.title}</Text>;
