@@ -5,12 +5,22 @@ import ENV from './env'
 
 const RAW_STRINGS = {
   en: require('./strings_en.json'),
+  es: require('./strings_es.json'),
+  fr: require('./strings_fr.json'),
+  fil: require('./strings_fil.json'),
+  bn: require('./strings_bn.json'),
+  vi: require('./strings_vi.json'),
   nl: require('./strings_nl.json')
 }
 
 const STRINGS = {
   en: envify(RAW_STRINGS.en, ENV),
-  nl: envify(RAW_STRINGS.nl, ENV)
+  nl: envify(RAW_STRINGS.nl, ENV),
+  es: envify(RAW_STRINGS.es, ENV),
+  fr: envify(RAW_STRINGS.fr, ENV),
+  bn: envify(RAW_STRINGS.bn, ENV),
+  vi: envify(RAW_STRINGS.vi, ENV),
+  fil: envify(RAW_STRINGS.fil, ENV),
 }
 
 const DEFAULT_LANGUAGE = new LocalizedStrings({ en: {}, nl: {} }).getLanguage()

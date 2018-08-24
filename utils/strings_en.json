@@ -11,7 +11,6 @@
     "invalidPropertyValue": "Invalid value",
     "optional": "optional",
     "thisFieldIsRequired": "This field is required",
-
     "unlockDevice": "unlock your device to proceed",
     "pleaseDrawPassword": "Draw your pattern",
     "drawYourPassword": "Draw your pattern",
@@ -26,7 +25,6 @@
     "wrongPattern": "Wrong pattern",
     "correctGesture": "Correct pattern detected",
     "authenticationFailed": "Authentication failed",
-
     "setPassword": "Choose a secure password",
     "enterPassword": "Enter your password",
     "enterCurrentPassword": "Enter your current password",
@@ -36,7 +34,6 @@
     "correctPassword": "Aww, you remembered!",
     "passwordsDontMatch": "Passwords don't match",
     "temporarilyLocked": "For your protection, this application has been temporarily locked for {1}",
-
     "pleaseRestartTIM": "Please restart TiM",
     "ok": "OK",
     "cancel": "Cancel",
@@ -77,11 +74,9 @@
     "verifiedBy": "Verified by {1}",
     "issuedBy": "Issued by {1}",
     "sentTo": "Sent to {1}",
-
     "verifiedByOn": "Verified by {1} on",
     "issuedByOn": "Issued by {1} on",
     "sentToOn": "Sent to {1} on",
-
     "typeMessage": "Type a message",
     "newProductMsg": "I need a {1}.",
     "shareOne": "Alternatively, share below",
