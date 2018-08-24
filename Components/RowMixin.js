@@ -15,8 +15,7 @@ import {
 import PropTypes from 'prop-types';
 import { coroutine as co } from 'bluebird'
 
-import utils from '../utils/utils'
-var translate = utils.translate
+import utils, { translate, translateEnum } from '../utils/utils'
 import constants from '@tradle/constants'
 import Actions from '../Actions/Actions'
 import CustomIcon from '../styles/customicons'
@@ -78,8 +77,8 @@ var RowMixin = {
       else {
         let m = utils.getModel(prop.ref)
         if (m.subClassOf === ENUM) {
-          let tVal = (typeof val === 'string') && val || val.title
-          val = translate(tVal)
+          // let tVal = (typeof val === 'string') && val || val.title
+          val = translateEnum(resource[prop.name])
         }
       }
     }

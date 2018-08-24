@@ -35,7 +35,6 @@ const BLOCKCHAIN_EXPLORERS = [
   'https://rinkeby.etherscan.io/tx/0x$TXID',
   // 'https://etherchain.org/tx/0x$TXID' // doesn't support rinkeby testnet
 ]
-
 import ActionSheet from 'react-native-actionsheet'
 import Prompt from 'react-native-prompt'
 // import Communications from 'react-native-communications'
@@ -209,7 +208,7 @@ class ShowPropertiesView extends Component {
             viewCols.push(
               <View style={{padding: 15}} key={this.getNextKey()}>
                 <View style={styles.groupStyle}>
-                  <Text style={styles.groupStyleText}>{translate(pMeta)}</Text>
+                  <Text style={styles.groupStyleText}>{translate(pMeta, model)}</Text>
                 </View>
               </View>
             )
@@ -272,7 +271,7 @@ class ShowPropertiesView extends Component {
           return
         // Could be enum like props
         else if (utils.getModel(pMeta.ref).subClassOf === ENUM)
-          val = val.title
+          val = utils.translateEnum(val)
         else if (showRefResource) {
           // ex. property that is referencing to the Organization for the contact
           var value = val[TYPE] ? utils.getDisplayName(val) : val.title;
@@ -330,20 +329,21 @@ class ShowPropertiesView extends Component {
                   </View>
         }
         isItems = Array.isArray(val)
-        if (isItems  &&  pMeta.items.ref) {
-          if  (pMeta.items.ref === PHOTO)
+        let iref = isItems  &&  pMeta.items.ref
+        if (iref) {
+          if (iref === PHOTO)
             return
-          if (utils.getModel(pMeta.items.ref).subClassOf === ENUM) {
+          if (utils.getModel(iref).subClassOf === ENUM) {
             let values = val.map((v) => utils.getDisplayName(v)).join(', ')
             viewCols.push(
               <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
-                 <View style={{paddingLeft: 10}}>
-                   <Text style={[styles.title]}>{pMeta.title}</Text>
-                   <Text style={[styles.description]}>{values}</Text>
-                 </View>
-                 {checkForCorrection}
+                <View style={{paddingLeft: 10}}>
+                  <Text style={styles.title}>{utils.translate(pMeta, model)}</Text>
+                  <Text style={styles.description}>{values}</Text>
+                </View>
+                {checkForCorrection}
               </View>
-            )
+              )
             return
           }
         }
@@ -351,7 +351,7 @@ class ShowPropertiesView extends Component {
       }
       var title
       if (!pMeta.skipLabel  &&  !isItems)
-        title = <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{pMeta.title || utils.makeLabel(p)}</Text>
+        title = <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{utils.translate(pMeta, model)}</Text>
 
       first = false;
       let isPromptVisible = this.state.promptVisible !== null
