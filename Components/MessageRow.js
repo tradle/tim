@@ -797,7 +797,7 @@ class MessageRow extends Component {
       title: title,
       id: 3,
       component: ResourceView,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: {
         resource: me,
         bankStyle: this.props.bankStyle

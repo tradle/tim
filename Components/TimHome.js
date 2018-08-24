@@ -713,26 +713,26 @@ class TimHome extends Component {
       title: translate('officialAccounts'),
       id: 10,
       component: ResourceList,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: {
         modelName: ORGANIZATION,
         isConnected: this.state.isConnected,
         officialAccounts: true,
         bankStyle: defaultBankStyle
       },
-      rightButtonTitle: translate('profile'),
+      rightButtonTitle: 'Profile',
       onRightButtonPress: {
         title: title,
         id: 3,
         component: ResourceView,
-        backButtonTitle: translate('back'),
-        rightButtonTitle: translate('edit'),
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
           id: 4,
           component: NewResource,
-          backButtonTitle: translate('back'),
-          rightButtonTitle: translate('done'),
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Edit',
           passProps: {
             model: utils.getModel(me[TYPE]),
             resource: me,

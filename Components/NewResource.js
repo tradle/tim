@@ -377,14 +377,14 @@ class NewResource extends Component {
       title: title,
       component: isMessage ? MessageView : ResourceView,
       titleTextColor: '#7AAAC3',
-      rightButtonTitle: translate('edit'),
-      backButtonTitle: translate('back'),
+      rightButtonTitle: 'Edit',
+      backButtonTitle: 'Back',
       onRightButtonPress: {
         title: title,
         id: 4,
         component: NewResource,
-        rightButtonTitle: translate('done'),
-        backButtonTitle: translate('back'),
+        rightButtonTitle: 'Done',
+        backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
         passProps: {
           model: model,
@@ -412,9 +412,9 @@ class NewResource extends Component {
     this.props.navigator.replace({
       id: 10,
       title: translate('shareChangesWith'),
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: ResourceList,
-      rightButtonTitle: translate('Done'),
+      rightButtonTitle: 'Done',
       passProps: {
         message: translate('chooseCompaniesToShareChangesWith'),
         modelName: ORGANIZATION,
@@ -688,7 +688,7 @@ class NewResource extends Component {
       navigator.push({
         id: 30,
         title: translate(bl, blmodel), // Add new ' + bl.title,
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         component: GridList,
         passProps: {
           modelName: bl.items.ref,
@@ -706,9 +706,9 @@ class NewResource extends Component {
     navigator.push({
       id: 6,
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: NewItem,
-      rightButtonTitle: translate('done'),
+      rightButtonTitle: 'Done',
       passProps: {
         metadata: bl,
         bankStyle,
@@ -1077,7 +1077,7 @@ class NewResource extends Component {
       id: 3,
       component: ResourceView,
       title: translate('termsAndConditions'),
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       rightButtonTitle: 'Accept',
       passProps: {
         resource: termsAndConditions,
@@ -1136,7 +1136,7 @@ class NewResource extends Component {
       id: 19,
       component: GridItemsList,
       noLeftButton: true,
-      rightButtonTitle: translate('done'),
+      rightButtonTitle: 'Done',
       passProps: {
         prop:        prop.name,
         resource:    resource,

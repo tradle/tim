@@ -291,14 +291,14 @@ class VerificationMessageRow extends Component {
     var route = {
       id: 5,
       component: MessageView,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: passProps,
       title: title
     }
     if (this.isMyMessage()) {
-      route.rightButtonTitle = translate('edit');
+      route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
-        title: translate('edit'),
+        title: 'Edit',
         component: NewResource,
         // titleTextColor: '#7AAAC3',
         id: 4,
