@@ -722,9 +722,10 @@ class GridList extends Component {
     else if (isApplication) {
       let aTitle = resource.applicantName || resource.applicant.title
       if (aTitle)
-        title = aTitle  + '  →  ' + me.organization.title
-      else
-        title = me.organization.title
+        title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName(resource)
+      else {
+        title = me.organization.title  + '  --  ' + utils.getDisplayName(resource)
+      }
     }
     else if (me.isEmployee)
       title = me.organization.title + '  →  ' + utils.getDisplayName(resource)
@@ -826,12 +827,13 @@ class GridList extends Component {
     let rType = utils.getType(resource)
     let rModel = utils.getModel(rType)
     let isMessage = utils.isMessage(resource)
-    let title
     let isStub = utils.isStub(resource)
     let isFormError = rType === FORM_ERROR
     let isForm = rModel.subClassOf === FORM
 
-    if (rType === VERIFICATION) {
+    let isVerification = rType === VERIFICATION
+    let title
+    if (isVerification) {
       if (isStub)
         title = utils.makeModelTitle(utils.getType(resource))
       else {
@@ -839,21 +841,21 @@ class GridList extends Component {
         title = 'Verification - ' + utils.makeModelTitle(utils.getModel(type))
       }
     }
-    else
+    else {
       title = utils.makeModelTitle(rModel)
 
-    let dn
-    if (isFormError) {
-      if (!isStub)
-        dn = utils.makeModelTitle(utils.getType(resource.prefill))
+      let dn
+      if (isFormError) {
+        if (!isStub)
+          dn = utils.makeModelTitle(utils.getType(resource.prefill))
+      }
+      else
+        dn = utils.getDisplayName(resource)
+      title = (dn ? dn + ' -- '  : '') + title;
     }
-    else
-      dn = utils.getDisplayName(resource)
-    // let newTitle = title + (dn ? ' -- ' + dn : '');
-    let newTitle = (dn ? dn + ' -- '  : '') + title;
 
     let route = {
-      title: newTitle,
+      title: title,
       id: 5,
       component: MessageView,
       backButtonTitle: 'Back',
@@ -908,8 +910,13 @@ class GridList extends Component {
       }
       route.passProps.backlink = prop
     }
-    let canEdit //= isFormError  &&   isRM
-    if (!isStub  ||  canEdit  ||  utils.isMyMessage({resource})) {
+    // Edit verifications
+    // let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
+    // if (!canEdit  &&  !isVerification)
+    //   canEdit = utils.isMyMessage({resource})
+    // if ((!isStub  &&  !isVerification)  ||  canEdit  ||  utils.isMyMessage({resource})) {
+    // if (canEdit) {
+    if (!isStub  ||  utils.isMyMessage({resource})) {
       _.extend(route, {
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
@@ -1496,7 +1503,7 @@ class GridList extends Component {
     }
 
     if (isEmptyItemsTab) {
-      let height = utils.dimensions(GridList).height + 100
+      let height = utils.dimensions(GridList).height - 105
       content = <View style={{justifyContent: 'flex-end', height}}>
                   <NoResources
                     message={translate('pleaseClickOnAddButton', prop && prop.title || utils.makeModelTitle(model))}
@@ -1577,7 +1584,7 @@ class GridList extends Component {
       }
       if (showLoadingIndicator)
         loading = <View style={styles.loadingView}>
-                    <View style={[platformStyles.container]}>
+                    <View style={platformStyles.container}>
                       <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{'Loading...'}</Text>
                       <ActivityIndicator size='large' style={styles.indicator} />
                     </View>
@@ -1828,7 +1835,7 @@ var styles = StyleSheet.create({
   loading: {
     fontSize: 17,
     alignSelf: 'center',
-    marginTop: 80,
+    // marginTop: 0,
     color: '#629BCA'
   },
   loadingView: {
