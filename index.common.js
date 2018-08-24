@@ -83,6 +83,7 @@ import QRCode from './Components/QRCode'
 import QRCodeScanner from './Components/QRCodeScanner'
 import Log from './Components/Log'
 import HomePageMixin from './Components/HomePageMixin'
+import MatchImages from './Components/MatchImages'
 
 import utils from './utils/utils'
 var translate = utils.translate
@@ -103,6 +104,7 @@ const CAMERA_VIEW = 12
 const PASSWORD_CHECK = 20
 const REMEDIATION = 29
 const TOUR_PAGE = 35
+const MATCH_VIEW = 40
 const AVIVA_INTRO_VIEW = 50
 
 const LOGO_HEIGHT = 27
@@ -566,6 +568,8 @@ class TiMApp extends Component {
       return <SplashPage navigator={nav} {...props } />
     case 37:
       return <ShareResourceList navigator={nav} {...props } />
+    case 40:
+      return <MatchImages navigator={nav} {...props } />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -591,7 +595,7 @@ var NavigationBarRouteMapper = {
 
     let bankStyle = route.passProps.bankStyle
     let color = '#7AAAC3'
-    if (route.id === CAMERA_VIEW) // Camera view
+    if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW) // Camera view
       color = '#ffffff'
     else if (bankStyle  &&  bankStyle.linkColor)
       color = bankStyle.linkColor
@@ -604,10 +608,10 @@ var NavigationBarRouteMapper = {
     let icon
     if (iconIdx !== -1)
       icon = lbTitle.substring(iconIdx + 1)
-    else if (lbTitle === 'Back')
-      icon = 'ios-arrow-back'
     else if (lbTitle === 'Profile')
       icon = 'md-person'
+    else //if (lbTitle === 'Back')
+      icon = 'ios-arrow-back'
 
     let style = [platformStyles.navBarText];
     if (route.tintColor)
@@ -701,12 +705,19 @@ var NavigationBarRouteMapper = {
     case 'Share':
       icon = 'md-share'
       break
+    default:
+      let iconIdx = rbTitle.indexOf('|')
+      if (iconIdx !== -1) {
+        icon = rbTitle.substring(iconIdx + 1)
+        if (icon === 'md-person')
+          iconSize = 28
+      }
     }
     let title
     if (icon)  {
       title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={iconColor} style={[styles.icon, style]} />
       if (isSubmit)
-        title = <View style={[styles.submit, {backgroundColor: bankStyle ? bankStyle.linkColor : '#7AAAC3', justifyContent: 'center'}]}>
+        title = <View style={[styles.submit, {backgroundColor: bankStyle ? bankStyle.linkColor : '#7AAAC3', justifyContent: 'center'}, platformStyles.navBarRightIcon]}>
                   {title}
                 </View>
     }
@@ -834,7 +845,7 @@ var NavigationBarRouteMapper = {
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width, marginTop}]} />
     }
 
-    if (route.id === CAMERA_VIEW)  // Camera view
+    if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW)  // Camera view
       st.color = color = '#ffffff'
     else if (bankStyle)
       st.color = color = bankStyle.linkColor
