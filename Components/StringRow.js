@@ -2,7 +2,6 @@ console.log('requiring StringRow.js')
 'use strict';
 
 import utils from '../utils/utils'
-var translate = utils.translate
 import StyleSheet from '../StyleSheet'
 
 var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
