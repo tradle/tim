@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
 } from 'react-native'
 import PropTypes from 'prop-types'
+import _ from 'lodash'
 import { LazyloadScrollView } from 'react-native-lazyload'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -24,7 +25,8 @@ const {
 const {
   PROFILE,
   IDENTITY,
-  MESSAGE
+  MESSAGE,
+  VERIFICATION
 } = constants.TYPES
 
 import utils, {
@@ -42,6 +44,7 @@ import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
 import HomePageMixin from './HomePageMixin'
 import NetworkInfoProvider from './NetworkInfoProvider'
+import MatchImages from './MatchImages'
 
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
@@ -52,6 +55,15 @@ const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const DENIAL = 'tradle.ApplicationDenial'
 const APPROVAL = 'tradle.ApplicationApproval'
 const APPLICATION = 'tradle.Application'
+const PHOTO_ID = 'tradle.PhotoID'
+const SELFIE = 'tradle.Selfie'
+const FACIAL_RECOGNITION_CHECK = 'tradle.FacialRecognitionCheck'
+const STATUS = 'tradle.Status'
+const VISUAL_VERIFICATION_METHOD = 'tradle.VisualPhotosVerificationMethod'
+const API = 'tradle.Api'
+
+const VERIFICATION_PROVIDER = 'Manual visual comparison'
+const FACIAL_MATCH = 'facial similarity'
 
 const ScrollView = LazyloadScrollView
 const LAZY_ID = 'lazyload-list'
@@ -189,10 +201,27 @@ class ApplicationView extends Component {
                     <Icon name='ios-home' color={bankStyle.linkColor} size={33}/>
                   </View>
                 </TouchableOpacity>
+
+    let photoId, selfie
+    if (resource.forms) {
+      photoId = resource.forms.find(r => utils.getType(r) === PHOTO_ID)
+      selfie = resource.forms.find(r => utils.getType(r)  === SELFIE)
+    }
+    let compareImages
+    if (photoId  &&  selfie) {
+      compareImages = <TouchableOpacity onPress={() => this.compareImages(photoId, selfie)} style={styles.openChatPadding}>
+                        <View style={buttonStyles.homeButton}>
+                          <Icon name='md-git-compare' color={bankStyle.linkColor} size={30}/>
+                        </View>
+                      </TouchableOpacity>
+    }
+
+
     let footer = <View style={styles.footer}>
                   <View style={styles.row}>
                     {home}
-                    <TouchableOpacity onPress={this.openChat} style={styles.openChatPadding}>
+                    {compareImages}
+                    <TouchableOpacity onPress={this.openChat} style={[styles.openChatPadding]}>
                       <View style={[buttonStyles.conversationButton, styles.conversationButton]}>
                         <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
                       </View>
@@ -251,6 +280,96 @@ class ApplicationView extends Component {
       ]
     )
   }
+  compareImages(photoId, selfie) {
+    let { navigator, bankStyle, resource } = this.props
+    let route = {
+      component: MatchImages,
+      id: 40,
+      backButtonTitle: 'Back',
+      title: translate('checkIfMatch'),
+      passProps: {
+        photoId,
+        selfie,
+        bankStyle
+      }
+    }
+    if (utils.isRM(resource)) {
+      _.extend(route, {
+        rightButtonTitle: 'VerifyOrCorrect',
+        onRightButtonPress: () => {
+          Alert.alert(
+            translate('createManualMatchCheck'), // + utils.getDisplayName(resource),
+            null,
+            [
+              {text: 'Cancel', onPress: () => console.log('Canceled!')},
+              {text: 'Ok', onPress: () => this.createManualCheckAndVerification(photoId, selfie)},
+            ]
+          )
+        }
+      })
+    }
+    navigator.push(route)
+  }
+  createManualCheckAndVerification(photoID, selfie) {
+    let { navigator, resource } = this.props
+    let me = utils.getMe();
+    let statusModel = utils.getModel(STATUS)
+    let status = statusModel.enum.find(r => r.id === 'pass')
+    let r = {
+      [TYPE]: FACIAL_RECOGNITION_CHECK,
+      selfie,
+      photoID,
+      provider: VERIFICATION_PROVIDER,
+      from: me,
+      to: resource.to,
+      aspects: FACIAL_MATCH,
+      dateChecked: new Date().getTime(),
+      application: resource,
+      status: {
+        id: STATUS + '_' + status.id,
+        title: status.title
+      }
+    }
+    r.message = utils.getStatusMessageForCheck({check: r})
+    let params = {to: resource.to, resource: r, application: resource}
+    if (resource._context) {
+      params.context = resource._context
+      r._context = resource._context
+    }
+// debugger
+    Actions.addChatItem(params)
+    this.createVerification(photoID)
+    navigator.pop();
+  }
+  createVerification(photoId) {
+    let { navigator, resource } = this.props
+    let model = utils.getModel(utils.getType(photoId))
+
+    let applicant = resource.applicant
+    const method = {
+      [TYPE]: VISUAL_VERIFICATION_METHOD,
+      api: {
+        [TYPE]: API,
+        name: VERIFICATION_PROVIDER
+      },
+      aspect: FACIAL_MATCH,
+    }
+
+    let r = {
+      [TYPE]: VERIFICATION,
+      from: utils.getMe(),
+      document: photoId,
+      to: applicant,
+      method,
+    }
+    let params = { to: applicant, r, application: resource }
+    if (resource._context) {
+      r._context = resource._context
+      params.context = resource._context
+    }
+    Actions.addVerification(params)
+  }
+
   openChat() {
     let { navigator, bankStyle } = this.props
     let resource = this.state.resource || this.props.resource
