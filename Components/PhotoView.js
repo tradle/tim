@@ -3,7 +3,6 @@ console.log('requiring PhotoView.js')
 
 import React, { Component } from 'react'
 import {
-  StyleSheet,
   Image,
   ImageBackground,
   View,
@@ -165,20 +164,5 @@ class PhotoView extends Component {
 }
 reactMixin(PhotoView.prototype, PhotoCarouselMixin);
 PhotoView = makeResponsive(PhotoView)
-
-var styles = StyleSheet.create({
-  photoBG: {
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    borderBottomColor: '#e8e8e8',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    alignSelf: 'stretch'
-  },
-  modalBackgroundStyle: {
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'center',
-    // padding: 20,
-  },
-});
 
 module.exports = PhotoView;
