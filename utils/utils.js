@@ -36,7 +36,7 @@ import Cache from 'lru-cache'
 import mutexify from 'mutexify'
 const Promise = require('bluebird')
 const debug = require('debug')('tradle:app:utils')
-
+import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
 import Lens from '@tradle/lens'
@@ -45,6 +45,7 @@ import tradle, {
   utils as tradleUtils
 } from '@tradle/engine'
 import constants from '@tradle/constants'
+import { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
 import AsyncStorage from '../Store/Storage'
 import Store from '../Store/Store'
@@ -110,7 +111,10 @@ const APPLICATION = 'tradle.Application'
 const BOOKMARK = 'tradle.Bookmark'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
-// import dictionaries from '@tradle/models'.dict
+const STATUS = 'tradle.Status'
+
+import dictionaries from './dictionaries'
+
 var dictionary //= dictionaries[Strings.language]
 
 var models, me
@@ -162,14 +166,21 @@ var utils = {
     me = meR;
     if (!me)
       return
+    if (!me.language)
+      return
 
-    Strings.setLanguage(me.languageCode)
-    if (me.languageCode) {
-      if (me.dictionary)
-        dictionary = me.dictionary
-      // else if (dictionaries[me.languageCode])
-      //   dictionary = dictionaries[me.languageCode]
-    }
+    let lang = me.languageCode
+    if (!lang)
+      lang = me.language.id.split('_')[1]
+    if (!lang)
+      return
+    if (this.language === lang)
+      return
+    this.language = lang
+    Strings.setLanguage(lang)
+    let d = dictionaries(lang)
+    if (d)
+      dictionary = _.extend({}, dictionaries('en'), d)
   },
   getMe() {
     return me;
@@ -403,6 +414,28 @@ var utils = {
     if (dictionary  &&  dictionary.models[model.id])
       return dictionary.models[model.id]  ||  this.makeModelTitle(model, isPlural)
     return model.title ? model.title : this.makeModelTitle(model, isPlural)
+  },
+  translateEnum(resource) {
+    if (!dictionary) {
+      if (!resource.title)
+        return this.buildRef(resource).title
+      return resource.title
+    }
+    let rtype = utils.getType(resource)
+    let e = dictionary.enums[rtype]
+    if (utils.isStub(resource))  {
+      if (!e)
+        return resource.title
+      let [type, id] = resource.id.split('_')
+      return e[id]  ||  resource.title
+    }
+    else if (e)
+      return e[resource[ROOT_HASH]]
+    else {
+      return this.buildRef(resource, this.getModel(rtype)).title
+      // let prop = Object.keys(this.getModel(rtype).properties)[0]
+      // return resource[prop]
+    }
   },
   translateString(...args) {
     const { strings } = Strings
@@ -790,8 +823,11 @@ var utils = {
       model = this.getModel(resource[TYPE])
     }
     let props = model.properties
-    let resourceModel = resource[TYPE] ? this.getModel(resource[TYPE]) : null
+    let rType = this.getType(resource)
+    let resourceModel = rType && this.getModel(rType)
+
     var displayName = '';
+
     let dnProps = this.getPropertiesWithAnnotation(resourceModel ||  model, 'displayName')
     if (dnProps) {
       for (let p in dnProps) {
@@ -889,9 +925,48 @@ var utils = {
     }
   },
   getDateValue(value) {
+    let lang = this.language || 'en'
+    switch (lang) {
+    case 'fil':
+      lang = 'tl-ph'
+      require('moment/locale/tl-ph')
+      break
+    case 'fr':
+      require('moment/locale/fr')
+      break
+    case 'es':
+      require('moment/locale/es')
+      break
+    case 'vi':
+      require('moment/locale/vi')
+      break
+    case 'bn':
+      require('moment/locale/bn')
+      break
+    case 'nl':
+      require('moment/locale/nl')
+      break
+    default:
+      moment.locale(false)
+    }
+    moment('en')
     let valueMoment = moment.utc(value)
-    let format = 'MMMM Do, YYYY h:MMA'
-    return valueMoment && valueMoment.format(format)
+    let v = value instanceof Date && value.getTime()  ||  value
+    let localLocale = moment(valueMoment).locale(lang === 'en' && false || lang)
+    let useCalendarFormat = Math.abs(Date.now() - v) <= 24 * 3600 * 60 * 1000
+    if (useCalendarFormat)
+      return localLocale.calendar()
+
+    let format
+    if (!valueMoment.hours()  &&  !valueMoment.minutes()  &&  !valueMoment.seconds())
+      format = 'LL'
+    else
+      format = 'LLL'
+
+    // return moment.calendarFormat(valueMoment)
+    return localLocale.format(format)
+    // let format = 'MMMM Do, YYYY h:MMA'
+    // return valueMoment && valueMoment.format(format)
   },
   getPropStringValue(prop, resource) {
     let p = prop.name
@@ -1076,11 +1151,12 @@ var utils = {
       break;
     case 1:
       // noTime = false
-      val = 'yesterday, ' + dateformat(date, 'h:MM TT')
+      val = this.getDateValue(date)
+      // val = 'yesterday, ' + dateformat(date, 'h:MM TT')
       // val = moment(date).format('[yesterday], h:mA');
       break;
     default:
-      val = dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));
+      val = this.getDateValue(date) // dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));
       // val = moment(date).format('LL');
     }
     return val;
@@ -2466,6 +2542,9 @@ var utils = {
   },
 
   async updateEnv() {
+    console.warn('fix blinkid keys in S3, uncomment utils.updateEnv')
+    return
+
     let env
     try {
       env = await this.fetchEnv()
@@ -2636,6 +2715,30 @@ var utils = {
   //   let fromId = utils.getId(r.from)
   //   return toId === fromId  &&  toId === utils.getId(utils.getMe())
   // },
+  getStatusMessageForCheck({ check }) {
+    const model = this.getModel(STATUS);
+    const { aspects } = check;
+    const aspectsStr = typeof aspects === 'string' ? aspects : aspects.join(', ');
+    let status
+    if (check.status) {
+      status = model.enum.find(r => r.title === check.status.title)
+      if (status)
+        status = status.id
+    }
+
+    switch (status) {
+      case 'pending':
+        return `One or more check(s) pending: ${aspects}`;
+      case 'fail':
+        return `One or more check(s) failed: ${aspects}`;
+      case 'error':
+        return `One or more check(s) hit an error: ${aspects}`;
+      case 'pass':
+        return `Check(s) passed: ${aspects}`;
+      default:
+        throw new ValidateResourceErrors.InvalidPropertyValue(`unsupported check status: ${safeStringify(check.status)}`)
+    }
+  },
 }
 
 if (__DEV__) {
