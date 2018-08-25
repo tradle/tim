@@ -28,6 +28,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
 import Actions from '../Actions/Actions'
+import ApplicationView from './ApplicationView'
 
 import ENV from '../utils/env'
 
@@ -72,15 +73,17 @@ var ResourceMixin = {
       title = title + ' -- ' + modelTitle
     else
       title = modelTitle
-    let isMessageView
-    if (!utils.isStub(resource))
+    let isMessageView, isApplicationView
+    if (type === APPLICATION)
+      isApplicationView = true
+    else if (!utils.isStub(resource))
       isMessageView = utils.isMessage(resource)
     else
       isMessageView = (type !== ORGANIZATION  &&  type !== PROFILE)
 
-    let {bankStyle, search, currency, country} = this.props
+    let {bankStyle, search, currency, country, navigator} = this.props
     if (isMessageView) {
-      this.props.navigator.push({
+      navigator.push({
         id: 5,
         component: require('./MessageView'),
         backButtonTitle: 'Back',
@@ -94,8 +97,23 @@ var ResourceMixin = {
         }
       })
     }
+    else if (isApplicationView) {
+      navigator.push({
+        title: title,
+        id: 34,
+        component: ApplicationView,
+        // titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        passProps: {
+          resource,
+          search,
+          bankStyle,
+          application: resource
+        }
+      })
+    }
     else {
-      this.props.navigator.push({
+      navigator.push({
         title: title,
         id: 3,
         component: require('./ResourceView'),
