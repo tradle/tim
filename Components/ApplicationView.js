@@ -57,7 +57,7 @@ const APPROVAL = 'tradle.ApplicationApproval'
 const APPLICATION = 'tradle.Application'
 const PHOTO_ID = 'tradle.PhotoID'
 const SELFIE = 'tradle.Selfie'
-const FACIAL_RECOGNITION_CHECK = 'tradle.FacialRecognitionCheck'
+const MANUAL_VISUAL_COMPARISON_CHECK = 'tradle.ManualVisualComparisonCheck'
 const STATUS = 'tradle.Status'
 const VISUAL_VERIFICATION_METHOD = 'tradle.VisualPhotosVerificationMethod'
 const API = 'tradle.Api'
@@ -316,7 +316,7 @@ class ApplicationView extends Component {
     let statusModel = utils.getModel(STATUS)
     let status = statusModel.enum.find(r => r.id === 'pass')
     let r = {
-      [TYPE]: FACIAL_RECOGNITION_CHECK,
+      [TYPE]: MANUAL_VISUAL_COMPARISON_CHECK,
       selfie,
       photoID,
       provider: VERIFICATION_PROVIDER,
