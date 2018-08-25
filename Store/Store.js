@@ -5443,8 +5443,10 @@ if (!res[SIG]  &&  res._message)
       seal: true
     }
     if (formResource  &&  formResource._context) {
-      let context = utils.getId(formResource._context)
-      opts.other = { context: this._getItem(context).contextId }
+      let contextId = formResource._context.contextId
+      if (!contextId)
+        contextId = this._getItem(utils.getId(formResource._context)).contextId
+      opts.other = { context: contextId }
     }
       // opts.other = {context: utils.getId(formResource._context).split('_')[1]}
 
@@ -7336,9 +7338,18 @@ if (!res[SIG]  &&  res._message)
           let prefill = refsObj[utils.getId(r.prefill)]
           if (prefill)
             r.prefill = prefill
-
         }
+
         this.addVisualProps(r)
+        // Check if this message was shared, display the time when it was shared not when created
+        if (r._sharedWith  &&  to  &&  utils.getId(to) !== utils.getId(r.to.organization)) {
+          let author = to._author
+          if (author) {
+            let sh = r._sharedWith.filter(r => utils.getRootHash(r.bankRepresentative) === author)
+            if (sh.length)
+              r._time = sh[0].timeShared
+          }
+        }
       })
       // Minor hack before we intro sort property here
       let sortedFR = []
