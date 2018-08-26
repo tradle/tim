@@ -953,7 +953,7 @@ var utils = {
     let valueMoment = moment.utc(value)
     let v = value instanceof Date && value.getTime()  ||  value
     let localLocale = moment(valueMoment).locale(lang === 'en' && false || lang)
-    let useCalendarFormat = Math.abs(Date.now() - v) <= 24 * 3600 * 60 * 1000
+    let useCalendarFormat = Math.abs(Date.now() - v) <= 24 * 3600 * 1000
     if (useCalendarFormat)
       return localLocale.calendar()
 
@@ -2695,6 +2695,10 @@ var utils = {
     return prefillProps[Object.keys(prefillProps)[0]]
   },
   getRootHash(r) {
+    if (typeof r === 'string') {
+      let keys = r.split('_')
+      return keys.length &&  keys[1] || null
+    }
     return r[ROOT_HASH] ? r[ROOT_HASH] : r.id.split('_')[1]
   },
   getMessageWidth(component) {
