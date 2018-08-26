@@ -19,9 +19,11 @@ import {
 import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
+
 import utils, {
   translate
 } from '../utils/utils'
+import { circled } from '../styles/utils'
 
 import ArticleView from './ArticleView'
 import MessageView from './MessageView'
@@ -52,6 +54,8 @@ const CONFIRMATION = 'tradle.Confirmation'
 const APPLICATION_DENIAL = 'tradle.ApplicationDenial'
 const INTRODUCTION = 'tradle.Introduction'
 const BOOKMARK = 'tradle.Bookmark'
+const CHECK = 'tradle.Check'
+const STATUS = 'tradle.Status'
 const {
   TYPE,
   ROOT_HASH
@@ -109,7 +113,7 @@ class MessageRow extends Component {
     let photoListStyle = {height: 3};
     let addStyle
 
-    let model = utils.getModel(resource[TYPE] || resource.id);
+    let model = utils.getModel(utils.getType(resource));
 
     let isContext = utils.isContext(model)
     let message = isContext ? ret.message : resource.message
@@ -117,7 +121,9 @@ class MessageRow extends Component {
     let noMessage = !message  ||  !message.length;
     let isSimpleMessage = resource[TYPE] === SIMPLE_MESSAGE
 
-    let noBg = (isSimpleMessage  &&  resource.message.toLowerCase().indexOf('http') === 0)
+    let isCheck = model.subClassOf === CHECK
+
+    let noBg = isCheck  ||  (isSimpleMessage  &&  resource.message.toLowerCase().indexOf('http') === 0)
 
     let isForgetting = model.id === FORGET_ME || model.id === FORGOT_YOU
     if (!renderedRow.length) {
@@ -156,7 +162,7 @@ class MessageRow extends Component {
       // }
       let isDataBundle = resource[TYPE] === DATA_BUNDLE
       if (isMyMessage  &&  !isSimpleMessage  &&  !isDataBundle) {
-        let st = {backgroundColor: bankStyle.contextBackgroundColor, borderColor: bankStyle.linkColor}
+        let st = {backgroundColor: noBg ? '#ffffff' : bankStyle.contextBackgroundColor, borderColor: bankStyle.linkColor}
         addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       }
     }
@@ -420,6 +426,32 @@ class MessageRow extends Component {
                 </View>
       renderedRow.push(msg);
       return ({message: str})
+    }
+    if (model.subClassOf === CHECK) {
+      let checkIcon
+      if (resource.status) {
+        let statusId = this.getEnumID(resource.status.id)
+        let statusM = utils.getModel(STATUS).enum.find(r => r.id === statusId)
+        if (statusM) {
+          const { icon, color } = statusM
+          if (icon) {
+            checkIcon = <View style={[styles.checkButton, {backgroundColor: color}]}>
+                          <Icon color='#ffffff' size={30} name={icon} />
+                        </View>
+          }
+        }
+      }
+      let msg = <View key={this.getNextKey()}>
+                  <View style={styles.row}>
+                    <View style={styles.container}>
+                      <Text style={[chatStyles.resourceTitle, {color: '#555555'}]}>{resource.message}</Text>
+                    </View>
+                    {checkIcon}
+                  </View>
+                </View>
+
+      renderedRow.push(msg)
+      return {onPressCall: () => this.props.onSelect(resource)}
     }
     if (model.id === APPLICATION_DENIAL  ||  (model.id === CONFIRMATION  &&  isMyMessage)) {
       let iname = model.id === APPLICATION_DENIAL ? 'md-close-circle' : 'ios-ribbon'
@@ -944,6 +976,13 @@ var createStyles = utils.styleFactory(MessageRow, function ({ dimensions, bankSt
       color: bankStyle.confirmationColor,
       alignSelf: 'flex-end',
       marginTop: -30
+    },
+    checkButton: {
+      ...circled(30),
+      shadowOpacity: 0.7,
+      opacity: 0.9,
+      shadowRadius: 5,
+      shadowColor: '#afafaf',
     },
   })
 })
