@@ -1,9 +1,20 @@
 console.log('requiring ContextChooser.js')
 'use strict';
 
-import utils from '../utils/utils'
-var translate = utils.translate
+import {
+  ListView,
+  Text,
+  // StyleSheet,
+  View,
+  Platform
+} from 'react-native'
+import PropTypes from 'prop-types'
+
+import React, { Component } from 'react'
+
 import constants from '@tradle/constants'
+
+import utils, { translate } from '../utils/utils'
 import MessageList from './MessageList'
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
@@ -19,16 +30,6 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const CONTEXT = 'tradle.Context'
 
 const { TYPE } = constants
-import {
-  ListView,
-  Text,
-  // StyleSheet,
-  View,
-  Platform
-} from 'react-native'
-import PropTypes from 'prop-types'
-
-import React, { Component } from 'react'
 
 class ContextChooser extends Component {
   constructor(props) {
@@ -102,7 +103,7 @@ class ContextChooser extends Component {
     if (this.state.isLoading)
       return <PageView >
                 <View style={[platformStyles.container, bgStyle]}>
-                  <Text style={styles.loading}>{'Loading...'}</Text>
+                  <Text style={styles.loading}>{translate('loading')}</Text>
                   <ActivityIndicator size='large' style={{alignSelf: 'center', marginTop: 20}} />
                 </View>
               </PageView>

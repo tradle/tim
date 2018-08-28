@@ -336,6 +336,8 @@ class ApplicationView extends Component {
       params.context = resource._context
       r._context = resource._context
     }
+    else
+      params.contextId = resource.contextId
 // debugger
     Actions.addChatItem(params)
     this.createVerification(photoID)
@@ -367,6 +369,8 @@ class ApplicationView extends Component {
       r._context = resource._context
       params.context = resource._context
     }
+    else
+      params.contextId = resource.contextId
     Actions.addVerification(params)
   }
 
@@ -417,7 +421,7 @@ class ApplicationView extends Component {
         }},
         {text: translate('Approve'), onPress: () => {
           Actions.hideModal()
-          let title = utils.makeModelTitle(utils.getModel(resource.product || resource.requestFor))
+          let title = translate(utils.getModel(resource.product || resource.requestFor))
           let me = utils.getMe()
           let msg = {
             [TYPE]: APPROVAL,
@@ -445,7 +449,7 @@ class ApplicationView extends Component {
         }},
         {text: translate('Deny'), onPress: () => {
           Actions.hideModal()
-          let title = utils.makeModelTitle(utils.getModel(resource.product ||  resource.requestFor))
+          let title = translate(utils.getModel(resource.product ||  resource.requestFor))
           let me = utils.getMe()
           let msg = {
             [TYPE]: DENIAL,

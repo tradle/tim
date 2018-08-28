@@ -68,7 +68,7 @@ var ResourceMixin = {
     let type = utils.getType(resource)
     let model = utils.getModel(type);
     let title = utils.getDisplayName(resource);
-    let modelTitle = utils.makeModelTitle(model)
+    let modelTitle = translate(model)
     if (title  &&  title.length)
       title = title + ' -- ' + modelTitle
     else
@@ -225,7 +225,7 @@ var ResourceMixin = {
         )
       })
       if (!ret.length) {
-        let vTitle = displayName || v.title  ||  utils.makeModelTitle(utils.getType(v))
+        let vTitle = displayName || v.title  ||  translate(utils.getModel(utils.getType(v)))
 
         let image = v.photo  &&  <Image source={{uri: v.photo}} style={styles.thumb} />
         let color = cancelItem ? '#757575' : linkColor
@@ -355,7 +355,7 @@ var ResourceMixin = {
       }
       else {
         if (pMeta.range === 'model')
-          val = utils.makeModelTitle(val)
+          val = translate(utils.getModel(val))
         val = <Text style={[styles.description]}>{val}</Text>;
       }
     }

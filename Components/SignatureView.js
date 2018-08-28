@@ -1,7 +1,7 @@
 console.log('requiring SignatureView.js')
 'use strict';
 
-import utils from '../utils/utils'
+import utils, { translate } from '../utils/utils'
 import PageView from './PageView'
 import extend from 'extend'
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -53,7 +53,7 @@ class SignatureView extends Component {
     let styles = createStyles({sigViewStyle})
     return (
       <PageView style={platformStyles.container} separator={separator} bankStyle={sigViewStyle}>
-        <Text style={styles.instructions}>Please sign inside the grey box</Text>
+        <Text style={styles.instructions}>{translate('pleaseSign')}</Text>
         <View style={{
           flex: 1,
           maxHeight: Math.min(width / 2, 200),
@@ -69,10 +69,10 @@ class SignatureView extends Component {
         </View>
         <View style={styles.buttons}>
           <TouchableOpacity onPress={() => this.done()} style={styles.submit}>
-            <Text style={styles.submitText}>Submit</Text>
+            <Text style={styles.submitText}>{translate('Submit')}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => this.refs.sigpad.clear()} style={styles.clear}>
-            <Text style={styles.clearText}>Clear</Text>
+            <Text style={styles.clearText}>{translate('Clear')}</Text>
           </TouchableOpacity>
         </View>
       </PageView>
@@ -90,7 +90,7 @@ class SignatureView extends Component {
 var createStyles = utils.styleFactory(SignatureView, function ({ dimensions, sigViewStyle  }) {
   return StyleSheet.create({
     instructions: {
-      fontSize: 24,
+      fontSize: 22,
       padding: 10,
       alignSelf: 'center',
       color: '#aaaaaa'

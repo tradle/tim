@@ -927,7 +927,7 @@ class NewResource extends Component {
       let formList = resource.signatureFor.map((r) => (
           <TouchableOpacity onPress={() => this.showResource(r)} style={styles.formListItem} key={this.getNextKey()}>
           <View>
-            <Text style={styles.forms}>{utils.makeModelTitle(r.id.split('_')[0])}</Text>
+            <Text style={styles.forms}>{translate(utils.getModel(r[TYPE]))}</Text>
           </View>
           </TouchableOpacity>))
 
@@ -1097,7 +1097,7 @@ class NewResource extends Component {
     let dn = ''
     let ref = pMeta.items.ref
     if (ref)
-      dn = utils.makeModelTitle(ref)
+      dn = translate(utils.getModel(ref))
     Alert.alert(
       translate('cancelItem', dn),
       null,

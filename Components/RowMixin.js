@@ -284,7 +284,7 @@ var RowMixin = {
         msg = <Text style={styles.sentStatus}>{utils.formatDate(resource._sentTime)}</Text>
     }
     else
-        msg = <Text style={styles.sentStatus}>{sendStatus}</Text>
+        msg = <Text style={styles.sentStatus}>{translate(sendStatus)}</Text>
 
     let routes = this.props.navigator.getCurrentRoutes()
     let w = utils.dimensions(routes[routes.length - 1].component).width

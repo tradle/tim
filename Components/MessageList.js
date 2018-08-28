@@ -467,8 +467,9 @@ class MessageList extends Component {
           return
         let meApplying = rcontext.from.organization  &&  rcontext.from.organization.id === me.organization.id
         if (meApplying) {
+          let m = utils.getModel(resource.product)
           Alert.alert(
-            `The application for ${utils.makeModelTitle(resource.product)} was started by another employee`,
+            `The application for ${translate(m)} was started by another employee`,
             'Do you want to switch to it and continue from there?',
             [
               {text: translate('cancel'), onPress: () => console.log('Canceled!')},
@@ -814,7 +815,7 @@ class MessageList extends Component {
 
           content = <View style={styles.flex1}>
                       <View style={[platformStyles.container, bgStyle]}>
-                        <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{'Loading...'}</Text>
+                        <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{translate('loading')}</Text>
                         <ActivityIndicator size='large' style={styles.indicator} />
                       </View>
                       {menuBtn}
@@ -985,7 +986,7 @@ class MessageList extends Component {
     let application = this.props.application
     let model = utils.getModel(application.requestFor)
     this.props.navigator.push({
-      title: translate(utils.makeModelTitle(model)),
+      title: translate(model),
       id: 33,
       component: StringChooser,
       backButtonTitle: 'Back',
@@ -999,7 +1000,7 @@ class MessageList extends Component {
             [TYPE]: FORM_REQUEST,
             message: m.formRequestMessage
                     ? translate(m.formRequestMessage)
-                    : translate('fillTheForm', translate(utils.makeModelTitle(m))),
+                    : translate('fillTheForm', translate(m)),
                 // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
             product: model.id,
             form: val,

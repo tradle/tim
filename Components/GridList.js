@@ -835,19 +835,21 @@ class GridList extends Component {
     let title
     if (isVerification) {
       if (isStub)
-        title = utils.makeModelTitle(utils.getType(resource))
+        title = translate(rModel)
       else {
         let type = utils.getType(resource.document)
-        title = 'Verification - ' + utils.makeModelTitle(utils.getModel(type))
+        title = 'Verification - ' + translate(utils.getModel(type))
       }
     }
     else {
-      title = utils.makeModelTitle(rModel)
+      title = translate(rModel)
 
       let dn
       if (isFormError) {
-        if (!isStub)
-          dn = utils.makeModelTitle(utils.getType(resource.prefill))
+        if (!isStub) {
+          let pModel = utils.getModel(utils.getType(resource.prefill))
+          dn = translate(pModel)
+        }
       }
       else
         dn = utils.getDisplayName(resource)
@@ -947,7 +949,7 @@ class GridList extends Component {
     if (prefill) {
       let pm = utils.getModel(resource[prefill.name][TYPE])
       if (pm)
-        title = utils.makeModelTitle(pm)
+        title = translate(pm)
     }
     if (!title)
       title = utils.getDisplayName(resource);
@@ -1078,7 +1080,7 @@ class GridList extends Component {
     let { navigator, bankStyle, currency, exploreData } = this.props
     navigator.push({
       id: 30,
-      title: translate('searchSomething', utils.makeModelTitle(model)),
+      title: translate('searchSomething', translate(model)),
       backButtonTitle: 'Back',
       component: GridList,
       passProps: {
@@ -1092,7 +1094,7 @@ class GridList extends Component {
       },
       rightButtonTitle: 'Search',
       onRightButtonPress: {
-        title: translate('searchSomething', utils.makeModelTitle(model)),
+        title: translate('searchSomething', translate(model)),
         id: 4,
         component: NewResource,
         titleTextColor: '#7AAAC3',
@@ -1122,7 +1124,7 @@ class GridList extends Component {
            mm.subClassOf !== METHOD      &&
            mm.subClassOf !== FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
         if (filter) {
-          if (utils.makeModelTitle(mm).toLowerCase().indexOf(filterLower) !== -1)
+          if (translate(mm).toLowerCase().indexOf(filterLower) !== -1)
             mArr.push(mm)
         }
         else
@@ -1506,7 +1508,7 @@ class GridList extends Component {
       let height = utils.dimensions(GridList).height - 105
       content = <View style={{justifyContent: 'flex-end', height}}>
                   <NoResources
-                    message={translate('pleaseClickOnAddButton', prop && prop.title || utils.makeModelTitle(model))}
+                    message={translate('pleaseClickOnAddButton', prop && prop.title || translate(model))}
                     iconColor={'#ffffff'}
                     iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
                     model={model}
@@ -1585,7 +1587,7 @@ class GridList extends Component {
       if (showLoadingIndicator)
         loading = <View style={styles.loadingView}>
                     <View style={platformStyles.container}>
-                      <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{'Loading...'}</Text>
+                      <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{translate('loading')}</Text>
                       <ActivityIndicator size='large' style={styles.indicator} />
                     </View>
                   </View>

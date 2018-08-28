@@ -569,7 +569,7 @@ class MessageRow extends Component {
     }
     if (model.id === APPLICATION_SUBMITTED) {
       let msg = <View key={this.getNextKey()}>
-                  <Text style={[chatStyles.resourceTitle, {color: bankStyle.confirmationColor}]}>{resource.message}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: bankStyle.confirmationColor}]}>{translate(resource.message)}</Text>
                 </View>
       renderedRow.push(msg);
       return null
@@ -578,7 +578,7 @@ class MessageRow extends Component {
       let params = {filterResource: resource, search: true, modelName: resource[TYPE], limit: LIMIT * 2, first: true}
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate('Bookmark was created')}</Text>
-                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message || utils.makeModelTitle(model)}</Text>
+                  <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message || translate(model)}</Text>
                 </View>
       renderedRow.push(msg);
       return {onPressCall: () => uiUtils.showBookmarks(this.props)}
