@@ -54,7 +54,7 @@ import employee from '../people/employee.json'
 const FRIEND = 'Tradler'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
 
-import { getCoverPhotoForRegion, getYukiForRegion } from './locale'
+import { getCoverPhotoForRegion, getYukiForRegion, getLanguage } from './locale'
 
 import Q from 'q'
 Q.longStackSupport = true
@@ -233,6 +233,7 @@ const DATA_BUNDLE         = 'tradle.DataBundle'
 const DATA_CLAIM          = 'tradle.DataClaim'
 const CHECK               = 'tradle.Check'
 const LEGAL_ENTITY        = 'tradle.legal.LegalEntity'
+const LANGUAGE            = 'tradle.Language'
 
 const MY_ENVIRONMENT      = 'environment.json'
 
@@ -4575,8 +4576,11 @@ if (!res[SIG]  &&  res._message)
       let savedContext = this._getItem(context)
       if (savedContext) //  &&  me.isEmployee)
         context = savedContext
-      if (!context)
+      if (!context) {
         debugger
+        if (params.contextId)
+          context = await this.getContext(params.contextId, resource)
+      }
       isRemediation = context.requestFor === REMEDIATION
 
       // with employee it could be context that was started by different employee
@@ -5933,6 +5937,13 @@ if (!res[SIG]  &&  res._message)
       //   width: coverPhoto.width,
       //   height: coverPhoto.height
       // }
+    }
+    let languageCode = getLanguage()
+    let m = this.getModel(LANGUAGE)
+    let l = utils.buildStubByEnumTitleOrId(m, languageCode)
+    if (l) {
+      r.language = l
+      r.languageCode = languageCode
     }
     await this.onAddItem({resource: r, isRegistration: true})
   },
@@ -7342,12 +7353,17 @@ if (!res[SIG]  &&  res._message)
 
         this.addVisualProps(r)
         // Check if this message was shared, display the time when it was shared not when created
-        if (r._sharedWith  &&  to  &&  utils.getId(to) !== utils.getId(r.to.organization)) {
-          let author = to._author
-          if (author) {
-            let sh = r._sharedWith.filter(r => utils.getRootHash(r.bankRepresentative) === author)
-            if (sh.length)
-              r._time = sh[0].timeShared
+        if (r._sharedWith  &&  to) {
+          let orgTo = r.to.organization
+          if (!orgTo &&  utils.getId(r.to) === utils.getId(me))
+            orgTo = r.from.organization
+          if (utils.getId(to) !== utils.getId(orgTo)) {
+            let author = to._author
+            if (author) {
+              let sh = r._sharedWith.filter(r => utils.getRootHash(r.bankRepresentative) === author)
+              if (sh.length)
+                r._time = sh[0].timeShared
+            }
           }
         }
       })
@@ -9524,10 +9540,10 @@ if (!res[SIG]  &&  res._message)
     }
     _.extend(identity, publishedIdentity)
     var iKey = utils.getId(identity)
-    if (me.language) {
-      me.language = this._getItem(utils.getId(me.language))
-      me.languageCode = me.language.code
-    }
+    // if (me.language) {
+      // me.language = this._getItem(utils.getId(me.language))
+      // me.languageCode = me.language.code
+    // }
     batch.push({type: 'put', key: iKey, value: identity});
     return db.batch(batch)
     .then(() => {
