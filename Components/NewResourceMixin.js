@@ -1645,7 +1645,7 @@ var styles= StyleSheet.create({
     width: 40,
     height: 40,
     marginRight: 2,
-    // marginTop: 7,
+    marginTop: 7,
     borderRadius: 5
   },
   err: {
