@@ -90,6 +90,7 @@ class CameraView extends Component {
         base64: true,
         mirrorImage: true,
         quality: 0.5,
+        fixOrientation: true,
         forceUpOrientation: true
       })
       this.setState({ data })
