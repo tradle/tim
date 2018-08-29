@@ -890,7 +890,7 @@ class NewResource extends Component {
         let blmodel = meta
         itemsArray = null
         let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-        if (count  &&  (bl.name === 'photos' || bl.items.ref === PHOTO  ||  bl.items.ref === FILE))
+        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO  ||  bl.items.ref === FILE))
           arrayItems.push(this.getPhotoItem(bl, styles))
         else
           arrayItems.push(this.getItem(bl, styles))
@@ -1286,7 +1286,7 @@ class NewResource extends Component {
                          <View style={[styles.items, {paddingBottom: 5}]}>
                            <Text style={styles.noItemsText}>{label}</Text>
                            <View style={styles.addButton}>
-                              <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' style={{marginTop: 2}}/>
+                              <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
                            </View>
                          </View>
                        </TouchableOpacity>
