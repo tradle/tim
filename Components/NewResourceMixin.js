@@ -146,7 +146,7 @@ var NewResourceMixin = {
 
         data[TYPE] = meta.id;
         for (let p in data) {
-          if (p == constants.TYPE)
+          if (p == TYPE)
             continue;
           if (props[p])
             continue;
@@ -234,7 +234,7 @@ var NewResourceMixin = {
     let options = {fields: {}}
     let resource = this.state.resource
     for (let p in eCols) {
-      if (p === constants.TYPE  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
+      if (p === TYPE || p.charAt(0) === '_' ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
 
       if (meta  &&  meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
@@ -591,7 +591,7 @@ var NewResourceMixin = {
     }
     if (missedRequiredOrErrorValue)
       delete missedRequiredOrErrorValue[prop.name]
-    if (!search  &&  r[constants.TYPE] !== SETTINGS)
+    if (!search  &&  r[TYPE] !== SETTINGS)
       Actions.saveTemporary(r)
 
     this.setState({
@@ -1132,7 +1132,7 @@ var NewResourceMixin = {
   setDefaultValue(prop, data, isHidden) {
     let p = prop.name
     let resource = this.state.resource
-    if (resource[p]  ||  resource[constants.ROOT_HASH])
+    if (resource[p]  ||  resource[ROOT_HASH])
       return
     let defaults = this.props.defaultPropertyValues
     let value
@@ -1472,7 +1472,7 @@ var NewResourceMixin = {
         coerceNumber(value, p)
         this.checkNumber(value[p], prop, err)
       }
-      else if (prop.ref === constants.TYPES.MONEY) {
+      else if (prop.ref === MONEY) {
         coerceNumber(value[p], 'value')
         let error = this.checkNumber(value[p].value, prop, err)
         if (error  &&  m.required.indexOf(p) === -1)
