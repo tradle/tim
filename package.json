@@ -155,7 +155,7 @@
     "react-native-flexbox-grid": "github:tradle/react-native-flexbox-grid",
     "react-native-floating-labels": "github:mvayngrib/react-native-floating-labels#dev",
     "react-native-gesture-password": "github:mvayngrib/react-native-gesture-password",
-    "react-native-gifted-messenger": "file:///Users/Ellen/lablz/react-native-gifted-messenger",
+    "react-native-gifted-messenger": "github:pgmemk/react-native-gifted-messenger#dev",
     "react-native-http": "github:tradle/react-native-http#834492d",
     "react-native-image-picker": "github:tradle/react-native-image-picker",
     "react-native-infinite-scroll-view": "github:tradle/react-native-infinite-scroll-view",
