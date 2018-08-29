@@ -584,7 +584,7 @@ var utils = {
 
   makeLabel(label, isPlural) {
     if (!this.isCamelCase(label))
-      return label
+      return label.charAt(0).toUpperCase() + label.slice(1)
 
     label = label
           .replace(/_/g, ' ')
@@ -622,7 +622,7 @@ var utils = {
         string += strArr[i];
     }
 
-    if (this.toCamelCase(string, true) === str)
+    if (this.toCamelCase(string) === str)
       return true;
     else
       return false;
