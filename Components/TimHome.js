@@ -732,7 +732,7 @@ class TimHome extends Component {
           id: 4,
           component: NewResource,
           backButtonTitle: 'Back',
-          rightButtonTitle: 'Edit',
+          rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel(me[TYPE]),
             resource: me,
