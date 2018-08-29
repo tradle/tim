@@ -5,25 +5,32 @@ import withDefaults from 'lodash/defaults'
 import groupBy from 'lodash/groupBy'
 import getValues from 'lodash/values'
 // import BlinkID from 'react-native-blinkid'
-import { BlinkID, MRTDKeys, USDLKeys, EUDLKeys, NZDLFrontKeys as NZDLKeys, MYKADKeys } from 'blinkid-react-native'
+import * as BlinkID from 'blinkid-react-native';
+// import { BlinkID , MrtdKeys, UsdlKeys, EUDLKeys, NzdlFrontKeys as NZDLKeys, MYKADKeys } from 'blinkid-react-native'
+const UsdlKeys = BlinkID.UsdlKeys
 import { microblink } from '../utils/env'
 import { isSimulator, keyByValue, sanitize } from '../utils/utils'
+import xml2js from 'xml2js'
 
 const recognizers = {
   // scans documents with face image and returns document images
   // BlinkID.RECOGNIZER_DOCUMENT_FACE,
   // scans documents with MRZ (Machine Readable Zone)
-  mrtd: BlinkID.RECOGNIZER_MRTD,
+  mrtd:  BlinkID.MrtdRecognizer, // BlinkID.RECOGNIZER_MRTD,
+  mrtdCombined: BlinkID.MrtdCombinedRecognizer,
   // scans EUDL (EU Driver License)
-  eudl: BlinkID.RECOGNIZER_EUDL,
+  eudl: BlinkID.EudlRecognizer,
   // scans USDL (US Driver License)
-  usdl: BlinkID.RECOGNIZER_USDL,
+  usdl: BlinkID.UsdlRecognizer,
+  usdlCombined: BlinkID.UsdlCombinedRecognizer,
   // scans NZDL (NZ Driver License)
-  nzdl: BlinkID.RECOGNIZER_NZDL_FRONT,
+  nzdl: BlinkID.NewZealandDlFrontRecognizer,
   // scans MyKad (Malaysian ID)
-  mykad: BlinkID.RECOGNIZER_MYKAD,
-  face: BlinkID.RECOGNIZER_DOCUMENT_FACE,
-  barcode: BlinkID.RECOGNIZER_PDF417,
+  myKadBack: BlinkID.MyKadBackRecognizer,
+  myKadFront: BlinkID.MyKadFrontRecognizer,
+  documentFace: BlinkID.DocumentFaceRecognizer,
+  pdf417: BlinkID.Pdf417Recognizer,
+  barcode: BlinkID.BarcodeRecognizer
 }
 
 const defaults = {
@@ -35,6 +42,11 @@ const defaults = {
   // shouldReturnSuccessfulImage: true,
   recognizers: getValues(recognizers)
 }
+const parser = new xml2js.Parser({ explicitArray: false, strict: false })
+// // parser = Promise.promisifyAll(parser)
+// // TODO: make checkIDDocument ready at the end of constructor
+// // don't make people wait for ready promise to resolve
+var parseXML = parser.parseString.bind(parser)
 
 let licenseKey
 
@@ -47,39 +59,62 @@ const scan = (function () {
   if (!licenseKey) return
 
   return async (opts) => {
-    const recognizer = [].concat(opts.recognizers).find(r => {
-      return r !== recognizers.face // face is a secondary recognizer
-    })
+    let types = []
+    let isCombined
+    let frameGrabbers = opts.recognizers.map(r => {
+      // const type = keyByValue(recognizers, r)
+      // let rec = new BlinkID[r]()
+      let rec = new r()
+      if (!isCombined)
+        isCombined = rec.recognizerType.indexOf('Combined') !== -1
+      types.push(keyByValue(recognizers, r))
 
-    const type = keyByValue(recognizers, recognizer)
-    const result = await BlinkID.scan(licenseKey, withDefaults(opts, defaults))
-    return postProcessResult({ type, result: result.resultList[0] })
+      if (!(rec instanceof BlinkID.DocumentFaceRecognizer)) {
+        rec.returnFullDocumentImage = true
+        rec.returnFaceImage = true
+        rec.returnSignatureImage = true
+        rec.setAllowUnparsedResults = true
+        rec.setAllowUnverifiedResults = true
+      }
+      if (rec instanceof BlinkID.BarcodeRecognizer) {
+        if (opts.country.title === 'Bangladesh')
+          rec.scanPdf417 = true
+      }
+      // let fName = type.charAt(0).toUpperCase() + type.slice(1);
+      return isCombined ? rec : new BlinkID.SuccessFrameGrabberRecognizer(rec)
+    })
+    const result = await BlinkID.BlinkID.scanWithCamera(
+      isCombined ? new BlinkID.DocumentVerificationOverlaySettings() : new BlinkID.DocumentOverlaySettings(),
+      new BlinkID.RecognizerCollection(frameGrabbers),
+      licenseKey) //, withDefaults(opts, defaults))
+    if (!result.length)
+      return
+    let normalized = result.map((r, i) =>  postProcessResult({ type: types[i], result: r, isCombined }))
+    // debugger
+    return normalized[0]
   }
 }());
 
-const postProcessResult = ({ type, result }) => {
-  const ret = {}
-  let photoId = result.fields
+const postProcessResult = ({ type, result, isCombined }) => {
+  let scanData = isCombined ? result : result.slaveRecognizerResult
+  if (!scanData)
+    return
 
   const normalize = normalizers[type]
-  if (normalize) {
-    photoId = normalize(photoId)
-  }
+  let photoId
+  if (normalize)
+    photoId = normalize(scanData)
 
-  ret[type] = photoId
-  ret.images = {
-    face: result.resultImageFace,
-    successful: result.successful || result.resultImageSuccessful,
-    signature: result.resultImageSignature,
-    document: result.resultImageDocument
-  }
-
-  const image = ret.images.document
-  if (image) {
-    ret.image = {
-      ...image,
-      base64: 'data:image/jpeg;base64,' + image.base64
-    }
+  const image = scanData.fullDocumentImage
+  let ret = {
+    [type]: photoId,
+    images: {
+      face: scanData.faceImage,
+      successful: result.successful || result.resultImageSuccessful,
+      signature: scanData.signatureImage,
+      document: image
+    },
+    image: image  &&  { base64: 'data:image/jpeg;base64,' + image }
   }
 
   return sanitize(ret)
@@ -91,18 +126,29 @@ export default { scan, dismiss, recognizers, setLicenseKey }
 export { scan, dismiss, recognizers, setLicenseKey }
 
 function normalizeEUDLResult (result) {
+
+  // "resultState": 2,
+  // "address": "CRESCENT I,J EDINBURGH I- EH1 9GP",
+  // "birthData": "11.03.1976 UNITED KINGDOM",
+  // "country": 1,
+  // "driverNumber": "MORGA753116SM9IJ 35",
+  // "expiryDate": { ... },
+  // "issueDate": { ... }
+  // "issuingAuthority": "DVLA",
+  // "lastName": "MORGAN L.I",
+  // "personalNumber": ""
   result = {
     personal: {
-      firstName: result[EUDLKeys.FirstName],
-      lastName: result[EUDLKeys.LastName],
-      address: result[EUDLKeys.Address],
-      birthData: result[EUDLKeys.BirthData],
+      firstName: result.firstName,
+      lastName: result.lastName,
+      address: result.address,
+      birthData: result.birthData,
     },
     document: {
-      dateOfExpiry: result[EUDLKeys.ExpiryDate],
-      dateOfIssue: result[EUDLKeys.IssueDate],
-      issuer: result[EUDLKeys.IssuingAuthority],
-      documentNumber: result[EUDLKeys.DriverNumber],
+      dateOfExpiry: result.expiryDate,
+      dateOfIssue: result.issueDate,
+      issuer: result.issuingAuthority,
+      documentNumber: result.driverNumber,
     }
   }
 
@@ -134,19 +180,19 @@ function normalizeNZDLResult (result) {
   // documentClassification:"NewZealandDLFrontNew"
 
   const personal = {
-    dateOfBirth: result[NZDLKeys.DateOfBirth],
-    firstName: normalizeWhitespace(result[NZDLKeys.FirstNames]),
-    lastName: normalizeWhitespace(result[NZDLKeys.Surname]),
+    dateOfBirth: result.dateOfBirth,
+    firstName: normalizeWhitespace(result.firstNames),
+    lastName: normalizeWhitespace(result.surname),
   }
 
   const document = {
-    documentNumber: result[NZDLKeys.LicenseNumber],
-    cardVersion: result[NZDLKeys.CardVersion],
+    documentNumber: result.licenseNumber,
+    cardVersion: result.cardVersion,
     // this is scanned incorrectly as dateOfBirth sometimes
     // and is not present on most licenses' front sides
     // dateOfIssue: result[NZDLKeys.IssueDate],
-    dateOfExpiry: result[NZDLKeys.ExpiryDate],
-    isDonor: result[NZDLKeys.DonorIndicator] === '1'
+    dateOfExpiry: result.expiryDate,
+    isDonor: result.donorIndicator
   }
 
   result = { personal, document }
@@ -174,23 +220,25 @@ function normalizeMRTDResult (result) {
   // "Opt2": "",
   // "PrimaryId": "OTHER",
   // "SecondaryId": "ADAM NORMAN"
-
-  const sex = result[MRTDKeys.Sex]
+  let mrzResult = result.mrzResult
+  const sex = mrzResult.gender
   result = {
     personal: {
-      firstName: result[MRTDKeys.SecondaryId],
-      lastName: result[MRTDKeys.PrimaryId],
+      firstName: mrzResult.secondaryId,
+      lastName: mrzResult.primaryId,
       sex: sex === 'M' || sex === 'F' ? sex : undefined,
-      dateOfBirth: result[MRTDKeys.DateOfBirth],
-      nationality: result[MRTDKeys.Nationality]
+      dateOfBirth: mrzResult.dateOfBirth,
+      nationality: mrzResult.nationality
     },
     document: {
-      documentNumber: result[MRTDKeys.DocumentNumber],
-      dateOfExpiry: result[MRTDKeys.DateOfExpiry],
-      issuer: result[MRTDKeys.Issuer],
-      opt1: result[MRTDKeys.Opt1],
-      opt2: result[MRTDKeys.Opt2],
-      mrzText: result[MRTDKeys.MRZText],
+      documentNumber: mrzResult.documentNumber,
+      dateOfExpiry: mrzResult.dateOfExpiry,
+      issuer: mrzResult.issuer,
+      opt1: mrzResult.opt1,
+      opt2: mrzResult.opt2,
+      mrzText: mrzResult.mrzText,
+      mrzParsed: mrzResult.mrzParsed,
+      mrzVerified: mrzResult.mrzVerified,
       /*
        * Document code. Document code contains two characters. For MRTD the first character shall
        * be A, C or I. The second character shall be discretion of the issuing State or organization except
@@ -200,11 +248,11 @@ function normalizeMRTDResult (result) {
        * MRP. If the second character position is not used for this purpose, it shall be filled by the filter
        * character '<'.
        */
-      documentCode: result[MRTDKeys.DocumentCode],
+      documentCode: mrzResult.documentCode,
       // US Green Card only
-      applicationReceiptNumber: result[MRTDKeys.ApplicationReceiptNumber],
-      alienNumber: result[MRTDKeys.AlienNumber],
-      immigrantCaseNumber: result[MRTDKeys.ImmigrantCaseNumber],
+      applicationReceiptNumber: mrzResult.applicationReceiptNumber,
+      alienNumber: mrzResult.alienNumber,
+      immigrantCaseNumber: mrzResult.immigrantCaseNumber,
     }
   }
 
@@ -246,8 +294,15 @@ function parseYYMMDD (str) {
     original: str
   }
 }
-
-function normalizeUSDLResult (result) {
+function normalizeBarcodeResult (result) {
+  let ret = {}
+  let s = `<xml>${result.stringData}</xml>`
+  this.parseXML(s, (err, result) => {
+     ret = JSON.stringify(result, 0, 2)
+  })
+  return ret
+}
+function normalizeUSDLResult (scanned) {
   // "Full Address": "2345 ANYWHERE STREET, YOUR CITY, NY, 123450000",
   // "Jurisdiction-specific restriction codes": "NONE",
   // "pdf417": "@\n\u001e\rANSI 636001070002DL00410392ZN04330047DLDCANONE  \nDCBNONE        \nDCDNONE \nDBA08312013\nDCSMichael                                 \nDACM                                       \nDADMotorist                                \nDBD08312013\nDBB08312013\nDBC1\nDAYBRO\nDAU064 in\nDAG2345 ANYWHERE STREET               \nDAIYOUR CITY           \nDAJNY\nDAK123450000  \nDAQNONE                     \nDCFNONE                     \nDCGUSA\nDDEN\nDDFN\nDDGN\n\rZNZNAMDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5\n\r",
@@ -284,43 +339,44 @@ function normalizeUSDLResult (result) {
   // "Height cm": "163",
   // "First name truncation": "N",
   // "ZNA": "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5"
-
-  const sex = String(result[USDLKeys.Sex])
+  let result = scanned.fields
+  const sex = String(result[UsdlKeys.Sex])
   result = {
     personal: {
-      dateOfBirth: result[USDLKeys.DateOfBirth],
+      dateOfBirth: result[UsdlKeys.DateOfBirth],
       sex: sex === '1' ? 'M' : sex === '2' ? 'F' : undefined,
-      firstName: result[USDLKeys.CustomerFirstName],
-      lastName: result[USDLKeys.CustomerFamilyName],
-      middleName: result[USDLKeys.CustomerMiddleName],
-      eyeColor: result[USDLKeys.EyeColor],
-      hairColor: result[USDLKeys.HairColor],
-      heightCm: result[USDLKeys.HeightCm],
-      heightIn: result[USDLKeys.HeightIn],
-      weightKg: result[USDLKeys.WeightKilograms],
-      weightLb: result[USDLKeys.WeightPounds],
-      race: result[USDLKeys.RaceEthnicity],
-      country: result[USDLKeys.CountryIdentification],
+      firstName: result[UsdlKeys.CustomerFirstName],
+      lastName: result[UsdlKeys.CustomerFamilyName],
+      middleName: result[UsdlKeys.CustomerMiddleName],
+      eyeColor: result[UsdlKeys.EyeColor],
+      hairColor: result[UsdlKeys.HairColor],
+      heightCm: result[UsdlKeys.HeightCm],
+      heightIn: result[UsdlKeys.HeightIn],
+      weightKg: result[UsdlKeys.WeightKilograms],
+      weightLb: result[UsdlKeys.WeightPounds],
+      race: result[UsdlKeys.RaceEthnicity],
+      country: result[UsdlKeys.CountryIdentification],
       address: {
-        street: result[USDLKeys.AddressStreet],
-        stree2: result[USDLKeys.AddressStreet2],
-        city: result[USDLKeys.AddressCity],
-        region: result[USDLKeys.AddressJurisdictionCode],
-        postalCode: result[USDLKeys.AddressPostalCode],
-        full: result[USDLKeys.FullAddress],
+        street: result[UsdlKeys.AddressStreet],
+        stree2: result[UsdlKeys.AddressStreet2],
+        city: result[UsdlKeys.AddressCity],
+        region: result[UsdlKeys.AddressJurisdictionCode],
+        postalCode: result[UsdlKeys.AddressPostalCode],
+        full: result[UsdlKeys.FullAddress],
       }
     },
     document: {
-      documentNumber: result[USDLKeys.CustomerIdNumber],
-      dateOfExpiry: result[USDLKeys.DocumentExpirationDate],
-      dateOfIssue: result[USDLKeys.DocumentIssueDate],
-      issuer: result[USDLKeys.IssuerIdentificationNumber],
+      documentNumber: result[UsdlKeys.CustomerIdNumber],
+      dateOfExpiry: result[UsdlKeys.DocumentExpirationDate],
+      dateOfIssue: result[UsdlKeys.DocumentIssueDate],
+      issuer: result[UsdlKeys.IssuerIdentificationNumber],
     }
   }
 
   normalizeDates(result, parseUSDate)
   return result
 }
+
 
 function normalizeDates (result, normalizer) {
   const { personal, document } = result
@@ -376,9 +432,12 @@ function dateFromParts ({ day, month, year }) {
 
 const normalizers = {
   mrtd: normalizeMRTDResult,
+  mrtdCombined: normalizeMRTDResult,
   usdl: normalizeUSDLResult,
+  usdlCombined: normalizeUSDLResult,
   eudl: normalizeEUDLResult,
   nzdl: normalizeNZDLResult,
+  barcode: normalizeBarcodeResult
 }
 
 const normalizeWhitespace = str => {
