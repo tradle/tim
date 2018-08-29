@@ -18,8 +18,6 @@ import utils, { translate, translateEnum } from '../utils/utils'
 import constants from '@tradle/constants'
 import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
-import chatStyles from '../styles/chatStyles'
-import ResourceList from './ResourceList'
 var cnt = 0;
 import Navigator from './Navigator'
 import ENV from '../utils/env'
