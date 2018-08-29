@@ -199,7 +199,11 @@ var utils = {
   getModels() {
     return models;
   },
-
+  getModelByTitle(title) {
+    let mm = Object.values(models)
+    let idx = _.findIdx(mm, (m) => m.title === title)
+    return idx && mm[idx]
+  },
   // getModelsForStub() {
   //   return modelsForStub
   // },
@@ -577,7 +581,11 @@ var utils = {
     //       // uppercase the first character
     //       .replace(/^./, function(str){ return str.toUpperCase(); }).trim()
   },
+
   makeLabel(label, isPlural) {
+    if (!this.isCamelCase(label))
+      return label
+
     label = label
           .replace(/_/g, ' ')
           // insert a space before all caps
@@ -589,9 +597,39 @@ var utils = {
     if (parts.length === 1)
       return label
     // keep abbreviations intact
-    // let newLabel = parts.reduce((sum, cur) => sum + (cur.length === 1 ? cur : ' ' + cur))
-    let newLabel = parts.reduce((sum, cur) => sum + (' ' + cur)).trim()
-    return newLabel
+    return parts.reduce((sum, cur) => sum + (!cur.length ? cur : ' ' + cur))
+
+    // let newLabel = ''
+    // parts.forEach(s => {
+    //   if (!newLabel)
+    //     newLabel += s
+    //   else {
+    //     let ch = s.charAt(s.length - 1)
+    //     if (ch !== ch.toUpperCase())
+    //       newLabel += ' '
+    //     newLabel += s
+    //   }
+    // })
+    // return newLabel
+  },
+  isCamelCase(str){
+    var strArr = str.split('');
+    var string = '';
+    for(var i in strArr) {
+      if(strArr[i].toUpperCase() === strArr[i])
+        string += '-'+strArr[i].toLowerCase();
+      else
+        string += strArr[i];
+    }
+
+    if (this.toCamelCase(string, true) === str)
+      return true;
+    else
+      return false;
+
+  },
+  toCamelCase(str, cap1st) {
+    return ((cap1st ? '-' : '') + str).replace(/-+([^-])/g, (a, b) => b.toUpperCase())
   },
   arrayToObject(arr) {
     if (!arr)
@@ -831,7 +869,15 @@ var utils = {
     let dnProps = this.getPropertiesWithAnnotation(resourceModel ||  model, 'displayName')
     if (dnProps) {
       for (let p in dnProps) {
-        let dn = this.getStringValueForProperty(resource, p, props)
+        let dn
+        if (props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM)
+          dn = this.translateEnum(resource[p])
+        else if (props[p].range === 'model')
+          dn = this.translate(resourceModel)
+        else if (rType === BOOKMARK)
+          dn = this.translate(resource.message)
+        else
+          dn = this.getStringValueForProperty(resource, p, props)
         if (dn)
           displayName += displayName.length ? ' ' + dn : dn;
       }
@@ -949,7 +995,7 @@ var utils = {
     default:
       moment.locale(false)
     }
-    moment('en')
+    moment().locale('en')
     let valueMoment = moment.utc(value)
     let v = value instanceof Date && value.getTime()  ||  value
     let localLocale = moment(valueMoment).locale(lang === 'en' && false || lang)
@@ -1149,12 +1195,11 @@ var utils = {
       val = dateformat(date, 'h:MM TT')
       // val = moment(date).format('h:mA') //moment(date).fromNow();
       break;
-    case 1:
-      // noTime = false
-      val = this.getDateValue(date)
-      // val = 'yesterday, ' + dateformat(date, 'h:MM TT')
-      // val = moment(date).format('[yesterday], h:mA');
-      break;
+    // case 1:
+    //   // noTime = false
+    //   val = 'yesterday, ' + dateformat(date, 'h:MM TT')
+    //   // val = moment(date).format('[yesterday], h:mA');
+    //   break;
     default:
       val = this.getDateValue(date) // dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));
       // val = moment(date).format('LL');
@@ -2398,30 +2443,35 @@ var utils = {
   parseMessage(params) {
     let { resource, message, bankStyle, noLink, idx } = params
     let i1 = message.indexOf('**')
-    let formType, message1, message2
-    let messagePart
     if (i1 === -1)
-      return message
-    formType = message.substring(i1 + 2)
+      return this.translate(message)
+    let formType = message.substring(i1 + 2)
     let i2 = formType.indexOf('**')
     let linkColor = noLink ? '#757575' : bankStyle.linkColor
+    let message1, message2, messagePart
+    let formTitle
     if (i2 !== -1) {
-      message1 = message.substring(0, i1)
+      message1 = message.substring(0, i1).trim()
       message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
       formType = formType.substring(0, i2)
       if (resource[TYPE] === FORM_REQUEST) {
-        let form = this.getModel(resource.form)
-        if (form.subClassOf === MY_PRODUCT)
+        let formModel = this.getModel(resource.form)
+        if (formModel.subClassOf === MY_PRODUCT)
           linkColor = '#aaaaaa'
+        let title = this.makeModelTitle(formModel)
+        if (formType === title)
+          formTitle = this.translate(formModel)
       }
     }
+    if (!formTitle)
+      formTitle = this.translate(formType)
     let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
     let newParams = _.extend({}, params)
     newParams.idx = idx
-    newParams.message = message2
-    return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{message1}
-             <Text style={{color: linkColor}}>{formType}</Text>
+    newParams.message = message2.trim()
+    return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{this.translate(message1) + ' '}
+             <Text style={{color: linkColor}}>{formTitle}</Text>
              <Text>{utils.parseMessage(newParams)}</Text>
            </Text>
   },
