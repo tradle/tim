@@ -79,6 +79,7 @@ import ENV from '../utils/env'
 const BG_IMAGE = ENV.brandBackground
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
+const FILE = 'tradle.File'
 const HAND_SIGNATURE = 'tradle.HandSignature'
 var Form = t.form.Form;
 
@@ -862,7 +863,7 @@ class NewResource extends Component {
         let blmodel = meta
         itemsArray = null
         let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO))
+        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO ||  bl.items.ref === FILE))
           arrayItems.push(this.getPhotoItem(bl, styles))
         else
           arrayItems.push(this.getItem(bl, styles))
