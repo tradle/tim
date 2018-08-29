@@ -932,7 +932,7 @@ var NewResourceMixin = {
 
     let { search, bankStyle } = this.props
     if (!value)
-      value = utils.getDateValue(new Date())
+      value = utils.getDateValue(new Date())  + (!search  &&  required  ?  ' *' : '')
       // value = translate(params.prop)  + (!search  &&  required  ?  ' *' : '')
     let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
 
