@@ -54,7 +54,7 @@ import employee from '../people/employee.json'
 const FRIEND = 'Tradler'
 const ALREADY_PUBLISHED_MESSAGE = '[already published](tradle.Identity)'
 
-import { getCoverPhotoForRegion, getYukiForRegion } from './locale'
+import { getCoverPhotoForRegion, getYukiForRegion, getLanguage } from './locale'
 
 import Q from 'q'
 Q.longStackSupport = true
@@ -225,6 +225,7 @@ const DATA_BUNDLE         = 'tradle.DataBundle'
 const DATA_CLAIM          = 'tradle.DataClaim'
 const CHECK               = 'tradle.Check'
 const LEGAL_ENTITY        = 'tradle.legal.LegalEntity'
+const LANGUAGE            = 'tradle.Language'
 
 const MY_ENVIRONMENT      = 'environment.json'
 
@@ -489,7 +490,7 @@ var Store = Reflux.createStore({
         action: 'app_open'
       }))
 
-    this._envPromise = this.loadEnv()
+    // this._envPromise = this.loadEnv()
     this.cache = new Cache({max: 500, maxAge: 1000 * 60 * 60})
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
@@ -2519,7 +2520,7 @@ var Store = Reflux.createStore({
       language = me.language
       if (language) {
         language = this._getItem(utils.getId(language))
-        languageCode = language.code
+        languageCode = language[ROOT_HASH]
       }
     }
     if (!languageCode)
@@ -3637,9 +3638,11 @@ var Store = Reflux.createStore({
     }
   },
   async onAddVerification(params) {
-    let { r, dontSend, notOneClickVerification, noTrigger } = params
+    let { r, dontSend, notOneClickVerification, noTrigger, application } = params
 
-    let to = params.to || [r.to]
+    let to = params.to || r.to
+    if (!Array.isArray(to))
+      to = [to]
     let docStub = params.document || r.document
     let docId = utils.getId(docStub)
     let document = this._getItem(docId)
@@ -3660,11 +3663,13 @@ var Store = Reflux.createStore({
       r._inbound = true
 
     let context = r._context
-    if (!context) {
+    if (!context)
       context = document._context
-      if (context)
-        r._context = context
-    }
+    if (!context  &&  application)
+      context = await this.getContext(application.context, r)
+
+    if (context)
+      r._context = context
 
     let isAssignRM = document[TYPE] === ASSIGN_RM
     if (isAssignRM) {
@@ -3694,11 +3699,14 @@ var Store = Reflux.createStore({
     let result
 
     if (!dontSend) {
-      result = await self.createObject({
-                  [TYPE]: VERIFICATION,
-                  document: this.buildSendRef(document),
-                  time: time
-                })
+      let v = {
+                [TYPE]: VERIFICATION,
+                document: this.buildSendRef(document),
+                time: time
+              }
+      if (r.method)
+        v.method = r.method
+      result = await self.createObject(v)
     }
 
     if (result) {
@@ -3814,8 +3822,13 @@ var Store = Reflux.createStore({
     if (!isAssignRM  &&  !noTrigger) {
       if (notOneClickVerification)
         this.trigger({action: 'addItem', resource: r});
-      else
+      else {
         this.trigger({action: 'addVerification', resource: r});
+        if (application) {
+          let newApplication = await this.onGetItem({resource: application, search: true})
+          this.trigger({action: 'getItem', resource: newApplication})
+        }
+      }
     }
     if (!doc  ||  docFromServer)
       return
@@ -3834,6 +3847,7 @@ var Store = Reflux.createStore({
       }
     }
     this.trigger({action: 'getItem', resource: doc})
+
     // if (!verificationRequest._sharedWith)
     //   verificationRequest._sharedWith = []
     // verificationRequest._sharedWith.push(fromId)
@@ -3916,6 +3930,14 @@ var Store = Reflux.createStore({
         r._sharedWith = []
       r._sharedWith.push(this.createSharedWith(id, time, shareBatchId, lens))
     }
+  },
+
+  async onGetItemsToMatch({selfie, photoId}) {
+    if (!selfie.selfie)
+      selfie = await this.onGetItem({resource: selfie, search: true, noTrigger: true})
+    if (!photoId.scan)
+      photoId = await this.onGetItem({resource: photoId, search: true, noTrigger: true})
+    this.trigger({action: 'matchImages', photoId, selfie})
   },
 
   async onGetItem(params) {
@@ -4005,6 +4027,8 @@ if (!res[SIG]  &&  res._message)
     let r
     if (!isApplication  ||  resource.id  ||  (!backlink  &&  !forwardlink)) {
       r = await this._getItemFromServer(rId, backlink)
+      if (!r)
+        return
       // Check if there are verifications
       if (!noTrigger                 &&
           application                &&
@@ -4542,7 +4566,7 @@ if (!res[SIG]  &&  res._message)
   },
   async onAddItem(params) {
     var self = this
-    var {resource, disableFormRequest, isMessage, disableAutoResponse, doneWithMultiEntry,
+    var {resource, application, disableFormRequest, isMessage, disableAutoResponse, doneWithMultiEntry,
          value, chat, shareWith, cb, meta, isRegistration, provider, noTrigger, lens} = params
     if (!value)
       value = resource
@@ -4574,8 +4598,11 @@ if (!res[SIG]  &&  res._message)
       let savedContext = this._getItem(context)
       if (savedContext) //  &&  me.isEmployee)
         context = savedContext
-      if (!context)
+      if (!context) {
         debugger
+        if (params.contextId)
+          context = await this.getContext(params.contextId, resource)
+      }
       isRemediation = context.requestFor === REMEDIATION
 
       // with employee it could be context that was started by different employee
@@ -4585,6 +4612,9 @@ if (!res[SIG]  &&  res._message)
           resource.to = utils.clone(utils.getId(context.to) === utils.getId(me) ? context.from : context.to)
       }
     }
+    else if (application)
+      context = await this.getContext(application.context, resource)
+
 
     let isSelfIntroduction = meta[TYPE] === SELF_INTRODUCTION
     var isNew = !resource[ROOT_HASH];
@@ -5438,8 +5468,10 @@ if (!res[SIG]  &&  res._message)
       seal: true
     }
     if (formResource  &&  formResource._context) {
-      let context = utils.getId(formResource._context)
-      opts.other = { context: this._getItem(context).contextId }
+      let contextId = formResource._context.contextId
+      if (!contextId)
+        contextId = this._getItem(utils.getId(formResource._context)).contextId
+      opts.other = { context: contextId }
     }
       // opts.other = {context: utils.getId(formResource._context).split('_')[1]}
 
@@ -5955,6 +5987,13 @@ if (!res[SIG]  &&  res._message)
       //   width: coverPhoto.width,
       //   height: coverPhoto.height
       // }
+    }
+    let languageCode = getLanguage()
+    let m = this.getModel(LANGUAGE)
+    let l = utils.buildStubByEnumTitleOrId(m, languageCode)
+    if (l) {
+      r.language = l
+      r.languageCode = languageCode
     }
     await this.onAddItem({resource: r, isRegistration: true})
   },
@@ -6539,8 +6578,11 @@ if (!res[SIG]  &&  res._message)
 
       // importedVerification = graphQL.getChat(params)
     }
-    else if (context)
+    else if (context) {
       contextId = context.contextId
+      if (!context[TYPE])
+        context = null
+    }
     else if (!filterResource)
       return
     if (!context  &&  contextId) {
@@ -7364,9 +7406,23 @@ if (!res[SIG]  &&  res._message)
           let prefill = refsObj[utils.getId(r.prefill)]
           if (prefill)
             r.prefill = prefill
-
         }
+
         this.addVisualProps(r)
+        // Check if this message was shared, display the time when it was shared not when created
+        if (r._sharedWith  &&  to) {
+          let orgTo = r.to.organization
+          if (!orgTo &&  utils.getId(r.to) === utils.getId(me))
+            orgTo = r.from.organization
+          if (utils.getId(to) !== utils.getId(orgTo)) {
+            let author = to._author
+            if (author) {
+              let sh = r._sharedWith.filter(r => utils.getRootHash(r.bankRepresentative) === author)
+              if (sh.length)
+                r._time = sh[0].timeShared
+            }
+          }
+        }
       })
       // Minor hack before we intro sort property here
       let sortedFR = []
@@ -9277,11 +9333,11 @@ if (!res[SIG]  &&  res._message)
         this.setMe(me)
         if (newLanguage) {
           let lang = this._getItem(utils.getId(me.language))
-          value.languageCode = lang.code
-          this.dbPut(iKey, value)
+          value.languageCode = lang[ROOT_HASH]
 
           me.language = lang
-          me.languageCode = lang.code
+          me.languageCode = lang[ROOT_HASH]
+          this.dbPut(iKey, value)
           this.setMe(me)
           var urls = []
           // if (SERVICE_PROVIDERS.length) {
@@ -9540,10 +9596,10 @@ if (!res[SIG]  &&  res._message)
     }
     _.extend(identity, publishedIdentity)
     var iKey = utils.getId(identity)
-    if (me.language) {
-      me.language = this._getItem(utils.getId(me.language))
-      me.languageCode = me.language.code
-    }
+    // if (me.language) {
+      // me.language = this._getItem(utils.getId(me.language))
+      // me.languageCode = me.language.code
+    // }
     batch.push({type: 'put', key: iKey, value: identity});
     return db.batch(batch)
     .then(() => {
@@ -9820,9 +9876,9 @@ if (!res[SIG]  &&  res._message)
       })
     }
 
-    if (identity) {
-      await this.maybeRequireFreshUser()
-    }
+    // if (identity) {
+    //   await this.maybeRequireFreshUser()
+    // }
 
     if (mePub) {
       const lookupKeys = Keychain

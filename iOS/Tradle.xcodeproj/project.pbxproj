@@ -23,7 +23,6 @@
 		1B6C319A28EA8EA2AC935AF5 /* Pods_Tradle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A996C95D73C126D60C908C12 /* Pods_Tradle.framework */; };
 		43EDC8BAFC1D48CDB9B731A5 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = EEECD0C1934547049DA9F6AE /* libz.tbd */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
-		730D64D0207EF60100358558 /* libBlinkIDReactNative.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 730D6460207EF5BC00358558 /* libBlinkIDReactNative.a */; };
 		73113FE5205F4AAF000C04F6 /* libRNSearchBar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73113FE4205F4AA7000C04F6 /* libRNSearchBar.a */; };
 		73113FFB205F4D55000C04F6 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73113FF8205F4B44000C04F6 /* libRCTBlob.a */; };
 		732B67862060213F00B16D6F /* libRNCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B67852060213500B16D6F /* libRNCamera.a */; };
@@ -68,6 +67,7 @@
 		73F1D0981EDA10EE00D4AB5B /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73F1D0941EDA10EE00D4AB5B /* tradle.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8C736C6F8FA64018866A2A0C /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 09E311D0387D4764923D9B71 /* Ionicons.ttf */; };
+		9B53A9DF212715CA00521887 /* libMicroblinkModule.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B53A99E212715BB00521887 /* libMicroblinkModule.a */; };
 		DCFA2F9E52F04D73AD1335E2 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = 1447D734074D4C7BBD023C62 /* branch.json */; };
 /* End PBXBuildFile section */
 
@@ -232,13 +232,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 2D2A28201D9B03D100D4039D;
 			remoteInfo = "RCTAnimation-tvOS";
-		};
-		730D645F207EF5BC00358558 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = A27CCA2B1E9E57A500BED675;
-			remoteInfo = BlinkIDReactNative;
 		};
 		73113F8F205F4A95000C04F6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -569,6 +562,13 @@
 			remoteGlobalIDString = 58B5119B1A9E6C1200147676;
 			remoteInfo = RCTText;
 		};
+		9B53A99D212715BB00521887 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = A27CCA2B1E9E57A500BED675;
+			remoteInfo = MicroblinkModule;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -647,11 +647,11 @@
 		8B8FD5DD4E4F4FFB9581AD8E /* libreact-native-branch.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libreact-native-branch.a"; sourceTree = "<group>"; };
 		97F331FA96224F67B61B074E /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
+		9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MicroblinkModule.xcodeproj; path = "../node_modules/blinkid-react-native/src/ios/MicroblinkModule/MicroblinkModule.xcodeproj"; sourceTree = "<group>"; };
 		A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		A4C66A6D1DDE4BC083E2095B /* libReactNativeExceptionHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libReactNativeExceptionHandler.a; sourceTree = "<group>"; };
 		A996C95D73C126D60C908C12 /* Pods_Tradle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Tradle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
-		B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = BlinkIDReactNative.xcodeproj; path = "../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative.xcodeproj"; sourceTree = "<group>"; };
 		BFC0C75130C445498FB831DE /* RNPasscodeStatus.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNPasscodeStatus.xcodeproj; path = "../node_modules/react-native-passcode-status/ios/RNPasscodeStatus.xcodeproj"; sourceTree = "<group>"; };
 		CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBranch.xcodeproj; path = "../node_modules/react-native-branch/ios/RNBranch.xcodeproj"; sourceTree = "<group>"; };
 		D0DAF985EAB8452CAF6683AC /* libBlinkIDReactNative.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libBlinkIDReactNative.a; sourceTree = "<group>"; };
@@ -715,8 +715,8 @@
 				73113FFB205F4D55000C04F6 /* libRCTBlob.a in Frameworks */,
 				73F1B89F205F5ABD004E96E2 /* libTcpSockets.a in Frameworks */,
 				73F1B8A0205F5AC8004E96E2 /* libreact-native-branch.a in Frameworks */,
-				730D64D0207EF60100358558 /* libBlinkIDReactNative.a in Frameworks */,
 				73834C3820D1B462000C9AFC /* libRNCardIO.a in Frameworks */,
+				9B53A9DF212715CA00521887 /* libMicroblinkModule.a in Frameworks */,
 				1B6C319A28EA8EA2AC935AF5 /* Pods_Tradle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -869,14 +869,6 @@
 			children = (
 				5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */,
 				5E9157351DD0AC6500FF2AA8 /* libRCTAnimation.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		730D645C207EF5BB00358558 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				730D6460207EF5BC00358558 /* libBlinkIDReactNative.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1123,6 +1115,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */,
 				9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */,
 				73EF39B420CC7071009EDE8B /* RNDeviceInfo.xcodeproj */,
 				732B67802060213500B16D6F /* RNCamera.xcodeproj */,
@@ -1161,7 +1154,6 @@
 				0F777F0159624A2AA6123F88 /* TcpSockets.xcodeproj */,
 				CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */,
 				6B75EECB744A4B5E9B111227 /* RNFirebase.xcodeproj */,
-				B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */,
 				EA429A9B07F944E893CD5380 /* RNCardIO.xcodeproj */,
 			);
 			name = Libraries;
@@ -1195,6 +1187,14 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* Tradle.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9B53A996212715BB00521887 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				9B53A99E212715BB00521887 /* libMicroblinkModule.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1283,16 +1283,16 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 730D645C207EF5BB00358558 /* Products */;
-					ProjectRef = B9D4AEDCE1D442B6A42DBF06 /* BlinkIDReactNative.xcodeproj */;
-				},
-				{
 					ProductGroup = 732B64551ED9FF7C0056F4BF /* Products */;
 					ProjectRef = 6B3FC1286FC44AFDBB86B8CD /* BVLinearGradient.xcodeproj */;
 				},
 				{
 					ProductGroup = 732B63DD1ED9FF670056F4BF /* Products */;
 					ProjectRef = 5533C47B56414D49AC0BA942 /* CodePush.xcodeproj */;
+				},
+				{
+					ProductGroup = 9B53A996212715BB00521887 /* Products */;
+					ProjectRef = 9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */;
 				},
 				{
 					ProductGroup = 00C302A81ABCB8CE00DB3ED1 /* Products */;
@@ -1610,13 +1610,6 @@
 			fileType = archive.ar;
 			path = libRCTAnimation.a;
 			remoteRef = 5E9157341DD0AC6500FF2AA8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		730D6460207EF5BC00358558 /* libBlinkIDReactNative.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libBlinkIDReactNative.a;
-			remoteRef = 730D645F207EF5BC00358558 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		73113F90205F4A95000C04F6 /* libBVLinearGradient.a */ = {
@@ -1941,6 +1934,13 @@
 			remoteRef = 832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		9B53A99E212715BB00521887 /* libMicroblinkModule.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libMicroblinkModule.a;
+			remoteRef = 9B53A99D212715BB00521887 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -2141,10 +2141,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Tradle\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -2213,10 +2210,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Tradle\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -2323,10 +2317,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Tradle\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

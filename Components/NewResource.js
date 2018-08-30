@@ -395,7 +395,7 @@ class NewResource extends Component {
       title: title,
       component: isMessage ? MessageView : ResourceView,
       titleTextColor: '#7AAAC3',
-      rightButtonTitle: translate('edit'),
+      rightButtonTitle: 'Edit',
       backButtonTitle: 'Back',
       onRightButtonPress: {
         title: title,
@@ -736,7 +736,7 @@ class NewResource extends Component {
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
       backButtonTitle: 'Back',
       component: NewItem,
-      rightButtonTitle: translate('done'),
+      rightButtonTitle: 'Done',
       passProps: {
         metadata: bl,
         bankStyle,
@@ -890,7 +890,7 @@ class NewResource extends Component {
         let blmodel = meta
         itemsArray = null
         let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO  ||  bl.items.ref === FILE))
+        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO ||  bl.items.ref === FILE))
           arrayItems.push(this.getPhotoItem(bl, styles))
         else
           arrayItems.push(this.getItem(bl, styles))
@@ -979,7 +979,7 @@ class NewResource extends Component {
       let formList = resource.signatureFor.map((r) => (
           <TouchableOpacity onPress={() => this.showResource(r)} style={styles.formListItem} key={this.getNextKey()}>
           <View>
-            <Text style={styles.forms}>{utils.makeModelTitle(r.id.split('_')[0])}</Text>
+            <Text style={styles.forms}>{translate(utils.getModel(r[TYPE]))}</Text>
           </View>
           </TouchableOpacity>))
 
@@ -1179,7 +1179,7 @@ class NewResource extends Component {
       id: 3,
       component: ResourceView,
       title: translate('termsAndConditions'),
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       rightButtonTitle: 'Accept',
       passProps: {
         resource: termsAndConditions,
@@ -1198,7 +1198,7 @@ class NewResource extends Component {
     let dn = ''
     let ref = pMeta.items.ref
     if (ref)
-      dn = utils.makeModelTitle(ref)
+      dn = translate(utils.getModel(ref))
     Alert.alert(
       translate('cancelItem', dn),
       null,
@@ -1466,7 +1466,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       justifyContent: 'center',
       // justifyContent: 'flex-end',
       alignItems: 'flex-end',
-      paddingRight: 5
+      // paddingRight: 5
     },
     itemButton: {
       height: 60,

@@ -19,6 +19,7 @@ const {
 const {
   IDENTITY,
   PROFILE,
+  ENUM,
   FINANCIAL_PRODUCT
 } = constants.TYPES
 
@@ -93,13 +94,16 @@ class RefPropertyEditor extends Component {
     if (val) {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto) {
-        label = prop.title
+        label = translate(prop, model)
         // floatingProps[pName] = resource[pName]
       }
       else {
         let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
         // let m = utils.getId(resource[pName]).split('_')[0]
-        label = utils.getDisplayName(resource[pName], rModel)
+        if (rModel.subClassOf === ENUM)
+          label = utils.translateEnum(resource[pName])
+        else
+          label = utils.getDisplayName(resource[pName], rModel)
         if (!label) {
           // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
           if (utils.isEnum(rModel)  &&  Array.isArray(resource[pName])) {
@@ -109,8 +113,11 @@ class RefPropertyEditor extends Component {
               label += label ? ', ' + title : title
             })
           }
-          else
+          else {
             label = resource[pName].title
+            if (!label)
+              label = prop.title
+          }
         }
         if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
           if (!label)
@@ -119,10 +126,10 @@ class RefPropertyEditor extends Component {
         }
       }
       style = textStyle
-      propLabel = <Text style={[styles.labelDirty, lcolor]}>{prop.title}</Text>
+      propLabel = <Text style={[styles.labelDirty, lcolor]}>{translate(prop, model)}</Text>
     }
     else {
-      label = prop.title
+      label = translate(prop, model)
       if (!search  &&  required)
         label += ' *'
       style = [labelStyle, lcolor]
@@ -160,11 +167,11 @@ class RefPropertyEditor extends Component {
         propView = <Text style={[styles.input, color, {width: utils.dimensions(component).width - 60}]}>{label}</Text>
       }
     }
-    let maxChars = (utils.dimensions(component).width - 20)/10
-    if (maxChars < label.length)
-      label = label.substring(0, maxChars - 3) + '...'
-    if (isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[pName])
-      label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
+    // let maxChars = (utils.dimensions(component).width - 20)/10
+    // if (maxChars < label.length)
+    //   label = label.substring(0, maxChars - 3) + '...'
+    // if (isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[pName])
+    //   label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
 
     let fontSize = styles.font20 //isRegistration ? styles.font20 : styles.font18
     // let fontSize = styles.font18 //isRegistration ? styles.font20 : styles.font18
@@ -231,6 +238,7 @@ class RefPropertyEditor extends Component {
     );
   }
   onSetMediaProperty(propName, item) {
+    debugger
     if (!item)
       return;
     let { model, floatingProps, resource } = this.props
@@ -316,16 +324,22 @@ class RefPropertyEditor extends Component {
       // machine readable travel documents (passport)
       recognizers = BlinkID.recognizers.mrtd
       break
+    case 'card':
+      tooltip = translate('centerIdCard')
+      // machine readable travel documents (passport)
+      recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
+      break
     case 'license':
+    case 'licence':
       tooltip = translate('centerLicence')
       if (country.title === 'United States') {
-        recognizers = [BlinkID.recognizers.usdl, BlinkID.recognizers.face]
-      } else if (country.title === 'New Zealand') {
-        recognizers = BlinkID.recognizers.nzdl
-      } else {
-        recognizers = BlinkID.recognizers.eudl
+        recognizers = BlinkID.recognizers.usdlCombined
+        // recognizers = BlinkID.recognizers.usdl
       }
-
+      else if (country.title === 'New Zealand')
+        recognizers = BlinkID.recognizers.nzdl
+      else
+        recognizers = BlinkID.recognizers.eudl
       break
     default:
       tooltip = translate('centerID')
@@ -333,9 +347,10 @@ class RefPropertyEditor extends Component {
     }
 
     const blinkIDOpts = {
-      quality: 0.2,
-      base64: true,
-      timeout: ENV.blinkIDScanTimeoutInternal,
+      // quality: 0.2,
+      // base64: true,
+      // timeout: ENV.blinkIDScanTimeoutInternal,
+      country,
       tooltip,
       recognizers: recognizers ? [].concat(recognizers) : BlinkID.recognizers
     }
@@ -358,6 +373,8 @@ class RefPropertyEditor extends Component {
       ])
     } catch (err) {
       debug('scan failed:', err.message)
+      debugger
+
       const canceled = /canceled/i.test(err.message)
       const timedOut = !canceled && /time/i.test(err.message)
       if (!canceled && typeof BlinkID.dismiss === 'function') {
@@ -385,6 +402,9 @@ class RefPropertyEditor extends Component {
       )
     }
 
+    if (!result)
+      return
+
     // const tradleObj = utils.fromMicroBlink(result)
     const r = _.cloneDeep(resource)
     if (result.image) {
@@ -394,14 +414,20 @@ class RefPropertyEditor extends Component {
         height: result.image.height
       }
     }
+    if (result.images) {
+      let { faceImage, signatureImage } = result.images
+      if (faceImage)
+        r.faceImage = { url: faceImage }
+      if (signatureImage)
+        r.signatureImage = { url: signatureImage }
+    }
 
     let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
     if (docScannerProps  &&  docScannerProps.length)
       r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
 
-
     let dateOfExpiry
-    ;['mrtd', 'usdl', 'eudl', 'nzdl'].some(docType => {
+    ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl'].some(docType => {
       const scan = result[docType]
       if (!scan) return
 
@@ -511,7 +537,7 @@ class RefPropertyEditor extends Component {
     }
 
     let route = {
-      title: translate(prop), //m.title,
+      title: translate(prop, model), //m.title,
       id:  30,
       component: GridList,
       backButtonTitle: 'Back',
@@ -560,10 +586,17 @@ class RefPropertyEditor extends Component {
 }
 function getDocumentTypeFromTitle (title='') {
   title = title.toLowerCase()
-  const match = title.match(/(licen[cs]e|passport)/)
+  const match = title.match(/(licen[cs]e|passport|card)/)
   if (!match) return
-
-  return match[1] === 'passport' ? 'passport' : 'license'
+  switch (match[1]) {
+  case 'passport':
+    return 'passport'
+  case 'license':
+  case 'licence':
+    return 'license'
+  case 'card':
+    return 'card'
+  }
 }
 module.exports = RefPropertyEditor;
   // setChosenValue(propName, value) {

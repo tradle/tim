@@ -1,8 +1,19 @@
 console.log('requiring PhotoView.js')
 'use strict';
 
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
+import {
+  Image,
+  ImageBackground,
+  View,
+  Text,
+  Modal,
+  Animated,
+  Easing,
+  TouchableHighlight
+} from 'react-native'
+
+import PropTypes from 'prop-types'
 import * as Animatable from 'react-native-animatable'
 import { makeResponsive } from 'react-native-orient'
 import _ from 'lodash'
@@ -13,17 +24,6 @@ import utils from '../utils/utils'
 import constants from '@tradle/constants'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
 
-import {
-  StyleSheet,
-  Image,
-  ImageBackground,
-  View,
-  Text,
-  Modal,
-  Animated,
-  Easing,
-  TouchableHighlight,
-} from 'react-native'
 
 class PhotoView extends Component {
   constructor(props) {
@@ -170,20 +170,5 @@ class PhotoView extends Component {
 }
 reactMixin(PhotoView.prototype, PhotoCarouselMixin);
 PhotoView = makeResponsive(PhotoView)
-
-var styles = StyleSheet.create({
-  photoBG: {
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-    borderBottomColor: '#e8e8e8',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    alignSelf: 'stretch'
-  },
-  modalBackgroundStyle: {
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-    justifyContent: 'center',
-    // padding: 20,
-  },
-});
 
 module.exports = PhotoView;

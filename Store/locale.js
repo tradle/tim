@@ -1,4 +1,5 @@
 import DeviceInfo from 'react-native-device-info'
+const Language = 'tradle.Language'
 const INFO_PER_REGION = {
   "Africa": {
     "coverPhoto": {
@@ -19,7 +20,7 @@ const INFO_PER_REGION = {
       "width": "1280",
       "height": "778",
     },
-    "languages": ["en-us"],
+    "languages": ["en-us","es-us"],
     "yuki": {
       "name": "Jane",
       "photos": [{
@@ -105,6 +106,7 @@ const INFO_PER_REGION = {
 module.exports = {
   getYukiForRegion,
   getCoverPhotoForRegion,
+  getLanguage
 }
 
 function getYukiForRegion() {
@@ -115,11 +117,20 @@ function getCoverPhotoForRegion() {
   let infoPerRegion = getInfoForRegion()
   return infoPerRegion  &&  infoPerRegion.coverPhoto
 }
+function getLanguage() {
+  debugger
+  let lang = DeviceInfo.getDeviceLocale()
+  if (!lang)
+    lang = navigator.language
+  return lang.split('-')[0]
+}
 function getInfoForRegion() {
   let tz = DeviceInfo.getTimezone()
   if (tz)
     return INFO_PER_REGION[tz]  ||  INFO_PER_REGION[tz.split('/')[0]]
-  let lang = navigator.language
+  let lang = DeviceInfo.getDeviceLocale()
+  if (!lang)
+    lang = navigator.language
   if (!lang)
     return
   lang = lang.toLowerCase()

@@ -728,9 +728,10 @@ class GridList extends Component {
     else if (isApplication) {
       let aTitle = resource.applicantName || resource.applicant.title
       if (aTitle)
-        title = aTitle  + '  →  ' + me.organization.title
-      else
-        title = me.organization.title
+        title = aTitle  + '  --  ' + me.organization.title  + '  →  ' + utils.getDisplayName(resource)
+      else {
+        title = me.organization.title  + '  --  ' + utils.getDisplayName(resource)
+      }
     }
     else if (me.isEmployee)
       title = me.organization.title + '  →  ' + utils.getDisplayName(resource)
@@ -832,34 +833,37 @@ class GridList extends Component {
     let rType = utils.getType(resource)
     let rModel = utils.getModel(rType)
     let isMessage = utils.isMessage(resource)
-    let title
     let isStub = utils.isStub(resource)
     let isFormError = rType === FORM_ERROR
     let isForm = rModel.subClassOf === FORM
 
-    if (rType === VERIFICATION) {
+    let isVerification = rType === VERIFICATION
+    let title
+    if (isVerification) {
       if (isStub)
-        title = utils.makeModelTitle(utils.getType(resource))
+        title = translate(rModel)
       else {
         let type = utils.getType(resource.document)
-        title = 'Verification - ' + utils.makeModelTitle(utils.getModel(type))
+        title = 'Verification - ' + translate(utils.getModel(type))
       }
     }
-    else
-      title = utils.makeModelTitle(rModel)
+    else {
+      title = translate(rModel)
 
-    let dn
-    if (isFormError) {
-      if (!isStub)
-        dn = utils.makeModelTitle(utils.getType(resource.prefill))
+      let dn
+      if (isFormError) {
+        if (!isStub) {
+          let pModel = utils.getModel(utils.getType(resource.prefill))
+          dn = translate(pModel)
+        }
+      }
+      else
+        dn = utils.getDisplayName(resource)
+      title = (dn ? dn + ' -- '  : '') + title;
     }
-    else
-      dn = utils.getDisplayName(resource)
-    // let newTitle = title + (dn ? ' -- ' + dn : '');
-    let newTitle = (dn ? dn + ' -- '  : '') + title;
 
     let route = {
-      title: newTitle,
+      title: title,
       id: 5,
       component: MessageView,
       backButtonTitle: 'Back',
@@ -914,8 +918,13 @@ class GridList extends Component {
       }
       route.passProps.backlink = prop
     }
-    let canEdit //= isFormError  &&   isRM
-    if (!isStub  ||  canEdit  ||  utils.isMyMessage({resource})) {
+    // Edit verifications
+    // let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
+    // if (!canEdit  &&  !isVerification)
+    //   canEdit = utils.isMyMessage({resource})
+    // if ((!isStub  &&  !isVerification)  ||  canEdit  ||  utils.isMyMessage({resource})) {
+    // if (canEdit) {
+    if (!isStub  ||  utils.isMyMessage({resource})) {
       _.extend(route, {
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
@@ -946,7 +955,7 @@ class GridList extends Component {
     if (prefill) {
       let pm = utils.getModel(resource[prefill.name][TYPE])
       if (pm)
-        title = utils.makeModelTitle(pm)
+        title = translate(pm)
     }
     if (!title)
       title = utils.getDisplayName(resource);
@@ -1077,7 +1086,7 @@ class GridList extends Component {
     let { navigator, bankStyle, currency, exploreData } = this.props
     navigator.push({
       id: 30,
-      title: translate('searchSomething', utils.makeModelTitle(model)),
+      title: translate('searchSomething', translate(model)),
       backButtonTitle: 'Back',
       component: GridList,
       passProps: {
@@ -1091,7 +1100,7 @@ class GridList extends Component {
       },
       rightButtonTitle: 'Search',
       onRightButtonPress: {
-        title: translate('searchSomething', utils.makeModelTitle(model)),
+        title: translate('searchSomething', translate(model)),
         id: 4,
         component: NewResource,
         titleTextColor: '#7AAAC3',
@@ -1121,7 +1130,7 @@ class GridList extends Component {
            mm.subClassOf !== METHOD      &&
            mm.subClassOf !== FINANCIAL_PRODUCT) { //mm.interfaces  && mm.interfaces.indexOf(this.props.modelName) !== -1) {
         if (filter) {
-          if (utils.makeModelTitle(mm).toLowerCase().indexOf(filterLower) !== -1)
+          if (translate(mm).toLowerCase().indexOf(filterLower) !== -1)
             mArr.push(mm)
         }
         else
@@ -1501,10 +1510,10 @@ class GridList extends Component {
     }
 
     if (isEmptyItemsTab) {
-      let height = utils.dimensions(GridList).height + 100
+      let height = utils.dimensions(GridList).height - 105
       content = <View style={{justifyContent: 'flex-end', height}}>
                   <NoResources
-                    message={translate('pleaseClickOnAddButton', prop && prop.title || utils.makeModelTitle(model))}
+                    message={translate('pleaseClickOnAddButton', prop && prop.title || translate(model))}
                     iconColor={'#ffffff'}
                     iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
                     model={model}
@@ -1590,8 +1599,8 @@ class GridList extends Component {
       }
       if (showLoadingIndicator)
         loading = <View style={styles.loadingView}>
-                    <View style={[platformStyles.container]}>
-                      <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{'Loading...'}</Text>
+                    <View style={platformStyles.container}>
+                      <Text style={[styles.loading, {color: bankStyle.linkColor}]}>{translate('loading')}</Text>
                       <ActivityIndicator size='large' style={styles.indicator} />
                     </View>
                   </View>
@@ -1845,7 +1854,7 @@ var styles = StyleSheet.create({
   loading: {
     fontSize: 17,
     alignSelf: 'center',
-    marginTop: 80,
+    // marginTop: 0,
     color: '#629BCA'
   },
   loadingView: {

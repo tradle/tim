@@ -365,8 +365,8 @@ class HomePage extends Component {
         id: 4,
         component: NewResource,
         // titleTextColor: '#7AAAC3',
-        backButtonTitle: translate('back'),
-        rightButtonTitle: translate('done'),
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Done',
         passProps: {
           model: utils.getModel(me[constants.TYPE]),
           resource: me,

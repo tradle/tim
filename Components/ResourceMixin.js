@@ -17,7 +17,7 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import constants from '@tradle/constants'
 
 var { TYPE } = constants
-var { PROFILE, ORGANIZATION } = constants.TYPES
+var { PROFILE, ORGANIZATION, VERIFICATION } = constants.TYPES
 
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
@@ -27,6 +27,8 @@ import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
+import Actions from '../Actions/Actions'
+import ApplicationView from './ApplicationView'
 
 import ENV from '../utils/env'
 
@@ -66,20 +68,22 @@ var ResourceMixin = {
     let type = utils.getType(resource)
     let model = utils.getModel(type);
     let title = utils.getDisplayName(resource);
-    let modelTitle = utils.makeModelTitle(model)
+    let modelTitle = translate(model)
     if (title  &&  title.length)
       title = title + ' -- ' + modelTitle
     else
       title = modelTitle
-    let isMessageView
-    if (!utils.isStub(resource))
+    let isMessageView, isApplicationView
+    if (type === APPLICATION)
+      isApplicationView = true
+    else if (!utils.isStub(resource))
       isMessageView = utils.isMessage(resource)
     else
       isMessageView = (type !== ORGANIZATION  &&  type !== PROFILE)
 
-    let {bankStyle, search, currency, country} = this.props
+    let {bankStyle, search, currency, country, navigator} = this.props
     if (isMessageView) {
-      this.props.navigator.push({
+      navigator.push({
         id: 5,
         component: require('./MessageView'),
         backButtonTitle: 'Back',
@@ -93,8 +97,23 @@ var ResourceMixin = {
         }
       })
     }
+    else if (isApplicationView) {
+      navigator.push({
+        title: title,
+        id: 34,
+        component: ApplicationView,
+        // titleTextColor: '#7AAAC3',
+        backButtonTitle: 'Back',
+        passProps: {
+          resource,
+          search,
+          bankStyle,
+          application: resource
+        }
+      })
+    }
     else {
-      this.props.navigator.push({
+      navigator.push({
         title: title,
         id: 3,
         component: require('./ResourceView'),
@@ -206,7 +225,7 @@ var ResourceMixin = {
         )
       })
       if (!ret.length) {
-        let vTitle = displayName || v.title  ||  utils.makeModelTitle(utils.getType(v))
+        let vTitle = displayName || v.title  ||  translate(utils.getModel(utils.getType(v)))
 
         let image = v.photo  &&  <Image source={{uri: v.photo}} style={styles.thumb} />
         let color = cancelItem ? '#757575' : linkColor
@@ -336,7 +355,7 @@ var ResourceMixin = {
       }
       else {
         if (pMeta.range === 'model')
-          val = utils.makeModelTitle(val)
+          val = translate(utils.getModel(val))
         val = <Text style={[styles.description]}>{val}</Text>;
       }
     }
@@ -524,17 +543,19 @@ var ResourceMixin = {
     }
     return true
   },
-  showLoading(_component) {
-    if (!_component)
+  showLoading(params) {
+    if (!params.component)
       return
-    component = _component
+
+    component = params.component
+    let style = params.style || {}
     let bankStyle = this.props.bankStyle || this.state.bankStyle
     let contentSeparator = utils.getContentSeparator(bankStyle)
 
     let lstyles = createStyles({bankStyle})
     let network = <NetworkInfoProvider connected={this.state.isConnected} resource={this.state.resource} />
     return (
-      <PageView style={[platformStyles.container, {alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
+      <PageView style={[platformStyles.container, style, {alignItems: 'center'}]} separator={contentSeparator} bankStyle={bankStyle} >
         <View style={lstyles.loadingIndicator}>
           <View style={platformStyles.container}>
             {network}
@@ -616,19 +637,20 @@ var ResourceMixin = {
   },
   getBlockchainExplorerRow(url, i, styles) {
     const { bankStyle } = this.props
+    let key = `url${i}`
     return (
-      <TouchableOpacity onPress={this.onPress.bind(this, url)} key={`url${i}`}>
+      <TouchableOpacity onPress={this.onPress.bind(this, url)} key={key}>
         <Text style={[styles.description, {color: bankStyle.linkColor}]}>{translate('independentBlockchainViewer') + ' ' + (i+1)}</Text>
       </TouchableOpacity>
     )
-  }
+  },
 }
 
 var createStyles = utils.styleFactory(component || PhotoList, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({
     loadingIndicator: {
       alignSelf: 'center',
-      marginTop: dimensions.height - 200,
+      marginTop: dimensions.height - 300,
     },
     loading: {
       fontSize: 17,

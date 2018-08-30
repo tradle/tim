@@ -234,7 +234,7 @@ var NewResourceMixin = {
     let options = {fields: {}}
     let resource = this.state.resource
     for (let p in eCols) {
-      if (p === TYPE || p.charAt(0) === '_' ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
+      if (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
 
       if (meta  &&  meta.hidden  &&  meta.hidden.indexOf(p) !== -1)
@@ -931,10 +931,12 @@ var NewResourceMixin = {
     }
 
     let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
-    let format = 'MMMM Do, YYYY'
+    let format = 'LL'
+    // let format = 'MMMM Do, YYYY'
     // let format = 'YYYY-MM-DD'
     let valueMoment = params.value && moment.utc(new Date(params.value))
-    let value = valueMoment && valueMoment.format(format)
+    // let value = valueMoment && valueMoment.format(format)
+    let value = params.value  &&  utils.getDateValue(new Date(params.value))
     let dateProps = {}
     if (prop.maxDate  ||  prop.minDate) {
       let maxDate = this.getDateRange(prop.maxDate)
@@ -949,8 +951,7 @@ var NewResourceMixin = {
 
     let { search, bankStyle } = this.props
     if (!value)
-      value = translate(params.prop)  + (!search  &&  required  ?  ' *' : '')
-
+      value = utils.getDateValue(new Date())  + (!search  &&  required  ?  ' *' : '')
     // let st = utils.isWeb() ? { borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
     let st = utils.isWeb() ? { } : {marginHorizontal: 10}
 
@@ -974,6 +975,7 @@ var NewResourceMixin = {
             format={format}
             confirmBtnText="Confirm"
             cancelBtnText="Cancel"
+            locale={utils.getMe().languageCode || 'en'}
             date={localizedDate}
             onDateChange={(date) => {
               if (!(date instanceof Date)) {
@@ -990,7 +992,8 @@ var NewResourceMixin = {
                 paddingLeft: 10
               }],
               dateIconColor: {color: linkColor},
-              dateIcon: styles.dateIcon
+              dateIcon: styles.dateIcon,
+              btnTextConfirm: {color: linkColor}
             }}
             {...dateProps}
           />
@@ -1196,7 +1199,9 @@ var NewResourceMixin = {
             else {
               let valueId = utils.getId(value)
               let hasValue = resource[propName].some(r => utils.getId(r) === valueId)
-              if (!hasValue) {
+              if (hasValue)
+                value = resource[propName]
+              else {
                 let arr = _.cloneDeep(resource[propName]) || []
                 arr.push(value)
                 value = arr
@@ -1246,6 +1251,15 @@ var NewResourceMixin = {
           if (!this.floatingProps)
             this.floatingProps = {}
           this.floatingProps[propName] = resource[propName]
+        }
+        else if (prop.items.ref) {
+          if (resource[propName]) {
+            let some = resource[propName].some(r => r[ROOT_HASH] === value[ROOT_HASH])
+            if (!some)
+              resource[propName].push(value)
+          }
+          else
+            resource[propName] = [value]
         }
         else {
           delete resource[propName]
@@ -1658,7 +1672,7 @@ var styles= StyleSheet.create({
     width: 40,
     height: 40,
     marginRight: 2,
-    // marginTop: 7,
+    marginTop: 7,
     borderRadius: 5
   },
   err: {

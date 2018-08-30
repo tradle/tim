@@ -52,7 +52,7 @@ class MessageTypeRow extends Component {
     let renderedRow
     if (isContext) {
       let model = utils.getModel(resource.requestFor)
-      title = model ? utils.makeModelTitle(resource.requestFor) : resource.requestFor
+      title = model  &&  translate(model) || resource.requestFor
       let date
       // if (resource._time)
       //    date = <Text style= {styles.date}>{utils.formatDate(resource._time)}</Text>

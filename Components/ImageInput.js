@@ -15,7 +15,7 @@ import ImagePicker from 'react-native-image-picker'
 import _ from 'lodash'
 const debug = require('debug')('tradle:app:ImageInput')
 
-import utils from '../utils/utils'
+import utils, { translate } from '../utils/utils'
 import ENV from '../utils/env'
 
 const BASE64_PREFIX = 'data:image/jpeg;base64,'
@@ -65,6 +65,7 @@ class ImageInput extends Component {
       returnIsVertical: true,
       quality: this.props.quality || ENV.imageQuality,
       cameraType: this.props.prop.cameraType || 'back',
+      cancelButtonTitle: translate('cancel'),
       // due to out-of-memory issues
       // maxWidth: 1536,
       // maxHeight: 1536,

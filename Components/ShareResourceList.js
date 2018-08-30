@@ -77,7 +77,7 @@ class ShareResourceList extends Component {
     return false
   }
   selectResource(resource) {
-    let title = utils.makeModelTitle(resource[TYPE])
+    let title = translate(utils.getModel(resource[TYPE]))
     let { navigator, bankStyle } = this.props
 
     if (utils.isMessage(resource)) {
@@ -139,7 +139,7 @@ class ShareResourceList extends Component {
       return (
         <ResourceRow
           onSelect={() => this.selectResource(resource)}
-          title={utils.makeModelTitle(resource[TYPE])}
+          title={translate(utils.getModel(resource[TYPE]))}
           bankStyle={bankStyle}
           navigator={navigator}
           multiChooser={multiChooser}
@@ -204,7 +204,7 @@ class ShareResourceList extends Component {
     let listStr = list.join(', ')
 
     Alert.alert(
-      translate('youAreAboutToShare', translate(utils.makeModelTitle(this.props.modelName))),
+      translate('youAreAboutToShare', translate(utils.getModel(this.props.modelName))),
       listStr,
       [
         {text: translate('cancel'), onPress: () => console.log('Canceled!')},

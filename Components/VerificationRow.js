@@ -10,8 +10,7 @@ import reactMixin from 'react-mixin'
 
 import constants from '@tradle/constants'
 
-import utils from '../utils/utils'
-var translate = utils.translate
+import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
 
 import RowMixin from './RowMixin'
@@ -208,10 +207,10 @@ class VerificationRow extends Component {
     if (isVerification) {
       dn = utils.getDisplayName(resource.document)
       if (!dn)
-        dn = utils.makeModelTitle(utils.getType(resource.document))
+        dn = translate(utils.getModel(utils.getType(resource.document)))
     }
     else if (isMyProduct)
-      dn = utils.makeModelTitle(rType)
+      dn = translate(model)
     else
       dn = utils.getDisplayName(resource)
     let title
@@ -219,30 +218,30 @@ class VerificationRow extends Component {
       title = dn //utils.getDisplayName(resource, model.properties)
     else if (utils.isItem(model))  {
       if (model.id === FORM_PREFILL)
-        title = utils.makeModelTitle(resource.prefill[TYPE]) //utils.getDisplayName(resource, model.properties)
+        title = translate(utils.getModel(resource.prefill[TYPE])) //utils.getDisplayName(resource, model.properties)
       else
         title = dn
     }
     if (!title || !title.length) {
       if (listModel.id === FORM_REQUEST)
-        title = utils.makeModelTitle(resource.form)
+        title = translate(utils.getModel(resource.form))
       else if (isBookmark)
-        title = resource.message  ||  utils.makeModelTitle(resource.bookmark[TYPE])
+        title = resource.message  ||  translate(utils.getModel(resource.bookmark[TYPE]))
       else if (isApplicationSubmission)
-        title = utils.makeModelTitle(utils.getType(resource.submission))
+        title = translate(utils.getModel(utils.getType(resource.submission)))
       // Case for forms on Application. forms has a type og ApplicationSubmittion but the component
       // received the submission itself
       else if (rType !== modelName  &&  model.subClassOf !== modelName)
-        title = utils.makeModelTitle(model)
+        title = translate(model)
       else if (this.props.search) {
         if (isVerification)
-          title = verificationRequest.title
+          title = translate(verificationRequest)
         else if (model.id === APPLICATION_SUBMITTED)
           title = resource.application.title
         else if (model.id === CONFIRMATION)
           title = resource.confirmationFor.title
         else if (utils.getModel(modelName).abstract)
-          title = utils.makeModelTitle(verificationRequest)
+          title = translate(verificationRequest)
         // else
         //   title = 'Submitted by ' + resource.from.title
       }
@@ -255,7 +254,7 @@ class VerificationRow extends Component {
               needModelType = false
           }
         }
-        title = needModelType  &&  (verificationRequest.title || utils.makeModelTitle(verificationRequest))
+        title = needModelType  &&  translate(verificationRequest)
       }
     }
 
@@ -301,7 +300,7 @@ class VerificationRow extends Component {
                              {checkIcon}
                              <View style={{justifyContent: 'center', paddingLeft: 10}}>
                                <Text style={styles.rTitle}>{dn}</Text>
-                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
+                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || translate(model)}</Text>
                              </View>
                            </View>
         }
@@ -309,7 +308,7 @@ class VerificationRow extends Component {
           if (title  &&  dn) {
             titleComponent = <View style={{justifyContent: 'center'}}>
                                <Text style={styles.rTitle}>{dn}</Text>
-                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || utils.makeModelTitle(resource[TYPE])}</Text>
+                               <Text style={styles.checkDescription}>{'Provider: ' + resource.provider || translate(model)}</Text>
                              </View>
 
           }

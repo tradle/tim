@@ -156,7 +156,7 @@ class ProductChooser extends Component {
       msg[constants.TYPE] =  FORM_REQUEST,
       msg.message = model.formRequestMessage
                   ? translate(model.formRequestMessage)
-                  : translate('fillTheForm', translate(utils.makeModelTitle(model)))
+                  : translate('fillTheForm', translate(model))
           // translate(model.properties.photos ? 'fillTheFormWithAttachments' : 'fillTheForm', translate(model.title)),
       // product: productModel.id,
       msg.form = model.id

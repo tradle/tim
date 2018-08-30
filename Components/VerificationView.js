@@ -68,7 +68,7 @@ class VerificationView extends Component {
     let dprop = model.properties.document
     let dtitle = utils.getDisplayName(resource.document)
     if (!dtitle)
-      dtitle = utils.makeModelTitle(utils.getType(resource.document))
+      dtitle = translate(utils.getModel(utils.getType(resource.document)))
 
     let details = <View style={styles.document}>
                     <Text style={styles.ptitle}>{dprop.title}</Text>
@@ -129,7 +129,7 @@ class VerificationView extends Component {
     let m = utils.getModel(utils.getType(r.method))
     let { bankStyle, navigator } = this.props
     navigator.push({
-      title: utils.makeModelTitle(m),
+      title: translate(m),
       id: 3,
       component: ResourceView,
       // titleTextColor: '#7AAAC3',

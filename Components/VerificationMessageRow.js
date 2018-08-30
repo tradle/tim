@@ -297,9 +297,9 @@ class VerificationMessageRow extends Component {
       title: title
     }
     if (this.isMyMessage()) {
-      route.rightButtonTitle = translate('edit');
+      route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = {
-        title: translate('edit'),
+        title: 'Edit',
         component: NewResource,
         // titleTextColor: '#7AAAC3',
         id: 4,

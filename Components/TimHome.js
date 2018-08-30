@@ -749,13 +749,13 @@ class TimHome extends Component {
         officialAccounts: true,
         bankStyle: defaultBankStyle
       },
-      rightButtonTitle: translate('profile'),
+      rightButtonTitle: 'Profile',
       onRightButtonPress: {
         title: title,
         id: 3,
         component: ResourceView,
         backButtonTitle: 'Back',
-        rightButtonTitle: translate('edit'),
+        rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
           id: 4,
@@ -965,7 +965,7 @@ class TimHome extends Component {
             ? <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
                   onPress={() => this._pressHandler()}>
                 <View style={styles.getStarted}>
-                   <Text style={styles.getStartedText}>Get started</Text>
+                   <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
                 </View>
               </TouchableOpacity>
             : regView

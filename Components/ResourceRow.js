@@ -173,7 +173,7 @@ class ResourceRow extends Component {
     if (!style)
       style = defaultBankStyle
     if (isModel) {
-      let title = utils.makeModelTitle(resource)
+      let title = translate(utils.getModel(rType))
       let parts = resource.id.split('.')
       if (parts.length > 2)
         title = <Text style={styles.resourceTitle}>{title + '  →  '}
@@ -392,18 +392,19 @@ class ResourceRow extends Component {
     if (!viewCols  &&  model.id !== APPLICATION) {
       if (model.id === PARTIAL) {
         let p = resource.leaves.find((l) => l.key === TYPE && l.value).value
-        let productTitle = utils.makeModelTitle(p)
+        let productTitle = translate(utils.getModel(p))
         return <View style={{flexDirection: 'row'}}>
                 <Text style={[styles.resourceTitle, {fontSize: 18}]}>{resource.providerInfo.title}</Text>
                 <Text style={[styles.resourceTitle, {fontSize: 18, paddingLeft: 7, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
               </View>
       }
-      let vCols = utils.getDisplayName(resource);
-      if (vCols && vCols.length) {
+      let dn = utils.getDisplayName(resource);
+      if (dn && dn.length) {
         if (model.subClassOf  &&  model.subClassOf === ENUM)
-          vCols = utils.createAndTranslate(vCols, true)
+          dn = utils.translateEnum(resource)
+          // dn = utils.createAndTranslate(dn, true)
 
-        return <Text style={styles.resourceTitle}>{vCols}</Text>;
+        return <Text style={styles.resourceTitle}>{dn}</Text>;
       }
       else
         return <Text style={styles.resourceTitle}>{model.title}</Text>;
@@ -663,7 +664,7 @@ class ResourceRow extends Component {
               {draft}
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
-                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{m ? translate(m) : utils.makeModelTitle(resource.requestFor)}</Text>
+                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{m ? translate(m) : translate(utils.getModel(resource.requestFor))}</Text>
                   {formsCount}
                 </View>
                 {applicant}

@@ -221,8 +221,8 @@ repositories {
 }
 
 dependencies {
-    compile project(':react-native-awesome-card-io')
     compile project(':blinkid-react-native')
+    compile project(':react-native-awesome-card-io')
     compile(project(':react-native-firebase')) {
         transitive = false
     }
@@ -274,6 +274,10 @@ dependencies {
     compile project(':react-native-code-push')
     compile (project(':react-native-camera')) {
       exclude group: "com.google.android.gms"
+      compile 'com.android.support:exifinterface:25.+'
+      compile ('com.google.android.gms:play-services-vision:11.8.0') {
+        force = true
+      }
     }
     // compile ("com.google.android.gms:play-services-vision:11.8.0") {
     //   force = true;

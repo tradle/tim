@@ -50,7 +50,7 @@ class StringChooser extends Component {
     return (
       <StringRow
         onSelect={() => this.selectResource(modelId)}
-        title={utils.makeModelTitle(model)}
+        title={translate(model)}
         bankStyle={this.props.bankStyle}
         navigator={this.props.navigator}
         callback={() => this.selectResource(modelId)}

@@ -12,6 +12,7 @@ import constants from '@tradle/constants'
 
 import utils from '../utils/utils'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
+import chatStyles from '../styles/chatStyles'
 import RowMixin from './RowMixin'
 import {
   StyleSheet,
@@ -145,7 +146,8 @@ var styles = StyleSheet.create({
     // paddingTop: 5,
   },
   thumbCommon: {
-    borderWidth: 0.5,
+    borderWidth: .5,
+    borderRadius: 10,
     margin: 1,
     borderColor: '#999999'
   },

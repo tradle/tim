@@ -21,7 +21,7 @@ class PageView extends Component {
       platformSeparator = <View style={[{backgroundColor: bankStyle.navBarBackgroundColor}, separator || styles.separator, platformStyles.navBarSeparator]}/>
 
     return (
-      <View style={[style]}>
+      <View style={style}>
         {platformSeparator}
         {children}
       </View>

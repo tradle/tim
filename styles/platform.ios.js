@@ -20,6 +20,9 @@ export default StyleSheet.create({
     marginTop: 64,
     flex: 1,
   },
+  navBarRightIcon: {
+    marginTop: isIphone10 ? -1 : 3
+  },
   navBarSeparator: {
     height: isIphone10 ? 15 : 0
   },
