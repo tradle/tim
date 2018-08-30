@@ -6,7 +6,6 @@ import React from 'react'
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
 import CustomIcon from '../styles/customicons'
-import StyleSheet from '../StyleSheet'
 import CameraView from './CameraView'
 var cnt = 0;
 import {
@@ -21,6 +20,7 @@ import { coroutine as co } from 'bluebird'
 import utils, { translate, translateEnum } from '../utils/utils'
 import constants from '@tradle/constants'
 import Actions from '../Actions/Actions'
+import StyleSheet from '../StyleSheet'
 var cnt = 0;
 import Navigator from './Navigator'
 import ENV from '../utils/env'
