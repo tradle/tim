@@ -33,8 +33,7 @@ import SplashPage from './SplashPage'
 import GridList from './GridList'
 import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
-import utils from '../utils/utils'
-var translate = utils.translate
+import utils, { translate, translateModel } from '../utils/utils'
 import HomePageMixin from './HomePageMixin'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
@@ -568,10 +567,10 @@ class ResourceList extends Component {
         let title
         if (isVerificationR) {
           let type = utils.getType(resource.document)
-          title = utils.makeModelTitle(utils.getModel(type))
+          title = translate(utils.getModel(type))
         }
         else
-          title = utils.makeModelTitle(m)
+          title = translate(m)
 
         navigator.push({
           title: title,
@@ -883,7 +882,7 @@ class ResourceList extends Component {
       if (!model)
         return
       this.props.navigator.push({
-        title: 'Search ' + utils.makeModelTitle(model),
+        title: translate('searchSomething', translate(model)),
         id: 4,
         component: NewResource,
         backButtonTitle: 'Back',
@@ -1263,7 +1262,7 @@ class ResourceList extends Component {
           onPress: this.onSettingsPressed
         },
         {
-          text: translate(hideText, translate(utils.makeModelTitle(this.props.modelName, true))),
+          text: translate(hideText, translateModel(utils.getModel(this.props.modelName), true)),
           onPress: () => this.setState({hideMode: !this.state.hideMode, dataSource: this.state.dataSource.cloneWithRows(utils.clone(this.state.list))})
         },
         {
@@ -1348,7 +1347,7 @@ class ResourceList extends Component {
             <View style={styles.row}>
               <Icon name='ios-search' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5, marginRight: 0}]} />
               <View style={styles.textContainer}>
-                <Text style={styles.resourceTitle}>{translate('Explore data')}</Text>
+                <Text style={styles.resourceTitle}>{translate('exploreData')}</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -1399,7 +1398,7 @@ class ResourceList extends Component {
                 <View style={styles.row}>
                   <Icon name='ios-apps-outline' size={45} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
                   <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('Bookmarks')}</Text>
+                    <Text style={styles.resourceTitle}>{translate('bookmarks')}</Text>
                   </View>
                   <View style={[styles.sharedContext, {backgroundColor: color}]}>
                     <Text style={styles.sharedContextText}>{this.state.bookmarksCount}</Text>
@@ -1464,7 +1463,7 @@ class ResourceList extends Component {
   }
   showBookmarks() {
     this.props.navigator.push({
-      title: 'Bookmarks',
+      title: translate('bookmarks'),
       id: 30,
       component: GridList,
       backButtonTitle: 'Back',

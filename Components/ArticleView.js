@@ -33,7 +33,7 @@ class ArticleView extends Component {
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <View style={styles.container}>
           <View style={styles.loading}>
-            <Text>Loading...</Text>
+            <Text>{translate('loading')}</Text>
             <ActivityIndicator style={{alignSelf: 'center'}} />
           </View>
         </View>

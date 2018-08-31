@@ -79,6 +79,7 @@ import ENV from '../utils/env'
 const BG_IMAGE = ENV.brandBackground
 const FORM_ERROR = 'tradle.FormError'
 const PHOTO = 'tradle.Photo'
+const FILE = 'tradle.File'
 const HAND_SIGNATURE = 'tradle.HandSignature'
 var Form = t.form.Form;
 
@@ -377,14 +378,14 @@ class NewResource extends Component {
       title: title,
       component: isMessage ? MessageView : ResourceView,
       titleTextColor: '#7AAAC3',
-      rightButtonTitle: translate('edit'),
-      backButtonTitle: translate('back'),
+      rightButtonTitle: 'Edit',
+      backButtonTitle: 'Back',
       onRightButtonPress: {
         title: title,
         id: 4,
         component: NewResource,
-        rightButtonTitle: translate('done'),
-        backButtonTitle: translate('back'),
+        rightButtonTitle: 'Done',
+        backButtonTitle: 'Back',
         titleTextColor: '#7AAAC3',
         passProps: {
           model: model,
@@ -412,9 +413,9 @@ class NewResource extends Component {
     this.props.navigator.replace({
       id: 10,
       title: translate('shareChangesWith'),
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: ResourceList,
-      rightButtonTitle: translate('Done'),
+      rightButtonTitle: 'Done',
       passProps: {
         message: translate('chooseCompaniesToShareChangesWith'),
         modelName: ORGANIZATION,
@@ -688,7 +689,7 @@ class NewResource extends Component {
       navigator.push({
         id: 30,
         title: translate(bl, blmodel), // Add new ' + bl.title,
-        backButtonTitle: translate('back'),
+        backButtonTitle: 'Back',
         component: GridList,
         passProps: {
           modelName: bl.items.ref,
@@ -706,9 +707,9 @@ class NewResource extends Component {
     navigator.push({
       id: 6,
       title: translate('addNew', translate(bl, blmodel)), // Add new ' + bl.title,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       component: NewItem,
-      rightButtonTitle: translate('done'),
+      rightButtonTitle: 'Done',
       passProps: {
         metadata: bl,
         bankStyle,
@@ -862,7 +863,7 @@ class NewResource extends Component {
         let blmodel = meta
         itemsArray = null
         let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
-        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO))
+        if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO ||  bl.items.ref === FILE))
           arrayItems.push(this.getPhotoItem(bl, styles))
         else
           arrayItems.push(this.getItem(bl, styles))
@@ -927,7 +928,7 @@ class NewResource extends Component {
       let formList = resource.signatureFor.map((r) => (
           <TouchableOpacity onPress={() => this.showResource(r)} style={styles.formListItem} key={this.getNextKey()}>
           <View>
-            <Text style={styles.forms}>{utils.makeModelTitle(r.id.split('_')[0])}</Text>
+            <Text style={styles.forms}>{translate(utils.getModel(r[TYPE]))}</Text>
           </View>
           </TouchableOpacity>))
 
@@ -1077,7 +1078,7 @@ class NewResource extends Component {
       id: 3,
       component: ResourceView,
       title: translate('termsAndConditions'),
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       rightButtonTitle: 'Accept',
       passProps: {
         resource: termsAndConditions,
@@ -1097,7 +1098,7 @@ class NewResource extends Component {
     let dn = ''
     let ref = pMeta.items.ref
     if (ref)
-      dn = utils.makeModelTitle(ref)
+      dn = translate(utils.getModel(ref))
     Alert.alert(
       translate('cancelItem', dn),
       null,
@@ -1136,7 +1137,7 @@ class NewResource extends Component {
       id: 19,
       component: GridItemsList,
       noLeftButton: true,
-      rightButtonTitle: translate('done'),
+      rightButtonTitle: 'Done',
       passProps: {
         prop:        prop.name,
         resource:    resource,
@@ -1185,7 +1186,7 @@ class NewResource extends Component {
                          <View style={[styles.items, {paddingBottom: 5}]}>
                            <Text style={styles.noItemsText}>{label}</Text>
                            <View style={styles.addButton}>
-                              <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' />
+                              <Icon name={bl.icon || 'md-add'}   size={bl.icon ? 25 : 20} color='#ffffff' style={{marginTop: 2}}/>
                            </View>
                          </View>
                        </TouchableOpacity>
@@ -1354,7 +1355,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       flex: 1,
       justifyContent: 'flex-end',
       alignItems: 'flex-end',
-      paddingRight: 5
+      // paddingRight: 5
     },
     itemButton: {
       height: 60,

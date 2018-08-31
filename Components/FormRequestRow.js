@@ -24,8 +24,7 @@ const debug = require('debug')('tradle:app:FormRequestRow')
 
 import constants from '@tradle/constants'
 
-import utils from '../utils/utils'
-var translate = utils.translate
+import utils, { translate } from '../utils/utils'
 import NewResource from './NewResource'
 import RemediationItemsList from './RemediationItemsList'
 import RowMixin from './RowMixin'
@@ -420,16 +419,16 @@ class FormRequestRow extends Component {
     //   vtt = []
     //   vtt.push(meShare)
     // }
-    let number = numbers[vtt.length]
+    let number = vtt.length //numbers[vtt.length]
     let offerToShare
     if (number)
-      offerToShare = `Good news! You already have ${number}. To share tap icon below.`
+      offerToShare = 'goodNews' //`Good news! You already have ${number}. To share tap icon below.`
     else
-      offerToShare = `Good news! You already have quite a few. To share tap icon below.`
+      offerToShare = 'goodNewsFew'  //`Good news! You already have quite a few. To share tap icon below.`
     return (
       <View style={styles.shareable} key={this.getNextKey()}>
         <View style={{padding: 10, backgroundColor: '#efefef', marginHorizontal: -1}}>
-          <Text style={styles.assistentText}>{offerToShare}</Text>
+          <Text style={styles.assistentText}>{translate(offerToShare, number)}</Text>
         </View>
         <View style={styles.container}>
           <View style={styles.shareablesList}>
@@ -463,7 +462,7 @@ class FormRequestRow extends Component {
 
     let displayName
     if (docModel.subClassOf === MY_PRODUCT)
-      displayName = utils.makeModelTitle(docModel)
+      displayName = translate(docModel)
     else
       displayName = utils.getDisplayName(document)
     let headerContent = <View style={headerStyle}>
@@ -711,8 +710,9 @@ class FormRequestRow extends Component {
     //   }
     // })
     let modelName = documents[0][TYPE]
+    let m = utils.getModel(modelName)
     navigator.push({
-      title: utils.makeModelTitle(modelName) + (verifiedBy  &&  ('  →  '  + verifiedBy)),
+      title: translate(m) + (verifiedBy  &&  ('  →  '  + verifiedBy)),
       id: 37,
       component: ShareResourceList,
       backButtonTitle: 'Back',
@@ -751,7 +751,6 @@ class FormRequestRow extends Component {
       _.extend(r, resource.prefill)
       isPrefilled = true
     }
-
     let rightButtonTitle = 'Done'
     if (isMyMessage) {
       let me = utils.getMe()
@@ -782,16 +781,16 @@ class FormRequestRow extends Component {
     const { bankStyle, to, application, context, productToForms, chooseTrustedProvider, shareableResources } = this.props
     let message = resource.message
     let messagePart
-    if (resource._documentCreated) {
-      if (resource.message)
-        message = resource.message.replace(/\*/g, '')
-      else
-        message = ''
-    }
-    else {
+    // if (resource._documentCreated) {
+    //   if (resource.message)
+    //     message = resource.message.replace(/\*/g, '')
+    //   else
+    //     message = ''
+    // }
+    // else {
       let params = { resource, message, bankStyle, noLink: application != null  || resource._documentCreated }
       messagePart = utils.parseMessage(params)
-    }
+    // }
     if (typeof messagePart === 'string')
       messagePart = null
 
@@ -835,7 +834,7 @@ class FormRequestRow extends Component {
     if (!isReadOnly)
       isReadOnly = !switchToContext  && !context &&  (!isMyMessage  &&  utils.isReadOnlyChat(this.props.resource, this.props.resource._context)) //this.props.context  &&  this.props.context._readOnly
 
-    let addMessage = messagePart || message
+    let addMessage = messagePart || translate(message)
     messagePart = null
     let msg, link
 
@@ -890,7 +889,7 @@ class FormRequestRow extends Component {
           })
           // addMessage = 'You can choose the product by clicking on a red  menu button'
           let style = {transform: [{rotate: rotateX}]}
-          msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={[styles.message, {paddingVertical: 5}]}  key={this.getNextKey()}>
+          msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={[styles.message, {paddingVertical: utils.isAndroid() ? 5 : 0}]}  key={this.getNextKey()}>
                   <Animated.View style={style}>
                     <View style={[styles.addButton, {backgroundColor: '#007EFF', marginRight: 7}]}>
                       <Icon name='md-information' size={35} color='#ffffff' />
@@ -935,7 +934,7 @@ class FormRequestRow extends Component {
             if (utils.isWeb())
               useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
             else
-              useImageInput = utils.isSimulator()  ||  prop.allowPicturesFromLibrary  ||  !isScan
+              useImageInput = utils.isSimulator()  ||  (prop.allowPicturesFromLibrary  &&  !isScan)
 
             let actionItem
                              // <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
@@ -1037,7 +1036,7 @@ class FormRequestRow extends Component {
   }
   makeButtonLink({form, prop, isMyMessage, styles, msg, isAnother, onPress, useImageInput}) {
     if (!msg)
-      msg = translate(isAnother ? 'createNext' : 'createNew', utils.makeModelTitle(form))
+      msg = translate(isAnother ? 'createNext' : 'createNew', translate(utils.getModel(form)))
     let { application, bankStyle } = this.props
     if (application) {
       return (
@@ -1053,7 +1052,7 @@ class FormRequestRow extends Component {
     let content = <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
                     <Animated.View style={zoomIn}>
                       <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
-                        <Icon name='md-add' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
+                        <Icon name='md-add' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'} style={{marginTop: 2}}/>
                       </View>
                     </Animated.View>
                      <View style={{justifyContent: 'center'}}>

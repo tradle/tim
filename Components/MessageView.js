@@ -83,7 +83,7 @@ class MessageView extends Component {
       else
         currentRoutes[len - 1].onRightButtonPress = this.verifyOrCreateError.bind(this)
     }
-    this.doVerify = this.doVerify.bind(this)
+    this.createVerification = this.createVerification.bind(this)
     this.showVerification = this.showVerification.bind(this)
     this.onCheck = this.onCheck.bind(this)
     this.onPageLayout = this.onPageLayout.bind(this)
@@ -237,7 +237,7 @@ class MessageView extends Component {
         null,
         [
           {text: 'Cancel', onPress: () => console.log('Canceled!')},
-          {text: 'Ok', onPress: this.doVerify},
+          {text: 'Ok', onPress: this.createVerification},
         ]
       )
     }
@@ -258,7 +258,7 @@ class MessageView extends Component {
         ]
       )
    }
-  }
+ }
  createError(text) {
     let errors = []
     for (let p in this.state.errorProps) {
@@ -528,13 +528,12 @@ class MessageView extends Component {
     this.props.navigator.push({
       id: 7,
       component: ArticleView,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: {url: url}
     });
   }
-
-  doVerify() {
-    let { navigator, resource } = this.props
+  createVerification() {
+    let { navigator, resource, application } = this.props
     navigator.pop();
     let model = utils.getModel(resource[TYPE]);
     let me = utils.getMe();
@@ -551,11 +550,14 @@ class MessageView extends Component {
       document: document,
       from: me,
       to: resource.to,
-      _context: resource._context
     }
-    let params = {to: to, r: r}
     if (resource._context)
-      params.context = resource._context
+      r._context = resource._context
+    else if (application  &&  application._context)
+      r._context = application._context
+    let params = {to: to, r: r}
+    if (r._context)
+      params.context = r._context
     Actions.addVerification(params)
   }
 }

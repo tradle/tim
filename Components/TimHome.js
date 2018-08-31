@@ -713,26 +713,26 @@ class TimHome extends Component {
       title: translate('officialAccounts'),
       id: 10,
       component: ResourceList,
-      backButtonTitle: translate('back'),
+      backButtonTitle: 'Back',
       passProps: {
         modelName: ORGANIZATION,
         isConnected: this.state.isConnected,
         officialAccounts: true,
         bankStyle: defaultBankStyle
       },
-      rightButtonTitle: translate('profile'),
+      rightButtonTitle: 'Profile',
       onRightButtonPress: {
         title: title,
         id: 3,
         component: ResourceView,
-        backButtonTitle: translate('back'),
-        rightButtonTitle: translate('edit'),
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Edit',
         onRightButtonPress: {
           title: title,
           id: 4,
           component: NewResource,
-          backButtonTitle: translate('back'),
-          rightButtonTitle: translate('done'),
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
           passProps: {
             model: utils.getModel(me[TYPE]),
             resource: me,
@@ -946,7 +946,7 @@ class TimHome extends Component {
             ? <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
                   onPress={() => this._pressHandler()}>
                 <View style={styles.getStarted}>
-                   <Text style={styles.getStartedText}>Get started</Text>
+                   <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
                 </View>
               </TouchableOpacity>
             : regView

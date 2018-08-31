@@ -16,8 +16,11 @@ import { makeResponsive } from 'react-native-orient'
 
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
-const ENUM = 'tradle.Enum'
-const VERIFICATION = 'tradle.Verification'
+const {
+  VERIFICATION,
+  MONEY,
+  ENUM
+} = constants.TYPES
 const TYPE = constants.TYPE
 
 import StyleSheet from '../StyleSheet'
@@ -44,7 +47,7 @@ class VerificationView extends Component {
     }
   }
   render() {
-    let resource = this.props.resource
+    let { resource, bankStyle } = this.props
     let vTree = []
     let verifier
     if (resource._verifiedBy)
@@ -53,6 +56,7 @@ class VerificationView extends Component {
       verifier = resource.from.organization.title
     else
       verifier = resource.from.title
+    let styles = createStyles({bankStyle})
     let dataSecurity
     if (resource.txId) {
       this.addDataSecurity(resource)
@@ -60,20 +64,33 @@ class VerificationView extends Component {
                        {this.addDataSecurity(resource)}
                      </View>
     }
+    let model = utils.getModel(VERIFICATION)
+    let dprop = model.properties.document
+    let dtitle = utils.getDisplayName(resource.document)
+    if (!dtitle)
+      dtitle = translate(utils.getModel(utils.getType(resource.document)))
+
+    let details = <View style={styles.document}>
+                    <Text style={styles.ptitle}>{dprop.title}</Text>
+                    <TouchableOpacity onPress={() => this.showRefResource(resource.document, dprop)}>
+                      <Text style={styles.pvalue}>{dtitle}</Text>
+                    </TouchableOpacity>
+                  </View>
     return (
        <View>
-        <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: this.props.bankStyle.verifiedHeaderColor}]}>
-          <Text style={[styles.description, {color: this.props.bankStyle.verifiedHeaderTextColor, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
+        <View style={[styles.textContainer, {padding: 5, alignSelf: 'stretch', alignItems: 'center', backgroundColor: bankStyle.verifiedHeaderColor}]}>
+          <Text style={[styles.description, {color: bankStyle.verifiedHeaderTextColor, fontSize:20}]}>{translate('verifiedBy', verifier)}</Text>
         </View>
-        {this.renderVerification(resource, utils.getModel(constants.TYPES.VERIFICATION), vTree, 0, 0)}
+        {details}
+        {this.renderVerification(resource, utils.getModel(VERIFICATION), vTree, 0, 0, styles)}
         {dataSecurity}
       </View>
     );
   }
 
-  renderVerification(resource, model, vTree, currentLayer) {
+  renderVerification(resource, model, vTree, currentLayer, styles) {
     resource = resource || this.props.resource;
-    let vModel = utils.getModel(constants.TYPES.VERIFICATION)
+    let vModel = utils.getModel(VERIFICATION)
     let bankStyle = this.props.bankStyle
     if (resource.method) {
       let displayName = utils.getDisplayName(resource.method)
@@ -93,7 +110,7 @@ class VerificationView extends Component {
         arrow += '→'
       resource.sources.forEach((r) => {
         if (r.method)
-          this.renderVerification(r, model, vTree, currentLayer)
+          this.renderVerification(r, model, vTree, currentLayer, styles)
         else if (r.from) {
           vTree.push(<View key={this.getNextKey()}>
                        <View style={styles.separator}></View>
@@ -102,7 +119,7 @@ class VerificationView extends Component {
                            <Text style={[styles.description, {color: bankStyle.verifiedSourcesColor}]}>{translate('sourcesBy', r.from.organization ? r.from.organization.title : r.from.title)}</Text>
                          </View>
                       </View>)
-          this.renderVerification(r, model, vTree, currentLayer + 1)
+          this.renderVerification(r, model, vTree, currentLayer + 1, styles)
         }
       })
     }
@@ -112,7 +129,7 @@ class VerificationView extends Component {
     let m = utils.getModel(utils.getType(r.method))
     let { bankStyle, navigator } = this.props
     navigator.push({
-      title: utils.makeModelTitle(m),
+      title: translate(m),
       id: 3,
       component: ResourceView,
       // titleTextColor: '#7AAAC3',
@@ -129,7 +146,7 @@ class VerificationView extends Component {
       passProps: {url: url ? url : this.props.resource.url}
     });
   }
-  renderResource(r, model) {
+  renderResource(r, model, styles) {
     let resource = !r ? this.props.resource : r
     let isVerification = resource[TYPE] === VERIFICATION
     if (isVerification)
@@ -207,13 +224,13 @@ class VerificationView extends Component {
           return;
       }
       else if (pMeta.ref) {
-        if (pMeta.ref == constants.TYPES.MONEY) {
+        if (pMeta.ref == MONEY) {
           let c = utils.normalizeCurrencySymbol(val.currency)
           let CURRENCY_SYMBOL = this.props.currency ? this.props.currency.symbol || this.props.currency : DEFAULT_CURRENCY_SYMBOL
           val = (c || CURRENCY_SYMBOL) + val.value
         }
         else if (pMeta.inlined ||  utils.getModel(pMeta.ref).inlined)
-          return this.renderResource(val, utils.getModel(val[TYPE]))
+          return this.renderResource(val, utils.getModel(val[TYPE]), styles)
 
         // Could be enum like props
         else if (utils.getModel(pMeta.ref).subClassOf === ENUM)
@@ -305,7 +322,8 @@ reactMixin(VerificationView.prototype, RowMixin);
 reactMixin(VerificationView.prototype, ResourceMixin);
 VerificationView = makeResponsive(VerificationView)
 
-var styles = StyleSheet.create({
+var createStyles = utils.styleFactory(MessageView, function ({bankStyle}) {
+return StyleSheet.create({
   textContainer: {
     flex: 1,
   },
@@ -331,6 +349,24 @@ var styles = StyleSheet.create({
     color: '#2892C6',
     fontSize: 16
   },
-});
-
+  ptitle: {
+    fontSize: 16,
+    // fontFamily: 'Avenir Next',
+    marginTop: 3,
+    marginBottom: 0,
+    marginHorizontal: 7,
+    color: '#9b9b9b'
+  },
+  pvalue: {
+    fontSize: 20,
+    marginVertical: 3,
+    marginHorizontal: 7,
+    color: bankStyle.linkColor,
+  },
+  document: {
+    paddingVertical: 5,
+    paddingHorizontal: 10
+  }
+})
+})
 module.exports = VerificationView

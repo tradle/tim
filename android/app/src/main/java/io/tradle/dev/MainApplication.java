@@ -9,6 +9,7 @@ import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
+import com.microblink.reactnative.MicroblinkReactPackage;
 import com.cardio.RNCardIOPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -18,7 +19,6 @@ import com.github.yamill.orientation.OrientationPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.masteratul.exceptionhandler.ReactNativeExceptionHandlerPackage;
-import com.microblink.reactnative.blinkid.BlinkIDReactPackage;
 import com.microsoft.codepush.react.CodePush;
 import com.oblador.keychain.KeychainPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
@@ -66,6 +66,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
+            new MicroblinkReactPackage(),
             new RNCardIOPackage(),
         new RNFirebasePackage(),
         new RNFirebaseAnalyticsPackage(),
@@ -90,8 +91,7 @@ public class MainApplication extends Application implements ReactApplication {
         new RNCameraPackage(),
         new OrientationPackage(),
         new ECCPackage(),
-        new LocalAuthPackage(),
-        new BlinkIDReactPackage()
+        new LocalAuthPackage()
 //        new RNBlinkIDPackage()
 //        new RNPassportReaderPackage()
       );

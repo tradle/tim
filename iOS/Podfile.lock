@@ -19,11 +19,11 @@ PODS:
     - nanopb/encode (= 0.3.8)
   - nanopb/decode (0.3.8)
   - nanopb/encode (0.3.8)
-  - PPBlinkID (2.17.3)
+  - PPBlinkID (4.1.0)
 
 DEPENDENCIES:
   - Firebase/Core (~> 4.13.0)
-  - PPBlinkID (~> 2.17.3)
+  - PPBlinkID (~> 4.1.0)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -42,8 +42,8 @@ SPEC CHECKSUMS:
   FirebaseInstanceID: 8d20d890d65c917f9f7d9950b6e10a760ad34321
   GoogleToolboxForMac: 91c824d21e85b31c2aae9bb011c5027c9b4e738f
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
-  PPBlinkID: 83131cd1edceb87f9b96d76c12c8fa8594b1103e
+  PPBlinkID: e9853d27b5b788db75fde0f37463135b16dc919b
 
-PODFILE CHECKSUM: 8a0de1fb779bb737b0fe94bd3bdf67c5eb259fac
+PODFILE CHECKSUM: 8be09cc5d1eaf1d25281e1c0e04b8d48150df0e5
 
 COCOAPODS: 1.5.3

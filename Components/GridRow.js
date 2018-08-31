@@ -184,7 +184,7 @@ class GridRow extends Component {
       let rModel = utils.getModel(resource[TYPE])
       let typeTitle
       if (rModel.id !== m.id  &&  rModel.subClassOf === m.id)
-        typeTitle = <Text style={styles.type}>{utils.makeModelTitle(rModel)}</Text>
+        typeTitle = <Text style={styles.type}>{translate(rModel)}</Text>
       let cellStyle = {paddingVertical: 5, paddingLeft: 7}
       cols = [<View style={cellStyle}>
                {typeTitle}
@@ -279,7 +279,7 @@ class GridRow extends Component {
           let resType = utils.getType(resource[pName])
           let resM = utils.getModel(resType)
           row = <View key={this.getNextKey(resource)}>
-                  <Text style={styles.type}>{utils.makeModelTitle(resM)}</Text>
+                  <Text style={styles.type}>{translate(resM)}</Text>
                   {row}
                 </View>
         }
@@ -344,7 +344,7 @@ class GridRow extends Component {
       if (this.props.isModel  &&  (pName === 'form'  ||  pName === 'product')) {
         let m = utils.getModel(pName)
         if (m)
-          val = utils.makeModelTitle(m)
+          val = translate(m)
       }
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
     }

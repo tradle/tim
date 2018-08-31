@@ -20,7 +20,7 @@ var uiUtils = {
     let bm = utils.getModel(btype)
     navigator.push({
       id: 30,
-      title: translate('searchSomething', utils.makeModelTitle(bm)),
+      title: translate('searchSomething', translate(bm)),
       backButtonTitle: 'Back',
       component: GridList,
       passProps: {

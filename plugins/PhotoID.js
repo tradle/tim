@@ -22,6 +22,8 @@ module.exports = function PhotoID ({ models }) {
         return
 
       let scan = form.scanJson
+      let isDifferentPerson = form.firstName !== scan.personal.firstName  || form.lastName !== scan.personal.lastName
+
       const model = models[form[TYPE]]
       // Check if there is a need to clean the form
       if (scan  &&  currentResource) {
@@ -38,9 +40,14 @@ module.exports = function PhotoID ({ models }) {
 
       let isLicence = form.documentType.title.indexOf('Licence') !== -1
       if (scan) {
+        let countryCCA
         let { document } = scan
-
-        let countryCCA = document && (isLicence && document.country || document.issuer)
+        if (document) {
+          if (isLicence)
+            countryCCA =  document.country
+          else
+            countryCCA = document.issuer
+        }
         if (countryCCA) {
           let countryModel = utils.getModel(COUNTRY)
           // let countryId = form.country.id.split('_')[1]
@@ -50,7 +57,7 @@ module.exports = function PhotoID ({ models }) {
             scan = null
           }
         }
-        let errors = prefillValues(form, scan, model)
+        let errors = scan  &&  prefillValues(form, isDifferentPerson, scan, model)
       }
       let requestedProperties = getRequestedProps({scan, model, form})
       if (form.dateOfExpiry) {
@@ -78,22 +85,22 @@ module.exports = function PhotoID ({ models }) {
     }
   }
 }
-function prefillValues(form, values, model) {
+function prefillValues(form, isDifferentPerson, values, model) {
   let props = model.properties
   // let dateProps = ['dateOfExpiry', 'dateOfBirth', 'dateOfIssue']
   // Check if this is a new scan
   let exclude = [ 'country' ]
   for (let p in values)
-    if (form[p])
+    if (!isDifferentPerson  && form[p])
       exclude.push(p)
   for (let p in values) {
     if (exclude.includes(p))
       continue
-    if (form[p])
+    if (form[p]  &&  !isDifferentPerson)
       continue
     let val = values[p]
     if (typeof val === 'object')
-      prefillValues(form, val, model)
+      prefillValues(form, isDifferentPerson, val, model)
     else if (!props[p]) {
       if (p === 'birthData') {
         let parts = val.split(' ')
@@ -133,8 +140,12 @@ function getRequestedProps({scan, model, requestedProperties, form}) {
     let isLicence = form.documentType.title.indexOf('Licence') !== -1
     if (isLicence)
       requestedProperties = [{name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
-    else
-      requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
+    else {
+      if (form.documentType.title.indexOf('ID') === -1)
+        requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
+      else
+        requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
+    }
     return requestedProperties
   }
   let props = model.properties
