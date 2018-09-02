@@ -126,6 +126,14 @@ var HomePageMixin = {
         passProps: {
           bankStyle: style || bankStyle,
           noTransitions: true,
+          customStyles: {
+            nextButtonText: {
+              fontSize: 23,
+              fontWeight: 'bold',
+              fontFamily: 'Arial',
+            },
+
+          },
           tour: resource._tour,
           callback: () => {
             resource._noTour = true
