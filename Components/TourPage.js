@@ -8,7 +8,7 @@ import {
 } from 'react-native'
 import PropTypes from 'prop-types'
 import AppIntro from 'react-native-app-intro'
-import utils from '../utils/utils'
+import utils, { translate } from '../utils/utils'
 
 import { makeResponsive } from 'react-native-orient'
 import { models } from '@tradle/models'
@@ -46,7 +46,15 @@ class TourPage extends Component {
       })
     } else {
       // in case some extra props snuck in
-      pageArray = withoutUrl.map(page => _.pick(page, pageProps))
+      pageArray = withoutUrl.map(page => {
+        let p = _.pick(page, pageProps)
+        let pp = _.cloneDeep(p)
+        if (p.title)
+          pp.title = translate(p.title)
+        if (p.description)
+          pp.description = translate(p.description)
+        return pp
+      })
     }
 
     let props = {
@@ -54,6 +62,9 @@ class TourPage extends Component {
       onDoneBtnClick: this.doneBtnHandle,
       onSkipBtnClick: this.onSkipBtnHandle,
       onSlideChange: this.onSlideChangeHandle,
+      skipBtnLabel: translate('Skip'),
+      nextBtnLabel: translate('Next'),
+      doneBtnLabel: translate('Done'),
       showSkipButton: typeof showSkipButton === 'undefined' ? true : showSkipButton,
       showDoneButton: typeof showDoneButton === 'undefined' ? true : showDoneButton,
       showDots: typeof showDots === 'undefined' ? true : showDots,
