@@ -1,4 +1,4 @@
-{
+module.exports = {
     "officialAccounts": "Conversations",
     "back": "Back",
     "profile": "Profile",
@@ -47,27 +47,9 @@
     "confirmForgetMe": "Are you sure you want '{1}' to forget you",
     "forgetMe": "Forget me",
     "iNeed": "I need...",
-    "LivingWithParents": "Living with parents",
-    "HomeOwnerWithMortgage": "Home owner (with mortgage)",
-    "HomeOwnerWithoutMortgage": "Home owner (without mortgage)",
-    "TenantPrivate":  "Tenant (private)",
-    "TenantCounsel": "Tenant (counsel)",
-    "BenefitPayments": "Benefit Payments",
-    "BillsExpenses": "Bills / Expenses",
-    "CapitalRaisingScottishWidowsBank": "Capital Raising ( Scottish Widows Bank )",
-    "Inheritance": "Inheritance",
-    "ProbateExecutorTrustee": "Probate / Executor / Trustee",
-    "SalaryPensionOtherRegularIncome" : "Salary / Pension / Other Regular Income",
-    "Savings": "Savings",
-    "SpendingMoney": "Spending Money",
-    "Student": "Student",
-    "Home": "Home",
-    "Mobile": "Mobile",
-    "Work": "Work",
     "newProduct": "New product",
     "tapToRemovePhotos": "Tap to remove photos",
     "addNew": "Add new {1}",
-    "switchToRepresentative": "Switching to representative mode is not yet implemented.",
     "fillTheForm": "Please fill out this form **{1}**",
     "fillTheFormWithAttachments": "Please fill out this form **{1}**",
     "takeAPicture": "Please take a **selfie** picture of your face",
@@ -101,13 +83,9 @@
     "noConnectionForNewProduct": "{1}, {appName} requires a working internet connection to fill out the {2} application.",
     "inProgress": "Your request is in progress",
     "newContactRequest": "{1} sent you contact request",
-    "howCanIHelpYou": "Hello {1}. My name is {2}. How can I help you today?",
     "pleaseCorrectTheErrors": "Please correct error in the form",
     "verifierHelp": "Click 'Done' button after reviewing the form. If some fields require correction check them them first and then click the 'Done' button",
     "errorNotification": "Error notification has been sent to the customer to correct",
-    "addAnotherFormOrGetNext": "Add another {1} or move on to the next form",
-    "getNextForm": "Next",
-    "addSameForm": "Add",
     "areYouSureAboutNextForm": "Are you sure you are done with {1}?",
     "formChooser": "Form list",
     "showQR": "My QR code",
@@ -216,8 +194,12 @@
     "enableCameraAccess": "{appName} currently does not have permission to use the camera. To grant access, choose Settings, and make sure Camera is enabled.",
     "noScanningOnAndroid": "Document scanning on Android is coming soon.",
     "pleaseTapOnMenu": "Please tap on the red button and",
+    // messages to delete
     "holdPhoneToPassportBackCover": "Hold the back of your phone against the back inside cover of your passport.",
     "holdPhoneToPassport": "Hold the back of your phone against the front cover of your passport",
+    "addAnotherFormOrGetNext": "Add another {1} or move on to the next form",
+    "switchToRepresentative": "Switching to representative mode is not yet implemented.",
+    // end messages to delete
     "scanningFailedTryAgain": "Scanning was unsuccessful. Could you please try again?",
     "documentNotScanning": "Oops, something went wrong!",
     "retryScanning": "Was that a {1}? I couldn't tell. Please try again?\n\nFor best results, use landscape mode, avoid glare, and be sure to position the document within the frame shown.",
@@ -280,6 +262,7 @@
     "exploreData": "Explore Data",
     "bookmarks": "Bookmarks",
     "createManualMatchCheck": "Create manual match check",
+    // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
     "Cancel": "Cancel",
@@ -292,9 +275,10 @@
     "Applications": "Applications",
     "Verifications": "Verifications",
     "Seals": "Seals",
-    "Santions Checks": "Santions Checks",
+    "Sanctions Checks": "Sanctions Checks",
     "Corporation Exists Checks": "Corporation Exists Checks",
     "Application submitted!": "Application submitted!",
+    // Server side messages
     "See our list of products": "See our list of products",
     "Please fill out the form": "Please fill out the form ",
     "Our products have changed": "Our products have changed",
@@ -311,5 +295,29 @@
     "pleaseSign": "Please sign inside the grey box",
     "getStarted": "Get started",
     "goodNews": "Good news! You already have {1}. To share tap the icon below",
-    "goodNewsFew": "Good news! You already have quite a few. To share tap icon below."
+    "goodNewsFew": "Good news! You already have quite a few. To share tap icon below.",
+    // Tours buttons
+    "Skip": "Skip",
+    "Done": "Done",
+    "Next": "Next",
+    // TOURS Friendly
+    // message
+    "Take a quick tour of chat bot?": "Take a quick tour of chat bot?",
+    // Page 1
+    "Ready for friendliness?": "Ready for friendliness?",
+    "Finally, you will be in control of your own private information!": "Finally, you will be in control of your own private information!",
+    // Page 2
+    "Get set for friendliness?": "Get set for friendliness?",
+    // Page 3
+    "Go friendliness!": "Go friendliness!",
+    // Safe-Re
+    // Message
+    // Page 1
+    "Ready?": "Ready?",
+    // Page 2
+    "Get set": "Get set",
+    "Before we start you'll need a valid passport, identity card or driving license": "Before we start you'll need a valid passport, identity card or driving license",
+    // // Page 3
+    "Go!": "Go!",
+    "We'll ask you questions in the chat and you simply fill the forms or follow the requests":  "We'll ask you questions in the chat and you simply fill the forms or follow the requests"
 }

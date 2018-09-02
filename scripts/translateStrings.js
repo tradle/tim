@@ -42,9 +42,9 @@ async function writeStrings(stringsDir, lang) {
 async function writeFile(stringsDir, lang) {
   if (lang === 'en')
     return
-  let fn = 'strings_' + lang + '.json'
+  let fn = 'strings_' + lang + '.js'
   let fnStrings = path.resolve(stringsDir, fn)
-  let enFn = 'strings_en.json'
+  let enFn = 'strings_en.js'
   let stringsLang, stringsEN
   let currentIds
   try {
@@ -81,7 +81,7 @@ async function writeFile(stringsDir, lang) {
     }
   }
   if (hasChanged)
-    writeFileAtomic(fnStrings, JSON.stringify(stringsLang, 0, 2), console.log)
+    writeFileAtomic(fnStrings, 'module.exports = ' + JSON.stringify(stringsLang, 0, 2), console.log)
 }
 async function translateText({strings, key, text, lang}) {
   const results = await translate.translate(text, lang)
