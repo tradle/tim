@@ -73,8 +73,8 @@ const merged = extend({
     // 'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
     // 'https://t22ju1ga5c.execute-api.us-east-1.amazonaws.com/dev',
-    // // safere.io
-    // 'https://a87crkepec.execute-api.us-east-1.amazonaws.com/dev',
+    // safere.io
+    'https://a87crkepec.execute-api.us-east-1.amazonaws.com/dev',
     // // easybank.io
     // 'https://m6rpwdztvk.execute-api.us-east-1.amazonaws.com/dev',
     // // perpetualguardian.co.nz

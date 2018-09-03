@@ -583,7 +583,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#972dd1962aab41e9f78434dd3b2be766d95e5cc8"
+      "resolved": "git://github.com/tradle/models.git#508698609d4cec2d139d4da5821ca2f238194059"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -6266,8 +6266,8 @@
     },
     "react-native-camera": {
       "version": "1.1.4",
-      "from": "react-native-camera@>=1.0.2 <2.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-camera/-/react-native-camera-1.1.4.tgz"
+      "from": "mvayngrib/react-native-camera#1.1.4",
+      "resolved": "git://github.com/mvayngrib/react-native-camera.git#09d7e7ab29378875ad46d68f83360bc4965b0b2b"
     },
     "react-native-carousel": {
       "version": "0.11.0",
