@@ -2793,6 +2793,11 @@ var utils = {
         throw new ValidateResourceErrors.InvalidPropertyValue(`unsupported check status: ${safeStringify(check.status)}`)
     }
   },
+
+  cleanBase64(str) {
+    // some libraries generate base64 with line breaks, spaces, etc.
+    return str.replace(/[\s]/g, '')
+  },
 }
 
 if (__DEV__) {

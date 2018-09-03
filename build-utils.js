@@ -24,7 +24,7 @@ function getReleaseDir ({
 
   const releases = fs.readdirSync(path.resolve(__dirname, `release/${platform}/${version}`))
   const releaseDirname = releases.find(r => r.indexOf(gitHash) === 0)
-  if (!releaseDirname) throw new Error('release dir not found, run bundle.sh first')
+  if (!releaseDirname) throw new Error('release dir not found, build a release first for this commit!')
 
   return path.resolve(__dirname, `release/${platform}/${version}/${releaseDirname}/`)
 }

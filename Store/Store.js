@@ -1220,6 +1220,9 @@ var Store = Reflux.createStore({
         let hashToUrl = self._getItem(SETTINGS + '_1').hashToUrl
         const url = hashToUrl  &&  hashToUrl[recipientHash]
         transport = url && wsClients.byUrl[url]
+        if (!transport) {
+          debug('missing client for provider', { url, permalink: recipientHash })
+        }
       }
 
       const identifier = self.getIdentifier(recipientInfo)

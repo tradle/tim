@@ -38,10 +38,11 @@
     "build:codepush:ios": "echo 'ERROR: PLEASE BUILD IN XCODE FOR NOW'",
     "pushenv": "./scripts/pushenv.sh",
     "translate:strings": "node ./scripts/translateStrings -d ./utils -l vi,bn,fil,es,fr,nl,ru,km",
-    "translate:moreStrings": "node ./scripts/translateStrings -d ./utils -l th,km,my"
+    "translate:moreStrings": "node ./scripts/translateStrings -d ./utils -l th,km,my",
+    "android-dev": "adb reverse tcp:8081 tcp:8081 && react-native run-android"
   },
   "dependencies": {
-    "@tradle/aws-client": "^1.9.0",
+    "@tradle/aws-client": "^1.9.2",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
     "@tradle/biz-plugins": "github:tradle/biz-plugins",
     "@tradle/build-resource": "^4.0.2",
@@ -139,7 +140,7 @@
     "react-native-awesome-card-io": "^0.7.0",
     "react-native-branch": "^2.2.4",
     "react-native-button": "^2.3.0",
-    "react-native-camera": "^1.0.2",
+    "react-native-camera": "github:mvayngrib/react-native-camera#1.1.4",
     "react-native-carousel": "^0.11.0",
     "react-native-code-push": "^5.4.0",
     "react-native-collapsible": "^0.10.0",
