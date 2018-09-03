@@ -19,7 +19,6 @@ import CameraView from './CameraView'
 import SignatureView from './SignatureView'
 import Navigator from './Navigator'
 
-const BASE64_PREFIX = 'data:image/jpeg;base64,'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 
@@ -134,7 +133,7 @@ var OnePropFormMixin = {
         [prop.name]: {
           width,
           height,
-          url: BASE64_PREFIX + base64
+          url: base64
         },
         _context: resource._context,
         from: utils.getMe(),
