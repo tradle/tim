@@ -3838,6 +3838,7 @@ var Store = Reflux.createStore({
       if (!varr)
         return
       varr.forEach((v) => {
+        self.rewriteStubs(v)
         if (v.method) {
           if (utils.getId(v.document) !== rId)
             docs.push(v.document)
@@ -4060,6 +4061,8 @@ if (!res[SIG]  &&  res._message)
       let link = forwardlink  ||  backlink
       if (link) {
         let linkName = link.name
+        if (!r[linkName])
+          this.organizeSubmissions(r)
         if (r[linkName]) {
           // list = await this.getObjects(r[forwardlinkName], forwardlink)
           list = await this.getObjects(r[linkName], link)
@@ -10750,7 +10753,7 @@ if (!res[SIG]  &&  res._message)
             if (context  &&  !app._context)
               app._context = context
             this.trigger({action: 'updateRow', resource: app, forceUpdate: true})
-            await this.onGetItem({resource: app, backlink: this.getModel(APPLICATION).properties.submissions, search: true})
+            await this.onGetItem({resource: app, backlink: this.getModel(APPLICATION).properties.forms, search: true})
             // this.trigger({action: 'getItem', resource: app})
           }
         }
