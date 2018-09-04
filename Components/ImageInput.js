@@ -106,7 +106,7 @@ class ImageInput extends Component {
       }
 
       onImage({
-        url: BASE64_PREFIX + response.data,
+        url: BASE64_PREFIX + utils.cleanBase64(response.data),
         isVertical: response.isVertical,
         width: response.width,
         height: response.height
