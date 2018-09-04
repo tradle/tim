@@ -582,11 +582,15 @@ var search = {
         }
         else {
           let allProps = this.addProps({isList, props: prop.items.properties})
-          arr.push(
-            `${p} {
-              ${allProps.toString().replace(/,/g, '\n')}
-            }`
-          )
+          if (allProps.length) {
+            arr.push(
+              `${p} {
+                ${allProps.toString().replace(/,/g, '\n')}
+              }`
+            )
+          }
+          else
+            arr.push(p)
         }
         continue
       }
