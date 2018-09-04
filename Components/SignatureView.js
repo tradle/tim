@@ -85,12 +85,15 @@ class SignatureView extends Component {
   getSignature() {
     return { ...this.state.value }
   }
+  _signaturePadError() {
+    debugger
+  }
 }
 
 var createStyles = utils.styleFactory(SignatureView, function ({ dimensions, sigViewStyle  }) {
   return StyleSheet.create({
     instructions: {
-      fontSize: 22,
+      fontSize: 20,
       padding: 10,
       alignSelf: 'center',
       color: '#aaaaaa'

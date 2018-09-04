@@ -80,7 +80,7 @@ var styles = {
   },
   flip: {
     position: 'absolute',
-    top: 40,
+    top: 30,
     right: 10
   }
 }
