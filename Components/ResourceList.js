@@ -60,6 +60,7 @@ const LIMIT = 10
 const SCAN_QR_CODE_VIEW = 16
 const {
   MESSAGE,
+  IDENTITY,
   ORGANIZATION,
   PROFILE,
   CUSTOMER_WAITING,
@@ -1284,9 +1285,15 @@ class ResourceList extends Component {
   }
   async scanQRAndProcess(prop) {
     const result = await this.scanFormsQRCode()
+    const { schema, data } = result
+    if (schema !== 'AddProvider') {
+      Alert.alert(translate('tryProviderQrCode'))
+      return
+    }
     if (result  &&  result.data) {
       let { host, provider } = result.data
-      Actions.addApp({ url: host, permalink: provider })
+      // Actions.addApp({ url: host, permalink: provider })
+      Actions.addApp({ url: host, permalink: provider, addSettings: true })
     }
   }
 
