@@ -304,5 +304,6 @@ module.exports = {
   "Skip": "লাফালাফি করা",
   "Done": "সম্পন্ন",
   "Next": "পরবর্তী",
-  "Sanctions Checks": "নিষেধাজ্ঞা চেক"
+  "Sanctions Checks": "নিষেধাজ্ঞা চেক",
+  "tryProviderQrCode": "শুধুমাত্র প্রোভাইডার এর QR কোড আপনি এখানে scn করতে পারেন। অনুগ্রহপূর্বক আবার চেষ্টা করুন"
 }

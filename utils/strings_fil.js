@@ -304,5 +304,6 @@ module.exports = {
   "Done": "Tapos na",
   "Skip": "Laktawan",
   "Next": "Susunod",
-  "Sanctions Checks": "Mga tseke ng Sanctions"
+  "Sanctions Checks": "Mga tseke ng Sanctions",
+  "tryProviderQrCode": "QR code ng Provider lamang na maaari mong i-scan dito. Pakisubukang muli"
 }

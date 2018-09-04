@@ -262,6 +262,7 @@ module.exports = {
     "exploreData": "Explore Data",
     "bookmarks": "Bookmarks",
     "createManualMatchCheck": "Create manual match check",
+    "tryProviderQrCode": "Only Provider\'s QR code you can scan here. Please try again",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

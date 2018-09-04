@@ -304,5 +304,6 @@ module.exports = {
   "Done": "Làm xong",
   "Next": "Kế tiếp",
   "Skip": "Bỏ qua",
-  "Sanctions Checks": "Kiểm tra xử phạt"
+  "Sanctions Checks": "Kiểm tra xử phạt",
+  "tryProviderQrCode": "Chỉ có mã QR của nhà cung cấp mà bạn có thể quét tại đây. Vui lòng thử lại"
 }

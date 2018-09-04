@@ -304,5 +304,6 @@ module.exports = {
   "Skip": "Sauter",
   "Next": "Prochain",
   "Done": "Terminé",
-  "Sanctions Checks": "Contrôles de sanctions"
+  "Sanctions Checks": "Contrôles de sanctions",
+  "tryProviderQrCode": "Seul le code QR du fournisseur que vous pouvez scn ici. Veuillez réessayer"
 }

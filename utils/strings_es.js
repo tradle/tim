@@ -304,5 +304,6 @@ module.exports = {
   "Done": "Hecho",
   "Next": "Siguiente",
   "Skip": "Omitir",
-  "Sanctions Checks": "Verificaciones de sanciones"
+  "Sanctions Checks": "Verificaciones de sanciones",
+  "tryProviderQrCode": "Solo el código QR del proveedor puede encontrar aquí. Inténtalo de nuevo"
 }

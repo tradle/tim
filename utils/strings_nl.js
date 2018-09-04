@@ -304,5 +304,6 @@ module.exports = {
   "Next": "volgende",
   "Skip": "Overspringen",
   "Done": "Gedaan",
-  "Sanctions Checks": "Sanctiescheques"
+  "Sanctions Checks": "Sanctiescheques",
+  "tryProviderQrCode": "Alleen de QR-code van Provider kunt u hier vinden. Probeer het opnieuw"
 }
