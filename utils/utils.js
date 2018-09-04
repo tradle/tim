@@ -25,7 +25,7 @@ import { getDimensions, getOrientation } from 'react-native-orient'
 import compareVersions from 'compare-versions'
 import crypto from 'crypto'
 import Q from 'q'
-import collect from 'stream-collector'
+import _collect from 'stream-collector'
 import t from 'tcomb-form-native'
 import moment from 'moment'
 import dateformat from 'dateformat'
@@ -33,7 +33,7 @@ import Backoff from 'backoff'
 import levelErrors from 'levelup/lib/errors'
 import Cache from 'lru-cache'
 import mutexify from 'mutexify'
-const Promise = require('bluebird')
+import Promise from 'bluebird'
 const debug = require('debug')('tradle:app:utils')
 import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
@@ -57,6 +57,8 @@ import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import Strings from './strings'
+
+const collect = Promise.promisify(_collect)
 
 // import Orientation from 'react-native-orientation'
 
@@ -804,6 +806,7 @@ var utils = {
   getType(r) {
     if (typeof r === 'string')
       return r.split('_')[0]
+    if (!r) debugger
     if (r[TYPE])
       return r[TYPE]
     let id = this.getId(r)
@@ -1488,26 +1491,16 @@ var utils = {
     return m.subClassOf === ENUM
   },
 
+  collect,
+
   /**
    * fast but dangerous way to read a levelup
    * it's dangerous because it relies on the underlying implementation
    * of levelup and asyncstorage-down, and their respective key/value encoding sechemes
    */
   async dangerousReadDB(db) {
-    // return new Promise((resolve, reject) => {
-    //   collect(db.createReadStream(), (err, data) => {
-    //     if (err) reject(err)
-    //     else resolve(data)
-    //   })
-    // })
-
     if (Platform.OS === 'web') {
-      return new Promise(function (resolve, reject) {
-        collect(db.createReadStream(), function (err, results) {
-          if (err) reject(err)
-          else resolve(results)
-        })
-      })
+      return await collect(db.createReadStream())
     }
 
     await Q.ninvoke(db, 'open')
