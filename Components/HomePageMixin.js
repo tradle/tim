@@ -42,7 +42,7 @@ var HomePageMixin = {
     return new Promise((resolve, reject) => {
       this.setState({hideMode: false})
       this.props.navigator.push({
-        title: 'Scan QR Code',
+        title: translate('scanQRcode'),
         id: 16,
         component: QRCodeScanner,
         titleTintColor: '#eeeeee',
@@ -126,6 +126,14 @@ var HomePageMixin = {
         passProps: {
           bankStyle: style || bankStyle,
           noTransitions: true,
+          customStyles: {
+            nextButtonText: {
+              fontSize: 23,
+              fontWeight: 'bold',
+              fontFamily: 'Arial',
+            },
+
+          },
           tour: resource._tour,
           callback: () => {
             resource._noTour = true

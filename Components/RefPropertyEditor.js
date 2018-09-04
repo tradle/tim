@@ -327,7 +327,8 @@ class RefPropertyEditor extends Component {
     case 'card':
       tooltip = translate('centerIdCard')
       // machine readable travel documents (passport)
-      recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
+      recognizers = BlinkID.recognizers.mrtd
+      // recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
       break
     case 'license':
     case 'licence':

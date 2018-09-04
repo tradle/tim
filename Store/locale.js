@@ -118,7 +118,7 @@ function getCoverPhotoForRegion() {
   return infoPerRegion  &&  infoPerRegion.coverPhoto
 }
 function getLanguage() {
-  debugger
+  // debugger
   let lang = DeviceInfo.getDeviceLocale()
   if (!lang)
     lang = navigator.language

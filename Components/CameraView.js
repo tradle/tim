@@ -17,12 +17,13 @@ import { makeResponsive } from 'react-native-orient'
 
 import utils, { translate } from '../utils/utils'
 const BASE64_PREFIX = 'data:image/jpeg;base64,'
+const { back, front } = RNCamera.Constants.Type
 
 class CameraView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      cameraType: props.cameraType === 'front' &&    RNCamera.Constants.Type.front  ||  RNCamera.Constants.Type.back
+      cameraType: props.cameraType === 'front' && front || back
     }
   }
           // captureTarget={RNCamera.Constants.CaptureTarget.cameraRoll}
@@ -34,7 +35,7 @@ class CameraView extends Component {
       // debugger
       let { width, height } = utils.dimensions(CameraView)
       return <View style={[styles.container, {backgroundColor: '#000', justifyContent: 'center'}]}>
-                <Image source={{uri: 'data:image/jpeg;base64,' + data.base64}} style={{width: width, height: height - 80}} />
+                <Image source={{uri: data.base64}} style={{width: width, height: height - 80}} />
                 <View style={styles.footer1}>
                    <TouchableOpacity onPress={() => this.setState({data: null})}>
                      <Text style={styles.cancel}>{translate('retake')}</Text>
@@ -77,11 +78,8 @@ class CameraView extends Component {
     console.log(e);
   }
   _switchCamera() {
-    var state = this.state;
-    state.cameraType = state.cameraType === RNCamera.Constants.Type.back
-                     ? RNCamera.Constants.Type.front
-                     : RNCamera.Constants.Type.back;
-    this.setState(state);
+    const cameraType = this.state.cameraType === back ? front : back
+    this.setState({ cameraType })
   }
   async _takePicture() {
     let data
@@ -93,6 +91,8 @@ class CameraView extends Component {
         fixOrientation: true,
         forceUpOrientation: true
       })
+
+      data.base64 = BASE64_PREFIX + utils.cleanBase64(data.base64)
       this.setState({ data })
     } catch (err) {
       console.error(err)

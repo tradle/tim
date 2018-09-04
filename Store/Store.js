@@ -1245,6 +1245,9 @@ var Store = Reflux.createStore({
         let hashToUrl = self._getItem(SETTINGS + '_1').hashToUrl
         const url = hashToUrl  &&  hashToUrl[recipientHash]
         transport = url && wsClients.byUrl[url]
+        if (!transport) {
+          debug('missing client for provider', { url, permalink: recipientHash })
+        }
       }
 
       const identifier = self.getIdentifier(recipientInfo)
@@ -5392,7 +5395,7 @@ if (!res[SIG]  &&  res._message)
     if (addSettings)
       this.addSettings(newProvider)
     else
-      this.addToSettings(newProvider)
+      this.addToSettings({ hash: newProvider.permalink, url })
     if (!noTrigger) {
       this.trigger({ action: 'addApp' })
       let isTest = this._getItem(newProvider.org)._isTest
@@ -9443,7 +9446,7 @@ if (!res[SIG]  &&  res._message)
     let from = this._getItem(utils.getId(value.from));
     let fromId = utils.getId(from)
     let meId = utils.getId(me)
-    let isNew = !value[ROOT_HASH] || !this._getItem(utils.getId(value))
+    let isNew = !value[ROOT_HASH] || value[ROOT_HASH] === value[CUR_HASH]
 
     if (fromId !== meId  &&  from.bot)
       from = this._getItem(utils.getId(from.organization))

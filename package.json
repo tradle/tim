@@ -35,7 +35,8 @@
     "prepush": "npm run lint",
     "update:models": "npm i -S tradle/models tradle/custom-models tradle/models-corporate-onboarding tradle/models-nz tradle/models-onfido tradle/models-products-bot && ./reshrink.sh",
     "translate:strings": "node ./scripts/translateStrings -d ./utils -l vi,bn,fil,es,fr,nl,ru,km",
-    "translate:moreStrings": "node ./scripts/translateStrings -d ./utils -l th,km,my"
+    "translate:moreStrings": "node ./scripts/translateStrings -d ./utils -l th,km,my",
+    "android-dev": "adb reverse tcp:8081 tcp:8081 && react-native run-android"
   },
   "dependencies": {
     "@tradle/aws-client": "^1.9.2",

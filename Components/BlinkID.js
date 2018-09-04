@@ -71,10 +71,11 @@ const scan = (function () {
 
       if (!(rec instanceof BlinkID.DocumentFaceRecognizer)) {
         rec.returnFullDocumentImage = true
-        rec.returnFaceImage = true
-        rec.returnSignatureImage = true
-        rec.setAllowUnparsedResults = true
-        rec.setAllowUnverifiedResults = true
+        // rec.returnFaceImage = true
+        // rec.returnSignatureImage = true
+        // rec.setAllowUnparsedResults = true
+        // rec.setAllowUnverifiedResults = true
+        rec.allowUnverifiedResults = true
       }
       if (rec instanceof BlinkID.BarcodeRecognizer) {
         if (opts.country.title === 'Bangladesh')

@@ -551,8 +551,8 @@
       "title": "Valid Driver Licence"
     },
     "country": {
-      "id": "tradle.Country_GB",
-      "title": "United Kingdom"
+      "id": "tradle.Country_NZ",
+      "title": "New Zealand"
     },
     "scan": {
       "height": 750,
@@ -562,10 +562,6 @@
     "firstName": "SARAH MEREDYTH",
     "lastName": "MORGAN",
     "dateOfIssue": 1358553600000,
-    "country": {
-      "id": "tradle.Country_NZ",
-      "title": "New Zealand"
-    },
     "documentNumber": "MORGA753116SM9IJ 35",
     "issuer": "DVLA",
     "dateOfExpiry": 1674000000000,

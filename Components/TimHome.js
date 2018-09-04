@@ -1100,7 +1100,7 @@ class TimHome extends Component {
 
   pairDevices() {
     this.props.navigator.push({
-      title: 'Scan QR Code',
+      title: translate('scanQRcode'),
       id: 16,
       component: QRCodeScanner,
       titleTintColor: '#eeeeee',

@@ -4,13 +4,13 @@ import LocalizedStrings from 'react-native-localization'
 import ENV from './env'
 
 const RAW_STRINGS = {
-  en: require('./strings_en.json'),
-  es: require('./strings_es.json'),
-  fr: require('./strings_fr.json'),
-  fil: require('./strings_fil.json'),
-  bn: require('./strings_bn.json'),
-  vi: require('./strings_vi.json'),
-  nl: require('./strings_nl.json')
+  en: require('./strings_en.js'),
+  es: require('./strings_es.js'),
+  fr: require('./strings_fr.js'),
+  fil: require('./strings_fil.js'),
+  bn: require('./strings_bn.js'),
+  vi: require('./strings_vi.js'),
+  nl: require('./strings_nl.js')
 }
 
 const STRINGS = {
