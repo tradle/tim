@@ -63,7 +63,6 @@ class TourPage extends Component {
       onSkipBtnClick: this.onSkipBtnHandle,
       onSlideChange: this.onSlideChangeHandle,
       skipBtnLabel: translate('Skip'),
-      nextBtnLabel: translate('Next'),
       doneBtnLabel: translate('Done'),
       showSkipButton: typeof showSkipButton === 'undefined' ? true : showSkipButton,
       showDoneButton: typeof showDoneButton === 'undefined' ? true : showDoneButton,
