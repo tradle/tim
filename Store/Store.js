@@ -3658,8 +3658,13 @@ var Store = Reflux.createStore({
       if (!docFromServer)
         document = await this._getItemFromServer(document)
       let application = await this._getItemFromServer(document.application)
-      if (!application._context)
-        application._context = await this._getItemFromServer(utils.getId(context))
+      if (!application._context) {
+        if (!context)
+          context = await this.getContext(application.context, r)
+        else
+          context = await this._getItemFromServer(utils.getId(context))
+        application._context = context //await this._getItemFromServer(utils.getId(context))
+      }
       this.trigger({action: 'assignRM_Confirmed', application: application})
     }
     // if (__DEV__) {
@@ -6518,21 +6523,13 @@ if (!res[SIG]  &&  res._message)
     let applicantId = application  &&  application.applicant.id.replace(IDENTITY, PROFILE)
     let applicant = applicantId  &&  this._getItem(applicantId)
     let importedVerification
-    // Right now we request all imported verificationsthe first time.
+    // Right now we request all imported verifications the first time.
     // May be we'll decide to page them too
-    if (application  &&  !endCursor) {
+    if (application) { //  &&  !endCursor) {
       context = application._context
       if (!application.context)
         application = await this._getItemFromServer(application)
       contextId = application.context
-      // var params = {
-      //   client: this.client,
-      //   author: me[ROOT_HASH],
-      //   context: contextId,
-      //   filterResource: {_payloadType: VERIFICATION}
-      // }
-
-      // importedVerification = graphQL.getChat(params)
     }
     else if (context) {
       contextId = context.contextId
