@@ -238,11 +238,6 @@ class ResourceView extends Component {
       // if (backlink !== this.state.backlink)
       //   this.setState({backlink: backlink})
       break
-    // default:
-    //   if (resource  &&  action !== 'onlineStatus')
-    //     Actions.getItem(resource)
-    //     // this.onResourceUpdate(params)
-    //   break
     }
   }
   shouldComponentUpdate(nextProps, nextState) {
@@ -306,7 +301,6 @@ class ResourceView extends Component {
                                   backlink={backlink}
                                   showQR={this.openModal.bind(this)}
                                   backlinkList={backlinkList}/>
-        // actionPanel = <ShowRefList showQR={this.openModal.bind(this)} {...this.props} backlink={backlink} backlinkList={back
     }
     let qrcode, w
     let { width } = utils.dimensions(ResourceView)
@@ -350,30 +344,12 @@ class ResourceView extends Component {
                  </View>
       }
     }
-    else
-      qrcode = <View />
 
     let footer
     // let conversations
     let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
     let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
     let paddingRight = Platform.OS === 'android' ? 0 : 10
-    // if (isIdentity) {
-    //   footer = <View style={styles.footer}>
-    //             <View style={styles.row}>
-    //               <TouchableOpacity onPress={this.showBanks.bind(this)} style={{paddingRight}}>
-    //                 <View style={[platformStyles.conversationButton, {backgroundColor: bgcolor, borderColor: bgcolor, borderWidth: 1, opacity: 0.5}]}>
-    //                   <ConversationsIcon size={30} color={color} style={styles.conversationsIcon} />
-    //                 </View>
-    //               </TouchableOpacity>
-    //               <TouchableOpacity onPress={() => this.ActionSheet.show()}>
-    //                 <View style={[buttonStyles.menuButton, {opacity: 0.5}]}>
-    //                   <Icon name='md-finger-print' color={Platform.select(FINGERPRINT_COLOR)} size={fontSize(30)} />
-    //                 </View>
-    //               </TouchableOpacity>
-    //             </View>
-    //           </View>
-    // }
     if (isIdentity) {
       footer = <View style={styles.footer}>
                 <TouchableOpacity onPress={() => this.ActionSheet.show()}>
@@ -591,11 +567,6 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions, bank
       borderTopWidth: 1,
       borderBottomWidth: 1
     },
-    conversationsRow: {
-      flexDirection: 'row',
-      paddingLeft: 5,
-      width: dimensions.width - 100
-    },
     row: {
       flex: 1,
       paddingHorizontal: 10,
@@ -623,10 +594,6 @@ var createStyles = utils.styleFactory(ResourceView, function ({ dimensions, bank
       backgroundColor: '#ffffff',
       padding:10
     },
-    conversationsIcon: {
-      marginLeft: 9,
-      marginRight: 9
-    }
   })
 })
 
