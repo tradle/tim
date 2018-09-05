@@ -1093,7 +1093,7 @@ class FormRequestRow extends Component {
     let content = <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
                     <Animated.View style={zoomIn}>
                       <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
-                        <Icon name='md-add' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'} style={{marginTop: 2}}/>
+                        <Icon name='md-add' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'} style={{marginTop: utils.isWeb() ? 0 : 2}}/>
                       </View>
                     </Animated.View>
                      <View style={{justifyContent: 'center'}}>

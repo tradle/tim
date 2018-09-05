@@ -131,7 +131,7 @@ class MessageView extends Component {
     if (!params.resource)
       return
     let { bankStyle, application, resource, search } = this.props
-    if (params.resource[ROOT_HASH] !== utils.getRootHash(resource))
+    if (utils.getId(params.resource) !== utils.getId(resource))
       return
     if (action === 'verifyOrCorrect') {
       this.verifyOrCreateError()

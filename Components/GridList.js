@@ -143,7 +143,11 @@ class GridList extends Component {
 
     const dataSource = new ListView.DataSource({
       rowHasChanged: function(row1, row2) {
-        return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
+        if (row1 !== row2)
+          return true
+        if (row1  &&  row2)
+          return row1 !== row2 || row1._online !== row2._online || row1.style !== row2.style
+        return true
       }
     })
     let {resource, officialAccounts, modelName, prop, filter, serverOffline, search} = this.props
@@ -168,6 +172,7 @@ class GridList extends Component {
       // hasPartials: false,
       // bookmarksCount: 0,
       // hasTestProviders: false,
+      notFoundMap: {},
       resource: search  &&  resource,
       isGrid:  !this.isSmallScreen  &&  !officialAccounts  && !model.abstract  &&  !model.isInterface  &&  modelName !== APPLICATION_SUBMISSION
     };
@@ -876,6 +881,8 @@ class GridList extends Component {
     }
     let isRM = utils.isRM(application)
     if (isBacklink) {
+      route.passProps.backlink = prop
+
       if (application  &&  isRM) {
         let editView
         _.extend(route.passProps, {
@@ -893,30 +900,10 @@ class GridList extends Component {
                 editView.setState({isVerifier: true})
             }
           })
+          navigator.push(route)
+          return
         }
-        // _.extend(route, {
-        //   rightButtonTitle: 'Edit',
-        //   onRightButtonPress: {
-        //     title: newTitle,
-        //     id: 5,
-        //     backButtonTitle: 'Back',
-        //     component: MessageView,
-        //     rightButtonTitle:'Done', //ribbon-b|ios-close'
-        //     help: translate('verifierHelp'),  // will show in alert when clicked on help icon in navbar
-        //     // application = application
-        //     passProps: {
-        //       bankStyle,
-        //       resource,
-        //       // lensId: lensId,
-        //       application,
-        //       currency: resource.currency || this.props.resource.currency,
-        //       country: resource.country,
-        //       isVerifier: true
-        //     }
-        //   }
-        // })
       }
-      route.passProps.backlink = prop
     }
     // Edit verifications
     // let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
@@ -1160,17 +1147,34 @@ class GridList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
+    // Case when the model was not found but the stub existed,
+    // and now when it is re-rendering with actual data graphQL didn't return resource for this stub
+    if (!resource) {
+      let text = this.state.notFoundMap[rowId]
+      if (text)
+        return <NotFoundRow text={text} id={rowId}/>
+      else
+        return <View/>
+    }
     let { isModel, isBacklink, isForwardlink, modelName, prop, lazy, officialAccounts,
           currency, navigator, search, isChooser, chat, multiChooser, bankStyle } = this.props
 
     let rtype = modelName === VERIFIED_ITEM ? VERIFICATION : modelName
+    let resType = utils.getType(resource)
+
     let model
     if (isModel)
       model = resource
     else if (isBacklink  ||  isForwardlink)
-      model = utils.getModel(utils.getType(resource))
+      model = utils.getModel(resType)
     else
       model = utils.getModel(rtype);
+    if (!model) {
+      let text = `model ${resType} not found`
+      this.state.notFoundMap[rowId] = text
+      return <NotFoundRow text={text} id={rowId}/>
+    }
+
     if (model.isInterface)
       model = utils.getModel(utils.getType(resource))
     let isContext = utils.isContext(model)

@@ -118,16 +118,16 @@ class ShowPropertiesView extends Component {
 
     let styles = createStyles({bankStyle: bankStyle || defaultBankStyle})
     var props = model.properties;
-    if (checkProperties) {
-      vCols = utils.getEditCols(model)
-      if (vCols)
-        vCols = Object.keys(vCols)
-    }
-    else {
+    // if (checkProperties) {
+    //   vCols = utils.getEditCols(model)
+    //   if (vCols)
+    //     vCols = Object.keys(vCols)
+    // }
+    // else {
       vCols = model.viewCols
       if (vCols)
         vCols = utils.ungroup(model, vCols)
-    }
+    // }
     // see if it is inlined resource like 'prefill' in tradle.FormPrefill and show all of the properties
     if (!resource[ROOT_HASH]) {
       if (!vCols)
@@ -234,9 +234,11 @@ class ShowPropertiesView extends Component {
                 <Text style={[styles.title, styles.description]}>{dateformat(new Date(resource._time), 'mmm d, yyyy')}</Text>
               </View>
             )
-          return
+          if (!checkProperties)
+            return
+          val = <Image source={{uri: val.url}} resizeMode='cover' style={styles.thumb} />
         }
-        if (pMeta.ref == MONEY) {
+        else if (pMeta.ref == MONEY) {
           let CURRENCY_SYMBOL = currency ? currency.symbol || currency : DEFAULT_CURRENCY_SYMBOL
           let c = utils.normalizeCurrencySymbol(val.currency)
           val = (c || CURRENCY_SYMBOL) + val.value
@@ -479,6 +481,10 @@ var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions
       marginHorizontal: 7,
       color: '#7AAAC3'
     },
+    thumb: {
+      width: 40,
+      height: 40
+    }
   })
 })
 

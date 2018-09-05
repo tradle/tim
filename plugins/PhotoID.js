@@ -22,7 +22,7 @@ module.exports = function PhotoID ({ models }) {
         return
 
       let scan = form.scanJson
-      let isDifferentPerson = form.firstName !== scan.personal.firstName  || form.lastName !== scan.personal.lastName
+      let isDifferentPerson = scan && (form.firstName !== scan.personal.firstName  || form.lastName !== scan.personal.lastName)
 
       const model = models[form[TYPE]]
       // Check if there is a need to clean the form
@@ -35,7 +35,6 @@ module.exports = function PhotoID ({ models }) {
           scan = null
         }
       }
-
       console.log('PhotoID: requesting additional properties for Driver Licence')
 
       let isLicence = form.documentType.title.indexOf('Licence') !== -1
