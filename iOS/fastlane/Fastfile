@@ -24,11 +24,14 @@ platform :ios do
   before_all do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
     sh "../../scripts/placesecrets.sh"
+    ENV['PROFILE_PROD'] = "match AppStore io.tradle.dev.tim"
+    ENV['PROFILE_DEV'] = "match Development io.tradle.dev.tim"
     ENV['GYM_XCCONFIG'] = "./release.xcconfig"
     ENV['PROJECT'] = "./Tradle.xcodeproj"
     ENV['WORKSPACE'] = "./Tradle.xcworkspace"
+    # ENV['CODE_SIGNING_IDENTITY'] = 'iPhone Distribution: Tradle Inc (94V7783F74)'
     # sh "../../scripts/ensure_git_clean.sh"
-    # cocoapods
+    cocoapods
   end
 
   lane :commit_version do
@@ -58,12 +61,27 @@ platform :ios do
     commit_version
   end
 
-  lane :sign_manual do
-    disable_automatic_code_signing(path: ENV['PROJECT'])
+  lane :sign_dev do
+    automatic_code_signing(
+      path: ENV['PROJECT'],
+      use_automatic_signing: false,
+      profile_name: ENV['PROFILE_DEV']
+    )
+  end
+
+  lane :sign_prod do
+    automatic_code_signing(
+      path: ENV['PROJECT'],
+      use_automatic_signing: false,
+      profile_name: ENV['PROFILE_PROD']
+    )
   end
 
   lane :sign_auto do
-    enable_automatic_code_signing(path: ENV['PROJECT'])
+    automatic_code_signing(
+      path: ENV['PROJECT'],
+      use_automatic_signing: true
+    )
   end
 
   desc "Runs all the tests"
@@ -71,38 +89,52 @@ platform :ios do
     scan
   end
 
-  lane :gymit do
-    gym(
-      scheme: ENV['SCHEME'],
-      configuration: ENV['CONFIGURATION'],
-      export_method: 'app-store',
-      workspace: ENV['WORKSPACE']
-    )
+  # lane :gymit do
+  #   gym(
+  #     scheme: ENV['SCHEME'],
+  #     configuration: ENV['CONFIGURATION'],
+  #     export_method: 'app-store',
+  #     workspace: ENV['WORKSPACE']
+  #   )
+  # end
+
+  desc "Submit a new Beta Build to Apple TestFlight"
+  desc "This will also make sure the profile is up to date"
+  lane :beta_all do |values|
+    beta_testflight
+    upload_to_fabric(values)
   end
 
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta_testflight do |values|
-    sign_manual
+    sign_prod
     match(type: 'appstore')
-    gymit
-
-    # build_app(
-    #   workspace: ENV['WORKSPACE'],
-    #   scheme: 'Release',
-    #   clean: true
-    # )
-
+    gym_release
     upload_to_testflight
+    sign_auto
+  end
+
+  lane :gym_release do
+    gym(
+      workspace: ENV['WORKSPACE'],
+      # codesigning_identity: ENV['CODE_SIGNING_IDENTITY'],
+      # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
+      scheme: 'Release',
+      configuration: 'Release',
+      export_method: 'app-store',
+      xcconfig: 'release.xcconfig'
+    )
   end
 
   desc "Deploy a new version to the App Store"
   lane :release do
+    #snapshot
+    sign_prod
     match(type: 'appstore')
-
-    # snapshot
-    gymit
+    gym_release
     deliverit
+    sign_auto
     # frameit
   end
 
@@ -131,16 +163,22 @@ platform :ios do
     #   force_for_new_devices: true
     # )
 
-    enable_automatic_code_signing(path: ENV['PROJECT'])
+    sign_dev
     gym(
       export_method: 'development'
     )
 
+    upload_to_fabric(values)
+    sign_auto
+  end
+
+  lane :upload_to_fabric do |values|
     emails = values[:test_email] ? values[:test_email] : ['mark@tradle.io'] # You can list more emails here
     groups = values[:test_email] ? nil : nil # You can define groups on the web and reference them here
 
     crashlytics(api_token: ENV['CRASHLYTICS_API_TOKEN'],
              build_secret: ENV['CRASHLYTICS_BUILD_SECRET'],
+         # crashlytics_path: './Pods/Crashlytics/submit',
                    emails: emails,
                    groups: groups,
                     notes: 'Distributed with fastlane', # Check out the changelog_from_git_commits action
@@ -148,6 +186,7 @@ platform :ios do
   end
 
   lane :travis do
+    sign_prod
     create_keychain(
       name: "MATCH_KEYCHAIN_NAME",
       password: "MATCH_KEYCHAIN_PASSWORD",
