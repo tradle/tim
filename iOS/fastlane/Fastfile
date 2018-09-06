@@ -24,13 +24,16 @@ platform :ios do
   before_all do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
     sh "../../scripts/placesecrets.sh"
+    ENV['GYM_XCCONFIG'] = "./release.xcconfig"
+    ENV['PROJECT'] = "./Tradle.xcodeproj"
+    ENV['WORKSPACE'] = "./Tradle.xcworkspace"
     # sh "../../scripts/ensure_git_clean.sh"
-    cocoapods
+    # cocoapods
   end
 
   lane :commit_version do
     commit_version_bump(
-      xcodeproj: ENV['IOS_PROJECT'],
+      xcodeproj: ENV['PROJECT'],
       message: 'iOS release version bump'
     )
   end
@@ -56,11 +59,11 @@ platform :ios do
   end
 
   lane :sign_manual do
-    disable_automatic_code_signing(path: ENV['IOS_PROJECT'])
+    disable_automatic_code_signing(path: ENV['PROJECT'])
   end
 
   lane :sign_auto do
-    enable_automatic_code_signing(path: ENV['IOS_PROJECT'])
+    enable_automatic_code_signing(path: ENV['PROJECT'])
   end
 
   desc "Runs all the tests"
@@ -128,7 +131,7 @@ platform :ios do
     #   force_for_new_devices: true
     # )
 
-    enable_automatic_code_signing(path: ENV['IOS_PROJECT'])
+    enable_automatic_code_signing(path: ENV['PROJECT'])
     gym(
       export_method: 'development'
     )
