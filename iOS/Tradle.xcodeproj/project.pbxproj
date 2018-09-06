@@ -20,9 +20,9 @@
 		13B07FBF1A68108700A75B9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Assets.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
-		1B6C319A28EA8EA2AC935AF5 /* Pods_Tradle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A996C95D73C126D60C908C12 /* Pods_Tradle.framework */; };
 		43EDC8BAFC1D48CDB9B731A5 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = EEECD0C1934547049DA9F6AE /* libz.tbd */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
+		6EBE865496731565BF2DA554 /* libPods-Tradle.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9368CEF0C04E9875449C8781 /* libPods-Tradle.a */; };
 		73113FE5205F4AAF000C04F6 /* libRNSearchBar.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73113FE4205F4AA7000C04F6 /* libRNSearchBar.a */; };
 		73113FFB205F4D55000C04F6 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73113FF8205F4B44000C04F6 /* libRCTBlob.a */; };
 		732B67862060213F00B16D6F /* libRNCamera.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B67852060213500B16D6F /* libRNCamera.a */; };
@@ -645,12 +645,12 @@
 		7DDCD02C4E3C408F80640010 /* RNOS.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNOS.xcodeproj; path = "../node_modules/react-native-os/ios/RNOS.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		8B8FD5DD4E4F4FFB9581AD8E /* libreact-native-branch.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libreact-native-branch.a"; sourceTree = "<group>"; };
+		9368CEF0C04E9875449C8781 /* libPods-Tradle.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tradle.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		97F331FA96224F67B61B074E /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
 		9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MicroblinkModule.xcodeproj; path = "../node_modules/blinkid-react-native/src/ios/MicroblinkModule/MicroblinkModule.xcodeproj"; sourceTree = "<group>"; };
 		A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		A4C66A6D1DDE4BC083E2095B /* libReactNativeExceptionHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libReactNativeExceptionHandler.a; sourceTree = "<group>"; };
-		A996C95D73C126D60C908C12 /* Pods_Tradle.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Tradle.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
 		BFC0C75130C445498FB831DE /* RNPasscodeStatus.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNPasscodeStatus.xcodeproj; path = "../node_modules/react-native-passcode-status/ios/RNPasscodeStatus.xcodeproj"; sourceTree = "<group>"; };
 		CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBranch.xcodeproj; path = "../node_modules/react-native-branch/ios/RNBranch.xcodeproj"; sourceTree = "<group>"; };
@@ -717,7 +717,7 @@
 				73F1B8A0205F5AC8004E96E2 /* libreact-native-branch.a in Frameworks */,
 				73834C3820D1B462000C9AFC /* libRNCardIO.a in Frameworks */,
 				9B53A9DF212715CA00521887 /* libMicroblinkModule.a in Frameworks */,
-				1B6C319A28EA8EA2AC935AF5 /* Pods_Tradle.framework in Frameworks */,
+				6EBE865496731565BF2DA554 /* libPods-Tradle.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -859,7 +859,7 @@
 				7379FAD11EDA5AEC0093535C /* Fabric.framework */,
 				732B9D4C1EDA8A4C00FF957D /* AssetsLibrary.framework */,
 				EEECD0C1934547049DA9F6AE /* libz.tbd */,
-				A996C95D73C126D60C908C12 /* Pods_Tradle.framework */,
+				9368CEF0C04E9875449C8781 /* libPods-Tradle.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -2036,15 +2036,11 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
 				"${PODS_ROOT}/PPBlinkID/MicroBlink.framework",
-				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MicroBlink.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2104,7 +2100,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2173,7 +2169,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2279,7 +2275,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
