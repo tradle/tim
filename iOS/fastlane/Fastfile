@@ -29,9 +29,11 @@ platform :ios do
     ENV['GYM_XCCONFIG'] = "./release.xcconfig"
     ENV['PROJECT'] = "./Tradle.xcodeproj"
     ENV['WORKSPACE'] = "./Tradle.xcworkspace"
+    ENV['CODE_PUSH_APP_NAME_IOS'] = 'tim-ios'
     # ENV['CODE_SIGNING_IDENTITY'] = 'iPhone Distribution: Tradle Inc (94V7783F74)'
     # sh "../../scripts/ensure_git_clean.sh"
-    cocoapods
+    # ensure_git_status_clean
+    # cocoapods
   end
 
   lane :commit_version do
@@ -108,6 +110,7 @@ platform :ios do
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta_testflight do |values|
+    cocoapods
     sign_prod
     match(type: 'appstore')
     gym_release
@@ -120,6 +123,7 @@ platform :ios do
       workspace: ENV['WORKSPACE'],
       # codesigning_identity: ENV['CODE_SIGNING_IDENTITY'],
       # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
+      # see log in iOS/fastlane/staging-broken.log
       scheme: 'Release',
       configuration: 'Release',
       export_method: 'app-store',
@@ -158,6 +162,7 @@ platform :ios do
   end
 
   lane :beta_fabric do |values|
+    cocoapods
     # build your iOS app
     # match(
     #   force_for_new_devices: true
@@ -186,6 +191,7 @@ platform :ios do
   end
 
   lane :travis do
+    cocoapods
     sign_prod
     create_keychain(
       name: "MATCH_KEYCHAIN_NAME",
@@ -214,6 +220,29 @@ platform :ios do
   desc "Upload to App Store and submit for review"
   lane :upload do
     deliver
+  end
+
+  desc "build & codepush an ios bundle (defaults to Staging)"
+  desc "test on Staging, then run: fastlane codepush_ios_promote"
+  lane :codepush_ios do |options|
+    current_version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
+    # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
+    # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
+    dry_run = options[:dry_run] == false ? false : true
+    # see config opts for code_push plugin here
+    # https://github.com/manuelkch/fastlane-plugin-code_push
+    code_push_release_react(
+      app_name: ENV['CODE_PUSH_APP_NAME_IOS'],
+      platform: 'ios',
+      deployment: options[:deployment] || 'Staging',
+      target_binary_version: options[:target_binary_version] || current_version,
+      dry_run: dry_run,
+      execution_dir_path: '../'
+    )
+  end
+
+  lane :codepush_ios_promote do
+    code_push_promote(app_name: ENV['CODE_PUSH_APP_NAME_IOS'])
   end
 
   # You can define as many lanes as you want
