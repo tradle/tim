@@ -17,6 +17,7 @@ clean() {
 }
 
 mk_links() {
+  aws s3 cp --recursive s3://private.tradle.io/app-secrets/ secrets
   echo "placing iOS build and runtime secrets"
   cp ./secrets/ios/.env ./iOS/fastlane/
   cp ./secrets/ios/.env.development ./iOS/fastlane/
@@ -32,6 +33,7 @@ mk_links() {
 
   echo "placing environment files"
   cp -r ./secrets/env/* ./
+  rm -rf secrets
 }
 
 clean
