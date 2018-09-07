@@ -85,7 +85,8 @@ npm start
 
 ### Prerequisites
 
-- Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/installing.html)
+- [jq](https://stedolan.github.io/jq/download/): a great command line JSON parser (On OS X, you can `brew install jq`)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/installing.html)
 - ask someone at Tradle for access to release credentials
 
 ```sh

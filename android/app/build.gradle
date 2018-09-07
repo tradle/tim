@@ -87,9 +87,26 @@ def getPassword(String currentUser, String keyChain) {
    stdout.toString().trim()
 }
 
+def getCodePushKey(String deployment) {
+   def stdout = new ByteArrayOutputStream()
+   def stderr = new ByteArrayOutputStream()
+   exec {
+       commandLine "../../scripts/get-code-push-key.sh", "android", deployment
+       standardOutput = stdout
+       errorOutput = stderr
+       ignoreExitValue false
+   }
+   //noinspection GroovyAssignabilityCheck
+   def key = stdout.toString().trim()
+   def err = stderr.toString().trim()
+   if (key.isEmpty() || !err.isEmpty()) {
+       throw new GradleException('error occurred fetching CodePush key: ' + err.toString())
+   }
+
+   return key
+}
+
 def pass = getPassword("tradle", "android_keystore")
-def codePushStagingKey = getPassword("tradle", "android_code_push_staging")
-def codePushProductionKey = getPassword("tradle", "android_code_push_production")
 
 /**
  * Set this to true to create two separate APKs instead of one:
@@ -170,11 +187,13 @@ android {
             // minifyEnabled enableProguardInReleaseBuilds
             // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release
-            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushProductionKey}\""
+            def codePushKey = getCodePushKey("Production")
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
         }
         releaseStaging {
             signingConfig signingConfigs.release
-            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushStagingKey}\""
+            def codePushKey = getCodePushKey("Staging")
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
             matchingFallbacks = ['release']
         }
     }
