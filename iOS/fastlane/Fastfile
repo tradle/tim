@@ -31,10 +31,11 @@ platform :ios do
     ENV['WORKSPACE'] = "./Tradle.xcworkspace"
     ENV['CODE_PUSH_APP_NAME_IOS'] = 'tim-ios'
     ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
-    cocoapods
     clean_build_artifacts
-    ensure_git_status_clean
+    cocoapods
+    sh "../../scripts/fix-staging.js"
     sh "../../hooks/update_version.sh"
+    ensure_git_status_clean
   end
 
   private_lane :inc_version do |options|
@@ -107,10 +108,9 @@ platform :ios do
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta_testflight do |options|
-    cocoapods
     sign_prod
     match(type: 'appstore')
-    gymit
+    gym_staging
     notification(
       title: "Beta Built!",
       message: "Uploading to TestFlight and waiting for it to get processed. This may take ~10 minutes"
@@ -123,16 +123,27 @@ platform :ios do
     )
   end
 
-  lane :gymit do
+  lane :gym_staging do
+    gymit(scheme: "Staging")
+  end
+
+  lane :gym_release do
+    gymit(scheme: "Release")
+  end
+
+  private_lane :gymit do |options|
+    scheme = options[:scheme] || 'Release'
+    lScheme = scheme.downcase
     gym(
       workspace: ENV['WORKSPACE'],
       codesigning_identity: 'iPhone Distribution: Tradle Inc (94V7783F74)',
       # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
       # see log in iOS/fastlane/staging-broken.log
-      scheme: 'Release',
-      configuration: 'Release',
+      scheme: scheme,
+      configuration: scheme,
       export_method: 'app-store',
-      xcconfig: 'release.xcconfig'
+      xcconfig: "#{lScheme}.xcconfig",
+      clean: true
     )
   end
 
@@ -141,7 +152,7 @@ platform :ios do
     #snapshot
     sign_prod
     match(type: 'appstore')
-    gymit
+    gym_release
     deliverit
     sign_auto
     # frameit
