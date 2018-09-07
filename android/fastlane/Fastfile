@@ -19,19 +19,34 @@ platform :android do
   before_all do
     ENV['CODE_PUSH_APP_NAME_ANDROID'] = 'tim-android'
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
-    # ensure_git_status_clean
+    ensure_git_status_clean
   end
 
-  lane :inc_build do
-    gradle(task: 'versionBuild')
-    #increment_android_version_code(path: "gradle.properties")
-
+  private_lane :inc_version do |options|
+    part = options[:part]
+    sh "../../scripts/inc-android-version.js #{part}"
     git_commit(
       path: '../android/gradle.properties',
-      message: "Android release version bump"
+      message: "Android release version, bump #{part}"
     )
 
     #push_to_git_remote
+  end
+
+  lane :inc_build do
+    inc_version(part: "build")
+  end
+
+  lane :inc_patch do
+    inc_version(part: "patch")
+  end
+
+  lane :inc_minor do
+    inc_version(part: "minor")
+  end
+
+  lane :inc_major do
+    inc_version(part: "minor")
   end
 
   desc "Runs all the tests"
