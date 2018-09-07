@@ -17,36 +17,43 @@ default_platform :android
 
 platform :android do
   before_all do
+    # weird to have them declared here, but .env is loaded from s3
     ENV['CODE_PUSH_APP_NAME_ANDROID'] = 'tim-android'
+    ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
     ensure_git_status_clean
+    sh "../../hooks/update_version.sh"
   end
 
   private_lane :inc_version do |options|
     part = options[:part]
-    sh "../../scripts/inc-android-version.js #{part}"
+    version = sh "../../scripts/inc-android-version.js #{part}"
+    message = "Android release (#{part})"
     git_commit(
-      path: '../android/gradle.properties',
-      message: "Android release version, bump #{part}"
+      path: './gradle.properties',
+      message: message
     )
 
-    #push_to_git_remote
+    add_git_tag(
+      tag: "v#{version}-android",
+      message: message
+    )
   end
 
-  lane :inc_build do
-    inc_version(part: "build")
-  end
-
-  lane :inc_patch do
-    inc_version(part: "patch")
+  lane :inc_major do
+    inc_version(part: "major")
   end
 
   lane :inc_minor do
     inc_version(part: "minor")
   end
 
-  lane :inc_major do
-    inc_version(part: "minor")
+  lane :inc_patch do
+    inc_version(part: "patch")
+  end
+
+  lane :inc_build do
+    inc_version(part: "build")
   end
 
   desc "Runs all the tests"
@@ -54,23 +61,52 @@ platform :android do
     gradle(task: "test")
   end
 
-  desc "Submit a new Beta Build to Crashlytics Beta"
-  lane :beta do
-    gradle(task: "assembleRelease")
-    crashlytics
+  desc "Assemble a Staging Release"
+  lane :build_staging do
+    gradle(task: "assembleReleaseStaging")
+    notification(
+      title: "Staging Release Built!",
+      message: "Try it out on your device with: fastlane install_staging_apk"
+    )
+  end
+
+  desc "Submit a new Staging release to Crashlytics (Fabric)"
+  lane :beta do |options|
+    build_staging
+    emails = options[:test_email] ? options[:test_email] : [ENV['DEFAULT_TESTER_EMAIL']] # You can list more emails here
+    groups = options[:test_email] ? nil : nil # You can define groups on the web and reference them here
+
+    crashlytics(
+      emails: emails,
+      groups: groups,
+      # Check out the changelog_from_git_commits action
+      notes: 'Distributed with fastlane',
+      # Should this distribution notify your testers via email?
+      notifications: true
+    )
+
+    notification(
+      title: "Pushed Staging Release to Crashlytics!"
+    )
 
     # sh "your_script.sh"
     # You can also use other beta testing services here
   end
 
-  desc "Deploy a new version to the Google Play"
-  lane :alpha do
+  desc "Deploy a new version to the Google Play alpha track"
+  lane :release_alpha do
     gradle(task: "assembleRelease")
     supply(track: "alpha")
   end
 
+  desc "Deploy a new version to the Google Play beta track"
+  lane :release_beta do
+    gradle(task: "assembleRelease")
+    supply(track: "beta")
+  end
+
   desc "Deploy a new version to the Google Play"
-  lane :release do
+  lane :release_prod do
     gradle(task: "assembleRelease")
     supply
   end
@@ -81,15 +117,29 @@ platform :android do
     supply(validate_only: true)
   end
 
-  desc "Assemble a Staging Release"
-  lane :release_staging do
-    gradle(task: "assembleReleaseStaging")
+  desc "Remove Tradle APK from attached device or emulator"
+  lane :uninstall_apk do
+    adb uninstall io.tradle.dev
+  end
+
+  private_lane :install_apk do |options|
+    stage = options[:stage]
+    sh "adb install ../app/build/outputs/apk/#{stage}/app-#{stage}.apk"
+  end
+
+  desc "Install the Staging APK to the attached device or emulator"
+  lane :install_staging_apk do |options|
+    install_apk(stage: "releaseStaging")
+  end
+
+  desc "Install the Release APK to the attached device or emulator"
+  lane :install_release_apk do |options|
+    install_apk(stage: "release")
   end
 
   desc "build & codepush android bundle (defaults to Staging)"
   desc "test on Staging, then run: fastlane codepush_android_promote"
-  lane :codepush_android do |options|
-    # ensure_git_status_clean
+  lane :codepush do |options|
     current_version = sh "../../scripts/get-android-version.sh"
     # current_version = sh("env $(grep -v '^#' \"../gradle.properties\" | xargs) echo \"$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH\"")
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
@@ -107,7 +157,7 @@ platform :android do
     )
   end
 
-  lane :codepush_android_promote do
+  lane :codepush_promote_to_release do
     code_push_promote(app_name: ENV['CODE_PUSH_APP_NAME_ANDROID'])
   end
 

@@ -23,44 +23,50 @@ default_platform :ios
 platform :ios do
   before_all do
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
-    sh "../../scripts/placesecrets.sh"
+    # weird to have them declared here, but .env is loaded from s3
     ENV['PROFILE_PROD'] = "match AppStore io.tradle.dev.tim"
     ENV['PROFILE_DEV'] = "match Development io.tradle.dev.tim"
     ENV['GYM_XCCONFIG'] = "./release.xcconfig"
     ENV['PROJECT'] = "./Tradle.xcodeproj"
     ENV['WORKSPACE'] = "./Tradle.xcworkspace"
     ENV['CODE_PUSH_APP_NAME_IOS'] = 'tim-ios'
-    # ENV['CODE_SIGNING_IDENTITY'] = 'iPhone Distribution: Tradle Inc (94V7783F74)'
-    # sh "../../scripts/ensure_git_clean.sh"
-    # ensure_git_status_clean
-    # cocoapods
+    ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
+    cocoapods
+    clean_build_artifacts
+    ensure_git_status_clean
+    sh "../../hooks/update_version.sh"
   end
 
-  lane :commit_version do
-    commit_version_bump(
-      xcodeproj: ENV['PROJECT'],
-      message: 'iOS release version bump'
+  private_lane :inc_version do |options|
+    part = options[:part]
+    sh "../../scripts/version_ios.sh #{options[:part]}"
+    message = "iOS release (#{options[:part]})"
+    git_commit(
+      path: './Tradle/Info.plist',
+      message: message
+    )
+
+    version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
+    add_git_tag(
+      tag: "v#{version}-ios",
+      message: message
     )
   end
 
   lane :inc_major do
-    sh "../../scripts/version_ios.sh major"
-    commit_version
+    inc_version(part: "major")
   end
 
   lane :inc_minor do
-    sh "../../scripts/version_ios.sh minor"
-    commit_version
+    inc_version(part: "minor")
   end
 
   lane :inc_patch do
-    sh "../../scripts/version_ios.sh patch"
-    commit_version
+    inc_version(part: "patch")
   end
 
   lane :inc_build do
-    sh "../../scripts/version_ios.sh build"
-    commit_version
+    inc_version(part: "build")
   end
 
   lane :sign_dev do
@@ -91,37 +97,36 @@ platform :ios do
     scan
   end
 
-  # lane :gymit do
-  #   gym(
-  #     scheme: ENV['SCHEME'],
-  #     configuration: ENV['CONFIGURATION'],
-  #     export_method: 'app-store',
-  #     workspace: ENV['WORKSPACE']
-  #   )
-  # end
-
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
-  lane :beta_all do |values|
+  lane :beta do |options|
     beta_testflight
-    upload_to_fabric(values)
+    upload_to_fabric(options)
   end
 
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
-  lane :beta_testflight do |values|
+  lane :beta_testflight do |options|
     cocoapods
     sign_prod
     match(type: 'appstore')
-    gym_release
+    gymit
+    notification(
+      title: "Beta Built!",
+      message: "Uploading to TestFlight and waiting for it to get processed. This may take ~10 minutes"
+    )
     upload_to_testflight
     sign_auto
+    notification(
+      title: "Beta Released!",
+      message: "see it in TestFlight!"
+    )
   end
 
-  lane :gym_release do
+  lane :gymit do
     gym(
       workspace: ENV['WORKSPACE'],
-      # codesigning_identity: ENV['CODE_SIGNING_IDENTITY'],
+      codesigning_identity: 'iPhone Distribution: Tradle Inc (94V7783F74)',
       # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
       # see log in iOS/fastlane/staging-broken.log
       scheme: 'Release',
@@ -136,7 +141,7 @@ platform :ios do
     #snapshot
     sign_prod
     match(type: 'appstore')
-    gym_release
+    gymit
     deliverit
     sign_auto
     # frameit
@@ -161,7 +166,8 @@ platform :ios do
     )
   end
 
-  lane :beta_fabric do |values|
+  desc "Submit a new release to Crashlytics (Fabric)"
+  lane :beta_fabric do |options|
     cocoapods
     # build your iOS app
     # match(
@@ -173,13 +179,13 @@ platform :ios do
       export_method: 'development'
     )
 
-    upload_to_fabric(values)
+    upload_to_fabric(options)
     sign_auto
   end
 
-  lane :upload_to_fabric do |values|
-    emails = values[:test_email] ? values[:test_email] : ['mark@tradle.io'] # You can list more emails here
-    groups = values[:test_email] ? nil : nil # You can define groups on the web and reference them here
+  lane :upload_to_fabric do |options|
+    emails = options[:test_email] ? options[:test_email] : [ENV['DEFAULT_TESTER_EMAIL']] # You can list more emails here
+    groups = options[:test_email] ? nil : nil # You can define groups on the web and reference them here
 
     crashlytics(api_token: ENV['CRASHLYTICS_API_TOKEN'],
              build_secret: ENV['CRASHLYTICS_BUILD_SECRET'],
@@ -224,7 +230,7 @@ platform :ios do
 
   desc "build & codepush an ios bundle (defaults to Staging)"
   desc "test on Staging, then run: fastlane codepush_ios_promote"
-  lane :codepush_ios do |options|
+  lane :codepush do |options|
     current_version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
     # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
@@ -241,7 +247,7 @@ platform :ios do
     )
   end
 
-  lane :codepush_ios_promote do
+  lane :codepush_promote_to_release do
     code_push_promote(app_name: ENV['CODE_PUSH_APP_NAME_IOS'])
   end
 

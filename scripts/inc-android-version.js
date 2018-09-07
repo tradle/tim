@@ -36,3 +36,5 @@ const newText = Object.keys(props).reduce((newText, key) => {
 }, text)
 
 fs.writeFileSync(G_PROPS_PATH, newText)
+
+process.stdout.write(`${props.VERSION_MAJOR}.${props.VERSION_MINOR}.${props.VERSION_PATCH}.${props.VERSION_BUILD}`)
