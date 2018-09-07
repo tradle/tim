@@ -27,7 +27,9 @@ platform :android do
 
   private_lane :inc_version do |options|
     part = options[:part]
-    version = sh "../../scripts/inc-android-version.js #{part}"
+    sh "../../scripts/inc-android-version.js #{part}"
+    Dotenv.load('../gradle.properties')
+    version = "#{ENV['VERSION_MAJOR']}.#{ENV['VERSION_MINOR']}.#{ENV['VERSION_PATCH']}.#{ENV['VERSION_BUILD']}"
     message = "Android release (#{part})"
     git_commit(
       path: './gradle.properties',
@@ -72,6 +74,9 @@ platform :android do
 
   desc "Submit a new Staging release to Crashlytics (Fabric)"
   lane :beta do |options|
+    Dotenv.load('../app/fabric.properties')
+    api_token = ENV['apiKey']
+    build_secret = ENV['apiSecret']
     build_staging
     emails = options[:test_email] ? options[:test_email] : [ENV['DEFAULT_TESTER_EMAIL']] # You can list more emails here
     groups = options[:test_email] ? nil : nil # You can define groups on the web and reference them here
@@ -82,11 +87,14 @@ platform :android do
       # Check out the changelog_from_git_commits action
       notes: 'Distributed with fastlane',
       # Should this distribution notify your testers via email?
-      notifications: true
+      notifications: true,
+      api_token: api_token,
+      build_secret: build_secret
     )
 
     notification(
-      title: "Pushed Staging Release to Crashlytics!"
+      title: "Pushed Staging Release to Crashlytics!",
+      message: "you should get an email with further instructions"
     )
 
     # sh "your_script.sh"
