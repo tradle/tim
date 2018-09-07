@@ -163,7 +163,7 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushStagingKey}\""
+            buildConfigField "String", "CODEPUSH_KEY", '""'
             // applicationIdSuffix ".debug"
         }
         release {
@@ -171,6 +171,11 @@ android {
             // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushProductionKey}\""
+        }
+        releaseStaging {
+            signingConfig signingConfigs.release
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushStagingKey}\""
+            matchingFallbacks = ['release']
         }
     }
     // applicationVariants are e.g. debug, release

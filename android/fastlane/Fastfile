@@ -17,8 +17,9 @@ default_platform :android
 
 platform :android do
   before_all do
+    ENV['CODE_PUSH_APP_NAME_ANDROID'] = 'tim-android'
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
-    #sh "../../scripts/ensure_git_clean.sh"
+    # ensure_git_status_clean
   end
 
   lane :inc_build do
@@ -63,6 +64,36 @@ platform :android do
   lane :release_dryrun do
     gradle(task: "assembleRelease")
     supply(validate_only: true)
+  end
+
+  desc "Assemble a Staging Release"
+  lane :release_staging do
+    gradle(task: "assembleReleaseStaging")
+  end
+
+  desc "build & codepush android bundle (defaults to Staging)"
+  desc "test on Staging, then run: fastlane codepush_android_promote"
+  lane :codepush_android do |options|
+    # ensure_git_status_clean
+    current_version = sh "../../scripts/get-android-version.sh"
+    # current_version = sh("env $(grep -v '^#' \"../gradle.properties\" | xargs) echo \"$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH\"")
+    # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
+    # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
+    dry_run = options[:dry_run] == false ? false : true
+    # see config opts for code_push plugin here
+    # https://github.com/manuelkch/fastlane-plugin-code_push
+    code_push_release_react(
+      app_name: ENV['CODE_PUSH_APP_NAME_ANDROID'],
+      platform: 'android',
+      deployment: options[:deployment] || 'Staging',
+      target_binary_version: options[:target_binary_version] || current_version,
+      dry_run: dry_run,
+      execution_dir_path: '../'
+    )
+  end
+
+  lane :codepush_android_promote do
+    code_push_promote(app_name: ENV['CODE_PUSH_APP_NAME_ANDROID'])
   end
 
   # You can define as many lanes as you want
