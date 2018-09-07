@@ -36,7 +36,7 @@ local.properties
 node_modules/
 npm-debug.log
 environment.plist
-environment.json
+environment*.json
 environment_preprocess.h
 iOS/Tradle/*.plist
 release/

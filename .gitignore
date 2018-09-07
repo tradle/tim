@@ -105,3 +105,4 @@ Additional components/
 Store/utils/
 version.json
 *.dSYM.zip
+*.sh1
