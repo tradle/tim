@@ -4,32 +4,58 @@
 //   https://github.com/Microsoft/AppCenter-SDK-React-Native/issues/210#issuecomment-371567486
 // and screenshots from here:
 //   https://medium.com/@royprashenjeet25/solution-of-appcenter-codepush-multi-deployment-issue-ios-which-i-have-faced-c149813f84dd
+// and fiddling around with xcode instead of living
 
 const path = require('path')
 const writeSync = require('write-file-atomic').sync
 const xcode = require('xcode')
 const _ = require('lodash')
-const STAGING_PODS_CONFIGURATION_BUILD_DIR = '"${PODS_BUILD_DIR}/Release$(EFFECTIVE_PLATFORM_NAME)"'
-const STAGING_CONFIGURATION_TEMP_DIR = '"$(PROJECT_TEMP_DIR)/Release$(EFFECTIVE_PLATFORM_NAME)"'
-const STAGING_CONFIGURATION_BUILD_DIR = '"$(BUILD_DIR)/Release$(EFFECTIVE_PLATFORM_NAME)"'
+const stableStringify = require('json-stable-stringify')
+
+// main
+// +      "CONFIGURATION_BUILD_DIR": "\"$(BUILD_DIR)/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\",
+// +      "CONFIGURATION_HACK": "Release",
+// +      "CONFIGURATION_TEMP_DIR": "\"$(PROJECT_TEMP_DIR)/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\"",
+// +      "PODS_CONFIGURATION_BUILD_DIR": "\"${PODS_BUILD_DIR}/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\"",
+
+// others
+// +      "CONFIGURATION_HACK": "Release",
+// +      "CONFIGURATION_TEMP_DIR": "\"$(PROJECT_TEMP_DIR)/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\"",
+// +      "PODS_CONFIGURATION_BUILD_DIR": "\"${PODS_BUILD_DIR}/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\"",
+
+
+const common = {
+  CONFIGURATION_HACK: "Release",
+  CONFIGURATION_TEMP_DIR: "\"$(PROJECT_TEMP_DIR)/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\"",
+  PODS_CONFIGURATION_BUILD_DIR: "\"${PODS_BUILD_DIR}/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\"",
+  CONFIGURATION_BUILD_DIR: "\"$(BUILD_DIR)/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\"",
+}
+
 const main = {
-  CONFIGURATION_TEMP_DIR: STAGING_CONFIGURATION_TEMP_DIR,
-  CONFIGURATION_BUILD_DIR: STAGING_CONFIGURATION_BUILD_DIR,
-  PODS_CONFIGURATION_BUILD_DIR: STAGING_PODS_CONFIGURATION_BUILD_DIR
+  ...common,
+  // CONFIGURATION_BUILD_DIR: "\"$(BUILD_DIR)/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\"",
 }
 
-const sub = {
-  PODS_CONFIGURATION_BUILD_DIR: STAGING_PODS_CONFIGURATION_BUILD_DIR
+const isMain = ({ baseConfigurationReference_comment='', buildSettings }) => {
+  return baseConfigurationReference_comment.startsWith('Pods-') &&
+    buildSettings.PRODUCT_BUNDLE_IDENTIFIER &&
+    buildSettings.PODS_ROOT
 }
 
-const isMain = config => !config.buildSettings.INFOPLIST_FILE
-const getProps = config => isMain(config) ? main : sub
+const getProps = config => isMain(config) ? main : common
+const validate = configs => {
+  const oneMain = Object.keys(configs).filter(id => isMain(configs[id])).length === 1
+  if (!oneMain) {
+    throw new Error('expected only one main project...i guess i suck at detecting the main one?')
+  }
+}
 
 const fixProject = projPath => {
   const proj = xcode.project(projPath)
   proj.parseSync()
 
   const configs = proj.getBuildConfigByName('Staging')
+  validate(configs)
 
   let fixed
   for (let id in configs) {
@@ -39,6 +65,8 @@ const fixProject = projPath => {
   if (fixed) {
     writeSync(projPath, proj.writeSync())
   }
+
+  // console.log(stableStringify(configs, { space: 2 }))
 }
 
 const fixConfig = config => {
