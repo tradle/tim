@@ -127,8 +127,8 @@ platform :ios do
   lane :ensure_build_not_in_testflight do
     current = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
     latest = latest_testflight_build_number
-    Helper.log.info("echo Current Build: #{current}".green)
-    Helper.log.info("echo Current Build in TestFlight: #{latest}".green)
+    UI.message("echo Current Build: #{current}".green)
+    UI.message("echo Current Build in TestFlight: #{latest}".green)
     unless Gem::Version.new(current) > Gem::Version.new(latest)
       UI.user_error!("this build already exists in TestFlight!")
     end
