@@ -108,6 +108,7 @@ platform :ios do
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta_testflight do |options|
+    ensure_build_not_in_testflight
     sign_prod
     match(type: 'appstore')
     gym_staging
@@ -121,6 +122,16 @@ platform :ios do
       title: "Beta Released!",
       message: "see it in TestFlight!"
     )
+  end
+
+  lane :ensure_build_not_in_testflight do
+    current = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
+    latest = latest_testflight_build_number
+    sh "echo Current Build: #{current}"
+    sh "echo Current Build in TestFlight: #{latest}"
+    unless Gem::Version.new(current) > Gem::Version.new(latest)
+      UI.user_error!("this build already exists in TestFlight!")
+    end
   end
 
   lane :gym_staging do
