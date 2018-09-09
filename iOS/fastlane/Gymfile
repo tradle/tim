@@ -1,6 +1,6 @@
-scheme "Release"
-configuration "Release"
-clean true
+#scheme "Release"
+#configuration "Release"
+#clean true
 output_name "Tradle"
 workspace "Tradle.xcworkspace"
-xcconfig "release.xcconfig"
+#xcconfig "release.xcconfig"
