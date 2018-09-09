@@ -3661,6 +3661,14 @@ var Store = Reflux.createStore({
       else if (r[NOT_CHAT_ITEM])
         document = docStub
     }
+    else if (!dontSend) {
+      try {
+        let kres = await this._keeper.get(this.getCurHash(document))
+        document = kres
+      } catch (err) {
+        debugger
+      }
+    }
     r.document = document
     if (dontSend)
       r._inbound = true
@@ -4672,7 +4680,7 @@ if (!res[SIG]  &&  res._message)
       let elm = this._getItem(rValue)
       if (!elm  &&  me.isEmployee) {
         elm = await this._getItemFromServer(rValue)
-        foundRefs.push({value: elm, state: 'fulfilled'})
+        foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
         // debugger
       }
       else {

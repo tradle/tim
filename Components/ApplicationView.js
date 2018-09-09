@@ -281,7 +281,8 @@ class ApplicationView extends Component {
     )
   }
   compareImages(photoId, selfie) {
-    let { navigator, bankStyle, resource } = this.props
+    let { navigator, bankStyle } = this.props
+    let resource = this.state.resource || this.props.resource
     let route = {
       component: MatchImages,
       id: 40,
@@ -311,7 +312,8 @@ class ApplicationView extends Component {
     navigator.push(route)
   }
   createManualCheckAndVerification(photoID, selfie) {
-    let { navigator, resource } = this.props
+    let { navigator } = this.props
+    let resource = this.state.resource || this.props.resource
     let me = utils.getMe();
     let statusModel = utils.getModel(STATUS)
     let status = statusModel.enum.find(r => r.id === 'pass')
@@ -344,7 +346,8 @@ class ApplicationView extends Component {
     navigator.pop();
   }
   createVerification(photoId) {
-    let { navigator, resource } = this.props
+    let { navigator } = this.props
+    let resource = this.state.resource || this.props.resource
     let model = utils.getModel(utils.getType(photoId))
 
     let applicant = resource.applicant
