@@ -30,7 +30,7 @@ import reactMixin from 'react-mixin'
 import plugins from '@tradle/biz-plugins'
 import appPlugins from '../plugins'
 
-import yukiConfig from '../yuki.json'
+// import yukiConfig from '../yuki.json'
 
 import Reflux from 'reflux'
 import Actions from '../Actions/Actions'
@@ -543,22 +543,22 @@ var Store = Reflux.createStore({
     }
 
     await this.getReady()
-    if (ENV.yukiOn) {
-      await this._setupYuki()
-    }
+    // if (ENV.yukiOn) {
+    //   await this._setupYuki()
+    // }
   },
 
-  async _setupYuki() {
-    const node = await this._enginePromise
-    this._yuki = await loadYuki({
-      node,
-      db: level('~yuki')
-    })
+  // async _setupYuki() {
+  //   const node = await this._enginePromise
+  //   this._yuki = await loadYuki({
+  //     node,
+  //     db: level('~yuki')
+  //   })
 
-    await this.addYuki()
-    await this._yuki.welcome()
-    // this.postHistory()
-  },
+  //   await this.addYuki()
+  //   await this._yuki.welcome()
+  //   // this.postHistory()
+  // },
 
   onAcceptTermsAndChat(params) {
     me._termsAccepted = true;
@@ -1686,32 +1686,32 @@ var Store = Reflux.createStore({
       return providers
     }))
   },
-  addYuki() {
-    const sp =  utils.clone(yukiConfig)
-    let yuki = getYukiForRegion()
-    if (yuki) {
-      sp.org.name = yuki.name
-      if (yuki.photos)
-        sp.org.photos = yuki.photos
-    }
-    sp.bot = {
-      [ROOT_HASH]: this._yuki.permalink,
-      [CUR_HASH]: this._yuki.permalink,
-      pub: this._yuki.identity,
-      profile: {
-        name: {
-          firstName: (yuki && yuki.name) || 'Yuki'
-        }
-      }
-    }
+  // addYuki() {
+  //   const sp =  utils.clone(yukiConfig)
+  //   let yuki = getYukiForRegion()
+  //   if (yuki) {
+  //     sp.org.name = yuki.name
+  //     if (yuki.photos)
+  //       sp.org.photos = yuki.photos
+  //   }
+  //   sp.bot = {
+  //     [ROOT_HASH]: this._yuki.permalink,
+  //     [CUR_HASH]: this._yuki.permalink,
+  //     pub: this._yuki.identity,
+  //     profile: {
+  //       name: {
+  //         firstName: (yuki && yuki.name) || 'Yuki'
+  //       }
+  //     }
+  //   }
 
-    // if (!SERVICE_PROVIDERS)
-    //   SERVICE_PROVIDERS = []
-    // sp.org.contacts = [utils.optimizeResource(me)]
+  //   // if (!SERVICE_PROVIDERS)
+  //   //   SERVICE_PROVIDERS = []
+  //   // sp.org.contacts = [utils.optimizeResource(me)]
 
-    this.parseProvider(sp)
-    return this.addInfo(sp)
-  },
+  //   this.parseProvider(sp)
+  //   return this.addInfo(sp)
+  // },
 
   getMyEmployerBotPermalink() {
     if (me && me.isEmployee) {

@@ -7,7 +7,7 @@ echo "removing react-native peer deps that prevent shrinkwrap from being written
 
 npm run nodeify
 npm run installhooks
-npm run placesecrets
+npm run loadsecrets
 ./fbdedupe.sh
 ./hooks/update_version.sh
 npm run fixasyncstorage
