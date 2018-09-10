@@ -305,5 +305,6 @@ module.exports = {
   "Next": "Siguiente",
   "Skip": "Omitir",
   "Sanctions Checks": "Verificaciones de sanciones",
-  "tryProviderQrCode": "Solo el código QR del proveedor puede encontrar aquí. Inténtalo de nuevo"
+  "tryProviderQrCode": "Solo el código QR del proveedor puede encontrar aquí. Inténtalo de nuevo",
+  "inProcess": "En proceso..."
 }

@@ -81,7 +81,6 @@ module.exports = {
     "noConnectionWillProcessLater": "{appName} requires a working internet connection which you don't have at the moment. The request will be processed when a connection is established",
     "noConnectionForPL": "{appName} requires a working internet connection to request a list of products from {1} which you don't have at the moment",
     "noConnectionForNewProduct": "{1}, {appName} requires a working internet connection to fill out the {2} application.",
-    "inProgress": "Your request is in progress",
     "newContactRequest": "{1} sent you contact request",
     "pleaseCorrectTheErrors": "Please correct error in the form",
     "verifierHelp": "Click 'Done' button after reviewing the form. If some fields require correction check them them first and then click the 'Done' button",
@@ -263,6 +262,8 @@ module.exports = {
     "bookmarks": "Bookmarks",
     "createManualMatchCheck": "Create manual match check",
     "tryProviderQrCode": "Only Provider\'s QR code you can scan here. Please try again",
+    "inProcess": "In process...",
+    "inProgress": "'In progress...",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

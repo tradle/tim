@@ -305,5 +305,6 @@ module.exports = {
   "Next": "Prochain",
   "Done": "Terminé",
   "Sanctions Checks": "Contrôles de sanctions",
-  "tryProviderQrCode": "Seul le code QR du fournisseur que vous pouvez scn ici. Veuillez réessayer"
+  "tryProviderQrCode": "Seul le code QR du fournisseur que vous pouvez scn ici. Veuillez réessayer",
+  "inProcess": "En cours..."
 }

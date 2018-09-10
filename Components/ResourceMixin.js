@@ -559,7 +559,7 @@ var ResourceMixin = {
         <View style={lstyles.loadingIndicator}>
           <View style={platformStyles.container}>
             {network}
-            <Text style={lstyles.loading}>{'In progress...'}</Text>
+            <Text style={lstyles.loading}>{translate('inProgress')}</Text>
             <ActivityIndicator size='large' style={lstyles.indicator} />
           </View>
         </View>
