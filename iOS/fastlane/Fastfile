@@ -281,7 +281,7 @@ platform :ios do
     reset_git_repo(
       skip_clean: true
       files: [
-        ENV['PROJECT']
+        ENV['PROJECT'],
         ENV['WORKSPACE']
       ]
     )
