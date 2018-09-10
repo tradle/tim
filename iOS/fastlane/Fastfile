@@ -252,7 +252,11 @@ platform :ios do
   desc "build & codepush an ios bundle (defaults to Staging)"
   desc "test on Staging, then run: fastlane codepush_ios_promote"
   lane :codepush do |options|
-    current_version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
+    version = options[:version]
+    if version.nil?
+      version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
+    end
+
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
     # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
     dry_run = options[:dry_run] == false ? false : true
@@ -262,7 +266,7 @@ platform :ios do
       app_name: ENV['CODE_PUSH_APP_NAME_IOS'],
       platform: 'ios',
       deployment: options[:deployment] || 'Staging',
-      target_binary_version: options[:target_binary_version] || current_version,
+      target_binary_version: version,
       dry_run: dry_run,
       execution_dir_path: '../'
     )
@@ -279,10 +283,9 @@ platform :ios do
 
     # don't delete untracked files
     reset_git_repo(
-      skip_clean: true
+      skip_clean: true,
       files: [
-        ENV['PROJECT'],
-        ENV['WORKSPACE']
+        ENV['PROJECT']
       ]
     )
     # slack(
