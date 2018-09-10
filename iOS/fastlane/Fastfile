@@ -116,12 +116,13 @@ platform :ios do
       title: "Beta Built!",
       message: "Uploading to TestFlight and waiting for it to get processed. This may take ~10 minutes"
     )
-    # upload_to_testflight
-    # sign_auto
-    # notification(
-    #   title: "Beta Released!",
-    #   message: "see it in TestFlight!"
-    # )
+
+    upload_to_testflight
+    sign_auto
+    notification(
+      title: "Beta Released!",
+      message: "see it in TestFlight!"
+    )
   end
 
   lane :gym_staging do
