@@ -52,9 +52,9 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
 
 #ifdef DEBUG
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
-  if (jsCodeLocation == nil) {
-    jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.155:8081/index.ios.bundle?platform=ios&dev=true"];
-  }
+//  if (jsCodeLocation == nil) {
+//    jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.155:8081/index.ios.bundle?platform=ios&dev=true"];
+//  }
 
 //  [RNBranch setDebug];
 #else
