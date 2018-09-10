@@ -265,6 +265,7 @@ platform :ios do
     code_push_release_react(
       app_name: ENV['CODE_PUSH_APP_NAME_IOS'],
       platform: 'ios',
+      description: options[:description] || 'no description for release',
       deployment: options[:deployment] || 'Staging',
       target_binary_version: version,
       dry_run: dry_run,
