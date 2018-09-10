@@ -305,5 +305,6 @@ module.exports = {
   "Skip": "Overspringen",
   "Done": "Gedaan",
   "Sanctions Checks": "Sanctiescheques",
-  "tryProviderQrCode": "Alleen de QR-code van Provider kunt u hier vinden. Probeer het opnieuw"
+  "tryProviderQrCode": "Alleen de QR-code van Provider kunt u hier vinden. Probeer het opnieuw",
+  "inProcess": "In proces..."
 }

@@ -3639,6 +3639,21 @@ var Store = Reflux.createStore({
       else if (r[NOT_CHAT_ITEM])
         document = docStub
     }
+    else if (!dontSend) {
+      try {
+        let kres = await this._keeper.get(this.getCurHash(document))
+        document = kres
+      } catch (err) {
+        if (me.isEmployee) {
+          document = await this._getItemFromServer(docId)
+          if (!document)
+            document = docStub
+          else
+            docFromServer = true
+        }
+        debugger
+      }
+    }
     r.document = document
     if (dontSend)
       r._inbound = true
@@ -3810,8 +3825,17 @@ var Store = Reflux.createStore({
         this.trigger({action: 'addItem', resource: r});
       else {
         this.trigger({action: 'addVerification', resource: r});
+        let newApplication
         if (application) {
-          let newApplication = await this.onGetItem({resource: application, search: true})
+          newApplication = await this.onGetItem({resource: application, search: true})
+          // See if the verification is already landed and if not add it manually for displaying
+          if (!application.verifications  ||  application.verifications.length === newApplication.verifications.length) {
+            let newApplication = _.cloneDeep(application)
+            if (!newApplication.verifications)
+              newApplication.verifications = []
+            newApplication.verifications.push(this.buildRef(r))
+            newApplication._verificationsCount = newApplication.verifications.length
+          }
           this.trigger({action: 'getItem', resource: newApplication})
         }
       }
@@ -4650,7 +4674,7 @@ if (!res[SIG]  &&  res._message)
       let elm = this._getItem(rValue)
       if (!elm  &&  me.isEmployee) {
         elm = await this._getItemFromServer(rValue)
-        foundRefs.push({value: elm, state: 'fulfilled'})
+        foundRefs.push({value: elm, state: elm && 'fulfilled' || 'failed'})
         // debugger
       }
       else {

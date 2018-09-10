@@ -932,8 +932,7 @@ var NewResourceMixin = {
 
     let { search, bankStyle } = this.props
     if (!value)
-      value = utils.getDateValue(new Date())  + (!search  &&  required  ?  ' *' : '')
-      // value = translate(params.prop)  + (!search  &&  required  ?  ' *' : '')
+      value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
     let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
 
     // convert from UTC date to local, so DatePicker displays it correctly
