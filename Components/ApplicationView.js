@@ -275,7 +275,7 @@ class ApplicationView extends Component {
           }
           Actions.addChatItem({resource: msg})
           this.setState({hasRM: true})
-          Actions.showModal({title: 'In progress...', showIndicator: true})
+          Actions.showModal({title: translate('inProgress'), showIndicator: true})
         }}
       ]
     )
