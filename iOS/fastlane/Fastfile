@@ -277,7 +277,14 @@ platform :ios do
   after_all do |lane|
     # This block is called, only if the executed lane was successful
 
-    reset_git_repo
+    # don't delete untracked files
+    reset_git_repo(
+      skip_clean: true
+      files: [
+        ENV['PROJECT']
+        ENV['WORKSPACE']
+      ]
+    )
     # slack(
     #   message: "Successfully deployed new App Update."
     # )
