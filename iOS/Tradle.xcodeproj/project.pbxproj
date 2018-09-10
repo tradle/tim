@@ -2028,7 +2028,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"*Debug*\" ]; then\n    set -euo pipefail\n    ../scripts/set-local-ip.sh\nfi";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Debug\" ]; then\n    echo \"HEYEEYE\"\n    set -euo pipefail\n    ../scripts/set-local-ip.sh\nfi";
 		};
 		7379F7D01EDA14430093535C /* Fabric / Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
