@@ -27,6 +27,7 @@ import Promise, { coroutine as co } from 'bluebird'
 import TimerMixin from 'react-timer-mixin'
 import plugins from '@tradle/biz-plugins'
 import appPlugins from '../plugins'
+import * as Intercept from '../utils/intercept'
 
 // import yukiConfig from '../yuki.json'
 
@@ -402,7 +403,7 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
 }
 
 // var Store = Reflux.createStore(timeFunctions({
-var Store = Reflux.createStore({
+var Store = {
   mixins: [TimerMixin],
 
   // this will set up listeners to all publishers in TodoActions, using onKeyname (or keyname) as callbacks
@@ -412,6 +413,9 @@ var Store = Reflux.createStore({
     return this.ready = this._init()
   },
   async _init() {
+    // make sure Action listeners get attached
+    await utils.promiseDelay(1)
+
     // Setup components:
     db = level('TiM.db', { valueEncoding: 'json' });
     this._emitter = new EventEmitter()
@@ -982,13 +986,20 @@ var Store = Reflux.createStore({
     })
   },
 
-  setBusyWith(reason) {
-    if (this.busyWith) {
-      debug(`${this.busyWith.name} took ${(Date.now() - this.busyWith.start)}ms`)
+  onNotBusyWith(reason) {
+    if (this.busyWith && this.busyWith.name === reason) {
+      Actions.busyWith(null)
+    }
+  },
+
+  onBusyWith(reason) {
+    if (this.busyWith && this.busyWith.name) {
+      debug(`busy with ${this.busyWith.name} took ${(Date.now() - this.busyWith.start)}ms`)
     }
 
     this.busyWith = {
-      name: reason && translate(reason),
+      name: reason,
+      reason: reason && translate(reason),
       start: Date.now()
     }
 
@@ -997,17 +1008,17 @@ var Store = Reflux.createStore({
     }
 
     this.triggerBusy()
+    // return canceler
+    return () => Actions.notBusyWith(reason)
   },
 
   triggerBusy() {
-    this.trigger({ action: 'busy', activity: this.busyWith.name })
+    this.trigger({ action: 'busy', activity: this.busyWith.reason })
   },
 
   async buildDriver (...args) {
-    this.setBusyWith('initializingEngine')
     const ret = await this._buildDriver(...args)
     this.buildCustomIndexes()
-    this.setBusyWith(null)
     return ret
   },
   buildCustomIndexes() {
@@ -2897,7 +2908,6 @@ var Store = Reflux.createStore({
     return match
   },
   async onStart() {
-    this.triggerBusy()
     var self = this;
     const [hasTouchID] = await Promise.all([
       LocalAuth.hasTouchID(),
@@ -9942,16 +9952,10 @@ if (!res[SIG]  &&  res._message)
     const encryptionKey = crypto.randomBytes(32).toString('hex')
     // const globalSalt = crypto.randomBytes(32).toString('hex')
 
-    this.setBusyWith('generatingKeys')
     try {
       // don't run in parallel, keychain is touchy
       const identityInfo = await identityUtils.generateIdentity()
-      if (__DEV__) {
-        this.setBusyWith('setting encryption key')
-      }
-
       await utils.setPassword(ENCRYPTION_KEY, encryptionKey)
-      this.setBusyWith(null)
       return {
         encryptionKey,
         identityInfo
@@ -12037,7 +12041,6 @@ if (!res[SIG]  &&  res._message)
     //       .catch((err) => {
     //         err = err;
     //       });
-    this.setBusyWith('loadingResources')
     return this.loadMyResources();
   },
 
@@ -12247,11 +12250,25 @@ if (!res[SIG]  &&  res._message)
       ENV.dateModified = env.dateModified
     }
   },
+}
 
+// Store = Intercept.injectDelay(Store, {
+//   loadMyResources: 2000,
+//   buildDriver: 2000,
+// }, {
+//   before: true
+// })
+
+Store = Intercept.injectBusy(Store, {
+  // method -> UI message
+  buildDriver: 'initializingEngine',
+  loadMyResources: 'loadingResources',
+  createNewIdentity: 'generatingKeys',
 })
-// );
 
-module.exports = Store;
+Store = Reflux.createStore(Store)
+
+module.exports = Store
 
 function getProviderUrl (provider) {
   return provider.url

@@ -270,6 +270,7 @@ class TimHome extends Component {
         await AutomaticUpdates.sync({
           onSyncStatusChanged: status => {
             if (status === SyncStatus.DOWNLOADING_PACKAGE) {
+              Actions.busyWith('downloadingUpdate')
               this.setState({ downloadingUpdate: true, downloadUpdateProgress: 0 })
             }
           },
@@ -282,6 +283,7 @@ class TimHome extends Component {
       } catch (err) {
         debug('failed to sync with code push', err)
       } finally {
+        Actions.notBusyWith('downloadingUpdate')
         this.setState({ downloadingUpdate: false, downloadUpdateProgress: null })
       }
 

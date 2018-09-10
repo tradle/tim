@@ -88,7 +88,9 @@ var syncActions = [
   'showModal',
   'hideModal',
   'setProviderStyle',
-  'updateEnvironment'
+  'updateEnvironment',
+  'busyWith',
+  'notBusyWith',
 ]
 
 asyncActions.forEach(name => actionProps[name] = {})
