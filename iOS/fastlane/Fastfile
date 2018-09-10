@@ -108,6 +108,7 @@ platform :ios do
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta_testflight do |options|
+    ensure_build_not_in_testflight
     sign_prod
     match(type: 'appstore')
     gym_staging
@@ -115,12 +116,12 @@ platform :ios do
       title: "Beta Built!",
       message: "Uploading to TestFlight and waiting for it to get processed. This may take ~10 minutes"
     )
-    # upload_to_testflight
-    # sign_auto
-    # notification(
-    #   title: "Beta Released!",
-    #   message: "see it in TestFlight!"
-    # )
+
+    upload_to_testflight
+    notification(
+      title: "Beta Released!",
+      message: "see it in TestFlight!"
+    )
   end
 
   lane :gym_staging do
@@ -129,6 +130,16 @@ platform :ios do
 
   lane :gym_release do
     gymit(scheme: "Release")
+  end
+
+  lane :ensure_build_not_in_testflight do
+    current = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
+    latest = latest_testflight_build_number
+    UI.message("echo Current Build: #{current}".green)
+    UI.message("echo Current Build in TestFlight: #{latest}".green)
+    unless Gem::Version.new(current) > Gem::Version.new(latest)
+      UI.user_error!("this build already exists in TestFlight!")
+    end
   end
 
   private_lane :gymit do |options|
@@ -154,7 +165,6 @@ platform :ios do
     match(type: 'appstore')
     gym_release
     deliverit
-    sign_auto
     # frameit
   end
 
@@ -242,7 +252,11 @@ platform :ios do
   desc "build & codepush an ios bundle (defaults to Staging)"
   desc "test on Staging, then run: fastlane codepush_ios_promote"
   lane :codepush do |options|
-    current_version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
+    version = options[:version]
+    if version.nil?
+      version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
+    end
+
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
     # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
     dry_run = options[:dry_run] == false ? false : true
@@ -251,8 +265,9 @@ platform :ios do
     code_push_release_react(
       app_name: ENV['CODE_PUSH_APP_NAME_IOS'],
       platform: 'ios',
+      description: options[:description] || 'no description for release',
       deployment: options[:deployment] || 'Staging',
-      target_binary_version: options[:target_binary_version] || current_version,
+      target_binary_version: version,
       dry_run: dry_run,
       execution_dir_path: '../'
     )
@@ -267,6 +282,13 @@ platform :ios do
   after_all do |lane|
     # This block is called, only if the executed lane was successful
 
+    # don't delete untracked files
+    reset_git_repo(
+      skip_clean: true,
+      files: [
+        ENV['PROJECT']
+      ]
+    )
     # slack(
     #   message: "Successfully deployed new App Update."
     # )

@@ -22,7 +22,7 @@
 #import <asl.h>
 #import "SplashScreen.h"
 #import <react-native-branch/RNBranch.h>
-#import <Firebase.h>
+// #import <Firebase.h>
 
 @implementation AppDelegate
 
@@ -52,9 +52,9 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
 
 #ifdef DEBUG
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
-  if (jsCodeLocation == nil) {
-    jsCodeLocation = [NSURL URLWithString:@"http://127.0.0.1:8081/index.ios.bundle?platform=ios&dev=true"];
-  }
+//  if (jsCodeLocation == nil) {
+//    jsCodeLocation = [NSURL URLWithString:@"http://192.168.1.155:8081/index.ios.bundle?platform=ios&dev=true"];
+//  }
 
 //  [RNBranch setDebug];
 #else
@@ -63,7 +63,7 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
 #endif
 
   [RNBranch initSessionWithLaunchOptions:launchOptions isReferrable:YES];
-  [FIRApp configure];
+//  [FIRApp configure];
 
   /**
    * OPTION 2
