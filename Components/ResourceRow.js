@@ -26,7 +26,6 @@ import {
   Image,
   Alert,
   Platform,
-  Text,
   TouchableHighlight,
   TouchableOpacity,
   View
@@ -36,6 +35,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
+import { Text } from './Text'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
