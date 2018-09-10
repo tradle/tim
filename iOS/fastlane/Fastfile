@@ -118,7 +118,6 @@ platform :ios do
     )
 
     upload_to_testflight
-    sign_auto
     notification(
       title: "Beta Released!",
       message: "see it in TestFlight!"
@@ -166,7 +165,6 @@ platform :ios do
     match(type: 'appstore')
     gym_release
     deliverit
-    sign_auto
     # frameit
   end
 
@@ -279,6 +277,7 @@ platform :ios do
   after_all do |lane|
     # This block is called, only if the executed lane was successful
 
+    reset_git_repo
     # slack(
     #   message: "Successfully deployed new App Update."
     # )
