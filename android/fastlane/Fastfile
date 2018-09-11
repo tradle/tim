@@ -101,28 +101,81 @@ platform :android do
     # You can also use other beta testing services here
   end
 
+  desc "Ensure build number available"
+  lane :ensure_build_not_in_store do |options|
+    track = options[:track]
+    local = sh "../../scripts/get-android-version.sh build"
+    remote = google_play_track_version_codes(track: track)[0]
+    if !remote.nil?
+      UI.message("Current Build: #{local}".green)
+      UI.message("Current Build in Play Store \"#{track}\" track: #{remote}".green)
+      unless local.to_i > remote.to_i
+        UI.user_error!("this build already exists in the Play Store \"#{track}\" track!")
+      end
+    end
+  end
+
+  private_lane :releaseit do |options|
+    track = options[:track]
+    if track.nil?
+      UI.user_error!("expected 'track' option, e.g. track:internal or track:production")
+    end
+
+    task = options[:task]
+    if task.nil?
+      if track == "internal"
+        UI.message("building staging release".green)
+        task = "assembleReleaseStaging"
+      else
+        task = "assembleRelease"
+      end
+    end
+
+    unless options[:dry_run]
+      ensure_build_not_in_store(track: track)
+    end
+
+    gradle(task: task)
+
+    unless options[:dry_run]
+      stage = "release"
+      if track == "internal"
+        stage = "releaseStaging"
+      end
+
+      apk = "./app/build/outputs/apk/#{stage}/app-#{stage}.apk"
+      UI.message("uploading apk #{apk}".green)
+      upload_to_play_store(
+        track: track,
+        skip_upload_screenshots: options[:skip_upload_screenshots] != false,
+        skip_upload_images: options[:skip_upload_images] != false,
+        apk: apk
+      )
+    end
+  end
+
+  desc "Deploy a new version to the Google Play internal track"
+  lane :release_staging do |options|
+    options[:track] = "internal"
+    releaseit(options)
+  end
+
   desc "Deploy a new version to the Google Play alpha track"
-  lane :release_alpha do
-    gradle(task: "assembleRelease")
-    supply(track: "alpha")
+  lane :release_alpha do |options|
+    options[:track] = "alpha"
+    releaseit(options)
   end
 
   desc "Deploy a new version to the Google Play beta track"
-  lane :release_beta do
-    gradle(task: "assembleRelease")
-    supply(track: "beta")
+  lane :release_beta do |options|
+    options[:track] = "beta"
+    releaseit(options)
   end
 
   desc "Deploy a new version to the Google Play"
-  lane :release_prod do
-    gradle(task: "assembleRelease")
-    supply
-  end
-
-  desc "Deploy a new version to the Google Play (dry run)"
-  lane :release_dryrun do
-    gradle(task: "assembleRelease")
-    supply(validate_only: true)
+  lane :release_prod do |options|
+    options[:track] = "production"
+    releaseit(options)
   end
 
   desc "Remove Tradle APK from attached device or emulator"
@@ -148,21 +201,34 @@ platform :android do
   desc "build & codepush android bundle (defaults to Staging)"
   desc "test on Staging, then run: fastlane codepush_android_promote"
   lane :codepush do |options|
-    current_version = sh "../../scripts/get-android-version.sh"
+    current_version = sh "../../scripts/get-android-version.sh semver"
     # current_version = sh("env $(grep -v '^#' \"../gradle.properties\" | xargs) echo \"$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH\"")
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
     # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
     dry_run = options[:dry_run] == false ? false : true
     # see config opts for code_push plugin here
     # https://github.com/manuelkch/fastlane-plugin-code_push
+    target_binary_version = (options[:target_binary_version] || current_version).strip
+    mandatory = options[:mandatory] || false
+    deployment = options[:deployment] || 'Staging'
     code_push_release_react(
       app_name: ENV['CODE_PUSH_APP_NAME_ANDROID'],
       platform: 'android',
-      deployment: options[:deployment] || 'Staging',
-      target_binary_version: options[:target_binary_version] || current_version,
+      deployment: deployment,
+      target_binary_version: target_binary_version,
+      description: options[:description] || 'no description for release',
       dry_run: dry_run,
-      execution_dir_path: '../'
+      execution_dir_path: '../',
+      bundle_name: 'main.jsbundle',
+      mandatory: mandatory
     )
+
+    unless options[:dry_run]
+      notification(
+        title: "Android Code Pushed!",
+        message: "deployment: #{deployment}, version: #{target_binary_version}, mandatory: #{mandatory}"
+      )
+    end
   end
 
   lane :codepush_promote_to_release do
