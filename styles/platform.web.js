@@ -9,7 +9,7 @@ export default StyleSheet.create({
     flex: 1,
   },
   navBarText: {
-    marginTop: 5,
+    marginTop: 3,
     fontSize: 17
   },
   navBarLeftButton: {
@@ -20,7 +20,7 @@ export default StyleSheet.create({
   navBarRightButton: {
     paddingLeft: 25,
     paddingRight: 20,
-    marginTop: 5
+    // marginTop: 5
   },
   touchIdText: {
     color: '#2E3B4E',
