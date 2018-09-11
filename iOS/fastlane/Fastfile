@@ -101,14 +101,19 @@ platform :ios do
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta do |options|
-    beta_testflight
-    upload_to_fabric(options)
+    beta_testflight(options)
+    unless options[:dry_run]
+      upload_to_fabric(options)
+    end
   end
 
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta_testflight do |options|
-    ensure_build_not_in_testflight
+    unless options[:dry_run]
+      ensure_build_not_in_testflight
+    end
+
     sign_prod
     match(type: 'appstore')
     gym_staging
@@ -117,11 +122,13 @@ platform :ios do
       message: "Uploading to TestFlight and waiting for it to get processed. This may take ~10 minutes"
     )
 
-    upload_to_testflight
-    notification(
-      title: "Beta Released!",
-      message: "see it in TestFlight!"
-    )
+    unless options[:dry_run]
+      upload_to_testflight
+      notification(
+        title: "Beta Released!",
+        message: "see it in TestFlight!"
+      )
+    end
   end
 
   lane :gym_staging do
