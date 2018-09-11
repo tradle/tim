@@ -211,6 +211,8 @@ platform :android do
     target_binary_version = (options[:target_binary_version] || current_version).strip
     mandatory = options[:mandatory] || false
     deployment = options[:deployment] || 'Staging'
+    commit = last_git_commit
+    bundle_name = 'main.jsbundle'
     code_push_release_react(
       app_name: ENV['CODE_PUSH_APP_NAME_ANDROID'],
       platform: 'android',
@@ -219,8 +221,10 @@ platform :android do
       description: options[:description] || 'no description for release',
       dry_run: dry_run,
       execution_dir_path: '../',
-      bundle_name: 'main.jsbundle',
-      mandatory: mandatory
+      bundle_name: bundle_name,
+      mandatory: mandatory,
+      output_dir: "./release/android/#{target_binary_version}/#{commit[:abbreviated_commit_hash]}",
+      sourcemap_output: "./release/android/#{target_binary_version}/#{commit[:abbreviated_commit_hash]}/#{bundle_name}.map"
     )
 
     unless options[:dry_run]
