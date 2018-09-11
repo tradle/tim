@@ -11,13 +11,10 @@ then
 
   if [ -z "$DEVICE" ]
   then
-    echo "ERROR: expected name of device as first arg. See list of known devices below:"
-    echo ""
-    instruments -s devices
-    exit 1
+    react-native run-ios --device --scheme "$SCHEME"
+  else
+    react-native run-ios --device "$DEVICE" --scheme "$SCHEME"
   fi
-
-  react-native run-ios --device "$DEVICE" --scheme "$SCHEME"
 else
   react-native run-android
 fi
