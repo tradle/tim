@@ -12368,6 +12368,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   let userId
   try {
     userId = await AsyncStorage.getItem(ANALYTICS_KEY)
+    if (!userId) throw new Error('tracker id not found')
   } catch (err) {
     userId = crypto.randomBytes(32).toString('hex')
     await AsyncStorage.setItem(ANALYTICS_KEY, userId)
