@@ -104,12 +104,14 @@ platform :android do
   desc "Ensure build number available"
   lane :ensure_build_not_in_store do |options|
     track = options[:track]
-    current = google_play_track_version_codes(track: track)[0]
-    latest = sh "../../scripts/get-android-version.sh build"
-    UI.message("Current Build: #{current}".green)
-    UI.message("Current Build in Play Store \"#{track}\" track: #{latest}".green)
-    unless current.to_i > latest.to_i
-      UI.user_error!("this build already exists in the Play Store \"#{track}\" track!")
+    local = sh "../../scripts/get-android-version.sh build"
+    remote = google_play_track_version_codes(track: track)[0]
+    if !remote.nil?
+      UI.message("Current Build: #{local}".green)
+      UI.message("Current Build in Play Store \"#{track}\" track: #{remote}".green)
+      unless local.to_i > remote.to_i
+        UI.user_error!("this build already exists in the Play Store \"#{track}\" track!")
+      end
     end
   end
 
@@ -120,8 +122,8 @@ platform :android do
     end
 
     task = options[:task]
-    if task..nil?
-      if options[:track] == "internal"
+    if task.nil?
+      if track == "internal"
         UI.message("building staging release".green)
         task = "assembleReleaseStaging"
       else
@@ -136,48 +138,45 @@ platform :android do
     gradle(task: task)
 
     unless options[:dry_run]
-      supply(track: track)
+      stage = "release"
+      if track == "internal"
+        stage = "releaseStaging"
+      end
+
+      apk = "./app/build/outputs/apk/#{stage}/app-#{stage}.apk"
+      UI.message("uploading apk #{apk}".green)
+      upload_to_play_store(
+        track: track,
+        skip_upload_screenshots: options[:skip_upload_screenshots] != false,
+        skip_upload_images: options[:skip_upload_images] != false,
+        apk: apk
+      )
     end
   end
 
   desc "Deploy a new version to the Google Play internal track"
   lane :release_staging do |options|
-    releaseit(
-      dry_run: options[:dry_run],
-      track: "internal"
-    )
+    options[:track] = "internal"
+    releaseit(options)
   end
 
   desc "Deploy a new version to the Google Play alpha track"
-  lane :release_alpha do
-    releaseit(
-      dry_run: options[:dry_run],
-      track: "alpha"
-    )
+  lane :release_alpha do |options|
+    options[:track] = "alpha"
+    releaseit(options)
   end
 
   desc "Deploy a new version to the Google Play beta track"
-  lane :release_beta do
-    releaseit(
-      dry_run: options[:dry_run],
-      track: "beta"
-    )
+  lane :release_beta do |options|
+    options[:track] = "beta"
+    releaseit(options)
   end
 
   desc "Deploy a new version to the Google Play"
-  lane :release_prod do
-    releaseit(
-      dry_run: options[:dry_run],
-      track: "production"
-    )
+  lane :release_prod do |options|
+    options[:track] = "production"
+    releaseit(options)
   end
-
-  # desc "Deploy a new version to the Google Play (dry run)"
-  # lane :release_dryrun do
-  #   ensure_build_not_in_store(track: "production")
-  #   gradle(task: "assembleRelease")
-  #   supply(validate_only: true)
-  # end
 
   desc "Remove Tradle APK from attached device or emulator"
   lane :uninstall_apk do
