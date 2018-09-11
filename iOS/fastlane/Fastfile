@@ -269,6 +269,7 @@ platform :ios do
     dry_run = options[:dry_run] == false ? false : true
     # see config opts for code_push plugin here
     # https://github.com/manuelkch/fastlane-plugin-code_push
+    mandatory = options[:mandatory] || false
     code_push_release_react(
       app_name: ENV['CODE_PUSH_APP_NAME_IOS'],
       platform: 'ios',
@@ -276,7 +277,8 @@ platform :ios do
       deployment: options[:deployment] || 'Staging',
       target_binary_version: version,
       dry_run: dry_run,
-      execution_dir_path: '../'
+      execution_dir_path: '../',
+      mandatory: mandatory
     )
   end
 
