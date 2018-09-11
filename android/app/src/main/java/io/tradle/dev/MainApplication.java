@@ -36,8 +36,6 @@ import java.util.List;
 
 import io.branch.referral.Branch;
 import io.branch.rnbranch.RNBranchPackage;
-import io.invertase.firebase.RNFirebasePackage;
-import io.invertase.firebase.analytics.RNFirebaseAnalyticsPackage;
 import io.tradle.react.LocalAuthPackage;
 import io.tradle.snappystorage.RNAsyncSnappyStoragePackage;
 
@@ -68,8 +66,6 @@ public class MainApplication extends Application implements ReactApplication {
         new MainReactPackage(),
             new MicroblinkReactPackage(),
             new RNCardIOPackage(),
-        new RNFirebasePackage(),
-        new RNFirebaseAnalyticsPackage(),
         new SplashScreenReactPackage(),
         new RNBranchPackage(),
         new TcpSocketsModule(),
