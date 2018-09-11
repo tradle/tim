@@ -613,7 +613,11 @@ var Store = Reflux.createStore({
         try {
           await process(data)
         } catch (err) {
-          debug('failed to process entry', data, err.stack)
+          debug('failed to process entry', JSON.stringify({
+            data,
+            message: err.message,
+            stack: err.stack
+          }))
         } finally {
           cb()
         }
