@@ -28,6 +28,7 @@ import {
   Platform,
   TouchableHighlight,
   TouchableOpacity,
+  Text,
   View
 } from 'react-native'
 import PropTypes from 'prop-types';
@@ -36,7 +37,7 @@ import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
 import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
-import { Text } from './Text'
+// import { Text } from './Text'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
@@ -398,14 +399,14 @@ class ResourceRow extends Component {
                 <Text style={[styles.resourceTitle, {fontSize: 18, paddingLeft: 7, color: '#FF6D0D'}]}>{' ' + productTitle}</Text>
               </View>
       }
-      let dn = utils.getDisplayName(resource);
-      if (dn && dn.length) {
-        if (model.subClassOf  &&  model.subClassOf === ENUM)
-          dn = utils.translateEnum(resource)
-          // dn = utils.createAndTranslate(dn, true)
+      let dn
+      if (model.subClassOf  &&  model.subClassOf === ENUM)
+        dn = utils.translateEnum(resource)
+      else
+        dn = utils.getDisplayName(resource);
 
+      if (dn && dn.length)
         return <Text style={styles.resourceTitle}>{dn}</Text>;
-      }
       else
         return <Text style={styles.resourceTitle}>{model.title}</Text>;
     }
