@@ -6,6 +6,7 @@ cd "$DIR/../"
 clean() {
   echo "removing placed secrets"
   rm -f ./iOS/fastlane/.env
+  rm -f ./iOS/fastlane/.env.staging
   rm -f ./iOS/fastlane/.env.development
   rm -f ./iOS/GoogleService-Info.plist
   rm -f ./android/app/google-services.json
@@ -20,6 +21,7 @@ mk_links() {
   aws s3 cp --recursive s3://private.tradle.io/app-secrets/ secrets
   echo "placing iOS build and runtime secrets"
   cp ./secrets/ios/.env ./iOS/fastlane/
+  cp ./secrets/ios/.env.staging ./iOS/fastlane/
   cp ./secrets/ios/.env.development ./iOS/fastlane/
   cp ./secrets/ios/GoogleService-Info.plist ./iOS/
 

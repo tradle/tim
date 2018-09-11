@@ -3,14 +3,23 @@ import {
   Platform
 } from 'react-native'
 
-import firebase from 'react-native-firebase'
+// import firebase from 'react-native-firebase'
 import ENV from './env'
 import { getRouteName } from './utils'
 
 let ENABLED
 let PREV_ROUTE
 const debug = require('debug')('tradle:app:analytics')
-const Analytics = firebase.analytics()
+// const Analytics = firebase.analytics()
+const noop = () => {}
+// mock of firebase analytics api, to be used later
+// stubbed out when removed firebase
+const Analytics = {
+  setAnalyticsCollectionEnabled: noop,
+  logEvent: noop,
+  setUserId: noop,
+  setUserProperty: noop,
+}
 
 setEnabled(ENV.analyticsEnabled)
 

@@ -30,7 +30,7 @@ const recognizers = {
   myKadFront: BlinkID.MyKadFrontRecognizer,
   documentFace: BlinkID.DocumentFaceRecognizer,
   pdf417: BlinkID.Pdf417Recognizer,
-  barcode: BlinkID.BarcodeRecognizer
+  barcode: BlinkID.BarcodeRecognizer,
 }
 
 const defaults = {
@@ -65,17 +65,20 @@ const scan = (function () {
       // const type = keyByValue(recognizers, r)
       // let rec = new BlinkID[r]()
       let rec = new r()
-      if (!isCombined)
-        isCombined = rec.recognizerType.indexOf('Combined') !== -1
+      isCombined = rec.recognizerType.indexOf('Combined') !== -1
       types.push(keyByValue(recognizers, r))
 
-      if (!(rec instanceof BlinkID.DocumentFaceRecognizer)) {
-        rec.returnFullDocumentImage = true
+      rec.returnFullDocumentImage = true
+      if (rec instanceof BlinkID.DocumentFaceRecognizer)
+        rec.returnFaceImage = true
+      else {
         // rec.returnFaceImage = true
         // rec.returnSignatureImage = true
         // rec.setAllowUnparsedResults = true
         // rec.setAllowUnverifiedResults = true
-        rec.allowUnverifiedResults = true
+        if (opts.country.title === 'Bangladesh'  &&
+            opts.documentType.id.indexOf('_id') !== -1)
+          rec.allowUnverifiedResults = true
       }
       if (rec instanceof BlinkID.BarcodeRecognizer) {
         if (opts.country.title === 'Bangladesh')
@@ -381,19 +384,29 @@ function normalizeUSDLResult (scanned) {
 
 function normalizeDates (result, normalizer) {
   const { personal, document } = result
-  if (typeof personal.dateOfBirth === 'string') {
-    personal.dateOfBirth = normalizer(personal.dateOfBirth)
+  if (personal.dateOfBirth) {
+    if (typeof personal.dateOfBirth === 'string')
+      personal.dateOfBirth = normalizer(personal.dateOfBirth)
+    else
+      personal.dateOfBirth = getUTCDate(personal.dateOfBirth)
   }
-
-  if (typeof document.dateOfExpiry === 'string') {
-    document.dateOfExpiry = normalizer(document.dateOfExpiry)
+  if (document.dateOfExpiry) {
+    if (typeof document.dateOfExpiry === 'string')
+      document.dateOfExpiry = normalizer(document.dateOfExpiry)
+    else
+      document.dateOfExpiry = getUTCDate(document.dateOfExpiry)
   }
-
-  if (typeof document.dateOfIssue === 'string') {
-    document.dateOfIssue = normalizer(document.dateOfIssue)
+  if (document.dateOfIssue) {
+    if (typeof document.dateOfIssue === 'string')
+      document.dateOfIssue = normalizer(document.dateOfIssue)
+    else
+      document.dateOfIssue = getUTCDate(document.dateOfIssue)
   }
 
   return result
+}
+function getUTCDate({year, month, day}) {
+  return dateFromParts({ day, month, year })
 }
 
 function parseMRTDDate (str) {
@@ -438,7 +451,7 @@ const normalizers = {
   usdlCombined: normalizeUSDLResult,
   eudl: normalizeEUDLResult,
   nzdl: normalizeNZDLResult,
-  barcode: normalizeBarcodeResult
+  barcode: normalizeBarcodeResult,
 }
 
 const normalizeWhitespace = str => {
@@ -447,3 +460,68 @@ const normalizeWhitespace = str => {
   // normalize spaces
   return str.replace(/[\s]+/g, ' ').trim()
 }
+/*
+const scan1 = (function () {
+  if (isSimulator()) return
+  if (!microblink || !BlinkID || BlinkID.notSupportedBecause) return
+
+  licenseKey = Platform.select(microblink.licenseKey)
+  if (!licenseKey) return
+
+  return async (opts) => {
+    let types = []
+    let isCombined
+    let res = []
+    for (let i=0; i<opts.recognizers.length; i++) {
+      let r = opts.recognizers[i]
+      // const type = keyByValue(recognizers, r)
+      // let rec = new BlinkID[r]()
+      let rec = new r()
+      isCombined = rec.recognizerType.indexOf('Combined') !== -1
+      let type = keyByValue(recognizers, r)
+      types.push(type)
+
+      rec.returnFullDocumentImage = true
+      if (rec instanceof BlinkID.DocumentFaceRecognizer)
+        rec.returnFaceImage = true
+      else {
+        // rec.returnFaceImage = true
+        // rec.returnSignatureImage = true
+        // rec.setAllowUnparsedResults = true
+        // rec.setAllowUnverifiedResults = true
+        rec.allowUnparsedResults = true
+        if (opts.country.title === 'Bangladesh'  &&
+            opts.documentType.id.indexOf('_id') !== -1)
+          rec.allowUnverifiedResults = true
+      }
+      if (rec instanceof BlinkID.BarcodeRecognizer) {
+        if (opts.country.title === 'Bangladesh')
+          rec.scanPdf417 = true
+      }
+      // let fName = type.charAt(0).toUpperCase() + type.slice(1);
+      let fr = isCombined ? rec : new BlinkID.SuccessFrameGrabberRecognizer(rec)
+
+      const result = await BlinkID.BlinkID.scanWithCamera(
+        isCombined ? new BlinkID.DocumentVerificationOverlaySettings() : new BlinkID.DocumentOverlaySettings(),
+        new BlinkID.RecognizerCollection([fr]),
+        licenseKey) //, withDefaults(opts, defaults))
+      if (!result.length)
+        return
+      let normalized = postProcessResult({ type, result: result[0], isCombined })
+      // debugger
+      res.push(normalized)
+    }
+    if (res.length === 1)
+      return res[0]
+
+    let idx = types.indexOf('documentFace')
+    if (idx === -1)
+      return res[0]
+      // res.images.face = res[idx].image
+    let r = res[idx && 0 || 1]
+    r.image = res[idx].image
+
+    return r
+  }
+}());
+*/
