@@ -3628,31 +3628,24 @@ var Store = Reflux.createStore({
     let docId = utils.getId(docStub)
     let document = this._getItem(docId)
     let docFromServer
-    if (!document) {
-      if (me.isEmployee) {
-        document = await this._getItemFromServer(docId)
-        if (!document)
-          document = docStub
-        else
-          docFromServer = true
-      }
-      else if (r[NOT_CHAT_ITEM])
+    if (me.isEmployee) {
+      document = await this._getItemFromServer(docId)
+      if (!document)
         document = docStub
+      else
+        docFromServer = true
     }
-    else if (!dontSend) {
+    else { //if (!dontSend) {
       try {
         let kres = await this._keeper.get(this.getCurHash(document))
         document = kres
       } catch (err) {
-        if (me.isEmployee) {
-          document = await this._getItemFromServer(docId)
-          if (!document)
-            document = docStub
-          else
-            docFromServer = true
-        }
         debugger
       }
+    }
+    if (!document) {
+      if (r[NOT_CHAT_ITEM])
+        document = docStub
     }
     r.document = document
     if (dontSend)
