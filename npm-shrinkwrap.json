@@ -5145,7 +5145,7 @@
     "onetime": {
       "version": "2.0.1",
       "from": "onetime@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/onetime/-/onetime-2.0.1.tgz"
+      "resolved": "https://registry.npmjs.org/onetime/-/onetime-2.0.1.tgz",
       "dev": true
     },
     "open": {
