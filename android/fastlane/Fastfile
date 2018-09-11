@@ -101,6 +101,12 @@ platform :android do
     # You can also use other beta testing services here
   end
 
+  desc "Deploy a new version to the Google Play internal track"
+  lane :release_staging do
+    gradle(task: "assembleReleaseStaging")
+    supply(track: "internal")
+  end
+
   desc "Deploy a new version to the Google Play alpha track"
   lane :release_alpha do
     gradle(task: "assembleRelease")
@@ -160,6 +166,7 @@ platform :android do
       platform: 'android',
       deployment: options[:deployment] || 'Staging',
       target_binary_version: options[:target_binary_version] || current_version,
+      description: options[:description] || 'no description for release',
       dry_run: dry_run,
       execution_dir_path: '../'
     )
