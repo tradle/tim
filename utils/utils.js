@@ -872,6 +872,8 @@ var utils = {
     let dnProps = this.getPropertiesWithAnnotation(resourceModel ||  model, 'displayName')
     if (dnProps) {
       for (let p in dnProps) {
+        if (!resource[p])
+          continue
         let dn
         if (props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM)
           dn = this.translateEnum(resource[p])

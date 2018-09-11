@@ -897,6 +897,8 @@ var NewResourceMixin = {
   },
   myDateTemplate(params) {
     let { prop, required, component } = params
+    let { search, bankStyle } = this.props
+
     let resource = this.state.resource
     let label, style, propLabel
     let hasValue = resource && resource[prop.name]
@@ -910,6 +912,8 @@ var NewResourceMixin = {
       label = params.label
       propLabel = <View style={styles.floatingLabel}/>
     }
+    if (!search  &&  required)
+      label += ' *'
 
     let valuePadding = 0 //Platform.OS === 'ios' ? 0 : (hasValue ? 10 : 0)
     let format = 'LL'
@@ -930,7 +934,6 @@ var NewResourceMixin = {
     if (prop.format)
       dateProps.format = prop.format
 
-    let { search, bankStyle } = this.props
     if (!value)
       value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
     let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
