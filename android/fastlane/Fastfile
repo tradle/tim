@@ -180,7 +180,7 @@ platform :android do
 
   desc "Remove Tradle APK from attached device or emulator"
   lane :uninstall_apk do
-    adb uninstall io.tradle.dev
+    sh "adb uninstall io.tradle.dev"
   end
 
   private_lane :install_apk do |options|
