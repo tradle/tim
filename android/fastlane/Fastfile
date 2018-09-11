@@ -101,35 +101,83 @@ platform :android do
     # You can also use other beta testing services here
   end
 
+  desc "Ensure build number available"
+  lane :ensure_build_not_in_store do |options|
+    track = options[:track]
+    current = google_play_track_version_codes(track: track)[0]
+    latest = sh "../../scripts/get-android-version.sh build"
+    UI.message("Current Build: #{current}".green)
+    UI.message("Current Build in Play Store \"#{track}\" track: #{latest}".green)
+    unless current.to_i > latest.to_i
+      UI.user_error!("this build already exists in the Play Store \"#{track}\" track!")
+    end
+  end
+
+  private_lane :releaseit do |options|
+    track = options[:track]
+    if track.nil?
+      UI.user_error!("expected 'track' option, e.g. track:internal or track:production")
+    end
+
+    task = options[:task]
+    if task..nil?
+      if options[:track] == "internal"
+        UI.message("building staging release".green)
+        task = "assembleReleaseStaging"
+      else
+        task = "assembleRelease"
+      end
+    end
+
+    unless options[:dry_run]
+      ensure_build_not_in_store(track: track)
+    end
+
+    gradle(task: task)
+
+    unless options[:dry_run]
+      supply(track: track)
+    end
+  end
+
   desc "Deploy a new version to the Google Play internal track"
-  lane :release_staging do
-    gradle(task: "assembleReleaseStaging")
-    supply(track: "internal")
+  lane :release_staging do |options|
+    releaseit(
+      dry_run: options[:dry_run],
+      track: "internal"
+    )
   end
 
   desc "Deploy a new version to the Google Play alpha track"
   lane :release_alpha do
-    gradle(task: "assembleRelease")
-    supply(track: "alpha")
+    releaseit(
+      dry_run: options[:dry_run],
+      track: "alpha"
+    )
   end
 
   desc "Deploy a new version to the Google Play beta track"
   lane :release_beta do
-    gradle(task: "assembleRelease")
-    supply(track: "beta")
+    releaseit(
+      dry_run: options[:dry_run],
+      track: "beta"
+    )
   end
 
   desc "Deploy a new version to the Google Play"
   lane :release_prod do
-    gradle(task: "assembleRelease")
-    supply
+    releaseit(
+      dry_run: options[:dry_run],
+      track: "production"
+    )
   end
 
-  desc "Deploy a new version to the Google Play (dry run)"
-  lane :release_dryrun do
-    gradle(task: "assembleRelease")
-    supply(validate_only: true)
-  end
+  # desc "Deploy a new version to the Google Play (dry run)"
+  # lane :release_dryrun do
+  #   ensure_build_not_in_store(track: "production")
+  #   gradle(task: "assembleRelease")
+  #   supply(validate_only: true)
+  # end
 
   desc "Remove Tradle APK from attached device or emulator"
   lane :uninstall_apk do
@@ -154,7 +202,7 @@ platform :android do
   desc "build & codepush android bundle (defaults to Staging)"
   desc "test on Staging, then run: fastlane codepush_android_promote"
   lane :codepush do |options|
-    current_version = sh "../../scripts/get-android-version.sh"
+    current_version = sh "../../scripts/get-android-version.sh semver"
     # current_version = sh("env $(grep -v '^#' \"../gradle.properties\" | xargs) echo \"$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH\"")
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
     # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
