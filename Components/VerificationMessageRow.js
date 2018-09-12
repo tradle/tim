@@ -108,8 +108,7 @@ class VerificationMessageRow extends Component {
 
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
-    var w = utils.dimensions(VerificationMessageRow).width
-    let msgWidth = Math.min(Math.floor(w * 0.8), 600)
+    let msgWidth = utils.getMessageWidth(VerificationMessageRow)
     // if (isReadOnlyChat || application)
     //   msgWidth -= 50 // provider icon and padding
     // let numberOfCharacters = msgWidth / 12
@@ -216,8 +215,8 @@ class VerificationMessageRow extends Component {
                 </View>
                  <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={flowerStyle} />
               </View>
-              {this.getSendStatus()}
             </View>
+              {this.getSendStatus()}
           </TouchableOpacity>
 
     // let messageBody =
