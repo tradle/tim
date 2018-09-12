@@ -3642,7 +3642,10 @@ var Store = Reflux.createStore({
     else { //if (!dontSend) {
       try {
         let kres = await this._keeper.get(this.getCurHash(document))
-        document = kres
+        if (document)
+          _.extend(document, kres)
+        else
+          document = kres
       } catch (err) {
         debugger
       }
