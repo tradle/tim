@@ -772,11 +772,14 @@ class MessageList extends Component {
     clearTimeout(this._scrollTimeout)
     if (this.state.allLoaded  ||  this.state.noScroll)
       this.state.noScroll = false
-    else
+    else {
+      console.log('MessageList: setting timeout for scrollToBottom')
       this._scrollTimeout = this.setTimeout(() => {
         // inspired by http://stackoverflow.com/a/34838513/1385109
+        console.log('MessageList: scrollToBottom started')
         this._GiftedMessenger  &&  this._GiftedMessenger.scrollToBottom()
-      }, 200)
+      }, 400)
+    }
   }
 
   render() {
