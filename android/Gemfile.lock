@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/mvayngrib/fastlane-plugin-code_push
-  revision: f925be892b57694b7958c3d940567c15d506c60c
+  revision: a14580b5aa96a0c51e4ac90a699420011dbf64a5
   specs:
     fastlane-plugin-code_push (0.3.0)
 

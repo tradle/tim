@@ -629,7 +629,7 @@ var Store = Reflux.createStore({
         try {
           await process(data)
         } catch (err) {
-          debug('failed to process entry', data, err)
+          debug('failed to process entry', data, err.stack)
         } finally {
           cb()
         }
@@ -3660,7 +3660,10 @@ var Store = Reflux.createStore({
     else { //if (!dontSend) {
       try {
         let kres = await this._keeper.get(this.getCurHash(document))
-        document = kres
+        if (document)
+          _.extend(document, kres)
+        else
+          document = kres
       } catch (err) {
         debugger
       }
