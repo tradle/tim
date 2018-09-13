@@ -613,7 +613,11 @@ var Store = Reflux.createStore({
         try {
           await process(data)
         } catch (err) {
-          debug('failed to process entry', data, err.stack)
+          debug('failed to process entry', JSON.stringify({
+            data,
+            message: err.message,
+            stack: err.stack
+          }))
         } finally {
           cb()
         }
@@ -12369,6 +12373,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   let userId
   try {
     userId = await AsyncStorage.getItem(ANALYTICS_KEY)
+    if (!userId) throw new Error('tracker id not found')
   } catch (err) {
     userId = crypto.randomBytes(32).toString('hex')
     await AsyncStorage.setItem(ANALYTICS_KEY, userId)
