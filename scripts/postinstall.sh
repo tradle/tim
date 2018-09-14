@@ -2,31 +2,11 @@
 
 set -euo pipefail
 
-fetch_zoom() {
-  if [ -d "node_modules/react-native-facetec-zoom" ] && [ ! -d "node_modules/react-native-facetec-zoom/ios/ZoomAuthenticationHybrid.framework" ]
-  then
-    if [ -f "./scripts/.env" ]
-    then
-      source ./scripts/.env
-    fi
-
-    ZIP_NAME="ZoomAuthenticationHybrid.framework-6.8.0.zip"
-    # TARGET_DIR="node_modules/react-native-facetec-zoom/ios"
-    TARGET_DIR="ios"
-    set -x
-    if [ ! -f "$TARGET_DIR/$ZIP_NAME" ]
-    then
-      aws s3 cp "s3://app.tradle.io/sdk/$ZIP_NAME" "$TARGET_DIR/"
-    fi
-
-    unzip "$TARGET_DIR/$ZIP_NAME" -d "$TARGET_DIR/"
-    rm "$TARGET_DIR/$ZIP_NAME"
-    set +x
-    unzip
-  fi
-}
-
-fetch_zoom &
+ZOOM_VERSION=$(cat package.json | jq -r '.dependencies["react-native-facetec-zoom"]')
+if [ "$ZOOM_VERSION" != "null" ];
+then
+  ./scripts/fetch-zoom-framework.sh &
+fi
 
 echo "removing react-native peer deps that prevent shrinkwrap from being written"
 ./scripts/rm-rn-peerdeps.js
