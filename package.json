@@ -44,7 +44,7 @@
     "android-dev": "adb reverse tcp:8081 tcp:8081 && react-native run-android"
   },
   "dependencies": {
-    "@tradle/aws-client": "^1.9.2",
+    "@tradle/aws-client": "github:tradle/aws-client#dev",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
     "@tradle/biz-plugins": "github:tradle/biz-plugins",
     "@tradle/build-resource": "^4.0.2",
@@ -97,7 +97,7 @@
     "dns.js": "^1.0.1",
     "domain-browser": "^1.2.0",
     "dot-prop": "~4.2.0",
-    "error-ex": "^1.3.1",
+    "error-ex": "^1.3.2",
     "es6-symbol": "~3.1.1",
     "events": "^1.1.0",
     "extend": "~2.0.1",

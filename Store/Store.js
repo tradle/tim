@@ -1239,7 +1239,7 @@ var Store = Reflux.createStore({
       debug(`pushing msg to ${identifier} into network stack`)
       if (transport instanceof AWSClient) {
         try {
-          yield transport.ready()
+          // yield transport.ready()
           yield transport.send({
             link: msg.unserialized.link,
             message: msg
