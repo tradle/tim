@@ -212,7 +212,7 @@ class VerificationView extends Component {
           if (p.indexOf('_group') === p.length - 6) {
             return (<View style={{padding: 15}} key={this.getNextKey()}>
                       <View key={this.getNextKey()}  style={{borderBottomColor: this.props.bankStyle.linkColor, borderBottomWidth: 1, paddingBottom: 5}}>
-                        <Text style={{fontSize: 22, color: this.props.bankStyle.linkColor}}>{translate(pMeta)}</Text>
+                        <Text style={{fontSize: 22, color: this.props.bankStyle.linkColor}}>{translate(pMeta, model)}</Text>
                       </View>
                     </View>
              );
