@@ -856,6 +856,7 @@
 		2677092A1F0C806BF108543A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				73B145AF214A223200EC469E /* ZoomAuthenticationHybrid.framework */,
 				736290B41EDE461F007E4DE1 /* iAd.framework */,
 				736290B21EDE4619007E4DE1 /* MobileCoreServices.framework */,
 				736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */,
@@ -1176,7 +1177,6 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				73B145AF214A223200EC469E /* ZoomAuthenticationHybrid.framework */,
 				13B07FAE1A68108700A75B9A /* Tradle */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
