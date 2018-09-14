@@ -1259,8 +1259,8 @@
 				7379F7D01EDA14430093535C /* Fabric / Crashlytics */,
 				785003D2BB1DC37AFBF63652 /* [CP] Embed Pods Frameworks */,
 				1C8E6EEA354CD283DCEE4BFD /* [CP] Copy Pods Resources */,
-				73B145AC214A210B00EC469E /* Facetec Zoom Strip Unused Architectures */,
 				73B145B3214A223400EC469E /* Embed Frameworks */,
+				73B145AC214A210B00EC469E /* Facetec Zoom Strip Unused Architectures */,
 			);
 			buildRules = (
 			);
@@ -2073,7 +2073,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Facetec ZoomAuthenticationHybrid.framework stripping unused architectures\"\nbash -x ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/ZoomAuthenticationHybrid.framework/strip-unused-architectures-from-target.sh";
+			shellScript = "echo \"Facetec ZoomAuthenticationHybrid.framework stripping unused architectures\"\necho \"PRINTING CURRENT ENV\"\nenv\nbash -x ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/ZoomAuthenticationHybrid.framework/strip-unused-architectures-from-target.sh";
 		};
 		785003D2BB1DC37AFBF63652 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
