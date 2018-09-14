@@ -54,5 +54,7 @@
 
   "navBarBorderColor": "#7AAAC3",
   "logoNeedsText": false,
-  "navBarBorderWidth": 1
+  "navBarBorderWidth": 1,
+  "menuBgColor": "red",
+  "menuColor": "#ffffff"
 }
