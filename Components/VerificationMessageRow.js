@@ -199,8 +199,6 @@ class VerificationMessageRow extends Component {
     }
     else
       shareWith = <View/>
-    let flowerStyle = {position: 'absolute', right: 0, top: -15}
-    // let flowerStyle = {position: 'absolute', right: isReadOnlyChat || application ? -50 : 0, top: -15}
     let messageBody =
           <TouchableOpacity onPress={this.verify.bind(this, resource)} style={{marginTop: 10}}>
             <View style={styles.messageBody}>
@@ -213,7 +211,6 @@ class VerificationMessageRow extends Component {
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={flowerStyle} />
               </View>
             </View>
               {this.getSendStatus()}
