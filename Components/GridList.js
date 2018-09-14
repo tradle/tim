@@ -11,7 +11,7 @@ import {
   Image,
   StatusBar,
   View,
-  Text,
+  // Text,
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -25,6 +25,7 @@ import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import InfiniteScrollView from 'react-native-infinite-scroll-view'
 
+import { Text } from './Text'
 import NoResources from './NoResources'
 // import ResourceRow from './ResourceRow'
 import ResourceRow from './ResourceRow'

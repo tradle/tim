@@ -10,7 +10,7 @@ import {
   Image,
   StatusBar,
   View,
-  Text,
+  // Text,
   Platform
 } from 'react-native'
 import PropTypes from 'prop-types';
@@ -20,6 +20,7 @@ import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import _ from 'lodash'
 
+import { Text, resetFontFamily } from './Text'
 import NoResources from './NoResources'
 import ResourceRow from './ResourceRow'
 import ResourceView from './ResourceView'
@@ -178,6 +179,8 @@ class ResourceList extends Component {
     let { officialAccounts, modelName, chat, navigator, resource } = this.props
     if (officialAccounts  &&  modelName === PROFILE)
       return
+    if (officialAccounts)
+      resetFontFamily()
     if (chat) {
       utils.onNextTransitionEnd(navigator, () => {
         Actions.listSharedWith(resource, chat)
@@ -1039,8 +1042,8 @@ class ResourceList extends Component {
     }
     else {
       icon = isAndroid ?  'md-menu' : 'md-more'
-      color = isAndroid ? 'red' : '#ffffff'
-      backgroundColor = isAndroid ? '#ffffff' : 'red'
+      color = isAndroid ? bankStyle.menuBgColor : bankStyle.menuColor
+      backgroundColor = isAndroid ? '#ffffff' : bankStyle.menuBgColor
     }
 
     let employee
@@ -1575,11 +1578,11 @@ var styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#eeeeee',
   },
-  icon: {
-    marginLeft: -23,
-    marginTop: -25,
-    color: 'red'
-  },
+  // icon: {
+  //   marginLeft: -23,
+  //   marginTop: -25,
+  //   color: 'red'
+  // },
   image: {
     width: 25,
     height: 25,

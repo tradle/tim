@@ -4,7 +4,7 @@ console.log('requiring ChatContext.js')
 import {
   View,
   StyleSheet,
-  Text,
+  // Text,
   TouchableOpacity
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -16,6 +16,7 @@ import utils, {
 } from '../utils/utils'
 
 import PageView from './PageView'
+import { Text } from './Text'
 
 const REMEDIATION = 'tradle.Remediation'
 const PROFILE = constants.TYPES.PROFILE

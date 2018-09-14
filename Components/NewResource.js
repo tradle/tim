@@ -1483,7 +1483,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       alignSelf: 'center'
     },
     submitButton: {
-      backgroundColor: bankStyle.linkColor,
+      backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
       flexDirection: 'row',
       justifyContent: 'center',
       width: 340,
@@ -1497,18 +1497,18 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     submitText: {
       fontSize: 20,
       paddingLeft: 7,
-      color: '#ffffff',
+      color: bankStyle.buttonColor || '#ffffff',
       alignSelf: 'center'
     },
     errors: {
       height: 45,
       justifyContent: 'center',
-      backgroundColor: '#990000',
+      backgroundColor: bankStyle.errorBgColor || '#990000',
       alignSelf: 'stretch',
       alignItems: 'center'
     },
     errorsText: {
-      color: '#eeeeee',
+      color: bankStyle.errorColor ||  '#eeeeee',
       fontSize: 16
     },
     sendIcon: {

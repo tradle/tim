@@ -8,13 +8,14 @@ var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
 var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 var PRODUCT_ROW_BG_COLOR, PRODUCT_ROW_TEXT_COLOR
 import {
-  Text,
+  // Text,
   TouchableHighlight,
   View
 } from 'react-native'
 import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
+import { Text } from './Text'
 
 class StringRow extends Component {
   constructor(props) {

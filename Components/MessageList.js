@@ -10,7 +10,7 @@ import {
   Platform,
   PixelRatio,
   View,
-  Text,
+  // Text,
   StatusBar,
   TouchableOpacity,
   Alert,
@@ -33,6 +33,8 @@ import { makeResponsive } from 'react-native-orient'
 import debounce from 'debounce'
 
 import constants from '@tradle/constants'
+
+import { Text, setFontFamily } from './Text'
 import Navigator from './Navigator'
 import MessageView from './MessageView'
 import MessageRow from './MessageRow'
@@ -160,7 +162,7 @@ class MessageList extends Component {
     return true
   }
   componentWillMount() {
-    let { navigator, modelName, resource, prop, context, search, isAggregation, application } = this.props
+    let { navigator, bankStyle, modelName, resource, prop, context, search, isAggregation, application } = this.props
     let params = {
       modelName: modelName,
       to: resource,
@@ -178,6 +180,8 @@ class MessageList extends Component {
     utils.onNextTransitionEnd(navigator, () => Actions.list(params));
     if (!application)
       Actions.getProductList({ resource })
+    // if (resource  &&  resource[TYPE] === ORGANIZATION)
+    setFontFamily(bankStyle)
   }
   componentDidMount() {
     this.listenTo(Store, 'onAction');
@@ -778,7 +782,7 @@ class MessageList extends Component {
         // inspired by http://stackoverflow.com/a/34838513/1385109
         console.log('MessageList: scrollToBottom started')
         this._GiftedMessenger  &&  this._GiftedMessenger.scrollToBottom()
-      }, 400)
+      }, 700)
     }
   }
 

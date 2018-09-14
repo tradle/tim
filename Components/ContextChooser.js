@@ -3,7 +3,7 @@ console.log('requiring ContextChooser.js')
 
 import {
   ListView,
-  Text,
+  // Text,
   // StyleSheet,
   View,
   Platform
@@ -15,6 +15,7 @@ import React, { Component } from 'react'
 import constants from '@tradle/constants'
 
 import utils, { translate } from '../utils/utils'
+import { Text } from './Text'
 import MessageList from './MessageList'
 import PageView from './PageView'
 import platformStyles from '../styles/platform'

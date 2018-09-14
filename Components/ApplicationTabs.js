@@ -277,6 +277,8 @@ ApplicationTabs = makeResponsive(ApplicationTabs)
 
 var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, bankStyle  }) {
   let bg = bankStyle && bankStyle.myMessageBackgroundColor || appStyle.CURRENT_UNDERLINE_COLOR
+  let buttonBg = bankStyle.buttonBgColor ||  bankStyle.linkColor
+  let buttonColor = bankStyle.buttonColor || '#ffffff'
   return StyleSheet.create({
     count: {
       alignSelf: 'flex-start',
@@ -316,7 +318,7 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       alignSelf: 'center'
     },
     approve: {
-      backgroundColor: bankStyle.linkColor,
+      backgroundColor: buttonBg,
       flexDirection: 'row',
       justifyContent: 'center',
       width: 150,
@@ -328,11 +330,11 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
     },
     approveText: {
       fontSize: 20,
-      color: '#ffffff',
+      color: buttonColor,
       alignSelf: 'center'
     },
     deny: {
-      backgroundColor: '#fff',
+      backgroundColor: buttonColor,
       flexDirection: 'row',
       justifyContent: 'center',
       width: 150,
@@ -341,11 +343,11 @@ var createStyles = utils.styleFactory(ApplicationTabs, function ({ dimensions, b
       height: 40,
       borderRadius: 15,
       borderWidth: 1,
-      borderColor: bankStyle.linkColor
+      borderColor: buttonBg
     },
     denyText: {
       fontSize: 20,
-      color: bankStyle.linkColor,
+      color: buttonBg,
       alignSelf: 'center'
     },
     buttonsFooter: {

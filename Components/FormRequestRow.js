@@ -1284,9 +1284,9 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     },
     shareButton: {
       ...circled(40),
-      backgroundColor: bankStyle.linkColor,
+      backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
       shadowOpacity: 0.7,
-      opacity: 0.9,
+      opacity: 1,
       shadowRadius: 5,
       shadowColor: '#afafaf',
     },
@@ -1296,7 +1296,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       shadowOpacity: 0.7,
       shadowRadius: 5,
       shadowColor: '#afafaf',
-      borderColor: bankStyle.linkColor,
+      borderColor: bankStyle.buttonBgColor || bankStyle.linkColor,
       borderWidth: StyleSheet.hairlineWidth,
     },
     // myProductSeparator: {
