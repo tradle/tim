@@ -1,42 +1,43 @@
 console.log('requiring ResourceRow.js')
 'use strict';
 
-import utils from '../utils/utils'
-var translate = utils.translate
-import LinearGradient from 'react-native-linear-gradient';
-import ArticleView from './ArticleView'
-import constants from '@tradle/constants'
-import Icon from 'react-native-vector-icons/Ionicons';
-import RowMixin from './RowMixin'
-import ResourceView from './ResourceView'
-
-import equal from 'deep-equal'
-import extend from 'extend'
-import Store from '../Store/Store'
-import Actions from '../Actions/Actions'
-import Reflux from 'reflux'
-import reactMixin from 'react-mixin'
-import defaultBankStyle from '../styles/defaultBankStyle.json'
-import appStyle from '../styles/appStyle.json'
-import StyleSheet from '../StyleSheet'
-// import Pie from 'react-native-progress/Pie';
-import ProgressBar from './ProgressBar';
-
 import {
   Image,
   Alert,
   Platform,
   TouchableHighlight,
   TouchableOpacity,
-  Text,
+  // Text,
   View
 } from 'react-native'
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
+import _ from 'lodash'
+import extend from 'extend'
+import Reflux from 'reflux'
+import reactMixin from 'react-mixin'
+import Icon from 'react-native-vector-icons/Ionicons';
+
+import constants from '@tradle/constants'
+
+import utils, { translate } from '../utils/utils'
+import LinearGradient from 'react-native-linear-gradient';
+import ArticleView from './ArticleView'
+import RowMixin from './RowMixin'
+import ResourceView from './ResourceView'
+
+import Store from '../Store/Store'
+import Actions from '../Actions/Actions'
+import defaultBankStyle from '../styles/defaultBankStyle.json'
+import appStyle from '../styles/appStyle.json'
+import StyleSheet from '../StyleSheet'
+// import Pie from 'react-native-progress/Pie';
+import ProgressBar from './ProgressBar';
+
 import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
-// import { Text } from './Text'
+import { Text } from './Text'
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'
@@ -138,13 +139,13 @@ class ResourceRow extends Component {
           return true
       }
       else if (this.props[p] !== nextProps[p]) {
-        if (!equal(this.props[p], nextProps[p], opts))
+        if (!_.isEqual(this.props[p], nextProps[p], opts))
           return true
       }
     }
     for (let p in this.state) {
       if (this.state[p] !== nextState[p]) {
-        if (!equal(this.state[p], nextState[p], opts))
+        if (!_.isEqual(this.state[p], nextState[p], opts))
           return true
       }
     }
@@ -774,7 +775,7 @@ var styles = StyleSheet.create({
     borderRadius: 3,
     borderWidth: 1,
     height: 20,
-    marginRight: 10,
+    marginRight: 12,
     width: 20,
     alignSelf: 'center'
   },
@@ -897,10 +898,10 @@ var styles = StyleSheet.create({
   count: {
     alignSelf: 'flex-start',
     minWidth: 18,
-    marginLeft: -7,
+    marginLeft: -12,
     marginTop: 0,
     backgroundColor: appStyle.COUNTER_BG_COLOR,
-    paddingHorizontal: 3,
+    paddingHorizontal: 2,
     borderWidth: StyleSheet.hairlineWidth,
     borderRadius: 9,
     borderColor: appStyle.COUNTER_COLOR,
