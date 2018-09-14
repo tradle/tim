@@ -1,4 +1,8 @@
 rootProject.name = 'Tradle'
+include ':zoom-authentication-hybrid-6.8.0'
+project(':zoom-authentication-hybrid-6.8.0').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-facetec-zoom/android/zoom-authentication-hybrid-6.8.0')
+include ':react-native-facetec-zoom'
+project(':react-native-facetec-zoom').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-facetec-zoom/android')
 include ':blinkid-react-native'
 project(':blinkid-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/blinkid-react-native/src/android')
 include ':react-native-awesome-card-io'
