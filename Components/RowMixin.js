@@ -148,7 +148,7 @@ var RowMixin = {
       if  (photo) {
         let uri = utils.getImageUri(photo.url)
         photo = <View style={{paddingRight: 3}}>
-                  <Image source={{uri: uri}} style={styles.cellRoundImage} />
+                  <Image source={{uri: uri}} resizeMode='contain' style={styles.cellRoundImage} />
                 </View>
         return photo
       }
