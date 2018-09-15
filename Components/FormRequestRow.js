@@ -4,7 +4,7 @@ console.log('requiring FormRequestRow.js')
 import {
   Image,
   // StyleSheet,
-  Text,
+  // Text,
   TouchableOpacity,
   Alert,
   View,
@@ -24,6 +24,7 @@ const debug = require('debug')('tradle:app:FormRequestRow')
 
 import constants from '@tradle/constants'
 
+import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import NewResource from './NewResource'
 import RemediationItemsList from './RemediationItemsList'
