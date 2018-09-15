@@ -26,14 +26,15 @@ import {
   Modal,
   TouchableOpacity,
   View,
-  Text,
+  // Text,
   Dimensions,
   Platform,
   ActivityIndicator
 } from 'react-native'
 import PropTypes from 'prop-types'
-
 import omit from 'object.omit'
+
+import { Text } from './Text'
 
 const CENTER = false
 const noop = () => {}

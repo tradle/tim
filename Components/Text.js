@@ -7,6 +7,9 @@ import _ from 'lodash'
 var fontFamily
 // import { translate } from '../utils/utils'
 export function setFontFamily(style) {
+  if (!style.fontFamily)
+    fontFamily = 'BentonSans Regular'
+  else
   fontFamily = Platform.OS === 'android'  &&  style.fontFamilyAndroid  ||  style.fontFamily
 }
 export function resetFontFamily(ff) {
