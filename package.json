@@ -280,6 +280,7 @@
     "./utils/crashlytics.js": false,
     "./utils/errors.js": false,
     "./utils/keychain.js": false,
+    "./utils/automaticUpdates.js": false,
     "./utils/linking.js": "./utils/linking.web.js",
     "./Components/BlinkID.js": false,
     "./Components/Anyline.js": false,

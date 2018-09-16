@@ -97,7 +97,7 @@ var translate = utils.translate
 var ReactPerf //= __DEV__ && !utils.isWeb() && require('react-addons-perf')
 
 import Actions from './Actions/Actions'
-import * as AutomaticUpdates from './utils/automaticUpdates';
+import AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
 import Store from './Store/Store'
 import StyleSheet from './StyleSheet'

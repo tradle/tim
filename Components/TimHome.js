@@ -277,7 +277,7 @@ class TimHome extends Component {
     // prior to registration
     // force install updates before first interaction
     const me = utils.getMe()
-    if (!(me && me.ensuredUpToDateOnFirstRun)) {
+    if (AutomaticUpdates.sync && !(me && me.ensuredUpToDateOnFirstRun)) {
       //   UP_TO_DATE: 0, // The running app is up-to-date
       //   UPDATE_INSTALLED: 1, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
       //   UPDATE_IGNORED: 2, // The app had an optional update and the end-user chose to ignore it
@@ -314,7 +314,10 @@ class TimHome extends Component {
       if (hasUpdate) return AutomaticUpdates.install()
     }
 
-    AutomaticUpdates.on()
+    if (AutomaticUpdates.on) {
+      AutomaticUpdates.on()
+    }
+
     if (this.state.message) {
       this.restartTiM()
       return
