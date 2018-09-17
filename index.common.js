@@ -11,6 +11,7 @@ var ReactPerf //= __DEV__ && require('ReactPerf')
 import SplashScreen from 'react-native-splash-screen'
 import 'stream'
 import debounce from 'debounce'
+import _ from 'lodash'
 import Navigator from './Components/Navigator'
 import {
   Image,
@@ -21,7 +22,7 @@ import {
   Platform,
   AppState,
   AppRegistry,
-  Text,
+  // Text,
   BackHandler
 } from 'react-native';
 
@@ -32,7 +33,7 @@ const {
 const {
   PROFILE
 } = constants.TYPES
-
+// console.disableYellowBox = true
 // import './utils/logAll'
 // import './utils/perf'
 
@@ -51,6 +52,7 @@ var perfDebug = Debug('perf')
 // require('regenerator/runtime') // support es7.asyncFunctions
 // import './utils/crypto'
 // require('./timmy')
+import { Text } from './Components/Text'
 import ResourceList from './Components/ResourceList'
 import VerifierChooser from './Components/VerifierChooser'
 import ShareResourceList from './Components/ShareResourceList'
@@ -89,6 +91,7 @@ import QRCodeScanner from './Components/QRCodeScanner'
 import Log from './Components/Log'
 import HomePageMixin from './Components/HomePageMixin'
 import MatchImages from './Components/MatchImages'
+import VideoCamera from './Components/VideoCamera'
 
 import utils from './utils/utils'
 var translate = utils.translate
@@ -116,7 +119,7 @@ const AVIVA_INTRO_VIEW = 50
 const LOGO_HEIGHT = 27
 const VERIFY_OR_CORRECT = 'VerifyOrCorrect'
 
-import platformStyles from './styles/platform'
+import platformStyles, { navBarTitleWidth } from './styles/platform'
 import SimpleModal from './Components/SimpleModal'
 import Transitions from './utils/transitions'
 
@@ -586,6 +589,8 @@ class TiMApp extends Component {
       return <ShareResourceList navigator={nav} {...props } />
     case 40:
       return <MatchImages navigator={nav} {...props } />
+    case 41:
+      return <VideoCamera navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -613,9 +618,8 @@ var NavigationBarRouteMapper = {
     let color = '#7AAAC3'
     if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW) // Camera view
       color = '#ffffff'
-    else if (bankStyle  &&  bankStyle.linkColor)
-      color = bankStyle.linkColor
-
+    else if (bankStyle)
+      color = bankStyle.navBarColor ||  bankStyle.linkColor
     let previousRoute = navState.routeStack[index - 1];
     let lbTitle = 'backButtonTitle' in route ? route.backButtonTitle : previousRoute.title;
     if (!lbTitle)
@@ -639,7 +643,7 @@ var NavigationBarRouteMapper = {
     style.push({fontSize: utils.getFontSize(20)})
 
     let title = icon
-              ? <Icon name={icon} size={30} color={color} style={styles.icon}/>
+              ? <Icon name={icon} size={30} color={color} style={platformStyles.navBarIcon}/>
               : <Text style={style}>
                   {lbTitle}
                 </Text>
@@ -672,7 +676,16 @@ var NavigationBarRouteMapper = {
     let symbol
     let iconSize = 25
     let bankStyle = route.passProps.bankStyle
-    let iconColor = bankStyle ? bankStyle.linkColor : '#7AAAC3'
+    let iconColor
+    if (bankStyle) {
+      iconColor = bankStyle.navBarColor
+      if (!iconColor)
+        iconColor = bankStyle.linkColor
+    }
+    else
+      iconColor = '#7AAAC3'
+    let color = iconColor
+
     let style = {}
     let isSubmit
     let isProfile
@@ -681,7 +694,8 @@ var NavigationBarRouteMapper = {
     switch (rbTitle) {
     case 'Done':
     case VERIFY_OR_CORRECT:
-      iconColor = '#fff'
+      color = bankStyle  &&  bankStyle.buttonBgColor || iconColor
+      iconColor = bankStyle  &&  bankStyle.buttonColor || '#fff'
       isSubmit = true
       if (route.passProps.isChooser)
         icon = 'md-checkmark'
@@ -692,7 +706,7 @@ var NavigationBarRouteMapper = {
         icon = 'ios-send'
         iconSize = 28
         if (isAndroid)
-          viewStyle = {paddingTop: 10}
+          viewStyle = {paddingTop: 14}
       }
       style = {marginTop: isAndroid ? 2 : -2}
       // style = {marginTop: 5, transform: [
@@ -711,6 +725,7 @@ var NavigationBarRouteMapper = {
       break
     case 'Profile':
       isProfile = true
+      style = {marginTop: isAndroid ? 10 : 0}
       iconSize = 28
       icon = 'md-person'
       break
@@ -732,9 +747,9 @@ var NavigationBarRouteMapper = {
     }
     let title
     if (icon)  {
-      title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={iconColor} style={[styles.icon, style]} />
+      title = <Icon name={icon} size={utils.getFontSize(iconSize)} color={iconColor} style={[platformStyles.navBarIcon, style]} />
       if (isSubmit)
-        title = <View style={[styles.submit, {backgroundColor: bankStyle ? bankStyle.linkColor : '#7AAAC3', justifyContent: 'center'}, platformStyles.navBarRightIcon]}>
+        title = <View style={[styles.submit, {backgroundColor: color, justifyContent: 'center'}, platformStyles.navBarRightIcon]}>
                   {title}
                 </View>
     }
@@ -815,7 +830,7 @@ var NavigationBarRouteMapper = {
     // let noLogo = route.id === RESOURCE_VIEW  &&  route.passProps.resource[TYPE] === PROFILE
     // if (!noLogo) {
     if (bankStyle)
-      photoObj = bankStyle.logo
+      photoObj = bankStyle.barLogo  ||  bankStyle.logo
 
     if (!photoObj)
       photoObj = route.id === MESSAGE_LIST  &&
@@ -843,30 +858,16 @@ var NavigationBarRouteMapper = {
     let st = t.length > 1 ? {marginTop: 2} : {}
     let color
     if (uri) {
-      let width
-      // if (photoObj.width  &&  photoObj.height)
-      //   width = photoObj.width > photoObj.height ? LOGO_HEIGHT * (photoObj.width/photoObj.height) : LOGO_HEIGHT
-      // else
-        width = LOGO_HEIGHT
-
-      let marginTop
-      if (utils.isWeb())
-        marginTop = 2
-      else if (utils.isAndroid())
-        marginTop = t.length > 1 ? 2 : 18 //logoNeedsText ? 18 : 23
-      else
-        marginTop = t.length > 1 ? 0 : 8
-
       if (logoNeedsText)
-        photo = <Image source={{uri: uri}} style={[styles.msgImage, {resizeMode: 'contain', width, marginTop}]} />
+        photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo]} />
       else
-        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, {resizeMode: 'contain', width, marginTop}]} />
+        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo]} />
     }
 
     if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW)  // Camera view
       st.color = color = '#ffffff'
     else if (bankStyle)
-      st.color = color = bankStyle.linkColor
+      st.color = color = bankStyle.navBarColor || bankStyle.linkColor
     else
       color = '#7AAAC3'
 
@@ -882,30 +883,27 @@ var NavigationBarRouteMapper = {
         else if (resource)
           model = utils.getModel(utils.getType(resource))
       }
-      let tstyle = {alignSelf: 'center'}
+
+      let width = navBarTitleWidth(route.component)
       for (let i=1; i<t.length; i++) {
         if (!tArr)
           tArr = []
-        tArr.push(<View style={tstyle} key={'index.common.js_' + i}>
-                    <Text style={[styles.arr, {color: color}]} numberOfLines={1}>{this.makeTitle(t[i])}</Text>
+        tArr.push(<View style={{width}} key={'index.common.js_' + i}>
+                    <Text style={[styles.arr, {color: color}]} numberOfLines={1}>{t[i]}</Text>
                   </View>
                   )
       }
-      if (utils.isAndroid()) {
-        let { width } = utils.dimensions(route.component)
-        tstyle.width = width - 150
-      }
-      let tt = this.makeTitle(t[0])
+      let tstyle = utils.isWeb() ? {} : {width}
       text = <View style={tstyle} key={'index.common.js_0'}>
-               <Text numberOfLines={1} style={style}>{tt}</Text>
+               <Text numberOfLines={1} style={style}>{t[0]}</Text>
              </View>
     }
-
+    let titleStyle = tArr ? platformStyles.navBarMultiRowTitle : styles.navBarMultiRowTitle
     return (
       <View key={'index.common.js'}>
         <View style={{flexDirection: 'row'}}>
           {photo}
-          <View style={{flexDirection: 'column'}}>
+          <View style={titleStyle}>
             {text}
             {tArr}
           </View>
@@ -913,43 +911,12 @@ var NavigationBarRouteMapper = {
         {org}
       </View>
     );
-    // return (
-    //   <View key={'index.common.js'}>
-    //     <Text style={style}>
-    //       {t[0]}
-    //     </Text>
-    //     {tArr}
-    //     {org}
-    //   </View>
-    // );
-
   },
-  makeTitle(title, component) {
-    // if (Platform.OS === 'web')
-      return title
-  //   let { width } = utils.dimensions(component)
-
-  //   let tWidth = width * 0.8
-  //   let numberOfCharsInWidth = tWidth / utils.getFontSize(12)
-  //   if (title.length < numberOfCharsInWidth)
-  //     return title
-  //   title = title.substring(0, numberOfCharsInWidth)
-  //   let i = title.length - 1
-  //   for (; i>=0; i--) {
-  //     let ch  = title.charAt(i)
-  //     if (ch === ' '  ||  ch !== ','  ||  ch === ':'  ||  ch === ';')
-  //       break
-  //   }
-  //   return (i === 0 ? title : title.substring(0, i))  + '...'
-  }
-
 };
 
 var styles = StyleSheet.create({
   msgImage: {
-    // backgroundColor: '#dddddd',
     height: LOGO_HEIGHT,
-    marginRight: 3,
     resizeMode: 'contain',
     marginTop: 2,
     marginLeft: 0,
@@ -957,19 +924,17 @@ var styles = StyleSheet.create({
     // borderRadius: 13,
     // borderColor: '#cccccc',
     // borderWidth: StyleSheet.hairlineWidth
+    width: LOGO_HEIGHT,
   },
   msgImageNoText: {
-    // backgroundColor: '#dddddd',
-    height: 27,
+    height: LOGO_HEIGHT,
+    width: LOGO_HEIGHT * 2,
     resizeMode: 'contain',
-    marginRight: 3,
     marginTop: 7,
     marginLeft: 0,
   },
-  icon: {
-    width: 25,
-    height: 30,
-    marginTop: Platform.OS === 'web' ? 0 : Platform.OS === 'android' ? 10 : 0
+  navBarMultiRowTitle: {
+    flexDirection: 'column',
   },
   row: {
     flexDirection: 'row'
@@ -995,10 +960,8 @@ var styles = StyleSheet.create({
     fontSize: 18
   },
   arr: {
-    // marginTop: -3,
     color: '#2892C6',
     fontSize: 12,
-    // alignSelf: 'center'
   },
   submit: {
     backgroundColor: '#7AAAC3',
@@ -1007,7 +970,6 @@ var styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     paddingRight: 10,
     paddingLeft: 15,
-    // paddingBottom: 5
   }
 });
 

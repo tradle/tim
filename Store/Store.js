@@ -629,7 +629,11 @@ var Store = Reflux.createStore({
         try {
           await process(data)
         } catch (err) {
-          debug('failed to process entry', data, err.stack)
+          debug('failed to process entry', JSON.stringify({
+            data,
+            message: err.message,
+            stack: err.stack
+          }))
         } finally {
           cb()
         }
@@ -2957,7 +2961,8 @@ var Store = Reflux.createStore({
       me: me,
       hasTouchID
     });
-
+    // if (me  &&  me.isEmployee  &&  me.organization.style)
+    //   this.trigger({action: 'customStyles', provider: me.organization})
     await this.maybeRequestUpdate()
   },
   onSetPreferences(preferences) {
@@ -6734,7 +6739,7 @@ if (!res[SIG]  &&  res._message)
     }
     if (!noTrigger)
       noTrigger = filterResource  &&  filterResource._payloadType
-    let newCursor = limit  &&  result[0].pageInfo  &&  result[0].pageInfo.endCursor
+    let newCursor = limit  &&  result  &&  result[0].pageInfo  &&  result[0].pageInfo.endCursor
     if (!noTrigger) {
       let style
       if (application) {
@@ -12429,6 +12434,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   let userId
   try {
     userId = await AsyncStorage.getItem(ANALYTICS_KEY)
+    if (!userId) throw new Error('tracker id not found')
   } catch (err) {
     userId = crypto.randomBytes(32).toString('hex')
     await AsyncStorage.setItem(ANALYTICS_KEY, userId)

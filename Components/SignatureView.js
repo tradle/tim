@@ -12,12 +12,12 @@ import platformStyles from '../styles/platform'
 import {
   Platform,
   View,
-  Text,
+  // Text,
   ScrollView,
   TouchableOpacity
 } from 'react-native'
 import PropTypes from 'prop-types';
-
+import { Text } from './Text'
 import React, { Component } from 'react'
 // import { makeResponsive } from 'react-native-orient'
 import SignaturePad from 'react-native-signature-pad'
@@ -92,6 +92,7 @@ class SignatureView extends Component {
 }
 
 var createStyles = utils.styleFactory(SignatureView, function ({ dimensions, sigViewStyle  }) {
+  let bgcolor = sigViewStyle.buttonBgColor || sigViewStyle.linkColor
   return StyleSheet.create({
     instructions: {
       fontSize: 20,
@@ -116,7 +117,7 @@ var createStyles = utils.styleFactory(SignatureView, function ({ dimensions, sig
       paddingHorizontal: 10,
     },
     submit: {
-      backgroundColor: sigViewStyle.linkColor,
+      backgroundColor: bgcolor,
       flexDirection: 'row',
       justifyContent: 'center',
       width: 250,
@@ -128,7 +129,7 @@ var createStyles = utils.styleFactory(SignatureView, function ({ dimensions, sig
     },
     submitText: {
       fontSize: 20,
-      color: '#ffffff',
+      color: sigViewStyle.buttonColor || '#ffffff',
       alignSelf: 'center'
     },
     clear: {
@@ -141,11 +142,11 @@ var createStyles = utils.styleFactory(SignatureView, function ({ dimensions, sig
       height: 40,
       borderRadius: 15,
       borderWidth: 1,
-      borderColor: sigViewStyle.linkColor
+      borderColor: bgcolor
     },
     clearText: {
       fontSize: 20,
-      color: sigViewStyle.linkColor,
+      color: bgcolor,
       alignSelf: 'center'
     },
     buttons: {

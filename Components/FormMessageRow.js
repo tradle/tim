@@ -16,6 +16,7 @@ import { makeStylish } from './makeStylish'
 
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
+import { Text } from './Text'
 
 const MAX_PROPS_IN_FORM = 1
 const PHOTO = 'tradle.Photo'
@@ -26,7 +27,7 @@ const { IDENTITY, ENUM, VERIFICATION } = constants.TYPES
 var { TYPE, SIG } = constants
 import {
   // StyleSheet,
-  Text,
+  // Text,
   TouchableHighlight,
   View,
   Image
@@ -323,7 +324,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
   let bg = isMyMessage ? bankStyle.myMessageBackgroundColor : bankStyle.sharedWithBg
   let rgb = utils.hexToRgb(bg)
   rgb = Object.values(rgb).join(',')
-  let signedBg = `rgba(${rgb},0.5)`
+  let signedBg = `rgba(${rgb},0.7)`
   let notSignedBg = `rgba(${rgb},0.2)`
   let pageBg = bankStyle.backgroundImage ? {} : {backgroundColor: bankStyle.backgroundColor}
   return StyleSheet.create({

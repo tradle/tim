@@ -1,15 +1,18 @@
 import React, { Component } from 'react'
 import {
   View,
-  Text,
+  // Text,
   TouchableOpacity,
   Image,
-  Alert
+  Alert,
+  Platform
 } from 'react-native'
 import _ from 'lodash'
 const debug = require('debug')('tradle:app:blinkid')
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
+import { scan } from 'react-native-passport-reader'
+import dateformat from 'dateformat'
 
 import constants from '@tradle/constants'
 const {
@@ -23,6 +26,7 @@ const {
   FINANCIAL_PRODUCT
 } = constants.TYPES
 
+import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
@@ -100,24 +104,30 @@ class RefPropertyEditor extends Component {
       else {
         let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
         // let m = utils.getId(resource[pName]).split('_')[0]
-        if (rModel.subClassOf === ENUM)
-          label = utils.translateEnum(resource[pName])
+        if (rModel.subClassOf === ENUM) {
+          if (prop.type === 'array') {
+            let l = resource[pName].map(r => translate(r))
+            label = l.join(',')
+          }
+          else
+            label = utils.translateEnum(resource[pName])
+        }
         else
           label = utils.getDisplayName(resource[pName], rModel)
         if (!label) {
           // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
-          if (utils.isEnum(rModel)  &&  Array.isArray(resource[pName])) {
-            label = ''
-            resource[pName].forEach((r) => {
-              let title = utils.getDisplayName(r)
-              label += label ? ', ' + title : title
-            })
-          }
-          else {
+          // if (utils.isEnum(rModel)  &&  Array.isArray(resource[pName])) {
+          //   label = ''
+          //   resource[pName].forEach((r) => {
+          //     let title = utils.getDisplayName(r)
+          //     label += label ? ', ' + title : title
+          //   })
+          // }
+          // else {
             label = resource[pName].title
             if (!label)
               label = prop.title
-          }
+          // }
         }
         if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
           if (!label)
@@ -146,7 +156,6 @@ class RefPropertyEditor extends Component {
     }
     else
       color = '#AAAAAA'
-    color = {color}
     let propView
     if (photoR) {
       if (utils.isImageDataURL(photoR.url)) {
@@ -164,7 +173,13 @@ class RefPropertyEditor extends Component {
                    </View>
       }
       else {
-        propView = <Text style={[styles.input, color, {width: utils.dimensions(component).width - 60}]}>{label}</Text>
+        let marginTop
+        if (val  ||  !utils.isAndroid())
+          marginTop = 15
+        else
+          marginTop = 15
+        let width = utils.dimensions(component).width - 60
+        propView = <Text style={[styles.input, {marginTop, color, width}]}>{label}</Text>
       }
     }
     // let maxChars = (utils.dimensions(component).width - 20)/10
@@ -312,22 +327,50 @@ class RefPropertyEditor extends Component {
     else
       return '#b1b1b1'
   }
+
+  async scanPassport(resource) {
+    // 1. start a scan
+    // 2. press the back of your android phone against the passport
+    // 3. wait for the scan(...) Promise to get resolved/rejected
+    try {
+      // const {
+      //   firstName,
+      //   lastName,
+      //   gender,
+      //   issuer,
+      //   nationality,
+      //   photo
+      // } =
+      return await scan({
+        // yes, you need to know a bunch of data up front
+        // this is data you can get from reading the MRZ zone of the passport
+        documentNumber: resource.documentNumber,
+        dateOfBirth: dateformat(resource.dateOfBirth, 'yyMMdd'),
+        dateOfExpiry: dateformat(resource.dateOfExpiry, 'yyMMdd')
+      })
+    } catch (err) {
+      debugger
+    }
+  }
   async showBlinkIDScanner(prop) {
     let { resource } = this.props
     const { documentType, country } = resource
     const type = getDocumentTypeFromTitle(documentType.title)
     let recognizers
     let tooltip
+    let isPassport
     switch (type) {
     case 'passport':
       tooltip = translate('centerPassport')
+      isPassport = true
       // machine readable travel documents (passport)
       recognizers = BlinkID.recognizers.mrtd
       break
     case 'card':
       tooltip = translate('centerIdCard')
       // machine readable travel documents (passport)
-      recognizers = BlinkID.recognizers.mrtd
+      // should be combined
+      recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
       // recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
       break
     case 'license':
@@ -351,14 +394,15 @@ class RefPropertyEditor extends Component {
       // quality: 0.2,
       // base64: true,
       // timeout: ENV.blinkIDScanTimeoutInternal,
+      documentType,
       country,
       tooltip,
       recognizers: recognizers ? [].concat(recognizers) : BlinkID.recognizers
     }
 
-    const promiseTimeout = new Promise((resolve, reject) => {
-      setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
-    })
+    // const promiseTimeout = new Promise((resolve, reject) => {
+    //   setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
+    // })
 
     Analytics.sendEvent({
       category: 'widget',
@@ -368,25 +412,26 @@ class RefPropertyEditor extends Component {
 
     let result
     try {
-      result = await Promise.race([
-        BlinkID.scan(blinkIDOpts),
-        promiseTimeout
-      ])
+      result = await BlinkID.scan(blinkIDOpts)
+      // result = await Promise.race([
+      //   BlinkID.scan(blinkIDOpts),
+      //   promiseTimeout
+      // ])
     } catch (err) {
       debug('scan failed:', err.message)
       debugger
 
-      const canceled = /canceled/i.test(err.message)
-      const timedOut = !canceled && /time/i.test(err.message)
-      if (!canceled && typeof BlinkID.dismiss === 'function') {
-        // cancel programmatically
-        BlinkID.dismiss()
-      }
+      // const canceled = /canceled/i.test(err.message)
+      // const timedOut = !canceled && /time/i.test(err.message)
+      // if (!canceled && typeof BlinkID.dismiss === 'function') {
+      //   // cancel programmatically
+      //   BlinkID.dismiss()
+      // }
 
       // give the BlinkID view time to disappear
       // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
-      await utils.promiseDelay(800)
-      debug('BlinkID scan failed', err.stack)
+      // await utils.promiseDelay(800)
+      // debug('BlinkID scan failed', err.stack)
 
       // if (canceled || timedOut) {
       //   return Alert.alert(
@@ -395,14 +440,14 @@ class RefPropertyEditor extends Component {
       //   )
       // }
 
-      if (canceled) return
+      // if (canceled) return
 
-      return Alert.alert(
-        translate('documentNotScanning'),
-        translate('retryScanning', documentType.title)
-      )
+      // return Alert.alert(
+      //   translate('documentNotScanning'),
+      //   translate('retryScanning', documentType.title)
+      // )
     }
-
+// debugger
     if (!result)
       return
 
@@ -427,21 +472,17 @@ class RefPropertyEditor extends Component {
     if (docScannerProps  &&  docScannerProps.length)
       r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
 
-    let dateOfExpiry
+    let dateOfExpiry, dateOfBirth, documentNumber
     ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl'].some(docType => {
       const scan = result[docType]
       if (!scan) return
 
       const { personal, document } = scan
-      // if (personal.dateOfBirth) {
-      //   personal.dateOfBirth = formatDate(personal.dateOfBirth)
-      // }
-
-      if (document.dateOfExpiry) {
+      documentNumber = document.documentNumber
+      if (document.dateOfExpiry)
         dateOfExpiry = document.dateOfExpiry
-        // document.dateOfExpiry = formatDate(document.dateOfExpiry)
-      }
-
+      if (personal.dateOfBirth)
+        dateOfBirth = personal.dateOfBirth
       // if (document.dateOfIssue) {
       //   document.dateOfIssue = formatDate(document.dateOfIssue)
       // }
@@ -461,6 +502,11 @@ class RefPropertyEditor extends Component {
 
       return
     }
+    // let chipScan
+    // if (isPassport  &&  Platform.OS === 'android') {
+    //   Alert.alert('Please press the back of your android phone against the passport')
+    //   chipScan = await this.scanPassport({documentNumber, dateOfBirth, dateOfExpiry})
+    // }
 
     this.afterScan(r, prop)
   }

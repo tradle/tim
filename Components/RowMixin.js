@@ -9,7 +9,7 @@ import CustomIcon from '../styles/customicons'
 import CameraView from './CameraView'
 var cnt = 0;
 import {
-  Text,
+  // Text,
   View,
   Alert,
   Platform,
@@ -17,14 +17,15 @@ import {
 } from 'react-native'
 import { coroutine as co } from 'bluebird'
 
-import utils, { translate, translateEnum } from '../utils/utils'
 import constants from '@tradle/constants'
+
+import utils, { translate, translateEnum } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
-var cnt = 0;
 import Navigator from './Navigator'
 import ENV from '../utils/env'
 import IProov from '../utils/iproov'
+import { Text } from './Text'
 
 const SHOW_TIME_INTERVAL = 60000
 const DEFAULT_CURRENCY_SYMBOL = '£'
@@ -51,6 +52,8 @@ var {
   ENUM,
   FORM
 } = constants.TYPES
+
+var cnt = 0;
 
 var RowMixin = {
   addDateProp(dateProp, style) {
@@ -148,7 +151,7 @@ var RowMixin = {
       if  (photo) {
         let uri = utils.getImageUri(photo.url)
         photo = <View style={{paddingRight: 3}}>
-                  <Image source={{uri: uri}} style={styles.cellRoundImage} />
+                  <Image source={{uri: uri}} resizeMode='contain' style={styles.cellRoundImage} />
                 </View>
         return photo
       }
@@ -233,19 +236,19 @@ var RowMixin = {
         msg = <Text style={styles.sentStatus}>{utils.formatDate(resource._sentTime)}</Text>
     }
     else
-        msg = <Text style={styles.sentStatus}>{translate(sendStatus)}</Text>
+      msg = <Text style={styles.sentStatus}>{translate(sendStatus)}</Text>
 
     let routes = this.props.navigator.getCurrentRoutes()
-    let w = utils.dimensions(routes[routes.length - 1].component).width
-    let msgWidth = Math.min(Math.floor(w * 0.8), 600)
+    let msgWidth = utils.getMessageWidth(routes[routes.length - 1].component)
 
     let isMyMessage = this.isMyMessage();
+    let isShared = !isMyMessage  &&  this.isShared()
 
     let view = <View style={styles.sendStatus}>
                  {msg}
                  {icon}
                </View>
-    if (isMyMessage)
+    if (isMyMessage  ||  isShared)
       return view
     return <View style={{width: msgWidth}}>
              {view}

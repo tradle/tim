@@ -54,7 +54,7 @@ class MyProductMessageRow extends Component {
     let ret = this.formatRow(isMyMessage, renderedRow);
     let onPressCall = ret ? ret.onPressCall : null
 
-    let addStyle = [chatStyles.verificationBody, {backgroundColor: bankStyle.productBgColor , borderColor: bankStyle.confirmationColor}];
+    let addStyle = [chatStyles.verificationBody, {borderColor: bankStyle.productBgColor}];
     // let rowStyle = [chatStyles.row,  {backgroundColor: bankStyle.backgroundColor}];
     let val = this.getTime(resource);
     let date = val
@@ -63,7 +63,7 @@ class MyProductMessageRow extends Component {
 
     // let viewStyle = {flexDirection: 'row', alignSelf: 'flex-start', width: DeviceWidth - 50};
 
-    let hdrStyle = {backgroundColor: '#289427', paddingVertical: 5} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
+    let hdrStyle = {backgroundColor: bankStyle.productBgColor || '#289427', paddingVertical: 5} //this.props.bankStyle.PRODUCT_BG_COLOR ? {backgroundColor: this.props.bankStyle.PRODUCT_BG_COLOR} : {backgroundColor: '#289427'}
     let orgName = resource.from.organization  ? resource.from.organization.title : ''
 
     let w = utils.dimensions(MyProductMessageRow).width
@@ -83,7 +83,7 @@ class MyProductMessageRow extends Component {
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
 
-    renderedRow.push(<Text  key={this.getNextKey()} style={[chatStyles.formType, {color: '#289427'}]}>{title}</Text>);
+    renderedRow.push(<Text  key={this.getNextKey()} style={[chatStyles.formType, {color: bankStyle.productBgColor  ||  '#289427'}]}>{title}</Text>);
     let rowStyle = addStyle ? [chatStyles.textContainer, addStyle] : chatStyles.textContainer
     // let width = Math.floor(utils.dimensions().width * 0.7)
     let width = utils.getMessageWidth(MyProductMessageRow)
@@ -141,7 +141,7 @@ class MyProductMessageRow extends Component {
     let onPressCall;
 
     let cnt = 0;
-
+    let { bankStyle, onSelect } =  this.props
     let vCols = [];
     viewCols.forEach((v) => {
       if (properties[v].type === 'array'  ||  properties[v].type === 'date')
@@ -156,7 +156,7 @@ class MyProductMessageRow extends Component {
       }
       let style = chatStyles.description; //resourceTitle; //(first) ? styles.resourceTitle : styles.description;
       if (isMyMessage)
-        style = [style, {justifyContent: 'flex-end', color: '#2892C6'}];
+        style = [style, {justifyContent: 'flex-end', color: bankStyle.productBgColor || '#289427'}];
 
       if (resource[v]                      &&
           properties[v].type === 'string'  &&
@@ -174,7 +174,7 @@ class MyProductMessageRow extends Component {
         // if (model.properties.verifications  &&  !isMyMessage)
         //   onPressCall = this.verify.bind(this);
         if (!isMyMessage)
-          style = [style, {paddingBottom: 10, color: '#2892C6'}];
+          style = [style, {paddingBottom: 10, color: bankStyle.productBgColor || '#289427'}];
         vCols.push(this.getPropRow(properties[v], resource, val))
       }
       else {
@@ -183,12 +183,11 @@ class MyProductMessageRow extends Component {
         let isConfirmation = resource[v].indexOf('Congratulations!') !== -1
 
         if (isConfirmation) {
-          style = [style, {color: this.props.bankStyle.confirmationColor, fontSize: 18}]
+          style = [style, {color: bankStyle.confirmationColor, fontSize: 18}]
           vCols.push(
             <View key={this.getNextKey()}>
               <Text style={[style]}>{resource[v]}</Text>
-              <Icon style={[{color: this.props.bankStyle.confirmationColor}, styles.flower]} size={50} name={'ios-flower'} />
-              <Icon style={{color: this.props.bankStyle.confirmationColor}, styles.done} size={30} name={'ios-done-all'} />
+              <Icon style={{color: bankStyle.confirmationColor}, styles.done} size={30} name={'ios-done-all'} />
             </View>
           );
 
@@ -208,7 +207,7 @@ class MyProductMessageRow extends Component {
     }
     if (onPressCall)
       return {onPressCall: onPressCall}
-    return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+    return {onPressCall: onSelect.bind(this, resource, null)}
   }
 }
 

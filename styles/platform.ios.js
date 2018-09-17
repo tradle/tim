@@ -3,6 +3,7 @@
 import DeviceInfo from 'react-native-device-info'
 import StyleSheet from '../StyleSheet'
 import { circled } from './utils'
+import { dimensions } from '../utils/utils'
 
 const deviceID = DeviceInfo.getDeviceId()
 const isIphone10 = deviceID  &&  deviceID.indexOf('iPhone10') === 0
@@ -30,7 +31,7 @@ export default StyleSheet.create({
     marginTop: isIphone10 ? 15 : 0,
   },
   navBarText: {
-    marginTop: 10,
+    marginTop: 8,
     fontSize: 17
   },
   navBarLeftButton: {
@@ -54,6 +55,16 @@ export default StyleSheet.create({
     marginTop: 10,
     marginLeft: 15,
     alignSelf: 'flex-start'
+  },
+  logo: {
+    marginTop: 8
+  },
+  navBarMultiRowTitle: {
+    flexDirection: 'column'
+  },
+  navBarIcon: {
+    width: 25,
+    height: 25,
   }
 })
 
@@ -73,6 +84,9 @@ export const MenuIcon = {
   color: '#ffffff'
 }
 
+export function navBarTitleWidth(component) {
+  return dimensions(component).width - 150
+}
 // Object.defineProperty(exports, 'MB', {
 //   icon: 'md-more',
 //   color: '#ffffff'

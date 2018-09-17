@@ -4,7 +4,7 @@ console.log('requiring FormRequestRow.js')
 import {
   Image,
   // StyleSheet,
-  Text,
+  // Text,
   TouchableOpacity,
   Alert,
   View,
@@ -24,6 +24,7 @@ const debug = require('debug')('tradle:app:FormRequestRow')
 
 import constants from '@tradle/constants'
 
+import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import NewResource from './NewResource'
 import RemediationItemsList from './RemediationItemsList'
@@ -1301,9 +1302,9 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     },
     shareButton: {
       ...circled(40),
-      backgroundColor: bankStyle.linkColor,
+      backgroundColor: bankStyle.buttonBgColor || bankStyle.linkColor,
       shadowOpacity: 0.7,
-      opacity: 0.9,
+      opacity: 1,
       shadowRadius: 5,
       shadowColor: '#afafaf',
     },
@@ -1313,7 +1314,7 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       shadowOpacity: 0.7,
       shadowRadius: 5,
       shadowColor: '#afafaf',
-      borderColor: bankStyle.linkColor,
+      borderColor: bankStyle.buttonBgColor || bankStyle.linkColor,
       borderWidth: StyleSheet.hairlineWidth,
     },
     // myProductSeparator: {

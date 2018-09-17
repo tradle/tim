@@ -108,7 +108,7 @@ class VerificationMessageRow extends Component {
 
     let verifiedBy = isShared ? translate('youShared', orgName) : translate('verifiedBy', orgName)
 
-    var msgWidth = utils.getMessageWidth(VerificationMessageRow)
+    let msgWidth = utils.getMessageWidth(VerificationMessageRow)
     // if (isReadOnlyChat || application)
     //   msgWidth -= 50 // provider icon and padding
     // let numberOfCharacters = msgWidth / 12
@@ -199,8 +199,6 @@ class VerificationMessageRow extends Component {
     }
     else
       shareWith = <View/>
-    let flowerStyle = {position: 'absolute', right: 0, top: -15}
-    // let flowerStyle = {position: 'absolute', right: isReadOnlyChat || application ? -50 : 0, top: -15}
     let messageBody =
           <TouchableOpacity onPress={this.verify.bind(this, resource)} style={{marginTop: 10}}>
             <View style={styles.messageBody}>
@@ -213,10 +211,9 @@ class VerificationMessageRow extends Component {
                     {shareWith}
                   </View>
                 </View>
-                 <Icon name='ios-flower-outline' size={40} color={bankStyle.verifiedBorderColor} style={flowerStyle} />
               </View>
-              {this.getSendStatus()}
             </View>
+              {this.getSendStatus()}
           </TouchableOpacity>
 
                   // <View style={[{flex: 1, backgroundColor: 'transparent', borderRadius: 10, borderWidth: 1, borderColor: '#D4D4B8'}, isMyMessage ? {borderTopRightRadius: 0} : {borderTopLeftRadius: 0}]}>

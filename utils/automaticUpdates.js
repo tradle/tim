@@ -1,11 +1,10 @@
-console.log('requiring automaticUpdates.js')
-
 import { AsyncStorage, Alert } from 'react-native'
+import Debug from 'debug'
 import utils from './utils'
 import Actions from '../Actions/Actions'
 
-let CodePush = !__DEV__ && !utils.isSimulator() && !utils.isWeb() && require('react-native-code-push')
-// if (CodePush) CodePush.notifyAppReady()
+const debug = Debug('tradle:auto-update')
+let CodePush = !__DEV__ && !utils.isWeb() && require('react-native-code-push')
 
 let ON = !!CodePush
 let CHECKING
@@ -97,6 +96,7 @@ function sync (opts={}) {
   .then(
     syncStatus => {
       if (syncStatus === CodePush.SyncStatus.UPDATE_INSTALLED) {
+        debug('downloaded update')
         return AsyncStorage.setItem(CODE_UPDATE_KEY, '1')
           .then(() => {
             downloadedUpdate = true
