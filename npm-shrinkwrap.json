@@ -6492,9 +6492,9 @@
       "resolved": "git://github.com/tradle/react-native-prompt.git#4c0fc06ea1860e423c220ce034cbade4e1080aa2"
     },
     "react-native-push-notification": {
-      "version": "3.0.2",
-      "from": "react-native-push-notification@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-push-notification/-/react-native-push-notification-3.0.2.tgz"
+      "version": "3.1.1",
+      "from": "react-native-push-notification@>=3.1.0 <3.2.0",
+      "resolved": "https://registry.npmjs.org/react-native-push-notification/-/react-native-push-notification-3.1.1.tgz"
     },
     "react-native-qrcode": {
       "version": "0.2.6",
@@ -6502,9 +6502,9 @@
       "resolved": "https://registry.npmjs.org/react-native-qrcode/-/react-native-qrcode-0.2.6.tgz"
     },
     "react-native-randombytes": {
-      "version": "3.2.0",
-      "from": "react-native-randombytes@>=3.1.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-randombytes/-/react-native-randombytes-3.2.0.tgz"
+      "version": "3.5.1",
+      "from": "react-native-randombytes@latest",
+      "resolved": "https://registry.npmjs.org/react-native-randombytes/-/react-native-randombytes-3.5.1.tgz"
     },
     "react-native-scrollable-mixin": {
       "version": "1.0.1",
