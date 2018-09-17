@@ -1,6 +1,7 @@
 'use strict';
 
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
+import { dimensions } from '../utils/utils'
 
 export default StyleSheet.create({
   container: {
@@ -28,8 +29,24 @@ export default StyleSheet.create({
     marginTop: 10,
     marginLeft: 15,
     alignSelf: 'flex-start'
+  },
+  logo: {
+    marginTop: 2
+  },
+  navBarMultiRowTitle: {
+    flexDirection: 'column',
+    marginTop: 0
+  },
+  navBarIcon: {
+    width: 25,
+    height: 25,
+    // marginTop: 10
   }
 })
+
+export function navBarTitleWidth(component) {
+  return dimensions(component).width - 150
+}
 
 export {
   MenuIcon,
