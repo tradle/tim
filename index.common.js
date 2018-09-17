@@ -91,7 +91,7 @@ import QRCodeScanner from './Components/QRCodeScanner'
 import Log from './Components/Log'
 import HomePageMixin from './Components/HomePageMixin'
 import MatchImages from './Components/MatchImages'
-import VideoCamera from './Components/VideoCamera'
+// import VideoCamera from './Components/VideoCamera'
 
 import utils from './utils/utils'
 var translate = utils.translate
@@ -885,15 +885,18 @@ var NavigationBarRouteMapper = {
       }
 
       let width = navBarTitleWidth(route.component)
+      let st = {width}
+      if (utils.isWeb())
+        st.paddingLeft = 5
       for (let i=1; i<t.length; i++) {
         if (!tArr)
           tArr = []
-        tArr.push(<View style={{width}} key={'index.common.js_' + i}>
+        tArr.push(<View style={st} key={'index.common.js_' + i}>
                     <Text style={[styles.arr, {color: color}]} numberOfLines={1}>{t[i]}</Text>
                   </View>
                   )
       }
-      let tstyle = utils.isWeb() ? {} : {width}
+      let tstyle = utils.isWeb() ? {paddingLeft: 5} : {width}
       text = <View style={tstyle} key={'index.common.js_0'}>
                <Text numberOfLines={1} style={style}>{t[0]}</Text>
              </View>
