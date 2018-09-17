@@ -932,5 +932,4 @@ var styles = StyleSheet.create({
   }
 });
 
-ResourceRow = makeResponsive(ResourceRow)
 module.exports = ResourceRow;
