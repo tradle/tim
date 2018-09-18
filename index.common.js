@@ -11,7 +11,6 @@ var ReactPerf //= __DEV__ && require('ReactPerf')
 import SplashScreen from 'react-native-splash-screen'
 import 'stream'
 import debounce from 'debounce'
-import _ from 'lodash'
 import Navigator from './Components/Navigator'
 import {
   Image,
@@ -57,7 +56,7 @@ import GridList from './Components/GridList'
 import TimHome from './Components/TimHome'
 import MarkdownPropertyEdit from './Components/MarkdownPropertyEdit'
 import SignatureView from './Components/SignatureView'
-import AvivaIntroView from './Components/AvivaIntroView'
+// import AvivaIntroView from './Components/AvivaIntroView'
 import TourPage from './Components/TourPage'
 import SplashPage from './Components/SplashPage'
 
@@ -86,7 +85,7 @@ import QRCodeScanner from './Components/QRCodeScanner'
 import Log from './Components/Log'
 import HomePageMixin from './Components/HomePageMixin'
 import MatchImages from './Components/MatchImages'
-import VideoCamera from './Components/VideoCamera'
+// import VideoCamera from './Components/VideoCamera'
 
 import utils from './utils/utils'
 var translate = utils.translate
@@ -133,10 +132,10 @@ import Analytics from './utils/analytics'
 var UNAUTHENTICATE_AFTER_BG_MILLIS = require('./utils/localAuth').TIMEOUT
 
 const landingPageMapping = {
-  AvivaIntroView: {
-    component: AvivaIntroView,
-    id: AVIVA_INTRO_VIEW
-  },
+  // AvivaIntroView: {
+  //   component: AvivaIntroView,
+  //   id: AVIVA_INTRO_VIEW
+  // },
   TourPage: {
     component: TourPage,
     id: TOUR_PAGE
@@ -553,8 +552,8 @@ class TiMApp extends Component {
       return <RemediationItemsList navigator={nav} {...props} />
     // case 30:
     //   return <HomePage navigator={nav} {...props} />
-    case AVIVA_INTRO_VIEW:
-      return <AvivaIntroView navigator={nav} {...props} />
+    // case AVIVA_INTRO_VIEW:
+    //   return <AvivaIntroView navigator={nav} {...props} />
     case 30:
       return <GridList navigator={nav} {...props} />
     case 31:
