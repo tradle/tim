@@ -1355,6 +1355,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       flex: 1,
       justifyContent: 'flex-end',
       alignItems: 'flex-end',
+      paddingBottom: 2
       // paddingRight: 5
     },
     itemButton: {

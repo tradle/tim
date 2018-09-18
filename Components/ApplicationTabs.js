@@ -4,7 +4,7 @@ console.log('requiring ApplicationTabs.js')
 import { makeResponsive } from 'react-native-orient'
 import {
   View,
-  Text,
+  // Text,
   StyleSheet,
   TouchableOpacity,
   Platform,
@@ -15,6 +15,7 @@ import React, { Component } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import ScrollableTabView from 'react-native-scrollable-tab-view'
 
+import { Text } from './Text'
 import ProgressBar from './ProgressBar'
 import constants from '@tradle/constants'
 import utils, {

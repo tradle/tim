@@ -3,7 +3,7 @@ console.log('requiring NewResourceMixin.js')
 
 import React from 'react'
 import {
-  Text,
+  // Text,
   View,
   TouchableOpacity,
   Platform,
@@ -28,6 +28,7 @@ const debug = require('debug')('tradle:app:blinkid')
 import constants from '@tradle/constants'
 
 import Navigator from './Navigator'
+import { Text, getFontMapping } from './Text'
 import GridList from './GridList'
 import utils, {
   translate
@@ -57,8 +58,6 @@ const {
   ROOT_HASH
 } = constants
 
-const COUNTRY = 'tradle.Country'
-const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
 const INTERSECTION = 'tradle.Intersection'
 
 const PHOTO = 'tradle.Photo'
@@ -66,8 +65,6 @@ const YEAR = 3600 * 1000 * 24 * 365
 const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
-const FOCUSED_LABEL_COLOR = '#7AAAC3'// #139459'
-const TIMEOUT_ERROR = new Error('timed out')
 
 var cnt = 0;
 var propTypesMap = {
@@ -78,12 +75,6 @@ var propTypesMap = {
 };
 
 const DEFAULT_LINK_COLOR = '#a94442'
-// import transform from 'tcomb-json-schema'
-// var DEFAULT_BLINK_ID_OPTS = {
-//   mrtd: { showFullDocument: true },
-//   eudl: { showFullDocument: true },
-//   usdl: {}
-// }
 
 var NewResourceMixin = {
   onScroll(e) {
@@ -731,6 +722,7 @@ var NewResourceMixin = {
       if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
         lStyle = [lStyle, {marginTop: 0}]
     // }
+
     let lcolor = this.getLabelAndBorderColor(prop.name)
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
@@ -740,11 +732,13 @@ var NewResourceMixin = {
     // Especially for money type props
     if (!help)
       st.flex = 5
+    let { bankStyle } = this.props
+    let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.name !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     return (
       <View style={st}>
         <FloatLabel
-          labelStyle={[lStyle, {color: lcolor}]}
+          labelStyle={[lStyle, fontF, {color: lcolor}]}
           autoCorrect={false}
           multiline={multiline}
           editable={editable}
@@ -1586,7 +1580,7 @@ var styles= StyleSheet.create({
     alignSelf: 'stretch'
   },
   chooserContainer: {
-    minHeight: 60,
+    minHeight: 55,
     marginTop: 10,
     borderColor: '#ffffff',
     // borderBottomColor: '#cccccc',
@@ -1667,7 +1661,12 @@ var styles= StyleSheet.create({
   photoIcon: {
     position: 'absolute',
     right: 0,
-    marginTop: 15
+    bottom: 3
+  },
+  photoIconEmpty: {
+    position: 'absolute',
+    right: 0,
+    marginTop: 12
   },
   input: {
     backgroundColor: 'transparent',
