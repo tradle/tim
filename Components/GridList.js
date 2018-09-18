@@ -41,6 +41,7 @@ import PageView from './PageView'
 import uiUtils from './uiUtils'
 import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
+import NotFoundRow from './NotFoundRow'
 import utils, {
   translate
 } from '../utils/utils'
@@ -901,12 +902,12 @@ class GridList extends Component {
       }
     }
     // Edit verifications
-    // let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
-    // if (!canEdit  &&  !isVerification)
-    //   canEdit = utils.isMyMessage({resource})
+    let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
+    if (!canEdit  &&  !isVerification)
+      canEdit = utils.isMyMessage({resource})
     // if ((!isStub  &&  !isVerification)  ||  canEdit  ||  utils.isMyMessage({resource})) {
     // if (canEdit) {
-    if (!isStub  ||  utils.isMyMessage({resource})) {
+    if (!isStub  &&  canEdit) { //||  utils.isMyMessage({resource})) {
       _.extend(route, {
         rightButtonTitle: 'Edit',
         onRightButtonPress: {
@@ -1546,7 +1547,7 @@ class GridList extends Component {
     let { search, _readOnly, officialAccounts } = this.props
 
     if (SearchBar  &&  !isBacklink  &&  !isForwardlink) {
-      let hasSearch = isModel
+      let hasSearch = isModel  ||  utils.isEnum(model)
       if (!hasSearch  && !search) {
         hasSearch = !_readOnly  ||  !utils.isContext(modelName)
         if (hasSearch)
