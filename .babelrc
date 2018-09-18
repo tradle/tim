@@ -15,6 +15,21 @@
         'check-es2015-constants',
         'transform-es2015-destructuring',
         ['./inline-requires.js', { strict: false, allowTopLevelThis: true }],
+        ['module-resolver', {
+          // dedupe: true,
+          extensions: [".js", "*.jsx"],
+          aliasFields: ['browser', 'react-native'],
+          alias: {
+            // misc
+            q: 'bluebird-q',
+            scrypt: 'scrypt.js/js.js',
+            sha3: 'browserify-sha3',
+            // dangerous, we're assuming it's the only place
+            'utf-8-validate': 'ws/lib/Validation.fallback.js',
+            bufferutil: './non-existent-module.js',
+            // 'nkey-bitcoin': './non-existent-module.js',
+          }
+        }],
         'transform-es2015-parameters',
         'transform-es2015-shorthand-properties',
         'transform-es2015-spread',
@@ -34,6 +49,7 @@
           method: 'coroutine'
         }],
         ['transform-es2015-for-of', { loose: true }],
+        // 'lodash',
       ]
     },
     development: {
@@ -50,6 +66,21 @@
         'check-es2015-constants',
         'transform-es2015-destructuring',
         ['./inline-requires.js', { strict: false, allowTopLevelThis: true }],
+        ['module-resolver', {
+          // dedupe: true,
+          extensions: [".js", "*.jsx"],
+          aliasFields: ['browser', 'react-native'],
+          alias: {
+            // misc
+            q: 'bluebird-q',
+            scrypt: 'scrypt.js/js.js',
+            sha3: 'browserify-sha3',
+            // dangerous, we're assuming it's the only place
+            'utf-8-validate': 'ws/lib/Validation.fallback.js',
+            bufferutil: './non-existent-module.js',
+            // 'nkey-bitcoin': './non-existent-module.js',
+          }
+        }],
         'transform-es2015-parameters',
         'transform-es2015-shorthand-properties',
         'transform-es2015-spread',
@@ -69,6 +100,7 @@
           method: 'coroutine'
         }],
         ['transform-es2015-for-of', { loose: true }],
+        // 'lodash',
       ]
     }
   }
