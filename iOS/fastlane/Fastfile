@@ -31,6 +31,9 @@ platform :ios do
     ENV['WORKSPACE'] = "./Tradle.xcworkspace"
     ENV['CODE_PUSH_APP_NAME_IOS'] = 'tim-ios'
     ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
+  end
+
+  private_lane :build_prereq do
     clean_build_artifacts
     cocoapods
     sh "../../scripts/fix-staging.js"
@@ -39,6 +42,7 @@ platform :ios do
   end
 
   private_lane :inc_version do |options|
+    build_prereq
     part = options[:part]
     sh "../../scripts/version_ios.sh #{options[:part]}"
     message = "iOS release (#{options[:part]})"
@@ -101,6 +105,8 @@ platform :ios do
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta do |options|
+    build_prereq
+    options[:prebuilt] = true
     beta_testflight(options)
     unless options[:dry_run]
       upload_to_fabric(options)
@@ -110,6 +116,10 @@ platform :ios do
   desc "Submit a new Beta Build to Apple TestFlight"
   desc "This will also make sure the profile is up to date"
   lane :beta_testflight do |options|
+    unless options[:prebuilt]
+      build_prereq
+    end
+
     unless options[:dry_run]
       ensure_build_not_in_testflight
     end
@@ -196,7 +206,10 @@ platform :ios do
 
   desc "Submit a new release to Crashlytics (Fabric)"
   lane :beta_fabric do |options|
-    cocoapods
+    unless options[:prebuilt]
+      build_prereq
+    end
+
     # build your iOS app
     # match(
     #   force_for_new_devices: true

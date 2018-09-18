@@ -106,3 +106,4 @@ Store/utils/
 version.json
 *.dSYM.zip
 *.sh1
+iOS/ZoomAuthenticationHybrid.framework
