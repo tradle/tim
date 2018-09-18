@@ -250,10 +250,10 @@ AWSClient.CONNECT_TIMEOUT = 10000
 
 import dns from 'dns'
 import map from 'map-stream'
-import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
+// import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet
-import createKeeper from '@tradle/keeper'
-import cachifyKeeper from '@tradle/keeper/cachify'
+// import createKeeper from '@tradle/keeper'
+import { createKeeper } from '../utils/keeper'
 import Restore from '@tradle/restore'
 import crypto from 'crypto'
 import { loadOrCreate as loadYuki } from './yuki'
@@ -1087,14 +1087,13 @@ var Store = Reflux.createStore({
     //   }
     // })
 
-    let keeper = createKeeper({
+    const keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
       db: asyncstorageDown,
-      encryption: encryption
-    })
-
-    cachifyKeeper(keeper, {
-      max: 100
+      encryption: encryption,
+      caching: {
+        max: 100,
+      }
     })
 
     const { wsClients, restoreMonitors, identifierProp } = driverInfo
