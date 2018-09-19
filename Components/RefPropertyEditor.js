@@ -109,8 +109,13 @@ class RefPropertyEditor extends Component {
             let l = resource[pName].map(r => translate(r))
             label = l.join(',')
           }
-          else
-            label = utils.translateEnum(resource[pName])
+          else {
+            let val = resource[pName]
+            if (Array.isArray(val))
+              label = val.map(r => utils.translateEnum(r)).join(',')
+            else
+              label = utils.translateEnum(val)
+          }
         }
         else
           label = utils.getDisplayName(resource[pName], rModel)
@@ -158,7 +163,7 @@ class RefPropertyEditor extends Component {
       color = '#AAAAAA'
     let propView
     if (photoR)
-      propView = <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5, marginTop: 15}]} />
+      propView = <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
     else {
       let img = photo
       if (img) {
@@ -168,13 +173,13 @@ class RefPropertyEditor extends Component {
                    </View>
       }
       else {
-        let marginTop
-        if (val  ||  !utils.isAndroid())
-          marginTop = 15
-        else
-          marginTop = 15
+        let marginTop = 15
+        // if (val  ||  !utils.isAndroid())
+        //   marginTop = 15
+        // else
+        //   marginTop = 15
         let width = utils.dimensions(component).width - 60
-        propView = <Text style={[styles.input, {marginTop, color, width}]}>{label}</Text>
+        propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
       }
     }
     // let maxChars = (utils.dimensions(component).width - 20)/10
@@ -191,9 +196,9 @@ class RefPropertyEditor extends Component {
       if (isVideo)
         icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
       else if (isPhoto)
-        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={styles.photoIcon}/>
+        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
       else if (isIdentity)
-        icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={styles.photoIcon}/>
+        icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
       else
         icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={styles.customIcon} />
     }
@@ -212,7 +217,7 @@ class RefPropertyEditor extends Component {
       // HACK
       const isScan = pName === 'scan'
       let useImageInput
-      if (utils.isWeb()) {
+      if (utils.isWeb()  ||  utils.isSimulator()) {
         useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
       } else {
         useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
@@ -248,7 +253,7 @@ class RefPropertyEditor extends Component {
     );
   }
   onSetMediaProperty(propName, item) {
-    debugger
+    // debugger
     if (!item)
       return;
     let { model, floatingProps, resource } = this.props
