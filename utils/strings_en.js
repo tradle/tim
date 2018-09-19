@@ -263,7 +263,7 @@ module.exports = {
     "createManualMatchCheck": "Create manual match check",
     "tryProviderQrCode": "Only Provider\'s QR code you can scan here. Please try again",
     "inProcess": "In process...",
-    "inProgress": "'In progress...",
+    "inProgress": "In progress...",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
