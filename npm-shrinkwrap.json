@@ -409,9 +409,9 @@
       }
     },
     "@tradle/aws-client": {
-      "version": "1.10.2",
-      "from": "tradle/aws-client#dev",
-      "resolved": "git://github.com/tradle/aws-client.git#7a8d5790fc239086a4922656b592a26f4714afa9",
+      "version": "2.0.0",
+      "from": "@tradle/aws-client@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-2.0.0.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",

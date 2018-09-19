@@ -241,13 +241,6 @@ const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 
 import AWSClient from '@tradle/aws-client'
-
-// increase timeouts
-AWSClient.CLOSE_TIMEOUT = 2000
-AWSClient.SEND_TIMEOUT = 10000
-AWSClient.CATCH_UP_TIMEOUT = 10000
-AWSClient.CONNECT_TIMEOUT = 10000
-
 import dns from 'dns'
 import map from 'map-stream'
 // import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
@@ -1886,7 +1879,14 @@ var Store = Reflux.createStore({
         permalink: node.permalink,
         provider
       }),
-      retryOnSend: 3 // then give up and re-queue
+      retryOnSend: 3, // then give up and re-queue
+      timeouts: {
+        close: 2000,
+        send: 10000,
+        catchUp: 10000,
+        connect: 10000,
+        auth: 10000,
+      },
     })
 
     const checkMissing = (() => {
