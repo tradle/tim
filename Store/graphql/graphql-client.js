@@ -212,14 +212,27 @@ var search = {
           if (Array.isArray(val)) {
             if (!val.length)
               continue
-            let s = `${p}___permalink: [`
-            val.forEach((r, i) => {
-              if (i)
-                s += ', '
-              s += `"${r[ROOT_HASH]}"`
-            })
-            s += ']'
-            inClause.push(s)
+            let isEnum = props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM
+            if (isEnum) {
+              let s = `${p}__id: [`
+              val.forEach((r, i) => {
+                if (i)
+                  s += ', '
+                s += `"${r.id}"`
+              })
+              s += ']'
+              inClause.push(s)
+            }
+            else {
+              let s = `${p}___permalink: [`
+              val.forEach((r, i) => {
+                if (i)
+                  s += ', '
+                s += `"${r[ROOT_HASH]}"`
+              })
+              s += ']'
+              inClause.push(s)
+            }
           }
           else {
             if (props[p].ref === MONEY) {
@@ -313,10 +326,11 @@ var search = {
           query: gql(`${query}`),
           variables: versionId  &&  {modelsVersionId: versionId}
         })
-      return data.data[table]
+      return { result: data.data[table] }
     } catch(error) {
-      // debugger
+      debugger
       console.log(error)
+      return { error: error.message }
       // throw error
     }
 
