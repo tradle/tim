@@ -124,38 +124,43 @@ var NewResourceMixin = {
     }
 
 
-    let eCols
-    if (editCols) {
-      eCols = {};
-      editCols.forEach((r) => eCols[r] = props[r])
-    }
+    let eCols = []
+    if (editCols)
+      eCols = editCols.slice();
+      // editCols.forEach((r) => eCols[r] = props[r])
     else {
-      eCols = utils.getEditCols(meta)
-      if (!eCols || utils.isEmpty(eCols)) {
-        eCols = {}
+      eCols = utils.getEditCols(meta).map(p => p.name)
+      if (!eCols.length) {
         if (meta.required)
-          meta.required.forEach((p) => eCols[p] = props[p])
+          eCols = meta.required.slice
         else
-          eCols = props
+          eCols = Object.keys(props)
       }
       else if (exploreData) {
+        let vColsList = utils.getViewCols(meta)
+        vColsList.forEach(p => {
+          if (eCols.indexOf(p) === -1)
+            eCols.push(p)
+        })
+
         let exclude = ['time', 'context', 'lens']
         let prefillProp = utils.getPrefillProperty(meta)
         if (prefillProp)
           exclude.push(prefillProp.name)
         for (let p in props) {
-          if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  exclude.indexOf(p) === -1)
-            eCols[p] = props[p]
+          if (eCols.indexOf(p) === -1  &&
+              !props[p].items              &&
+              p.charAt(0) !== '_'          &&
+              exclude.indexOf(p) === -1)
+            eCols.push(p)
         }
       }
-      // else
-      //   eCols = Object.values(eCols)
     }
     let showReadOnly = true
-    for (let p in eCols) {
+    eCols.forEach(p => {
       if (!props[p].readOnly)
         showReadOnly = false
-    }
+    })
 
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
@@ -166,15 +171,16 @@ var NewResourceMixin = {
         formErrors = params.formErrors
       }
       for (let p in requestedProperties) {
-        if (eCols[p]) {
+        // if (eCols.some((prop) => prop.name === p) {
+        if (eCols.indexOf(p) !== -1)
           // this.addError(p, params)
           continue
-        }
+
         let idx = p.indexOf('_group')
-        eCols[p] = props[p]
+        eCols.push(p)
         if (idx !== -1  &&  props[p].list) {
           props[p].list.forEach((pp) => {
-            eCols[pp] = props[pp]
+            eCols.push(pp)
             requestedProperties[pp] = ''
             // this.addError(p, params)
           })
@@ -185,8 +191,8 @@ var NewResourceMixin = {
     }
     else if (data) {
       for (let p in data) {
-        if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
-          eCols[p] = props[p]
+        if (eCols.indexOf(p) === -1  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
+          eCols.push(p)
       }
       // // filter out the backlink on which the adding resource was initiated
       // let prop = this.props.prop
@@ -202,7 +208,8 @@ var NewResourceMixin = {
 
     let options = {fields: {}}
     let resource = this.state.resource
-    for (let p in eCols) {
+    for (let i=0; i<eCols.length; i++) {
+      let p = eCols[i]
       if (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
 
@@ -483,7 +490,7 @@ var NewResourceMixin = {
     }
 
     // HACK for video
-    if (eCols.video) {
+    if (eCols.indexOf('video') !== -1) {
       let maybe = required  &&  !required.hasOwnProperty('video');
 
       model.video = maybe ? t.maybe(t.Str) : t.Str;
