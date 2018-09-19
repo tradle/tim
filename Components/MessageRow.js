@@ -198,10 +198,6 @@ class MessageRow extends Component {
     }
     let rowStyle = isSimpleMessage ? {backgroundColor: 'transparent'} : [chatStyles.row, {backgroundColor: 'transparent'}];
     // let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
-    let val = this.getTime(resource);
-    let date = val
-             ? <Text style={chatStyles.date}>{val}</Text>
-             : <View />;
 
     let showMessageBody;
     if (noMessage) {
@@ -319,7 +315,7 @@ class MessageRow extends Component {
     let contextId = this.getContextId(resource)
     return (
       <View style={[viewStyle, {backgroundColor: bg}]}>
-        {date}
+        {this.getChatDate(resource)}
         {messageBody}
         {contextId}
         <View style={photoListStyle}>

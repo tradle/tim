@@ -23,6 +23,7 @@ import Navigator from './Navigator'
 import ENV from '../utils/env'
 import IProov from '../utils/iproov'
 import { Text } from './Text'
+import chatStyles from '../styles/chatStyles'
 
 const SHOW_TIME_INTERVAL = 60000
 const DEFAULT_CURRENCY_SYMBOL = '£'
@@ -190,6 +191,10 @@ var RowMixin = {
 
     if (showTime)
       return utils.formatDate(resource._time);
+  },
+  getChatDate(resource) {
+    let val = this.getTime(resource);
+    return val  && <Text style={chatStyles.date}>{val}</Text>
   },
   isMyMessage(to) {
     let { resource, isAggregation, application } = this.props
