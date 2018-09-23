@@ -264,6 +264,8 @@ module.exports = {
     "tryProviderQrCode": "Only Provider\'s QR code you can scan here. Please try again",
     "inProcess": "In process...",
     "inProgress": "In progress...",
+    "networkFailure": "I'm experiencing some network issues. Can you check and then tap Try Again / Cancel",
+    "invalidQuery": "Oops, we hit an error running your search. Our developers will try to fix it asap.",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

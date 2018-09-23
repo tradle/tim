@@ -306,5 +306,7 @@ module.exports = {
   "Skip": "Bỏ qua",
   "Sanctions Checks": "Kiểm tra xử phạt",
   "tryProviderQrCode": "Chỉ có mã QR của nhà cung cấp mà bạn có thể quét tại đây. Vui lòng thử lại",
-  "inProcess": "Đang tiến hành..."
+  "inProcess": "Đang tiến hành...",
+  "networkFailure": "Tôi đang gặp một số vấn đề về mạng. Bạn có thể kiểm tra và sau đó nhấn Thử lại / Hủy",
+  "invalidQuery": "Rất tiếc, chúng tôi đã gặp lỗi khi chạy tìm kiếm của bạn. Các nhà phát triển của chúng tôi sẽ cố gắng khắc phục nó càng sớm càng tốt."
 }

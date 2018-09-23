@@ -306,5 +306,7 @@ module.exports = {
   "Done": "Terminé",
   "Sanctions Checks": "Contrôles de sanctions",
   "tryProviderQrCode": "Seul le code QR du fournisseur que vous pouvez scn ici. Veuillez réessayer",
-  "inProcess": "En cours..."
+  "inProcess": "En cours...",
+  "networkFailure": "Je rencontre des problèmes de réseau. Pouvez-vous vérifier puis appuyer sur Réessayer / Annuler",
+  "invalidQuery": "Oups, nous rencontrons une erreur lors de l'exécution de votre recherche. Nos développeurs vont essayer de résoudre le problème dès que possible."
 }

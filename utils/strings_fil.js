@@ -306,5 +306,7 @@ module.exports = {
   "Next": "Susunod",
   "Sanctions Checks": "Mga tseke ng Sanctions",
   "tryProviderQrCode": "QR code ng Provider lamang na maaari mong i-scan dito. Pakisubukang muli",
-  "inProcess": "Pinoproseso..."
+  "inProcess": "Pinoproseso...",
+  "networkFailure": "Nakakaranas ako ng ilang mga isyu sa network. Maaari mong suriin at pagkatapos ay i-tap ang Subukan muli / Kanselahin",
+  "invalidQuery": "Oops, naabot namin ang isang error na nagpapatakbo ng iyong paghahanap. Susubukan ng aming mga developer na ayusin ito sa lalong madaling panahon."
 }
