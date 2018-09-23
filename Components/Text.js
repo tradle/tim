@@ -25,8 +25,10 @@ export const Text = props => {
   // let ff = {fontFamily: Platform.OS === 'ios' ? fontFamily || 'Bradley Hand' : 'notoserif'}
   let st
   if (fontFamily) {
-    if (!style  ||  !Array.isArray(style))
+    if (!style)
       st = { fontFamily }
+    else if (!Array.isArray(style))
+      st = [{ fontFamily }, style]
     else {
       st = _.clone(style)
       st.splice(0, 0, { fontFamily })
