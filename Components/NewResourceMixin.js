@@ -1695,8 +1695,13 @@ var styles= StyleSheet.create({
   },
   photoIcon: {
     position: 'absolute',
-    right: 5,
-    marginTop: -2
+    right: 0,
+    marginTop: utils.isWeb() ? 20 : -2
+  },
+  photoIconEmpty: {
+    position: 'absolute',
+    right: 0,
+    marginTop: utils.isWeb() ? 20 : 12
   },
   input: {
     backgroundColor: 'transparent',
@@ -1706,7 +1711,7 @@ var styles= StyleSheet.create({
   customIcon: {
     position: 'absolute',
     right: 0,
-    // marginTop: 15
+    alignSelf: 'center'
   },
   dateInput: {
     flex: 1,

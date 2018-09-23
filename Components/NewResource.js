@@ -1363,7 +1363,7 @@ class NewResource extends Component {
     else {
       itemsArray = <Text style={styles.noItemsText}>{label}</Text>
     }
-    counter = <Icon name='ios-camera-outline'  size={25} color={linkColor} />
+    counter = <Icon name='ios-camera-outline'  size={25} color={linkColor} style={styles.camera} />
     let title = translate(bl, blmodel) //.title || utils.makeLabel(p)
     let actionableItem
     if (count)
@@ -1581,6 +1581,9 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     pics: {
       paddingTop: 10,
       width: '90%'
+    },
+    camera: {
+      paddingTop: 30
     },
     submit: {
       width: 340,

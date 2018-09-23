@@ -778,6 +778,8 @@ var NavigationBarRouteMapper = {
       //     </TouchableOpacity>
       //   : <View />
       // }
+    let helpStyle = route.help ? {paddingLeft: 5} : {paddingLeft: 25}
+    let submitStyle = isSubmit ? { paddingTop: 3 }  : {}
     return (
       <View style={{position: 'absolute', right: 0, flexDirection: 'row'}}>
       <TouchableOpacity
@@ -800,7 +802,7 @@ var NavigationBarRouteMapper = {
                     navigator.push(route.onRightButtonPress)
                }
         }>
-        <View style={[platformStyles.navBarRightButton, route.help ? {paddingLeft: 5} : {paddingLeft: 25}]}>
+        <View style={[platformStyles.navBarRightButton, helpStyle, submitStyle]}>
           {title}
         </View>
       </TouchableOpacity>
@@ -974,6 +976,7 @@ var styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     paddingRight: 10,
     paddingLeft: 15,
+    paddingBottom: utils.isWeb() ? 3 : 0
   }
 });
 
