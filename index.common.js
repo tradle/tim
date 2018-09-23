@@ -91,7 +91,7 @@ import utils from './utils/utils'
 var translate = utils.translate
 
 import Actions from './Actions/Actions'
-import * as AutomaticUpdates from './utils/automaticUpdates';
+import AutomaticUpdates from './utils/automaticUpdates';
 import { signIn } from './utils/localAuth'
 import Store from './Store/Store'
 import StyleSheet from './StyleSheet'
