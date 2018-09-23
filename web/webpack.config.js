@@ -307,7 +307,7 @@ function getBabelLoader () {
     exclude: [
       /errno/,
       /xtend/,
-      /react-dropzone/
+      /react-dropzone/,
     ],
     query: {
       compact: false,
@@ -328,7 +328,7 @@ function getBabelLoader () {
     // exclude node_modules, include react & tcomb
     // /node_modules\/(?!(.*)?(react|tcomb))/,
     loader.exclude.push(
-      /node_modules\/(?!react|tcomb|rn-markdown)/
+      /node_modules\/(?!react|tcomb|rn-markdown|\@tradle\/aws-client)/
     )
   }
 
