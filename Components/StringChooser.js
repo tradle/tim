@@ -2,23 +2,17 @@ console.log('requiring StringChooser.js')
 'use strict';
 
 import React, { Component } from 'react'
-import _ from 'lodash'
-import constants from '@tradle/constants'
 import StringRow from './StringRow'
 import utils, { translate } from '../utils/utils'
-import MessageList from './MessageList'
 
 import PageView from './PageView'
 import platformStyles from '../styles/platform'
 import {
   ListView,
-  // Text,
   StyleSheet,
   View,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
-import { Text } from './Text'
 
 class StringChooser extends Component {
   props: {
