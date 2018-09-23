@@ -190,11 +190,18 @@ function createPusher (opts) {
 //     data: {}, // OBJECT: The push data
 // }
 
-    debug('NOTIFICATION:', notification)
     const appIsActive = AppState.currentState === 'active'
     const unread = appIsActive ? 0 : utils.getMe().unreadPushNotifications
-    const { foreground, userInteraction, data } = notification
-    if (foreground) return
+    const { userInteraction, data } = notification
+    debug('notification:', {
+      notification,
+      appIsActive,
+    })
+
+    if (appIsActive) {
+      debug(`ignoring notification, i'm in foreground`)
+      return
+    }
 
     if (appIsActive) resetBadgeNumber()
 
@@ -209,24 +216,15 @@ function createPusher (opts) {
     // }
 
     // Actions.updateMe({ unreadPushNotifications: unread + 1 })
-    //
-    // show 1, because receiving a push notification
-    // doesn't actually mean there's a message to be received,
-    // as "poking" clients is something any tradle mycloud can do
-    Actions.updateMe({ unreadPushNotifications: 1 })
 
-    const unsubscribe = Store.listen(function (event) {
-      if (AppState.currentState === 'active') return unsubscribe()
-      if (event.action !== 'receivedMessage') return
+    // don't show local notification until
+    // we know we have a message in our inbox
+    const showLocalNotification = ({ message }) => {
+      // show 1, because receiving a push notification
+      // doesn't actually mean there's a message to be received,
+      // as "poking" clients is something any tradle mycloud can do
+      Actions.updateMe({ unreadPushNotifications: 1 })
 
-      const { deepPayloadType } = event
-      if (ENV.SILENT_TYPES.includes(deepPayloadType)) return
-
-      unsubscribe()
-      showLocalNotification({ message: event.msg })
-    })
-
-    function showLocalNotification ({ message }) {
       const localNotification = {
         message: translate('unreadMessages')
       }
@@ -261,7 +259,25 @@ function createPusher (opts) {
       PushImpl.localNotification(localNotification)
     }
 
-    setTimeout(unsubscribe, 20000)
+    const unsubscribe = Store.listen(function (event) {
+      if (AppState.currentState === 'active') return unsubscribe()
+      if (event.action !== 'receivedMessage') return
+
+      const { deepPayloadType } = event
+      if (ENV.SILENT_TYPES.includes(deepPayloadType)) {
+        debug('ignoring silent type', deepPayloadType)
+        return
+      }
+
+      unsubscribe()
+      showLocalNotification({ message: event.msg })
+    })
+
+    debug(`waiting for a message...`)
+    setTimeout(() => {
+      debug(`giving up waiting for messages`)
+      unsubscribe()
+    }, 20000)
 
     // example
     // const foreground = notification.foreground ? 'foreground' : 'background'
