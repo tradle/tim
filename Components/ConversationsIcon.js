@@ -1,9 +1,10 @@
 console.log('requiring ConversationsIcon.js')
 import React from 'react'
+import { Platform } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 
 // ios-chatbubbles is 26x32
-const EXTRA_MARGIN_TO_MAKE_SQUARE = 8
+const EXTRA_MARGIN_TO_MAKE_SQUARE = Platform.OS === 'web' ? 0 : 8
 
 export default function (props={}) {
   const style = [
