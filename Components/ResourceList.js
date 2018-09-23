@@ -1423,7 +1423,7 @@ class ResourceList extends Component {
               <TouchableOpacity onPress={this.showBookmarks.bind(this)}>
                 <View style={styles.row}>
                   <Icon name='ios-apps-outline' size={45} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
+                  <View style={[styles.textContainer, {paddingLeft: 0}]}>
                     <Text style={styles.resourceTitle}>{translate('bookmarks')}</Text>
                   </View>
                   <View style={[styles.sharedContext, {backgroundColor: color}]}>
