@@ -266,6 +266,7 @@ module.exports = {
     "inProgress": "In progress...",
     "networkFailure": "I'm experiencing some network issues. Can you check and then tap Try Again / Cancel",
     "invalidQuery": "Oops, we hit an error running your search. Our developers will try to fix it asap.",
+    "noResourcesForCriteria": "No resources were found for this criteria",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
