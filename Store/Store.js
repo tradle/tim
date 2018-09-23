@@ -6467,11 +6467,11 @@ if (!res[SIG]  &&  res._message)
 
     _.extend(params, {client: this.client, filterResource: filterResource, endCursor, noPaging: !endCursor})
     let list
-    let result = await graphQL.searchServer(params)
+    let { result, error, retry } = await graphQL.searchServer(params)
     if (!result  ||  !result.edges  ||  !result.edges.length) {
       if (!noTrigger  &&  (!params.prop  ||  !params.prop.items  ||  !params.prop.items.backlink))
-        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first})
-      return { list }
+        this.trigger({action: 'list', resource: filterResource, isSearch: true, direction: direction, first: first, errorMessage: error, query: retry  &&  params})
+      return { list, errorMessage: error, query: params }
     }
 
     let newCursor = limit  &&  result.pageInfo  &&  result.pageInfo.endCursor
