@@ -1055,8 +1055,16 @@ var utils = {
           properties[p].title.toLowerCase() !== p)
         eCols.push(properties[p])
 
-      if (idx !== -1  &&  properties[p].list)
-        properties[p].list.forEach((p) => eCols.push(properties[p]))
+      if (idx !== -1  &&  properties[p].list) {
+        let eColsCnt = eCols.length
+        let isLastPropGroup = eCols[eColsCnt - 1].name.indexOf('_group') !== -1
+        properties[p].list.forEach((p) => {
+          if (eCols.indexOf(properties[p]) === -1)
+            eCols.push(properties[p])
+        })
+        if (eColsCnt === eCols.length  &&  isLastPropGroup)
+          eCols.pop()
+      }
     })
     return eCols
   },
