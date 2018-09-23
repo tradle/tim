@@ -1,3 +1,5 @@
+'use strict'
+
 import React from 'react'
 import {
   Text as RawText,
@@ -21,25 +23,26 @@ export function getFontMapping(font) {
   return fonts[font] || font
 }
 export const Text = props => {
-  let { children, style, ...rest } = props
+  let { children, ...rest } = props
   // let ff = {fontFamily: Platform.OS === 'ios' ? fontFamily || 'Bradley Hand' : 'notoserif'}
+  if (!fontFamily)
+    return <RawText {...rest}>{children}</RawText>
+
+  let { style, other } = rest
   let st
-  if (fontFamily) {
-    if (!style)
-      st = { fontFamily }
-    else if (!Array.isArray(style))
-      st = [{ fontFamily }, style]
-    else {
-      st = _.clone(style)
-      st.splice(0, 0, { fontFamily })
-    }
+  if (!style)
+    st = { fontFamily }
+  else if (!Array.isArray(style))
+    st = [{ fontFamily }, style]
+  else {
+    st = _.clone(style)
+    st.splice(0, 0, { fontFamily })
   }
-  else
-    st = style || {}
+  return <RawText style={st} {...other}>{children}</RawText>
+
   // if (typeof children === 'string') {
   //   children = translate(children)
   // }
 
-  return <RawText style={st} {...rest}>{children}</RawText>
 }
 
