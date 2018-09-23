@@ -25,7 +25,7 @@ class StringRow extends Component {
     let styles = createStyles({bankStyle})
     let renderedRow = <Text style={styles.modelTitle}>{title}</Text>;
     return (
-      <TouchableOpacity style={styles.viewStyle} onPress={this.props.callback} underlayColor='transparent'>
+      <TouchableOpacity style={styles.viewStyle} onPress={this.props.callback}>
         {renderedRow}
       </TouchableOpacity>
     );
