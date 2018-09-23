@@ -14,7 +14,7 @@ import {
 import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
-// import { Text } from './Text'
+import { Text } from './Text'
 
 class StringRow extends Component {
   constructor(props) {
