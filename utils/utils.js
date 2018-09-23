@@ -1041,7 +1041,7 @@ var utils = {
     if (!editCols) {
       let viewCols = this.getViewCols(model)
       if (viewCols)
-        eCols = viewCols.map(p => eCols.push(properties[p]))
+        eCols = viewCols.map(p => properties[p])
       return eCols
     }
     editCols.forEach((p) => {
@@ -1095,7 +1095,7 @@ var utils = {
     }
     for (let p in properties) {
       let prop = properties[p]
-      if (!vCols[p]  &&  !prop.readOnly  &&  !prop.hidden  &&  p.indexOf('_group') !== p.length - 6  &&  !prop.signature)
+      if (vCols.indexOf(p) === -1  &&  !prop.readOnly  &&  !prop.hidden  &&  p.indexOf('_group') !== p.length - 6  &&  !prop.signature)
         vCols.push(p)
     }
     return vCols
