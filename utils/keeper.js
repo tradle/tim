@@ -1,62 +1,83 @@
-console.log('requiring keeper.js')
+import promisify from 'pify'
+import { TYPE, TYPES } from '@tradle/constants'
+import { linkString } from '@tradle/protocol'
+import createBaseKeeper from '@tradle/keeper'
+import cachifyKeeper from '@tradle/keeper/cachify'
 
-import through from 'through2'
-import pump from 'pump'
-import { AsyncStorage } from 'react-native'
-// import { dangerousReadDB } from './utils'
-import Promise from 'bluebird'
-import createKeeper from '@tradle/keeper'
-const collect = Promise.promisify(require('stream-collector'))
+const debug = require('debug')('tradle:app:keeper')
+const { MESSAGE } = TYPES
+const noop = () => {}
 
-module.exports = function keeperWrapper (keeperOpts) {
-  const { path, db } = keeperOpts
-  const keeper = createKeeper(keeperOpts)
-  const open = Promise.promisify(keeper.open.bind(keeper))
-  const { get, put, batch, createReadStream } = keeper
-  keeper.get = function (key, cb) {
-    get.call(keeper, key, function (err, val) {
-      if (err) return cb(err)
+const stripEmbeddedObjects = keeper => {
+  const getStored = promisify(keeper.get.bind(keeper))
+  const getAndResolveEmbeds = async (key) => {
+    const result = await getStored(key)
+    if (result[TYPE] === MESSAGE && typeof result.object === 'string') {
+      // recurse
+      debug('resolving object embedded in message')
+      result.object = await getAndResolveEmbeds(result.object)
+    }
 
-      cb(null, val.value)
-    })
+    return result
   }
 
-  keeper.put = function (key, value, cb) {
-    value = { key, value }
-    put.call(keeper, key, value, cb)
+  const get = async (key, cb) => {
+    let result
+    try {
+      result = await getAndResolveEmbeds(key)
+    } catch (err) {
+      return cb(err)
+    }
+
+    cb(null, result)
   }
 
-  keeper.batch = function (rows, cb) {
-    rows = rows.map(row => {
-      return {
-        type: row.type,
-        key: row.key,
-        value: { key: row.key, value: row.value }
-      }
-    })
+  // only one level down
+  // @tradle/engine runs keeper.put on both message and object
+  // but not nested messages
+  const replaceEmbeddedObjects = val => {
+    if (val[TYPE] !== MESSAGE) return val
 
-    batch.call(keeper, rows, cb)
+    debug('stripping object embedded in message')
+    return {
+      ...val,
+      object: linkString(val.object)
+    }
   }
 
-  keeper.createReadStream = function (opts={}) {
-    return pump(
-      createReadStream.call(keeper, opts),
-      through.obj(function (data, enc, cb) {
-        const wrapper = opts.keys === false ? data : data.value
-        const { key, value } = wrapper
-        const ret = opts.keys === false ? value :
-          opts.values === false ? key : wrapper
+  const put = (key, val, cb) => keeper.put(key, replaceEmbeddedObjects(val), cb)
+  const batch = (batch, cb) => {
+    batch = batch.map(({ value, ...rest }) => ({
+      value: value && replaceEmbeddedObjects(value),
+      ...rest,
+    }))
 
-        cb(null, ret)
-      })
-    )
+    keeper.batch(batch, cb)
   }
 
-  keeper.dump = async function () {
-    // TODO: optimize
-    await open()
-    return collect(keeper.createReadStream())
+  const createReadStream = () => {
+    throw new Error('keeper.createReadStream is not implemented')
   }
 
-  return keeper
+  return {
+    get,
+    put,
+    batch,
+    del: keeper.del.bind(keeper),
+    close: keeper.close.bind(keeper),
+    createReadStream,
+  }
+}
+
+const createKeeper = ({ caching, ...opts }) => {
+  const keeper = createBaseKeeper(opts)
+  if (caching) {
+    cachifyKeeper(keeper, caching)
+  }
+
+  return stripEmbeddedObjects(keeper)
+}
+
+module.exports = {
+  createKeeper,
 }

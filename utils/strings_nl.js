@@ -306,5 +306,7 @@ module.exports = {
   "Done": "Gedaan",
   "Sanctions Checks": "Sanctiescheques",
   "tryProviderQrCode": "Alleen de QR-code van Provider kunt u hier vinden. Probeer het opnieuw",
-  "inProcess": "In proces..."
+  "inProcess": "In proces...",
+  "invalidQuery": "Oeps, we hebben een fout opgetreden bij het uitvoeren van uw zoekopdracht. Onze ontwikkelaars zullen proberen het zo snel mogelijk te herstellen.",
+  "networkFailure": "Ik ondervind een aantal netwerkproblemen. Kunt u dit controleren en vervolgens op Opnieuw proberen / Annuleren tikken"
 }

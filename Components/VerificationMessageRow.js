@@ -62,11 +62,6 @@ class VerificationMessageRow extends Component {
     let model = utils.getModel(resource[TYPE]);
     let renderedRow = [];
 
-    var time = this.getTime(resource);
-    var date = time
-             ? <Text style={chatStyles.date}>{time}</Text>
-             : <View />;
-
     var isMyMessage = this.isMyMessage();
 
     var dType = utils.getType(resource.document)
@@ -252,7 +247,7 @@ class VerificationMessageRow extends Component {
 
     return (
       <View key={this.getNextKey()}>
-        {date}
+        {this.getChatDate(resource)}
         {messageBody}
         {contextId}
       </View>

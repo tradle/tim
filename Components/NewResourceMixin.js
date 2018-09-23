@@ -4,7 +4,7 @@ console.log('requiring NewResourceMixin.js')
 import React from 'react'
 import ReactDOM from 'react-dom'
 import {
-  Text,
+  // Text,
   View,
   TouchableOpacity,
   Platform,
@@ -29,6 +29,7 @@ const debug = require('debug')('tradle:app:blinkid')
 import constants from '@tradle/constants'
 
 import Navigator from './Navigator'
+import { Text, getFontMapping } from './Text'
 import GridList from './GridList'
 import utils, {
   translate
@@ -58,8 +59,6 @@ const {
   ROOT_HASH
 } = constants
 
-const COUNTRY = 'tradle.Country'
-const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
 const INTERSECTION = 'tradle.Intersection'
 
 const PHOTO = 'tradle.Photo'
@@ -67,8 +66,6 @@ const YEAR = 3600 * 1000 * 24 * 365
 const DAY  = 3600 * 1000 * 24
 const HOUR = 3600 * 1000
 const MINUTE = 60 * 1000
-const FOCUSED_LABEL_COLOR = '#7AAAC3'// #139459'
-const TIMEOUT_ERROR = new Error('timed out')
 
 var cnt = 0;
 var propTypesMap = {
@@ -79,12 +76,6 @@ var propTypesMap = {
 };
 
 const DEFAULT_LINK_COLOR = '#a94442'
-// import transform from 'tcomb-json-schema'
-// var DEFAULT_BLINK_ID_OPTS = {
-//   mrtd: { showFullDocument: true },
-//   eudl: { showFullDocument: true },
-//   usdl: {}
-// }
 
 var NewResourceMixin = {
   onScroll(e) {
@@ -141,38 +132,43 @@ var NewResourceMixin = {
     }
 
 
-    let eCols
-    if (editCols) {
-      eCols = {};
-      editCols.forEach((r) => eCols[r] = props[r])
-    }
+    let eCols = []
+    if (editCols)
+      eCols = editCols.slice();
+      // editCols.forEach((r) => eCols[r] = props[r])
     else {
-      eCols = utils.getEditCols(meta)
-      if (!eCols || utils.isEmpty(eCols)) {
-        eCols = {}
+      eCols = utils.getEditCols(meta).map(p => p.name)
+      if (!eCols.length) {
         if (meta.required)
-          meta.required.forEach((p) => eCols[p] = props[p])
+          eCols = meta.required.slice
         else
-          eCols = props
+          eCols = Object.keys(props)
       }
       else if (exploreData) {
+        let vColsList = utils.getViewCols(meta)
+        vColsList.forEach(p => {
+          if (eCols.indexOf(p) === -1)
+            eCols.push(p)
+        })
+
         let exclude = ['time', 'context', 'lens']
         let prefillProp = utils.getPrefillProperty(meta)
         if (prefillProp)
           exclude.push(prefillProp.name)
         for (let p in props) {
-          if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  exclude.indexOf(p) === -1)
-            eCols[p] = props[p]
+          if (eCols.indexOf(p) === -1  &&
+              !props[p].items              &&
+              p.charAt(0) !== '_'          &&
+              exclude.indexOf(p) === -1)
+            eCols.push(p)
         }
       }
-      // else
-      //   eCols = Object.values(eCols)
     }
     let showReadOnly = true
-    for (let p in eCols) {
+    eCols.forEach(p => {
       if (!props[p].readOnly)
         showReadOnly = false
-    }
+    })
 
     if (this.state.requestedProperties)
        requestedProperties = this.state.requestedProperties
@@ -183,15 +179,16 @@ var NewResourceMixin = {
         formErrors = params.formErrors
       }
       for (let p in requestedProperties) {
-        if (eCols[p]) {
+        // if (eCols.some((prop) => prop.name === p) {
+        if (eCols.indexOf(p) !== -1)
           // this.addError(p, params)
           continue
-        }
+
         let idx = p.indexOf('_group')
-        eCols[p] = props[p]
+        eCols.push(p)
         if (idx !== -1  &&  props[p].list) {
           props[p].list.forEach((pp) => {
-            eCols[pp] = props[pp]
+            eCols.push(pp)
             requestedProperties[pp] = ''
             // this.addError(p, params)
           })
@@ -202,8 +199,8 @@ var NewResourceMixin = {
     }
     else if (data) {
       for (let p in data) {
-        if (!eCols[p]  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
-          eCols[p] = props[p]
+        if (eCols.indexOf(p) === -1  &&  p.charAt(0) !== '_'  &&  props[p]  &&  !props[p].readOnly)
+          eCols.push(p)
       }
       // // filter out the backlink on which the adding resource was initiated
       // let prop = this.props.prop
@@ -219,7 +216,8 @@ var NewResourceMixin = {
 
     let options = {fields: {}}
     let resource = this.state.resource
-    for (let p in eCols) {
+    for (let i=0; i<eCols.length; i++) {
+      let p = eCols[i]
       if (p === TYPE || p.charAt(0) === '_'  ||  p === bl  ||  (props[p].items  &&  props[p].items.backlink))
         continue;
 
@@ -501,7 +499,7 @@ var NewResourceMixin = {
     }
 
     // HACK for video
-    if (eCols.video) {
+    if (eCols.indexOf('video') !== -1) {
       let maybe = required  &&  !required.hasOwnProperty('video');
 
       model.video = maybe ? t.maybe(t.Str) : t.Str;
@@ -742,6 +740,7 @@ var NewResourceMixin = {
       if (maxChars < label.length  &&  (!this.state.resource[prop.name] || !this.state.resource[prop.name].length))
         lStyle = [lStyle, {marginTop: 0}]
     // }
+
     let lcolor = this.getLabelAndBorderColor(prop.name)
     if (this.state.isRegistration)
       lStyle = [lStyle, {color: lcolor}]
@@ -754,11 +753,13 @@ var NewResourceMixin = {
     // Especially for money type props
     if (!help)
       st.flex = 5
+    let { bankStyle } = this.props
+    let fontF = bankStyle && bankStyle.fontFamily && {fontFamily: getFontMapping(bankStyle.fontFamily)} || {}
     let autoCapitalize = this.state.isRegistration  ||  (prop.name !== 'url' &&  prop.name !== 'form' &&  prop.name !== 'product' &&  prop.range !== 'email') ? 'sentences' : 'none'
     return (
       <View style={st}>
         <FloatLabel
-          labelStyle={[lStyle, {color: lcolor}]}
+          labelStyle={[lStyle, fontF, {color: lcolor}]}
           autoCorrect={false}
           multiline={multiline}
           editable={editable}
@@ -1614,7 +1615,7 @@ var styles= StyleSheet.create({
     alignSelf: 'stretch'
   },
   chooserContainer: {
-    minHeight: 60,
+    minHeight: 55,
     marginTop: 10,
     borderColor: '#ffffff',
     // borderBottomColor: '#cccccc',

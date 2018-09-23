@@ -30,17 +30,17 @@ const PROD_PUSH_SERVER = 'https://push1-prod.tradle.io'
 
 const splash = {
   get tradle() { return require('../img/splash1536x2048.png') },
-  get aviva() { return require('../img/Aviva.png') }
+  // get aviva() { return require('../img/Aviva.png') }
 }
 
 const splashContrastColor = {
   tradle: '#eeeeee',
-  aviva: '#004db5'
+  // aviva: '#004db5'
 }
 
 const brandBG = {
   get tradle() { return require('../img/bg.png') },
-  get aviva() { return require('../img/Aviva.png') }
+  // get aviva() { return require('../img/Aviva.png') }
 }
 
 const navBarHeight = Platform.select({

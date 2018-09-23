@@ -306,5 +306,7 @@ module.exports = {
   "Skip": "Omitir",
   "Sanctions Checks": "Verificaciones de sanciones",
   "tryProviderQrCode": "Solo el código QR del proveedor puede encontrar aquí. Inténtalo de nuevo",
-  "inProcess": "En proceso..."
+  "inProcess": "En proceso...",
+  "networkFailure": "Estoy experimentando algunos problemas de red. ¿Puedes verificar y luego tocar Volver a intentar / Cancelar",
+  "invalidQuery": "Vaya, nos topamos con un error al ejecutar su búsqueda. Nuestros desarrolladores intentarán solucionarlo lo antes posible."
 }

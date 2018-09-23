@@ -87,7 +87,7 @@ class GridHeader extends Component {
       return <Col sm={smCol} md={1} lg={1} style={colStyle} key={p}>
                 <TouchableOpacity onPress={() => this.props.sort(p)}>
                   <Text style={[styles.cell, textStyle]}>
-                    {props[p].title.toUpperCase()}
+                    {translate(props[p], model).toUpperCase()}
                   </Text>
                 </TouchableOpacity>
               </Col>

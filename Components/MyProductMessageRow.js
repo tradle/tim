@@ -4,23 +4,20 @@ console.log('requiring MyProductMessageRow.js')
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import {
-  Image,
   StyleSheet,
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   Alert,
   View,
 } from 'react-native'
 import PropTypes from 'prop-types'
-
 import React, { Component } from 'react'
-
-import utils from '../utils/utils'
-var translate = utils.translate
-import ArticleView from './ArticleView'
-import NewResource from './NewResource'
 import Icon from 'react-native-vector-icons/Ionicons';
+
 import constants from '@tradle/constants'
+
+import utils, { translate } from '../utils/utils'
+import ArticleView from './ArticleView'
 import RowMixin from './RowMixin'
 import chatStyles from '../styles/chatStyles'
 
@@ -98,7 +95,7 @@ class MyProductMessageRow extends Component {
     let vStyle = isMyMessage ? styles.viewStyleR : styles.viewStyleL
     // let photo = isMyMessage ? null : this.getOwnerPhoto()
     let messageBody =
-      <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+      <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
         <View style={[vStyle, {width: width}]}>
           {this.getOwnerPhoto()}
           <View style={rowStyle}>
@@ -107,7 +104,7 @@ class MyProductMessageRow extends Component {
            </View>
           </View>
         </View>
-      </TouchableHighlight>
+      </TouchableOpacity>
 
 
     let viewStyle = { margin: 1, paddingTop: 7} //, backgroundColor: bankStyle.BACKGROUND_COLOR }

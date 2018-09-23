@@ -21,6 +21,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 import constants from '@tradle/constants'
 
+import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import LinearGradient from 'react-native-linear-gradient';
 import ArticleView from './ArticleView'
@@ -37,7 +38,7 @@ import ProgressBar from './ProgressBar';
 
 import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
-import { Text } from './Text'
+
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const MODEL = 'tradle.Model'
 const UNREAD_COLOR = '#FF6D0D'

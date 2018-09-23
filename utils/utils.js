@@ -1036,12 +1036,12 @@ var utils = {
   },
   getEditCols(model) {
     let { editCols, properties } = model
-    let eCols = {}
+    let eCols = []
     let isWeb = utils.isWeb()
     if (!editCols) {
       let viewCols = this.getViewCols(model)
       if (viewCols)
-         viewCols.forEach((p) => eCols[p] = properties[p])
+        eCols = viewCols.map(p => eCols.push(properties[p]))
       return eCols
     }
     editCols.forEach((p) => {
@@ -1053,10 +1053,10 @@ var utils = {
       if (idx === -1                          ||
           !properties[p].list                 ||
           properties[p].title.toLowerCase() !== p)
-        eCols[p] = properties[p]
+        eCols.push(properties[p])
 
       if (idx !== -1  &&  properties[p].list)
-        properties[p].list.forEach((p) => eCols[p] = properties[p])
+        properties[p].list.forEach((p) => eCols.push(properties[p]))
     })
     return eCols
   },
@@ -1077,7 +1077,7 @@ var utils = {
       viewCols.forEach((p) => {
         let prop = properties[p]
         let idx = p.indexOf('_group')
-        if (idx === -1  ||  !prop.list || prop.title.toLowerCase() !== p)
+        if (idx === -1  ||  !prop.list || prop.title.toLowerCase() !== p  ||  vCols.indexOf(p) !== -1)
           vCols.push(p)
 
         if (idx !== -1  &&  prop.list)
@@ -2286,7 +2286,7 @@ var utils = {
       }
     }
   },
-  submitLog: async function () {
+  submitLog: async function (noAlert) {
     const me = utils.getMe() || { firstName: '[unknown]', lastName: '[unknown]' }
     try {
       const res = await submitLog(ENV.serverToSendLog + '?' + querystring.stringify({
@@ -2298,12 +2298,14 @@ var utils = {
         const why = await res.text()
         throw new Error(why)
       } else {
-        Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
+        if (!noAlert)
+          Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
       }
 
       return true
     } catch (err) {
-      Alert.alert('Failed to send log', err.message)
+      if (!noAlert)
+        Alert.alert('Failed to send log', err.message)
       return false
     }
   },

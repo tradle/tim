@@ -68,6 +68,7 @@ import com.android.build.OutputFile
 project.ext.react = [
   // the name of the generated asset file containing your JS bundle
   bundleAssetName: "main.jsbundle",
+  // bundleInDebug: false,
   nodeExecutableAndArgs: ["/usr/local/bin/node"]
 ]
 
@@ -90,20 +91,20 @@ def getPassword(String currentUser, String keyChain) {
 def getCodePushKey(String deployment) {
    def stdout = new ByteArrayOutputStream()
    def stderr = new ByteArrayOutputStream()
-   exec {
-       commandLine "../../scripts/get-code-push-key.sh", "android", deployment
-       standardOutput = stdout
-       errorOutput = stderr
-       ignoreExitValue false
-   }
-   //noinspection GroovyAssignabilityCheck
-   def key = stdout.toString().trim()
-   def err = stderr.toString().trim()
-   if (key.isEmpty() || !err.isEmpty()) {
-       throw new GradleException('error occurred fetching CodePush key: ' + err.toString())
+   try {
+     exec {
+         commandLine "../../scripts/get-code-push-key.sh", "android", deployment
+         standardOutput = stdout
+         errorOutput = stdout
+         ignoreExitValue false
+     }
+   } catch (err) {
+      logger.error("failed to fetch CodePush key for deployment $deployment: $stdout $stderr")
+      throw err
    }
 
-   return key
+   //noinspection GroovyAssignabilityCheck
+   return stdout.toString().trim()
 }
 
 def pass = getPassword("tradle", "android_keystore")
@@ -144,7 +145,7 @@ android {
         // minSdkVersion 23
         // elliptic curve keys support
         minSdkVersion 19
-        targetSdkVersion 23
+        targetSdkVersion 27
         versionCode vbuild
         versionName vmajor + "." + vminor + "." + vpatch
         ndk {
@@ -180,7 +181,9 @@ android {
     }
     buildTypes {
         debug {
-            buildConfigField "String", "CODEPUSH_KEY", '""'
+            debuggable true
+            def codePushKey = getCodePushKey("Debug")
+            buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
             // applicationIdSuffix ".debug"
         }
         release {
@@ -295,6 +298,7 @@ dependencies {
     compile fileTree(dir: "libs", include: ["*.jar"])
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.facebook.react:react-native:+"  // From node_modules
+    compile project(':react-native-facetec-zoom')
 }
 
 task copyDownloadableDepsToLibs(type: Copy) {
@@ -302,4 +306,4 @@ task copyDownloadableDepsToLibs(type: Copy) {
     into 'libs'
 }
 
-apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.gms.google-services'
