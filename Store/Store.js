@@ -233,7 +233,6 @@ const WELCOME_INTERVAL = 600000
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 
 import AWSClient from '@tradle/aws-client'
-import dns from 'dns'
 import map from 'map-stream'
 // import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // var defaultKeySet = midentity.defaultKeySet
