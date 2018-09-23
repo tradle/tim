@@ -25,6 +25,15 @@ const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
 const APPLICATION = 'tradle.Application'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
+const NETWORK_FAILURE = 'Network error: request failed'
+const INVALID_QUERY = 'Syntax Error GraphQL request'
+
+const MAX_ATTEMPTS = 3
+
+var messageMap = {
+  [NETWORK_FAILURE]: 'networkFailure',
+  [INVALID_QUERY]: 'invalidQuery'
+}
 
 var search = {
   initClient(meDriver, url) {
@@ -115,6 +124,7 @@ var search = {
       LTE: '',
     }
     let exclude = [ROOT_HASH, CUR_HASH, TYPE]
+    let numberOfAttempts = 1
     if (filterResource) {
       for (let p in filterResource) {
         if (exclude.indexOf(p) !== -1)
@@ -320,21 +330,42 @@ var search = {
     query += `\n}`   // close 'edges'
     query += `\n}`   // close properties block
     query += `\n}`   // close query
-    try {
-      let data = await client.query({
-          fetchPolicy: 'network-only',
-          errorPolicy: 'all',
-          query: gql(`${query}`),
-          variables: versionId  &&  {modelsVersionId: versionId}
-        })
-      return { result: data.data[table] }
-    } catch(error) {
-      debugger
-      console.log(error)
-      return { error: error.message }
-      // throw error
+
+    let error, message, retry = true
+    for (let attemptsCnt=0; attemptsCnt<MAX_ATTEMPTS  &&  retry; attemptsCnt++) {
+      let data = await execute(query)
+      if (data.result)
+        return { result:  data.result }
+      error = data.error.message
+      if (error === NETWORK_FAILURE)
+        continue
+      retry = false
+      if (error.indexOf(INVALID_QUERY) === 0)
+        error = INVALID_QUERY
+      else
+        debugger
+      await utils.submitLog(true)
     }
 
+    console.log(error)
+    return { error: messageMap[error] || error, retry }
+      // throw error
+
+    async function execute() {
+      try {
+        let data = await client.query({
+            fetchPolicy: 'network-only',
+            errorPolicy: 'all',
+            query: gql(`${query}`),
+            variables: versionId  &&  {modelsVersionId: versionId}
+          })
+        return { result: data.data[table] }
+      } catch(error) {
+        // debugger
+        console.log(error)
+        return { error }
+      }
+    }
     function prettify (obj) {
       return JSON.stringify(obj, null, 2)
     }

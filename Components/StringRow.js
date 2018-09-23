@@ -7,8 +7,8 @@ import StyleSheet from '../StyleSheet'
 var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
 var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 import {
-  Text,
-  TouchableHighlight,
+  // Text,
+  TouchableOpacity,
   View
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -25,9 +25,9 @@ class StringRow extends Component {
     let styles = createStyles({bankStyle})
     let renderedRow = <Text style={styles.modelTitle}>{title}</Text>;
     return (
-      <TouchableHighlight style={styles.viewStyle} onPress={this.props.callback} underlayColor='transparent'>
+      <TouchableOpacity style={styles.viewStyle} onPress={this.props.callback} underlayColor='transparent'>
         {renderedRow}
-      </TouchableHighlight>
+      </TouchableOpacity>
     );
   }
 }
