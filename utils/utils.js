@@ -2213,7 +2213,7 @@ var utils = {
       }
     }
   },
-  submitLog: async function () {
+  submitLog: async function (noAlert) {
     const me = utils.getMe() || { firstName: '[unknown]', lastName: '[unknown]' }
     try {
       const res = await submitLog(ENV.serverToSendLog + '?' + querystring.stringify({
@@ -2225,12 +2225,14 @@ var utils = {
         const why = await res.text()
         throw new Error(why)
       } else {
-        Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
+        if (!noAlert)
+          Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
       }
 
       return true
     } catch (err) {
-      Alert.alert('Failed to send log', err.message)
+      if (!noAlert)
+        Alert.alert('Failed to send log', err.message)
       return false
     }
   },
