@@ -353,8 +353,13 @@ class GridList extends Component {
     if (search  ||  application) {
       if (isModel) {
         let me = utils.getMe()
-        if (me.isEmployee)
+        if (me.isEmployee) {
+          // Show models that are present and call for all
+          let list = Object.values(utils.getModels())
+          this.state.list = list
+          this.state.dataSource = this.state.dataSource.cloneWithRows(list)
           Actions.getModels(utils.getId(me.organization))
+        }
         else {
           let modelsArr = this.filterModels()
           this.state.dataSource = this.state.dataSource.cloneWithRows(modelsArr)
@@ -502,8 +507,13 @@ class GridList extends Component {
         if (params.alert)
           Alert.alert(params.alert)
         else if (search  &&  !isModel) {
-          if (params.isSearch  &&   resource)
-            Alert.alert('No resources were found for this criteria')
+          if (params.isSearch  &&   resource) {
+            let msg
+            if (params.errorMessage)
+              this.errorAlert(params.errorMessage, params.query)
+            else
+              this.errorAlert('noResourcesForCriteria')
+          }
           this.setState({refreshing: false, isLoading: false})
         }
         else if (prop  &&  prop.allowToAdd)
@@ -1667,6 +1677,25 @@ class GridList extends Component {
       />
     )
   }
+  errorAlert(message, query) {
+    if (query)
+      Alert.alert(
+        translate(message),
+        null,
+        [
+          {text: translate('cancel'), onPress: () => {
+            this.setState({hideMode: false})
+            console.log('Canceled!')
+          }},
+          {text: translate('Retry'), onPress: () => {
+            Actions.list(query)
+          }},
+        ]
+      )
+    else
+      Alert.alert(translate(message))
+  }
+
   hideResource(resource) {
     Alert.alert(
       translate('areYouSureYouWantToDelete', translate(resource.name)),
