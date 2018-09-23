@@ -855,7 +855,7 @@ var NavigationBarRouteMapper = {
       }
     }
     let t = route.title.split(' -- ')
-    let st = t.length > 1 ? {marginTop: 2} : {}
+    let st = {} //t.length > 1 ? {marginTop: 2} : {}
     let color
     if (uri) {
       if (logoNeedsText)
@@ -885,7 +885,7 @@ var NavigationBarRouteMapper = {
       }
 
       let width = navBarTitleWidth(route.component)
-      let st = {width}
+      let st = {width, alignItems: 'center'}
       if (utils.isWeb())
         st.paddingLeft = 5
       for (let i=1; i<t.length; i++) {
@@ -905,9 +905,11 @@ var NavigationBarRouteMapper = {
     return (
       <View key={'index.common.js'}>
         <View style={{flexDirection: 'row'}}>
-          {photo}
-          <View style={titleStyle}>
-            {text}
+          <View style={[titleStyle, {alignItems: 'center', marginTop: tArr ? -10 : 0}]}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              {photo}
+              {text}
+            </View>
             {tArr}
           </View>
         </View>
@@ -921,7 +923,7 @@ var styles = StyleSheet.create({
   msgImage: {
     height: LOGO_HEIGHT,
     resizeMode: 'contain',
-    marginTop: 2,
+    // marginTop: 2,
     marginLeft: 0,
     // width: LOGO_HEIGHT,
     // borderRadius: 13,

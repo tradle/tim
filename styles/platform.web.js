@@ -10,7 +10,7 @@ export default StyleSheet.create({
     flex: 1,
   },
   navBarText: {
-    marginTop: 3,
+    // marginTop: 3,
     fontSize: 17
   },
   navBarLeftButton: {
