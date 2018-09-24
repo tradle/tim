@@ -6,6 +6,17 @@ import utils, { translate, isWeb, isSimulator } from '../utils/utils'
 const COUNTRY = 'tradle.Country'
 const PHOTO_ID = 'tradle.PhotoID'
 
+// const requestAdditionalSnapshot = {
+//   US: {
+//     license: 'front'
+//   },
+//   GB: {
+//     license: 'back'
+//   },
+//   BD: {
+//     idcard: 'back'
+//   }
+// }
 module.exports = function PhotoID ({ models }) {
   return {
     validateForm: function validateForm ({
@@ -21,6 +32,8 @@ module.exports = function PhotoID ({ models }) {
       if (!isWeb()  &&  !isSimulator()  &&  !form.scanJson)
         return
 
+      if (isWeb)
+        form.uploaded = true
       let scan = form.scanJson
       let isDifferentPerson = scan && (form.firstName !== scan.personal.firstName  || form.lastName !== scan.personal.lastName)
 
@@ -59,11 +72,33 @@ module.exports = function PhotoID ({ models }) {
         let errors = scan  &&  prefillValues(form, isDifferentPerson, scan, model)
       }
       let requestedProperties = getRequestedProps({scan, model, form})
+      // if (form.scan) {
+      //   if (!form.photo) {
+      //     let countryModel = utils.getModel(COUNTRY)
+      //     let countryVal = form.country
+      //     // let countryId = form.country.id.split('_')[1]
+      //     let countryR = countryModel.enum.find(country => country.id === countryVal.id)
+      //     let country = form.country
+      //     let cid = country  &&  country.id  &&  country.id.split('_')[1]
+      //     let getMore = requestAdditionalSnapshot[cid]
+      //     let isPassport = !isLicence  &&  form.documentType.title.indexOf('Passport') !== -1
+      //     if (getMore) {
+      //       let sideInfo
+      //       if (isLicence)
+      //         sideInfo = getMore.license
+      //       else if (!isPassport)
+      //         sideInfo = getMore.idcard
+      //       if (sideInfo) {
+      //         requestedProperties.push({name: 'photo'})
+      //       }
+      //     }
+      //   }
+      // }
       if (form.dateOfExpiry) {
         if (form.dateOfExpiry < new Date().getTime()) {
           let ret = cleanupValues(form, scan, model)
           ret.message += '. The document has expired'
-            return ret
+          return ret
         }
       }
       if (form.dateOfBirth) {
@@ -101,7 +136,7 @@ function prefillValues(form, isDifferentPerson, values, model) {
     if (typeof val === 'object')
       prefillValues(form, isDifferentPerson, val, model)
     else if (!props[p]) {
-      if (p === 'birthData') {
+      if (p === 'birthData'  &&  (isDifferentPerson  ||  !form.dateOfBirth)) {
         let parts = val.split(' ')
         form.dateOfBirth = new Date(parts[0]).getTime()
       }
@@ -184,7 +219,7 @@ function cleanupValues(form, values, model) {
   delete form.scan
   delete form.scanJson
   let requestedProperties
-  if (!values  &&  (isWeb()  ||  isSimulator())) {
+  if (isWeb()  ||  isSimulator()) {
     let isLicence = form.documentType.title.indexOf('Licence') !== -1
     if (isLicence)
       requestedProperties = [{name: 'personal_group'}, {name: 'document_group'}, {name: 'address_group'}]
