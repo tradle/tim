@@ -52,11 +52,6 @@
 		7379FC491EDA61A20093535C /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63E11ED9FF670056F4BF /* libCodePush.a */; };
 		7379FC4D1EDA61BB0093535C /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63BD1ED9FF670056F4BF /* libRCTAsyncRocksDBStorage.a */; };
 		73834C3820D1B462000C9AFC /* libRNCardIO.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73834C3720D1B44F000C9AFC /* libRNCardIO.a */; };
-		73B14568214A11D200EC469E /* libRNReactNativeZoomSdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73B14567214A117900EC469E /* libRNReactNativeZoomSdk.a */; };
-		73B1456B214A12AA00EC469E /* Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73B1456A214A12AA00EC469E /* Dummy.swift */; };
-		73B145B0214A223200EC469E /* ZoomAuthenticationHybrid.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73B145AF214A223200EC469E /* ZoomAuthenticationHybrid.framework */; };
-		73B145B1214A223400EC469E /* ZoomAuthenticationHybrid.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 73B145AF214A223200EC469E /* ZoomAuthenticationHybrid.framework */; };
-		73B145B2214A223400EC469E /* ZoomAuthenticationHybrid.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 73B145AF214A223200EC469E /* ZoomAuthenticationHybrid.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		73BDD36320C2DBBD00FD92A1 /* staging.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */; };
 		73EF39BD20CC7077009EDE8B /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73EF39BA20CC7071009EDE8B /* libRNDeviceInfo.a */; };
 		73F1B89D205F5AA5004E96E2 /* libReactNativeExceptionHandler.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 734DE31C1F6B8542009152AD /* libReactNativeExceptionHandler.a */; };
@@ -488,6 +483,13 @@
 			remoteGlobalIDString = B3A3CC361C5B0A070016AC52;
 			remoteInfo = RNBranch;
 		};
+		73523B7920603F4D00AAE739 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6B75EECB744A4B5E9B111227 /* RNFirebase.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = RNFirebase;
+		};
 		736E5A7F20BC95DD00C62331 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */;
@@ -522,13 +524,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNCardIO;
-		};
-		73B14566214A117900EC469E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 8A1A99832C4843F9BFCB32F3 /* RNReactNativeZoomSdk.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RNReactNativeZoomSdk;
 		};
 		73EF39B920CC7071009EDE8B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -574,20 +569,6 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		73B145B3214A223400EC469E /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				73B145B2214A223400EC469E /* ZoomAuthenticationHybrid.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
 		00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTActionSheet.xcodeproj; path = "../node_modules/react-native/Libraries/ActionSheetIOS/RCTActionSheet.xcodeproj"; sourceTree = "<group>"; };
@@ -626,6 +607,7 @@
 		59BCC33C56304833B09BF867 /* libRNFirebase.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFirebase.a; sourceTree = "<group>"; };
 		5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
 		6B3FC1286FC44AFDBB86B8CD /* BVLinearGradient.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = BVLinearGradient.xcodeproj; path = "../node_modules/react-native-linear-gradient/BVLinearGradient.xcodeproj"; sourceTree = "<group>"; };
+		6B75EECB744A4B5E9B111227 /* RNFirebase.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNFirebase.xcodeproj; path = "../node_modules/react-native-firebase/ios/RNFirebase.xcodeproj"; sourceTree = "<group>"; };
 		73113FDF205F4AA7000C04F6 /* RNSearchBar.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNSearchBar.xcodeproj; path = "../node_modules/react-native-search-bar/ios/RNSearchBar.xcodeproj"; sourceTree = "<group>"; };
 		73113FF2205F4B43000C04F6 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
 		732B67802060213500B16D6F /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
@@ -639,10 +621,15 @@
 		7379F84B1EDA19630093535C /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Tradle/Launch Screen.storyboard"; sourceTree = "<group>"; };
 		7379FAD01EDA5AEC0093535C /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		7379FAD11EDA5AEC0093535C /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
-		73B14569214A12A900EC469E /* Tradle-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Tradle-Bridging-Header.h"; sourceTree = "<group>"; };
-		73B1456A214A12AA00EC469E /* Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dummy.swift; sourceTree = "<group>"; };
-		73B145AF214A223200EC469E /* ZoomAuthenticationHybrid.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ZoomAuthenticationHybrid.framework; sourceTree = "<group>"; };
 		73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = staging.xcconfig; sourceTree = "<group>"; };
+		73DF864A21432A500048E731 /* libGoogleToolboxForMac.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libGoogleToolboxForMac.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		73DF864C21432A500048E731 /* libnanopb.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libnanopb.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		73EC81A91EDA99280051FA02 /* FirebaseCoreDiagnostics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseCoreDiagnostics.framework; sourceTree = "<group>"; };
+		73EC81AA1EDA99280051FA02 /* FirebaseAnalytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseAnalytics.framework; sourceTree = "<group>"; };
+		73EC81AB1EDA99280051FA02 /* FirebaseCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseCore.framework; sourceTree = "<group>"; };
+		73EC81AC1EDA99280051FA02 /* FirebaseInstanceID.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseInstanceID.framework; sourceTree = "<group>"; };
+		73EC81AD1EDA99280051FA02 /* FirebaseNanoPB.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FirebaseNanoPB.framework; sourceTree = "<group>"; };
+		73EC81AE1EDA99280051FA02 /* GoogleToolboxForMac.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GoogleToolboxForMac.framework; sourceTree = "<group>"; };
 		73EC81B51EDA994A0051FA02 /* Firebase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Firebase.h; sourceTree = "<group>"; };
 		73EF39B420CC7071009EDE8B /* RNDeviceInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDeviceInfo.xcodeproj; path = "../node_modules/react-native-device-info/ios/RNDeviceInfo.xcodeproj"; sourceTree = "<group>"; };
 		73F1B858205F5A89004E96E2 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
@@ -658,14 +645,12 @@
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		7DDCD02C4E3C408F80640010 /* RNOS.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNOS.xcodeproj; path = "../node_modules/react-native-os/ios/RNOS.xcodeproj"; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
-		8A1A99832C4843F9BFCB32F3 /* RNReactNativeZoomSdk.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNReactNativeZoomSdk.xcodeproj; path = "../node_modules/react-native-facetec-zoom/ios/RNReactNativeZoomSdk.xcodeproj"; sourceTree = "<group>"; };
 		8B8FD5DD4E4F4FFB9581AD8E /* libreact-native-branch.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libreact-native-branch.a"; sourceTree = "<group>"; };
 		97F331FA96224F67B61B074E /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
 		9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MicroblinkModule.xcodeproj; path = "../node_modules/blinkid-react-native/src/ios/MicroblinkModule/MicroblinkModule.xcodeproj"; sourceTree = "<group>"; };
 		A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		A4C66A6D1DDE4BC083E2095B /* libReactNativeExceptionHandler.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libReactNativeExceptionHandler.a; sourceTree = "<group>"; };
-		A88DF099721149629CB6EBBB /* libRNReactNativeZoomSdk.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNReactNativeZoomSdk.a; sourceTree = "<group>"; };
 		B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
 		BFC0C75130C445498FB831DE /* RNPasscodeStatus.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNPasscodeStatus.xcodeproj; path = "../node_modules/react-native-passcode-status/ios/RNPasscodeStatus.xcodeproj"; sourceTree = "<group>"; };
 		CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNBranch.xcodeproj; path = "../node_modules/react-native-branch/ios/RNBranch.xcodeproj"; sourceTree = "<group>"; };
@@ -691,7 +676,6 @@
 				736290AF1EDE460D007E4DE1 /* CoreTelephony.framework in Frameworks */,
 				732B9D4D1EDA8A4C00FF957D /* AssetsLibrary.framework in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
-				73B145B1214A223400EC469E /* ZoomAuthenticationHybrid.framework in Frameworks */,
 				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
@@ -711,7 +695,6 @@
 				7379FC471EDA619A0093535C /* libRNECC.a in Frameworks */,
 				7379FC461EDA61930093535C /* libSMXCrashlytics.a in Frameworks */,
 				7379FC451EDA618D0093535C /* libRNImagePicker.a in Frameworks */,
-				73B145B0214A223200EC469E /* ZoomAuthenticationHybrid.framework in Frameworks */,
 				7379FC441EDA61830093535C /* libRNKeychain.a in Frameworks */,
 				7379F8281EDA17E10093535C /* libRCTPushNotification.a in Frameworks */,
 				7379FC3A1EDA61410093535C /* libBVLinearGradient.a in Frameworks */,
@@ -733,7 +716,6 @@
 				73834C3820D1B462000C9AFC /* libRNCardIO.a in Frameworks */,
 				9B53A9DF212715CA00521887 /* libMicroblinkModule.a in Frameworks */,
 				35373D1DE2D20F1EAE9167C7 /* libPods-Tradle.a in Frameworks */,
-				73B14568214A11D200EC469E /* libRNReactNativeZoomSdk.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -824,8 +806,6 @@
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				1447D734074D4C7BBD023C62 /* branch.json */,
-				73B1456A214A12AA00EC469E /* Dummy.swift */,
-				73B14569214A12A900EC469E /* Tradle-Bridging-Header.h */,
 			);
 			name = Tradle;
 			sourceTree = "<group>";
@@ -861,10 +841,18 @@
 				736290B21EDE4619007E4DE1 /* MobileCoreServices.framework */,
 				736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */,
 				736290AE1EDE460D007E4DE1 /* CoreTelephony.framework */,
+				73EC81A91EDA99280051FA02 /* FirebaseCoreDiagnostics.framework */,
+				73EC81AA1EDA99280051FA02 /* FirebaseAnalytics.framework */,
+				73EC81AB1EDA99280051FA02 /* FirebaseCore.framework */,
+				73EC81AC1EDA99280051FA02 /* FirebaseInstanceID.framework */,
+				73EC81AD1EDA99280051FA02 /* FirebaseNanoPB.framework */,
+				73EC81AE1EDA99280051FA02 /* GoogleToolboxForMac.framework */,
 				7379FAD01EDA5AEC0093535C /* Crashlytics.framework */,
 				7379FAD11EDA5AEC0093535C /* Fabric.framework */,
 				732B9D4C1EDA8A4C00FF957D /* AssetsLibrary.framework */,
 				EEECD0C1934547049DA9F6AE /* libz.tbd */,
+				73DF864A21432A500048E731 /* libGoogleToolboxForMac.a */,
+				73DF864C21432A500048E731 /* libnanopb.a */,
 				3B513E7D51E31F67AE40A045 /* libPods-Tradle.a */,
 			);
 			name = Frameworks;
@@ -1059,6 +1047,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		73523B7620603F4D00AAE739 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				73523B7A20603F4D00AAE739 /* libRNFirebase.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		7379F7F21EDA17D80093535C /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -1080,14 +1076,6 @@
 			isa = PBXGroup;
 			children = (
 				73834CE520D1E0EE000C9AFC /* libRNCardIO.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		73B14563214A117900EC469E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				73B14567214A117900EC469E /* libRNReactNativeZoomSdk.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1159,8 +1147,8 @@
 				7DDCD02C4E3C408F80640010 /* RNOS.xcodeproj */,
 				0F777F0159624A2AA6123F88 /* TcpSockets.xcodeproj */,
 				CBBC44B46C7E44EDA8A1AEF0 /* RNBranch.xcodeproj */,
+				6B75EECB744A4B5E9B111227 /* RNFirebase.xcodeproj */,
 				EA429A9B07F944E893CD5380 /* RNCardIO.xcodeproj */,
-				8A1A99832C4843F9BFCB32F3 /* RNReactNativeZoomSdk.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -1216,7 +1204,6 @@
 				D0DAF985EAB8452CAF6683AC /* libBlinkIDReactNative.a */,
 				4E8DE8CFD0754E1B9ADDBF1C /* libRNBlinkID.a */,
 				E0A5EEFD26554B2886E344D8 /* libRNCardIO.a */,
-				A88DF099721149629CB6EBBB /* libRNReactNativeZoomSdk.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -1259,8 +1246,6 @@
 				7379F7D01EDA14430093535C /* Fabric / Crashlytics */,
 				785003D2BB1DC37AFBF63652 /* [CP] Embed Pods Frameworks */,
 				1C8E6EEA354CD283DCEE4BFD /* [CP] Copy Pods Resources */,
-				73B145B3214A223400EC469E /* Embed Frameworks */,
-				73B145AC214A210B00EC469E /* Facetec Zoom Strip Unused Architectures */,
 			);
 			buildRules = (
 			);
@@ -1283,7 +1268,6 @@
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						DevelopmentTeam = 94V7783F74;
-						LastSwiftMigration = 0940;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -1409,6 +1393,10 @@
 					ProjectRef = 025FE4A02ADE4DA2823A4C6D /* RNECC.xcodeproj */;
 				},
 				{
+					ProductGroup = 73523B7620603F4D00AAE739 /* Products */;
+					ProjectRef = 6B75EECB744A4B5E9B111227 /* RNFirebase.xcodeproj */;
+				},
+				{
 					ProductGroup = 732B640C1ED9FF7C0056F4BF /* Products */;
 					ProjectRef = 4A77A9E59FA34C10B19D120B /* RNImagePicker.xcodeproj */;
 				},
@@ -1431,10 +1419,6 @@
 				{
 					ProductGroup = 732B640E1ED9FF7C0056F4BF /* Products */;
 					ProjectRef = A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */;
-				},
-				{
-					ProductGroup = 73B14563214A117900EC469E /* Products */;
-					ProjectRef = 8A1A99832C4843F9BFCB32F3 /* RNReactNativeZoomSdk.xcodeproj */;
 				},
 				{
 					ProductGroup = 73113FE0205F4AA7000C04F6 /* Products */;
@@ -1875,6 +1859,13 @@
 			remoteRef = 734E53701FB0F07E0099FE02 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		73523B7A20603F4D00AAE739 /* libRNFirebase.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRNFirebase.a;
+			remoteRef = 73523B7920603F4D00AAE739 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		736E5A8020BC95DD00C62331 /* libRNRandomBytes-tvOS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1908,13 +1899,6 @@
 			fileType = archive.ar;
 			path = libRNCardIO.a;
 			remoteRef = 73834CE420D1E0EE000C9AFC /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		73B14567214A117900EC469E /* libRNReactNativeZoomSdk.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRNReactNativeZoomSdk.a;
-			remoteRef = 73B14566214A117900EC469E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		73EF39BA20CC7071009EDE8B /* libRNDeviceInfo.a */ = {
@@ -2045,7 +2029,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Debug\" ]; then\n    set -euo pipefail\n    ../scripts/set-local-ip.sh\nfi";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Debug\" ]; then\n    echo \"HEYEEYE\"\n    set -euo pipefail\n    ../scripts/set-local-ip.sh\nfi";
 		};
 		7379F7D01EDA14430093535C /* Fabric / Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2060,20 +2044,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ \"$CONFIGURATION\" == \"Release\" ]; then\n  ../scripts/fabric-prod.sh\nfi";
-		};
-		73B145AC214A210B00EC469E /* Facetec Zoom Strip Unused Architectures */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Facetec Zoom Strip Unused Architectures";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "echo \"Facetec ZoomAuthenticationHybrid.framework stripping unused architectures\"\necho \"PRINTING CURRENT ENV\"\nenv\nbash -x ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/ZoomAuthenticationHybrid.framework/strip-unused-architectures-from-target.sh";
 		};
 		785003D2BB1DC37AFBF63652 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2102,7 +2072,6 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				73B1456B214A12AA00EC469E /* Dummy.swift in Sources */,
 				73F1D08F1EDA10B600D4AB5B /* QTouchposeApplication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2134,9 +2103,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 73F1D0901EDA10EE00D4AB5B /* debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_PUSH_KEY = "";
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
@@ -2145,14 +2112,11 @@
 				CURRENT_PROJECT_VERSION = "";
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 94V7783F74;
-				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
-					"$(SRCROOT)/../node_modules/react-native-facetec-zoom/ios",
-					"$(PROJECT_DIR)",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2184,7 +2148,6 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative",
 					"$(SRCROOT)/../node_modules/react-native-awesome-card-io/ios/**",
-					"$(SRCROOT)/../node_modules/react-native-facetec-zoom/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -2201,9 +2164,6 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REACT_HEADERS_PATH = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "Tradle-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "";
 			};
@@ -2213,23 +2173,18 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 73F1D0921EDA10EE00D4AB5B /* release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "";
 				DEVELOPMENT_TEAM = 94V7783F74;
-				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
-					"$(SRCROOT)/../node_modules/react-native-facetec-zoom/ios",
-					"$(PROJECT_DIR)",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2261,7 +2216,6 @@
 					"$(SRCROOT)/../node_modules/react-native-firebase/ios/RNFirebase/**",
 					"$(SRCROOT)/../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative",
 					"$(SRCROOT)/../node_modules/react-native-awesome-card-io/ios/**",
-					"$(SRCROOT)/../node_modules/react-native-facetec-zoom/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -2278,8 +2232,6 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REACT_HEADERS_PATH = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "Tradle-Bridging-Header.h";
-				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "";
 			};
@@ -2325,23 +2277,18 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "";
 				DEVELOPMENT_TEAM = 94V7783F74;
-				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
-					"$(SRCROOT)/../node_modules/react-native-facetec-zoom/ios",
-					"$(PROJECT_DIR)",
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2374,7 +2321,6 @@
 					"$(SRCROOT)/../node_modules/blinkid-react-native/src/ios/BlinkIDReactNative/BlinkIDReactNative",
 					"$(SRCROOT)/../node_modules/react-native-awesome-card-io/ios/**",
 					"$(REACT_HEADERS_PATH)",
-					"$(SRCROOT)/../node_modules/react-native-facetec-zoom/ios",
 				);
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -2392,8 +2338,6 @@
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REACT_HEADERS_PATH = "$(BUILD_DIR)/Release-$(PLATFORM_NAME)/include";
-				SWIFT_OBJC_BRIDGING_HEADER = "Tradle-Bridging-Header.h";
-				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "";
 			};
