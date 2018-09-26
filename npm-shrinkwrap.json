@@ -94,7 +94,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#396cf2f1da234a12041751a237ab0863fcc6e277"
+      "resolved": "git://github.com/tradle/custom-models.git#c4e1443db1ae3301740b15b17b03614b274aa0f7"
     },
     "@tradle/embed": {
       "version": "1.1.2",
@@ -102,9 +102,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.2.tgz"
     },
     "@tradle/engine": {
-      "version": "7.0.1",
-      "from": "@tradle/engine@>=7.0.1 <8.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-7.0.1.tgz",
+      "version": "7.0.2",
+      "from": "@tradle/engine@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-7.0.2.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
@@ -217,7 +217,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#508698609d4cec2d139d4da5821ca2f238194059"
+      "resolved": "git://github.com/tradle/models.git#c7195f581e0b4f8dbdd5155676a752eed2ad8069"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -5928,9 +5928,9 @@
       "resolved": "https://registry.npmjs.org/pull-level/-/pull-level-1.5.2.tgz",
       "dependencies": {
         "pull-stream": {
-          "version": "3.6.8",
+          "version": "3.6.9",
           "from": "pull-stream@>=3.4.0 <4.0.0",
-          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.6.8.tgz"
+          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.6.9.tgz"
         }
       }
     },
@@ -7243,9 +7243,9 @@
           "resolved": "https://registry.npmjs.org/looper/-/looper-3.0.0.tgz"
         },
         "pull-stream": {
-          "version": "3.6.8",
+          "version": "3.6.9",
           "from": "pull-stream@>=3.2.3 <4.0.0",
-          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.6.8.tgz"
+          "resolved": "https://registry.npmjs.org/pull-stream/-/pull-stream-3.6.9.tgz"
         }
       }
     },
