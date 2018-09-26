@@ -884,7 +884,7 @@ var utils = {
         if (props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM)
           dn = this.translateEnum(resource[p])
         else if (props[p].range === 'model')
-          dn = this.translate(resourceModel)
+          dn = this.translate(this.getModel(resource[p]))
         else if (rType === BOOKMARK)
           dn = this.translate(resource.message)
         else
