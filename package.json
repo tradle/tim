@@ -166,7 +166,7 @@
     "react-signature-pad": "github:tradle/react-signature-pad",
     "react-timer-mixin": "^0.13.3",
     "react-web": "github:mvayngrib/react-web#edgedist",
-    "react-webcam": "github:tradle/react-webcam",
+    "react-webcam": "github:tradle/react-webcam#dev",
     "readable-stream": "^1.0.33",
     "reflux": "^0.4.1",
     "regenerator": "^0.8.42",

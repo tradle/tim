@@ -154,7 +154,7 @@ const canvasStyle = {
   height: 0
 }
 
-const styles = StyleSheet.create({
+const styles = {
   container: {
     flex: 1,
     marginTop: 64,
@@ -178,4 +178,4 @@ const styles = StyleSheet.create({
   error: {
     fontSize: getFontSize(30)
   }
-})
+}

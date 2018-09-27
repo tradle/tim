@@ -6438,9 +6438,9 @@
       }
     },
     "react-webcam": {
-      "version": "0.0.14",
-      "from": "tradle/react-webcam",
-      "resolved": "git://github.com/tradle/react-webcam.git#8e3b494acb04d2aefcc9267d348ba61b9364e23d"
+      "version": "1.0.4",
+      "from": "tradle/react-webcam#dev",
+      "resolved": "git://github.com/tradle/react-webcam.git#fff99c7f1a896898c8013cd4e9598103ae7c3d5d"
     },
     "read-pkg": {
       "version": "1.1.0",
