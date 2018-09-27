@@ -6440,7 +6440,7 @@
     "react-webcam": {
       "version": "1.0.4",
       "from": "tradle/react-webcam#dev",
-      "resolved": "git://github.com/tradle/react-webcam.git#fff99c7f1a896898c8013cd4e9598103ae7c3d5d"
+      "resolved": "git://github.com/tradle/react-webcam.git#1b89d65b5179eef35243e2bd138d317961b0fc77"
     },
     "read-pkg": {
       "version": "1.1.0",
