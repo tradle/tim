@@ -446,7 +446,7 @@ class ResourceRow extends Component {
       this.dateProp = null;
 
     let isOfficialAccounts = this.props.isOfficialAccounts
-    let color = isOfficialAccounts && style ? {color: style.LIST_COLOR} : {}
+    let color = isOfficialAccounts && style ? {color: style.listColor} : {}
     let isContact = rtype === PROFILE;
     viewCols.forEach((v) => {
       if (v === this.dateProp)
