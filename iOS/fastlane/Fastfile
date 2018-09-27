@@ -272,6 +272,7 @@ platform :ios do
   desc "build & codepush an ios bundle (defaults to Staging)"
   desc "test on Staging, then run: fastlane codepush_ios_promote"
   lane :codepush do |options|
+    ensure_git_status_clean
     version = options[:version]
     if version.nil?
       version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
