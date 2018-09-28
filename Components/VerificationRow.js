@@ -1,22 +1,37 @@
 console.log('requiring VerificationRow.js')
 'use strict';
 
+import {
+  // Image,
+  // StyleSheet,
+  Platform,
+  // Text,
+  TouchableOpacity,
+  Alert,
+  // View
+} from 'react-native'
+import PropTypes from 'prop-types';
+import {
+  LazyloadView as View,
+  LazyloadImage as Image
+} from 'react-native-lazyload'
+
+import React, { Component } from 'react'
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
 import dateformat from 'dateformat'
 import Swipeout from 'react-native-swipeout'
-
 import reactMixin from 'react-mixin'
+// import Accordion from 'react-native-accordion'
 
 import constants from '@tradle/constants'
 
 import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
-
 import RowMixin from './RowMixin'
-// import Accordion from 'react-native-accordion'
 import StyleSheet from '../StyleSheet'
 import appStyle from '../styles/appStyle.json'
+import { Text } from './Text'
 
 var DEFAULT_CURRENCY_SYMBOL = '£'
 
@@ -44,24 +59,6 @@ const CHECK  = 'tradle.Check'
 const STATUS = 'tradle.Status'
 const INTERSECTION = 'tradle.Intersection'
 const IMAGE_PLACEHOLDER = utils.whitePixel
-
-import {
-  // Image,
-  // StyleSheet,
-  Platform,
-  Text,
-  TouchableOpacity,
-  Alert,
-  // View
-} from 'react-native'
-import PropTypes from 'prop-types';
-
-import {
-  LazyloadView as View,
-  LazyloadImage as Image
-} from 'react-native-lazyload'
-
-import React, { Component } from 'react'
 
 class VerificationRow extends Component {
   props: {

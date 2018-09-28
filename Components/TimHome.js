@@ -6,7 +6,7 @@ import debounce from 'debounce'
 import React, { Component } from 'react'
 import {
   StyleSheet,
-  Text,
+  // Text,
   View,
   TouchableOpacity,
   Image,
@@ -21,6 +21,7 @@ import {
 import PropTypes from 'prop-types'
 import _ from 'lodash'
 
+import { Text, setFontFamily } from './Text'
 import ResourceList from './ResourceList'
 // import VideoPlayer from './VideoPlayer'
 import NewResource from './NewResource'
@@ -310,6 +311,8 @@ class TimHome extends Component {
     this.setState({isLoading: false});
     clearTimeout(this.uhOhTimeout)
 
+    if (me  &&  me.isEmployee)
+      setFontFamily(me.organization.style)
     // Need to laod data for landing page first
     if (!ENV.landingPage  &&  !this.state.inTour)
       this.show()
@@ -398,6 +401,9 @@ class TimHome extends Component {
     case 'getMe':
       utils.setMe(me)
       this.setState({hasMe: me})
+      if (me.isEmployee) {
+        debugger
+      }
       this.signInAndContinue()
       // await signIn(this.props.navigator)
       // this.showFirstPage()

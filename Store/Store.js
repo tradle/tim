@@ -2937,7 +2937,8 @@ var Store = Reflux.createStore({
       me: me,
       hasTouchID
     });
-
+    // if (me  &&  me.isEmployee  &&  me.organization.style)
+    //   this.trigger({action: 'customStyles', provider: me.organization})
     await this.maybeRequestUpdate()
   },
   onSetPreferences(preferences) {
@@ -6688,7 +6689,7 @@ if (!res[SIG]  &&  res._message)
     }
     if (!noTrigger)
       noTrigger = filterResource  &&  filterResource._payloadType
-    let newCursor = limit  &&  result[0].pageInfo  &&  result[0].pageInfo.endCursor
+    let newCursor = limit  &&  result  &&  result[0].pageInfo  &&  result[0].pageInfo.endCursor
     if (!noTrigger) {
       let style
       if (application) {

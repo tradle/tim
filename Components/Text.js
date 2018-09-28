@@ -11,6 +11,9 @@ const fonts = {
 }
 
 export function setFontFamily(style) {
+  if (!style.fontFamily)
+    fontFamily = 'BentonSans Regular'
+  else
   fontFamily = Platform.OS === 'android'  &&  style.fontFamilyAndroid  ||  style.fontFamily
   if (fontFamily  &&  fonts[fontFamily])
     fontFamily = fonts[fontFamily]
