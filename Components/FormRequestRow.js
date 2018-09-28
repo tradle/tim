@@ -21,6 +21,7 @@ import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons';
 const debug = require('debug')('tradle:app:FormRequestRow')
+// import Zoom from 'react-native-facetec-zoom'
 
 import constants from '@tradle/constants'
 
@@ -53,6 +54,8 @@ const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const ITEM = 'tradle.Item'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const SELFIE = 'tradle.Selfie'
+
 const DEFAULT_MESSAGE = 'Would you like to...'
 const numbers = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
 const {
@@ -217,10 +220,6 @@ class FormRequestRow extends Component {
       renderedRow.push(msg)
     }
     let fromHash = resource.from.id;
-    var val = this.getTime(resource);
-    var date = val
-             ? <Text style={chatStyles.date}>{val}</Text>
-             : <View />;
 
     var sendStatus = <View />
     // HACK that solves the case when the message is short and we don't want it to be displayed
@@ -301,7 +300,7 @@ class FormRequestRow extends Component {
     let contextId = this.getContextId(resource)
     return (
       <View style={styles.formRequest}>
-        {date}
+        {this.getChatDate(resource)}
         <View style={shareables ? {borderWidth: 1, width: msgWidth + 2, borderColor: '#dddddd', backgroundColor: bankStyle.incomingMessageBgColor, borderRadius: 10, borderTopLeftRadius: 0} : {}}>
           {messageBody}
           {sendStatus}
@@ -941,11 +940,12 @@ class FormRequestRow extends Component {
                              // <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
             if (useImageInput)
               actionItem = this.makeButtonLink({form, isMyMessage, prop, styles, msg: addMessage, onPress: (item) => this.onSetMediaProperty(prop.name, item), useImageInput})
-            else
-              actionItem = <TouchableOpacity underlayColor='transparent' onPress={() => this.showCamera({prop: prop})}>
+            else {
+              let isSelfie = resource.form === SELFIE
+              actionItem = <TouchableOpacity underlayColor='transparent' onPress={isSelfie && this.verifyLiveness.bind(this, {prop}) || this.showCamera.bind(this, {prop})}>
                              <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
                            </TouchableOpacity>
-
+            }
 
             msg = <View key={this.getNextKey()}>
                    <View style={styles.thumbView}>

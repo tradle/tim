@@ -6,6 +6,7 @@ import { Alert } from 'react-native'
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io'
 const debug = require('debug')('tradle:app:OnePropForm')
 import _ from 'lodash'
+import Zoom from 'react-native-facetec-zoom'
 
 import constants from '@tradle/constants'
 var {
@@ -16,11 +17,13 @@ import utils from '../utils/utils'
 const translate = utils.translate
 import Actions from '../Actions/Actions'
 import CameraView from './CameraView'
+import VideoCamera from './VideoCamera'
 import SignatureView from './SignatureView'
 import Navigator from './Navigator'
 
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
+const SELFIE = 'tradle.Selfie'
 
 var OnePropFormMixin = {
   onSetSignatureProperty(prop, item) {
@@ -105,6 +108,19 @@ var OnePropFormMixin = {
         return
       }
     }
+    // this.props.navigator.push({
+    //   // title: 'Take a pic',
+    //   backButtonTitle: 'Back',
+    //   noLeftButton: true,
+    //   id: 41,
+    //   component: VideoCamera,
+    //   sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
+    //   passProps: {
+    //     cameraType: prop.cameraType,
+    //     onTakePic: this.onTakePic.bind(this, params)
+    //   }
+    // });
+
     this.props.navigator.push({
       // title: 'Take a pic',
       backButtonTitle: 'Back',
@@ -118,6 +134,94 @@ var OnePropFormMixin = {
       }
     });
   },
+  // verify liveness with facetec ZOOM
+  async verifyLiveness(params) {
+    // ensure zoom is initialized
+    // this only needs to be done once
+      this.showCamera(params)
+      return
+
+    let result
+    try {
+      const { success, status } = await Zoom.initialize({
+        appToken: 'die6CRNhYAk0ZtA3W5TaBOvqpxd1HIVH',
+        // optional customization options
+        // see defaults.js for the full list
+        showZoomIntro: false,
+        showPreEnrollmentScreen: false,
+        showUserLockedScreen: false,
+        showSuccessScreen: false,
+        showFailureScreen: false,
+      })
+
+      if (!success) {
+        // see constants.js SDKStatus for explanations of various
+        // reasons why initialize might not have gone through
+        throw new Error(`failed to init. SDK status: ${status}`)
+      }
+
+      // launch Zoom's verification process
+      result = await Zoom.verify({
+        // no options at this point
+      })
+    } catch (err) {
+      this.showCamera(params)
+      return
+    }
+    debugger
+
+    if (result.status == 'FailedBecauseUserCancelled')
+      return
+    if (!result.faceMetrics) {
+      Alert.alert('Something is wrong with Zoom scan', result)
+      console.log('Something is wrong with Zoom scan', result)
+      return
+    }
+
+    let { livenessResult, livenessScore, auditTrail } = result.faceMetrics
+    let { width, height } = utils.dimensions()
+    let selfie = {
+      from: utils.getMe(),
+      to: this.props.resource.from,
+      _context: this.props.resource._context,
+      [TYPE]: SELFIE,
+      selfie: {
+        url: 'data:image/png;base64,' + auditTrail[0],
+        width,
+        height
+      }
+    }
+    auditTrail.splice(0, 1)
+    if (auditTrail.length > 1) {
+      selfie.additionalImages = auditTrail.map((url) => {
+        url: 'data:image/png;base64,' + url,
+        width,
+        height
+      })
+    }
+    selfie.selfieJson = result
+
+    Actions.addChatItem({
+      resource: selfie
+    })
+
+    // result looks like this:
+    // {
+    //   "countOfZoomSessionsPerformed": 1,
+    //   "sessionId": "45D5D648-3B14-46B1-86B0-55A91AB9E7DD",
+    //   "faceMetrics": {
+    //     "livenessResult": "Alive",
+    //     "livenessScore": 86.69999694824219,
+    //     "auditTrail": [
+    //       "..base64 image 1..",
+    //       "..base64 image 2..",
+    //       "..base64 image 3.."
+    //     ],
+    //     "externalImageSetVerificationResult": "CouldNotDetermineMatch"
+    //   }
+    // }
+  },
+
   onTakePic(params, photo) {
     if (!photo)
       return
