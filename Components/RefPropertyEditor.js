@@ -11,7 +11,6 @@ import _ from 'lodash'
 const debug = require('debug')('tradle:app:blinkid')
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
-import { scan } from 'react-native-passport-reader'
 import dateformat from 'dateformat'
 
 import constants from '@tradle/constants'
@@ -328,30 +327,30 @@ class RefPropertyEditor extends Component {
       return '#b1b1b1'
   }
 
-  async scanPassport(resource) {
-    // 1. start a scan
-    // 2. press the back of your android phone against the passport
-    // 3. wait for the scan(...) Promise to get resolved/rejected
-    try {
-      // const {
-      //   firstName,
-      //   lastName,
-      //   gender,
-      //   issuer,
-      //   nationality,
-      //   photo
-      // } =
-      return await scan({
-        // yes, you need to know a bunch of data up front
-        // this is data you can get from reading the MRZ zone of the passport
-        documentNumber: resource.documentNumber,
-        dateOfBirth: dateformat(resource.dateOfBirth, 'yyMMdd'),
-        dateOfExpiry: dateformat(resource.dateOfExpiry, 'yyMMdd')
-      })
-    } catch (err) {
-      debugger
-    }
-  }
+  // async scanPassport(resource) {
+  //   // 1. start a scan
+  //   // 2. press the back of your android phone against the passport
+  //   // 3. wait for the scan(...) Promise to get resolved/rejected
+  //   try {
+  //     // const {
+  //     //   firstName,
+  //     //   lastName,
+  //     //   gender,
+  //     //   issuer,
+  //     //   nationality,
+  //     //   photo
+  //     // } =
+  //     return await scan({
+  //       // yes, you need to know a bunch of data up front
+  //       // this is data you can get from reading the MRZ zone of the passport
+  //       documentNumber: resource.documentNumber,
+  //       dateOfBirth: dateformat(resource.dateOfBirth, 'yyMMdd'),
+  //       dateOfExpiry: dateformat(resource.dateOfExpiry, 'yyMMdd')
+  //     })
+  //   } catch (err) {
+  //     debugger
+  //   }
+  // }
   async showBlinkIDScanner(prop) {
     let { resource } = this.props
     const { documentType, country } = resource

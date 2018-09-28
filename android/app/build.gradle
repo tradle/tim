@@ -145,7 +145,7 @@ android {
         // minSdkVersion 23
         // elliptic curve keys support
         minSdkVersion 19
-        targetSdkVersion 27
+        targetSdkVersion 23
         versionCode vbuild
         versionName vmajor + "." + vminor + "." + vpatch
         ndk {
@@ -298,7 +298,6 @@ dependencies {
     compile fileTree(dir: "libs", include: ["*.jar"])
     compile "com.android.support:appcompat-v7:${supportLibVersion}"
     compile "com.facebook.react:react-native:+"  // From node_modules
-    compile project(':react-native-facetec-zoom')
 }
 
 task copyDownloadableDepsToLibs(type: Copy) {
@@ -306,4 +305,4 @@ task copyDownloadableDepsToLibs(type: Copy) {
     into 'libs'
 }
 
-//apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'
