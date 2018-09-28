@@ -82,37 +82,15 @@ class PhotoView extends Component {
       if (p === url)
         nextPhoto = i === len - 1 ? resource.photos[0] : resource.photos[i + 1];
     }
-    let {width, height} = utils.dimensions(PhotoView)
+    let { width, height } = utils.dimensions(PhotoView)
     let [screenWidth, screenHeight] = [width, height]
     let maxHeight = screenHeight / 2.5
+    height = maxHeight
     let resizeMode = 'contain'
-    if (currentPhoto.width  &&  currentPhoto.height) {
-      if (currentPhoto.width  <=  currentPhoto.height) {
-        if (width > currentPhoto.width) {
-          width = currentPhoto.width
-          height = currentPhoto.height
-        }
-        else
-          height = Math.round(height * currentPhoto.height / currentPhoto.width)
-      }
-      else {
-        height = Math.round(height * currentPhoto.height / currentPhoto.width)
-        if (screenHeight > screenWidth) {
-          if (height <= maxHeight)
-            resizeMode = 'cover'
-        }
-      }
-      height = Math.min(height, maxHeight)
-    }
-    else {
-      width = width < height ? width : height
-      height = Math.round(width < height ? height / 2.5 : width / 2)
-      resizeMode = 'contain'
-    }
-    let image = {
-      width,
-      height,
-    }
+    if (currentPhoto.width  &&  currentPhoto.height)
+      width = currentPhoto.width * height/currentPhoto.height
+    else
+      width = width * height/screenHeight
 
     let style={transform: [{scale: this.state.anim}]}
  // onPress={() => {
@@ -132,6 +110,10 @@ class PhotoView extends Component {
       var coverPhotoSource = { uri: coverPhotoUri, cache: 'force-cache' }
       if (coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0)
         coverPhotoSource.isStatic = true
+      let image = {
+        width: screenWidth,
+        height: maxHeight,
+      }
 
       var title = utils.getDisplayName(this.props.resource)
       let fontSize = title.length < 15 ? 30 : 24
@@ -143,8 +125,13 @@ class PhotoView extends Component {
         </ImageBackground>
       )
     }
-    else
+    else {
+      let image = {
+        width,
+        height,
+      }
       photoView = <Image resizeMode={resizeMode} source={source} style={image} />
+    }
 
     return (
           <Animated.View style={style}>
