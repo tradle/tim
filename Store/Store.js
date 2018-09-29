@@ -1882,7 +1882,7 @@ var Store = Reflux.createStore({
       retryOnSend: 3, // then give up and re-queue
       timeouts: {
         close: 2000,
-        send: 10000,
+        send: 20000,
         catchUp: 10000,
         connect: 10000,
         auth: 10000,
