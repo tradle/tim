@@ -11,7 +11,6 @@ import _ from 'lodash'
 const debug = require('debug')('tradle:app:blinkid')
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
-// import { scan } from 'react-native-passport-reader'
 import dateformat from 'dateformat'
 
 import constants from '@tradle/constants'

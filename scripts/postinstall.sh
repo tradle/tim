@@ -2,12 +2,6 @@
 
 set -euo pipefail
 
-ZOOM_VERSION=$(cat package.json | jq -r '.dependencies["react-native-facetec-zoom"]')
-if [ "$ZOOM_VERSION" != "null" ];
-then
-  ./scripts/fetch-zoom-framework.sh &
-fi
-
 echo "removing react-native peer deps that prevent shrinkwrap from being written"
 ./scripts/rm-rn-peerdeps.js
 
@@ -28,5 +22,3 @@ fi
 cp node_modules/react-native-camera/postinstall_project/projectWithoutFaceDetection.pbxproj node_modules/react-native-camera/ios/RNCamera.xcodeproj/project.pbxproj
 
 npm run fix:staging
-
-wait
