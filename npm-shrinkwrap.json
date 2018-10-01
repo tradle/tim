@@ -1582,9 +1582,9 @@
       }
     },
     "blinkid-react-native": {
-      "version": "4.1.0",
-      "from": "blinkid-react-native@4.1.0",
-      "resolved": "http://registry.npmjs.org/blinkid-react-native/-/blinkid-react-native-4.1.0.tgz"
+      "version": "4.2.0",
+      "from": "blinkid-react-native@4.2.0",
+      "resolved": "https://registry.npmjs.org/blinkid-react-native/-/blinkid-react-native-4.2.0.tgz"
     },
     "bluebird": {
       "version": "2.11.0",
