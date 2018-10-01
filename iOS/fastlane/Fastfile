@@ -280,7 +280,7 @@ platform :ios do
 
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
     # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
-    dry_run = options[:dry_run] == false ? false : true
+
     # see config opts for code_push plugin here
     # https://github.com/manuelkch/fastlane-plugin-code_push
     mandatory = options[:mandatory] || false
@@ -290,7 +290,7 @@ platform :ios do
       description: options[:description] || 'no description for release',
       deployment: options[:deployment] || 'Staging',
       target_binary_version: version,
-      dry_run: dry_run,
+      dry_run: options[:dry_run],
       execution_dir_path: '../',
       mandatory: mandatory
     )
