@@ -7,18 +7,14 @@ import {
   ImageBackground,
   View,
   Text,
-  Modal,
   Animated,
-  Easing,
   TouchableHighlight
 } from 'react-native'
 
 import PropTypes from 'prop-types'
-import * as Animatable from 'react-native-animatable'
 import { makeResponsive } from 'react-native-orient'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
-import Icon from 'react-native-vector-icons/Ionicons';
 
 import utils from '../utils/utils'
 import constants from '@tradle/constants'
@@ -89,8 +85,8 @@ class PhotoView extends Component {
     let resizeMode = 'contain'
     if (currentPhoto.width  &&  currentPhoto.height)
       width = currentPhoto.width * height/currentPhoto.height
-    else
-      width = width * height/screenHeight
+    // else
+    //   width = width * height/screenHeight
 
     let style={transform: [{scale: this.state.anim}]}
  // onPress={() => {
