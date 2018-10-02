@@ -1883,8 +1883,8 @@ var Store = Reflux.createStore({
       timeouts: {
         close: 2000,
         send: 20000,
-        catchUp: 10000,
-        connect: 10000,
+        catchUp: 15000,
+        connect: 20000,
         auth: 10000,
       },
     })
