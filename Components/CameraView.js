@@ -2,14 +2,12 @@ console.log('requiring CameraView.js')
 
 import React, { Component } from 'react'
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   View,
   Image,
   TouchableOpacity
 } from 'react-native'
-import PropTypes from 'prop-types'
 // import Camera from 'react-native-camera'
 import { RNCamera } from 'react-native-camera'
 import Icon from 'react-native-vector-icons/Ionicons'

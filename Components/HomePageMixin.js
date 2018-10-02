@@ -21,20 +21,15 @@ import {
   Alert,
   StatusBar
 } from 'react-native'
-import PropTypes from 'prop-types'
 
-const debug = require('debug')('tradle:app:HomePageMixin')
 const {
   TYPE
 } = constants
 const {
-  PROFILE,
   ORGANIZATION,
   MESSAGE,
-  IDENTITY
 } = constants.TYPES
 
-const DATA_CLAIM = 'tradle.DataClaim'
 const APPLICATION = 'tradle.Application'
 
 var HomePageMixin = {
@@ -215,15 +210,13 @@ var HomePageMixin = {
   renderGridHeader() {
     let { modelName, navigator, multiChooser } = this.props
     if (modelName === APPLICATION)
-      return <View/>
-    let model = utils.getModel(modelName)
-    let props = model.properties
+      return
     let gridCols = this.getGridCols() // model.gridCols || model.viewCols;
     if (gridCols)
-    return (
-      // <GridHeader gridCols={gridCols} modelName={modelName} navigator={navigator} />
-      <GridHeader gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)}/>
-    )
+      return (
+        // <GridHeader gridCols={gridCols} modelName={modelName} navigator={navigator} />
+        <GridHeader gridCols={gridCols} multiChooser={multiChooser} checkAll={multiChooser  &&  this.checkAll.bind(this)} modelName={modelName} navigator={navigator} sort={this.sort.bind(this)}/>
+      )
   },
   getGridCols() {
     let model = utils.getModel(this.props.modelName)

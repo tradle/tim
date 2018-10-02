@@ -11,7 +11,6 @@ import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import Reflux from 'reflux'
 import constants from '@tradle/constants'
-import buttonStyles from '../styles/buttonStyles'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import StyleSheet from '../StyleSheet'
@@ -23,15 +22,8 @@ const PROFILE = 'tradle.Profile'
 import React, { Component } from 'react'
 import {
   ListView,
-  // StyleSheet,
-  Alert,
-  // AlertIOS,
-  // ActionSheetIOS,
-  TouchableOpacity,
   StatusBar,
   View,
-  Text,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types';
 
@@ -118,7 +110,6 @@ class VerifierChooser extends Component {
               resource={resource} />
   }
   render() {
-    var model = utils.getModel(this.props.modelName);
     var content = <ListView
           dataSource={this.state.dataSource}
           enableEmptySections={true}
@@ -158,7 +149,7 @@ class VerifierChooser extends Component {
     })
   }
   verifyByTrustedProvider(resource, product) {
-    let provider = this.props.provider
+    // let provider = this.props.provider
     let msg = {
       [constants.TYPE]: PRODUCT_REQUEST,
       product: product,
