@@ -3,7 +3,6 @@ console.log('requiring VideoPlayer.js')
 
 import React from 'react'
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   View,
@@ -12,8 +11,6 @@ import {
 import PropTypes from 'prop-types'
 
 // import Video from 'react-native-video'
-var utils = require('../utils/utils')
-
 class VideoPlayer extends React.Component {
   propTypes: {
     onEnd: PropTypes.func.isRequired,

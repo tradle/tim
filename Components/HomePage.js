@@ -2,40 +2,27 @@ console.log('requiring HomePage.js')
 'use strict';
 
 import NoResources from './NoResources'
-import ResourceRow from './ResourceRow'
 import SponsorRow from './SponsorRow'
 import ResourceView from './ResourceView'
-import ResourceList from './ResourceList'
-import VerificationRow from './VerificationRow'
 import NewResource from './NewResource'
 import MessageList from './MessageList'
-import MessageView from './MessageView'
 import HomePageMixin from './HomePageMixin'
 import PageView from './PageView'
-import SupervisoryView from './SupervisoryView'
 import ActionSheet from 'react-native-actionsheet'
 import utils from '../utils/utils'
 var translate = utils.translate
 import reactMixin from 'react-mixin'
-import extend from 'extend'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import Reflux from 'reflux'
 import constants from '@tradle/constants'
 import Icon from 'react-native-vector-icons/Ionicons';
-import QRCodeScanner from './QRCodeScanner'
-import QRCode from './QRCode'
 import buttonStyles from '../styles/buttonStyles'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import StyleSheet from '../StyleSheet'
 
-const WEB_TO_MOBILE = '0'
-const TALK_TO_EMPLOYEEE = '1'
-const APP_QR_CODE = '5'
-const PARTIAL = 'tradle.Partial'
 const TYPE = constants.TYPE
-const ROOT_HASH = constants.ROOT_HASH
 const PROFILE = constants.TYPES.PROFILE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 
@@ -45,9 +32,7 @@ const ENUM = 'tradle.Enum'
 import React, { Component } from 'react'
 import {
   ListView,
-  Alert,
   TouchableOpacity,
-  Image,
   StatusBar,
   View,
   Text,
@@ -120,15 +105,10 @@ class HomePage extends Component {
   selectResource(resource) {
     var me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    var model = utils.getModel(this.props.modelName);
     var isIdentity = this.props.modelName === PROFILE;
-    var isVerification = model.value.id === constants.TYPES.VERIFICATION
-    var isForm = model.value.id === constants.TYPES.FORM
     var isOrganization = this.props.modelName === ORGANIZATION;
-    var m = utils.getModel(resource[TYPE]);
     var title = isIdentity ? resource.firstName : resource.name; //utils.getDisplayName(resource, model.value.properties);
     var modelName = constants.TYPES.MESSAGE;
-    var self = this;
     let style = this.mergeStyle(resource.style)
     var route = {
       component: MessageList,
@@ -161,16 +141,6 @@ class HomePage extends Component {
   }
 
   renderRow(resource)  {
-    var model = utils.getModel(this.props.modelName);
-    if (model.isInterface)
-      model = utils.getModel(resource[TYPE])
- // || (model.id === constants.TYPES.FORM)
-    var isVerification = model.id === constants.TYPES.VERIFICATION  ||  model.subClassOf === constants.TYPES.VERIFICATION
-    var isForm = model.id === constants.TYPES.FORM || model.subClassOf === constants.TYPES.FORM
-    var isMyProduct = model.id === 'tradle.MyProduct'  ||  model.subClassOf === 'tradle.MyProduct'
-    var isSharedContext = utils.isContext(model)  &&  utils.isReadOnlyChat(resource)
-
-    // let hasBacklink = this.props.prop && this.props.prop.items  &&  this.props.prop.backlink
     return (
       <SponsorRow
         onSelect={() => this.selectResource(resource)}
@@ -182,9 +152,6 @@ class HomePage extends Component {
     );
   }
   renderFooter() {
-    var me = utils.getMe();
-    // if (!me  ||  (this.props.prop  &&  (this.props.prop.readOnly || (this.props.prop.items  &&  this.props.prop.items.readOnly))))
-    //   return <View />;
     var model = utils.getModel(this.props.modelName);
     if (!this.props.prop  &&  model.id !== ORGANIZATION)
       return <View />
@@ -368,7 +335,7 @@ class HomePage extends Component {
         backButtonTitle: 'Back',
         rightButtonTitle: 'Done',
         passProps: {
-          model: utils.getModel(me[constants.TYPE]),
+          model: utils.getModel(me[TYPE]),
           resource: me,
           bankStyle: defaultBankStyle
         }

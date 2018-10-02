@@ -3,17 +3,13 @@ console.log('requiring SignatureView.js')
 
 import utils, { translate } from '../utils/utils'
 import PageView from './PageView'
-import extend from 'extend'
-import Icon from 'react-native-vector-icons/Ionicons';
 
 import StyleSheet from '../StyleSheet'
 import platformStyles from '../styles/platform'
 
 import {
-  Platform,
   View,
   // Text,
-  ScrollView,
   TouchableOpacity
 } from 'react-native'
 import PropTypes from 'prop-types';
@@ -48,7 +44,7 @@ class SignatureView extends Component {
   }
   render() {
     let { sigViewStyle } = this.props
-    const { width, height } = utils.dimensions(SignatureView)
+    const { width } = utils.dimensions(SignatureView)
     let separator = utils.getContentSeparator(sigViewStyle)
     let styles = createStyles({sigViewStyle})
     return (

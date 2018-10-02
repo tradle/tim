@@ -3,12 +3,9 @@ console.log('requiring VerificationButton.js')
 
 import utils from '../utils/utils'
 import Icon from 'react-native-vector-icons/Ionicons';
-import reactMixin from 'react-mixin'
-import constants from '@tradle/constants'
 import buttonStyles from '../styles/buttonStyles'
 
 import {
-  StyleSheet,
   View,
   Alert,
   Text,

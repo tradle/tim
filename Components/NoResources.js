@@ -9,7 +9,6 @@ import {
 import PropTypes from 'prop-types';
 import Icon from 'react-native-vector-icons/Ionicons'
 
-import utils from '../utils/utils'
 import React, { Component } from 'react'
 class NoResources extends Component {
   props: {

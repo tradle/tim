@@ -5,10 +5,7 @@ import React, {
 } from 'react'
 
 import {
-  Platform,
   TouchableHighlight,
-  Linking,
-  Alert
 } from 'react-native'
 import PropTypes from 'prop-types'
 import ImagePicker from 'react-native-image-picker'
