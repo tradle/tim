@@ -583,12 +583,12 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#c7195f581e0b4f8dbdd5155676a752eed2ad8069"
+      "resolved": "git://github.com/tradle/models.git#3570cc8e087ec699484a8a6358753209ae50f0b6"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
       "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#8c4e61234ee90276fce8508803707e7945a602ba"
+      "resolved": "git://github.com/tradle/models-cloud.git#c336cffd2b61a341e3fa767de644c5ab6a4516f3"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
@@ -1582,9 +1582,9 @@
       }
     },
     "blinkid-react-native": {
-      "version": "4.1.0",
-      "from": "blinkid-react-native@latest",
-      "resolved": "http://registry.npmjs.org/blinkid-react-native/-/blinkid-react-native-4.1.0.tgz"
+      "version": "4.2.0",
+      "from": "blinkid-react-native@4.2.0",
+      "resolved": "https://registry.npmjs.org/blinkid-react-native/-/blinkid-react-native-4.2.0.tgz"
     },
     "bluebird": {
       "version": "2.11.0",
@@ -2741,7 +2741,7 @@
     },
     "es6-symbol": {
       "version": "3.1.1",
-      "from": "es6-symbol@>=3.1.1 <3.2.0",
+      "from": "https://registry.npmjs.org/es6-symbol/-/es6-symbol-3.1.1.tgz",
       "resolved": "https://registry.npmjs.org/es6-symbol/-/es6-symbol-3.1.1.tgz"
     },
     "es6-weak-map": {

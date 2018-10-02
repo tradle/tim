@@ -467,7 +467,7 @@ var Store = Reflux.createStore({
         action: 'app_open'
       }))
 
-    // this._envPromise = this.loadEnv()
+    this._envPromise = this.loadEnv()
     this.cache = new Cache({max: 500, maxAge: 1000 * 60 * 60})
 
     // this.lockReceive = utils.locker({ timeout: 600000 })
@@ -1882,7 +1882,7 @@ var Store = Reflux.createStore({
       retryOnSend: 3, // then give up and re-queue
       timeouts: {
         close: 2000,
-        send: 10000,
+        send: 20000,
         catchUp: 10000,
         connect: 10000,
         auth: 10000,
@@ -9844,9 +9844,9 @@ if (!res[SIG]  &&  res._message)
       })
     }
 
-    // if (identity) {
-    //   await this.maybeRequireFreshUser()
-    // }
+    if (identity) {
+      await this.maybeRequireFreshUser()
+    }
 
     if (mePub) {
       const lookupKeys = Keychain
