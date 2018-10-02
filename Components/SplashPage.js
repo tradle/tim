@@ -28,7 +28,7 @@ import { makeResponsive } from 'react-native-orient'
 //     }]
 // }
 class SplashPage extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     splashscreen: PropTypes.object.isRequired,
   };
@@ -53,7 +53,7 @@ class SplashPage extends Component {
       ]
     }
 
-    return <TourPage customStyles={splashStyle} tour={tour} callback={() => {}} />
+    return <TourPage navigator={navigator} customStyles={splashStyle} tour={tour} callback={() => {}} />
   }
 }
 

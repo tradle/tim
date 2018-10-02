@@ -44,13 +44,13 @@ const PHOTO = 'tradle.Photo'
 const OBJECT = 'tradle.Object'
 
 class GridRow extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     gridCols: PropTypes.array.isRequired,
-    multiChooser: PropTypes.boolean,
-    isSmallScreen: PropTypes.boolean,
-    chosen: PropTypes.boolean,
+    multiChooser: PropTypes.bool,
+    isSmallScreen: PropTypes.bool,
+    chosen: PropTypes.bool,
   };
   constructor(props) {
     super(props)

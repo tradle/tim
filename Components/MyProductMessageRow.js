@@ -23,7 +23,7 @@ import chatStyles from '../styles/chatStyles'
 const MAX_PROPS_IN_FORM = 1
 
 class MyProductMessageRow extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     application: PropTypes.object,

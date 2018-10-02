@@ -24,7 +24,7 @@ import buttonStyles from '../styles/buttonStyles'
 import ImageInput from './ImageInput'
 
 class GridItemsList extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     list: PropTypes.array.isRequired,
     callback: PropTypes.func.isRequired,

@@ -13,7 +13,7 @@ import {
 import PropTypes from 'prop-types'
 
 class StringChooser extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     strings: PropTypes.array.isRequired,
     bankStyle: PropTypes.object,

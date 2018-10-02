@@ -19,7 +19,7 @@ import utils from '../utils/utils'
 import { makeResponsive } from 'react-native-orient'
 
 class MatchImages extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     selfie: PropTypes.object.isRequired,
     photoId: PropTypes.object.isRequired,

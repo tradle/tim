@@ -21,12 +21,12 @@ import StyleSheet from '../StyleSheet'
 const MONEY = constants.TYPES
 
 class GridHeader extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
     gridCols: PropTypes.array.isRequired,
-    multiChooser: PropTypes.boolean,
-    isSmallScreen: PropTypes.boolean,
+    multiChooser: PropTypes.bool,
+    isSmallScreen: PropTypes.bool,
     checkAll: PropTypes.func,
     sort: PropTypes.func
     // backlinkList: PropTypes.array

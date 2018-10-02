@@ -17,9 +17,9 @@ const PageModel = models['tradle.TourPage']
 const pageProps = Object.keys(PageModel.properties)
 
 class TourPage extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
-    tour: PropTypes.string.isRequired,
+    tour: PropTypes.object.isRequired,
     callback: PropTypes.func,
     customStyles: PropTypes.object
   };

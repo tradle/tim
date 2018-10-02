@@ -19,7 +19,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react'
 
 class MarkdownPropertyEdit extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     prop: PropTypes.object.isRequired,

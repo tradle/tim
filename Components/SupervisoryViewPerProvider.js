@@ -25,7 +25,7 @@ import platformStyles from '../styles/platform'
 const MILLIS_IN_DAY = 86400000
 
 class SupervisoryViewPerProvider extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
   };

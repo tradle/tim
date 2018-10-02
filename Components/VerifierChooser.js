@@ -32,7 +32,7 @@ import platformStyles from '../styles/platform'
 const SETTINGS = 'tradle.Settings'
 
 class VerifierChooser extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
     resource: PropTypes.object.isRequired,

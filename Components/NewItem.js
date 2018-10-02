@@ -34,7 +34,7 @@ import React, { Component } from 'react'
 
 class NewItem extends Component {
   static displayName = 'NewItem'
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     metadata: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,

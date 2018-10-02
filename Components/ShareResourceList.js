@@ -38,11 +38,11 @@ import {
 } from 'react-native'
 
 class ShareResourceList extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     list: PropTypes.object.isRequired,
     formRequest: PropTypes.object,
-    multiChooser: PropTypes.boolean,
+    multiChooser: PropTypes.bool
   };
   constructor(props) {
     super(props);

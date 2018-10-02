@@ -18,7 +18,7 @@ const LINK_COLOR = '#7AAAC3'
 const BTN_COLOR = LINK_COLOR
 
 class TouchIDOptIn extends Component {
-  props: {
+  static propTypes = {
     optIn: PropTypes.func.isRequired,
     navigator: PropTypes.object.isRequired
   };

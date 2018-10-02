@@ -26,7 +26,7 @@ import PropTypes from 'prop-types';
 import platformStyles from '../styles/platform'
 
 class SupervisoryView extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
   };

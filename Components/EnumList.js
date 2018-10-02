@@ -13,7 +13,7 @@ import StyleSheet from '../StyleSheet'
 import SearchBar from './SearchBar'
 import { Text } from './Text'
 class EnumList extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     returnRoute: PropTypes.object,

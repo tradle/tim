@@ -30,7 +30,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const { TYPE } = constants
 
 class ContextChooser extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     bankStyle: PropTypes.object,
