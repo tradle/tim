@@ -9,8 +9,6 @@ import PageView from './PageView'
 import platformStyles from '../styles/platform'
 import {
   ListView,
-  StyleSheet,
-  View,
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -70,7 +68,6 @@ class StringChooser extends Component {
       bgStyle = {backgroundColor: bankStyle.backgroundColor}
     else
       bgStyle = {backgroundColor: '#ffffff'}
-      // <View style={[styles.container, bgStyle]}>
     let contentSeparator = utils.getContentSeparator(bankStyle)
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={contentSeparator} bankStyle={bankStyle}>
@@ -79,18 +76,5 @@ class StringChooser extends Component {
     );
   }
 }
-
-var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  // listview: {
-  //   marginTop: 64,
-  //   borderWidth: 0,
-  //   marginHorizontal: -1,
-  //   borderBottomWidth: StyleSheet.hairlineWidth,
-  //   borderColor: '#ffffff',
-  // },
-});
 
 module.exports = StringChooser;

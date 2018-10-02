@@ -1,7 +1,7 @@
 console.log('requiring analytics.js')
-import {
-  Platform
-} from 'react-native'
+// import {
+//   Platform
+// } from 'react-native'
 
 // import firebase from 'react-native-firebase'
 import ENV from './env'

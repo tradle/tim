@@ -24,7 +24,7 @@ class TourPage extends Component {
     customStyles: PropTypes.object
   };
   render() {
-    const {pages, doneBtnLabel, skipBtnLabel, nextBtnLabel, dotColor, activeDotColor, leftTextColor, rightTextColor} = this.props.tour
+    const {pages, dotColor, activeDotColor, leftTextColor, rightTextColor} = this.props.tour
     if (!pages)
       return <View/>
     StatusBar.setHidden(true)
