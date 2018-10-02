@@ -6489,9 +6489,9 @@
       "resolved": "git://github.com/tradle/react-native-prompt.git#4c0fc06ea1860e423c220ce034cbade4e1080aa2"
     },
     "react-native-push-notification": {
-      "version": "3.1.1",
-      "from": "react-native-push-notification@>=3.1.0 <3.2.0",
-      "resolved": "https://registry.npmjs.org/react-native-push-notification/-/react-native-push-notification-3.1.1.tgz"
+      "version": "3.0.3",
+      "from": "zo0r/react-native-push-notification#5b34f15",
+      "resolved": "git://github.com/zo0r/react-native-push-notification.git#5b34f1587b038b3361c48f560fba06a92a57ae5e"
     },
     "react-native-qrcode": {
       "version": "0.2.6",

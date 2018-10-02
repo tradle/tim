@@ -176,7 +176,7 @@
     "react-native-passcode-status": "1.1.0",
     "react-native-progress": "^3.4.0",
     "react-native-prompt": "github:tradle/react-native-prompt",
-    "react-native-push-notification": "^3.1.1",
+    "react-native-push-notification": "github:zo0r/react-native-push-notification#5b34f15",
     "react-native-qrcode": "^0.2.6",
     "react-native-randombytes": "^3.5.1",
     "react-native-scrollable-tab-view": "github:tradle/react-native-scrollable-tab-view#fixes_android",
