@@ -27,7 +27,6 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableHighlight,
 } from 'react-native'
 import PropTypes from 'prop-types'
 

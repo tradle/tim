@@ -7,15 +7,10 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
-  TouchableHighlight,
-  Platform,
 } from 'react-native'
-import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
 import ScrollableTabView from 'react-native-scrollable-tab-view'
-import Icon from 'react-native-vector-icons/Ionicons'
 
 import GridList from './GridList'
 import utils, {
@@ -67,8 +62,6 @@ class ShowRefList extends Component {
 
     let bg = bankStyle ? bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
 
-    let currentMarker = <View style={{backgroundColor: bg, height: 4, marginTop: -5}} />
-
     let hasItemBacklinks = []
     let itemProps = utils.getPropertiesWithAnnotation(model, 'items')
     if (itemProps) {
@@ -93,7 +86,6 @@ class ShowRefList extends Component {
     }
     let isMessage = utils.isMessage(resource)
     this.tabDetail = {}
-    let moreIconsIdx = 0
     // Show supporting docs
     if (isMessage) {
       let rId = utils.getId(resource)

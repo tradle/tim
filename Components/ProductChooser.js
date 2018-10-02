@@ -1,7 +1,6 @@
 console.log('requiring ProductChooser.js')
 'use strict';
 
-import NewResource from './NewResource'
 import utils from '../utils/utils'
 var translate = utils.translate
 import equal from 'deep-equal'
@@ -10,16 +9,13 @@ import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import Reflux from 'reflux'
 import constants from '@tradle/constants'
-import MessageList from './MessageList'
 import MessageTypeRow from './MessageTypeRow'
 import PageView from './PageView'
-import platformStyles from '../styles/platform'
 import {
   ListView,
   Text,
   StyleSheet,
   View,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -129,17 +125,6 @@ class ProductChooser extends Component {
   }
 
   selectResource(model) {
-    var route = {
-      component: MessageList,
-      backButtonTitle: 'Back',
-      id: 11,
-      title: this.props.resource.name,
-      passProps: {
-        resource: this.props.resource,
-        filter: '',
-        modelName: constants.TYPES.MESSAGE,
-      },
-    }
     var msg = {
       from: utils.getMe(),
       to:   this.props.resource,

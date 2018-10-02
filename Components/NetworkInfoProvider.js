@@ -19,6 +19,12 @@ const TYPE = constants.TYPE
 const ORGANIZATION = constants.TYPES.ORGANIZATION
 
 class NetworkInfoProvider extends Component {
+  props: {
+    resource: PropTypes.object.isRequired,
+    online: PropTypes.bool,
+    isConnected: PropTypes.bool,
+    serverOffline: PropTypes.bool,
+  };
   constructor(props) {
     super(props)
     this.state = {

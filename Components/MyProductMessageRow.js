@@ -7,7 +7,6 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  Alert,
   View,
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -24,6 +23,14 @@ import chatStyles from '../styles/chatStyles'
 const MAX_PROPS_IN_FORM = 1
 
 class MyProductMessageRow extends Component {
+  props: {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    application: PropTypes.object,
+    onSelect: PropTypes.func,
+    bankStyle: PropTypes.object,
+    to: PropTypes.object,
+  };
   constructor(props) {
     super(props);
   }
@@ -123,10 +130,8 @@ class MyProductMessageRow extends Component {
     let first = true;
 
     let properties = model.properties;
-    let noMessage = !resource.message  ||  !resource.message.length;
     let onPressCall;
 
-    let cnt = 0;
     let { bankStyle, onSelect } =  this.props
     let vCols = [];
     viewCols.forEach((v) => {

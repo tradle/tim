@@ -3,7 +3,6 @@ console.log('requiring RowMixin.js')
 
 const debug = require('debug')('tradle:app:RowMixin')
 import React from 'react'
-import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
   // Text,
@@ -19,7 +18,6 @@ import constants from '@tradle/constants'
 import utils, { translate, translateEnum } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
-import Navigator from './Navigator'
 import ENV from '../utils/env'
 import IProov from '../utils/iproov'
 import { Text } from './Text'
@@ -30,12 +28,7 @@ const DEFAULT_CURRENCY_SYMBOL = '£'
 const SENT = 'Sent'
 
 const MY_PRODUCT = 'tradle.MyProduct'
-const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
-const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
-const PHOTO = 'tradle.Photo'
-const IPROOV_SELFIE = 'tradle.IProovSelfie'
-const PRODUCT_REQUEST = 'tradle.ProductRequest'
 
 var BORDER_WIDTH = StyleSheet.hairlineWidth
 var {
@@ -132,7 +125,7 @@ var RowMixin = {
 
   },
   getOwnerPhoto(isMyMessage) {
-    let { to, resource, application, context, bankStyle } = this.props
+    let { to, resource, application, bankStyle } = this.props
     let isContext = utils.isContext(to[TYPE])
     let isSharedContext = isContext  &&  utils.isReadOnlyChat(to)
     if (/*Platform.OS !== 'android'  &&*/  !isSharedContext  &&  !application)
@@ -177,7 +170,7 @@ var RowMixin = {
   getTime(resource) {
     if (!resource._time)
       return
-    let { to, isAggregation, previousMessageTime } = this.props
+    let { isAggregation, previousMessageTime } = this.props
     let showTime = !previousMessageTime  ||  isAggregation;
 
     if (!showTime)  {

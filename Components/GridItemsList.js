@@ -2,7 +2,6 @@ console.log('requiring GridItemsList.js')
 'use strict';
 
 import React, { Component } from 'react'
-import ImagePicker from 'react-native-image-picker';
 import _ from 'lodash'
 import equal from 'deep-equal'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -13,7 +12,6 @@ import {
   StyleSheet,
   Platform,
   ScrollView,
-  TouchableHighlight,
   View,
 } from 'react-native'
 import PropTypes from 'prop-types'
@@ -21,12 +19,9 @@ import PropTypes from 'prop-types'
 import PhotoList from './PhotoList'
 import PageView from './PageView'
 import utils from '../utils/utils'
-var translate = utils.translate
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import ImageInput from './ImageInput'
-
-const PHOTO = 'tradle.Photo'
 
 class GridItemsList extends Component {
   props: {
@@ -80,7 +75,6 @@ class GridItemsList extends Component {
   render() {
     let m = utils.getModel(this.props.resource[constants.TYPE])
     let prop = m.properties[this.props.prop]
-    let isPhoto = prop.items.ref === PHOTO
     // let buttons = [translate('addNew', prop.title), translate('cancel')]
     let icon = Platform.OS === 'ios' ?  'md-add' : 'md-add'
     let color = Platform.OS === 'android' ? 'red' : '#ffffff'
