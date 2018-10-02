@@ -2,7 +2,7 @@ console.log('requiring PhotoCarousel.js')
 'use strict'
 
 import Carousel from 'react-native-carousel';
-import constants from '@tradle/constants'
+import { ROOT_HASH } from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'
 
 import {
@@ -23,7 +23,6 @@ class PhotoCarousel extends Component {
     return utils.resized(this.props, nextProps)
   }
   render() {
-    let photoUrls = [];
     let rPhotos = this.props.photos
     let currentPhoto = this.props.currentPhoto || (rPhotos.length  &&  rPhotos[0])
     let currentPhotoIndex = -1;
@@ -31,7 +30,6 @@ class PhotoCarousel extends Component {
       rPhotos = [currentPhoto]
     let n = rPhotos.length
 
-    let model = utils.getModel(this.props.resource[constants.TYPE]);
     let isVertical = currentPhoto.isVertical
     let cnt = 2000
     let r = this.props.resource
@@ -49,10 +47,11 @@ class PhotoCarousel extends Component {
         }
         if (currentPhotoIndex === -1)
           currentPhotoIndex = i;
-        let key = r[constants.ROOT_HASH] + cnt++
-
+        let key = r[ROOT_HASH] + cnt++
+        let style
+        let isPNG = utils.isImageDataURL(photo.url)  &&  photo.url.indexOf('data:image/png;') === 0
         if (photo.width) {
-          let w = width, h, padding
+          let w = width, h //, padding
 
           if (height > width) {
             if (photo.width > width)
@@ -60,7 +59,7 @@ class PhotoCarousel extends Component {
             else {
               h = photo.height
               w = photo.width
-              padding = (width - photo.width) / 2
+              // padding = (width - photo.width) / 2
             }
 
             if (h > 0.8 * height)
@@ -75,22 +74,18 @@ class PhotoCarousel extends Component {
               w = photo.width
             }
           }
-
-          photos.push(
-                        <View style={[styles.container]} key={key}>
-                          <Image resizeMode='contain' source={{uri: photo.url}} style={{width: w, height: h}}/>
-                        </View>
-                     )
+          style = {width: w, height: h, backgroundColor: isPNG && '#ffffff' || 'transparent'}
         }
-        else
-          photos.push(
-            isVertical  ? <View style={styles.container} key={key}>
-                            <Image resizeMode='contain' source={{uri: photo.url}} style={styles.imageV}/>
-                          </View>
-
-                        : <View style={styles.container} key={key}>
-                            <Image resizeMode='contain' source={{uri: photo.url}} style={styles.image}/>
-                          </View>
+        else {
+          if (isVertical)
+            style = isPNG && styles.imagePngV || styles.imageV
+          else
+            style = isPNG && styles.imagePng || styles.image
+        }
+        photos.push(
+          <View style={styles.container} key={key}>
+            <Image resizeMode='contain' source={{uri: photo.url}} style={style}/>
+          </View>
         )
       }
       n = currentPhotoIndex

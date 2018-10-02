@@ -1963,6 +1963,18 @@ var utils = {
   restartApp: function () {
     return NativeModules.CodePush.restartApp(false)
   },
+  isImageDataURL(dataUrl) {
+    if (!dataUrl) return false
+
+    const mime = utils.getMimeType({ dataUrl })
+    return /^image\//.test(mime)
+  },
+
+  getMimeType({ dataUrl }) {
+    // data:image/jpeg;base64,...
+    return dataUrl.slice(5, dataUrl.indexOf(';'))
+  },
+
   printStack: tradleUtils.printStack.bind(tradleUtils),
   addCatchLogger: function (name, fn) {
     return function () {

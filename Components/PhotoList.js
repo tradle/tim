@@ -4,7 +4,6 @@ console.log('requiring PhotoList.js')
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import reactMixin from 'react-mixin'
-import Icon from 'react-native-vector-icons/Ionicons'
 import _ from 'lodash'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 import { makeResponsive } from 'react-native-orient'
@@ -12,7 +11,6 @@ import constants from '@tradle/constants'
 
 import utils from '../utils/utils'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
-import chatStyles from '../styles/chatStyles'
 import RowMixin from './RowMixin'
 
 import {
@@ -20,11 +18,7 @@ import {
   Image,
   View,
   ListView,
-  Text,
   Animated,
-  Easing,
-  Platform,
-  TextInput,
   TouchableHighlight,
 } from 'react-native'
 
@@ -127,7 +121,7 @@ class PhotoList extends Component {
     return (
       <Col size={1}  key={this.getNextKey() + '_photo'}>
         <Animated.View style={[{margin: 1, transform: [{scale: this.state.anim}]}, imageStyle]}>
-          <TouchableHighlight underlayColor='transparent' onPress={callback ? callback.bind(this, photo) : this.showCarousel.bind(this, photo, this.props.isView)}>
+          <TouchableHighlight underlayColor='transparent' onPress={callback ? callback.bind(this, photo) : this.showCarousel.bind(this, photo, isView)}>
              <Image resizeMode='cover' style={[styles.thumbCommon, imageStyle]} source={source} />
           </TouchableHighlight>
         </Animated.View>
