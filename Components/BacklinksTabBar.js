@@ -132,7 +132,7 @@ const BacklinksTabBar = createReactClass({
     const textColor = isTabActive ? activeTextColor : inactiveTextColor;
     const fontWeight = isTabActive ? 'bold' : 'normal';
     const { tabDetail } = this.props
-    let { icon, count, action } = tabDetail[name]
+    let { icon, count } = tabDetail[name]
     if (icon)
       icon = <Icon name={icon}  size={30}  color='#757575' />
     let countC

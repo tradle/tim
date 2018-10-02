@@ -1,7 +1,6 @@
 console.log('requiring BackgroundImage.js')
 import React, { Component } from 'react'
 import {
-  Platform,
   StyleSheet,
   Image,
   ScrollView,
@@ -16,7 +15,6 @@ import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
 import PageView from './PageView'
 import utils from '../utils/utils'
-import platformStyles from '../styles/platform'
 
 import { makeResponsive } from 'react-native-orient'
 
