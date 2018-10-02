@@ -90,7 +90,6 @@ class VerificationView extends Component {
 
   renderVerification(resource, model, vTree, currentLayer, styles) {
     resource = resource || this.props.resource;
-    let vModel = utils.getModel(VERIFICATION)
     let bankStyle = this.props.bankStyle
     if (resource.method) {
       let displayName = utils.getDisplayName(resource.method)
@@ -105,9 +104,9 @@ class VerificationView extends Component {
                 </TouchableOpacity>)
     }
     else if (resource.sources) {
-      let arrow = ''
-      for (let i=0; i<currentLayer; i++)
-        arrow += '→'
+      // let arrow = ''
+      // for (let i=0; i<currentLayer; i++)
+      //   arrow += '→'
       resource.sources.forEach((r) => {
         if (r.method)
           this.renderVerification(r, model, vTree, currentLayer, styles)
@@ -176,7 +175,6 @@ class VerificationView extends Component {
       }
     }
     let first = true;
-    let self = this
     let style = [styles.textContainer, {padding: 10}]
     let retCols = []
     if (isVerification) {
