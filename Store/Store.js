@@ -1048,8 +1048,14 @@ var Store = Reflux.createStore({
         'typeAndTime'
       ],
       getProps: function (wrapper) {
-        const payload = wrapper.object.object
         const props = {}
+        const msg = wrapper.object
+        const payload = msg && msg.object
+        if (!payload) {
+          debug(`[ERROR] unable to index, missing ${msg ? 'payload' : 'message'} body`, JSON.stringify(wrapper))
+          return props
+        }
+
         // get payload
         const model = self.getModel(payload[TYPE])
         if (!model)
