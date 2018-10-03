@@ -3037,7 +3037,7 @@
     "etherscan-api": {
       "version": "3.0.8",
       "from": "mvayngrib/etherscan-api",
-      "resolved": "git://github.com/mvayngrib/etherscan-api.git#3b2862e5e53fdff861b249bf11e3e05e3571dede"
+      "resolved": "git://github.com/mvayngrib/etherscan-api.git#4f46cc5853211276a5ab2c3ddc0dc88787e78f3a"
     },
     "event-emitter": {
       "version": "0.3.5",
@@ -6489,9 +6489,9 @@
       "resolved": "git://github.com/tradle/react-native-prompt.git#4c0fc06ea1860e423c220ce034cbade4e1080aa2"
     },
     "react-native-push-notification": {
-      "version": "3.1.1",
-      "from": "react-native-push-notification@>=3.1.0 <3.2.0",
-      "resolved": "https://registry.npmjs.org/react-native-push-notification/-/react-native-push-notification-3.1.1.tgz"
+      "version": "3.0.3",
+      "from": "zo0r/react-native-push-notification#5b34f15",
+      "resolved": "git://github.com/zo0r/react-native-push-notification.git#5b34f1587b038b3361c48f560fba06a92a57ae5e"
     },
     "react-native-qrcode": {
       "version": "0.2.6",
