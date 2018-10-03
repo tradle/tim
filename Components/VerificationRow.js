@@ -2,9 +2,6 @@ console.log('requiring VerificationRow.js')
 'use strict';
 
 import {
-  // Image,
-  // StyleSheet,
-  Platform,
   // Text,
   TouchableOpacity,
   Alert,
@@ -35,7 +32,6 @@ import { Text } from './Text'
 
 var DEFAULT_CURRENCY_SYMBOL = '£'
 
-const ITEM = 'tradle.Item'
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_PREFILL = 'tradle.FormPrefill'
@@ -43,13 +39,10 @@ const BOOKMARK = 'tradle.Bookmark'
 
 const { TYPE } = constants
 const {
-  PROFILE,
-  VERIFICATION,
   ORGANIZATION,
   FORM,
   ENUM,
   MONEY,
-  SIMPLE_MESSAGE
 } = constants.TYPES
 
 const APPLICATION_SUBMITTED = 'tradle.ApplicationSubmitted'
@@ -61,15 +54,14 @@ const INTERSECTION = 'tradle.Intersection'
 const IMAGE_PLACEHOLDER = utils.whitePixel
 
 class VerificationRow extends Component {
-  props: {
-    key: PropTypes.string.isRequired,
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     onSelect: PropTypes.func.isRequired,
     prop: PropTypes.object,
-    currency: PropTypes.object,
-    isChooser: PropTypes.boolean,
-    multiChooser: PropTypes.boolean,
+    isChooser: PropTypes.bool,
+    multiChooser: PropTypes.bool,
+    // currency: PropTypes.object,
   };
   constructor(props) {
     super(props);
@@ -122,7 +114,6 @@ class VerificationRow extends Component {
         photo = photos  &&  photos.length ? photos[0] : null
       }
     }
-    let hasPhoto = photo != null
     if (photo)
       photo = <Image host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
     else if (model.icon  ||  isForm) {
@@ -144,25 +135,10 @@ class VerificationRow extends Component {
                             ? utils.getModel(utils.getType(resource.document))
                             : model
 
-    let rows = [];
-
     let notAccordion = true //!isMyProduct  &&  !isVerification && !prop === null || resource.sources || resource.method || isForm
-    // if (r  &&  !notAccordion) {
-    //   this.formatDoc(verificationRequest, r, rows);
-    //   let backlink = prop &&  prop.items  &&  prop.items.backlink;
-    //   if (resource.txId)
-    //     rows.push(
-    //         <View style={{flexDirection: 'row'}} key={this.getNextKey()}>
-    //           <Text style={styles.resourceTitleL}>{translate('verificationTransactionID')}</Text>
-    //           <Text style={[styles.description, {color: '#7AAAc3'}]} onPress={this.onPress.bind(this, 'https://tbtc.blockr.io/tx/info/' + resource.txId)}>{resource.txId}</Text>
-    //         </View>
-    //       )
-    // }
 
     let verifiedBy, org
     if (!isChooser  && !this.props.search  &&  (isVerification || isMyProduct /* ||  isForm*/) &&  resource.from) {
-      let contentRows = [];
-
       if (isMyProduct)
         org = resource.from.organization
       else if (isForm)
@@ -352,7 +328,6 @@ class VerificationRow extends Component {
     let sharedFrom
     if (isForm  &&  prop  &&  parentResource[TYPE] === ORGANIZATION) {
       if (utils.getId(resource.to.organization) !== utils.getId(parentResource)) {
-        let img
         if (resource.to.photo)
           sharedFrom = <View style={styles.sharedView}>
                         <Image source={{uri: utils.getImageUri(resource.to.photo)}}  style={styles.recipientPhoto} />
@@ -446,7 +421,7 @@ class VerificationRow extends Component {
     else
       title = resource.to.title
     Alert.alert(
-      translate('confirmRevoke', resource.to.organization.title),
+      translate('confirmRevoke', title),
       null,
       [
         {text: translate('cancel'), onPress: () => console.log('Cancel')},
@@ -472,14 +447,10 @@ class VerificationRow extends Component {
     // let viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
       return
-    let verPhoto;
     let vCols = [];
 
     let properties = model.properties;
-    let noMessage = !resource.message  ||  !resource.message.length;
-    let onPressCall;
 
-    let isSimpleMessage = model.id === SIMPLE_MESSAGE;
     let style = styles.resourceTitle
     let labelStyle = styles.resourceTitleL
     viewCols.forEach((v) => {
@@ -531,7 +502,6 @@ class VerificationRow extends Component {
         else if (criteria  &&  criteria.length) {
           criteria = criteria.replace(/\*/g, '')
           let idx = val.indexOf(criteria)
-          let part
           let parts = []
           if (idx > 0) {
             parts.push(<Text style={style} key={this.getNextKey()}>{val.substring(0, idx)}</Text>)
@@ -594,7 +564,6 @@ class VerificationRow extends Component {
         viewCols.push(p)
     }
 
-    let onPressCall;
     let style = styles.resourceTitle
     let labelStyle = styles.resourceTitleL
     let vCols = []
