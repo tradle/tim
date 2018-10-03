@@ -7,11 +7,9 @@ import {
   RefreshControl,
   Alert,
   TouchableOpacity,
-  Image,
   StatusBar,
   View,
   // Text,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types';
 import Reflux from 'reflux'
@@ -29,8 +27,6 @@ import NewResource from './NewResource'
 import MessageList from './MessageList'
 import MessageView from './MessageView'
 import PageView from './PageView'
-import TourPage from './TourPage'
-import SplashPage from './SplashPage'
 import GridList from './GridList'
 import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
@@ -54,14 +50,12 @@ import ConversationsIcon from './ConversationsIcon'
 
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const PARTIAL = 'tradle.Partial'
-const CONFIRMATION = 'tradle.Confirmation'
 const BOOKMARK = 'tradle.Bookmark'
 
 const LIMIT = 10
 const SCAN_QR_CODE_VIEW = 16
 const {
   MESSAGE,
-  IDENTITY,
   ORGANIZATION,
   PROFILE,
   CUSTOMER_WAITING,
@@ -77,7 +71,7 @@ const {
 } = constants
 
 class ResourceList extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
     resource: PropTypes.object,
@@ -187,7 +181,7 @@ class ResourceList extends Component {
       });
       return
     }
-    let me = utils.getMe()
+    // let me = utils.getMe()
     // if (me  &&  me.isEmployee && officialAccounts) {
     //   utils.onNextTransitionEnd(navigator, () => {
     //     Actions.addMessage({msg: utils.requestForModels(), isWelcome: true})
@@ -556,7 +550,6 @@ class ResourceList extends Component {
     let me = utils.getMe();
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let { modelName, callback, navigator, bankStyle, serverOffline, prop, currency, officialAccounts } = this.props
-    let model = utils.getModel(modelName);
     let isContact = modelName === PROFILE;
     let rType = resource[TYPE]
     let isVerificationR  = rType === VERIFICATION
@@ -647,7 +640,6 @@ class ResourceList extends Component {
     }
     else
       title = resource.name //utils.getDisplayName(resource, model.properties);
-    let self = this;
     let style = this.mergeStyle(resource.style)
 
     if (officialAccounts) {
@@ -667,56 +659,6 @@ class ResourceList extends Component {
       if (isOrganization) {
         if (this.showTourOrSplash({resource, action: action || 'push', callback: this.selectResource}))
           return
-      //   if (resource._tour  &&  !resource._noTour) {
-      //     StatusBar.setHidden(true)
-      //     navigator.push({
-      //       title: "",
-      //       component: TourPage,
-      //       id: 35,
-      //       backButtonTitle: null,
-      //       // backButtonTitle: __DEV__ ? 'Back' : null,
-      //       passProps: {
-      //         bankStyle: bankStyle,
-      //         noTransitions: true,
-      //         tour: resource._tour,
-      //         callback: () => {
-      //           resource._noTour = true
-      //           resource._noSplash = true
-      //           Actions.addItem({resource: resource})
-      //           // resource._noSplash = true
-      //           this.selectResource(resource, 'replace')
-      //         }
-      //       }
-      //     })
-      //     return
-      //   }
-      //   if (!resource._noSplash)  {
-      //     StatusBar.setHidden(true)
-      //     let splashscreen = resource.style  &&  resource.style.splashscreen
-      //     if (splashscreen) {
-      //       let resolvePromise
-      //       let promise = new Promise(resolve => {
-      //         navigator.push({
-      //           title: "",
-      //           component: SplashPage,
-      //           id: 36,
-      //           backButtonTitle: null,
-      //           passProps: {
-      //             splashscreen: splashscreen
-      //           }
-      //         })
-      //         resolvePromise = resolve
-      //       })
-      //       // return
-      //       setTimeout(() => {
-      //         resolvePromise()
-      //         resource._noSplash = true
-      //         Actions.addItem({resource: resource})
-      //         this.selectResource(resource, 'replace')
-      //       }, 2000)
-      //       return
-      //     }
-      //   }
       }
     }
     StatusBar.setHidden(false);
@@ -749,7 +691,7 @@ class ResourceList extends Component {
           rightButtonTitle: 'Done',
           passProps: {
             bankStyle: style,
-            model: utils.getModel(resource[TYPE]),
+            model: utils.getModel(utils.getType(resource)),
             resource: resource,
             currency: currency,
           }
@@ -813,7 +755,6 @@ class ResourceList extends Component {
     if (me                       &&
        !model.isInterface  &&
        (resource[ROOT_HASH] === me[ROOT_HASH]  ||  resource[TYPE] !== PROFILE)) {
-      let self = this ;
       route.rightButtonTitle = 'Edit'
       route.onRightButtonPress = /*() =>*/ {
         title: 'Edit',
@@ -908,7 +849,7 @@ class ResourceList extends Component {
       return
     }
 
-    let {to, prop, listView, resource, modelName} = this.props
+    let { prop, listView, resource, modelName } = this.props
     this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     Actions.list({
       query: this.state.filter,
@@ -1166,7 +1107,7 @@ class ResourceList extends Component {
   }
   render() {
     let content;
-    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly, backlinkList } = this.props
+    let { modelName, isChooser, isBacklink, officialAccounts, _readOnly } = this.props
     let model = utils.getModel(modelName);
     if (this.state.dataSource.getRowCount() === 0   &&
         utils.getMe()                               &&
@@ -1200,7 +1141,6 @@ class ResourceList extends Component {
           scrollRenderAhead={10}
           showsVerticalScrollIndicator={false} />;
     }
-    let me = utils.getMe()
     let actionSheet = this.renderActionSheet() // me.isEmployee && me.organization ? this.renderActionSheet() : null
     let footer = (actionSheet || this.state.hideMode) && this.renderFooter()
     let searchBar
@@ -1221,7 +1161,6 @@ class ResourceList extends Component {
     let network
     if (!isChooser && officialAccounts && modelName === ORGANIZATION)
        network = <NetworkInfoProvider connected={this.state.isConnected} serverOffline={this.state.serverOffline} />
-    let hasSearchBar = isBacklink && backlinkList && backlinkList.length > 10
     let contentSeparator = utils.getContentSeparator(this.state.bankStyle)
     let style = {backgroundColor: '#fff'}
     // let isProfile = modelName === PROFILE
@@ -1288,7 +1227,7 @@ class ResourceList extends Component {
   }
   async scanQRAndProcess(prop) {
     const result = await this.scanFormsQRCode()
-    const { schema, data } = result
+    const { schema } = result
     if (schema !== 'AddProvider') {
       Alert.alert(translate('tryProviderQrCode'))
       return
