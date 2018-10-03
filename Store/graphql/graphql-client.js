@@ -4,8 +4,7 @@ import omit from 'lodash/omit'
 import isEmpty from 'lodash/isEmpty'
 import getPropertyAtPath from 'lodash/get'
 import gql from 'graphql-tag'
-import deepEqual from 'deep-equal'
-import tradle, { utils as tradleUtils } from '@tradle/engine'
+import { utils as tradleUtils } from '@tradle/engine'
 import { ApolloClient, createNetworkInterface } from 'apollo-client'
 import constants from '@tradle/constants'
 import { print as printQuery } from 'graphql/language/printer'
@@ -15,10 +14,9 @@ const {
   SIG,
   ROOT_HASH,
   CUR_HASH,
-  PREV_HASH
 } = constants
 
-const { MONEY, ENUM, ORGANIZATION, FORM, MESSAGE, MODEL } = constants.TYPES
+const { MONEY, ENUM, ORGANIZATION, MESSAGE, MODEL } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
@@ -77,29 +75,30 @@ var search = {
       }
     }])
 
-    networkInterface.useAfter([
-      {
-        applyAfterware(result, next) {
-          const { response } = result
-          if (response.status > 300) {
-            const err = Error('request failed')
-            err.status = response.status
-            err.statusText = response.statusText
-            err.response = response
-            throw err
-          }
+    // networkInterface.useAfter([
+    //   {
+    //     applyAfterware(result, next) {
+    //       const { response } = result
+    //       if (response.status > 300) {
+    //         const err = Error('request failed')
+    //         err.status = response.status
+    //         err.statusText = response.statusText
+    //         err.response = response
+    //         throw err
+    //       }
 
-          next()
-        }
-      }
-    ])
+    //       next()
+    //     }
+    //   }
+    // ])
 
     return new ApolloClient({ networkInterface })
   },
 
   async searchServer(params) {
     let self = this
-    let {client, modelName, filterResource, sortProperty, asc, limit, endCursor, direction, properties, select} = params
+    let {client, modelName, filterResource, sortProperty, asc, limit,
+         endCursor, properties, select, excludeProps} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -123,7 +122,8 @@ var search = {
       LTE: '',
     }
     let exclude = [ROOT_HASH, CUR_HASH, TYPE]
-    let numberOfAttempts = 1
+    if (excludeProps)
+      exclude.concat(excludeProps)
     if (filterResource) {
       for (let p in filterResource) {
         if (exclude.indexOf(p) !== -1)
@@ -321,7 +321,7 @@ var search = {
     query += `edges {\n node {\n`
 
     if (!select) {
-      select = this.getSearchProperties({model, properties, isList: true})
+      select = this.getSearchProperties({model, properties, isList: true, excludeProps})
     }
 
     query += `${select.join('   \n')}`
@@ -330,20 +330,47 @@ var search = {
     query += `\n}`   // close properties block
     query += `\n}`   // close query
 
-    let error, message, retry = true
+    let error, retry = true
     for (let attemptsCnt=0; attemptsCnt<MAX_ATTEMPTS  &&  retry; attemptsCnt++) {
       let data = await execute(query)
       if (data.result)
         return { result:  data.result }
-      error = data.error.message
-      if (error === NETWORK_FAILURE)
-        continue
+      let { message, graphQLErrors, networkError } = data.error
+      if (graphQLErrors.length) {
+        let excludeProps = []
+        let str = 'Cannot query field \"'
+        let len = str.length
+        graphQLErrors.forEach(err => {
+          debugger
+          let msg = err.message
+          let idx = msg.indexOf(str)
+          if (idx !== 0)
+            return
+          idx = msg.indexOf('\"', len)
+          excludeProps.push(msg.substring(len, idx))
+        })
+        if (excludeProps.length) {
+          params.excludeProps = excludeProps
+          return await this.searchServer(params)
+        }
+        else {
+          debugger
+          return
+        }
+      }
+      if (networkError) {
+        if (networkError.status === 400)
+          message = INVALID_QUERY
+        else
+          continue
+      }
       retry = false
-      if (error.indexOf(INVALID_QUERY) === 0)
-        error = INVALID_QUERY
+      if (message.indexOf(INVALID_QUERY) === 0)
+        message = INVALID_QUERY
       else
         debugger
       await utils.submitLog(true)
+      error = message
     }
 
     console.log(error)
@@ -364,9 +391,6 @@ var search = {
         console.log(error)
         return { error }
       }
-    }
-    function prettify (obj) {
-      return JSON.stringify(obj, null, 2)
     }
     function addEqualsOrGreaterOrLesserNumber(val, op, prop) {
       let isMoney = prop.ref === MONEY
@@ -397,7 +421,7 @@ var search = {
                 // # _inbound: false
                 // # _recipient: ${hash}
   async getChat(params) {
-    let { author, recipient, client, context, filterResource, limit, endCursor, direction, application } = params
+    let { author, client, context, filterResource, limit, endCursor } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
     let contextVar = filterResource || context ? '' : '($context: String)'
     let limitP = limit ? `limit:  ${limit}` : ''
@@ -485,10 +509,8 @@ var search = {
 
   },
   getSearchProperties(params) {
-    let {model, inlined, properties, currentProp, isList, backlink} = params
+    let {model, inlined, properties, backlink} = params
     let props = backlink ? {[backlink.name]: backlink} : model.properties
-
-    let isApplication = model.id === APPLICATION
 
     let arr
     if (utils.isInlined(model))
@@ -527,7 +549,7 @@ var search = {
       )
     }
 
-    if (ref === COUNTRY) {//   ||  ref === CURRENCY)
+    else if (ref === COUNTRY) {//   ||  ref === CURRENCY)
       return (
         `${p} {
           id
@@ -561,11 +583,13 @@ var search = {
       }`
     )
   },
-  addProps({isList, backlink, props, currentProp, arr, model}) {
+  addProps({isList, backlink, props, currentProp, arr, model, excludeProps}) {
     if (!arr)
       arr = []
     let isApplication = model  &&  model.id === APPLICATION
     for (let p in props) {
+      if (excludeProps  &&  excludeProps.indexOf(p) !== -1)
+        continue
       if (p.charAt(0) === '_')
         continue
       if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
@@ -783,7 +807,7 @@ var search = {
   }
 }
 
-const neuter = obj => utils.omitVirtual(utils.sanitize(obj))
+// const neuter = obj => utils.omitVirtual(utils.sanitize(obj))
 const getFirstNode = result => getPropertyAtPath(result, ['edges', '0', 'node'])
 
 module.exports = search
@@ -997,3 +1021,6 @@ module.exports = search
   //   }
 
   // },
+    // function prettify (obj) {
+    //   return JSON.stringify(obj, null, 2)
+    // }
