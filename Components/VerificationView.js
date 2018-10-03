@@ -33,7 +33,7 @@ import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 class VerificationView extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     currency: PropTypes.string,
