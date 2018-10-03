@@ -21,12 +21,9 @@ import { makeResponsive } from 'react-native-orient'
 import constants from '@tradle/constants'
 const {
   TYPE,
-  ROOT_HASH
 } = constants
 const {
   VERIFICATION,
-  ENUM,
-  MONEY,
   FORM
 } = constants.TYPES
 
@@ -42,23 +39,16 @@ import PageView from './PageView'
 import Actions from '../Actions/Actions'
 import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
-import NetworkInfoProvider from './NetworkInfoProvider'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
-import Navigator from './Navigator'
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import StyleSheet from '../StyleSheet'
 
-const PHOTO = 'tradle.Photo'
-const ITEM = 'tradle.Item'
-// const DRAFT_APPLICATION = 'tradle.DraftApplication'
-// const FORM_PREFILL = 'tradle.FormPrefill'
-// import Prompt from 'react-native-prompt'
 const NAV_BAR_CONST = Platform.OS === 'ios' ? 64 : 56
 
 class MessageView extends Component {
   static displayName = 'MessageView';
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     verification: PropTypes.object,
@@ -103,19 +93,7 @@ class MessageView extends Component {
     let vCols = utils.getViewCols(m)
     if (!vCols)
       return
-    let props = m.properties
-    let runGetItem
-    vCols.forEach((col) => {
-      if (!resource[col])
-        return
-      let ref = props[col].ref
-      if (ref  &&  ref !== MONEY  &&  utils.getModel(ref).subClassOf !== ENUM) {
-        if (resource[col].id)
-          runGetItem = true
-      }
-    })
-    // if (runGetItem)
-      Actions.getItem({resource, search, application})
+    Actions.getItem({resource, search, application})
   }
 
   componentDidMount() {
@@ -180,7 +158,7 @@ class MessageView extends Component {
     // if to is passed then resources only of this container need to be returned
     let r = {[TYPE]: ref};
     let rType = resource[TYPE]
-    let rModel = utils.getModel(rType)
+    // let rModel = utils.getModel(rType)
 
     let blModel = utils.getModel(ref)
     // let refProps = utils.getPropertiesWithAnnotation(blModel, 'ref')
@@ -230,7 +208,6 @@ class MessageView extends Component {
   verifyOrCreateError() {
     let { application } = this.props
     let { resource } = this.state
-    let model = utils.getModel(resource[TYPE])
     if (utils.isEmpty(this.state.errorProps)) {
       Alert.alert(
         translate('verifyPrompt'), // + utils.getDisplayName(resource),
@@ -300,8 +277,6 @@ class MessageView extends Component {
   }
 
   getRefResource(resource, prop) {
-    let model = utils.getModel(utils.getType(resource));
-
     this.state.prop = prop;
     // this.state.propValue = utils.getId(resource.id);
     this.showRefResource(resource, prop)
@@ -313,10 +288,8 @@ class MessageView extends Component {
     let model = utils.getModel(document[TYPE]);
     let title = model.title; //utils.getDisplayName(resource, model.properties);
     let newTitle = title;
-    let me = utils.getMe()
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier = !resource && utils.isVerifier(document)
-    let isEmployee = utils.isEmployee(this.props.resource)
     let route = {
       title: newTitle,
       id: 5,
@@ -337,7 +310,7 @@ class MessageView extends Component {
     let { backlink, bankStyle, resource } = this.state
     if (this.state.isLoading)
       return this.showLoading({bankStyle, component: MessageView})
-    let { lensId, style, search, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
+    let { lensId, style, navigator, currency, isVerifier, defaultPropertyValues, verification, application } = this.props
 
     let rModel = utils.getModel(utils.getType(resource))
     let isWrapper = utils.getPrefillProperty(rModel)
@@ -356,15 +329,22 @@ class MessageView extends Component {
     let mainPhoto, inRow
 
     if (!backlink) {
-      if (!photos  ||  !photos.length) {
-        photos = utils.getResourcePhotos(model, resource)
-        let mainPhotoProp = utils.getMainPhotoProperty(model)
-        mainPhoto = mainPhotoProp ? resource[mainPhotoProp] : photos && photos[0]
+      let mainPhotoProp = utils.getMainPhotoProperty(model)
+      if (mainPhotoProp) {
+        mainPhoto = resource[mainPhotoProp]
+        if (photos) {
+          if (mainPhotoProp !== 'photos') {
+            photos = photos.slice()
+            photos.splice(0, 0, mainPhoto)
+          }
+        }
       }
-      else //if (photos.length === 1)
+      else if (!photos  ||  !photos.length) {
+        photos = utils.getResourcePhotos(model, resource)
+        mainPhoto = photos && photos[0]
+      }
+      if (!mainPhoto  &&  photos)
         mainPhoto = photos[0]
-      // if (photos  &&  photos.length)
-      //   photos.splice(0, 1)
 
       inRow = photos ? photos.length - 1 : 0
       if (inRow  &&  inRow > 4)
@@ -627,10 +607,6 @@ var createStyles = utils.styleFactory(MessageView, function ({ dimensions, bankS
       // paddingTop: 3,
       // marginTop: -10,
     },
-    // rowContainer: {
-    //   paddingBottom: 10,
-    //   // paddingHorizontal: 10
-    // },
     date: {
       fontSize: 14,
       marginTop: 5,
