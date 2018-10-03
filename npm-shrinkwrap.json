@@ -524,7 +524,7 @@
     "@tradle/ethereum-adapter-etherscan": {
       "version": "1.0.0",
       "from": "tradle/ethereum-adapter-etherscan",
-      "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#120f00fd357eab408bf48ef6fcbab9bf9a147a96"
+      "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#6223f22d875da76274b8e45ff7c8930b4258802a"
     },
     "@tradle/iot-message": {
       "version": "3.0.0",
@@ -1583,8 +1583,8 @@
     },
     "blinkid-react-native": {
       "version": "4.2.0",
-      "from": "blinkid-react-native@4.2.0",
-      "resolved": "https://registry.npmjs.org/blinkid-react-native/-/blinkid-react-native-4.2.0.tgz"
+      "from": "tradle/blinkid-react-native-dist",
+      "resolved": "git://github.com/tradle/blinkid-react-native-dist.git#f73ab18f9610026761c9e901b671d7b288ba7f0d"
     },
     "bluebird": {
       "version": "2.11.0",
@@ -2221,6 +2221,18 @@
       "version": "15.6.3",
       "from": "create-react-class@>=15.5.2 <16.0.0",
       "resolved": "https://registry.npmjs.org/create-react-class/-/create-react-class-15.6.3.tgz"
+    },
+    "cross-fetch": {
+      "version": "2.2.2",
+      "from": "cross-fetch@2.2.2",
+      "resolved": "https://registry.npmjs.org/cross-fetch/-/cross-fetch-2.2.2.tgz",
+      "dependencies": {
+        "node-fetch": {
+          "version": "2.1.2",
+          "from": "node-fetch@2.1.2",
+          "resolved": "https://registry.npmjs.org/node-fetch/-/node-fetch-2.1.2.tgz"
+        }
+      }
     },
     "cross-spawn": {
       "version": "5.1.0",
@@ -3560,6 +3572,11 @@
       "version": "3.1.0",
       "from": "graphql-anywhere@>=3.0.1 <4.0.0",
       "resolved": "https://registry.npmjs.org/graphql-anywhere/-/graphql-anywhere-3.1.0.tgz"
+    },
+    "graphql-request": {
+      "version": "1.8.2",
+      "from": "graphql-request@>=1.8.2 <2.0.0",
+      "resolved": "https://registry.npmjs.org/graphql-request/-/graphql-request-1.8.2.tgz"
     },
     "graphql-tag": {
       "version": "2.9.2",
