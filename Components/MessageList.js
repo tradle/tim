@@ -3,9 +3,6 @@ console.log('requiring MessageList.js')
 
 import React, { Component } from 'react'
 import {
-  // ListView,
-  // StyleSheet,
-  Image,
   ImageBackground,
   Platform,
   PixelRatio,
@@ -14,9 +11,6 @@ import {
   StatusBar,
   TouchableOpacity,
   Alert,
-  Modal,
-  TouchableHighlight,
-  WebView
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -44,7 +38,6 @@ import FormMessageRow from './FormMessageRow'
 import FormRequestRow from './FormRequestRow'
 import FormErrorRow from './FormErrorRow'
 import TourRow from './TourRow'
-import NoResources from './NoResources'
 import NewResource from './NewResource'
 // import ProductChooser from './ProductChooser'
 import StringChooser from './StringChooser'
@@ -61,7 +54,6 @@ import Actions from '../Actions/Actions'
 import NetworkInfoProvider from './NetworkInfoProvider'
 import ProgressInfo from './ProgressInfo'
 import PageView from './PageView'
-import BackgroundImage from './BackgroundImage'
 import { makeStylish } from './makeStylish'
 import ActivityIndicator from './ActivityIndicator'
 import platformStyles, {MenuIcon} from '../styles/platform'
@@ -74,15 +66,14 @@ import StyleSheet from '../StyleSheet'
 // import ResourceTypesScreen from './ResourceTypesScreen'
 
 var LIMIT = 20
-const { TYPE, TYPES, ROOT_HASH, CUR_HASH, PREV_HASH } = constants
-const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM, FINANCIAL_PRODUCT } = TYPES
+const { TYPE, TYPES, ROOT_HASH, CUR_HASH } = constants
+const { PROFILE, VERIFICATION, ORGANIZATION, SIMPLE_MESSAGE, MESSAGE, FORM } = TYPES
 const MY_PRODUCT = 'tradle.MyProduct'
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
 const CONFIRM_PACKAGE_REQUEST = "tradle.ConfirmPackageRequest"
 const REMEDIATION = 'tradle.Remediation'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
-const CONTEXT = 'tradle.Context'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
 
@@ -90,14 +81,10 @@ const NAV_BAR_HEIGHT = ENV.navBarHeight
 var currentMessageTime
 
 class MessageList extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
-    resource: PropTypes.object.isRequired,
-    returnRoute: PropTypes.object,
-    callback: PropTypes.func,
-    filter: PropTypes.string,
-    isAggregation: PropTypes.bool
+    resource: PropTypes.object.isRequired
   };
   constructor(props) {
     super(props);
@@ -164,16 +151,16 @@ class MessageList extends Component {
   componentWillMount() {
     let { navigator, bankStyle, modelName, resource, prop, context, search, isAggregation, application } = this.props
     let params = {
-      modelName: modelName,
+      modelName,
       to: resource,
-      prop: prop,
-      context: context,
+      prop,
+      context,
       gatherForms: true,
       limit: LIMIT,
-      search: search,
+      search,
       isChat: true,
-      isAggregation: isAggregation,
-      application: application,
+      isAggregation,
+      application,
     }
 
     StatusBar.setHidden(false);
@@ -225,7 +212,6 @@ class MessageList extends Component {
       }
       return
     }
-    let rtype = resource  &&  resource[TYPE]
     if (action === 'addItem'  ||  action === 'addVerification' ||  action === 'addMessage') {
       this.add(params)
       return
@@ -320,7 +306,6 @@ class MessageList extends Component {
           }
         }
       }
-      let me = utils.getMe()
       _.extend(state, {
         list,
         shareableResources,
@@ -342,13 +327,13 @@ class MessageList extends Component {
     if (!utils.isMessage(resource))
       return
 
-    let { application, originatingMessage, modelName } = this.props
+    let { application, originatingMessage } = this.props
     let chatWith = this.props.resource
     let rtype = resource  &&  resource[TYPE]
     if (rtype === NEXT_FORM_REQUEST) {
       let list = this.state.list
       let r = list[list.length - 1]
-      if (r[TYPE] === FORM_REQUEST  &&  r.form === resource.after) {
+      if (rtype === FORM_REQUEST  &&  r.form === resource.after) {
         // not fulfilled form request for multi-entry form will have it's own ID set
         // as fulfilled document
         if (!r._document || utils.getId(r) === r._document) {
@@ -373,18 +358,6 @@ class MessageList extends Component {
         return
     }
 
-    let actionParams = {
-      query: this.state.filter,
-      modelName: modelName,
-      to: chatWith,
-      context: this.state.allContexts ? null : this.state.context,
-      limit: this.state.list ? Math.max(this.state.list.length + 1, LIMIT) : LIMIT
-    }
-    // if (resource._sendStatus) {
-    //   this.state.sendStatus = resource._sendStatus
-    //   this.state.sendResource = resource
-    // }
-    // let addedItem
     let replace
     if (rtype === FORM_REQUEST            ||
         rtype === CONFIRM_PACKAGE_REQUEST ||
@@ -395,8 +368,6 @@ class MessageList extends Component {
       if (resource._documentCreated  ||  resource._denied  ||  resource._approved)
         replace = true
     }
-    // else
-    //   addedItem = null
 
     let list
     list = this.state.list || []
@@ -483,7 +454,6 @@ class MessageList extends Component {
         }
       }
     }
-    // Actions.list(actionParams)
   }
   switchToOneContext(context, to) {
     this.setState({allContexts: false, limit: LIMIT})
@@ -578,14 +548,14 @@ class MessageList extends Component {
 
   selectResource(r, verification) {
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
-    if (!r[TYPE])
+    let rtype = utils.getType(r)
+    if (!rtype)
       return;
     let application = this.state.application || this.props.application
-    let me = utils.getMe()
-    let model = utils.getModel(r[TYPE]);
+    let model = utils.getModel(rtype);
     let title //utils.getDisplayName(resource, model.properties);
 
-    if (r[TYPE] === VERIFICATION) {
+    if (rtype === VERIFICATION) {
       let type = utils.getType(r.document)
       if (type)
         title = translate(utils.getModel(type))
@@ -597,8 +567,7 @@ class MessageList extends Component {
     let newTitle = (dn ? dn + ' -- '  : '') + title;
     // Check if I am a customer or a verifier and if I already verified this resource
     let isVerifier = application ? utils.isRM(application) : !verification && utils.isVerifier(r)
-    let { resource, bankStyle, currency, country } = this.props
-    let isEmployee = utils.isEmployee(resource)
+    let { resource, bankStyle, currency } = this.props
     let lensId = utils.getLensId(r, resource)
     let route = {
       title: newTitle,
@@ -639,7 +608,7 @@ class MessageList extends Component {
         }
       }
       else {
-        let editProps = utils.getEditableProperties(r)
+        // let editProps = utils.getEditableProperties(r)
         // let prop = editProps.length === 1  &&  editProps[0]
         // if (prop  &&  prop.signature) {
         //   route.onRightButtonPress = this.showSignatureView.bind(this, prop, r)
@@ -692,10 +661,8 @@ class MessageList extends Component {
   }
 
   renderRow(resource, sectionId, rowId)  {
-    let { application, isAggregation, bankStyle, originatingMessage, currency, country, navigator } = this.props
+    let { application, isAggregation, bankStyle, originatingMessage, currency, navigator } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id);
-    let me = utils.getMe();
-    // import MessageRow from './MessageRow'
     let previousMessageTime = currentMessageTime;
     let isContext = utils.isContext(this.props.resource)
     currentMessageTime = resource._time
@@ -715,9 +682,6 @@ class MessageList extends Component {
     if (model.subClassOf === 'tradle.MyProduct')
       return  <MyProductMessageRow {...props} />
 
-      // messageNumber: rowId,
-    // let sendStatus = this.state.sendStatus &&  this.state.sendResource[ROOT_HASH] === resource[ROOT_HASH]
-    //                ? this.state.sendStatus : (resource._sendStatus === 'Sent' ? null : resource._sendStatus)
     let moreProps = {
       share: this.share,
       // sendStatus: sendStatus,
@@ -787,13 +751,12 @@ class MessageList extends Component {
   }
 
   render() {
-    let { modelName, resource, bankStyle, navigator, originatingMessage, isAggregation } = this.props
+    let { modelName, resource, bankStyle, navigator, originatingMessage } = this.props
     let application = this.state.application ||  this.props.application
-    let { list, noLoadingIndicator, isLoading, context, isConnected, isForgetting, allLoaded,
+    let { list, isLoading, context, isConnected, isForgetting, allLoaded,
           onlineStatus, loadEarlierMessages, customStyle, allContexts, currentContext } = this.state
     if (currentContext)
       context = currentContext
-    let model = utils.getModel(modelName);
     let bgImage = bankStyle &&  bankStyle.backgroundImage && bankStyle.backgroundImage.url
     let bgStyle
     if (!bgImage  &&  bankStyle.backgroundColor)
@@ -832,15 +795,13 @@ class MessageList extends Component {
     }
     let isContext = resource  &&  utils.isContext(resource[TYPE])
     if (!content) {
-      let isAllMessages = model.id === MESSAGE
-
       let h = utils.dimensions(MessageList).height
       let maxHeight = h - NAV_BAR_HEIGHT
       // Chooser for trusted party verifier
       let isChooser = originatingMessage && originatingMessage.verifiers
       let notRemediation = (context  &&  context.requestFor !== REMEDIATION) ||
                            (isContext && resource.requestFor !== REMEDIATION)
-      let me = utils.getMe()
+      // let me = utils.getMe()
       // if (me.isEmployee  &&  utils.getId(me.organization) !== utils.getId(resource));
       // else
       if (this.hasChatContext())
@@ -864,9 +825,6 @@ class MessageList extends Component {
         loadEarlierMessagesButton={loadEarlierMessages}
         onLoadEarlierMessages={this.onLoadEarlierMessages}
         messages={list}
-        // messageSent={sendResource}
-        // messageSentStatus={this.state.sendStatus}
-        // addedItem={this.state.addedItem}
         customStyle={customStyle}
         enableEmptySections={true}
         autoFocus={false}
@@ -890,19 +848,9 @@ class MessageList extends Component {
       />
     }
 
-    let isOrg = !isAggregation  &&  resource  &&  resource[TYPE] === ORGANIZATION
-    // let chooser
-    // if (isOrg)
-    //   chooser =  <View style={{flex:1, marginTop: 8}}>
-    //               <TouchableHighlight underlayColor='transparent' onPress={this.onAddNewPressed.bind(this, true)}>
-    //                 <Icon name={'ios-arrow-round-down'} size={25} style={styles.imageOutline} />
-    //               </TouchableHighlight>
-    //             </View>
-
     let sepStyle = { height: 1,backgroundColor: 'transparent' }
     if (!allLoaded  && !navigator.isConnected  &&  isForgetting)
       Alert.alert(translate('noConnectionWillProcessLater'))
-    let me = utils.getMe()
     let actionSheet = !hideTextInput  && this.renderActionSheet()
     let network
     if (originatingMessage)
@@ -947,7 +895,7 @@ class MessageList extends Component {
   }
 
   getActionSheetItems() {
-    const { resource, application } = this.props
+    const { application } = this.props
     const buttons = []
     const push = btn => buttons.push({ ...btn, index: buttons.length })
 
@@ -1170,7 +1118,6 @@ class MessageList extends Component {
       application: this.props.application,
       endCursor: this.state.endCursor,
     })
-    let earlierMessages = []
     this.setState({postLoad: callback, loadEarlierMessages: true})
   }
   checkStart(evt) {
@@ -1202,8 +1149,6 @@ class MessageList extends Component {
 
     let model = utils.getModel(modelName);
 
-    let toName = utils.getDisplayName(resource);
-    let meName = utils.getDisplayName(me);
     let message
     if (modelName === MESSAGE  ||  model.isInterface)
       message = msg

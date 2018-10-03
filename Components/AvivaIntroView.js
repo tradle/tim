@@ -5,7 +5,7 @@ import utils from '../utils/utils'
 var translate = utils.translate
 import PageView from './PageView'
 import Icon from 'react-native-vector-icons/Ionicons';
-import ResourceMixin from './ResourceMixin'
+// import ResourceMixin from './ResourceMixin'
 // import MessageList from './MessageList'
 // import ResourceView from './ResourceView'
 import StyleSheet from '../StyleSheet'

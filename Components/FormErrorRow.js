@@ -166,7 +166,6 @@ class FormErrorRow extends Component {
                       </View>
       }
     }
-    var model = utils.getModel(this.props.resource[TYPE])
     var bg = bankStyle.backgroundImage ? 'transparent' : bankStyle.backgroundColor
     return (
       <View style={[styles.viewStyle, {backgroundColor: bg, width: width, alignSelf: isMyMessage ? 'flex-end' : 'flex-start'}]}>

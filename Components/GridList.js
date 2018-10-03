@@ -148,7 +148,6 @@ class GridList extends Component {
     let {resource, officialAccounts, modelName, prop, filter, serverOffline, search} = this.props
     let model = utils.getModel(modelName)
 
-    let viewCols = this.getGridCols()
     this.isSmallScreen = !utils.isWeb() &&  utils.dimensions(GridList).width < 736
     this.limit = 20 //this.isSmallScreen ? 20 : 40
     this.state = {

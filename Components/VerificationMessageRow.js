@@ -19,7 +19,6 @@ import chatStyles from '../styles/chatStyles'
 import reactMixin from 'react-mixin'
 
 import {
-  Image,
   Text,
   TouchableOpacity,
   Alert,

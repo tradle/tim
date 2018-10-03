@@ -45,7 +45,7 @@ const {
 
 class ApplicationTabs extends Component {
   static displayName = 'ApplicationTabs'
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     showDetails: PropTypes.bool,

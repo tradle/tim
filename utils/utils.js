@@ -2084,7 +2084,7 @@ var utils = {
   //   }
   // },
   fromAnyline: function (result) {
-    const { scanMode, cutoutBase64, barcode, reading, data } = result
+    const { scanMode, cutoutBase64, data } = result
     // as produced by newtondev-mrz-parser
     // {
     //       documentCode: documentCode,

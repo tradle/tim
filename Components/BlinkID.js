@@ -1,8 +1,7 @@
 console.log('requiring BlinkID.js')
 import { Platform } from 'react-native'
-import PropTypes from 'prop-types'
-import withDefaults from 'lodash/defaults'
-import groupBy from 'lodash/groupBy'
+// import withDefaults from 'lodash/defaults'
+// import groupBy from 'lodash/groupBy'
 import getValues from 'lodash/values'
 // import BlinkID from 'react-native-blinkid'
 import * as BlinkID from 'blinkid-react-native';
@@ -33,20 +32,20 @@ const recognizers = {
   barcode: BlinkID.BarcodeRecognizer,
 }
 
-const defaults = {
-  enableBeep: true,
-  useFrontCamera: false,
-  shouldReturnFaceImage: true,
-  shouldReturnDocumentImage: true,
-  // shouldReturnSignatureImage: true,
-  // shouldReturnSuccessfulImage: true,
-  recognizers: getValues(recognizers)
-}
-const parser = new xml2js.Parser({ explicitArray: false, strict: false })
+// const defaults = {
+//   enableBeep: true,
+//   useFrontCamera: false,
+//   shouldReturnFaceImage: true,
+//   shouldReturnDocumentImage: true,
+//   // shouldReturnSignatureImage: true,
+//   // shouldReturnSuccessfulImage: true,
+//   recognizers: getValues(recognizers)
+// }
+// const parser = new xml2js.Parser({ explicitArray: false, strict: false })
 // // parser = Promise.promisifyAll(parser)
 // // TODO: make checkIDDocument ready at the end of constructor
 // // don't make people wait for ready promise to resolve
-var parseXML = parser.parseString.bind(parser)
+// var parseXML = parser.parseString.bind(parser)
 
 let licenseKey
 

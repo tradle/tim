@@ -13,7 +13,7 @@ import React, { Component } from 'react'
 
 import constants from '@tradle/constants'
 
-import utils, { translate } from '../utils/utils'
+import { translate } from '../utils/utils'
 import { Text } from './Text'
 import PageView from './PageView'
 import platformStyles from '../styles/platform'

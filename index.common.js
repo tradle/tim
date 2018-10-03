@@ -16,9 +16,6 @@ import {
   Image,
   View,
   TouchableOpacity,
-  Dimensions,
-  Alert,
-  Platform,
   AppState,
   AppRegistry,
   // Text,
@@ -37,7 +34,7 @@ const {
 // import './utils/perf'
 
 // see issue: https://github.com/facebook/react-native/issues/6227
-import NativeAppEventEmitter from 'RCTNativeAppEventEmitter'
+// import NativeAppEventEmitter from 'RCTNativeAppEventEmitter'
 
 // require('react-native-level')
 import Debug from './utils/debug'
@@ -88,11 +85,9 @@ import MatchImages from './Components/MatchImages'
 // import VideoCamera from './Components/VideoCamera'
 
 import utils from './utils/utils'
-var translate = utils.translate
 
 import Actions from './Actions/Actions'
 import AutomaticUpdates from './utils/automaticUpdates';
-import { signIn } from './utils/localAuth'
 import Store from './Store/Store'
 import StyleSheet from './StyleSheet'
 
@@ -107,7 +102,7 @@ const PASSWORD_CHECK = 20
 const REMEDIATION = 29
 const TOUR_PAGE = 35
 const MATCH_VIEW = 40
-const AVIVA_INTRO_VIEW = 50
+// const AVIVA_INTRO_VIEW = 50
 
 const LOGO_HEIGHT = 27
 const VERIFY_OR_CORRECT = 'VerifyOrCorrect'
@@ -217,7 +212,7 @@ class TiMApp extends Component {
     // and check if authentication expired in store
 
     let dateAppStateChanged = Date.now()
-    let lastDateAppStateChanged = this.state.dateAppStateChanged
+    // let lastDateAppStateChanged = this.state.dateAppStateChanged
     let newState = { currentAppState, dateAppStateChanged }
     let me = utils.getMe()
 
@@ -484,7 +479,7 @@ class TiMApp extends Component {
       return <ResourceView navigator={nav} {...props } />
     case NEW_RESOURCE: // 4
       return <NewResource navigator={nav} {...props } />
-    case 5:
+    case MESSAGE_VIEW:
       return <MessageView navigator={nav} {...props} />
     case 6:
       return <NewItem navigator={nav} {...props} />
@@ -584,7 +579,7 @@ class TiMApp extends Component {
 reactMixin(TiMApp.prototype, Reflux.ListenerMixin)
 
 const goBack = debounce(function (nav) {
-  const { routes, route, index } = Navs.getCurrentRouteInfo(nav)
+  const { route, index } = Navs.getCurrentRouteInfo(nav)
   if (index === 0 || route.component.backButtonDisabled) return false
 
   nav.pop()
@@ -654,7 +649,6 @@ var NavigationBarRouteMapper = {
     // else if (route.passProps.bankStyle)
     //   style.push({color: route.passProps.bankStyle.linkColor || '#7AAAC3'})
     let rbTitle = route.rightButtonTitle
-    let iconIdx = rbTitle.indexOf('|')
     let icon
     let symbol
     let iconSize = 25
@@ -857,13 +851,6 @@ var NavigationBarRouteMapper = {
     if (logoNeedsText  ||  !uri) {
       if (route.titleTextColor)
         style.push({color: route.titleTextColor});
-      else {
-        let model
-        if (modelName)
-          model = utils.getModel(modelName)
-        else if (resource)
-          model = utils.getModel(utils.getType(resource))
-      }
 
       let width = navBarTitleWidth(route.component)
       for (let i=1; i<t.length; i++) {

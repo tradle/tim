@@ -10,7 +10,6 @@ var DEFAULT_PRODUCT_ROW_BG_COLOR = '#f7f7f7'
 var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 var PRODUCT_ROW_BG_COLOR, PRODUCT_ROW_TEXT_COLOR
 import {
-  Image,
   Text,
   TouchableHighlight,
   View
