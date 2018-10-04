@@ -6,6 +6,7 @@ import getPropertyAtPath from 'lodash/get'
 import gql from 'graphql-tag'
 import { utils as tradleUtils } from '@tradle/engine'
 import { ApolloClient, createNetworkInterface } from 'apollo-client'
+import { GraphQLClient } from 'graphql-request'
 import constants from '@tradle/constants'
 import { print as printQuery } from 'graphql/language/printer'
 import utils from '../../utils/utils'
@@ -31,9 +32,17 @@ var messageMap = {
   [NETWORK_FAILURE]: 'networkFailure',
   [INVALID_QUERY]: 'invalidQuery'
 }
-
+const useApollo = false
 var search = {
   initClient(meDriver, url) {
+    // debugger
+    if (useApollo)
+      return this.initClientApollo(meDriver, url)
+    else
+      return this.initClientGraphQLRequest(meDriver, url)
+  },
+
+  initClientApollo(meDriver, url) {
     // let graphqlEndpoint
     // let orgId = me.organization.id
     // let url = me.organization.url
@@ -95,8 +104,18 @@ var search = {
     return new ApolloClient({ networkInterface })
   },
 
+  initClientGraphQLRequest(meDriver, url, headers) {
+    // debugger
+    let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
+    if (!graphqlEndpoint)
+      return
+    this.graphqlEndpoint = graphqlEndpoint
+    this.meDriver = meDriver
+    // Not needed but just to make it generic
+    return new GraphQLClient(graphqlEndpoint, {headers})
+  },
+
   async searchServer(params) {
-    let self = this
     let {client, modelName, filterResource, sortProperty, asc, limit,
          endCursor, properties, select, excludeProps} = params
 
@@ -206,7 +225,7 @@ var search = {
             op.NEQ += `\n   ${p}: true,`
         }
         else if (props[p].type === 'number')
-          self.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
+          this.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
 
         else if (props[p].type === 'object') {
           // if (Array.isArray(val)) {
@@ -332,16 +351,16 @@ var search = {
 
     let error, retry = true
     for (let attemptsCnt=0; attemptsCnt<MAX_ATTEMPTS  &&  retry; attemptsCnt++) {
-      let data = await execute(query)
-      if (data.result)
+      let data = await this.execute({client, query, table, versionId})
+      if (data.result) {
         return { result:  data.result }
+      }
       let { message, graphQLErrors, networkError } = data.error
       if (graphQLErrors.length) {
         let excludeProps = []
         let str = 'Cannot query field \"'
         let len = str.length
         graphQLErrors.forEach(err => {
-          debugger
           let msg = err.message
           let idx = msg.indexOf(str)
           if (idx !== 0)
@@ -377,21 +396,6 @@ var search = {
     return { error: messageMap[error] || error, retry }
       // throw error
 
-    async function execute() {
-      try {
-        let data = await client.query({
-            fetchPolicy: 'network-only',
-            errorPolicy: 'all',
-            query: gql(`${query}`),
-            variables: versionId  &&  {modelsVersionId: versionId}
-          })
-        return { result: data.data[table] }
-      } catch(error) {
-        // debugger
-        console.log(error)
-        return { error }
-      }
-    }
     function addEqualsOrGreaterOrLesserNumber(val, op, prop) {
       let isMoney = prop.ref === MONEY
       let p = prop.name
@@ -495,14 +499,19 @@ var search = {
     }
 
     let query = queryHeader + eq + neq + queryFooter
+
     try {
-      let result = await client.query({
-          fetchPolicy: 'network-only',
-          errorPolicy: 'all',
-          query: gql(`${query}`),
-          variables: filterResource || context ? null : {context: context}
-        })
-      return result  &&  result.data[table]
+      let result = await this.execute({client, query, table})
+      // let result = await client.query({
+      //     fetchPolicy: 'network-only',
+      //     errorPolicy: 'all',
+      //     query: gql(`${query}`),
+      //     variables: filterResource || context ? null : {context: context}
+      //   })
+      if (useApollo)
+        return result  &&  result.data[table]
+      else
+        return result  &&  result.result
     } catch (err) {
       debugger
     }
@@ -733,12 +742,14 @@ var search = {
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
-      let result = await client.query({
-        fetchPolicy: 'network-only',
-        errorPolicy: 'all',
-        query: gql(`${query}`)
-      })
-      return result.data[table]
+      let result = await this.execute({client, query, table})
+      return useApollo  &&  result.data[table]  ||  result.result
+      // let result = await client.query({
+      //   fetchPolicy: 'network-only',
+      //   errorPolicy: 'all',
+      //   query: gql(`${query}`)
+      // })
+      // return result.data[table]
     }
     catch(err) {
       console.log('graphQL._getItem', err)
@@ -759,12 +770,17 @@ var search = {
         }
      }`
     try {
-      let result = await client.query({
-        fetchPolicy: 'network-only',
-        errorPolicy: 'all',
-        query: gql(`${query}`)
-      })
-      return result.data[table]  &&  result.data[table].objects
+      let result = await this.execute({client, query, table})
+      if (useApollo)
+        return result.data[table]  &&  result.data[table].objects
+      else
+        return result.result  &&  result.result.objects
+      // let result = await client.query({
+      //   fetchPolicy: 'network-only',
+      //   errorPolicy: 'all',
+      //   query: gql(`${query}`)
+      // })
+      // return result.data[table]  &&  result.data[table].objects
     }
     catch(err) {
       console.log('graphQL._getItem', err)
@@ -804,6 +820,56 @@ var search = {
     if (isEmpty(results)) throw new Error(`identity not found with link: ${link}`)
 
     return results[0]
+  },
+  async executeApollo({client, query, table, versionId}) {
+let start = Date.now()
+    try {
+      let data = await client.query({
+          fetchPolicy: 'network-only',
+          errorPolicy: 'all',
+          query: gql(`${query}`),
+          variables: versionId  &&  {modelsVersionId: versionId}
+        })
+console.log('searchServer.apollo ' + (Date.now() - start))
+      return { result: data.data[table] }
+    } catch(error) {
+      // debugger
+      console.log(error)
+      return { error }
+    }
+  },
+
+  async execute(params) {
+    if (useApollo)
+      return this.executeApollo(params)
+    var {query, table, versionId} = params
+    // debugger
+    const body = tradleUtils.stringify({
+      query: JSON.stringify(query)
+    })
+let start = Date.now()
+    const result = await this.meDriver.sign({
+      object: {
+        [TYPE]: 'tradle.GraphQLQuery',
+        body,
+        _time: Date.now()
+      }
+    })
+console.log('searchServer.length ' + (Date.now() - start))
+
+    let headers = {
+      'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
+    }
+    let client = new GraphQLClient(this.graphqlEndpoint, headers)
+
+    let variables = versionId  &&  {modelsVersionId: versionId} || undefined
+    try {
+      let data = await client.rawRequest(query, variables)
+      if (data.data)
+        return {result: data.data[table]}
+    } catch (error) {
+      return { error }
+    }
   }
 }
 

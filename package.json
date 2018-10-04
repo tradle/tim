@@ -104,6 +104,7 @@
     "es6-symbol": "~3.1.1",
     "events": "^1.1.0",
     "extend": "~2.0.1",
+    "graphql-request": "^1.8.2",
     "graphql-tag": "^2.4.2",
     "https-browserify": "0.0.1",
     "inherits": "^2.0.1",
