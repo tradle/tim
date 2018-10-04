@@ -31,10 +31,6 @@ const {
   ENUM
 } = constants.TYPES
 
-const BLOCKCHAIN_EXPLORERS = [
-  'https://rinkeby.etherscan.io/tx/0x$TXID',
-  // 'https://etherchain.org/tx/0x$TXID' // doesn't support rinkeby testnet
-]
 import ActionSheet from 'react-native-actionsheet'
 import Prompt from 'react-native-prompt'
 import { makeResponsive } from 'react-native-orient'
