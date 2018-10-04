@@ -26,13 +26,10 @@ import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
 import ApplicationView from './ApplicationView'
 
+const debug = utils.logger('ResourceMixin')
 const NOT_SPECIFIED = '[not specified]'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const APPLICATION = 'tradle.Application'
-const BLOCKCHAIN_EXPLORERS = [
-  'https://rinkeby.etherscan.io/tx/0x$TXID',
-  // 'https://etherchain.org/tx/0x$TXID' // doesn't support rinkeby testnet
-]
 
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
@@ -587,26 +584,24 @@ var ResourceMixin = {
                 </View>
     }
     else {
-      let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
-      let txs = (
-        <View>
-          {
-            BLOCKCHAIN_EXPLORERS.map((url, i) => {
-              url = url.replace('$TXID', txId)
-              return this.getBlockchainExplorerRow(url, i, styles)
-            })
-          }
-        </View>
-      )
+      const description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
+      const urls = utils.getBlockchainExplorerUrlsForTx({ blockchain, networkName, txId })
+      if (urls.length) {
+        const renderRow = (url, i) => {
+          url = url.replace('$TXID', txId)
+          return this.getBlockchainExplorerRow(url, i, styles)
+        }
 
-      content = <View style={{paddingHorizontal: 10}}>
-                   <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
-                     <Text style={styles.content}>{description}
-                       <Text style={lstyles.learnMore}> Learn more</Text>
-                     </Text>
-                   </TouchableOpacity>
-                   {txs}
-                  </View>
+        const txs = <View>{urls.map(renderRow)}</View>
+        content = <View style={{paddingHorizontal: 10}}>
+                     <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
+                       <Text style={styles.content}>{description}
+                         <Text style={lstyles.learnMore}> Learn more</Text>
+                       </Text>
+                     </TouchableOpacity>
+                     {txs}
+                    </View>
+      }
     }
     return <Accordion
                 sections={['txId']}

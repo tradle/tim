@@ -33,7 +33,8 @@ import levelErrors from 'levelup/lib/errors'
 import Cache from 'lru-cache'
 // import mutexify from 'mutexify'
 import Promise from 'bluebird'
-const debug = require('debug')('tradle:app:utils')
+import Debug from 'debug'
+const debug = Debug('tradle:app:utils')
 import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
@@ -56,6 +57,7 @@ import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import Strings from './strings'
 import { calcLinks, omitVirtual } from '@tradle/build-resource'
+import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 
 const collect = Promise.promisify(_collect)
 
@@ -2802,6 +2804,16 @@ var utils = {
   cleanBase64(str) {
     // some libraries generate base64 with line breaks, spaces, etc.
     return str.replace(/[\s]/g, '')
+  },
+
+  logger: namespace => Debug(`tradle:app:${namespace}`),
+  getBlockchainExplorerUrlsForTx: ({ blockchain, networkName, txId }) => {
+    const urls = _.get(BLOCKCHAIN_EXPLORERS, [blockchain, networkName]) || []
+    if (!urls.length) {
+      debug(`no blockchain explorer configured for blockchain ${blockchain} network ${networkName}`)
+    }
+
+    return urls
   },
 }
 
