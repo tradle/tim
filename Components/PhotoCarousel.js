@@ -112,13 +112,19 @@ const createStyles = utils.styleFactory(PhotoCarousel, function ({ dimensions })
       width: dimensions.width,
       height: dimensions.height - 200,
     },
-    imageH: {
-      width: dimensions.width,
-      height: dimensions.width - 100
-    },
     imageV: {
       width: dimensions.width,
       height: dimensions.height - 200,
+    },
+    imagePng: {
+      width: dimensions.width,
+      height: dimensions.height - 200,
+      backgroundColor: '#ffffff'
+    },
+    imagePngV: {
+      width: dimensions.width,
+      height: dimensions.height - 200,
+      backgroundColor: '#ffffff'
     },
     container: {
       width: dimensions.width,
