@@ -847,7 +847,7 @@ console.log('searchServer.apollo ' + (Date.now() - start))
     const body = tradleUtils.stringify({
       query: JSON.stringify(query)
     })
-let start = Date.now()
+    let start = Date.now()
     const result = await this.meDriver.sign({
       object: {
         [TYPE]: 'tradle.GraphQLQuery',
@@ -855,7 +855,7 @@ let start = Date.now()
         _time: Date.now()
       }
     })
-console.log('searchServer.length ' + (Date.now() - start))
+    console.log('searchServer.length ' + (Date.now() - start))
 
     let headers = {
       'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
@@ -867,7 +867,10 @@ console.log('searchServer.length ' + (Date.now() - start))
       let data = await client.rawRequest(query, variables)
       if (data.data)
         return {result: data.data[table]}
+      else
+        return {error: JSON.stringify(data.errors  &&  data.errors || data)}
     } catch (error) {
+debugger
       return { error }
     }
   }
