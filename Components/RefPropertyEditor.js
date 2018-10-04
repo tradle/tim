@@ -5,13 +5,11 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  Platform
 } from 'react-native'
 import _ from 'lodash'
 const debug = require('debug')('tradle:app:blinkid')
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
-import dateformat from 'dateformat'
 
 import constants from '@tradle/constants'
 const {
@@ -30,8 +28,6 @@ import utils, { translate } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
-import StyleSheet from '../StyleSheet'
-import Markdown from './Markdown'
 import Actions from '../Actions/Actions'
 import BlinkID from './BlinkID'
 import Navigator from './Navigator'
@@ -41,7 +37,6 @@ import GridList from './GridList'
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
-const TIMEOUT_ERROR = new Error('timed out')
 
 class RefPropertyEditor extends Component {
   constructor(props) {
@@ -66,7 +61,7 @@ class RefPropertyEditor extends Component {
   }
   render() {
     let { prop, resource, error, styles, model, bankStyle, country,
-          search, photo, floatingProps, component, paintError, paintHelp } = this.props
+          search, photo, component, paintError, paintHelp } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -93,7 +88,7 @@ class RefPropertyEditor extends Component {
     let val = resource && resource[pName]
     if (Array.isArray(val)  &&  !val.length)
       val = null
-    let label, style, propLabel, isImmutable
+    let label, propLabel, isImmutable
     if (val) {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto) {
@@ -139,14 +134,12 @@ class RefPropertyEditor extends Component {
           label = utils.createAndTranslate(label, true)
         }
       }
-      style = textStyle
       propLabel = <Text style={[styles.labelDirty, lcolor]}>{translate(prop, model)}</Text>
     }
     else {
       label = translate(prop, model)
       if (!search  &&  required)
         label += ' *'
-      style = [labelStyle, lcolor]
       propLabel = <View/>
     }
     let photoR = isPhoto && (photo || resource[pName])
@@ -173,22 +166,11 @@ class RefPropertyEditor extends Component {
       }
       else {
         let marginTop = 15
-        // if (val  ||  !utils.isAndroid())
-        //   marginTop = 15
-        // else
-        //   marginTop = 15
         let width = utils.dimensions(component).width - 60
         propView = <Text style={[styles.input, {marginTop, justifyContent: 'flex-end', color, width}]}>{label}</Text>
       }
     }
-    // let maxChars = (utils.dimensions(component).width - 20)/10
-    // if (maxChars < label.length)
-    //   label = label.substring(0, maxChars - 3) + '...'
-    // if (isRegistration  &&  prop.ref  &&  prop.ref === 'tradle.Language'  &&  !resource[pName])
-    //   label += ' (' + utils.translate(utils.getDefaultLanguage()) + ')'
 
-    let fontSize = styles.font20 //isRegistration ? styles.font20 : styles.font18
-    // let fontSize = styles.font18 //isRegistration ? styles.font20 : styles.font18
     let iconColor = isRegistration && '#eeeeee' || linkColor
     let icon
     if (!isImmutable) {
@@ -224,7 +206,6 @@ class RefPropertyEditor extends Component {
 
       if (useImageInput) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0, paddingBottom: help ? 0 : 7}
-        let m = utils.getModel(prop.ref)
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                        {content}
                      </ImageInput>
@@ -357,11 +338,11 @@ class RefPropertyEditor extends Component {
     const type = getDocumentTypeFromTitle(documentType.title)
     let recognizers
     let tooltip
-    let isPassport
+    // let isPassport
     switch (type) {
     case 'passport':
       tooltip = translate('centerPassport')
-      isPassport = true
+      // isPassport = true
       // machine readable travel documents (passport)
       recognizers = BlinkID.recognizers.mrtd
       break
@@ -369,7 +350,13 @@ class RefPropertyEditor extends Component {
       tooltip = translate('centerIdCard')
       // machine readable travel documents (passport)
       // should be combined
-      recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
+      // if (country.title === 'Bangladesh')
+      //   recognizers = BlinkID.recognizers.mrtd
+      //   // recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
+      // else if (country.title === "Philippines")
+      //   recognizers = BlinkID.recognizers.pdf417
+      // else
+        recognizers = BlinkID.recognizers.mrtd
       // recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
       break
     case 'license':
@@ -380,7 +367,7 @@ class RefPropertyEditor extends Component {
         // recognizers = BlinkID.recognizers.usdl
       }
       else if (country.title === 'New Zealand')
-        recognizers = BlinkID.recognizers.nzdl
+        recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
       else
         recognizers = BlinkID.recognizers.eudl
       break
@@ -471,20 +458,21 @@ class RefPropertyEditor extends Component {
     if (docScannerProps  &&  docScannerProps.length)
       r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
 
-    let dateOfExpiry, dateOfBirth, documentNumber
+    let dateOfExpiry //, dateOfBirth, documentNumber
     ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl'].some(docType => {
       const scan = result[docType]
       if (!scan) return
 
-      const { personal, document } = scan
-      documentNumber = document.documentNumber
-      if (document.dateOfExpiry)
-        dateOfExpiry = document.dateOfExpiry
-      if (personal.dateOfBirth)
-        dateOfBirth = personal.dateOfBirth
+      // const { personal, document } = scan
+      // documentNumber = document.documentNumber
+      // if (personal.dateOfBirth)
+      //   dateOfBirth = personal.dateOfBirth
       // if (document.dateOfIssue) {
       //   document.dateOfIssue = formatDate(document.dateOfIssue)
       // }
+      const { document } = scan
+      if (document.dateOfExpiry)
+        dateOfExpiry = document.dateOfExpiry
 
       r[prop + 'Json'] = scan
       return
@@ -612,7 +600,7 @@ class RefPropertyEditor extends Component {
     navigator.push(route)
   }
   multiChooser(prop, values) {
-    const { navigator, parent, onChange } = this.props
+    const { navigator, onChange } = this.props
     let vArr = []
     for (let v in values)
       vArr.push(values[v])
