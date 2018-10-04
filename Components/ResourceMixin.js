@@ -25,8 +25,8 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
 import ApplicationView from './ApplicationView'
-import { BLOCKCHAIN_EXPLORERS } from '../utils/blockchain-explorers'
 
+const debug = utils.logger('ResourceMixin')
 const NOT_SPECIFIED = '[not specified]'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
 const APPLICATION = 'tradle.Application'
@@ -585,8 +585,8 @@ var ResourceMixin = {
     }
     else {
       const description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
-      const urls = _.get(BLOCKCHAIN_EXPLORERS, [blockchain, networkName])
-      if (urls) {
+      const urls = utils.getBlockchainExplorerUrlsForTx({ blockchain, networkName, txId })
+      if (urls.length) {
         const renderRow = (url, i) => {
           url = url.replace('$TXID', txId)
           return this.getBlockchainExplorerRow(url, i, styles)
