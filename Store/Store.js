@@ -3432,7 +3432,13 @@ var Store = Reflux.createStore({
       // Request for remediation
       if (r[TYPE] === DATA_CLAIM) {
         Actions.showModal({title: 'Connecting to ' + this._getItem(id).name, showIndicator: true})
-        setTimeout(() => Actions.hideModal(), 5000)
+        let dcTime = Date.now()
+        setTimeout(() => {
+          // If data bundle was not received after this timeout - hide this modal
+          let res = this.searchNotMessages({modelName: DATA_BUNDLE})
+          if (!res  ||  !res.length  ||  !res.some(r => r._time > dcTime))
+            Actions.hideModal()
+        }, 20000)
       }
       // request for remediation failed
       else if (r[TYPE] === SIMPLE_MESSAGE) {
