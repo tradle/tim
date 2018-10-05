@@ -78,7 +78,8 @@ var asyncActions = [
   'getIdentity',
   'openURL',
   'requestWipe',
-  'verifyOrCorrect'
+  'verifyOrCorrect',
+  'importData',
 ]
 
 var syncActions = [

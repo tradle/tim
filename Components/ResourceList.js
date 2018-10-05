@@ -1228,6 +1228,10 @@ class ResourceList extends Component {
   async scanQRAndProcess(prop) {
     const result = await this.scanFormsQRCode()
     const { schema } = result
+    if (schema === 'ImportData') {
+      Actions.importData(result.data)
+      return
+    }
     if (schema !== 'AddProvider') {
       Alert.alert(translate('tryProviderQrCode'))
       return

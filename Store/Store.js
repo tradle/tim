@@ -5374,7 +5374,29 @@ if (!res[SIG]  &&  res._message)
     }
     return newProvider
   },
-
+  onImportData(data) {
+    let r = {
+      _t: 'tradle.DataClaim',
+      claimId: data.dataHash,
+      from: {
+        id: utils.getId(me),
+        title: utils.getDisplayName(me)
+      },
+      to: {
+        id: utils.makeId(PROFILE, data.provider)
+      }
+    }
+    this.onAddChatItem({
+      resource: r,
+      value: r,
+      provider: {
+        url: data.host,
+        hash: data.provider
+      },
+      meta: utils.getModel(DATA_CLAIM),
+      disableAutoResponse: true
+    })
+  },
   onGetMe() {
     this.trigger({action: 'getMe', me: me})
   },
