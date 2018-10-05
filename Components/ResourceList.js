@@ -1227,20 +1227,20 @@ class ResourceList extends Component {
   }
   async scanQRAndProcess(prop) {
     const result = await this.scanFormsQRCode()
-    const { schema } = result
+    const { schema, data } = result
     if (schema === 'ImportData') {
-      Actions.importData(result.data)
+      Actions.importData(data)
       return
     }
-    if (schema !== 'AddProvider') {
-      Alert.alert(translate('tryProviderQrCode'))
-      return
-    }
-    if (result  &&  result.data) {
-      let { host, provider } = result.data
+
+    if (schema === 'AddProvider') {
+      const { host, provider } = data
       // Actions.addApp({ url: host, permalink: provider })
       Actions.addApp({ url: host, permalink: provider, addSettings: true })
+      return
     }
+
+    Alert.alert(translate('invalidQrCode'), translate('supportedQrCodes'))
   }
 
   hideResource(resource) {
