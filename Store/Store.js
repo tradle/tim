@@ -3430,8 +3430,10 @@ var Store = Reflux.createStore({
     }
     else if (!isInit) {
       // Request for remediation
-      if (r[TYPE] === DATA_CLAIM)
+      if (r[TYPE] === DATA_CLAIM) {
         Actions.showModal({title: 'Connecting to ' + this._getItem(id).name, showIndicator: true})
+        setTimeout(() => Actions.hideModal(), 5000)
+      }
       // request for remediation failed
       else if (r[TYPE] === SIMPLE_MESSAGE) {
         if (!noMessages  &&  utils.getType(allMessages[allMessages.length - 1].id) === DATA_CLAIM)
@@ -10633,6 +10635,7 @@ if (!res[SIG]  &&  res._message)
       for (let i=0; i<result.length; i++) {
         let item = result[i]
         let r = item.object
+        this.rewriteStubs(r)
         r[ROOT_HASH] = item.permalink
         r[CUR_HASH] = item.link
         let m = this.getModel(r[TYPE])
