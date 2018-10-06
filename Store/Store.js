@@ -5382,24 +5382,39 @@ if (!res[SIG]  &&  res._message)
     }
     return newProvider
   },
-  onImportData(data) {
+  async onImportData(data) {
+    let { host, provider, dataHash } = data
+    let providerId = utils.makeId(PROFILE, data.provider)
     let r = {
       _t: 'tradle.DataClaim',
-      claimId: data.dataHash,
+      claimId: dataHash,
       from: {
         id: utils.getId(me),
         title: utils.getDisplayName(me)
       },
       to: {
-        id: utils.makeId(PROFILE, data.provider)
+        id: providerId
       }
     }
-    this.onAddChatItem({
+    // check if we have this provider
+    let sp = SERVICE_PROVIDERS.filter((sp) => sp.url === host)
+
+    if (!sp.length)
+      await this.getInfo({serverUrls: [host]})
+    else {
+      let r = this._getItem(providerId)
+      if (!r) {
+        Alert.alert(translate('invalidQR'))
+        return
+      }
+    }
+
+    await this.onAddChatItem({
       resource: r,
       value: r,
       provider: {
-        url: data.host,
-        hash: data.provider
+        url: host,
+        hash: provider
       },
       meta: utils.getModel(DATA_CLAIM),
       disableAutoResponse: true
