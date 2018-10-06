@@ -179,12 +179,16 @@ platform :ios do
     )
   end
 
-  desc "Deploy a new version to the App Store"
-  lane :release do
-    #snapshot
+  lane :prepare_release do
     sign_prod
     match(type: 'appstore')
     gym_release
+  end
+
+  desc "Deploy a new version to the App Store"
+  lane :release do
+    #snapshot
+    prepare_release
     deliverit
     # frameit
   end
