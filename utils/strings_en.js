@@ -269,6 +269,7 @@ module.exports = {
     "invalidQuery": "Oops, we hit an error running your search. Our developers will try to fix it asap.",
     "noResourcesForCriteria": "No resources were found for this criteria",
     "invalidQR": "Invalid QR code",
+    "validatingDataClaim": "Validating Data Claim",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
