@@ -267,6 +267,7 @@ module.exports = {
     "networkFailure": "I'm experiencing some network issues. Can you check and then tap Try Again / Cancel",
     "invalidQuery": "Oops, we hit an error running your search. Our developers will try to fix it asap.",
     "noResourcesForCriteria": "No resources were found for this criteria",
+    "invalidQR": "Invalid QR code",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
