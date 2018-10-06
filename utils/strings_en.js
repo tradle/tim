@@ -263,7 +263,7 @@ module.exports = {
     "createManualMatchCheck": "Create manual match check",
     "invalidQrCode": "Invalid QR code",
     "supportedQrCodes": "Supported QR codes: \n1) add chat channel \n2) import data",
-    "inProcess": "In process...",
+    "inProcess": "Processing...",
     "inProgress": "In progress...",
     "networkFailure": "I'm experiencing some network issues. Can you check and then tap Try Again / Cancel",
     "invalidQuery": "Oops, we hit an error running your search. Our developers will try to fix it asap.",
