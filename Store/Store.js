@@ -3431,7 +3431,7 @@ var Store = Reflux.createStore({
     else if (!isInit) {
       // Request for remediation
       if (r[TYPE] === DATA_CLAIM) {
-        Actions.showModal({title: 'Connecting to ' + this._getItem(id).name, showIndicator: true})
+        Actions.showModal({title: translate('validatingDataClaim')/* + this._getItem(id).name*/, showIndicator: true})
         let dcTime = Date.now()
         setTimeout(() => {
           // If data bundle was not received after this timeout - hide this modal
@@ -5398,15 +5398,16 @@ if (!res[SIG]  &&  res._message)
     }
     // check if we have this provider
     let sp = SERVICE_PROVIDERS.filter((sp) => sp.url === host)
-
-    if (!sp.length)
+    let invalidQR
+    if (!sp.length) {
       await this.getInfo({serverUrls: [host]})
-    else {
-      let r = this._getItem(providerId)
-      if (!r) {
-        Alert.alert(translate('invalidQR'))
-        return
-      }
+      invalidQR = !SERVICE_PROVIDERS.filter((sp) => sp.url === host).length
+    }
+    else
+      invalidQR = !this._getItem(providerId)
+    if (invalidQR) {
+      Alert.alert(translate('invalidQR'))
+      return
     }
 
     await this.onAddChatItem({
@@ -10649,7 +10650,10 @@ if (!res[SIG]  &&  res._message)
         })
     }
     if (val[TYPE] === DATA_BUNDLE) {
-      Actions.showModal({title: translate('importingData', val.items.length, val.from.title), showIndicator: true})
+      let fromR = this._getItem(val.from)
+      let forg = fromR && fromR.organization
+      let title = forg  &&  forg.title  ||  val.from.title
+      Actions.showModal({title: translate('importingData', val.items.length, title), showIndicator: true})
       setTimeout(() => Actions.hideModal(), 3000)
       let result = await Promise.all(val.items.map(item => meDriver.saveObject({object: item})))
       let orgR = this._getItem(val.from).organization
