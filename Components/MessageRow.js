@@ -804,7 +804,8 @@ class MessageRow extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: me,
-        bankStyle: this.props.bankStyle
+        bankStyle: this.props.bankStyle,
+        backlink: utils.getModel(me[TYPE]).properties.myForms,
       }
     })
     // let n = this.props.navigator.getCurrentRoutes().length
