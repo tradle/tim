@@ -33,11 +33,15 @@ platform :ios do
     ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
   end
 
+  private_lane :update_version_file do
+    sh "../../hooks/update_version.sh"
+  end
+
   private_lane :build_prereq do
     clean_build_artifacts
     cocoapods
     sh "../../scripts/fix-staging.js"
-    sh "../../hooks/update_version.sh"
+    update_version_file
     ensure_git_status_clean
   end
 
@@ -273,6 +277,7 @@ platform :ios do
   desc "test on Staging, then run: fastlane codepush_ios_promote"
   lane :codepush do |options|
     ensure_git_status_clean
+    update_version_file
     version = options[:version]
     if version.nil?
       version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
