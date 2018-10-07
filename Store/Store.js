@@ -4146,7 +4146,7 @@ if (!res[SIG]  &&  res._message)
   },
   async getObjects(list, prop) {
     if (!list.length)
-      return
+      return []
     let links
     if (prop) {
       if (prop.items.ref !== VERIFIED_ITEM)
