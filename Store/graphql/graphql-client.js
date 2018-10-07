@@ -356,8 +356,9 @@ var search = {
         return { result:  data.result }
       }
       let message, graphQLErrors, networkError
-      if (useApollo)
+      if (useApollo) {
         ({ message, graphQLErrors, networkError } = data.error)
+      }
       else {
         if (data.error.response) {
           graphQLErrors = data.error.response.errors
