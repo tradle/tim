@@ -152,8 +152,8 @@ const merged = extend({
   paintContextIds: false,
   tradleAPIKey: null,
   tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/',
-  APP_URL,
   resetCheckpoint: 0,
+  APP_URL,
   SILENT_TYPES: [
     'tradle.Seal',
     'tradle.CustomerWaiting',
