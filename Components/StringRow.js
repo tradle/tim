@@ -9,7 +9,6 @@ var DEFAULT_PRODUCT_ROW_TEXT_COLOR = '#757575'
 import {
   // Text,
   TouchableOpacity,
-  View
 } from 'react-native'
 import PropTypes from 'prop-types'
 

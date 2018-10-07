@@ -3,8 +3,6 @@ console.log('requiring MarkdownPropertyEdit.js')
 
 import utils from '../utils/utils'
 import PageView from './PageView'
-import extend from 'extend'
-import Icon from 'react-native-vector-icons/Ionicons';
 
 import StyleSheet from '../StyleSheet'
 import platformStyles from '../styles/platform'
@@ -12,9 +10,7 @@ import Markdown from './Markdown'
 import format from 'string-template'
 
 import {
-  Platform,
   View,
-  Text,
   TextInput,
   ScrollView,
 } from 'react-native'
@@ -23,7 +19,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react'
 
 class MarkdownPropertyEdit extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     prop: PropTypes.object.isRequired,
@@ -56,14 +52,14 @@ class MarkdownPropertyEdit extends Component {
     this._contentOffset = { ...e.nativeEvent.contentOffset }
   }
   render() {
-    let {bankStyle, resource} = this.props
+    let { bankStyle, resource } = this.props
     const markdownStyles = {
       heading1: {
         fontSize: 24,
         color: 'purple',
       },
       link: {
-        color: this.props.bankStyle.linkColor,
+        color: bankStyle.linkColor,
         textDecorationLine: 'none'
       },
       mailTo: {
@@ -74,12 +70,12 @@ class MarkdownPropertyEdit extends Component {
         fontStyle: 'italic'
       },
     }
-    let {value} = this.state
+    let { value } = this.state
     let markdown
     if (value && value.length)
       markdown = <View style={[styles.container, {backgroundColor: value.length ? '#f7f7f7' : 'transparent', paddingBottom: 5 }]}>
                   <Markdown markdownStyles={markdownStyles}>
-                    {format(value, this.props.resource)}
+                    {format(value, resource)}
                   </Markdown>
                 </View>
     let width = utils.dimensions(MarkdownPropertyEdit).width

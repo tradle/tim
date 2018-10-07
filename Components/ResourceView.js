@@ -7,11 +7,8 @@ import { makeResponsive } from 'react-native-orient'
 import ActionSheet from 'react-native-actionsheet'
 
 import {
-  Image,
   View,
-  Text,
   Platform,
-  TextInput,
   Modal,
   Alert,
   Linking,
@@ -63,7 +60,6 @@ import Log from './Log'
 import Navs from '../utils/navs'
 import ArticleView from './ArticleView'
 
-const TALK_TO_EMPLOYEE = '1'
 // const SERVER_URL = 'http://192.168.0.162:44444/'
 
 const SCAN_QR_CODE = 0
@@ -77,7 +73,6 @@ const MY_PRODUCT = 'tradle.MyProduct'
 
 const {
   PROFILE,
-  IDENTITY,
   VERIFICATION,
   FORM,
   MESSAGE,
@@ -147,7 +142,7 @@ class ResourceView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, error, pairingData, to, backlink} = params
+    let { resource, action, error, pairingData, to } = params
 
     let isMe = utils.isMe(this.props.resource)
     if (resource  &&  utils.getId(resource) !== utils.getId(this.props.resource)) {
@@ -212,7 +207,7 @@ class ResourceView extends Component {
       this.closeModal()
       break
     case 'employeeOnboarding':
-      let routes = this.props.navigator.getCurrentRoutes()
+      // let routes = this.props.navigator.getCurrentRoutes()
       // this.props.navigator.jumpTo(routes[1])
       let style = {}
       _.extend(style, defaultBankStyle)
@@ -257,7 +252,6 @@ class ResourceView extends Component {
     this.setState({currentPhoto: photo});
   }
   onShowIdentityList(params) {
-    let me = utils.getMe();
     this.props.navigator.push({
       id: 8,
       title: 'My Identities',
@@ -271,7 +265,7 @@ class ResourceView extends Component {
   }
 
   render() {
-    let { navigator, bankStyle, currency, dimensions, application } = this.props
+    let { navigator, bankStyle, currency, application } = this.props
     if (this.state.isLoading)
       return this.showLoading({bankStyle, component: ResourceView})
 
@@ -364,9 +358,6 @@ class ResourceView extends Component {
 
     let footer
     // let conversations
-    let bgcolor = Platform.OS === 'android' ? 'transparent' : '#7AAAC3'
-    let color = Platform.OS !== 'android' ? '#ffffff' : '#7AAAC3'
-    let paddingRight = Platform.OS === 'android' ? 0 : 10
     if (isIdentity) {
       footer = <View style={styles.footer}>
                 <TouchableOpacity onPress={() => this.ActionSheet.show()}>
@@ -505,8 +496,6 @@ class ResourceView extends Component {
     this.setState({isModalOpen: false});
   }
   getRefResource(resource, prop) {
-    let model = utils.getModel(this.props.resource[TYPE]);
-
     this.state.prop = prop;
     this.state.propValue = utils.getId(resource.id);
     Actions.getItem({resource: resource});
@@ -521,7 +510,6 @@ class ResourceView extends Component {
       ...authSettings
     }
 
-    let isChangeGesturePassword
     switch (action) {
     case USE_TOUCH_ID:
       r.useTouchId = !me.useTouchId

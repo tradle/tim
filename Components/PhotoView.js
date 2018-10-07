@@ -7,18 +7,14 @@ import {
   ImageBackground,
   View,
   Text,
-  Modal,
   Animated,
-  Easing,
   TouchableHighlight
 } from 'react-native'
 
 import PropTypes from 'prop-types'
-import * as Animatable from 'react-native-animatable'
 import { makeResponsive } from 'react-native-orient'
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
-import Icon from 'react-native-vector-icons/Ionicons';
 
 import utils from '../utils/utils'
 import constants from '@tradle/constants'
@@ -86,36 +82,42 @@ class PhotoView extends Component {
     let width = utils.getContentWidth(PhotoView)
     let coverPhoto = utils.getPropertiesWithAnnotation(model, 'coverPhoto')
     coverPhoto = coverPhoto  &&  resource[Object.keys(coverPhoto)[0]]
+
     let [screenWidth, screenHeight] = [width, height]
     let maxHeight = screenHeight / 2.5
+    height = maxHeight
     let resizeMode = 'contain'
-    if (currentPhoto.width  &&  currentPhoto.height) {
-      if (currentPhoto.width  <=  currentPhoto.height) {
-        if (width > currentPhoto.width) {
-          width = currentPhoto.width
-          height = currentPhoto.height
-        }
-        else
-          height = Math.round(height * currentPhoto.height / currentPhoto.width)
-      }
-      else {
-        height = Math.round(height * currentPhoto.height / currentPhoto.width)
-        if (screenHeight > screenWidth) {
-          if (height <= maxHeight)
-            resizeMode = 'cover'
-        }
-      }
-      height = Math.min(height, maxHeight)
-    }
-    else {
-      height = Math.round(height * currentPhoto.height / currentPhoto.width)
-      resizeMode = 'contain'
-    }
-    height = height ? Math.min(height, screenHeight / 2.5) : screenHeight / 2.5
-    let image = {
-      width,
-      height,
-    }
+    // if (currentPhoto.width  &&  currentPhoto.height) {
+    //   if (currentPhoto.width  <=  currentPhoto.height) {
+    //     if (width > currentPhoto.width) {
+    //       width = currentPhoto.width
+    //       height = currentPhoto.height
+    //     }
+    //     else
+    //       height = Math.round(height * currentPhoto.height / currentPhoto.width)
+    //   }
+    //   else {
+    //     height = Math.round(height * currentPhoto.height / currentPhoto.width)
+    //     if (screenHeight > screenWidth) {
+    //       if (height <= maxHeight)
+    //         resizeMode = 'cover'
+    //     }
+    //   }
+    //   height = Math.min(height, maxHeight)
+    // }
+    // else {
+    //   height = Math.round(height * currentPhoto.height / currentPhoto.width)
+    //   resizeMode = 'contain'
+    // }
+    // height = height ? Math.min(height, screenHeight / 2.5) : screenHeight / 2.5
+    // let image = {
+    //   width,
+    //   height,
+    // }
+    if (currentPhoto.width  &&  currentPhoto.height)
+      width = currentPhoto.width * height/currentPhoto.height
+    // else
+    //   width = width * height/screenHeight
 
     let style={transform: [{scale: this.state.anim}]}
  // onPress={() => {
@@ -135,6 +137,10 @@ class PhotoView extends Component {
       var coverPhotoSource = { uri: coverPhotoUri, cache: 'force-cache' }
       if (coverPhotoUri.charAt(0) == '/' || coverPhotoUri.indexOf('data') === 0)
         coverPhotoSource.isStatic = true
+      let image = {
+        width: screenWidth,
+        height: maxHeight,
+      }
 
       var title = utils.getDisplayName(this.props.resource)
               // <Image resizeMode='cover' source={coverPhotoSource} style={{width: width, height: cpHeight}}>
@@ -149,8 +155,13 @@ class PhotoView extends Component {
         </ImageBackground>
       )
     }
-    else
+    else {
+      let image = {
+        width,
+        height,
+      }
       photoView = <Image resizeMode={resizeMode} source={source} style={image} />
+    }
 
     return (
           <View>

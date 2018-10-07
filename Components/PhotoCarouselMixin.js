@@ -1,7 +1,6 @@
 console.log('requiring PhotoCarouselMixin.js')
 'use strict';
 
-import PropTypes from 'prop-types'
 import { TYPE } from '@tradle/constants'
 import PhotoCarousel from './PhotoCarousel'
 import Navigator from './Navigator'

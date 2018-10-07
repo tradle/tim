@@ -9,12 +9,9 @@ import {
   // Text,
   View,
   TouchableOpacity,
-  Image,
   // NetInfo,
-  ScrollView,
   // Linking,
   // StatusBar,
-  Modal,
   Alert,
   Platform
 } from 'react-native'
@@ -54,7 +51,6 @@ import {
 import { SyncStatus } from 'react-native-code-push'
 import Linking from '../utils/linking'
 import AutomaticUpdates from '../utils/automaticUpdates'
-import CustomIcon from '../styles/customicons'
 import BackgroundImage from './BackgroundImage'
 import Navs from '../utils/navs'
 import ENV from '../utils/env'
@@ -79,8 +75,6 @@ var {
 } = constants.TYPES
 // import Progress from 'react-native-progress'
 
-const BOOKMARK = 'tradle.Bookmark'
-
 const BG_IMAGE = ENV.splashBackground
 const SUBMIT_LOG_TEXT = {
   submit: translate('submitLog'),
@@ -89,13 +83,12 @@ const SUBMIT_LOG_TEXT = {
 }
 
 const isLinkingSupported = Linking
-const isAndroid = Platform.OS === 'android'
 const FOOTER_TEXT_COLOR = ENV.splashContrastColor
 
 class TimHome extends Component {
   static displayName = 'TimHome';
   static orientation = Platform.OS === 'web' ? 'LANDSCAPE' : 'PORTRAIT';
-  props: {
+  static propTypes = {
     modelName: PropTypes.string.isRequired,
     navigator: PropTypes.object.isRequired
   };
@@ -627,8 +620,6 @@ class TimHome extends Component {
   }
 
   showChatPage({resource, termsAccepted, action, showProfile}) {
-    let me = utils.getMe()
-
     if (ENV.landingPage  &&  !termsAccepted) {
       this.showLandingPage(resource, ENV.landingPage)
       return
@@ -738,13 +729,6 @@ class TimHome extends Component {
   }
   showOfficialAccounts(action) {
     const me = utils.getMe()
-    let passProps = {
-      filter: '',
-      modelName: ORGANIZATION,
-      sortProperty: 'lastMessageTime',
-      officialAccounts: true,
-      bankStyle: defaultBankStyle
-    };
     Actions.hasPartials()
     let title = me.firstName;
     let route = {
@@ -916,7 +900,7 @@ class TimHome extends Component {
       return
     }
     // var url = Linking.getInitialURL();
-    var {width, height} = utils.dimensions(TimHome)
+    var { height } = utils.dimensions(TimHome)
     var h = height > 800 ? height - 220 : height - 180
 
     if (!__DEV__ && ENV.landingPage) {
@@ -1071,7 +1055,6 @@ class TimHome extends Component {
 
   getSplashScreen() {
     const version = __DEV__ && this.renderVersion()
-    const { width, height } = utils.dimensions(TimHome)
     const updateIndicator = this.getUpdateIndicator()
     const submitLogButton = this.getSubmitLogButton()
     const busyReason = updateIndicator ? null : this.getBusyReason()

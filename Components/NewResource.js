@@ -9,20 +9,15 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import t from 'tcomb-form-native'
 import { makeResponsive } from 'react-native-orient'
 import React, { Component } from 'react'
-const debug = require('debug')('NewResource')
 
-import Native, {
-  // StyleSheet,
+import {
   View,
   Text,
-  TextInput,
   ScrollView,
   Image,
   Platform,
-  // StatusBar,
   Alert,
   TouchableOpacity,
-  Animated
 } from 'react-native'
 import PropTypes from 'prop-types';
 
@@ -36,8 +31,6 @@ const {
   SETTINGS,
   ENUM,
   PROFILE,
-  FINANCIAL_PRODUCT,
-  SIMPLE_MESSAGE,
   ORGANIZATION,
   MONEY
 } = constants.TYPES
@@ -47,7 +40,6 @@ import NewItem from './NewItem'
 import ResourceList from './ResourceList'
 import GridList from './GridList'
 import GridItemsList from './GridItemsList'
-import PhotoView from './PhotoView'
 import ResourceView from './ResourceView'
 import MessageView from './MessageView'
 import ResourceMixin from './ResourceMixin'
@@ -65,7 +57,6 @@ import SignatureView from './SignatureView'
 import termsAndConditions from '../termsAndConditions.json'
 import StyleSheet from '../StyleSheet'
 import ImageInput from './ImageInput'
-import chatStyles from '../styles/chatStyles'
 import CustomIcon from '../styles/customicons'
 import stylesheet from '../styles/styles'
 
@@ -90,7 +81,7 @@ var Form = t.form.Form;
 
 class NewResource extends Component {
   static displayName = 'NewResource';
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     model: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
@@ -249,7 +240,7 @@ class NewResource extends Component {
 
   onAction(params) {
     let { resource, action, error, requestedProperties, deleteProperties, message, validationErrors } = params
-    let { navigator, prop, containerResource, callback, modelName, originatingMessage, bankStyle, model, currency, chat } = this.props
+    let { navigator, prop, containerResource, callback, originatingMessage, bankStyle, model, currency, chat } = this.props
     if (action === 'languageChange') {
       navigator.popToTop()
       return
@@ -323,11 +314,6 @@ class NewResource extends Component {
       Alert.alert(
         error,
       )
-      let actionParams = {
-        query: this.state.filter,
-        modelName: modelName,
-        to: this.props.resource,
-      }
       return
     }
     if (!resource  ||  (action !== 'addItem'  &&  action !== 'addMessage')) {
@@ -478,7 +464,7 @@ class NewResource extends Component {
           json[p] = this.floatingProps[p]
       }
     }
-    let { model, currency, originatingMessage, lensId, chat, doNotSend, prop, containerResource } = this.props
+    let { model, originatingMessage, lensId, chat, doNotSend, prop, containerResource } = this.props
     let props = model.properties
     let required = utils.ungroup(model, model.required)
     if (!required) {
@@ -775,7 +761,6 @@ class NewResource extends Component {
     if (this.state.isUploading)
       return <View/>
 
-    let parentBG = {backgroundColor: '#7AAAC3'};
     let resource = this.state.resource;
 
     let bankStyle = this.props.bankStyle || defaultBankStyle
@@ -809,15 +794,6 @@ class NewResource extends Component {
     let model = {};
     let arrays = [];
     _.extend(data, resource);
-    let isMessage = utils.isMessage(resource)
-    let isFinancialProduct = isMessage  &&  meta.subClassOf && meta.subClassOf === FINANCIAL_PRODUCT
-    let showSendVerificationForm = false;
-    let formToDisplay;
-    if (isMessage) {
-      let len = resource.message  &&  utils.splitMessage(resource.message).length;
-      if (len < 2)
-        showSendVerificationForm = true;
-    }
     let params = {
         meta: meta,
         data: data,
@@ -872,9 +848,7 @@ class NewResource extends Component {
     else
       itemsMeta = utils.getItemsMeta(meta);
 
-    let self = this;
     let arrayItems
-    let itemsArray
     if (!search) {
       for (let p in itemsMeta) {
         let bl = itemsMeta[p]
@@ -887,9 +861,7 @@ class NewResource extends Component {
           arrayItems.push(<View key={this.getNextKey()} ref={bl.name} />)
           continue
         }
-        let blmodel = meta
-        itemsArray = null
-        let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
+        // let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
         if (/*count  && */ (bl.name === 'photos' || bl.items.ref === PHOTO ||  bl.items.ref === FILE))
           arrayItems.push(this.getPhotoItem(bl, styles))
         else
@@ -901,12 +873,10 @@ class NewResource extends Component {
     else
       Form.stylesheet = stylesheet
 
-    let style = {backgroundColor: 'transparent'}
     if (!options)
       options = {}
     options.auto = 'placeholders';
     options.tintColor = 'red'
-    let photoStyle = /*isMessage && !isFinancialProduct ? {marginTop: -35} :*/ styles.photoBG;
     let button
     if (isRegistration)
       button = <View>
@@ -965,7 +935,7 @@ class NewResource extends Component {
              </View>
     let photoView
     if (!utils.isWeb())
-      photoView = <View style={photoStyle}>
+      photoView = <View style={styles.photoBG}>
                     <PhotoView resource={resource} navigator={this.props.navigator}/>
                   </View>
     let loadingVideo
@@ -1255,10 +1225,8 @@ class NewResource extends Component {
     let meta = this.props.model
     let blmodel = meta
     let lcolor = this.getLabelAndBorderColor(bl.name)
-    let bankStyle = this.props.bankStyle || defaultBankStyle
-    let linkColor = bankStyle.linkColor
 
-    let actionableItem, itemsArray
+    let actionableItem
     let count = resource  &&  resource[bl.name] ? resource[bl.name].length : 0
     let label = translate(bl, blmodel)
     if (!this.props.search  &&  meta.required  &&  meta.required.indexOf(bl.name) !== -1)
@@ -1280,7 +1248,6 @@ class NewResource extends Component {
 
     }
     else {
-      // let acStyle = [{flex: 1, position: 'absolute', right: 0, width, paddingBottom: 3}, count ? {paddingTop: 0} : {paddingBottom: 7}]
       actionableItem = <View style={{width}}>
                        <TouchableOpacity onPress={this.onNewPressed.bind(this, bl, meta)}>
                          <View style={[styles.items, {paddingBottom: 5}]}>
@@ -1296,12 +1263,6 @@ class NewResource extends Component {
             ? this.state.missedRequiredOrErrorValue[bl.name]
             : null
 
-    // let aiStyle = [{flex: 7}, count ? {paddingTop: 0} : {paddingTop: 15, paddingBottom: 7}]
-    // let actionableItem = <View style={aiStyle}>{itemsArray}</View>
-      // actionableItem = <TouchableOpacity style={aiStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
-      //                   {itemsArray}
-      //                 </TouchableOpacity>
-
     let istyle = [styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
     if (err)
       istyle.push({marginBottom: 10})
@@ -1312,13 +1273,6 @@ class NewResource extends Component {
       istyle.push({paddingBottom: 0, height: count * height + 35})
     }
     istyle = StyleSheet.flatten(istyle)
-    // let acStyle = [{flex: 1, justifyContent: 'center'}, count ? {paddingTop: 0} : {marginTop: 15, paddingBottom: 7}]
-    // let acStyle = [{flex: 1, position: 'absolute', right: 0}, count ? {paddingTop: 0} : {paddingBottom: 7}]
-    // let actionableCounter
-    // if (!count)
-    //   actionableCounter = <TouchableOpacity style={acStyle} onPress={this.onNewPressed.bind(this, bl, meta)}>
-    //                         {counter}
-    //                       </TouchableOpacity>
     return (
       <View key={this.getNextKey()}>
         <View style={istyle} ref={bl.name}>
@@ -1364,7 +1318,6 @@ class NewResource extends Component {
       itemsArray = <Text style={styles.noItemsText}>{label}</Text>
     }
     counter = <Icon name='ios-camera-outline'  size={25} color={linkColor} style={styles.camera} />
-    let title = translate(bl, blmodel) //.title || utils.makeLabel(p)
     let actionableItem
     if (count)
       actionableItem = <TouchableOpacity

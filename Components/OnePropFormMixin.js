@@ -1,10 +1,8 @@
 console.log('requiring OnePropFormMixin.js')
 'use strict';
 
-import React from 'react'
 import { Alert } from 'react-native'
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io'
-const debug = require('debug')('tradle:app:OnePropForm')
 import _ from 'lodash'
 
 import constants from '@tradle/constants'
@@ -85,7 +83,6 @@ var OnePropFormMixin = {
     //     translate('noScanningOnAndroid')
     //   )
     // }
-    let props = utils.getModel(this.props.resource[TYPE]).properties
     let scanner = prop.scanner
     let pname = prop.name
     if (scanner) {

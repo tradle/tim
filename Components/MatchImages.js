@@ -1,7 +1,6 @@
 console.log('requiring BackgroundImage.js')
 import React, { Component } from 'react'
 import {
-  Platform,
   StyleSheet,
   Image,
   ScrollView,
@@ -16,12 +15,11 @@ import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
 import PageView from './PageView'
 import utils from '../utils/utils'
-import platformStyles from '../styles/platform'
 
 import { makeResponsive } from 'react-native-orient'
 
 class MatchImages extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     selfie: PropTypes.object.isRequired,
     photoId: PropTypes.object.isRequired,

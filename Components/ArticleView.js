@@ -21,6 +21,13 @@ import utils, {
 } from '../utils/utils'
 
 class ArticleView extends Component {
+  static propTypes = {
+    href: PropTypes.string,
+    url: PropTypes.string,
+    bankStyle: PropTypes.object,
+    action: PropTypes.string,
+    actionBarTitle: PropTypes.string
+  };
   constructor(props) {
     super(props);
   }
@@ -40,10 +47,10 @@ class ArticleView extends Component {
     )
   }
   render() {
-    let bankStyle = this.props.bankStyle || defaultBankStyle
-    let actionBarTitle = this.props.actionBarTitle
+    let { bankStyle, actionBarTitle, href, url, action } = this.props
+    bankStyle = bankStyle || defaultBankStyle
     let wView = <WebView style={styles.webView}
-                  source={this.props.href ? {uri: this.props.href} : this.props.url}
+                  source={href ? {uri: href} : url}
                   startInLoadingState={true}
                   renderError={this.renderError.bind(this)}
                   automaticallyAdjustContentInsets={false}
@@ -52,17 +59,17 @@ class ArticleView extends Component {
     if (!actionBarTitle)
       return wView
 
-    let action = <TouchableOpacity onPress={this.props.action}>
-                   <View style={{marginHorizontal: -3, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
-                     <View style={{backgroundColor: 'transparent', paddingHorizontal: 10, justifyContent: 'center'}}>
-                       <Text style={{fontSize: 20,color: bankStyle.contextTextColor}}>{translate(this.props.actionBarTitle || 'next')}</Text>
-                     </View>
-                   </View>
-                 </TouchableOpacity>
+    let actionItem = <TouchableOpacity onPress={action}>
+               <View style={{marginHorizontal: -3, backgroundColor: bankStyle.contextBackgroundColor, borderTopColor: bankStyle.contextBackgroundColor, borderTopWidth: StyleSheet.hairlineWidth, height: 45, justifyContent: 'center', alignItems: 'center'}}>
+                 <View style={{backgroundColor: 'transparent', paddingHorizontal: 10, justifyContent: 'center'}}>
+                   <Text style={{fontSize: 20,color: bankStyle.contextTextColor}}>{translate(actionBarTitle || 'next')}</Text>
+                 </View>
+               </View>
+             </TouchableOpacity>
     return (
       <View style={{height: utils.dimensions().height}}>
         {wView}
-        {action}
+        {actionItem}
       </View>
     )
 

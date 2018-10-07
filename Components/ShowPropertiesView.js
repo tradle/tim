@@ -7,11 +7,9 @@ import reactMixin from 'react-mixin'
 import dateformat from 'dateformat'
 
 import constants from '@tradle/constants'
-import utils from '../utils/utils'
-var translate = utils.translate
+import utils, { translate } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
-import Accordion from './Accordion'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 var NOT_SPECIFIED = '[not specified]'
 var DEFAULT_CURRENCY_SYMBOL = '£'
@@ -31,18 +29,13 @@ const {
   ENUM
 } = constants.TYPES
 
-import ActionSheet from 'react-native-actionsheet'
 import Prompt from 'react-native-prompt'
-import { makeResponsive } from 'react-native-orient'
-// import Communications from 'react-native-communications'
 import StyleSheet from '../StyleSheet'
 import {
   // StyleSheet,
   Image,
   View,
   Text,
-  TextInput,
-  ScrollView,
   TouchableOpacity,
   Linking
 } from 'react-native'
@@ -52,14 +45,14 @@ import React, { Component } from 'react'
 class ShowPropertiesView extends Component {
   static displayName = 'ShowPropertiesView';
 
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
-    checkProperties: PropTypes.func,
+    checkProperties: PropTypes.bool,
     currency: PropTypes.string,
     bankStyle: PropTypes.object,
     errorProps: PropTypes.object,
-    excludedProperties: PropTypes.Array
+    excludedProperties: PropTypes.array
   };
   constructor(props) {
     super(props);
@@ -104,7 +97,7 @@ class ShowPropertiesView extends Component {
   getViewCols(resource, model) {
     if (!resource)
       resource = this.props.resource
-    let { checkProperties, excludedProperties, bankStyle, currency, showRefResource, onPageLayout } = this.props
+    let { checkProperties, excludedProperties, bankStyle, currency, showRefResource } = this.props
     var modelName = utils.getType(resource)
     if (!model)
       model = this.props.model  ||  utils.getModel(modelName)
@@ -156,8 +149,6 @@ class ShowPropertiesView extends Component {
         }
       }
     }
-    var first = true;
-    let self = this
     let isPartial = model.id === PARTIAL
     let isMethod = model.subClassOf === METHOD
     let me = utils.getMe()
@@ -220,7 +211,7 @@ class ShowPropertiesView extends Component {
           return;
       }
       else if (pMeta.type === 'date')
-        val = utils.getDateValue(val)
+        val = utils.formatDate(val)
       else if (pMeta.ref) {
         if (pMeta.ref === PHOTO) {
           if (vCols.length === 1  &&  resource._time)
@@ -354,7 +345,6 @@ class ShowPropertiesView extends Component {
       if (!pMeta.skipLabel  &&  !isItems)
         title = <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{utils.translate(pMeta, model)}</Text>
 
-      first = false;
       let isPromptVisible = this.state.promptVisible !== null
       if (isPromptVisible)
         console.log(this.state.promptVisible)
@@ -382,18 +372,17 @@ class ShowPropertiesView extends Component {
          </View>
       )
     })
-    let { txId, blockchain, networkName } = resource
-    if (txId) { // || utils.isSealableModel(model)) {
-    viewCols.push(
-        <View key={this.getNextKey()} ref='propertySheet'>
-          {this.addDataSecurity(resource)}
-        </View>
-      )
+    if (resource.txId) { // || utils.isSealableModel(model)) {
+      viewCols.push(
+          <View key={this.getNextKey()} ref='propertySheet'>
+            {this.addDataSecurity(resource)}
+          </View>
+        )
     }
     return viewCols;
   }
   getCheckForCorrection(pMeta) {
-    let { checkProperties, errorProps, bankStyle, width } = this.props
+    let { checkProperties, errorProps, bankStyle } = this.props
     if (!checkProperties)
       return
     let p = pMeta.name
@@ -427,7 +416,6 @@ class ShowPropertiesView extends Component {
 }
 reactMixin(ShowPropertiesView.prototype, RowMixin);
 reactMixin(ShowPropertiesView.prototype, ResourceMixin);
-ShowPropertiesView = makeResponsive(ShowPropertiesView)
 
 var createStyles = utils.styleFactory(ShowPropertiesView, function ({ dimensions, bankStyle }) {
   return StyleSheet.create({

@@ -1,8 +1,7 @@
 console.log('requiring BlinkID.js')
 import { Platform } from 'react-native'
-import PropTypes from 'prop-types'
-import withDefaults from 'lodash/defaults'
-import groupBy from 'lodash/groupBy'
+// import withDefaults from 'lodash/defaults'
+// import groupBy from 'lodash/groupBy'
 import getValues from 'lodash/values'
 // import BlinkID from 'react-native-blinkid'
 import * as BlinkID from 'blinkid-react-native';
@@ -26,27 +25,27 @@ const recognizers = {
   // scans NZDL (NZ Driver License)
   nzdl: BlinkID.NewZealandDlFrontRecognizer,
   // scans MyKad (Malaysian ID)
-  myKadBack: BlinkID.MyKadBackRecognizer,
-  myKadFront: BlinkID.MyKadFrontRecognizer,
+  // myKadBack: BlinkID.MyKadBackRecognizer,
+  // myKadFront: BlinkID.MyKadFrontRecognizer,
   documentFace: BlinkID.DocumentFaceRecognizer,
   pdf417: BlinkID.Pdf417Recognizer,
   barcode: BlinkID.BarcodeRecognizer,
 }
 
-const defaults = {
-  enableBeep: true,
-  useFrontCamera: false,
-  shouldReturnFaceImage: true,
-  shouldReturnDocumentImage: true,
-  // shouldReturnSignatureImage: true,
-  // shouldReturnSuccessfulImage: true,
-  recognizers: getValues(recognizers)
-}
-const parser = new xml2js.Parser({ explicitArray: false, strict: false })
+// const defaults = {
+//   enableBeep: true,
+//   useFrontCamera: false,
+//   shouldReturnFaceImage: true,
+//   shouldReturnDocumentImage: true,
+//   // shouldReturnSignatureImage: true,
+//   // shouldReturnSuccessfulImage: true,
+//   recognizers: getValues(recognizers)
+// }
+// const parser = new xml2js.Parser({ explicitArray: false, strict: false })
 // // parser = Promise.promisifyAll(parser)
 // // TODO: make checkIDDocument ready at the end of constructor
 // // don't make people wait for ready promise to resolve
-var parseXML = parser.parseString.bind(parser)
+// var parseXML = parser.parseString.bind(parser)
 
 let licenseKey
 
@@ -59,6 +58,8 @@ const scan = (function () {
   if (!licenseKey) return
 
   return async (opts) => {
+    const { firstSideInstructions, secondSideInstructions } = opts
+
     let types = []
     let isCombined
     let frameGrabbers = opts.recognizers.map(r => {
@@ -72,6 +73,8 @@ const scan = (function () {
       if (rec instanceof BlinkID.DocumentFaceRecognizer)
         rec.returnFaceImage = true
       else {
+        // TODO: this component shouldn't need to know about Tradle's enum structures!
+
         // rec.returnFaceImage = true
         // rec.returnSignatureImage = true
         // rec.setAllowUnparsedResults = true
@@ -87,10 +90,24 @@ const scan = (function () {
       // let fName = type.charAt(0).toUpperCase() + type.slice(1);
       return isCombined ? rec : new BlinkID.SuccessFrameGrabberRecognizer(rec)
     })
+
+    let overlaySettings
+    if (isCombined) {
+      overlaySettings = new BlinkID.DocumentVerificationOverlaySettings({
+        firstSideInstructions,
+        secondSideInstructions,
+      })
+    } else {
+      overlaySettings = new BlinkID.DocumentOverlaySettings({
+        tooltipText: firstSideInstructions,
+      })
+    }
+
     const result = await BlinkID.BlinkID.scanWithCamera(
-      isCombined ? new BlinkID.DocumentVerificationOverlaySettings() : new BlinkID.DocumentOverlaySettings(),
+      overlaySettings,
       new BlinkID.RecognizerCollection(frameGrabbers),
       licenseKey) //, withDefaults(opts, defaults))
+
     if (!result.length)
       return
     let normalized = result.map((r, i) =>  postProcessResult({ type: types[i], result: r, isCombined }))

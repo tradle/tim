@@ -1,14 +1,11 @@
 import _ from 'lodash'
 import Icon from 'react-native-vector-icons/Ionicons';
-import React, { Component } from 'react'
+import React from 'react'
 import {
   Text,
   View,
-  Platform,
-  // StyleSheet,
   ActivityIndicator,
   Image,
-  Navigator,
   Linking,
   TouchableOpacity
 } from 'react-native'
@@ -17,7 +14,7 @@ import {Column as Col, Row} from 'react-native-flexbox-grid'
 import constants from '@tradle/constants'
 
 var { TYPE } = constants
-var { PROFILE, ORGANIZATION, VERIFICATION } = constants.TYPES
+var { PROFILE, ORGANIZATION } = constants.TYPES
 
 import StyleSheet from '../StyleSheet'
 import PhotoList from './PhotoList'
@@ -27,23 +24,13 @@ import PageView from './PageView'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
-import Actions from '../Actions/Actions'
 import ApplicationView from './ApplicationView'
 
-import ENV from '../utils/env'
-
+const debug = utils.logger('ResourceMixin')
 const NOT_SPECIFIED = '[not specified]'
 const TERMS_AND_CONDITIONS = 'tradle.TermsAndConditions'
-const ENUM = 'tradle.Enum'
 const APPLICATION = 'tradle.Application'
-const PRODUCT_REQUEST = 'tradle.ProductRequest'
-const BLOCKCHAIN_EXPLORERS = [
-  'https://rinkeby.etherscan.io/tx/0x$TXID',
-  // 'https://etherchain.org/tx/0x$TXID' // doesn't support rinkeby testnet
-]
 
-// var tada = []
-var skip
 const skipLabelsInJSON = {
   'tradle.PhotoID': {
     'address': ['full']
@@ -188,7 +175,6 @@ var ResourceMixin = {
           value = v[p] ? 'Yes' : 'No'
         else if (itemMeta.type !== 'object') {
           if (p == 'photos') {
-            let photos = [];
             ret.push(
                <PhotoList photos={v.photos} navigator={navigator} numberInRow={4} resource={resource} isView={true}/>
             );
@@ -329,7 +315,7 @@ var ResourceMixin = {
       else if (typeof val === 'boolean')
         val = <Text style={styles.description}>{val ? 'Yes' : 'No'}</Text>;
       else if (pMeta.signature) {
-        let {width, height} = utils.dimensions(component)
+        let { width } = utils.dimensions(component)
         let h = 200
         let w = width - 40
         // if (width > height)
@@ -600,28 +586,25 @@ var ResourceMixin = {
                 </View>
     }
     else {
-      let description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
-      let txs = (
-        <View>
-          {
-            BLOCKCHAIN_EXPLORERS.map((url, i) => {
-              url = url.replace('$TXID', txId)
-              return this.getBlockchainExplorerRow(url, i, styles)
-            })
-          }
-        </View>
-      )
+      const description = 'This app uses blockchain technology to ensure you can always prove the contents of your data and whom you shared it with.'
+      const urls = utils.getBlockchainExplorerUrlsForTx({ blockchain, networkName, txId })
+      if (urls.length) {
+        const renderRow = (url, i) => {
+          url = url.replace('$TXID', txId)
+          return this.getBlockchainExplorerRow(url, i, styles)
+        }
 
-      content = <View style={{paddingHorizontal: 10}}>
-                   <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
-                     <Text style={styles.content}>{description}
-                       <Text style={lstyles.learnMore}> Learn more</Text>
-                     </Text>
-                   </TouchableOpacity>
-                   {txs}
-                  </View>
+        const txs = <View>{urls.map(renderRow)}</View>
+        content = <View style={{paddingHorizontal: 10}}>
+                     <TouchableOpacity onPress={this.onPress.bind(this, 'http://thefinanser.com/2016/03/the-best-blockchain-white-papers-march-2016-part-2.html/')}>
+                       <Text style={styles.content}>{description}
+                         <Text style={lstyles.learnMore}> Learn more</Text>
+                       </Text>
+                     </TouchableOpacity>
+                     {txs}
+                    </View>
+      }
     }
-    let self = this
     return <Accordion
                 sections={['txId']}
                 onPress={() => {

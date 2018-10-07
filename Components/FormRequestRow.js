@@ -3,7 +3,6 @@ console.log('requiring FormRequestRow.js')
 
 import {
   Image,
-  // StyleSheet,
   // Text,
   TouchableOpacity,
   Alert,
@@ -11,7 +10,6 @@ import {
   Platform,
   Animated,
   Easing,
-  processColor
 } from 'react-native'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
@@ -20,28 +18,26 @@ import { CardIOUtilities } from 'react-native-awesome-card-io';
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import Icon from 'react-native-vector-icons/Ionicons';
-const debug = require('debug')('tradle:app:FormRequestRow')
+// const debug = require('debug')('tradle:app:FormRequestRow')
 
 import constants from '@tradle/constants'
 
 import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import NewResource from './NewResource'
-import RemediationItemsList from './RemediationItemsList'
+// import RemediationItemsList from './RemediationItemsList'
 import RowMixin from './RowMixin'
-import StringChooser from './StringChooser'
 import ImageInput from './ImageInput'
 import ShareResourceList from './ShareResourceList'
 import ResourceList from './ResourceList'
 import OnePropFormMixin from './OnePropFormMixin'
 
-import CustomIcon from '../styles/customicons'
+// import CustomIcon from '../styles/customicons'
 import formDefaults from '../data/formDefaults'
 import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
 
 import { circled } from '../styles/utils'
-import SignatureView from './SignatureView'
 
 import chatStyles from '../styles/chatStyles'
 
@@ -49,12 +45,10 @@ const MY_PRODUCT = 'tradle.MyProduct'
 const PHOTO = 'tradle.Photo'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
-const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
+// const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
-const ITEM = 'tradle.Item'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
-const DEFAULT_MESSAGE = 'Would you like to...'
-const numbers = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
+// const DEFAULT_MESSAGE = 'Would you like to...'
 const {
   TYPE,
   ROOT_HASH
@@ -63,7 +57,6 @@ const {
 const {
   ORGANIZATION,
   FORM,
-  ENUM
 } = constants.TYPES
 
 import Navigator from './Navigator'
@@ -71,6 +64,17 @@ import Navigator from './Navigator'
 import ENV from '../utils/env'
 class FormRequestRow extends Component {
   static displayName = 'FormRequestRow';
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    bankStyle: PropTypes.object,
+    to: PropTypes.object,
+    sendStatus: PropTypes.bool,
+    application: PropTypes.object,
+    onSelect: PropTypes.func.isRequired,
+    shareableResources: PropTypes.object,
+    share: PropTypes.func
+  };
 
   constructor(props) {
     super(props);
@@ -130,7 +134,7 @@ class FormRequestRow extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    let {resource, to, orientation} = this.props
+    let { resource, to } = this.props
     if (this.props.sendStatus !== nextProps.sendStatus)
       return true
     let rid = utils.getId(resource)
@@ -152,13 +156,9 @@ class FormRequestRow extends Component {
   }
   render() {
     let { resource, to, bankStyle, application } = this.props
-    let model = utils.getModel(resource[TYPE] || resource.id);
-
-    let me = utils.getMe();
 
     var isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
-    let hasOwnerPhoto = !isMyMessage &&  to  &&  to.photos;
 
     let message = resource.message
     let renderedRow = [];
@@ -216,7 +216,6 @@ class FormRequestRow extends Component {
               </View>
       renderedRow.push(msg)
     }
-    let fromHash = resource.from.id;
     var val = this.getTime(resource);
     var date = val
              ? <Text style={chatStyles.date}>{val}</Text>
@@ -323,7 +322,7 @@ class FormRequestRow extends Component {
   }
 
   showShareableResources(styles) {
-    let { resource, to, shareableResources, productToForms, bankStyle } = this.props
+    let { resource, shareableResources, productToForms } = this.props
     if (!shareableResources) // || !this.props.resource.message)
       return null
 
@@ -335,7 +334,6 @@ class FormRequestRow extends Component {
                 : null
     var vtt = [];
     var cnt = 0;
-    var chatOrg = to[TYPE] === ORGANIZATION  &&  utils.getId(to)
     let { verifications, providers, multientryResources } = shareableResources
     let resourceContextId = resource._context  &&  utils.getId(resource._context)
     let hasMultientry = !utils.isEmpty(multientryResources)
@@ -361,8 +359,7 @@ class FormRequestRow extends Component {
         if (t !== formModel.id)
           continue
         var ver = verifications[t];
-        var r = ver[0]
-        var totalShareables = ver.length
+        // var totalShareables = ver.length
         ver.forEach((r) => {
           let document = r.document
           if (entries  &&  (entries.indexOf(utils.getId(document)) !== -1  ||  entries.indexOf(r.document[constants.NONCE]) !== -1))
@@ -370,7 +367,6 @@ class FormRequestRow extends Component {
           // Dont' share forms for the same product
           if (resourceContextId  &&  document._context  && resourceContextId === utils.getId(document._context))
             return
-          var vModel = utils.getModel(r[TYPE]);
           var doc = this.formatShareables({
             model: formModel,
             verification: r,
@@ -393,43 +389,6 @@ class FormRequestRow extends Component {
       return null
 
     var modelTitle = translate(formModel)
-    var idx = modelTitle.indexOf('Verification');
-    var docType;
-    if (idx === -1)
-      docType = modelTitle;
-    else
-      docType = modelTitle.substring(0, idx) + (modelTitle.length === idx + 12 ? '' : modelTitle.substring(idx + 12))
-
-    let org = to.organization ? (to.organization.title + '.') : to.name;
-    let msg = (vtt.length === 1)
-            ? (formModel.subClassOf === MY_PRODUCT
-                ? translate('shareMyProduct', translate(formModel), org)
-                : translate('shareOne', utils.getMe().firstName, docType, org)
-              )
-            : translate('shareOneOfMany', utils.getMe().firstName, docType, org)
-
-    // let w = utils.getMessageWidth(FormRequestRow)
-    // let or
-    // if (formModel.subClassOf === MY_PRODUCT)
-    //   or = <View style={{paddingVertical: 5}}>
-    //         <View style={styles.myProductSeparator}/>
-    //       </View>
-    // else {
-    //   let abStyle = {backgroundColor: bankStyle.verifiedBg, height: 1, flex: 5, alignSelf: 'center'}
-    //   or = <View style={styles.row}>
-    //         <View style={abStyle}/>
-    //         <View style={styles.assistentBox}>
-    //           <Text style={[styles.orText, {color: bankStyle.verifiedBg}]}>{'or share'}</Text>
-    //         </View>
-    //         <View style={abStyle}/>
-    //       </View>
-    // }
-    // if (!hasMultientry  &&  vtt.length > 3) {
-    //   let documents = verifications[formModel.id].map((v) => v.document)
-    //   let meShare = this.formatMultiEntryShareable({verifications: verifications[formModel.id], model: formModel, multiChooser: false})
-    //   vtt = []
-    //   vtt.push(meShare)
-    // }
     let number = vtt.length //numbers[vtt.length]
     let offerToShare
     if (number)
@@ -450,13 +409,12 @@ class FormRequestRow extends Component {
      );
   }
   formatShareables(params) {
-    let { model, verification, onPress, providers, styles } = params
-    let { bankStyle, resource, onSelect, to, share } = this.props
+    let { verification, onPress, styles } = params
+    let { resource, onSelect, to, share } = this.props
 
     let document = verification.document
 
     let docModel = utils.getModel(document[TYPE]);
-    let isMyProduct = docModel.subClassOf === MY_PRODUCT
     let docModelTitle = docModel.title || utils.makeLabel(docModel.id)
     let idx = docModelTitle.indexOf('Verification');
     let docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
@@ -466,10 +424,9 @@ class FormRequestRow extends Component {
       msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
     let msgWidth = utils.getMessageWidth(FormRequestRow) - 50
     let headerStyle = {paddingLeft: 10, width: msgWidth}
-    let isShared = this.isShared(verification)
 
     let hs = /*isShared ? chatStyles.description :*/ {fontSize: 16, color: '#555555'}
-    let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
+    // let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
 
     let displayName
     if (docModel.subClassOf === MY_PRODUCT)
@@ -494,9 +451,8 @@ class FormRequestRow extends Component {
     let orgRow = <View/>
     // let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     let isItem = utils.isSavedItem(document)
-    let verifiedBy
     if (verification  && (verification.organization || isItem)) {
-      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem, styles)
+      let {verifiedBy, shareView, orgTitle, orgView} = this.getParts(verification, isItem, styles)
       if (onPress) {
       }
       else if (resource._documentCreated) {
@@ -542,7 +498,7 @@ class FormRequestRow extends Component {
            </View>
   }
   getParts(verification, isItem, styles) {
-    let { resource, to, shareableResources, bankStyle } = this.props
+    let { resource, to, shareableResources } = this.props
     let document = verification.document
     let providers = shareableResources.providers
     let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
@@ -624,46 +580,27 @@ class FormRequestRow extends Component {
   }
   formatMultiEntryShareable(params) {
     // let { model, verifications, onPress, context, providers } = params
-    let { model, verifications, onPress, providers, multiChooser, styles } = params
-    let { bankStyle, resource, onSelect, to, share } = this.props
+    let { verifications, onPress, multiChooser, styles } = params
+    let { bankStyle, resource, onSelect } = this.props
 
     let documents = verifications.map((v) => v.document)
     let verification = verifications[0]
     let document = documents[0]
 
-    let docModel = model
-    let isMyProduct = docModel.subClassOf === MY_PRODUCT
-    let docModelTitle = docModel.title || utils.makeLabel(docModel.id)
-    let idx = docModelTitle.indexOf('Verification');
-    let docTitle = idx === -1 ? docModelTitle : docModelTitle.substring(0, idx);
-
-    let msg;
-    if (document.message  &&  docModel.subClassOf !== FORM)
-      msg = <View><Text style={chatStyles.description}>{document.message}</Text></View>
-
     let headerStyle = {paddingTop: 5, paddingLeft: 10}
-    let isShared = this.isShared(verification)
 
     let msgWidth = utils.getMessageWidth(FormRequestRow) - 100
-    let hs = /*isShared ? chatStyles.description :*/ [styles.header, {fontSize: 14, width: msgWidth - 100, color: bankStyle.linkColor}]
-    let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
-
-    // let docRows = documents.map((d) => {
-    //   return <TouchableOpacity onPress={onSelect.bind(this, document, verification)} key={this.getNextKey()}>
-    //            <Text style={hs}>{utils.getDisplayName(d)}</Text>
-    //          </TouchableOpacity>
-    // })
+    let hs = [styles.header, {fontSize: 14, width: msgWidth - 100, color: bankStyle.linkColor}]
+    // let arrow = <Icon color={bankStyle.verifiedHeaderColor} size={20} name={'ios-arrow-forward'} style={styles.arrow}/>
 
     let orgRow
-    let doShareDocument = (typeof resource.requireRawData === 'undefined')  ||  resource.requireRawData
     let isItem = utils.isSavedItem(document)
-    let verifiedBy
     let headerContent = <View style={headerStyle}>
                           <Text style={hs}>{translate('multientryToShare', documents.length)}</Text>
                         </View>
 
     if (verification  && (verification.organization || isItem)) {
-      let {verifiedBy, orgPhoto, shareView, orgTitle, orgView} = this.getParts(verification, isItem, styles)
+      let { verifiedBy, shareView, orgView } = this.getParts(verification, isItem, styles)
       if (onPress) {
       }
       else if (resource._documentCreated) {
@@ -762,20 +699,13 @@ class FormRequestRow extends Component {
       _.extend(r, resource.prefill)
       isPrefilled = true
     }
-    else {
-      // isPrefilled = false
-      isPrefilled = /* utils.isSimulator() &&*/  ENV.prefillForms && model.id in formDefaults
-      if (isPrefilled)
-        _.extend(r, formDefaults[model.id])
-        // console.log(JSON.stringify(resource, 0, 2))
-    }
 
-    let rightButtonTitle = 'Done'
-    if (isMyMessage) {
-      let me = utils.getMe()
-      if (!me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(resource.to.organization))
-        rightButtonTitle = null
-    }
+    // let rightButtonTitle = 'Done'
+    // if (isMyMessage) {
+    //   let me = utils.getMe()
+    //   if (!me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(resource.to.organization))
+    //     rightButtonTitle = null
+    // }
     navigator.push({
       id: 4,
       title: translate(model),
@@ -797,7 +727,7 @@ class FormRequestRow extends Component {
   }
 
   formRequest(resource, vCols, prop, styles) {
-    const { bankStyle, to, application, context, productToForms, chooseTrustedProvider, shareableResources } = this.props
+    const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
     let message = resource.message
     let messagePart
     // if (resource._documentCreated) {
@@ -840,11 +770,7 @@ class FormRequestRow extends Component {
         onPressCall = this.createNewResource.bind(this, form, isMyMessage);
     }
 
-    let color = isMyMessage
-              ? {color: '#AFBBA8'}
-              : {color: '#2892C6'}
     let icon
-    let isReadOnlyContext = context  &&  utils.isReadOnlyChat(context)
     let me = utils.getMe()
     let switchToContext = me.isEmployee  &&  context  &&  resource.product  && context.to.organization  &&  context.to.organization.id === me.organization.id
 
@@ -1157,7 +1083,6 @@ class FormRequestRow extends Component {
       resource._context = oResource._context
 
     var propRef = prop.ref
-    var m = utils.getModel(propRef);
     var currentRoutes = this.props.navigator.getCurrentRoutes();
     this.props.navigator.push({
       title: translate(prop), //m.title,

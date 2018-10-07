@@ -6,15 +6,10 @@ import equal from 'deep-equal'
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import {
-  Image,
-  // StyleSheet,
   Text,
   TouchableHighlight,
-  Alert,
   View,
-  Platform,
-  processColor,
-  WebView
+  WebView,
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -26,11 +21,8 @@ import utils, {
 import { circled } from '../styles/utils'
 
 import ArticleView from './ArticleView'
-import MessageView from './MessageView'
 import ResourceView from './ResourceView'
 import NewResource from './NewResource'
-import ProductChooser from './ProductChooser'
-import SplashPage from './SplashPage'
 import PhotoList from './PhotoList'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
@@ -38,7 +30,6 @@ import uiUtils from './uiUtils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import formDefaults from '../data/formDefaults'
-import Actions from '../Actions/Actions'
 import StyleSheet from '../StyleSheet'
 import chatStyles from '../styles/chatStyles'
 import ENV from '../utils/env'
@@ -62,31 +53,32 @@ const {
 } = constants
 
 const {
-  MESSAGE,
   SIMPLE_MESSAGE,
   FORGET_ME,
   FORGOT_YOU,
-  VERIFICATION,
-  FORM,
   SELF_INTRODUCTION,
   CUSTOMER_WAITING,
-  ENUM,
-  // PRODUCT_LIST
 } = constants.TYPES
-const LIMIT = 20
 const MESSAGE_WITH_LINK_REGEX = /(?:__|[*#])|\[(.*?)\]\(.*?\)/
 
 // const MESSAGE_WITH_LINK_REGEX = /\[(?:[^\]]+)\]\(https?:\/\/[^)]+\)/ig
 
 class MessageRow extends Component {
   static displayName = 'MessageRow';
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    onSelect: PropTypes.func,
+    bankStyle: PropTypes.object,
+    to: PropTypes.object,
+  };
   constructor(props) {
     super(props);
     this.showMyData = this.showMyData.bind(this)
     // this.verify = this.verify.bind(this)
   }
   shouldComponentUpdate(nextProps, nextState) {
-    let {to, resource, orientation} = this.props
+    let { to, resource } = this.props
     return !equal(resource, nextProps.resource)   ||
            !equal(to, nextProps.to)               ||
            // (nextProps.addedItem  &&  utils.getId(nextProps.addedItem) === utils.getId(resource)) ||
@@ -97,8 +89,6 @@ class MessageRow extends Component {
   render() {
     let { resource, to, bankStyle, navigator } = this.props
     let styles = createStyles({bankStyle})
-
-    let me = utils.getMe();
 
     let isMyMessage = this.isMyMessage()//  &&  !isRemediationCompleted
     let ownerPhoto = this.getOwnerPhoto(isMyMessage)
@@ -132,7 +122,6 @@ class MessageRow extends Component {
         renderedRow = <Text style={chatStyles.resourceTitle}>{vCols}</Text>;
     }
     else {
-      let fromHash = resource.from.id;
       if (isMyMessage) {
         if (!noMessage)
           addStyle = [chatStyles.myCell,  noBg  && styles.noBg || styles.bg]
@@ -168,18 +157,10 @@ class MessageRow extends Component {
     }
     let properties = model.properties
     let inRow
-    let verPhoto;
     if (properties.photos) {
       if (resource.photos) {
         let len = resource.photos.length;
         inRow = len === 1 ? 1 : (len == 2 || len == 4) ? 2 : 3;
-        let style;
-        if (inRow === 1)
-          style = chatStyles.bigImage;
-        else if (inRow === 2)
-          style = chatStyles.mediumImage;
-        else
-          style = chatStyles.image;
         resource.photos.forEach((p) => {
           photoUrls.push({url: utils.getImageUri(p.url)});
         })
@@ -193,8 +174,6 @@ class MessageRow extends Component {
           marginBottom: 3,
         }
       }
-      else
-        verPhoto = <View style={styles.noPhotos} />
     }
     let rowStyle = isSimpleMessage ? {backgroundColor: 'transparent'} : [chatStyles.row, {backgroundColor: 'transparent'}];
     // let rowStyle = [chatStyles.row, {backgroundColor: 'transparent'}];
@@ -401,7 +380,7 @@ class MessageRow extends Component {
   }
 
   formatRow(isMyMessage, renderedRow, styles) {
-    let { resource, bankStyle, navigator, to, isLast, currency } = this.props
+    let { resource, bankStyle, navigator, to, isLast } = this.props
     let model = utils.getModel(resource[TYPE] || resource.id);
 
     let isReadOnlyChat = to[TYPE]  &&  utils.isReadOnlyChat(resource, resource._context) //this.props.context  &&  this.props.context._readOnly
@@ -572,7 +551,6 @@ class MessageRow extends Component {
       return null
     }
     if (model.id === BOOKMARK) {
-      let params = {filterResource: resource, search: true, modelName: resource[TYPE], limit: LIMIT * 2, first: true}
       let msg = <View key={this.getNextKey()}>
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{translate('Bookmark was created')}</Text>
                   <Text style={[chatStyles.resourceTitle, {color: '#ffffff'}]}>{resource.message || translate(model)}</Text>
@@ -595,13 +573,11 @@ class MessageRow extends Component {
     let first = true;
 
     let properties = model.properties;
-    let noMessage = !resource.message  ||  !resource.message.length;
     let onPressCall;
 
     let isMyProduct = model.subClassOf === MY_PRODUCT
     let isSimpleMessage = model.id === SIMPLE_MESSAGE
     let isConfirmation = model.id === CONFIRMATION
-    let cnt = 0;
 
     let vCols = [];
 
@@ -624,7 +600,7 @@ class MessageRow extends Component {
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
         if (resource[v].trim().indexOf(' ') === -1) {
-          let {width, height} = utils.dimensions(MessageRow)
+          let {width} = utils.dimensions(MessageRow)
           vCols.push(<WebView key={this.getNextKey()} style={{width: utils.getMessageWidth(MessageRow), height: 150, borderWidth: 0}}
              source={{uri: resource[v]}}
              startInLoadingState={true}
@@ -770,7 +746,7 @@ class MessageRow extends Component {
 
           if (typeof row === 'string') {
             if (this.isUrl(resource[v])) {
-              let {width, height} = utils.dimensions(MessageRow)
+              let {width} = utils.dimensions(MessageRow)
               vCols.push(<WebView key={this.getNextKey()} style={{width: width * 0.8, height: 150, borderWidth: 0}}
                  source={{uri: resource[v]}}
                  startInLoadingState={true}
@@ -829,7 +805,8 @@ class MessageRow extends Component {
       backButtonTitle: 'Back',
       passProps: {
         resource: me,
-        bankStyle: this.props.bankStyle
+        bankStyle: this.props.bankStyle,
+        backlink: utils.getModel(me[TYPE]).properties.myForms,
       }
     })
     // let n = this.props.navigator.getCurrentRoutes().length

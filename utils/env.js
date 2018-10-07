@@ -161,7 +161,7 @@ const merged = extend({
   tradleAPIKey: null,
   tradleAPIEndpoint: 'https://suqwvc3g0d.execute-api.us-east-1.amazonaws.com/dev/',
   APP_URL,
-  resetCheckpoint: 1,
+  resetCheckpoint: 0,
   SILENT_TYPES: [
     'tradle.Seal',
     'tradle.CustomerWaiting',

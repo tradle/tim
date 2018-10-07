@@ -22,9 +22,9 @@ const REMEDIATION = 'tradle.Remediation'
 const PROFILE = constants.TYPES.PROFILE
 
 class ChatContext extends Component {
-  props: {
+  static propTypes = {
     chat: PropTypes.object.isRequired,
-    context: PropTypes.object.isRequired,
+    context: PropTypes.object,
     contextChooser: PropTypes.func.isRequired,
     shareWith: PropTypes.func.isRequired,
     bankStyle: PropTypes.object.isRequired,

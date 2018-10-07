@@ -4,9 +4,7 @@ console.log('requiring ApplicationView.js')
 import React, { Component } from 'react'
 import {
   View,
-  Text,
   Platform,
-  Dimensions,
   Alert,
   TouchableOpacity,
 } from 'react-native'
@@ -23,8 +21,8 @@ const {
   ROOT_HASH
 } = constants
 const {
-  PROFILE,
-  IDENTITY,
+  // PROFILE,
+  // IDENTITY,
   MESSAGE,
   VERIFICATION
 } = constants.TYPES
@@ -40,7 +38,6 @@ import Reflux from 'reflux'
 import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
 import MessageList from './MessageList'
-import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
 import HomePageMixin from './HomePageMixin'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -48,7 +45,6 @@ import MatchImages from './MatchImages'
 
 import platformStyles from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
-import debug from '../utils/debug'
 import ConversationsIcon from './ConversationsIcon'
 
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
@@ -71,11 +67,17 @@ let INSTANCE_ID = 0
 
 class ApplicationView extends Component {
   static displayName = 'ApplicationView';
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    search: PropTypes.bool,
+    bankStyle: PropTypes.object,
+    backlink: PropTypes.string,
+  };
   constructor(props) {
     super(props);
     this._lazyId = LAZY_ID + INSTANCE_ID++
 
-    let me = utils.getMe()
     let { resource, action, navigator } = props
     this.state = {
       resource: resource,
@@ -109,9 +111,8 @@ class ApplicationView extends Component {
     this.listenTo(Store, 'handleEvent');
   }
   handleEvent(params) {
-    let {resource, action, error, to, backlink, application} = params
+    let {resource, action, backlink, application} = params
 
-    let isMe = utils.isMe(this.props.resource)
     if (resource  &&  resource[ROOT_HASH] !== this.props.resource[ROOT_HASH])
       return
 
@@ -154,7 +155,7 @@ class ApplicationView extends Component {
 
   render() {
     let { resource, backlink, isLoading, hasRM, isConnected } = this.state
-    let { navigator, bankStyle, currency, dimensions } = this.props
+    let { navigator, bankStyle, currency } = this.props
 
     hasRM = hasRM  ||  resource.relationshipManagers
     let isRM = hasRM  &&  utils.isRM(resource)
@@ -163,15 +164,8 @@ class ApplicationView extends Component {
     let network = <NetworkInfoProvider connected={isConnected} resource={resource} />
     if (isLoading)
       return this.showLoading({bankStyle, component: ApplicationView})
-    let modelName = resource[TYPE];
-    let model = utils.getModel(modelName)
-
-    let me = utils.getMe()
-
-    let { width } = utils.dimensions(ApplicationView)
 
     let isAndroid = utils.isAndroid()
-    let bgcolor = isAndroid ? 'transparent' : bankStyle.linkColor
     let color = isAndroid ? bankStyle.linkColor : '#ffffff'
     let iconName = 'ios-person-add-outline'
     let icolor
@@ -251,7 +245,6 @@ class ApplicationView extends Component {
 
   assignRM() {
     let resource = this.state.resource || this.props.resource
-    let me = utils.getMe()
     if (utils.isRM(resource)) {
       Alert.alert(translate('youAreTheRM'))
       return
@@ -346,10 +339,7 @@ class ApplicationView extends Component {
     navigator.pop();
   }
   createVerification(photoId) {
-    let { navigator } = this.props
     let resource = this.state.resource || this.props.resource
-    let model = utils.getModel(utils.getType(photoId))
-
     let applicant = resource.applicant
     const method = {
       [TYPE]: VISUAL_VERIFICATION_METHOD,
@@ -478,7 +468,6 @@ ApplicationView = makeResponsive(ApplicationView)
 var createStyles = utils.styleFactory(ApplicationView, function ({ dimensions, hasRM, isRM, bankStyle }) {
   let isAndroid = Platform.OS === 'android'
   let bgcolor = isAndroid && 'transparent' || bankStyle.linkColor
-  let color = isAndroid &&  '#ffffff' || bankStyle.linkColor
   let paddingRight = Platform.OS === 'android' ? 0 : 10
   return StyleSheet.create({
     row: {

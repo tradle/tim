@@ -38,11 +38,11 @@ import {
 } from 'react-native'
 
 class ShareResourceList extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     list: PropTypes.object.isRequired,
     formRequest: PropTypes.object,
-    multiChooser: PropTypes.boolean,
+    multiChooser: PropTypes.bool
   };
   constructor(props) {
     super(props);
@@ -188,7 +188,6 @@ class ShareResourceList extends Component {
     );
   }
   renderHeader() {
-    let { modelName } = this.props
     if (!this.isSmallScreen)
       return this.renderGridHeader()
   }
@@ -222,7 +221,7 @@ class ShareResourceList extends Component {
     navigator.pop()
   }
   onSearchChange(filter) {
-    let { search, isModel, modelName, listView, prop, formRequest, isChooser } = this.props
+    let { search, isModel, formRequest } = this.props
     this.state.filter = typeof filter === 'string' ? filter : filter.nativeEvent.text
     if (search  &&  isModel) {
       let mArr = this.filterModels(this.state.filter)

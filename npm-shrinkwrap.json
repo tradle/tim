@@ -82,7 +82,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#c4e1443db1ae3301740b15b17b03614b274aa0f7"
+      "resolved": "git://github.com/tradle/custom-models.git#36c22af6fafbba2c19511a18e888391700df18f0"
     },
     "@tradle/embed": {
       "version": "1.1.2",
@@ -146,7 +146,14 @@
     "@tradle/ethereum-adapter-etherscan": {
       "version": "1.0.0",
       "from": "tradle/ethereum-adapter-etherscan",
-      "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#120f00fd357eab408bf48ef6fcbab9bf9a147a96"
+      "resolved": "git://github.com/tradle/ethereum-adapter-etherscan.git#144be222771fa8f86083c3d8210f5a57a612548a",
+      "dependencies": {
+        "mem": {
+          "version": "4.0.0",
+          "from": "mem@>=4.0.0 <5.0.0",
+          "resolved": "https://registry.npmjs.org/mem/-/mem-4.0.0.tgz"
+        }
+      }
     },
     "@tradle/iot-message": {
       "version": "3.0.0",
@@ -205,7 +212,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#3570cc8e087ec699484a8a6358753209ae50f0b6"
+      "resolved": "git://github.com/tradle/models.git#e4c08f63fbea27bf280405ea1907fb14183b20e5"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -215,17 +222,17 @@
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#13fb342a34eff631d4ea444e1a30d07adfb94a57"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#3ecf44a9b670d49d50aaba15915e26c8e8fd0285"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
       "from": "tradle/models-nz",
-      "resolved": "git://github.com/tradle/models-nz.git#53f1ba44819645f00d7618b048a5cfc2b4cdf2e2"
+      "resolved": "git://github.com/tradle/models-nz.git#97ccbecee522fad6ef2e33d7701cc4f2c80d64fe"
     },
     "@tradle/models-onfido": {
       "version": "1.0.0",
       "from": "tradle/models-onfido",
-      "resolved": "git://github.com/tradle/models-onfido.git#2ff632aa316e02e65a83a1580df1adac9b8c8fff"
+      "resolved": "git://github.com/tradle/models-onfido.git#25b108b414a54bad4c04af44fcf2c8bee72aba25"
     },
     "@tradle/models-products-bot": {
       "version": "1.0.0",
@@ -2602,7 +2609,7 @@
     "etherscan-api": {
       "version": "3.0.8",
       "from": "mvayngrib/etherscan-api",
-      "resolved": "git://github.com/mvayngrib/etherscan-api.git#3b2862e5e53fdff861b249bf11e3e05e3571dede"
+      "resolved": "git://github.com/mvayngrib/etherscan-api.git#37acc504d542d1ee0cfb0dc25d1d41fafe1cc864"
     },
     "event-emitter": {
       "version": "0.3.5",
@@ -3156,6 +3163,11 @@
       "version": "3.1.0",
       "from": "graphql-anywhere@>=3.0.1 <4.0.0",
       "resolved": "https://registry.npmjs.org/graphql-anywhere/-/graphql-anywhere-3.1.0.tgz"
+    },
+    "graphql-request": {
+      "version": "1.8.2",
+      "from": "graphql-request@>=1.8.2 <2.0.0",
+      "resolved": "https://registry.npmjs.org/graphql-request/-/graphql-request-1.8.2.tgz"
     },
     "graphql-tag": {
       "version": "2.9.2",
@@ -5328,10 +5340,20 @@
       "from": "p-debounce@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/p-debounce/-/p-debounce-1.0.0.tgz"
     },
+    "p-defer": {
+      "version": "1.0.0",
+      "from": "p-defer@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/p-defer/-/p-defer-1.0.0.tgz"
+    },
     "p-finally": {
       "version": "1.0.0",
       "from": "p-finally@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/p-finally/-/p-finally-1.0.0.tgz"
+    },
+    "p-is-promise": {
+      "version": "1.1.0",
+      "from": "p-is-promise@>=1.1.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/p-is-promise/-/p-is-promise-1.1.0.tgz"
     },
     "p-limit": {
       "version": "1.3.0",

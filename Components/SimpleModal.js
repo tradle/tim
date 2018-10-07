@@ -27,7 +27,6 @@ import {
   TouchableOpacity,
   View,
   // Text,
-  Dimensions,
   Platform,
   ActivityIndicator
 } from 'react-native'

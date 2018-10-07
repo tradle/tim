@@ -10,10 +10,6 @@ import {
 import PropTypes from 'prop-types'
 
 import constants from '@tradle/constants'
-import Icon from 'react-native-vector-icons/Ionicons'
-// import extend from 'extend'
-import _ from 'lodash'
-import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 
 import {Column as Col, Row} from 'react-native-flexbox-grid'
@@ -25,35 +21,28 @@ import StyleSheet from '../StyleSheet'
 const MONEY = constants.TYPES
 
 class GridHeader extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     modelName: PropTypes.string.isRequired,
     gridCols: PropTypes.array.isRequired,
-    multiChooser: PropTypes.boolean,
-    isSmallScreen: PropTypes.boolean,
+    multiChooser: PropTypes.bool,
+    isSmallScreen: PropTypes.bool,
     checkAll: PropTypes.func,
     sort: PropTypes.func
     // backlinkList: PropTypes.array
   };
   constructor(props) {
     super(props);
-
-    let {resource, modelName, multiChooser, gridCols} = this.props
-    let model = utils.getModel(modelName)
-
-    let size = gridCols ? gridCols.length : 1
-    this.limit = 20 //this.isSmallScreen ? 20 : 40
     this.state = {
       isChecked: false
     };
   }
   render() {
-    let { modelName, isSmallScreen } = this.props
-    let model = utils.getModel(modelName)
-    let props = model.properties
-    let gridCols = this.props.gridCols
+    let { modelName, isSmallScreen, multiChooser, gridCols } = this.props
     if (!gridCols)
       return <View />
+    let model = utils.getModel(modelName)
+    let props = model.properties
 
     let size
     if (gridCols) {
@@ -67,7 +56,7 @@ class GridHeader extends Component {
       size = 1
 
     let smCol = isSmallScreen ? size/2 : 1
-    if (this.props.multiChooser)
+    if (multiChooser)
       size++
     let {sortProperty, order} = this.state
     let cols = gridCols.map((p) => {

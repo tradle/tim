@@ -32,8 +32,7 @@ import ENV from '../utils/env'
 import GridList from './GridList'
 
 const {
-  TYPE,
-  ROOT_HASH
+  TYPE
 } = constants
 
 const {
@@ -44,6 +43,14 @@ const {
 
 class ApplicationTabs extends Component {
   static displayName = 'ApplicationTabs'
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    showDetails: PropTypes.bool,
+    bankStyle: PropTypes.object,
+    approve: PropTypes.func.isRequired,
+    deny: PropTypes.func.isRequired
+  };
   constructor(props) {
     super(props);
   }
@@ -52,7 +59,6 @@ class ApplicationTabs extends Component {
     var model = utils.getModel(resource[TYPE]);
     var props = model.properties;
     var refList = [];
-    var me = utils.getMe()
     let propsToShow = []
 
     let currentProp = backlink

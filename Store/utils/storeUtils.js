@@ -14,7 +14,7 @@ const {
   CUR_HASH
 } = constants
 
-const { MONEY, ENUM, ORGANIZATION, FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
+const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
 
 var storeUtils = {

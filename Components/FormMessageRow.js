@@ -21,16 +21,13 @@ import { Text } from './Text'
 const MAX_PROPS_IN_FORM = 1
 const PHOTO = 'tradle.Photo'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
-const SENT = 'Sent'
+// const SENT = 'Sent'
 
-const { IDENTITY, ENUM, VERIFICATION } = constants.TYPES
+const { IDENTITY, ENUM } = constants.TYPES
 var { TYPE, SIG } = constants
 import {
-  // StyleSheet,
-  // Text,
   TouchableHighlight,
   View,
-  Image
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -38,6 +35,14 @@ import React, { Component } from 'react'
 
 class FormMessageRow extends Component {
   static displayName = 'FormMessageRow'
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    bankStyle: PropTypes.object,
+    to: PropTypes.object,
+    application: PropTypes.object,
+    onSelect: PropTypes.func
+  };
   constructor(props) {
     super(props);
     this.onPress = this.onPress.bind(this)
@@ -152,9 +157,7 @@ class FormMessageRow extends Component {
     // let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
 
     var width = utils.getMessageWidth(FormMessageRow)
-    let { bankStyle, application } = this.props
-    // if (application)
-    //   width -= 50 // provider icon and padding
+    let { bankStyle } = this.props
 
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
@@ -223,10 +226,8 @@ class FormMessageRow extends Component {
       if (!viewCols)
         return
     }
-    let first = true;
-
     let properties = model.properties;
-    let onPressCall;
+    // let onPressCall;
 
     let vCols = [];
     let isShared = this.isShared()
@@ -254,10 +255,8 @@ class FormMessageRow extends Component {
       let ref = properties[v].ref
           // debugger
       if (ref) {
-        if (resource[v]  &&  ref !== PHOTO  &&  ref !== IDENTITY) {
+        if (resource[v]  &&  ref !== PHOTO  &&  ref !== IDENTITY)
           vCols.push(this.getPropRow(properties[v], resource, resource[v].title || resource[v]))
-          first = false;
-        }
         return;
       }
       let style = chatStyles.resourceTitle
@@ -269,7 +268,7 @@ class FormMessageRow extends Component {
       else if (resource[v]                 &&
           properties[v].type === 'string'  &&
           (resource[v].indexOf('http://') == 0  ||  resource[v].indexOf('https://') == 0)) {
-        onPressCall = this.onPress;
+        // onPressCall = this.onPress;
         vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>);
       }
       else if (!model.autoCreate) {
@@ -297,8 +296,6 @@ class FormMessageRow extends Component {
           return
         vCols.push(<Text style={style} key={this.getNextKey()}>{resource[v]}</Text>);
       }
-      first = false;
-
     });
 
     if (vCols.length > MAX_PROPS_IN_FORM)
@@ -316,7 +313,7 @@ class FormMessageRow extends Component {
 }
 
 var createStyles = utils.styleFactory(FormMessageRow, function (params) {
-  let { dimensions, bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
+  let { bankStyle, isMyMessage, isShared, width, isSharedContext, application } = params
   let moreHeader = {borderTopRightRadius: 10, borderTopLeftRadius: 10 }
   // let moreHeader = isMyMessage || isShared
   //                ? {borderTopRightRadius: 0, borderTopLeftRadius: 10 }

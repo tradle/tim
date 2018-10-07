@@ -205,7 +205,7 @@ platform :android do
     # current_version = sh("env $(grep -v '^#' \"../gradle.properties\" | xargs) echo \"$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH\"")
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
     # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
-    dry_run = options[:dry_run] == false ? false : true
+
     # see config opts for code_push plugin here
     # https://github.com/manuelkch/fastlane-plugin-code_push
     target_binary_version = (options[:target_binary_version] || current_version).strip
@@ -219,7 +219,7 @@ platform :android do
       deployment: deployment,
       target_binary_version: target_binary_version,
       description: options[:description] || 'no description for release',
-      dry_run: dry_run,
+      dry_run: options[:dry_run],
       execution_dir_path: '../',
       bundle_name: bundle_name,
       mandatory: mandatory,

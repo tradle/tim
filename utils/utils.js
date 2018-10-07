@@ -5,7 +5,7 @@ import React from 'react'
 import {
   NativeModules,
   Text,
-  findNodeHandle,
+  // findNodeHandle,
   Dimensions,
   Alert,
   Linking,
@@ -19,26 +19,24 @@ import Camera from 'react-native-camera'
 import querystring from 'querystring'
 import traverse from 'traverse'
 import DeviceInfo from 'react-native-device-info'
-import PushNotifications from 'react-native-push-notification'
 import Keychain from 'react-native-keychain'
 import { getDimensions, getOrientation } from 'react-native-orient'
 import compareVersions from 'compare-versions'
 import crypto from 'crypto'
 import Q from 'q'
 import _collect from 'stream-collector'
-import t from 'tcomb-form-native'
 import moment from 'moment'
 import dateformat from 'dateformat'
 import Backoff from 'backoff'
 import levelErrors from 'levelup/lib/errors'
 import Cache from 'lru-cache'
-import mutexify from 'mutexify'
+// import mutexify from 'mutexify'
 import Promise from 'bluebird'
-const debug = require('debug')('tradle:app:utils')
+import Debug from 'debug'
+const debug = Debug('tradle:app:utils')
 import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
-import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 import Lens from '@tradle/lens'
 import tradle, {
   protocol,
@@ -57,6 +55,8 @@ import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import Strings from './strings'
+import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
+import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 
 const collect = Promise.promisify(_collect)
 
@@ -74,7 +74,6 @@ var strMap = {
 
 var {
   TYPE,
-  TYPES,
   CUR_HASH,
   NONCE,
   ROOT_HASH,
@@ -122,7 +121,6 @@ import dictionaries from './dictionaries'
 var dictionary //= dictionaries[Strings.language]
 
 var models, me
-var lenses = {}  //, modelsForStub;
 var BACKOFF_DEFAULTS = {
   randomisationFactor: 0,
   initialDelay: 1000,
@@ -130,7 +128,7 @@ var BACKOFF_DEFAULTS = {
 }
 
 var DEFAULT_FETCH_TIMEOUT = 5000
-var stylesCache = {}
+// var stylesCache = {}
 
 var defaultPropertyValues = {}
 var hidePropertyInEdit = {}
@@ -438,7 +436,7 @@ var utils = {
     if (utils.isStub(resource))  {
       if (!e)
         return resource.title
-      let [type, id] = resource.id.split('_')
+      let [id] = resource.id.split('_')
       return e[id]  ||  resource.title
     }
     else if (e)
@@ -820,7 +818,7 @@ var utils = {
   },
   getItemsMeta(metadata) {
     var props = metadata.properties;
-    var required = utils.arrayToObject(metadata.required);
+    // var required = utils.arrayToObject(metadata.required);
     // if (!required)
     //   return;
     var itemsMeta = {};
@@ -1009,7 +1007,7 @@ var utils = {
     moment().locale('en')
     let valueMoment = moment.utc(value)
     let v = value instanceof Date && value.getTime()  ||  value
-    let localLocale = moment(valueMoment).locale(lang === 'en' && false || lang)
+    let localLocale = moment(value).locale(lang === 'en' && false || lang)
     let useCalendarFormat = Math.abs(Date.now() - v) <= 24 * 3600 * 1000
     if (useCalendarFormat)
       return localLocale.calendar()
@@ -1207,7 +1205,7 @@ var utils = {
     var dayDiff = Math.floor((now.getTime() - date.getTime()) / (3600 * 24 * 1000))
     if (dayDiff === 0)
       dayDiff = now.getDate() - date.getDate()
-    var noTime = true
+    // var noTime = true
     var val;
     switch (dayDiff) {
     case 0:
@@ -1234,7 +1232,6 @@ var utils = {
     if (!message)
       return []
     var lBr = message.indexOf('[');
-    var msg;
     if (lBr == -1)
       return [message];
     var rBr = message.indexOf(']', lBr);
@@ -1358,7 +1355,6 @@ var utils = {
   buildRef(resource) {
     if (!resource[TYPE] && resource.id)
       return resource
-    let m = this.getModel(resource[TYPE])
     let ref = {
       id: utils.getId(resource),
       title: resource.id ? resource.title : utils.getDisplayName(resource)
@@ -1601,8 +1597,7 @@ var utils = {
         //
         // currentScrollOffset is how far down we've scrolled already
 
-        const { left, top, width, height } = rect
-
+        const { top, height } = rect
         let keyboardScreenY = Dimensions.get('window').height;
         if (scrollResponder.keyboardWillOpenTo) {
           keyboardScreenY = scrollResponder.keyboardWillOpenTo.endCoordinates.screenY;
@@ -1687,7 +1682,6 @@ var utils = {
   joinURL(...parts) {
     var first = parts.shift()
     var rest = parts.join('/')
-    var addSlash
     if (first[first.length - 1] === '/') first = first.slice(0, -1)
     if (rest[0] === '/') rest = rest.slice(1)
 
@@ -1743,8 +1737,6 @@ var utils = {
   },
   isSimulator() {
     if (utils.isWeb()) return false
-
-    let timezone = DeviceInfo.getTimezone()
     return DeviceInfo.getModel() === 'Simulator' || DeviceInfo.isEmulator()
   },
 
@@ -2044,6 +2036,7 @@ var utils = {
       image.src = dataUrl
     })
   },
+
   printStack: tradleUtils.printStack.bind(tradleUtils),
   addCatchLogger: function (name, fn) {
     return function () {
@@ -2056,7 +2049,6 @@ var utils = {
   },
   getPhotoProperty(resource) {
     let props = this.getModel(resource[TYPE]).properties
-    let photoProp
     for (let p in resource) {
       if (props[p].ref === PHOTO  &&  props[p].mainPhoto)
         return props[p]
@@ -2120,41 +2112,41 @@ var utils = {
         rProps.push(props[p])
     return rProps
   },
-  fromMicroBlink: function (result) {
-    const { mrtd, usdl, eudl, image } = result
-    if (mrtd) {
-      return {
-        [TYPE]: 'tradle.Passport',
-        givenName: mrtd.secondaryId,
-        surname: mrtd.primaryId,
-        nationality: {
-          id: 'tradle.Country_abc',
-          title: mrtd.nationality.slice(0, 2)
-        },
-        issuingCountry: {
-          id: 'tradle.Country_abc',
-          title: mrtd.issuer.slice(0, 2)
-        },
-        passportNumber: mrtd.documentNumber,
-        sex: {
-          id: 'tradle.Sex_abc',
-          title: mrtd.sex === 'M' ? 'Male' : 'Female'
-        },
-        dateOfExpiry: mrtd.dateOfExpiry,
-        dateOfBirth: mrtd.dateOfBirth,
-        photos: [
-          {
-            url: image.base64,
-            // width: image.width,
-            // height: image.height,
-            // isVertical: image.width < image.height
-          }
-        ]
-      }
-    }
-  },
+  // fromMicroBlink: function (result) {
+  //   const { mrtd, usdl, eudl, image } = result
+  //   if (mrtd) {
+  //     return {
+  //       [TYPE]: 'tradle.Passport',
+  //       givenName: mrtd.secondaryId,
+  //       surname: mrtd.primaryId,
+  //       nationality: {
+  //         id: 'tradle.Country_abc',
+  //         title: mrtd.nationality.slice(0, 2)
+  //       },
+  //       issuingCountry: {
+  //         id: 'tradle.Country_abc',
+  //         title: mrtd.issuer.slice(0, 2)
+  //       },
+  //       passportNumber: mrtd.documentNumber,
+  //       sex: {
+  //         id: 'tradle.Sex_abc',
+  //         title: mrtd.sex === 'M' ? 'Male' : 'Female'
+  //       },
+  //       dateOfExpiry: mrtd.dateOfExpiry,
+  //       dateOfBirth: mrtd.dateOfBirth,
+  //       photos: [
+  //         {
+  //           url: image.base64,
+  //           // width: image.width,
+  //           // height: image.height,
+  //           // isVertical: image.width < image.height
+  //         }
+  //       ]
+  //     }
+  //   }
+  // },
   fromAnyline: function (result) {
-    const { scanMode, cutoutBase64, barcode, reading, data } = result
+    const { scanMode, cutoutBase64, data } = result
     // as produced by newtondev-mrz-parser
     // {
     //       documentCode: documentCode,
@@ -2487,7 +2479,7 @@ var utils = {
   getEditableProperties(resource) {
     let type = this.getType(resource)
     let isFormRequest = type === FORM_REQUEST
-    let isFormError = type === FORM_ERROR
+    // let isFormError = type === FORM_ERROR
     // if (!isFormRequest  &&  !isFormError)
     //   return []
     let ftype
@@ -2556,7 +2548,7 @@ var utils = {
     let formType = message.substring(i1 + 2)
     let i2 = formType.indexOf('**')
     let linkColor = noLink ? '#757575' : bankStyle.linkColor
-    let message1, message2, messagePart
+    let message1, message2
     let formTitle
     if (i2 !== -1) {
       message1 = message.substring(0, i1).trim()
@@ -2841,7 +2833,7 @@ var utils = {
   },
 
   getIotClientId: function ({ permalink, provider }) {
-    const { connectEndpoint, hash } = provider
+    const { connectEndpoint } = provider
     const prefix = connectEndpoint && connectEndpoint.clientIdPrefix || ''
     return `${prefix}${permalink}${provider.hash.slice(0, 6)}`
     // return new Buffer(`${permalink}${counterparty.slice(0, 6)}`, 'hex').toString('base64')
@@ -2897,7 +2889,7 @@ var utils = {
   getStatusMessageForCheck({ check }) {
     const model = this.getModel(STATUS);
     const { aspects } = check;
-    const aspectsStr = typeof aspects === 'string' ? aspects : aspects.join(', ');
+    // const aspectsStr = typeof aspects === 'string' ? aspects : aspects.join(', ');
     let status
     if (check.status) {
       status = model.enum.find(r => r.title === check.status.title)
@@ -2922,6 +2914,16 @@ var utils = {
   cleanBase64(str) {
     // some libraries generate base64 with line breaks, spaces, etc.
     return str.replace(/[\s]/g, '')
+  },
+
+  logger: namespace => Debug(`tradle:app:${namespace}`),
+  getBlockchainExplorerUrlsForTx: ({ blockchain, networkName, txId }) => {
+    const urls = _.get(BLOCKCHAIN_EXPLORERS, [blockchain, networkName]) || []
+    if (!urls.length) {
+      debug(`no blockchain explorer configured for blockchain ${blockchain} network ${networkName}`)
+    }
+
+    return urls
   },
 }
 

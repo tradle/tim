@@ -108,3 +108,4 @@ Store/utils/
 version.json
 *.dSYM.zip
 *.sh1
+debug/

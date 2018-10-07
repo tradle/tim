@@ -4,10 +4,9 @@ import omit from 'lodash/omit'
 import isEmpty from 'lodash/isEmpty'
 import getPropertyAtPath from 'lodash/get'
 import gql from 'graphql-tag'
-import deepEqual from 'deep-equal'
-
-import tradle, { utils as tradleUtils } from '@tradle/engine'
+import { utils as tradleUtils } from '@tradle/engine'
 import { ApolloClient, createNetworkInterface } from 'apollo-client'
+import { GraphQLClient } from 'graphql-request'
 import constants from '@tradle/constants'
 import { print as printQuery } from 'graphql/language/printer'
 import utils from '../../utils/utils'
@@ -16,10 +15,9 @@ const {
   SIG,
   ROOT_HASH,
   CUR_HASH,
-  PREV_HASH
 } = constants
 
-const { MONEY, ENUM, ORGANIZATION, FORM, MESSAGE, MODEL } = constants.TYPES
+const { MONEY, ENUM, ORGANIZATION, MESSAGE, MODEL } = constants.TYPES
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
@@ -34,9 +32,17 @@ var messageMap = {
   [NETWORK_FAILURE]: 'networkFailure',
   [INVALID_QUERY]: 'invalidQuery'
 }
-
+const useApollo = false
 var search = {
   initClient(meDriver, url) {
+    // debugger
+    if (useApollo)
+      return this.initClientApollo(meDriver, url)
+    else
+      return this.initClientGraphQLRequest(meDriver, url)
+  },
+
+  initClientApollo(meDriver, url) {
     // let graphqlEndpoint
     // let orgId = me.organization.id
     // let url = me.organization.url
@@ -78,29 +84,40 @@ var search = {
       }
     }])
 
-    networkInterface.useAfter([
-      {
-        applyAfterware(result, next) {
-          const { response } = result
-          if (response.status > 300) {
-            const err = Error('request failed')
-            err.status = response.status
-            err.statusText = response.statusText
-            err.response = response
-            throw err
-          }
+    // networkInterface.useAfter([
+    //   {
+    //     applyAfterware(result, next) {
+    //       const { response } = result
+    //       if (response.status > 300) {
+    //         const err = Error('request failed')
+    //         err.status = response.status
+    //         err.statusText = response.statusText
+    //         err.response = response
+    //         throw err
+    //       }
 
-          next()
-        }
-      }
-    ])
+    //       next()
+    //     }
+    //   }
+    // ])
 
     return new ApolloClient({ networkInterface })
   },
 
+  initClientGraphQLRequest(meDriver, url, headers) {
+    // debugger
+    let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
+    if (!graphqlEndpoint)
+      return
+    this.graphqlEndpoint = graphqlEndpoint
+    this.meDriver = meDriver
+    // Not needed but just to make it generic
+    return new GraphQLClient(graphqlEndpoint, {headers})
+  },
+
   async searchServer(params) {
-    let self = this
-    let {client, modelName, filterResource, sortProperty, asc, limit, endCursor, direction, properties, select} = params
+    let {client, modelName, filterResource, sortProperty, asc, limit,
+         endCursor, properties, select, excludeProps} = params
 
     if (filterResource  &&  !Object.keys(filterResource).length)
       filterResource = null
@@ -124,7 +141,8 @@ var search = {
       LTE: '',
     }
     let exclude = [ROOT_HASH, CUR_HASH, TYPE]
-    let numberOfAttempts = 1
+    if (excludeProps)
+      exclude.concat(excludeProps)
     if (filterResource) {
       for (let p in filterResource) {
         if (exclude.indexOf(p) !== -1)
@@ -207,7 +225,7 @@ var search = {
             op.NEQ += `\n   ${p}: true,`
         }
         else if (props[p].type === 'number')
-          self.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
+          this.addEqualsOrGreaterOrLesserNumber(val, op, props[p])
 
         else if (props[p].type === 'object') {
           // if (Array.isArray(val)) {
@@ -322,7 +340,7 @@ var search = {
     query += `edges {\n node {\n`
 
     if (!select) {
-      select = this.getSearchProperties({model, properties, isList: true})
+      select = this.getSearchProperties({model, properties, isList: true, excludeProps})
     }
 
     query += `${select.join('   \n')}`
@@ -331,44 +349,53 @@ var search = {
     query += `\n}`   // close properties block
     query += `\n}`   // close query
 
-    let error, message, retry = true
+    let error, retry = true
     for (let attemptsCnt=0; attemptsCnt<MAX_ATTEMPTS  &&  retry; attemptsCnt++) {
-      let data = await execute(query)
-      if (data.result)
+      let data = await this.execute({client, query, table, versionId})
+      if (data.result) {
         return { result:  data.result }
-      error = data.error.message
-      if (error === NETWORK_FAILURE)
-        continue
+      }
+      let { message, graphQLErrors, networkError } = data.error
+      if (graphQLErrors.length) {
+        let excludeProps = []
+        let str = 'Cannot query field \"'
+        let len = str.length
+        graphQLErrors.forEach(err => {
+          let msg = err.message
+          let idx = msg.indexOf(str)
+          if (idx !== 0)
+            return
+          idx = msg.indexOf('\"', len)
+          excludeProps.push(msg.substring(len, idx))
+        })
+        if (excludeProps.length) {
+          params.excludeProps = excludeProps
+          return await this.searchServer(params)
+        }
+        else {
+          debugger
+          return
+        }
+      }
+      if (networkError) {
+        if (networkError.status === 400)
+          message = INVALID_QUERY
+        else
+          continue
+      }
       retry = false
-      if (error.indexOf(INVALID_QUERY) === 0)
-        error = INVALID_QUERY
+      if (message.indexOf(INVALID_QUERY) === 0)
+        message = INVALID_QUERY
       else
         debugger
       await utils.submitLog(true)
+      error = message
     }
 
     console.log(error)
     return { error: messageMap[error] || error, retry }
       // throw error
 
-    async function execute() {
-      try {
-        let data = await client.query({
-            fetchPolicy: 'network-only',
-            errorPolicy: 'all',
-            query: gql(`${query}`),
-            variables: versionId  &&  {modelsVersionId: versionId}
-          })
-        return { result: data.data[table] }
-      } catch(error) {
-        // debugger
-        console.log(error)
-        return { error }
-      }
-    }
-    function prettify (obj) {
-      return JSON.stringify(obj, null, 2)
-    }
     function addEqualsOrGreaterOrLesserNumber(val, op, prop) {
       let isMoney = prop.ref === MONEY
       let p = prop.name
@@ -398,7 +425,7 @@ var search = {
                 // # _inbound: false
                 // # _recipient: ${hash}
   async getChat(params) {
-    let { author, recipient, client, context, filterResource, limit, endCursor, direction, application } = params
+    let { author, client, context, filterResource, limit, endCursor } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
     let contextVar = filterResource || context ? '' : '($context: String)'
     let limitP = limit ? `limit:  ${limit}` : ''
@@ -472,24 +499,24 @@ var search = {
     }
 
     let query = queryHeader + eq + neq + queryFooter
+
     try {
-      let result = await client.query({
-          fetchPolicy: 'network-only',
-          errorPolicy: 'all',
-          query: gql(`${query}`),
-          variables: filterResource || context ? null : {context: context}
-        })
-      return result  &&  result.data[table]
+      let result = await this.execute({client, query, table})
+      // let result = await client.query({
+      //     fetchPolicy: 'network-only',
+      //     errorPolicy: 'all',
+      //     query: gql(`${query}`),
+      //     variables: filterResource || context ? null : {context: context}
+      //   })
+      return result  &&  result.result
     } catch (err) {
       debugger
     }
 
   },
   getSearchProperties(params) {
-    let {model, inlined, properties, currentProp, isList, backlink} = params
+    let {model, inlined, properties, backlink} = params
     let props = backlink ? {[backlink.name]: backlink} : model.properties
-
-    let isApplication = model.id === APPLICATION
 
     let arr
     if (utils.isInlined(model))
@@ -528,7 +555,7 @@ var search = {
       )
     }
 
-    if (ref === COUNTRY) {//   ||  ref === CURRENCY)
+    else if (ref === COUNTRY) {//   ||  ref === CURRENCY)
       return (
         `${p} {
           id
@@ -562,11 +589,13 @@ var search = {
       }`
     )
   },
-  addProps({isList, backlink, props, currentProp, arr, model}) {
+  addProps({isList, backlink, props, currentProp, arr, model, excludeProps}) {
     if (!arr)
       arr = []
     let isApplication = model  &&  model.id === APPLICATION
     for (let p in props) {
+      if (excludeProps  &&  excludeProps.indexOf(p) !== -1)
+        continue
       if (p.charAt(0) === '_')
         continue
       if (p === 'from' || p === 'to' || p === '_time'  ||  p.indexOf('_group') !== -1)
@@ -710,12 +739,14 @@ var search = {
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
-      let result = await client.query({
-        fetchPolicy: 'network-only',
-        errorPolicy: 'all',
-        query: gql(`${query}`)
-      })
-      return result.data[table]
+      let result = await this.execute({client, query, table})
+      return result.result
+      // let result = await client.query({
+      //   fetchPolicy: 'network-only',
+      //   errorPolicy: 'all',
+      //   query: gql(`${query}`)
+      // })
+      // return result.data[table]
     }
     catch(err) {
       console.log('graphQL._getItem', err)
@@ -736,12 +767,14 @@ var search = {
         }
      }`
     try {
-      let result = await client.query({
-        fetchPolicy: 'network-only',
-        errorPolicy: 'all',
-        query: gql(`${query}`)
-      })
-      return result.data[table]  &&  result.data[table].objects
+      let result = await this.execute({client, query, table})
+      return result.result  &&  result.result.objects
+      // let result = await client.query({
+      //   fetchPolicy: 'network-only',
+      //   errorPolicy: 'all',
+      //   query: gql(`${query}`)
+      // })
+      // return result.data[table]  &&  result.data[table].objects
     }
     catch(err) {
       console.log('graphQL._getItem', err)
@@ -781,10 +814,63 @@ var search = {
     if (isEmpty(results)) throw new Error(`identity not found with link: ${link}`)
 
     return results[0]
+  },
+  async executeApollo({client, query, table, versionId}) {
+let start = Date.now()
+    try {
+      let data = await client.query({
+          fetchPolicy: 'network-only',
+          errorPolicy: 'all',
+          query: gql(`${query}`),
+          variables: versionId  &&  {modelsVersionId: versionId}
+        })
+console.log('searchServer.apollo ' + (Date.now() - start))
+      return { result: data.data[table] }
+    } catch(error) {
+      // debugger
+      console.log(error)
+      return { error }
+    }
+  },
+
+  async execute(params) {
+    if (useApollo)
+      return this.executeApollo(params)
+    var {query, table, versionId} = params
+    // debugger
+    const body = tradleUtils.stringify({
+      query: JSON.stringify(query)
+    })
+    let start = Date.now()
+    const result = await this.meDriver.sign({
+      object: {
+        [TYPE]: 'tradle.GraphQLQuery',
+        body,
+        _time: Date.now()
+      }
+    })
+    console.log('searchServer.length ' + (Date.now() - start))
+
+    let headers = {
+      'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
+    }
+    let client = new GraphQLClient(this.graphqlEndpoint, headers)
+
+    let variables = versionId  &&  {modelsVersionId: versionId} || undefined
+    try {
+      let data = await client.rawRequest(query, variables)
+      if (data.data)
+        return {result: data.data[table]}
+      else
+        return {error: JSON.stringify(data.errors  &&  data.errors || data)}
+    } catch (error) {
+debugger
+      return { error }
+    }
   }
 }
 
-const neuter = obj => utils.omitVirtual(utils.sanitize(obj))
+// const neuter = obj => utils.omitVirtual(utils.sanitize(obj))
 const getFirstNode = result => getPropertyAtPath(result, ['edges', '0', 'node'])
 
 module.exports = search
@@ -998,3 +1084,6 @@ module.exports = search
   //   }
 
   // },
+    // function prettify (obj) {
+    //   return JSON.stringify(obj, null, 2)
+    // }

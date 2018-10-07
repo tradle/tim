@@ -7,11 +7,9 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
   TouchableHighlight,
-  Platform,
+  Platform
 } from 'react-native'
-import PropTypes from 'prop-types';
 
 import React, { Component } from 'react'
 import GridList from './GridList'
@@ -59,11 +57,8 @@ class ShowRefList extends Component {
     let propsToShow = []
 
     let currentBacklink = backlink
-    let hasPropsToShow = this.hasPropsToShow(resource)
+    let hasPropsToShow = hasPropertiesToShow(resource)
     showDetails = !isIdentity  &&  !isOrg  &&  !showDocuments  &&  (showDetails || !backlink)  && hasPropsToShow
-    // showDetails = !isIdentity  &&  !showDocuments  &&  (showDetails || !backlink)
-    // if (showDetails  &&  isOrg)
-    //   showDetails = false
 
     let bg = bankStyle ? bankStyle.myMessageBackgroundColor : appStyle.CURRENT_UNDERLINE_COLOR
 
@@ -104,7 +99,7 @@ class ShowRefList extends Component {
         docs = this.state.docs
       else {
         docs = []
-        this.getDocs(resource.verifications, rId, docs)
+        getDocs(resource.verifications, rId, docs)
       }
       if (docs  &&  docs.length) {
         let count = <View style={styles.count}>
@@ -277,40 +272,40 @@ class ShowRefList extends Component {
 
     return children || <View/>
   }
-  getDocs(varr, rId, docs) {
-    if (!varr)
-      return
-    varr.forEach((v) => {
-      if (v.method) {
-        if (utils.getId(v.document) !== rId)
-          docs.push(v.document)
-      }
-      else if (v.sources)
-        this.getDocs(v.sources, rId, docs)
-    })
-  }
-  hasPropsToShow(resource) {
-    let m = utils.getModel(resource[TYPE])
-    let viewCols = m.viewCols
-    if (!viewCols)
-      viewCols = utils.getViewCols(m)
-    viewCols = utils.ungroup(m, viewCols)
-    let vCols = []
-    let props = m.properties
-    viewCols.forEach((pr) => {
-      if (props[pr].group)
-        props[pr].group.forEach((gp) => vCols.push(gp))
-      else
-        vCols.push(pr)
-    })
+  // getDocs(varr, rId, docs) {
+  //   if (!varr)
+  //     return
+  //   varr.forEach((v) => {
+  //     if (v.method) {
+  //       if (utils.getId(v.document) !== rId)
+  //         docs.push(v.document)
+  //     }
+  //     else if (v.sources)
+  //       this.getDocs(v.sources, rId, docs)
+  //   })
+  // }
+  // hasPropsToShow(resource) {
+  //   let m = utils.getModel(resource[TYPE])
+  //   let viewCols = m.viewCols
+  //   if (!viewCols)
+  //     viewCols = utils.getViewCols(m)
+  //   viewCols = utils.ungroup(m, viewCols)
+  //   let vCols = []
+  //   let props = m.properties
+  //   viewCols.forEach((pr) => {
+  //     if (props[pr].group)
+  //       props[pr].group.forEach((gp) => vCols.push(gp))
+  //     else
+  //       vCols.push(pr)
+  //   })
 
-    for (let p in resource) {
-      if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
-        continue
-      if (vCols  &&  vCols.indexOf(p) !== -1)
-        return true
-    }
-  }
+  //   for (let p in resource) {
+  //     if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
+  //       continue
+  //     if (vCols  &&  vCols.indexOf(p) !== -1)
+  //       return true
+  //   }
+  // }
   exploreBacklink(resource, prop) {
     Actions.exploreBacklink(resource, prop)
   }
@@ -322,6 +317,40 @@ class ShowRefList extends Component {
   }
   getRefResource(resource, prop) {
     this.showRefResource(resource, prop)
+  }
+}
+function getDocs(varr, rId, docs) {
+  if (!varr)
+    return
+  varr.forEach((v) => {
+    if (v.method) {
+      if (utils.getId(v.document) !== rId)
+        docs.push(v.document)
+    }
+    else if (v.sources)
+      getDocs(v.sources, rId, docs)
+  })
+}
+function hasPropertiesToShow(resource) {
+  let m = utils.getModel(resource[TYPE])
+  let viewCols = m.viewCols
+  if (!viewCols)
+    viewCols = utils.getViewCols(m)
+  viewCols = utils.ungroup(m, viewCols)
+  let vCols = []
+  let props = m.properties
+  viewCols.forEach((pr) => {
+    if (props[pr].group)
+      props[pr].group.forEach((gp) => vCols.push(gp))
+    else
+      vCols.push(pr)
+  })
+
+  for (let p in resource) {
+    if (!props[p]  ||  p.charAt(0) === '_'  ||  props[p].type === 'array')
+      continue
+    if (vCols  &&  vCols.indexOf(p) !== -1)
+      return true
   }
 }
 

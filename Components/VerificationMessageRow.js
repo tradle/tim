@@ -19,14 +19,10 @@ import chatStyles from '../styles/chatStyles'
 import reactMixin from 'react-mixin'
 
 import {
-  Image,
-  // StyleSheet,
   Text,
   TouchableOpacity,
   Alert,
-  Modal,
   View,
-  processColor
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -59,7 +55,6 @@ class VerificationMessageRow extends Component {
   }
   render() {
     let { resource, application, bankStyle } = this.props
-    let model = utils.getModel(resource[TYPE]);
     let renderedRow = [];
 
     var isMyMessage = this.isMyMessage();
@@ -377,9 +372,6 @@ class VerificationMessageRow extends Component {
 
     var orgRow = <View/>
     if (verification  && verification.organization) {
-      var orgPhoto = verification.organization.photo
-                   ? <Image source={{uri: utils.getImageUri(verification.organization.photo)}} style={[styles.orgImage, {marginTop: -5}]} />
-                   : <View />
       var shareView = <View style={[chatStyles.shareButton, {backgroundColor: this.props.bankStyle.shareButtonBackgroundColor, opacity: this.props.resource._documentCreated ? 0.3 : 1}]}>
                         <CustomIcon name='tradle' style={{color: '#ffffff' }} size={32} />
                         <Text style={chatStyles.shareText}>{translate('Share')}</Text>

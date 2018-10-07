@@ -36,7 +36,8 @@
     "update:models": "npm i -S tradle/models tradle/custom-models tradle/models-corporate-onboarding tradle/models-nz tradle/models-onfido tradle/models-products-bot && ./reshrink.sh",
     "translate:strings": "node ./scripts/translateStrings -d ./utils -l vi,bn,fil,es,fr,nl,ru,km",
     "translate:moreStrings": "node ./scripts/translateStrings -d ./utils -l th,km,my",
-    "android-dev": "adb reverse tcp:8081 tcp:8081 && react-native run-android"
+    "android-dev": "adb reverse tcp:8081 tcp:8081 && react-native run-android",
+    "nibble": "eslint-nibble Components/ Store/ utils/ index.common.js"
   },
   "dependencies": {
     "@tradle/aws-client": "^2.0.1",
@@ -99,6 +100,7 @@
     "events": "^1.1.0",
     "extend": "~2.0.1",
     "getusermedia": "2.0.1",
+    "graphql-request": "https://registry.npmjs.org/graphql-request/-/graphql-request-1.8.2.tgz",
     "graphql-tag": "^2.4.2",
     "history": "^1.12.6",
     "https-browserify": "0.0.1",
@@ -209,6 +211,7 @@
     "css-loader": "^0.24.0",
     "eslint": "^3.19.0",
     "eslint-config-standard": "^5.3.1",
+    "eslint-nibble": "^4.2.1",
     "eslint-plugin-promise": "^1.3.2",
     "eslint-plugin-react": "6.9.0",
     "eslint-plugin-react-native": "2.2.1",

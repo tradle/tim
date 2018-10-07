@@ -7,7 +7,6 @@ import {
   Image,
   View,
   Text,
-  Platform
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -19,10 +18,9 @@ import reactMixin from 'react-mixin'
 import { makeResponsive } from 'react-native-orient'
 import {Column as Col, Row} from 'react-native-flexbox-grid'
 
-import ResourceView from './ResourceView'
-import MessageView from './MessageView'
+// import ResourceView from './ResourceView'
+// import MessageView from './MessageView'
 import RowMixin from './RowMixin'
-import PageView from './PageView'
 import ArticleView from './ArticleView'
 import utils, { translate } from '../utils/utils'
 import { circled } from '../styles/utils'
@@ -46,13 +44,13 @@ const PHOTO = 'tradle.Photo'
 const OBJECT = 'tradle.Object'
 
 class GridRow extends Component {
-  props: {
+  static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
     gridCols: PropTypes.array.isRequired,
-    multiChooser: PropTypes.boolean,
-    isSmallScreen: PropTypes.boolean,
-    chosen: PropTypes.boolean,
+    multiChooser: PropTypes.bool,
+    isSmallScreen: PropTypes.bool,
+    chosen: PropTypes.bool,
   };
   constructor(props) {
     super(props)
@@ -74,9 +72,9 @@ class GridRow extends Component {
     this.listenTo(Store, 'onRowUpdate');
   }
   componentWillReceiveProps(props) {
-    let { chosen } = props
-    if (props.multiChooser)  {
-      if (props.chosen  &&  props.chosen[utils.getId(props.resource)])
+    let { chosen, multiChooser, resource } = props
+    if (multiChooser)  {
+      if (chosen  &&  chosen[utils.getId(resource)])
         this.state.isChosen = true
       else
         this.state.isChosen = false
@@ -154,7 +152,7 @@ class GridRow extends Component {
     return false
   }
   render()  {
-    let { multiChooser, search, resource, modelName, rowId, gridCols, bankStyle, isSmallScreen } = this.props
+    let { multiChooser, resource, modelName, rowId, gridCols, bankStyle, isSmallScreen } = this.props
     let size
     if (gridCols) {
       let model = utils.getModel(modelName)
@@ -362,7 +360,6 @@ class GridRow extends Component {
   highlightCriteria(resource,val, criteria, style) {
     criteria = criteria.replace(/\*/g, '')
     let idx = val.indexOf(criteria)
-    let part
     let parts = []
 
     if (idx > 0) {

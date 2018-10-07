@@ -8,14 +8,10 @@ import constants from '@tradle/constants'
 import {
   ListView,
   StyleSheet,
-  Text,
-  TouchableHighlight,
   View,
 } from 'react-native'
-import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
-import SearchBar from './SearchBar'
 import ResourceRow from './ResourceRow'
 import ResourceView from './ResourceView'
 import NewResource from './NewResource'
@@ -73,7 +69,6 @@ class IdentitiesList extends Component {
     var modelName = me[constants.TYPE];
     var model = utils.getModel(modelName);
     var meName = utils.getDisplayName(me);
-    var self = this;
     var route = {
       title: model.title,
       component: ResourceList,
@@ -115,8 +110,6 @@ class IdentitiesList extends Component {
   // }
 
   renderRow(resource)  {
-    var model = utils.getModel(resource[constants.TYPE] || resource.id);
-    var me = utils.getMe();
     return (
       <ResourceRow
         onSelect={() => this.selectResource(resource)}

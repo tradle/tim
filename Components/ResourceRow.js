@@ -33,10 +33,7 @@ import Actions from '../Actions/Actions'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
 import appStyle from '../styles/appStyle.json'
 import StyleSheet from '../StyleSheet'
-// import Pie from 'react-native-progress/Pie';
-import ProgressBar from './ProgressBar';
 
-import ActivityIndicator from './ActivityIndicator'
 import Geometry from './Geometry'
 
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
@@ -163,7 +160,6 @@ class ResourceRow extends Component {
       resource = this.state.application
     let photo;
     let isContact = rType === PROFILE;
-    let isOrg = rType === ORGANIZATION
     let noImage;
     let isOfficialAccounts = this.props.isOfficialAccounts
     let style
@@ -242,7 +238,7 @@ class ResourceRow extends Component {
               </View>
     }
 
-    let rId = utils.getId(this.props.resource)
+    // let rId = utils.getId(this.props.resource)
     // let cancelResource = (this.props.onCancel ||  this.state)
     //                    ? <TouchableHighlight onPress={this.action.bind(this)} underlayColor='transparent' style={{position: 'absolute', right: 0, top: 20}}>
     //                        <View>
@@ -420,10 +416,8 @@ class ResourceRow extends Component {
     let vCols = [];
     let properties = model.properties;
     let first = true
-    let datePropIdx;
     let datePropsCounter = 0;
     let backlink;
-    let cnt = 10;
     for (let i=0; i<viewCols.length; i++) {
       let v = viewCols[i];
       if (properties[v].type === 'array') {
@@ -436,8 +430,6 @@ class ResourceRow extends Component {
       if (resource[v]) {
         if (v === 'dateSubmitted') { // || v === 'lastMessageTime') {
           this.dateProp = v;
-          if (!datePropsCounter)
-            datePropIdx = i;
           datePropsCounter++;
         }
       }
@@ -575,7 +567,7 @@ class ResourceRow extends Component {
 
     let props = model.properties
     // if (utils.isReadOnlyChat(resource)  &&  resource.to.organization) {
-    let color, dateCompleted, dateEvaluated, dateStarted
+    let dateCompleted, dateEvaluated, dateStarted
     if (resource.dateStarted) {
       dateStarted = <View style={{flexDirection: 'row', paddingTop:5, justifyContent: 'flex-end'}}>
                       <Text style={{fontSize: 12, color: '#aaaaaa'}}>{translate(props.dateStarted)}</Text>
@@ -656,14 +648,13 @@ class ResourceRow extends Component {
     // progressBar = <View style={styles.progress}>
     //                 <ProgressBar progress={progress} width={utils.dimensions().width - 40} color={progressColor} borderWidth={1} borderRadius={0} height={20} />
     //               </View>
-    let draft
-    if (resource.draft) {
-      draft = <View style={{position: 'absolute', top: 0, width: '100%'}}>
-                 <Text style={{fontSize: 70, color: '#f5f5f5', fontWeight: '600', alignSelf: 'center'}}>{translate('DRAFT')}</Text>
-              </View>
-    }
+    // let draft
+    // if (resource.draft) {
+    //   draft = <View style={{position: 'absolute', top: 0, width: '100%'}}>
+    //              <Text style={{fontSize: 70, color: '#f5f5f5', fontWeight: '600', alignSelf: 'center'}}>{translate('DRAFT')}</Text>
+    //           </View>
+    // }
     return  <View>
-              {draft}
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
                   <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{m ? translate(m) : translate(utils.getModel(resource.requestFor))}</Text>

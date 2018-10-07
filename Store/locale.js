@@ -1,5 +1,4 @@
 import DeviceInfo from 'react-native-device-info'
-const Language = 'tradle.Language'
 const INFO_PER_REGION = {
   "Africa": {
     "coverPhoto": {
