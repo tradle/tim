@@ -508,10 +508,7 @@ var search = {
       //     query: gql(`${query}`),
       //     variables: filterResource || context ? null : {context: context}
       //   })
-      if (useApollo)
-        return result  &&  result.data[table]
-      else
-        return result  &&  result.result
+      return result  &&  result.result
     } catch (err) {
       debugger
     }
@@ -743,7 +740,7 @@ var search = {
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
       let result = await this.execute({client, query, table})
-      return useApollo  &&  result.data[table]  ||  result.result
+      return result.result
       // let result = await client.query({
       //   fetchPolicy: 'network-only',
       //   errorPolicy: 'all',
@@ -771,10 +768,7 @@ var search = {
      }`
     try {
       let result = await this.execute({client, query, table})
-      if (useApollo)
-        return result.data[table]  &&  result.data[table].objects
-      else
-        return result.result  &&  result.result.objects
+      return result.result  &&  result.result.objects  || []
       // let result = await client.query({
       //   fetchPolicy: 'network-only',
       //   errorPolicy: 'all',
@@ -784,6 +778,7 @@ var search = {
     }
     catch(err) {
       console.log('graphQL._getItem', err)
+      return []
       debugger
     }
   },
