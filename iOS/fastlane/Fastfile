@@ -62,6 +62,16 @@ platform :ios do
     )
   end
 
+  lane :backup_release do |options|
+    scheme = options[:scheme]
+    if scheme.nil?
+      UI.user_error!("expected 'scheme', e.g. backup_release scheme:Staging")
+    end
+
+    version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
+    sh "../../scripts/backup-ios-release.sh #{scheme} #{version}"
+  end
+
   lane :inc_major do
     inc_version(part: "major")
   end
@@ -147,10 +157,12 @@ platform :ios do
 
   lane :gym_staging do
     gymit(scheme: "Staging")
+    backup_release(scheme: "Staging")
   end
 
   lane :gym_release do
     gymit(scheme: "Release")
+    backup_release(scheme: "Release")
   end
 
   lane :ensure_build_not_in_testflight do
@@ -179,12 +191,16 @@ platform :ios do
     )
   end
 
-  desc "Deploy a new version to the App Store"
-  lane :release do
-    #snapshot
+  lane :prepare_release do
     sign_prod
     match(type: 'appstore')
     gym_release
+  end
+
+  desc "Deploy a new version to the App Store"
+  lane :release do
+    #snapshot
+    prepare_release
     deliverit
     # frameit
   end

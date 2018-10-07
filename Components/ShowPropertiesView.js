@@ -1,7 +1,6 @@
 console.log('requiring ShowPropertiesView.js')
 'use strict';
 
-// import ArticleView from './ArticleView'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
 import dateformat from 'dateformat'

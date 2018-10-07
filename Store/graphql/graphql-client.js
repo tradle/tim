@@ -23,7 +23,7 @@ const COUNTRY = 'tradle.Country'
 const PUB_KEY = 'tradle.PubKey'
 const APPLICATION = 'tradle.Application'
 const APPLICATION_SUBMISSION = 'tradle.ApplicationSubmission'
-const NETWORK_FAILURE = 'Network error: request failed'
+const NETWORK_FAILURE = 'Failed to fetch'
 const INVALID_QUERY = 'Syntax Error GraphQL request'
 
 const MAX_ATTEMPTS = 3
@@ -355,7 +355,25 @@ var search = {
       if (data.result) {
         return { result:  data.result }
       }
-      let { message, graphQLErrors, networkError } = data.error
+      let message, graphQLErrors, networkError
+      if (useApollo)
+        ({ message, graphQLErrors, networkError } = data.error)
+      else {
+        if (data.error.response) {
+          graphQLErrors = data.error.response.errors
+          message = INVALID_QUERY
+        }
+        else {
+          graphQLErrors = []
+          if (data.error.message === 'Failed to fetch') {
+            error = NETWORK_FAILURE
+            break
+          }
+          else
+            message = data.error.message
+        }
+      }
+      // let { message, graphQLErrors, networkError } = data.error
       if (graphQLErrors.length) {
         let excludeProps = []
         let str = 'Cannot query field \"'
@@ -377,11 +395,9 @@ var search = {
           return
         }
       }
-      if (networkError) {
-        if (networkError.status === 400)
-          message = INVALID_QUERY
-        else
-          continue
+      if (networkError  &&  networkError.message === NETWORK_FAILURE) {
+        error = NETWORK_FAILURE
+        break
       }
       retry = false
       if (message.indexOf(INVALID_QUERY) === 0)
@@ -768,7 +784,7 @@ var search = {
      }`
     try {
       let result = await this.execute({client, query, table})
-      return result.result  &&  result.result.objects
+      return result.result  &&  result.result.objects  || []
       // let result = await client.query({
       //   fetchPolicy: 'network-only',
       //   errorPolicy: 'all',
@@ -778,6 +794,7 @@ var search = {
     }
     catch(err) {
       console.log('graphQL._getItem', err)
+      return []
       debugger
     }
   },
