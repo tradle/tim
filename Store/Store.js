@@ -3148,7 +3148,7 @@ var Store = Reflux.createStore({
         if (isApproval  ||  isDenial ||  rr[TYPE] === CONFIRMATION)
           self.trigger({action: 'updateRow', resource: application || r.application, forceUpdate: true})
         if (isApproval)
-          Actions.showModal({title: 'In process...', showIndicator: true})
+          Actions.showModal({title: translate('inProcess'), showIndicator: true})
 
         self.addMessagesToChat(utils.getId(toOrg), rr)
       }

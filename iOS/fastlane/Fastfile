@@ -33,11 +33,15 @@ platform :ios do
     ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
   end
 
+  private_lane :update_version_file do
+    sh "../../hooks/update_version.sh"
+  end
+
   private_lane :build_prereq do
     clean_build_artifacts
     cocoapods
     sh "../../scripts/fix-staging.js"
-    sh "../../hooks/update_version.sh"
+    update_version_file
     ensure_git_status_clean
   end
 
@@ -56,6 +60,16 @@ platform :ios do
       tag: "v#{version}-ios",
       message: message
     )
+  end
+
+  lane :backup_release do |options|
+    scheme = options[:scheme]
+    if scheme.nil?
+      UI.user_error!("expected 'scheme', e.g. backup_release scheme:Staging")
+    end
+
+    version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
+    sh "../../scripts/backup-ios-release.sh #{scheme} #{version}"
   end
 
   lane :inc_major do
@@ -143,10 +157,12 @@ platform :ios do
 
   lane :gym_staging do
     gymit(scheme: "Staging")
+    backup_release(scheme: "Staging")
   end
 
   lane :gym_release do
     gymit(scheme: "Release")
+    backup_release(scheme: "Release")
   end
 
   lane :ensure_build_not_in_testflight do
@@ -175,12 +191,16 @@ platform :ios do
     )
   end
 
-  desc "Deploy a new version to the App Store"
-  lane :release do
-    #snapshot
+  lane :prepare_release do
     sign_prod
     match(type: 'appstore')
     gym_release
+  end
+
+  desc "Deploy a new version to the App Store"
+  lane :release do
+    #snapshot
+    prepare_release
     deliverit
     # frameit
   end
@@ -273,6 +293,7 @@ platform :ios do
   desc "test on Staging, then run: fastlane codepush_ios_promote"
   lane :codepush do |options|
     ensure_git_status_clean
+    update_version_file
     version = options[:version]
     if version.nil?
       version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
