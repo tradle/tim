@@ -1670,6 +1670,7 @@ class GridList extends Component {
             console.log('Canceled!')
           }},
           {text: translate('Retry'), onPress: () => {
+            this.setState({isLoading: true})
             Actions.list(query)
           }},
         ]
