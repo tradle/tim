@@ -169,7 +169,7 @@ class VerificationRow extends Component {
       else if (isCheck)
         dateP = 'dateChecked'
       if (!dateP)
-        dateP = resource.date && 'date' || 'time'
+        dateP = resource.date && 'date' || '_time'
       let dateVal = resource[dateP]
       if (dateVal) {
         let dateFormatted = dateformat(dateVal, 'mmm dS, yyyy h:MM TT')
