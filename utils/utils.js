@@ -58,7 +58,7 @@ import Strings from './strings'
 import { calcLinks, omitVirtual } from '@tradle/build-resource'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
-import * as Alert from '../Components/Alert'
+import Alert from '../Components/Alert'
 
 const collect = Promise.promisify(_collect)
 
@@ -2327,53 +2327,7 @@ var utils = {
     })
     return val
   },
-  requestCameraAccess: async function (opts={}) {
-    if (utils.isAndroid()) {
-      const check = PermissionsAndroid.check || PermissionsAndroid.checkPermission
-      const request = PermissionsAndroid.request || PermissionsAndroid.requestPermission
-      // const alreadyGranted = check.call(PermissionsAndroid, PermissionsAndroid.PERMISSIONS.CAMERA)
-      // if (alreadyGranted) return true
-
-      return await request.call(
-        PermissionsAndroid,
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          'title': utils.translate('cameraAccess'),
-          'message': utils.translate('enableCameraAccess')
-        }
-      )
-    }
-
-    const { video=true, audio=false } = opts
-
-    if (!(video || audio)) throw new Error('expected "video" and/or "audio"')
-
-    let request
-    if (video && audio) {
-      request = Camera.checkDeviceAuthorizationStatus()
-    } else if (video) {
-      request = Camera.checkVideoAuthorizationStatus()
-    } else {
-      request = Camera.checkAudioAuthorizationStatus()
-    }
-
-    const granted = await request
-    if (granted) return true
-
-    Alert.alert(
-      'cameraAccess',
-      'enableCameraAccess',
-      [
-        { text: 'cancel' },
-        {
-          text: 'settings',
-          onPress: () => {
-            Linking.openURL('app-settings:')
-          }
-        }
-      ]
-    )
-  },
+  requestCameraAccess: platformUtils.requestCameraAccess,
   requestForModels() {
     let me = utils.getMe()
     var msg = {

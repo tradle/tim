@@ -28,3 +28,5 @@ export const alert = (title, message, buttons, options, type) => Alert.alert(
   options,
   type,
 )
+
+export default { alert }
