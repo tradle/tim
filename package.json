@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "./scripts/start.sh",
+    "start:resetcache": "RESET_CACHE=1 ./scripts/start.sh",
     "start:ios": "PLATFORM=ios ./scripts/start.sh",
     "start:android": "PLATFORM=android ./scripts/start.sh",
     "start:chrome": "&& node --max_old_space_size=4096 ./node_modules/.bin/react-native start",
