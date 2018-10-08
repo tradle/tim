@@ -198,18 +198,22 @@ platform :ios do
   end
 
   desc "Deploy a new version to the App Store"
-  lane :release do
+  lane :release do |options|
     #snapshot
+    ensure_build_not_in_testflight
     prepare_release
-    deliverit
+    deliverit(options)
     # frameit
   end
 
-  lane :deliverit do
-    changelog = prompt(
-      text: "What's new in this version? ",
-      multi_line_end_keyword: 'END'
-    )
+  lane :deliverit do |options|
+    changelog = options[:changelog]
+    if changelog.nil?
+      changelog = prompt(
+        text: "What's new in this version? ",
+        multi_line_end_keyword: 'END'
+      )
+    end
 
     deliver(
       force: true,
@@ -218,9 +222,9 @@ platform :ios do
         'en-US' => changelog,
         'en-UK' => changelog
       }),
-      skip_metadata: false,
+      skip_metadata: true,
       skip_screenshots: true,
-      skip_binary_upload: true
+      # skip_binary_upload: false
     )
   end
 
