@@ -2599,10 +2599,7 @@ var utils = {
     uri: 'data:image/gif;base64,R0lGODlhAQABAIAAAP7//wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='
   },
 
-  async updateEnv() {
-    console.warn('fix blinkid keys in S3, uncomment utils.updateEnv')
-    return
-
+  updateEnv: async () => {
     let env
     try {
       env = await this.fetchEnv()
@@ -2611,9 +2608,9 @@ var utils = {
       return
     }
 
-    if (env) {
-      require('../Actions/Actions').updateEnvironment(env)
-    }
+    if (!env) return
+
+    require('../Actions/Actions').updateEnvironment(env)
   },
 
   async fetchEnv() {
