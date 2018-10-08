@@ -327,5 +327,8 @@ module.exports = {
     "Before we start you'll need a valid passport, identity card or driving license": "Before we start you'll need a valid passport, identity card or driving license",
     // // Page 3
     "Go!": "Go!",
-    "We'll ask you questions in the chat and you simply fill the forms or follow the requests":  "We'll ask you questions in the chat and you simply fill the forms or follow the requests"
+    "We'll ask you questions in the chat and you simply fill the forms or follow the requests":  "We'll ask you questions in the chat and you simply fill the forms or follow the requests",
+    "debugLogSent": "Debug Log Sent",
+    "logSentToDevTeam": "The log was sent to the Tradle developer team",
+    "failedToSendLog": "Failed to send log",
 }

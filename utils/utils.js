@@ -7,7 +7,6 @@ import {
   Text,
   // findNodeHandle,
   Dimensions,
-  Alert,
   Linking,
   PixelRatio,
   Platform,
@@ -58,6 +57,8 @@ import locker from './locker'
 import Strings from './strings'
 import { calcLinks, omitVirtual } from '@tradle/build-resource'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
+// FIXME: circular dep
+import * as Alert from '../Components/Alert'
 
 const collect = Promise.promisify(_collect)
 
@@ -2239,13 +2240,13 @@ var utils = {
         throw new Error(why)
       } else {
         if (!noAlert)
-          Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
+          Alert.alert('debugLogSent', 'logSentToDevTeam')
       }
 
       return true
     } catch (err) {
       if (!noAlert)
-        Alert.alert('Failed to send log', err.message)
+        Alert.alert('failedToSendLog', err.message)
       return false
     }
   },
@@ -2360,12 +2361,12 @@ var utils = {
     if (granted) return true
 
     Alert.alert(
-      utils.translate('cameraAccess'),
-      utils.translate('enableCameraAccess'),
+      'cameraAccess',
+      'enableCameraAccess',
       [
-        { text: 'Cancel' },
+        { text: 'cancel' },
         {
-          text: 'Settings',
+          text: 'settings',
           onPress: () => {
             Linking.openURL('app-settings:')
           }
@@ -2815,6 +2816,7 @@ var utils = {
 
     return urls
   },
+  alert: (...args) => Alert.alert(...args),
 }
 
 if (__DEV__) {
