@@ -5,7 +5,7 @@ import utils from './utils'
 import Actions from '../Actions/Actions'
 
 const debug = Debug('tradle:auto-update')
-let CodePush = require('react-native-code-push')
+let CodePush = !__DEV__ && require('react-native-code-push')
 // if (CodePush) CodePush.notifyAppReady()
 
 let ON = !!CodePush
