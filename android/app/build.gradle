@@ -70,7 +70,9 @@ project.ext.react = [
   bundleAssetName: "main.jsbundle",
   extraPackagerArgs: ["--sourcemap-output", "$buildDir/intermediates/assets/release/main.jsbundle.map"],
   // bundleInDebug: false,
-  nodeExecutableAndArgs: ["/usr/local/bin/node"]
+  nodeExecutableAndArgs: ["/usr/local/bin/node"],
+  // bundleCommand: "ram-bundle",
+  // extraPackagerArgs: ["--indexed-ram-bundle"]
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
@@ -188,13 +190,23 @@ android {
             // applicationIdSuffix ".debug"
         }
         release {
-            // minifyEnabled enableProguardInReleaseBuilds
+            shrinkResources enableProguardInReleaseBuilds
+            zipAlignEnabled enableProguardInReleaseBuilds
+            minifyEnabled enableProguardInReleaseBuilds
             // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            setProguardFiles([getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'])
+
             signingConfig signingConfigs.release
             def codePushKey = getCodePushKey("Production")
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
         }
         releaseStaging {
+            shrinkResources enableProguardInReleaseBuilds
+            zipAlignEnabled enableProguardInReleaseBuilds
+            minifyEnabled enableProguardInReleaseBuilds
+            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            setProguardFiles([getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'])
+
             signingConfig signingConfigs.release
             def codePushKey = getCodePushKey("Staging")
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
