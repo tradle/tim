@@ -221,6 +221,7 @@ class TiMApp extends Component {
         return
       case 'active':
         utils.updateEnv()
+        // fire off async, don't wait
         AutomaticUpdates.hasUpdate().then(has => {
           if (has) return AutomaticUpdates.install()
 
