@@ -87,7 +87,8 @@ class CameraView extends Component {
         mirrorImage: true,
         quality: 0.5,
         fixOrientation: true,
-        forceUpOrientation: true
+        forceUpOrientation: true,
+        doNotSave: true,
       })
 
       data.base64 = BASE64_PREFIX + utils.cleanBase64(data.base64)
