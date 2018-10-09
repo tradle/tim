@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
 
 import utils, { translate } from '../utils/utils'
+import { normalizeImageCaptureData } from '../utils/image-utils'
 
 const CameraType = RNCamera.Constants.Type
 const { front, back } = CameraType
@@ -96,24 +97,22 @@ class CameraView extends Component {
     this.setState({ cameraType })
   }
   _takePicture = async () => {
+    const { quality, fixOrientation } = this.props
     let data
     try {
       data = await this.camera.takePictureAsync({
         base64: true,
         mirrorImage: true,
-        quality: this.props.quality,
-        fixOrientation: this.props.fixOrientation,
-        forceUpOrientation: this.props.fixOrientation,
+        quality,
+        fixOrientation,
+        forceUpOrientation: fixOrientation,
         doNotSave: true,
         // skipProcessing: true,
       })
 
-      data.base64 = utils.createDataUri({
-        extension: this.props.quality === 1 ? 'png' : 'jpeg',
-        base64: data.base64,
+      this.setState({
+        data: normalizeImageCaptureData({ ...data, quality })
       })
-
-      this.setState({ data })
     } catch (err) {
       console.error(err)
       return
