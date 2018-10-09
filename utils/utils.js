@@ -2753,7 +2753,21 @@ var utils = {
     }
   },
 
-  cleanBase64(str) {
+  createDataUri: ({ base64, extension }) => {
+    if (!(base64 && extension)) {
+      throw new Error('expected "base64" and "extension"')
+    }
+
+    if (extension === 'jpg') extension = 'jpeg'
+    if (extension !== 'jpeg' && extension !== 'png') {
+      throw new Error(`unsupported extension: ${extension}`)
+    }
+
+    base64 = utils.cleanBase64(base64)
+    return `data:image/${extension};base64,${base64}`
+  },
+
+  cleanBase64: str => {
     // some libraries generate base64 with line breaks, spaces, etc.
     return str.replace(/[\s]/g, '')
   },

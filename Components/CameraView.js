@@ -1,6 +1,7 @@
 console.log('requiring CameraView.js')
 
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import {
   StyleSheet,
   Text,
@@ -14,14 +15,28 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
 
 import utils, { translate } from '../utils/utils'
-const BASE64_PREFIX = 'data:image/jpeg;base64,'
-const { back, front } = RNCamera.Constants.Type
+
+const CameraType = RNCamera.Constants.Type
+const { front, back } = CameraType
 
 class CameraView extends Component {
+  static defaultProps = {
+    quality: 0.5,
+    cameraType: 'back',
+    fixOrientation: true,
+  };
+
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    cameraType: PropTypes.oneOf(['front', 'back']),
+    quality: PropTypes.number,
+    fixOrientation: PropTypes.bool,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
-      cameraType: props.cameraType === 'front' && front || back
+      cameraType: CameraType[props.cameraType]
     }
   }
           // captureTarget={RNCamera.Constants.CaptureTarget.cameraRoll}
@@ -32,8 +47,9 @@ class CameraView extends Component {
     if (data) {
       // debugger
       let { width, height } = utils.dimensions(CameraView)
+      const uri = data.uri || data.base64
       return <View style={[styles.container, {backgroundColor: '#000', justifyContent: 'center'}]}>
-                <Image source={{uri: data.base64}} style={{width: width, height: height - 80}} />
+                <Image source={{uri}} style={{width, height: height - 80}} />
                 <View style={styles.footer1}>
                    <TouchableOpacity onPress={() => this.setState({data: null})}>
                      <Text style={styles.cancel}>{translate('retake')}</Text>
@@ -79,19 +95,24 @@ class CameraView extends Component {
     const cameraType = this.state.cameraType === back ? front : back
     this.setState({ cameraType })
   }
-  async _takePicture() {
+  _takePicture = async () => {
     let data
     try {
       data = await this.camera.takePictureAsync({
         base64: true,
         mirrorImage: true,
-        quality: 0.5,
-        fixOrientation: true,
-        forceUpOrientation: true,
+        quality: this.props.quality,
+        fixOrientation: this.props.fixOrientation,
+        forceUpOrientation: this.props.fixOrientation,
         doNotSave: true,
+        // skipProcessing: true,
       })
 
-      data.base64 = BASE64_PREFIX + utils.cleanBase64(data.base64)
+      data.base64 = utils.createDataUri({
+        extension: this.props.quality === 1 ? 'png' : 'jpeg',
+        base64: data.base64,
+      })
+
       this.setState({ data })
     } catch (err) {
       console.error(err)
@@ -104,13 +125,9 @@ class CameraView extends Component {
     //   path: data.uri
     // })
   }
-  onTakePic() {
-    let data = this.state.data
-    this.props.onTakePic({
-      ...data,
-      // backwards compat
-      path: data.uri
-    })
+  onTakePic = async () => {
+    const { data } = this.state
+    this.props.onTakePic(this.state.data)
   }
 }
 CameraView = makeResponsive(CameraView)
