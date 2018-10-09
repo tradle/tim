@@ -531,7 +531,7 @@ var Store = Reflux.createStore({
     try {
       me = await this.getMe()
     } catch(err)  {
-      debug('Store.init ' + err.stack)
+      debug('Store.init', err.message)
     }
 
     this._noSplash = []
@@ -5954,7 +5954,7 @@ if (!res[SIG]  &&  res._message)
       try {
         me = await this.getMe()
       } catch(err) {
-        debug('Store.autoRegister', err.stack)
+        debug('Store.autoRegister', err.message)
       }
     }
     if (me)
