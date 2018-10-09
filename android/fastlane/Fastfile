@@ -115,6 +115,22 @@ platform :android do
     end
   end
 
+  lane :backup_release do |options|
+    usage = "e.g. backup_release stage:release apk_path:/path/to/app-release.apk"
+    stage = options[:stage]
+    if stage.nil?
+      UI.user_error!("expected 'stage', #{usage}")
+    end
+
+    apk_path = options[:apk_path]
+    if apk_path.nil?
+      UI.user_error!("expected 'apk_path', #{usage}")
+    end
+
+    version = sh "../../scripts/get-android-version.sh full"
+    sh "../../scripts/backup-release.sh android #{track} #{version} #{apk_path}"
+  end
+
   private_lane :releaseit do |options|
     track = options[:track]
     if track.nil?
@@ -137,13 +153,18 @@ platform :android do
 
     gradle(task: task)
 
-    unless options[:dry_run]
-      stage = "release"
-      if track == "internal"
-        stage = "releaseStaging"
-      end
+    stage = "release"
+    if track == "internal"
+      stage = "releaseStaging"
+    end
 
-      apk = "./app/build/outputs/apk/#{stage}/app-#{stage}.apk"
+    apk = "./app/build/outputs/apk/#{stage}/app-#{stage}.apk"
+    backup_release(
+      apk_path: apk,
+      stage: stage
+    )
+
+    unless options[:dry_run]
       UI.message("uploading apk #{apk}".green)
       upload_to_play_store(
         track: track,

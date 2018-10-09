@@ -31,6 +31,7 @@ platform :ios do
     ENV['WORKSPACE'] = "./Tradle.xcworkspace"
     ENV['CODE_PUSH_APP_NAME_IOS'] = 'tim-ios'
     ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
+    ENV['APP_NAME'] = 'Tradle'
   end
 
   private_lane :update_version_file do
@@ -69,7 +70,7 @@ platform :ios do
     end
 
     version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
-    sh "../../scripts/backup-ios-release.sh #{scheme} #{version}"
+    sh "../../scripts/backup-release.sh ios #{scheme} #{version}"
   end
 
   lane :inc_major do
