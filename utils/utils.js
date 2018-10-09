@@ -59,6 +59,7 @@ import { calcLinks, omitVirtual } from '@tradle/build-resource'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
 import Alert from '../Components/Alert'
+import * as promiseUtils from '@tradle/promise-utils'
 
 const collect = Promise.promisify(_collect)
 
@@ -156,6 +157,8 @@ const getVersionInAppStore = Platform.select({
 
 
 var utils = {
+  ...promiseUtils,
+  promisify: Promise.promisify,
   isEmpty(obj) {
     for(var prop in obj) {
       if(obj.hasOwnProperty(prop))
@@ -1683,11 +1686,7 @@ var utils = {
     return first + '/' + rest
   },
 
-  promiseDelay(millis) {
-    return Q.Promise((resolve) => {
-      setTimeout(resolve, millis)
-    })
-  },
+  promiseDelay: promiseUtils.wait,
 
   // TODO: add maxTries
   tryWithExponentialBackoff(fn, opts) {
@@ -1905,13 +1904,6 @@ var utils = {
   isAndroid: ENV.isAndroid,
   isIOS: ENV.isIOS,
   isWeb: ENV.isWeb,
-  promiseThunky: function (fn) {
-    let promise
-    return function () {
-      return promise ? promise : promise = fn.apply(this, arguments)
-    }
-  },
-
   getTopNonAuthRoute: function (navigator) {
     const routes = navigator.getCurrentRoutes()
     let top
@@ -2680,10 +2672,6 @@ var utils = {
     const results = await utils.series(utils.batchify(data, batchSize), worker)
     // flatten
     return results.reduce((all, some) => all.concat(some), [])
-  },
-
-  isPromise(obj) {
-    return obj && typeof obj.then === 'function'
   },
 
   isAWSProvider: function (provider)  {

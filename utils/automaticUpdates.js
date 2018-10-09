@@ -1,10 +1,11 @@
 import { AsyncStorage, Alert } from 'react-native'
 import Debug from 'debug'
+import { runWithTimeout } from '@tradle/promise-utils'
 import utils from './utils'
 import Actions from '../Actions/Actions'
 
 const debug = Debug('tradle:auto-update')
-let CodePush = !__DEV__ && require('react-native-code-push')
+let CodePush = require('react-native-code-push')
 // if (CodePush) CodePush.notifyAppReady()
 
 let ON = !!CodePush
@@ -20,15 +21,7 @@ const noop = () => {}
 // in case the user restarted the app manually
 AsyncStorage.removeItem(CODE_UPDATE_KEY)
 
-module.exports = {
-  sync,
-  on,
-  off,
-  hasUpdate,
-  install
-}
-
-async function hasUpdate () {
+const hasUpdate = async () => {
   if (downloadedUpdate) return true
 
   try {
@@ -39,7 +32,7 @@ async function hasUpdate () {
   }
 }
 
-async function install (opts={}) {
+const install = async (opts={}) => {
   const { warn=true, delay=3000 } = opts
   const item = await AsyncStorage.getItem(CODE_UPDATE_KEY)
   if (!item) return false
@@ -67,25 +60,16 @@ async function install (opts={}) {
   return true
 }
 
-function checkPeriodically (millis=DEFAULT_INTERVAL) {
-  if (CHECKING) return CHECKING
+const sync = async (opts={}) => {
+  if (!(CodePush && ON)) return false
+  if (downloadedUpdate) return true
 
-  return CHECKING = sync()
-    .then(() => utils.promiseDelay(millis))
-    .then(() => {
-      if (!downloadedUpdate) {
-        // loop
-        return ON && checkPeriodically(millis)
-      }
-    })
-}
+  const { timeout } = opts
+  if (currentSync) {
+    return runWithTimeout(currentSync, timeout)
+  }
 
-function sync (opts={}) {
-  if (!(CodePush && ON)) return Promise.resolve(false)
-  if (downloadedUpdate) return Promise.resolve(true)
-  if (currentSync) return currentSync
-
-  return currentSync = CodePush.sync(
+  currentSync = CodePush.sync(
     {
       // use our own dialog below when the download completes
       updateDialog: false,
@@ -111,15 +95,41 @@ function sync (opts={}) {
     currentSync = null
     return result
   })
+
+  return sync(opts)
 }
 
-function on (period) {
+const on = (period) => {
   if (CodePush) {
     ON = true
     checkPeriodically(period)
   }
 }
 
-function off () {
+const off = () => {
   if (CodePush) ON = false
+}
+
+const checkPeriodically = (millis=DEFAULT_INTERVAL) => {
+  if (CHECKING) return CHECKING
+
+  return CHECKING = sync()
+    .catch(err => {
+      debug('sync failed', err.message)
+    })
+    .then(() => utils.promiseDelay(millis))
+    .then(() => {
+      if (!downloadedUpdate) {
+        // loop
+        return ON && checkPeriodically(millis)
+      }
+    })
+}
+
+module.exports = {
+  hasUpdate,
+  install,
+  sync,
+  on,
+  off,
 }

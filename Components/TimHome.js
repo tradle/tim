@@ -268,6 +268,7 @@ class TimHome extends Component {
       //   INSTALLING_UPDATE: 8
       try {
         await AutomaticUpdates.sync({
+          timeout: 10000,
           onSyncStatusChanged: status => {
             if (status === SyncStatus.DOWNLOADING_PACKAGE) {
               this.setState({ downloadingUpdate: true, downloadUpdateProgress: 0 })
