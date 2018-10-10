@@ -4,7 +4,7 @@ import { Linking } from 'react-native'
 import Camera from 'react-native-camera'
 import Alert from '../Components/Alert'
 
-const requestCameraAccess = async opts => {
+const requestCameraAccess = async (opts={}) => {
   const { video=true, audio=false } = opts
 
   if (!(video || audio)) throw new Error('expected "video" and/or "audio"')
