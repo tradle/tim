@@ -67,7 +67,7 @@
     "@tradle/models-onfido": "github:tradle/models-onfido",
     "@tradle/models-products-bot": "github:tradle/models-products-bot",
     "@tradle/multiqueue": "^2.3.1",
-    "@tradle/promise-utils": "^1.0.0",
+    "@tradle/promise-utils": "^1.1.0",
     "@tradle/protocol": "^4.2.0",
     "@tradle/qr-schema": "^1.11.0",
     "@tradle/restore": "github:tradle/restore",

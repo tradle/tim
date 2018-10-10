@@ -26,6 +26,7 @@ import EventEmitter from 'events'
 import Promise, { coroutine as co } from 'bluebird'
 import TimerMixin from 'react-timer-mixin'
 import plugins from '@tradle/biz-plugins'
+import { allSettled } from '@tradle/promise-utils'
 import appPlugins from '../plugins'
 
 // import yukiConfig from '../yuki.json'
@@ -287,6 +288,12 @@ var driverInfo = (function () {
   const byUrl = {}
   const byIdentifier = {}
   const byPath = {}
+  const stopAll = async () => {
+    const promises = []
+    clientToIdentifiers.forEach((ids, client) => promises.push(client.stop()))
+    return allSettled(promises)
+  }
+
   const wsClients = {
     add({ client, url, identifier, path }) {
       const identifiers = clientToIdentifiers.get(client) || []
@@ -321,7 +328,8 @@ var driverInfo = (function () {
       return `${base}/${path}`
     },
     byUrl,
-    byIdentifier
+    byIdentifier,
+    stopAll,
   }
 
   const restoreMonitors = {}
@@ -5940,7 +5948,10 @@ if (!res[SIG]  &&  res._message)
   async onReloadDB(opts) {
     const destroyTim = meDriver ? meDriver.destroy() : Promise.resolve()
     await Promise.race([
-      destroyTim,
+      allSettled([
+        destroyTim,
+        driverInfo.wsClients.stopAll()
+      ]),
       Promise.delay(5000)
     ])
 
