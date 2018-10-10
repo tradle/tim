@@ -140,7 +140,7 @@ platform :ios do
     end
 
     sign_prod
-    match(type: 'appstore')
+    match(type: 'development')
     gym_staging
     notification(
       title: "Beta Built!",
