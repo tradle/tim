@@ -233,9 +233,9 @@ platform :android do
     deployment = options[:deployment] || 'Staging'
 
     # offset from project root
-    commit = last_git_commit
+    commit = (sh "../../scripts/get-short-commit-hash.sh").strip
     bundle_name = 'main.jsbundle'
-    output_dir = "release/android/#{target_binary_version}/#{commit[:abbreviated_commit_hash]}"
+    output_dir = "release/android/#{target_binary_version}/#{commit}"
     sh "mkdir -p #{output_dir}"
 
     code_push_release_react(

@@ -125,7 +125,19 @@ platform :ios do
     beta_testflight(options)
     unless options[:dry_run]
       upload_to_fabric(options)
+      if options[:codepush]
+        codepush_prebuilt
+      end
     end
+  end
+
+  lane :codepush_prebuilt do |options|
+    target_binary_version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleShortVersionString")
+    full_version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
+    commit = (sh "../../scripts/get-short-commit-hash.sh").strip
+    bundle_name = 'main.jsbundle'
+    release_dir = "../../release/ios/#{full_version}/#{commit}"
+    sh "code-push release #{ENV['CODE_PUSH_APP_NAME_IOS']} #{release_dir} #{target_binary_version} -d Staging"
   end
 
   desc "Submit a new Beta Build to Apple TestFlight"
@@ -315,9 +327,9 @@ platform :ios do
     deployment = options[:deployment] || 'Staging'
 
     # offset from project root
-    commit = last_git_commit
+    commit = (sh "../../scripts/get-short-commit-hash.sh").strip
     bundle_name = 'main.jsbundle'
-    output_dir = "release/ios/#{target_binary_version}/#{commit[:abbreviated_commit_hash]}"
+    output_dir = "release/ios/#{target_binary_version}/#{commit}"
     sh "mkdir -p #{output_dir}"
 
     code_push_release_react(
