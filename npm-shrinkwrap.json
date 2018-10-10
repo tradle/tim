@@ -6258,8 +6258,8 @@
     },
     "react-native-camera": {
       "version": "1.3.0",
-      "from": "react-native-camera@latest",
-      "resolved": "https://registry.npmjs.org/react-native-camera/-/react-native-camera-1.3.0.tgz",
+      "from": "react-native-community/react-native-camera#fd87a34",
+      "resolved": "git://github.com/react-native-community/react-native-camera.git#fd87a3475aedf64243fc0cc5f225dcbf2484bbab",
       "dependencies": {
         "prop-types": {
           "version": "15.6.2",

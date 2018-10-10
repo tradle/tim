@@ -148,7 +148,7 @@
     "react-native-awesome-card-io": "^0.7.0",
     "react-native-branch": "^2.2.4",
     "react-native-button": "^2.3.0",
-    "react-native-camera": "^1.3.0",
+    "react-native-camera": "github:react-native-community/react-native-camera#fd87a34",
     "react-native-carousel": "^0.11.0",
     "react-native-code-push": "^5.4.0",
     "react-native-collapsible": "^0.10.0",
