@@ -201,9 +201,14 @@ platform :ios do
   desc "Deploy a new version to the App Store"
   lane :release do |options|
     #snapshot
-    ensure_build_not_in_testflight
+    unless options[:dry_run]
+      ensure_build_not_in_testflight
+    end
+
     prepare_release
-    deliverit(options)
+    unless options[:dry_run]
+      deliverit(options)
+    end
     # frameit
   end
 
