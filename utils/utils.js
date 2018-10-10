@@ -2562,7 +2562,7 @@ var utils = {
   fetchEnv: async () => {
     if (!ENV.tradleAPIKey) return
 
-    const url = this.joinURL(ENV.tradleAPIEndpoint, 'fs', DeviceInfo.getBundleId(), 'environment.json')
+    const url = utils.joinURL(ENV.tradleAPIEndpoint, 'fs', DeviceInfo.getBundleId(), 'environment.json')
     const res = await fetch(url, {
       headers: {
         'x-api-key': ENV.tradleAPIKey
