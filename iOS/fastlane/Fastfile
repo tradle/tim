@@ -301,8 +301,13 @@ platform :ios do
     update_version_file
     version = options[:version]
     if version.nil?
-      version = get_version_number(xcodeproj: ENV['PROJECT'], target: 'Tradle')
+      version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleShortVersionString")
     end
+
+    full_version = get_info_plist_value(path: "./Tradle/Info.plist", key: "CFBundleVersion")
+    commit = (sh "../../scripts/get-short-commit-hash.sh").strip
+    output_dir = "../../release/ios/#{full_version}/#{commit}/"
+    sh "mkdir -p #{output_dir}"
 
     # current_major = [current_version.split('.').first, 'x', 'x'].join('.')
     # current_minor = current_version.split('.').slice(0, 2).push('x').join('.')
@@ -318,7 +323,8 @@ platform :ios do
       target_binary_version: version,
       dry_run: options[:dry_run],
       execution_dir_path: '../',
-      mandatory: mandatory
+      mandatory: mandatory,
+      output_dir: output_dir
     )
   end
 
