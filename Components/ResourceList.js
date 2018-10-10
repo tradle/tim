@@ -1240,7 +1240,7 @@ class ResourceList extends Component {
       return
     }
 
-    Alert.alert(translate('invalidQrCode'), translate('supportedQrCodes'))
+    Alert.alert(translate('invalidQR'), translate('supportedQrCodes'))
   }
 
   hideResource(resource) {

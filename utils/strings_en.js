@@ -261,7 +261,6 @@ module.exports = {
     "exploreData": "Explore Data",
     "bookmarks": "Bookmarks",
     "createManualMatchCheck": "Create manual match check",
-    "invalidQrCode": "Invalid QR code",
     "supportedQrCodes": "Supported QR codes: \n1) add chat channel \n2) import data",
     "inProcess": "Processing...",
     "inProgress": "In progress...",
