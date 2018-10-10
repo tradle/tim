@@ -126,6 +126,8 @@ const checkPeriodically = (millis=DEFAULT_INTERVAL) => {
     })
 }
 
+sync().catch(err => debug('sync failed', err.message))
+
 module.exports = {
   hasUpdate,
   install,
