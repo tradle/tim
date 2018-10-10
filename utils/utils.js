@@ -2548,7 +2548,7 @@ var utils = {
   updateEnv: async () => {
     let env
     try {
-      env = await this.fetchEnv()
+      env = await utils.fetchEnv()
     } catch (err) {
       debug('failed to update environment from tradle server', err.message)
       return
@@ -2559,7 +2559,7 @@ var utils = {
     require('../Actions/Actions').updateEnvironment(env)
   },
 
-  async fetchEnv() {
+  fetchEnv: async () => {
     if (!ENV.tradleAPIKey) return
 
     const url = this.joinURL(ENV.tradleAPIEndpoint, 'fs', DeviceInfo.getBundleId(), 'environment.json')
