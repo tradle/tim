@@ -231,8 +231,13 @@ platform :android do
     target_binary_version = (options[:target_binary_version] || current_version).strip
     mandatory = options[:mandatory] || false
     deployment = options[:deployment] || 'Staging'
+
+    # offset from project root
     commit = last_git_commit
     bundle_name = 'main.jsbundle'
+    output_dir = "release/android/#{target_binary_version}/#{commit[:abbreviated_commit_hash]}"
+    sh "mkdir -p #{output_dir}"
+
     code_push_release_react(
       app_name: ENV['CODE_PUSH_APP_NAME_ANDROID'],
       platform: 'android',
@@ -243,11 +248,12 @@ platform :android do
       execution_dir_path: '../',
       bundle_name: bundle_name,
       mandatory: mandatory,
-      output_dir: "./release/android/#{target_binary_version}/#{commit[:abbreviated_commit_hash]}",
-      sourcemap_output: "./release/android/#{target_binary_version}/#{commit[:abbreviated_commit_hash]}/#{bundle_name}.map"
+      output_dir: output_dir,
+      sourcemap_output: "#{output_dir}/#{bundle_name}.map"
     )
 
     unless options[:dry_run]
+      sh "../../scripts/backup-bundle.sh android #{output_dir}"
       notification(
         title: "Android Code Pushed!",
         message: "deployment: #{deployment}, version: #{target_binary_version}, mandatory: #{mandatory}"
