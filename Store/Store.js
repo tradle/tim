@@ -10687,6 +10687,7 @@ if (!res[SIG]  &&  res._message)
         r[NOT_CHAT_ITEM] = true
         if (context)
           r._context = context
+        r._latest = true
         await this.onAddChatItem({resource: r, noTrigger: true})
       }
 
