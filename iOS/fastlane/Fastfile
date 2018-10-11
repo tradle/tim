@@ -162,11 +162,6 @@ platform :ios do
     sign_dev
     sync_code_signing(type: 'development')
     gym_staging
-    notification(
-      title: "Beta Built!",
-      message: "Uploading to TestFlight and waiting for it to get processed. This may take ~10 minutes"
-    )
-
     unless options[:dry_run]
       upload_to_testflight
       notification(
@@ -394,6 +389,20 @@ platform :ios do
 
   lane :codepush_promote_to_release do
     code_push_promote(app_name: ENV['CODE_PUSH_APP_NAME_IOS'])
+  end
+
+  lane :install do |options|
+    ipa = options[:ipa]
+    if ipa.nil?
+      version = options[:version]
+      if version.nil?
+        UI.user_error!("expected 'ipa' or 'version'")
+      end
+    else
+      install_on_device(
+        ipa: ipa,
+      )
+    end
   end
 
   # You can define as many lanes as you want
