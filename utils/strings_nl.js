@@ -305,8 +305,14 @@ module.exports = {
   "Skip": "Overspringen",
   "Done": "Gedaan",
   "Sanctions Checks": "Sanctiescheques",
-  "tryProviderQrCode": "Alleen de QR-code van Provider kunt u hier vinden. Probeer het opnieuw",
   "inProcess": "In proces...",
   "invalidQuery": "Oeps, we hebben een fout opgetreden bij het uitvoeren van uw zoekopdracht. Onze ontwikkelaars zullen proberen het zo snel mogelijk te herstellen.",
-  "networkFailure": "Ik ondervind een aantal netwerkproblemen. Kunt u dit controleren en vervolgens op Opnieuw proberen / Annuleren tikken"
+  "networkFailure": "Ik ondervind een aantal netwerkproblemen. Kunt u dit controleren en vervolgens op Opnieuw proberen / Annuleren tikken",
+  "validatingDataClaim": "Gegevens importeren",
+  "debugLogSent": "Foutopsporingslogboek verzonden",
+  "supportedQrCodes": "Ondersteunde QR-codes:\n1) chatkanaal toevoegen\n2) gegevens importeren",
+  "invalidQR": "Ongeldige QR-code",
+  "noResourcesForCriteria": "Voor dit criterium zijn geen middelen gevonden",
+  "logSentToDevTeam": "Het logboek is verzonden naar het ontwikkelaarsteam van Tradle",
+  "failedToSendLog": "Verzenden mislukt"
 }

@@ -305,8 +305,14 @@ module.exports = {
   "Next": "Prochain",
   "Done": "Terminé",
   "Sanctions Checks": "Contrôles de sanctions",
-  "tryProviderQrCode": "Seul le code QR du fournisseur que vous pouvez scn ici. Veuillez réessayer",
   "inProcess": "En cours...",
   "networkFailure": "Je rencontre des problèmes de réseau. Pouvez-vous vérifier puis appuyer sur Réessayer / Annuler",
-  "invalidQuery": "Oups, nous rencontrons une erreur lors de l'exécution de votre recherche. Nos développeurs vont essayer de résoudre le problème dès que possible."
+  "invalidQuery": "Oups, nous rencontrons une erreur lors de l'exécution de votre recherche. Nos développeurs vont essayer de résoudre le problème dès que possible.",
+  "noResourcesForCriteria": "Aucune ressource trouvée pour ce critère",
+  "invalidQR": "Code QR invalide",
+  "supportedQrCodes": "Codes QR pris en charge:\n1) ajouter un canal de discussion\n2) importer des données",
+  "failedToSendLog": "Échec d'envoi du journal",
+  "logSentToDevTeam": "Le journal a été envoyé à l'équipe de développeurs Tradle",
+  "validatingDataClaim": "Importer des données",
+  "debugLogSent": "Journal de débogage envoyé"
 }
