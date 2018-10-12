@@ -1886,7 +1886,7 @@ var Store = Reflux.createStore({
         missing = {}
         debug('aws-client detected missing messages, reconnecting')
         client.reset()
-      })
+      }, 1000)
 
       let missing = {}
       return ({ tip, seq }) => {
