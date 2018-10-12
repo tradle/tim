@@ -1165,13 +1165,14 @@ var NewResourceMixin = {
           this.floatingProps[propName] = resource[propName]
         }
         else if (prop.items.ref) {
-          if (resource[propName]) {
-            let some = resource[propName].some(r => r[ROOT_HASH] === value[ROOT_HASH])
-            if (!some)
-              resource[propName].push(value)
-          }
-          else
-            resource[propName] = [value]
+          resource[propName] = null
+          // if (resource[propName]) {
+          //   let some = resource[propName].some(r => r[ROOT_HASH] === value[ROOT_HASH])
+          //   if (!some)
+          //     resource[propName].push(value)
+          // }
+          // else
+          //   resource[propName] = [value]
         }
         else {
           delete resource[propName]
