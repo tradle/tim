@@ -99,7 +99,7 @@ class PhotoList extends Component {
     // return  {width: d5, height: d5};
     switch (len) {
     case 1:
-      return {width: d1, height: d1 / 1.5};
+      // return {width: d1, height: d1 / 1.5};
     case 2:
     case 3:
       return {width: d3, height: d3};

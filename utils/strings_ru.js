@@ -314,5 +314,6 @@ module.exports = {
   "logSentToDevTeam": "Журнал был отправлен команде разработчиков Tradle",
   "noResourcesForCriteria": "Ресурсов для этого критерия не найдено",
   "debugLogSent": "Отладочный журнал отправлен",
-  "failedToSendLog": "Не удалось отправить журнал"
+  "failedToSendLog": "Не удалось отправить журнал",
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Ознакомьтесь с приведенными ниже данными и сделайте снимок {1} стороны документа"
 }

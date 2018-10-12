@@ -314,5 +314,6 @@ module.exports = {
   "invalidQR": "Código QR no válido",
   "supportedQrCodes": "Códigos QR soportados:\n1) agregar canal de chat\n2) importar datos",
   "logSentToDevTeam": "El registro fue enviado al equipo de desarrolladores de Tradle.",
-  "noResourcesForCriteria": "No se encontraron recursos para este criterio."
+  "noResourcesForCriteria": "No se encontraron recursos para este criterio.",
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Revise los datos a continuación y tome una instantánea del lado {1} del documento"
 }

@@ -197,12 +197,16 @@ class FormMessageRow extends Component {
     let prefillProp = utils.getPrefillProperty(model)
     let mTitle = prefillProp ? 'Draft' : translate(model)
     let headerTitle = mTitle + (prefillProp  &&  ' - ' + translate(utils.getModel(resource[prefillProp.name][TYPE])) || ' ')
+    let { bankStyle } = this.props
+    let color = isMyMessage && bankStyle.myMessageLinkColor
+    if (!color)
+      color = '#ffffff'
     return (
       <View style={styles.viewStyle} key={this.getNextKey()}>
         {ownerPhoto}
         <View style={[{flex:1}, chatStyles.verificationBody]}>
           <View style={[headerStyle, noContent  &&  styles.noContentStyle]}>
-           <Text style={[chatStyles.verificationHeaderText, {width: '97%'}]}>{headerTitle}
+           <Text style={[chatStyles.verificationHeaderText, {width: '97%', color }]}>{headerTitle}
               {sealedStatus}
             </Text>
             {arrowIcon}
@@ -365,7 +369,7 @@ var createStyles = utils.styleFactory(FormMessageRow, function (params) {
       justifyContent: 'space-between',
       paddingLeft: 5,
       paddingRight: 7,
-      backgroundColor: signedBg
+      backgroundColor: signedBg,
     },
     notSignedHeaderStyle: {
       ...moreHeader,

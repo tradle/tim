@@ -314,5 +314,6 @@ module.exports = {
   "failedToSendLog": "লগ পাঠাতে ব্যর্থ",
   "logSentToDevTeam": "লগ ট্রেন্ডেল বিকাশকারী দল পাঠানো হয়েছিল",
   "noResourcesForCriteria": "কোন সম্পদ এই মানদণ্ডের জন্য পাওয়া যায় নি",
-  "supportedQrCodes": "সমর্থিত QR কোডগুলি:\n1) চ্যাট চ্যানেল যোগ করুন\n2) আমদানি তথ্য"
+  "supportedQrCodes": "সমর্থিত QR কোডগুলি:\n1) চ্যাট চ্যানেল যোগ করুন\n2) আমদানি তথ্য",
+  "reviewScannedPropertiesAndSecondSideSnapshot": "নীচের ডেটা পর্যালোচনা করুন এবং দস্তাবেজের {1} পাশের স্ন্যাপশট নিন"
 }

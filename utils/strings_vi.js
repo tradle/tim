@@ -314,5 +314,6 @@ module.exports = {
   "logSentToDevTeam": "Nhật ký đã được gửi đến nhóm nhà phát triển Tradle",
   "invalidQR": "Mã QR không hợp lệ",
   "failedToSendLog": "Không thể gửi nhật ký",
-  "debugLogSent": "Nhật ký gỡ lỗi đã được gửi"
+  "debugLogSent": "Nhật ký gỡ lỗi đã được gửi",
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Vui lòng xem lại dữ liệu bên dưới và chụp nhanh mặt {1} của tài liệu"
 }

@@ -314,5 +314,6 @@ module.exports = {
   "failedToSendLog": "Échec d'envoi du journal",
   "logSentToDevTeam": "Le journal a été envoyé à l'équipe de développeurs Tradle",
   "validatingDataClaim": "Importer des données",
-  "debugLogSent": "Journal de débogage envoyé"
+  "debugLogSent": "Journal de débogage envoyé",
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Veuillez examiner les données ci-dessous et prendre un instantané du côté {1} du document."
 }

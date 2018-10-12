@@ -314,5 +314,6 @@ module.exports = {
   "debugLogSent": "កំណត់ហេតុកំហុសឆ្គងបានផ្ញើ",
   "noResourcesForCriteria": "មិនមានធនធានត្រូវបានរកឃើញសម្រាប់លក្ខណៈវិនិច្ឆ័យនេះ",
   "logSentToDevTeam": "កំណត់ហេតុត្រូវបានផ្ញើទៅក្រុមអ្នកអភិវឌ្ឍន៍ Tradle",
-  "supportedQrCodes": "កូដ QR ដែលបានគាំទ្រ:\n1) បន្ថែមឆានែលជជែក\n2) ទិន្នន័យនាំចូល"
+  "supportedQrCodes": "កូដ QR ដែលបានគាំទ្រ:\n1) បន្ថែមឆានែលជជែក\n2) ទិន្នន័យនាំចូល",
+  "reviewScannedPropertiesAndSecondSideSnapshot": "សូមពិនិត្យមើលទិន្នន័យខាងក្រោមនិងថតរូបនៃផ្នែក {1} របស់ឯកសារ"
 }
