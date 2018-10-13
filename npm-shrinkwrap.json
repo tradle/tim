@@ -2880,12 +2880,6 @@
           "from": "strip-bom@>=3.0.0 <4.0.0",
           "resolved": "https://registry.npmjs.org/strip-bom/-/strip-bom-3.0.0.tgz",
           "dev": true
-        },
-        "strip-json-comments": {
-          "version": "2.0.1",
-          "from": "strip-json-comments@>=2.0.1 <2.1.0",
-          "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-2.0.1.tgz",
-          "dev": true
         }
       }
     },
@@ -6057,12 +6051,6 @@
           "from": "deep-extend@>=0.6.0 <0.7.0",
           "resolved": "https://registry.npmjs.org/deep-extend/-/deep-extend-0.6.0.tgz",
           "optional": true
-        },
-        "strip-json-comments": {
-          "version": "2.0.1",
-          "from": "strip-json-comments@>=2.0.1 <2.1.0",
-          "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-2.0.1.tgz",
-          "optional": true
         }
       }
     },
@@ -7652,6 +7640,11 @@
       "version": "1.0.1",
       "from": "strip-indent@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/strip-indent/-/strip-indent-1.0.1.tgz"
+    },
+    "strip-json-comments": {
+      "version": "2.0.1",
+      "from": "strip-json-comments@>=2.0.1 <2.1.0",
+      "resolved": "https://registry.npmjs.org/strip-json-comments/-/strip-json-comments-2.0.1.tgz"
     },
     "strong-data-uri": {
       "version": "1.0.6",
