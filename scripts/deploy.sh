@@ -83,6 +83,7 @@ set_cloudfront_origin_path() {
   local OLD_CONF
   local NEW_CONF
   local DIST_NAME
+  local INVALIDATION_ID
 
   DIST_ID="$1"
   ORIGIN_PATH="$2"
@@ -109,7 +110,9 @@ set_cloudfront_origin_path() {
 
   confirm_or_abort "about to modify origin path on $DIST_NAME cloudfront distribution to $ORIGIN_PATH"
   aws cloudfront update-distribution --id "$DIST_ID" --distribution-config "$NEW_CONF" --if-match "$ETAG"
-  aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths /index.html
+  INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths /index.html | jq -r .Invalidation.Id)
+  echo "waiting for invalidation to complete (5-15 minutes)"
+  aws cloudfront wait invalidation-completed --distribution-id "$DIST_ID" --id "$INVALIDATION_ID"
 }
 
 set_live_folder_dev() {
