@@ -110,7 +110,9 @@ const NOT_CHAT_ITEM = '_notChatItem'
 
 import utils from '../utils/utils'
 import graphQL from './graphql/graphql-client'
-import storeUtils from './utils/storeUtils'
+// import storeUtils from './utils/storeUtils'
+import ModelsStore from './ModelsStore'
+
 import { models as baseModels, data as sampleData } from '@tradle/models'
 
 const ObjectModel = baseModels['tradle.Object']
@@ -255,12 +257,12 @@ var TIM_PATH_PREFIX = 'me'
 const ON_RECEIVED_PROGRESS = 0.66
 // const NUM_MSGS_BEFORE_REG_FOR_PUSH = __DEV__ ? 3 : 10
 const ALL_MESSAGES = '_all'
-var models = {}
-var modelsWithAddOns = {}
-var lenses = {}
+// var models = {}
+// var modelsWithAddOns = {}
+// var lenses = {}
 var list = {};
 var msgToObj = {}
-var enums = {}
+// var enums = {}
 var chatMessages = {}
 
 var contextIdToResourceId = {}
@@ -498,11 +500,13 @@ var Store = Reflux.createStore({
     //   );
     // }
     // storeUtils.init({db, list, contextIdToResourceId, models})
-    storeUtils.addModels({models, enums})
+    this.modelsStore = new ModelsStore()
+
+    // storeUtils.addModels({models, enums})
     this.loadModels()
     // await storeUtils.loadModels()
     // utils.setModels(models);
-    utils.setModels(this.getModels())
+    // utils.setModels(this.getModels())
     this.loadStaticData()
     // if (true) {
     if (false) {
@@ -2918,7 +2922,7 @@ var Store = Reflux.createStore({
     // isLoaded = true
     self.trigger({
       action: 'start',
-      models: models,
+      models: this.modelsStore.getModels(),
       me: me,
       hasTouchID
     });
@@ -4375,10 +4379,11 @@ if (!res[SIG]  &&  res._message)
 
       this.setPropertyNames(props);
 
-      models[key] = {
-        key: key,
-        value: model
-      };
+      // models[key] = {
+      //   key: key,
+      //   value: model
+      // };
+      this.modelsStore.addModel(model)
       this.trigger({action: 'newModelAdded', newModel: model});
     })
     .catch((err) => {
@@ -5383,9 +5388,9 @@ if (!res[SIG]  &&  res._message)
 
     // !!!! Review why we need addToSettings
     if (addSettings)
-      this.addSettings(newProvider)
+      await this.addSettings(newProvider)
     else
-      this.addToSettings({ hash: newProvider.permalink, url })
+      await this.addToSettings({ hash: newProvider.permalink, url })
     if (!noTrigger) {
       this.trigger({ action: 'addApp' })
       let isTest = this._getItem(newProvider.org)._isTest
@@ -5875,10 +5880,12 @@ if (!res[SIG]  &&  res._message)
   },
   async onGetModels(providerId) {
     let modelPacks = await this.searchMessages({modelName: MODELS_PACK})
+    let models = this.modelsStore.getModels()
     if (!modelPacks) {
       let retModels = []
-      for (let m in models)
+      for (let m in models) {
         retModels.push(models[m].value)
+      }
       this.trigger({action: 'models', list: retModels})
       return
     }
@@ -7161,7 +7168,7 @@ if (!res[SIG]  &&  res._message)
   // },
   getEnum(params) {
     const { modelName, limit, query, lastId, prop, pin } = params
-    let enumList = enums[modelName]
+    let enumList = this.modelsStore.getModel(modelName).enum
     if (query)
       return enumList.filter((r) => this.checkCriteria({r, query}))
     if (prop) {
@@ -10166,7 +10173,8 @@ if (!res[SIG]  &&  res._message)
         isMessage = true
         type = SIMPLE_MESSAGE
         val[TYPE] = type
-        model = models[SIMPLE_MESSAGE].value
+        model = this.modelsStore.getModel(SIMPLE_MESSAGE)
+        // model = models[SIMPLE_MESSAGE].value
         isConfirmation = true
       }
       else
@@ -10922,17 +10930,19 @@ if (!res[SIG]  &&  res._message)
       if (!this.getModel(m.id))
         this._emitter.emit('model:' + m.id)
       m._versionId = val.versionId
+      // storeUtils.parseOneModel(m, models, enums)
+      this.modelsStore.addModel(m)
 
-      storeUtils.parseOneModel(m, models, enums)
       batch.push({type: 'put', key: m.id, value: m})
     })
-    utils.setModels(this.getModels())
+    // utils.setModels(this.getModels())
     // utils.setModels(models)
 
     if (val.lenses) {
       val.lenses.forEach((l) => {
         batch.push({type: 'put', key: l.id, value: l})
-        lenses[l.id] = l
+        this.modelsStore.addLens(l)
+        // lenses[l.id] = l
       })
     }
     await db.batch(batch)
@@ -11082,19 +11092,25 @@ if (!res[SIG]  &&  res._message)
         let dtype = data.value.type
         if (dtype === MODEL) {
           let m = data.value
-          if (models[data.key])
+          if (self.modelsStore.getModel(data.key))
             return
-          models[data.key] = data;
-          self.setPropertyNames(m.properties)
-          if (utils.isEnum(m))
-            storeUtils.createEnumResources(m, enums)
+          // if (models[data.key])
+          //   return
+          // models[data.key] = data;
+          // self.setPropertyNames(m.properties)
+          self.modelsStore.addModel(m)
+          // if (utils.isEnum(m))
+            // storeUtils.createEnumResources(m, enums)
           return
         }
         if (data.value[TYPE] === LENS) {
           let lens = data.value
-          if (lenses[lens.id])
+          if (this.modelsStore.getLens(lens.id))
             return
-          lenses[lens.id] = lens
+          this.modelsStore.addLens(lens)
+          // if (lenses[lens.id])
+          //   return
+          // lenses[lens.id] = lens
         }
         if (dtype === CUSTOMER_WAITING  ||  dtype === SELF_INTRODUCTION  ||  (dtype === FORM_REQUEST && data.value.product === PRODUCT_REQUEST))
           return
@@ -11171,7 +11187,7 @@ if (!res[SIG]  &&  res._message)
       if (me  &&  (!list[utils.getId(me)] || !list[utils.makeId(IDENTITY, me[ROOT_HASH])]))
         me = null
       console.log('Stream closed');
-      utils.setModels(self.getModels()) //models);
+      // utils.setModels(self.getModels()) //models);
     })
     .then(() => {
       if (me  &&  me.isEmployee) {
@@ -11946,45 +11962,49 @@ if (!res[SIG]  &&  res._message)
   //   })
   // },
   getModels() {
-    let mm = {}
-    for (let m in models)
-      mm[m] = models[m].value
+    return this.modelsStore.getModels()
+    // let mm = {}
+    // for (let m in models)
+    //   mm[m] = models[m].value
 
-    return mm
+    // return mm
   },
   getModel(modelOrId) {
-    const id = typeof modelOrId === 'string' ? modelOrId : modelOrId.id
-    const cached = modelsWithAddOns[id]
-    if (cached) return cached
-    if (!models) return
+    return this.modelsStore.getModel(modelOrId)
+    // const id = typeof modelOrId === 'string' ? modelOrId : modelOrId.id
+    // const cached = modelsWithAddOns[id]
+    // if (cached) return cached
+    // if (!models) return
 
-    const model = typeof modelOrId === 'string'
-      ? models[id] && models[id].value
-      : modelOrId
+    // const model = typeof modelOrId === 'string'
+    //   ? models[id] && models[id].value
+    //   : modelOrId
 
-    if (model) {
-      modelsWithAddOns[id] = this.getAugmentedModel(model)
-      return modelsWithAddOns[id]
-    }
+    // if (model) {
+    //   modelsWithAddOns[id] = this.getAugmentedModel(model)
+    //   return modelsWithAddOns[id]
+    // }
   },
 
   getAugmentedModel(model) {
-    model = _.cloneDeep(model)
-    storeUtils.addOns(model, models, enums)
-    // let props = rModel.properties
-    // for (let p in props)
-    //   props[p].name = p
-    return model
+    return this.modelsStore.getAugmentedModel(model)
+    // model = _.cloneDeep(model)
+    // storeUtils.addOns(model, models, enums)
+    // // let props = rModel.properties
+    // // for (let p in props)
+    // //   props[p].name = p
+    // return model
   },
 
   getOriginalModel(modelName) {
-    return models  &&  models[modelName] && models[modelName].value
+    return this.modelsStore.getOriginalModel(modelName)
+    // return models  &&  models[modelName] && models[modelName].value
   },
   getLenses() {
-    return lenses
+    return this.modelsStore.getLenses()
   },
   getLens(id) {
-    return lenses[id]
+    return this.modelsStore.getLens(id)
   },
 
   validateResource(resource) {
@@ -11995,9 +12015,8 @@ if (!res[SIG]  &&  res._message)
   },
 
   loadDB() {
-    // const self = this
-    if (utils.isEmpty(models))
-      storeUtils.addModels({models, enums})
+    this.modelsStore.addModels()
+      // storeUtils.addModels({models, enums})
 
     // // return this.loadStaticDbData(true)
     // // .then(() => {
@@ -12010,7 +12029,7 @@ if (!res[SIG]  &&  res._message)
   },
   loadStaticData() {
     sampleData.getResources().forEach((r) => {
-      storeUtils.loadStaticItem(r, enums)
+      this.modelsStore.loadStaticItem(r)
     });
   },
   // loadStaticItem(r, saveInDB, batch) {
@@ -12116,8 +12135,8 @@ if (!res[SIG]  &&  res._message)
       let m = this.getModel(rtype)
       if (!m)
         return
-      if (utils.isEnum(m)) {
-        let eValues = enums[rtype]
+      if (this.modelsStore.isEnum(m)) {
+        let eValues = this.modelsStore.getEnum(rtype)
         let eVal = eValues.filter((ev) => utils.getId(ev) === r)
         if (eVal.length)
           return eVal[0]
