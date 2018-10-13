@@ -1,8 +1,12 @@
 {
   "parser": "babel-eslint",
 
-  "ecmaFeatures": {
-    "jsx": true
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "ecmaFeatures": {
+      "jsx": true,
+      "classes": true
+    }
   },
 
   "env": {
@@ -11,7 +15,8 @@
   },
 
   "plugins": [
-    "react"
+    "react",
+    "react-native"
   ],
 
   // Map from global var to bool specifying if it can be redefined
