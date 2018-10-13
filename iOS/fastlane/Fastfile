@@ -43,7 +43,7 @@ platform :ios do
     cocoapods
     sh "../../scripts/fix-staging.js"
     update_version_file
-    ensure_git_status_clean
+    # ensure_git_status_clean
   end
 
   private_lane :inc_version do |options|
@@ -95,6 +95,10 @@ platform :ios do
       use_automatic_signing: false,
       profile_name: ENV['PROFILE_DEV']
     )
+
+    # get_certificates(
+    #   development: true,
+    # )
   end
 
   lane :sign_prod do
@@ -103,6 +107,10 @@ platform :ios do
       use_automatic_signing: false,
       profile_name: ENV['PROFILE_PROD']
     )
+
+    # get_certificates(
+    #   development: false,
+    # )
   end
 
   lane :sign_auto do
@@ -151,14 +159,9 @@ platform :ios do
       ensure_build_not_in_testflight
     end
 
-    sign_prod
-    match(type: 'development')
+    sign_dev
+    sync_code_signing(type: 'development')
     gym_staging
-    notification(
-      title: "Beta Built!",
-      message: "Uploading to TestFlight and waiting for it to get processed. This may take ~10 minutes"
-    )
-
     unless options[:dry_run]
       upload_to_testflight
       notification(
@@ -169,12 +172,33 @@ platform :ios do
   end
 
   lane :gym_staging do
-    gymit(scheme: "Staging")
+    gym(
+      workspace: ENV['WORKSPACE'],
+      # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
+      # see log in iOS/fastlane/staging-broken.log
+      scheme: 'Staging',
+      configuration: 'Staging',
+      export_method: 'development',
+      xcconfig: 'staging.xcconfig',
+      clean: true
+    )
+
     backup_release(scheme: "Staging")
   end
 
   lane :gym_release do
-    gymit(scheme: "Release")
+    gym(
+      workspace: ENV['WORKSPACE'],
+      codesigning_identity: 'iPhone Distribution: Tradle Inc (94V7783F74)',
+      # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
+      # see log in iOS/fastlane/staging-broken.log
+      scheme: 'Release',
+      configuration: 'Release',
+      export_method: 'app-store',
+      xcconfig: 'release.xcconfig',
+      clean: true
+    )
+
     backup_release(scheme: "Release")
   end
 
@@ -188,25 +212,33 @@ platform :ios do
     end
   end
 
-  private_lane :gymit do |options|
-    scheme = options[:scheme] || 'Release'
-    lScheme = scheme.downcase
-    gym(
-      workspace: ENV['WORKSPACE'],
-      codesigning_identity: 'iPhone Distribution: Tradle Inc (94V7783F74)',
-      # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
-      # see log in iOS/fastlane/staging-broken.log
-      scheme: scheme,
-      configuration: scheme,
-      export_method: 'app-store',
-      xcconfig: "#{lScheme}.xcconfig",
-      clean: true
-    )
-  end
+  # private_lane :gymit do |options|
+  #   scheme = options[:scheme] || 'Release'
+  #   lScheme = scheme.downcase
+  #   export_method = scheme == 'Release' ? 'app-store' : 'development'
+  #   # codesigning_identity = nil
+  #   # if scheme == 'Release'
+  #   #   codesigning_identity = 'iPhone Distribution: Tradle Inc (94V7783F74)'
+  #   # else
+  #   #   codesigning_identity = 'iPhone Development: Tradle Inc (94V7783F74)'
+  #   # end
+
+  #   gym(
+  #     workspace: ENV['WORKSPACE'],
+  #     # codesigning_identity: codesigning_identity,
+  #     # FIXME: change to 'Staging' and fix the error: "ld: library not found for -lPods-Tradle"
+  #     # see log in iOS/fastlane/staging-broken.log
+  #     scheme: scheme,
+  #     configuration: scheme,
+  #     export_method: export_method,
+  #     xcconfig: "#{lScheme}.xcconfig",
+  #     clean: true
+  #   )
+  # end
 
   lane :prepare_release do
     sign_prod
-    match(type: 'appstore')
+    sync_code_signing(type: 'appstore')
     gym_release
   end
 
@@ -253,7 +285,7 @@ platform :ios do
     end
 
     # build your iOS app
-    # match(
+    # sync_code_signing(
     #   force_for_new_devices: true
     # )
 
@@ -291,7 +323,7 @@ platform :ios do
       add_to_search_list: true
     )
 
-    match(
+    sync_code_signing(
       type: 'appstore',
       readonly: true,
       keychain_name: "MATCH_KEYCHAIN_NAME",
@@ -357,6 +389,20 @@ platform :ios do
 
   lane :codepush_promote_to_release do
     code_push_promote(app_name: ENV['CODE_PUSH_APP_NAME_IOS'])
+  end
+
+  lane :install do |options|
+    ipa = options[:ipa]
+    if ipa.nil?
+      version = options[:version]
+      if version.nil?
+        UI.user_error!("expected 'ipa' or 'version'")
+      end
+    else
+      install_on_device(
+        ipa: ipa,
+      )
+    end
   end
 
   # You can define as many lanes as you want

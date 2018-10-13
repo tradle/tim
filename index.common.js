@@ -2,6 +2,7 @@
 
 import './utils/errors'
 import './utils/shim'
+import './utils/automaticUpdates'
 import React, { Component } from 'react'
 import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons'
