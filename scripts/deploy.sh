@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# trap "exit 1" TERM
-# export TOP_PID=$$
-
 set -euo pipefail
 set -x
 
@@ -16,10 +13,6 @@ ORIGIN_PATH_PATH=".Origins.Items[0].OriginPath"
 A="releases/a"
 B="releases/b"
 COMMAND="$1"
-
-# abort() {
-#   kill -s TERM $TOP_PID
-# }
 
 get_cloudfront_dist_conf() {
   local DIST_ID
