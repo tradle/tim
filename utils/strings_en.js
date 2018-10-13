@@ -244,6 +244,7 @@ module.exports = {
     "nothingToShare": "Nothing to share",
     "importingData": "Importing {1} documents from {2}",
     "reviewScannedProperties": "Please review and correct the data below",
+    "reviewScannedPropertiesAndSecondSideSnapshot": "Please review the data below, and take a snapshot of the {1} side of the document",
     "pleaseClickOnAddButton": "Please click on '+' below to add '{1}'",
     "validationErrors": "Please correct failed validation fields",
     "createNew": "Fill out form \"{1}\"",
@@ -261,7 +262,6 @@ module.exports = {
     "exploreData": "Explore Data",
     "bookmarks": "Bookmarks",
     "createManualMatchCheck": "Create manual match check",
-    "invalidQrCode": "Invalid QR code",
     "supportedQrCodes": "Supported QR codes: \n1) add chat channel \n2) import data",
     "inProcess": "Processing...",
     "inProgress": "In progress...",
@@ -269,7 +269,7 @@ module.exports = {
     "invalidQuery": "Oops, we hit an error running your search. Our developers will try to fix it asap.",
     "noResourcesForCriteria": "No resources were found for this criteria",
     "invalidQR": "Invalid QR code",
-    "validatingDataClaim": "Validating Data Claim",
+    "validatingDataClaim": "Importing data",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
@@ -327,5 +327,8 @@ module.exports = {
     "Before we start you'll need a valid passport, identity card or driving license": "Before we start you'll need a valid passport, identity card or driving license",
     // // Page 3
     "Go!": "Go!",
-    "We'll ask you questions in the chat and you simply fill the forms or follow the requests":  "We'll ask you questions in the chat and you simply fill the forms or follow the requests"
+    "We'll ask you questions in the chat and you simply fill the forms or follow the requests":  "We'll ask you questions in the chat and you simply fill the forms or follow the requests",
+    "debugLogSent": "Debug Log Sent",
+    "logSentToDevTeam": "The log was sent to the Tradle developer team",
+    "failedToSendLog": "Failed to send log",
 }

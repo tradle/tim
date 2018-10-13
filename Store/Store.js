@@ -26,6 +26,7 @@ import EventEmitter from 'events'
 import Promise, { coroutine as co } from 'bluebird'
 import TimerMixin from 'react-timer-mixin'
 import plugins from '@tradle/biz-plugins'
+import { allSettled } from '@tradle/promise-utils'
 import appPlugins from '../plugins'
 
 // import yukiConfig from '../yuki.json'
@@ -279,6 +280,12 @@ var driverInfo = (function () {
   const byUrl = {}
   const byIdentifier = {}
   const byPath = {}
+  const stopAll = async () => {
+    const promises = []
+    clientToIdentifiers.forEach((ids, client) => promises.push(client.stop()))
+    return allSettled(promises)
+  }
+
   const wsClients = {
     add({ client, url, identifier, path }) {
       const identifiers = clientToIdentifiers.get(client) || []
@@ -313,7 +320,8 @@ var driverInfo = (function () {
       return `${base}/${path}`
     },
     byUrl,
-    byIdentifier
+    byIdentifier,
+    stopAll,
   }
 
   const restoreMonitors = {}
@@ -392,6 +400,9 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
 
   return createdByBot
 }
+
+const getServiceProviderByUrl = url => (SERVICE_PROVIDERS || [])
+  .find(sp => utils.urlsEqual(sp.url, url))
 
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
@@ -548,7 +559,7 @@ var Store = Reflux.createStore({
     try {
       me = await this.getMe()
     } catch(err)  {
-      debug('Store.init ' + err.stack)
+      debug('Store.init', err.message)
     }
 
     this._noSplash = []
@@ -1899,7 +1910,7 @@ var Store = Reflux.createStore({
         missing = {}
         debug('aws-client detected missing messages, reconnecting')
         client.reset()
-      })
+      }, 1000)
 
       let missing = {}
       return ({ tip, seq }) => {
@@ -5417,14 +5428,15 @@ if (!res[SIG]  &&  res._message)
       }
     }
     // check if we have this provider
-    let sp = SERVICE_PROVIDERS.filter((sp) => sp.url === host)
+    let sp = getServiceProviderByUrl(host)
     let invalidQR
-    if (!sp.length) {
+    if (!sp) {
       await this.getInfo({serverUrls: [host]})
-      invalidQR = !SERVICE_PROVIDERS.filter((sp) => sp.url === host).length
-    }
-    else
+      invalidQR = !getServiceProviderByUrl(host)
+    } else {
       invalidQR = !this._getItem(providerId)
+    }
+
     if (invalidQR) {
       Alert.alert(translate('invalidQR'))
       return
@@ -5985,7 +5997,10 @@ if (!res[SIG]  &&  res._message)
   async onReloadDB(opts) {
     const destroyTim = meDriver ? meDriver.destroy() : Promise.resolve()
     await Promise.race([
-      destroyTim,
+      allSettled([
+        destroyTim,
+        driverInfo.wsClients.stopAll()
+      ]),
       Promise.delay(5000)
     ])
 
@@ -6003,7 +6018,7 @@ if (!res[SIG]  &&  res._message)
       try {
         me = await this.getMe()
       } catch(err) {
-        debug('Store.autoRegister', err.stack)
+        debug('Store.autoRegister', err.message)
       }
     }
     if (me)
@@ -9727,10 +9742,8 @@ if (!res[SIG]  &&  res._message)
       value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
       self._setItem(key, value)
     }
-    let newProvider = SERVICE_PROVIDERS.find(sp => {
-                        if (sp.url  &&  utils.urlsEqual(sp.url, value.url))
-                          return sp
-                      })
+
+    const newProvider = getServiceProviderByUrl(value.url)
     self.trigger({action: 'addItem', resource: this._getItem(newProvider.org), addProvider: true})
     return self.dbPut(key, self._getItem(key))
   }),
@@ -10734,6 +10747,7 @@ if (!res[SIG]  &&  res._message)
         r[NOT_CHAT_ITEM] = true
         if (context)
           r._context = context
+        r._latest = true
         await this.onAddChatItem({resource: r, noTrigger: true})
       }
 

@@ -8,7 +8,7 @@ import * as BlinkID from 'blinkid-react-native';
 // import { BlinkID , MrtdKeys, UsdlKeys, EUDLKeys, NzdlFrontKeys as NZDLKeys, MYKADKeys } from 'blinkid-react-native'
 const UsdlKeys = BlinkID.UsdlKeys
 import { microblink } from '../utils/env'
-import { isSimulator, keyByValue, sanitize } from '../utils/utils'
+import { isSimulator, keyByValue, sanitize, requestCameraAccess } from '../utils/utils'
 import xml2js from 'xml2js'
 
 const recognizers = {
@@ -58,6 +58,10 @@ const scan = (function () {
   if (!licenseKey) return
 
   return async (opts) => {
+    if (!await requestCameraAccess()) {
+      throw new Error('user denied camera access')
+    }
+
     const { firstSideInstructions, secondSideInstructions } = opts
 
     let types = []

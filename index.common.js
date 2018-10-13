@@ -2,6 +2,7 @@
 
 import './utils/errors'
 import './utils/shim'
+import './utils/automaticUpdates'
 import React, { Component } from 'react'
 import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -233,6 +234,7 @@ class TiMApp extends Component {
         return
       case 'active':
         utils.updateEnv()
+        // fire off async, don't wait
         AutomaticUpdates.hasUpdate().then(has => {
           if (has) return AutomaticUpdates.install()
 

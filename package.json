@@ -40,7 +40,7 @@
     "nibble": "eslint-nibble Components/ Store/ utils/ index.common.js"
   },
   "dependencies": {
-    "@tradle/aws-client": "^2.0.1",
+    "@tradle/aws-client": "^2.1.1",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
     "@tradle/biz-plugins": "github:tradle/biz-plugins",
     "@tradle/build-resource": "^4.0.2",
@@ -59,6 +59,7 @@
     "@tradle/models-onfido": "github:tradle/models-onfido",
     "@tradle/models-products-bot": "github:tradle/models-products-bot",
     "@tradle/multiqueue": "^2.3.1",
+    "@tradle/promise-utils": "^1.1.0",
     "@tradle/protocol": "^4.2.0",
     "@tradle/qr-schema": "^1.11.0",
     "@tradle/restore": "github:tradle/restore",

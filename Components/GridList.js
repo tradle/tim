@@ -1513,7 +1513,7 @@ class GridList extends Component {
                   <NoResources
                     message={translate('pleaseClickOnAddButton', prop && prop.title || translate(model))}
                     iconColor={'#ffffff'}
-                    iconStyle= {[buttonStyles.menuButton, {opacity: 0.4, marginTop: 0, width: 30, height: 30}]}
+                    iconStyle= {StyleSheet.flatten([buttonStyles.menuButton, styles.noResourcesIcon])}
                     model={model}
                     isLoading={isLoading}>
                   </NoResources>
@@ -1882,6 +1882,12 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: 'transparent',
     marginTop: 20
+  },
+  noResourcesIcon: {
+    opacity: 0.4,
+    marginTop: 0,
+    width: 30,
+    height: 30
   }
 });
 

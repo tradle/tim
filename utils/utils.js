@@ -7,7 +7,6 @@ import {
   Text,
   // findNodeHandle,
   Dimensions,
-  Alert,
   Linking,
   PixelRatio,
   Platform,
@@ -57,6 +56,9 @@ import locker from './locker'
 import Strings from './strings'
 import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
+// FIXME: circular dep
+import Alert from '../Components/Alert'
+import * as promiseUtils from '@tradle/promise-utils'
 
 const collect = Promise.promisify(_collect)
 
@@ -157,6 +159,8 @@ const getVersionInAppStore = Platform.select({
 })
 
 var utils = {
+  ...promiseUtils,
+  promisify: Promise.promisify,
   isEmpty(obj) {
     for(var prop in obj) {
       if(obj.hasOwnProperty(prop))
@@ -1688,11 +1692,7 @@ var utils = {
     return first + '/' + rest
   },
 
-  promiseDelay(millis) {
-    return Q.Promise((resolve) => {
-      setTimeout(resolve, millis)
-    })
-  },
+  promiseDelay: promiseUtils.wait,
 
   // TODO: add maxTries
   tryWithExponentialBackoff(fn, opts) {
@@ -2299,13 +2299,13 @@ var utils = {
         throw new Error(why)
       } else {
         if (!noAlert)
-          Alert.alert('Success!', 'The log was sent to the Tradle developer team!')
+          Alert.alert('debugLogSent', 'logSentToDevTeam')
       }
 
       return true
     } catch (err) {
       if (!noAlert)
-        Alert.alert('Failed to send log', err.message)
+        Alert.alert('failedToSendLog', err.message)
       return false
     }
   },
@@ -2691,27 +2691,24 @@ var utils = {
     uri: 'data:image/gif;base64,R0lGODlhAQABAIAAAP7//wAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=='
   },
 
-  async updateEnv() {
-    console.warn('fix blinkid keys in S3, uncomment utils.updateEnv')
-    return
-
+  updateEnv: async () => {
     let env
     try {
-      env = await this.fetchEnv()
+      env = await utils.fetchEnv()
     } catch (err) {
       debug('failed to update environment from tradle server', err.message)
       return
     }
 
-    if (env) {
-      require('../Actions/Actions').updateEnvironment(env)
-    }
+    if (!env) return
+
+    require('../Actions/Actions').updateEnvironment(env)
   },
 
-  async fetchEnv() {
+  fetchEnv: async () => {
     if (!ENV.tradleAPIKey) return
 
-    const url = this.joinURL(ENV.tradleAPIEndpoint, 'fs', DeviceInfo.getBundleId(), 'environment.json')
+    const url = utils.joinURL(ENV.tradleAPIEndpoint, 'fs', DeviceInfo.getBundleId(), 'environment.json')
     const res = await fetch(url, {
       headers: {
         'x-api-key': ENV.tradleAPIKey
@@ -2823,10 +2820,6 @@ var utils = {
     return results.reduce((all, some) => all.concat(some), [])
   },
 
-  isPromise(obj) {
-    return obj && typeof obj.then === 'function'
-  },
-
   isAWSProvider: function (provider)  {
     if (provider.aws) return true
     if (provider.connectEndpoint) return provider.connectEndpoint.aws
@@ -2925,6 +2918,7 @@ var utils = {
 
     return urls
   },
+  alert: (...args) => Alert.alert(...args),
 }
 
 if (__DEV__) {
