@@ -35,7 +35,6 @@ module.exports = function PhotoID ({ models }) {
       if (isWeb)
         form.uploaded = true
       let scan = form.scanJson
-      let isDifferentPerson = scan && (form.firstName !== scan.personal.firstName  || form.lastName !== scan.personal.lastName)
 
       const model = models[form[TYPE]]
       // Check if there is a need to clean the form
@@ -69,7 +68,7 @@ module.exports = function PhotoID ({ models }) {
             scan = null
           }
         }
-        let errors = scan  &&  prefillValues(form, isDifferentPerson, scan, model)
+        let errors = scan  &&  prefillValues(form, scan, model)
       }
       let requestedProperties = getRequestedProps({scan, model, form})
       // if (form.scan) {
@@ -119,24 +118,24 @@ module.exports = function PhotoID ({ models }) {
     }
   }
 }
-function prefillValues(form, isDifferentPerson, values, model) {
+function prefillValues(form, values, model) {
   let props = model.properties
   // let dateProps = ['dateOfExpiry', 'dateOfBirth', 'dateOfIssue']
   // Check if this is a new scan
   let exclude = [ 'country' ]
   for (let p in values)
-    if (!isDifferentPerson  && form[p])
+    if (form[p])
       exclude.push(p)
   for (let p in values) {
     if (exclude.includes(p))
       continue
-    if (form[p]  &&  !isDifferentPerson)
+    if (form[p])
       continue
     let val = values[p]
     if (typeof val === 'object')
-      prefillValues(form, isDifferentPerson, val, model)
+      prefillValues(form, val, model)
     else if (!props[p]) {
-      if (p === 'birthData'  &&  (isDifferentPerson  ||  !form.dateOfBirth)) {
+      if (p === 'birthData'  &&  !form.dateOfBirth) {
         let parts = val.split(' ')
         form.dateOfBirth = new Date(parts[0]).getTime()
       }
