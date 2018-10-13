@@ -84,7 +84,7 @@ class CameraView extends Component {
     try {
       data = await this.camera.takePictureAsync({
         base64: true,
-        mirrorImage: true,
+        mirrorImage: this.state.cameraType === back ? false : true,
         quality: 0.5,
         fixOrientation: true,
         forceUpOrientation: true,
