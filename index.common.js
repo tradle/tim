@@ -891,7 +891,7 @@ var styles = StyleSheet.create({
     marginRight: 5,
     marginTop: 7,
     marginLeft: 0,
-    width: LOGO_HEIGHT,
+    width: LOGO_HEIGHT * 2,
   },
   msgImageNoText: {
     height: LOGO_HEIGHT,
