@@ -14,7 +14,6 @@ import {
   StyleSheet
 } from 'react-native'
 
-import Camera from 'react-native-camera'
 import querystring from 'querystring'
 import traverse from 'traverse'
 import DeviceInfo from 'react-native-device-info'
