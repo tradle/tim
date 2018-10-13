@@ -156,7 +156,9 @@ class RefPropertyEditor extends Component {
     let propView
     if (photoR) {
       if (utils.isImageDataURL(photoR.url)) {
-        propView = <Image source={{uri: photoR.url}} style={styles.thumb} />
+        propView = <View style={{marginTop:5}}>
+                     <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
+                   </View>
       } else {
         propView = <Icon name='ios-paper-outline' size={40} color={linkColor} />
       }
@@ -182,7 +184,7 @@ class RefPropertyEditor extends Component {
       if (isVideo)
         icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
       else if (isPhoto)
-        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
+        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={[val && styles.photoIcon || (styles.photoIconEmpty, {marginTop: 15})]}/>
       else if (isIdentity)
         icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
       else
@@ -299,8 +301,16 @@ class RefPropertyEditor extends Component {
   onTakePicture(params, data) {
     if (!data)
       return
-    this.props.resource.video = data
-    this.props.floatingProps.video = data
+    let { prop } = params
+    if (prop.ref === PHOTO) {
+      let { width, height, base64 } = data
+      let d = { width, height, url: base64}
+      this.onSetMediaProperty(prop.name, d)
+    }
+    else {
+      this.props.resource.video = data
+      this.props.floatingProps.video = data
+    }
     this.props.navigator.pop();
   }
   getLabelAndBorderColor(prop) {

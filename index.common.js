@@ -914,11 +914,7 @@ var styles = StyleSheet.create({
     resizeMode: 'contain',
     // marginTop: 2,
     marginLeft: 0,
-    // width: LOGO_HEIGHT,
-    // borderRadius: 13,
-    // borderColor: '#cccccc',
-    // borderWidth: StyleSheet.hairlineWidth
-    width: LOGO_HEIGHT,
+    width: LOGO_HEIGHT * 2,
   },
   msgImageNoText: {
     height: LOGO_HEIGHT,

@@ -30,7 +30,7 @@ import PageView from './PageView'
 import GridList from './GridList'
 import SupervisoryView from './SupervisoryView'
 import ActionSheet from './ActionSheet'
-import utils, { translate, translateModel } from '../utils/utils'
+import utils, { translate } from '../utils/utils'
 import HomePageMixin from './HomePageMixin'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
@@ -1221,7 +1221,7 @@ class ResourceList extends Component {
           onPress: this.onSettingsPressed
         },
         {
-          text: translate(hideText, translateModel(utils.getModel(this.props.modelName), true)),
+          text: translate(hideText, translate(utils.getModel(this.props.modelName), true)),
           onPress: () => this.setState({hideMode: !this.state.hideMode, dataSource: this.state.dataSource.cloneWithRows(utils.clone(this.state.list))})
         },
         {
