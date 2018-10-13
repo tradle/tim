@@ -157,7 +157,6 @@ class FormMessageRow extends Component {
     // let isSharedContext = toChat  &&  utils.isContext(toChat[TYPE]) && resource._context  &&  utils.isReadOnlyChat(resource._context)
 
     var width = utils.getMessageWidth(FormMessageRow)
-    let { bankStyle } = this.props
 
     this.formatRow(isMyMessage || isShared, renderedRow, styles)
     let noContent = !hasSentTo &&  !renderedRow.length
