@@ -24,7 +24,7 @@ const {
 } = constants.TYPES
 
 import { Text } from './Text'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, isWeb } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
@@ -37,6 +37,7 @@ import GridList from './GridList'
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
+const PHOTO_ID = 'tradle.PhotoID'
 
 class RefPropertyEditor extends Component {
   constructor(props) {
@@ -154,7 +155,7 @@ class RefPropertyEditor extends Component {
     let propView
     if (photoR) {
       if (utils.isImageDataURL(photoR.url)) {
-        propView = <View style={{marginTop:5}}>
+        propView = <View style={{marginTop: isWeb() ? 0 : 5}}>
                      <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
                    </View>
       } else {
@@ -201,7 +202,7 @@ class RefPropertyEditor extends Component {
                     </TouchableOpacity>
     else if (isVideo ||  isPhoto) {
       // HACK
-      const isScan = pName === 'scan'
+      const isScan = pName === 'scan'  ||  (isWeb()  &&  model.id === PHOTO_ID)
       let useImageInput
       if (utils.isWeb()  ||  utils.isSimulator()) {
         useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
