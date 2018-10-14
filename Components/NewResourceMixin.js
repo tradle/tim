@@ -1039,6 +1039,7 @@ var NewResourceMixin = {
                              component={params.component}
                              error={error}
                              inFocus={this.state.inFocus}
+                             required={params.required}
                              floatingProps={this.floatingProps}
                              paintHelp={this.paintHelp.bind(this)}
                              paintError={this.paintError.bind(this)}
