@@ -325,18 +325,16 @@ class MessageView extends Component {
       date = utils.formatDate(new Date(t), true)
     else
       date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
-    let photos = resource.photos
+    // let photos = resource.photos
     let mainPhoto, inRow
-
+    let photos = utils.getResourcePhotos(model, resource)
     if (!backlink) {
       let mainPhotoProp = utils.getMainPhotoProperty(model)
       if (mainPhotoProp) {
         mainPhoto = resource[mainPhotoProp]
         if (photos) {
-          if (mainPhotoProp !== 'photos') {
-            photos = photos.slice()
-            photos.splice(0, 0, mainPhoto)
-          }
+          if (mainPhotoProp !== 'photos')
+            photos = photos.filter(p => p.url !== mainPhoto)
         }
       }
       else if (!photos  ||  !photos.length) {

@@ -84,21 +84,24 @@ debug.log = function (...args) {
   }
 }
 
-debug.get = function () {
-  return lines.slice()
-}
+debug.getLines = () => lines.slice()
+debug.get = debug.getLines
 
 debug.clear = function () {
   lines.length = 0
 }
 
-debug.post = function (url) {
-  const body = debug
-    .get()
-    .map(debug.stripColors)
-    .map(line => Array.isArray(line) ? line.join(' ') : line)
-    .join('\n')
+debug.getText = () => debug
+  .get()
+  .map(debug.lineToPlainText)
+  .join('\n')
 
+debug.lineToPlainText = line => debug.stripColors(line)
+  .map(line => Array.isArray(line) ? line.join(' ') : line)
+  .join('\n')
+
+debug.post = function (url) {
+  const body = debug.getText()
   return fetch(url, {
     method: 'POST',
     headers: {

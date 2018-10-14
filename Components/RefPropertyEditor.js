@@ -24,7 +24,7 @@ const {
 } = constants.TYPES
 
 import { Text } from './Text'
-import utils, { translate, isWeb } from '../utils/utils'
+import utils, { translate, isWeb, isSimulator } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
@@ -198,7 +198,7 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (isIdentity && !utils.isWeb())
+    if (isIdentity && !isWeb())
        actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
                       {content}
                     </TouchableOpacity>
@@ -206,7 +206,7 @@ class RefPropertyEditor extends Component {
       // HACK
       const isScan = pName === 'scan'  ||  (isWeb()  &&  model.id === PHOTO_ID)
       let useImageInput
-      if (utils.isWeb()  ||  utils.isSimulator()) {
+      if (isWeb()  ||  isSimulator()) {
         useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
       } else {
         useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
@@ -283,13 +283,12 @@ class RefPropertyEditor extends Component {
         }
       }
       else if (scanner === 'payment-card') {
-        if (!utils.isWeb())
+        if (!isWeb())
           this.scanCard(pName)
         return
       }
     }
     this.props.navigator.push({
-      title: 'Take a pic',
       backButtonTitle: 'Back',
       id: 12,
       component: CameraView,
