@@ -157,9 +157,7 @@ class RefPropertyEditor extends Component {
       color = '#AAAAAA'
     let propView
     if (photoR)
-      propView = <View style={{marginTop:5}}>
-                   <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
-                 </View>
+      propView = <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
     else {
       let img = photo
       if (img) {
