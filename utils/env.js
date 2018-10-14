@@ -102,7 +102,7 @@ const merged = extend({
 
     return __DEV__
   },
-  serverToSendLog: __DEV__ ? `http://${LOCAL_IP}:44444/userlog` : 'https://azure1.tradle.io/userlog',
+  serverToSendLog: 'https://azure1.tradle.io/userlog',
   showMyQRCode: true,
   homePage: true,
   useKeychain: true,
