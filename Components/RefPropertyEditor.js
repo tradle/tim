@@ -283,7 +283,6 @@ class RefPropertyEditor extends Component {
       }
     }
     this.props.navigator.push({
-      title: 'Take a pic',
       backButtonTitle: 'Back',
       id: 12,
       component: CameraView,
