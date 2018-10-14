@@ -80,7 +80,7 @@ class NewResource extends Component {
   static propTypes = {
     navigator: PropTypes.object.isRequired,
     model: PropTypes.object.isRequired,
-    resource: PropTypes.object.isRequired,
+    resource: PropTypes.object,
     originatingMessage: PropTypes.object,
     editCols: PropTypes.string,
     callback: PropTypes.func,
@@ -198,11 +198,12 @@ class NewResource extends Component {
 
 
   componentDidUpdate() {
-    if (!this.state.missedRequiredOrErrorValue  ||  utils.isEmpty(this.state.missedRequiredOrErrorValue)) return
+    let { missedRequiredOrErrorValue, noScroll } = this.state
+    if (!missedRequiredOrErrorValue  ||  utils.isEmpty(missedRequiredOrErrorValue)) return
 
     let viewCols = this.props.model.viewCols
     let first
-    for (let p in this.state.missedRequiredOrErrorValue) {
+    for (let p in missedRequiredOrErrorValue) {
       if (!viewCols) {
         first = p
         break
@@ -215,7 +216,7 @@ class NewResource extends Component {
     let ref = this.refs.form.getComponent(first) || this.refs[first]
     if (!ref) return
 
-    if (!utils.isEmpty(this.state.missedRequiredOrErrorValue)  &&  !this.state.noScroll) {
+    if (!utils.isEmpty(missedRequiredOrErrorValue)  &&  !noScroll) {
       utils.scrollComponentIntoView(this, ref)
       this.state.noScroll = true
     }
@@ -277,7 +278,7 @@ class NewResource extends Component {
       this.setState({
         resource: r,
         isUploading: false,
-        requestedProperties: requestedProperties
+        requestedProperties
       })
       return
     }
@@ -566,36 +567,37 @@ class NewResource extends Component {
         else if (typeof v === 'object')  {
           let ref = props[p].ref
           if (ref) {
-            let rModel = utils.getModel(ref)
-            if (ref === MONEY) {
-              if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
-                missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
-                return
-              }
-              if (!v.currency) {
-                if (resource[p].currency)
-                  v.currency = resource[p].currency
-                // else if (currency)
-                //   v.currency = currency
-                else {
-                  missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
-                  return
-                }
-              }
-            }
-            else if (ref === 'tradle.Photo')
-              return
-            else if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
-              let units = props[p].units
-              if (units)
-                v = v.value
-              else {
-                if (v.value === '')
-                  v = null
-                delete json[p]
-              }
-              return
-            }
+            this.checkRef(v, props[p], json, missedRequiredOrErrorValue)
+            // let rModel = utils.getModel(ref)
+            // if (ref === 'tradle.Photo')
+            //   return
+            // if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
+            //   let units = props[p].units
+            //   if (units)
+            //     v = v.value
+            //   else {
+            //     if (v.value === '')
+            //       v = null
+            //     delete json[p]
+            //   }
+            //   return
+            // }
+            // if (ref === MONEY) {
+            //   if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
+            //     missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+            //     return
+            //   }
+            //   if (!v.currency) {
+            //     if (resource[p].currency)
+            //       v.currency = resource[p].currency
+            //     // else if (currency)
+            //     //   v.currency = currency
+            //     else {
+            //       missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+            //       return
+            //     }
+            //   }
+            // }
           }
           else if (props[p].type === 'array'  &&  !v.length) {
             missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
@@ -625,6 +627,41 @@ class NewResource extends Component {
       }
     })
 
+  }
+  checkRef(v, prop, json, missedRequiredOrErrorValue) {
+    let ref = prop.ref
+    let p = prop.name
+    if (ref === PHOTO)
+      return
+    let rModel = utils.getModel(ref)
+    if (!rModel.subClassOf  ||  rModel.subClassOf !== ENUM) {
+      let units = prop.units
+      if (units)
+        v = v.value
+      else {
+        if (v.value === '')
+          v = null
+        delete json[p]
+      }
+      return
+    }
+    let resource = this.state.resource
+    if (ref === MONEY) {
+      if (!v.value || (typeof v.value === 'string'  &&  !v.value.length)) {
+        missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+        return
+      }
+      if (!v.currency) {
+        if (resource[p].currency)
+          v.currency = resource[p].currency
+        // else if (currency)
+        //   v.currency = currency
+        else {
+          missedRequiredOrErrorValue[p] = translate('thisFieldIsRequired')
+          return
+        }
+      }
+    }
   }
   addFormValues() {
     let value = this.refs.form.getValue();
@@ -958,7 +995,6 @@ class NewResource extends Component {
           onStartShouldSetResponderCapture={(e) => {
             if (Platform.OS === 'android') {
               const focusField = TextInputState.currentlyFocusedField();
-
               if (focusField != null && e.nativeEvent.target != focusField)
                 dismissKeyboard();
             }
@@ -1460,7 +1496,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       justifyContent: 'center',
       backgroundColor: bankStyle.errorBgColor || '#990000',
       alignSelf: 'stretch',
-      alignItems: 'center'
+      alignItems: 'center',
+      paddingHorizontal: 7
     },
     errorsText: {
       color: bankStyle.errorColor ||  '#eeeeee',
