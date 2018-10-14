@@ -1705,7 +1705,7 @@ var styles= StyleSheet.create({
     fontSize: 20
   },
   dateLabel: {
-    // marginLeft: 10,
+    marginLeft: 10,
     fontSize: 12,
     marginVertical: 5,
     paddingBottom: 5
