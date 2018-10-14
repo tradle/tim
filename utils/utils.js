@@ -42,7 +42,7 @@ import tradle, {
   utils as tradleUtils
 } from '@tradle/engine'
 import constants from '@tradle/constants'
-import { calcLinks, omitVirtual } from '@tradle/build-resource'
+import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 import * as promiseUtils from '@tradle/promise-utils'
 import { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
@@ -56,7 +56,6 @@ import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
 import locker from './locker'
 import Strings from './strings'
-import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
 import Alert from '../Components/Alert'
