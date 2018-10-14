@@ -1,35 +1,12 @@
 version: '2'
-volumes:
-  server-conf:
-    external: true
-  server-storage:
-    external: true
 services:
-  tradle:
-    image: tradle/server-cli:v4.1.0
-    network_mode: bridge
-    container_name: tradle-server
+  web_cloud:
+    image: tradle/web-app:cloud
     restart: always
     ports:
-      - "44444:44444"
-    environment:
-      - TRADLE_SERVER_PORT=44444
-      - VALIDATE_FORMS=0
-      - NODE_ENV=production
-      - AUTORUN=1
-      - DEBUG=tradle:*
-      - HOME=/home
-      - CONF_PATH=./conf
-      - STORAGE_PATH=./storage
-#      - MODELS=./models
-    volumes:
-      - server-conf:/opt/app/conf
-      - server-storage:/opt/app/storage
-    tty: true
-    stdin_open: true
-  web-build:
-    image: tradle/web-app
-    container_name: tradle-web-app
+      - "55556:80"
+  web_local:
+    image: tradle/web-app:local
     restart: always
     ports:
-      - "55555:80"
+      - "55557:80"
