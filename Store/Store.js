@@ -5403,7 +5403,7 @@ if (!res[SIG]  &&  res._message)
     }
     // !!!! Review why we need addToSettings
     if (addSettings)
-      this.addSettings(newProvider)
+      await this.addSettings(newProvider)
     else
       this.addToSettings({ hash: newProvider.permalink, url })
     if (!noTrigger) {

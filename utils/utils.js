@@ -42,6 +42,8 @@ import tradle, {
   utils as tradleUtils
 } from '@tradle/engine'
 import constants from '@tradle/constants'
+import { calcLinks, omitVirtual } from '@tradle/build-resource'
+import * as promiseUtils from '@tradle/promise-utils'
 import { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
 import AsyncStorage from '../Store/Storage'
@@ -58,7 +60,7 @@ import { id, calcLinks, omitVirtual } from '@tradle/build-resource'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
 import Alert from '../Components/Alert'
-import * as promiseUtils from '@tradle/promise-utils'
+import dictionaries from './dictionaries'
 
 const collect = Promise.promisify(_collect)
 
@@ -118,9 +120,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const STATUS = 'tradle.Status'
 
-import dictionaries from './dictionaries'
-
-var dictionary //= dictionaries[Strings.language]
+var dictionary, language //= dictionaries[Strings.language]
 
 var models, me
 var BACKOFF_DEFAULTS = {
@@ -180,9 +180,9 @@ var utils = {
       lang = me.language.id.split('_')[1]
     if (!lang)
       return
-    if (this.language === lang)
+    if (language === lang)
       return
-    this.language = lang
+    language = lang
     Strings.setLanguage(lang)
     let d = dictionaries(lang)
     if (d)
@@ -835,7 +835,7 @@ var utils = {
     }
     return itemsMeta;
   },
-  makeTitle(resourceTitle, prop) {
+  makeTitle(resourceTitle) {
     return (resourceTitle.length > 28) ? resourceTitle.substring(0, 28) + '...' : resourceTitle;
   },
   getPropertiesWithAnnotation(model, annotation) {
@@ -984,7 +984,7 @@ var utils = {
     }
   },
   getDateValue(value) {
-    let lang = this.language || 'en'
+    let lang = language || 'en'
     switch (lang) {
     case 'fil':
       lang = 'tl-ph'
@@ -2046,14 +2046,6 @@ var utils = {
           throw err
         })
     }
-  },
-  getPhotoProperty(resource) {
-    let props = this.getModel(resource[TYPE]).properties
-    for (let p in resource) {
-      if (props[p].ref === PHOTO  &&  props[p].mainPhoto)
-        return props[p]
-    }
-    return props.photos
   },
 
   locker,

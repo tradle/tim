@@ -61,7 +61,7 @@ class RefPropertyEditor extends Component {
   }
   render() {
     let { prop, resource, error, styles, model, bankStyle, country,
-          search, photo, component, paintError, paintHelp } = this.props
+          search, photo, component, paintError, paintHelp, required } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -79,8 +79,8 @@ class RefPropertyEditor extends Component {
     let isPhoto = pName === 'photos'  ||  prop.ref === PHOTO
     let isIdentity = prop.ref === IDENTITY
 
-    let required = model  &&  utils.ungroup(model.required)
-    if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(pName)) {
+    // let required = model  &&  utils.ungroup(model.required)
+    if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
       if (resource  &&  !resource[pName])
         resource[pName] = country
@@ -89,7 +89,9 @@ class RefPropertyEditor extends Component {
     if (Array.isArray(val)  &&  !val.length)
       val = null
     let label, propLabel, isImmutable
-    if (val) {
+    if (!val)
+      label = translate(prop, model)
+    else {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto) {
         label = translate(prop, model)
@@ -136,12 +138,8 @@ class RefPropertyEditor extends Component {
       }
       propLabel = <Text style={[styles.labelDirty, lcolor]}>{translate(prop, model)}</Text>
     }
-    else {
-      label = translate(prop, model)
-      if (!search  &&  required)
-        label += ' *'
-      propLabel = <View/>
-    }
+    if (!search  &&  required)
+      label += ' *'
     let photoR = isPhoto && (photo || resource[pName])
     let isRegistration = this.state.isRegistration
     let linkColor = bankStyle.linkColor
