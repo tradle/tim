@@ -35,7 +35,7 @@ module.exports = function PhotoID ({ models }) {
       if (!isWeb()  &&  !isSimulator()  &&  !form.scanJson)
         return
 
-      if (isWeb)
+      if (isWeb())
         form.uploaded = true
       let scan = form.scanJson
 
@@ -45,7 +45,7 @@ module.exports = function PhotoID ({ models }) {
         if ((currentResource.documentType  &&  currentResource.documentType.id !== form.documentType.id)  ||
             (currentResource.country  &&  currentResource.country.id !== form.country.id)) {
           let requestedProperties = cleanupValues(form, scan, model)
-          if (!isWeb)
+          if (!isWeb())
             return requestedProperties
           scan = null
         }
