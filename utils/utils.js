@@ -139,7 +139,7 @@ const getVersionInAppStore = Platform.select({
   ios: async () => {
     const bundleId = DeviceInfo.getBundleId()
     const qs = querystring.stringify({ bundleId })
-    const res = await utils.fetchWithBackoff(`http://itunes.apple.com/lookup?${qs}`)
+    const res = await utils.fetchWithBackoff(`https://itunes.apple.com/lookup?${qs}`)
     const json = await res.json()
     if (json.resultCount < 0) throw new Error('app not found')
 

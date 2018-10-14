@@ -188,6 +188,18 @@ function getRequestedProps({scan, model, requestedProperties, form}) {
       requestedProperties.push({name: 'dateOfBirth'})
     }
   }
+  if (!isID) {
+    if (!requestedProperties.find(p => p.name === 'dateOfIssue')) {
+      if (!form.dateOfIssue) {
+        requestedProperties.push({name: 'dateOfIssue'})
+      }
+    }
+    if (!requestedProperties.find(p => p.name === 'dateOfExpiry')) {
+      if (!form.dateOfExpiry) {
+        requestedProperties.push({name: 'dateOfExpiry'})
+      }
+    }
+  }
   return requestedProperties
 }
 function cleanupValues(form, values, model) {

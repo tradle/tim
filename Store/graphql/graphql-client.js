@@ -442,7 +442,7 @@ var search = {
                 // # _inbound: false
                 // # _recipient: ${hash}
   async getChat(params) {
-    let { author, client, context, filterResource, limit, endCursor } = params
+    let { author, client, context, filterResource, limit, endCursor, application } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
     let contextVar = filterResource || context ? '' : '($context: String)'
     let limitP = limit ? `limit:  ${limit}` : ''
@@ -500,6 +500,7 @@ var search = {
       }
     }
     eq += filter
+
     if (context)
       eq += `             context: "${context}"`
     eq += `
@@ -511,10 +512,17 @@ var search = {
       neq = `
             NEQ: {
               context: $context
+              _payloadType: "${MESSAGE}"
             }
             `
     }
-
+    if (!neq  &&  application) {
+      neq = `
+            NEQ: {
+              _payloadType: "${MESSAGE}"
+            }
+            `
+    }
     let query = queryHeader + eq + neq + queryFooter
 
     try {

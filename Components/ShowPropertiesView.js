@@ -47,7 +47,7 @@ class ShowPropertiesView extends Component {
   static propTypes = {
     navigator: PropTypes.object.isRequired,
     resource: PropTypes.object.isRequired,
-    checkProperties: PropTypes.bool,
+    checkProperties: PropTypes.func,
     currency: PropTypes.string,
     bankStyle: PropTypes.object,
     errorProps: PropTypes.object,
