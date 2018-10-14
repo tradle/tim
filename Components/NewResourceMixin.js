@@ -1050,6 +1050,8 @@ var NewResourceMixin = {
     let resource = this.state.resource
     if (resource[p]  ||  resource[ROOT_HASH])
       return
+    if (this.floatingProps  &&  this.floatingProps.hasOwnProperty(p))
+      return
     let defaults = this.props.defaultPropertyValues
     let value
     if (defaults) {
