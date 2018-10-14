@@ -24,7 +24,7 @@ const {
 } = constants.TYPES
 
 import { Text } from './Text'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, isWeb, isSimulator } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
@@ -157,7 +157,9 @@ class RefPropertyEditor extends Component {
       color = '#AAAAAA'
     let propView
     if (photoR)
-      propView = <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
+      propView = <View style={{ marginTop: !isWeb()  &&  !isSimulator() && 5 || 0 }}>
+                   <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
+                 </View>
     else {
       let img = photo
       if (img) {
@@ -192,7 +194,7 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (isIdentity && !utils.isWeb())
+    if (isIdentity && !isWeb())
        actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
                       {content}
                     </TouchableOpacity>
@@ -200,7 +202,7 @@ class RefPropertyEditor extends Component {
       // HACK
       const isScan = pName === 'scan'
       let useImageInput
-      if (utils.isWeb()  ||  utils.isSimulator()) {
+      if (isWeb()  ||  isSimulator()) {
         useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
       } else {
         useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
@@ -277,7 +279,7 @@ class RefPropertyEditor extends Component {
         }
       }
       else if (scanner === 'payment-card') {
-        if (!utils.isWeb())
+        if (!isWeb())
           this.scanCard(pName)
         return
       }
