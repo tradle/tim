@@ -89,8 +89,11 @@ class RefPropertyEditor extends Component {
     if (Array.isArray(val)  &&  !val.length)
       val = null
     let label, propLabel, isImmutable
-    if (!val)
+    if (!val) {
       label = translate(prop, model)
+      if (!search  &&  required)
+        label += ' *'
+    }
     else {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto) {
@@ -136,10 +139,11 @@ class RefPropertyEditor extends Component {
           label = utils.createAndTranslate(label, true)
         }
       }
-      propLabel = <Text style={[styles.labelDirty, lcolor]}>{translate(prop, model)}</Text>
+      let pLabel = translate(prop, model)
+      if (!search  &&  required)
+        pLabel += ' *'
+      propLabel = <Text style={[styles.labelDirty, lcolor]}>{pLabel}</Text>
     }
-    if (!search  &&  required)
-      label += ' *'
     let photoR = isPhoto && (photo || resource[pName])
     let isRegistration = this.state.isRegistration
     let linkColor = bankStyle.linkColor
