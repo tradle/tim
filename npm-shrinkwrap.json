@@ -5226,7 +5226,8 @@
     "my-local-ip": {
       "version": "1.0.0",
       "from": "my-local-ip@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/my-local-ip/-/my-local-ip-1.0.0.tgz"
+      "resolved": "https://registry.npmjs.org/my-local-ip/-/my-local-ip-1.0.0.tgz",
+      "dev": true,
     },
     "nan": {
       "version": "2.10.0",
