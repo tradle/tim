@@ -10,8 +10,7 @@ var {
   TYPE
 } = constants
 
-import utils from '../utils/utils'
-const translate = utils.translate
+import utils, { translate, isWeb } from '../utils/utils'
 import Actions from '../Actions/Actions'
 import CameraView from './CameraView'
 import SignatureView from './SignatureView'
@@ -97,21 +96,24 @@ var OnePropFormMixin = {
         }
       }
       else if (scanner === 'payment-card') {
-        if (!utils.isWeb())
+        if (!isWeb())
           this.scanCard(prop)
         return
       }
     }
-    this.props.navigator.push({
-      // title: 'Take a pic',
+    let { navigator, resource, bankStyle } = this.props
+    let model = utils.getModel(utils.getType(resource.form))
+    navigator.push({
+      title: isWeb() &&  translate(prop, model),
       backButtonTitle: 'Back',
-      noLeftButton: true,
+      noLeftButton: !isWeb(),
       id: 12,
       component: CameraView,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
         cameraType: prop.cameraType,
-        onTakePic: this.onTakePic.bind(this, params)
+        onTakePic: this.onTakePic.bind(this, params),
+        bankStyle: isWeb() ? bankStyle : {}
       }
     });
   },
