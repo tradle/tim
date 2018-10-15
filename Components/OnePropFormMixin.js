@@ -104,7 +104,7 @@ var OnePropFormMixin = {
     let { navigator, resource, bankStyle } = this.props
     let model = utils.getModel(utils.getType(resource.form))
     navigator.push({
-      // title: 'Take a pic',
+      title: isWeb() &&  translate(prop, model),
       backButtonTitle: 'Back',
       noLeftButton: !isWeb(),
       id: 12,
