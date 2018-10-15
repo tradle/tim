@@ -358,18 +358,19 @@ class MessageView extends Component {
                                         currency={currency}
                                         showVerification={this.showVerification}/>
     // Don't show photostrip on backlink tab
-    let photoList
-    if (!backlink && photos  &&  photos.length > 1) {
-      // Don't show the main photo in the strip
-      photoList = photos.slice()
-      photoList.splice(0, 1)
+    let photoStrip
+    if (!checkProps) {
+      let photoList
+      if (!backlink && photos  &&  photos.length > 1) {
+        // Don't show the main photo in the strip
+        photoList = photos.slice()
+        photoList.splice(0, 1)
+      }
+
+      photoStrip = <View style={styles.photoListStyle}>
+                    <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
+                   </View>
     }
-
-    let photoStrip = <View style={styles.photoListStyle}>
-                      <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
-                    </View>
-
-
     let content = <View style={styles.rowContainer}>
                     {msg}
                     {propertySheet}
