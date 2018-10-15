@@ -1441,16 +1441,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       // alignSelf: 'center',
       paddingLeft: 10
     },
-    // itemsCounterEmpty: {
-    //   paddingHorizontal: 5,
-    //   justifyContent: 'center',
-    //   marginTop: -5
-    // },
-    // itemsCounter: {
-      // marginTop: 40,
-      // justifyContent: 'flex-end',
-      // paddingHorizontal: 5
-    // },
     actionIcon: {
       flex: 1,
       justifyContent: 'center',
@@ -1538,11 +1528,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       opacity: 0.7,
       alignSelf: 'flex-end',
     },
-    // submitButton: {
-    //   paddingBottom: 30,
-    //   justifyContent: 'center',
-    //   alignSelf: 'center'
-    // },
     noRegistration: {
       flex: 1,
       justifyContent: 'flex-start'
@@ -1631,14 +1616,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       fontSize: 24,
       color: bankStyle.contextTextColor
     },
-    logoNeedsText: {
-      backgroundColor: bankStyle.contextBackgroundColor,
-      borderTopColor: bankStyle.contextBackgroundColor,
-      borderTopWidth: StyleSheet.hairlineWidth,
-      height: 25,
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
     arrayItems: {
       marginTop: isRegistration ? 0 : -10,
       paddingBottom: 20
@@ -1650,6 +1627,38 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       // shadowRadius: 5,
       shadowColor: '#afafaf',
     },
+    // error: {
+    //   marginTop: -10,
+    //   backgroundColor: 'transparent'
+    // },
+    // errorText: {
+    //   fontSize: 14,
+    //   marginLeft: 10,
+    //   color: '#a94442'
+    // },
+    // itemsCounterEmpty: {
+    //   paddingHorizontal: 5,
+    //   justifyContent: 'center',
+    //   marginTop: -5
+    // },
+    // itemsCounter: {
+      // marginTop: 40,
+      // justifyContent: 'flex-end',
+      // paddingHorizontal: 5
+    // },
+    // submitButton: {
+    //   paddingBottom: 30,
+    //   justifyContent: 'center',
+    //   alignSelf: 'center'
+    // },
+    // logoNeedsText: {
+    //   backgroundColor: bankStyle.contextBackgroundColor,
+    //   borderTopColor: bankStyle.contextBackgroundColor,
+    //   borderTopWidth: StyleSheet.hairlineWidth,
+    //   height: 25,
+    //   justifyContent: 'center',
+    //   alignItems: 'center'
+    // },
     // itemsWithCount: {
     //   flex: 7,
     //   paddingTop: 15
