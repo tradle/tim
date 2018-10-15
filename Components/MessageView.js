@@ -377,7 +377,9 @@ class MessageView extends Component {
                     {verificationTxID}
                   </View>
 
-    let checkProps = !isVerification && isVerifier /* && !utils.isReadOnlyChat(resource)*/ && this.onCheck
+    let checkProps
+    if (!isVerification && isVerifier) /* && !utils.isReadOnlyChat(resource)*/
+      checkProps = this.onCheck
     let actionPanel, allowToAddBacklink
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content
