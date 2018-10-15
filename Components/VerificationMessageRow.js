@@ -9,7 +9,7 @@ import CustomIcon from '../styles/customicons'
 import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
 import RowMixin from './RowMixin'
-import equal from 'deep-equal'
+import equal from 'lodash/isEqual'
 // import BG_IMAGE from '../img/verificationBg.jpg'
 
 import { makeResponsive } from 'react-native-orient'

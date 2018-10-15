@@ -1,7 +1,6 @@
 console.log('requiring ResourceView.js')
 'use strict';
 
-import pick from 'object.pick'
 import _ from 'lodash'
 import { makeResponsive } from 'react-native-orient'
 import ActionSheet from 'react-native-actionsheet'
@@ -480,7 +479,7 @@ class ResourceView extends Component {
 
   changePreferences(action) {
     const me = utils.getMe()
-    const authSettings = pick(me, AUTH_PROPS)
+    const authSettings = _.pick(me, AUTH_PROPS)
     const r = {
       _r: me[ROOT_HASH],
       _t: PROFILE,
@@ -531,7 +530,7 @@ class ResourceView extends Component {
       navigator.popToRoute(currentRoute)
     }
 
-    this.setState(pick(settings, AUTH_PROPS))
+    this.setState(_.pick(settings, AUTH_PROPS))
   }
 }
 

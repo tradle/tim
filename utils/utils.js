@@ -476,9 +476,7 @@ var utils = {
     }
     return s ? s : args[0]
   },
-  clone(resource) {
-    return _.cloneDeep(resource)
-  },
+  clone: _.cloneDeep,
   compare(r1, r2, isInlined) {
     if (!r1 || !r2)
       return (r1 || r2) ? false : true

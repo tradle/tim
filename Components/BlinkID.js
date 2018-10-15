@@ -9,7 +9,6 @@ import * as BlinkID from 'blinkid-react-native';
 const UsdlKeys = BlinkID.UsdlKeys
 import { microblink } from '../utils/env'
 import { isSimulator, keyByValue, sanitize, requestCameraAccess } from '../utils/utils'
-import xml2js from 'xml2js'
 
 const recognizers = {
   // scans documents with face image and returns document images

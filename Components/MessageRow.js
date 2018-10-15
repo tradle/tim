@@ -2,7 +2,7 @@ console.log('requiring MessageRow.js')
 'use strict';
 
 import extend from 'extend'
-import equal from 'deep-equal'
+import equal from 'lodash/isEqual'
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import {

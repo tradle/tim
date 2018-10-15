@@ -11,8 +11,6 @@ import {
   InteractionManager
 } from 'react-native'
 import _ from 'lodash'
-import pick from 'object.pick'
-import dotProp from 'dot-prop'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 // const { ApolloClient, createNetworkInterface } = require('apollo-client')
@@ -6758,7 +6756,7 @@ if (!res[SIG]  &&  res._message)
 
     const propNames = Object.keys(m.properties)
     const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
-    let rr = pick(r, toKeep)
+    let rr = _.pick(r, toKeep)
 
     _.extend(rr, {
       [ROOT_HASH]: r._permalink,
@@ -6768,7 +6766,7 @@ if (!res[SIG]  &&  res._message)
 
     let lr = this._getItem(utils.getId(rr))
     if (lr) {
-      let rr = pick(r, toKeep)
+      let rr = _.pick(r, toKeep)
       let mr = {}
 
       _.extend(mr, lr)
@@ -12252,9 +12250,9 @@ if (!res[SIG]  &&  res._message)
     }
 
     const keyPath = `microblink.licenseKey.${Platform.OS}`
-    const key = dotProp.get(env, keyPath)
-    if (key && key !== dotProp.get(ENV, keyPath)) {
-      dotProp.set(ENV, keyPath, key)
+    const key = _.get(env, keyPath)
+    if (key && key !== _.get(ENV, keyPath)) {
+      _.set(ENV, keyPath, key)
       let blinkId = require('../Components/BlinkID')
       if (blinkId)
         blinkId.setLicenseKey(key)

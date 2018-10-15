@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import constants from '@tradle/constants'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
-import equal from 'deep-equal'
+import equal from 'lodash/isEqual'
 import { makeResponsive } from 'react-native-orient'
 import StyleSheet from '../StyleSheet'
 import reactMixin from 'react-mixin'

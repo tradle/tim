@@ -31,7 +31,7 @@ import {
   ActivityIndicator
 } from 'react-native'
 import PropTypes from 'prop-types'
-import omit from 'object.omit'
+import omit from 'lodash/omit'
 
 import { Text } from './Text'
 
