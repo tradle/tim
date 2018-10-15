@@ -8,7 +8,6 @@ import {
 } from 'react-native'
 import Branch from 'react-native-branch'
 import debounce from 'debounce'
-import { translate } from './utils'
 import { appScheme, deepLinkHost } from './env'
 
 const BRANCH_SPECIAL_CHARS = '$+~'

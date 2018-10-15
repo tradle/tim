@@ -9,9 +9,6 @@ import {
 
 const {
   getAllKeys,
-  setItem,
-  getItem,
-  removeKeyItem,
   multiSet,
   multiRemove
 } = AsyncStorage

@@ -5,10 +5,9 @@
 */
 'use strict';
 
-import { StyleSheet, Dimensions } from 'react-native'
+import { Dimensions } from 'react-native'
 import utils from '../utils/utils'
 import appStyle from './appStyle.json'
-import { circled } from './utils'
 import * as platformButtons from './platform'
 
 const {
@@ -19,7 +18,6 @@ const {
 
 var FONT_SIZE = 12;
 var FONT_SIZE_1 = 17;
-var FONT_WEIGHT = '500';
 
 (function adjustFontSize () {
   var { width, height } = Dimensions.get('window')

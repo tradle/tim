@@ -40,7 +40,6 @@ if (__DEV__) {
 debug.enable(enabled.join(','))
 
 const rawConsole = {}
-const debugConsole = {}
 
 consoleMethods.forEach(method => {
   const orig = console[method]

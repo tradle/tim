@@ -16,7 +16,6 @@ if (SplashScreen) {
 }
 
 const bigText = (text, style) => <Text style={[styles.bigText, style]}>{text}</Text>
-const wrapWithView = props => <View {...props }/>
 const createButton = ({ text, ...props }) => (
   <TouchableHighlight {...props} style={styles.button}>
     {bigText(text, styles.buttonText)}

@@ -10,7 +10,6 @@ import {
   Linking,
   PixelRatio,
   Platform,
-  PermissionsAndroid,
   StyleSheet
 } from 'react-native'
 
@@ -37,7 +36,7 @@ import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
 import Lens from '@tradle/lens'
-import tradle, {
+import {
   protocol,
   utils as tradleUtils
 } from '@tradle/engine'

@@ -1,7 +1,7 @@
 console.log('requiring Store.js')
 'use strict';
 
-import '../utils/perf'
+// import '../utils/perf'
 import path from 'path'
 import { parse as parseURL } from 'url'
 import {
@@ -232,7 +232,6 @@ import { createKeeper } from '../utils/keeper'
 // import Restore from '@tradle/restore'
 import crypto from 'crypto'
 // import { loadOrCreate as loadYuki } from './yuki'
-// import Aviva from '../utils/aviva'
 import monitorMissing from '../utils/missing'
 import identityUtils from '../utils/identity'
 import getBlockchainAdapter from '../utils/network-adapters'
@@ -15014,7 +15013,6 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   // },
 
   // parseOneModel(m) {
-  //   Aviva.preparseModel(m)
   //   storeUtils.addNameAndTitleProps(m)
   //   models[m.id] = {
   //     key: m.id,

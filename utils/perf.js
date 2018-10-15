@@ -2,7 +2,6 @@ console.log('requiring perf.js')
 
 import Q from 'q'
 import Debug from './debug'
-import { Alert } from 'react-native'
 var timerDebug = Debug('TIMER')
 
 global.timeFunctions = exports.timeFunctions = function timeFunctions (obj, overwrite) {

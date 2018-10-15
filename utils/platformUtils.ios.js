@@ -1,5 +1,3 @@
-console.log('requiring platformUtils.ios.js')
-import React from 'react'
 import { Linking } from 'react-native'
 import Camera from 'react-native-camera'
 import Alert from '../Components/Alert'

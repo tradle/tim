@@ -4,7 +4,6 @@ console.log('requiring push.js')
 
 import {
   AppState,
-  Alert,
   Platform
 } from 'react-native'
 
@@ -20,10 +19,7 @@ import Actions from '../Actions/Actions'
 
 const { translate, waitsFor } = utils
 const TYPE = constants.TYPE
-const DENIED_ERROR = new Error('denied')
-// import PushModal from '../Components/PushModal'
 const pushServerURL = ENV.pushServerURL
-const isMobile = () => Platform.OS === 'ios' || Platform.OS === 'android'
 const NOTIFICATION_CAN_HAVE_DATA = Platform.OS === 'ios' || Platform.OS === 'web'
 
 let onInitialized
@@ -76,7 +72,6 @@ function createPusher (opts) {
   if (registered) onRegistered()
 
   let regPromise
-  const unread = me.unreadPushNotifications || 0
   PushImpl.init({ onNotification, node })
 
   return {
@@ -191,7 +186,6 @@ function createPusher (opts) {
 // }
 
     const appIsActive = AppState.currentState === 'active'
-    const unread = appIsActive ? 0 : utils.getMe().unreadPushNotifications
     const { userInteraction, data } = notification
     debug('notification:', {
       notification,

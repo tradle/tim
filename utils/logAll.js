@@ -29,7 +29,7 @@ function log(str) {
     console.log(str)
 }
 
-var times = {}
+// var times = {}
 // import { Alert } from 'react-native'
 // setInterval(function () {
 //   var big = {}
