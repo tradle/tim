@@ -3,15 +3,21 @@
 set -euo pipefail
 set -x
 
+get_project_root() {
+  cd "$(dirname $0)/../"
+  printf $(pwd)
+}
+
+DEV_DIST_ID="E2D2Z4UNP3AOP2"
+PROD_DIST_ID="E9RQXIDLKX8ER"
 DEV_HOST=appdev.tradle.io
 PROD_HOST=app.tradle.io
 DEV_BUCKET="s3://$DEV_HOST"
 PROD_BUCKET="s3://$PROD_HOST"
-DEV_DIST_ID="E2D2Z4UNP3AOP2"
-PROD_DIST_ID="E9RQXIDLKX8ER"
 ORIGIN_PATH_PATH=".Origins.Items[0].OriginPath"
 A="releases/a"
 B="releases/b"
+PROJECT_ROOT=$(get_project_root)
 COMMAND="$1"
 
 get_cloudfront_dist_conf() {
@@ -59,7 +65,7 @@ confirm_or_abort() {
   fi
 }
 
-copy() {
+copy_files() {
   local SOURCE
   local DEST
 
@@ -224,32 +230,68 @@ deploy_dev() {
   local BUCKET
   local FOLDER
   local BACKUP_PATH
-  local RELEASE_PATH
+  local DEST
 
   TAG=$(get_latest_web_tag)
   COMMIT=$(get_short_commit_hash)
   BUCKET="$DEV_BUCKET"
   BACKUP_PATH="$BUCKET/$TAG/$COMMIT/"
-  RELEASE_FOLDER=$(get_alt_folder_dev)
-  RELEASE_PATH="$BUCKET/$RELEASE_FOLDER/"
+  SOURCE="./web/dist/"
+  DEST_FOLDER=$(get_alt_folder_dev)
+  DEST="$BUCKET/$DEST_FOLDER/"
 
-  copy ./web/dist/ "$BACKUP_PATH"
-  nuke "$RELEASE_PATH"
-  copy "$BACKUP_PATH" "$RELEASE_PATH"
-  set_live_folder_dev "$RELEASE_FOLDER"
+  copy_files "$SOURCE" "$BACKUP_PATH"
+  nuke "$DEST"
+  copy_app "$BACKUP_PATH" "$DEST"
+  set_live_folder_dev "$DEST_FOLDER"
+}
+
+copy_with_max_age() {
+  local SOURCE
+  local DEST
+  local MAX_AGE
+
+  SOURCE="$1"
+  DEST="$2"
+  MAX_AGE="$3"
+
+  validate_s3_path "$SOURCE"
+  validate_s3_path "$DEST"
+
+  aws s3 cp \
+    --cache-control max-age=$MAX_AGE,public \
+    --acl public-read \
+    --metadata-directive REPLACE \
+    "$SOURCE" "$DEST"
+}
+
+copy_index_html() {
+  local SOURCE
+  local DEST
+
+  SOURCE="$1"
+  DEST="$2"
+  copy_with_max_age "$SOURCE/index.html" "$DEST/index.html" "0"
+}
+
+copy_app() {
+  copy_files "$1" "$2"
+  copy_index_html "$1" "$2"
 }
 
 deploy_prod() {
-  local FRESH
   local SOURCE
+  local DEST_FOLDER
+  local DEST
 
   SOURCE="$1"
   validate_s3_path "$SOURCE" || exit 1
 
-  FRESH=$(get_alt_folder_prod)
-  nuke "$PROD_BUCKET/$FRESH/"
-  copy "$SOURCE" "$FRESH"
-  set_live_folder_prod "$FRESH"
+  DEST_FOLDER=$(get_alt_folder_prod)
+  DEST="$PROD_BUCKET/$DEST_FOLDER/"
+  nuke $DEST
+  copy_app "$SOURCE" "$DEST"
+  set_live_folder_prod "$DEST_FOLDER"
 }
 
 promote_dev() {
@@ -272,11 +314,12 @@ rollback_prod() {
 
 if [[ $COMMAND != "deploy_dev" ]] && \
   [[ $COMMAND != "rollback_dev" ]] && \
+  [[ $COMMAND != "deploy_prod" ]] && \
   [[ $COMMAND != "promote_dev" ]] && \
-  [[ $COMMAND != "rollback_prod" ]] && \
-  [[ $COMMAND != "deploy_dev" ]]
+  [[ $COMMAND != "rollback_prod" ]]
 then
-  confirm_or_abort "will eval passed in command"
+  cd "$PROJECT_ROOT"
+  confirm_or_abort "will eval passed in command from"
 fi
 
 eval "$@"
