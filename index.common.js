@@ -90,7 +90,7 @@ import HomePageMixin from './Components/HomePageMixin'
 import MatchImages from './Components/MatchImages'
 // import VideoCamera from './Components/VideoCamera'
 
-import utils from './utils/utils'
+import utils, { isWeb } from './utils/utils'
 
 import Actions from './Actions/Actions'
 import AutomaticUpdates from './utils/automaticUpdates';
@@ -121,7 +121,7 @@ let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
   return {
     ...originalGetDefaultProps(),
-    allowFontScaling: !utils.isWeb()
+    allowFontScaling: !isWeb()
   };
 };
 
@@ -222,7 +222,7 @@ class TiMApp extends Component {
 
     // uncomment after figuring out what to do when the user
     // uses the browser back button here to leave the auth screen
-    if (utils.isWeb()) return
+    if (isWeb()) return
 
     let dateAppStateChanged = Date.now()
     // let lastDateAppStateChanged = this.state.dateAppStateChanged
@@ -435,10 +435,10 @@ class TiMApp extends Component {
           }}
           passProps={this.state.props}
           configureScene={(route) => {
-            if (!utils.isWeb() && route.sceneConfig)
+            if (!isWeb() && route.sceneConfig)
               return route.sceneConfig;
 
-            const config = utils.isWeb()
+            const config = isWeb()
               ? Transitions.NONE
               : {...Navigator.SceneConfigs.FloatFromRight, springFriction:26, springTension:200}
 
@@ -839,25 +839,46 @@ var NavigationBarRouteMapper = {
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
     let logoNeedsText = bankStyle  &&  bankStyle.logoNeedsText
-    if (!logoNeedsText  &&  resource) {
-      if (route.id !== ARTICLE_VIEW)  { // ArticleView
-        if (route.id !== MESSAGE_LIST)
-          logoNeedsText = true
-        else {
-          let me = utils.getMe()
-          if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
-            logoNeedsText = true
-        }
+    if (!logoNeedsText) {
+      switch (route.id) {
+      case ARTICLE_VIEW:
+        break
+      case MESSAGE_LIST:
+        if (resource) {
+           let me = utils.getMe()
+           if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
+             logoNeedsText = true
+         }
+        break
+      default:
+        logoNeedsText = true
       }
     }
+    // if (!logoNeedsText  &&  resource) {
+    //   if (route.id !== ARTICLE_VIEW)  { // ArticleView
+    //     if (route.id !== MESSAGE_LIST)
+    //       logoNeedsText = true
+    //     else {
+    //       let me = utils.getMe()
+    //       if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
+    //         logoNeedsText = true
+    //     }
+    //   }
+    // }
     let t = route.title.split(' -- ')
     let st = {} //t.length > 1 ? {marginTop: 2} : {}
     let color
     if (uri) {
-      if (logoNeedsText)
-        photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo]} />
+      let { width, height } = photoObj
+      if (width  &&  height)
+        width = width * LOGO_HEIGHT / height
       else
-        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo]} />
+        width = LOGO_HEIGHT * 2
+      height = LOGO_HEIGHT
+      if (logoNeedsText)
+        photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo, {width, height}]} />
+      else
+        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
     }
 
     if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW)  // Camera view
@@ -875,7 +896,7 @@ var NavigationBarRouteMapper = {
 
       let width = navBarTitleWidth(route.component)
       let st = {width, alignItems: 'center'}
-      if (utils.isWeb())
+      if (isWeb())
         st.paddingLeft = 5
       for (let i=1; i<t.length; i++) {
         if (!tArr)
@@ -885,7 +906,7 @@ var NavigationBarRouteMapper = {
                   </View>
                   )
       }
-      let tstyle = utils.isWeb() ? {paddingLeft: 5} : {width}
+      let tstyle = isWeb() ? {paddingLeft: 5} : {width}
       text = <View style={tstyle} key={'index.common.js_0'}>
                <Text numberOfLines={1} style={style}>{t[0]}</Text>
              </View>
@@ -960,7 +981,7 @@ var styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     paddingRight: 10,
     paddingLeft: 15,
-    paddingBottom: utils.isWeb() ? 3 : 0
+    paddingBottom: isWeb() ? 3 : 0
   }
 });
 
