@@ -289,6 +289,7 @@ class RefPropertyEditor extends Component {
       }
     }
     this.props.navigator.push({
+      title: translate(prop, model),
       backButtonTitle: 'Back',
       id: 12,
       component: CameraView,
