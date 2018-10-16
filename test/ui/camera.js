@@ -20,7 +20,7 @@ import { capture as useCamera} from '../../utils/camera.rncamera'
 import { capture as useImagePicker } from '../../utils/camera.imagepicker'
 import Navigator from '../../Components/Navigator'
 
-if (SplashScreen) {
+if (SplashScreen && SplashScreen.hide) {
   SplashScreen.hide()
 }
 
@@ -89,14 +89,10 @@ class MainRoute extends Component {
     super(props)
     this.state = {}
     this.captureWith = fn => async () => {
-      let image
-      try {
-        image = await fn(this.props)
-      } catch (err) {
-        return Alert.alert('Error', err.message)
+      const image = await fn(this.props)
+      if (image) {
+        this.onImage(image)
       }
-
-      this.onImage(image)
     }
   }
 

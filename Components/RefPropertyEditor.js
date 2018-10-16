@@ -31,8 +31,9 @@ import ImageInput from './ImageInput'
 import Actions from '../Actions/Actions'
 import BlinkID from './BlinkID'
 import Navigator from './Navigator'
-import CameraView from './CameraView'
 import GridList from './GridList'
+import { capture } from '../utils/camera'
+import Errors from '@tradle/errors'
 
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
@@ -214,7 +215,7 @@ class RefPropertyEditor extends Component {
                      </ImageInput>
       }
       else
-        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop: prop})}>
+        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop})}>
                        {content}
                      </TouchableOpacity>
     }
@@ -254,7 +255,7 @@ class RefPropertyEditor extends Component {
     // this.setState(state);
     this.props.onChange(state)
   }
-  showCameraView(params) {
+  async showCameraView(params) {
     // if (utils.isAndroid()) {
     //   return Alert.alert(
     //     translate('oops') + '!',
@@ -283,17 +284,16 @@ class RefPropertyEditor extends Component {
         return
       }
     }
-    this.props.navigator.push({
+
+    const result = await capture({
+      navigator: this.props.navigator,
       title: translate(prop, model),
-      backButtonTitle: 'Back',
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        model,
-        onTakePic: this.onTakePicture.bind(this, params)
-      }
-    });
+      backButtonTitle: translate('back'),
+    })
+
+    if (result) {
+      this.onTakePicture(params, result)
+    }
   }
   onTakePicture(params, data) {
     if (!data)
@@ -308,7 +308,6 @@ class RefPropertyEditor extends Component {
       this.props.resource.video = data
       this.props.floatingProps.video = data
     }
-    this.props.navigator.pop();
   }
   getLabelAndBorderColor(prop) {
     let bankStyle = this.props.bankStyle

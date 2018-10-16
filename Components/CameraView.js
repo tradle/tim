@@ -17,7 +17,6 @@ import utils, { translate } from '../utils/utils'
 import { normalizeImageCaptureData } from '../utils/image-utils'
 
 const CameraType = RNCamera.Constants.Type
-const { front, back } = CameraType
 
 class CameraView extends Component {
   static defaultProps = {
@@ -27,16 +26,16 @@ class CameraView extends Component {
   };
 
   static propTypes = {
-    navigator: PropTypes.object.isRequired,
     cameraType: PropTypes.oneOf(['front', 'back']),
     quality: PropTypes.number,
     fixOrientation: PropTypes.bool,
+    callback: PropTypes.func.isRequired,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      cameraType: CameraType[props.cameraType]
+      cameraType: props.cameraType
     }
   }
           // captureTarget={RNCamera.Constants.CaptureTarget.cameraRoll}
@@ -71,7 +70,7 @@ class CameraView extends Component {
             style={styles.container}
             onBarCodeRead={this._onBarCodeRead.bind(this)}
             flashMode={RNCamera.Constants.FlashMode.auto}
-            type={this.state.cameraType}>
+            type={CameraType[this.state.cameraType]}>
           </RNCamera>
           <View style={styles.footer}>
             <Text style={styles.currentAction}>{translate('PHOTO')}</Text>
@@ -81,7 +80,7 @@ class CameraView extends Component {
             <TouchableOpacity onPress={this._switchCamera.bind(this)} style={styles.right}>
               <Icon name='ios-reverse-camera-outline' size={50} color='#eeeeee' />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.props.navigator.pop()} style={styles.left}>
+            <TouchableOpacity onPress={() => this.props.callback()} style={styles.left}>
               <Text style={{fontSize: 20, color: '#ffffff'}}>{translate('cancel')}</Text>
             </TouchableOpacity>
           </View>
@@ -114,18 +113,12 @@ class CameraView extends Component {
         data: normalizeImageCaptureData({ ...data, quality })
       })
     } catch (err) {
-      console.error(err)
+      this.props.callback(err)
       return
     }
-
-    // this.props.onTakePic({
-    //   ...data,
-    //   // backwards compat
-    //   path: data.uri
-    // })
   }
   onTakePic = () => {
-    this.props.onTakePic(this.state.data)
+    this.props.callback(null, this.state.data)
   }
 }
 CameraView = makeResponsive(CameraView)

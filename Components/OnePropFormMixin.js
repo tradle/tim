@@ -2,6 +2,7 @@ import { Alert } from 'react-native'
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io'
 import _ from 'lodash'
 
+import Errors from '@tradle/errors'
 import constants from '@tradle/constants'
 var {
   TYPE
@@ -9,9 +10,10 @@ var {
 
 import utils, { translate, isWeb } from '../utils/utils'
 import Actions from '../Actions/Actions'
-import CameraView from './CameraView'
+// import CameraView from './CameraView'
 import SignatureView from './SignatureView'
 import Navigator from './Navigator'
+import { capture } from '../utils/camera'
 
 const FORM_REQUEST = 'tradle.FormRequest'
 const FORM_ERROR = 'tradle.FormError'
@@ -71,7 +73,7 @@ var OnePropFormMixin = {
     })
   },
 
-  showCamera(params) {
+  async showCamera(params) {
     let { prop } = params
     // if (utils.isAndroid()) {
     //   return Alert.alert(
@@ -100,20 +102,17 @@ var OnePropFormMixin = {
     }
     let { navigator, resource, bankStyle } = this.props
     let model = utils.getModel(utils.getType(resource.form))
-    navigator.push({
+
+    const result = await capture({
+      navigator,
       title: isWeb() &&  translate(prop, model),
-      backButtonTitle: 'Back',
-      noLeftButton: !isWeb(),
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        cameraType: prop.cameraType,
-        model,
-        onTakePic: this.onTakePic.bind(this, params),
-        bankStyle: isWeb() ? bankStyle : {}
-      }
-    });
+      backButtonTitle: translate('back'),
+      cameraType: prop.cameraType,
+    })
+
+    if (result) {
+      this.onTakePic(params, result)
+    }
   },
   onTakePic(params, photo) {
     if (!photo)
@@ -138,7 +137,7 @@ var OnePropFormMixin = {
       }
     })
 
-    this.props.navigator.pop();
+    // this.props.navigator.pop();
   },
   async scanPaymentCard(prop) {
     let cardJson
