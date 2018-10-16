@@ -16,12 +16,14 @@ import { makeResponsive } from 'react-native-orient'
 import utils, { translate } from '../utils/utils'
 const BASE64_PREFIX = 'data:image/jpeg;base64,'
 const { back, front } = RNCamera.Constants.Type
+const PHOTO_ID = 'tradle.PhotoID'
+const SELFIE = 'tradle.Selfie'
 
 class CameraView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      cameraType: props.cameraType === 'front' && front || back
+      cameraType: props.cameraType || 'back'
     }
   }
           // captureTarget={RNCamera.Constants.CaptureTarget.cameraRoll}
@@ -76,20 +78,22 @@ class CameraView extends Component {
     console.log(e);
   }
   _switchCamera() {
-    const cameraType = this.state.cameraType === back ? front : back
+    const cameraType = this.state.cameraType === 'back' ? 'front' : 'back'
     this.setState({ cameraType })
   }
   async _takePicture() {
-    let data
+    let { model } = this.props
+    let isBestQuality = model  &&  (model.id === PHOTO_ID || model.id === SELFIE)
     try {
-      data = await this.camera.takePictureAsync({
+      let props = {
         base64: true,
-        mirrorImage: this.state.cameraType === back ? false : true,
-        quality: 0.5,
+        mirrorImage: this.state.cameraType !== 'back',
+        quality: isBestQuality && 1 || 0.5,
         fixOrientation: true,
         forceUpOrientation: true,
         doNotSave: true,
-      })
+      }
+      let data = await this.camera.takePictureAsync(props)
 
       data.base64 = BASE64_PREFIX + utils.cleanBase64(data.base64)
       this.setState({ data })

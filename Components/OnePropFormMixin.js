@@ -112,6 +112,7 @@ var OnePropFormMixin = {
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
         cameraType: prop.cameraType,
+        model,
         onTakePic: this.onTakePic.bind(this, params),
         bankStyle: isWeb() ? bankStyle : {}
       }
