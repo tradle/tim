@@ -1,6 +1,3 @@
-console.log('requiring PhotoView.js')
-'use strict';
-
 import React, { Component } from 'react'
 import {
   Image,

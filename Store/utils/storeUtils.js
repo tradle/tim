@@ -1,8 +1,6 @@
-'use strict'
 
 import voc from '../voc'
 import utils from '../../utils/utils'
-const Aviva = require('../../utils/aviva')
 var sha = require('stable-sha1');
 
 var constants = require('@tradle/constants');
@@ -27,7 +25,6 @@ var storeUtils = {
     }
   },
   parseOneModel(m, models, enums) {
-    Aviva.preparseModel(m)
     // this.addNameAndTitleProps(m)
     models[m.id] = {
       key: m.id,
@@ -47,7 +44,6 @@ var storeUtils = {
     }
   },
   addOns(m, models, enums) {
-    // Aviva.preparseModel(m)
     this.addNameAndTitleProps(m)
     // models[m.id] = {
     //   key: m.id,

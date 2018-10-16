@@ -3,8 +3,6 @@
   a bootstrap like style
 
 */
-'use strict';
-
 var React = require('react-native')
 
 var LABEL_COLOR = '#000000';

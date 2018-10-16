@@ -1,9 +1,3 @@
-console.log('requiring password-prompts.js')
-
-import {
-  Platform
-} from 'react-native'
-
 import ENV from './env'
 
 // maps to strings_en.json

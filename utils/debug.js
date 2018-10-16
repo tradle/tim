@@ -1,5 +1,3 @@
-console.log('requiring debug.js')
-
 import { EventEmitter } from 'events'
 import debug from 'debug'
 import './crashlytics'
@@ -39,7 +37,6 @@ if (__DEV__) {
 debug.enable(enabled.join(','))
 
 const rawConsole = {}
-const debugConsole = {}
 
 consoleMethods.forEach(method => {
   const orig = console[method]

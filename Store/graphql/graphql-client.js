@@ -1,4 +1,3 @@
-'use strict'
 
 import omit from 'lodash/omit'
 import isEmpty from 'lodash/isEmpty'

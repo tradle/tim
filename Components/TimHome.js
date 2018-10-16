@@ -1,5 +1,3 @@
-console.log('requiring TimHome.js')
-'use strict';
 
 import Q from 'q'
 import debounce from 'debounce'

@@ -212,7 +212,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#a0f5b93318b14dfe9cbe6275c5cfce11f526fd83"
+      "resolved": "git://github.com/tradle/models.git#0959bc47346ffa53ca9fd6b5dcf16efa790c5baf"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -569,9 +569,9 @@
       "dev": true
     },
     "art": {
-      "version": "0.10.2",
+      "version": "0.10.3",
       "from": "art@>=0.10.0 <0.11.0",
-      "resolved": "https://registry.npmjs.org/art/-/art-0.10.2.tgz"
+      "resolved": "https://registry.npmjs.org/art/-/art-0.10.3.tgz"
     },
     "asap": {
       "version": "2.0.6",
@@ -2018,7 +2018,7 @@
     },
     "deep-equal": {
       "version": "1.0.1",
-      "from": "deep-equal@>=1.0.1 <2.0.0",
+      "from": "deep-equal@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/deep-equal/-/deep-equal-1.0.1.tgz"
     },
     "deep-extend": {
@@ -2239,7 +2239,7 @@
     },
     "dot-prop": {
       "version": "4.2.0",
-      "from": "dot-prop@>=4.2.0 <4.3.0",
+      "from": "dot-prop@>=4.2.0 <5.0.0",
       "resolved": "https://registry.npmjs.org/dot-prop/-/dot-prop-4.2.0.tgz"
     },
     "downloadjs": {
@@ -4888,7 +4888,7 @@
     },
     "my-local-ip": {
       "version": "1.0.0",
-      "from": "my-local-ip@>=1.0.0 <2.0.0",
+      "from": "https://registry.npmjs.org/my-local-ip/-/my-local-ip-1.0.0.tgz",
       "resolved": "https://registry.npmjs.org/my-local-ip/-/my-local-ip-1.0.0.tgz",
       "dev": true
     },
@@ -8273,11 +8273,6 @@
           "resolved": "https://registry.npmjs.org/ultron/-/ultron-1.0.2.tgz"
         }
       }
-    },
-    "xml2js": {
-      "version": "0.4.19",
-      "from": "xml2js@>=0.4.19 <0.5.0",
-      "resolved": "https://registry.npmjs.org/xml2js/-/xml2js-0.4.19.tgz"
     },
     "xmlbuilder": {
       "version": "9.0.7",

@@ -1,9 +1,7 @@
-console.log('requiring GridItemsList.js')
-'use strict';
 
 import React, { Component } from 'react'
 import _ from 'lodash'
-import equal from 'deep-equal'
+import equal from 'lodash/isEqual'
 import Icon from 'react-native-vector-icons/Ionicons'
 import constants from '@tradle/constants'
 // import ActionSheet from 'react-native-actionsheet'

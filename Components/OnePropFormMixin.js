@@ -1,6 +1,3 @@
-console.log('requiring OnePropFormMixin.js')
-'use strict';
-
 import { Alert } from 'react-native'
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io'
 import _ from 'lodash'

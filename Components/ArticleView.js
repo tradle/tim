@@ -1,5 +1,3 @@
-console.log('requiring ArticleView.js')
-
 import {
   View,
   Text,

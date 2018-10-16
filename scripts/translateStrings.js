@@ -1,7 +1,6 @@
 const Promise = require('bluebird')
 const path = require('path')
 const writeFileAtomic = require('write-file-atomic')
-const stableStringify = require('json-stable-stringify')
 const Translate = require('@google-cloud/translate')
 
 const translate = new Translate();
@@ -23,7 +22,7 @@ const argv = require('minimist')(process.argv.slice(2), {
     l: 'languages'
   }
 })
-const { help, dictionary, languages, array } = argv
+const { help, dictionary, languages } = argv
 
 if (help) {
   console.log(HELP)
@@ -65,7 +64,7 @@ async function writeFile(stringsDir, lang) {
     if (!stringsLang[p])
       promises.push(translateText({strings: stringsLang, lang, key: p, text: stringsEN[p]}))
   }
-  let result = await Promise.all(promises, { concurrency: 20 })
+  await Promise.all(promises, { concurrency: 20 })
 
   // Check if some models/props were deleted
   let hasChanged = promises.length

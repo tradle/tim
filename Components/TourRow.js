@@ -1,5 +1,3 @@
-console.log('requiring TourRow.js')
-'use strict';
 
 import utils from '../utils/utils'
 import Icon from 'react-native-vector-icons/Ionicons';

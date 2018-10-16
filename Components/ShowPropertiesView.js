@@ -1,5 +1,3 @@
-console.log('requiring ShowPropertiesView.js')
-'use strict';
 
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'

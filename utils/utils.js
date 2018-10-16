@@ -1,6 +1,3 @@
-console.log('requiring utils.js')
-'use strict'
-
 import React from 'react'
 import {
   NativeModules,
@@ -10,7 +7,6 @@ import {
   Linking,
   PixelRatio,
   Platform,
-  PermissionsAndroid,
   StyleSheet
 } from 'react-native'
 import _ from 'lodash'
@@ -37,7 +33,7 @@ import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
 import Lens from '@tradle/lens'
-import tradle, {
+import {
   protocol,
   utils as tradleUtils
 } from '@tradle/engine'
@@ -54,7 +50,6 @@ import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
 import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
-import locker from './locker'
 import Strings from './strings'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
@@ -483,9 +478,7 @@ var utils = {
     }
     return s ? s : args[0]
   },
-  clone(resource) {
-    return _.cloneDeep(resource)
-  },
+  clone: _.cloneDeep,
   compare(r1, r2, isInlined) {
     if (!r1 || !r2)
       return (r1 || r2) ? false : true
@@ -2047,7 +2040,6 @@ var utils = {
     }
   },
 
-  locker,
   getMainPhotoProperty(model) {
     let mainPhoto
     let props = model.properties
@@ -2377,53 +2369,7 @@ var utils = {
     })
     return val
   },
-  requestCameraAccess: async function (opts={}) {
-    if (utils.isAndroid()) {
-      const check = PermissionsAndroid.check || PermissionsAndroid.checkPermission
-      const request = PermissionsAndroid.request || PermissionsAndroid.requestPermission
-      // const alreadyGranted = check.call(PermissionsAndroid, PermissionsAndroid.PERMISSIONS.CAMERA)
-      // if (alreadyGranted) return true
-
-      return await request.call(
-        PermissionsAndroid,
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          'title': utils.translate('cameraAccess'),
-          'message': utils.translate('enableCameraAccess')
-        }
-      )
-    }
-
-    const { video=true, audio=false } = opts
-
-    if (!(video || audio)) throw new Error('expected "video" and/or "audio"')
-
-    let request
-    if (video && audio) {
-      request = Camera.checkDeviceAuthorizationStatus()
-    } else if (video) {
-      request = Camera.checkVideoAuthorizationStatus()
-    } else {
-      request = Camera.checkAudioAuthorizationStatus()
-    }
-
-    const granted = await request
-    if (granted) return true
-
-    Alert.alert(
-      utils.translate('cameraAccess'),
-      utils.translate('enableCameraAccess'),
-      [
-        { text: 'Cancel' },
-        {
-          text: 'Settings',
-          onPress: () => {
-            Linking.openURL('app-settings:')
-          }
-        }
-      ]
-    )
-  },
+  requestCameraAccess: platformUtils.requestCameraAccess,
   requestForModels(to) {
     let me = this.getMe()
     var msg = {

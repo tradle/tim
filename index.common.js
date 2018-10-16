@@ -1,4 +1,3 @@
-'use strict'
 
 import './utils/errors'
 import './utils/shim'
@@ -42,9 +41,6 @@ const {
 // require('babel-polyfill')
 
 // require('react-native-level')
-import Debug from './utils/debug'
-var debug = Debug('tradle:app')
-var perfDebug = Debug('perf')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
 // import './utils/crypto'

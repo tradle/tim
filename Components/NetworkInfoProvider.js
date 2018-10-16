@@ -1,6 +1,3 @@
-console.log('requiring NetworkInfoProvider.js')
-'use strict'
-
 import {
   View,
   StyleSheet,

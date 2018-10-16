@@ -1,6 +1,3 @@
-import dateformat from 'dateformat'
-import _ from 'lodash'
-
 import { TYPE } from '@tradle/constants'
 import utils, { translate, isWeb, isSimulator } from '../utils/utils'
 const COUNTRY = 'tradle.Country'

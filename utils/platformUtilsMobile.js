@@ -1,4 +1,3 @@
-console.log('requiring platformUtilsMobile.js')
 
 import {
   findNodeHandle,

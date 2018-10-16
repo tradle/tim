@@ -1,9 +1,6 @@
-console.log('requiring missing.js')
 import Promise from 'bluebird'
-import lexint from 'lexicographic-integer'
 import Restore from '@tradle/restore'
 import { constants } from '@tradle/engine'
-const { parseMessageFromDB } = require('./utils')
 const debug = require('debug')('tradle:restore')
 const co = Promise.coroutine
 const MAX_BACKOFF = 60000
@@ -156,8 +153,4 @@ async function getReceivePosition ({ node, queue, counterparty }) {
 
 function bufferizePubKey (key) {
   key.pub = new Buffer(key.pub.data)
-}
-
-function hexint (n) {
-  return lexint.pack(n, 'hex')
 }

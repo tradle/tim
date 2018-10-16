@@ -1,15 +1,10 @@
-console.log('requiring keychain.js')
-import { Alert } from 'react-native'
-import { createHash } from 'crypto'
 import typeforce from 'typeforce'
-import Q from 'q'
 import * as ec from 'react-native-ecc'
 import utils from './utils'
 import { serviceID, accessGroup } from './env'
 ec.setServiceID(serviceID)
 if (accessGroup) ec.setAccessGroup(accessGroup)
 
-import { ec as ellipticEC } from 'elliptic'
 import { utils as tradleUtils } from '@tradle/engine'
 import promisify from 'pify'
 import nkeySE from './nkey-se'
@@ -23,7 +18,6 @@ if (!utils.isWeb()) {
 }
 
 const debug = require('debug')('tradle:app:keychain')
-const ellipticCurves = {}
 
 if (__DEV__) {
   createKeychainNativeKey = utils.addCatchLogger('createKeychainNativeKey', createKeychainNativeKey)
@@ -51,31 +45,6 @@ export async function generateNewSet (opts={}) {
     key.set('purpose', keyProps.purpose)
     return key
   }))
-
-  // const keys = []
-  // let i = 0
-  // let allStart = Date.now()
-  // for (let keyProps of defaultKeySet) {
-  //   let start = Date.now()
-  //   keyProps = { ...keyProps } // defensive copy
-  //   const gen = isKeychainNative(keyProps)
-  //     ? createKeychainNativeKey(keyProps)
-  //     : createKeychainResidentKey(keyProps, networks)
-
-  //   Alert.alert('generating key', JSON.stringify(keyProps) + ', ' + (new Date()))
-  //   debug('generating key', JSON.stringify(keyProps) + ', ' + (new Date()))
-  //   const key = await gen
-  //   let time = Date.now() - start
-  //   Alert.alert(`generated key (${time}ms)`, JSON.stringify(keyProps) + ', ' + (new Date()))
-  //   key.set('purpose', keyProps.purpose)
-  //   keys.push(key)
-  //   i++
-  // }
-
-  // let time = Date.now() - allStart
-  // Alert.alert(`generated ${defaultKeySet.length} keys (${time}ms)`)
-
-  // return keys
 }
 
 export function saveKey (pub, priv) {
@@ -139,9 +108,6 @@ function lookupKeychainResidentKey (pubKey) {
 }
 
 async function lookupKeychainNativeKey (pubKey) {
-  // const keyPair = getCurve(pubKey.curve).keyFromPublic(new Buffer(pubKey.pub, 'hex'))
-  // const uncompressed = keyPair.getPublic(false, true)
-  // const key = await Q.ninvoke(ec, 'lookupKey', new Buffer(uncompressed))
   const key = ec.keyFromPublic(new Buffer(pubKey.pub, 'hex'))
   return nkeySE.fromJSON({ ...pubKey, ...key })
 }
@@ -160,16 +126,6 @@ function createKeychainResidentKey (keyProps, networks) {
 
 function createKeychainNativeKey (keyProps) {
   return promisify(nkeySE.gen)(keyProps)
-}
-
-function rejectNotFound () {
-  return Promise.reject(new Error('NotFound'))
-}
-
-function getCurve (name) {
-  if (!ellipticCurves[name]) ellipticCurves[name] = new ellipticEC(name)
-
-  return ellipticCurves[name]
 }
 
 function isKeychainNative (key) {

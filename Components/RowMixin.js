@@ -1,5 +1,3 @@
-console.log('requiring RowMixin.js')
-'use strict';
 
 const debug = require('debug')('tradle:app:RowMixin')
 import React from 'react'

@@ -1,5 +1,3 @@
-console.log('requiring ShareResourceList.js')
-'use strict';
 
 import React, { Component } from 'react'
 import reactMixin from 'react-mixin'

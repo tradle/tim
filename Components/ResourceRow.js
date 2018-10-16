@@ -1,5 +1,3 @@
-console.log('requiring ResourceRow.js')
-'use strict';
 
 import {
   Image,

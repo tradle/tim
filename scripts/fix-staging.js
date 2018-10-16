@@ -10,7 +10,6 @@ const path = require('path')
 const writeSync = require('write-file-atomic').sync
 const xcode = require('xcode')
 const _ = require('lodash')
-const stableStringify = require('json-stable-stringify')
 
 // main
 // +      "CONFIGURATION_BUILD_DIR": "\"$(BUILD_DIR)/$(CONFIGURATION_HACK)$(EFFECTIVE_PLATFORM_NAME)\",
@@ -65,8 +64,6 @@ const fixProject = projPath => {
   if (fixed) {
     writeSync(projPath, proj.writeSync())
   }
-
-  // console.log(stableStringify(configs, { space: 2 }))
 }
 
 const fixConfig = config => {

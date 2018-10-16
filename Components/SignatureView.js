@@ -1,5 +1,3 @@
-console.log('requiring SignatureView.js')
-'use strict';
 
 import utils, { translate } from '../utils/utils'
 import PageView from './PageView'

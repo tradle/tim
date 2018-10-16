@@ -1,15 +1,12 @@
-console.log('requiring localAuth.js')
 
 import { Alert, Platform } from 'react-native'
 const LocalAuth = Platform.OS !== 'web' && require('react-native-local-auth')
 const Errors = LocalAuth && require('react-native-local-auth/data/errors')
 
 import Q from 'q'
-import Keychain from 'react-native-keychain'
 import PasswordCheck from '../Components/PasswordCheck'
 import LockScreen from '../Components/LockScreen'
 import ENV from '../utils/env'
-import { coroutine as co } from 'bluebird'
 
 // hack!
 // hasTouchID().then(ENV.setHasTouchID)
@@ -24,8 +21,7 @@ const debug = require('debug')('tradle:app:local-auth')
 const PASSWORD_ITEM_KEY = 'app-password'
 
 const isWeb = Platform.OS === 'web'
-const isAndroid = utils.isAndroid()
-const isIOS = utils.isIOS()
+const isAndroid = Platform.OS === 'android'
 const ForgivableTouchIDErrors = [
   'LAErrorTouchIDNotAvailable',
   'LAErrorTouchIDNotSupported',
@@ -59,7 +55,7 @@ const PASSWORD_REGEX = __DEV__ || ENV.lenientPassword
   ? DEV_PASSWORD_REGEX
   : /^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{10,}$/
 
-const validate = utils.isWeb()
+const validate = isWeb
   ? validateTextPassword
   : validateGesturePassword
 
@@ -299,14 +295,14 @@ function lockUp (nav, err) {
 }
 
 function setPassword (navigator, isChangePassword) {
-  const passwordSpec = utils.isWeb()
+  const passwordSpec = isWeb
     ? translate('textPasswordLimitations')
     : translate('passwordLimitations')
 
   debug('requesting to choose a gesture password')
-  return Q.Promise((resolve, reject) => {
-    let routes = navigator.getCurrentRoutes().length
-    let method = isChangePassword || routes === 1 ? 'push' : 'replace'
+  return new Promise((resolve, reject) => {
+    const routes = navigator.getCurrentRoutes().length
+    const method = isChangePassword || routes === 1 ? 'push' : 'replace'
     navigator[method]({
       component: PasswordCheck,
       id: 20,
@@ -382,7 +378,7 @@ function validateGesturePassword (pass) {
 }
 
 function getPasswordPrompts () {
-  const prompts = PROMPTS[utils.isWeb() ? 'text' : 'gesture']
+  const prompts = PROMPTS[isWeb ? 'text' : 'gesture']
   const translated = {}
   for (var p in prompts) {
     translated[p] = utils.translate(prompts[p])

@@ -1,5 +1,3 @@
-console.log('requiring Markdown.js')
-'use strict';
 
 import { parse as parseUrl } from 'url'
 import { deepLinkHost } from '../utils/env'

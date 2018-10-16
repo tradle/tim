@@ -1,5 +1,3 @@
-console.log('requiring SearchBar.js')
-'use strict'
 
 import React, { Component } from 'react'
 import {

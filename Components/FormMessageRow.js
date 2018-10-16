@@ -1,5 +1,3 @@
-console.log('requiring FormMessageRow.js')
-'use strict';
 
 import _ from 'lodash'
 import reactMixin from 'react-mixin'

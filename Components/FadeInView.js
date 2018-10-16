@@ -1,5 +1,3 @@
-console.log('requiring FadeInView.js')
-'use strict'
 
 import React, { Component } from 'react'
 import { Animated } from 'react-native'

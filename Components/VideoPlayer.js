@@ -1,5 +1,3 @@
-console.log('requiring VideoPlayer.js')
-'use strict'
 
 import React from 'react'
 import {

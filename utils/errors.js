@@ -1,4 +1,3 @@
-console.log('requiring errors.js')
 import {
   Alert
 } from 'react-native'

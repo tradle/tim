@@ -1,5 +1,3 @@
-console.log('requiring VerificationRow.js')
-'use strict';
 
 import {
   // Text,

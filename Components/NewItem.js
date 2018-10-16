@@ -1,6 +1,3 @@
-console.log('requiring NewItem.js')
-'use strict';
-
 import t from 'tcomb-form-native'
 import utils from '../utils/utils'
 var translate = utils.translate

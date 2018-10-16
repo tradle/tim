@@ -1,4 +1,3 @@
-console.log('requiring platformUtils.web.js')
 
 import ReactDOM from 'react-dom'
 import extend from 'xtend'
@@ -29,5 +28,8 @@ module.exports = {
   scrollTo: function (scrollView, x, y) {
     scrollView.scrollTo({ x, y })
   },
-  navBarHeight: NavigationBarStylesIOS.General.NavBarHeight
+  navBarHeight: NavigationBarStylesIOS.General.NavBarHeight,
+  requestCameraAccess: () => {
+    throw new Error('not implemented')
+  },
 }

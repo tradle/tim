@@ -1,5 +1,3 @@
-console.log('requiring VerifierChooser.js')
-'use strict';
 
 import ResourceRow from './ResourceRow'
 import MessageList from './MessageList'

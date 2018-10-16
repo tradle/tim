@@ -1,4 +1,3 @@
-console.log('requiring env.js')
 import {
   Platform
 } from 'react-native'
@@ -25,7 +24,6 @@ console.log('getUserMedia is available', !!getUserMedia)
 
 const LOCAL_IP = window.location.hostname
 
-const DEV_PUSH_SERVER = 'https://push1.tradle.io' //`http://${LOCAL_IP}:48284`
 const PROD_PUSH_SERVER = 'https://push1-prod.tradle.io'
 
 const splash = {
@@ -87,8 +85,6 @@ const merged = extend({
     // // r3.com
     // 'https://9xzhlnx5fb.execute-api.us-east-1.amazonaws.com/dev',
   ],
-  LOCAL_TRADLE_SERVER: 'https://wtpo3stsji.execute-api.us-east-1.amazonaws.com/dev/', // Goofy
-  // pushServerURL: __DEV__ ? DEV_PUSH_SERVER : PROD_PUSH_SERVER,
   pushServerURL: PROD_PUSH_SERVER,
   isAndroid: function () {
     return Platform.OS === 'android'

@@ -1,5 +1,3 @@
-console.log('requiring ContextChooser.js')
-'use strict';
 
 import {
   ListView,

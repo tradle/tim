@@ -1,5 +1,3 @@
-console.log('requiring ShowRefList.js')
-'use strict';
 
 import constants from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'

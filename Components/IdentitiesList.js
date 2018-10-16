@@ -1,5 +1,3 @@
-console.log('requiring IdentitiesList.js')
-'use strict';
 
 import reactMixin from 'react-mixin'
 import extend from 'extend'

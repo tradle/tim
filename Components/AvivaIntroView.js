@@ -1,6 +1,3 @@
-console.log('requiring AvivaIntroView.js')
-'use strict';
-
 import utils from '../utils/utils'
 var translate = utils.translate
 import PageView from './PageView'
