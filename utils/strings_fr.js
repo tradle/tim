@@ -315,5 +315,6 @@ module.exports = {
   "logSentToDevTeam": "Le journal a été envoyé à l'équipe de développeurs Tradle",
   "validatingDataClaim": "Importer des données",
   "debugLogSent": "Journal de débogage envoyé",
-  "reviewScannedPropertiesAndSecondSideSnapshot": "Veuillez examiner les données ci-dessous et prendre un instantané du côté {1} du document."
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Veuillez examiner les données ci-dessous et prendre un instantané du côté {1} du document.",
+  "documentBackSide": "Centrer le dos du document"
 }

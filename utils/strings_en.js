@@ -205,6 +205,7 @@ module.exports = {
     "centerPassport": "Center passport photo page in frame",
     "centerLicence": "Center licence in frame",
     "centerID": "Center ID in frame",
+    "documentBackSide": "Center document back side",
     "dataSecurity": "Data Security",
     "noAccessToServer": "Server is not accessible. Try later.",
     "next": "Next",

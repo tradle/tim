@@ -33,7 +33,7 @@ class CameraView extends Component {
   };
 
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
       cameraType: props.cameraType
     }
@@ -73,9 +73,9 @@ class CameraView extends Component {
             type={CameraType[this.state.cameraType]}>
           </RNCamera>
           <View style={styles.footer}>
-            <Text style={styles.currentAction}>{translate('PHOTO')}</Text>
+            <Text style={styles.currentAction}>{translate('Photo')}</Text>
             <TouchableOpacity onPress={this._takePicture.bind(this)}>
-               <Icon name='ios-radio-button-on'  size={85}  color='#eeeeee'  style={styles.icon}/>
+               <Icon name='ios-radio-button-on'  size={65}  color='#eeeeee'  style={styles.icon}/>
             </TouchableOpacity>
             <TouchableOpacity onPress={this._switchCamera.bind(this)} style={styles.right}>
               <Icon name='ios-reverse-camera-outline' size={50} color='#eeeeee' />
@@ -86,6 +86,9 @@ class CameraView extends Component {
           </View>
         </View>
       )
+  }
+  _onFacesDetected({faces}) {
+    debugger
   }
   _onBarCodeRead(e) {
     console.log(e);
@@ -104,6 +107,7 @@ class CameraView extends Component {
       fixOrientation,
       forceUpOrientation: fixOrientation,
       doNotSave: true,
+      width: 600,
       // skipProcessing: true,
     }
 
@@ -142,7 +146,8 @@ var styles = StyleSheet.create({
   footer: {
     backgroundColor: '#000000',
     paddingTop: 10,
-    height: 120,
+    height: 100,
+    justifyContent: 'center',
     alignSelf: 'stretch',
     alignItems: 'center'
   },
@@ -152,7 +157,7 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   icon: {
-    marginTop: 2,
+    marginTop: -2,
     alignSelf: 'center',
   },
   cancel: {

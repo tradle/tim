@@ -315,5 +315,6 @@ module.exports = {
   "supportedQrCodes": "Mga sinusuportahang QR code:\n1) magdagdag ng chat channel\n2) pag-import ng data",
   "logSentToDevTeam": "Ang log ay ipinadala sa koponan ng nag-develop ng Tradle",
   "noResourcesForCriteria": "Walang nakuhang mga mapagkukunan para sa pamantayang ito",
-  "reviewScannedPropertiesAndSecondSideSnapshot": "Mangyaring suriin ang data sa ibaba, at kumuha ng isang snapshot ng {1} bahagi ng dokumento"
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Mangyaring suriin ang data sa ibaba, at kumuha ng isang snapshot ng {1} bahagi ng dokumento",
+  "documentBackSide": "Ang dokumento sa likod ng dokumento"
 }

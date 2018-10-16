@@ -349,6 +349,7 @@ class RefPropertyEditor extends Component {
     const type = getDocumentTypeFromTitle(documentType.title)
     let recognizers
     let tooltip
+    let firstSideInstructions, secondSideInstructions
     // let isPassport
     switch (type) {
     case 'passport':
@@ -356,9 +357,10 @@ class RefPropertyEditor extends Component {
       // isPassport = true
       // machine readable travel documents (passport)
       recognizers = BlinkID.recognizers.mrtd
+      firstSideInstructions = translate('scanPassport')
       break
     case 'card':
-      tooltip = translate('centerIdCard')
+      firstSideInstructions = translate('centerIdCard')
       // machine readable travel documents (passport)
       // should be combined
       // if (country.title === 'Bangladesh')
@@ -372,15 +374,18 @@ class RefPropertyEditor extends Component {
       break
     case 'license':
     case 'licence':
-      tooltip = translate('centerLicence')
+      firstSideInstructions = translate('centerLicence')
       if (country.title === 'United States') {
+        secondSideInstructions = translate('documentBackSide')
         recognizers = BlinkID.recognizers.usdlCombined
         // recognizers = BlinkID.recognizers.usdl
       }
       else if (country.title === 'New Zealand')
         recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
-      else
+      else {
+        // secondSideInstructions = translate('scanLicenceBack')
         recognizers = BlinkID.recognizers.eudl
+      }
       break
     default:
       tooltip = translate('centerID')
@@ -393,7 +398,8 @@ class RefPropertyEditor extends Component {
       // timeout: ENV.blinkIDScanTimeoutInternal,
       documentType,
       country,
-      tooltip,
+      firstSideInstructions,
+      secondSideInstructions,
       recognizers: recognizers ? [].concat(recognizers) : BlinkID.recognizers
     }
 
