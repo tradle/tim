@@ -1056,36 +1056,8 @@ class NewResource extends Component {
       </ScrollView>
 
 
-    const { properties } = meta
-    const droppable = Object.keys(properties).find(key => {
-      const prop = properties[key]
-      const propMeta = prop.items || prop
-      const isPhoto = propMeta.ref === PHOTO
-      if (!isPhoto) return false
-      if (!ENV.canUseWebcam) return true
-
-      // if image processing is required
-      // let them upload, because there is none in web
-      return prop.component != null
-    })
-    if (droppable) {
-      const prop = properties[droppable]
-      // return (
-      return (
-        <PageView style={[platformStyles.container, {backgroundColor: 'transparent'}]} separator={contentSeparator}>
-          <DropPage
-            accept="image/*"
-            multiple={prop.type === 'array'}
-            style={platformStyles.container}
-            onDrop={(accepted, rejected) => this.onDropFiles({ prop, rejected, files: accepted })}
-          >
-            {content}
-          </DropPage>
-        </PageView>
-      )
-    }
+    let errors
     if (!isRegistration) {
-      let errors
       if (this.state.missedRequiredOrErrorValue  &&  !utils.isEmpty(this.state.missedRequiredOrErrorValue)) {
         errors = <View style={styles.errors}>
                    <Text style={styles.errorsText}>{translate('fillRequiredFields')}</Text>
@@ -1105,9 +1077,40 @@ class NewResource extends Component {
                    <Text style={styles.errorsText}>{translate('validationErrors')}</Text>
                  </View>
       }
-      // HACK for web otherwise does not get displyed
-      contentSeparator.width = utils.dimensions().width
-      return <PageView style={[platformStyles.container, {alignItems: 'center', backgroundColor: 'transparent'}]} separator={contentSeparator} bankStyle={bankStyle}>
+    }
+    const { properties } = meta
+    const droppable = Object.keys(properties).find(key => {
+      const prop = properties[key]
+      const propMeta = prop.items || prop
+      const isPhoto = propMeta.ref === PHOTO
+      if (!isPhoto) return false
+      if (!ENV.canUseWebcam) return true
+
+      // if image processing is required
+      // let them upload, because there is none in web
+      return prop.component != null
+    })
+    if (droppable) {
+      const prop = properties[droppable]
+      // contentSeparator.width = utils.getContentWidth(NewResource)
+      // return (
+      return (
+        <PageView style={[platformStyles.container, styles.message]} separator={contentSeparator}>
+          <DropPage
+            accept="image/*"
+            multiple={prop.type === 'array'}
+            style={platformStyles.container}
+            onDrop={(accepted, rejected) => this.onDropFiles({ prop, rejected, files: accepted })}
+          >
+            {errors}
+            {content}
+          </DropPage>
+        </PageView>
+      )
+    }
+    if (!isRegistration) {
+      contentSeparator.width = utils.getContentWidth(NewResource)
+      return <PageView style={[platformStyles.container, styles.message]} separator={contentSeparator} bankStyle={bankStyle}>
                {errors}
                {content}
               </PageView>
@@ -1363,24 +1366,19 @@ class NewResource extends Component {
       actionableItem = <ImageInput
                          prop={bl}
                          underlayColor='transparent'
+                         style={{paddingBottom: 5}}
                          onImage={item => this.onAddItem(bl.name, item)}>
                          {itemsArray}
                        </ImageInput>
 
-    let counterItem
-    counterItem = <ImageInput
-                      prop={bl}
-                      underlayColor='transparent' style={[{flex: 1, position: 'absolute', right: 0}, count ? {marginTop: 15} : {marginTop: 15, paddingBottom: 7}]}
-                      onImage={item => this.onAddItem(bl.name, item)}>
-                    {counter}
-                  </ImageInput>
-
     let istyle = [count ? styles.photoButton : styles.itemButton, {marginHorizontal: 10, borderBottomColor: lcolor}]
+    if (!count)
+      istyle.push({height: 70})
 
     return (
       <View key={this.getNextKey()}>
         <View style={istyle} ref={bl.name}>
-          <View style={styles.items}>
+          <View style={[styles.items, {alignItems: 'flex-end'}]}>
             {actionableItem}
             <ImageInput
                 prop={bl}
@@ -1440,8 +1438,8 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     actionIcon: {
       flex: 1,
-      justifyContent: 'center',
-      // justifyContent: 'flex-end',
+      // justifyContent: 'center',
+      justifyContent: 'flex-end',
       alignItems: 'flex-end',
       paddingBottom: 2
       // paddingRight: 5
@@ -1541,10 +1539,6 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       borderBottomColor: '#eeeeee',
       borderBottomWidth: 1
     },
-    // scroll: {
-    //   backgroundColor: 'transparent',
-    //   paddingTop:10
-    // },
     bar: {
       backgroundColor: 'transparent',
       paddingHorizontal: 10,
@@ -1555,7 +1549,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       width: '90%'
     },
     camera: {
-      paddingTop: 30
+      // paddingTop: 30
     },
     submit: {
       width: 340,
@@ -1583,7 +1577,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       height: 45,
       justifyContent: 'center',
       backgroundColor: bankStyle.errorBgColor || '#990000',
-      width: utils.getContentWidth(NewResource) - 40,
+      width: utils.getContentWidth(NewResource),
       alignItems: 'center',
       paddingHorizontal: 7
     },
@@ -1624,6 +1618,15 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
       // shadowRadius: 5,
       shadowColor: '#afafaf',
     },
+    message: {
+      alignItems: 'center',
+      // alignSelf: 'center',
+      backgroundColor: 'transparent'
+    },
+    // scroll: {
+    //   backgroundColor: 'transparent',
+    //   paddingTop:10
+    // },
     // error: {
     //   marginTop: -10,
     //   backgroundColor: 'transparent'
