@@ -1,7 +1,5 @@
-console.log('requiring Store.js')
-'use strict';
 
-import '../utils/perf'
+// import '../utils/perf'
 import path from 'path'
 import { parse as parseURL } from 'url'
 import {
@@ -11,8 +9,6 @@ import {
   InteractionManager
 } from 'react-native'
 import _ from 'lodash'
-import pick from 'object.pick'
-import dotProp from 'dot-prop'
 const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 // const { ApolloClient, createNetworkInterface } = require('apollo-client')
@@ -26,6 +22,7 @@ import EventEmitter from 'events'
 import Promise, { coroutine as co } from 'bluebird'
 import TimerMixin from 'react-timer-mixin'
 import plugins from '@tradle/biz-plugins'
+import { allSettled } from '@tradle/promise-utils'
 import appPlugins from '../plugins'
 
 // import yukiConfig from '../yuki.json'
@@ -233,7 +230,6 @@ import { createKeeper } from '../utils/keeper'
 // import Restore from '@tradle/restore'
 import crypto from 'crypto'
 // import { loadOrCreate as loadYuki } from './yuki'
-// import Aviva from '../utils/aviva'
 import monitorMissing from '../utils/missing'
 import identityUtils from '../utils/identity'
 import getBlockchainAdapter from '../utils/network-adapters'
@@ -287,6 +283,12 @@ var driverInfo = (function () {
   const byUrl = {}
   const byIdentifier = {}
   const byPath = {}
+  const stopAll = async () => {
+    const promises = []
+    clientToIdentifiers.forEach((ids, client) => promises.push(client.stop()))
+    return allSettled(promises)
+  }
+
   const wsClients = {
     add({ client, url, identifier, path }) {
       const identifiers = clientToIdentifiers.get(client) || []
@@ -321,7 +323,8 @@ var driverInfo = (function () {
       return `${base}/${path}`
     },
     byUrl,
-    byIdentifier
+    byIdentifier,
+    stopAll,
   }
 
   const restoreMonitors = {}
@@ -401,6 +404,9 @@ const getEmployeeBookmarks = ({ me, botPermalink }) => {
   return createdByBot
 }
 
+const getServiceProviderByUrl = url => (SERVICE_PROVIDERS || [])
+  .find(sp => utils.urlsEqual(sp.url, url))
+
 // var Store = Reflux.createStore(timeFunctions({
 var Store = Reflux.createStore({
   mixins: [TimerMixin],
@@ -449,7 +455,6 @@ var Store = Reflux.createStore({
     this._envPromise = this.loadEnv()
     this.cache = new Cache({max: 500, maxAge: 1000 * 60 * 60})
 
-    // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
 
     this._identityPromises = {}
@@ -531,7 +536,7 @@ var Store = Reflux.createStore({
     try {
       me = await this.getMe()
     } catch(err)  {
-      debug('Store.init ' + err.stack)
+      debug('Store.init', err.message)
     }
 
     this._noSplash = []
@@ -1815,8 +1820,7 @@ var Store = Reflux.createStore({
     // }
   },
 
-  async addAWSProvider(provider) {
-    const self = this
+  async addProvider(provider) {
     const node = await this._enginePromise
     const counterparty = provider.hash
     const url = getProviderUrl(provider)
@@ -1875,7 +1879,7 @@ var Store = Reflux.createStore({
         missing = {}
         debug('aws-client detected missing messages, reconnecting')
         client.reset()
-      })
+      }, 1000)
 
       let missing = {}
       return ({ tip, seq }) => {
@@ -1898,12 +1902,12 @@ var Store = Reflux.createStore({
       checkMissing(result)
     }
 
-    client.on('disconnect', function () {
-      self.setProviderOnlineStatus(provider.hash, false)
+    client.on('disconnect', () => {
+      this.setProviderOnlineStatus(provider.hash, false)
     })
 
-    client.on('connect', function () {
-      self.setProviderOnlineStatus(provider.hash, true)
+    client.on('connect', () => {
+      this.setProviderOnlineStatus(provider.hash, true)
     })
 
     wsClients.add({
@@ -1914,181 +1918,6 @@ var Store = Reflux.createStore({
     })
 
     meDriver.sender.resume(counterparty)
-  },
-
-  addProvider(provider) {
-    let self = this
-    if (utils.isAWSProvider(provider)) {
-      return this.addAWSProvider(provider)
-    }
-
-    const url = getProviderUrl(provider)
-    // let httpClient = driverInfo.httpClient
-    // httpClient.addRecipient(
-    //   provider.hash,
-    //   utils.joinURL(provider.url, provider.id, 'send')
-    // )
-
-    // let whitelist = driverInfo.whitelist
-    // if (provider.txId)
-    //   whitelist.push(provider.txId)
-    const { tlsKey, wsClients, restoreMonitors } = driverInfo
-    // const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
-
-    // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
-    debug('adding provider', provider.hash, url)
-
-    let transport = wsClients.byUrl[url] || wsClients.byIdentifier[provider.hash]
-    const transportExists = !!transport
-    let wsClient
-    if (!transport) {
-      wsClient = this.getWsClient(url)
-      transport = this.getTransport(wsClient)
-    }
-
-    wsClients.add({
-      client: transport,
-      url: url,
-      identifier: provider.hash,
-      path: provider.id
-    })
-
-    restoreMonitors.add({
-      node: meDriver,
-      url: `${url.replace(/\/+$/, '')}/${provider.id}`,
-      identifier: provider.hash,
-      receive: this.queueReceive.bind(this)
-    })
-
-    if (transportExists) return
-
-    // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
-    // const wsClient = new WebSocketClient({
-    //   url: url,
-    //   autoConnect: true,
-    //   // for now, till we figure out why binary
-    //   // doesn't work (socket.io parser errors on decode)
-    //   forceBase64: true
-    // })
-
-    transport.on('presence', updatePresence)
-
-    wsClient.on('disconnect', function () {
-      onTransportConnectivityChanged(false)
-    })
-
-    wsClient.on('connect', function () {
-      onTransportConnectivityChanged(true)
-      // request presence information
-      wsClient.sendCustomEvent('presence')
-    })
-
-    wsClient.on('presence', function (present) {
-      debug('presence updated', present)
-      // the below only handles the known parties
-      // TODO: handle the new arrivals in `present`
-
-      wsClients
-        .providers({ client: transport })
-        .forEach(permalink => {
-          const isPresent = present.indexOf(permalink) !== -1
-          updatePresence(permalink, isPresent)
-        })
-
-      // const permalinks = wsClients.providers({ client: transport })
-      // permalinks.forEach(permalink => {
-      //   const isPresent = present.indexOf(permalink) !== -1
-      //   updatePresence(permalink, isPresent)
-      // })
-
-      // const newArrivals = present.filter(permalink => {
-      //   if (permalinks.indexOf(permalink) === -1) {
-      //     const { hashToUrl={} } = self._getItem(SETTINGS + '_1')
-      //     return !hashToUrl[permalink]
-      //   }
-      // })
-
-      // if (newArrivals.length) self.getInfo([url])
-    })
-
-    function onTransportConnectivityChanged (connected) {
-      if (connected) {
-        self._handleConnectivityChange(true)
-        self._connectedServers[url] = true
-      } else {
-        delete self._connectedServers[url]
-        transport.clients().forEach(function (c) {
-          // reset OTR session, restart on connect
-          debug('aborting pending sends due to disconnect')
-          c.destroy()
-        })
-      }
-
-      const numConnected = Object.keys(self._connectedServers).length
-      if (numConnected === 0) {
-        self._handleConnectivityChange(false)
-        // self.trigger({ action: 'onlineStatus', online: false })
-      } else if (numConnected === 1) {
-        self._handleConnectivityChange(true)
-        // self.trigger({ action: 'onlineStatus', online: true })
-      }
-
-      wsClients
-        .providers({ client: transport })
-        .forEach(permalink => updatePresence(permalink, connected))
-    }
-
-    // let timeouts = {}
-    transport.on('receiving', function (msg) {
-      onTransportConnectivityChanged(true)
-    })
-
-    // transport.on('404', function (recipient) {
-    //   if (!timeouts[recipient]) {
-    //     timeout = setTimeout(function () {
-    //       delete timeouts[recipient]
-    //       transport.cancelPending(recipient)
-    //     }, 10000)
-    //   }
-    // })
-
-    transport.on('message', async function (msg, from) {
-      debug('queuing receipt of msg from', from)
-      if (!wsClients.byIdentifier[from]) {
-        wsClients.add({
-          client: transport,
-          url: url,
-          identifier: from
-        })
-      }
-
-      // const unlock = await self.lockReceive(from)
-      // try {
-        await self.queueReceive({ msg, from })
-        debug('received msg from', from)
-      // } finally {
-      //   unlock()
-      // }
-    })
-
-    transport.setTimeout(40000)
-    transport.on('timeout', function (identifier) {
-      debug(`connection timed out with ${identifier}, canceling pending to trigger resend`)
-      transport.cancelPending(identifier)
-    })
-
-    function updatePresence (recipient, present) {
-      if (present) {
-        meDriver.sender.resume(recipient)
-      } else {
-        meDriver.sender.pause(recipient)
-        transport.cancelPending(recipient)
-        // try again soon. Todo: make this smarter
-        setTimeout(() => meDriver.sender.resume(recipient), 10000)
-      }
-      // self.trigger({action: 'onlineStatus', online: present})
-      self.setProviderOnlineStatus(recipient, present)
-    }
   },
 
   queueReceive({ msg, from }) {
@@ -5372,7 +5201,7 @@ if (!res[SIG]  &&  res._message)
 
     // !!!! Review why we need addToSettings
     if (addSettings)
-      this.addSettings(newProvider)
+      await this.addSettings(newProvider)
     else
       this.addToSettings({ hash: newProvider.permalink, url })
     if (!noTrigger) {
@@ -5397,14 +5226,15 @@ if (!res[SIG]  &&  res._message)
       }
     }
     // check if we have this provider
-    let sp = SERVICE_PROVIDERS.filter((sp) => sp.url === host)
+    let sp = getServiceProviderByUrl(host)
     let invalidQR
-    if (!sp.length) {
+    if (!sp) {
       await this.getInfo({serverUrls: [host]})
-      invalidQR = !SERVICE_PROVIDERS.filter((sp) => sp.url === host).length
-    }
-    else
+      invalidQR = !getServiceProviderByUrl(host)
+    } else {
       invalidQR = !this._getItem(providerId)
+    }
+
     if (invalidQR) {
       Alert.alert(translate('invalidQR'))
       return
@@ -5936,7 +5766,10 @@ if (!res[SIG]  &&  res._message)
   async onReloadDB(opts) {
     const destroyTim = meDriver ? meDriver.destroy() : Promise.resolve()
     await Promise.race([
-      destroyTim,
+      allSettled([
+        destroyTim,
+        driverInfo.wsClients.stopAll()
+      ]),
       Promise.delay(5000)
     ])
 
@@ -5954,7 +5787,7 @@ if (!res[SIG]  &&  res._message)
       try {
         me = await this.getMe()
       } catch(err) {
-        debug('Store.autoRegister', err.stack)
+        debug('Store.autoRegister', err.message)
       }
     }
     if (me)
@@ -6743,7 +6576,7 @@ if (!res[SIG]  &&  res._message)
 
     const propNames = Object.keys(m.properties)
     const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
-    let rr = pick(r, toKeep)
+    let rr = _.pick(r, toKeep)
 
     _.extend(rr, {
       [ROOT_HASH]: r._permalink,
@@ -6753,7 +6586,7 @@ if (!res[SIG]  &&  res._message)
 
     let lr = this._getItem(utils.getId(rr))
     if (lr) {
-      let rr = pick(r, toKeep)
+      let rr = _.pick(r, toKeep)
       let mr = {}
 
       _.extend(mr, lr)
@@ -9671,10 +9504,8 @@ if (!res[SIG]  &&  res._message)
       value.urls = SERVICE_PROVIDERS_BASE_URL_DEFAULTS.concat(v)
       self._setItem(key, value)
     }
-    let newProvider = SERVICE_PROVIDERS.find(sp => {
-                        if (sp.url  &&  utils.urlsEqual(sp.url, value.url))
-                          return sp
-                      })
+
+    const newProvider = getServiceProviderByUrl(value.url)
     self.trigger({action: 'addItem', resource: this._getItem(newProvider.org), addProvider: true})
     return self.dbPut(key, self._getItem(key))
   }),
@@ -10674,6 +10505,7 @@ if (!res[SIG]  &&  res._message)
         r[NOT_CHAT_ITEM] = true
         if (context)
           r._context = context
+        r._latest = true
         await this.onAddChatItem({resource: r, noTrigger: true})
       }
 
@@ -12238,9 +12070,9 @@ if (!res[SIG]  &&  res._message)
     }
 
     const keyPath = `microblink.licenseKey.${Platform.OS}`
-    const key = dotProp.get(env, keyPath)
-    if (key && key !== dotProp.get(ENV, keyPath)) {
-      dotProp.set(ENV, keyPath, key)
+    const key = _.get(env, keyPath)
+    if (key && key !== _.get(ENV, keyPath)) {
+      _.set(ENV, keyPath, key)
       let blinkId = require('../Components/BlinkID')
       if (blinkId)
         blinkId.setLicenseKey(key)
@@ -15002,7 +14834,6 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   // },
 
   // parseOneModel(m) {
-  //   Aviva.preparseModel(m)
   //   storeUtils.addNameAndTitleProps(m)
   //   models[m.id] = {
   //     key: m.id,

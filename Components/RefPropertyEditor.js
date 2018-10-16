@@ -24,7 +24,7 @@ const {
 } = constants.TYPES
 
 import { Text } from './Text'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, isWeb, isSimulator } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
@@ -61,7 +61,7 @@ class RefPropertyEditor extends Component {
   }
   render() {
     let { prop, resource, error, styles, model, bankStyle, country,
-          search, photo, component, paintError, paintHelp } = this.props
+          search, photo, component, paintError, paintHelp, required } = this.props
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
@@ -79,8 +79,8 @@ class RefPropertyEditor extends Component {
     let isPhoto = pName === 'photos'  ||  prop.ref === PHOTO
     let isIdentity = prop.ref === IDENTITY
 
-    let required = model  &&  utils.ungroup(model.required)
-    if (required  &&  prop.ref === COUNTRY  &&  required.indexOf(pName)) {
+    // let required = model  &&  utils.ungroup(model.required)
+    if (required  &&  prop.ref === COUNTRY) { //  &&  required.indexOf(pName)) {
       // Don't overwrite default country on provider
       if (resource  &&  !resource[pName])
         resource[pName] = country
@@ -89,7 +89,12 @@ class RefPropertyEditor extends Component {
     if (Array.isArray(val)  &&  !val.length)
       val = null
     let label, propLabel, isImmutable
-    if (val) {
+    if (!val) {
+      label = translate(prop, model)
+      if (!search  &&  required)
+        label += ' *'
+    }
+    else {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto) {
         label = translate(prop, model)
@@ -134,13 +139,10 @@ class RefPropertyEditor extends Component {
           label = utils.createAndTranslate(label, true)
         }
       }
-      propLabel = <Text style={[styles.labelDirty, lcolor]}>{translate(prop, model)}</Text>
-    }
-    else {
-      label = translate(prop, model)
+      let pLabel = translate(prop, model)
       if (!search  &&  required)
-        label += ' *'
-      propLabel = <View/>
+        pLabel += ' *'
+      propLabel = <Text style={[styles.labelDirty, lcolor]}>{pLabel}</Text>
     }
     let photoR = isPhoto && (photo || resource[pName])
     let isRegistration = this.state.isRegistration
@@ -148,14 +150,15 @@ class RefPropertyEditor extends Component {
     let color
     if (isRegistration)
       color = '#eeeeee'
-    else if (val) {
+    else if (val)
       color = isImmutable  &&  linkColor || '#757575'
-    }
     else
       color = '#AAAAAA'
     let propView
     if (photoR)
-      propView = <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
+      propView = <View style={{ marginTop: !isWeb()  &&  !isSimulator() && 5 || 0 }}>
+                   <Image source={{uri: photoR.url}} style={[styles.thumb, {marginBottom: 5}]} />
+                 </View>
     else {
       let img = photo
       if (img) {
@@ -177,7 +180,7 @@ class RefPropertyEditor extends Component {
       if (isVideo)
         icon = <Icon name='ios-play-outline' size={25}  color={linkColor} />
       else if (isPhoto)
-        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
+        icon = <Icon name='ios-camera-outline' size={25}  color={linkColor} style={[val && styles.photoIcon || (styles.photoIconEmpty, {marginTop: 15})]}/>
       else if (isIdentity)
         icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
       else
@@ -190,7 +193,7 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (isIdentity && !utils.isWeb())
+    if (isIdentity && !isWeb())
        actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
                       {content}
                     </TouchableOpacity>
@@ -198,14 +201,14 @@ class RefPropertyEditor extends Component {
       // HACK
       const isScan = pName === 'scan'
       let useImageInput
-      if (utils.isWeb()  ||  utils.isSimulator()) {
+      if (isWeb()  ||  isSimulator()) {
         useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
       } else {
         useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
       }
 
       if (useImageInput) {
-        let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0, paddingBottom: help ? 0 : 7}
+        let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                        {content}
                      </ImageInput>
@@ -275,18 +278,19 @@ class RefPropertyEditor extends Component {
         }
       }
       else if (scanner === 'payment-card') {
-        if (!utils.isWeb())
+        if (!isWeb())
           this.scanCard(pName)
         return
       }
     }
     this.props.navigator.push({
-      title: 'Take a pic',
+      title: translate(prop, model),
       backButtonTitle: 'Back',
       id: 12,
       component: CameraView,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
+        model,
         onTakePic: this.onTakePicture.bind(this, params)
       }
     });
@@ -294,8 +298,16 @@ class RefPropertyEditor extends Component {
   onTakePicture(params, data) {
     if (!data)
       return
-    this.props.resource.video = data
-    this.props.floatingProps.video = data
+    let { prop } = params
+    if (prop.ref === PHOTO) {
+      let { width, height, base64 } = data
+      let d = { width, height, url: base64}
+      this.onSetMediaProperty(prop.name, d)
+    }
+    else {
+      this.props.resource.video = data
+      this.props.floatingProps.video = data
+    }
     this.props.navigator.pop();
   }
   getLabelAndBorderColor(prop) {

@@ -1,6 +1,3 @@
-console.log('requiring PhotoCarousel.js')
-'use strict'
-
 import Carousel from 'react-native-carousel';
 import { ROOT_HASH } from '@tradle/constants'
 import { makeResponsive } from 'react-native-orient'

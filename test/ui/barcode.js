@@ -4,10 +4,8 @@ import React from 'react'
 import {
   Alert,
   AppRegistry,
-  TouchableHighlight,
   StyleSheet,
   View,
-  Text,
 } from 'react-native'
 
 import { RNCamera } from 'react-native-camera'

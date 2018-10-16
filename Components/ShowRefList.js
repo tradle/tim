@@ -1,5 +1,3 @@
-console.log('requiring ShowRefList.js')
-'use strict';
 
 import { makeResponsive } from 'react-native-orient'
 
@@ -145,6 +143,8 @@ class ShowRefList extends Component {
         hasBacklinks = true
       this.tabDetail[propTitle] = { icon, action: this.exploreBacklink.bind(this, resource, props[p]), count: cnt }
       refList.push(<View style={[buttonStyles.container, {flex: 1}]} key={this.getNextKey()} tabLabel={propTitle}/>)
+      if (!currentBacklink  &&  !showDetails)
+        currentBacklink = props[p]
     })
     const showQR = ENV.showMyQRCode && utils.getId(me) === utils.getId(resource)  &&  !me.isEmployee
     if (showQR  &&  this.props.showQR) {

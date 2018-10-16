@@ -1,5 +1,3 @@
-console.log('requiring ChatContext.js')
-'use strict'
 
 import {
   View,

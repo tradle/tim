@@ -25,9 +25,9 @@ fi
 
 buildPlist="Tradle/$plistName.plist"
 bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
-gitHash=$(git rev-parse HEAD)
+gitHash=`$(dirname $0)/get-short-commit-hash.sh`
 RELEASES_DIR="$(pwd)/../release/ios" # up from iOS
-THIS_RELEASE_DIR="$RELEASES_DIR/$bundleVersion/${gitHash:0:10}"
+THIS_RELEASE_DIR="$RELEASES_DIR/$bundleVersion/$gitHash"
 
 source ~/.bash_profile
 source ~/.bashrc

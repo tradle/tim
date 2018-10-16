@@ -1,6 +1,3 @@
-console.log('requiring NoResources.js')
-'use strict'
-
 import {
   Text,
   StyleSheet,

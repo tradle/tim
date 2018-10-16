@@ -1,5 +1,3 @@
-console.log('requiring RemediationItemsList.js')
-'use strict';
 
 import MessageView from './MessageView'
 import utils from '../utils/utils'

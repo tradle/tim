@@ -305,8 +305,15 @@ module.exports = {
   "Next": "Kế tiếp",
   "Skip": "Bỏ qua",
   "Sanctions Checks": "Kiểm tra xử phạt",
-  "tryProviderQrCode": "Chỉ có mã QR của nhà cung cấp mà bạn có thể quét tại đây. Vui lòng thử lại",
   "inProcess": "Đang tiến hành...",
   "networkFailure": "Tôi đang gặp một số vấn đề về mạng. Bạn có thể kiểm tra và sau đó nhấn Thử lại / Hủy",
-  "invalidQuery": "Rất tiếc, chúng tôi đã gặp lỗi khi chạy tìm kiếm của bạn. Các nhà phát triển của chúng tôi sẽ cố gắng khắc phục nó càng sớm càng tốt."
+  "invalidQuery": "Rất tiếc, chúng tôi đã gặp lỗi khi chạy tìm kiếm của bạn. Các nhà phát triển của chúng tôi sẽ cố gắng khắc phục nó càng sớm càng tốt.",
+  "supportedQrCodes": "Mã QR được hỗ trợ:\n1) thêm kênh trò chuyện\n2) nhập dữ liệu",
+  "noResourcesForCriteria": "Không tìm thấy tài nguyên cho tiêu chí này",
+  "validatingDataClaim": "Nhập dữ liệu",
+  "logSentToDevTeam": "Nhật ký đã được gửi đến nhóm nhà phát triển Tradle",
+  "invalidQR": "Mã QR không hợp lệ",
+  "failedToSendLog": "Không thể gửi nhật ký",
+  "debugLogSent": "Nhật ký gỡ lỗi đã được gửi",
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Vui lòng xem lại dữ liệu bên dưới và chụp nhanh mặt {1} của tài liệu"
 }

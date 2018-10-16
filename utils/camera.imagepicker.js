@@ -6,7 +6,7 @@ import { translate } from './utils'
 import { normalizeImageCaptureData } from './image-utils'
 import CameraDefaults from './camera-defaults'
 
-const isIosSimulator = Platform.OS === 'ios' && isEmulator
+const isIosSimulator = Platform.OS === 'ios' && isEmulator()
 const DEFAULTS = {
   // image picker
   returnIsVertical: true,

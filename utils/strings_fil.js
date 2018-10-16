@@ -305,8 +305,15 @@ module.exports = {
   "Skip": "Laktawan",
   "Next": "Susunod",
   "Sanctions Checks": "Mga tseke ng Sanctions",
-  "tryProviderQrCode": "QR code ng Provider lamang na maaari mong i-scan dito. Pakisubukang muli",
   "inProcess": "Pinoproseso...",
   "networkFailure": "Nakakaranas ako ng ilang mga isyu sa network. Maaari mong suriin at pagkatapos ay i-tap ang Subukan muli / Kanselahin",
-  "invalidQuery": "Oops, naabot namin ang isang error na nagpapatakbo ng iyong paghahanap. Susubukan ng aming mga developer na ayusin ito sa lalong madaling panahon."
+  "invalidQuery": "Oops, naabot namin ang isang error na nagpapatakbo ng iyong paghahanap. Susubukan ng aming mga developer na ayusin ito sa lalong madaling panahon.",
+  "invalidQR": "Di-wastong QR code",
+  "failedToSendLog": "Nabigong magpadala ng log",
+  "debugLogSent": "Ipinadala ang Debug Log",
+  "validatingDataClaim": "Pag-import ng data",
+  "supportedQrCodes": "Mga sinusuportahang QR code:\n1) magdagdag ng chat channel\n2) pag-import ng data",
+  "logSentToDevTeam": "Ang log ay ipinadala sa koponan ng nag-develop ng Tradle",
+  "noResourcesForCriteria": "Walang nakuhang mga mapagkukunan para sa pamantayang ito",
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Mangyaring suriin ang data sa ibaba, at kumuha ng isang snapshot ng {1} bahagi ng dokumento"
 }

@@ -1,15 +1,12 @@
-console.log('requiring localAuth.js')
 
 import { Alert, Platform } from 'react-native'
 import LocalAuth from 'react-native-local-auth'
 import Errors from 'react-native-local-auth/data/errors'
 
 import Q from 'q'
-import Keychain from 'react-native-keychain'
 import PasswordCheck from '../Components/PasswordCheck'
 import LockScreen from '../Components/LockScreen'
 import ENV from '../utils/env'
-import { coroutine as co } from 'bluebird'
 
 // hack!
 // hasTouchID().then(ENV.setHasTouchID)
@@ -23,8 +20,7 @@ import Actions from '../Actions/Actions'
 const debug = require('debug')('tradle:app:local-auth')
 const PASSWORD_ITEM_KEY = 'app-password'
 
-const isAndroid = utils.isAndroid()
-const isIOS = utils.isIOS()
+const isAndroid = Platform.OS === 'android'
 const ForgivableTouchIDErrors = [
   'LAErrorTouchIDNotAvailable',
   'LAErrorTouchIDNotSupported',
@@ -284,7 +280,7 @@ function lockUp (nav, err) {
 
 function setPassword (navigator, isChangePassword) {
   debug('requesting to choose a gesture password')
-  return Q.Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     navigator.push({
       component: PasswordCheck,
       id: 20,

@@ -1,6 +1,3 @@
-console.log('requiring NoModel.js')
-'use strict'
-
 import {
   Text,
   // StyleSheet,

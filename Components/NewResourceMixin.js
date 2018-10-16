@@ -1,6 +1,3 @@
-console.log('requiring NewResourceMixin.js')
- 'use strict';
-
 import React from 'react'
 import {
   // Text,
@@ -1039,6 +1036,7 @@ var NewResourceMixin = {
                              component={params.component}
                              error={error}
                              inFocus={this.state.inFocus}
+                             required={params.required}
                              floatingProps={this.floatingProps}
                              paintHelp={this.paintHelp.bind(this)}
                              paintError={this.paintError.bind(this)}
@@ -1048,6 +1046,8 @@ var NewResourceMixin = {
     let p = prop.name
     let resource = this.state.resource
     if (resource[p]  ||  resource[ROOT_HASH])
+      return
+    if (this.floatingProps  &&  this.floatingProps.hasOwnProperty(p))
       return
     let defaults = this.props.defaultPropertyValues
     let value
@@ -1165,13 +1165,14 @@ var NewResourceMixin = {
           this.floatingProps[propName] = resource[propName]
         }
         else if (prop.items.ref) {
-          if (resource[propName]) {
-            let some = resource[propName].some(r => r[ROOT_HASH] === value[ROOT_HASH])
-            if (!some)
-              resource[propName].push(value)
-          }
-          else
-            resource[propName] = [value]
+          resource[propName] = null
+          // if (resource[propName]) {
+          //   let some = resource[propName].some(r => r[ROOT_HASH] === value[ROOT_HASH])
+          //   if (!some)
+          //     resource[propName].push(value)
+          // }
+          // else
+          //   resource[propName] = [value]
         }
         else {
           delete resource[propName]
@@ -1622,7 +1623,7 @@ var styles= StyleSheet.create({
     flex: 1,
     height: 35,
     paddingBottom: 5,
-    marginTop: 5,
+    // marginTop: 5,
     // borderWidth: 1,
     borderColor: 'transparent',
     // borderBottomColor: '#eeeeee',
@@ -1674,7 +1675,8 @@ var styles= StyleSheet.create({
   dateLabel: {
     marginLeft: 10,
     fontSize: 12,
-    marginVertical: 5,
+    marginTop: 5,
+    // marginVertical: 5,
     paddingBottom: 5
   },
   noItemsText: {

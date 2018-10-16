@@ -1,6 +1,3 @@
-console.log('requiring utils.js')
-'use strict'
-
 import React from 'react'
 import {
   NativeModules,
@@ -10,11 +7,9 @@ import {
   Linking,
   PixelRatio,
   Platform,
-  PermissionsAndroid,
   StyleSheet
 } from 'react-native'
 
-import Camera from 'react-native-camera'
 import querystring from 'querystring'
 import traverse from 'traverse'
 import DeviceInfo from 'react-native-device-info'
@@ -38,11 +33,13 @@ import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
 import Lens from '@tradle/lens'
-import tradle, {
+import {
   protocol,
   utils as tradleUtils
 } from '@tradle/engine'
 import constants from '@tradle/constants'
+import { calcLinks, omitVirtual } from '@tradle/build-resource'
+import * as promiseUtils from '@tradle/promise-utils'
 import { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
 import AsyncStorage from '../Store/Storage'
@@ -53,12 +50,11 @@ import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
 // import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
-import locker from './locker'
 import Strings from './strings'
-import { calcLinks, omitVirtual } from '@tradle/build-resource'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
 import Alert from '../Components/Alert'
+import dictionaries from './dictionaries'
 
 const collect = Promise.promisify(_collect)
 
@@ -115,9 +111,7 @@ const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
 const STATUS = 'tradle.Status'
 
-import dictionaries from './dictionaries'
-
-var dictionary //= dictionaries[Strings.language]
+var dictionary, language //= dictionaries[Strings.language]
 
 var models, me
 var BACKOFF_DEFAULTS = {
@@ -136,7 +130,7 @@ const getVersionInAppStore = Platform.select({
   ios: async () => {
     const bundleId = DeviceInfo.getBundleId()
     const qs = querystring.stringify({ bundleId })
-    const res = await utils.fetchWithBackoff(`http://itunes.apple.com/lookup?${qs}`)
+    const res = await utils.fetchWithBackoff(`https://itunes.apple.com/lookup?${qs}`)
     const json = await res.json()
     if (json.resultCount < 0) throw new Error('app not found')
 
@@ -156,6 +150,8 @@ const getVersionInAppStore = Platform.select({
 
 
 var utils = {
+  ...promiseUtils,
+  promisify: Promise.promisify,
   isEmpty(obj) {
     for(var prop in obj) {
       if(obj.hasOwnProperty(prop))
@@ -175,9 +171,9 @@ var utils = {
       lang = me.language.id.split('_')[1]
     if (!lang)
       return
-    if (this.language === lang)
+    if (language === lang)
       return
-    this.language = lang
+    language = lang
     Strings.setLanguage(lang)
     let d = dictionaries(lang)
     if (d)
@@ -475,9 +471,7 @@ var utils = {
     }
     return s ? s : args[0]
   },
-  clone(resource) {
-    return _.cloneDeep(resource)
-  },
+  clone: _.cloneDeep,
   compare(r1, r2, isInlined) {
     if (!r1 || !r2)
       return (r1 || r2) ? false : true
@@ -826,7 +820,7 @@ var utils = {
     }
     return itemsMeta;
   },
-  makeTitle(resourceTitle, prop) {
+  makeTitle(resourceTitle) {
     return (resourceTitle.length > 28) ? resourceTitle.substring(0, 28) + '...' : resourceTitle;
   },
   getPropertiesWithAnnotation(model, annotation) {
@@ -975,7 +969,7 @@ var utils = {
     }
   },
   getDateValue(value) {
-    let lang = this.language || 'en'
+    let lang = language || 'en'
     switch (lang) {
     case 'fil':
       lang = 'tl-ph'
@@ -1683,11 +1677,7 @@ var utils = {
     return first + '/' + rest
   },
 
-  promiseDelay(millis) {
-    return Q.Promise((resolve) => {
-      setTimeout(resolve, millis)
-    })
-  },
+  promiseDelay: promiseUtils.wait,
 
   // TODO: add maxTries
   tryWithExponentialBackoff(fn, opts) {
@@ -1905,13 +1895,6 @@ var utils = {
   isAndroid: ENV.isAndroid,
   isIOS: ENV.isIOS,
   isWeb: ENV.isWeb,
-  promiseThunky: function (fn) {
-    let promise
-    return function () {
-      return promise ? promise : promise = fn.apply(this, arguments)
-    }
-  },
-
   getTopNonAuthRoute: function (navigator) {
     const routes = navigator.getCurrentRoutes()
     let top
@@ -1988,16 +1971,7 @@ var utils = {
         })
     }
   },
-  getPhotoProperty(resource) {
-    let props = this.getModel(resource[TYPE]).properties
-    for (let p in resource) {
-      if (props[p].ref === PHOTO  &&  props[p].mainPhoto)
-        return props[p]
-    }
-    return props.photos
-  },
 
-  locker,
   getMainPhotoProperty(model) {
     let mainPhoto
     let props = model.properties
@@ -2560,7 +2534,7 @@ var utils = {
   updateEnv: async () => {
     let env
     try {
-      env = await this.fetchEnv()
+      env = await utils.fetchEnv()
     } catch (err) {
       debug('failed to update environment from tradle server', err.message)
       return
@@ -2571,10 +2545,10 @@ var utils = {
     require('../Actions/Actions').updateEnvironment(env)
   },
 
-  async fetchEnv() {
+  fetchEnv: async () => {
     if (!ENV.tradleAPIKey) return
 
-    const url = this.joinURL(ENV.tradleAPIEndpoint, 'fs', DeviceInfo.getBundleId(), 'environment.json')
+    const url = utils.joinURL(ENV.tradleAPIEndpoint, 'fs', DeviceInfo.getBundleId(), 'environment.json')
     const res = await fetch(url, {
       headers: {
         'x-api-key': ENV.tradleAPIKey
@@ -2684,10 +2658,6 @@ var utils = {
     const results = await utils.series(utils.batchify(data, batchSize), worker)
     // flatten
     return results.reduce((all, some) => all.concat(some), [])
-  },
-
-  isPromise(obj) {
-    return obj && typeof obj.then === 'function'
   },
 
   isAWSProvider: function (provider)  {

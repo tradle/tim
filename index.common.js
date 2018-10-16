@@ -1,7 +1,8 @@
-'use strict'
 
 import './utils/errors'
 import './utils/shim'
+import './utils/debug'
+import './utils/automaticUpdates'
 import React, { Component } from 'react'
 import Reflux from 'reflux'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -37,8 +38,6 @@ const {
 // import NativeAppEventEmitter from 'RCTNativeAppEventEmitter'
 
 // require('react-native-level')
-import Debug from './utils/debug'
-var debug = Debug('tradle:app')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
 // import './utils/crypto'
@@ -84,7 +83,7 @@ import HomePageMixin from './Components/HomePageMixin'
 import MatchImages from './Components/MatchImages'
 // import VideoCamera from './Components/VideoCamera'
 
-import utils from './utils/utils'
+import utils, { isWeb } from './utils/utils'
 
 import Actions from './Actions/Actions'
 import AutomaticUpdates from './utils/automaticUpdates';
@@ -114,7 +113,7 @@ let originalGetDefaultProps = Text.getDefaultProps;
 Text.defaultProps = function() {
   return {
     ...originalGetDefaultProps(),
-    allowFontScaling: !utils.isWeb()
+    allowFontScaling: !isWeb()
   };
 };
 
@@ -221,6 +220,7 @@ class TiMApp extends Component {
         return
       case 'active':
         utils.updateEnv()
+        // fire off async, don't wait
         AutomaticUpdates.hasUpdate().then(has => {
           if (has) return AutomaticUpdates.install()
 
@@ -818,25 +818,46 @@ var NavigationBarRouteMapper = {
       uri =  photoObj && utils.getImageUri(photoObj.url)
     }
     let logoNeedsText = bankStyle  &&  bankStyle.logoNeedsText
-    if (!logoNeedsText  &&  resource) {
-      if (route.id !== ARTICLE_VIEW)  { // ArticleView
-        if (route.id !== MESSAGE_LIST)
-          logoNeedsText = true
-        else {
-          let me = utils.getMe()
-          if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
-            logoNeedsText = true
-        }
+    if (!logoNeedsText) {
+      switch (route.id) {
+      case ARTICLE_VIEW:
+        break
+      case MESSAGE_LIST:
+        if (resource) {
+           let me = utils.getMe()
+           if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
+             logoNeedsText = true
+         }
+        break
+      default:
+        logoNeedsText = true
       }
     }
+    // if (!logoNeedsText  &&  resource) {
+    //   if (route.id !== ARTICLE_VIEW)  { // ArticleView
+    //     if (route.id !== MESSAGE_LIST)
+    //       logoNeedsText = true
+    //     else {
+    //       let me = utils.getMe()
+    //       if (me.isEmployee  &&  utils.getId(resource) !== utils.getId(me.organization))
+    //         logoNeedsText = true
+    //     }
+    //   }
+    // }
     let t = route.title.split(' -- ')
     let st = t.length > 1 ? {marginTop: 2} : {}
     let color
     if (uri) {
-      if (logoNeedsText)
-        photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo]} />
+      let { width, height } = photoObj
+      if (width  &&  height)
+        width = width * LOGO_HEIGHT / height
       else
-        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo]} />
+        width = LOGO_HEIGHT * 2
+      height = LOGO_HEIGHT
+      if (logoNeedsText)
+        photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo, {width, height}]} />
+      else
+        photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
     }
 
     if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW)  // Camera view
@@ -861,7 +882,7 @@ var NavigationBarRouteMapper = {
                   </View>
                   )
       }
-      let tstyle = utils.isWeb() ? {} : {width}
+      let tstyle = isWeb() ? {} : { width }
       text = <View style={tstyle} key={'index.common.js_0'}>
                <Text numberOfLines={1} style={style}>{t[0]}</Text>
              </View>
@@ -889,7 +910,7 @@ var styles = StyleSheet.create({
     marginRight: 5,
     marginTop: 7,
     marginLeft: 0,
-    width: LOGO_HEIGHT,
+    width: LOGO_HEIGHT * 2,
   },
   msgImageNoText: {
     height: LOGO_HEIGHT,

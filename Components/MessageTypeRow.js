@@ -1,6 +1,3 @@
-console.log('requiring MessageTypeRow.js')
-'use strict';
-
 import utils from '../utils/utils'
 import constants from '@tradle/constants'
 var translate = utils.translate

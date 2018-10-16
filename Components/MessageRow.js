@@ -1,8 +1,5 @@
-console.log('requiring MessageRow.js')
-'use strict';
-
 import extend from 'extend'
-import equal from 'deep-equal'
+import equal from 'lodash/isEqual'
 import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import {
@@ -97,25 +94,30 @@ class MessageRow extends Component {
     let renderedRow = [];
     let ret = this.formatRow(isMyMessage, renderedRow, styles);
     let onPressCall = ret ? ret.onPressCall : null
-    let isConfirmation = resource[TYPE] === CONFIRMATION
+
+    let rtype = utils.getType(resource)
+    let isConfirmation = rtype === CONFIRMATION
+    let isBookmark = rtype === BOOKMARK
+    let isSimpleMessage = rtype === SIMPLE_MESSAGE
 
     let photoUrls = [];
     let photoListStyle = {height: 3};
     let addStyle
 
-    let model = utils.getModel(utils.getType(resource));
+    let model = utils.getModel(rtype);
 
     let isContext = utils.isContext(model)
     let message = isContext ? ret.message : resource.message
 
     let noMessage = !message  ||  !message.length;
-    let isSimpleMessage = resource[TYPE] === SIMPLE_MESSAGE
 
     let isCheck = model.subClassOf === CHECK
 
     let noBg = isCheck  ||  (isSimpleMessage  &&  resource.message.toLowerCase().indexOf('http') === 0)
 
     let isForgetting = model.id === FORGET_ME || model.id === FORGOT_YOU
+    let isDataBundle = rtype === DATA_BUNDLE
+
     if (!renderedRow.length) {
       let vCols = noMessage ? null : utils.getDisplayName(resource);
       if (vCols)
@@ -134,7 +136,7 @@ class MessageRow extends Component {
         else {
           let mstyle = {
             borderColor: '#efefef',
-            backgroundColor: model.id === DATA_BUNDLE ? '#eeffee' : '#ffffff',
+            backgroundColor: isDataBundle ? bankStyle.currentContextBackgroundColor : '#ffffff',
             borderTopLeftRadius: 0
           }
           addStyle = [chatStyles.verificationBody, mstyle]
@@ -149,9 +151,8 @@ class MessageRow extends Component {
       //   let st = {backgroundColor: bankStyle.contextBackgroundColor}
       //   addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       // }
-      let isDataBundle = resource[TYPE] === DATA_BUNDLE
       if (isMyMessage  &&  !isSimpleMessage  &&  !isDataBundle) {
-        let st = {backgroundColor: noBg ? '#ffffff' : bankStyle.contextBackgroundColor, borderColor: bankStyle.linkColor}
+        let st = {backgroundColor: noBg ? '#ffffff' : bankStyle.contextBackgroundColor, borderColor: isBookmark && bankStyle.productBgColor || bankStyle.linkColor}
         addStyle = [addStyle, chatStyles.verificationBody, st]; //model.style];
       }
     }
@@ -593,7 +594,7 @@ class MessageRow extends Component {
       }
       let style = isSimpleMessage ? chatStyles.resourceTitle : chatStyles.description; //resourceTitle; //(first) ? chatStyles.resourceTitle : styles.description;
       if (isMyMessage)
-        style = [style, {justifyContent: 'flex-end', color: isMyProduct ? '#2892C6' : '#ffffff'}];
+        style = [style, {justifyContent: 'flex-end', color: isMyProduct ? '#2892C6' : bankStyle.myMessageLinkColor ||  '#ffffff'}]; //'#ffffff'}];
 
       if (resource[v]                      &&
           properties[v].type === 'string'  &&

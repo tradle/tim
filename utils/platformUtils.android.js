@@ -1,4 +1,3 @@
-console.log('requiring platformUtils.android.js')
 
 import {
   PermissionsAndroid,

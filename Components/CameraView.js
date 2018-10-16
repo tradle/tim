@@ -1,4 +1,3 @@
-console.log('requiring CameraView.js')
 
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
@@ -93,23 +92,24 @@ class CameraView extends Component {
     console.log(e);
   }
   _switchCamera() {
-    const cameraType = this.state.cameraType === back ? front : back
+    const cameraType = this.state.cameraType === 'back' ? 'front' : 'back'
     this.setState({ cameraType })
   }
+
   _takePicture = async () => {
     const { quality, fixOrientation } = this.props
-    let data
-    try {
-      data = await this.camera.takePictureAsync({
-        base64: true,
-        mirrorImage: true,
-        quality,
-        fixOrientation,
-        forceUpOrientation: fixOrientation,
-        doNotSave: true,
-        // skipProcessing: true,
-      })
+    const opts = {
+      base64: true,
+      mirrorImage: this.state.cameraType !== 'back',
+      quality,
+      fixOrientation,
+      forceUpOrientation: fixOrientation,
+      doNotSave: true,
+      // skipProcessing: true,
+    }
 
+    try {
+      const data = await this.camera.takePictureAsync(opts)
       this.setState({
         data: normalizeImageCaptureData({ ...data, quality })
       })
@@ -124,8 +124,7 @@ class CameraView extends Component {
     //   path: data.uri
     // })
   }
-  onTakePic = async () => {
-    const { data } = this.state
+  onTakePic = () => {
     this.props.onTakePic(this.state.data)
   }
 }

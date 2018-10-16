@@ -112,7 +112,7 @@ var search = {
     this.graphqlEndpoint = graphqlEndpoint
     this.meDriver = meDriver
     // Not needed but just to make it generic
-    return new GraphQLClient(graphqlEndpoint, {headers})
+    return new GraphQLClient(graphqlEndpoint, { headers })
   },
 
   async searchServer(params) {
@@ -375,7 +375,7 @@ var search = {
         }
       }
       // let { message, graphQLErrors, networkError } = data.error
-      if (graphQLErrors.length) {
+      if (graphQLErrors  &&  graphQLErrors.length) {
         let excludeProps = []
         let str = 'Cannot query field \"'
         let len = str.length
@@ -442,7 +442,7 @@ var search = {
                 // # _inbound: false
                 // # _recipient: ${hash}
   async getChat(params) {
-    let { author, client, context, filterResource, limit, endCursor } = params
+    let { author, client, context, filterResource, limit, endCursor, application } = params
     let table = `rl_${MESSAGE.replace(/\./g, '_')}`
     let contextVar = filterResource || context ? '' : '($context: String)'
     let limitP = limit ? `limit:  ${limit}` : ''
@@ -500,6 +500,7 @@ var search = {
       }
     }
     eq += filter
+
     if (context)
       eq += `             context: "${context}"`
     eq += `
@@ -511,10 +512,17 @@ var search = {
       neq = `
             NEQ: {
               context: $context
+              _payloadType: "${MESSAGE}"
             }
             `
     }
-
+    if (!neq  &&  application) {
+      neq = `
+            NEQ: {
+              _payloadType: "${MESSAGE}"
+            }
+            `
+    }
     let query = queryHeader + eq + neq + queryFooter
 
     try {
@@ -857,7 +865,7 @@ console.log('searchServer.apollo ' + (Date.now() - start))
     var {query, table, versionId} = params
     // debugger
     const body = tradleUtils.stringify({
-      query: JSON.stringify(query)
+      query
     })
     let start = Date.now()
     const result = await this.meDriver.sign({
@@ -869,10 +877,10 @@ console.log('searchServer.apollo ' + (Date.now() - start))
     })
     console.log('searchServer.length ' + (Date.now() - start))
 
-    let headers = {
+    const headers = {
       'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
     }
-    let client = new GraphQLClient(this.graphqlEndpoint, headers)
+    let client = new GraphQLClient(this.graphqlEndpoint, { headers })
 
     let variables = versionId  &&  {modelsVersionId: versionId} || undefined
     try {

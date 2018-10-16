@@ -1,4 +1,3 @@
-'use strict';
 
 import DeviceInfo from 'react-native-device-info'
 import StyleSheet from '../StyleSheet'

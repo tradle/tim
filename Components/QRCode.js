@@ -1,4 +1,3 @@
-console.log('requiring QRCode.js')
 import {
   StyleSheet,
   View,

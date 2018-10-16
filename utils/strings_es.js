@@ -305,8 +305,15 @@ module.exports = {
   "Next": "Siguiente",
   "Skip": "Omitir",
   "Sanctions Checks": "Verificaciones de sanciones",
-  "tryProviderQrCode": "Solo el código QR del proveedor puede encontrar aquí. Inténtalo de nuevo",
   "inProcess": "En proceso...",
   "networkFailure": "Estoy experimentando algunos problemas de red. ¿Puedes verificar y luego tocar Volver a intentar / Cancelar",
-  "invalidQuery": "Vaya, nos topamos con un error al ejecutar su búsqueda. Nuestros desarrolladores intentarán solucionarlo lo antes posible."
+  "invalidQuery": "Vaya, nos topamos con un error al ejecutar su búsqueda. Nuestros desarrolladores intentarán solucionarlo lo antes posible.",
+  "validatingDataClaim": "Importando datos",
+  "debugLogSent": "Registro de depuración enviado",
+  "failedToSendLog": "Error al enviar el registro",
+  "invalidQR": "Código QR no válido",
+  "supportedQrCodes": "Códigos QR soportados:\n1) agregar canal de chat\n2) importar datos",
+  "logSentToDevTeam": "El registro fue enviado al equipo de desarrolladores de Tradle.",
+  "noResourcesForCriteria": "No se encontraron recursos para este criterio.",
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Revise los datos a continuación y tome una instantánea del lado {1} del documento"
 }

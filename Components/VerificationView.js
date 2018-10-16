@@ -1,5 +1,3 @@
-console.log('requiring VerificationView.js')
-'use strict';
 
 import ArticleView from './ArticleView'
 import utils from '../utils/utils'

@@ -1,22 +1,22 @@
-import dateformat from 'dateformat'
-import _ from 'lodash'
-
 import { TYPE } from '@tradle/constants'
 import utils, { translate, isWeb, isSimulator } from '../utils/utils'
 const COUNTRY = 'tradle.Country'
 const PHOTO_ID = 'tradle.PhotoID'
 
-// const requestAdditionalSnapshot = {
-//   US: {
-//     license: 'front'
-//   },
-//   GB: {
-//     license: 'back'
-//   },
-//   BD: {
-//     idcard: 'back'
-//   }
-// }
+const sideToSnap = {
+  US: {
+    licence: 'back'
+  },
+  GB: {
+    licence: 'back'
+  },
+  BD: {
+    id: 'front'
+  },
+  NZ: {
+    licence: 'back'
+  }
+}
 module.exports = function PhotoID ({ models }) {
   return {
     validateForm: function validateForm ({
@@ -32,10 +32,9 @@ module.exports = function PhotoID ({ models }) {
       if (!isWeb()  &&  !isSimulator()  &&  !form.scanJson)
         return
 
-      if (isWeb)
+      if (isWeb())
         form.uploaded = true
       let scan = form.scanJson
-      let isDifferentPerson = scan && (form.firstName !== scan.personal.firstName  || form.lastName !== scan.personal.lastName)
 
       const model = models[form[TYPE]]
       // Check if there is a need to clean the form
@@ -43,7 +42,7 @@ module.exports = function PhotoID ({ models }) {
         if ((currentResource.documentType  &&  currentResource.documentType.id !== form.documentType.id)  ||
             (currentResource.country  &&  currentResource.country.id !== form.country.id)) {
           let requestedProperties = cleanupValues(form, scan, model)
-          if (!isWeb)
+          if (!isWeb())
             return requestedProperties
           scan = null
         }
@@ -51,9 +50,11 @@ module.exports = function PhotoID ({ models }) {
       console.log('PhotoID: requesting additional properties for Driver Licence')
 
       let isLicence = form.documentType.title.indexOf('Licence') !== -1
+      let isPassport = !isLicence  &&  form.documentType.title.indexOf('Passport') !== -1
+      let countryId = form.country.id.split('_')[1]
       if (scan) {
-        let countryCCA
         let { document } = scan
+        let countryCCA
         if (document) {
           if (isLicence)
             countryCCA =  document.country
@@ -62,38 +63,16 @@ module.exports = function PhotoID ({ models }) {
         }
         if (countryCCA) {
           let countryModel = utils.getModel(COUNTRY)
-          // let countryId = form.country.id.split('_')[1]
           let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
-          if (!country  ||  country.id !== form.country.id.split('_')[1]) {
+          if (!country  ||  country.id !== countryId) {
             cleanupValues(form, scan, model)
             scan = null
           }
         }
-        let errors = scan  &&  prefillValues(form, isDifferentPerson, scan, model)
+        if (scan)
+          prefillValues(form, scan, model)
       }
       let requestedProperties = getRequestedProps({scan, model, form})
-      // if (form.scan) {
-      //   if (!form.photo) {
-      //     let countryModel = utils.getModel(COUNTRY)
-      //     let countryVal = form.country
-      //     // let countryId = form.country.id.split('_')[1]
-      //     let countryR = countryModel.enum.find(country => country.id === countryVal.id)
-      //     let country = form.country
-      //     let cid = country  &&  country.id  &&  country.id.split('_')[1]
-      //     let getMore = requestAdditionalSnapshot[cid]
-      //     let isPassport = !isLicence  &&  form.documentType.title.indexOf('Passport') !== -1
-      //     if (getMore) {
-      //       let sideInfo
-      //       if (isLicence)
-      //         sideInfo = getMore.license
-      //       else if (!isPassport)
-      //         sideInfo = getMore.idcard
-      //       if (sideInfo) {
-      //         requestedProperties.push({name: 'photo'})
-      //       }
-      //     }
-      //   }
-      // }
       if (form.dateOfExpiry) {
         if (form.dateOfExpiry < new Date().getTime()) {
           let ret = cleanupValues(form, scan, model)
@@ -112,31 +91,41 @@ module.exports = function PhotoID ({ models }) {
           }
         }
       }
+      let message
+      let prop = !isPassport  &&  (isLicence && 'licence' || 'id')
+      let doOtherSide = prop  &&  sideToSnap[countryId]  &&  sideToSnap[countryId][prop]
+      if (doOtherSide  &&  !form.otherSideScan)
+        message = translate('reviewScannedPropertiesAndSecondSideSnapshot', sideToSnap[countryId][prop])
+      else
+        message = translate('reviewScannedProperties')
+      if (doOtherSide)
+        form.otherSideToScan = sideToSnap[countryId][prop]
+
       return {
-        message: translate('reviewScannedProperties'),
+        message,
         requestedProperties
       }
     }
   }
 }
-function prefillValues(form, isDifferentPerson, values, model) {
+function prefillValues(form, values, model) {
   let props = model.properties
   // let dateProps = ['dateOfExpiry', 'dateOfBirth', 'dateOfIssue']
   // Check if this is a new scan
   let exclude = [ 'country' ]
   for (let p in values)
-    if (!isDifferentPerson  && form[p])
+    if (form[p])
       exclude.push(p)
   for (let p in values) {
     if (exclude.includes(p))
       continue
-    if (form[p]  &&  !isDifferentPerson)
+    if (form[p])
       continue
     let val = values[p]
     if (typeof val === 'object')
-      prefillValues(form, isDifferentPerson, val, model)
+      prefillValues(form, val, model)
     else if (!props[p]) {
-      if (p === 'birthData'  &&  (isDifferentPerson  ||  !form.dateOfBirth)) {
+      if (p === 'birthData'  &&  !form.dateOfBirth) {
         let parts = val.split(' ')
         form.dateOfBirth = new Date(parts[0]).getTime()
       }
@@ -148,7 +137,6 @@ function prefillValues(form, isDifferentPerson, values, model) {
       // Need checking
       if (ref  &&  utils.isEnum(ref)) {
         if (ref === 'tradle.Sex') {
-
           let v = val.toLowerCase().charAt(0) === 'm'  &&  'Male'  ||  'Female'
           let enumValue = utils.getModel(ref).enum.find(r => r.id === v)
 
@@ -157,10 +145,6 @@ function prefillValues(form, isDifferentPerson, values, model) {
             title: enumValue.title
           }
         }
-
-        // let valL = ref + '_' + val.toLowerCase()
-        // let enumValue = utils.getModel(ref).enum.find(r => r.id === valL)
-        // form[p] = enumValue
       }
       else
         form[p] = val
@@ -170,20 +154,23 @@ function prefillValues(form, isDifferentPerson, values, model) {
 function getRequestedProps({scan, model, requestedProperties, form}) {
   if (!requestedProperties)
     requestedProperties = []
+  let isLicence = form.documentType.title.indexOf('Licence') !== -1
+  let isID = !isLicence  &&  form.documentType.title.indexOf('ID') !== -1
   if (!scan) {
-    let isLicence = form.documentType.title.indexOf('Licence') !== -1
     if (isLicence)
       requestedProperties = [{name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
     else {
-      if (form.documentType.title.indexOf('ID') === -1)
-        requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
-      else
+      if (isID)
         requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
+      else
+        requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
     }
     return requestedProperties
   }
   let props = model.properties
 
+  if (isID  ||  isLicence)
+    requestedProperties.push({name: 'otherSideScan'})
   for (let p in scan) {
     let val = scan[p]
     if (typeof val === 'object')
@@ -196,6 +183,18 @@ function getRequestedProps({scan, model, requestedProperties, form}) {
   if (!requestedProperties.find(p => p.name === 'dateOfBirth')) {
     if (form.dateOfBirth) {
       requestedProperties.push({name: 'dateOfBirth'})
+    }
+  }
+  if (!isID) {
+    if (!requestedProperties.find(p => p.name === 'dateOfIssue')) {
+      if (!form.dateOfIssue) {
+        requestedProperties.push({name: 'dateOfIssue'})
+      }
+    }
+    if (!requestedProperties.find(p => p.name === 'dateOfExpiry')) {
+      if (!form.dateOfExpiry) {
+        requestedProperties.push({name: 'dateOfExpiry'})
+      }
     }
   }
   return requestedProperties

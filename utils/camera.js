@@ -12,7 +12,7 @@ const RN_CAMERA_ONLY = [
   'instructions',
 ]
 
-const IMAGE_PICKER_PROPS = [
+const IMAGE_PICKER_ONLY = [
   'returnIsVertical',
   'cancelButtonTitle'
 ]

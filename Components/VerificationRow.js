@@ -1,5 +1,3 @@
-console.log('requiring VerificationRow.js')
-'use strict';
 
 import {
   // Text,
@@ -248,9 +246,21 @@ class VerificationRow extends Component {
           let checkIcon
           if (statusM) {
             const { icon, color } = statusM
+            let style, size, icolor
+            if (statusId === 'warning'  ||  statusId === 'error') {
+              style = {shadowOpacity: 0.7, shadowRadius: 5, shadowColor: '#afafaf'}
+              size = 37
+              icolor = color
+            }
+            else {
+              style = [styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]
+              size = 30
+              icolor = '#ffffff'
+            }
+
             if (icon) {
-              checkIcon = <View style={[styles.checkButton, {alignItems: 'center', width: 30, backgroundColor: color}]}>
-                            <Icon color='#ffffff' size={30} name={icon} />
+              checkIcon = <View style={style}>
+                            <Icon color={icolor} size={size} name={icon} />
                           </View>
             }
           }

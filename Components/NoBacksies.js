@@ -1,4 +1,3 @@
-console.log('requiring NoBacksies.js')
 import React, { Component } from 'react';
 
 export default class BackButtonDisabled extends Component {

@@ -6,7 +6,6 @@ import cachifyKeeper from '@tradle/keeper/cachify'
 
 const debug = require('debug')('tradle:app:keeper')
 const { MESSAGE } = TYPES
-const noop = () => {}
 
 const stripEmbeddedObjects = keeper => {
   const getStored = promisify(keeper.get.bind(keeper))

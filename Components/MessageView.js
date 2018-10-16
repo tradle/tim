@@ -1,6 +1,3 @@
-console.log('requiring MessageView.js')
-'use strict';
-
 import React, { Component } from 'react'
 import {
   // StyleSheet,
@@ -325,18 +322,16 @@ class MessageView extends Component {
       date = utils.formatDate(new Date(t), true)
     else
       date = t ? utils.formatDate(new Date(t)) : utils.formatDate(new Date())
-    let photos = resource.photos
+    // let photos = resource.photos
     let mainPhoto, inRow
-
+    let photos = utils.getResourcePhotos(model, resource)
     if (!backlink) {
       let mainPhotoProp = utils.getMainPhotoProperty(model)
       if (mainPhotoProp) {
         mainPhoto = resource[mainPhotoProp]
         if (photos) {
-          if (mainPhotoProp !== 'photos') {
-            photos = photos.slice()
-            photos.splice(0, 0, mainPhoto)
-          }
+          if (mainPhotoProp !== 'photos')
+            photos = photos.filter(p => p.url !== mainPhoto)
         }
       }
       else if (!photos  ||  !photos.length) {
@@ -360,18 +355,19 @@ class MessageView extends Component {
                                         currency={currency}
                                         showVerification={this.showVerification}/>
     // Don't show photostrip on backlink tab
-    let photoList
-    if (!backlink && photos  &&  photos.length > 1) {
-      // Don't show the main photo in the strip
-      photoList = photos.slice()
-      photoList.splice(0, 1)
+    let photoStrip
+    if (!checkProps) {
+      let photoList
+      if (!backlink && photos  &&  photos.length > 1) {
+        // Don't show the main photo in the strip
+        photoList = photos.slice()
+        photoList.splice(0, 1)
+      }
+
+      photoStrip = <View style={styles.photoListStyle}>
+                    <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
+                   </View>
     }
-
-    let photoStrip = <View style={styles.photoListStyle}>
-                      <PhotoList photos={photoList} resource={resource} isView={true} navigator={navigator} numberInRow={inRow} />
-                    </View>
-
-
     let content = <View style={styles.rowContainer}>
                     {msg}
                     {propertySheet}
@@ -379,7 +375,9 @@ class MessageView extends Component {
                     {verificationTxID}
                   </View>
 
-    let checkProps = !isVerification && isVerifier /* && !utils.isReadOnlyChat(resource)*/ && this.onCheck
+    let checkProps
+    if (!isVerification && isVerifier) /* && !utils.isReadOnlyChat(resource)*/
+      checkProps = this.onCheck
     let actionPanel, allowToAddBacklink
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content

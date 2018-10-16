@@ -9,7 +9,7 @@ PLATFORM="$1"
 RELEASE_TYPE="$2"
 VERSION="$3"
 APK_PATH=${4-""}
-BUILD_PATH="$(dirname $0)/../$PLATFORM"
+BUILD_PATH="$PLATFORM"
 
 if [[ "$PLATFORM" != "ios" ]] && [[ "$PLATFORM" != "android" ]];
 then
@@ -30,6 +30,8 @@ then
 fi
 
 TARGET_FOLDER="$BUCKET/$PLATFORM/$RELEASE_TYPE/$VERSION"
+
+cd "$(dirname $0)/../"
 
 echo "backing up $RELEASE_TYPE version $VERSION to $TARGET_FOLDER"
 

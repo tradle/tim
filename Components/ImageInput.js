@@ -1,4 +1,3 @@
-console.log('requiring ImageInput.js')
 
 import React, {
   Component
