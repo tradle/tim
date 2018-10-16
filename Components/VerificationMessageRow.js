@@ -1,5 +1,3 @@
-console.log('requiring VerificationMessageRow.js')
-'use strict';
 
 import utils from '../utils/utils'
 var translate = utils.translate

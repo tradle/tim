@@ -1,4 +1,3 @@
-console.log('requiring TourPage.js')
 import _ from 'lodash'
 import React, { Component } from 'react'
 import {

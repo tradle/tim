@@ -1,4 +1,3 @@
-console.log('requiring env.js')
 import {
   Platform
 } from 'react-native'

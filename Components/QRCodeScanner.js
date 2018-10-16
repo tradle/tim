@@ -1,5 +1,3 @@
-console.log('requiring QRCodeScanner.js')
-
 import {
   TouchableHighlight
 } from 'react-native'

@@ -1,4 +1,3 @@
-console.log('requiring CameraView.js')
 
 import React, { Component } from 'react'
 import {

@@ -1,4 +1,3 @@
-console.log('requiring BlinkID.js')
 import { Platform } from 'react-native'
 // import withDefaults from 'lodash/defaults'
 // import groupBy from 'lodash/groupBy'

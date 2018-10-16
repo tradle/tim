@@ -1,4 +1,3 @@
-console.log('requiring faker.js')
 import crypto from 'crypto'
 import extend from 'xtend'
 import { constants } from '@tradle/engine'

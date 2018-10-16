@@ -1,5 +1,3 @@
-console.log('requiring Store.js')
-'use strict';
 
 // import '../utils/perf'
 import path from 'path'
@@ -457,7 +455,6 @@ var Store = Reflux.createStore({
     this._envPromise = this.loadEnv()
     this.cache = new Cache({max: 500, maxAge: 1000 * 60 * 60})
 
-    // this.lockReceive = utils.locker({ timeout: 600000 })
     this._connectedServers = {}
 
     this._identityPromises = {}

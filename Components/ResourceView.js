@@ -1,5 +1,3 @@
-console.log('requiring ResourceView.js')
-'use strict';
 
 import _ from 'lodash'
 import { makeResponsive } from 'react-native-orient'

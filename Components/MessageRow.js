@@ -1,6 +1,3 @@
-console.log('requiring MessageRow.js')
-'use strict';
-
 import extend from 'extend'
 import equal from 'lodash/isEqual'
 import { makeResponsive } from 'react-native-orient'

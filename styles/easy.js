@@ -1,4 +1,3 @@
-'use strict';
 
 var LINK = '#006A4D';
 var MY_MESSAGE_BG = '#006A4D';

@@ -1,6 +1,3 @@
-console.log('requiring utils.js')
-'use strict'
-
 import React from 'react'
 import {
   NativeModules,
@@ -53,7 +50,6 @@ import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
 // import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
-import locker from './locker'
 import Strings from './strings'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
@@ -1976,7 +1972,6 @@ var utils = {
     }
   },
 
-  locker,
   getMainPhotoProperty(model) {
     let mainPhoto
     let props = model.properties

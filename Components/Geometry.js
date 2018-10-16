@@ -1,4 +1,3 @@
-console.log('requiring Geometry.js')
 
 import PropTypes from 'prop-types';
 

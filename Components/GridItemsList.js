@@ -1,5 +1,3 @@
-console.log('requiring GridItemsList.js')
-'use strict';
 
 import React, { Component } from 'react'
 import _ from 'lodash'

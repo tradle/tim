@@ -1,5 +1,3 @@
-console.log('requiring google-analytics.js')
-
 import {
   GoogleAnalyticsTracker,
   // GoogleTagManager,

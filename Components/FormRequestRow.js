@@ -1,5 +1,3 @@
-console.log('requiring FormRequestRow.js')
-'use strict';
 
 import {
   Image,

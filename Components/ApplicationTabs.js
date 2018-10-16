@@ -1,6 +1,3 @@
-console.log('requiring ApplicationTabs.js')
-'use strict';
-
 import { makeResponsive } from 'react-native-orient'
 import {
   View,

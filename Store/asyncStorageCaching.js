@@ -1,4 +1,3 @@
-console.log('requiring asyncStorageCaching.js')
 // NOTE: currently buggy, need tests
 
 import sortedIndex from 'lodash.sortedindex'

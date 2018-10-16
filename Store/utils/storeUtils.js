@@ -1,4 +1,3 @@
-'use strict'
 
 import voc from '../voc'
 import utils from '../../utils/utils'

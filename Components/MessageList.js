@@ -1,6 +1,3 @@
-console.log('requiring MessageList.js')
-'use strict';
-
 import React, { Component } from 'react'
 import {
   ImageBackground,

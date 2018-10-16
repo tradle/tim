@@ -1,4 +1,3 @@
-'use strict'
 
 // var ENV = require('react-native-env')
 // var TOP_LEVEL_PROVIDER = ENV.topLevelProvider

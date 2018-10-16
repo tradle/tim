@@ -1,5 +1,3 @@
-console.log('requiring SupervisoryViewPerProvider.js')
-'use strict';
 
 import PageView from './PageView'
 import utils from '../utils/utils'

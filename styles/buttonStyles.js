@@ -3,8 +3,6 @@
   a bootstrap like style
 
 */
-'use strict';
-
 import { Dimensions } from 'react-native'
 import utils from '../utils/utils'
 import appStyle from './appStyle.json'

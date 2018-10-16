@@ -1,4 +1,3 @@
-'use strict';
 
 import StyleSheet from '../StyleSheet'
 import { dimensions } from '../utils/utils'

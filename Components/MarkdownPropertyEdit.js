@@ -1,5 +1,3 @@
-console.log('requiring MarkdownPropertyEdit.js')
-'use strict';
 
 import utils from '../utils/utils'
 import PageView from './PageView'

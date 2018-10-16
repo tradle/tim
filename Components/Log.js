@@ -1,4 +1,3 @@
-console.log('requiring Log.js')
 
 import debug from '../utils/debug'
 import React, { Component } from 'react'

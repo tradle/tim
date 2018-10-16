@@ -1,5 +1,3 @@
-console.log('requiring ethereum.js')
-
 import { createNetwork } from '@tradle/ethereum-adapter-etherscan'
 import { etherscanApiKey } from './env'
 

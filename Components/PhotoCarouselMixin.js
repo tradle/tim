@@ -1,6 +1,3 @@
-console.log('requiring PhotoCarouselMixin.js')
-'use strict';
-
 import { TYPE } from '@tradle/constants'
 import PhotoCarousel from './PhotoCarousel'
 import Navigator from './Navigator'

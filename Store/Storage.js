@@ -1,4 +1,3 @@
-console.log('requiring Storage.js')
 
 import {
   AsyncStorage

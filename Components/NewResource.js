@@ -1,6 +1,3 @@
-console.log('requiring NewResource.js')
-'use strict'
-
 import _ from 'lodash'
 import { CardIOUtilities } from 'react-native-awesome-card-io';
 import Reflux from 'reflux'

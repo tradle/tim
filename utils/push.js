@@ -1,7 +1,3 @@
-console.log('requiring push.js')
-
-'use strict'
-
 import {
   AppState,
   Platform

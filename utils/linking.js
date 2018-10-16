@@ -1,5 +1,3 @@
-console.log('requiring linking.js')
-
 import _ from 'lodash'
 import querystring from 'querystring'
 import EventEmitter from 'EventEmitter'

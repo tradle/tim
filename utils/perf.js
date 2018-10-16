@@ -1,4 +1,3 @@
-console.log('requiring perf.js')
 
 import Q from 'q'
 import Debug from './debug'

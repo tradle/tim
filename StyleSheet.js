@@ -1,4 +1,3 @@
-'use strict'
 
 import {PixelRatio, StyleSheet} from 'react-native'
 

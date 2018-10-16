@@ -1,4 +1,3 @@
-'use strict';
 
 var Rabobank = Object.freeze({
   LINK_COLOR: '#FF6D0D',

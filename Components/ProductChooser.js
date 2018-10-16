@@ -1,6 +1,3 @@
-console.log('requiring ProductChooser.js')
-'use strict';
-
 import utils from '../utils/utils'
 var translate = utils.translate
 import equal from 'lodash/isEqual'

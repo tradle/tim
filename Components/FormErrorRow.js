@@ -1,5 +1,3 @@
-console.log('requiring FormErrorRow.js')
-'use strict';
 
 import utils from '../utils/utils'
 var translate = utils.translate
