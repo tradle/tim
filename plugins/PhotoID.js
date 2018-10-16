@@ -3,7 +3,7 @@ import utils, { translate, isWeb, isSimulator } from '../utils/utils'
 const COUNTRY = 'tradle.Country'
 const PHOTO_ID = 'tradle.PhotoID'
 
-const sideToScan = {
+const sideToSnap = {
   US: {
     licence: 'back'
   },
@@ -93,13 +93,13 @@ module.exports = function PhotoID ({ models }) {
       }
       let message
       let prop = !isPassport  &&  (isLicence && 'licence' || 'id')
-      let doOtherSide = prop  &&  sideToScan[countryId]  &&  sideToScan[countryId][prop]
+      let doOtherSide = prop  &&  sideToSnap[countryId]  &&  sideToSnap[countryId][prop]
       if (doOtherSide  &&  !form.otherSideScan)
-        message = translate('reviewScannedPropertiesAndSecondSideSnapshot', sideToScan[countryId][prop] === 'front' && 'back' || 'front')
+        message = translate('reviewScannedPropertiesAndSecondSideSnapshot', sideToSnap[countryId][prop])
       else
         message = translate('reviewScannedProperties')
       if (doOtherSide)
-        form.otherSideToScan = sideToScan[countryId][prop]
+        form.otherSideToScan = sideToSnap[countryId][prop]
 
       return {
         message,
