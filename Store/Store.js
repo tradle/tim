@@ -1823,8 +1823,7 @@ var Store = Reflux.createStore({
     // }
   },
 
-  async addAWSProvider(provider) {
-    const self = this
+  async addProvider(provider) {
     const node = await this._enginePromise
     const counterparty = provider.hash
     const url = getProviderUrl(provider)
@@ -1906,12 +1905,12 @@ var Store = Reflux.createStore({
       checkMissing(result)
     }
 
-    client.on('disconnect', function () {
-      self.setProviderOnlineStatus(provider.hash, false)
+    client.on('disconnect', () => {
+      this.setProviderOnlineStatus(provider.hash, false)
     })
 
-    client.on('connect', function () {
-      self.setProviderOnlineStatus(provider.hash, true)
+    client.on('connect', () => {
+      this.setProviderOnlineStatus(provider.hash, true)
     })
 
     wsClients.add({
@@ -1922,181 +1921,6 @@ var Store = Reflux.createStore({
     })
 
     meDriver.sender.resume(counterparty)
-  },
-
-  addProvider(provider) {
-    let self = this
-    if (utils.isAWSProvider(provider)) {
-      return this.addAWSProvider(provider)
-    }
-
-    const url = getProviderUrl(provider)
-    // let httpClient = driverInfo.httpClient
-    // httpClient.addRecipient(
-    //   provider.hash,
-    //   utils.joinURL(provider.url, provider.id, 'send')
-    // )
-
-    // let whitelist = driverInfo.whitelist
-    // if (provider.txId)
-    //   whitelist.push(provider.txId)
-    const { tlsKey, wsClients, restoreMonitors } = driverInfo
-    // const identifier = tlsKey ? tlsKey.pubKeyString : meDriver.permalink
-
-    // const identifier = tradle.utils.serializePubKey(identifierPubKey).toString('hex')
-    debug('adding provider', provider.hash, url)
-
-    let transport = wsClients.byUrl[url] || wsClients.byIdentifier[provider.hash]
-    const transportExists = !!transport
-    let wsClient
-    if (!transport) {
-      wsClient = this.getWsClient(url)
-      transport = this.getTransport(wsClient)
-    }
-
-    wsClients.add({
-      client: transport,
-      url: url,
-      identifier: provider.hash,
-      path: provider.id
-    })
-
-    restoreMonitors.add({
-      node: meDriver,
-      url: `${url.replace(/\/+$/, '')}/${provider.id}`,
-      identifier: provider.hash,
-      receive: this.queueReceive.bind(this)
-    })
-
-    if (transportExists) return
-
-    // const url = utils.joinURL(base, 'ws?from=' + identifier).replace(/^http/, 'ws')
-    // const wsClient = new WebSocketClient({
-    //   url: url,
-    //   autoConnect: true,
-    //   // for now, till we figure out why binary
-    //   // doesn't work (socket.io parser errors on decode)
-    //   forceBase64: true
-    // })
-
-    transport.on('presence', updatePresence)
-
-    wsClient.on('disconnect', function () {
-      onTransportConnectivityChanged(false)
-    })
-
-    wsClient.on('connect', function () {
-      onTransportConnectivityChanged(true)
-      // request presence information
-      wsClient.sendCustomEvent('presence')
-    })
-
-    wsClient.on('presence', function (present) {
-      debug('presence updated', present)
-      // the below only handles the known parties
-      // TODO: handle the new arrivals in `present`
-
-      wsClients
-        .providers({ client: transport })
-        .forEach(permalink => {
-          const isPresent = present.indexOf(permalink) !== -1
-          updatePresence(permalink, isPresent)
-        })
-
-      // const permalinks = wsClients.providers({ client: transport })
-      // permalinks.forEach(permalink => {
-      //   const isPresent = present.indexOf(permalink) !== -1
-      //   updatePresence(permalink, isPresent)
-      // })
-
-      // const newArrivals = present.filter(permalink => {
-      //   if (permalinks.indexOf(permalink) === -1) {
-      //     const { hashToUrl={} } = self._getItem(SETTINGS + '_1')
-      //     return !hashToUrl[permalink]
-      //   }
-      // })
-
-      // if (newArrivals.length) self.getInfo([url])
-    })
-
-    function onTransportConnectivityChanged (connected) {
-      if (connected) {
-        self._handleConnectivityChange(true)
-        self._connectedServers[url] = true
-      } else {
-        delete self._connectedServers[url]
-        transport.clients().forEach(function (c) {
-          // reset OTR session, restart on connect
-          debug('aborting pending sends due to disconnect')
-          c.destroy()
-        })
-      }
-
-      const numConnected = Object.keys(self._connectedServers).length
-      if (numConnected === 0) {
-        self._handleConnectivityChange(false)
-        // self.trigger({ action: 'onlineStatus', online: false })
-      } else if (numConnected === 1) {
-        self._handleConnectivityChange(true)
-        // self.trigger({ action: 'onlineStatus', online: true })
-      }
-
-      wsClients
-        .providers({ client: transport })
-        .forEach(permalink => updatePresence(permalink, connected))
-    }
-
-    // let timeouts = {}
-    transport.on('receiving', function (msg) {
-      onTransportConnectivityChanged(true)
-    })
-
-    // transport.on('404', function (recipient) {
-    //   if (!timeouts[recipient]) {
-    //     timeout = setTimeout(function () {
-    //       delete timeouts[recipient]
-    //       transport.cancelPending(recipient)
-    //     }, 10000)
-    //   }
-    // })
-
-    transport.on('message', async function (msg, from) {
-      debug('queuing receipt of msg from', from)
-      if (!wsClients.byIdentifier[from]) {
-        wsClients.add({
-          client: transport,
-          url: url,
-          identifier: from
-        })
-      }
-
-      // const unlock = await self.lockReceive(from)
-      // try {
-        await self.queueReceive({ msg, from })
-        debug('received msg from', from)
-      // } finally {
-      //   unlock()
-      // }
-    })
-
-    transport.setTimeout(40000)
-    transport.on('timeout', function (identifier) {
-      debug(`connection timed out with ${identifier}, canceling pending to trigger resend`)
-      transport.cancelPending(identifier)
-    })
-
-    function updatePresence (recipient, present) {
-      if (present) {
-        meDriver.sender.resume(recipient)
-      } else {
-        meDriver.sender.pause(recipient)
-        transport.cancelPending(recipient)
-        // try again soon. Todo: make this smarter
-        setTimeout(() => meDriver.sender.resume(recipient), 10000)
-      }
-      // self.trigger({action: 'onlineStatus', online: present})
-      self.setProviderOnlineStatus(recipient, present)
-    }
   },
 
   queueReceive({ msg, from }) {
