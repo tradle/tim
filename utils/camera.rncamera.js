@@ -3,6 +3,7 @@ import withDefaults from 'lodash/defaults'
 import CameraView from '../Components/CameraView'
 import Navigator from '../Components/Navigator'
 import CameraDefaults from './camera-defaults'
+import { onNextTransitionStart } from './utils'
 
 const DEFAULTS = {}
 
@@ -22,6 +23,12 @@ export const capture = async props => {
   }
 
   return new Promise((resolve, reject) => {
+    // nav to camera view
+    onNextTransitionStart(navigator, () => {
+      // nav away from camera view
+      onNextTransitionStart(navigator, () => resolve())
+    })
+
     navigator.push({
       title,
       backButtonTitle: backButtonTitle || 'Back',
