@@ -295,6 +295,7 @@ class RefPropertyEditor extends Component {
       component: CameraView,
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
+        model,
         onTakePic: this.onTakePicture.bind(this, params)
       }
     });
