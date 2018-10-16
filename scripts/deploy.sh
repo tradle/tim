@@ -271,6 +271,19 @@ copy_index_html() {
 
   SOURCE="$1"
   DEST="$2"
+
+  if [[ "$SOURCE" =~ /$ ]]
+  then
+    # strip slash
+    SOURCE=$(echo "$SOURCE" | sed 's/\/$//')
+  fi
+
+  if [[ "$DEST" =~ /$ ]]
+  then
+    # strip slash
+    DEST=$(echo "$DEST" | sed 's/\/$//')
+  fi
+
   copy_with_max_age "$SOURCE/index.html" "$DEST/index.html" "0"
 }
 
