@@ -112,7 +112,7 @@ var search = {
     this.graphqlEndpoint = graphqlEndpoint
     this.meDriver = meDriver
     // Not needed but just to make it generic
-    return new GraphQLClient(graphqlEndpoint, {headers})
+    return new GraphQLClient(graphqlEndpoint, { headers })
   },
 
   async searchServer(params) {
@@ -877,10 +877,10 @@ console.log('searchServer.apollo ' + (Date.now() - start))
     })
     console.log('searchServer.length ' + (Date.now() - start))
 
-    let headers = {
+    const headers = {
       'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
     }
-    let client = new GraphQLClient(this.graphqlEndpoint, headers)
+    let client = new GraphQLClient(this.graphqlEndpoint, { headers })
 
     let variables = versionId  &&  {modelsVersionId: versionId} || undefined
     try {
