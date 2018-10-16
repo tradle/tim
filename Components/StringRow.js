@@ -1,5 +1,3 @@
-console.log('requiring StringRow.js')
-'use strict';
 
 import utils from '../utils/utils'
 import StyleSheet from '../StyleSheet'

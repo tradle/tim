@@ -1,6 +1,3 @@
-console.log('requiring MyProductMessageRow.js')
-'use strict'
-
 import _ from 'lodash'
 import reactMixin from 'react-mixin'
 import {

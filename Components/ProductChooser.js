@@ -1,9 +1,6 @@
-console.log('requiring ProductChooser.js')
-'use strict';
-
 import utils from '../utils/utils'
 var translate = utils.translate
-import equal from 'deep-equal'
+import equal from 'lodash/isEqual'
 import reactMixin from 'react-mixin'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'

@@ -1,8 +1,6 @@
-console.log('requiring nkey-se.js')
 
 import crypto from 'crypto'
 import * as ec from 'react-native-ecc'
-import thunky from 'thunky'
 import nkey from 'nkey'
 const type = 'ec'
 

@@ -1,5 +1,3 @@
-console.log('requiring makeStylish.js')
-'use strict'
 // export default class StyleProvider {
 //   constructor(props) {
 //     super(props)

@@ -1,8 +1,5 @@
-'use strict';
 
 import StyleSheet from '../StyleSheet'
-import {Platform} from 'react-native';
-import { getFontSize } from '../utils/utils'
 import { dimensions } from '../utils/utils'
 
 export default StyleSheet.create({

@@ -1,6 +1,3 @@
-console.log('requiring utils.js')
-'use strict'
-
 import React from 'react'
 import {
   NativeModules,
@@ -10,7 +7,6 @@ import {
   Linking,
   PixelRatio,
   Platform,
-  PermissionsAndroid,
   StyleSheet
 } from 'react-native'
 
@@ -37,7 +33,7 @@ import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
 const { sanitize } = validateResource.utils
 import Lens from '@tradle/lens'
-import tradle, {
+import {
   protocol,
   utils as tradleUtils
 } from '@tradle/engine'
@@ -54,7 +50,6 @@ import platformUtils from './platformUtils'
 import { post as submitLog } from './debug'
 // import Actions from '../Actions/Actions'
 import chatStyles from '../styles/chatStyles'
-import locker from './locker'
 import Strings from './strings'
 import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
@@ -476,9 +471,7 @@ var utils = {
     }
     return s ? s : args[0]
   },
-  clone(resource) {
-    return _.cloneDeep(resource)
-  },
+  clone: _.cloneDeep,
   compare(r1, r2, isInlined) {
     if (!r1 || !r2)
       return (r1 || r2) ? false : true
@@ -1979,7 +1972,6 @@ var utils = {
     }
   },
 
-  locker,
   getMainPhotoProperty(model) {
     let mainPhoto
     let props = model.properties

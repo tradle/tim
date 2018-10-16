@@ -1,5 +1,3 @@
-console.log('requiring linking.js')
-
 import _ from 'lodash'
 import querystring from 'querystring'
 import EventEmitter from 'EventEmitter'
@@ -8,7 +6,6 @@ import {
 } from 'react-native'
 import Branch from 'react-native-branch'
 import debounce from 'debounce'
-import { translate } from './utils'
 import { appScheme, deepLinkHost } from './env'
 
 const BRANCH_SPECIAL_CHARS = '$+~'

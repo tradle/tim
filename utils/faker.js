@@ -1,8 +1,6 @@
-console.log('requiring faker.js')
 import crypto from 'crypto'
 import extend from 'xtend'
 import { constants } from '@tradle/engine'
-import ENV from './env'
 const { TYPE } = constants
 
 import formDefaults from '../data/formDefaults'
@@ -27,7 +25,7 @@ const nextTitle = (function () {
   }
 })()
 
-const SEND_TO_TAXTIME = ['Easy Bank', 'UBS', 'Private Bank']
+// const SEND_TO_TAXTIME = ['Easy Bank', 'UBS', 'Private Bank']
 const VERIFICATION = 'tradle.Verification'
 const apis = {
   au10tix: {

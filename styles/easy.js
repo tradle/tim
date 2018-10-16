@@ -1,9 +1,6 @@
-'use strict';
 
 var LINK = '#006A4D';
-var SEPARATOR = '#006A4D';
 var MY_MESSAGE_BG = '#006A4D';
-var STRUCTURED_MESSAGE_COLOR = '#5F9D6E';
 
 var EasyBank = Object.freeze({
   LINK_COLOR: '#006A4D',
@@ -12,7 +9,7 @@ var EasyBank = Object.freeze({
   PRODUCT_ROW_TEXT_COLOR: '#f7f7f7',
 
   SEPARATOR: '#006A4D',
-  MY_MESSAGE_BG: '#006A4D',
+  MY_MESSAGE_BG,
   STRUCTURED_MESSAGE_COLOR: '#5F9D6E',
   linkIcon: {
     width: 20,

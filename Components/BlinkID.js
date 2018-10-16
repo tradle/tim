@@ -1,15 +1,12 @@
-console.log('requiring BlinkID.js')
 import { Platform } from 'react-native'
 // import withDefaults from 'lodash/defaults'
 // import groupBy from 'lodash/groupBy'
-import getValues from 'lodash/values'
 // import BlinkID from 'react-native-blinkid'
 import * as BlinkID from 'blinkid-react-native';
 // import { BlinkID , MrtdKeys, UsdlKeys, EUDLKeys, NzdlFrontKeys as NZDLKeys, MYKADKeys } from 'blinkid-react-native'
 const UsdlKeys = BlinkID.UsdlKeys
 import { microblink } from '../utils/env'
 import { isSimulator, keyByValue, sanitize, requestCameraAccess } from '../utils/utils'
-import xml2js from 'xml2js'
 
 const recognizers = {
   // scans documents with face image and returns document images
@@ -281,7 +278,6 @@ function normalizeMRTDResult (result) {
     }
   }
 
-  const { personal, document } = result
   normalizeDates(result, parseMRTDDate)
 
   // const { mrzText } = document

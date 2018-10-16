@@ -1,4 +1,3 @@
-'use strict'
 
 import './utils/errors'
 import './utils/shim'
@@ -38,8 +37,6 @@ const {
 // import NativeAppEventEmitter from 'RCTNativeAppEventEmitter'
 
 // require('react-native-level')
-import Debug from './utils/debug'
-var debug = Debug('tradle:app')
 
 // require('regenerator/runtime') // support es7.asyncFunctions
 // import './utils/crypto'

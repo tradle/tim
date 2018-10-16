@@ -1,4 +1,3 @@
-console.log('requiring PasswordCheck.js')
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import {

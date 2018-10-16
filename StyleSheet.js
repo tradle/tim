@@ -1,6 +1,5 @@
-'use strict'
 
-import {PixelRatio, StyleSheet, Platform, Alert} from 'react-native'
+import {PixelRatio, StyleSheet} from 'react-native'
 
 module.exports = {
   ...StyleSheet,

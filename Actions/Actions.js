@@ -1,4 +1,3 @@
-'use strict';
 
 var Reflux = require('reflux');
 var debug = require('debug')('Actions')

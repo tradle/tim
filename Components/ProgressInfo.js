@@ -1,5 +1,3 @@
-console.log('requiring ProgressInfo.js')
-'use strict'
 
 import {
   View,

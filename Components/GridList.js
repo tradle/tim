@@ -1,5 +1,3 @@
-console.log('requiring GridList.js')
-'use strict';
 
 import React, { Component } from 'react'
 import {

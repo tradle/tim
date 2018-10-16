@@ -1,6 +1,3 @@
-console.log('requiring MessageList.js')
-'use strict';
-
 import React, { Component } from 'react'
 import {
   ImageBackground,
@@ -17,7 +14,6 @@ import PropTypes from 'prop-types'
 import _ from 'lodash'
 import TimerMixin from 'react-timer-mixin'
 import Reflux from 'reflux'
-import clone from 'clone'
 import DeviceInfo from 'react-native-device-info'
 import GiftedMessenger from 'react-native-gifted-messenger'
 import Icon from 'react-native-vector-icons/Ionicons'
@@ -337,7 +333,7 @@ class MessageList extends Component {
         // not fulfilled form request for multi-entry form will have it's own ID set
         // as fulfilled document
         if (!r._document || utils.getId(r) === r._document) {
-          let l = clone(list)
+          let l = utils.clone(list)
           l.splice(l.length - 1 , 1)
           this.setState({list: l})
         }
@@ -403,7 +399,7 @@ class MessageList extends Component {
     else if (utils.getModel(rtype).subClassOf === FORM  &&  resource._context) {
       let product = resource._context.requestFor
       if (this.state.productToForms)
-        productToForms = clone(this.state.productToForms)
+        productToForms = utils.clone(this.state.productToForms)
       else
         productToForms = {}
 

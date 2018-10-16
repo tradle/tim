@@ -3,8 +3,6 @@
   a bootstrap like style
 
 */
-'use strict';
-
 var LABEL_COLOR = '#cccccc';
 var INPUT_COLOR = '#000000';
 var ERROR_COLOR = '#a94442';

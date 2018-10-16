@@ -1,5 +1,3 @@
-console.log('requiring TouchIDOptIn.js')
-
 import {
   View,
   Text,

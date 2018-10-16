@@ -1,6 +1,3 @@
-console.log('requiring ApplicationView.js')
-'use strict';
-
 import React, { Component } from 'react'
 import {
   View,

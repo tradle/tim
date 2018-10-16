@@ -1,6 +1,3 @@
-console.log('requiring PageView.js')
-'use strict';
-
 import {
   StyleSheet,
   View,
