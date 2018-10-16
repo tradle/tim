@@ -116,9 +116,7 @@ set_cloudfront_origin_path() {
 
   confirm_or_abort "about to modify origin path on $DIST_NAME cloudfront distribution to $ORIGIN_PATH"
   aws cloudfront update-distribution --id "$DIST_ID" --distribution-config "$NEW_CONF" --if-match "$ETAG"
-  INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths /index.html | jq -r .Invalidation.Id)
-  echo "waiting for invalidation to complete (5-15 minutes)"
-  aws cloudfront wait invalidation-completed --distribution-id "$DIST_ID" --id "$INVALIDATION_ID"
+  clear_cache "$DIST_ID"
 }
 
 set_live_folder_dev() {
@@ -323,6 +321,24 @@ rollback_dev() {
 rollback_prod() {
   ALT=$(get_alt_folder_prod)
   set_live_folder_prod "$ALT"
+}
+
+clear_cache() {
+  local DIST_ID
+  local INVALIDATION_ID
+
+  DIST_ID="$1"
+  INVALIDATION_ID=$(aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths /index.html | jq -r .Invalidation.Id)
+  echo "waiting for invalidation to complete (5-15 minutes)"
+  aws cloudfront wait invalidation-completed --distribution-id "$DIST_ID" --id "$INVALIDATION_ID"
+}
+
+clear_cache_dev() {
+  clear_cache "$DEV_DIST_ID"
+}
+
+clear_cache_prod() {
+  clear_cache "$PROD_DIST_ID"
 }
 
 if [[ $COMMAND != "deploy_dev" ]] && \
