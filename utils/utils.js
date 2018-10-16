@@ -2301,10 +2301,12 @@ var utils = {
     })
     return val
   },
-  requestCameraAccess: async () => {
-    if (utils.isSimulator()) return true
+  getCaptureImageQualityForModel: ({ id }) => {
+    if (id === 'tradle.PhotoID' || id === 'tradle.Selfie') {
+      return 1
+    }
 
-    return platformUtils.requestCameraAccess()
+    return 0.5
   },
   requestForModels() {
     let me = utils.getMe()

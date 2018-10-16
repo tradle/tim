@@ -289,6 +289,7 @@ class RefPropertyEditor extends Component {
       navigator: this.props.navigator,
       title: translate(prop, model),
       backButtonTitle: translate('back'),
+      quality: utils.getCaptureImageQualityForModel(model),
     })
 
     if (result) {

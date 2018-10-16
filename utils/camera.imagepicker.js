@@ -56,6 +56,7 @@ export const capture = props => new Promise((resolve, reject) => {
 
     resolve(normalizeImageCaptureData({
       ...result,
+      extension: quality === 1 ? 'png' : 'jpeg',
       base64: result.data,
       quality,
     }))

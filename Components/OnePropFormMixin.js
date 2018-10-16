@@ -108,6 +108,7 @@ var OnePropFormMixin = {
       title: isWeb() &&  translate(prop, model),
       backButtonTitle: translate('back'),
       cameraType: prop.cameraType,
+      quality: utils.getCaptureImageQualityForModel(model),
     })
 
     if (result) {

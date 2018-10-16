@@ -14,6 +14,7 @@ const debug = require('debug')('tradle:app:ImageInput')
 import utils, { translate } from '../utils/utils'
 import ENV from '../utils/env'
 import { normalizeImageCaptureData } from '../utils/image-utils'
+import { requestCameraAccess } from '../utils/camera'
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
@@ -90,7 +91,7 @@ class ImageInput extends Component {
       })
     }
 
-    const allowed = utils.requestCameraAccess()
+    const allowed = requestCameraAccess()
     if (!allowed) return
 
     ImagePicker[action](options, (response) => {
@@ -103,7 +104,7 @@ class ImageInput extends Component {
       }
 
       const data = normalizeImageCaptureData({
-        quality,
+        extension: quality === 1 ? 'png' : 'jpeg',
         base64: response.data,
         isVertical: response.isVertical,
         width: response.width,

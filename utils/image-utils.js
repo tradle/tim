@@ -1,12 +1,8 @@
-export const createDataUri = ({ base64, extension, quality }) => {
+export const createDataUri = ({ base64, extension }) => {
   if (base64.startsWith('data:')) return base64
 
   if (!extension) {
-    if (typeof quality !== 'number') {
-      throw new Error('expected "quality" or "extension"')
-    }
-
-    extension = quality === 1 ? 'png' : 'jpeg'
+    throw new Error('expected "extension"')
   }
 
   if (!(base64 && extension)) {
@@ -25,10 +21,9 @@ export const createDataUri = ({ base64, extension, quality }) => {
 // some libraries generate base64 with line breaks, spaces, etc.
 export const cleanBase64 = str => str.replace(/[\s]/g, '')
 
-export const normalizeImageCaptureData = ({ quality, extension, ...data }) => ({
+export const normalizeImageCaptureData = ({ extension, ...data }) => ({
   ...data,
   base64: createDataUri({
-    quality,
     extension,
     base64: data.base64,
   }),

@@ -2,7 +2,6 @@ import { Platform } from 'react-native'
 import withDefaults from 'lodash/defaults'
 import CameraView from '../Components/CameraView'
 import Navigator from '../Components/Navigator'
-import { normalizeImageCaptureData } from './image-utils'
 import CameraDefaults from './camera-defaults'
 
 const DEFAULTS = {}

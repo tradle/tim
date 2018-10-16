@@ -37,6 +37,9 @@ class CameraView extends Component {
     this.state = {
       cameraType: props.cameraType
     }
+
+    this._switchCamera = this._switchCamera.bind(this)
+    this._takePicture = this._takePicture.bind(this)
   }
           // captureTarget={RNCamera.Constants.CaptureTarget.cameraRoll}
           // captureMode={RNCamera.Constants.CaptureMode.video}
@@ -68,16 +71,15 @@ class CameraView extends Component {
                 this.camera = ref;
               }}
             style={styles.container}
-            onBarCodeRead={this._onBarCodeRead.bind(this)}
             flashMode={RNCamera.Constants.FlashMode.auto}
             type={CameraType[this.state.cameraType]}>
           </RNCamera>
           <View style={styles.footer}>
             <Text style={styles.currentAction}>{translate('Photo')}</Text>
-            <TouchableOpacity onPress={this._takePicture.bind(this)}>
+            <TouchableOpacity onPress={this._takePicture}>
                <Icon name='ios-radio-button-on'  size={65}  color='#eeeeee'  style={styles.icon}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={this._switchCamera.bind(this)} style={styles.right}>
+            <TouchableOpacity onPress={this._switchCamera} style={styles.right}>
               <Icon name='ios-reverse-camera-outline' size={50} color='#eeeeee' />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => this.props.callback()} style={styles.left}>
@@ -87,18 +89,13 @@ class CameraView extends Component {
         </View>
       )
   }
-  _onFacesDetected({faces}) {
-    debugger
-  }
-  _onBarCodeRead(e) {
-    console.log(e);
-  }
+
   _switchCamera() {
     const cameraType = this.state.cameraType === 'back' ? 'front' : 'back'
     this.setState({ cameraType })
   }
 
-  _takePicture = async () => {
+  async _takePicture () {
     const { quality, fixOrientation } = this.props
     const opts = {
       base64: true,
@@ -113,8 +110,10 @@ class CameraView extends Component {
 
     try {
       const data = await this.camera.takePictureAsync(opts)
+      // always
+      data.extension = 'jpeg'
       this.setState({
-        data: normalizeImageCaptureData({ ...data, quality })
+        data: normalizeImageCaptureData(data)
       })
     } catch (err) {
       this.props.callback(err)
