@@ -315,5 +315,6 @@ module.exports = {
   "noResourcesForCriteria": "Voor dit criterium zijn geen middelen gevonden",
   "logSentToDevTeam": "Het logboek is verzonden naar het ontwikkelaarsteam van Tradle",
   "failedToSendLog": "Verzenden mislukt",
-  "reviewScannedPropertiesAndSecondSideSnapshot": "Bekijk de onderstaande gegevens en neem een ​​momentopname van de {1} kant van het document"
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Bekijk de onderstaande gegevens en neem een ​​momentopname van de {1} kant van het document",
+  "documentBackSide": "Middelste document achterkant"
 }

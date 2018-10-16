@@ -315,5 +315,6 @@ module.exports = {
   "invalidQR": "Mã QR không hợp lệ",
   "failedToSendLog": "Không thể gửi nhật ký",
   "debugLogSent": "Nhật ký gỡ lỗi đã được gửi",
-  "reviewScannedPropertiesAndSecondSideSnapshot": "Vui lòng xem lại dữ liệu bên dưới và chụp nhanh mặt {1} của tài liệu"
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Vui lòng xem lại dữ liệu bên dưới và chụp nhanh mặt {1} của tài liệu",
+  "documentBackSide": "Trung tâm tài liệu mặt sau"
 }
