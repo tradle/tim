@@ -41,28 +41,32 @@ export default class Log extends Component {
   }
   render() {
     return (
-      <View style={styles.container}>
-        <ScrollView
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          directionalLockEnabled={true}
-          bounces={true}
-          scrollsToTop={false}
-        >
+      <ScrollView
+        contentContainerStyle={styles.contentContainer}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={true}
+        directionalLockEnabled={true}
+        bounces={true}
+        scrollsToTop={false}
+      >
+        <View style={styles.container}>
           <Text>{this.state.text}</Text>
-        </ScrollView>
-      </View>
+        </View>
+      </ScrollView>
     );
   }
 }
 reactMixin(Log.prototype, TimerMixin);
 
 const styles = StyleSheet.create({
-  container: {
+  contentContainer: {
     paddingTop: 60,
+    paddingHorizontal: 10,
+  },
+  container: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    justifyContent: 'center'
+    justifyContent: 'flex-start'
   }
 })
