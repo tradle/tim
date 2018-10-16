@@ -1,3 +1,4 @@
+'use strict'
 
 import omit from 'lodash/omit'
 import isEmpty from 'lodash/isEmpty'
@@ -374,7 +375,7 @@ var search = {
         }
       }
       // let { message, graphQLErrors, networkError } = data.error
-      if (graphQLErrors.length) {
+      if (graphQLErrors  &&  graphQLErrors.length) {
         let excludeProps = []
         let str = 'Cannot query field \"'
         let len = str.length
@@ -864,7 +865,7 @@ console.log('searchServer.apollo ' + (Date.now() - start))
     var {query, table, versionId} = params
     // debugger
     const body = tradleUtils.stringify({
-      query: JSON.stringify(query)
+      query
     })
     let start = Date.now()
     const result = await this.meDriver.sign({
