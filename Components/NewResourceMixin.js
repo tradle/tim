@@ -1623,7 +1623,7 @@ var styles= StyleSheet.create({
     flex: 1,
     height: 35,
     paddingBottom: 5,
-    marginTop: 5,
+    // marginTop: 5,
     // borderWidth: 1,
     borderColor: 'transparent',
     // borderBottomColor: '#eeeeee',
@@ -1675,7 +1675,8 @@ var styles= StyleSheet.create({
   dateLabel: {
     marginLeft: 10,
     fontSize: 12,
-    marginVertical: 5,
+    marginTop: 5,
+    // marginVertical: 5,
     paddingBottom: 5
   },
   noItemsText: {

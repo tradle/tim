@@ -150,9 +150,8 @@ class RefPropertyEditor extends Component {
     let color
     if (isRegistration)
       color = '#eeeeee'
-    else if (val) {
+    else if (val)
       color = isImmutable  &&  linkColor || '#757575'
-    }
     else
       color = '#AAAAAA'
     let propView
@@ -209,7 +208,7 @@ class RefPropertyEditor extends Component {
       }
 
       if (useImageInput) {
-        let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0, paddingBottom: help ? 0 : 7}
+        let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
         actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                        {content}
                      </ImageInput>
