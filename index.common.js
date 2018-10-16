@@ -1,6 +1,7 @@
 
 import './utils/errors'
 import './utils/shim'
+import './utils/debug'
 import './utils/automaticUpdates'
 import React, { Component } from 'react'
 import Reflux from 'reflux'
