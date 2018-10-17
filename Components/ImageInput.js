@@ -20,6 +20,7 @@ const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
   allowPicturesFromLibrary: PropTypes.bool,
   cameraType: PropTypes.string,
+  nonImageAllowed: PropTypes.bool,
   onImage: PropTypes.func.isRequired
 }
 

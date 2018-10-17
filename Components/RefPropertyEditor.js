@@ -214,7 +214,7 @@ class RefPropertyEditor extends Component {
 
       if (useImageInput) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        actionItem = <ImageInput cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
+        actionItem = <ImageInput nonImageAllowed={isVideo} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                        {content}
                      </ImageInput>
       }
