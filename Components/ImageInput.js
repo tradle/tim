@@ -18,7 +18,7 @@ import { requestCameraAccess } from '../utils/camera'
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
-  prop: PropTypes.string.isRequired,
+  prop: PropTypes.object.isRequired,
   onImage: PropTypes.func.isRequired
 }
 
