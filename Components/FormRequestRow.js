@@ -992,7 +992,7 @@ class FormRequestRow extends Component {
                      </View>
                    </View>
     if (useImageInput)
-      return <ImageInput prop={prop} style={styles.container} onImage={onPress}>
+      return <ImageInput allowPicturesFromLibrary={prop.allowPicturesFromLibrary} cameraType={prop.cameraType} style={styles.container} onImage={onPress}>
                {content}
              </ImageInput>
 
