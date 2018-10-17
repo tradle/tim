@@ -865,7 +865,7 @@ var NavigationBarRouteMapper = {
     else if (bankStyle)
       st.color = color = bankStyle.navBarColor || bankStyle.linkColor
     else
-      color = '#7AAAC3'
+      st.color = '#7AAAC3'
 
     let style = [platformStyles.navBarText, t.length === 1 && styles.navBarTitleText || styles.navBarTitleText1, st]
     let text, tArr
