@@ -13,14 +13,13 @@ import { RNCamera } from 'react-native-camera'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
 
-import utils, { translate } from '../utils/utils'
+import utils, { translate, pickNonNull } from '../utils/utils'
 import { normalizeImageCaptureData } from '../utils/image-utils'
 
 const CameraType = RNCamera.Constants.Type
 
 class CameraView extends Component {
   static defaultProps = {
-    quality: 0.5,
     cameraType: 'back',
     fixOrientation: true,
   };
@@ -28,6 +27,8 @@ class CameraView extends Component {
   static propTypes = {
     cameraType: PropTypes.oneOf(['front', 'back']),
     quality: PropTypes.number,
+    width: PropTypes.number,
+    height: PropTypes.number,
     fixOrientation: PropTypes.bool,
     callback: PropTypes.func.isRequired,
   };
@@ -96,20 +97,21 @@ class CameraView extends Component {
   }
 
   async _takePicture () {
-    const { quality, fixOrientation } = this.props
+    const { width, height, quality, fixOrientation } = this.props
     const opts = {
       base64: true,
       mirrorImage: this.state.cameraType !== 'back',
       quality,
+      width,
+      height,
       fixOrientation,
       forceUpOrientation: fixOrientation,
       doNotSave: true,
-      width: 600,
       // skipProcessing: true,
     }
 
     try {
-      const data = await this.camera.takePictureAsync(opts)
+      const data = await this.camera.takePictureAsync(pickNonNull(opts))
       // always
       data.extension = 'jpeg'
       this.setState({
