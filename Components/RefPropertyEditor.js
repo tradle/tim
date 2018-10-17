@@ -31,8 +31,9 @@ import ImageInput from './ImageInput'
 import Actions from '../Actions/Actions'
 import BlinkID from './BlinkID'
 import Navigator from './Navigator'
-import CameraView from './CameraView'
 import GridList from './GridList'
+import { capture } from '../utils/camera'
+import Errors from '@tradle/errors'
 
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
@@ -151,9 +152,8 @@ class RefPropertyEditor extends Component {
     let color
     if (isRegistration)
       color = '#eeeeee'
-    else if (val) {
+    else if (val)
       color = isImmutable  &&  linkColor || '#757575'
-    }
     else
       color = '#AAAAAA'
     let propView
@@ -219,7 +219,7 @@ class RefPropertyEditor extends Component {
                      </ImageInput>
       }
       else
-        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop: prop})}>
+        actionItem = <TouchableOpacity onPress={this.showCameraView.bind(this, {prop})}>
                        {content}
                      </TouchableOpacity>
     }
@@ -259,7 +259,7 @@ class RefPropertyEditor extends Component {
     // this.setState(state);
     this.props.onChange(state)
   }
-  showCameraView(params) {
+  async showCameraView(params) {
     // if (utils.isAndroid()) {
     //   return Alert.alert(
     //     translate('oops') + '!',
@@ -288,17 +288,17 @@ class RefPropertyEditor extends Component {
         return
       }
     }
-    this.props.navigator.push({
+
+    const result = await capture({
+      navigator: this.props.navigator,
       title: translate(prop, model),
-      backButtonTitle: 'Back',
-      id: 12,
-      component: CameraView,
-      sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
-      passProps: {
-        model,
-        onTakePic: this.onTakePicture.bind(this, params)
-      }
-    });
+      backButtonTitle: translate('back'),
+      quality: utils.getCaptureImageQualityForModel(model),
+    })
+
+    if (result) {
+      this.onTakePicture(params, result)
+    }
   }
   onTakePicture(params, data) {
     if (!data)
@@ -313,7 +313,6 @@ class RefPropertyEditor extends Component {
       this.props.resource.video = data
       this.props.floatingProps.video = data
     }
-    this.props.navigator.pop();
   }
   getLabelAndBorderColor(prop) {
     let bankStyle = this.props.bankStyle
@@ -355,6 +354,7 @@ class RefPropertyEditor extends Component {
     const type = getDocumentTypeFromTitle(documentType.title)
     let recognizers
     let tooltip
+    let firstSideInstructions, secondSideInstructions
     // let isPassport
     switch (type) {
     case 'passport':
@@ -362,9 +362,10 @@ class RefPropertyEditor extends Component {
       // isPassport = true
       // machine readable travel documents (passport)
       recognizers = BlinkID.recognizers.mrtd
+      firstSideInstructions = translate('scanPassport')
       break
     case 'card':
-      tooltip = translate('centerIdCard')
+      firstSideInstructions = translate('centerIdCard')
       // machine readable travel documents (passport)
       // should be combined
       // if (country.title === 'Bangladesh')
@@ -378,15 +379,18 @@ class RefPropertyEditor extends Component {
       break
     case 'license':
     case 'licence':
-      tooltip = translate('centerLicence')
+      firstSideInstructions = translate('centerLicence')
       if (country.title === 'United States') {
+        secondSideInstructions = translate('documentBackSide')
         recognizers = BlinkID.recognizers.usdlCombined
         // recognizers = BlinkID.recognizers.usdl
       }
       else if (country.title === 'New Zealand')
         recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
-      else
+      else {
+        // secondSideInstructions = translate('scanLicenceBack')
         recognizers = BlinkID.recognizers.eudl
+      }
       break
     default:
       tooltip = translate('centerID')
@@ -399,7 +403,8 @@ class RefPropertyEditor extends Component {
       // timeout: ENV.blinkIDScanTimeoutInternal,
       documentType,
       country,
-      tooltip,
+      firstSideInstructions,
+      secondSideInstructions,
       recognizers: recognizers ? [].concat(recognizers) : BlinkID.recognizers
     }
 

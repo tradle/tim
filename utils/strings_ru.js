@@ -315,5 +315,6 @@ module.exports = {
   "noResourcesForCriteria": "Ресурсов для этого критерия не найдено",
   "debugLogSent": "Отладочный журнал отправлен",
   "failedToSendLog": "Не удалось отправить журнал",
-  "reviewScannedPropertiesAndSecondSideSnapshot": "Ознакомьтесь с приведенными ниже данными и сделайте снимок {1} стороны документа"
+  "reviewScannedPropertiesAndSecondSideSnapshot": "Ознакомьтесь с приведенными ниже данными и сделайте снимок {1} стороны документа",
+  "documentBackSide": "Обратная сторона центрального документа"
 }

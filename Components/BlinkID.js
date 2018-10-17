@@ -6,7 +6,8 @@ import * as BlinkID from 'blinkid-react-native';
 // import { BlinkID , MrtdKeys, UsdlKeys, EUDLKeys, NzdlFrontKeys as NZDLKeys, MYKADKeys } from 'blinkid-react-native'
 const UsdlKeys = BlinkID.UsdlKeys
 import { microblink } from '../utils/env'
-import { isSimulator, keyByValue, sanitize, requestCameraAccess } from '../utils/utils'
+import { isSimulator, keyByValue, sanitize } from '../utils/utils'
+import { requestCameraAccess } from '../utils/camera'
 
 const recognizers = {
   // scans documents with face image and returns document images

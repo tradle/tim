@@ -2369,13 +2369,20 @@ var utils = {
     })
     return val
   },
-  requestCameraAccess: platformUtils.requestCameraAccess,
-  requestForModels(to) {
-    let me = this.getMe()
+  getCaptureImageQualityForModel: ({ id }) => {
+    if (id === 'tradle.PhotoID' || id === 'tradle.Selfie') {
+      return 1
+    }
+
+    return 0.5
+  },
+  requestForModels() {
+    let me = utils.getMe()
     var msg = {
+      message: this.translate('customerWaiting', me.firstName),
       _t: CUSTOMER_WAITING,
       from: me,
-      to: to || me.organization,
+      to: me.organization,
       time: new Date().getTime()
     }
     return msg
@@ -2839,11 +2846,6 @@ var utils = {
       default:
         throw new ValidateResourceErrors.InvalidPropertyValue(`unsupported check status: ${safeStringify(check.status)}`)
     }
-  },
-
-  cleanBase64(str) {
-    // some libraries generate base64 with line breaks, spaces, etc.
-    return str.replace(/[\s]/g, '')
   },
 
   logger: namespace => Debug(`tradle:app:${namespace}`),

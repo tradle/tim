@@ -1,5 +1,6 @@
 
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import {
   StyleSheet,
   Text,
@@ -13,17 +14,32 @@ import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive } from 'react-native-orient'
 
 import utils, { translate } from '../utils/utils'
-const BASE64_PREFIX = 'data:image/jpeg;base64,'
-const { back, front } = RNCamera.Constants.Type
-const PHOTO_ID = 'tradle.PhotoID'
-const SELFIE = 'tradle.Selfie'
+import { normalizeImageCaptureData } from '../utils/image-utils'
+
+const CameraType = RNCamera.Constants.Type
 
 class CameraView extends Component {
+  static defaultProps = {
+    quality: 0.5,
+    cameraType: 'back',
+    fixOrientation: true,
+  };
+
+  static propTypes = {
+    cameraType: PropTypes.oneOf(['front', 'back']),
+    quality: PropTypes.number,
+    fixOrientation: PropTypes.bool,
+    callback: PropTypes.func.isRequired,
+  };
+
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
-      cameraType: props.cameraType || 'back'
+      cameraType: props.cameraType
     }
+
+    this._switchCamera = this._switchCamera.bind(this)
+    this._takePicture = this._takePicture.bind(this)
   }
           // captureTarget={RNCamera.Constants.CaptureTarget.cameraRoll}
           // captureMode={RNCamera.Constants.CaptureMode.video}
@@ -33,8 +49,9 @@ class CameraView extends Component {
     if (data) {
       // debugger
       let { width, height } = utils.dimensions(CameraView)
+      const uri = data.uri || data.base64
       return <View style={[styles.container, {backgroundColor: '#000', justifyContent: 'center'}]}>
-                <Image source={{uri: data.base64}} style={{width: width, height: height - 80}} />
+                <Image source={{uri}} style={{width, height: height - 80}} />
                 <View style={styles.footer1}>
                    <TouchableOpacity onPress={() => this.setState({data: null})}>
                      <Text style={styles.cancel}>{translate('retake')}</Text>
@@ -54,66 +71,57 @@ class CameraView extends Component {
                 this.camera = ref;
               }}
             style={styles.container}
-            onBarCodeRead={this._onBarCodeRead.bind(this)}
             flashMode={RNCamera.Constants.FlashMode.auto}
-            type={this.state.cameraType}>
+            type={CameraType[this.state.cameraType]}>
           </RNCamera>
           <View style={styles.footer}>
-            <Text style={styles.currentAction}>{translate('PHOTO')}</Text>
-            <TouchableOpacity onPress={this._takePicture.bind(this)}>
-               <Icon name='ios-radio-button-on'  size={85}  color='#eeeeee'  style={styles.icon}/>
+            <Text style={styles.currentAction}>{translate('Photo')}</Text>
+            <TouchableOpacity onPress={this._takePicture}>
+               <Icon name='ios-radio-button-on'  size={65}  color='#eeeeee'  style={styles.icon}/>
             </TouchableOpacity>
-            <TouchableOpacity onPress={this._switchCamera.bind(this)} style={styles.right}>
+            <TouchableOpacity onPress={this._switchCamera} style={styles.right}>
               <Icon name='ios-reverse-camera-outline' size={50} color='#eeeeee' />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.props.navigator.pop()} style={styles.left}>
+            <TouchableOpacity onPress={() => this.props.callback()} style={styles.left}>
               <Text style={{fontSize: 20, color: '#ffffff'}}>{translate('cancel')}</Text>
             </TouchableOpacity>
           </View>
         </View>
       )
   }
-  _onBarCodeRead(e) {
-    console.log(e);
-  }
+
   _switchCamera() {
     const cameraType = this.state.cameraType === 'back' ? 'front' : 'back'
     this.setState({ cameraType })
   }
-  async _takePicture() {
-    let { model } = this.props
-    let isBestQuality = model  &&  (model.id === PHOTO_ID || model.id === SELFIE)
-    try {
-      let props = {
-        base64: true,
-        mirrorImage: this.state.cameraType !== 'back',
-        quality: isBestQuality && 1 || 0.5,
-        fixOrientation: true,
-        forceUpOrientation: true,
-        doNotSave: true,
-      }
-      let data = await this.camera.takePictureAsync(props)
 
-      data.base64 = BASE64_PREFIX + utils.cleanBase64(data.base64)
-      this.setState({ data })
-    } catch (err) {
-      console.error(err)
-      return
+  async _takePicture () {
+    const { quality, fixOrientation } = this.props
+    const opts = {
+      base64: true,
+      mirrorImage: this.state.cameraType !== 'back',
+      quality,
+      fixOrientation,
+      forceUpOrientation: fixOrientation,
+      doNotSave: true,
+      width: 600,
+      // skipProcessing: true,
     }
 
-    // this.props.onTakePic({
-    //   ...data,
-    //   // backwards compat
-    //   path: data.uri
-    // })
+    try {
+      const data = await this.camera.takePictureAsync(opts)
+      // always
+      data.extension = 'jpeg'
+      this.setState({
+        data: normalizeImageCaptureData(data)
+      })
+    } catch (err) {
+      this.props.callback(err)
+      return
+    }
   }
-  onTakePic() {
-    let data = this.state.data
-    this.props.onTakePic({
-      ...data,
-      // backwards compat
-      path: data.uri
-    })
+  onTakePic = () => {
+    this.props.callback(null, this.state.data)
   }
 }
 CameraView = makeResponsive(CameraView)
@@ -137,7 +145,8 @@ var styles = StyleSheet.create({
   footer: {
     backgroundColor: '#000000',
     paddingTop: 10,
-    height: 120,
+    height: 100,
+    justifyContent: 'center',
     alignSelf: 'stretch',
     alignItems: 'center'
   },
@@ -147,7 +156,7 @@ var styles = StyleSheet.create({
     alignSelf: 'center'
   },
   icon: {
-    marginTop: 2,
+    marginTop: -2,
     alignSelf: 'center',
   },
   cancel: {

@@ -13,8 +13,9 @@ const debug = require('debug')('tradle:app:ImageInput')
 
 import utils, { translate } from '../utils/utils'
 import ENV from '../utils/env'
+import { normalizeImageCaptureData } from '../utils/image-utils'
+import { requestCameraAccess } from '../utils/camera'
 
-const BASE64_PREFIX = 'data:image/jpeg;base64,'
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
   prop: PropTypes.string.isRequired,
@@ -22,7 +23,11 @@ const imageInputPropTypes = {
 }
 
 class ImageInput extends Component {
-  props: imageInputPropTypes;
+  static propTypes = imageInputPropTypes;
+  static defaultProps = {
+    quality: ENV.imageQuality,
+  }
+
   constructor(props) {
     super(props)
     this.showImagePicker = this.showImagePicker.bind(this)
@@ -56,10 +61,10 @@ class ImageInput extends Component {
     }
   }
   async _doShowImagePicker () {
-    const { prop, onImage } = this.props
+    const { prop, onImage, quality } = this.props
     let options = {
       returnIsVertical: true,
-      quality: this.props.quality || ENV.imageQuality,
+      quality,
       cameraType: this.props.prop.cameraType || 'back',
       cancelButtonTitle: translate('cancel'),
       // due to out-of-memory issues
@@ -86,10 +91,7 @@ class ImageInput extends Component {
       })
     }
 
-    const allowed = utils.isSimulator()
-      ? true //await ImagePicker.checkPhotosPermissions()
-      : await utils.requestCameraAccess()
-
+    const allowed = requestCameraAccess()
     if (!allowed) return
 
     ImagePicker[action](options, (response) => {
@@ -101,11 +103,17 @@ class ImageInput extends Component {
         return
       }
 
-      onImage({
-        url: BASE64_PREFIX + utils.cleanBase64(response.data),
+      const data = normalizeImageCaptureData({
+        extension: quality === 1 ? 'png' : 'jpeg',
+        base64: response.data,
         isVertical: response.isVertical,
         width: response.width,
         height: response.height
+      })
+
+      onImage({
+        ...data,
+        url: data.base64,
       })
     })
   }
