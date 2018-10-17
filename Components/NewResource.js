@@ -1364,7 +1364,8 @@ class NewResource extends Component {
                        </TouchableOpacity>
     else
       actionableItem = <ImageInput
-                         prop={bl}
+                         cameraType={bl.cameraType}
+                         allowPicturesFromLibrary={bl.allowPicturesFromLibrary}
                          underlayColor='transparent'
                          style={{paddingBottom: 5}}
                          onImage={item => this.onAddItem(bl.name, item)}>

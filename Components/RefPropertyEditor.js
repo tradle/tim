@@ -214,7 +214,7 @@ class RefPropertyEditor extends Component {
 
       if (useImageInput) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
-        actionItem = <ImageInput prop={prop} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
+        actionItem = <ImageInput cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                        {content}
                      </ImageInput>
       }
@@ -388,7 +388,6 @@ class RefPropertyEditor extends Component {
       else if (country.title === 'New Zealand')
         recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
       else {
-        // secondSideInstructions = translate('scanLicenceBack')
         recognizers = BlinkID.recognizers.eudl
       }
       break

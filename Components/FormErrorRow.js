@@ -140,11 +140,11 @@ class FormErrorRow extends Component {
       }
       else {
         messageBody = <View style={[rowStyle, viewStyle]}>
-                       <ImageInput prop={prop} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
-                        <View style={cellStyle}>
-                          {renderedRow}
-                        </View>
-                       </ImageInput>
+                        <ImageInput allowPicturesFromLibrary={prop.allowPicturesFromLibrary} cameraType={prop.cameraType} style={{flex: 1}} onImage={item => this.onSetMediaProperty(prop.name, item)}>
+                          <View style={cellStyle}>
+                            {renderedRow}
+                          </View>
+                        </ImageInput>
                      </View>
       }
     }
