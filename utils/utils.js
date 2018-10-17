@@ -2858,6 +2858,7 @@ var utils = {
     return urls
   },
   alert: (...args) => Alert.alert(...args),
+  pickNonNull: obj => _.pickBy(obj, val => val != null),
 }
 
 if (__DEV__) {

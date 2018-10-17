@@ -156,7 +156,7 @@ platform :android do
       stage = "releaseStaging"
     end
 
-    apk = "app/build/outputs/apk/#{stage}/app-#{stage}.apk"
+    apk = "android/app/build/outputs/apk/#{stage}/app-#{stage}.apk"
     backup_release(
       apk_path: apk,
       stage: stage
