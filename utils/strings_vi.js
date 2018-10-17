@@ -316,5 +316,6 @@ module.exports = {
   "failedToSendLog": "Không thể gửi nhật ký",
   "debugLogSent": "Nhật ký gỡ lỗi đã được gửi",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Vui lòng xem lại dữ liệu bên dưới và chụp nhanh mặt {1} của tài liệu",
-  "documentBackSide": "Trung tâm tài liệu mặt sau"
+  "documentBackSide": "Trung tâm tài liệu mặt sau",
+  "Photo": "ảnh"
 }

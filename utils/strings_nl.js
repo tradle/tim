@@ -316,5 +316,6 @@ module.exports = {
   "logSentToDevTeam": "Het logboek is verzonden naar het ontwikkelaarsteam van Tradle",
   "failedToSendLog": "Verzenden mislukt",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Bekijk de onderstaande gegevens en neem een ​​momentopname van de {1} kant van het document",
-  "documentBackSide": "Middelste document achterkant"
+  "documentBackSide": "Middelste document achterkant",
+  "Photo": "Foto"
 }
