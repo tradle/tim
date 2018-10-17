@@ -18,7 +18,8 @@ import { requestCameraAccess } from '../utils/camera'
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
-  prop: PropTypes.object.isRequired,
+  allowPicturesFromLibrary: PropTypes.bool,
+  cameraType: PropTypes.string,
   onImage: PropTypes.func.isRequired
 }
 
@@ -61,11 +62,11 @@ class ImageInput extends Component {
     }
   }
   async _doShowImagePicker () {
-    const { prop, onImage, quality } = this.props
+    const { allowPicturesFromLibrary, cameraType, onImage, quality } = this.props
     let options = {
       returnIsVertical: true,
       quality,
-      cameraType: this.props.prop.cameraType || 'back',
+      cameraType: cameraType || 'back',
       cancelButtonTitle: translate('cancel'),
       // due to out-of-memory issues
       // maxWidth: 1536,
@@ -81,7 +82,7 @@ class ImageInput extends Component {
     let action
     if (utils.isIOS() && utils.isSimulator())
       action = 'launchImageLibrary'
-    else if (!prop.allowPicturesFromLibrary)
+    else if (!allowPicturesFromLibrary)
       action = 'launchCamera'
     else {
       action = 'showImagePicker'
