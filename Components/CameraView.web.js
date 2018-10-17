@@ -22,7 +22,10 @@ const DEFAULT_ASPECT_RATIO = 1.33333
 
 class CameraView extends Component {
   static propTypes = {
-    onTakePic: PropTypes.func.isRequired
+    callback: PropTypes.func.isRequired,
+    screenshotFormat: PropTypes.oneOf(['image/jpeg', 'image/png']),
+    getUserMediaUnknownError: PropTypes.string,
+    getUserMediaPermissionError: PropTypes.string,
   };
 
   static defaultProps = {
@@ -58,7 +61,7 @@ class CameraView extends Component {
         <TouchableOpacity onPress={() => this.setState({ photo: null })}>
           <Icon name='ios-close' size={50} color={ICON_COLOR} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => this.props.onTakePic(this.state.photo)}>
+        <TouchableOpacity onPress={() => this.props.callback(null, this.state.photo)}>
           <Icon name='ios-checkmark' size={50} color={ICON_COLOR} />
         </TouchableOpacity>
       </View>
