@@ -1632,7 +1632,7 @@ var styles= StyleSheet.create({
   photoIcon: {
     position: 'absolute',
     right: 0,
-    marginTop: utils.isWeb() ? 20 : -2
+    marginTop: utils.isWeb() ? 25 : -2
   },
   photoIconEmpty: {
     position: 'absolute',
