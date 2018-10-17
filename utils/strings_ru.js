@@ -316,5 +316,6 @@ module.exports = {
   "debugLogSent": "Отладочный журнал отправлен",
   "failedToSendLog": "Не удалось отправить журнал",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Ознакомьтесь с приведенными ниже данными и сделайте снимок {1} стороны документа",
-  "documentBackSide": "Обратная сторона центрального документа"
+  "documentBackSide": "Обратная сторона центрального документа",
+  "Photo": "Фото"
 }

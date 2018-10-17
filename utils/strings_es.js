@@ -316,5 +316,6 @@ module.exports = {
   "logSentToDevTeam": "El registro fue enviado al equipo de desarrolladores de Tradle.",
   "noResourcesForCriteria": "No se encontraron recursos para este criterio.",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Revise los datos a continuación y tome una instantánea del lado {1} del documento",
-  "documentBackSide": "Parte central del documento"
+  "documentBackSide": "Parte central del documento",
+  "Photo": "Foto"
 }
