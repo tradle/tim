@@ -23,7 +23,7 @@ const PHOTO = 'tradle.Photo'
 
 const imageInputPropTypes = {
   ...TouchableHighlight.propTypes,
-  prop: PropTypes.string.isRequired,
+  nonImageAllowed: PropTypes.bool,
   onImage: PropTypes.func.isRequired
 }
 
@@ -65,19 +65,17 @@ class ImageInput extends Component {
     )
   }
   renderImageFileInput() {
-    const { prop, onImage } = this.props
-    let isPhoto = prop.items  &&  prop.items.ref === PHOTO || prop.ref === PHOTO
+    const { onImage, nonImageAllowed } = this.props
+    // let isPhoto = prop.items  &&  prop.items.ref === PHOTO || prop.ref === PHOTO
     return (
       <View style={{ width: 0, height: 0, opacity: 0 }}>
         <FileInput
           ref={ref => this._input = ref}
-          name={prop.name}
-          placeholder={prop.title || prop.name}
           onChange={e => {
             readImage(e.target.files[0], function (err, item, file) {
               if (err) return Alert.alert(translate('unableToProcessFile'), err.message)
 
-              if (isPhoto) {
+              if (!nonImageAllowed) {
                 if (isImageDataURL(item.url))  {
                   onImage({...item, isVertical: true})
                   return
