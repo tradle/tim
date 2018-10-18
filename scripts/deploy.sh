@@ -15,8 +15,6 @@ PROD_HOST=app.tradle.io
 DEV_BUCKET="s3://$DEV_HOST"
 PROD_BUCKET="s3://$PROD_HOST"
 ORIGIN_PATH_PATH=".Origins.Items[0].OriginPath"
-A="releases/a"
-B="releases/b"
 PROJECT_ROOT=$(get_project_root)
 COMMAND="$1"
 
@@ -148,6 +146,7 @@ get_live_folder() {
 get_alt_folder() {
   local DIST_ID
   local LIVE
+  local SUFFIX
   local ALT
 
   DIST_ID="$1"
@@ -158,10 +157,12 @@ get_alt_folder() {
   fi
 
   LIVE=$(get_live_folder "$DIST_ID")
-  ALT="$A"
-  if [[ $LIVE == "$A" ]]
+  if [[ $LIVE =~ releases/[0-9]+$ ]]
   then
-    ALT="$B"
+    SUFFIX=${LIVE:9} # cut off releases/
+    ALT="releases/$(($SUFFIX + 1))"
+  else
+    ALT="releases/1"
   fi
 
   printf "$ALT"
@@ -239,7 +240,7 @@ deploy_dev() {
   DEST="$BUCKET/$DEST_FOLDER/"
 
   copy_files "$SOURCE" "$BACKUP_PATH"
-  nuke "$DEST"
+  # nuke "$DEST"
   copy_app "$BACKUP_PATH" "$DEST"
   set_live_folder_dev "$DEST_FOLDER"
 }
@@ -300,7 +301,7 @@ deploy_prod() {
 
   DEST_FOLDER=$(get_alt_folder_prod)
   DEST="$PROD_BUCKET/$DEST_FOLDER/"
-  nuke $DEST
+  # nuke $DEST
   copy_app "$SOURCE" "$DEST"
   set_live_folder_prod "$DEST_FOLDER"
 }
