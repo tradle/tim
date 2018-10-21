@@ -1,4 +1,5 @@
 import promisify from 'pify'
+import flatten from 'lodash/flattenDeep'
 import { TYPE, TYPES } from '@tradle/constants'
 import { linkString } from '@tradle/protocol'
 import createBaseKeeper from '@tradle/keeper'
@@ -31,27 +32,50 @@ const stripEmbeddedObjects = keeper => {
     cb(null, result)
   }
 
-  // only one level down
-  // @tradle/engine runs keeper.put on both message and object
-  // but not nested messages
-  const replaceEmbeddedObjects = val => {
-    if (val[TYPE] !== MESSAGE) return val
+  // deep replace
+  const replaceEmbeddedObjects = ({ key, value, type }) => {
+    if (value[TYPE] !== MESSAGE) return [{ key, value, type }]
 
-    debug('stripping object embedded in message')
-    return {
-      ...val,
-      object: linkString(val.object)
-    }
+    const objLink = linkString(value.object)
+    const sub = replaceEmbeddedObjects({
+      key: objLink,
+      value: value.object,
+      type
+    })
+
+    debug('stripping object embedded in message', objLink)
+    return flatten(sub).concat({
+      key,
+      value: {
+        ...value,
+        object: objLink,
+      },
+      type,
+    })
   }
 
-  const put = (key, val, cb) => keeper.put(key, replaceEmbeddedObjects(val), cb)
-  const batch = (batch, cb) => {
-    batch = batch.map(({ value, ...rest }) => ({
-      value: value && replaceEmbeddedObjects(value),
-      ...rest,
-    }))
+  const put = (key, value, cb) => batch([{
+    type: 'put',
+    key,
+    value,
+  }], cb)
 
-    keeper.batch(batch, cb)
+  const expand = batch => {
+    const expanded = []
+    for (const item of batch) {
+      if (item.type === 'put') {
+        expanded.push(...replaceEmbeddedObjects(item))
+      } else {
+        expanded.push(item)
+      }
+    }
+
+    return expanded
+  }
+
+  const batch = (batch, cb) => {
+    const expanded = expand(batch)
+    keeper.batch(expanded, cb)
   }
 
   const createReadStream = () => {
