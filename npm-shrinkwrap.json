@@ -168,9 +168,9 @@
       }
     },
     "@tradle/keeper": {
-      "version": "3.2.0",
-      "from": "@tradle/keeper@>=3.2.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/keeper/-/keeper-3.2.0.tgz",
+      "version": "3.3.0",
+      "from": "@tradle/keeper@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/keeper/-/keeper-3.3.0.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
