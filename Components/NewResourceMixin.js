@@ -1265,7 +1265,7 @@ var NewResourceMixin = {
                   })
         }
       </View>
-      {this.paintError({prop})}
+      {this.paintError({prop, errors})}
       {this.paintHelp(prop)}
       </View>
     );
