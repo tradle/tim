@@ -4890,7 +4890,12 @@ if (!res[SIG]  &&  res._message)
         if (Errors.matches(err, ValidateResourceErrors.InvalidPropertyValue))
         // if (err.name === 'InvalidPropertyValue')
           self.trigger({action: 'validationError', validationErrors: {[err.property]: translate('invalidPropertyValue')}})
-        else
+        else if (Errors.matches(err, ValidateResourceErrors.Required)) {
+          let validationErrors = {}
+          err.properties.forEach(p => validationErrors[p] = translate('thisFieldIsRequired'))
+          self.trigger({action: 'validationError', validationErrors})
+        }
+         else
           self.trigger({action: 'validationError', error: err.message})
         return
       }
@@ -6655,7 +6660,8 @@ if (!res[SIG]  &&  res._message)
       rr.networkName = seal.network
     }
 
-    let authorId = utils.makeId(PROFILE, r._org  ||  r._author)
+    let isIdentity = r[TYPE] === IDENTITY
+    let authorId = utils.makeId(PROFILE, isIdentity && r._permalink || (r._org  ||  r._author))
     let author = this._getItem(authorId)
     let authorTitle = r._authorTitle || (author && author.organization &&  utils.getDisplayName(author.organization))
     let myOrgRep = this.getRepresentative(me.organization)
@@ -9252,7 +9258,7 @@ if (!res[SIG]  &&  res._message)
       // let orgName = utils.getDisplayName(to, this.getModel(ORGANIZATION).value.properties)
       if (model.subClassOf !== MY_PRODUCT && model.subClassOf !== FORM)
         return
-      dn = translate('sharedForm', translate(model), orgName)
+      dn = translate('sharedForm', translate(model))
       sharedWithOrg.lastMessage = dn
       sharedWithOrg.lastMessageTime = value._time
       sharedWithOrg.lastMessageType = messageType

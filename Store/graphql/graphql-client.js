@@ -642,6 +642,8 @@ var search = {
         }
         let iref = prop.items.ref
         if (iref) {
+          let isInlined = utils.isInlined(utils.getModel(iref))
+
           if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
             if (isList  &&  !isApplication)
               continue
@@ -653,7 +655,7 @@ var search = {
               }
             }`)
           }
-          else if (prop.inlined) {
+          else if (prop.inlined  ||  isInlined) {
             if (currentProp  &&  currentProp === prop)
               continue
             arr.push(this.addInlined(prop))
