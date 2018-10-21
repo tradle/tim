@@ -143,11 +143,36 @@ get_live_folder() {
   printf "${ORIGIN_PATH:1}"
 }
 
-get_alt_folder() {
+get_prev_folder() {
   local DIST_ID
   local LIVE
   local SUFFIX
-  local ALT
+  local PREV
+
+  DIST_ID="$1"
+  if [[ ! $DIST_ID ]]
+  then
+    echo "expected cloudfront distribution id as argument, got: $DIST_ID"
+    exit 1
+  fi
+
+  if [[ ! $LIVE =~ releases/[0-9]+$ ]]
+  then
+    echo "there is no previous release!"
+    exit 1
+  fi
+
+  LIVE=$(get_live_folder "$DIST_ID")
+  SUFFIX=${LIVE:9} # cut off releases/
+  PREV="releases/$(($SUFFIX - 1))"
+  printf "$PREV"
+}
+
+get_next_folder() {
+  local DIST_ID
+  local LIVE
+  local SUFFIX
+  local NEXT
 
   DIST_ID="$1"
   if [[ ! $DIST_ID ]]
@@ -160,28 +185,36 @@ get_alt_folder() {
   if [[ $LIVE =~ releases/[0-9]+$ ]]
   then
     SUFFIX=${LIVE:9} # cut off releases/
-    ALT="releases/$(($SUFFIX + 1))"
+    NEXT="releases/$(($SUFFIX + 1))"
   else
-    ALT="releases/1"
+    NEXT="releases/1"
   fi
 
-  printf "$ALT"
+  printf "$NEXT"
+}
+
+get_prev_folder_dev() {
+  get_prev_folder "$DEV_DIST_ID"
 }
 
 get_live_folder_dev() {
   get_live_folder "$DEV_DIST_ID"
 }
 
-get_alt_folder_dev() {
-  get_alt_folder "$DEV_DIST_ID"
+get_next_folder_dev() {
+  get_next_folder "$DEV_DIST_ID"
+}
+
+get_prev_folder_prod() {
+  get_prev_folder "$PROD_DIST_ID"
 }
 
 get_live_folder_prod() {
   get_live_folder "$PROD_DIST_ID"
 }
 
-get_alt_folder_prod() {
-  get_live_folder "$PROD_DIST_ID"
+get_next_folder_prod() {
+  get_next_folder "$PROD_DIST_ID"
 }
 
 validate_s3_path() {
@@ -236,7 +269,7 @@ deploy_dev() {
   BUCKET="$DEV_BUCKET"
   BACKUP_PATH="$BUCKET/$TAG/$COMMIT/"
   SOURCE="./web/dist/"
-  DEST_FOLDER=$(get_alt_folder_dev)
+  DEST_FOLDER=$(get_next_folder_dev)
   DEST="$BUCKET/$DEST_FOLDER/"
 
   copy_files "$SOURCE" "$BACKUP_PATH"
@@ -315,13 +348,13 @@ promote_dev() {
 }
 
 rollback_dev() {
-  ALT=$(get_alt_folder_dev)
-  set_live_folder_dev "$ALT"
+  PREV=$(get_prev_folder_dev)
+  set_live_folder_dev "$PREV"
 }
 
 rollback_prod() {
-  ALT=$(get_alt_folder_prod)
-  set_live_folder_prod "$ALT"
+  PREV=$(get_prev_folder_prod)
+  set_live_folder_prod "$PREV"
 }
 
 clear_cache() {
