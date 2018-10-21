@@ -19,7 +19,6 @@ import SignaturePad from 'react-native-signature-pad'
 class SignatureView extends Component {
   static displayName = 'SignatureView';
   static propTypes = {
-    navigator: PropTypes.object.isRequired,
     onSignature: PropTypes.func
   };
 
