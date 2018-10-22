@@ -248,7 +248,7 @@ class VerificationRow extends Component {
             const { icon, color } = statusM
             let style, size, icolor
             if (statusId === 'warning'  ||  statusId === 'error') {
-              style = {shadowOpacity: 0.7, shadowRadius: 5, shadowColor: '#afafaf'}
+              // style = {shadowOpacity: 0.7, shadowRadius: 5, shadowColor: '#afafaf'}
               size = 37
               icolor = color
             }
