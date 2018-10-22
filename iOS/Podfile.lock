@@ -1,16 +1,16 @@
 PODS:
-  - PPBlinkID (4.2.0)
+  - PPBlinkID (4.3.0)
 
 DEPENDENCIES:
-  - PPBlinkID (= 4.2.0)
+  - PPBlinkID (= 4.3.0)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - PPBlinkID
 
 SPEC CHECKSUMS:
-  PPBlinkID: d5a5175623de2cf17517e1b80545a4a2e0838197
+  PPBlinkID: 13b702bc1b42e524367d9636ab536961ea06b21a
 
-PODFILE CHECKSUM: 0f533037aac99dec03c682d2ab1da523a6fedeeb
+PODFILE CHECKSUM: 736c8d100f02ced90399760cddca1f6b30423868
 
 COCOAPODS: 1.5.3
