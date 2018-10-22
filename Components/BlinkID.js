@@ -1,4 +1,4 @@
-import { Platform } from 'react-native'
+import { Platform, Alert } from 'react-native'
 // import withDefaults from 'lodash/defaults'
 // import groupBy from 'lodash/groupBy'
 // import BlinkID from 'react-native-blinkid'
@@ -60,8 +60,6 @@ const scan = (function () {
       throw new Error('user denied camera access')
     }
 
-    const { firstSideInstructions, secondSideInstructions } = opts
-
     let types = []
     let isCombined
     let frameGrabbers = opts.recognizers.map(r => {
@@ -76,14 +74,15 @@ const scan = (function () {
         rec.returnFaceImage = true
       else {
         // TODO: this component shouldn't need to know about Tradle's enum structures!
-
         // rec.returnFaceImage = true
         // rec.returnSignatureImage = true
         // rec.setAllowUnparsedResults = true
         // rec.setAllowUnverifiedResults = true
         if (opts.country.title === 'Bangladesh'  &&
-            opts.documentType.id.indexOf('_id') !== -1)
+            opts.documentType.id.indexOf('_id') !== -1) {
           rec.allowUnverifiedResults = true
+          rec.allowUnparsedResults = true
+        }
       }
       if (rec instanceof BlinkID.BarcodeRecognizer) {
         if (opts.country.title === 'Bangladesh')
@@ -93,6 +92,7 @@ const scan = (function () {
       return isCombined ? rec : new BlinkID.SuccessFrameGrabberRecognizer(rec)
     })
 
+    const { firstSideInstructions, secondSideInstructions } = opts
     let overlaySettings
     if (isCombined) {
       overlaySettings = new BlinkID.DocumentVerificationOverlaySettings({
@@ -105,11 +105,16 @@ const scan = (function () {
       })
     }
 
-    const result = await BlinkID.BlinkID.scanWithCamera(
+    let result
+    try {
+    result = await BlinkID.BlinkID.scanWithCamera(
       overlaySettings,
       new BlinkID.RecognizerCollection(frameGrabbers),
       licenseKey) //, withDefaults(opts, defaults))
-
+    } catch (err) {
+      Alert.alert(err)
+      return
+    }
     if (!result.length)
       return
     let normalized = result.map((r, i) =>  postProcessResult({ type: types[i], result: r, isCombined }))
@@ -128,18 +133,21 @@ const postProcessResult = ({ type, result, isCombined }) => {
   if (normalize)
     photoId = normalize(scanData)
 
-  const image = scanData.fullDocumentImage
+  const image = scanData.fullDocumentImage       ||
+                scanData.fullDocumentFrontImage  ||
+                result.successFrame
+  const backImage = scanData.fullDocumentBackImage
   let ret = {
     [type]: photoId,
     images: {
       face: scanData.faceImage,
       successful: result.successful || result.resultImageSuccessful,
       signature: scanData.signatureImage,
-      document: image
+      document: image,
     },
-    image: image  &&  { base64: 'data:image/jpeg;base64,' + image }
+    image: image  &&  { base64: 'data:image/jpeg;base64,' + image },
+    backImage: backImage  &&  { base64: 'data:image/jpeg;base64,' + backImage },
   }
-
   return sanitize(ret)
 }
 
@@ -243,7 +251,7 @@ function normalizeMRTDResult (result) {
   // "Opt2": "",
   // "PrimaryId": "OTHER",
   // "SecondaryId": "ADAM NORMAN"
-  let mrzResult = result.mrzResult
+  let mrzResult = result.mrzResult || result
   const sex = mrzResult.gender
   result = {
     personal: {
@@ -278,7 +286,6 @@ function normalizeMRTDResult (result) {
       immigrantCaseNumber: mrzResult.immigrantCaseNumber,
     }
   }
-
   normalizeDates(result, parseMRTDDate)
 
   // const { mrzText } = document

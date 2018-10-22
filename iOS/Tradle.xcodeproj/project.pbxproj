@@ -64,7 +64,7 @@
 		73F1D0981EDA10EE00D4AB5B /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73F1D0941EDA10EE00D4AB5B /* tradle.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8C736C6F8FA64018866A2A0C /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 09E311D0387D4764923D9B71 /* Ionicons.ttf */; };
-		9B53A9DF212715CA00521887 /* libMicroblinkModule.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B53A99E212715BB00521887 /* libMicroblinkModule.a */; };
+		9B44A9482179665B00C8E0B0 /* libMicroblinkModule.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B44A9472179662500C8E0B0 /* libMicroblinkModule.a */; };
 		C8C7DC4BE45D05EEEEA0D6E9 /* libPods-Tradle.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 866225A0083F67269536F0F0 /* libPods-Tradle.a */; };
 		DCFA2F9E52F04D73AD1335E2 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = 1447D734074D4C7BBD023C62 /* branch.json */; };
 /* End PBXBuildFile section */
@@ -553,9 +553,9 @@
 			remoteGlobalIDString = 58B5119B1A9E6C1200147676;
 			remoteInfo = RCTText;
 		};
-		9B53A99D212715BB00521887 /* PBXContainerItemProxy */ = {
+		9B44A9462179662500C8E0B0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */;
+			containerPortal = 9B44A9422179662500C8E0B0 /* MicroblinkModule.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = A27CCA2B1E9E57A500BED675;
 			remoteInfo = MicroblinkModule;
@@ -626,7 +626,7 @@
 		866225A0083F67269536F0F0 /* libPods-Tradle.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tradle.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		97F331FA96224F67B61B074E /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
-		9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MicroblinkModule.xcodeproj; path = "../node_modules/blinkid-react-native/src/ios/MicroblinkModule/MicroblinkModule.xcodeproj"; sourceTree = "<group>"; };
+		9B44A9422179662500C8E0B0 /* MicroblinkModule.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MicroblinkModule.xcodeproj; path = "../node_modules/blinkid-react-native/src/ios/MicroblinkModule/MicroblinkModule.xcodeproj"; sourceTree = "<group>"; };
 		A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
 		BFC0C75130C445498FB831DE /* RNPasscodeStatus.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNPasscodeStatus.xcodeproj; path = "../node_modules/react-native-passcode-status/ios/RNPasscodeStatus.xcodeproj"; sourceTree = "<group>"; };
@@ -688,8 +688,8 @@
 				73113FFB205F4D55000C04F6 /* libRCTBlob.a in Frameworks */,
 				73F1B89F205F5ABD004E96E2 /* libTcpSockets.a in Frameworks */,
 				73F1B8A0205F5AC8004E96E2 /* libreact-native-branch.a in Frameworks */,
+				9B44A9482179665B00C8E0B0 /* libMicroblinkModule.a in Frameworks */,
 				73834C3820D1B462000C9AFC /* libRNCardIO.a in Frameworks */,
-				9B53A9DF212715CA00521887 /* libMicroblinkModule.a in Frameworks */,
 				C8C7DC4BE45D05EEEEA0D6E9 /* libPods-Tradle.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1066,7 +1066,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */,
+				9B44A9422179662500C8E0B0 /* MicroblinkModule.xcodeproj */,
 				9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */,
 				73EF39B420CC7071009EDE8B /* RNDeviceInfo.xcodeproj */,
 				732B67802060213500B16D6F /* RNCamera.xcodeproj */,
@@ -1141,10 +1141,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		9B53A996212715BB00521887 /* Products */ = {
+		9B44A9432179662500C8E0B0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9B53A99E212715BB00521887 /* libMicroblinkModule.a */,
+				9B44A9472179662500C8E0B0 /* libMicroblinkModule.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1241,8 +1241,8 @@
 					ProjectRef = 5533C47B56414D49AC0BA942 /* CodePush.xcodeproj */;
 				},
 				{
-					ProductGroup = 9B53A996212715BB00521887 /* Products */;
-					ProjectRef = 9B53A995212715BB00521887 /* MicroblinkModule.xcodeproj */;
+					ProductGroup = 9B44A9432179662500C8E0B0 /* Products */;
+					ProjectRef = 9B44A9422179662500C8E0B0 /* MicroblinkModule.xcodeproj */;
 				},
 				{
 					ProductGroup = 00C302A81ABCB8CE00DB3ED1 /* Products */;
@@ -1873,11 +1873,11 @@
 			remoteRef = 832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9B53A99E212715BB00521887 /* libMicroblinkModule.a */ = {
+		9B44A9472179662500C8E0B0 /* libMicroblinkModule.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libMicroblinkModule.a;
-			remoteRef = 9B53A99D212715BB00521887 /* PBXContainerItemProxy */;
+			remoteRef = 9B44A9462179662500C8E0B0 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -2052,7 +2052,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2118,7 +2118,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2220,7 +2220,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$PROJECT_DIR",
+					$PROJECT_DIR,
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
