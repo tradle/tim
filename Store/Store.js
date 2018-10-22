@@ -9192,8 +9192,12 @@ if (!res[SIG]  &&  res._message)
 
     let to = this._getItem(utils.getId(value.to));
     let toId = utils.getId(to)
-    if (toId !== meId  &&  to.bot)
+    let meId = utils.getId(me)
+    let isTest
+    if (toId !== meId  &&  to.bot) {
       to = this._getItem(utils.getId(to.organization))
+      isTest = to._isTest
+    }
 
     let dn
     let messageType = model.id
@@ -9214,18 +9218,20 @@ if (!res[SIG]  &&  res._message)
 
     let from = this._getItem(utils.getId(value.from));
     let fromId = utils.getId(from)
-    let meId = utils.getId(me)
     let isNew = !value[ROOT_HASH] || value[ROOT_HASH] === value[CUR_HASH]
 
-    if (fromId !== meId  &&  from.bot)
+    if (fromId !== meId  &&  from.bot) {
       from = this._getItem(utils.getId(from.organization))
+      isTest = from._isTest
+    }
 
     if (model.id === FORM_REQUEST  &&  value.product) {
-      let m = this.getModel(value.product)
-      if (m.forms.indexOf(value.form) !== 0)
-        return
-      dn = translate('formRequest', translate(this.getModel(value.product)))
-      messageType = FINANCIAL_PRODUCT
+      // let m = this.getModel(value.product)
+      // if (m.forms.indexOf(value.form) !== -1)
+      //   return
+      dn = translate('formRequest', translate(this.getModel(value.form)))
+      // dn = translate('formRequest', translate(this.getModel(value.product)))
+      // messageType = FINANCIAL_PRODUCT
     }
     else if (model.id === VERIFICATION) {
       let docType = utils.getType(value.document) // utils.getId(value.document).split('_')[0]
@@ -9262,7 +9268,7 @@ if (!res[SIG]  &&  res._message)
     r.lastMessageTime = value._time;
     r.lastMessageType = messageType
     batch.push({type: 'put', key: utils.getId(r), value: r});
-    this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
+    this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION, isTest}), isTest, forceUpdate: true})
   },
 
   addBacklinksTo(action, resource, msg, batch) {
@@ -10676,6 +10682,7 @@ if (!res[SIG]  &&  res._message)
     }
     this.dbBatchPut(key, val, batch)
     this.addVisualProps(val)
+    this.addLastMessage(val, batch)
     // if (!switchToContext  &&  isFormRequest  &&  context  &&  context._startForm)
     //   switchToContext = true
     // if (!noTrigger  &&  switchToContext) {
