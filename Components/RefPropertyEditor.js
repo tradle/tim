@@ -283,10 +283,10 @@ class RefPropertyEditor extends Component {
         return
       }
     }
-    else if (pName === 'otherSideScan') {
-      this.showBlinkIDScanner(pName)
-      return
-    }
+    // else if (pName === 'otherSideScan') {
+    //   this.showBlinkIDScanner(pName)
+    //   return
+    // }
 
     const result = await capture({
       navigator: this.props.navigator,

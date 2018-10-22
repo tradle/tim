@@ -133,7 +133,9 @@ const postProcessResult = ({ type, result, isCombined }) => {
   if (normalize)
     photoId = normalize(scanData)
 
-  const image = scanData.fullDocumentImage  ||  scanData.fullDocumentFrontImage
+  const image = scanData.fullDocumentImage       ||
+                scanData.fullDocumentFrontImage  ||
+                result.successFrame
   const backImage = scanData.fullDocumentBackImage
   let ret = {
     [type]: photoId,
