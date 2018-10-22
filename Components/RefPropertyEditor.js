@@ -466,8 +466,6 @@ class RefPropertyEditor extends Component {
     if (result.image) {
       r[prop] = {
         url: result.image.base64,
-        width: result.image.width || 840,
-        height: result.image.height || 530
       }
     }
     if (result.backImage) {
@@ -475,8 +473,6 @@ class RefPropertyEditor extends Component {
       if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
         r.otherSideScan = {
           url: result.backImage.base64,
-          width: result.backImage.width || 840,
-          height: result.backImage.height || 530
         }
       }
     }
