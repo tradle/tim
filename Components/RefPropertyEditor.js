@@ -89,16 +89,16 @@ class RefPropertyEditor extends Component {
     let val = resource && resource[pName]
     if (Array.isArray(val)  &&  !val.length)
       val = null
+
+    let pLabel = this.getPropertyLabel(prop) + (!search  &&  required ? ' *' : '')
     let label, propLabel, isImmutable
-    if (!val) {
-      label = translate(prop, model)
-      if (!search  &&  required)
-        label += ' *'
-    }
+    if (!val)
+      label = pLabel
     else {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
       if (isPhoto) {
-        label = translate(prop, model)
+        label = pLabel
+        // label = translate(prop, model)
         // floatingProps[pName] = resource[pName]
       }
       else {
@@ -119,20 +119,10 @@ class RefPropertyEditor extends Component {
         }
         else
           label = utils.getDisplayName(resource[pName], rModel)
-        if (!label) {
-          // if ((prop.items || search)  &&  utils.isEnum(rModel)) {
-          // if (utils.isEnum(rModel)  &&  Array.isArray(resource[pName])) {
-          //   label = ''
-          //   resource[pName].forEach((r) => {
-          //     let title = utils.getDisplayName(r)
-          //     label += label ? ', ' + title : title
-          //   })
-          // }
-          // else {
-            label = resource[pName].title
-            if (!label)
-              label = prop.title
-          // }
+        if (!label) { // see if stub
+          label = resource[pName].title
+          if (!label)
+            label = prop.title
         }
         if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
           if (!label)
@@ -140,9 +130,6 @@ class RefPropertyEditor extends Component {
           label = utils.createAndTranslate(label, true)
         }
       }
-      let pLabel = translate(prop, model)
-      if (!search  &&  required)
-        pLabel += ' *'
       propLabel = <Text style={[styles.labelDirty, lcolor]}>{pLabel}</Text>
     }
     let photoR = isPhoto && (photo || resource[pName])
@@ -236,6 +223,18 @@ class RefPropertyEditor extends Component {
       </View>
     );
   }
+  getPropertyLabel(prop) {
+    const { model, metadata } = this.props
+    if (model)
+      return translate(prop, model)
+    let m
+    if (!metadata.items)
+      m = metadata
+    else {
+      m = utils.getModel(metadata.items.ref)
+    }
+    return translate(prop, m)
+  }
   onSetMediaProperty(propName, item) {
     // debugger
     if (!item)
@@ -283,6 +282,10 @@ class RefPropertyEditor extends Component {
           this.scanCard(pName)
         return
       }
+    }
+    else if (pName === 'otherSideScan') {
+      this.showBlinkIDScanner(pName)
+      return
     }
 
     const result = await capture({
@@ -352,46 +355,50 @@ class RefPropertyEditor extends Component {
     let tooltip
     let firstSideInstructions, secondSideInstructions
     // let isPassport
-    switch (type) {
-    case 'passport':
-      tooltip = translate('centerPassport')
-      // isPassport = true
-      // machine readable travel documents (passport)
-      recognizers = BlinkID.recognizers.mrtd
-      firstSideInstructions = translate('scanPassport')
-      break
-    case 'card':
-      firstSideInstructions = translate('centerIdCard')
-      // machine readable travel documents (passport)
-      // should be combined
-      // if (country.title === 'Bangladesh')
-      //   recognizers = BlinkID.recognizers.mrtd
-      //   // recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
-      // else if (country.title === "Philippines")
-      //   recognizers = BlinkID.recognizers.pdf417
-      // else
+    // HACK
+    if (!recognizers  &&  prop === 'otherSideScan')
+      recognizers = BlinkID.recognizers.documentFace
+    else {
+      switch (type) {
+      case 'passport':
+        tooltip = translate('centerPassport')
+        // isPassport = true
+        // machine readable travel documents (passport)
         recognizers = BlinkID.recognizers.mrtd
-      // recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
-      break
-    case 'license':
-    case 'licence':
-      firstSideInstructions = translate('centerLicence')
-      if (country.title === 'United States') {
-        secondSideInstructions = translate('documentBackSide')
-        recognizers = BlinkID.recognizers.usdlCombined
-        // recognizers = BlinkID.recognizers.usdl
+        firstSideInstructions = translate('scanPassport')
+        break
+      case 'card':
+        firstSideInstructions = translate('centerIdCard')
+        // machine readable travel documents (passport)
+        // should be combined
+        // if (country.title === 'Bangladesh')
+        //   recognizers = BlinkID.recognizers.mrtd
+        //   // recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
+        // else if (country.title === "Philippines")
+        //   recognizers = BlinkID.recognizers.pdf417
+        // else
+          // recognizers = BlinkID.recognizers.mrtd
+        recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
+        break
+      case 'license':
+      case 'licence':
+        firstSideInstructions = translate('centerLicence')
+        if (country.title === 'United States') {
+          secondSideInstructions = translate('documentBackSide')
+          recognizers = BlinkID.recognizers.usdlCombined
+          // recognizers = BlinkID.recognizers.usdl
+        }
+        else if (country.title === 'New Zealand')
+          recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
+        else {
+          recognizers = BlinkID.recognizers.eudl
+        }
+        break
+      default:
+        tooltip = translate('centerID')
+        break
       }
-      else if (country.title === 'New Zealand')
-        recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
-      else {
-        recognizers = BlinkID.recognizers.eudl
-      }
-      break
-    default:
-      tooltip = translate('centerID')
-      break
     }
-
     const blinkIDOpts = {
       // quality: 0.2,
       // base64: true,
@@ -400,7 +407,7 @@ class RefPropertyEditor extends Component {
       country,
       firstSideInstructions,
       secondSideInstructions,
-      recognizers: recognizers ? [].concat(recognizers) : BlinkID.recognizers
+      recognizers: recognizers ? [].concat(recognizers) : [BlinkID.recognizers.documentFace]
     }
 
     // const promiseTimeout = new Promise((resolve, reject) => {
@@ -459,8 +466,18 @@ class RefPropertyEditor extends Component {
     if (result.image) {
       r[prop] = {
         url: result.image.base64,
-        width: result.image.width,
-        height: result.image.height
+        width: result.image.width || 840,
+        height: result.image.height || 530
+      }
+    }
+    if (result.backImage) {
+      // HACK
+      if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
+        r.otherSideScan = {
+          url: result.backImage.base64,
+          width: result.backImage.width || 840,
+          height: result.backImage.height || 530
+        }
       }
     }
     if (result.images) {
@@ -588,7 +605,7 @@ class RefPropertyEditor extends Component {
     }
 
     let route = {
-      title: translate(prop, model), //m.title,
+      title: this.getPropertyLabel(prop), //m.title,
       id:  30,
       component: GridList,
       backButtonTitle: 'Back',
