@@ -427,7 +427,7 @@ var utils = {
     if (utils.isStub(resource))  {
       if (!e)
         return resource.title
-      let [id] = resource.id.split('_')
+      let [type, id] = resource.id.split('_')
       return e[id]  ||  resource.title
     }
     else if (e)
