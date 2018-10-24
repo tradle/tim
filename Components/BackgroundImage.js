@@ -8,6 +8,9 @@ import {
 import { makeResponsive } from 'react-native-orient'
 
 class BackgroundImage extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.props.source.uri !== nextProps.source.uri
+  }
   render() {
     const props = this.props
     const { width, height } = Dimensions.get('window')
