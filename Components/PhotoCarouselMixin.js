@@ -11,7 +11,7 @@ var PhotoCarouselMixin = {
     //                        ? utils.translate('backTo', utils.getDisplayName(this.props.chat)) : utils.translate('backToResults')
     this.props.navigator.push({
       id: 14,
-      title: utils.translate(utils.getModel(this.props.resource[TYPE])),
+      // title: utils.translate(utils.getModel(this.props.resource[TYPE])),
       // noLeftButton: true,
       backButtonTitle: 'Back',
       component: PhotoCarousel,

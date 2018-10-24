@@ -642,7 +642,7 @@ var search = {
         }
         let iref = prop.items.ref
         if (iref) {
-          let isInlined = utils.isInlined(utils.getModel(iref))
+          let isInlined = iref !== MODEL  && utils.isInlined(utils.getModel(iref))
 
           if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
             if (isList  &&  !isApplication)

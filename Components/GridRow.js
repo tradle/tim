@@ -40,6 +40,7 @@ var {
 
 const PHOTO = 'tradle.Photo'
 const OBJECT = 'tradle.Object'
+const CHECK = 'tradle.Check'
 
 class GridRow extends Component {
   static propTypes = {
@@ -256,19 +257,19 @@ class GridRow extends Component {
       else {
         let title = utils.getDisplayName(resource[pName])
         row = <Text style={styles.description} key={this.getNextKey(resource)}>{title}</Text>
+
         if (refM.subClassOf === ENUM) {
           let eVal = refM.enum.find(r => r.id === this.getEnumID(resource[pName].id))
           if (eVal) {
             let { icon, color } = eVal
-            if (icon)
-              row = <View key={this.getNextKey(resource)} style={styles.row}>
-                      <View style={[styles.button, {alignItems: 'center', backgroundColor: color}]}>
-                        <Icon name={icon} color='#ffffff' size={25}/>
-                      </View>
+            if (icon) {
+              row = <View key={this.getNextKey(this.props.resource)} style={styles.row}>
+                      {this.paintIcon(model, eVal)}
                       <View style={{paddingLeft: 5, justifyContent: 'center'}}>
                         {row}
                       </View>
                     </View>
+            }
           }
         }
         else if (refM.isInterface || refM.id === FORM  || refM.id === OBJECT) {
@@ -344,6 +345,26 @@ class GridRow extends Component {
       }
       return <View style={cellStyle}><Text style={style} key={this.getNextKey(resource)}>{val}</Text></View>
     }
+  }
+
+  paintIcon(model, eVal) {
+    let isCheck = model.subClassOf === CHECK
+    let icolor = '#ffffff'
+    let size = 25
+    let style = {}
+    let buttonStyles
+    let { icon, color } = eVal
+    if (isCheck  &&  (eVal.id === 'error' ||  eVal.id === 'warning')) {
+      icolor = color
+      color = 'transparent'
+      buttonStyles = {}
+      size = 30
+    }
+    else
+      buttonStyles = styles.button
+    return <View style={[buttonStyles, {alignItems: 'center', backgroundColor: color}]}>
+             <Icon name={icon} color={icolor} size={size}/>
+            </View>
   }
   onPress(resource) {
     let title = utils.makeTitle(utils.getDisplayName(resource));

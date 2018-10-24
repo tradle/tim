@@ -4,15 +4,6 @@ import './utils/shim'
 import './utils/debug'
 import './utils/automaticUpdates'
 import React, { Component } from 'react'
-import Reflux from 'reflux'
-import Icon from 'react-native-vector-icons/Ionicons'
-import reactMixin from 'react-mixin'
-import Orientation from 'react-native-orientation'
-var ReactPerf //= __DEV__ && require('ReactPerf')
-import SplashScreen from 'react-native-splash-screen'
-import 'stream'
-import debounce from 'debounce'
-import Navigator from './Components/Navigator'
 import {
   Image,
   View,
@@ -22,6 +13,16 @@ import {
   // Text,
   BackHandler
 } from 'react-native';
+import Orientation from 'react-native-orientation'
+import { makeResponsive } from 'react-native-orient'
+import Reflux from 'reflux'
+import Icon from 'react-native-vector-icons/Ionicons'
+import reactMixin from 'react-mixin'
+import SplashScreen from 'react-native-splash-screen'
+import 'stream'
+import debounce from 'debounce'
+var ReactPerf //= __DEV__ && require('ReactPerf')
+import Navigator from './Components/Navigator'
 
 var constants = require('@tradle/constants');
 const {
@@ -981,8 +982,8 @@ var styles = StyleSheet.create({
     paddingBottom: isWeb() ? 3 : 0
   }
 });
-
-AppRegistry.registerComponent('Tradle', () => TiMApp)
+TiMApp = makeResponsive(TiMApp)
+AppRegistry.registerComponent('Tradle', function() { return TiMApp });
 
 function isPortraitOnlyRoute (route) {
   const orientation = route.component.orientation
