@@ -119,7 +119,7 @@ var OnePropFormMixin = {
     if (!photo)
       return
     let { prop } = params
-    let { width, height, base64 } = photo
+    let { width, height, dataUrl } = photo
 
     let resource = this.props.resource
     let isFormError = resource[TYPE] === FORM_ERROR
@@ -130,7 +130,7 @@ var OnePropFormMixin = {
         [prop.name]: {
           width,
           height,
-          url: base64
+          url: dataUrl
         },
         _context: resource._context,
         from: utils.getMe(),

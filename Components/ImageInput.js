@@ -115,7 +115,7 @@ class ImageInput extends Component {
 
       onImage({
         ...data,
-        url: data.base64,
+        url: data.dataUrl,
       })
     })
   }

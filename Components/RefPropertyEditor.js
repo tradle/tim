@@ -302,10 +302,11 @@ class RefPropertyEditor extends Component {
   onTakePicture(params, data) {
     if (!data)
       return
+
     let { prop } = params
     if (prop.ref === PHOTO) {
-      let { width, height, base64 } = data
-      let d = { width, height, url: base64}
+      let { width, height, dataUrl } = data
+      let d = { width, height, url: dataUrl }
       this.onSetMediaProperty(prop.name, d)
     }
     else {
