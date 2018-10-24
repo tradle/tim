@@ -50,7 +50,7 @@ class CameraView extends Component {
     if (data) {
       // debugger
       let { width, height } = utils.dimensions(CameraView)
-      const uri = data.uri || data.base64
+      const uri = data.uri || data.dataUrl
       return <View style={[styles.container, {backgroundColor: '#000', justifyContent: 'center'}]}>
                 <Image source={{uri}} style={{width, height: height - 80}} />
                 <View style={styles.footer1}>
