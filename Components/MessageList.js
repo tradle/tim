@@ -56,7 +56,7 @@ import platformStyles, {MenuIcon} from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
-
+import BackgroundImage from './BackgroundImage'
 // import AddNewMessage from './AddNewMessage'
 // import SearchBar from 'react-native-search-bar'
 // import ResourceTypesScreen from './ResourceTypesScreen'
@@ -420,36 +420,43 @@ class MessageList extends Component {
     }
     if (shareableResources)
       state.shareableResources = shareableResources
-    this.setState(state)
 
     if (action === 'addVerification') {
       if (originatingMessage  &&  originatingMessage.verifiers)  {
         let docType = utils.getId(resource.document).split('_')[0]
-        this.state.verifiedByTrustedProvider = originatingMessage.form === docType && resource
+        state.verifiedByTrustedProvider = originatingMessage.form === docType && resource
       }
       else
-        this.state.verifiedByTrustedProvider = null
+        state.verifiedByTrustedProvider = null
     }
+    this.showAnotherEmployeeAlert(resource)
+    this.setState(state)
+  }
+  // Application was started by another employee
+  showAnotherEmployeeAlert(resource) {
+    let rtype = utils.getType(resource)
     let me = utils.getMe()
-    if (me.isEmployee  && rtype === FORM_REQUEST && !resource._documentCreated) {
-      let rcontext = resource._context
-      if (rcontext  &&  this.state.allContexts) {
-        if (utils.getId(rcontext.from) === utils.getId(utils.getMe()))
-          return
-        let meApplying = rcontext.from.organization  &&  rcontext.from.organization.id === me.organization.id
-        if (meApplying) {
-          let m = utils.getModel(resource.product)
-          Alert.alert(
-            `The application for ${translate(m)} was started by another employee`,
-            'Do you want to switch to it and continue from there?',
-            [
-              {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-              {text: translate('Ok'),     onPress: () => this.switchToOneContext(rcontext, resource.from)},
-            ]
-          )
-        }
-      }
-    }
+    if (!me.isEmployee  || rtype !== FORM_REQUEST || resource._documentCreated)
+      return
+
+    let rcontext = resource._context
+    if (!rcontext  ||  !this.state.allContexts)
+      return
+
+    if (utils.getId(rcontext.from) === utils.getId(utils.getMe()))
+      return
+    let meApplying = rcontext.from.organization  &&  rcontext.from.organization.id === me.organization.id
+    if (!meApplying)
+      return
+    let m = utils.getModel(resource.product)
+    Alert.alert(
+      translate('startedByAnotherEmployee', translate(m)),
+      translate('doYouWantToContinue'),
+      [
+        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+        {text: translate('Ok'),     onPress: () => this.switchToOneContext(rcontext, resource.from)},
+      ]
+    )
   }
   switchToOneContext(context, to) {
     this.setState({allContexts: false, limit: LIMIT})
@@ -488,13 +495,9 @@ class MessageList extends Component {
         return true
     }
     if (this.state.currentContext !== nextState.currentContext)
-      return true
-    if (this.state.context !== nextState.context) {
-      if (!this.state.context  ||  !nextState.context)
-        return true
-      if (utils.getId(this.state.context)  !==  utils.getId(nextState.context))
-        return true
-    }
+      return this.isTheSameResource(this.state.currentContext, nextState.currentContext)
+    if (this.state.context !== nextState.context)
+      return this.isTheSameResource(this.state.context, nextState.context)
     if (this.state.allContexts !== nextState.allContexts)
       return true
     if (this.state.hasProducts !== nextState.hasProducts)
@@ -537,6 +540,11 @@ class MessageList extends Component {
         return true
     }
     return false
+  }
+  isTheSameResource(r1, r2) {
+    if (!r1  ||  !r2)
+      return (r1  ||  r2) ? false : true
+    return utils.getId(r1) !== utils.getId(r2)
   }
   share(resource, to, formRequest) {
     Actions.share(resource, to, formRequest) // forRequest - originating message
@@ -873,7 +881,7 @@ class MessageList extends Component {
 
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
-        <ImageBackground source={{uri: bgImage}}  resizeMode='cover' style={image}>
+        <BackgroundImage source={{uri: bgImage}}  resizeMode='cover' style={image} />
           {network}
           <ProgressInfo recipient={progressInfoR[ROOT_HASH]} color={bankStyle.linkColor} />
           <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
@@ -881,7 +889,6 @@ class MessageList extends Component {
           {content}
           {actionSheet}
           {alert}
-        </ImageBackground>
       </PageView>
     );
   }
