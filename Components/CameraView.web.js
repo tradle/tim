@@ -14,6 +14,7 @@ import Camera from 'react-webcam'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { makeResponsive, getDimensions } from 'react-native-orient'
 import { translate, getFontSize } from '../utils/utils'
+import { normalizeImageCaptureData } from '../utils/image-utils'
 
 const debug = require('debug')('tradle:app:camera')
 const ICON_COLOR = '#77ADFC'
@@ -42,8 +43,8 @@ class CameraView extends Component {
   async capture() {
     const canvas = this.refs.cam.getCanvas()
     const { width, height } = canvas
-    const data = canvas.toDataURL(this.props.screenshotFormat)
-    const photo = { data, width, height }
+    const base64 = canvas.toDataURL(this.props.screenshotFormat)
+    const photo = normalizeImageCaptureData({ base64, width, height })
     this.setState({ photo })
   }
   renderShootButtons() {
@@ -116,8 +117,8 @@ class CameraView extends Component {
 
     let media
     if (this.state.photo) {
-      const { data, width, height } = this.state.photo
-      media = <Image source={{uri: data}} style={{width, height}} />
+      const { dataUrl, width, height } = this.state.photo
+      media = <Image source={{uri: dataUrl}} style={{width, height}} />
     } else {
       media = this.renderCamera()
     }

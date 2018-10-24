@@ -6,6 +6,7 @@ import {
   StyleSheet,
   View,
   Text,
+  Image,
   TouchableHighlight,
 } from 'react-native'
 
@@ -85,9 +86,12 @@ class MainRoute extends Component {
     cameraType: 'back',
   }
 
+  state = {
+    preview: null,
+  }
+
   constructor(props) {
     super(props)
-    this.state = {}
     this.captureWith = fn => async () => {
       const image = await fn(this.props)
       if (image) {
@@ -96,7 +100,18 @@ class MainRoute extends Component {
     }
   }
 
-  render() {
+  renderPreview() {
+    return (
+      <View style={styles.container}>
+        <Image style={styles.container} source={this.state.preview} />
+        <TouchableHighlight style={styles.button} key="reshoot" onPress={() => this.setState({ preview: null })}>
+          <Text>Reshoot</Text>
+        </TouchableHighlight>
+      </View>
+    )
+  }
+
+  renderCapture() {
     return (
       <View style={styles.container}>
         <TouchableHighlight style={styles.button} key="image-picker" onPress={this.captureWith(useImagePicker)}>
@@ -112,9 +127,17 @@ class MainRoute extends Component {
     )
   }
 
-  onImage(data) {
-    Alert.alert('took pic', `length: ${data.base64.length}, image: ${data.base64.slice(0, 100)}`)
-    // this.setState({ camera: false })
+  render() {
+    return this.state.preview ? this.renderPreview() : this.renderCapture()
+  }
+
+  onImage({ dataUrl }) {
+    // Alert.alert('took pic', `length: ${dataUrl.length}, image: ${dataUrl.slice(0, 100)}`)
+    this.setState({
+      preview: {
+        uri: dataUrl
+      }
+    })
   }
 }
 
