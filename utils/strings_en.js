@@ -272,6 +272,8 @@ module.exports = {
     "noResourcesForCriteria": "No resources were found for this criteria",
     "invalidQR": "Invalid QR code",
     "validatingDataClaim": "Importing data",
+    "startedByAnotherEmployee": "The application for {1} was started by another employee",
+    "doYouWantToContinue": "Do you want to switch to it and continue from there?",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

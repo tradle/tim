@@ -317,5 +317,7 @@ module.exports = {
   "supportedQrCodes": "সমর্থিত QR কোডগুলি:\n1) চ্যাট চ্যানেল যোগ করুন\n2) আমদানি তথ্য",
   "reviewScannedPropertiesAndSecondSideSnapshot": "নীচের ডেটা পর্যালোচনা করুন এবং দস্তাবেজের {1} পাশের স্ন্যাপশট নিন",
   "documentBackSide": "কেন্দ্র দল ফিরে পাশ",
-  "Photo": "ছবি"
+  "Photo": "ছবি",
+  "doYouWantToContinue": "আপনি কি এটিতে স্যুইচ করতে চান এবং সেখানে থেকে যেতে চান?",
+  "startedByAnotherEmployee": "{1} এর জন্য আবেদনটি অন্য কর্মচারী দ্বারা শুরু হয়েছিল"
 }

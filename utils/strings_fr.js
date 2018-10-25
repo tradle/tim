@@ -317,5 +317,7 @@ module.exports = {
   "debugLogSent": "Journal de débogage envoyé",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Veuillez examiner les données ci-dessous et prendre un instantané du côté {1} du document.",
   "documentBackSide": "Centrer le dos du document",
-  "Photo": "Photo"
+  "Photo": "Photo",
+  "doYouWantToContinue": "Voulez-vous passer à cela et continuer à partir de là?",
+  "startedByAnotherEmployee": "L'application pour {1} a été lancée par un autre employé."
 }

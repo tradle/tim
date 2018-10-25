@@ -317,5 +317,7 @@ module.exports = {
   "failedToSendLog": "Verzenden mislukt",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Bekijk de onderstaande gegevens en neem een ​​momentopname van de {1} kant van het document",
   "documentBackSide": "Middelste document achterkant",
-  "Photo": "Foto"
+  "Photo": "Foto",
+  "startedByAnotherEmployee": "De aanvraag voor {1} is gestart door een andere medewerker",
+  "doYouWantToContinue": "Wilt u hiernaar overschakelen en vandaar verder gaan?"
 }

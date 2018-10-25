@@ -317,5 +317,7 @@ module.exports = {
   "debugLogSent": "Nhật ký gỡ lỗi đã được gửi",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Vui lòng xem lại dữ liệu bên dưới và chụp nhanh mặt {1} của tài liệu",
   "documentBackSide": "Trung tâm tài liệu mặt sau",
-  "Photo": "ảnh"
+  "Photo": "ảnh",
+  "startedByAnotherEmployee": "Ứng dụng cho {1} đã được bắt đầu bởi một nhân viên khác",
+  "doYouWantToContinue": "Bạn có muốn chuyển sang nó và tiếp tục từ đó không?"
 }
