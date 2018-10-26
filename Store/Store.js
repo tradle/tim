@@ -1,4 +1,3 @@
-
 // import '../utils/perf'
 import path from 'path'
 import { parse as parseURL } from 'url'
@@ -104,7 +103,7 @@ const excludeWhenSignAndSend = [
 const IS_MESSAGE = '_message'
 const NOT_CHAT_ITEM = '_notChatItem'
 
-import utils from '../utils/utils'
+import utils, {translate, translateEnum} from '../utils/utils'
 import graphQL from './graphql/graphql-client'
 import storeUtils from './utils/storeUtils'
 import { models as baseModels, data as sampleData } from '@tradle/models'
@@ -118,7 +117,6 @@ import sampleProfile from '../data/sampleProfile.json'
 
 import sha from 'stable-sha1'
 var Keychain = ENV.useKeychain !== false && !utils.isWeb() && require('../utils/keychain')
-var translate = utils.translate
 import promisify from 'pify'
 var collect = promisify(require('stream-collector'))
 import debounce from 'debounce'
@@ -6986,8 +6984,12 @@ if (!res[SIG]  &&  res._message)
   getEnum(params) {
     const { modelName, limit, query, lastId, prop, pin } = params
     let enumList = enums[modelName]
-    if (query)
-      return enumList.filter((r) => this.checkCriteria({r, query}))
+    if (query) {
+      return enumList.filter((r) => {
+        let val = utils.translateEnum(r)
+        return val.indexOf(query) !== -1
+      })
+    }
     if (prop) {
       if (prop.limit  ||  prop.pin)
         return utils.applyLens({prop, list: enumList})
@@ -7007,6 +7009,7 @@ if (!res[SIG]  &&  res._message)
     return ret
   },
   checkCriteria({r, query, prop, isChooser}) {
+    debugger
     if (!query)
       return r
     if (isChooser) {
@@ -7270,74 +7273,6 @@ if (!res[SIG]  &&  res._message)
     let link = this.addLink(links, stub)
     if (link)
       all[link] = stub.id
-  },
-  async handleAll(params) {
-    let { links, all, refsObj, refs, resource, to, list, prop, query } = params
-    let objects = await this.getObjects(all)
-    // objects.forEach((r) => {
-    //   if (refs.indexOf(r[CUR_HASH]))
-    //     refsObj[utils.getId(r)] = r
-    // })
-    let checked = []
-    objects.forEach((rr) => {
-      if (links.indexOf(rr[CUR_HASH]) === -1)
-        return
-      let rId = utils.getId(rr)
-      let r = this._getItem(rId)
-      this._setItem(rId, r)
-      _.extend(r, rr)
-
-      if (r._context  &&  !utils.isContext(r[TYPE])) {
-        let rcontext = this.findContext(r._context)
-        if (!rcontext) {
-          let rcontextId = utils.getId(r._context)
-          rcontext = refsObj[rcontextId]
-          if (!rcontextId) {
-            rcontext = this._getItemFromServer(rcontextId)
-            refsObj[rcontextId] = rcontext
-          }
-        }
-        r._context = rcontext
-      }
-      let hash = r[CUR_HASH]
-      if (refs.indexOf(hash) !== -1) {
-        refsObj[utils.getId(r)] = r
-        if (links.indexOf(hash) === -1)
-          return
-      }
-
-      _.extend(params, { r })
-      let backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
-      let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
-      try {
-        if (isBacklinkProp) {
-          let container = resource  ||  to
-          let isOrganization = container[TYPE] === ORGANIZATION
-          if (isOrganization  && ['to', 'from'].indexOf(backlink) !== -1)
-            container = this.getRepresentative(utils.getId(container))
-
-
-          let rId = utils.getId(container)
-          if (r[backlink]  &&  utils.getId(r[backlink]) === rId)
-            list.push(r)
-          else if (isOrganization  && r._sharedWith  &&  r._sharedWith.length > 1) {
-            if (r._sharedWith.some((sh) => sh.bankRepresentative === rId))
-              list.push(r)
-          }
-          if (query)
-            checked.push(this.checkAndFilter(params))
-        }
-        else
-          checked.push(this.checkResource(params))
-        if (checked   &&  isBacklinkProp) {
-          if (query)
-            list.push(r)
-        }
-      } catch (err) {
-      }
-    })
-    if (checked.length)
-      await Promise.all(checked)
   },
   async handleOne(params) {
     let { link, links, all, refsObj, refs, resource, to, prop, list, query, isChooser } = params
@@ -7743,6 +7678,10 @@ if (!res[SIG]  &&  res._message)
       let resourceId = resource ? utils.getId(resource) : null
       allMessages.forEach((res, i) => {
         let r = self._getItem(res.id)
+        if (!r) {
+          debugger
+          return
+        }
         let type = r[TYPE]
         let m = self.getModel(type)
         if (!m) return
@@ -10683,25 +10622,8 @@ if (!res[SIG]  &&  res._message)
     this.dbBatchPut(key, val, batch)
     this.addVisualProps(val)
     this.addLastMessage(val, batch)
-    // if (!switchToContext  &&  isFormRequest  &&  context  &&  context._startForm)
-    //   switchToContext = true
-    // if (!noTrigger  &&  switchToContext) {
-    //   Alert.alert(
-    //     `The application for ${utils.makeModelTitle(resource.product)} was started by another employee`,
-    //     'Do you want to switch to it and continue from there?',
-    //     [
-    //       {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-    //       {text: translate('Ok'),     onPress: () => switchToChatContext(context, val.from)},
-    //     ]
-    //   )
-    //   // noTrigger = true
-    // }
-    // // }
     return { noTrigger, application, isRM }
 
-    // async function switchToChatContext(context, to) {
-    //   await self.searchServer({modelName: MESSAGE, to: self._getItem(to.organization ||  to), context: context, switchToContext: true})
-    // }
     async function setupEmployee() {
       me.isEmployee = true
       me.organization = self.buildRef(org)
@@ -15232,4 +15154,72 @@ async function getAnalyticsUserId ({ promiseEngine }) {
     //     c = c
     //   })
     // }
+  async handleAll(params) {
+    let { links, all, refsObj, refs, resource, to, list, prop, query } = params
+    let objects = await this.getObjects(all)
+    // objects.forEach((r) => {
+    //   if (refs.indexOf(r[CUR_HASH]))
+    //     refsObj[utils.getId(r)] = r
+    // })
+    let checked = []
+    objects.forEach((rr) => {
+      if (links.indexOf(rr[CUR_HASH]) === -1)
+        return
+      let rId = utils.getId(rr)
+      let r = this._getItem(rId)
+      this._setItem(rId, r)
+      _.extend(r, rr)
+
+      if (r._context  &&  !utils.isContext(r[TYPE])) {
+        let rcontext = this.findContext(r._context)
+        if (!rcontext) {
+          let rcontextId = utils.getId(r._context)
+          rcontext = refsObj[rcontextId]
+          if (!rcontextId) {
+            rcontext = this._getItemFromServer(rcontextId)
+            refsObj[rcontextId] = rcontext
+          }
+        }
+        r._context = rcontext
+      }
+      let hash = r[CUR_HASH]
+      if (refs.indexOf(hash) !== -1) {
+        refsObj[utils.getId(r)] = r
+        if (links.indexOf(hash) === -1)
+          return
+      }
+
+      _.extend(params, { r })
+      let backlink = prop ? (prop.items ? prop.items.backlink : prop) : null;
+      let isBacklinkProp = (prop  &&  prop.items  &&  prop.items.backlink)
+      try {
+        if (isBacklinkProp) {
+          let container = resource  ||  to
+          let isOrganization = container[TYPE] === ORGANIZATION
+          if (isOrganization  && ['to', 'from'].indexOf(backlink) !== -1)
+            container = this.getRepresentative(utils.getId(container))
+
+
+          let rId = utils.getId(container)
+          if (r[backlink]  &&  utils.getId(r[backlink]) === rId)
+            list.push(r)
+          else if (isOrganization  && r._sharedWith  &&  r._sharedWith.length > 1) {
+            if (r._sharedWith.some((sh) => sh.bankRepresentative === rId))
+              list.push(r)
+          }
+          if (query)
+            checked.push(this.checkAndFilter(params))
+        }
+        else
+          checked.push(this.checkResource(params))
+        if (checked   &&  isBacklinkProp) {
+          if (query)
+            list.push(r)
+        }
+      } catch (err) {
+      }
+    })
+    if (checked.length)
+      await Promise.all(checked)
+  },
 */
