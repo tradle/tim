@@ -4,7 +4,7 @@ import reactMixin from 'react-mixin'
 import dateformat from 'dateformat'
 
 import constants from '@tradle/constants'
-import utils, { translate } from '../utils/utils'
+import utils, { translate, translateEnum, isEnum, isStub } from '../utils/utils'
 import RowMixin from './RowMixin'
 import ResourceMixin from './ResourceMixin'
 import defaultBankStyle from '../styles/defaultBankStyle.json'
@@ -23,7 +23,6 @@ const {
 const {
   IDENTITY,
   MONEY,
-  ENUM
 } = constants.TYPES
 
 import Prompt from 'react-native-prompt'
@@ -182,7 +181,6 @@ class ShowPropertiesView extends Component {
       }
       var isRef;
       var isItems
-      var isDirectionRow;
       // var isEmail
       let isUndefined = !val  &&  (typeof val === 'undefined')
       if (isUndefined) {
@@ -232,7 +230,7 @@ class ShowPropertiesView extends Component {
           val = <Text style={[styles.title, styles.linkTitle]}>{title}</Text>
         }
         else if (pMeta.inlined  ||  utils.getModel(pMeta.ref).inlined) {
-          if (utils.isStub(val)) {
+          if (isStub(val)) {
             val[TYPE] = utils.getType(val.id)
             val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
                     <Text style={[styles.title, styles.linkTitle]}>{val.title}</Text>
@@ -243,22 +241,21 @@ class ShowPropertiesView extends Component {
             if (!val[TYPE])
               val[TYPE] = pMeta.ref
             let pViewCols = this.getViewCols(val, utils.getModel(val[TYPE]), bankStyle)
-            if (pViewCols.length)
+            if (pViewCols.length) {
               pViewCols.forEach((v) => viewCols.push(v))
-            else {
-              val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
-                      <Text style={[styles.title, styles.linkTitle]}>{utils.getDisplayName(val)}</Text>
-                    </TouchableOpacity>
-              isRef = true
+              return
             }
+            val = <TouchableOpacity onPress={showRefResource.bind(this, val, pMeta)}>
+                    <Text style={[styles.title, styles.linkTitle]}>{utils.getDisplayName(val)}</Text>
+                  </TouchableOpacity>
+            isRef = true
           }
-          // return
         }
-        else if (pMeta.mainPhoto)
-          return
+        // else if (pMeta.mainPhoto)
+        //   return
         // Could be enum like props
-        else if (utils.getModel(pMeta.ref).subClassOf === ENUM)
-          val = utils.translateEnum(val)
+        else if (isEnum(pMeta.ref))
+          val = translateEnum(val)
         else if (showRefResource) {
           // ex. property that is referencing to the Organization for the contact
           var value = val[TYPE] ? utils.getDisplayName(val) : val.title;
@@ -280,52 +277,20 @@ class ShowPropertiesView extends Component {
       let checkForCorrection = this.getCheckForCorrection(pMeta)
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
-          let labels = []
-          let type = val.find((l) => l.key === TYPE  &&  l.value).value
-          let lprops = utils.getModel(type).properties
-          val.forEach((v) => {
-            let key
-            if (v.key.charAt(0) === '_') {
-              if (v.key === TYPE) {
-                key = 'type'
-                value = utils.getModel(v.value).title
-              }
-              else
-                return
-            }
-            else {
-              key = lprops[v.key]  &&  lprops[v.key].title
-              if (v.value  &&  v.key  && (v.key === 'product'  ||  v.key === 'form'))
-                value = utils.getModel(v.value).title
-              else
-                value = v.value || '[not shared]'
-              if (typeof value === 'object')
-                value = value.title
-            }
-
-            if (!key)
-              return
-            labels.push(<View style={styles.row} key={this.getNextKey()}>
-                           <Text style={[styles.title]}>{key}</Text>
-                           <Text style={[styles.title, {color: '#2e3b4e'}]}>{value}</Text>
-                        </View>)
-          })
-          return <View style={{paddingLeft: 10}} key={this.getNextKey()}>
-                    <Text  style={[styles.title, {paddingVertical: 3}]}>{'Properties Shared'}</Text>
-                    {labels}
-                  </View>
+          viewCols.push(this.addForPartial(val, styles))
+          return
         }
         isItems = Array.isArray(val)
         let iref = isItems  &&  pMeta.items.ref
         if (iref) {
           if (iref === PHOTO)
             return
-          if (utils.getModel(iref).subClassOf === ENUM) {
+          if (isEnum(iref)) {
             let values = val.map((v) => utils.getDisplayName(v)).join(', ')
             viewCols.push(
               <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
                 <View style={{paddingLeft: 10}}>
-                  <Text style={styles.title}>{utils.translate(pMeta, model)}</Text>
+                  <Text style={styles.title}>{translate(pMeta, model)}</Text>
                   <Text style={styles.description}>{values}</Text>
                 </View>
                 {checkForCorrection}
@@ -338,11 +303,13 @@ class ShowPropertiesView extends Component {
       }
       var title
       if (!pMeta.skipLabel  &&  !isItems)
-        title = <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{utils.translate(pMeta, model)}</Text>
+        title = <Text style={modelName === TERMS_AND_CONDITIONS ? styles.bigTitle : styles.title}>{translate(pMeta, model)}</Text>
 
       let isPromptVisible = this.state.promptVisible !== null
       if (isPromptVisible)
         console.log(this.state.promptVisible)
+
+      var isDirectionRow;
       if (checkProperties)
         isDirectionRow = true
 
@@ -357,7 +324,7 @@ class ShowPropertiesView extends Component {
 
       viewCols.push(
         <View key={this.getNextKey()}>
-           <View style={isDirectionRow ? {flexDirection: 'row'} : {flexDirection: 'column'}}>
+           <View style={{flexDirection: isDirectionRow && 'row' || 'column'}}>
              <View style={[style, {flexDirection: 'column'}]}>
                {title}
                {val}
@@ -375,6 +342,42 @@ class ShowPropertiesView extends Component {
         )
     }
     return viewCols;
+  }
+  addForPartial(val, styles) {
+    let labels = []
+    let type = val.find((l) => l.key === TYPE  &&  l.value).value
+    let lprops = utils.getModel(type).properties
+    val.forEach((v) => {
+      let key, value
+      if (v.key.charAt(0) === '_') {
+        if (v.key === TYPE) {
+          key = 'type'
+          value = utils.getModel(v.value).title
+        }
+        else
+          return
+      }
+      else {
+        key = lprops[v.key]  &&  lprops[v.key].title
+        if (v.value  &&  v.key  && (v.key === 'product'  ||  v.key === 'form'))
+          value = utils.getModel(v.value).title
+        else
+          value = v.value || '[not shared]'
+        if (typeof value === 'object')
+          value = value.title
+      }
+
+      if (!key)
+        return
+      labels.push(<View style={styles.row} key={this.getNextKey()}>
+                     <Text style={[styles.title]}>{key}</Text>
+                     <Text style={[styles.title, {color: '#2e3b4e'}]}>{value}</Text>
+                  </View>)
+    })
+    return <View style={{paddingLeft: 10}} key={this.getNextKey()}>
+             <Text  style={[styles.title, {paddingVertical: 3}]}>{'Properties Shared'}</Text>
+             {labels}
+           </View>
   }
   getCheckForCorrection(pMeta) {
     let { checkProperties, errorProps, bankStyle } = this.props
