@@ -691,6 +691,10 @@ var NavigationBarRouteMapper = {
       //     {rotate: '45deg'}
       //   ]}
       break
+    case 'Confirm':
+      icon = 'md-checkmark-circle-outline'
+      iconSize = 28
+      break
     case 'View':
       icon = 'md-eye'
       iconSize = 28
