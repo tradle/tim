@@ -183,7 +183,7 @@ var utils = {
     return me;
   },
   isMe(resource) {
-    let me = this.getMe()
+    let me = utils.getMe()
     return me  &&  me[ROOT_HASH] === resource[ROOT_HASH]
   },
   setModels(modelsRL) {
@@ -198,7 +198,7 @@ var utils = {
   },
   getModelByTitle(title) {
     let mm = Object.values(models)
-    let idx = _.findIdx(mm, (m) => m.title === title)
+    let idx = _.findIndex(mm, (m) => m.title === title)
     return idx && mm[idx]
   },
   // getModelsForStub() {
@@ -222,7 +222,7 @@ var utils = {
   toStylesPack(oldStylesFormat) {
     if (oldStylesFormat[TYPE] === STYLES_PACK) return oldStylesFormat
 
-    const { properties } = this.getModel(STYLES_PACK)
+    const { properties } = utils.getModel(STYLES_PACK)
     const pack = {
       [TYPE]: STYLES_PACK
     }
@@ -279,7 +279,7 @@ var utils = {
       const type = resource.prefill && resource.prefill[TYPE]
       if (type) return type
 
-      return this._parseStub(resource.prefill).type
+      return utils._parseStub(resource.prefill).type
     }
 
     return resource[TYPE]
@@ -296,7 +296,7 @@ var utils = {
       return { type: _t, link: _link, permalink: _permalink }
     }
 
-    const parsedId = this._parseId(id)
+    const parsedId = utils._parseId(id)
     parsedId.title = title
     return parsedId
   },
@@ -316,7 +316,7 @@ var utils = {
     if (!lens)
       return Store.getAugmentedModel(model)
 
-    let merged = Lens.merge({ models: this.getModels(), model, lens })
+    let merged = Lens.merge({ models: utils.getModels(), model, lens })
     // let m = _.cloneDeep(merged)
     // let props = m.properties
     // for (let p in props)
@@ -328,7 +328,7 @@ var utils = {
     let limit = prop.limit
     if (!pin  &&  !limit)
       return list
-    let isEnum = this.isEnum(prop.ref  ||  prop.items.ref)
+    let isEnum = utils.isEnum(prop.ref  ||  prop.items.ref)
     if (isEnum) {
       if (limit  &&  limit.length) {
         let limitMap = {}
@@ -359,7 +359,7 @@ var utils = {
             pinMap[id] = l
           return false
         })
-        if (this.isEmpty(pinMap))
+        if (utils.isEmpty(pinMap))
           return list
         let newpin = [] //= pin.filter((id) => pinMap[id])
         pin.forEach(p => {
@@ -403,7 +403,7 @@ var utils = {
   },
   translateProperty(property, model) {
     if (!dictionary)
-      return property.title || this.makeLabel(property.name)
+      return property.title || utils.makeLabel(property.name)
     let translations = dictionary.properties[property.name]
     let val
     if (translations)
@@ -413,13 +413,13 @@ var utils = {
   },
   translateModel(model, isPlural) {
     if (dictionary  &&  dictionary.models[model.id])
-      return dictionary.models[model.id]  ||  this.makeModelTitle(model, isPlural)
-    return model.title ? model.title : this.makeModelTitle(model, isPlural)
+      return dictionary.models[model.id]  ||  utils.makeModelTitle(model, isPlural)
+    return model.title ? model.title : utils.makeModelTitle(model, isPlural)
   },
   translateEnum(resource) {
     if (!dictionary) {
       if (!resource.title)
-        return this.buildRef(resource).title
+        return utils.buildRef(resource).title
       return resource.title
     }
     let rtype = utils.getType(resource)
@@ -433,19 +433,19 @@ var utils = {
     else if (e)
       return e[resource[ROOT_HASH]]
     else {
-      return this.buildRef(resource, this.getModel(rtype)).title
-      // let prop = Object.keys(this.getModel(rtype).properties)[0]
+      return utils.buildRef(resource, utils.getModel(rtype)).title
+      // let prop = Object.keys(utils.getModel(rtype).properties)[0]
       // return resource[prop]
     }
   },
   translateString(...args) {
     const { strings } = Strings
     if (!strings)
-      return this.makeLabel(args[0])
+      return utils.makeLabel(args[0])
 
     let s = strings[args[0]]
     if (!s)
-      return this.makeLabel(args[0])
+      return utils.makeLabel(args[0])
 
     // if (args.length === 2  &&  typeof args[1] === 'object') {
     //   let pos = 0
@@ -478,7 +478,7 @@ var utils = {
 
     if (isInlined) return _.isEqual(r1, r2)
 
-    let properties = this.getModel(r1[TYPE]).properties
+    let properties = utils.getModel(r1[TYPE]).properties
     let exclude = ['_time', ROOT_HASH, CUR_HASH, PREV_HASH, NONCE, 'verifications', '_sharedWith']
     for (var p in properties) {
       let prop = properties[p]
@@ -501,8 +501,8 @@ var utils = {
           if (r1[p].currency !== r2[p].currency  ||  r1[p].value !== r2[p].value)
             return false
         }
-        else if (prop.inlined  ||  (prop.ref  &&  this.getModel(prop.ref).inlined)) {
-          if (!this.compare(r1[p], r2[p], true))
+        else if (prop.inlined  ||  (prop.ref  &&  utils.getModel(prop.ref).inlined)) {
+          if (!utils.compare(r1[p], r2[p], true))
             return false
         }
         else if (utils.getId(r1[p]) !== utils.getId(r2[p]))
@@ -540,12 +540,12 @@ var utils = {
   },
   makeModelTitle(model, isPlural) {
     if (typeof model === 'string') {
-      let m = this.getModel(model)
+      let m = utils.getModel(model)
       if (m)
-        return this.makeModelTitle(m, isPlural)
+        return utils.makeModelTitle(m, isPlural)
       else {
         let idx = model.lastIndexOf('.')
-        return idx === -1 ? this.makeLabel(model) : this.makeLabel(model.substring(idx + 1))
+        return idx === -1 ? utils.makeLabel(model) : utils.makeLabel(model.substring(idx + 1))
       }
     }
     if (isPlural  &&  model.plural)
@@ -578,7 +578,7 @@ var utils = {
   },
 
   makeLabel(label, isPlural) {
-    if (!this.isCamelCase(label))
+    if (!utils.isCamelCase(label))
       return label.charAt(0).toUpperCase() + label.slice(1)
 
     label = label
@@ -617,7 +617,7 @@ var utils = {
         string += strArr[i];
     }
 
-    if (this.toCamelCase(string) === str)
+    if (utils.toCamelCase(string) === str)
       return true;
     else
       return false;
@@ -652,7 +652,7 @@ var utils = {
           if (p === excludeModels[i])
             found = true
           else {
-            var em = this.getModel(p)
+            var em = utils.getModel(p)
             if (em.subClassOf  &&  em.subClassOf === excludeModels[i])
               found = true;
           }
@@ -676,28 +676,28 @@ var utils = {
   },
   isSubclassOf(type, subType) {
     if (typeof type === 'string')
-      return this.getModel(type).subClassOf === subType
+      return utils.getModel(type).subClassOf === subType
     if (type.type)  {
       if (type.type === 'tradle.Model')
       return type.subClassOf === subType
     }
-    return this.getModel(type[TYPE]).subClassOf === subType
+    return utils.getModel(type[TYPE]).subClassOf === subType
   },
   isMyProduct(type) {
-    return this.isSubclassOf(type, MY_PRODUCT)
+    return utils.isSubclassOf(type, MY_PRODUCT)
   },
   isForm(type) {
-    return this.isSubclassOf(type, FORM)
+    return utils.isSubclassOf(type, FORM)
   },
   isVerification(type) {
-    return this.isSubclassOf(type, VERIFICATION)
+    return utils.isSubclassOf(type, VERIFICATION)
   },
   isInlined(m) {
     if (m.inlined)
       return true
     if (!m.subClassOf)
       return false
-    return this.isInlined(this.getModel(m.subClassOf))
+    return utils.isInlined(utils.getModel(m.subClassOf))
   },
   isMyMessage({resource, to}) {
     let r = resource
@@ -773,7 +773,7 @@ var utils = {
     }
     else if (r[ROOT_HASH]) {
       let id = r[TYPE] + '_' + r[ROOT_HASH] // +  '_' + (r[CUR_HASH] || r[ROOT_HASH])
-      let m = this.getModel(r[TYPE])
+      let m = utils.getModel(r[TYPE])
       if (m  &&  m.subClassOf !== ENUM)
         id +=  '_' + (r[CUR_HASH] || r[ROOT_HASH])
       // return  m  &&  (m.subClassOf === FORM  ||  m.id === VERIFICATION  ||  m.id === MY_PRODUCT)
@@ -783,9 +783,9 @@ var utils = {
     }
   },
   makeId(type, permalink, link) {
-    let model = this.getModel(type)
+    let model = utils.getModel(type)
     link = link || permalink
-    return this.buildId({model, permalink, link})
+    return utils.buildId({model, permalink, link})
   },
   makePermId(type, permalink) {
     return `${type}_${permalink}`
@@ -796,7 +796,7 @@ var utils = {
     if (!r) debugger
     if (r[TYPE])
       return r[TYPE]
-    let id = this.getId(r)
+    let id = utils.getId(r)
     if (id)
       return id.split('_')[0]
   },
@@ -815,7 +815,7 @@ var utils = {
       if (props[p].type !== 'array')  //  &&  required[p]) {
         continue
       let ref = props[p].items.ref
-      if (!ref  ||  this.getModel(ref).subClassOf !== ENUM)
+      if (!ref  ||  utils.getModel(ref).subClassOf !== ENUM)
         itemsMeta[p] = props[p];
     }
     return itemsMeta;
@@ -840,42 +840,42 @@ var utils = {
     if (Array.isArray(resource))
       return
     if (!model) {
-      if (this.isStub(resource)) {
+      if (utils.isStub(resource)) {
         if (!resource.title)
           return ''
-        let rType = this.getType(resource)
-        let dnObj = this.getPropertiesWithAnnotation(utils.getModel(rType), 'displayName')
+        let rType = utils.getType(resource)
+        let dnObj = utils.getPropertiesWithAnnotation(utils.getModel(rType), 'displayName')
         if (dnObj) {
           let dnProps = Object.values(dnObj)
           if (dnProps.length === 1  &&  dnProps[0].range === 'model') {
-            let m = this.getModel(resource.title)
-            return m && this.makeModelTitle(m) || resource.title
+            let m = utils.getModel(resource.title)
+            return m && utils.makeModelTitle(m) || resource.title
           }
         }
         return resource.title
       }
-      model = this.getModel(resource[TYPE])
+      model = utils.getModel(resource[TYPE])
     }
     let props = model.properties
-    let rType = this.getType(resource)
-    let resourceModel = rType && this.getModel(rType)
+    let rType = utils.getType(resource)
+    let resourceModel = rType && utils.getModel(rType)
 
     var displayName = '';
 
-    let dnProps = this.getPropertiesWithAnnotation(resourceModel ||  model, 'displayName')
+    let dnProps = utils.getPropertiesWithAnnotation(resourceModel ||  model, 'displayName')
     if (dnProps) {
       for (let p in dnProps) {
         if (!resource[p])
           continue
         let dn
         if (props[p].ref  &&  utils.getModel(props[p].ref).subClassOf === ENUM)
-          dn = this.translateEnum(resource[p])
+          dn = utils.translateEnum(resource[p])
         else if (props[p].range === 'model')
-          dn = this.translate(this.getModel(resource[p]))
+          dn = utils.translate(utils.getModel(resource[p]))
         else if (rType === BOOKMARK)
-          dn = this.translate(resource.message)
+          dn = utils.translate(resource.message)
         else
-          dn = this.getStringValueForProperty(resource, p, props)
+          dn = utils.getStringValueForProperty(resource, p, props)
         if (dn)
           displayName += displayName.length ? ' ' + dn : dn;
       }
@@ -884,7 +884,7 @@ var utils = {
       return displayName
 
     // Choose ENUM prop for display name
-    let refProps = this.getPropertiesWithAnnotation(resourceModel ||  model, 'ref')
+    let refProps = utils.getPropertiesWithAnnotation(resourceModel ||  model, 'ref')
     for (var p in refProps) {
       if (p.charAt(0) === '_')
         continue
@@ -895,32 +895,32 @@ var utils = {
         return resource[p]
       else if (prop.ref  &&  utils.getModel(prop.ref).subClassOf === ENUM)
         return resource[p].title
-      if (this.isContainerProp(prop, resourceModel))
+      if (utils.isContainerProp(prop, resourceModel))
         continue
-      let dn = this.getStringValueForProperty(resource, p, props)
+      let dn = utils.getStringValueForProperty(resource, p, props)
       if (dn)
         displayName += displayName.length ? ' ' + dn : dn;
     }
     if (displayName.length)
       return displayName
     // Construct display name from viewCols
-    let vCols = resourceModel.viewCols || this.getViewCols(resourceModel)
+    let vCols = resourceModel.viewCols || utils.getViewCols(resourceModel)
     if (!vCols)
       return displayName
 
     let excludeProps = []
-    if (this.isMessage(resourceModel))
+    if (utils.isMessage(resourceModel))
       excludeProps = ['from', 'to']
     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
       let p =  vCols[i]
       let prop = props[p]
       if (prop.type === 'array' || prop.markdown  ||  prop.signature)
         continue
-      if (this.isContainerProp(p, resourceModel))
+      if (utils.isContainerProp(p, resourceModel))
         continue
       if ((!resource[p]  &&  !prop.displayAs)  ||  excludeProps.indexOf[p])
         continue
-      displayName = this.getStringValueForProperty(resource, p, resourceModel.properties)
+      displayName = utils.getStringValueForProperty(resource, p, resourceModel.properties)
     }
     return displayName;
   },
@@ -929,12 +929,12 @@ var utils = {
     let displayName = ''
     if (resource[p]) {
       if (meta[p].type === 'date')
-        return this.getDateValue(resource[p])
+        return utils.getDateValue(resource[p])
       if (meta[p].type !== 'object') {
         if (meta[p].range  ===  'model') {
-          let m = this.getModel(resource[p])
+          let m = utils.getModel(resource[p])
           if (m)
-            return this.makeModelTitle(m)
+            return utils.makeModelTitle(m)
         }
         return resource[p] + (meta[p].units || '')
       }
@@ -942,18 +942,18 @@ var utils = {
         return resource[p].title;
       if (meta[p].ref) {
         if (meta[p].ref == MONEY)  {
-          let c = this.normalizeCurrencySymbol(resource[p].currency)
+          let c = utils.normalizeCurrencySymbol(resource[p].currency)
           return (c || '') + resource[p].value
         }
         else if (resource[p][TYPE]) {
-          let rm = this.getModel(resource[p][TYPE])
+          let rm = utils.getModel(resource[p][TYPE])
           if (rm)
-            return this.getDisplayName(resource[p], rm);
+            return utils.getDisplayName(resource[p], rm);
         }
       }
     }
     else if (meta[p].displayAs) {
-      var dn = this.templateIt(meta[p], resource);
+      var dn = utils.templateIt(meta[p], resource);
       if (dn)
         return dn
     }
@@ -963,7 +963,7 @@ var utils = {
     let propTitleLC = propTitle.toLowerCase()
     for (let p in props) {
       let prop = props[p]
-      let pTitle = prop.title || this.makeLabel(p)
+      let pTitle = prop.title || utils.makeLabel(p)
       if (pTitle.toLowerCase() === propTitleLC)
         return p
     }
@@ -1015,9 +1015,9 @@ var utils = {
   getPropStringValue(prop, resource) {
     let p = prop.name
     if (!resource[p]  &&  prop.displayAs)
-      return this.templateIt(prop, resource);
+      return utils.templateIt(prop, resource);
     if (prop.type == 'object')
-      return resource[p].title || this.getDisplayName(resource[p], this.getModel(resource[p][TYPE]).properties);
+      return resource[p].title || utils.getDisplayName(resource[p], utils.getModel(resource[p][TYPE]).properties);
     else
       return resource[p] + '';
   },
@@ -1026,7 +1026,7 @@ var utils = {
     let eCols = []
     let isWeb = utils.isWeb()
     if (!editCols) {
-      let viewCols = this.getViewCols(model)
+      let viewCols = utils.getViewCols(model)
       if (viewCols)
         eCols = viewCols.map(p => properties[p])
       return eCols
@@ -1056,7 +1056,7 @@ var utils = {
     return eCols
   },
   hasPaymentCardScannerProperty(type) {
-    let m = this.getModel(type)
+    let m = utils.getModel(type)
     let scannedProps = utils.getPropertiesWithAnnotation(m, 'scanner')
     if (scannedProps)  {
       let p = Object.keys(scannedProps)
@@ -1108,14 +1108,14 @@ var utils = {
       return prop.displayAs
     let group = []
     let hasSetProps
-    let props = this.getModel(rtype).properties
+    let props = utils.getModel(rtype).properties
     for (let i=0; i<pgroup.length; i++) {
       let p = pgroup[i]
       let v =  resource[p] ? resource[p] : ''
       if (v)
         hasSetProps = true
       if (typeof v === 'object')
-        v = v.title ? v.title : utils.getDisplayName(v, this.getModel(props[p].ref))
+        v = v.title ? v.title : utils.getDisplayName(v, utils.getModel(props[p].ref))
       else if (props  &&  props[p].range  &&  props[p].range  === 'check')
         v = ''
       if (props[p].units)
@@ -1124,7 +1124,7 @@ var utils = {
     }
 
     if (hasSetProps) {
-      let s = this.template(prop.displayAs, group).trim()
+      let s = utils.template(prop.displayAs, group).trim()
       s = s.replace(/[,\s+,]+[,,]/g, ',')
       if (s.charAt(0) === ',')
         s = s.replace(/,/, '')
@@ -1151,14 +1151,14 @@ var utils = {
   //   if (!hasSetProps)
   //     return
   //   else
-  //     return this.template(prop.displayAs, group).trim()
+  //     return utils.template(prop.displayAs, group).trim()
   // },
 
   // parentModel for array type props
   templateIt(prop, resource, parentModel) {
     var template = prop.displayAs;
     if (typeof template === 'string')
-      return this.templateIt1(prop, resource, parentModel)
+      return utils.templateIt1(prop, resource, parentModel)
     var val = '';
     let self = this
     if (template instanceof Array) {
@@ -1207,7 +1207,7 @@ var utils = {
     //   // val = moment(date).format('[yesterday], h:mA');
     //   break;
     default:
-      val = this.getDateValue(date) // dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));
+      val = utils.getDateValue(date) // dateformat(date, 'mmm d, yyyy' + (showTime ? ' h:MM TT' : ''));
       // val = moment(date).format('LL');
     }
     return val;
@@ -1310,17 +1310,17 @@ var utils = {
     return verifiedByMe
   },
   isReadOnlyChat(resource, context) {
-    let me = this.getMe()
+    let me = utils.getMe()
     if (!me)
       return false
     if (resource[TYPE] === APPLICATION)
-      return this.isRM(resource)
+      return utils.isRM(resource)
     let {to, from} = resource
     if (!to || !from)
       return false
-    let meId = this.getId(me)
-    let fromId = this.getId(from)
-    let toId = this.getId(to)
+    let meId = utils.getId(me)
+    let fromId = utils.getId(from)
+    let toId = utils.getId(to)
     let isReadOnly
     if (toId !== meId  &&  fromId !== meId) {
       if (!me.isEmployee  ||  !to.organization  ||  utils.getId(me.organization) !== utils.getId(to.organization))
@@ -1331,11 +1331,11 @@ var utils = {
       return isReadOnly
     // Form error can be used only by context originating contact
     // return !isReadOnly  &&  context
-    //        ? meId  !== this.getId(context.from)
+    //        ? meId  !== utils.getId(context.from)
     //        : isReadOnly
     if (isReadOnly  ||  !context)
       return isReadOnly
-    if (meId  === this.getId(context.from))
+    if (meId  === utils.getId(context.from))
       return isReadOnly
     if (me.isEmployee  &&  to.organization  &&  to.organization.id  &&  to.organization.id === me.organization.id)
       return isReadOnly
@@ -1356,7 +1356,7 @@ var utils = {
     return !resource[ROOT_HASH]  &&  resource.id //  &&  resource.title
   },
   hasSupportLine(resource) {
-    let me = this.getMe()
+    let me = utils.getMe()
     if (resource._hasSupportLine)
       return true
     if (!me.isEmployee)
@@ -1365,7 +1365,7 @@ var utils = {
     if (me.organization._hasSupportLine) {
       if (resource[TYPE] === PROFILE)
         return true
-      if (this.isContext(resource[TYPE])) {
+      if (utils.isContext(resource[TYPE])) {
         if (resource._relationshipManager)
           return true
       }
@@ -1375,20 +1375,20 @@ var utils = {
   },
   optimizeResource(resource, doNotChangeOriginal) {
     let res = doNotChangeOriginal ? _.cloneDeep(resource) : resource
-    let m = this.getModel(res[TYPE])
+    let m = utils.getModel(res[TYPE])
     // if (!m.interfaces)
-    //   res = this.optimizeResource1(resource, doNotChangeOriginal)
+    //   res = utils.optimizeResource1(resource, doNotChangeOriginal)
     // else {
       var properties = m.properties
       var exclude = ['from', 'to', '_time', 'sealedTime', 'txId', 'blockchain', 'networkName']
       let isVerification = m.id === VERIFICATION
-      let isContext = this.isContext(m)
+      let isContext = utils.isContext(m)
       let isFormRequest = m.id === FORM_REQUEST
       let isFormError = m.id === FORM_ERROR
       let isBookmark = m.id === BOOKMARK
       Object.keys(res).forEach(p => {
         if (p === '_context'  &&  res._context) {
-          res._context = this.buildRef(res._context)
+          res._context = utils.buildRef(res._context)
           return
         }
         if (p.charAt(0) === '_'  ||  exclude.indexOf(p) !== -1)
@@ -1398,21 +1398,21 @@ var utils = {
         if (isFormRequest  &&  (p === 'product'  ||  p === 'form'))
           return
         if (isVerification  &&  p === 'document')
-          res[p] = this.buildRef(res[p])
+          res[p] = utils.buildRef(res[p])
         else if (isFormError  &&  p === 'prefill') {
           if (res[p][ROOT_HASH])
-            res[p] = this.buildRef(res[p])
+            res[p] = utils.buildRef(res[p])
         }
         else if (isBookmark  &&  p === 'bookmark')
           return
-        else if (properties[p]  &&  properties[p].ref  &&  this.isContainerProp(properties[p], m))
-          res[p] = this.buildRef(res[p])
+        else if (properties[p]  &&  properties[p].ref  &&  utils.isContainerProp(properties[p], m))
+          res[p] = utils.buildRef(res[p])
         else
           delete res[p]
       })
     // }
     delete res._cached
-    if (!this.isMessage(res))
+    if (!utils.isMessage(res))
       return res
 
     if (res._sharedWith) {
@@ -1430,16 +1430,16 @@ var utils = {
     return res
   },
   getContainerProp(itemModel) {
-    let refs = this.getPropertiesWithAnnotation(itemModel, 'ref')
+    let refs = utils.getPropertiesWithAnnotation(itemModel, 'ref')
     if (!refs)
       return
     for (let p in refs) {
       let r = refs[p]
-      let refModel = this.getModel(r.ref)
+      let refModel = utils.getModel(r.ref)
       if (refModel.subClassOf === ENUM)
         continue
 
-      let itemsProps = this.getPropertiesWithAnnotation(refModel, 'items')
+      let itemsProps = utils.getPropertiesWithAnnotation(refModel, 'items')
       if (!itemsProps)
         continue
       for (let pr in itemsProps) {
@@ -1453,8 +1453,8 @@ var utils = {
   isContainerProp(prop, pModel) {
     if (!prop.ref  ||  !prop.readOnly)
       return
-    let refM = this.getModel(prop.ref)
-    let aprops = this.getPropertiesWithAnnotation(refM, 'items')
+    let refM = utils.getModel(prop.ref)
+    let aprops = utils.getPropertiesWithAnnotation(refM, 'items')
     if (!aprops)
       return
     for (let apName in aprops) {
@@ -1468,18 +1468,18 @@ var utils = {
   isContext(typeOrModel) {
     let m = typeOrModel
     if (typeof typeOrModel === 'string') {
-      m = this.getModel(typeOrModel)
+      m = utils.getModel(typeOrModel)
       if (!m)
         return
     }
     else if (typeOrModel[TYPE])
-      m = this.getModel(typeOrModel[TYPE])
+      m = utils.getModel(typeOrModel[TYPE])
     return m.interfaces  &&  m.interfaces.indexOf(CONTEXT) !== -1
   },
   isEnum(typeOrModel) {
     let m = typeOrModel
     if (typeof typeOrModel === 'string') {
-      m = this.getModel(typeOrModel)
+      m = utils.getModel(typeOrModel)
       if (!m)
         return
     }
@@ -1522,26 +1522,36 @@ var utils = {
       })
   },
   isEmployee(resource) {
+    let me = utils.getMe()
     if (!me.isEmployee)
       return false
-    let myId = this.getId(me.organization)
+    return utils.compareOrg(me.organization, resource)
+  },
+  isAgent(resource) {
+    let me = utils.getMe()
+    if (!me.isAgent)
+      return false
+    return utils.compareOrg(me.organization, resource)
+  },
+  compareOrg(org, resource) {
+    let orgId = utils.getId(org)
     if (resource[TYPE] === ORGANIZATION)
-      return this.getId(resource) === myId ? true : false
+      return utils.getId(resource) === orgId ? true : false
     if (!resource.organization)
       return true
-    if (utils.getId(resource.organization) === utils.getId(me.organization))
+    if (utils.getId(resource.organization) === orgId)
       return true
   },
   isVerifier(resource) {
     // return true
-    if (!this.isEmployee(resource))
+    if (!utils.isEmployee(resource))
       return false
-    let me = this.getMe()
+    let me = utils.getMe()
     if (!me.isEmployee)
       return false
-    // let model = this.getModel(resource[TYPE])
+    // let model = utils.getModel(resource[TYPE])
     // if (model.subClassOf === FORM) {
-    //   return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
+    //   return  (utils.getId(me) === utils.getId(resource.to)  ||  utils.isReadOnlyChat(resource)) &&
     //          !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
     // }
     // if (model.id === VERIFICATION)
@@ -1550,9 +1560,9 @@ var utils = {
   isRM(application) {
     if (!application)
       return
-    let myIdentity = this.getId(this.getMe()).replace(PROFILE, IDENTITY)
+    let myIdentity = utils.getId(utils.getMe()).replace(PROFILE, IDENTITY)
     if (application.relationshipManagers)
-      return application.relationshipManagers.some((r) => this.getId(r) === myIdentity)
+      return application.relationshipManagers.some((r) => utils.getId(r) === myIdentity)
   },
   scrollComponentIntoView (container, component) {
     const handle = platformUtils.getNode(component)
@@ -2010,7 +2020,7 @@ var utils = {
     }
   },
   getPropertiesWithRef(ref, model) {
-    let props = this.getPropertiesWithAnnotation(model, 'ref')
+    let props = utils.getPropertiesWithAnnotation(model, 'ref')
     let rProps = []
     for (let p in props) {
       let pRef = props[p].ref  ||  (props[p].items  &&  props[p].items.ref)
@@ -2250,9 +2260,9 @@ var utils = {
   isMessage(m) {
     return m[IS_MESSAGE]
     // if (typeof m === 'string')
-    //   m = this.getModel(m)
+    //   m = utils.getModel(m)
     // else if (m[TYPE])  // resource was passed
-    //   m = this.getModel(m[TYPE])
+    //   m = utils.getModel(m[TYPE])
 
     // if (m.isInterface  &&  (m.id === MESSAGE || m.id === DOCUMENT || m.id === ITEM))
     //   return true
@@ -2262,9 +2272,9 @@ var utils = {
   isImplementing(resource, interfaceType) {
     let model
     if (typeof resource === 'string')
-      model = this.getModel(resource)
+      model = utils.getModel(resource)
     else if (resource[TYPE])
-      model = this.getModel(resource[TYPE])
+      model = utils.getModel(resource[TYPE])
     else
       model = resource
     return model.interfaces  &&  model.interfaces.indexOf(interfaceType) !== -1
@@ -2273,9 +2283,9 @@ var utils = {
   isItem(resource) {
     let model
     if (typeof resource === 'string')
-      model = this.getModel(resource)
+      model = utils.getModel(resource)
     else if (resource[TYPE])
-      model = this.getModel(resource[TYPE])
+      model = utils.getModel(resource[TYPE])
     else
       model = resource
     return model.interfaces  &&  model.interfaces.indexOf(ITEM) !== -1
@@ -2311,7 +2321,7 @@ var utils = {
   requestForModels() {
     let me = utils.getMe()
     var msg = {
-      message: this.translate('customerWaiting', me.firstName),
+      message: utils.translate('customerWaiting', me.firstName),
       _t: CUSTOMER_WAITING,
       from: me,
       to: me.organization,
@@ -2320,7 +2330,7 @@ var utils = {
     return msg
   },
   getEditableProperties(resource) {
-    let type = this.getType(resource)
+    let type = utils.getType(resource)
     let isFormRequest = type === FORM_REQUEST
     // let isFormError = type === FORM_ERROR
     // if (!isFormRequest  &&  !isFormError)
@@ -2335,7 +2345,7 @@ var utils = {
     // }
     else
       ftype = type
-    const model = this.getModel(ftype)
+    const model = utils.getModel(ftype)
     const props = model.properties
     let eCols = []
     for (let p in props) {
@@ -2352,7 +2362,7 @@ var utils = {
         return [ep]
       if (ftype === PRODUCT_REQUEST)
         return [ep]
-      if (ep  &&  ep.type === 'object'  &&  (ep.ref === PHOTO ||  this.getModel(ep.ref).subClassOf === ENUM))
+      if (ep  &&  ep.type === 'object'  &&  (ep.ref === PHOTO ||  utils.getModel(ep.ref).subClassOf === ENUM))
         return [ep]
       if (ep.signature)
         return [ep]
@@ -2364,13 +2374,13 @@ var utils = {
     return model.subClassOf === 'tradle.Form' || model.subClassOf === 'tradle.MyProduct' || model.id === 'tradle.Verification'
   },
   isSavedItem(r) {
-    let type = this.getType(r)
-    let m = this.getModel(type)
+    let type = utils.getType(r)
+    let m = utils.getModel(type)
     if (!m.interfaces || m.interfaces.indexOf(ITEM) === -1)
       return
     let toId = utils.getId(r.to)
     let fromId = utils.getId(r.from)
-    return toId === fromId  &&  toId === utils.getId(this.getMe())
+    return toId === fromId  &&  toId === utils.getId(utils.getMe())
   },
   getContentSeparator(bankStyle) {
     let separator = {}
@@ -2386,7 +2396,7 @@ var utils = {
     let { resource, message, bankStyle, noLink, idx } = params
     let i1 = message.indexOf('**')
     if (i1 === -1)
-      return this.translate(message)
+      return utils.translate(message)
     let formType = message.substring(i1 + 2)
     let i2 = formType.indexOf('**')
     let linkColor = noLink ? '#757575' : bankStyle.linkColor
@@ -2397,22 +2407,22 @@ var utils = {
       message2 = i2 + 2 === formType.length ? '' : formType.substring(i2 + 2)
       formType = formType.substring(0, i2)
       if (resource[TYPE] === FORM_REQUEST) {
-        let formModel = this.getModel(resource.form)
+        let formModel = utils.getModel(resource.form)
         if (formModel.subClassOf === MY_PRODUCT)
           linkColor = '#aaaaaa'
-        let title = this.makeModelTitle(formModel)
+        let title = utils.makeModelTitle(formModel)
         if (formType === title)
-          formTitle = this.translate(formModel)
+          formTitle = utils.translate(formModel)
       }
     }
     if (!formTitle)
-      formTitle = this.translate(formType)
-    let key = this.getDisplayName(resource).replace(' ', '_') + (idx || 0)
+      formTitle = utils.translate(formType)
+    let key = utils.getDisplayName(resource).replace(' ', '_') + (idx || 0)
     idx = idx ? ++idx : 1
     let newParams = _.extend({}, params)
     newParams.idx = idx
     newParams.message = message2.trim()
-    return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{this.translate(message1) + ' '}
+    return <Text key={key} style={[chatStyles.resourceTitle, noLink ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{utils.translate(message1) + ' '}
              <Text style={{color: linkColor}}>{formTitle}</Text>
              <Text>{utils.parseMessage(newParams)}</Text>
            </Text>
@@ -2439,23 +2449,23 @@ var utils = {
     return markdownStyles
   },
   addDefaultPropertyValuesFor(provider) {
-    defaultPropertyValues[this.getId(provider)] = provider._defaultPropertyValues
+    defaultPropertyValues[utils.getId(provider)] = provider._defaultPropertyValues
   },
   addHidePropertyInEditFor(provider) {
-    hidePropertyInEdit[this.getId(provider)] = provider._hidePropertyInEdit
+    hidePropertyInEdit[utils.getId(provider)] = provider._hidePropertyInEdit
   },
   isHidden(p, resource) {
-    let modelName = this.getType(resource)
-    let model = this.getModel(modelName)
+    let modelName = utils.getType(resource)
+    let model = utils.getModel(modelName)
     let props = model.properties
-    if (!this.isMessage(resource)  ||  !resource.from)
+    if (!utils.isMessage(resource)  ||  !resource.from)
       return props[p].hidden  ||  (model.hidden  &&  model.hidden.indexOf(p) !== -1)
     // Check if the resource is one of the remedition resources
     // and in a reviewing after scan process - there are no from or to in it
     // let isReview = !resource.from
     // if (isReview)
     //   return
-    let meId = this.getId(me)
+    let meId = utils.getId(me)
     let provider = (utils.getId(resource.from) === meId) ? resource.to.organization : resource.from.organization
     if (provider) {
       let hiddenProps = hidePropertyInEdit[utils.getId(provider)]
@@ -2590,8 +2600,8 @@ var utils = {
 
   deepRemoveProperties(obj, test) {
     traverse(obj).forEach(function (value) {
-      if (test(({ key: this.key, value }))) {
-        this.remove()
+      if (test(({ key: utils.key, value }))) {
+        utils.remove()
       }
     })
   },
@@ -2618,7 +2628,7 @@ var utils = {
       return
     let lr = result[startI]
     let rtype = lr[TYPE]
-    let pinFR = rtype === VERIFICATION // || this.getModel(rtype).subClassOf === FORM
+    let pinFR = rtype === VERIFICATION // || utils.getModel(rtype).subClassOf === FORM
     if (!pinFR)
       return
     let contextId = utils.getId(lr._context)
@@ -2674,8 +2684,8 @@ var utils = {
     // return new Buffer(`${permalink}${counterparty.slice(0, 6)}`, 'hex').toString('base64')
   },
   getPrefillProperty(model) {
-    let prefillProps = this.getPropertiesWithAnnotation(model, 'partial')
-    if (!prefillProps  ||  this.isEmpty(prefillProps))
+    let prefillProps = utils.getPropertiesWithAnnotation(model, 'partial')
+    if (!prefillProps  ||  utils.isEmpty(prefillProps))
       return
     return prefillProps[Object.keys(prefillProps)[0]]
   },
@@ -2687,7 +2697,7 @@ var utils = {
     return r[ROOT_HASH] ? r[ROOT_HASH] : r.id.split('_')[1]
   },
   getMessageWidth(component) {
-    let width = component ? this.dimensions(component).width : this.dimensions().width
+    let width = component ? utils.dimensions(component).width : utils.dimensions().width
     return Math.floor(width * 0.8)
   },
   // normalizeBoxShadow({ shadowOffset={}, shadowRadius=0, shadowOpacity=0, shadowColor }) {
@@ -2705,7 +2715,7 @@ var utils = {
   //   return toId === fromId  &&  toId === utils.getId(utils.getMe())
   // },
   getStatusMessageForCheck({ check }) {
-    const model = this.getModel(STATUS);
+    const model = utils.getModel(STATUS);
     const { aspects } = check;
     // const aspectsStr = typeof aspects === 'string' ? aspects : aspects.join(', ');
     let status
@@ -2803,14 +2813,14 @@ function dateFromParts (parts) {
 
 module.exports = utils;
   // isVerifier(resource, application) {
-  //   if (!this.isEmployee(resource))
+  //   if (!utils.isEmployee(resource))
   //     return false
-  //   let me = this.getMe()
+  //   let me = utils.getMe()
   //   if (!me.isEmployee)
   //     return false
-  //   let model = this.getModel(resource[TYPE])
+  //   let model = utils.getModel(resource[TYPE])
   //   if (model.subClassOf === FORM) {
-  //     return  (utils.getId(me) === utils.getId(resource.to)  ||  this.isReadOnlyChat(resource)) &&
+  //     return  (utils.getId(me) === utils.getId(resource.to)  ||  utils.isReadOnlyChat(resource)) &&
   //            !utils.isVerifiedByMe(resource)               // !verification  &&  utils.getId(resource.to) === utils.getId(me)  &&
   //   }
   //   if (model.id === VERIFICATION)
