@@ -267,7 +267,7 @@ module.exports = {
     "supportedQrCodes": "Supported QR codes: \n1) add chat channel \n2) import data",
     "inProcess": "Processing...",
     "inProgress": "In progress...",
-    "networkFailure": "I'm experiencing some network issues. Can you check and then tap Try Again / Cancel",
+    "networkFailure": "I'm experiencing some network issues. Can you check and then tap Retry / Cancel",
     "invalidQuery": "Oops, we hit an error running your search. Our developers will try to fix it asap.",
     "noResourcesForCriteria": "No resources were found for this criteria",
     "invalidQR": "Invalid QR code",
