@@ -116,6 +116,7 @@ var OnePropFormMixin = {
 
     if (result) {
       this.onTakePic(params, result)
+      return result
     }
   },
   onTakePic(params, photo) {

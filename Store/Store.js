@@ -4798,7 +4798,7 @@ if (!res[SIG]  &&  res._message)
       }
     }
     async function updateRequestFoRefresh(to) {
-      let [ requestForRefresh ] = await self.searchMessages({to, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
+      let [ requestForRefresh ] = await self.searchMessages({to, modelName: FORM_REQUEST, isRefresh: true, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
       if (!requestForRefresh._forms)
         requestForRefresh._forms = []
 
@@ -5693,7 +5693,11 @@ if (!res[SIG]  &&  res._message)
       // return result
     }
     else if (isRefresh) {
-      ({result, refreshProducts, requestForRefresh} = await this.searchForRefresh(params))
+      try {
+        ({result, refreshProducts, requestForRefresh} = await this.searchForRefresh(params))
+      } catch (err) {
+        debugger
+      }
     }
     else
       result = await this._searchMessages(params)
@@ -5924,11 +5928,31 @@ if (!res[SIG]  &&  res._message)
       }
       return false
     })
-    let myProducts = await this.searchMessages({modelName: MY_PRODUCT, to: params.to})
+    if (!result.length)
+      return
+    let { to, resource } = params
+    let [ requestForRefresh ] = await this.searchMessages({to, isRefresh: true, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
+    if (!requestForRefresh)
+      return
+    let time = requestForRefresh._time
+    let forms = requestForRefresh  &&  requestForRefresh._forms
+
+    result = result.filter(r => {
+      if (r._time < time)
+        return true
+      if (forms  &&  _.findIndex(forms, f => r[ROOT_HASH] === f.hash) !== -1)
+        return true
+      return false
+    })
+    result.sort((a, b) => b._time - a._time)
+
+    let myProducts = await this.searchMessages({modelName: MY_PRODUCT, to})
     if (myProducts) {
       if (!refreshProducts)
         refreshProducts = []
       myProducts.forEach(p => {
+        if (p._time > time)
+          return
         let requestFor = 'tradle.' + p[TYPE].split('.')[1].substring(2)
         refreshProducts.push({
           [TYPE]: PRODUCT_REQUEST,
@@ -5936,14 +5960,10 @@ if (!res[SIG]  &&  res._message)
         })
       })
     }
-    result.sort((a, b) => b._time - a._time)
 
-    let { to, resource } = params
     let moreForms = resource.prefill.additionalForms
     if (!moreForms)
-      return result
-    let [ requestForRefresh ] = await this.searchMessages({to, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
-    let forms = requestForRefresh  &&  requestForRefresh._forms
+      return {result, refreshProducts, requestForRefresh}
     let toId = utils.getId(to)
     moreForms.forEach(p => {
       let product = refreshProducts  &&  refreshProducts.find(r => r.requestFor === p.product)
@@ -7069,7 +7089,7 @@ if (!res[SIG]  &&  res._message)
     return link
   },
   async checkResource(params) {
-    let { r, foundResources, context, toOrgId, chatTo, chatId, query, isForgetting } = params
+    let { r, foundResources, context, toOrgId, chatTo, chatId, query, isForgetting, isRefresh } = params
     // var key = thisChatMessages[i].id
     // var r = this._getItem(key)
     if (r.canceled)
@@ -7081,7 +7101,10 @@ if (!res[SIG]  &&  res._message)
         foundResources.push(this.fillMessage(r))
       return
     }
-
+    if (isRefresh) {
+      foundResources.push(this.fillMessage(r))
+      return
+    }
     if (context) {
       if (!this.inContext(r, context))
         return
@@ -7264,7 +7287,7 @@ if (!res[SIG]  &&  res._message)
       return await this.searchAllMessages(params)
 
     let {resource, query, modelName, prop, context, _readOnly, to, dataBundle,
-         listView, isForgetting, lastId, limit, isChooser} = params
+         listView, isForgetting, isRefresh, lastId, limit, isChooser} = params
 
     let model = this.getModel(modelName)
 
@@ -7475,7 +7498,7 @@ if (!res[SIG]  &&  res._message)
     let refsObj = {}
 
     return Promise.all(allLinks.map(link => {
-      return this.handleOne({ link, links, all, isForgetting, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to, isChooser })
+      return this.handleOne({ link, links, all, isForgetting, isRefresh, refsObj, isBacklinkProp, refs, list, filterOutForms, foundResources, context, toOrgId, chatTo, chatId, prop, query, resource, to, isChooser })
       // return handleOne(r)
     }))
     .then((l) => {
