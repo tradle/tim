@@ -291,6 +291,7 @@ class RemediationItemsList extends Component {
         <ListView ref='listview'
           dataSource={this.state.dataSource}
           renderRow={this.renderRow.bind(this)}
+          enableEmptySections={true}
           removeClippedSubviews={false}
           automaticallyAdjustContentInsets={false}
           keyboardDismissMode='on-drag'
