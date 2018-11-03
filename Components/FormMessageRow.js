@@ -120,7 +120,7 @@ class FormMessageRow extends Component {
     }
     let stub = this.formStub(resource, to, styles)
     if (resource[TYPE] !== PRODUCT_REQUEST  &&  resource[SIG])
-      stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
+      stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, {resource})} underlayColor='transparent'>
                {stub}
              </TouchableHighlight>
 

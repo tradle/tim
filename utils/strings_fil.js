@@ -319,5 +319,7 @@ module.exports = {
   "documentBackSide": "Ang dokumento sa likod ng dokumento",
   "Photo": "Larawan",
   "doYouWantToContinue": "Gusto mo bang lumipat dito at magpatuloy mula doon?",
-  "startedByAnotherEmployee": "Ang aplikasyon para sa {1} ay sinimulan ng isa pang empleyado"
+  "startedByAnotherEmployee": "Ang aplikasyon para sa {1} ay sinimulan ng isa pang empleyado",
+  "afterRefresh": "Malinaw na ginagamit mo ang aming mga serbisyo nang tuluy-tuloy",
+  "reviewData": "Suriin ang data"
 }

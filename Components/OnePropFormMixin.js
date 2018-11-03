@@ -23,7 +23,7 @@ var OnePropFormMixin = {
     if (!item)
       return;
 
-    let resource = this.props.resource
+    let { resource, isRefresh } = this.props
 
     let formRequest
     if (resource[TYPE] === FORM_REQUEST) {
@@ -42,13 +42,13 @@ var OnePropFormMixin = {
     if (!resource[prop.name])
       this.props.navigator.pop()
     resource[prop.name] = item
-    let params = {resource}
+    let params = {resource, isRefresh}
     if (formRequest)
       params.disableFormRequest = formRequest
     Actions.addChatItem(params)
   },
   showSignatureView(prop, onSet) {
-    const { navigator, bankStyle } = this.props
+    const { navigator, bankStyle, isRefresh } = this.props
     let sigView
     navigator.push({
       title: translate(prop), //m.title,
@@ -74,34 +74,37 @@ var OnePropFormMixin = {
   },
 
   async showCamera(params) {
-    let { prop } = params
+    let { prop, resource } = params
     // if (utils.isAndroid()) {
     //   return Alert.alert(
     //     translate('oops') + '!',
     //     translate('noScanningOnAndroid')
     //   )
     // }
-    let scanner = prop.scanner
     let pname = prop.name
+    let scanner = prop.scanner
     if (scanner) {
       if (scanner === 'id-document') {
         if (pname === 'scan')  {
-          if (this.state.resource.documentType  &&  this.state.resource.country) {
-            this.showBlinkIDScanner(pname)
-          }
-          else
-            Alert.alert('Please choose country and document type first')
+          debugger
+          // if (this.state.resource.documentType  &&  this.state.resource.country) {
+          //   this.showBlinkIDScanner(pname)
+          // }
+          // else
+          //   Alert.alert('Please choose country and document type first')
           return
         }
       }
       else if (scanner === 'payment-card') {
         if (!isWeb())
-          this.scanCard(prop)
+          this.scanPaymentCard(prop)
         return
       }
     }
-    let { navigator, resource, bankStyle } = this.props
-    let model = utils.getModel(utils.getType(resource.form))
+    let { navigator, bankStyle } = this.props
+    if (!resource)
+      resource = this.props.resource
+    let model = utils.getModel(utils.getType(resource.form || resource[TYPE]))
 
     const result = await capture({
       navigator,
@@ -118,24 +121,31 @@ var OnePropFormMixin = {
   onTakePic(params, photo) {
     if (!photo)
       return
-    let { prop } = params
     let { width, height, dataUrl } = photo
+    let { isRefresh } = this.props
 
-    let resource = this.props.resource
+    let { prop, resource } = params
+    if (!resource)
+      resource = this.props.resource
     let isFormError = resource[TYPE] === FORM_ERROR
-    Actions.addChatItem({
-      disableFormRequest: resource,
-      resource: {
-        [TYPE]: isFormError ? resource.prefill[TYPE] : resource.form,
-        [prop.name]: {
-          width,
-          height,
-          url: dataUrl
-        },
+    let r
+    if (isRefresh)
+      r = resource
+    else {
+      r = {
+        [TYPE]: isFormError && resource.prefill || resource.form,
         _context: resource._context,
         from: utils.getMe(),
-        to: resource.from
+        to: isRefresh && resource.to || resource.from
       }
+    }
+    _.extend(r, {
+        [prop.name]: { width, height, url: dataUrl }
+      })
+    Actions.addChatItem({
+      disableFormRequest: !isRefresh  &&  resource,
+      isRefresh,
+      resource: r
     })
 
     // this.props.navigator.pop();
@@ -163,7 +173,7 @@ var OnePropFormMixin = {
       return
     }
 
-    let resource = this.props.resource
+    let { resource, isRefresh } = this.props
     let r = { [TYPE]: resource.form, to: resource.from, from: utils.getMe() }
     let props = utils.getModel(r[TYPE]).properties
     for (let p in cardJson) {
@@ -176,7 +186,7 @@ var OnePropFormMixin = {
     r[prop.name + 'Json'] = cardJson
     this.setState({ r })
 
-    Actions.addChatItem({resource: r, disableFormRequest: resource})
+    Actions.addChatItem({resource: r, disableFormRequest: resource, isRefresh})
   },
 }
 module.exports = OnePropFormMixin;

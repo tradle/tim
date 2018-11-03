@@ -319,5 +319,7 @@ module.exports = {
   "documentBackSide": "Trung tâm tài liệu mặt sau",
   "Photo": "ảnh",
   "startedByAnotherEmployee": "Ứng dụng cho {1} đã được bắt đầu bởi một nhân viên khác",
-  "doYouWantToContinue": "Bạn có muốn chuyển sang nó và tiếp tục từ đó không?"
+  "doYouWantToContinue": "Bạn có muốn chuyển sang nó và tiếp tục từ đó không?",
+  "reviewData": "Đánh giá dữ liệu",
+  "afterRefresh": "Bạn được xóa sử dụng dịch vụ của chúng tôi mà không bị gián đoạn"
 }
