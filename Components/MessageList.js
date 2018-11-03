@@ -72,6 +72,7 @@ const REMEDIATION = 'tradle.Remediation'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
+const REFRESH = 'tradle.Refresh'
 
 const NAV_BAR_HEIGHT = ENV.navBarHeight
 var currentMessageTime
@@ -420,7 +421,6 @@ class MessageList extends Component {
     }
     if (shareableResources)
       state.shareableResources = shareableResources
-
     if (action === 'addVerification') {
       if (originatingMessage  &&  originatingMessage.verifiers)  {
         let docType = utils.getId(resource.document).split('_')[0]
@@ -550,7 +550,9 @@ class MessageList extends Component {
     Actions.share(resource, to, formRequest) // forRequest - originating message
   }
 
-  selectResource(r, verification) {
+  selectResource(params) {
+    let { isReview, verification } = params
+    let r = params.resource
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let rtype = utils.getType(r)
     if (!rtype)
@@ -573,6 +575,8 @@ class MessageList extends Component {
     let isVerifier = application ? utils.isRM(application) : !verification && utils.isVerifier(r)
     let { resource, bankStyle, currency } = this.props
     let lensId = utils.getLensId(r, resource)
+    if (!verification  &&  resource[TYPE] === VERIFICATION)
+      verification = resource
     let route = {
       title: newTitle,
       id: 5,
@@ -580,14 +584,15 @@ class MessageList extends Component {
       component: MessageView,
       parentMeta: model,
       passProps: {
-        bankStyle: bankStyle,
+        bankStyle,
         resource: r,
         lensId: lensId,
-        application: application,
+        application,
         currency: resource.currency || currency,
         country: resource.country,
-        verification: verification,
-        isVerifier: isVerifier
+        verification,
+        isReview,
+        isVerifier
       }
     }
     let showEdit
@@ -608,7 +613,7 @@ class MessageList extends Component {
           resource: r[prefill.name],
           prop: prefill,
           model: utils.getModel(r[prefill.name][TYPE]),
-          bankStyle: bankStyle
+          bankStyle,
         }
       }
       else {
@@ -621,16 +626,17 @@ class MessageList extends Component {
           passProps = {
             model: utils.getLensedModel(r, lensId),
             resource: r,
-            lensId: lensId,
             currency: resource.currency || this.props.currency,
             country: resource.country,
             chat: resource,
-            bankStyle: bankStyle
+            lensId,
+            bankStyle,
+            isReview
           }
         // }
       }
 
-      route.rightButtonTitle = 'Edit'
+      route.rightButtonTitle =  isReview  &&  'Review' || 'Edit'
       if (!route.onRightButtonPress)
         route.onRightButtonPress = {
           title: newTitle, //utils.getDisplayName(resource),
@@ -717,7 +723,7 @@ class MessageList extends Component {
 
     if (model.id === FORM_ERROR)
       return <FormErrorRow {...props} />
-    else if (model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST) {
+    else if (model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST || model.id === REFRESH) {
       _.extend(props, {productChooser: this.productChooser.bind(this)})
       return <FormRequestRow {...props} />
     }
@@ -877,7 +883,7 @@ class MessageList extends Component {
         </PageView>
     )
     let {width, height} = utils.dimensions(MessageList)
-    let image = { width, height }
+    let image = { width, height: height - 1, marginTop: 1 }
 
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
@@ -1261,7 +1267,7 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   flex1: {
-    flex: 1
+    flex: 1,
   },
   bottom: {
     position: 'absolute',

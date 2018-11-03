@@ -319,5 +319,7 @@ module.exports = {
   "documentBackSide": "কেন্দ্র দল ফিরে পাশ",
   "Photo": "ছবি",
   "doYouWantToContinue": "আপনি কি এটিতে স্যুইচ করতে চান এবং সেখানে থেকে যেতে চান?",
-  "startedByAnotherEmployee": "{1} এর জন্য আবেদনটি অন্য কর্মচারী দ্বারা শুরু হয়েছিল"
+  "startedByAnotherEmployee": "{1} এর জন্য আবেদনটি অন্য কর্মচারী দ্বারা শুরু হয়েছিল",
+  "reviewData": "পর্যালোচনা তথ্য",
+  "afterRefresh": "আপনি বাধা ছাড়া আমাদের সেবা ব্যবহার করার জন্য সাফ করা হয়"
 }

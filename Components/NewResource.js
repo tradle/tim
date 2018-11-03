@@ -63,6 +63,7 @@ import ActivityIndicator from './ActivityIndicator'
 import platformStyles from '../styles/platform'
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
+import chatStyles from '../styles/chatStyles'
 
 const BG_IMAGE = ENV.brandBackground
 const FORM_ERROR = 'tradle.FormError'
@@ -113,11 +114,17 @@ class NewResource extends Component {
     this.onChange = this.onChange.bind(this)
     this.cancelItem = this.cancelItem.bind(this)
 
-    let currentRoutes = this.props.navigator.getCurrentRoutes()
+    let currentRoutes = props.navigator.getCurrentRoutes()
     let currentRoutesLength = currentRoutes.length
-    currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.props.search
-            ? this.getSearchResult.bind(this)
-            : this.onSavePressed
+
+    if (props.isRefresh)
+      currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.refresh.bind(this)
+    else if (props.search)
+      currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.getSearchResult.bind(this)
+    else
+      currentRoutes[currentRoutesLength - 1].onRightButtonPress = this.onSavePressed
+
+
     // HACK
     let editProps = !props.exploreData  &&  utils.getEditableProperties(r)
     if (editProps.length  &&  editProps.length === 1) {
@@ -133,6 +140,13 @@ class NewResource extends Component {
       scrollEventThrottle: 50,
       onScroll: this.onScroll.bind(this)
     };
+  }
+  refresh() {
+    this.onSavePressed()
+    if (this.state.missedRequiredOrErrorValue  &&  !utils.isEmpty(this.state.missedRequiredOrErrorValue))
+      this.state.submitted = false
+    else
+      this.props.action()
   }
   shouldComponentUpdate(nextProps, nextState) {
     let isUpdate = nextState.err                             ||
@@ -221,13 +235,14 @@ class NewResource extends Component {
 
   onAction(params) {
     let { resource, action, error, requestedProperties, deleteProperties, message, validationErrors } = params
-    let { navigator, prop, containerResource, callback, originatingMessage, bankStyle, model, currency, chat } = this.props
+    let { navigator, prop, containerResource, callback, originatingMessage, bankStyle, model, currency, chat, isRefresh } = this.props
     if (action === 'languageChange') {
       navigator.popToTop()
       return
     }
     if (action === 'noChanges') {
-      this.setState({err: translate('nothingChanged'), submitted: false})
+      if (!isRefresh)
+        this.setState({err: translate('nothingChanged'), submitted: false})
       return
     }
     if (action === 'getItem'  &&  utils.getId(this.state.resource) === utils.getId(resource)) {
@@ -300,6 +315,8 @@ class NewResource extends Component {
     if (!resource  ||  (action !== 'addItem'  &&  action !== 'addMessage')) {
       return;
     }
+    if (isRefresh)
+      return
     if (this.state.resource[TYPE] !== resource[TYPE]) {
       if (!prop  ||  !containerResource)
         return
@@ -334,7 +351,7 @@ class NewResource extends Component {
     let isMessage = utils.isMessage(resource)
     // When message created the return page is the chat window,
     // When profile or some contact info changed/added the return page is Profile view page
-    if (isMessage) {
+    if (isMessage  &&  !isRefresh) {
       if (originatingMessage  &&  resource[ROOT_HASH] !== originatingMessage[ROOT_HASH]) {
         let params = {
           value: {_documentCreated: true, _document: utils.getId(resource)},
@@ -445,7 +462,7 @@ class NewResource extends Component {
           json[p] = this.floatingProps[p]
       }
     }
-    let { model, originatingMessage, lensId, chat, doNotSend, prop, containerResource } = this.props
+    let { model, originatingMessage, lensId, chat, doNotSend, prop, containerResource, isRefresh } = this.props
     let props = model.properties
     let required = utils.ungroup(model, model.required)
     if (!required) {
@@ -500,6 +517,8 @@ class NewResource extends Component {
         missedRequiredOrErrorValue: missedRequiredOrErrorValue
       }
       this.setState(state)
+      // HACK for REFRESH
+      this.state.missedRequiredOrErrorValue = missedRequiredOrErrorValue
       return;
     }
     if (!value)
@@ -521,14 +540,15 @@ class NewResource extends Component {
       resource: r,
       meta: model,
       lens: lensId,
-      isRegistration: this.state.isRegistration
+      isRegistration: this.state.isRegistration,
+      isRefresh,
+      doNotSend,
+      chat
     };
-    if (chat)
-      params.chat = chat
+
     if (!lensId  &&  this.floatingProps  &&  this.floatingProps._lens)
       params.lens = this.floatingProps._lens
 
-    params.doNotSend = doNotSend
     // HACK
     if (!resource.from  ||  !resource.to)
       Actions.addItem(params)
@@ -779,18 +799,11 @@ class NewResource extends Component {
                       this.onSetSignatureProperty(eProp, this.sigView.getSignature())
                     }} />
                  </View>
-        // ref: ref => {
-        //   sigView = ref
-        // },
-        // bankStyle,
-        // sigViewStyle: bankStyle
-
-        // return this.showSignatureView(eProp)
       }
     }
 
     let meta =  this.props.model;
-    let { originatingMessage, setProperty, editCols, search, exploreData } = this.props
+    let { originatingMessage, setProperty, editCols, search, exploreData, isRefresh } = this.props
 
     let styles = createStyles({bankStyle, isRegistration})
     if (setProperty)
@@ -953,7 +966,7 @@ class NewResource extends Component {
     //             </View>
     // StatusBar.setHidden(true);
     let submit
-    if (!isRegistration) {
+    if (!isRegistration  &&  !isRefresh) {
       let onPress = exploreData ? this.getSearchResult.bind(this) : this.onSavePressed
       if (this.state.err) {
         Alert.alert(this.state.err)

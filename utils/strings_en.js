@@ -181,6 +181,7 @@ module.exports = {
     "confirmedMyData": "All imported data can be viewed in your {profileTitle}",
     "importData": "Import data",
     "importYourData": "Import Your Data",
+    "reviewData": "Review data",
     "digitalWealthPassport": "Digital Wealth Passport",
     "homePage": "Home",
     "sponsoredBy": "Sponsored by",
@@ -274,6 +275,7 @@ module.exports = {
     "validatingDataClaim": "Importing data",
     "startedByAnotherEmployee": "The application for {1} was started by another employee",
     "doYouWantToContinue": "Do you want to switch to it and continue from there?",
+    "afterRefresh": "You are cleared to use our services without interruption",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

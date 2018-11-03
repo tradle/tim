@@ -319,5 +319,7 @@ module.exports = {
   "documentBackSide": "Parte central del documento",
   "Photo": "Foto",
   "startedByAnotherEmployee": "La solicitud para {1} fue iniciada por otro empleado",
-  "doYouWantToContinue": "¿Quieres cambiar a él y continuar desde allí?"
+  "doYouWantToContinue": "¿Quieres cambiar a él y continuar desde allí?",
+  "afterRefresh": "Usted está autorizado a utilizar nuestros servicios sin interrupción.",
+  "reviewData": "Revisar datos"
 }
