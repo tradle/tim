@@ -66,13 +66,19 @@ class RemediationItemsList extends Component {
   done() {
     let { resource, reviewed, navigator } = this.props
     const numReviewed = Object.keys(reviewed).length
+    let isAll = numReviewed === numItems
     const numItems = this.state.list.length
-    let msg1 = numReviewed === numItems
+    let msg1 = isAll
              ? translate('youReviewedAll', numReviewed)
              : translate('youReviewed', numReviewed, numItems)
-    let msg2 = numReviewed === numItems
+    if (!isAll) {
+      Alert.alert(msg1)
+      return
+    }
+    let msg2 = isAll
              ? translate('confirmAllItems', numItems)
              : translate('areYouSureYouWantToConfirmAllItems', numItems)
+
 
     Alert.alert(
       msg1,
@@ -185,6 +191,8 @@ class RemediationItemsList extends Component {
     if (onePropHandler) {
       return onePropHandler()
       .then(result => {
+        if (!result)
+          return
         reviewed[rowId] = resource
         this.setState({
           // list: newList,
@@ -259,9 +267,9 @@ class RemediationItemsList extends Component {
         return this.scanPaymentCard.bind(this, prop)
       return
     }
-    if (prop.signature)
-      return this.onSetSignatureProperty.bind(this)
-    if (prop.ref === PHOTO) {
+    // if (prop.signature)
+      // return this.onSetSignatureProperty.bind(this)
+    if (prop.ref === PHOTO  &&  !prop.signature) {
       let useImageInput
       const isScan = prop.scanner //  &&  prop.scanner === 'id-document'
       if (utils.isWeb())
