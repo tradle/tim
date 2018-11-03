@@ -4669,7 +4669,7 @@ if (!res[SIG]  &&  res._message)
         let sendStatus = self.isConnected ? SENDING : QUEUED
         if (rtype === DATA_CLAIM) {
           org = self._getItem(utils.getId(org))
-          Actions.showModal({title: 'Connecting to ' + org.name, showIndicator: true})
+          Actions.showModal({title: translate('requestMyData'), showIndicator: true})
           params = {action: 'getForms', to: org}
           // params = {action: 'showProfile', importingData: true}
         }
