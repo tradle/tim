@@ -273,6 +273,7 @@ module.exports = {
     "noResourcesForCriteria": "No resources were found for this criteria",
     "invalidQR": "Invalid QR code",
     "validatingDataClaim": "Importing data",
+    "requestMyData": "Requesting my data",
     "startedByAnotherEmployee": "The application for {1} was started by another employee",
     "doYouWantToContinue": "Do you want to switch to it and continue from there?",
     "afterRefresh": "You are cleared to use our services without interruption",

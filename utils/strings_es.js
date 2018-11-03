@@ -321,5 +321,6 @@ module.exports = {
   "startedByAnotherEmployee": "La solicitud para {1} fue iniciada por otro empleado",
   "doYouWantToContinue": "¿Quieres cambiar a él y continuar desde allí?",
   "afterRefresh": "Usted está autorizado a utilizar nuestros servicios sin interrupción.",
-  "reviewData": "Revisar datos"
+  "reviewData": "Revisar datos",
+  "requestMyData": "Solicitando mis datos"
 }

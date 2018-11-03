@@ -321,5 +321,6 @@ module.exports = {
   "startedByAnotherEmployee": "Ứng dụng cho {1} đã được bắt đầu bởi một nhân viên khác",
   "doYouWantToContinue": "Bạn có muốn chuyển sang nó và tiếp tục từ đó không?",
   "reviewData": "Đánh giá dữ liệu",
-  "afterRefresh": "Bạn được xóa sử dụng dịch vụ của chúng tôi mà không bị gián đoạn"
+  "afterRefresh": "Bạn được xóa sử dụng dịch vụ của chúng tôi mà không bị gián đoạn",
+  "requestMyData": "Yêu cầu dữ liệu của tôi"
 }

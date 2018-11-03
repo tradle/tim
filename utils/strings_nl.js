@@ -321,5 +321,6 @@ module.exports = {
   "startedByAnotherEmployee": "De aanvraag voor {1} is gestart door een andere medewerker",
   "doYouWantToContinue": "Wilt u hiernaar overschakelen en vandaar verder gaan?",
   "afterRefresh": "U bent vrij om onze diensten zonder onderbreking te gebruiken",
-  "reviewData": "Gegevens bekijken"
+  "reviewData": "Gegevens bekijken",
+  "requestMyData": "Mijn gegevens opvragen"
 }

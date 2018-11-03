@@ -321,5 +321,6 @@ module.exports = {
   "doYouWantToContinue": "Voulez-vous passer à cela et continuer à partir de là?",
   "startedByAnotherEmployee": "L'application pour {1} a été lancée par un autre employé.",
   "reviewData": "Revoir les données",
-  "afterRefresh": "Vous êtes autorisé à utiliser nos services sans interruption"
+  "afterRefresh": "Vous êtes autorisé à utiliser nos services sans interruption",
+  "requestMyData": "Demander mes données"
 }
