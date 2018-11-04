@@ -4779,6 +4779,7 @@ if (!res[SIG]  &&  res._message)
           // self.trigger({action: 'getItem', resource: returnVal, to: org})
           self.trigger({action: 'updateItem', resource: prevResCached, to: org})
           self.dbPut(prevResId, prevResCached)
+          self._setItem(prevResId, prevRes)
         }
         if (!isNew  ||  self.getModel(rtype).subClassOf !== FORM)
           return
