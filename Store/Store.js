@@ -5912,15 +5912,31 @@ if (!res[SIG]  &&  res._message)
 
   },
   async searchForRefresh(params) {
+    let { to, resource } = params
+    let [ requestForRefresh ] = await this.searchMessages({to, isRefresh: true, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
+    if (!requestForRefresh)
+      return
+    let time = requestForRefresh._time
+    let forms = requestForRefresh  &&  requestForRefresh._forms
+
     let refreshProducts
     let result = await this.searchMessages(params)
+
     result = result  &&  result.filter(r => {
       if (r[TYPE] !== PRODUCT_REQUEST) {
         // if (utils.getModel(r[TYPE]).notEditable)
         //   return false
-        if (r._latest)
+        if (!r._latest)
+          return false
+        if (r._time < time)
           return true
+        // Check if the resource that was created as new reviewed already
+        if (forms  &&  _.findIndex(forms, f => r[ROOT_HASH] === f.hash) !== -1)
+          return true
+        return false
       }
+      if (r._time > time)
+        return false
       // Gather all products for the customer
       if (r._formsCount) {
         if (!refreshProducts)
@@ -5931,20 +5947,14 @@ if (!res[SIG]  &&  res._message)
     })
     if (!result.length)
       return
-    let { to, resource } = params
-    let [ requestForRefresh ] = await this.searchMessages({to, isRefresh: true, modelName: FORM_REQUEST, filterProps: {product: REFRESH_PRODUCT, _latest: true, _documentCreated: false}})
-    if (!requestForRefresh)
-      return
-    let time = requestForRefresh._time
-    let forms = requestForRefresh  &&  requestForRefresh._forms
 
-    result = result.filter(r => {
-      if (r._time < time)
-        return true
-      if (forms  &&  _.findIndex(forms, f => r[ROOT_HASH] === f.hash) !== -1)
-        return true
-      return false
-    })
+    // result = result.filter(r => {
+    //   if (r._time < time)
+    //     return true
+    //   if (forms  &&  _.findIndex(forms, f => r[ROOT_HASH] === f.hash) !== -1)
+    //     return true
+    //   return false
+    // })
     result.sort((a, b) => b._time - a._time)
 
     let myProducts = await this.searchMessages({modelName: MY_PRODUCT, to})

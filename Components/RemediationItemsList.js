@@ -66,8 +66,8 @@ class RemediationItemsList extends Component {
   done() {
     let { resource, reviewed, navigator } = this.props
     const numReviewed = Object.keys(reviewed).length
-    let isAll = numReviewed === numItems
     const numItems = this.state.list.length
+    let isAll = numReviewed === numItems
     let msg1 = isAll
              ? translate('youReviewedAll', numReviewed)
              : translate('youReviewed', numReviewed, numItems)
@@ -163,14 +163,20 @@ class RemediationItemsList extends Component {
     }
     else
       dn = utils.getDisplayName(resource)
+    let reviewedOrNew
+    if (reviewed[rowId])
+      reviewedOrNew = <View style={[styles.checkButton, {backgroundColor: bankStyle.linkColor}]}><Icon name='ios-checkmark' size={30} color='#ffffff' style={{marginHorizontal: 10}} /></View>
+    else if (isNewForm)
+      reviewedOrNew = <View style={{justifyContent: 'center'}}><Text style={{color:bankStyle.linkColor, fontWeight: '600', fontStyle: 'italic', marginHorizontal: 10}}>New</Text></View>
+
     return (
-      <TouchableOpacity onPress={this.selectResource.bind(this, resource, rowId)}  key={rowId} style={[styles.viewStyle, {backgroundColor: isNewForm ? '#ffeeee' : '#f5f5f5'}]}>
+      <TouchableOpacity onPress={this.selectResource.bind(this, resource, rowId)}  key={rowId} style={[styles.viewStyle, {backgroundColor: isNewForm ? '#efffff' : '#f5f5f5'}]}>
         <View style={styles.row}>
           <View style={{flexDirection: 'column', flex: 1}}>
             <Text style={styles.modelTitle}>{translate(utils.getModel(resource[TYPE]))}</Text>
             <Text style={[styles.resourceTitle, {color: bankStyle.linkColor}]}>{dn}</Text>
           </View>
-          {reviewed[rowId] && <View style={[styles.checkButton, {backgroundColor: bankStyle.linkColor}]}><Icon name='ios-checkmark' size={40} color='#ffffff' style={{marginHorizontal: 10}} /></View>}
+          {reviewedOrNew}
         </View>
       </TouchableOpacity>
     )
@@ -328,7 +334,7 @@ var styles = StyleSheet.create({
     flexDirection: 'row'
   },
   checkButton: {
-    ...circled(40),
+    ...circled(30),
     shadowOpacity: 0.7,
     opacity: 0.9,
     shadowRadius: 5,
