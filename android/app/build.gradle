@@ -68,6 +68,7 @@ import com.android.build.OutputFile
 project.ext.react = [
   // the name of the generated asset file containing your JS bundle
   bundleAssetName: "main.jsbundle",
+  extraPackagerArgs: ["--sourcemap-output", "$buildDir/intermediates/assets/release/main.jsbundle.map"],
   // bundleInDebug: false,
   nodeExecutableAndArgs: ["/usr/local/bin/node"]
 ]
