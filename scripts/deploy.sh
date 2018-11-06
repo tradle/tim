@@ -63,6 +63,38 @@ confirm_or_abort() {
   fi
 }
 
+zip_index_html() {
+  local FOLDER
+  local INDEX_HTML
+
+  FOLDER=$1
+  INDEX_HTML="$FOLDER/index.html"
+  echo "index html: $INDEX_HTML"
+  aws s3 cp "$INDEX_HTML" - | \
+  gzip -c -9 | \
+  aws s3 cp \
+    --content-encoding gzip \
+    --cache-control max-age=0,public \
+    --content-type text/html \
+    --acl public-read \
+    --metadata-directive REPLACE \
+    - "$INDEX_HTML"
+}
+
+# gzip_to() {
+#   local SOURCE
+#   local DEST
+
+#   SOURCE="$1"
+#   DEST="$2"
+#   # -L to de-reference symlinks
+#   cp -Lr "$SOURCE/." "$DEST/"
+#   # -r recursive
+#   # -9 best compression
+#   gzip -r -9 "$DEST"
+#   while IFS= read -r file; do mv "$file" "${file%.gz}"; done < <(find "$DEST/" -type f -name "*.gz")
+# }
+
 copy_files() {
   local SOURCE
   local DEST
@@ -267,14 +299,14 @@ deploy_dev() {
   TAG=$(get_latest_web_tag)
   COMMIT=$(get_short_commit_hash)
   BUCKET="$DEV_BUCKET"
-  BACKUP_PATH="$BUCKET/$TAG/$COMMIT/"
-  SOURCE="./web/dist/"
+  BACKUP_PATH="$BUCKET/$TAG/$COMMIT"
+  SOURCE="./web/dist"
   DEST_FOLDER=$(get_next_folder_dev)
-  DEST="$BUCKET/$DEST_FOLDER/"
+  DEST="$BUCKET/$DEST_FOLDER"
 
-  copy_files "$SOURCE" "$BACKUP_PATH"
-  # nuke "$DEST"
-  copy_app "$BACKUP_PATH" "$DEST"
+  copy_files "$SOURCE/" "$BACKUP_PATH/"
+  zip_index_html "$BACKUP_PATH"
+  copy_app "$BACKUP_PATH/" "$DEST/"
   set_live_folder_dev "$DEST_FOLDER"
 }
 
@@ -320,8 +352,9 @@ copy_index_html() {
 }
 
 copy_app() {
+  confirm_or_abort "copying from $1 to $2"
   copy_files "$1" "$2"
-  copy_index_html "$1" "$2"
+  # copy_index_html "$1" "$2"
 }
 
 deploy_prod() {
@@ -332,7 +365,7 @@ deploy_prod() {
   SOURCE="$1"
   validate_s3_path "$SOURCE" || exit 1
 
-  DEST_FOLDER=$(get_alt_folder_prod)
+  DEST_FOLDER=$(get_next_folder_prod)
   DEST="$PROD_BUCKET/$DEST_FOLDER/"
   # nuke $DEST
   copy_app "$SOURCE" "$DEST"
