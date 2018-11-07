@@ -2600,8 +2600,8 @@ var utils = {
 
   deepRemoveProperties(obj, test) {
     traverse(obj).forEach(function (value) {
-      if (test(({ key: utils.key, value }))) {
-        utils.remove()
+      if (test(({ key: this.key, value }))) {
+        this.remove()
       }
     })
   },

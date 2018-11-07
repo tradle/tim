@@ -277,6 +277,7 @@ module.exports = {
     "startedByAnotherEmployee": "The application for {1} was started by another employee",
     "doYouWantToContinue": "Do you want to switch to it and continue from there?",
     "afterRefresh": "You are cleared to use our services without interruption",
+    "newCustomer": "New customer",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

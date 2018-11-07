@@ -322,5 +322,6 @@ module.exports = {
   "doYouWantToContinue": "Wilt u hiernaar overschakelen en vandaar verder gaan?",
   "afterRefresh": "U bent vrij om onze diensten zonder onderbreking te gebruiken",
   "reviewData": "Gegevens bekijken",
-  "requestMyData": "Mijn gegevens opvragen"
+  "requestMyData": "Mijn gegevens opvragen",
+  "newCustomer": "Nieuwe klant"
 }

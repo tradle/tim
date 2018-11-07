@@ -322,5 +322,6 @@ module.exports = {
   "startedByAnotherEmployee": "{1} এর জন্য আবেদনটি অন্য কর্মচারী দ্বারা শুরু হয়েছিল",
   "reviewData": "পর্যালোচনা তথ্য",
   "afterRefresh": "আপনি বাধা ছাড়া আমাদের সেবা ব্যবহার করার জন্য সাফ করা হয়",
-  "requestMyData": "আমার তথ্য অনুরোধ"
+  "requestMyData": "আমার তথ্য অনুরোধ",
+  "newCustomer": "নতুন গ্রাহক"
 }
