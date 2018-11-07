@@ -32,7 +32,7 @@ const {
   PROFILE,
   MESSAGE
 } = constants.TYPES
-console.disableYellowBox = true
+// console.disableYellowBox = true
 // import './utils/logAll'
 // import './utils/perf'
 
