@@ -9673,7 +9673,7 @@ if (!res[SIG]  &&  res._message)
         if (utils.isContext(val.form)) {
           this.onGetProductList({resource: val.from})
           let dataClaim = await this.searchMessages({modelName: DATA_CLAIM, to: val.from.organization})
-          if (dataClaim  &&  dataClaim.length)
+          if (dataClaim  &&  dataClaim.length  ||  me.isAgent)
             this.deleteMessageFromChat(utils.getId(val.from.organization), val)
           else
             this.trigger({action: 'addItem', resource: val})
@@ -9956,7 +9956,7 @@ if (!res[SIG]  &&  res._message)
       }
     }
     if (isFormRequest  &&  val.form !== PRODUCT_REQUEST && utils.isSimulator()) {
-await fireRefresh(fOrg)
+// await fireRefresh(fOrg)
       ///=============== TEST VERIFIERS
       if (isNew) {
         // Prefill for testing and demoing
