@@ -293,7 +293,7 @@ class VerificationMessageRow extends Component {
           metadata: model,
           bankStyle: this.props.bankStyle,
           currency: this.props.currency,
-          callback: this.props.onSelect.bind(this, r)
+          callback: this.props.onSelect.bind(this, {resource: r})
         }
       };
     }
@@ -359,7 +359,7 @@ class VerificationMessageRow extends Component {
 
 
 
-    let header = <TouchableOpacity onPress={this.props.onSelect.bind(this, me.isEmployee ? verification : document, verification)}>
+    let header = <TouchableOpacity onPress={this.props.onSelect.bind(this, {resource: me.isEmployee && verification || document, verification})}>
                    <View style={[addStyle, {flexDirection: 'row', justifyContent: 'space-between'}]}>
                      {headerContent}
                      {arrow}
@@ -431,7 +431,7 @@ class VerificationMessageRow extends Component {
       else if (this.props.resource._documentCreated) {
         orgRow = <View style={chatStyles.shareView}>
                    {shareView}
-                  <TouchableOpacity onPress={this.props.onSelect.bind(this, verification, verification)}>
+                  <TouchableOpacity onPress={this.props.onSelect.bind(this, {resource: verification})}>
                     {orgView}
                   </TouchableOpacity>
                 </View>
@@ -449,14 +449,14 @@ class VerificationMessageRow extends Component {
                           )}>
                     {shareView}
                    </TouchableOpacity>
-                   <TouchableOpacity onPress={this.props.onSelect.bind(this, verification, verification)}>
+                   <TouchableOpacity onPress={this.props.onSelect.bind(this, {resource: verification})}>
                      {orgView}
                    </TouchableOpacity>
                 </View>
       }
     }
     let content = <View style={{flex:1}}>
-                     <TouchableOpacity onPress={this.props.onSelect.bind(this, verification, verification)}>
+                     <TouchableOpacity onPress={this.props.onSelect.bind(this, {resource: verification})}>
                        {msg}
                      </TouchableOpacity>
                      {orgRow}

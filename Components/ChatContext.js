@@ -40,7 +40,8 @@ class ChatContext extends Component {
     if (!m)
       return <View/>
     let me = utils.getMe()
-    let isChattingWithPerson = chat[constants.TYPE] === PROFILE
+    let ctype = utils.getType(chat)
+    let isChattingWithPerson = ctype === PROFILE
     if (me.isEmployee) {
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return <View/>
@@ -51,7 +52,7 @@ class ChatContext extends Component {
     // if (!context  ||  context._readOnly)
     //   return <View/>
     let isReadOnlyChat = utils.isReadOnlyChat(context)
-    let isShareContext = utils.isContext(chat[constants.TYPE]) && isReadOnlyChat
+    let isShareContext = utils.isContext(ctype) && isReadOnlyChat
     let product = utils.getProduct(context)
     let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product))}</Text>
     let chooser

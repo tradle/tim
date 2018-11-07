@@ -29,7 +29,8 @@ const {
   TYPE
 } = constants
 const {
-  PROFILE
+  PROFILE,
+  MESSAGE
 } = constants.TYPES
 // console.disableYellowBox = true
 // import './utils/logAll'
@@ -315,7 +316,7 @@ class TiMApp extends Component {
           r[TYPE] = 'tradle.Organization';
       }
     }
-    let props = {modelName: 'tradle.Message'};
+    let props = {modelName: MESSAGE};
 
     if (this.state.navigator) {
       let currentRoutes = this.state.navigator.getCurrentRoutes();
@@ -326,7 +327,7 @@ class TiMApp extends Component {
         id: 11,
         passProps: {
           resource: r, //{'_t': type, '_r': rId},
-          modelName: 'tradle.Message',
+          modelName: MESSAGE,
           // prop: prop
         }
       }
@@ -344,7 +345,7 @@ class TiMApp extends Component {
           id: 11,
           passProps: {
             resource: r, //{'_t': type, '_r': rId},
-            modelName: 'tradle.Message',
+            modelName: MESSAGE,
             // prop: prop
           }
         },
@@ -707,6 +708,10 @@ var NavigationBarRouteMapper = {
       break
     case 'Download':
       icon = 'md-download'
+      break
+    case 'Confirm':
+      icon = 'md-checkmark-circle-outline'
+      iconSize = 28
       break
     case 'View':
       icon = 'md-eye'

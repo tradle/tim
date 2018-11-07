@@ -26,7 +26,7 @@ module.exports = function PhotoID ({ models }) {
     }) {
       if (form[TYPE] !== PHOTO_ID)
         return
-      if (!form.documentType)
+      if (!form.documentType  ||  Array.isArray(form.documentType))
         return
 
       if (!isWeb()  &&  !isSimulator()  &&  !form.scanJson)

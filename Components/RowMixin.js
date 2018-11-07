@@ -127,7 +127,8 @@ var RowMixin = {
   },
   getOwnerPhoto(isMyMessage) {
     let { to, resource, application, bankStyle } = this.props
-    let isContext = utils.isContext(to[TYPE])
+    let toType = utils.getType(to)
+    let isContext = utils.isContext(toType)
     let isSharedContext = isContext  &&  utils.isReadOnlyChat(to)
     if (/*Platform.OS !== 'android'  &&*/  !isSharedContext  &&  !application)
       return <View/>
@@ -211,10 +212,11 @@ var RowMixin = {
     // if (!resource.organization  ||  (this.props.context  &&  this.props.context._readOnly))
     if (/*!resource.organization  || */ utils.isReadOnlyChat(resource))
       return false
-    if (to[TYPE] === PROFILE)
+    let toType = utils.getType(to)
+    if (toType === PROFILE)
       return false
     let me = utils.getMe()
-    if (utils.isContext(to[TYPE])  &&  utils.isReadOnlyChat(to)) {
+    if (utils.isContext(toType)  &&  utils.isReadOnlyChat(to)) {
       if (utils.getId(resource.from) === utils.getId(me))
         return false
     }

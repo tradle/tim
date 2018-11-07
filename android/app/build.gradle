@@ -68,8 +68,11 @@ import com.android.build.OutputFile
 project.ext.react = [
   // the name of the generated asset file containing your JS bundle
   bundleAssetName: "main.jsbundle",
+  extraPackagerArgs: ["--sourcemap-output", "$buildDir/intermediates/assets/release/main.jsbundle.map"],
   // bundleInDebug: false,
-  nodeExecutableAndArgs: ["/usr/local/bin/node"]
+  nodeExecutableAndArgs: ["/usr/local/bin/node"],
+  // bundleCommand: "ram-bundle",
+  // extraPackagerArgs: ["--indexed-ram-bundle"]
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
@@ -130,8 +133,8 @@ android {
     //     targetCompatibility JavaVersion.VERSION_1_7
     // }
 
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion project.compileSdkVersion
+    buildToolsVersion project.buildToolsVersion
 
     def vmajor = project.property('VERSION_MAJOR').toInteger()
     def vminor = project.property('VERSION_MINOR').toInteger()
@@ -144,8 +147,8 @@ android {
         // KeyPairGenerator for EC is supported on APIs 23+
         // minSdkVersion 23
         // elliptic curve keys support
-        minSdkVersion 19
-        targetSdkVersion 23
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.targetSdkVersion
         versionCode vbuild
         versionName vmajor + "." + vminor + "." + vpatch
         ndk {
@@ -187,13 +190,23 @@ android {
             // applicationIdSuffix ".debug"
         }
         release {
-            // minifyEnabled enableProguardInReleaseBuilds
+            shrinkResources enableProguardInReleaseBuilds
+            zipAlignEnabled enableProguardInReleaseBuilds
+            minifyEnabled enableProguardInReleaseBuilds
             // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            setProguardFiles([getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'])
+
             signingConfig signingConfigs.release
             def codePushKey = getCodePushKey("Production")
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
         }
         releaseStaging {
+            shrinkResources enableProguardInReleaseBuilds
+            zipAlignEnabled enableProguardInReleaseBuilds
+            minifyEnabled enableProguardInReleaseBuilds
+            // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            setProguardFiles([getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'])
+
             signingConfig signingConfigs.release
             def codePushKey = getCodePushKey("Staging")
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
@@ -248,56 +261,56 @@ repositories {
 }
 
 dependencies {
-    compile project(':blinkid-react-native')
-    compile project(':react-native-awesome-card-io')
-    compile 'com.android.support:multidex:1.0.1'
-    compile project(':react-native-branch')
-    compile project(':react-native-tcp')
-    compile project(':react-native-os')
-    compile project(':react-native-exception-handler')
-    compile project(':react-native-splash-screen')
-    compile project(':react-native-fabric')
+    implementation project(':blinkid-react-native')
+    implementation project(':react-native-awesome-card-io')
+    implementation 'com.android.support:multidex:1.0.1'
+    implementation project(':react-native-branch')
+    implementation project(':react-native-tcp')
+    implementation project(':react-native-os')
+    implementation project(':react-native-exception-handler')
+    implementation project(':react-native-splash-screen')
+    implementation project(':react-native-fabric')
     compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
         transitive = true
     }
-    compile project(':react-native-async-storage-snappy')
-    // compile project(':anyline-ocr-react-native-module')
-    compile project(':react-native-local-auth')
-    compile project(':react-native-ecc')
-    compile project(':react-native-orientation')
-    compile project(':react-native-vector-icons')
-    compile project(':react-native-udp')
-    compile project(':react-native-randombytes')
+    implementation project(':react-native-async-storage-snappy')
+    // implementation project(':anyline-ocr-react-native-module')
+    implementation project(':react-native-local-auth')
+    implementation project(':react-native-ecc')
+    implementation project(':react-native-orientation')
+    implementation project(':react-native-vector-icons')
+    implementation project(':react-native-udp')
+    implementation project(':react-native-randombytes')
     compile(project(':react-native-push-notification'))
     {
         exclude group: 'com.google.android.gms'
     }
-    compile project(':react-native-localization')
-    compile project(':react-native-linear-gradient')
-    compile project(':react-native-keychain')
-    compile project(':react-native-image-picker')
+    implementation project(':react-native-localization')
+    implementation project(':react-native-linear-gradient')
+    implementation project(':react-native-keychain')
+    implementation project(':react-native-image-picker')
     compile(project(':react-native-device-info')) {
         exclude group: 'com.google.android.gms'
     }
-    compile "com.google.android.gms:play-services-base:11.8.0"
-    compile ('com.google.android.gms:play-services-gcm:11.8.0') {
+    implementation "com.google.android.gms:play-services-base:${googlePlayServicesVersion}"
+    implementation ("com.google.android.gms:play-services-gcm:${googlePlayServicesVersion}") {
         force = true;
     }
 
-    compile project(':react-native-code-push')
-    compile (project(':react-native-camera')) {
+    implementation project(':react-native-code-push')
+    implementation (project(':react-native-camera')) {
       exclude group: "com.google.android.gms"
-      compile "com.android.support:exifinterface:${supportLibVersion}"
-      compile ('com.google.android.gms:play-services-vision:11.8.0') {
+      implementation "com.android.support:exifinterface:${supportLibVersion}"
+      implementation ("com.google.android.gms:play-services-vision:${googlePlayServicesVersion}") {
         force = true
       }
     }
-    // compile ("com.google.android.gms:play-services-vision:11.8.0") {
+    // implementation ("com.google.android.gms:play-services-vision:${googlePlayServicesVersion}") {
     //   force = true;
     // }
-    compile fileTree(dir: "libs", include: ["*.jar"])
-    compile "com.android.support:appcompat-v7:${supportLibVersion}"
-    compile "com.facebook.react:react-native:+"  // From node_modules
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "com.android.support:appcompat-v7:${supportLibVersion}"
+    implementation "com.facebook.react:react-native:+"  // From node_modules
 }
 
 task copyDownloadableDepsToLibs(type: Copy) {

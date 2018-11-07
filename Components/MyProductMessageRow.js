@@ -80,6 +80,10 @@ class MyProductMessageRow extends Component {
                                <Text style={styles.issuedBy}>{issuedBy}</Text>
                             </View>
                             );
+    // HACK
+    if (utils.getMe().isAgent  &&   model.id === 'tradle.MyEmployeeOnboarding')
+      model = utils.getModel('tradle.MyAgentOnboarding')
+    // end Hack
     let title = translate(model)
     if (title.length > 30)
       title = title.substring(0, 27) + '...'
