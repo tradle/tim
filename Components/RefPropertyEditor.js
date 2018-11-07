@@ -32,6 +32,7 @@ import Actions from '../Actions/Actions'
 import BlinkID from './BlinkID'
 import Navigator from './Navigator'
 import GridList from './GridList'
+import NewResource from './NewResource'
 import { capture } from '../utils/camera'
 import Errors from '@tradle/errors'
 
@@ -209,10 +210,16 @@ class RefPropertyEditor extends Component {
     else {
       if (isImmutable)
         actionItem = content
-      else
+      else if (prop.inlined  ||  utils.getModel(prop.ref).inlined) {
+        actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
+                       {content}
+                     </TouchableOpacity>
+      }
+      else {
         actionItem = <TouchableOpacity onPress={this.chooser.bind(this, prop, pName)}>
                        {content}
                      </TouchableOpacity>
+      }
     }
     return (
       <View key={pName} style={{paddingBottom: error ? 0 : 10, margin: 0}} ref={pName}>
@@ -222,6 +229,25 @@ class RefPropertyEditor extends Component {
         {help}
       </View>
     );
+  }
+  createNew(prop) {
+    let { navigator, bankStyle, model, resource, currency } = this.props
+    let refModel = utils.getModel(prop.ref)
+    navigator.push({
+      id: 4,
+      title: translate('addNew', translate(refModel)), // Add new ' + bl.title,
+      backButtonTitle: 'Back',
+      component: NewResource,
+      rightButtonTitle: 'Done',
+      passProps: {
+        model: refModel,
+        bankStyle,
+        prop,
+        parentResource: resource,
+        parentMeta: model,
+        currency
+      }
+    });
   }
   getPropertyLabel(prop) {
     const { model, metadata } = this.props

@@ -177,7 +177,9 @@ const CONTEXT             = 'tradle.Context'
 const PARTIAL             = 'tradle.Partial'
 const MY_PRODUCT          = 'tradle.MyProduct'
 const FORM_ERROR          = 'tradle.FormError'
+const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
 const MY_EMPLOYEE_PASS    = 'tradle.MyEmployeeOnboarding'
+const MY_AGENT_PASS       = 'tradle.MyAgentOnboarding'
 const FORM_REQUEST        = 'tradle.FormRequest'
 const NEXT_FORM_REQUEST   = 'tradle.NextFormRequest'
 const PAIRING_REQUEST     = 'tradle.PairingRequest'
@@ -213,6 +215,7 @@ const DATA_CLAIM          = 'tradle.DataClaim'
 const LEGAL_ENTITY        = 'tradle.legal.LegalEntity'
 const LANGUAGE            = 'tradle.Language'
 const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
+const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 
 const MY_ENVIRONMENT      = 'environment.json'
 
@@ -4874,6 +4877,7 @@ if (!res[SIG]  &&  res._message)
     let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
       return
+    debugger
     let org = this._getItem(newProvider.org)
     let resource = {
       [TYPE]: PRODUCT_REQUEST,
@@ -4882,8 +4886,20 @@ if (!res[SIG]  &&  res._message)
       to: this.getRepresentative(org),
       contextId
     }
-    if (me)
+    if (me) {
+      // HACK!!!
+      if (product === EMPLOYEE_ONBOARDING  &&  params.isAgent) {
+        me.isAgent = true
+        me.entity = {
+          id: utils.makeId(LEGAL_ENTITY, params.legalEntity)
+        }//await this._getItemFromServer(utils.makeId(LEGAL_ENTITY, params.legalEntity))
+        let meId = utils.getId(me)
+        await db.put(meId, me)
+        this._setItem(meId, me)
+      }
+
       await this.insurePublishingIdentity(org)
+    }
     await this.onAddChatItem({resource, noTrigger: true,  })
     this.trigger({ action: 'applyForProduct', provider: org })
   },
@@ -5700,6 +5716,18 @@ if (!res[SIG]  &&  res._message)
         debugger
       }
     }
+    else if (params.newCustomer &&  me.isAgent  &&  me.organization.id === utils.getId(to)) {
+      if (!context) {
+        let pr = {
+          [TYPE]: PRODUCT_REQUEST,
+          requestFor: CUSTOMER_ONBOARDING,
+          from: me,
+          to: this.getRepresentative(to)
+        }
+        this.onAddChatItem({resource: pr})
+        return
+      }
+    }
     else
       result = await this._searchMessages(params)
 
@@ -5937,7 +5965,7 @@ if (!res[SIG]  &&  res._message)
       }
       if (r._time > time)
         return false
-      // Gather all products for the customer
+      // Gather all products for the customer before the request date
       if (r._formsCount) {
         if (!refreshProducts)
           refreshProducts = []
@@ -9927,7 +9955,7 @@ if (!res[SIG]  &&  res._message)
           }
       }
     }
-    if (isFormRequest  &&  utils.isSimulator()) {
+    if (isFormRequest  &&  val.form !== PRODUCT_REQUEST && utils.isSimulator()) {
 await fireRefresh(fOrg)
       ///=============== TEST VERIFIERS
       if (isNew) {
@@ -10091,7 +10119,16 @@ await fireRefresh(val.from.organization)
     }
     if (!isReadOnly) {
       if (type === MY_EMPLOYEE_PASS) {
-        await setupEmployee()
+        if (me.isAgent)
+          await setupAgent()
+        else
+          await setupEmployee()
+        this.client = graphQL.initClient(meDriver, me.organization.url)
+        if (me.isAgent)
+           me.entity = await this._getItemFromServer(me.entity.id)
+      }
+      else if (type === MY_AGENT_PASS) {
+        await setupAgent()
         this.client = graphQL.initClient(meDriver, me.organization.url)
       }
       else {
@@ -10189,6 +10226,27 @@ await fireRefresh(val.from.organization)
         }
         await self.onAddChatItem({resource:  requestForRefresh, doNotSend: true})
       }, 5000)
+    }
+    async function setupAgent() {
+      me.isEmployee = true
+      me.organization = self.buildRef(org)
+
+      me.isAgent = true
+      utils.setMe(me)
+      self._setItem(meId, me)
+      await self.dbPut(meId, me)
+      let bookmark = {
+        [TYPE]: BOOKMARK,
+        message: utils.makeModelTitle(utils.getModel(APPLICATION), true),
+        bookmark: {
+          [TYPE]: APPLICATION,
+          'applicant._permalink': me[CUR_HASH],
+          _org: self.getRepresentative(me.organization)[ROOT_HASH]
+        },
+        from: utils.buildRef(me)
+      }
+      await self.onAddChatItem({resource: bookmark, noTrigger: true})
+      disableBlockchainSync(meDriver)
     }
     async function setupEmployee() {
       me.isEmployee = true
