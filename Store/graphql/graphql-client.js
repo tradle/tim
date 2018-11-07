@@ -877,7 +877,6 @@ console.log('searchServer.apollo ' + (Date.now() - start))
         _time: Date.now()
       }
     })
-    console.log('searchServer.length ' + (Date.now() - start))
 
     const headers = {
       'x-tradle-auth': JSON.stringify(omit(result.object, ['body', TYPE]))
