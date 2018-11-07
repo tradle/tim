@@ -79,7 +79,8 @@ class FormMessageRow extends Component {
   }
   render() {
     let { resource, to, bankStyle, application } = this.props
-    let model = utils.getModel(resource[TYPE])
+    let rtype = utils.getType(resource)
+    let model = utils.getModel(rtype)
     let photos = utils.getResourcePhotos(model, resource)
     let isMyMessage = this.isMyMessage()
     let isShared = this.isShared()
@@ -116,12 +117,12 @@ class FormMessageRow extends Component {
     let styles = createStyles({bankStyle, isMyMessage, isShared, width, isSharedContext, application})
     let photoListStyle = {height: 3};
     if (photos) {
-      isSharedContext = utils.isContext(to[TYPE]) && utils.isReadOnlyChat(resource._context)
+      isSharedContext = utils.isContext(utils.getType(to)) && utils.isReadOnlyChat(resource._context)
       photoListStyle = styles.photoListStyle
     }
     let stub = this.formStub(resource, to, styles)
-    if (resource[TYPE] !== PRODUCT_REQUEST  &&  resource[SIG])
-      stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, resource, null)} underlayColor='transparent'>
+    if (rtype !== PRODUCT_REQUEST  &&  resource[SIG])
+      stub = <TouchableHighlight onPress={this.props.onSelect.bind(this, {resource})} underlayColor='transparent'>
                {stub}
              </TouchableHighlight>
 
@@ -164,7 +165,7 @@ class FormMessageRow extends Component {
     let headerStyle = [chatStyles.verifiedHeader, notSigned && styles.notSignedHeaderStyle || styles.headerStyle]
 
     let sealedStatus = resource.txId  &&  <Icon name='md-done-all' size={20} color='#EBFCFF'/>
-    let model = utils.getModel(resource[TYPE])
+    let model = utils.getModel(utils.getType(resource))
     if (noContent) {
       let prop = model.properties._time
       if (prop  &&  resource[prop.name]) {
@@ -214,11 +215,13 @@ class FormMessageRow extends Component {
   }
   formatRow(isMyMessage, renderedRow, styles) {
     let resource = this.props.resource;
-    let model = utils.getModel(resource[TYPE] || resource.id);
+    let rtype = utils.getType(resource)
+    let model = utils.getModel(rtype);
     let prefillProp = utils.getPrefillProperty(model)
     if (prefillProp) {
       resource = resource[prefillProp.name]
       model = utils.getModel(resource[TYPE])
+      rtype = model.id
     }
 
     let viewCols = model.gridCols || model.viewCols;

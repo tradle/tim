@@ -317,5 +317,11 @@ module.exports = {
   "failedToSendLog": "Не удалось отправить журнал",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Ознакомьтесь с приведенными ниже данными и сделайте снимок {1} стороны документа",
   "documentBackSide": "Обратная сторона центрального документа",
-  "Photo": "Фото"
+  "Photo": "Фото",
+  "startedByAnotherEmployee": "Приложение для {1} было запущено другим сотрудником",
+  "doYouWantToContinue": "Вы хотите переключиться на него и продолжить оттуда?",
+  "reviewData": "Обзор данных",
+  "afterRefresh": "Вы очищены, чтобы использовать наши услуги без перерыва",
+  "requestMyData": "Запрос моих данных",
+  "newCustomer": "Новый покупатель"
 }

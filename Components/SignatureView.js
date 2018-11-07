@@ -34,7 +34,9 @@ class SignatureView extends Component {
     };
   }
   done() {
-    this.props.onSignature(this.getSignature())
+    let sig = this.getSignature()
+    this.props.onSignature(sig)
+    return sig
   }
   onScroll(e) {
     this._contentOffset = { ...e.nativeEvent.contentOffset }

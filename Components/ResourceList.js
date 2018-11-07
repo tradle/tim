@@ -1284,6 +1284,7 @@ class ResourceList extends Component {
     let bookmarks
     let conversations
     let testProviders
+    let newCustomer
     let isOrg = this.props.modelName === ORGANIZATION
     let isProfile = this.props.modelName === PROFILE
     if (!isOrg  &&  !isProfile)
@@ -1308,18 +1309,61 @@ class ResourceList extends Component {
       // )
     }
     let search
+    let me = utils.getMe()
     if (isProfile) {
-      search = <View style={styles.searchRow}>
-          <TouchableOpacity onPress={this.showSearch.bind(this)}>
+      if (me.isAgent) {
+        let color = '#1F59A3'
+        newCustomer = <View style={styles.newCustomerRow}>
+          <TouchableOpacity onPress={this.newCustomer.bind(this)}>
             <View style={styles.row}>
-              <Icon name='ios-search' size={45} color='#246624' style={[styles.cellImage, {paddingHorizontal: 5, marginRight: 5}]} />
+              <Icon name='ios-people-outline' size={45} color={color} style={[styles.cellImage, {paddingLeft: 5}]} />
               <View style={styles.textContainer}>
-                <Text style={styles.resourceTitle}>{translate('exploreData')}</Text>
+                <Text style={styles.resourceTitle}>{translate('newCustomer')}</Text>
               </View>
             </View>
           </TouchableOpacity>
         </View>
-      // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+      }
+      else {
+        search = <View style={styles.searchRow}>
+            <TouchableOpacity onPress={this.showSearch.bind(this)}>
+              <View style={styles.row}>
+                <Icon name='ios-search' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5, marginRight: 0}]} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.resourceTitle}>{translate('exploreData')}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
+        // if (!this.props.hasPartials  &&  !this.state.sharedContextCount)
+
+
+        if (this.state.hasPartials)
+          partial = (
+            <View>
+              <View style={styles.statisticsRow}>
+                <TouchableOpacity onPress={this.showPartials.bind(this)}>
+                  <View style={styles.row}>
+                    <Icon name='ios-stats-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                    <View style={styles.textContainer}>
+                      <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.partialsRow}>
+                <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
+                  <View style={styles.row}>
+                    <Icon name='ios-apps-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
+                    <View style={styles.textContainer}>
+                      <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+        )
+      }
       conversations = <View style={styles.conversationsRow}>
           <TouchableOpacity onPress={this.showBanks.bind(this)}>
             <View style={styles.row}>
@@ -1330,33 +1374,6 @@ class ResourceList extends Component {
             </View>
           </TouchableOpacity>
         </View>
-
-
-      if (this.state.hasPartials)
-        partial = (
-          <View>
-            <View style={styles.statisticsRow}>
-              <TouchableOpacity onPress={this.showPartials.bind(this)}>
-                <View style={styles.row}>
-                  <Icon name='ios-stats-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('Statistics')}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.partialsRow}>
-              <TouchableOpacity onPress={this.showAllPartials.bind(this)}>
-                <View style={styles.row}>
-                  <Icon name='ios-apps-outline' size={45} color='#246624' style={[styles.cellImage, {paddingLeft: 5}]} />
-                  <View style={styles.textContainer}>
-                    <Text style={styles.resourceTitle}>{translate('Partials')}</Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-      )
       if (this.state.bookmarksCount) {
         let color = '#6C4EA3'
         bookmarks = (
@@ -1375,6 +1392,7 @@ class ResourceList extends Component {
             </View>
           )
       }
+
       if (this.state.sharedContextCount)
         sharedContext = (
           <View style={styles.sharedContextRow}>
@@ -1398,6 +1416,7 @@ class ResourceList extends Component {
     return  (
       <View style={{ width }}>
         {search}
+        {newCustomer}
         {conversations}
         {bookmarks}
         {sharedContext}
@@ -1405,6 +1424,22 @@ class ResourceList extends Component {
         {testProviders}
       </View>
     )
+  }
+  newCustomer() {
+    const { navigator, bankStyle } = this.props
+    let me = utils.getMe()
+    let route = {
+      component: MessageList,
+      id: 11,
+      backButtonTitle: 'Back',
+      title: translate('newCustomer'),
+      passProps: {
+        resource: me.organization,
+        bankStyle,
+        newCustomer: true
+      }
+    }
+    this.props.navigator.push(route)
   }
   showSearch() {
     this.props.navigator.push({
@@ -1518,6 +1553,9 @@ var styles = StyleSheet.create({
   }),
   conversationsRow: prettifyRow({
     backgroundColor: '#CDE4F7'
+  }),
+  newCustomerRow: prettifyRow({
+    backgroundColor: '#FBFFE5'
   }),
   statisticsRow: prettifyRow({
     backgroundColor: '#BADFCD'

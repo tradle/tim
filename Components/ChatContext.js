@@ -17,6 +17,8 @@ import PageView from './PageView'
 import { Text } from './Text'
 
 const REMEDIATION = 'tradle.Remediation'
+const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
+const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
 const PROFILE = constants.TYPES.PROFILE
 
 class ChatContext extends Component {
@@ -40,7 +42,8 @@ class ChatContext extends Component {
     if (!m)
       return <View/>
     let me = utils.getMe()
-    let isChattingWithPerson = chat[constants.TYPE] === PROFILE
+    let ctype = utils.getType(chat)
+    let isChattingWithPerson = ctype === PROFILE
     if (me.isEmployee) {
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return <View/>
@@ -51,8 +54,12 @@ class ChatContext extends Component {
     // if (!context  ||  context._readOnly)
     //   return <View/>
     let isReadOnlyChat = utils.isReadOnlyChat(context)
-    let isShareContext = utils.isContext(chat[constants.TYPE]) && isReadOnlyChat
+    let isShareContext = utils.isContext(ctype) && isReadOnlyChat
     let product = utils.getProduct(context)
+    // HACK
+    if (me.isAgent  &&  product === EMPLOYEE_ONBOARDING)
+      product = AGENT_ONBOARDING
+
     let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product))}</Text>
     let chooser
     if (context  &&  isShareContext || application)

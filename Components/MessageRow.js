@@ -4,7 +4,7 @@ import { makeResponsive } from 'react-native-orient'
 import reactMixin from 'react-mixin'
 import {
   Text,
-  TouchableHighlight,
+  TouchableOpacity,
   View,
   WebView,
 } from 'react-native'
@@ -263,9 +263,9 @@ class MessageRow extends Component {
 
       messageBody = isSimpleMessage || isContext || isConfirmation
                   ? msgContent
-                  : <TouchableHighlight onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
+                  : <TouchableOpacity onPress={onPressCall ? onPressCall : () => {}} underlayColor='transparent'>
                       {msgContent}
-                    </TouchableHighlight>
+                    </TouchableOpacity>
     }
     else
       messageBody = <View style={{height: 5}}/>
@@ -427,7 +427,7 @@ class MessageRow extends Component {
                 </View>
 
       renderedRow.push(msg)
-      return {onPressCall: () => this.props.onSelect(resource)}
+      return {onPressCall: () => this.props.onSelect({resource})}
     }
     if (model.id === APPLICATION_DENIAL  ||  (model.id === CONFIRMATION  &&  isMyMessage)) {
       let iname = model.id === APPLICATION_DENIAL ? 'md-close-circle' : 'ios-ribbon-outline'
@@ -716,18 +716,18 @@ class MessageRow extends Component {
             text = pVal.substring(textIdx + 1, linkIdx - 1)
             linkIdx = textIdx
           }
-          vCols.push(<TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}  key={this.getNextKey()}>
+          vCols.push(<TouchableOpacity underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}  key={this.getNextKey()}>
                       <Text style={style}>
                         {pVal.substring(0, linkIdx)}
                         <Text style={[style, {color: bankStyle.linkColor}]}>{text || link} </Text>
                         {pVal.substring(endLink + 1)}
                       </Text>
-                     </TouchableHighlight>
+                     </TouchableOpacity>
           // vCols.push(<Text key={this.getNextKey()}>
           //               <Text style={style}>{pVal.substring(0, linkIdx)}</Text>
-          //               <TouchableHighlight underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
+          //               <TouchableOpacity underlayColor='transparent' onPress={this.onPress.bind(this, link, text)}>
           //                 <Text style={[style, {color: bankStyle.bankStyle.linkColor}]}>{text || link}</Text>
-          //               </TouchableHighlight>
+          //               </TouchableOpacity>
           //               <Text style={style}>{pVal.substring(endLink + 1)}</Text>
           //             </Text>
             )
@@ -783,7 +783,7 @@ class MessageRow extends Component {
       return {onPressCall: onPressCall}
     if (isSimpleMessage)
       return isConfirmation ? {isConfirmation: true} : null
-    return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+    return {onPressCall: this.props.onSelect.bind(this, {resource})}
   }
   messageHasLink(message) {
     return MESSAGE_WITH_LINK_REGEX.test(message)

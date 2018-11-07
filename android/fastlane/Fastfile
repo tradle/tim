@@ -156,19 +156,20 @@ platform :android do
       stage = "releaseStaging"
     end
 
-    apk = "android/app/build/outputs/apk/#{stage}/app-#{stage}.apk"
+    apk_path_from_proj = "app/build/outputs/apk/#{stage}/app-#{stage}.apk"
+    apk_path_from_root = "android/#{apk_path_from_proj}"
     backup_release(
-      apk_path: apk,
+      apk_path: apk_path_from_root,
       stage: stage
     )
 
     unless options[:dry_run]
-      UI.message("uploading apk #{apk}".green)
+      UI.message("uploading apk #{apk_path_from_proj}".green)
       upload_to_play_store(
         track: track,
         skip_upload_screenshots: options[:skip_upload_screenshots] != false,
         skip_upload_images: options[:skip_upload_images] != false,
-        apk: apk
+        apk: apk_path_from_proj
       )
     end
   end

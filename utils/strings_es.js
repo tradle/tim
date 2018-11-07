@@ -317,5 +317,11 @@ module.exports = {
   "noResourcesForCriteria": "No se encontraron recursos para este criterio.",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Revise los datos a continuación y tome una instantánea del lado {1} del documento",
   "documentBackSide": "Parte central del documento",
-  "Photo": "Foto"
+  "Photo": "Foto",
+  "startedByAnotherEmployee": "La solicitud para {1} fue iniciada por otro empleado",
+  "doYouWantToContinue": "¿Quieres cambiar a él y continuar desde allí?",
+  "afterRefresh": "Usted está autorizado a utilizar nuestros servicios sin interrupción.",
+  "reviewData": "Revisar datos",
+  "requestMyData": "Solicitando mis datos",
+  "newCustomer": "Nuevo cliente"
 }

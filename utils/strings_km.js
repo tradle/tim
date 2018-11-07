@@ -317,5 +317,11 @@ module.exports = {
   "supportedQrCodes": "កូដ QR ដែលបានគាំទ្រ:\n1) បន្ថែមឆានែលជជែក\n2) ទិន្នន័យនាំចូល",
   "reviewScannedPropertiesAndSecondSideSnapshot": "សូមពិនិត្យមើលទិន្នន័យខាងក្រោមនិងថតរូបនៃផ្នែក {1} របស់ឯកសារ",
   "documentBackSide": "ដាក់កណ្ដាលផ្នែកឯកសារ",
-  "Photo": "រូបថត"
+  "Photo": "រូបថត",
+  "doYouWantToContinue": "តើអ្នកចង់ប្ដូរទៅវាហើយបន្តពីទីនោះទេ?",
+  "startedByAnotherEmployee": "កម្មវិធីសម្រាប់ {1} ត្រូវបានចាប់ផ្ដើមដោយបុគ្គលិកផ្សេងទៀត",
+  "afterRefresh": "អ្នកត្រូវបានសម្អាតដើម្បីប្រើសេវាកម្មរបស់យើងដោយគ្មានការរំខាន",
+  "reviewData": "ពិនិត្យទិន្នន័យឡើងវិញ",
+  "requestMyData": "ស្នើសុំទិន្នន័យរបស់ខ្ញុំ",
+  "newCustomer": "អតិថិជន​ថ្មី"
 }

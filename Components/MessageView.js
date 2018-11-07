@@ -192,7 +192,7 @@ class MessageView extends Component {
         prop: itemBl,
         search,
         // containerResource: resource,
-        doNotSend: true,
+        // doNotSend: true,
         defaultPropertyValues: defaultPropertyValues,
         currency: this.props.currency || this.state.currency,
         callback: (resource) => {

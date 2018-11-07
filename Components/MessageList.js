@@ -57,7 +57,7 @@ import platformStyles, {MenuIcon} from '../styles/platform'
 import buttonStyles from '../styles/buttonStyles'
 import ENV from '../utils/env'
 import StyleSheet from '../StyleSheet'
-
+import BackgroundImage from './BackgroundImage'
 // import AddNewMessage from './AddNewMessage'
 // import SearchBar from 'react-native-search-bar'
 // import ResourceTypesScreen from './ResourceTypesScreen'
@@ -72,6 +72,7 @@ const REMEDIATION = 'tradle.Remediation'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
+const REFRESH = 'tradle.Refresh'
 
 const NAV_BAR_HEIGHT = ENV.navBarHeight
 var currentMessageTime
@@ -79,7 +80,7 @@ var currentMessageTime
 class MessageList extends Component {
   static propTypes = {
     navigator: PropTypes.object.isRequired,
-    modelName: PropTypes.string.isRequired,
+    modelName: PropTypes.string,
     resource: PropTypes.object.isRequired
   };
   constructor(props) {
@@ -125,7 +126,7 @@ class MessageList extends Component {
     if (me.isEmployee)  {
       if (application  &&  utils.isRM(application))
         return true
-      let isChattingWithPerson = resource[TYPE] === PROFILE
+      let isChattingWithPerson = utils.getType(resource) === PROFILE
       if (isChattingWithPerson  &&  !me.organization._canShareContext)
         return false
       return true
@@ -145,9 +146,9 @@ class MessageList extends Component {
     return true
   }
   componentWillMount() {
-    let { navigator, bankStyle, modelName, resource, prop, context, search, isAggregation, application } = this.props
+    let { navigator, bankStyle, modelName, resource, prop, context, search, isAggregation, application, newCustomer } = this.props
     let params = {
-      modelName,
+      modelName: MESSAGE,
       to: resource,
       prop,
       context,
@@ -157,10 +158,10 @@ class MessageList extends Component {
       isChat: true,
       isAggregation,
       application,
+      newCustomer
     }
-
     StatusBar.setHidden(false);
-    utils.onNextTransitionEnd(navigator, () => Actions.list(params));
+    utils.onNextTransitionEnd(navigator, () => Actions.list({modelName: MESSAGE, ...params}));
     if (!application)
       Actions.getProductList({ resource })
     // if (resource  &&  resource[TYPE] === ORGANIZATION)
@@ -218,6 +219,8 @@ class MessageList extends Component {
       return
     }
     let { application, modelName, bankStyle, navigator } = this.props
+    if (!modelName)
+      modelName = MESSAGE
     if (action === 'productList') {
       this.setState({productList: params.resource})
       return
@@ -267,7 +270,7 @@ class MessageList extends Component {
     }
     if (resource  &&  resource[ROOT_HASH] != chatWith[ROOT_HASH]) {
       let doUpdate
-      if (chatWith[TYPE] === ORGANIZATION  &&  resource.organization) {
+      if (utils.getType(chatWith) === ORGANIZATION  &&  resource.organization) {
         if (utils.getId(chatWith) === utils.getId(resource.organization))
           doUpdate = true
       }
@@ -310,7 +313,7 @@ class MessageList extends Component {
     let isEmployee = utils.isEmployee(chatWith)
     let state = {isLoading: false, isEmployee}
     if (list.length || (this.state.filter  &&  this.state.filter.length)) {
-      let type = list[0][TYPE];
+      let type = utils.getType(list[0]);
       if (type  !== modelName) {
         let model = utils.getModel(modelName);
         if (model.id !== MESSAGE) {
@@ -346,7 +349,7 @@ class MessageList extends Component {
 
     let { application, originatingMessage } = this.props
     let chatWith = this.props.resource
-    let rtype = resource  &&  resource[TYPE]
+    let rtype = resource  &&  utils.getType(resource)
     if (rtype === NEXT_FORM_REQUEST) {
       let list = this.state.list
       let r = list[list.length - 1]
@@ -363,12 +366,12 @@ class MessageList extends Component {
     }
 
     let rid = utils.getId(chatWith)
-    let isContext = utils.isContext(chatWith[TYPE])
+    let isContext = utils.isContext(utils.getType(chatWith))
     if (isContext) {
       if (!resource._context  ||  utils.getId(resource._context) !== utils.getId(chatWith))
         return
     }
-    else if (chatWith[TYPE] !== PROFILE) {
+    else if (utils.getType(chatWith) !== PROFILE) {
       let fid = resource.from.organization &&  utils.getId(resource.from.organization)
       let tid = resource.to.organization && utils.getId(resource.to.organization)
       if (rid !== fid  &&  rid !== tid  &&  !to)
@@ -410,7 +413,7 @@ class MessageList extends Component {
     let currentContext
     if (utils.isContext(resource))
       currentContext = resource
-    else if (resource._context  &&  resource._context[TYPE])
+    else if (resource._context  &&  utils.getType(resource._context))
     // else //if (rtype === FORM_REQUEST  ||  rtype === FORM_ERROR)
       currentContext = resource._context
     if (currentContext)
@@ -441,36 +444,42 @@ class MessageList extends Component {
     }
     if (shareableResources)
       state.shareableResources = shareableResources
-    this.setState(state)
-
     if (action === 'addVerification') {
       if (originatingMessage  &&  originatingMessage.verifiers)  {
         let docType = utils.getId(resource.document).split('_')[0]
-        this.state.verifiedByTrustedProvider = originatingMessage.form === docType && resource
+        state.verifiedByTrustedProvider = originatingMessage.form === docType && resource
       }
       else
-        this.state.verifiedByTrustedProvider = null
+        state.verifiedByTrustedProvider = null
     }
+    this.showAnotherEmployeeAlert(resource)
+    this.setState(state)
+  }
+  // Application was started by another employee
+  showAnotherEmployeeAlert(resource) {
+    let rtype = utils.getType(resource)
     let me = utils.getMe()
-    if (me.isEmployee  && rtype === FORM_REQUEST && !resource._documentCreated) {
-      let rcontext = resource._context
-      if (rcontext  &&  this.state.allContexts) {
-        if (utils.getId(rcontext.from) === utils.getId(utils.getMe()))
-          return
-        let meApplying = rcontext.from.organization  &&  rcontext.from.organization.id === me.organization.id
-        if (meApplying) {
-          let m = utils.getModel(resource.product)
-          Alert.alert(
-            `The application for ${translate(m)} was started by another employee`,
-            'Do you want to switch to it and continue from there?',
-            [
-              {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-              {text: translate('Ok'),     onPress: () => this.switchToOneContext(rcontext, resource.from)},
-            ]
-          )
-        }
-      }
-    }
+    if (!me.isEmployee  || rtype !== FORM_REQUEST || resource._documentCreated)
+      return
+
+    let rcontext = resource._context
+    if (!rcontext  ||  !this.state.allContexts)
+      return
+
+    if (utils.getId(rcontext.from) === utils.getId(utils.getMe()))
+      return
+    let meApplying = rcontext.from.organization  &&  rcontext.from.organization.id === me.organization.id
+    if (!meApplying)
+      return
+    let m = utils.getModel(resource.product)
+    Alert.alert(
+      translate('startedByAnotherEmployee', translate(m)),
+      translate('doYouWantToContinue'),
+      [
+        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+        {text: translate('Ok'),     onPress: () => this.switchToOneContext(rcontext, resource.from)},
+      ]
+    )
   }
   switchToOneContext(context, to) {
     this.setState({allContexts: false, limit: LIMIT})
@@ -513,13 +522,9 @@ class MessageList extends Component {
         return true
     }
     if (this.state.currentContext !== nextState.currentContext)
-      return true
-    if (this.state.context !== nextState.context) {
-      if (!this.state.context  ||  !nextState.context)
-        return true
-      if (utils.getId(this.state.context)  !==  utils.getId(nextState.context))
-        return true
-    }
+      return this.isTheSameResource(this.state.currentContext, nextState.currentContext)
+    if (this.state.context !== nextState.context)
+      return this.isTheSameResource(this.state.context, nextState.context)
     if (this.state.allContexts !== nextState.allContexts)
       return true
     if (this.state.hasProducts !== nextState.hasProducts)
@@ -563,11 +568,18 @@ class MessageList extends Component {
     }
     return false
   }
+  isTheSameResource(r1, r2) {
+    if (!r1  ||  !r2)
+      return (r1  ||  r2) ? false : true
+    return utils.getId(r1) !== utils.getId(r2)
+  }
   share(resource, to, formRequest) {
     Actions.share(resource, to, formRequest) // forRequest - originating message
   }
 
-  selectResource(r, verification) {
+  selectResource(params) {
+    let { isReview, verification } = params
+    let r = params.resource
     // Case when resource is a model. In this case the form for creating a new resource of this type will be displayed
     let rtype = utils.getType(r)
     if (!rtype)
@@ -590,6 +602,8 @@ class MessageList extends Component {
     let isVerifier = application ? utils.isRM(application) : !verification && utils.isVerifier(r)
     let { resource, bankStyle, currency } = this.props
     let lensId = utils.getLensId(r, resource)
+    if (!verification  &&  utils.getType(resource) === VERIFICATION)
+      verification = resource
     let route = {
       title: newTitle,
       id: 5,
@@ -597,14 +611,15 @@ class MessageList extends Component {
       component: MessageView,
       parentMeta: model,
       passProps: {
-        bankStyle: bankStyle,
+        bankStyle,
         resource: r,
         lensId: lensId,
-        application: application,
+        application,
         currency: resource.currency || currency,
         country: resource.country,
-        verification: verification,
-        isVerifier: isVerifier
+        verification,
+        isReview,
+        isVerifier
       }
     }
     let showEdit
@@ -625,7 +640,7 @@ class MessageList extends Component {
           resource: r[prefill.name],
           prop: prefill,
           model: utils.getModel(r[prefill.name][TYPE]),
-          bankStyle: bankStyle
+          bankStyle,
         }
       }
       else {
@@ -638,16 +653,17 @@ class MessageList extends Component {
           passProps = {
             model: utils.getLensedModel(r, lensId),
             resource: r,
-            lensId: lensId,
             currency: resource.currency || this.props.currency,
             country: resource.country,
             chat: resource,
-            bankStyle: bankStyle
+            lensId,
+            bankStyle,
+            isReview
           }
         // }
       }
 
-      route.rightButtonTitle = 'Edit'
+      route.rightButtonTitle =  isReview  &&  'Review' || 'Edit'
       if (!route.onRightButtonPress)
         route.onRightButtonPress = {
           title: newTitle, //utils.getDisplayName(resource),
@@ -671,7 +687,7 @@ class MessageList extends Component {
   onSearchChange(text) {
     let actionParams = {
       query: text,
-      modelName: this.props.modelName,
+      modelName: this.props.modelName || MESSAGE,
       to: this.props.resource,
       isChat: true,
       context: this.state.allContexts ? null : this.state.context,
@@ -683,7 +699,7 @@ class MessageList extends Component {
 
   renderRow(resource, sectionId, rowId)  {
     let { application, isAggregation, bankStyle, originatingMessage, currency, navigator } = this.props
-    let model = utils.getModel(resource[TYPE] || resource.id);
+    let model = utils.getModel(utils.getType(resource))
     let previousMessageTime = currentMessageTime;
     let isContext = utils.isContext(this.props.resource)
     currentMessageTime = resource._time
@@ -734,7 +750,7 @@ class MessageList extends Component {
 
     if (model.id === FORM_ERROR)
       return <FormErrorRow {...props} />
-    else if (model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST) {
+    else if (model.id === FORM_REQUEST || model.id === CONFIRM_PACKAGE_REQUEST || model.id === REFRESH) {
       _.extend(props, {productChooser: this.productChooser.bind(this)})
       return <FormRequestRow {...props} />
     }
@@ -745,7 +761,7 @@ class MessageList extends Component {
   }
   addedMessage(text) {
     Actions.list({
-      modelName: this.props.modelName,
+      modelName: this.props.modelName || MESSAGE,
       to: this.props.resource,
       isChat: true,
       context: this.state.allContexts ? null : this.state.context,
@@ -775,6 +791,8 @@ class MessageList extends Component {
 
   render() {
     let { modelName, resource, bankStyle, navigator, originatingMessage } = this.props
+    if (!modelName)
+      modelName = MESSAGE
     let application = this.state.application ||  this.props.application
     let { list, isLoading, context, isConnected, isForgetting, allLoaded,
           onlineStatus, loadEarlierMessages, customStyle, allContexts, currentContext } = this.state
@@ -797,7 +815,7 @@ class MessageList extends Component {
     // hideTextInput = false
     let content
     if (!list || !list.length) {
-      if (application  ||  navigator.isConnected  &&  resource[TYPE] === ORGANIZATION) {
+      if (application  ||  navigator.isConnected  &&  utils.getType(resource) === ORGANIZATION) {
         if (isLoading) {
           let menuBtn
           // let menuBtn = !hideTextInput /*this.hasMenuButton() */ && (
@@ -816,7 +834,7 @@ class MessageList extends Component {
         }
       }
     }
-    let isContext = resource  &&  utils.isContext(resource[TYPE])
+    let isContext = resource  &&  utils.isContext(utils.getType(resource))
     if (!content) {
       let h = utils.dimensions(MessageList).height
       let maxHeight = h - NAV_BAR_HEIGHT
@@ -887,11 +905,12 @@ class MessageList extends Component {
     let separator = utils.getContentSeparator(bankStyle)
     StatusBar.setHidden(false);
     let progressInfoR = resource || application
+    let hash = utils.getRootHash(progressInfoR)
     if (!bgImage)
       return (
         <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
           {network}
-          <ProgressInfo recipient={progressInfoR[ROOT_HASH]} color={bankStyle.linkColor} />
+          <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
           <ChatContext chat={resource} application={application} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}
@@ -900,19 +919,18 @@ class MessageList extends Component {
         </PageView>
     )
     let {width, height} = utils.dimensions(MessageList)
-    let image = { width, height }
+    let image = { width, height: height - 1, marginTop: 1 }
 
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
-        <ImageBackground source={{uri: bgImage}}  resizeMode='cover' style={image}>
+        <BackgroundImage source={{uri: bgImage}}  resizeMode='cover' style={image} />
           {network}
-          <ProgressInfo recipient={progressInfoR[ROOT_HASH]} color={bankStyle.linkColor} />
+          <ProgressInfo recipient={hash} color={bankStyle.linkColor} />
           <ChatContext chat={resource} context={context} contextChooser={this.contextChooser} shareWith={this.shareWith} bankStyle={bankStyle} allContexts={allContexts} />
           <View style={ sepStyle } />
           {content}
           {actionSheet}
           {alert}
-        </ImageBackground>
       </PageView>
     );
   }
@@ -1021,7 +1039,8 @@ class MessageList extends Component {
   // Context chooser shows all the context of the particular chat.
   // When choosing the context chat will show only the messages in linked to this context.
   contextChooser(context) {
-    let name = this.props.resource[TYPE] === PROFILE ? this.props.resource.formatted : this.props.resource.name
+    let { resource } = this.props
+    let name = utils.getType(resource) === PROFILE ? resource.formatted : resource.name
     this.props.navigator.push({
       title: translate('contextsFor') + ' ' + name,
       id: 23,
@@ -1029,7 +1048,7 @@ class MessageList extends Component {
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       backButtonTitle: 'Back',
       passProps: {
-        resource: this.props.resource,
+        resource,
         // bankStyle: this.props.bankStyle,
         selectContext: this.selectContext
       },
@@ -1140,7 +1159,7 @@ class MessageList extends Component {
       search: this.props.search,
       loadEarlierMessages: true,
       context: this.state.allContexts ? null : this.state.context,
-      modelName: this.props.modelName,
+      modelName: this.props.modelName || MESSAGE,
       to: this.props.resource,
       application: this.props.application,
       endCursor: this.state.endCursor,
@@ -1173,7 +1192,8 @@ class MessageList extends Component {
       return
     let me = utils.getMe();
     let { resource, application, modelName } = this.props
-
+    if (!modelName)
+      modelName = MESSAGE
     let model = utils.getModel(modelName);
 
     let message
@@ -1284,7 +1304,7 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   flex1: {
-    flex: 1
+    flex: 1,
   },
   bottom: {
     position: 'absolute',

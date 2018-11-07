@@ -317,5 +317,11 @@ module.exports = {
   "noResourcesForCriteria": "Walang nakuhang mga mapagkukunan para sa pamantayang ito",
   "reviewScannedPropertiesAndSecondSideSnapshot": "Mangyaring suriin ang data sa ibaba, at kumuha ng isang snapshot ng {1} bahagi ng dokumento",
   "documentBackSide": "Ang dokumento sa likod ng dokumento",
-  "Photo": "Larawan"
+  "Photo": "Larawan",
+  "doYouWantToContinue": "Gusto mo bang lumipat dito at magpatuloy mula doon?",
+  "startedByAnotherEmployee": "Ang aplikasyon para sa {1} ay sinimulan ng isa pang empleyado",
+  "afterRefresh": "Malinaw na ginagamit mo ang aming mga serbisyo nang tuluy-tuloy",
+  "reviewData": "Suriin ang data",
+  "requestMyData": "Humihiling ng aking data",
+  "newCustomer": "Bagong customer"
 }

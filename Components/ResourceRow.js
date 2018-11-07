@@ -652,10 +652,15 @@ class ResourceRow extends Component {
     //              <Text style={{fontSize: 70, color: '#f5f5f5', fontWeight: '600', alignSelf: 'center'}}>{translate('DRAFT')}</Text>
     //           </View>
     // }
+
+    if (!m)
+      m = utils.getModel(resource.requestFor)
+    let mTitle = m && translate(m) || utils.makeModelTitle(resource.requestFor)
+
     return  <View>
               <View style={{padding: 5}}>
                 <View style={{flexDirection: 'row'}}>
-                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{m ? translate(m) : translate(utils.getModel(resource.requestFor))}</Text>
+                  <Text style={[styles.resourceTitle, {paddingRight: 10}]}>{mTitle}</Text>
                   {formsCount}
                 </View>
                 {applicant}

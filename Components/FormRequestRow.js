@@ -23,7 +23,7 @@ import constants from '@tradle/constants'
 import { Text } from './Text'
 import utils, { translate } from '../utils/utils'
 import NewResource from './NewResource'
-// import RemediationItemsList from './RemediationItemsList'
+import RemediationItemsList from './RemediationItemsList'
 import RowMixin from './RowMixin'
 import ImageInput from './ImageInput'
 import ShareResourceList from './ShareResourceList'
@@ -43,9 +43,10 @@ const MY_PRODUCT = 'tradle.MyProduct'
 const PHOTO = 'tradle.Photo'
 const FORM_REQUEST = 'tradle.FormRequest'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
-// const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
+const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const IPROOV_SELFIE = 'tradle.IProovSelfie'
+const REFRESH = 'tradle.Refresh'
 // const DEFAULT_MESSAGE = 'Would you like to...'
 const {
   TYPE,
@@ -254,9 +255,9 @@ class FormRequestRow extends Component {
     let addStyle = [chatStyles.verificationBody, styles.mstyle]
     if (message.length < 30)
       addStyle.push(styles.container)
-    var shareables = !isFormRequest  || resource._documentCreated
-                   ? null
-                   : this.showShareableResources(styles);
+    var shareables
+    if (isFormRequest  && !resource._documentCreated)
+      shareables = this.showShareableResources(styles)
 
     let cellStyle
     if (addStyle)
@@ -727,41 +728,25 @@ class FormRequestRow extends Component {
   formRequest(resource, vCols, prop, styles) {
     const { bankStyle, to, application, context, productToForms, chooseTrustedProvider } = this.props
     let message = resource.message
-    let messagePart
-    // if (resource._documentCreated) {
-    //   if (resource.message)
-    //     message = resource.message.replace(/\*/g, '')
-    //   else
-    //     message = ''
-    // }
-    // else {
-      let params = { resource, message, bankStyle, noLink: application != null  || resource._documentCreated }
-      messagePart = utils.parseMessage(params)
-    // }
+    let params = { resource, message, bankStyle, noLink: application != null  || resource._documentCreated }
+    let messagePart = utils.parseMessage(params)
     if (typeof messagePart === 'string')
       messagePart = null
 
     let form = utils.getModel(resource.form)
-    // if (this.props.shareableResources)
-    //   style = styles.description;
     let onPressCall
-    // if (s.length === 2)
-    //   onPressCall = this.editForm.bind(self, msgParts[1], msgParts[0])
     let sameFormRequestForm
     let isMyMessage = this.isMyMessage(to[TYPE] === ORGANIZATION ? to : null);
     let { product } = resource
     let isMyProduct = utils.getModel(resource.form).subClassOf === MY_PRODUCT
     if (!resource._documentCreated  &&  product) {
       let multiEntryForms = utils.getModel(product).multiEntryForms
-      if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1) {
-        if (productToForms) {
-          let forms = productToForms[product]
-          if (forms) {
-            let formsArray = forms[resource.form]
-            if (formsArray)
-              sameFormRequestForm = true
-          }
-          // onPressCall = this.getNextFormAlert.bind(this)
+      if (multiEntryForms  &&  multiEntryForms.indexOf(form.id) !== -1  &&  productToForms) {
+        let forms = productToForms[product]
+        if (forms) {
+          let formsArray = forms[resource.form]
+          if (formsArray)
+            sameFormRequestForm = true
         }
       }
       if (!sameFormRequestForm  &&  !isMyProduct)
@@ -785,40 +770,36 @@ class FormRequestRow extends Component {
 
     let isRequestForNext = sameFormRequestForm  &&  !resource._documentCreated
     let msgWidth = utils.getMessageWidth(FormRequestRow)
+    let isRefresh = resource.form === REFRESH
     if (isRequestForNext) {
       let animStyle = {transform: [{scale: this.springValue}]}
-
-// this.springValue.interpolate({
-//   inputRange: [0, 1],
-//   outputRange: [0, 100],
-// });
-       link = <View style={{flex: 1}}>
-               <View style={{flex: 1, paddingTop: 10}}>
-                 {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, isAnother: true})}
-                 <View style={styles.hr}/>
-                 <TouchableOpacity onPress={() => {
-                    Alert.alert(
-                      translate('areYouSureAboutNextForm', translate(form)),
-                      null,
-                      [
-                        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-                        {text: translate('Ok'), onPress: onOK.bind(this)},
-                      ]
-                    )
-                 }}>
-                   <View style={[styles.row, {paddingTop: 10}]}>
-                     <Animated.View style={animStyle}>
-                       <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
-                         <Icon name='ios-arrow-forward' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
-                       </View>
-                     </Animated.View>
-                     <View style={{justifyContent: 'center'}}>
-                       <Text style={styles.addMore}>{translate('moveToTheNextForm')}</Text>
-                     </View>
-                    </View>
-                </TouchableOpacity>
-              </View>
-             </View>
+      let buttons = (
+        <View style={[styles.row, {paddingTop: 10}]}>
+          <Animated.View style={animStyle}>
+            <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
+              <Icon name='ios-arrow-forward' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'}/>
+            </View>
+          </Animated.View>
+          <View style={{justifyContent: 'center'}}>
+            <Text style={styles.addMore}>{translate('moveToTheNextForm')}</Text>
+          </View>
+        </View>
+      )
+      // this.springValue.interpolate({
+      //   inputRange: [0, 1],
+      //   outputRange: [0, 100],
+      // });
+      link = (
+        <View style={{flex: 1}}>
+          <View style={{flex: 1, paddingTop: 10}}>
+            {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, isAnother: true})}
+            <View style={styles.hr}/>
+            <TouchableOpacity onPress={this.moveToTheNextForm.bind(this, form)}>
+              {buttons}
+            </TouchableOpacity>
+          </View>
+        </View>
+      )
     }
     else {
       let linkColor = isMyMessage ? bankStyle.myMessageLinkColor : bankStyle.linkColor
@@ -831,7 +812,7 @@ class FormRequestRow extends Component {
             outputRange: ['0deg', '180deg', '0deg']
           })
           // addMessage = 'You can choose the product by clicking on a red  menu button'
-          let style = {transform: [{rotate: rotateX}]}
+          let style = {transform: [{rotate: rotateX}], paddingLeft: 5, marginLeft: -3}
           msg = <TouchableOpacity onPress={() => this.props.productChooser(prop)} style={[styles.message, {paddingVertical: utils.isAndroid() ? 5 : 0}]}  key={this.getNextKey()}>
                   <Animated.View style={style}>
                     <View style={[styles.addButton, {backgroundColor: '#007EFF', marginRight: 7}]}>
@@ -848,7 +829,15 @@ class FormRequestRow extends Component {
         }
       }
       else {
-        if (resource.verifiers)
+        if (isRefresh) {
+          // onPressCall = this.reviewFormsInContext.bind(this, {isRefresh})
+          msg = <View key={this.getNextKey()}>
+                  <View style={styles.messageLink}>
+                    {this.makeButtonLink({form, isMyMessage, styles, msg: addMessage, onPress: this.reviewFormsInContext.bind(this, {isRefresh})})}
+                  </View>
+                </View>
+        }
+        else if (resource.verifiers)
           onPressCall = chooseTrustedProvider.bind(this, this.props.resource, form, isMyMessage)
         else if (!prop)
           onPressCall = this.createNewResource.bind(this, form, isMyMessage)
@@ -967,25 +956,39 @@ class FormRequestRow extends Component {
              </View>
     }
     vCols.push(msg);
-    return isReadOnly ? null : onPressCall
-    function onOK() {
-      Actions.addMessage({msg: {
-        from: resource.to,
-        to: resource.from,
-        _context: resource._context,
-        // _context: self.props.context  ||  resource._context,
-        [TYPE]: NEXT_FORM_REQUEST,
-        after: form.id
-      }})
-      var params = {
-        value: {_documentCreated: true, _document: utils.getId(resource)},
-        doneWithMultiEntry: true,
-        resource: resource,
-        meta: utils.getModel(resource[TYPE])
-      }
-      Actions.addChatItem(params)
-    }
+    return isReadOnly || isRefresh ? null : onPressCall
   }
+  moveToTheNextForm(form) {
+   Alert.alert(
+     translate('areYouSureAboutNextForm', translate(form)),
+     null,
+     [
+       {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+       {text: translate('Ok'), onPress: this.onOK.bind(this)},
+     ]
+   )
+  }
+  onOK() {
+    let { resource } = this.props
+    let form = utils.getModel(resource.form)
+
+    Actions.addMessage({msg: {
+      from: resource.to,
+      to: resource.from,
+      _context: resource._context,
+      // _context: self.props.context  ||  resource._context,
+      [TYPE]: NEXT_FORM_REQUEST,
+      after: form.id
+    }})
+    var params = {
+      value: {_documentCreated: true, _document: utils.getId(resource)},
+      doneWithMultiEntry: true,
+      resource: resource,
+      meta: utils.getModel(resource[TYPE])
+    }
+    Actions.addChatItem(params)
+  }
+
   hasSharables() {
     let shareableResources = this.props.shareableResources
     if (!shareableResources)
@@ -1036,31 +1039,33 @@ class FormRequestRow extends Component {
 
   }
 
-  reviewFormsInContext() {
-    Alert.alert(
-      translate('importDataPrompt'),
-      utils.getDisplayName(this.props.to),
-      [
-        {text: translate('cancel'), onPress: () => console.log('Canceled!')},
-        {text: translate('Import'), onPress: this.submitAllForms.bind(this)},
-      ]
-    )
-    // this.props.navigator.push({
-    //   id: 29,
-    //   title: translate("importData"),
-    //   backButtonTitle: 'Back',
-    //   component: RemediationItemsList,
-    //   rightButtonTitle: 'Done',
-    //   passProps: {
-    //     modelName: CONFIRM_PACKAGE_REQUEST,
-    //     resource: this.props.resource,
-    //     bankStyle: this.props.bankStyle,
-    //     reviewed: {},
-    //     to: this.props.to,
-    //     list: this.props.resource.items,
-    //     currency: this.props.currency
-    //   }
-    // })
+  reviewFormsInContext({isRefresh}) {
+    // Alert.alert(
+    //   translate('importDataPrompt'),
+    //   utils.getDisplayName(this.props.to),
+    //   [
+    //     {text: translate('cancel'), onPress: () => console.log('Canceled!')},
+    //     {text: translate('Import'), onPress: this.submitAllForms.bind(this)},
+    //   ]
+    // )
+    const { navigator, bankStyle, resource, to, currency, list } = this.props
+    this.props.navigator.push({
+      id: 29,
+      title: translate("reviewData"),
+      backButtonTitle: 'Back',
+      component: RemediationItemsList,
+      rightButtonTitle: 'Done',
+      passProps: {
+        modelName: CONFIRM_PACKAGE_REQUEST,
+        resource,
+        bankStyle,
+        isRefresh,
+        reviewed: {},
+        to,
+        list: resource.items || list,
+        currency
+      }
+    })
   }
   submitAllForms() {
     // utils.onNextTransitionEnd(this.props.navigator, () => {
@@ -1189,8 +1194,9 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
       justifyContent: 'space-between'
     },
     separator: {
-      height: 1,
-      paddingBottom: 3,
+      height: StyleSheet.hairlineWidth,
+      marginBottom: 3,
+      marginHorizontal: -3,
       backgroundColor: '#dddddd'
     },
     arrow: {
@@ -1208,11 +1214,12 @@ var createStyles = utils.styleFactory(FormRequestRow, function ({ dimensions, ba
     },
     messageLink: {
       // flexDirection: 'row',
-      flex: 1,
+      // flex: 1,
       // minHeight: 35,
+      marginLeft: -5,
       paddingLeft: 5,
       // alignItems: 'center',
-      justifyContent: 'space-between',
+      // justifyContent: 'space-between',
     },
     message: {
       flexDirection: 'row',
