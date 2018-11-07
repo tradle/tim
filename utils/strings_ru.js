@@ -322,5 +322,6 @@ module.exports = {
   "doYouWantToContinue": "Вы хотите переключиться на него и продолжить оттуда?",
   "reviewData": "Обзор данных",
   "afterRefresh": "Вы очищены, чтобы использовать наши услуги без перерыва",
-  "requestMyData": "Запрос моих данных"
+  "requestMyData": "Запрос моих данных",
+  "newCustomer": "Новый покупатель"
 }

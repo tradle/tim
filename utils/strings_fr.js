@@ -322,5 +322,6 @@ module.exports = {
   "startedByAnotherEmployee": "L'application pour {1} a été lancée par un autre employé.",
   "reviewData": "Revoir les données",
   "afterRefresh": "Vous êtes autorisé à utiliser nos services sans interruption",
-  "requestMyData": "Demander mes données"
+  "requestMyData": "Demander mes données",
+  "newCustomer": "Nouveau client"
 }

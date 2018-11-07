@@ -322,5 +322,6 @@ module.exports = {
   "startedByAnotherEmployee": "Ang aplikasyon para sa {1} ay sinimulan ng isa pang empleyado",
   "afterRefresh": "Malinaw na ginagamit mo ang aming mga serbisyo nang tuluy-tuloy",
   "reviewData": "Suriin ang data",
-  "requestMyData": "Humihiling ng aking data"
+  "requestMyData": "Humihiling ng aking data",
+  "newCustomer": "Bagong customer"
 }

@@ -322,5 +322,6 @@ module.exports = {
   "doYouWantToContinue": "Bạn có muốn chuyển sang nó và tiếp tục từ đó không?",
   "reviewData": "Đánh giá dữ liệu",
   "afterRefresh": "Bạn được xóa sử dụng dịch vụ của chúng tôi mà không bị gián đoạn",
-  "requestMyData": "Yêu cầu dữ liệu của tôi"
+  "requestMyData": "Yêu cầu dữ liệu của tôi",
+  "newCustomer": "Khách hàng mới"
 }
