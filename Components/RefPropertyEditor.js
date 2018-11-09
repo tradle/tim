@@ -210,7 +210,7 @@ class RefPropertyEditor extends Component {
     else {
       if (isImmutable)
         actionItem = content
-      else if (prop.inlined  ||  utils.getModel(prop.ref).inlined) {
+      else if (!utils.isEnum(prop.ref  ||  prop.items.ref)  && (prop.inlined  ||  utils.getModel(prop.ref).inlined)) {
         actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
                        {content}
                      </TouchableOpacity>
