@@ -1413,7 +1413,7 @@ class ResourceList extends Component {
       component: MessageList,
       id: 11,
       backButtonTitle: 'Back',
-      title: translate('newCustomer'),
+      title: me.organization.title,
       passProps: {
         resource: me.organization,
         bankStyle,
