@@ -581,31 +581,37 @@ var utils = {
     if (!utils.isCamelCase(label))
       return label.charAt(0).toUpperCase() + label.slice(1)
 
-    label = label
-          .replace(/_/g, ' ')
-          // insert a space before all caps
-          .replace(/([A-Z])/g, ' $1')
-          // uppercase the first character
-          .replace(/^./, function(str){ return str.toUpperCase(); })
-          .trim()
+label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
+        // space before last upper in a sequence followed by lower
+        .replace(/\b([A-Z]+)([A-Z])([a-z])/, '$1 $2$3')
+        // uppercase the first character
+        .replace(/^./, function(str){ return str.toUpperCase(); })
+
+    // label = label
+    //       .replace(/_/g, ' ')
+    //       // insert a space before all caps
+    //       .replace(/([A-Z])/g, ' $1')
+    //       // uppercase the first character
+    //       .replace(/^./, function(str){ return str.toUpperCase(); })
+    //       .trim()
     let parts = label.split(' ')
     if (parts.length === 1)
       return label
     // keep abbreviations intact
+
+
+// return parts.reduce((sum, cur) => {
+//   if (!cur.length)
+//     return sum + cur
+//   if (cur.length === 1  &&  cur.toUpperCase() === cur) {
+//     let len = sum.length - 1
+//     if (len  &&  sum.charAt(len - 1).toUpperCase() === sum.charAt(len - 1))
+//       return sum + cur
+//   }
+//   return sum + ' ' + cur
+// })
     return parts.reduce((sum, cur) => sum + (!cur.length ? cur : ' ' + cur))
 
-    // let newLabel = ''
-    // parts.forEach(s => {
-    //   if (!newLabel)
-    //     newLabel += s
-    //   else {
-    //     let ch = s.charAt(s.length - 1)
-    //     if (ch !== ch.toUpperCase())
-    //       newLabel += ' '
-    //     newLabel += s
-    //   }
-    // })
-    // return newLabel
   },
   isCamelCase(str){
     var strArr = str.split('');
