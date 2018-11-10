@@ -563,7 +563,10 @@
     "lastName": "MORGAN",
     "dateOfIssue": 1358553600000,
     "documentNumber": "MORGA753116SM9IJ 35",
-    "issuer": "DVLA",
+    "issuer": {
+      "id": "tradle.Country_NZ",
+      "title": "New Zealand"
+    },
     "dateOfExpiry": 1674000000000,
     "scanJson": {
       "personal": {

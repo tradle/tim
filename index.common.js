@@ -77,7 +77,7 @@ import ArticleView from './Components/ArticleView'
 import IdentitiesList from './Components/IdentitiesList'
 import SupervisoryViewPerProvider from './Components/SupervisoryViewPerProvider'
 import SupervisoryView from './Components/SupervisoryView'
-import ProductChooser from './Components/ProductChooser'
+// import ProductChooser from './Components/ProductChooser'
 import StringChooser from './Components/StringChooser'
 import ContextChooser from './Components/ContextChooser'
 import CameraView from './Components/CameraView'
@@ -527,8 +527,8 @@ class TiMApp extends Component {
 
     case 14:
       return <PhotoCarousel {...props} />
-    case 15:
-      return <ProductChooser navigator={nav} {...props} />
+    // case 15:
+    //   return <ProductChooser navigator={nav} {...props} />
     case 16:
       return <QRCodeScanner navigator={nav}
                 onread={props.onread} />
@@ -782,30 +782,32 @@ var NavigationBarRouteMapper = {
       <View style={{position: 'absolute', right: 0, flexDirection: 'row'}}>
       <TouchableOpacity
         hitSlop={HIT_SLOP}
-        onPress={() => {
-                  // 'Done' button case for creating new resources
-                  if (typeof route.onRightButtonPress === 'function') {
-                    route.onRightButtonPress()
-                  }
-                  else if (isProfile)
-                    HomePageMixin.showProfile(navigator)
-                  else if (route.onRightButtonPress.stateChange) {
-                    if (route.onRightButtonPress.before)
-                      route.onRightButtonPress.before();
-                    route.onRightButtonPress.stateChange();
-                    if (route.onRightButtonPress.after)
-                      route.onRightButtonPress.after();
-                  }
-                  else
-                    navigator.push(route.onRightButtonPress)
-               }
-        }>
-        <View style={[platformStyles.navBarRightButton, helpStyle, submitStyle]}>
+        onPress={() => this.rightButtonHandler({route, navigator})}>
+        <View style={platformStyles.navBarRightButton}>
           {title}
         </View>
       </TouchableOpacity>
       </View>
     );
+  },
+
+  rightButtonHandler: function({navigator, route}) {
+    // 'Done' button case for creating new resources
+    let isProfile = route.rightButtonTitle.toLowerCase() === 'profile'
+    if (typeof route.onRightButtonPress === 'function') {
+                    route.onRightButtonPress()
+                  }
+    else if (isProfile)
+      HomePageMixin.showProfile(navigator)
+    else if (route.onRightButtonPress.stateChange) {
+      if (route.onRightButtonPress.before)
+        route.onRightButtonPress.before();
+      route.onRightButtonPress.stateChange();
+      if (route.onRightButtonPress.after)
+        route.onRightButtonPress.after();
+    }
+    else
+      navigator.push(route.onRightButtonPress)
   },
 
   Title: function(route, navigator, index, navState) {

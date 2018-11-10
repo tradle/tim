@@ -18,24 +18,40 @@ class StringRow extends Component {
     super(props);
   }
   render() {
-    let { title, bankStyle } = this.props
-    let styles = createStyles({bankStyle})
+    let { title, bankStyle, description } = this.props
+    let styles = createStyles({bankStyle, description})
+    let d
+    if (description)
+      d = <Text style={styles.modelDescription}>{description}</Text>
     return (
       <TouchableOpacity style={styles.viewStyle} onPress={this.props.callback}>
         <Text style={styles.modelTitle}>{title}</Text>
+        {d}
       </TouchableOpacity>
     );
   }
 }
 
-var createStyles = utils.styleFactory(StringRow, function ({ bankStyle }) {
+var createStyles = utils.styleFactory(StringRow, function ({ bankStyle, description }) {
   return StyleSheet.create({
     modelTitle: {
       flex: 1,
       flexWrap: 'wrap',
       fontSize: 20,
       fontWeight: '400',
-      marginVertical: 15,
+      marginTop: 15,
+      marginBottom: description ? 7 : 15,
+      marginLeft: 15,
+      color: bankStyle  &&  bankStyle.productRowTextColor || DEFAULT_PRODUCT_ROW_TEXT_COLOR
+    },
+    modelDescription: {
+      flex: 1,
+      flexWrap: 'wrap',
+      fontSize: 14,
+      fontWeight: '400',
+      marginTop: 0,
+      marginBottom: 15,
+      fontStyle: 'italic',
       marginLeft: 15,
       color: bankStyle  &&  bankStyle.productRowTextColor || DEFAULT_PRODUCT_ROW_TEXT_COLOR
     },

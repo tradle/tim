@@ -33,18 +33,25 @@ class StringChooser extends Component {
       this.props.navigator.pop();
     this.props.callback(modelId)
   }
-  renderRow(modelId)  {
-    let model = utils.getModel(modelId)
+  renderRow(product)  {
+    if (typeof product === 'string')
+      product = { product }
+    let { id, title, description } = product
+
+    let model = utils.getModel(id)
     if (!model)
       return null
+    if (!title)
+      title = translate(model)
 
     return (
       <StringRow
-        onSelect={() => this.selectResource(modelId)}
-        title={translate(model)}
+        onSelect={() => this.selectResource(id)}
+        title={title}
+        description={description}
         bankStyle={this.props.bankStyle}
         navigator={this.props.navigator}
-        callback={() => this.selectResource(modelId)}
+        callback={() => this.selectResource(id)}
         />
       );
   }

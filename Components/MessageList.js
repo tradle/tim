@@ -346,7 +346,11 @@ class MessageList extends Component {
     let { action, resource, to, productToForms, shareableResources } = params
     if (!utils.isMessage(resource))
       return
-
+    // HACK for Agent to not to receive messages from one customer in the chat for another
+    if (utils.getMe().isAgent  &&  this.state.currentContext  &&  resource._context) {
+      if (this.state.currentContext.contextId !== resource._context.contextId)
+        return
+    }
     let { application, originatingMessage } = this.props
     let chatWith = this.props.resource
     let rtype = resource  &&  utils.getType(resource)

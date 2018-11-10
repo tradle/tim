@@ -62,7 +62,7 @@ class ChatContext extends Component {
 
     let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product))}</Text>
     let chooser
-    if (context  &&  isShareContext || application)
+    if (me.isAgent  ||  (context  &&  isShareContext || application))
       chooser = <View style={styles.contextBar}>{content}</View>
     else
       chooser = <TouchableOpacity onPress={contextChooser} style={styles.contextBar}>

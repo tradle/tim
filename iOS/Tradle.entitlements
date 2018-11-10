@@ -10,6 +10,8 @@
 		<string>applinks:test-link.tradle.io</string>
 		<string>applinks:tradle.io</string>
 	</array>
+	<key>application-identifier</key>
+	<string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)io.tradle.dev</string>
