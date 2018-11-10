@@ -1980,7 +1980,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Release\" ]; then\n  ../scripts/fabric-prod.sh\nfi";
+			shellScript = "if [[ \"$CONFIGURATION\" != \"Debug\" ]]; then\n  ../scripts/fabric-prod.sh\nfi";
 		};
 		785003D2BB1DC37AFBF63652 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
