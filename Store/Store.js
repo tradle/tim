@@ -4934,16 +4934,19 @@ if (!res[SIG]  &&  res._message)
     if (rIdx === -1)
       return
     let pl = this._getItem(messages[rIdx])
+    let productListR
     try {
       let kr = await this._keeper.get(pl[CUR_HASH])
-      let productListR = utils.clone(kr)
-      _.extend(productListR, pl)
-      this.trigger({action: 'productList', resource: productListR, to: resource})
+      productListR = utils.clone(kr)
     } catch (err) {
       debug('Store.onGetProductList: ' + err.stack)
-      return
+      productListR = {}
+      // return
     }
-
+    _.extend(productListR, pl)
+    let plist = productListR.chooser.oneOf.map(p => (typeof p === 'object') && p || {id: p})
+    productListR.chooser.oneOf = plist
+    this.trigger({action: 'productList', resource: productListR, to: resource})
   },
   async onAddApp({ url, permalink, noTrigger, addSettings }) {
     try {
