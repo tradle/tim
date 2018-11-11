@@ -18,6 +18,8 @@ export const capture = async props => {
     cameraType,
     width,
     height,
+    saveToFS,
+    returnBase64,
   } = withDefaults(props, CameraDefaults, DEFAULTS)
 
   if (!navigator) {
@@ -43,6 +45,8 @@ export const capture = async props => {
         cameraType,
         width,
         height,
+        returnBase64,
+        saveToFS,
         callback: (err, result) => {
           if (err) {
             reject(err)

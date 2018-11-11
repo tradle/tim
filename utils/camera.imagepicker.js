@@ -11,10 +11,6 @@ const DEFAULTS = {
   // image picker
   returnIsVertical: true,
   cancelButtonTitle: translate('cancel'),
-  storageOptions: {
-    skipBackup: true,
-    store: false
-  },
   mediaType: 'photo',
 }
 
@@ -26,11 +22,13 @@ export const capture = props => new Promise((resolve, reject) => {
     quality,
     width,
     height,
+    saveToFS,
+    returnBase64,
+    backupToICloud,
 
     // specific to image picker
     returnIsVertical,
     cancelButtonTitle,
-    storageOptions,
     mediaType,
   } = withDefaults(props, CameraDefaults, DEFAULTS)
 
@@ -49,8 +47,12 @@ export const capture = props => new Promise((resolve, reject) => {
     cameraType,
     returnIsVertical,
     cancelButtonTitle,
-    storageOptions,
     mediaType,
+    noData: returnBase64 === false,
+    storageOptions: {
+      skipBackup: backupToICloud === false,
+      store: saveToFS !== false,
+    },
     // due to out-of-memory issues
     // maxHeight: 1536,
   }

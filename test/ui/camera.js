@@ -4,8 +4,10 @@ import {
   Alert,
   AppRegistry,
   StyleSheet,
+  ScrollView,
   View,
   Text,
+  Image,
   TouchableHighlight,
 } from 'react-native'
 
@@ -81,24 +83,36 @@ class CameraTest extends Component {
 
 class MainRoute extends Component {
   static defaultProps = {
-    quality: 0.5,
+    quality: 1,
     cameraType: 'back',
+    useBase64: false,
+  }
+
+  state = {
+    camera: false,
+    preview: null,
   }
 
   constructor(props) {
     super(props)
-    this.state = {}
     this.captureWith = fn => async () => {
-      const image = await fn(this.props)
+      const start = Date.now()
+      const image = await fn({
+        ...props,
+        returnBase64: props.useBase64,
+        saveToFS: !props.useBase64,
+      })
+
       if (image) {
-        this.onImage(image)
+        this.onImage({ ...image, time: Date.now() - start })
       }
     }
   }
 
   render() {
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
+        {this.renderPreview()}
         <TouchableHighlight style={styles.button} key="image-picker" onPress={this.captureWith(useImagePicker)}>
           <Text>Image Picker</Text>
         </TouchableHighlight>
@@ -108,18 +122,41 @@ class MainRoute extends Component {
         <TouchableHighlight style={styles.button} key="default" onPress={this.captureWith(defaultCapture)}>
           <Text>Default</Text>
         </TouchableHighlight>
-      </View>
+      </ScrollView>
     )
   }
 
+  renderPreview() {
+    const { preview } = this.state
+    if (!preview) return null
+
+    const { uri, dataUrl, width, height } = preview
+    return <Image style={[styles.preview, { width, height }]} source={{uri: uri || dataUrl}} />
+  }
+
   onImage(data) {
-    Alert.alert('took pic', `length: ${data.base64.length}, image: ${data.base64.slice(0, 100)}`)
-    // this.setState({ camera: false })
+    const { navigator, ...settings } = this.props
+    const { dataUrl='', uri, ...moreData } = data
+    Alert.alert('took pic', JSON.stringify({
+      ...settings,
+      base64Length: dataUrl.length,
+      useFS: !!uri,
+      ...moreData,
+    }, null, 2))
+
+    // Alert.alert('took pic', `length: ${data.base64.length}, image: ${data.base64.slice(0, 100)}`)
+    this.setState({
+      camera: false,
+      preview: data,
+    })
   }
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  preview: {
     flex: 1,
   },
   button: {

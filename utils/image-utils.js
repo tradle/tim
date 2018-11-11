@@ -23,5 +23,5 @@ export const cleanBase64 = str => str.replace(/[\s]/g, '')
 
 export const normalizeImageCaptureData = ({ extension, base64, ...data }) => ({
   ...data,
-  dataUrl: createDataUri({ extension, base64 }),
+  dataUrl: base64 && createDataUri({ extension, base64 }),
 })

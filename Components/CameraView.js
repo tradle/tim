@@ -30,6 +30,8 @@ class CameraView extends Component {
     width: PropTypes.number,
     height: PropTypes.number,
     fixOrientation: PropTypes.bool,
+    saveToFS: PropTypes.bool,
+    returnBase64: PropTypes.bool,
     callback: PropTypes.func.isRequired,
   };
 
@@ -97,16 +99,16 @@ class CameraView extends Component {
   }
 
   async _takePicture () {
-    const { width, height, quality, fixOrientation } = this.props
+    const { width, height, quality, fixOrientation, saveToFS, returnBase64 } = this.props
     const opts = {
-      base64: true,
       mirrorImage: this.state.cameraType !== 'back',
       quality,
       width,
       height,
       fixOrientation,
       forceUpOrientation: fixOrientation,
-      doNotSave: true,
+      base64: returnBase64,
+      doNotSave: saveToFS === false,
       // skipProcessing: true,
     }
 
