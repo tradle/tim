@@ -48,7 +48,9 @@
 -keepclassmembers class *  { @com.facebook.react.uimanager.annotations.ReactProp <methods>; }
 -keepclassmembers class *  { @com.facebook.react.uimanager.annotations.ReactPropGroup <methods>; }
 
+-keep class com.facebook.** { *; }
 -dontwarn com.facebook.react.**
+-dontwarn android.text.StaticLayout
 
 # okhttp
 
@@ -65,3 +67,40 @@
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -dontwarn okio.**
 -dontwarn io.branch.**
+
+# courtesy of:
+# https://github.com/nhachicha/SnappyDB/issues/78#issuecomment-271823612
+
+#SnappyDB
+-dontwarn sun.reflect.**
+-dontwarn java.beans.**
+-dontwarn sun.nio.ch.**
+-dontwarn sun.misc.**
+
+-keep class com.esotericsoftware.** {*;}
+
+-keep class java.beans.** { *; }
+-keep class sun.reflect.** { *; }
+-keep class sun.nio.ch.** { *; }
+
+-keep class com.snappydb.** { *; }
+-dontwarn com.snappydb.**
+
+#kryo
+-dontwarn sun.reflect.**
+-dontwarn java.beans.**
+-keep,allowshrinking class com.esotericsoftware.** {
+   <fields>;
+   <methods>;
+}
+-keep,allowshrinking class java.beans.** { *; }
+-keep,allowshrinking class sun.reflect.** { *; }
+-keep,allowshrinking class com.esotericsoftware.kryo.** { *; }
+-keep,allowshrinking class com.esotericsoftware.kryo.io.** { *; }
+-keep,allowshrinking class sun.nio.ch.** { *; }
+-dontwarn sun.nio.ch.**
+-keep public class * extends com.google.protobuf.GeneratedMessage { *; }
+-keep class de.javakaffee.kryoserializers.** { *; }
+-dontwarn de.javakaffee.kryoserializers.**
+-keep class com.esotericsoftware.kryo.serializers.** { *; }
+-dontwarn com.esotericsoftware.kryo.serializers.**
