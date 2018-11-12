@@ -6700,8 +6700,9 @@ if (!res[SIG]  &&  res._message)
     const { modelName, limit, query, lastId, prop, pin } = params
     let enumList = enums[modelName]
     if (query) {
+      let q = query.toLowerCase()
       return enumList.filter((r) => {
-        let val = utils.translateEnum(r)
+        let val = utils.translateEnum(r).toLowerCase()
         return val.indexOf(query) !== -1
       })
     }
