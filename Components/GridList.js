@@ -1446,10 +1446,11 @@ class GridList extends Component {
       r.to = resource.to
       r._context = resource._context
     }
-
+    // if (utils.isSimulator()) {
     let isPrefilled = ENV.prefillForms && model.id in formDefaults
     if (isPrefilled)
       _.extend(r, formDefaults[model.id])
+    // }
     let self = this
     navigator.push({
       title: model.title,
@@ -1538,6 +1539,9 @@ class GridList extends Component {
 
     if (SearchBar  &&  !isBacklink  &&  !isForwardlink) {
       let hasSearch = isModel  ||  utils.isEnum(model)
+      // Check if the starting - no filter list - is small
+      if (hasSearch  &&  (!filter  &&  list  &&  list.length < SEARCH_LIMIT))
+        hasSearch = false
       if (!hasSearch  && !search) {
         hasSearch = !_readOnly  ||  !utils.isContext(modelName)
         if (hasSearch)
