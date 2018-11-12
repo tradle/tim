@@ -468,9 +468,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.2.tgz"
     },
     "@tradle/engine": {
-      "version": "7.0.2",
+      "version": "7.0.4",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-7.0.2.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-7.0.4.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
@@ -539,9 +539,9 @@
       }
     },
     "@tradle/keeper": {
-      "version": "3.3.0",
+      "version": "3.4.0",
       "from": "@tradle/keeper@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/keeper/-/keeper-3.3.0.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/keeper/-/keeper-3.4.0.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
@@ -583,7 +583,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#6fce8e512be8ce37f980a764e57e9c19598ed2e8"
+      "resolved": "git://github.com/tradle/models.git#f87db0d55552fb8c03a9d7a66a83fc0d3ffdf014"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -1047,9 +1047,9 @@
       "resolved": "https://registry.npmjs.org/asynckit/-/asynckit-0.4.0.tgz"
     },
     "asyncstorage-down": {
-      "version": "3.1.1",
-      "from": "asyncstorage-down@>=3.1.1 <4.0.0",
-      "resolved": "https://registry.npmjs.org/asyncstorage-down/-/asyncstorage-down-3.1.1.tgz",
+      "version": "3.2.1",
+      "from": "asyncstorage-down@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/asyncstorage-down/-/asyncstorage-down-3.2.1.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "0.12.3",
@@ -3126,26 +3126,19 @@
       }
     },
     "feed-indexer": {
-      "version": "1.3.0",
-      "from": "feed-indexer@1.3.0",
-      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.3.0.tgz",
+      "version": "1.4.0",
+      "from": "feed-indexer@1.4.0",
+      "resolved": "https://registry.npmjs.org/feed-indexer/-/feed-indexer-1.4.0.tgz",
       "dependencies": {
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@>=2.1.4 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
-          "dependencies": {
-            "isarray": {
-              "version": "1.0.0",
-              "from": "isarray@~1.0.0",
-              "resolved": "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
-            },
-            "string_decoder": {
-              "version": "1.1.1",
-              "from": "string_decoder@>=1.1.1 <1.2.0",
-              "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.1.1.tgz"
-            }
-          }
+          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz"
+        },
+        "string_decoder": {
+          "version": "1.1.1",
+          "from": "string_decoder@>=1.1.1 <1.2.0",
+          "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.1.1.tgz"
         }
       }
     },
@@ -6119,14 +6112,14 @@
       "resolved": "git://github.com/tradle/react-native-app-intro.git#f774220db421109ecf627ec9883b742bd2722486"
     },
     "react-native-async-storage-rocks": {
-      "version": "2.0.0",
-      "from": "react-native-async-storage-rocks@>=2.0.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-async-storage-rocks/-/react-native-async-storage-rocks-2.0.0.tgz"
+      "version": "2.2.0",
+      "from": "react-native-async-storage-rocks@latest",
+      "resolved": "https://registry.npmjs.org/react-native-async-storage-rocks/-/react-native-async-storage-rocks-2.2.0.tgz"
     },
     "react-native-async-storage-snappy": {
-      "version": "1.1.0",
-      "from": "react-native-async-storage-snappy@1.1.0",
-      "resolved": "https://registry.npmjs.org/react-native-async-storage-snappy/-/react-native-async-storage-snappy-1.1.0.tgz"
+      "version": "1.2.0",
+      "from": "react-native-async-storage-snappy@latest",
+      "resolved": "https://registry.npmjs.org/react-native-async-storage-snappy/-/react-native-async-storage-snappy-1.2.0.tgz"
     },
     "react-native-awesome-card-io": {
       "version": "0.7.0",
@@ -6372,9 +6365,9 @@
       "resolved": "git://github.com/mvayngrib/react-native-lazyload.git#fb332fdd216b0a3e7aeec5ea0dd01dda3e6624de"
     },
     "react-native-level": {
-      "version": "3.0.0",
-      "from": "react-native-level@>=3.0.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/react-native-level/-/react-native-level-3.0.0.tgz"
+      "version": "3.1.0",
+      "from": "react-native-level@latest",
+      "resolved": "https://registry.npmjs.org/react-native-level/-/react-native-level-3.1.0.tgz"
     },
     "react-native-level-fs": {
       "version": "3.0.1",

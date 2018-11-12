@@ -1,11 +1,11 @@
 
 import Q from 'q'
 import Debug from './debug'
-var timerDebug = Debug('TIMER')
 
-global.timeFunctions = exports.timeFunctions = function timeFunctions (obj, overwrite) {
-  if (!__DEV__) return obj
+const timerDebug = Debug('TIMER')
+const noop = () => {}
 
+export const timeFunctions = (obj, overwrite) => {
   var timed = overwrite ? obj : {}
   var totals = {}
   Object.keys(obj).forEach((k) => {
@@ -55,29 +55,42 @@ global.timeFunctions = exports.timeFunctions = function timeFunctions (obj, over
   return timed
 }
 
-global.tradleTimer = tradleTimer
-global.timeAsyncFunction = function (fn) {
+export const timeAsyncFunctions = (obj, fns, onInvocationFinished=noop) => fns.reduce((timed, name) => {
+  timed[name] = timeAsyncFunction(obj[name].bind(obj), info => onInvocationFinished({ ...info, name }))
+  return timed
+}, {})
+
+// global.tradleTimer = tradleTimer
+export const timeAsyncFunction = (fn, onInvocationFinished = noop) => {
   return function (...args) {
+    const stack = new Error().stack.split('\n').slice(2).join('\n')
     const start = Date.now()
     const cb = args.pop()
-    args.push(function () {
+    const baseArgs = args.slice()
+    args.push(function (...results) {
       const time = Date.now() - start
-      console.log(`TIMER: ${fn.name} took ${time}ms`)
-      cb.apply(this, arguments)
+      try {
+        onInvocationFinished({ args: baseArgs, stack, time, results })
+      } finally {
+        cb.apply(this, results)
+      }
     })
 
     return fn.apply(this, args)
   }
 }
 
-function tradleTimer (name) {
-  var now = Date.now()
-  return function (print=true) {
-    var time = Date.now() - now
-    if (print && time > 100) {
-      console.log(`TIMER ${name}: ${time}ms`)
-    }
+global.tradleTimeAsyncFunction = timeAsyncFunction
+global.tradleTimeAsyncFunctions = timeAsyncFunctions
 
-    return time
-  }
-}
+// function tradleTimer (name) {
+//   var now = Date.now()
+//   return function (print=true) {
+//     var time = Date.now() - now
+//     if (print && time > 100) {
+//       console.log(`TIMER ${name}: ${time}ms`)
+//     }
+
+//     return time
+//   }
+// }
