@@ -6703,7 +6703,7 @@ if (!res[SIG]  &&  res._message)
       let q = query.toLowerCase()
       return enumList.filter((r) => {
         let val = utils.translateEnum(r).toLowerCase()
-        return val.indexOf(query) !== -1
+        return val.indexOf(q) !== -1
       })
     }
     if (prop) {
