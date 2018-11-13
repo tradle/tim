@@ -630,70 +630,7 @@ var search = {
         continue
       let ptype = prop.type
       if (ptype === 'array') {
-        // HACK
-        if (p === 'verifications')
-          continue
-
-        if (isApplication) {
-          if (isList  &&  p !== 'relationshipManagers')
-            continue
-          if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
-            continue
-        }
-        let iref = prop.items.ref
-        if (iref) {
-          let isInlined = iref !== MODEL  && utils.isInlined(utils.getModel(iref))
-
-          if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
-            if (isList  &&  !isApplication)
-              continue
-            arr.push(`${p} {
-              edges {
-                node {
-                  ${this.getSearchProperties({model: utils.getModel(iref)})}
-                }
-              }
-            }`)
-          }
-          else if (prop.inlined  ||  isInlined) {
-            if (currentProp  &&  currentProp === prop)
-              continue
-            arr.push(this.addInlined(prop))
-          }
-          // else if (iref === model.id) {
-          //   arr.push(
-          //     `${p} {
-          //       ${TYPE}
-          //       _permalink
-          //       _link
-          //       _displayName
-          //     }`
-          //   )
-          // }
-          // else if (prop.inlined)
-          //   arr.push(this.addInlined(prop))
-          else
-            arr.push(
-              `${p} {
-                ${TYPE}
-                _permalink
-                _link
-                _displayName
-              }`
-            )
-        }
-        else {
-          let allProps = this.addProps({isList, props: prop.items.properties})
-          if (allProps.length) {
-            arr.push(
-              `${p} {
-                ${allProps.toString().replace(/,/g, '\n')}
-              }`
-            )
-          }
-          else
-            arr.push(p)
-        }
+        this.addArrayProperty({prop, model, arr, isList, backlink, currentProp})
         continue
       }
       if (ptype !== 'object') {
@@ -709,7 +646,7 @@ var search = {
       if (ref === ORGANIZATION)
         continue
 
-      if (prop.inlined)
+      if (prop.inlined  ||  utils.getModel(ref).inlined)
         arr.push(this.addInlined(prop))
       else {
         arr.push(this.addRef(prop))
@@ -720,6 +657,73 @@ var search = {
       }
     }
     return arr
+  },
+  addArrayProperty({prop, model, arr, isList, backlink, currentProp}) {
+    let p = prop.name
+    let isApplication = model  &&  model.id === APPLICATION
+    if (p === 'verifications')
+      return
+
+    if (isApplication) {
+      if (isList  &&  p !== 'relationshipManagers')
+        return
+      if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
+        return
+    }
+    let iref = prop.items.ref
+    if (iref) {
+      let isInlined = iref !== MODEL  && utils.isInlined(utils.getModel(iref))
+
+      if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
+        if (isList  &&  !isApplication)
+          return
+        arr.push(`${p} {
+          edges {
+            node {
+              ${this.getSearchProperties({model: utils.getModel(iref)})}
+            }
+          }
+        }`)
+      }
+      else if (prop.inlined  ||  isInlined) {
+        if (currentProp  &&  currentProp === prop)
+          return
+        arr.push(this.addInlined(prop))
+      }
+      // else if (iref === model.id) {
+      //   arr.push(
+      //     `${p} {
+      //       ${TYPE}
+      //       _permalink
+      //       _link
+      //       _displayName
+      //     }`
+      //   )
+      // }
+      // else if (prop.inlined)
+      //   arr.push(this.addInlined(prop))
+      else
+        arr.push(
+          `${p} {
+            ${TYPE}
+            _permalink
+            _link
+            _displayName
+          }`
+        )
+    }
+    else {
+      let allProps = this.addProps({isList, props: prop.items.properties})
+      if (allProps.length) {
+        arr.push(
+          `${p} {
+            ${allProps.toString().replace(/,/g, '\n')}
+          }`
+        )
+      }
+      else
+        arr.push(p)
+    }
   },
   addInlined(prop) {
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
