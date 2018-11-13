@@ -195,3 +195,17 @@ watchman watch-del-all
 npm start -- --reset-cache # start packager with clean cache
 ```
 
+#### OSX node-gyp error
+
+If you see node-gyp failing with an error like: 
+
+```sh
+clang: warning: using sysroot for 'iPhoneOS' but targeting 'MacOSX' [-Wincompatible-sysroot]
+```
+
+This might help: 
+```sh
+export SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+```
+
+source: https://stackoverflow.com/questions/13964742/sdkroot-path-for-latest-sdk
