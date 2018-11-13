@@ -112,6 +112,7 @@ class IdentitiesList extends Component {
       <ResourceRow
         onSelect={() => this.selectResource(resource)}
         resource={resource}
+        navigator={this.props.navigator}
         onCancel={() => Actions.removeIdentity(resource)} />
     );
   }

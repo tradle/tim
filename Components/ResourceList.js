@@ -231,13 +231,15 @@ class ResourceList extends Component {
     // else
     if (isBacklink)
       Actions.list(params)
-    else
+    else {
+      let self = this
       utils.onNextTransitionEnd(navigator, () => {
         Actions.list(params)
-        if (officialAccounts  &&  modelName === ORGANIZATION)
+        if (officialAccounts  &&  modelName === ORGANIZATION  && !self.props.isDeepLink)
           Actions.hasTestProviders()
         // StatusBar.setHidden(false);
       });
+    }
   }
 
   componentDidMount() {
@@ -277,7 +279,7 @@ class ResourceList extends Component {
       this.setState({isConnected: params.isConnected})
       return
     }
-    let { modelName, officialAccounts } = this.props
+    let { modelName, officialAccounts, isDeepLink } = this.props
     if (action == 'newStyles'  &&  modelName === ORGANIZATION) {
       this.setState({newStyles: params.resource})
       return
@@ -389,7 +391,7 @@ class ResourceList extends Component {
       this.setState(state)
       return
     }
-    if (action === 'hasTestProviders'  &&  officialAccounts) {
+    if (action === 'hasTestProviders'  &&  officialAccounts  &&  !isDeepLink) {
       if (!params.list  ||  !params.list.length)
         return
 
@@ -450,7 +452,8 @@ class ResourceList extends Component {
         })
       }
     }
-    list = this.addTestProvidersRow(list)
+    if (!isDeepLink)
+      list = this.addTestProvidersRow(list)
 
     let state = {
       dataSource: this.state.dataSource.cloneWithRows(list),
@@ -776,55 +779,6 @@ class ResourceList extends Component {
     }
     this.props.navigator.push(route);
   }
-  showRefResources(resource, prop) {
-    let props = utils.getModel(resource[TYPE]).properties;
-    let propJson = props[prop];
-    let resourceTitle = utils.getDisplayName(resource);
-    resourceTitle = utils.makeTitle(resourceTitle);
-
-    let backlinksTitle = propJson.title + ' - ' + resourceTitle;
-    backlinksTitle = utils.makeTitle(backlinksTitle);
-    let modelName = propJson.items.ref;
-
-    this.props.navigator.push({
-      title: backlinksTitle,
-      id: 10,
-      component: ResourceList,
-      backButtonTitle: 'Back',
-      passProps: {
-        resource: resource,
-        prop: prop,
-        bankStyle: this.props.style,
-        modelName: modelName
-      },
-      rightButtonTitle: translate('details'),
-      onRightButtonPress: {
-        title: resourceTitle,
-        id: 3,
-        component: ResourceView,
-        backButtonTitle: 'Back',
-        rightButtonTitle: 'Edit',
-        onRightButtonPress: {
-          title: resourceTitle,
-          id: 4,
-          component: NewResource,
-          backButtonTitle: 'Back',
-          rightButtonTitle: 'Done',
-          passProps: {
-            model: utils.getModel(resource[TYPE]),
-            bankStyle: this.props.style,
-            resource: resource
-          }
-        },
-
-        passProps: {
-          bankStyle: this.props.style,
-          resource: resource,
-          currency: this.props.currency
-        }
-      }
-    });
-  }
 
   onSearchChange(filter) {
     if (this.props.search) {
@@ -893,7 +847,6 @@ class ResourceList extends Component {
       return (<VerificationRow
                 lazy={this.props.lazy}
                 onSelect={this.selectResource}
-                key={resource[ROOT_HASH]}
                 navigator={this.props.navigator}
                 prop={this.props.prop}
                 modelName={this.props.modelName}
@@ -903,9 +856,7 @@ class ResourceList extends Component {
                 resource={resource} />
       )
     return (<ResourceRow
-      lazy={this.props.lazy}
       onSelect={isSharedContext ? this.openSharedContextChat : this.selectResource}
-      key={resource[ROOT_HASH]}
       hideResource={this.hideResource.bind(this)}
       hideMode={this.state.hideMode}
       navigator={this.props.navigator}
@@ -915,6 +866,7 @@ class ResourceList extends Component {
       isOfficialAccounts={this.props.officialAccounts}
       multiChooser={this.props.multiChooser}
       isChooser={this.props.isChooser}
+      parentComponent={ResourceList}
       showRefResources={this.showRefResources.bind(this)}
       resource={resource}
       chosen={this.state.chosen} />
@@ -1667,3 +1619,52 @@ var styles = StyleSheet.create({
 });
 
 module.exports = ResourceList;
+  // showRefResources(resource, prop) {
+  //   let rType = utils.getType(resource)
+  //   let props = utils.getModel(rtype).properties;
+  //   let propJson = props[prop];
+  //   let resourceTitle = utils.getDisplayName(resource);
+  //   resourceTitle = utils.makeTitle(resourceTitle);
+
+  //   let backlinksTitle = propJson.title + ' - ' + resourceTitle;
+  //   backlinksTitle = utils.makeTitle(backlinksTitle);
+  //   let modelName = propJson.items.ref;
+  //   let { style, currency, navigator } = this.props
+  //   navigator.push({
+  //     title: backlinksTitle,
+  //     id: 10,
+  //     component: ResourceList,
+  //     backButtonTitle: 'Back',
+  //     passProps: {
+  //       resource: resource,
+  //       prop: prop,
+  //       bankStyle: style,
+  //       modelName: modelName
+  //     },
+  //     rightButtonTitle: translate('details'),
+  //     onRightButtonPress: {
+  //       title: resourceTitle,
+  //       id: 3,
+  //       component: ResourceView,
+  //       backButtonTitle: 'Back',
+  //       rightButtonTitle: 'Edit',
+  //       onRightButtonPress: {
+  //         title: resourceTitle,
+  //         id: 4,
+  //         component: NewResource,
+  //         backButtonTitle: 'Back',
+  //         rightButtonTitle: 'Done',
+  //         passProps: {
+  //           model: utils.getModel(rType),
+  //           bankStyle: style,
+  //           resource: resource
+  //         }
+  //       },
+  //       passProps: {
+  //         bankStyle: style,
+  //         resource: resource,
+  //         currency: currency
+  //       }
+  //     }
+  //   });
+  // }
