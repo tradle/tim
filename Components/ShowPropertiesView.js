@@ -254,7 +254,7 @@ class ShowPropertiesView extends Component {
         // else if (pMeta.mainPhoto)
         //   return
         // Could be enum like props
-        else if (isEnum(pMeta.ref))
+        else if (isEnum(pMeta.ref)  &&  typeof val === 'object')
           val = translateEnum(val)
         else if (showRefResource) {
           // ex. property that is referencing to the Organization for the contact
