@@ -235,7 +235,7 @@ var ResourceMixin = {
             isMessageView = (ref !== ORGANIZATION  &&  ref !== PROFILE)
           let id = isMessageView && 5 || 3
           let component = isMessageView && require('./MessageView') || require('./ResourceView')
-          item =  <TouchableOpacity underlayColor='transparent' style={{paddingVertical: 5}} key={this.getNextKey()} onPress={() => {
+          item =  <TouchableOpacity underlayColor='transparent' style={styles.rowStyle} key={this.getNextKey()} onPress={() => {
                     navigator.push({
                      title: vTitle,
                      id,
@@ -348,7 +348,8 @@ var ResourceMixin = {
     return val
   },
   showJson(params) {
-    let { json } = params
+    let { json, indent, isView } = params
+    _.extend(params, {rawStyles: createStyles({bankStyle: this.props.bankStyle, indent, isView})})
     if (!Array.isArray(json))
       return this.showJsonPart(params)
     return json.map((r) => {
@@ -359,7 +360,8 @@ var ResourceMixin = {
     })
   },
   showJsonPart(params) {
-    let {prop, json, isView, jsonRows, skipLabels, indent, isOnfido, isBreakdown} = params
+    let {prop, json, isView, jsonRows, skipLabels, indent,
+         isOnfido, isBreakdown, rawStyles} = params
     // let json = JSON.parse(jsonStr)
     // let jsonRows = []
     let { resource, bankStyle } = this.props
@@ -380,7 +382,7 @@ var ResourceMixin = {
       let state
       let icon
       if (showCollapsed  &&  showCollapsed === prop.name)
-        icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={{position: 'absolute', top: 15, right: 20}} />
+        icon = <Icon size={20} name='ios-arrow-down' color='#ffffff' style={styles.arrow} />
       if (isOnfido) {
         let color = json.result === 'clear' ? '#f1ffe7' : 'red'
         cols.push(<Col sm={1} md={1} lg={1} style={{paddingVertical: 5, backgroundColor}} key={this.getNextKey()}>
@@ -390,12 +392,13 @@ var ResourceMixin = {
       }
       let style = {opacity: 0.7, ...backlinksBg}
 
-      cols.push(<Col sm={1} md={1} lg={1} style={style} key={this.getNextKey()}>
+      let colSize = cols.length && 2 || 3
+
+      cols.push(<Col sm={colSize} md={colSize} lg={colSize} style={style} key={this.getNextKey()}>
                  <Text  style={[styles.hugeTitle, {color, paddingVertical: 10}]}>{translate(prop)}</Text>
                  {!isOnfido  &&  icon}
                </Col>)
-      let colSize = state ? 2 : 1
-      jsonRows.push(<Row size={colSize} style={styles.gridRow} key={this.getNextKey()}>
+      jsonRows.push(<Row size={3} style={styles.gridRow} key={this.getNextKey()} nowrap>
                       {cols}
                     </Row>)
 
@@ -418,19 +421,19 @@ var ResourceMixin = {
           val = <Text style={[styles.title, {flex: 1, color: bankStyle.linkColor}]} onPress={() => Linking.openURL(jVal)}>{jVal}</Text>
         else
           val = <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{jVal}</Text>
-        jsonRows.push(<Row size={2} style={styles.gridRow} key={this.getNextKey()}>
-                        <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
+        jsonRows.push(<Row size={3} style={styles.gridRow} key={this.getNextKey()} nowrap>
+                        <Col sm={1} md={1} lg={1} style={rawStyles.col} key={this.getNextKey()}>
                           {label}
                           </Col>
-                        <Col sm={1} md={1} lg={1} style={{paddingVertical: 5}} key={this.getNextKey()}>
+                        <Col sm={2} md={2} lg={2} style={styles.rowStyle} key={this.getNextKey()}>
                           {val}
                         </Col>
                       </Row>)
       }
     }
     else if (isOnfido  &&  !indent) {
-      jsonRows.push(<Row size={2} style={styles.gridRow} key={this.getNextKey()} nowrap>
-                      <Col sm={2} md={2} lg={2} style={{paddingVertical: 5}} key={this.getNextKey()}>
+      jsonRows.push(<Row size={3} style={styles.gridRow} key={this.getNextKey()} nowrap>
+                      <Col sm={3} md={3} lg={3} style={styles.rowStyle} key={this.getNextKey()}>
                         <Text  style={[styles.bigTitle, {color: color, paddingVertical: 10}]}>{translate('Breakdown')}</Text>
                       </Col>
                     </Row>)
@@ -448,59 +451,74 @@ var ResourceMixin = {
       if (prop  &&  hideGroup  &&  hideGroup.indexOf(p) !== -1)
         continue
       let jVal = json[p]
-      if (typeof jVal === 'object') {
-        if (utils.isEmpty(jVal)  ||  this.checkIfJsonEmpty(jVal))
-          continue
-        if (Array.isArray(jVal)) {
-          let arrRows = []
-          jVal.forEach((js) => {
-            if (typeof js === 'object')
-              this.showJson({json: js, isView, jsonRows: arrRows, indent: indent - 1})
-            else {
-              jsonRows.push(<Row size={2} style={{paddingVertical: 5}} key={this.getNextKey()}>
-                              <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
-                                <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
-                              </Col>
-                              <Col sm={1} md={1} lg={1} style={{paddingVertical: 5}} key={this.getNextKey()}>
-                                <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{js + ''}</Text>
-                              </Col>
-                            </Row>)
-            }
-          })
-          continue
-        }
-        // HACK for Onfido
-        let arrow
-        if (showCollapsed  &&  showCollapsed === p)
-          arrow = <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
+      if (typeof jVal !== 'object')
+        continue
+      if (utils.isEmpty(jVal)  ||  this.checkIfJsonEmpty(jVal))
+        continue
+      if (Array.isArray(jVal)) {
+        let arrRows = []
+        jVal.forEach((js) => {
+          if (typeof js === 'object') {
+            this.showJson({json: js, isView, jsonRows: arrRows, indent: indent + 1})
+            jsonRows.push(<Row size={3} style={styles.rowStyle} key={this.getNextKey()}>
+                            <Col sm={3} md={3} lg={3} style={rawStyles.col} key={this.getNextKey()}>
+                              <Text style={[styles.bigTitle, {flex: 1}]}>{utils.makeLabel(p)}</Text>
+                            </Col>
+                          </Row>)
 
-        // HACK for Onfido
-        if (p !== 'breakdown') {
-          let result
-          if (isOnfido && isBreakdown) {
-            let color = isBreakdown  &&  jVal.properties ? {color: '#757575'} : {color: jVal.result === 'clear' ?  'green' : 'red'}
-            result = <Text style={[textStyle, color]}>{jVal.result}</Text>
+            jsonRows.push(arrRows)
           }
-          jsonRows.push(<Row size={2} style={{paddingVertical: 5}} key={this.getNextKey()}>
-                          <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, paddingRight: 10, paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)}} key={this.getNextKey()}>
+          else {
+            jsonRows.push(<Row size={3} style={styles.rowStyle} key={this.getNextKey()}>
+                            <Col sm={1} md={1} lg={1} style={rawStyles.col} key={this.getNextKey()}>
+                              <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
+                            </Col>
+                            <Col sm={2} md={2} lg={2} style={styles.rowStyle} key={this.getNextKey()}>
+                              <Text style={[styles.title, {flex: 1, color: '#2e3b4e'}]}>{js + ''}</Text>
+                            </Col>
+                          </Row>)
+          }
+        })
+        continue
+      }
+      // HACK for Onfido
+      let arrow
+      if (showCollapsed  &&  showCollapsed === p)
+        arrow = <Icon color={bankStyle.linkColor} size={20} name={'ios-arrow-down'} style={{marginRight: 10, marginTop: 7}}/>
+
+      // HACK for Onfido
+      if (p !== 'breakdown') {
+        let result
+        if (isOnfido && isBreakdown) {
+          let color = isBreakdown  &&  jVal.properties ? {color: '#757575'} : {color: jVal.result === 'clear' ?  'green' : 'red'}
+          result = <Text style={[textStyle, color]}>{jVal.result}</Text>
+        }
+        if (result || arrow) {
+          jsonRows.push(<Row size={3} style={styles.row} key={this.getNextKey()}>
+                          <Col sm={1} md={1} lg={1} style={rawStyles.col} key={this.getNextKey()}>
                             <Text style={textStyle}>{utils.makeLabel(p)}</Text>
                           </Col>
-                          <Col sm={1} md={1} lg={1} style={{paddingVertical: 5, flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
+                          <Col sm={2} md={2} lg={2} style={styles.col} key={this.getNextKey()}>
                             {result}
                             {arrow}
                           </Col>
                         </Row>)
-
-          if (isBreakdown  &&  jVal.properties)
-            continue
         }
-        else if (isOnfido)
-          isBreakdown = true
-
-        let params = {json: jVal, isView, jsonRows, skipLabels, indent: indent + 1, isOnfido, isBreakdown}
-        this.showJson(params)
-        continue
+        else {
+          jsonRows.push(<Row size={3} style={styles.row} key={this.getNextKey()}>
+                          <Col sm={3} md={3} lg={3} style={rawStyles.col} key={this.getNextKey()}>
+                            <Text style={textStyle}>{utils.makeLabel(p)}</Text>
+                          </Col>
+                        </Row>)
+        }
+        if (isBreakdown  &&  jVal.properties)
+          continue
       }
+      else if (isOnfido)
+        isBreakdown = true
+
+      let params = {json: jVal, isView, jsonRows, skipLabels, indent: indent + 1, isOnfido, isBreakdown}
+      this.showJson(params)
     }
     if (!prop)
       return
@@ -629,7 +647,7 @@ var ResourceMixin = {
   },
 }
 
-var createStyles = utils.styleFactory(component || PhotoList, function ({ dimensions, bankStyle }) {
+var createStyles = utils.styleFactory(component || PhotoList, function ({ dimensions, bankStyle, indent, isView }) {
   return StyleSheet.create({
     loadingIndicator: {
       alignSelf: 'center',
@@ -657,6 +675,11 @@ var createStyles = utils.styleFactory(component || PhotoList, function ({ dimens
       marginBottom: 0,
       marginHorizontal: 7
     },
+    col: {
+      paddingVertical: 5,
+      paddingRight: 10,
+      paddingLeft: isView ? 10 * (indent + 1) : 10 * (indent - 1)
+    }
   })
 })
 
@@ -702,12 +725,20 @@ var styles = StyleSheet.create({
     justifyContent: 'space-between',
     // marginRight: 3
   },
+  rowStyle: {
+    // paddingVertical: 5
+  },
   title: {
     fontSize: 16,
     marginTop: 3,
     marginBottom: 0,
     marginHorizontal: 7,
     color: '#9b9b9b'
+  },
+  arrow: {
+    position: 'absolute',
+    top: 15,
+    right: 20
   },
   description: {
     fontSize: 18,

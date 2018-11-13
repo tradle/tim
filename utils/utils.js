@@ -1366,7 +1366,10 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
     return ref
   },
   isStub(resource) {
-    return !resource[ROOT_HASH]  &&  resource.id //  &&  resource.title
+    if (!resource[ROOT_HASH]  &&  resource.id)
+      return true
+    let m = utils.getModel(utils.getType(resource))
+    return m.required  &&  !resource[m.required[0]]
   },
   hasSupportLine(resource) {
     let me = utils.getMe()

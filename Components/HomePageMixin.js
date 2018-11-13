@@ -252,6 +252,55 @@ var HomePageMixin = {
       _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
     Actions.list(params)
   },
+  showRefResources({resource, prop, component}) {
+    let rType = utils.getType(resource)
+    let props = utils.getModel(rType).properties;
+    let propJson = props[prop];
+    let resourceTitle = utils.getDisplayName(resource);
+    resourceTitle = utils.makeTitle(resourceTitle);
+
+    let backlinksTitle = propJson.title + ' - ' + resourceTitle;
+    backlinksTitle = utils.makeTitle(backlinksTitle);
+    let modelName = propJson.items.ref;
+    let { style, currency, navigator } = this.props
+    navigator.push({
+      title: backlinksTitle,
+      id: 10,
+      component,
+      backButtonTitle: 'Back',
+      passProps: {
+        resource: resource,
+        prop: prop,
+        bankStyle: style,
+        modelName: modelName
+      },
+      rightButtonTitle: translate('details'),
+      onRightButtonPress: {
+        title: resourceTitle,
+        id: 3,
+        component: ResourceView,
+        backButtonTitle: 'Back',
+        rightButtonTitle: 'Edit',
+        onRightButtonPress: {
+          title: resourceTitle,
+          id: 4,
+          component: NewResource,
+          backButtonTitle: 'Back',
+          rightButtonTitle: 'Done',
+          passProps: {
+            model: utils.getModel(rType),
+            bankStyle: style,
+            resource: resource
+          }
+        },
+        passProps: {
+          bankStyle: style,
+          resource: resource,
+          currency: currency
+        }
+      }
+    });
+  }
 }
 
 module.exports = HomePageMixin;

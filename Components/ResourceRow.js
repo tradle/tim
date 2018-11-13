@@ -58,6 +58,24 @@ const DEFAULT_CURRENCY_SYMBOL = '£'
 const MAX_LENGTH = 70
 
 class ResourceRow extends Component {
+  static propTypes = {
+    navigator: PropTypes.object.isRequired,
+    resource: PropTypes.object.isRequired,
+    onSelect: PropTypes.func.isRequired,
+    showRefResources: PropTypes.func,
+    hideMode: PropTypes.bool,
+    hideResource: PropTypes.func,
+    isOfficialAccounts: PropTypes.bool,
+    isChooser: PropTypes.bool,
+    selectModel: PropTypes.func,
+    onCancel: PropTypes.func,
+    changeSharedWithList: PropTypes.func,
+    newContact: PropTypes.object,
+    multiChooser: PropTypes.bool,
+    chosen: PropTypes.object,
+    parentComponent: PropTypes.func,
+  };
+
   constructor(props) {
     super(props)
     this.state = {
@@ -383,7 +401,6 @@ class ResourceRow extends Component {
     let rtype = utils.getType(resource)
     let model = utils.getModel(rtype);
     let viewCols = model.gridCols || model.viewCols;
-    let renderedViewCols
 
     if (!viewCols  &&  model.id !== APPLICATION) {
       if (model.id === PARTIAL) {
@@ -540,7 +557,7 @@ class ResourceRow extends Component {
         first = false;
       }
     });
-
+    let renderedViewCols
     if (vCols  &&  vCols.length)
       renderedViewCols = vCols;
     else {
@@ -549,8 +566,9 @@ class ResourceRow extends Component {
     }
     if (!backlink)
       return renderedViewCols
+    const { showRefResources, parentComponent } = this.props
     return [
-      <TouchableOpacity key={this.getNextKey()} onPress={this.props.showRefResources.bind(this, resource, backlink)}>
+      <TouchableHighlight key={this.getNextKey()} onPress={showRefResources.bind(this, {resource, prop: backlink, component: parentComponent})} underlayColor='transparent'>
         <View key={this.getNextKey()}>
           {renderedViewCols}
         </View>
@@ -737,12 +755,8 @@ var styles = StyleSheet.create({
   // TODO: remove when you figure out v-centering
   // HACK FOR VERTICAL CENTERING
   resourceTitle: {
-    // flex: 1,
     fontSize: 20,
-    // fontWeight: '400',
     color: '#555555'
-    // paddingTop: 18,
-    // marginBottom: 2,
   },
   description: {
     // flex: 1,
@@ -758,7 +772,6 @@ var styles = StyleSheet.create({
   row: {
     backgroundColor: '#ffffff',
     justifyContent: 'center',
-    // justifyContent: 'space-around',
     flexDirection: 'row',
     padding: 5,
   },
@@ -767,34 +780,11 @@ var styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#ffffff'
   },
-  formsCount: {
-    // flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    // backgroundColor: '#7AAAc3',
-    paddingVertical: 1,
-    borderColor: '#7AAAc3',
-    borderRadius: 3,
-    borderWidth: 1,
-    height: 20,
-    marginRight: 12,
-    width: 20,
-    alignSelf: 'center'
-  },
-  formsCountText: {
-    paddingVertical: 1,
-    fontSize: 14,
-    alignSelf: 'center'
-  },
   cellRoundImage: {
-    // flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#7AAAc3',
     paddingVertical: 1,
-    // borderColor: '#7AAAc3',
     borderRadius: 30,
-    // borderWidth: 1,
     height: 60,
     marginRight: 10,
     width: 60,
@@ -816,9 +806,6 @@ var styles = StyleSheet.create({
     height: 60,
     marginRight: 10,
     width: 60,
-    // borderColor: '#7AAAc3',
-    // borderRadius: 30,
-    // borderWidth: 1,
   },
   cellNoImage: {
     backgroundColor: '#dddddd',
@@ -836,31 +823,17 @@ var styles = StyleSheet.create({
     marginLeft: 4,
   },
   icon: {
-    // width: 40,
-    // height: 40,
     alignSelf: 'center',
     marginLeft: 10,
     marginTop: 7,
-    // color: '#7AAAc3'
   },
   online: {
     backgroundColor: '#ffffff',
     borderRadius: 10,
     alignItems: 'center',
-    // alignSelf: 'flex-end',
-    // marginLeft: -25,
-    // marginRight: 25,
-    // width: 16,
-    // height: 16,
     position: 'absolute',
     top: 40,
     left: 43,
-    // borderWidth: 1,
-    // borderColor: '#ffffff'
-  },
-  contextOwners: {
-    fontSize: 14,
-    color: '#b4c3cb'
   },
   verySmallLetters: {
     fontSize: 12,
@@ -916,11 +889,11 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     color: appStyle.COUNTER_COLOR,
   },
-  progress: {
-    marginTop: 10,
-    justifyContent: 'center',
-    alignSelf: 'center'
-  },
+  // progress: {
+  //   marginTop: 10,
+  //   justifyContent: 'center',
+  //   alignSelf: 'center'
+  // },
   providerLogo: {
     flexDirection: 'row',
     alignItems: 'center'
