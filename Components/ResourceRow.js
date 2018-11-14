@@ -124,6 +124,10 @@ class ResourceRow extends Component {
       break
     }
   }
+  componentWillReceiveProps(props) {
+    if (props.isOfficialAccounts)
+      this.state.resource = props.resource
+  }
   shouldComponentUpdate(nextProps, nextState) {
     if (utils.resized(this.props, nextProps))
       return true
