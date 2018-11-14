@@ -124,6 +124,10 @@ class ResourceRow extends Component {
       break
     }
   }
+  componentWillReceiveProps(props) {
+    if (props.isOfficialAccounts)
+      this.state.resource = props.resource
+  }
   shouldComponentUpdate(nextProps, nextState) {
     if (Object.keys(this.props).length  !== Object.keys(nextProps).length)
       return true
