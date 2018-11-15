@@ -6,6 +6,7 @@ import * as BlinkID from 'blinkid-react-native';
 // import { BlinkID , MrtdKeys, UsdlKeys, EUDLKeys, NzdlFrontKeys as NZDLKeys, MYKADKeys } from 'blinkid-react-native'
 const UsdlKeys = BlinkID.UsdlKeys
 import { microblink } from '../utils/env'
+import _ from 'lodash'
 import { isSimulator, keyByValue, sanitize } from '../utils/utils'
 import { requestCameraAccess } from '../utils/camera'
 
@@ -22,6 +23,9 @@ const recognizers = {
   usdlCombined: BlinkID.UsdlCombinedRecognizer,
   // scans NZDL (NZ Driver License)
   nzdl: BlinkID.NewZealandDlFrontRecognizer,
+  // Australia DL
+  australiaFront: BlinkID.AustraliaDlFrontRecognizer,
+  australiaBack: BlinkID.AustraliaDlBackRecognizer,
   // scans MyKad (Malaysian ID)
   // myKadBack: BlinkID.MyKadBackRecognizer,
   // myKadFront: BlinkID.MyKadFrontRecognizer,
@@ -88,11 +92,15 @@ const scan = (function () {
         if (opts.country.title === 'Bangladesh')
           rec.scanPdf417 = true
       }
+      if (rec instanceof BlinkID.MrtdCombinedRecognizer  ||  rec instanceof BlinkID.UsdlCombinedRecognizer) {
+        rec.numStableDetectionsThreshold = 10
+        rec.fullDocumentImageDpi = 400
+      }
       // let fName = type.charAt(0).toUpperCase() + type.slice(1);
       return isCombined ? rec : new BlinkID.SuccessFrameGrabberRecognizer(rec)
     })
 
-    const { firstSideInstructions, secondSideInstructions } = opts
+    const { firstSideInstructions, secondSideInstructions, scanBothSides } = opts
     let overlaySettings
     if (isCombined) {
       overlaySettings = new BlinkID.DocumentVerificationOverlaySettings({
@@ -106,22 +114,47 @@ const scan = (function () {
     }
 
     let result
-    try {
-    result = await BlinkID.BlinkID.scanWithCamera(
-      overlaySettings,
-      new BlinkID.RecognizerCollection(frameGrabbers),
-      licenseKey) //, withDefaults(opts, defaults))
-    } catch (err) {
-      Alert.alert(err)
-      return
+    if (scanBothSides) {
+      try {
+        result = []
+        let r = await BlinkID.BlinkID.scanWithCamera(
+          overlaySettings,
+          new BlinkID.RecognizerCollection([frameGrabbers[0]]),
+          licenseKey) //, withDefaults(opts, defaults))
+        if (r.length  &&  r[0].resultState === 3)
+          result.push(r[0])
+        r = await BlinkID.BlinkID.scanWithCamera(
+          overlaySettings,
+          new BlinkID.RecognizerCollection([frameGrabbers[1]]),
+          licenseKey) //, withDefaults(opts, defaults))
+        if (r.length  &&  r[0].resultState === 3)
+          result.push(r[0])
+      } catch (err) {
+        Alert.alert(err)
+        return
+      }
+    }
+    else {
+      try {
+        result = await BlinkID.BlinkID.scanWithCamera(
+          overlaySettings,
+          new BlinkID.RecognizerCollection(frameGrabbers),
+          licenseKey) //, withDefaults(opts, defaults))
+      } catch (err) {
+        Alert.alert(err)
+        return
+      }
     }
     if (!result.length)
       return
     let normalized = result.map((r, i) =>  postProcessResult({ type: types[i], result: r, isCombined }))
+    if (scanBothSides  &&  normalized.length === 2)
+      _.merge(normalized[0], normalized[1])
     // debugger
     return normalized[0]
   }
 }());
+
 
 const postProcessResult = ({ type, result, isCombined }) => {
   let scanData = isCombined ? result : result.slaveRecognizerResult
@@ -405,7 +438,48 @@ function normalizeUSDLResult (scanned) {
   normalizeDates(result, parseUSDate)
   return result
 }
-
+function normalizeAUFront(scanned) {
+// {
+//   "resultState": 3,
+//   "address": "FLAT 10\n77 SAMPLE PARADE\nKEVV EAST VIC 3102",
+//   "dateOfBirth": {
+//     "day": 29,
+//     "month": 7,
+//     "year": 1983
+//   },
+//   "dateOfExpiry": {
+//     "day": 20,
+//     "month": 5,
+//     "year": 2019
+//   },
+//   "licenceNumber": "987654321",
+//   "licenceType": "CAR",
+//   "name": "JANE CITIZEN"
+// }"
+  let result = {
+    personal: {
+      firstName: scanned.name,
+      lastName: scanned.name,
+      address: scanned.address,
+      birthData: scanned.dateOfBirth,
+    },
+    document: {
+      dateOfExpiry: scanned.dateOfExpiry,
+      documentNumber: scanned.licenceNumber,
+      "licenceType": scanned.licenceType
+    }
+  }
+  normalizeDates(result)
+  return result
+}
+function normalizeAUBack(scanned) {
+  // "address",
+  // "dateOfExpiry"
+  // "fullDocumentImage"
+  // "lastName"
+  // "licenceNumber"
+  return scanned
+}
 
 function normalizeDates (result, normalizer) {
   const { personal, document } = result
@@ -476,6 +550,8 @@ const normalizers = {
   usdlCombined: normalizeUSDLResult,
   eudl: normalizeEUDLResult,
   nzdl: normalizeNZDLResult,
+  australiaFront: normalizeAUFront,
+  australiaBack: normalizeAUBack,
   barcode: normalizeBarcodeResult,
 }
 
