@@ -385,6 +385,7 @@ class RefPropertyEditor extends Component {
     let recognizers
     let tooltip
     let firstSideInstructions, secondSideInstructions
+    let scanBothSides
     // let isPassport
     // HACK
     if (!recognizers  &&  prop === 'otherSideScan')
@@ -421,6 +422,10 @@ class RefPropertyEditor extends Component {
         }
         else if (country.title === 'New Zealand')
           recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
+        else if (country.title === 'Australia') {
+          scanBothSides = true
+          recognizers = [BlinkID.recognizers.australiaFront, BlinkID.recognizers.australiaBack]
+        }
         else {
           recognizers = BlinkID.recognizers.eudl
         }
@@ -430,6 +435,7 @@ class RefPropertyEditor extends Component {
         break
       }
     }
+
     const blinkIDOpts = {
       // quality: 0.2,
       // base64: true,
@@ -438,6 +444,7 @@ class RefPropertyEditor extends Component {
       country,
       firstSideInstructions,
       secondSideInstructions,
+      scanBothSides,
       recognizers: recognizers ? [].concat(recognizers) : [BlinkID.recognizers.documentFace]
     }
 
@@ -520,7 +527,7 @@ class RefPropertyEditor extends Component {
       r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
 
     let dateOfExpiry //, dateOfBirth, documentNumber
-    ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl'].some(docType => {
+    ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl', 'australiaFront'].some(docType => {
       const scan = result[docType]
       if (!scan) return
 

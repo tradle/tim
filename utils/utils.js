@@ -438,7 +438,7 @@ var utils = {
       return e[id]  ||  resource.title
     }
     else if (e)
-      return e[resource[ROOT_HASH]]
+      return e[resource[ROOT_HASH]] || resource[utils.getEnumProperty(utils.getModel(rtype))]
     else {
       return utils.buildRef(resource, utils.getModel(rtype)).title
       // let prop = Object.keys(utils.getModel(rtype).properties)[0]

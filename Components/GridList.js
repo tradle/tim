@@ -867,7 +867,7 @@ class GridList extends Component {
     }
     // Edit verifications
     let canEdit = isRM  &&  isVerification //= isFormError  &&   isRM
-    if (!canEdit  &&  !isVerification)
+    if (!canEdit  &&  !isVerification  &&  !rModel.notEditable)
       canEdit = utils.isMyMessage({resource})
     // if ((!isStub  &&  !isVerification)  ||  canEdit  ||  utils.isMyMessage({resource})) {
     // if (canEdit) {
