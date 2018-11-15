@@ -321,13 +321,8 @@ class GridList extends Component {
     if (this.state.refreshing || this.props.isModel)
       return
 
-    const { target } = event.nativeEvent
-    if (!target) {
-      // debugger
-      return
-    }
-    const currentOffset = target.scrollTop
-    this.contentHeight = target.scrollHeight
+    let currentOffset = event.nativeEvent.contentOffset.y
+    this.contentHeight = event.nativeEvent.contentSize.height
     let delta = currentOffset - (this.offset || 0)
     this.direction = delta > 0 || Math.abs(delta) < 3 ? 'down' : 'up'
     this.offset = currentOffset
