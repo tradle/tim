@@ -12,7 +12,7 @@
     "copyassets": "shopt -s dotglob && cp -RL web/public/* web/dist && shopt -u dotglob",
     "analyze": "NODE_ENV=production node --max_old_space_size=4096 $(which webpack) --config web/webpack.config.js --json | node web/fix-analysis.js > web/dist/analysis.json && webpack-bundle-size-analyzer web/dist/analysis.json",
     "build:dev": "mkdir -p web/dist && npm run clean && NODE_ENV=development node --max_old_space_size=4096 $(which webpack) --config web/webpack.config.js --progress --colors && npm run copyassets",
-    "build": "mkdir -p web/dist && npm run clean && NODE_ENV=production node --max_old_space_size=4096 $(which webpack) --config web/webpack.config.js --progress --colors && npm run copyassets",
+    "build": "./hooks/update_version.sh && mkdir -p web/dist && npm run clean && NODE_ENV=production node --max_old_space_size=4096 $(which webpack) --config web/webpack.config.js --progress --colors && npm run copyassets",
     "build:serverinenv": "PROVIDERS=serverinenv npm run build",
     "build:cloud:localstack": "PROVIDERS=localstack npm run build",
     "build:cloud:dev": "PROVIDERS=cloud npm run build:dev",
