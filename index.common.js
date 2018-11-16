@@ -87,7 +87,7 @@ import QRCodeScanner from './Components/QRCodeScanner'
 import Log from './Components/Log'
 import HomePageMixin from './Components/HomePageMixin'
 import MatchImages from './Components/MatchImages'
-// import VideoCamera from './Components/VideoCamera'
+import VideoCamera from './Components/VideoCamera'
 
 import utils, { isWeb } from './utils/utils'
 
