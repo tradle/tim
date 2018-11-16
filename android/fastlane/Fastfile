@@ -182,7 +182,7 @@ platform :android do
 
   desc "Deploy a new version to the Google Play alpha track"
   lane :release_alpha do |options|
-    options[:track] = "alpha"
+    options[:track] = "internal"
     releaseit(options)
   end
 
