@@ -610,7 +610,7 @@ var NavigationBarRouteMapper = {
 
     let bankStyle = route.passProps.bankStyle
     let color = '#7AAAC3'
-    if ((!isWeb()  &&  route.id === CAMERA_VIEW)  ||  route.id === MATCH_VIEW) // Camera view
+    if (!isWeb()  &&  route.id === CAMERA_VIEW) // Camera view
       color = '#ffffff'
     else if (bankStyle)
       color = bankStyle.navBarColor ||  bankStyle.linkColor
@@ -886,7 +886,7 @@ var NavigationBarRouteMapper = {
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
     }
 
-    if ((!isWeb()  &&  route.id === CAMERA_VIEW)  ||  route.id === MATCH_VIEW)  // Camera view
+    if (!isWeb()  &&  route.id === CAMERA_VIEW) // Camera view
       st.color = color = '#ffffff'
     else if (bankStyle)
       st.color = color = bankStyle.navBarColor || bankStyle.linkColor
