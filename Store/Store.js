@@ -6339,7 +6339,7 @@ if (!res[SIG]  &&  res._message)
     let refs = utils.getPropertiesWithAnnotation(m, 'ref')
     if (refs) {
       for (let p in refs) {
-        if (rr[p]  &&  refs[p].inlined  ||  utils.getModel(refs[p].ref).inlined)
+        if (rr[p]  &&  (refs[p].inlined  ||  utils.getModel(refs[p].ref).inlined))
           rr[p][TYPE] = refs[p].ref
       }
     }
