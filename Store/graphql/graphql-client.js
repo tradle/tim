@@ -355,58 +355,76 @@ var search = {
       if (data.result) {
         return { result:  data.result }
       }
-      let message, graphQLErrors, networkError
-      if (useApollo) {
-        ({ message, graphQLErrors, networkError } = data.error)
+      ({ error='',  excludeProps={}, retry=true } = await this.checkError(data, model))
+      if (excludeProps.length) {
+        params.excludeProps = excludeProps
+        return await this.searchServer(params)
       }
-      else {
-        if (data.error.response) {
-          graphQLErrors = data.error.response.errors
-          message = INVALID_QUERY
-        }
-        else {
-          graphQLErrors = []
-          if (data.error.message === 'Failed to fetch') {
-            error = NETWORK_FAILURE
-            break
-          }
-          else
-            message = data.error.message
-        }
-      }
-      // let { message, graphQLErrors, networkError } = data.error
-      if (graphQLErrors  &&  graphQLErrors.length) {
-        let excludeProps = []
-        let str = 'Cannot query field \"'
-        let len = str.length
-        graphQLErrors.forEach(err => {
-          let msg = err.message
-          let idx = msg.indexOf(str)
-          if (idx !== 0)
-            return
-          idx = msg.indexOf('\"', len)
-          excludeProps.push(msg.substring(len, idx))
-        })
-        if (excludeProps.length) {
-          params.excludeProps = excludeProps
-          return await this.searchServer(params)
-        }
-        else {
-          debugger
-          return
-        }
-      }
-      if (networkError  &&  networkError.message === NETWORK_FAILURE) {
-        error = NETWORK_FAILURE
+      if (error  &&  error === NETWORK_FAILURE  ||  !retry)
         break
-      }
-      retry = false
-      if (message.indexOf(INVALID_QUERY) === 0)
-        message = INVALID_QUERY
-      else
-        debugger
-      await utils.submitLog(true)
-      error = message
+
+    //   let message, graphQLErrors, networkError
+    //   if (useApollo) {
+    //     ({ message, graphQLErrors, networkError } = data.error)
+    //   }
+    //   else {
+    //     if (data.error.response) {
+    //       graphQLErrors = data.error.response.errors
+    //       message = INVALID_QUERY
+    //     }
+    //     else {
+    //       graphQLErrors = []
+    //       if (data.error.message === 'Failed to fetch') {
+    //         error = NETWORK_FAILURE
+    //         break
+    //       }
+    //       else
+    //         message = data.error.message
+    //     }
+    //   }
+    //   // let { message, graphQLErrors, networkError } = data.error
+    //   if (graphQLErrors  &&  graphQLErrors.length) {
+    //     let excludeProps = []
+    //     let str = 'Cannot query field \"'
+    //     let len = str.length
+    //     graphQLErrors.forEach(err => {
+    //       if (err.path) {
+    //         let prop
+    //         for (let i=err.path.length - 1  &&  !prop; i>=0; i--) {
+    //           let p = err.path[i]
+    //           if (props[p])
+    //             prop = p
+    //         }
+    //         excludeProps.push(prop)
+    //         return
+    //       }
+    //       let msg = err.message
+    //       let idx = msg.indexOf(str)
+    //       if (idx !== 0)
+    //         return
+    //       idx = msg.indexOf('\"', len)
+    //       excludeProps.push(msg.substring(len, idx))
+    //     })
+    //     if (excludeProps.length) {
+    //       params.excludeProps = excludeProps
+    //       return await this.searchServer(params)
+    //     }
+    //     else {
+    //       debugger
+    //       return
+    //     }
+    //   }
+    //   if (networkError  &&  networkError.message === NETWORK_FAILURE) {
+    //     error = NETWORK_FAILURE
+    //     break
+    //   }
+    //   retry = false
+    //   if (message.indexOf(INVALID_QUERY) === 0)
+    //     message = INVALID_QUERY
+    //   else
+    //     debugger
+    //   await utils.submitLog(true)
+    //   error = message
     }
 
     console.log(error)
@@ -772,7 +790,7 @@ var search = {
     try {
       let result = await this.execute({client, query, table})
       if (result.error  &&  !excludeProps) {
-        let { excludeProps, error } = await this.checkError(result)
+        let { excludeProps, error } = await this.checkError(result, model)
         if (excludeProps)
           return await this.getItem(id, client, backlink, excludeProps)
       }
@@ -783,26 +801,37 @@ var search = {
       debugger
     }
   },
-  async checkError(result) {
-    let graphQLErrors = []
-    let excludeProps, message
-    if (result.error.response) {
-      graphQLErrors = result.error.response.errors
-      message = INVALID_QUERY
+  async checkError(result, model) {
+    let message, graphQLErrors, networkError, excludeProps
+    if (useApollo) {
+      ({ message, graphQLErrors, networkError } = result.error)
     }
     else {
-      graphQLErrors = []
-      if (result.error.message === 'Failed to fetch')
-        return { error: NETWORK_FAILURE }
-      message = result.error.message
+      if (result.error.response) {
+        graphQLErrors = result.error.response.errors
+        message = INVALID_QUERY
+      }
+      else {
+        graphQLErrors = []
+        if (result.error.message === 'Failed to fetch')
+          return { error: NETWORK_FAILURE }
+        message = result.error.message
+      }
     }
     if (graphQLErrors  &&  graphQLErrors.length) {
       excludeProps = []
       let str = 'Cannot query field \"'
       let len = str.length
+      let props = model.properties
       graphQLErrors.forEach(err => {
         if (err.path) {
-          excludeProps.push(err.path[1])
+          let prop
+          for (let i=err.path.length - 1; i>=0  &&  !prop; i--) {
+            let p = err.path[i]
+            if (props[p])
+              prop = p
+          }
+          excludeProps.push(prop)
           return
         }
 
@@ -814,18 +843,19 @@ var search = {
         excludeProps.push(msg.substring(len, idx))
       })
 
-      if (excludeProps.length) {
+      if (excludeProps.length)
         return { excludeProps }
-        // return await this.searchServer(params)
-      }
-      debugger
       return { error: message }
     }
+    if (networkError  &&  networkError.message === NETWORK_FAILURE)
+      return { error: NETWORK_FAILURE }
+
     if (message.indexOf(INVALID_QUERY) === 0)
       message = INVALID_QUERY
     await utils.submitLog(true)
-    return { error: message, excludeProps }
+    return { error: message, retry: false }
   },
+
   // TODO: rename _getItem to getItem
   // getItem: (...args) => search._getItem(...args),
   async getObjects(links, client) {
