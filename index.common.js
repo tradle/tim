@@ -83,7 +83,6 @@ import QRCodeScanner from './Components/QRCodeScanner'
 import Log from './Components/Log'
 import HomePageMixin from './Components/HomePageMixin'
 import MatchImages from './Components/MatchImages'
-// import VideoCamera from './Components/VideoCamera'
 
 import utils, { isWeb } from './utils/utils'
 
@@ -569,8 +568,6 @@ class TiMApp extends Component {
       return <ShareResourceList navigator={nav} {...props } />
     case 40:
       return <MatchImages navigator={nav} {...props } />
-    case 41:
-      return <VideoCamera navigator={nav} {...props} />
     case 10:
     default: // 10
       return <ResourceList navigator={nav} {...props} />
@@ -596,7 +593,7 @@ var NavigationBarRouteMapper = {
 
     let bankStyle = route.passProps.bankStyle
     let color = '#7AAAC3'
-    if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW) // Camera view
+    if (route.id === CAMERA_VIEW ) // Camera view
       color = '#ffffff'
     else if (bankStyle)
       color = bankStyle.navBarColor ||  bankStyle.linkColor
@@ -868,7 +865,7 @@ var NavigationBarRouteMapper = {
         photo = <Image source={{uri: uri}} style={[styles.msgImageNoText, platformStyles.logo, {width, height}]} />
     }
 
-    if (route.id === CAMERA_VIEW  ||  route.id === MATCH_VIEW)  // Camera view
+    if (route.id === CAMERA_VIEW)  // Camera view
       st.color = color = '#ffffff'
     else if (bankStyle)
       st.color = color = bankStyle.navBarColor || bankStyle.linkColor
