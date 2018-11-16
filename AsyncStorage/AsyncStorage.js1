@@ -186,6 +186,65 @@ var AsyncStorage = {
     });
   },
 
+  getAllKeysInRange: function(
+    lte: string,
+    gte: string,
+    callback?: ?(error: ?Error, keys: ?Array<string>) => void
+  ): Promise {
+    return new Promise((resolve, reject) => {
+      const finish = (err, keys) => {
+        err = convertError(err)
+        if (callback) callback(err, keys);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(keys);
+        }
+      }
+
+      if (RCTAsyncStorage.getAllKeysInRange) {
+        return RCTAsyncStorage.getAllKeysInRange(lte, gte, finish);
+      }
+
+      AsyncStorage.getAllKeys((err, keys) => {
+        if (keys) {
+          keys = keys.filter(key => key <= lte && key >= gte);
+        }
+
+        finish(err, keys);
+      });
+    });
+  },
+
+  getAllKeysWithPrefix: function(prefix: string, callback?: ?(error: ?Error, keys: ?Array<string>) => void): Promise {
+    return new Promise((resolve, reject) => {
+      const finish = (err, keys) => {
+        err = convertError(err)
+        if (callback) callback(err, keys);
+        if (err) {
+          reject(err);
+        } else {
+          resolve(keys);
+        }
+      }
+
+      if (RCTAsyncStorage.getAllKeysWithPrefix) {
+        return RCTAsyncStorage.getAllKeysWithPrefix(prefix, finish);
+      }
+
+      AsyncStorage.getAllKeys((err, keys) => {
+        if (keys) {
+          const prefixLen = prefix.length
+          keys = keys
+            .filter(key => key.startsWith(prefix))
+            .map(key => key.slice(prefix.length));
+        }
+
+        finish(err, keys);
+      });
+    });
+  },
+
   /**
    * The following batched functions are useful for executing a lot of
    * operations at once, allowing for native optimizations and provide the

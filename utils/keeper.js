@@ -4,12 +4,18 @@ import { TYPE, TYPES } from '@tradle/constants'
 import { linkString } from '@tradle/protocol'
 import createBaseKeeper from '@tradle/keeper'
 import cachifyKeeper from '@tradle/keeper/cachify'
+import { timeAsyncFunctions } from './perf'
 
 const debug = require('debug')('tradle:app:keeper')
 const { MESSAGE } = TYPES
 
 const stripEmbeddedObjects = keeper => {
-  const getStored = promisify(keeper.get.bind(keeper))
+  // don't promisify statically as keeper.get may change
+  const getStored = key => new Promise((resolve, reject) => keeper.get(key, (err, value) => {
+    if (err) return reject(err)
+    return resolve(value)
+  }))
+
   const getAndResolveEmbeds = async (key) => {
     const result = await getStored(key)
     if (result[TYPE] === MESSAGE && typeof result.object === 'string') {
@@ -82,23 +88,36 @@ const stripEmbeddedObjects = keeper => {
     throw new Error('keeper.createReadStream is not implemented')
   }
 
-  return {
+  const del = keeper.del.bind(keeper)
+  const close = keeper.close.bind(keeper)
+  const ret = {
     get,
     put,
     batch,
-    del: keeper.del.bind(keeper),
-    close: keeper.close.bind(keeper),
+    del,
+    close,
     createReadStream,
+  }
+
+  return {
+    ...ret,
+    ...timeAsyncFunctions(ret, ['get', 'put', 'batch', 'del', 'close'], info => {
+      const { name, stack, time, args, results } = info
+      if (time > 1000) {
+        debug(`${name} took ${time}ms!`)
+      }
+    })
   }
 }
 
 const createKeeper = ({ caching, ...opts }) => {
-  const keeper = createBaseKeeper(opts)
+  let keeper = createBaseKeeper(opts)
+  keeper = stripEmbeddedObjects(keeper)
   if (caching) {
     cachifyKeeper(keeper, caching)
   }
 
-  return stripEmbeddedObjects(keeper)
+  return keeper
 }
 
 module.exports = {
