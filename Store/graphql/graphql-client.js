@@ -630,70 +630,7 @@ var search = {
         continue
       let ptype = prop.type
       if (ptype === 'array') {
-        // HACK
-        if (p === 'verifications')
-          continue
-
-        if (isApplication) {
-          if (isList  &&  p !== 'relationshipManagers')
-            continue
-          if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
-            continue
-        }
-        let iref = prop.items.ref
-        if (iref) {
-          let isInlined = iref !== MODEL  && utils.isInlined(utils.getModel(iref))
-
-          if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
-            if (isList  &&  !isApplication)
-              continue
-            arr.push(`${p} {
-              edges {
-                node {
-                  ${this.getSearchProperties({model: utils.getModel(iref)})}
-                }
-              }
-            }`)
-          }
-          else if (prop.inlined  ||  isInlined) {
-            if (currentProp  &&  currentProp === prop)
-              continue
-            arr.push(this.addInlined(prop))
-          }
-          // else if (iref === model.id) {
-          //   arr.push(
-          //     `${p} {
-          //       ${TYPE}
-          //       _permalink
-          //       _link
-          //       _displayName
-          //     }`
-          //   )
-          // }
-          // else if (prop.inlined)
-          //   arr.push(this.addInlined(prop))
-          else
-            arr.push(
-              `${p} {
-                ${TYPE}
-                _permalink
-                _link
-                _displayName
-              }`
-            )
-        }
-        else {
-          let allProps = this.addProps({isList, props: prop.items.properties})
-          if (allProps.length) {
-            arr.push(
-              `${p} {
-                ${allProps.toString().replace(/,/g, '\n')}
-              }`
-            )
-          }
-          else
-            arr.push(p)
-        }
+        this.addArrayProperty({prop, model, arr, isList, backlink, currentProp})
         continue
       }
       if (ptype !== 'object') {
@@ -709,7 +646,7 @@ var search = {
       if (ref === ORGANIZATION)
         continue
 
-      if (prop.inlined)
+      if (prop.inlined  ||  utils.getModel(ref).inlined)
         arr.push(this.addInlined(prop))
       else {
         arr.push(this.addRef(prop))
@@ -720,6 +657,73 @@ var search = {
       }
     }
     return arr
+  },
+  addArrayProperty({prop, model, arr, isList, backlink, currentProp}) {
+    let p = prop.name
+    let isApplication = model  &&  model.id === APPLICATION
+    if (p === 'verifications')
+      return
+
+    if (isApplication) {
+      if (isList  &&  p !== 'relationshipManagers')
+        return
+      if (!backlink  &&  prop.items.ref === APPLICATION_SUBMISSION &&  p !== 'submissions')
+        return
+    }
+    let iref = prop.items.ref
+    if (iref) {
+      let isInlined = iref !== MODEL  && utils.isInlined(utils.getModel(iref))
+
+      if (prop.items.backlink  &&  !prop.inlined) { //  &&  !utils.getModel(iref).abstract) {
+        if (isList  &&  !isApplication)
+          return
+        arr.push(`${p} {
+          edges {
+            node {
+              ${this.getSearchProperties({model: utils.getModel(iref)})}
+            }
+          }
+        }`)
+      }
+      else if (prop.inlined  ||  isInlined) {
+        if (currentProp  &&  currentProp === prop)
+          return
+        arr.push(this.addInlined(prop))
+      }
+      // else if (iref === model.id) {
+      //   arr.push(
+      //     `${p} {
+      //       ${TYPE}
+      //       _permalink
+      //       _link
+      //       _displayName
+      //     }`
+      //   )
+      // }
+      // else if (prop.inlined)
+      //   arr.push(this.addInlined(prop))
+      else
+        arr.push(
+          `${p} {
+            ${TYPE}
+            _permalink
+            _link
+            _displayName
+          }`
+        )
+    }
+    else {
+      let allProps = this.addProps({isList, props: prop.items.properties})
+      if (allProps.length) {
+        arr.push(
+          `${p} {
+            ${allProps.toString().replace(/,/g, '\n')}
+          }`
+        )
+      }
+      else
+        arr.push(p)
+    }
   },
   addInlined(prop) {
     let ref = prop.type === 'array' ? prop.items.ref : prop.ref
@@ -748,7 +752,7 @@ var search = {
       )
     }
   },
-  async getItem(id, client, backlink) {
+  async getItem(id, client, backlink, excludeProps) {
     let parts = id.split('_')
 
     let modelName = parts[0]
@@ -762,23 +766,65 @@ var search = {
     let _permalink = parts[1]
     let query = `query {\n${table} (_permalink: "${_permalink}")\n`
 
-    let arr = this.getSearchProperties({model, backlink})
+    let arr = this.getSearchProperties({model, backlink, excludeProps})
 
     query += `\n{${arr.join('   \n')}\n}\n}`
     try {
       let result = await this.execute({client, query, table})
+      if (result.error  &&  !excludeProps) {
+        let { excludeProps, error } = await this.checkError(result)
+        if (excludeProps)
+          return await this.getItem(id, client, backlink, excludeProps)
+      }
       return result.result
-      // let result = await client.query({
-      //   fetchPolicy: 'network-only',
-      //   errorPolicy: 'all',
-      //   query: gql(`${query}`)
-      // })
-      // return result.data[table]
     }
     catch(err) {
       console.log('graphQL._getItem', err)
       debugger
     }
+  },
+  async checkError(result) {
+    let graphQLErrors = []
+    let excludeProps, message
+    if (result.error.response) {
+      graphQLErrors = result.error.response.errors
+      message = INVALID_QUERY
+    }
+    else {
+      graphQLErrors = []
+      if (result.error.message === 'Failed to fetch')
+        return { error: NETWORK_FAILURE }
+      message = result.error.message
+    }
+    if (graphQLErrors  &&  graphQLErrors.length) {
+      excludeProps = []
+      let str = 'Cannot query field \"'
+      let len = str.length
+      graphQLErrors.forEach(err => {
+        if (err.path) {
+          excludeProps.push(err.path[1])
+          return
+        }
+
+        let msg = err.message
+        let idx = msg.indexOf(str)
+        if (idx !== 0)
+          return
+        idx = msg.indexOf('\"', len)
+        excludeProps.push(msg.substring(len, idx))
+      })
+
+      if (excludeProps.length) {
+        return { excludeProps }
+        // return await this.searchServer(params)
+      }
+      debugger
+      return { error: message }
+    }
+    if (message.indexOf(INVALID_QUERY) === 0)
+      message = INVALID_QUERY
+    await utils.submitLog(true)
+    return { error: message, excludeProps }
   },
   // TODO: rename _getItem to getItem
   // getItem: (...args) => search._getItem(...args),

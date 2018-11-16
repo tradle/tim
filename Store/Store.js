@@ -1111,6 +1111,8 @@ var Store = Reflux.createStore({
       let updateSettings
       if (settings  &&  settings.urls) {
         let urls = settings.urls
+        let orgs = this.searchNotMessages({modelName: ORGANIZATION, all: true})
+
         // HACK for non-static ip
         if (SERVICE_PROVIDERS_BASE_URL_DEFAULTS) {
           SERVICE_PROVIDERS_BASE_URL_DEFAULTS.forEach((url) => {
@@ -1125,6 +1127,12 @@ var Store = Reflux.createStore({
             }
           })
         }
+        urls = urls.filter(url => {
+          let idx = orgs.findIndex(r => r.url === url)
+          if (idx === -1)
+            return true
+          return !orgs[idx]._inactive
+        })
         SERVICE_PROVIDERS_BASE_URLS = urls
         if (updateSettings)
           this.dbPut(settingsId, settings)
@@ -2361,7 +2369,7 @@ var Store = Reflux.createStore({
       this._mergeItem(okey, sp.org)
     }
     else {
-      org = {}
+      org = {url}
       _.extend(org, sp.org)
       if (sp.sandbox) {
         delete org.sandbox
@@ -4934,16 +4942,19 @@ if (!res[SIG]  &&  res._message)
     if (rIdx === -1)
       return
     let pl = this._getItem(messages[rIdx])
+    let productListR
     try {
       let kr = await this._keeper.get(pl[CUR_HASH])
-      let productListR = utils.clone(kr)
-      _.extend(productListR, pl)
-      this.trigger({action: 'productList', resource: productListR, to: resource})
+      productListR = utils.clone(kr)
     } catch (err) {
       debug('Store.onGetProductList: ' + err.stack)
-      return
+      productListR = {}
+      // return
     }
-
+    _.extend(productListR, pl)
+    let plist = productListR.chooser.oneOf.map(p => (typeof p === 'object') && p || {id: p})
+    productListR.chooser.oneOf = plist
+    this.trigger({action: 'productList', resource: productListR, to: resource})
   },
   async onAddApp({ url, permalink, noTrigger, addSettings }) {
     try {
@@ -6324,6 +6335,15 @@ if (!res[SIG]  &&  res._message)
     const toKeep = NON_VIRTUAL_OBJECT_PROPS.concat(propNames)
     let rr = _.pick(r, toKeep)
 
+    // Add type for inlined props, visual components rely on it
+    let refs = utils.getPropertiesWithAnnotation(m, 'ref')
+    if (refs) {
+      for (let p in refs) {
+        if (rr[p]  &&  (refs[p].inlined  ||  utils.getModel(refs[p].ref).inlined))
+          rr[p][TYPE] = refs[p].ref
+      }
+    }
+
     _.extend(rr, {
       [ROOT_HASH]: r._permalink,
       [CUR_HASH]: r._link,
@@ -6569,7 +6589,7 @@ if (!res[SIG]  &&  res._message)
         continue
       if (r.canceled)
         continue;
-      if (isOrg  &&  r._inactive)
+      if (isOrg  &&  r._inactive  && !all)
         continue
       if (containerProp  &&  (!r[containerProp]  ||  utils.getId(r[containerProp]) !== resourceId))
         continue;
@@ -6697,9 +6717,13 @@ if (!res[SIG]  &&  res._message)
     const { modelName, limit, query, lastId, prop, pin } = params
     let enumList = enums[modelName]
     if (query) {
+      let q = query.toLowerCase()
       return enumList.filter((r) => {
         let val = utils.translateEnum(r)
-        return val.indexOf(query) !== -1
+        if (!val)
+          debugger
+        val = val.toLowerCase()
+        return val.indexOf(q) !== -1
       })
     }
     if (prop) {

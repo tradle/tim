@@ -62,7 +62,7 @@ try {
 } catch (err) {
   // no version info available
 }
-
+const actions = ['chat', 'profile', 'applyForProduct', 'r']
 var {
   TYPE
 } = constants
@@ -137,9 +137,19 @@ class TimHome extends Component {
     // this._checkConnectivity()
 
     try {
-      const url = await Linking.getInitialURL() || ENV.initWithDeepLink
+      // const url = await Linking.getInitialURL() || ENV.initWithDeepLink
+      let url = await Linking.getInitialURL()
+      if (url) {
+        let action = url.match(/.*\/([^?]+)/)
+        if (!action  ||  actions.indexOf(action[1]) === -1)
+          url = null
+        else
+          this.setState({isDeepLink: true})
+       }
+      if (!url)
+        url = ENV.initWithDeepLink
       if (url)
-        this._handleOpenURL({url})
+        await this._handleOpenURL({url})
       if (ENV.landingPage)
         this.show()
     } catch (err) {
@@ -203,8 +213,7 @@ class TimHome extends Component {
 
     let qs = query ? require('querystring').parse(query) : {}
 
-    let state = {firstPage: pathname}
-    extend(state, {qs: qs})
+    let state = {firstPage: pathname, qs, isDeepLink: true}
     this.setState(state)
     // Actions.setPreferences(state)
 
@@ -331,7 +340,7 @@ class TimHome extends Component {
       })
     }
 
-    if (afterAuthRoute.component.displayName !== TimHome.displayName  &&  !this.isDeepLink) {
+    if (afterAuthRoute.component.displayName !== TimHome.displayName  &&  !this.state.isDeepLink) {
       return this.props.navigator.popToRoute(afterAuthRoute)
     }
     return this.showFirstPage()
@@ -340,7 +349,7 @@ class TimHome extends Component {
   async handleEvent(params) {
     let {action, activity, isConnected, models, me, isRegistration, provider, termsAccepted, url} = params
     var nav = this.props.navigator
-
+    let { wasDeepLink } = this.state
     switch(action) {
     case 'busy':
       this.setState({
@@ -359,10 +368,10 @@ class TimHome extends Component {
       utils.setModels(models);
       return
     case 'applyForProduct':
-      this.showChatPage({resource: provider, action: this.wasDeepLink ? 'push' : 'replace', showProfile: this.wasDeepLink})
+      this.showChatPage({resource: provider, action: wasDeepLink ? 'push' : 'replace', showProfile: wasDeepLink})
       break
     case 'openURL':
-      this.isDeepLink = true
+      this.setState({isDeepLink: true})
       Actions.openURL(url)
       break
     case 'getProvider':
@@ -485,10 +494,11 @@ class TimHome extends Component {
     });
   }
   showFirstPage(noResetNavStack) {
-    let firstPage = this.state.firstPage
-    if (this.isDeepLink) {
-      this.state.firstPage = ENV.initWithDeepLink
-      this.wasDeepLink = true
+    let { firstPage, isDeepLink, qs } = this.state
+    let state = {}
+    if (isDeepLink) {
+      state.firstPage = ENV.initWithDeepLink
+      state.wasDeepLink = true
     }
     let replace
     if (!noResetNavStack) {
@@ -500,7 +510,7 @@ class TimHome extends Component {
         nav.immediatelyResetRouteStack(nav.getCurrentRoutes().slice(0,1));
     }
 
-    this.isDeepLink = false
+    state.isDeepLink = false
 // /chat?url=https://ubs.tradle.io&permalink=72d63e70bd75e65cf94e2d1f7f04c59816ad183801b981428a8a0d1abbf00190
     let action = replace ? 'replace' : 'push'
     let me = utils.getMe()
@@ -508,8 +518,9 @@ class TimHome extends Component {
       this.showContacts(action)
       return
     }
-    this.state.firstPage = null
-    this.state.inTour = false
+    state.firstPage = null
+    state.inTour = false
+    this.setState(state)
     let navigator = this.props.navigator
     if (firstPage) {
       switch (firstPage) {
@@ -518,13 +529,13 @@ class TimHome extends Component {
         //   permalink: this.state.permalink,
         //   url: this.state.url
         // })
-        Actions.getProvider(this.state.qs)
+        Actions.getProvider(qs)
         break
       case 'r':
-        Actions.getResourceFromLink(this.state.qs)
+        Actions.getResourceFromLink(qs)
         break
       case 'applyForProduct':
-        Actions.applyForProduct(this.state.qs)
+        Actions.applyForProduct(qs)
         break
       // case 'applyForProduct':
       //   Actions.applyForProduct({host: this.state.host, provider: this.state.provider, product: this.state.product })
@@ -705,6 +716,7 @@ class TimHome extends Component {
       backButtonTitle: 'Back',
       passProps: {
         modelName: ORGANIZATION,
+        isDeepLink: this.state.wasDeepLink,
         isConnected: this.state.isConnected,
         officialAccounts: true,
         bankStyle: defaultBankStyle
