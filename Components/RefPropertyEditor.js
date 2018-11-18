@@ -67,13 +67,6 @@ class RefPropertyEditor extends Component {
     let labelStyle = styles.labelClean
     let textStyle = styles.labelDirty
     let props
-    // if (model)
-    //   props = model.properties
-    // else if (metadata.items.properties)
-    //   props = metadata.items.properties
-    // else
-    //   props = utils.getModel(metadata.items.ref).properties
-    // let prop = props[params.prop]
     let pName = prop.name
 
     let lcolor = {color: this.getLabelAndBorderColor(pName)}
@@ -97,40 +90,10 @@ class RefPropertyEditor extends Component {
       label = pLabel
     else {
       isImmutable = prop.immutable  &&  resource[ROOT_HASH]
-      if (isPhoto) {
+      if (isPhoto)
         label = pLabel
-        // label = translate(prop, model)
-        // floatingProps[pName] = resource[pName]
-      }
-      else {
-        let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
-        // let m = utils.getId(resource[pName]).split('_')[0]
-        if (rModel.subClassOf === ENUM) {
-          if (prop.type === 'array') {
-            let l = resource[pName].map(r => translate(r))
-            label = l.join(',')
-          }
-          else {
-            let val = resource[pName]
-            if (Array.isArray(val))
-              label = val.map(r => utils.translateEnum(r)).join(',')
-            else
-              label = utils.translateEnum(val)
-          }
-        }
-        else
-          label = utils.getDisplayName(resource[pName], rModel)
-        if (!label) { // see if stub
-          label = resource[pName].title
-          if (!label)
-            label = prop.title
-        }
-        if (rModel.subClassOf  &&  utils.isEnum(rModel)) {
-          if (!label)
-            label = resource[pName]
-          label = utils.createAndTranslate(label, true)
-        }
-      }
+      else
+        label = this.getRefLabel(prop, resource)
       propLabel = <Text style={[styles.labelDirty, lcolor]}>{pLabel}</Text>
     }
     let photoR = isPhoto && (photo || resource[pName])
@@ -207,19 +170,17 @@ class RefPropertyEditor extends Component {
                        {content}
                      </TouchableOpacity>
     }
+    else if (isImmutable)
+      actionItem = content
+    else if (!utils.isEnum(prop.ref  ||  prop.items.ref)  && (prop.inlined  ||  utils.getModel(prop.ref).inlined)) {
+      actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
+                     {content}
+                   </TouchableOpacity>
+    }
     else {
-      if (isImmutable)
-        actionItem = content
-      else if (!utils.isEnum(prop.ref  ||  prop.items.ref)  && (prop.inlined  ||  utils.getModel(prop.ref).inlined)) {
-        actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
-                       {content}
-                     </TouchableOpacity>
-      }
-      else {
-        actionItem = <TouchableOpacity onPress={this.chooser.bind(this, prop, pName)}>
-                       {content}
-                     </TouchableOpacity>
-      }
+      actionItem = <TouchableOpacity onPress={this.chooser.bind(this, prop, pName)}>
+                     {content}
+                   </TouchableOpacity>
     }
     return (
       <View key={pName} style={{paddingBottom: error ? 0 : 10, margin: 0}} ref={pName}>
@@ -229,6 +190,33 @@ class RefPropertyEditor extends Component {
         {help}
       </View>
     );
+  }
+  getRefLabel(prop, resource) {
+    let rModel = utils.getModel(prop.ref  ||  prop.items.ref)
+    // let m = utils.getId(resource[pName]).split('_')[0]
+    let pName = prop.name
+    let label
+    if (utils.isEnum(rModel)) {
+      if (prop.type === 'array') {
+        let l = resource[pName].map(r => translate(r))
+        label = l.join(',')
+      }
+      else {
+        let val = resource[pName]
+        if (Array.isArray(val))
+          label = val.map(r => utils.translateEnum(r)).join(',')
+        else
+          label = utils.translateEnum(val)
+      }
+    }
+    else
+      label = utils.getDisplayName(resource[pName], rModel)
+    if (!label) { // see if stub
+      label = resource[pName].title
+      if (!label)
+        label = prop.title
+    }
+    return label
   }
   createNew(prop) {
     let { navigator, bankStyle, model, resource, currency } = this.props
@@ -256,9 +244,9 @@ class RefPropertyEditor extends Component {
     let m
     if (!metadata.items)
       m = metadata
-    else {
+    else
       m = utils.getModel(metadata.items.ref)
-    }
+
     return translate(prop, m)
   }
   onSetMediaProperty(propName, item) {
@@ -350,30 +338,6 @@ class RefPropertyEditor extends Component {
       return '#b1b1b1'
   }
 
-  // async scanPassport(resource) {
-  //   // 1. start a scan
-  //   // 2. press the back of your android phone against the passport
-  //   // 3. wait for the scan(...) Promise to get resolved/rejected
-  //   try {
-  //     // const {
-  //     //   firstName,
-  //     //   lastName,
-  //     //   gender,
-  //     //   issuer,
-  //     //   nationality,
-  //     //   photo
-  //     // } =
-  //     return await scan({
-  //       // yes, you need to know a bunch of data up front
-  //       // this is data you can get from reading the MRZ zone of the passport
-  //       documentNumber: resource.documentNumber,
-  //       dateOfBirth: dateformat(resource.dateOfBirth, 'yyMMdd'),
-  //       dateOfExpiry: dateformat(resource.dateOfExpiry, 'yyMMdd')
-  //     })
-  //   } catch (err) {
-  //     debugger
-  //   }
-  // }
   async showBlinkIDScanner(prop) {
     let { resource } = this.props
     const { documentType, country } = resource
@@ -444,10 +408,6 @@ class RefPropertyEditor extends Component {
       recognizers: recognizers ? [].concat(recognizers) : [BlinkID.recognizers.documentFace]
     }
 
-    // const promiseTimeout = new Promise((resolve, reject) => {
-    //   setTimeout(() => reject(TIMEOUT_ERROR), ENV.blinkIDScanTimeoutExternal)
-    // })
-
     Analytics.sendEvent({
       category: 'widget',
       action: 'scan_document',
@@ -457,45 +417,13 @@ class RefPropertyEditor extends Component {
     let result
     try {
       result = await BlinkID.scan(blinkIDOpts)
-      // result = await Promise.race([
-      //   BlinkID.scan(blinkIDOpts),
-      //   promiseTimeout
-      // ])
     } catch (err) {
       debug('scan failed:', err.message)
       debugger
-
-      // const canceled = /canceled/i.test(err.message)
-      // const timedOut = !canceled && /time/i.test(err.message)
-      // if (!canceled && typeof BlinkID.dismiss === 'function') {
-      //   // cancel programmatically
-      //   BlinkID.dismiss()
-      // }
-
-      // give the BlinkID view time to disappear
-      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
-      // await utils.promiseDelay(800)
-      // debug('BlinkID scan failed', err.stack)
-
-      // if (canceled || timedOut) {
-      //   return Alert.alert(
-      //     translate('documentNotScanning', documentType.title),
-      //     translate('retryScanning', documentType.title.toLowerCase())
-      //   )
-      // }
-
-      // if (canceled) return
-
-      // return Alert.alert(
-      //   translate('documentNotScanning'),
-      //   translate('retryScanning', documentType.title)
-      // )
     }
-// debugger
     if (!result)
       return
 
-    // const tradleObj = utils.fromMicroBlink(result)
     const r = _.cloneDeep(resource)
     if (result.image) {
       r[prop] = {
@@ -844,4 +772,28 @@ module.exports = RefPropertyEditor;
   //   }
 
   //   this.props.navigator.pop()
+  // }
+  // async scanPassport(resource) {
+  //   // 1. start a scan
+  //   // 2. press the back of your android phone against the passport
+  //   // 3. wait for the scan(...) Promise to get resolved/rejected
+  //   try {
+  //     // const {
+  //     //   firstName,
+  //     //   lastName,
+  //     //   gender,
+  //     //   issuer,
+  //     //   nationality,
+  //     //   photo
+  //     // } =
+  //     return await scan({
+  //       // yes, you need to know a bunch of data up front
+  //       // this is data you can get from reading the MRZ zone of the passport
+  //       documentNumber: resource.documentNumber,
+  //       dateOfBirth: dateformat(resource.dateOfBirth, 'yyMMdd'),
+  //       dateOfExpiry: dateformat(resource.dateOfExpiry, 'yyMMdd')
+  //     })
+  //   } catch (err) {
+  //     debugger
+  //   }
   // }
