@@ -24,7 +24,7 @@ const {
 } = constants.TYPES
 
 import { Text } from './Text'
-import utils, { translate, isWeb, isSimulator } from '../utils/utils'
+import utils, { translate, translateEnum, isWeb, isSimulator } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
@@ -198,15 +198,15 @@ class RefPropertyEditor extends Component {
     let label
     if (utils.isEnum(rModel)) {
       if (prop.type === 'array') {
-        let l = resource[pName].map(r => translate(r))
+        let l = resource[pName].map(r => translateEnum(r))
         label = l.join(',')
       }
       else {
         let val = resource[pName]
         if (Array.isArray(val))
-          label = val.map(r => utils.translateEnum(r)).join(',')
+          label = val.map(r => translateEnum(r)).join(',')
         else
-          label = utils.translateEnum(val)
+          label = translateEnum(val)
       }
     }
     else

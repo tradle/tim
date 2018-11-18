@@ -288,7 +288,7 @@ class ShowPropertiesView extends Component {
           if (iref === PHOTO)
             return
           if (isEnum(iref)) {
-            let values = val.map((v) => utils.getDisplayName(v)).join(', ')
+            let values = val.map((v) => translateEnum(v)).join(', ')
             viewCols.push(
               <View style={{flexDirection: 'row', justifyContent: 'space-between'}} key={this.getNextKey()}>
                 <View style={{paddingLeft: 10}}>
