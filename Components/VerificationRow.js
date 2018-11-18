@@ -264,21 +264,6 @@ class VerificationRow extends Component {
                           </View>
             }
           }
-          // switch (resource.status.title) {
-          //   case 'Pass':
-          //   color = 'green'
-          //   icon = 'ios-checkmark'
-          //   break
-          // case 'Fail':
-          // case 'Error':
-          //   color = 'red'
-          //   icon = 'ios-close'
-          //   break
-          // default:
-          //   color = 'blue'
-          //   icon = 'ios-information-outline'
-          //   break
-          // }
           titleComponent = <View style={styles.titleView}>
                              {checkIcon}
                              <View style={{justifyContent: 'center', paddingLeft: 10}}>
