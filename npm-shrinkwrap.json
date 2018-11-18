@@ -468,9 +468,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.2.tgz"
     },
     "@tradle/engine": {
-      "version": "7.0.4",
+      "version": "8.0.0",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-7.0.4.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-8.0.0.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",

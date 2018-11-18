@@ -1165,7 +1165,7 @@ var Store = Reflux.createStore({
     meDriver._send = function (msg, recipientInfo, cb) {
       const start = Date.now()
       const monitor = setInterval(function () {
-        debug(`still sending to ${recipientInfo.permalink} after ${(Date.now() - start)/1000|0} seconds`, msg.unserialized.object[TYPE])
+        debug(`still sending to ${recipientInfo.permalink} after ${(Date.now() - start)/1000|0} seconds`, msg.object[TYPE])
       }, 5000)
 
       trySend(msg, recipientInfo, function (err, result) {
@@ -1178,10 +1178,13 @@ var Store = Reflux.createStore({
       })
     }
 
-    const trySend = co(function* (msg, recipientInfo, cb) {
+    const trySend = async (message, recipientInfo, cb) => {
+      const { link } = message
+      message = message.object
+
       const recipientHash = recipientInfo.permalink
       if (self._yuki && recipientHash === self._yuki.permalink) {
-        return self._yuki.receive({ message: msg.unserialized.object })
+        return self._yuki.receive({ message })
           .then(() => cb(), cb)
       }
 
@@ -1203,36 +1206,26 @@ var Store = Reflux.createStore({
       }
 
       debug(`pushing msg to ${identifier} into network stack`)
-      if (transport instanceof AWSClient) {
-        try {
-          // yield transport.ready()
-          yield transport.send({
-            link: msg.unserialized.link,
-            message: msg
-          })
-        } catch (err) {
-          if (/timetravel/i.test(err.type)) {
-            self.abortUnsent({ to: identifier })
-            debug('aborting time traveler message', err.stack)
-            err = new tradle.errors.WillNotSend('aborted')
-          }
+      try {
+        // message = await uploadLinkedMedia({
+        //   client: transport,
+        //   keeper:
+        //   object: message,
+        // })
 
-          return cb(err)
+        await transport.send({ link, message })
+      } catch (err) {
+        if (/timetravel/i.test(err.type)) {
+          self.abortUnsent({ to: identifier })
+          debug('aborting time traveler message', err.stack)
+          err = new tradle.errors.WillNotSend('aborted')
         }
 
-        cb()
-        return
+        return cb(err)
       }
 
-      transport.send(identifier, msg, function (err) {
-        if (err) debug(`failed to deliver message to ${identifier}: ${err.message}`)
-        else debug(`delivered message to ${identifier}`)
-
-        cb(err)
-      })
-
-      // transport.setTimeout(60000)
-    })
+      cb()
+    }
 
     // receive flow:
     // 1. transport
@@ -1280,24 +1273,12 @@ var Store = Reflux.createStore({
     processor.start()
 
     this.queueReceive = function queueReceive ({ msg, from }) {
-      let length
-      if (Buffer.isBuffer(msg)) {
-        length = msg.length
-        msg = tradleUtils.unserializeMessage(msg)
-      }
-
-      // if (failOneOutOf(3)) {
-      //   debug('dropping', msg.object[TYPE])
-      //   return
-      // }
-
       const link = tradleUtils.hexLink(msg)
       return multiqueue.enqueue({
         seq: msg[SEQ],
         value: {
           link,
           message: msg,
-          length
         },
         queue: from,
         // compat with v1
