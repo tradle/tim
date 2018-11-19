@@ -1,9 +1,21 @@
+var sha = require('stable-sha1');
+import _ from 'lodash'
+import levelErrors from 'levelup/lib/errors'
+import Promise from 'bluebird'
+import Q from 'q'
+import _collect from 'stream-collector'
+const collect = Promise.promisify(_collect)
 
+import {
+  Platform
+} from 'react-native'
+import { protocol } from '@tradle/engine'
+var constants = require('@tradle/constants');
+
+import AsyncStorage from '../Storage'
 import voc from '../voc'
 import utils from '../../utils/utils'
-var sha = require('stable-sha1');
 
-var constants = require('@tradle/constants');
 // var models = {};
 
 const {
@@ -11,6 +23,8 @@ const {
   ROOT_HASH,
   CUR_HASH
 } = constants
+const STYLES_PACK = 'tradle.StylesPack'
+const MSG_LINK = '_msg'
 
 const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
@@ -155,5 +169,212 @@ var storeUtils = {
     // if (saveInDB)
     //   batch.push({type: 'put', key, value: r})
   },
+  getPermalink(object) {
+    return object[ROOT_HASH] || protocol.linkString(object)
+  },
+  parseMessageFromDB(message) {
+    let object = message
+    while (object[TYPE] === MESSAGE) {
+      let key = object.recipientPubKey
+      if (key) {
+        if (!Buffer.isBuffer(key.pub)) {
+          key.pub = new Buffer(key.pub.data)
+        }
+      }
+
+      object = object.object
+      if (!object) break
+    }
+
+    return message
+  },
+  addContactIdentity: async function (node, { identity, permalink }) {
+    if (!permalink) permalink = storeUtils.getPermalink(identity)
+
+    // defensive copy
+    identity = _.cloneDeep(identity)
+
+    let match
+    try {
+      match = await node.addressBook.byPermalink(permalink)
+      if (_.isEqual(match.object, identity)) return
+    } catch (err) {
+      // oh well, I guess we have to do things the long way
+    }
+
+    return node.addContactIdentity(identity)
+  },
+  rebuf,
+  /**
+   * optimized multi-get from levelup
+   * @param  {Object} opts
+   * @param  {levelup} opts.db
+   * @param  {Array} opts.keys
+   * @param  {Boolean} opts.strict (optional) - if true, fail if any keys is not found
+   * @return {[type]}      [description]
+   */
+  multiGet(opts) {
+    let strict = opts.strict
+    let loc = opts.db.location
+    let keys = opts.keys
+    return AsyncStorage.multiGet(keys.map(function (key) {
+      return loc + '!' + key
+    }))
+    .then(function (results) {
+      if (strict) {
+        if (results.some(function (r) {
+          return !r[1]
+        })) {
+          throw new levelErrors.NotFoundError()
+        }
+
+        return results.map(parseDBValue)
+      } else {
+        return results.map(function (pair) {
+          return {
+            value: parseDBValue(pair),
+            reason: pair[1] ? null : new levelErrors.NotFoundError()
+          }
+        })
+      }
+    })
+  },
+  normalizeGetInfoResponse(json) {
+    if (!json.providers) {
+      json = {
+        providers: [json]
+      }
+    }
+
+    json.providers.forEach(provider => {
+      if (provider.style) {
+        provider.style = storeUtils.toStylesPack(provider.style)
+      }
+    })
+
+    return json
+  },
+  toStylesPack(oldStylesFormat) {
+    if (oldStylesFormat[TYPE] === STYLES_PACK) return oldStylesFormat
+
+    const { properties } = utils.getModel(STYLES_PACK)
+    const pack = {
+      [TYPE]: STYLES_PACK
+    }
+
+    for (let bad in oldStylesFormat) {
+      let good = storeUtils.joinCamelCase(bad.split('_'))
+      if (good in properties) {
+        pack[good] = oldStylesFormat[bad]
+      }
+    }
+
+    return pack
+  },
+  joinCamelCase(parts) {
+    return parts.map((part, i) => {
+      if (part.toUpperCase() === part) {
+        // avoid breaking already camelcased strings
+        part = part.toLowerCase()
+      }
+
+      if (i !== 0) {
+        part = part[0].toUpperCase() + part.slice(1)
+      }
+
+      return part
+    })
+    .join('')
+  },
+  toOldStyleWrapper: function (wrapper) {
+    if (!wrapper.permalink) return wrapper
+
+    if (wrapper.object) {
+      const payload = wrapper.object[TYPE] === 'tradle.Message' ? wrapper.object.object : wrapper.object
+      const link = protocol.linkString(payload)
+      wrapper[CUR_HASH] = link
+      wrapper[ROOT_HASH] = payload[ROOT_HASH] || link
+      wrapper.from = { [ROOT_HASH]: wrapper.author }
+      // wrapper.to = wrapper.author
+      wrapper.parsed = {
+        data: payload
+      }
+
+      wrapper[TYPE] = payload[TYPE]
+    }
+    else if (wrapper.objectinfo) {
+      wrapper[CUR_HASH] = wrapper.objectinfo.link
+      wrapper[ROOT_HASH] = wrapper.objectinfo.permalink
+      wrapper[TYPE] = wrapper.objectinfo.type
+    }
+    else {
+      wrapper[CUR_HASH] = wrapper.link
+      wrapper[ROOT_HASH] = wrapper.permalink
+      wrapper[TYPE] = wrapper.type
+    }
+    wrapper[MSG_LINK] = wrapper.link
+    return wrapper
+  },
+  collect,
+
+  /**
+   * fast but dangerous way to read a levelup
+   * it's dangerous because it relies on the underlying implementation
+   * of levelup and asyncstorage-down, and their respective key/value encoding sechemes
+   */
+  async dangerousReadDB(db) {
+    if (Platform.OS === 'web') {
+      return await collect(db.createReadStream())
+    }
+
+    await Q.ninvoke(db, 'open')
+
+    const prefix = db.location + '!'
+    // dangerous!
+    const keys = db.db._down.container._keys.slice()
+    if (!keys.length) return []
+
+    const pairs = await AsyncStorage.multiGet(keys.map((key) => prefix + key))
+    return pairs
+      .filter((pair) => pair[1] != null)
+      .map((pair) => {
+        pair[1] = pair[1].slice(2)
+        try {
+          pair[1] = pair[1] && JSON.parse(pair[1])
+        } catch (err) {
+        }
+
+        return {
+          key: pair[0].slice(prefix.length + 2),
+          value: pair[1]
+        }
+      })
+  },
 }
 module.exports = storeUtils
+/**
+ * recover Buffer objects
+ * @param  {Object} json
+ * @return {Object} json with recovered Buffer-valued properties
+ */
+function rebuf (json) {
+  if (Object.prototype.toString.call(json) !== '[object Object]') return json
+
+  if (json &&
+    json.type === 'Buffer' &&
+    json.data &&
+    !Buffer.isBuffer(json) &&
+    Object.keys(json).length === 2) {
+    return new Buffer(json.data)
+  } else {
+    for (var p in json) {
+      json[p] = rebuf(json[p])
+    }
+
+    return json
+  }
+}
+
+function parseDBValue (pair) {
+  return pair[1] && rebuf(JSON.parse(pair[1]))
+}
