@@ -323,5 +323,6 @@ module.exports = {
   "afterRefresh": "U bent vrij om onze diensten zonder onderbreking te gebruiken",
   "reviewData": "Gegevens bekijken",
   "requestMyData": "Mijn gegevens opvragen",
-  "newCustomer": "Nieuwe klant"
+  "newCustomer": "Nieuwe klant",
+  "areYouSureYouAreDone": "Weet je zeker dat je deze sessie wilt beëindigen?"
 }

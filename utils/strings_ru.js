@@ -323,5 +323,6 @@ module.exports = {
   "reviewData": "Обзор данных",
   "afterRefresh": "Вы очищены, чтобы использовать наши услуги без перерыва",
   "requestMyData": "Запрос моих данных",
-  "newCustomer": "Новый покупатель"
+  "newCustomer": "Новый покупатель",
+  "areYouSureYouAreDone": "Вы уверены, что хотите завершить эту сессию?"
 }

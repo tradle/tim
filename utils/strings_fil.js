@@ -323,5 +323,6 @@ module.exports = {
   "afterRefresh": "Malinaw na ginagamit mo ang aming mga serbisyo nang tuluy-tuloy",
   "reviewData": "Suriin ang data",
   "requestMyData": "Humihiling ng aking data",
-  "newCustomer": "Bagong customer"
+  "newCustomer": "Bagong customer",
+  "areYouSureYouAreDone": "Sigurado ka ba na ikaw ay tapusin ang sesyon na ito?"
 }

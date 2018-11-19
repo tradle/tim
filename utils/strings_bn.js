@@ -323,5 +323,6 @@ module.exports = {
   "reviewData": "পর্যালোচনা তথ্য",
   "afterRefresh": "আপনি বাধা ছাড়া আমাদের সেবা ব্যবহার করার জন্য সাফ করা হয়",
   "requestMyData": "আমার তথ্য অনুরোধ",
-  "newCustomer": "নতুন গ্রাহক"
+  "newCustomer": "নতুন গ্রাহক",
+  "areYouSureYouAreDone": "আপনি এই সেশন শেষ করতে চান নিশ্চিত?"
 }

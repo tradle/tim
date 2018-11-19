@@ -278,6 +278,7 @@ module.exports = {
     "doYouWantToContinue": "Do you want to switch to it and continue from there?",
     "afterRefresh": "You are cleared to use our services without interruption",
     "newCustomer": "New customer",
+    "areYouSureYouAreDone": "Are you sure you wan to finish this session?",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
