@@ -215,11 +215,12 @@ const DATA_CLAIM          = 'tradle.DataClaim'
 const LEGAL_ENTITY        = 'tradle.legal.LegalEntity'
 const LANGUAGE            = 'tradle.Language'
 const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
-const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
+const CUSTOMER_ONBOARDING = 'bd.nagad.CustomerKYC'
 
 const MY_ENVIRONMENT      = 'environment.json'
 
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
+const MAX_CUSTOMERS_ON_DEVICE = 1
 
 import AWSClient from '@tradle/aws-client'
 // import dns from 'dns'
@@ -718,7 +719,7 @@ var Store = Reflux.createStore({
     // else if (payload[TYPE] === CONFIRM_PACKAGE_REQUEST)
     //   debugger
 
-    const old = utils.toOldStyleWrapper(msg)
+    const old = storeUtils.toOldStyleWrapper(msg)
 
     let toId = utils.makeId(PROFILE, msg.recipient)
     let to = this._getItem(toId)
@@ -809,7 +810,7 @@ var Store = Reflux.createStore({
         .then(msgInfo => {
           // wrapper.from = { [ROOT_HASH]: msgInfo.author }
           // wrapper.to = { [ROOT_HASH]: msgInfo.recipient }
-          wrapper = utils.toOldStyleWrapper(wrapper)
+          wrapper = storeUtils.toOldStyleWrapper(wrapper)
 
           let from = self._getItem(utils.makeId(PROFILE, msgInfo.author))
           let to = self._getItem(utils.makeId(PROFILE, msgInfo.recipient))
@@ -1099,7 +1100,7 @@ var Store = Reflux.createStore({
 
     // TODO: figure out of we need to publish identities
     meDriver.identityPublishStatus = meDriver.identitySealStatus
-    meDriver._multiGetFromDB = utils.multiGet
+    meDriver._multiGetFromDB = storeUtils.multiGet
     meDriver.addressBook.setCache(new Cache({ max: 500 }))
     meDriver.pause()
 
@@ -1262,7 +1263,7 @@ var Store = Reflux.createStore({
 
         // load non plain-js props (e.g. Buffers)
         const { length } = value
-        const msg = utils.parseMessageFromDB(value.message)
+        const msg = storeUtils.parseMessageFromDB(value.message)
 
         try {
           await self.receive({
@@ -1750,10 +1751,10 @@ var Store = Reflux.createStore({
       throw err
     }
 
-    if (!permalink) permalink = utils.getPermalink(identity)
+    if (!permalink) permalink = storeUtils.getPermalink(identity)
     if (!(permalink in this._identityPromises)) {
       this._identityPromises[permalink] = this._enginePromise
-        .then(engine => utils.addContactIdentity(engine, { identity, permalink }))
+        .then(engine => storeUtils.addContactIdentity(engine, { identity, permalink }))
     }
 
     // if meDriver is not available, don't lock everything up
@@ -1887,7 +1888,7 @@ var Store = Reflux.createStore({
     const { wsClients } = driverInfo
     const payload = msg.object
     const { identity } = payload
-    const permalink = utils.getPermalink(identity)
+    const permalink = storeUtils.getPermalink(identity)
     await this.addContactIdentity({ identity, permalink })
     await this.addContact(payload, permalink, msg.forPartials || msg.forContext)
     if (identifier) {
@@ -1899,7 +1900,7 @@ var Store = Reflux.createStore({
   receiveSelfIntroduction({ identifier, msg }) {
     const payload = msg.object
     const { wsClients } = driverInfo
-    const rootHash = utils.getPermalink(payload.identity)
+    const rootHash = storeUtils.getPermalink(payload.identity)
     let name = payload.name
     if (!name  ||  !name.length) {
       name = payload.identity.name
@@ -2076,7 +2077,7 @@ var Store = Reflux.createStore({
   },
 
   async addContactAndIdentity({ identity, permalink, profile={} }) {
-    if (!permalink) permalink = utils.getPermalink(identity)
+    if (!permalink) permalink = storeUtils.getPermalink(identity)
     await this.addContactIdentity({ identity, permalink })
     await this.addContact({ identity, profile: {} }, permalink)
   },
@@ -2244,7 +2245,7 @@ var Store = Reflux.createStore({
       throw new Error('Cannot access: ' + url)
 
     let json = await response.json()
-    json = utils.normalizeGetInfoResponse(json)
+    json = storeUtils.normalizeGetInfoResponse(json)
     if (json.dictionary) {
       _.extend(dictionary, json.dictionary)
       if (me) {
@@ -2938,7 +2939,7 @@ var Store = Reflux.createStore({
       if (!toOrg)
         toOrg = to.organization ? to.organization : to
       // saving the new message
-      const data = utils.toOldStyleWrapper(result.message)
+      const data = storeUtils.toOldStyleWrapper(result.message)
       if (data)  {
         rr[ROOT_HASH] = data[ROOT_HASH]
         rr[CUR_HASH] = data[CUR_HASH]
@@ -4885,8 +4886,18 @@ if (!res[SIG]  &&  res._message)
     let newProvider = await this.onAddApp({ url: host, permalink: provider, noTrigger: true, addSettings: true })
     if (!newProvider)
       return
-    debugger
+    // debugger
+
     let org = this._getItem(newProvider.org)
+    // if (product === EMPLOYEE_ONBOARDING  &&  me.isEmployee) {
+    //   var msg = {
+    //     [TYPE]: CUSTOMER_WAITING,
+    //     from: me,
+    //     to: this.getRepresentative(utils.getId(org))
+    //   }
+    //   await this.onAddMessage({msg: msg, isWelcome: true})
+    //   return
+    // }
     let resource = {
       [TYPE]: PRODUCT_REQUEST,
       requestFor: product,
@@ -5735,7 +5746,8 @@ if (!res[SIG]  &&  res._message)
           from: me,
           to: this.getRepresentative(to)
         }
-        this.onAddChatItem({resource: pr})
+        await this.onAddChatItem({resource: pr})
+        await this.deleteCustomersOnDevice()
         return
       }
     }
@@ -5948,7 +5960,36 @@ if (!res[SIG]  &&  res._message)
         retParams.productToForms = await this.gatherForms(utils.getId(to), context)
     }
     this.trigger(retParams)
+  },
+  async deleteCustomersOnDevice() {
+    let list = await this.searchMessages({modelName: PRODUCT_REQUEST, to: me.organization, noTrigger: true, filterProps: {requestFor: CUSTOMER_ONBOARDING}})
+    if (!list  ||  !list.length) {
+      return
+    }
+    if (list.length <= MAX_CUSTOMERS_ON_DEVICE)
+      return
+    let batch = []
+    let contexts = []
+    let messages = []
+    debugger
+    for (let i=list.length - 1; i>=MAX_CUSTOMERS_ON_DEVICE; i--) {
+      let r = list[i]
+      messages.push(this.searchMessages({modelName: MESSAGE, to: me.organization, noTrigger: true, filterProps: {_context: utils.buildRef(r)} }))
+    }
+    messages = await Promise.all(messages)
+    messages.forEach(list => {
+      if (!list.length)
+        return
+      list.forEach(r => {
+        let id = utils.getId(r)
+        this._deleteItem(id)
+        this.deleteMessageFromChat(me.organization.id, r)
+        batch.push({type: 'del', key: id})
+      })
+    })
 
+    if (batch.length)
+      await db.batch(batch)
   },
   async searchForRefresh(params) {
     let { to, resource } = params
@@ -6056,11 +6097,11 @@ if (!res[SIG]  &&  res._message)
       let contexts = c.filter((r) => !r._readOnly && r._formsCount)
 
       let lastContext = c[c.length - 1]
-      let currentProduct = utils.getProduct(lastContext)
+      let currentProduct = lastContext.requestFor
       contexts = c.filter((r) => {
         if (r._readOnly)
           return false
-        return (utils.getProduct(r) === currentProduct)
+        return (r.requestFor === currentProduct)
       })
       return contexts.length ? contexts[0] : c[c.length - 1]
     }
@@ -6812,7 +6853,7 @@ if (!res[SIG]  &&  res._message)
     var self = this
 
     // var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, checkForSplash} = params
-    var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop} = params
+    var {resource, query, context, _readOnly, to, isForgetting, lastId, limit, prop, filterProps} = params
 // console._time('searchAllMessages')
     var _readOnly = _readOnly  || (context  && utils.isReadOnlyChat(context)) //(context  &&  context._readOnly)
     var foundResources = [];
@@ -6979,6 +7020,9 @@ if (!res[SIG]  &&  res._message)
           }
         }
       }
+      if (filterProps)
+        foundResources = this.filterFound(foundResources, filterProps, refsObj)
+
       utils.pinFormRequest(foundResources)
 // console.timeEnd('searchAllMessages')
       return foundResources
@@ -7350,7 +7394,7 @@ if (!res[SIG]  &&  res._message)
       return await this.searchAllMessages(params)
 
     let {resource, query, modelName, prop, context, _readOnly, to, dataBundle,
-         listView, isForgetting, isRefresh, lastId, limit, isChooser} = params
+         listView, isForgetting, isRefresh, lastId, limit, isChooser, filterProps} = params
 
     let model = this.getModel(modelName)
 
@@ -7584,32 +7628,8 @@ if (!res[SIG]  &&  res._message)
       if (!foundResources.length)
         return
 
-      let filterProps = params.filterProps
-      foundResources = foundResources.filter((r) => {
-        if (filterProps) {
-          // debugger
-          for (let p in filterProps) {
-            if (typeof r[p] === 'object') {
-              if (!_.isEqual(r[p], filterProps[p]))
-                return false
-            }
-            else if (r[p] != filterProps[p]) {
-              if (typeof filterProps[p] === 'boolean'  &&  r[p] === undefined)
-                return !filterProps[p]
-              return false
-            }
-          }
-        }
-        if (r[TYPE] === VERIFICATION)
-          r.document = refsObj[utils.getId(r.document)] || r.document
-        else if (r[TYPE] === FORM_ERROR) {
-          let prefill = refsObj[utils.getId(r.prefill)]
-          if (prefill)
-            r.prefill = prefill
-        }
-        this.addVisualProps(r)
-        return true
-      })
+      if (filterProps)
+        foundResources = this.filterFound(foundResources, filterProps, refsObj)
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a._time - b._time)
       let result = params._readOnly  &&  utils.isContext(modelName)
@@ -7639,7 +7659,31 @@ if (!res[SIG]  &&  res._message)
       return newResult.reverse()
     }
   },
-
+  filterFound(foundResources, filterProps, refsObj) {
+    return foundResources.filter((r) => {
+      if (filterProps) {
+        // debugger
+        for (let p in filterProps) {
+          if (typeof r[p] === 'object')
+            return _.isEqual(r[p], filterProps[p])
+          if (r[p] != filterProps[p]) {
+            if (typeof filterProps[p] === 'boolean'  &&  r[p] === undefined)
+              return !filterProps[p]
+            return false
+          }
+        }
+      }
+      if (r[TYPE] === VERIFICATION)
+        r.document = refsObj[utils.getId(r.document)] || r.document
+      else if (r[TYPE] === FORM_ERROR) {
+        let prefill = refsObj[utils.getId(r.prefill)]
+        if (prefill)
+          r.prefill = prefill
+      }
+      this.addVisualProps(r)
+      return true
+    })
+  },
   async onGetAllContexts(params) {
     if (me.isEmployee) {
       _.extend(params, {modelName: FORM_REQUEST})
@@ -10465,7 +10509,7 @@ await fireRefresh(val.from.organization)
     let myId
     // console._time('dbStream')
     var orgContacts = {}
-    return utils.dangerousReadDB(db)
+    return storeUtils.dangerousReadDB(db)
     .then((results) => {
       if (!results.length)
         return
@@ -10670,7 +10714,7 @@ await fireRefresh(val.from.organization)
         if (data.state !== 'fulfilled')
           return
         data.value.forEach((r) => {
-          r = utils.toOldStyleWrapper(r)
+          r = storeUtils.toOldStyleWrapper(r)
           var rId = utils.getId(r)
           var res = this._getItem(rId)
           if (!res) {
@@ -11815,7 +11859,7 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //   })
   // },
   // async receivePairingRequest({ payload }) {
-  //   const rootHash = utils.getPermalink(payload.identity)
+  //   const rootHash = storeUtils.getPermalink(payload.identity)
   //   Alert.alert(
   //     translate('pairingRequest'),
   //     null,
@@ -11873,4 +11917,71 @@ async function getAnalyticsUserId ({ promiseEngine }) {
   //     return null
   //   let result = await this.searchMessages({modelName: form, dataBundle: utils.getId(dataBundle), to: dataBundle.from})
   //   return result
+  // },
+  // async deleteCustomersOnDevice() {
+  //   let rl = await this.searchServer({modelName: APPLICATION, noTrigger: true, filterResource: {requestFor: CUSTOMER_ONBOARDING, 'applicant._link': me[ROOT_HASH]}})
+  //   if (!rl.list) {
+  //     console.log(rl.errorMessage)
+  //     return
+  //   }
+  //   let list = rl.list
+  //   if (list.length < MAX_CUSTOMERS_ON_DEVICE)
+  //     return
+  //   let batch = []
+  //   let contexts = []
+  //   let subReq = []
+  //   for (let i=list.length - 1; i>MAX_CUSTOMERS_ON_DEVICE; i--) {
+  //     let r = list[i]
+  //     subReq.push(this._getItemFromServer(utils.getId(r)))
+  //     contexts.push(r.context)
+  //   }
+
+  //   debugger
+  //   let submissions = await Promise.all(subReq)
+  //   // let submissions = await this.searchServer({modelName: APPLICATION_SUBMISSION, noTrigger: true, filterResource: {'application._permalink': Object.keys(apps)}})
+
+
+  //   for (let i=0; i>submissions.length; i++) {
+  //     this.deleteAppFromDevice(submissions[i], batch)
+  //   }
+  //   let pr = await this.searchServer({modelName: PRODUCT_REQUEST, noTrigger: true, filterResource: {contextId: contexts}})
+  //   let prlist = pr && pr.list || []
+  //   let fr = await this.searchServer({modelName: FORM_REQUEST, noTrigger: true, filterResource: {context: contexts}})
+  //   let frlist = fr && fr.list || []
+  //   let l = [prlist, frlist]
+  //   l.forEach(list => {
+  //     if (!list.length)
+  //       return
+  //     list.forEach(r => {
+  //       let id = utils.getId(r)
+  //       this._deleteItem(id)
+  //       batch.push({type: 'del', key: id})
+  //     })
+  //   })
+
+  //   if (batch.length)
+  //     await db.batch(batch)
+  // },
+  // deleteAppFromDevice(submissions, batch) {
+  //   if (!submissions)
+  //     return
+  //   let submissionStubs
+  //   if (Array.isArray(submissions))
+  //     submissionStubs = submissions.map((sub) => sub.submission)
+  //   else {
+  //     const { submissions={} } = application
+  //     if (!submissions.edges ||  !submissions.edges.length)
+  //       return
+  //     submissionStubs = submissions.edges.map(s => s.node.submission)
+  //   }
+  //   submissionStubs.forEach(sub => {
+  //     let m = this.getModel(utils.getType(sub))
+  //     let type = m.subClassOf || m.id
+  //     let stub = this.makeStub(sub)
+  //     let item = this._getItem(stub.id)
+  //     if (item) {
+  //       this._deleteItem(stub.id)
+  //       batch.push({type: 'del', key: stub.id})
+  //     }
+  //   })
   // },
