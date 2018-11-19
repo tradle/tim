@@ -1468,9 +1468,13 @@ class GridList extends Component {
         showLoadingIndicator = false
       else if (isBacklink  ||  isForwardlink) {
         let pName = (prop && prop.name) || (forwardlink  &&  forwardlink.name)
-        if (!resource['_' + pName + 'Count']) {
+        let cnt = resource['_' + pName + 'Count']
+        if (!cnt) {
           if (!resource[pName]  || !resource[pName].length)
             showLoadingIndicator = false
+        }
+        else if (dataSource.getRowCount() === cnt  ||  !this.state.refreshing) {
+          showLoadingIndicator = false
         }
       }
       if (showLoadingIndicator)

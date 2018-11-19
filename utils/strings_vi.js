@@ -323,5 +323,6 @@ module.exports = {
   "reviewData": "Đánh giá dữ liệu",
   "afterRefresh": "Bạn được xóa sử dụng dịch vụ của chúng tôi mà không bị gián đoạn",
   "requestMyData": "Yêu cầu dữ liệu của tôi",
-  "newCustomer": "Khách hàng mới"
+  "newCustomer": "Khách hàng mới",
+  "areYouSureYouAreDone": "Bạn có chắc chắn muốn kết thúc phiên này không?"
 }

@@ -1209,6 +1209,20 @@ class ResourceList extends Component {
     Alert.alert(translate('invalidQR'), translate('supportedQrCodes'))
   }
 
+  areYouSure() {
+    Alert.alert(
+      translate('areYouSureYouAreDone'),
+      null,
+      [
+        {text: translate('cancel'), onPress: () => {
+          console.log('Canceled!')
+        }},
+        {text: translate('Ok'), onPress: () => {
+          this.props.navigator.pop()
+        }},
+      ]
+    )
+  }
   hideResource(resource) {
     Alert.alert(
       translate('areYouSureYouWantToDelete', translate(resource.name)),
@@ -1386,6 +1400,7 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       title: me.organization.title,
       passProps: {
+        onLeftButtonPress: this.areYouSure,
         resource: me.organization,
         bankStyle,
         newCustomer: true

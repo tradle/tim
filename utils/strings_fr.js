@@ -323,5 +323,6 @@ module.exports = {
   "reviewData": "Revoir les données",
   "afterRefresh": "Vous êtes autorisé à utiliser nos services sans interruption",
   "requestMyData": "Demander mes données",
-  "newCustomer": "Nouveau client"
+  "newCustomer": "Nouveau client",
+  "areYouSureYouAreDone": "Êtes-vous sûr de vouloir terminer cette session?"
 }

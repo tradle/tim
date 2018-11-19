@@ -414,7 +414,7 @@ var ResourceMixin = {
           continue
         let label
         if (!skipLabels  ||  skipLabels.indexOf(p) === -1)
-          label = <Text style={[styles.title, {flex: 1}]}>{utils.makeLabel(p)}</Text>
+          label = <Text style={[styles.title, {flex: 1, paddingLeft: 10}]}>{utils.makeLabel(p)}</Text>
         let val
         jVal += ''
         if (jVal.indexOf('http://') === 0  ||  jVal.indexOf('https://') === 0)
@@ -462,7 +462,7 @@ var ResourceMixin = {
             this.showJson({json: js, isView, jsonRows: arrRows, indent: indent + 1})
             jsonRows.push(<Row size={3} style={styles.rowStyle} key={this.getNextKey()}>
                             <Col sm={3} md={3} lg={3} style={rawStyles.col} key={this.getNextKey()}>
-                              <Text style={[styles.bigTitle, {flex: 1}]}>{utils.makeLabel(p)}</Text>
+                              <Text style={[styles.bigTitle, {flex: 1, paddingLeft: 10}]}>{utils.makeLabel(p)}</Text>
                             </Col>
                           </Row>)
 
@@ -507,7 +507,7 @@ var ResourceMixin = {
         else {
           jsonRows.push(<Row size={3} style={styles.row} key={this.getNextKey()}>
                           <Col sm={3} md={3} lg={3} style={rawStyles.col} key={this.getNextKey()}>
-                            <Text style={textStyle}>{utils.makeLabel(p)}</Text>
+                            <Text style={[textStyle, {paddingLeft: 10}]}>{utils.makeLabel(p)}</Text>
                           </Col>
                         </Row>)
         }
