@@ -1381,7 +1381,7 @@ class ResourceList extends Component {
       backButtonTitle: 'Back',
       title: me.organization.title,
       passProps: {
-        onLeftButtonPress: this.areYouSure,
+        onLeftButtonPress: this.areYouSure.bind(this),
         resource: me.organization,
         bankStyle,
         newCustomer: true
