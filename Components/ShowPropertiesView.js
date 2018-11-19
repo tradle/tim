@@ -29,7 +29,6 @@ import Prompt from 'react-native-prompt'
 import StyleSheet from '../StyleSheet'
 import {
   // StyleSheet,
-  Image,
   View,
   Text,
   TouchableOpacity,
@@ -38,6 +37,8 @@ import {
 import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
+import Image from './Image'
+
 class ShowPropertiesView extends Component {
   static displayName = 'ShowPropertiesView';
 

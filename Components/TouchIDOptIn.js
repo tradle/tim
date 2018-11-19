@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   TouchableHighlight,
 } from 'react-native'
@@ -9,6 +8,7 @@ import PropTypes from 'prop-types'
 
 import React, { Component } from 'react'
 import ArticleView from './ArticleView'
+import Image from './Image'
 import utils from '../utils/utils'
 import TOUCH_ID_IMG from '../img/touchid2.png'
 

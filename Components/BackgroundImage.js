@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
 import {
   StyleSheet,
-  Image,
+  // Image,
   Dimensions
 } from 'react-native'
 
 import { makeResponsive } from 'react-native-orient'
+import Image from './Image'
 
 class BackgroundImage extends Component {
   shouldComponentUpdate(nextProps, nextState) {

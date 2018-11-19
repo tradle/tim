@@ -21,7 +21,7 @@ export const createDataUri = ({ base64, extension }) => {
 // some libraries generate base64 with line breaks, spaces, etc.
 export const cleanBase64 = str => str.replace(/[\s]/g, '')
 
-export const normalizeImageCaptureData = ({ extension, base64, ...data }) => ({
+export const normalizeImageCaptureData = ({ extension, base64, imageTag, ...data }) => ({
   ...data,
-  dataUrl: createDataUri({ extension, base64 }),
+  url: imageTag || createDataUri({ extension, base64 })  ,
 })

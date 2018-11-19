@@ -1,21 +1,180 @@
 import promisify from 'pify'
 import flatten from 'lodash/flattenDeep'
+import omit from 'lodash/omit'
 import { TYPE, TYPES } from '@tradle/constants'
 import { linkString } from '@tradle/protocol'
 import createBaseKeeper from '@tradle/keeper'
 import cachifyKeeper from '@tradle/keeper/cachify'
+import NativeKeeper from 'react-native-tradle-keeper'
+import { buildKeeperUri as _buildKeeperUri, parseKeeperUri } from '@tradle/embed'
 import { timeAsyncFunctions } from './perf'
+
+const buildKeeperUri = props => _buildKeeperUri({
+  algorithm: DIGEST_ALGORITHM,
+  mimetype: props.mimetype || props.mimeType,
+  ...props,
+})
 
 const debug = require('debug')('tradle:app:keeper')
 const { MESSAGE } = TYPES
+const asyncNoop = async () => {}
+
+const keeperMethodsToPromisify = [
+  'get',
+  'put',
+  'batch',
+  'del',
+  'close',
+  'prefetch',
+  'prefetchUri',
+  'uncache',
+  'uncacheUri'
+]
+
+const toHex = hexStrOrBuf => Buffer.isBuffer(hexStrOrBuf) ? hexStrOrBuf.toString('hex') : hexStrOrBuf
+
+const DIGEST_ALGORITHM = 'sha256'
+const createNativeKeeper = ({ hmacKey, encryptionKey }) => new NativeKeeper({
+  hmacKey: toHex(hmacKey),
+  encryptionKey: toHex(encryptionKey),
+  digestAlgorithm: DIGEST_ALGORITHM,
+  hashInput: 'dataUrlForValue',
+  encoding: 'base64',
+})
+
+// dangerous, assumes obj only has async functions as props
+const promisifyMethods = (obj, methods) => Object.keys(obj).reduce((promisified, key) => {
+  if (methods.includes(key)) {
+    promisified[key] = promisify(obj[key].bind(obj))
+  } else {
+    proxyProp(obj, promisified, key)
+  }
+
+  return promisified
+}, {})
+
+const proxyProp = (source, target, key) => Object.defineProperty(target, key, {
+  enumerable: true,
+  get() { return source[key] },
+  set(value) { source[value] = value },
+})
+
+const genSuccessCallback = cb => result => cb(null, result)
+
+// dangerous, assumes obj only has async functions as props
+const supportCallbacksForMethods = (obj, methods) => Object.keys(obj).reduce((callbackBased, key) => {
+  if (methods.includes(key)) {
+    callbackBased[key] = (...args) => {
+      if (typeof args[args.length - 1] !== 'function') {
+        return obj[key](...args)
+      }
+
+      const cb = args.pop()
+      obj[key](...args).then(genSuccessCallback(cb), cb)
+    }
+  } else {
+    proxyProp(obj, callbackBased, key)
+  }
+
+  return callbackBased
+}, {})
+
+const remapNativeKeeperToRegularKeeper = nativeKeeper => {
+  const get = async key => {
+    const { value } = await nativeKeeper.get({
+      key,
+      encoding: 'utf8',
+      returnValue: true
+    })
+
+    return JSON.parse(value)
+  }
+
+  const put = (key, value) => {
+    let encoding = 'utf8'
+    if (Buffer.isBuffer(value)) {
+      value = value.toString('base64')
+    } else if (typeof value !== 'string') {
+      value = JSON.stringify(value)
+    }
+
+    return nativeKeeper.put({ key, value, encoding })
+  }
+
+  const del = key => nativeKeeper.del({ key })
+  // WARNING: this loses atomicity
+  // TODO: add native batch() support
+  const batch = batch => Promise.all(batch.map(({ type, key, value }) => {
+    return type === 'put' ? put(key, value) : del(key)
+  }))
+
+  const keyToImageTag = new Map()
+  // const getKeeperUriCacheKeys = keeperUri => ([keeperUri, parseKeeperUri(keeperUri).hash])
+
+  const getCacheKeyForKeeperUri = uri => parseKeeperUri(uri).hash
+  const cacheImageKey = (key, imageTag) => keyToImageTag.set(key, imageTag)
+  const uncacheImageKey = (key, imageTag) => keyToImageTag.delete(key)
+  const cacheKeeperUri = (keeperUri, imageTag) => {
+    cacheImageKey(getCacheKeyForKeeperUri(keeperUri), imageTag)
+    // getKeeperUriCacheKeys(keeperUri).forEach(key => keyToImageTag.set(key, imageTag))
+  }
+
+  const uncacheKeeperUri = keeperUri => {
+    uncacheImageKey(getCacheKeyForKeeperUri(keeperUri))
+    // getKeeperUriCacheKeys(keeperUri).forEach(key => keyToImageTag.delete(key))
+  }
+
+  const _prefetch = async key => {
+    const { imageTag } = await nativeKeeper.prefetch({ key })
+    return imageTag
+  }
+
+  const prefetch = async key => {
+    let imageTag = keyToImageTag.get(key)
+    if (!imageTag) {
+      imageTag = await _prefetch(key)
+      cacheImageKey(key, imageTag)
+      // cacheKeeperUri(buildKeeperUri({ hash: key }), imageTag)
+    }
+
+    return imageTag
+  }
+
+  const prefetchUri = uri => prefetch(getCacheKeyForKeeperUri(uri))
+  const uncacheUri = async uri => {
+    const imageTag = keyToImageTag.get(getCacheKeyForKeeperUri(uri))
+    keyToImageTag.delete(uri)
+    await nativeKeeper.removeFromImageStore({ imageTag })
+  }
+
+  const importFromImageStore = async imageTag => {
+    const { key, mimeType } = await nativeKeeper.importFromImageStore({ imageTag })
+    const keeperUri = buildKeeperUri({
+      hash: key,
+      mimeType,
+    })
+
+    cacheKeeperUri(keeperUri, imageTag)
+    return keeperUri
+  }
+
+  return {
+    get,
+    put,
+    del,
+    batch,
+    prefetch,
+    prefetchUri,
+    uncache: uncacheImageKey,
+    uncacheUri,
+    importFromImageStore,
+    close: asyncNoop,
+  }
+}
 
 const stripEmbeddedObjects = keeper => {
   // don't promisify statically as keeper.get may change
-  const getStored = key => new Promise((resolve, reject) => keeper.get(key, (err, value) => {
-    if (err) return reject(err)
-    return resolve(value)
-  }))
-
+  const getStored = key => keeper.get(key)
   const getAndResolveEmbeds = async (key) => {
     const result = await getStored(key)
     if (result[TYPE] === MESSAGE && typeof result.object === 'string') {
@@ -27,16 +186,7 @@ const stripEmbeddedObjects = keeper => {
     return result
   }
 
-  const get = async (key, cb) => {
-    let result
-    try {
-      result = await getAndResolveEmbeds(key)
-    } catch (err) {
-      return cb(err)
-    }
-
-    cb(null, result)
-  }
+  const get = getAndResolveEmbeds
 
   // deep replace
   const replaceEmbeddedObjects = ({ key, value, type }) => {
@@ -60,11 +210,11 @@ const stripEmbeddedObjects = keeper => {
     })
   }
 
-  const put = (key, value, cb) => batch([{
+  const put = async (key, value) => batch([{
     type: 'put',
     key,
     value,
-  }], cb)
+  }])
 
   const expand = batch => {
     const expanded = []
@@ -79,47 +229,74 @@ const stripEmbeddedObjects = keeper => {
     return expanded
   }
 
-  const batch = (batch, cb) => {
+  const batch = async batch => {
     const expanded = expand(batch)
-    keeper.batch(expanded, cb)
+    return keeper.batch(expanded)
   }
 
   const createReadStream = () => {
     throw new Error('keeper.createReadStream is not implemented')
   }
 
-  const del = keeper.del.bind(keeper)
-  const close = keeper.close.bind(keeper)
   const ret = {
     get,
     put,
     batch,
-    del,
-    close,
     createReadStream,
+    // may not be available
   }
 
-  return {
-    ...ret,
-    ...timeAsyncFunctions(ret, ['get', 'put', 'batch', 'del', 'close'], info => {
-      const { name, stack, time, args, results } = info
-      if (time > 1000) {
-        debug(`${name} took ${time}ms!`)
-      }
-    })
-  }
+  // pass through other methods
+  const passThrough = omit(keeper, Object.keys(ret))
+  Object.keys(passThrough)
+    .forEach(key => proxyProp(keeper, ret, key))
+
+  return ret
+  // return {
+  //   ...ret,
+  //   ...timeAsyncFunctions(ret, keeperMethodsToPromisify, info => {
+  //     const { name, stack, time, args, results } = info
+  //     if (time > 1000) {
+  //       debug(`${name} took ${time}ms!`)
+  //     }
+  //   })
+  // }
 }
 
 const createKeeper = ({ caching, ...opts }) => {
-  let keeper = createBaseKeeper(opts)
+  let keeper = NativeKeeper
+    ? remapNativeKeeperToRegularKeeper(createNativeKeeper(opts.encryption))
+    : createBaseKeeper(opts)
+
   keeper = stripEmbeddedObjects(keeper)
+
+  // export regular API, for @tradle/engine to consume
+  const callbackBased = supportCallbacksForMethods(keeper, keeperMethodsToPromisify)
   if (caching) {
-    cachifyKeeper(keeper, caching)
+    cachifyKeeper(callbackBased, caching)
   }
 
-  return keeper
+  return callbackBased
 }
 
+const {
+  setGlobalKeeper,
+  getGlobalKeeper,
+} = (() => {
+  let keeper
+  return {
+    setGlobalKeeper: value => {
+      keeper = value
+    },
+    getGlobalKeeper: () => keeper,
+  }
+})();
+
+const promisifyKeeper = keeper => promisifyMethods(keeper, keeperMethodsToPromisify)
+
 module.exports = {
+  promisifyKeeper,
   createKeeper,
+  setGlobalKeeper,
+  getGlobalKeeper,
 }

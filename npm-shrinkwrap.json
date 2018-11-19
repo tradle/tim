@@ -410,8 +410,8 @@
     },
     "@tradle/aws-client": {
       "version": "2.1.1",
-      "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-2.1.1.tgz",
+      "from": "../tradle-aws-client",
+      "resolved": "file:../tradle-aws-client",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -463,9 +463,9 @@
       "resolved": "git://github.com/tradle/custom-models.git#85b5e612e692104016f4df6e3fefea538bfa7a95"
     },
     "@tradle/embed": {
-      "version": "1.1.2",
-      "from": "@tradle/embed@>=1.1.2 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.2.tgz"
+      "version": "1.2.2",
+      "from": "@tradle/embed@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.2.2.tgz"
     },
     "@tradle/engine": {
       "version": "8.0.0",
@@ -1509,6 +1509,11 @@
           "resolved": "https://registry.npmjs.org/kind-of/-/kind-of-6.0.2.tgz"
         }
       }
+    },
+    "base-64": {
+      "version": "0.1.0",
+      "from": "base-64@0.1.0",
+      "resolved": "https://registry.npmjs.org/base-64/-/base-64-0.1.0.tgz"
     },
     "base-x": {
       "version": "1.1.0",
@@ -6345,9 +6350,14 @@
       "resolved": "git://github.com/tradle/react-native-http.git#834492dbc792b1dec8ec8f0a1c9671f640339f01"
     },
     "react-native-image-picker": {
-      "version": "0.26.10",
-      "from": "tradle/react-native-image-picker",
-      "resolved": "git://github.com/tradle/react-native-image-picker.git#4ebdfa3054c5656b44150bcc9edf3e6527beb979"
+      "version": "0.27.1",
+      "from": "tradle/react-native-image-picker#dev",
+      "resolved": "git://github.com/tradle/react-native-image-picker.git#6fe767dd2d37b0301ced87392627cc23db156207"
+    },
+    "react-native-image-store": {
+      "version": "1.0.0",
+      "from": "tradle/react-native-image-store",
+      "resolved": "git://github.com/tradle/react-native-image-store.git#a6651543931e10b9470a149252e497b16b86a4c3"
     },
     "react-native-infinite-scroll-view": {
       "version": "0.4.3",
@@ -6504,6 +6514,11 @@
           }
         }
       }
+    },
+    "react-native-tradle-keeper": {
+      "version": "1.0.0",
+      "from": "tradle/react-native-tradle-keeper",
+      "resolved": "git://github.com/tradle/react-native-tradle-keeper.git#97a0450142d284781042b9f1e0cb64a853c69698"
     },
     "react-native-udp": {
       "version": "2.3.1",
@@ -6938,6 +6953,18 @@
       "version": "1.1.0",
       "from": "rn-fetch@latest",
       "resolved": "http://registry.npmjs.org/rn-fetch/-/rn-fetch-1.1.0.tgz"
+    },
+    "rn-fetch-blob": {
+      "version": "0.10.13",
+      "from": "mvayngrib/rn-fetch-blob",
+      "resolved": "git://github.com/mvayngrib/rn-fetch-blob.git#1c7ca74928a552b2f513c06e0be4bdce75804865",
+      "dependencies": {
+        "glob": {
+          "version": "7.0.6",
+          "from": "glob@7.0.6",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-7.0.6.tgz"
+        }
+      }
     },
     "rn-markdown": {
       "version": "1.2.1",

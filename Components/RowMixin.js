@@ -7,7 +7,6 @@ import {
   View,
   Alert,
   Platform,
-  Image,
 } from 'react-native'
 import { coroutine as co } from 'bluebird'
 
@@ -20,6 +19,7 @@ import ENV from '../utils/env'
 import IProov from '../utils/iproov'
 import { Text } from './Text'
 import chatStyles from '../styles/chatStyles'
+import Image from './Image'
 
 const SHOW_TIME_INTERVAL = 60000
 const DEFAULT_CURRENCY_SYMBOL = '£'

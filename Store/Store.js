@@ -27,6 +27,7 @@ import refreshPrefill from './refreshPrefill.json'
 
 import Reflux from 'reflux'
 import Actions from '../Actions/Actions'
+import { uploadLinkedMedia } from '../utils/upload-linked-media'
 import Debug from 'debug'
 
 import createProcessor from 'level-change-processor'
@@ -226,7 +227,7 @@ import AWSClient from '@tradle/aws-client'
 // import map from 'map-stream'
 // import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // import createKeeper from '@tradle/keeper'
-import { createKeeper } from '../utils/keeper'
+import { createKeeper, promisifyKeeper, setGlobalKeeper } from '../utils/keeper'
 // import Restore from '@tradle/restore'
 import crypto from 'crypto'
 // import { loadOrCreate as loadYuki } from './yuki'
@@ -350,7 +351,8 @@ var driverInfo = (function () {
 //   { type: 'ec', purpose: 'update', curve: 'p256' }
 // ]
 
-const ENCRYPTION_KEY = 'accountkey'
+const ENCRYPTION_MATERIAL = 'accountkey'
+const ENC_KEY_LENGTH_IN_BYTES = 32
 // const DEVICE_ID = 'deviceid'
 const ANALYTICS_KEY = 'analyticskey'
 
@@ -1049,11 +1051,14 @@ var Store = Reflux.createStore({
     const keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
       db: asyncstorageDown,
-      encryption: encryption,
+      encryption,
       caching: {
         max: 100,
       }
     })
+
+    // terrible
+    setGlobalKeeper(keeper)
 
     const { wsClients, restoreMonitors } = driverInfo
 
@@ -1206,11 +1211,13 @@ var Store = Reflux.createStore({
 
       debug(`pushing msg to ${identifier} into network stack`)
       try {
-        // message = await uploadLinkedMedia({
-        //   client: transport,
-        //   keeper:
-        //   object: message,
-        // })
+        if (uploadLinkedMedia) {
+          message = await uploadLinkedMedia({
+            client: transport,
+            keeper,
+            object: message,
+          })
+        }
 
         await transport.send({ link, message })
       } catch (err) {
@@ -9248,25 +9255,29 @@ if (!res[SIG]  &&  res._message)
         ? Keychain.lookupKeys(mePub)
         : Promise.resolve(mePriv.map(k => tradleUtils.importKey(k)))
 
-      const [keys, encryptionKey] = await Promise.all([
+      let [keys, encryptionMaterial] = await Promise.all([
         lookupKeys,
-        utils.getPassword(ENCRYPTION_KEY)
+        utils.getPasswordBytes(ENCRYPTION_MATERIAL, 'hex'),
       ])
 
-      if (!encryptionKey) {
+      if (!encryptionMaterial) {
         await this.requireFreshUser({
           title: translate('resetRequired'),
           message: translate('storageCorrupted')
         })
       }
 
-      return { keys, encryptionKey, identity }
+      return {
+        keys,
+        identity,
+        encryptionMaterial,
+      }
     }
 
-    const { encryptionKey, identityInfo } = await this.createNewIdentity()
+    const { encryptionMaterial, identityInfo } = await this.createNewIdentity()
     return {
       ...identityInfo,
-      encryptionKey
+      encryptionMaterial,
     }
   },
 
@@ -9280,8 +9291,9 @@ if (!res[SIG]  &&  res._message)
 
     return this.loadIdentityAndKeys(me)
     .then(result => {
+      const { identity, keys, encryptionMaterial } = result
       if (!Keychain) {
-        let privkeys = result.keys.map(k => {
+        let privkeys = keys.map(k => {
           return k.toJSON ? k.toJSON(true) : k
         })
         let myIdentities = this._getItem(MY_IDENTITIES)
@@ -9304,11 +9316,9 @@ if (!res[SIG]  &&  res._message)
       // me[NONCE] = me[NONCE] || this.getNonce()
       // driverInfo.deviceID = result.deviceID
       return this.buildDriver({
-        identity: result.identity,
-        keys: result.keys,
-        encryption: {
-          key: new Buffer(result.encryptionKey, 'hex')
-        }
+        identity,
+        keys,
+        encryption: parseEncryptionMaterial(encryptionMaterial),
       })
     }, err => {
       debugger
@@ -9371,7 +9381,9 @@ if (!res[SIG]  &&  res._message)
     return utils.getMe().pushSubscriptions || []
   },
   async createNewIdentity() {
-    const encryptionKey = crypto.randomBytes(32).toString('hex')
+    // generate some extra material
+    // in case we need it later (like we did when we added the hmacKey)
+    const encryptionMaterial = crypto.randomBytes(ENC_KEY_LENGTH_IN_BYTES * 10)
     // const globalSalt = crypto.randomBytes(32).toString('hex')
 
     this.setBusyWith('generatingKeys')
@@ -9382,11 +9394,11 @@ if (!res[SIG]  &&  res._message)
         this.setBusyWith('setting encryption key')
       }
 
-      await utils.setPassword(ENCRYPTION_KEY, encryptionKey)
+      await utils.setPassword(ENCRYPTION_MATERIAL, encryptionMaterial.toString('hex'))
       this.setBusyWith(null)
       return {
-        encryptionKey,
-        identityInfo
+        identityInfo,
+        encryptionMaterial,
       }
     } catch (err) {
       if (!/authentication failed/.test(err.message)) {
@@ -9433,10 +9445,11 @@ if (!res[SIG]  &&  res._message)
     })
   },
   monitorTim() {
-    this._keeper = {}
-    ;['get', 'put', 'batch', 'del'].forEach(method => {
-      this._keeper[method] = promisify(meDriver.keeper[method].bind(meDriver.keeper))
-    })
+    this._keeper = promisifyKeeper(meDriver.keeper)
+    // this._keeper = {}
+    // ;['get', 'put', 'batch', 'del'].forEach(method => {
+    //   this._keeper[method] = promisify(meDriver.keeper[method].bind(meDriver.keeper))
+    // })
 
     this.monitorLog()
   },
@@ -11181,6 +11194,17 @@ await fireRefresh(val.from.organization)
 // );
 
 module.exports = Store;
+
+const parseEncryptionMaterial = encryptionMaterial => {
+  const length = Buffer.isBuffer(encryptionMaterial) ? ENC_KEY_LENGTH_IN_BYTES : ENC_KEY_LENGTH_IN_BYTES * 2
+  const encryptionKey = encryptionMaterial.slice(0, length)
+  // sorry, old users
+  const hmacKey = encryptionMaterial.length == length
+    ? encryptionMaterial
+    : encryptionMaterial.slice(length, length * 2)
+
+  return { encryptionKey, hmacKey }
+}
 
 function getProviderUrl (provider) {
   return provider.url

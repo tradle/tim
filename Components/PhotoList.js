@@ -11,12 +11,13 @@ import RowMixin from './RowMixin'
 
 import {
   StyleSheet,
-  Image,
   View,
   ListView,
   Animated,
   TouchableHighlight,
 } from 'react-native'
+
+import Image from './Image'
 
 const PHOTO = 'tradle.Photo'
 

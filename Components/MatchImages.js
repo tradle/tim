@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import {
   StyleSheet,
-  Image,
   ScrollView,
   View
 } from 'react-native'
@@ -14,6 +13,7 @@ import Store from '../Store/Store'
 import ResourceMixin from './ResourceMixin'
 import PageView from './PageView'
 import utils from '../utils/utils'
+import Image from './Image'
 
 import { makeResponsive } from 'react-native-orient'
 
