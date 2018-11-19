@@ -6971,30 +6971,44 @@ if (!res[SIG]  &&  res._message)
     .then((l) => {
       if (!foundResources.length)
         return
-
+      // Filter FR for PR
+      // let len = foundResources.length
+      // for (let i=0; i<len; i++) {
+      //   let r = foundResources[i]
+      //   if (r[TYPE] === FORM_REQUEST  &&  r.requestFor === PRODUCT_REQUEST) {
+      //     if (i < len - 1) {
+      //       let r2 = foundResources[i + 1]
+      //       if (r2[TYPE] === FORM_REQUEST  &&  r2.requestFor === PRODUCT_REQUEST) {
+      //         foundResources.splice(i, 1)
+      //         len--
+      //       }
+      //     }
+      //   }
+      // }
+      foundResources = this.filterFound({foundResources, filterProps, refsObj})
       foundResources.forEach((r) => {
-        if (r[TYPE] === VERIFICATION)
-          r.document = refsObj[utils.getId(r.document)] || r.document
-        else if (r[TYPE] === FORM_ERROR) {
-          let prefill = refsObj[utils.getId(r.prefill)]
-          if (prefill)
-            r.prefill = prefill
-        }
+        // if (r[TYPE] === VERIFICATION)
+        //   r.document = refsObj[utils.getId(r.document)] || r.document
+        // else if (r[TYPE] === FORM_ERROR) {
+        //   let prefill = refsObj[utils.getId(r.prefill)]
+        //   if (prefill)
+        //     r.prefill = prefill
+        // }
 
-        this.addVisualProps(r)
+        // this.addVisualProps(r)
         // Check if this message was shared, display the time when it was shared not when created
-        if (r._sharedWith  &&  to) {
-          let orgTo = r.to.organization
-          if (!orgTo &&  utils.getId(r.to) === utils.getId(me))
-            orgTo = r.from.organization
-          if (utils.getId(to) !== utils.getId(orgTo)) {
-            let author = to._author
-            if (author) {
-              let sh = r._sharedWith.filter(r => utils.getRootHash(r.bankRepresentative) === author)
-              if (sh.length)
-                r._time = sh[0].timeShared
-            }
-          }
+        if (!r._sharedWith  ||  !to)
+          return
+        let orgTo = r.to.organization
+        if (!orgTo &&  utils.getId(r.to) === utils.getId(me))
+          orgTo = r.from.organization
+        if (utils.getId(to) === utils.getId(orgTo))
+          return
+        let author = to._author
+        if (author) {
+          let sh = r._sharedWith.filter(r => utils.getRootHash(r.bankRepresentative) === author)
+          if (sh.length)
+            r._time = sh[0].timeShared
         }
       })
       // Minor hack before we intro sort property here
@@ -7007,21 +7021,6 @@ if (!res[SIG]  &&  res._message)
       }
       foundResources = sortedFR
       // foundResources.sort((a, b) => a._time - b._time)
-      let len = foundResources.length
-      for (let i=0; i<len; i++) {
-        let r = foundResources[i]
-        if (r[TYPE] === FORM_REQUEST  &&  r.requestFor === PRODUCT_REQUEST) {
-          if (i < len - 1) {
-            let r2 = foundResources[i + 1]
-            if (r2[TYPE] === FORM_REQUEST  &&  r2.requestFor === PRODUCT_REQUEST) {
-              foundResources.splice(i, 1)
-              len--
-            }
-          }
-        }
-      }
-      if (filterProps)
-        foundResources = this.filterFound(foundResources, filterProps, refsObj)
 
       utils.pinFormRequest(foundResources)
 // console.timeEnd('searchAllMessages')
@@ -7628,8 +7627,7 @@ if (!res[SIG]  &&  res._message)
       if (!foundResources.length)
         return
 
-      if (filterProps)
-        foundResources = this.filterFound(foundResources, filterProps, refsObj)
+      foundResources = this.filterFound({foundResources, filterProps, refsObj})
       // Minor hack before we intro sort property here
       foundResources.sort((a, b) => a._time - b._time)
       let result = params._readOnly  &&  utils.isContext(modelName)
@@ -7659,7 +7657,7 @@ if (!res[SIG]  &&  res._message)
       return newResult.reverse()
     }
   },
-  filterFound(foundResources, filterProps, refsObj) {
+  filterFound({foundResources, filterProps, refsObj}) {
     return foundResources.filter((r) => {
       if (filterProps) {
         // debugger
