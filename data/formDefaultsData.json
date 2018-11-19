@@ -551,8 +551,8 @@
       "title": "Valid Driver Licence"
     },
     "country": {
-      "id": "tradle.Country_NZ",
-      "title": "New Zealand"
+      "id": "tradle.Country_GB",
+      "title": "United Kingdom"
     },
     "scan": {
       "height": 750,

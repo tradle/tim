@@ -3,12 +3,16 @@ import { Platform, Alert } from 'react-native'
 // import groupBy from 'lodash/groupBy'
 // import BlinkID from 'react-native-blinkid'
 import * as BlinkID from 'blinkid-react-native';
+import ImageStore from 'react-native-image-store'
+import traverse from 'traverse'
+import setPropertyAtPath from 'lodash/set'
 // import { BlinkID , MrtdKeys, UsdlKeys, EUDLKeys, NzdlFrontKeys as NZDLKeys, MYKADKeys } from 'blinkid-react-native'
 const UsdlKeys = BlinkID.UsdlKeys
 import { microblink } from '../utils/env'
 import _ from 'lodash'
 import { isSimulator, keyByValue, sanitize } from '../utils/utils'
 import { requestCameraAccess } from '../utils/camera'
+import { getGlobalKeeper } from '../utils/keeper'
 
 const recognizers = {
   // scans documents with face image and returns document images
@@ -52,6 +56,25 @@ const recognizers = {
 let licenseKey
 
 const setLicenseKey = value => licenseKey = value
+
+const replaceDataUrls = async object => {
+  const dataUrlProps = []
+  traverse(object).forEach(function (value) {
+    if (typeof value === 'string' && value.startsWith('data:image/')) {
+      dataUrlProps.push({ path: this.path, value })
+    }
+  })
+
+  const keeper = getGlobalKeeper()
+  await Promise.all(dataUrlProps.map(async ({ path, value }) => {
+    const imageTag = await ImageStore.addImageFromBase64({ base64: value })
+    const keeperUri = await keeper.importFromImageStore(imageTag)
+    setPropertyAtPath(object, path, keeperUri)
+  }))
+
+  return object
+}
+
 const scan = (function () {
   if (isSimulator()) return
   if (!microblink || !BlinkID || BlinkID.notSupportedBecause) return
@@ -151,7 +174,7 @@ const scan = (function () {
     if (scanBothSides  &&  normalized.length === 2)
       _.merge(normalized[0], normalized[1])
     // debugger
-    return normalized[0]
+    return replaceDataUrls(normalized[0])
   }
 }());
 

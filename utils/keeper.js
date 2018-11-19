@@ -110,18 +110,16 @@ const remapNativeKeeperToRegularKeeper = nativeKeeper => {
 
   const keyToImageTag = new Map()
   // const getKeeperUriCacheKeys = keeperUri => ([keeperUri, parseKeeperUri(keeperUri).hash])
-
-  const getCacheKeyForKeeperUri = uri => parseKeeperUri(uri).hash
+  const getKeyFromKeeperUri = uri => parseKeeperUri(uri).hash
+  const getCacheKeyForKeeperUri = getKeyFromKeeperUri
   const cacheImageKey = (key, imageTag) => keyToImageTag.set(key, imageTag)
   const uncacheImageKey = (key, imageTag) => keyToImageTag.delete(key)
   const cacheKeeperUri = (keeperUri, imageTag) => {
     cacheImageKey(getCacheKeyForKeeperUri(keeperUri), imageTag)
-    // getKeeperUriCacheKeys(keeperUri).forEach(key => keyToImageTag.set(key, imageTag))
   }
 
   const uncacheKeeperUri = keeperUri => {
     uncacheImageKey(getCacheKeyForKeeperUri(keeperUri))
-    // getKeeperUriCacheKeys(keeperUri).forEach(key => keyToImageTag.delete(key))
   }
 
   const _prefetch = async key => {
@@ -132,17 +130,22 @@ const remapNativeKeeperToRegularKeeper = nativeKeeper => {
   const prefetch = async key => {
     let imageTag = keyToImageTag.get(key)
     if (!imageTag) {
-      imageTag = await _prefetch(key)
-      cacheImageKey(key, imageTag)
-      // cacheKeeperUri(buildKeeperUri({ hash: key }), imageTag)
+      // cache promise so that concurrent requests don't
+      // cause multiple fetches
+      const promise = _prefetch(key).catch(err => {
+        uncacheImageKey(key)
+      })
+
+      cacheImageKey(key, promise)
+      imageTag = await promise
     }
 
     return imageTag
   }
 
-  const prefetchUri = uri => prefetch(getCacheKeyForKeeperUri(uri))
+  const prefetchUri = uri => prefetch(getKeyFromKeeperUri(uri))
   const uncacheUri = async uri => {
-    const imageTag = keyToImageTag.get(getCacheKeyForKeeperUri(uri))
+    const imageTag = keyToImageTag.get(getKeyFromKeeperUri(uri))
     keyToImageTag.delete(uri)
     await nativeKeeper.removeFromImageStore({ imageTag })
   }

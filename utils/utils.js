@@ -31,6 +31,7 @@ import Debug from 'debug'
 const debug = Debug('tradle:app:utils')
 import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
+import Embed from '@tradle/embed'
 const { sanitize } = validateResource.utils
 import Lens from '@tradle/lens'
 import {
@@ -1253,7 +1254,7 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
       return url;
     else if (url.indexOf('file:///') === 0)
       return url.replace('file://', '')
-    else if (url.indexOf('../') === 0)
+    else if (url.indexOf('../') === 0 || Embed.isKeeperUri(url))
       return url
     // else if (url.indexOf('/var/mobile/') == 0)
     //   return url;
@@ -2328,7 +2329,7 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
       return 1
     }
 
-    return 0.5
+    return 1 // 0.5
   },
   requestForModels() {
     let me = utils.getMe()
