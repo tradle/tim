@@ -143,7 +143,7 @@
     "react-native-animatable": "^0.6.1",
     "react-native-app-intro": "github:tradle/react-native-app-intro#dev",
     "react-native-async-storage-rocks": "^2.2.0",
-    "react-native-async-storage-snappy": "^1.2.0",
+    "react-native-async-storage-snappy": "^1.2.1",
     "react-native-awesome-card-io": "^0.7.0",
     "react-native-branch": "^2.2.4",
     "react-native-button": "^2.3.0",
