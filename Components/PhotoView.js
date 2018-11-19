@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import {
-  ImageBackground,
   View,
   Text,
   Animated,
@@ -16,6 +15,7 @@ import utils from '../utils/utils'
 import constants from '@tradle/constants'
 import PhotoCarouselMixin from './PhotoCarouselMixin'
 import Image from './Image'
+import ImageBackground from './ImageBackground'
 
 class PhotoView extends Component {
   constructor(props) {

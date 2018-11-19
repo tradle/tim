@@ -326,7 +326,6 @@ class RefPropertyEditor extends Component {
     }
   }
   onTakePicture(params, data) {
-    debugger
     if (!data)
       return
 

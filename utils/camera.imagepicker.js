@@ -62,7 +62,6 @@ export const capture = props => new Promise((resolve, reject) => {
     if (didCancel) return resolve()
     if (error) return reject(new Error(error))
 
-    debugger
     resolve(normalizeImageCaptureData({
       ...result,
       extension: quality === 1 ? 'png' : 'jpeg',
