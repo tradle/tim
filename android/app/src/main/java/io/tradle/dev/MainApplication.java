@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.multidex.MultiDex;
 
 import com.BV.LinearGradient.LinearGradientPackage;
+import com.RNFetchBlob.RNFetchBlobPackage;
 import com.babisoft.ReactNativeLocalization.ReactNativeLocalizationPackage;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
@@ -36,7 +37,9 @@ import java.util.List;
 
 import io.branch.referral.Branch;
 import io.branch.rnbranch.RNBranchPackage;
-import io.tradle.react.LocalAuthPackage;
+import io.tradle.reactlocalauth.LocalAuthPackage;
+import io.tradle.reactimagestore.ImageStorePackage;
+import io.tradle.reactkeeper.RNTradleKeeperPackage;
 import io.tradle.snappystorage.RNAsyncSnappyStoragePackage;
 
 // import com.instabug.reactlibrary.RNInstabugReactnativePackage;
@@ -64,8 +67,11 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       List<ReactPackage> packages = Arrays.<ReactPackage>asList(
         new MainReactPackage(),
-            new MicroblinkReactPackage(),
-            new RNCardIOPackage(),
+        new ImageStorePackage(),
+        new RNFetchBlobPackage(),
+        new RNTradleKeeperPackage(),
+        new MicroblinkReactPackage(),
+        new RNCardIOPackage(),
         new SplashScreenReactPackage(),
         new RNBranchPackage(),
         new TcpSocketsModule(),
