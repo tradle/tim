@@ -26,6 +26,7 @@ export const capture = props => new Promise((resolve, reject) => {
     quality,
     width,
     height,
+    addToImageStore,
 
     // specific to image picker
     returnIsVertical,
@@ -51,6 +52,8 @@ export const capture = props => new Promise((resolve, reject) => {
     cancelButtonTitle,
     storageOptions,
     mediaType,
+    addToImageStore,
+    noData: addToImageStore && Platform.OS !== 'web',
     // due to out-of-memory issues
     // maxHeight: 1536,
   }
@@ -59,6 +62,7 @@ export const capture = props => new Promise((resolve, reject) => {
     if (didCancel) return resolve()
     if (error) return reject(new Error(error))
 
+    debugger
     resolve(normalizeImageCaptureData({
       ...result,
       extension: quality === 1 ? 'png' : 'jpeg',

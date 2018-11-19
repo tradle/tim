@@ -1868,6 +1868,9 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
     return Keychain.getGenericPassword(username, ENV.serviceID)
   },
 
+  getPasswordBytes: (username, encoding) => utils.getPassword(username)
+    .then(password => new Buffer(password, encoding)),
+
   /**
    * store hashed and salted password
    * @param {[type]} username [description]
@@ -2607,6 +2610,7 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
     }
   },
 
+  traverse,
   deepRemoveProperties(obj, test) {
     traverse(obj).forEach(function (value) {
       if (test(({ key: this.key, value }))) {

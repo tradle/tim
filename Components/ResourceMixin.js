@@ -5,7 +5,6 @@ import {
   Text,
   View,
   ActivityIndicator,
-  Image,
   Linking,
   TouchableOpacity
 } from 'react-native'
@@ -25,6 +24,7 @@ import defaultBankStyle from '../styles/defaultBankStyle.json'
 import utils, { translate } from '../utils/utils'
 import platformStyles from '../styles/platform'
 import ApplicationView from './ApplicationView'
+import Image from './Image'
 
 const debug = utils.logger('ResourceMixin')
 const NOT_SPECIFIED = '[not specified]'

@@ -1,6 +1,5 @@
 
 import {
-  Image,
   Alert,
   Platform,
   TouchableHighlight,
@@ -33,6 +32,7 @@ import appStyle from '../styles/appStyle.json'
 import StyleSheet from '../StyleSheet'
 
 import Geometry from './Geometry'
+import Image from './Image'
 
 const ASSIGN_RM = 'tradle.AssignRelationshipManager'
 const MODEL = 'tradle.Model'

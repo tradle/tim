@@ -122,7 +122,7 @@ var OnePropFormMixin = {
   onTakePic(params, photo) {
     if (!photo)
       return
-    let { width, height, dataUrl } = photo
+    let { width, height, url } = photo
     let { isRefresh } = this.props
 
     let { prop, resource } = params
@@ -141,7 +141,7 @@ var OnePropFormMixin = {
       }
     }
     _.extend(r, {
-        [prop.name]: { width, height, url: dataUrl }
+        [prop.name]: { width, height, url }
       })
     Actions.addChatItem({
       disableFormRequest: !isRefresh  &&  resource,
