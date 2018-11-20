@@ -8,7 +8,7 @@ const getHeadersFromParsedKeeperUri = ({ length, mimetype, mimeType }) => {
     'Content-Type': mimetype || mimeType,
   }
 
-  if (typeof length === 'number') {
+  if (length) {
     // rn-fetch-blob doesn't like numbers
     headers['Content-Length'] = String(length)
   }

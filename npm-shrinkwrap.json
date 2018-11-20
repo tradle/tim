@@ -6518,7 +6518,7 @@
     "react-native-tradle-keeper": {
       "version": "1.0.0",
       "from": "tradle/react-native-tradle-keeper",
-      "resolved": "git://github.com/tradle/react-native-tradle-keeper.git#5f9e2fe6832fcd9709e23959521fc68326ddd337"
+      "resolved": "git://github.com/tradle/react-native-tradle-keeper.git#7ef583fc98957e192da2a6289000594369029a30"
     },
     "react-native-udp": {
       "version": "2.3.1",
