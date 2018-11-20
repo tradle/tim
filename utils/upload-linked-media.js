@@ -2,7 +2,27 @@ import { Platform } from 'react-native'
 import Embed from '@tradle/embed'
 import RNFetchBlob from 'rn-fetch-blob'
 import cloneDeep from 'lodash/cloneDeep'
-import traverse from 'traverse'
+
+const getHeadersFromParsedKeeperUri = ({ length, mimetype, mimeType }) => {
+  const headers = {
+    'Content-Type': mimetype || mimeType,
+  }
+
+  if (typeof length === 'number') {
+    // rn-fetch-blob doesn't like numbers
+    headers['Content-Length'] = String(length)
+  }
+
+  return headers
+}
+
+const uploadFile = async ({ req, fileUri }) => {
+  if (Platform.OS === 'android') {
+    fileUri = RNFetchBlob.wrap(fileUri)
+  }
+
+  return RNFetchBlob.fetch('PUT', req.url, req.headers, fileUri)
+}
 
 export const uploadLinkedMedia = async ({ keeper, client, object }) => {
   await client.awaitAuthenticated()
@@ -18,9 +38,13 @@ export const uploadLinkedMedia = async ({ keeper, client, object }) => {
   //   launch async process (prefetch)
   //   run sync code while we wait (genUploadRequestSkeleton performs crypto)
   const getCacheUris = Promise.all(keys.map(key => keeper.prefetch(key)))
-  const reqs = replacements.map(({ hash, mimetype }) => client.genUploadRequestSkeleton({ key: hash, mimetype }))
+  const reqs = replacements.map(replacement => client.genUploadRequestSkeleton({
+    key: replacement.hash,
+    headers: getHeadersFromParsedKeeperUri(replacement),
+  }))
+
   const cacheUris = await getCacheUris
-  await Promise.all(reqs.map((req, i) => RNFetchBlob.fetch('PUT', req.url, req.headers, cacheUris[i])))
+  await Promise.all(reqs.map((req, i) => uploadFile({ req, fileUri: cacheUris[i] })))
   return object
 }
 

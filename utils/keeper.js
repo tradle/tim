@@ -1,17 +1,19 @@
 import promisify from 'pify'
 import flatten from 'lodash/flattenDeep'
 import omit from 'lodash/omit'
+import setPropertyAtPath from 'lodash/set'
+import traverse from 'traverse'
 import { TYPE, TYPES } from '@tradle/constants'
 import { linkString } from '@tradle/protocol'
 import createBaseKeeper from '@tradle/keeper'
 import cachifyKeeper from '@tradle/keeper/cachify'
 import NativeKeeper from 'react-native-tradle-keeper'
+import ImageStore from 'react-native-image-store'
 import { buildKeeperUri as _buildKeeperUri, parseKeeperUri } from '@tradle/embed'
 import { timeAsyncFunctions } from './perf'
 
 const buildKeeperUri = props => _buildKeeperUri({
   algorithm: DIGEST_ALGORITHM,
-  mimetype: props.mimetype || props.mimeType,
   ...props,
 })
 
@@ -151,17 +153,34 @@ const remapNativeKeeperToRegularKeeper = nativeKeeper => {
   }
 
   const importFromImageStore = async imageTag => {
-    const { key, mimeType } = await nativeKeeper.importFromImageStore({ imageTag })
+    const { key, ...details } = await nativeKeeper.importFromImageStore({ imageTag })
     const keeperUri = buildKeeperUri({
       hash: key,
-      mimeType,
+      ...details,
     })
 
     cacheKeeperUri(keeperUri, imageTag)
     return keeperUri
   }
 
-  return {
+  const replaceDataUrls = async object => {
+    const dataUrlProps = []
+    traverse(object).forEach(function (value) {
+      if (typeof value === 'string' && value.startsWith('data:image/')) {
+        dataUrlProps.push({ path: this.path, value })
+      }
+    })
+
+    await Promise.all(dataUrlProps.map(async ({ path, value }) => {
+      const imageTag = await ImageStore.addImageFromBase64({ base64: value })
+      const keeperUri = await importFromImageStore(imageTag)
+      setPropertyAtPath(object, path, keeperUri)
+    }))
+
+    return object
+  }
+
+  const ret = {
     get,
     put,
     del,
@@ -171,8 +190,11 @@ const remapNativeKeeperToRegularKeeper = nativeKeeper => {
     uncache: uncacheImageKey,
     uncacheUri,
     importFromImageStore,
+    replaceDataUrls,
     close: asyncNoop,
   }
+
+  return ret
 }
 
 const stripEmbeddedObjects = keeper => {

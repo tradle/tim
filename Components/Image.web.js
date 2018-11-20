@@ -3,4 +3,4 @@ import {
   Image,
 } from 'react-native'
 
-export default class Image
+export default Image
