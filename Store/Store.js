@@ -220,7 +220,7 @@ const CUSTOMER_ONBOARDING = 'bd.nagad.CustomerKYC'
 const MY_ENVIRONMENT      = 'environment.json'
 
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
-const MAX_CUSTOMERS_ON_DEVICE = 1
+const MAX_CUSTOMERS_ON_DEVICE = 3
 
 import AWSClient from '@tradle/aws-client'
 // import dns from 'dns'
@@ -4392,8 +4392,10 @@ if (!res[SIG]  &&  res._message)
           addDocumentCreated = form === resource[TYPE]
         }
         else if (fr[TYPE] === FORM_ERROR) {
-          let prefillForm = fr.prefill || disableFormRequest
-          addDocumentCreated = prefillForm.prefill[TYPE] === resource[TYPE]
+          if (fr  &&  fr.prefill)
+            addDocumentCreated = fr.prefillForm.prefill[TYPE] === resource[TYPE]
+          else if (disableFormRequest)
+            addDocumentCreated = disableFormRequest.prefill[TYPE] === resource[TYPE]
         }
         if (addDocumentCreated) {
           fr._documentCreated = true
@@ -5747,7 +5749,7 @@ if (!res[SIG]  &&  res._message)
           to: this.getRepresentative(to)
         }
         await this.onAddChatItem({resource: pr})
-        await this.deleteCustomersOnDevice()
+        // await this.deleteCustomersOnDevice()
         return
       }
     }
@@ -5962,30 +5964,37 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
   },
   async deleteCustomersOnDevice() {
-    let list = await this.searchMessages({modelName: PRODUCT_REQUEST, to: me.organization, noTrigger: true, filterProps: {requestFor: CUSTOMER_ONBOARDING}})
-    if (!list  ||  !list.length) {
+    if (!me.isAgent)
       return
+    // let list = await this.searchMessages({modelName: PRODUCT_REQUEST, to: me.organization, noTrigger: true, filterProps: {requestFor: CUSTOMER_ONBOARDING}})
+    let list = []
+    for (let c in contextIdToResourceId) {
+      let pr = this._getItem(contextIdToResourceId[c])
+      if (pr  &&  pr.requestFor === CUSTOMER_ONBOARDING)
+        list.push(pr)
     }
-    if (list.length <= MAX_CUSTOMERS_ON_DEVICE)
+    if (!list  ||  list.length <= MAX_CUSTOMERS_ON_DEVICE)
       return
+    list.sort((a, b) => b._time - a._time)
     let batch = []
     let contexts = []
     let messages = []
     debugger
-    for (let i=list.length - 1; i>=MAX_CUSTOMERS_ON_DEVICE; i--) {
-      let r = list[i]
-      messages.push(this.searchMessages({modelName: MESSAGE, to: me.organization, noTrigger: true, filterProps: {_context: utils.buildRef(r)} }))
-    }
-    messages = await Promise.all(messages)
-    messages.forEach(list => {
-      if (!list.length)
-        return
-      list.forEach(r => {
-        let id = utils.getId(r)
-        this._deleteItem(id)
-        this.deleteMessageFromChat(me.organization.id, r)
-        batch.push({type: 'del', key: id})
-      })
+    for (let i=list.length - 1; i>=MAX_CUSTOMERS_ON_DEVICE; i--)
+      contexts.push(utils.buildRef(list[i]))
+
+    messages = await this.searchMessages({modelName: MESSAGE, to: me.organization, noTrigger: true, filterProps: {_context: contexts} })
+    messages.forEach(r => {
+      let id = utils.getId(r)
+      this._deleteItem(id)
+      this.deleteMessageFromChat(me.organization.id, r)
+      batch.push({type: 'del', key: id})
+    })
+    list.forEach(r => {
+      let id = utils.getId(r)
+      this._deleteItem(id)
+      delete contextIdToResourceId[r.contextId]
+      batch.push({type: 'del', key: id})
     })
 
     if (batch.length)
@@ -8072,6 +8081,8 @@ if (!res[SIG]  &&  res._message)
   async getShareableResources(params) {
     let {foundResources, to, context, filter} = params
     if (!foundResources)
+      return
+    if (me.isAgent  &&  context.requestFor === CUSTOMER_ONBOARDING)
       return
     if (me.isEmployee)
       return await this.getShareableResourcesForEmployee(params)
