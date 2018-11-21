@@ -10,9 +10,17 @@ import ImageStylePropTypes from 'ImageStylePropTypes'
 import ViewStylePropTypes from 'ViewStylePropTypes'
 import pick from 'lodash/pick'
 
-import { isKeeperUri } from '@tradle/embed'
+import Embed from '@tradle/embed'
 import ActivityIndicator from './ActivityIndicator'
 import { getGlobalKeeper } from '../utils/keeper'
+
+const isKeeperUri = uri => uri && Embed.isKeeperUri(uri)
+const getUriProp = props => props && props.source && props.source.uri
+const shouldRefetch = (oldProps, newProps) => {
+  const oldUri = getUriProp(oldProps)
+  const newUri = getUriProp(newProps)
+  return newUri && newUri !== oldUri && isKeeperUri(newUri)
+}
 
 const getDefaultLoader = props => () => (
   <View style={[styles.container, pick(props, ViewStylePropTypes)]}>
@@ -32,7 +40,7 @@ const styles = StyleSheet.create({
 })
 
 export const wrapImageComponent = ImageComponent => {
-  class ImageComponentWrapper extends Component {
+  return class ImageComponentWrapper extends Component {
     static displayName = ImageComponent.displayName + 'Async'
     static propTypes = {
       ...ImageStylePropTypes,
@@ -40,34 +48,52 @@ export const wrapImageComponent = ImageComponent => {
       loading: PropTypes.func,
     }
 
-    state = {
-      loading: true,
-      source: null,
-    }
-
     constructor(props) {
       super(props)
       this.keeper = props.keeper || getGlobalKeeper()
       this.renderLoader = props.loading ? props.loading.bind(props) : getDefaultLoader(props)
+
+      const uri = getUriProp(props)
+      if (isKeeperUri(uri)) {
+        this.state = {
+          loading: true,
+          source: null,
+        }
+      } else {
+        this.state = {
+          source: props.source,
+        }
+      }
     }
 
     componentWillReceiveProps(props) {
-      if (props.source && props.source.uri !== this.props.source.uri) {
-        this._refetch(props)
+      this._maybeRefetch(this.props, props)
+    }
+
+    async _maybeRefetch(oldProps, newProps) {
+      if (!shouldRefetch(oldProps, newProps)) return
+
+      try {
+        await this._refetch(newProps)
+      } catch (err) {
+        console.log('failed to prefetch image from keeper', err.message)
       }
     }
 
     async _refetch(props) {
-      const keeperUri = props.source.uri
+      const keeperUri = getUriProp(props)
       const uri = await this.keeper.prefetchUri(keeperUri)
       this.setState({
         loading: false,
-        source: { uri }
+        source: {
+          ...props.source,
+          uri,
+        }
       })
     }
 
     componentWillMount() {
-      this._refetch(this.props)
+      this._maybeRefetch(null, this.props)
     }
 
     render() {
@@ -81,14 +107,20 @@ export const wrapImageComponent = ImageComponent => {
     }
   }
 
-  return props => {
-    const { source } = props
-    if (source && source.uri && isKeeperUri(source.uri)) {
-      return <ImageComponentWrapper {...props} />
-    }
+  // it would be tempting to return a regular unwrapped Image component
+  // if initial props.source.uri is not a keeperUri, as in the snipper below
+  //
+  // this would be a mistake, as this component may initially get a regular uri
+  // and then get a keeperUri later via componentWillReceiveProps
 
-    return <ImageComponent {...props} />
-  }
+  // return props => {
+  //   const { source } = props
+  //   if (source && source.uri && isKeeperUri(source.uri)) {
+  //     return <ImageComponentWrapper {...props} />
+  //   }
+
+  //   return <ImageComponent {...props} />
+  // }
 }
 
 export default wrapImageComponent(Image)
