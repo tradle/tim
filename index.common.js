@@ -3,10 +3,6 @@ import './utils/errors'
 import './utils/shim'
 import './utils/debug'
 import './utils/automaticUpdates'
-import { interceptTradleKeeperUris } from './utils/protocol-intercept'
-
-interceptTradleKeeperUris()
-
 import React, { Component } from 'react'
 import {
   Image,
