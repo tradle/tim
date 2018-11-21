@@ -552,8 +552,11 @@ class NewResource extends Component {
     // HACK
     if (!resource.from  ||  !resource.to)
       Actions.addItem(params)
-    else
+    else {
+      if (originatingMessage)
+        params.disableFormRequest = originatingMessage
       Actions.addChatItem(params)
+    }
   }
   // HACK: the value for property of the type that is subClassOf Enum is set on resource
   // and it is different from what tcomb sets in the text field

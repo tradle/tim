@@ -4370,7 +4370,30 @@ if (!res[SIG]  &&  res._message)
       let chatId = utils.getId(chat)
       returnVal.to = self.buildRef(self.getRepresentative(chatId))
     }
-
+    let addDocumentCreated, fr
+    // grayout form request that originated this form submission
+    if (disableFormRequest  &&  !disableFormRequest._documentCreated) {
+      // let fr =  disableFormRequest // this._getItem(disableFormRequest)
+      fr = utils.clone(disableFormRequest)
+      if (fr[TYPE] === FORM_REQUEST) {
+        let form = fr.form || disableFormRequest.form
+        addDocumentCreated = form === resource[TYPE]
+      }
+      else if (fr[TYPE] === FORM_ERROR) {
+        if (fr  &&  fr.prefill)
+          addDocumentCreated = fr.prefill[TYPE] === resource[TYPE]
+        else if (disableFormRequest)
+          addDocumentCreated = disableFormRequest.prefill[TYPE] === resource[TYPE]
+      }
+      if (addDocumentCreated) {
+        fr._documentCreated = true
+        fr._document = utils.getId(returnVal)//resource) /// NEW
+        // let key = utils.getId(fr)
+        // self._setItem(key, fr)
+        // self.dbPut(key, fr)
+        self.trigger({action: 'addItem', resource: fr})
+      }
+    }
     if (isRegistration)
       await handleRegistration()
     else if (isMessage  &&  (!returnVal[NOT_CHAT_ITEM] || isRefresh))
@@ -4381,32 +4404,32 @@ if (!res[SIG]  &&  res._message)
       let toId = utils.getId(returnVal.to)
       await updateRequestFoRefresh(this._getItem(toId))
     }
-
     if (disableFormRequest) {
-      // let fr =  disableFormRequest // this._getItem(disableFormRequest)
-      if (!disableFormRequest._documentCreated) {
-        let fr = utils.clone(disableFormRequest)
-        let addDocumentCreated
-        if (fr[TYPE] === FORM_REQUEST) {
-          let form = fr.form || disableFormRequest.form
-          addDocumentCreated = form === resource[TYPE]
-        }
-        else if (fr[TYPE] === FORM_ERROR) {
-          if (fr  &&  fr.prefill)
-            addDocumentCreated = fr.prefillForm.prefill[TYPE] === resource[TYPE]
-          else if (disableFormRequest)
-            addDocumentCreated = disableFormRequest.prefill[TYPE] === resource[TYPE]
-        }
+    //   // let fr =  disableFormRequest // this._getItem(disableFormRequest)
+    //   if (!disableFormRequest._documentCreated) {
+    //     let fr = utils.clone(disableFormRequest)
+    //     let addDocumentCreated
+    //     if (fr[TYPE] === FORM_REQUEST) {
+    //       let form = fr.form || disableFormRequest.form
+    //       addDocumentCreated = form === resource[TYPE]
+    //     }
+    //     else if (fr[TYPE] === FORM_ERROR) {
+    //       if (fr  &&  fr.prefill)
+    //         addDocumentCreated = fr.prefillForm.prefill[TYPE] === resource[TYPE]
+    //       else if (disableFormRequest)
+    //         addDocumentCreated = disableFormRequest.prefill[TYPE] === resource[TYPE]
+    //     }
         if (addDocumentCreated) {
-          fr._documentCreated = true
-          fr._document = utils.getId(returnVal)//resource) /// NEW
+    //       fr._documentCreated = true
+    //       fr._document = utils.getId(returnVal)//resource) /// NEW
           let key = utils.getId(fr)
           self._setItem(key, fr)
           self.dbPut(key, fr)
-          self.trigger({action: 'addItem', resource: fr})
+    //       self.trigger({action: 'addItem', resource: fr})
         }
-      }
+    //   }
     }
+
     if (cb) {
       if (returnVal[TYPE] !== SETTINGS)
         cb(returnVal)
