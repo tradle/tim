@@ -825,6 +825,8 @@ var search = {
       let props = model.properties
       graphQLErrors.forEach(err => {
         if (err.path) {
+          if (err.path === 1)
+            return
           let prop
           for (let i=err.path.length - 1; i>=0  &&  !prop; i--) {
             let p = err.path[i]
