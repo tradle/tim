@@ -847,7 +847,7 @@ var search = {
 
       if (excludeProps.length)
         return { excludeProps }
-      return { error: message }
+      return { error: message, retry: message === NETWORK_FAILURE }
     }
     if (networkError  &&  networkError.message === NETWORK_FAILURE)
       return { error: NETWORK_FAILURE }
