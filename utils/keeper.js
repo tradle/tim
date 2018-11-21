@@ -5,7 +5,8 @@ import setPropertyAtPath from 'lodash/set'
 import traverse from 'traverse'
 import { TYPE, TYPES } from '@tradle/constants'
 import { linkString } from '@tradle/protocol'
-import createBaseKeeper from '@tradle/keeper'
+import Errors from '@tradle/errors'
+import _createOldKeeper from '@tradle/keeper'
 import cachifyKeeper from '@tradle/keeper/cachify'
 import NativeKeeper from 'react-native-tradle-keeper'
 import ImageStore from 'react-native-image-store'
@@ -20,6 +21,7 @@ const buildKeeperUri = props => _buildKeeperUri({
 const debug = require('debug')('tradle:app:keeper')
 const { MESSAGE } = TYPES
 const asyncNoop = async () => {}
+const isNotFoundError = err => Errors.matches(err, { name: 'NotFound' })
 
 const keeperMethodsToPromisify = [
   'get',
@@ -34,26 +36,36 @@ const keeperMethodsToPromisify = [
 ]
 
 const toHex = hexStrOrBuf => Buffer.isBuffer(hexStrOrBuf) ? hexStrOrBuf.toString('hex') : hexStrOrBuf
+const isFallbackKeeperNeeded = opts => !opts.encryption.hmacKey
 
 const DIGEST_ALGORITHM = 'sha256'
 const createNativeKeeper = ({ hmacKey, encryptionKey }) => new NativeKeeper({
-  hmacKey: toHex(hmacKey),
   encryptionKey: toHex(encryptionKey),
+  hmacKey: toHex(hmacKey || encryptionKey), // old users don't have hmacKey
   digestAlgorithm: DIGEST_ALGORITHM,
-  hashInput: 'dataUrlForValue',
   encoding: 'base64',
 })
 
-// dangerous, assumes obj only has async functions as props
-const promisifyMethods = (obj, methods) => Object.keys(obj).reduce((promisified, key) => {
-  if (methods.includes(key)) {
-    promisified[key] = promisify(obj[key].bind(obj))
-  } else {
-    proxyProp(obj, promisified, key)
+const createOldKeeper = opts => promisifyKeeper(_createOldKeeper({
+  ...opts,
+  // opts format changed for native keeper
+  encryption: {
+    key: opts.encryption.encryptionKey,
+  }
+}))
+
+const promisifyMethods = (obj, methods) => {
+  const promisified = {}
+  for (let key in obj) {
+    if (methods.includes(key)) {
+      promisified[key] = promisify(obj[key].bind(obj))
+    } else {
+      proxyProp(obj, promisified, key)
+    }
   }
 
   return promisified
-}, {})
+}
 
 const proxyProp = (source, target, key) => Object.defineProperty(target, key, {
   enumerable: true,
@@ -81,7 +93,10 @@ const supportCallbacksForMethods = (obj, methods) => Object.keys(obj).reduce((ca
   return callbackBased
 }, {})
 
-const remapNativeKeeperToRegularKeeper = nativeKeeper => {
+/**
+ * @return API backwards compatible with promisified @tradle/keeper
+ */
+const wrapNativeKeeper = nativeKeeper => {
   const get = async key => {
     const { value } = await nativeKeeper.get({
       key,
@@ -288,10 +303,35 @@ const stripEmbeddedObjects = keeper => {
   // }
 }
 
+const addFallback = ({
+  primary,
+  fallback,
+  method,
+  shouldFallBack,
+}) => {
+  const orig = primary[method]
+  primary[method] = async (...args) => {
+    try {
+      return await orig.apply(primary, args)
+    } catch (err) {
+      if (!shouldFallBack(err)) throw err
+
+      return fallback[method](...args)
+    }
+  }
+}
+
 const createKeeper = ({ caching, ...opts }) => {
-  let keeper = NativeKeeper
-    ? remapNativeKeeperToRegularKeeper(createNativeKeeper(opts.encryption))
-    : createBaseKeeper(opts)
+  let keeper = wrapNativeKeeper(createNativeKeeper(opts.encryption))
+  if (isFallbackKeeperNeeded(opts)) {
+    const fallback = createOldKeeper(opts)
+    addFallback({
+      primary: keeper,
+      fallback,
+      method: 'get',
+      shouldFallBack: isNotFoundError,
+    })
+  }
 
   keeper = stripEmbeddedObjects(keeper)
 

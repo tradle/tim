@@ -11199,9 +11199,10 @@ const parseEncryptionMaterial = encryptionMaterial => {
   const length = Buffer.isBuffer(encryptionMaterial) ? ENC_KEY_LENGTH_IN_BYTES : ENC_KEY_LENGTH_IN_BYTES * 2
   const encryptionKey = encryptionMaterial.slice(0, length)
   // sorry, old users
-  const hmacKey = encryptionMaterial.length == length
-    ? encryptionMaterial
-    : encryptionMaterial.slice(length, length * 2)
+  let hmacKey
+  if (encryptionMaterial.length > length * 2) {
+    hmacKey = encryptionMaterial.slice(length, length * 2)
+  }
 
   return { encryptionKey, hmacKey }
 }
