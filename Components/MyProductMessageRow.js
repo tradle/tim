@@ -138,7 +138,7 @@ class MyProductMessageRow extends Component {
 
     let viewCols = model.gridCols || model.viewCols;
     if (!viewCols)
-      return {onPressCall: this.props.onSelect.bind(this, resource, null)}
+      return {onPressCall: this.props.onSelect.bind(this, { resource })}
     let first = true;
 
     let properties = model.properties;
@@ -210,7 +210,7 @@ class MyProductMessageRow extends Component {
     }
     if (onPressCall)
       return {onPressCall: onPressCall}
-    return {onPressCall: onSelect.bind(this, resource, null)}
+    return {onPressCall: onSelect.bind(this, { resource })}
   }
 }
 
