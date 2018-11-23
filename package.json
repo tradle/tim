@@ -69,7 +69,7 @@
     "@tradle/models-products-bot": "github:tradle/models-products-bot",
     "@tradle/multiqueue": "^2.3.1",
     "@tradle/promise-utils": "^1.1.0",
-    "@tradle/protocol": "github:tradle/protocol#prehash_media",
+    "@tradle/protocol": "^5.0.0",
     "@tradle/qr-schema": "^1.11.0",
     "@tradle/restore": "github:tradle/restore",
     "@tradle/validate-model": "^7.1.1",

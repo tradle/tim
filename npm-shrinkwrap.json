@@ -622,8 +622,8 @@
     },
     "@tradle/protocol": {
       "version": "5.0.0",
-      "from": "tradle/protocol#prehash_media",
-      "resolved": "git://github.com/tradle/protocol.git#c04c693505476cf35ab5569cbfe25ca37c54cc22"
+      "from": "@tradle/protocol@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-5.0.0.tgz"
     },
     "@tradle/qr-schema": {
       "version": "1.11.0",
@@ -6518,7 +6518,7 @@
     "react-native-tradle-keeper": {
       "version": "1.0.0",
       "from": "tradle/react-native-tradle-keeper",
-      "resolved": "git://github.com/tradle/react-native-tradle-keeper.git#7ef583fc98957e192da2a6289000594369029a30"
+      "resolved": "git://github.com/tradle/react-native-tradle-keeper.git#0a3dbe1c179274b22b7dc24d91be599266f8f5df"
     },
     "react-native-udp": {
       "version": "2.3.1",
