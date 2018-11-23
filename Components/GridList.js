@@ -362,6 +362,7 @@ class GridList extends Component {
         }
       }
       else if (!isForwardlink) {
+console.log('GridList.componentWillMount: filterResource', resource)
         Actions.list({
           modelName: modelName,
           filterResource: resource,
@@ -488,7 +489,7 @@ class GridList extends Component {
           if (params.isSearch  &&   resource) {
             if (params.errorMessage)
               this.errorAlert(params.errorMessage, params.query)
-            else
+            else if (!this.state.refreshing)
               this.errorAlert('noResourcesForCriteria')
           }
           this.setState({refreshing: false, isLoading: false})
@@ -1140,6 +1141,7 @@ class GridList extends Component {
     );
   }
   searchWithFilter(filterResource) {
+console.log('GridList.searchWithFilter: filterResource', filterResource)
     this.setState({resource: filterResource})
     Actions.list({filterResource: filterResource, search: true, modelName: filterResource[TYPE], limit: this.limit, first: true})
   }
@@ -1183,6 +1185,8 @@ class GridList extends Component {
       return
     let { modelName, search, resource } = this.props
     this.state.refreshing = true
+console.log('GridList._loadMoreContentAsync: filterResource', resource)
+
     Actions.list({
       modelName: modelName,
       sortProperty: sortProperty,
