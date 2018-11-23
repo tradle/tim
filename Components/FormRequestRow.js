@@ -442,7 +442,7 @@ class FormRequestRow extends Component {
     //                  {arrow}
     //                </View>
     //              </TouchableOpacity>
-    headerContent = <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
+    headerContent = <TouchableOpacity onPress={onSelect.bind(this, {resource: document, verification})}>
                    <View style={styles.header}>
                      {headerContent}
                    </View>
@@ -457,7 +457,7 @@ class FormRequestRow extends Component {
       else if (resource._documentCreated) {
         orgRow =  <View style={chatStyles.shareView}>
                     {shareView}
-                    <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
+                    <TouchableOpacity onPress={onSelect.bind(this, { resource: document, verification })}>
                       {orgView}
                     </TouchableOpacity>
                   </View>
@@ -477,7 +477,7 @@ class FormRequestRow extends Component {
                    </TouchableOpacity>
                    <View>
                      {headerContent}
-                     <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
+                     <TouchableOpacity onPress={onSelect.bind(this, { resource: document, verification })}>
                        {orgView}
                      </TouchableOpacity>
                    </View>
@@ -485,7 +485,7 @@ class FormRequestRow extends Component {
       }
     }
     let content = <View style={{flex:1, paddingVertical: 3}}>
-                     <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
+                     <TouchableOpacity onPress={onSelect.bind(this, { resource: document, verification })}>
                        {msg}
                      </TouchableOpacity>
                      {orgRow}
@@ -607,7 +607,7 @@ class FormRequestRow extends Component {
                     {shareView}
                     <View>
                      {headerContent}
-                    <TouchableOpacity onPress={onSelect.bind(this, document, verification)}>
+                    <TouchableOpacity onPress={onSelect.bind(this, { resource: document, verification })}>
                       {orgView}
                     </TouchableOpacity>
                     </View>
@@ -620,7 +620,7 @@ class FormRequestRow extends Component {
                    </TouchableOpacity>
                    <View>
                    {headerContent}
-                   <TouchableOpacity onPress={onSelect.bind(this, documents, verifications)}>
+                   <TouchableOpacity onPress={onSelect.bind(this, { resource: documents, verifications })}>
                      {orgView}
                    </TouchableOpacity>
                    </View>
