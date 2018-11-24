@@ -12,6 +12,5 @@
 @interface RNRegulaDocumentReaderBeta : NSObject <RCTBridgeModule>
 
 @property (strong, nonatomic) DocReader *docReader;
-@property (strong, nonatomic) NSString *currentScenario;
 
 @end

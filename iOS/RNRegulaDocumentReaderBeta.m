@@ -24,12 +24,14 @@ RCT_EXPORT_METHOD(initialize:(RCTResponseSenderBlock)callback)
     }];
 }
 
-RCT_EXPORT_METHOD(showScanner:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(showScanner:(NSDictionary*)opts callback:(RCTResponseSenderBlock)callback)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         UIViewController *currentViewController = [[[UIApplication sharedApplication] keyWindow] rootViewController];
 
-        self.docReader.processParams.scenario = self.currentScenario;
+        [self.docReader.processParams setValuesForKeysWithDictionary:opts[@"processParams"]];
+        [self.docReader.customization setValuesForKeysWithDictionary:opts[@"customization"]];
+        [self.docReader.functionality setValuesForKeysWithDictionary:opts[@"functionality"]];
 
         [self.docReader showScanner:currentViewController completion:^(enum DocReaderAction action, DocumentReaderResults * _Nullable result, NSString * _Nullable error) {
             switch (action) {
@@ -68,11 +70,6 @@ RCT_EXPORT_METHOD(showScanner:(RCTResponseSenderBlock)callback)
             }
         }];
     });
-}
-
-RCT_EXPORT_METHOD(setScenario:(NSString *)scenario)
-{
-  self.currentScenario = scenario;
 }
 
 - (NSString *) encodeToBase64String:(UIImage *)image {

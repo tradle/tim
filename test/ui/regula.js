@@ -21,13 +21,13 @@ import dummyResult from '../../data/sample-regula-result.json'
 class App extends Component {
   state = {
     // comment this out to shoot a new one
-    ...dummyResult,
+    // ...dummyResult,
   }
 
   async componentDidMount() {
     if (this.state.results) return
 
-    const result = await scan({ scenario: Scenario.mrz })
+    const result = await scan()
     this.setState(result)
   }
 
