@@ -53,6 +53,8 @@ mk_links() {
   cp ./secrets/android/secrets-main.xml ./android/app/src/main/res/values/secrets.xml
   cp ./secrets/android/secrets-debug.xml ./android/app/src/debug/res/values/secrets.xml
   # for Regula
+  mkdir -p ./android/app/src/main/res/raw/
+  mkdir -p ./android/src/main/assets/Regula/
   cp ./iOS/db.dat ./android/src/main/assets/Regula/
   cp ./secrets/android/regula.license ./android/app/src/main/res/raw/
 
