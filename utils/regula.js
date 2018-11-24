@@ -43,7 +43,7 @@ const normalizeResult = async result => {
   const results = result.jsonResult.map(normalizeJSON)
   // dummy response in data/sample-regula-result.json
   return {
-    results: result.jsonResult,
+    results,
     image: result.image,
   }
 }
