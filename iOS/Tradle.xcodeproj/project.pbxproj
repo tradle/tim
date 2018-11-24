@@ -29,6 +29,9 @@
 		7333B05421A1AE4700CD6374 /* libRNFetchBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7333B05321A1AE4200CD6374 /* libRNFetchBlob.a */; };
 		7333B06621A1C21800CD6374 /* libRNTradleKeeper.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7333B04821A1ADF300CD6374 /* libRNTradleKeeper.a */; };
 		7333B06721A1C21D00CD6374 /* libRNImageStore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7333B04D21A1ADF300CD6374 /* libRNImageStore.a */; };
+		734D71E121A8EA970072F7C9 /* regula.license in Resources */ = {isa = PBXBuildFile; fileRef = 734D719821A8EA970072F7C9 /* regula.license */; };
+		734D71E221A8EA970072F7C9 /* db.dat in Resources */ = {isa = PBXBuildFile; fileRef = 734D71E021A8EA970072F7C9 /* db.dat */; };
+		734D725621A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.m in Sources */ = {isa = PBXBuildFile; fileRef = 734D725521A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.m */; };
 		736290AF1EDE460D007E4DE1 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 736290AE1EDE460D007E4DE1 /* CoreTelephony.framework */; };
 		736290B11EDE4614007E4DE1 /* CoreSpotlight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */; };
 		736290B31EDE4619007E4DE1 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 736290B21EDE4619007E4DE1 /* MobileCoreServices.framework */; };
@@ -628,6 +631,10 @@
 		732B67802060213500B16D6F /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
 		732B9D4C1EDA8A4C00FF957D /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		7333B04E21A1AE4200CD6374 /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/rn-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
+		734D719821A8EA970072F7C9 /* regula.license */ = {isa = PBXFileReference; lastKnownFileType = file; path = regula.license; sourceTree = "<group>"; };
+		734D71E021A8EA970072F7C9 /* db.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = db.dat; sourceTree = "<group>"; };
+		734D725421A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNRegulaDocumentReaderBeta.h; sourceTree = "<group>"; };
+		734D725521A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNRegulaDocumentReaderBeta.m; sourceTree = "<group>"; };
 		736290AE1EDE460D007E4DE1 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreSpotlight.framework; path = System/Library/Frameworks/CoreSpotlight.framework; sourceTree = SDKROOT; };
 		736290B21EDE4619007E4DE1 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
@@ -797,6 +804,10 @@
 		13B07FAE1A68108700A75B9A /* Tradle */ = {
 			isa = PBXGroup;
 			children = (
+				734D725421A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.h */,
+				734D725521A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.m */,
+				734D71E021A8EA970072F7C9 /* db.dat */,
+				734D719821A8EA970072F7C9 /* regula.license */,
 				73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */,
 				7379F84B1EDA19630093535C /* Launch Screen.storyboard */,
 				7379F7CE1EDA14030093535C /* splash1536x2048.png */,
@@ -1998,6 +2009,8 @@
 				7379F7CF1EDA14030093535C /* splash1536x2048.png in Resources */,
 				73F1D0951EDA10EE00D4AB5B /* debug.xcconfig in Resources */,
 				DCFA2F9E52F04D73AD1335E2 /* branch.json in Resources */,
+				734D71E221A8EA970072F7C9 /* db.dat in Resources */,
+				734D71E121A8EA970072F7C9 /* regula.license in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2089,10 +2102,14 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
+				"${PODS_ROOT}/DocumentReader/DocumentReader.framework",
+				"${PODS_ROOT}/DocumentReaderFull/DocumentReaderCore.framework",
 				"${PODS_ROOT}/PPBlinkID/MicroBlink.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DocumentReader.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DocumentReaderCore.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MicroBlink.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2108,6 +2125,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				734D725621A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				73F1D08F1EDA10B600D4AB5B /* QTouchposeApplication.m in Sources */,
 			);
@@ -2140,6 +2158,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 73F1D0901EDA10EE00D4AB5B /* debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_PUSH_KEY = "";
@@ -2214,6 +2233,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 73F1D0921EDA10EE00D4AB5B /* release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
@@ -2322,6 +2342,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;

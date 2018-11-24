@@ -1,16 +1,24 @@
 PODS:
+  - DocumentReader (4.0.8641065)
+  - DocumentReaderFull (4.0.89647)
   - PPBlinkID (4.3.0)
 
 DEPENDENCIES:
+  - DocumentReader (~> 4.0)
+  - DocumentReaderFull (~> 4.0)
   - PPBlinkID (= 4.3.0)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
+    - DocumentReader
+    - DocumentReaderFull
     - PPBlinkID
 
 SPEC CHECKSUMS:
+  DocumentReader: 78de8f789aaeb05fa59562d04644dd7270d73dc8
+  DocumentReaderFull: d43d60d885bab463b6347fac1c4574198344be84
   PPBlinkID: 13b702bc1b42e524367d9636ab536961ea06b21a
 
-PODFILE CHECKSUM: 0b6de11c5668bc55063910d445528ebaea98ee2c
+PODFILE CHECKSUM: 5c1eae1a93136611f0fa9692774369184daf9ea9
 
 COCOAPODS: 1.5.3
