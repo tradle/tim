@@ -56,6 +56,7 @@ import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
 import Alert from '../Components/Alert'
 import dictionaries from './dictionaries'
+import { tryWithExponentialBackoff } from './backoff'
 
 const collect = Promise.promisify(_collect)
 
@@ -115,12 +116,6 @@ const STATUS = 'tradle.Status'
 var dictionary, language //= dictionaries[Strings.language]
 
 var models, me
-var BACKOFF_DEFAULTS = {
-  randomisationFactor: 0,
-  initialDelay: 1000,
-  maxDelay: 60000
-}
-
 var DEFAULT_FETCH_TIMEOUT = 5000
 // var stylesCache = {}
 
@@ -1698,22 +1693,12 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
   },
 
   promiseDelay: promiseUtils.wait,
+  hangForever: () => new Promise(resolve => {
+    // hang
+  }),
 
   // TODO: add maxTries
-  tryWithExponentialBackoff(fn, opts) {
-    opts = opts || {}
-    const backoff = Backoff.exponential(_.extend(BACKOFF_DEFAULTS, opts))
-    return fn().catch(backOffAndLoop)
-
-    function backOffAndLoop () {
-      const defer = Q.defer()
-      backoff.once('ready', defer.resolve)
-      backoff.backoff()
-      return defer.promise
-        .then(fn)
-        .catch(backOffAndLoop)
-    }
-  },
+  tryWithExponentialBackoff,
 
   fetchWithTimeout(url, opts, timeout) {
     return Q.race([
@@ -1727,7 +1712,7 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
   },
 
   fetchWithBackoff(url, opts, requestTimeout) {
-    return utils.tryWithExponentialBackoff(() => {
+    return tryWithExponentialBackoff(() => {
       return utils.fetchWithTimeout(url, opts, requestTimeout || DEFAULT_FETCH_TIMEOUT)
     })
   },

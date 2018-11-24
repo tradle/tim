@@ -947,7 +947,8 @@ var Store = Reflux.createStore({
       // })
   },
   onSetAuthenticated(authenticated) {
-    if (!authenticated) meDriver.pause()
+    if (!authenticated && meDriver) meDriver.pause()
+
     this.onUpdateMe({
       isAuthenticated: authenticated,
       dateAuthenticated: Date.now()
@@ -5556,11 +5557,8 @@ if (!res[SIG]  &&  res._message)
       }
     })
     .then(() => utils.restartApp())
-    .then(() => {
-      return new Promise(resolve => {
-        // hang, just in case, to prevent any further processing from running
-      })
-    })
+    // hang, just in case, to prevent any further processing from running
+    .then(() => utils.hangForever())
   },
   async onReloadDB(opts) {
     const destroyTim = meDriver ? meDriver.destroy() : Promise.resolve()
@@ -9257,15 +9255,31 @@ if (!res[SIG]  &&  res._message)
   },
 
   async requireFreshUser({ title, message }) {
-    await new Promise(resolve => {
+    const { reset, restart } = await new Promise(resolve => {
       Alert.alert(
         title,
         message,
-        [{ text: translate('ok'), onPress: resolve }]
+        [
+          {
+            text: translate('restartApp'),
+            onPress: () => resolve({ restart: true })
+          },
+          {
+            text: translate('resetApp'),
+            onPress: () => resolve({ reset: true })
+          },
+        ]
       )
     })
 
-    await this.onReloadDB()
+    if (reset) {
+      await this.onRequestWipe()
+      await utils.hangForever()
+      // this call should not allow any further processing
+      // by the caller
+    } else {
+      await utils.restartApp()
+    }
   },
 
   async maybeRequestUpdate() {
@@ -9331,14 +9345,20 @@ if (!res[SIG]  &&  res._message)
         ? Keychain.lookupKeys(mePub)
         : Promise.resolve(mePriv.map(k => tradleUtils.importKey(k)))
 
-      let [keys, encryptionMaterial] = await Promise.all([
-        lookupKeys,
-        utils.getPasswordBytes(ENCRYPTION_MATERIAL, 'hex'),
-      ])
+      let keys
+      let encryptionMaterial
+      try {
+        ([keys, encryptionMaterial] = await Promise.all([
+          lookupKeys,
+          utils.getPasswordBytes(ENCRYPTION_MATERIAL, 'hex'),
+        ]))
+      } catch (err) {
+        debug('failed to load keys and/or encryption material', err)
+      }
 
       if (!encryptionMaterial) {
         await this.requireFreshUser({
-          title: translate('resetRequired'),
+          title: translate('error'),
           message: translate('storageCorrupted')
         })
       }
