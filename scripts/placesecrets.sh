@@ -40,10 +40,8 @@ mk_links() {
   cp ./secrets/ios/.env.development ./iOS/fastlane/
   cp ./secrets/ios/GoogleService-Info.plist ./iOS/
   # for Regula
-  if [[ ! -f ./iOS/db.dat ]]
-  then
-    cp ./secrets/ios/regula.license ./secrets/regula-db.dat ./iOS/
-  fi
+  cp ./secrets/ios/regula.license iOS/
+  cp ./secrets/regula-db.dat ./iOS/db.dat
 
   echo "placing android build and runtime secrets"
   cp ./secrets/android/fabric.properties ./android/app/
@@ -55,7 +53,7 @@ mk_links() {
   # for Regula
   mkdir -p ./android/app/src/main/res/raw/
   mkdir -p ./android/src/main/assets/Regula/
-  cp ./iOS/db.dat ./android/src/main/assets/Regula/
+  cp ./secrets/regula-db.dat ./android/src/main/assets/Regula/db.dat
   cp ./secrets/android/regula.license ./android/app/src/main/res/raw/
 
   echo "placing environment files"
