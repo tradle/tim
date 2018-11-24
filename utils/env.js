@@ -66,8 +66,8 @@ const merged = extend({
     // // `http://${LOCAL_IP}:21013`,
     // hats
     // 'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
-    // // friendly.io
-    // 'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
+    // friendly.io
+    'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
     // 'https://t22ju1ga5c.execute-api.us-east-1.amazonaws.com/dev',
     // // safere.io

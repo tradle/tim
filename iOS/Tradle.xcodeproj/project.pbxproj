@@ -634,7 +634,7 @@
 		734D719821A8EA970072F7C9 /* regula.license */ = {isa = PBXFileReference; lastKnownFileType = file; path = regula.license; sourceTree = "<group>"; };
 		734D71E021A8EA970072F7C9 /* db.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = db.dat; sourceTree = "<group>"; };
 		734D725421A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNRegulaDocumentReaderBeta.h; sourceTree = "<group>"; };
-		734D725521A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNRegulaDocumentReaderBeta.m; sourceTree = "<group>"; };
+		734D725521A8ED780072F7C9 /* RNRegulaDocumentReaderBeta.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = RNRegulaDocumentReaderBeta.m; sourceTree = "<group>"; };
 		736290AE1EDE460D007E4DE1 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreSpotlight.framework; path = System/Library/Frameworks/CoreSpotlight.framework; sourceTree = SDKROOT; };
 		736290B21EDE4619007E4DE1 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };

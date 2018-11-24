@@ -3,6 +3,8 @@
 
 @implementation RNRegulaDocumentReaderBeta
 
+@synthesize bridge = _bridge;
+
 RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(initialize:(RCTResponseSenderBlock)callback)
@@ -46,16 +48,12 @@ RCT_EXPORT_METHOD(showScanner:(RCTResponseSenderBlock)callback)
                         }
                         [totalResults setObject:jsonResults forKey:@"jsonResult"];
                         UIImage *image = [result getGraphicFieldImageByTypeWithFieldType:GraphicFieldTypeGf_DocumentFront source:ResultTypeRawImage];
-                        NSString *base64Image = [self encodeToBase64String:image];
-                        if (image != nil) {
-                            [totalResults setObject:base64Image forKey:@"image"];
-                        }
 
-                      NSError *err;
-                      NSData *jsonData = [NSJSONSerialization dataWithJSONObject:totalResults options:0 error:&err];
-                      NSString *resultJSONString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-
-                        callback(@[[NSNull null], resultJSONString]);
+                        NSData *data = UIImagePNGRepresentation(image);
+                        [self->_bridge.imageStoreManager storeImageData:data withBlock:^(NSString *imageTag) {
+                            totalResults[@"image"] = imageTag;
+                            callback(@[[NSNull null], totalResults]);
+                        }];
                     }
                 }
                     break;

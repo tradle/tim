@@ -30,4 +30,7 @@ export const normalizeImageCaptureData = async ({ extension, base64, imageTag, .
   url: imageTag || createDataUri({ extension, base64 })  ,
 })
 
-export const replaceDataUrls = async obj => getGlobalKeeper().replaceDataUrls(obj)
+export const replaceDataUrls = async obj => {
+  const keeper = getGlobalKeeper()
+  return keeper ? keeper.replaceDataUrls(obj) : obj
+}
