@@ -22,6 +22,8 @@ class CameraView extends Component {
   static defaultProps = {
     cameraType: 'back',
     fixOrientation: true,
+    base64: false,
+    addToImageStore: true,
   };
 
   static propTypes = {
@@ -30,6 +32,7 @@ class CameraView extends Component {
     width: PropTypes.number,
     height: PropTypes.number,
     fixOrientation: PropTypes.bool,
+    addToImageStore: PropTypes.bool,
     callback: PropTypes.func.isRequired,
   };
 
@@ -50,9 +53,9 @@ class CameraView extends Component {
     if (data) {
       // debugger
       let { width, height } = utils.dimensions(CameraView)
-      const uri = data.uri || data.dataUrl
+      const { url } = data
       return <View style={[styles.container, {backgroundColor: '#000', justifyContent: 'center'}]}>
-                <Image source={{uri}} style={{width, height: height - 80}} />
+                <Image source={{uri: url}} style={{width, height: height - 80}} />
                 <View style={styles.footer1}>
                    <TouchableOpacity onPress={() => this.setState({data: null})}>
                      <Text style={styles.cancel}>{translate('retake')}</Text>
@@ -97,9 +100,8 @@ class CameraView extends Component {
   }
 
   async _takePicture () {
-    const { width, height, quality, fixOrientation } = this.props
+    const { width, height, quality, fixOrientation, base64, addToImageStore } = this.props
     const opts = {
-      base64: true,
       mirrorImage: this.state.cameraType !== 'back',
       quality,
       width,
@@ -107,6 +109,8 @@ class CameraView extends Component {
       fixOrientation,
       forceUpOrientation: fixOrientation,
       doNotSave: true,
+      base64,
+      addToImageStore,
       // skipProcessing: true,
     }
 
