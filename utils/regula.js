@@ -4,17 +4,10 @@ import { replaceDataUrls } from './image-utils'
 import { validate as validateType, types } from './validate-type'
 import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
+import memoize from 'lodash/memoize'
 
 const Regula = NativeModules.RNRegulaDocumentReaderBeta
-const memoize = fn => {
-  let promise
-  return async (...args) => {
-    if (!promise) promise = fn(...args)
-    return promise
-  }
-}
-
-const _init = promisify(Regula.initialize.bind(Regula))
+const _init = memoize(promisify(Regula.initialize.bind(Regula)))
 export const init = memoize(_init)
 
 // export const setScenario = async (name) => {
