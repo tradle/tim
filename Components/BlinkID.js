@@ -9,7 +9,7 @@ import { microblink } from '../utils/env'
 import _ from 'lodash'
 import { isSimulator, keyByValue, sanitize } from '../utils/utils'
 import { requestCameraAccess } from '../utils/camera'
-import { getGlobalKeeper } from '../utils/keeper'
+import { replaceDataUrls } from '../utils/image-utils'
 
 const recognizers = {
   // scans documents with face image and returns document images
@@ -153,7 +153,7 @@ const scan = (function () {
     if (scanBothSides  &&  normalized.length === 2)
       _.merge(normalized[0], normalized[1])
     // debugger
-    return getGlobalKeeper().replaceDataUrls(normalized[0])
+    return replaceDataUrls(normalized[0])
   }
 }());
 

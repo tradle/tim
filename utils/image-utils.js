@@ -1,3 +1,7 @@
+import {
+  getGlobalKeeper,
+} from './keeper'
+
 export const createDataUri = ({ base64, extension }) => {
   if (base64.startsWith('data:')) return base64
 
@@ -21,7 +25,9 @@ export const createDataUri = ({ base64, extension }) => {
 // some libraries generate base64 with line breaks, spaces, etc.
 export const cleanBase64 = str => str.replace(/[\s]/g, '')
 
-export const normalizeImageCaptureData = ({ extension, base64, imageTag, ...data }) => ({
+export const normalizeImageCaptureData = async ({ extension, base64, imageTag, ...data }) => replaceDataUrls({
   ...data,
   url: imageTag || createDataUri({ extension, base64 })  ,
 })
+
+export const replaceDataUrls = async obj => getGlobalKeeper().replaceDataUrls(obj)

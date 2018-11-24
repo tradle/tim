@@ -115,7 +115,7 @@ class CameraView extends Component {
       // always
       data.extension = 'jpeg'
       this.setState({
-        data: normalizeImageCaptureData(data)
+        data: await normalizeImageCaptureData(data)
       })
     } catch (err) {
       this.props.callback(err)

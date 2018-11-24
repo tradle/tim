@@ -36,7 +36,7 @@ const keeperMethodsToPromisify = [
 ]
 
 const toHex = hexStrOrBuf => Buffer.isBuffer(hexStrOrBuf) ? hexStrOrBuf.toString('hex') : hexStrOrBuf
-const isFallbackKeeperNeeded = opts => !opts.encryption.hmacKey
+const isFallbackKeeperNeeded = opts => NativeKeeper && !opts.encryption.hmacKey
 
 const DIGEST_ALGORITHM = 'sha256'
 const createNativeKeeper = ({ hmacKey, encryptionKey }) => new NativeKeeper({
@@ -179,6 +179,8 @@ const wrapNativeKeeper = nativeKeeper => {
   }
 
   const replaceDataUrls = async object => {
+    if (!NativeKeeper) return object
+
     const dataUrlProps = []
     traverse(object).forEach(function (value) {
       if (typeof value === 'string' && value.startsWith('data:image/')) {
@@ -322,7 +324,10 @@ const addFallback = ({
 }
 
 const createKeeper = ({ caching, ...opts }) => {
-  let keeper = wrapNativeKeeper(createNativeKeeper(opts.encryption))
+  let keeper = NativeKeeper
+    ? wrapNativeKeeper(createNativeKeeper(opts.encryption))
+    : createOldKeeper(opts)
+
   if (isFallbackKeeperNeeded(opts)) {
     const fallback = createOldKeeper(opts)
     addFallback({

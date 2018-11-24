@@ -107,7 +107,7 @@ class ImageInput extends Component {
         return
       }
 
-      const normalized = normalizeImageCaptureData({
+      const normalized = await normalizeImageCaptureData({
         extension: quality === 1 ? 'png' : 'jpeg',
         base64: data,
         isVertical,
