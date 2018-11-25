@@ -1253,6 +1253,8 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
       return url
     // else if (url.indexOf('/var/mobile/') == 0)
     //   return url;
+    else if (url.indexOf('://') !== -1)
+      return url
     else
       return 'http://' + url;
   },
