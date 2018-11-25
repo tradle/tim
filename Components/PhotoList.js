@@ -10,12 +10,14 @@ import PhotoCarouselMixin from './PhotoCarouselMixin'
 import RowMixin from './RowMixin'
 import {
   StyleSheet,
-  Image,
   View,
   ListView,
   Animated,
   TouchableHighlight,
 } from 'react-native'
+
+import Image from './Image'
+
 const MIN_WIDTH = 140
 const PHOTO = 'tradle.Photo'
 

@@ -32,8 +32,8 @@
     },
     "@tradle/aws-client": {
       "version": "2.1.1",
-      "from": "@tradle/aws-client@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-2.1.1.tgz",
+      "from": "tradle/aws-client#dev",
+      "resolved": "git://github.com/tradle/aws-client.git#d4bd23b8184aa1c1163088e5d18168f1dfff0d06",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -75,9 +75,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/cb-blockr/-/cb-blockr-3.2.1.tgz"
     },
     "@tradle/constants": {
-      "version": "2.4.0",
+      "version": "2.5.0",
       "from": "@tradle/constants@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-2.4.0.tgz"
+      "resolved": "https://registry.npmjs.org/@tradle/constants/-/constants-2.5.0.tgz"
     },
     "@tradle/custom-models": {
       "version": "4.10.10",
@@ -85,14 +85,14 @@
       "resolved": "git://github.com/tradle/custom-models.git#85b5e612e692104016f4df6e3fefea538bfa7a95"
     },
     "@tradle/embed": {
-      "version": "1.1.2",
-      "from": "@tradle/embed@>=1.1.2 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.1.2.tgz"
+      "version": "1.2.4",
+      "from": "@tradle/embed@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/embed/-/embed-1.2.4.tgz"
     },
     "@tradle/engine": {
-      "version": "7.0.4",
+      "version": "8.1.0",
       "from": "@tradle/engine@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-7.0.4.tgz",
+      "resolved": "https://registry.npmjs.org/@tradle/engine/-/engine-8.1.0.tgz",
       "dependencies": {
         "abstract-leveldown": {
           "version": "2.6.3",
@@ -205,7 +205,7 @@
     "@tradle/models": {
       "version": "4.10.10",
       "from": "tradle/models",
-      "resolved": "git://github.com/tradle/models.git#ca3f57b4e38c6aa682f3dac7b4932dcb33a7b4fe"
+      "resolved": "git://github.com/tradle/models.git#e309e40c9e71f94befd5797a7845e06143f3cca6"
     },
     "@tradle/models-cloud": {
       "version": "1.0.0",
@@ -243,14 +243,14 @@
       "resolved": "https://registry.npmjs.org/@tradle/promise-utils/-/promise-utils-1.1.0.tgz"
     },
     "@tradle/protocol": {
-      "version": "4.2.0",
+      "version": "5.0.0",
       "from": "@tradle/protocol@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-4.2.0.tgz"
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-5.0.0.tgz"
     },
     "@tradle/qr-schema": {
-      "version": "1.11.0",
-      "from": "@tradle/qr-schema@>=1.11.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-1.11.0.tgz",
+      "version": "2.0.0",
+      "from": "@tradle/qr-schema@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/qr-schema/-/qr-schema-2.0.0.tgz",
       "dependencies": {
         "is-extendable": {
           "version": "1.0.1",

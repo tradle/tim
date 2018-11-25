@@ -11,7 +11,6 @@ import {
   View,
   Text,
   ScrollView,
-  Image,
   Platform,
   Alert,
   TouchableOpacity,
@@ -67,6 +66,8 @@ import platformStyles from '../styles/platform'
 import BackgroundImage from './BackgroundImage'
 import ENV from '../utils/env'
 import DropPage from './DropPage'
+import chatStyles from '../styles/chatStyles'
+import Image from './Image'
 
 const BG_IMAGE = ENV.brandBackground
 const FORM_ERROR = 'tradle.FormError'

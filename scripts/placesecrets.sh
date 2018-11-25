@@ -29,6 +29,7 @@ clean() {
   rm -f ./android/app/src/debug/res/values/secrets.xml
   rm -f ./android/app/src/main/res/values/secrets.xml
   rm -f ./environment*.json
+  rm -f ./code-push.json
 }
 
 mk_links() {
@@ -38,6 +39,9 @@ mk_links() {
   cp ./secrets/ios/.env.staging ./iOS/fastlane/
   cp ./secrets/ios/.env.development ./iOS/fastlane/
   cp ./secrets/ios/GoogleService-Info.plist ./iOS/
+  # for Regula
+  cp ./secrets/ios/regula.license iOS/
+  cp ./secrets/regula-db.dat ./iOS/db.dat
 
   echo "placing android build and runtime secrets"
   cp ./secrets/android/fabric.properties ./android/app/
@@ -46,9 +50,18 @@ mk_links() {
   cp ./secrets/android/service-account-actor.json ./android/fastlane/
   cp ./secrets/android/secrets-main.xml ./android/app/src/main/res/values/secrets.xml
   cp ./secrets/android/secrets-debug.xml ./android/app/src/debug/res/values/secrets.xml
+  # for Regula
+  mkdir -p ./android/app/src/main/res/raw/
+  mkdir -p ./android/src/main/assets/Regula/
+  cp ./secrets/regula-db.dat ./android/src/main/assets/Regula/db.dat
+  cp ./secrets/android/regula.license ./android/app/src/main/res/raw/
 
   echo "placing environment files"
   cp -r ./secrets/env/* ./
+
+  echo "placing code-push file"
+  cp ./secrets/code-push.json .
+
   rm -rf secrets
 }
 

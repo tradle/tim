@@ -5,10 +5,12 @@ import React, {
 
 import {
   TouchableHighlight,
+  Platform,
 } from 'react-native'
 import PropTypes from 'prop-types'
 import ImagePicker from 'react-native-image-picker'
-import _ from 'lodash'
+import pick from 'lodash/pick'
+import extend from 'lodash/extend'
 const debug = require('debug')('tradle:app:ImageInput')
 
 import utils, { translate } from '../utils/utils'
@@ -72,6 +74,8 @@ class ImageInput extends Component {
       // due to out-of-memory issues
       // maxWidth: 1536,
       // maxHeight: 1536,
+      noData: Platform.OS !== 'web',
+      addToImageStore: true,
       storageOptions: {
         skipBackup: true,
         store: false
@@ -87,7 +91,7 @@ class ImageInput extends Component {
       action = 'launchCamera'
     else {
       action = 'showImagePicker'
-      _.extend(options, {
+      extend(options, {
         chooseFromLibraryButtonTitle: 'Choose from Library',
         takePhotoButtonTitle: 'Take Photo…',
       })
@@ -96,27 +100,30 @@ class ImageInput extends Component {
     const allowed = requestCameraAccess()
     if (!allowed) return
 
-    ImagePicker[action](options, (response) => {
-      if (response.didCancel)
-        return
-
-      if (response.error) {
-        console.log('ImagePickerManager Error: ', response.error);
+    ImagePicker[action](options, async ({ didCancel, error, data, isVertical, width, height, imageTag }) => {
+      if (didCancel) return
+      if (error) {
+        console.log('ImagePickerManager Error: ', error);
         return
       }
 
-      const data = normalizeImageCaptureData({
+      const normalized = await normalizeImageCaptureData({
         extension: quality === 1 ? 'png' : 'jpeg',
-        base64: response.data,
-        isVertical: response.isVertical,
-        width: response.width,
-        height: response.height
+        base64: data,
+        isVertical,
+        width,
+        height,
+        imageTag,
       })
 
-      onImage({
-        ...data,
-        url: data.dataUrl,
-      })
+      if (Platform.OS !== 'web') {
+        normalized.url = await require('../utils/keeper')
+          .getGlobalKeeper()
+          .importFromImageStore(imageTag)
+      }
+
+      const result = pick(normalized, ['isVertical', 'width', 'height', 'url'])
+      onImage(result)
     })
   }
 }

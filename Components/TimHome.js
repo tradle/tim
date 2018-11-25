@@ -220,7 +220,7 @@ class TimHome extends Component {
         return
     }
 
-    let qs = query ? require('querystring').parse(query) : {}
+    let qs = query ? require('@tradle/qr-schema').links.parseQueryString(query) : {}
 
     let state = {firstPage: pathname, qs, isDeepLink: true}
     this.setState(state)

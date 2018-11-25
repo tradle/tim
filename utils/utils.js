@@ -31,6 +31,7 @@ import Debug from 'debug'
 const debug = Debug('tradle:app:utils')
 import safeStringify from 'json-stringify-safe'
 import validateResource from '@tradle/validate-resource'
+import Embed from '@tradle/embed'
 const { sanitize } = validateResource.utils
 import Lens from '@tradle/lens'
 import {
@@ -55,6 +56,7 @@ import { BLOCKCHAIN_EXPLORERS } from './blockchain-explorers'
 // FIXME: circular dep
 import Alert from '../Components/Alert'
 import dictionaries from './dictionaries'
+import { tryWithExponentialBackoff } from './backoff'
 
 const collect = Promise.promisify(_collect)
 
@@ -117,12 +119,6 @@ const STATUS = 'tradle.Status'
 var dictionary, language //= dictionaries[Strings.language]
 
 var models, me
-var BACKOFF_DEFAULTS = {
-  randomisationFactor: 0,
-  initialDelay: 1000,
-  maxDelay: 60000
-}
-
 var DEFAULT_FETCH_TIMEOUT = 5000
 // var stylesCache = {}
 
@@ -1260,7 +1256,7 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
       return url;
     else if (url.indexOf('file:///') === 0)
       return url.replace('file://', '')
-    else if (url.indexOf('../') === 0)
+    else if (url.indexOf('../') === 0 || Embed.isKeeperUri(url))
       return url
     // else if (url.indexOf('/var/mobile/') == 0)
     //   return url;
@@ -1704,22 +1700,12 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
   },
 
   promiseDelay: promiseUtils.wait,
+  hangForever: () => new Promise(resolve => {
+    // hang
+  }),
 
   // TODO: add maxTries
-  tryWithExponentialBackoff(fn, opts) {
-    opts = opts || {}
-    const backoff = Backoff.exponential(_.extend(BACKOFF_DEFAULTS, opts))
-    return fn().catch(backOffAndLoop)
-
-    function backOffAndLoop () {
-      const defer = Q.defer()
-      backoff.once('ready', defer.resolve)
-      backoff.backoff()
-      return defer.promise
-        .then(fn)
-        .catch(backOffAndLoop)
-    }
-  },
+  tryWithExponentialBackoff,
 
   fetchWithTimeout(url, opts, timeout) {
     return Q.race([
@@ -1733,7 +1719,7 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
   },
 
   fetchWithBackoff(url, opts, requestTimeout) {
-    return utils.tryWithExponentialBackoff(() => {
+    return tryWithExponentialBackoff(() => {
       return utils.fetchWithTimeout(url, opts, requestTimeout || DEFAULT_FETCH_TIMEOUT)
     })
   },
@@ -1879,6 +1865,9 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
   getPassword: function (username) {
     return Keychain.getGenericPassword(username, ENV.serviceID)
   },
+
+  getPasswordBytes: (username, encoding) => utils.getPassword(username)
+    .then(password => new Buffer(password, encoding)),
 
   /**
    * store hashed and salted password
@@ -2393,7 +2382,7 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
       return 1
     }
 
-    return 0.5
+    return 1 // 0.5
   },
   requestForModels() {
     let me = utils.getMe()
@@ -2709,6 +2698,7 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
     }
   },
 
+  traverse,
   deepRemoveProperties(obj, test) {
     traverse(obj).forEach(function (value) {
       if (test(({ key: this.key, value }))) {

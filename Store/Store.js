@@ -27,6 +27,7 @@ import refreshPrefill from './refreshPrefill.json'
 
 import Reflux from 'reflux'
 import Actions from '../Actions/Actions'
+import { uploadLinkedMedia } from '../utils/upload-linked-media'
 import Debug from 'debug'
 
 import createProcessor from 'level-change-processor'
@@ -219,7 +220,7 @@ import AWSClient from '@tradle/aws-client'
 // import map from 'map-stream'
 // import Blockchain from '@tradle/cb-blockr' // use tradle/cb-blockr fork
 // import createKeeper from '@tradle/keeper'
-import { createKeeper } from '../utils/keeper'
+import { createKeeper, promisifyKeeper, setGlobalKeeper } from '../utils/keeper'
 // import Restore from '@tradle/restore'
 import crypto from 'crypto'
 // import { loadOrCreate as loadYuki } from './yuki'
@@ -343,7 +344,8 @@ var driverInfo = (function () {
 //   { type: 'ec', purpose: 'update', curve: 'p256' }
 // ]
 
-const ENCRYPTION_KEY = 'accountkey'
+const ENCRYPTION_MATERIAL = 'accountkey'
+const ENC_KEY_LENGTH_IN_BYTES = 32
 // const DEVICE_ID = 'deviceid'
 const ANALYTICS_KEY = 'analyticskey'
 
@@ -962,7 +964,8 @@ var Store = Reflux.createStore({
       // })
   },
   onSetAuthenticated(authenticated) {
-    if (!authenticated) meDriver.pause()
+    if (!authenticated && meDriver) meDriver.pause()
+
     this.onUpdateMe({
       isAuthenticated: authenticated,
       dateAuthenticated: Date.now()
@@ -1067,11 +1070,14 @@ var Store = Reflux.createStore({
     const keeper = createKeeper({
       path: path.join(TIM_PATH_PREFIX, 'keeper'),
       db: asyncstorageDown,
-      encryption: encryption,
+      encryption,
       caching: {
         max: 100,
       }
     })
+
+    // terrible
+    setGlobalKeeper(keeper)
 
     const { wsClients, restoreMonitors } = driverInfo
 
@@ -1189,7 +1195,7 @@ var Store = Reflux.createStore({
     meDriver._send = function (msg, recipientInfo, cb) {
       const start = Date.now()
       const monitor = setInterval(function () {
-        debug(`still sending to ${recipientInfo.permalink} after ${(Date.now() - start)/1000|0} seconds`, msg.unserialized.object[TYPE])
+        debug(`still sending to ${recipientInfo.permalink} after ${(Date.now() - start)/1000|0} seconds`, msg.object[TYPE])
       }, 5000)
 
       trySend(msg, recipientInfo, function (err, result) {
@@ -1202,10 +1208,13 @@ var Store = Reflux.createStore({
       })
     }
 
-    const trySend = co(function* (msg, recipientInfo, cb) {
+    const trySend = async (message, recipientInfo, cb) => {
+      const { link } = message
+      message = message.object
+
       const recipientHash = recipientInfo.permalink
       if (self._yuki && recipientHash === self._yuki.permalink) {
-        return self._yuki.receive({ message: msg.unserialized.object })
+        return self._yuki.receive({ message })
           .then(() => cb(), cb)
       }
 
@@ -1227,36 +1236,28 @@ var Store = Reflux.createStore({
       }
 
       debug(`pushing msg to ${identifier} into network stack`)
-      if (transport instanceof AWSClient) {
-        try {
-          // yield transport.ready()
-          yield transport.send({
-            link: msg.unserialized.link,
-            message: msg
+      try {
+        if (uploadLinkedMedia) {
+          message = await uploadLinkedMedia({
+            client: transport,
+            keeper,
+            object: message,
           })
-        } catch (err) {
-          if (/timetravel/i.test(err.type)) {
-            self.abortUnsent({ to: identifier })
-            debug('aborting time traveler message', err.stack)
-            err = new tradle.errors.WillNotSend('aborted')
-          }
-
-          return cb(err)
         }
 
-        cb()
-        return
+        await transport.send({ link, message })
+      } catch (err) {
+        if (/timetravel/i.test(err.type)) {
+          self.abortUnsent({ to: identifier })
+          debug('aborting time traveler message', err.stack)
+          err = new tradle.errors.WillNotSend('aborted')
+        }
+
+        return cb(err)
       }
 
-      transport.send(identifier, msg, function (err) {
-        if (err) debug(`failed to deliver message to ${identifier}: ${err.message}`)
-        else debug(`delivered message to ${identifier}`)
-
-        cb(err)
-      })
-
-      // transport.setTimeout(60000)
-    })
+      cb()
+    }
 
     // receive flow:
     // 1. transport
@@ -1304,24 +1305,12 @@ var Store = Reflux.createStore({
     processor.start()
 
     this.queueReceive = function queueReceive ({ msg, from }) {
-      let length
-      if (Buffer.isBuffer(msg)) {
-        length = msg.length
-        msg = tradleUtils.unserializeMessage(msg)
-      }
-
-      // if (failOneOutOf(3)) {
-      //   debug('dropping', msg.object[TYPE])
-      //   return
-      // }
-
       const link = tradleUtils.hexLink(msg)
       return multiqueue.enqueue({
         seq: msg[SEQ],
         value: {
           link,
           message: msg,
-          length
         },
         queue: from,
         // compat with v1
@@ -5618,11 +5607,8 @@ if (!res[SIG]  &&  res._message)
       }
     })
     .then(() => utils.restartApp())
-    .then(() => {
-      return new Promise(resolve => {
-        // hang, just in case, to prevent any further processing from running
-      })
-    })
+    // hang, just in case, to prevent any further processing from running
+    .then(() => utils.hangForever())
   },
   async onReloadDB(opts) {
     const destroyTim = meDriver ? meDriver.destroy() : Promise.resolve()
@@ -9331,15 +9317,32 @@ if (!res[SIG]  &&  res._message)
   },
 
   async requireFreshUser({ title, message }) {
-    await new Promise(resolve => {
+    const { reset, restart } = await new Promise(resolve => {
       Alert.alert(
         title,
         message,
-        [{ text: translate('ok'), onPress: resolve }]
+        [
+          {
+            text: translate('restartApp'),
+            onPress: () => resolve({ restart: true })
+          },
+          {
+            text: translate('resetApp'),
+            onPress: () => resolve({ reset: true })
+          },
+        ]
       )
     })
 
-    await this.onReloadDB({ silent: true })
+    if (reset) {
+      await this.onReloadDB({ silent: true })
+      // await this.onRequestWipe()
+      await utils.hangForever()
+      // this call should not allow any further processing
+      // by the caller
+    } else {
+      await utils.restartApp()
+    }
   },
 
   async maybeRequestUpdate() {
@@ -9405,25 +9408,35 @@ if (!res[SIG]  &&  res._message)
         ? Keychain.lookupKeys(mePub)
         : Promise.resolve(mePriv.map(k => tradleUtils.importKey(k)))
 
-      const [keys, encryptionKey] = await Promise.all([
-        lookupKeys,
-        utils.getPassword(ENCRYPTION_KEY)
-      ])
+      let keys
+      let encryptionMaterial
+      try {
+        ([keys, encryptionMaterial] = await Promise.all([
+          lookupKeys,
+          utils.getPasswordBytes(ENCRYPTION_MATERIAL, 'hex'),
+        ]))
+      } catch (err) {
+        debug('failed to load keys and/or encryption material', err)
+      }
 
-      if (!encryptionKey) {
+      if (!encryptionMaterial) {
         await this.requireFreshUser({
-          title: translate('resetRequired'),
+          title: translate('error'),
           message: translate('storageCorrupted')
         })
       }
 
-      return { keys, encryptionKey, identity }
+      return {
+        keys,
+        identity,
+        encryptionMaterial,
+      }
     }
 
-    const { encryptionKey, identityInfo } = await this.createNewIdentity()
+    const { encryptionMaterial, identityInfo } = await this.createNewIdentity()
     return {
       ...identityInfo,
-      encryptionKey
+      encryptionMaterial,
     }
   },
 
@@ -9437,8 +9450,9 @@ if (!res[SIG]  &&  res._message)
 
     return this.loadIdentityAndKeys(me)
     .then(result => {
+      const { identity, keys, encryptionMaterial } = result
       if (!Keychain) {
-        let privkeys = result.keys.map(k => {
+        let privkeys = keys.map(k => {
           return k.toJSON ? k.toJSON(true) : k
         })
         let myIdentities = this._getItem(MY_IDENTITIES)
@@ -9461,11 +9475,9 @@ if (!res[SIG]  &&  res._message)
       // me[NONCE] = me[NONCE] || this.getNonce()
       // driverInfo.deviceID = result.deviceID
       return this.buildDriver({
-        identity: result.identity,
-        keys: result.keys,
-        encryption: {
-          key: new Buffer(result.encryptionKey, 'hex')
-        }
+        identity,
+        keys,
+        encryption: parseEncryptionMaterial(encryptionMaterial),
       })
     }, err => {
       debugger
@@ -9528,7 +9540,9 @@ if (!res[SIG]  &&  res._message)
     return utils.getMe().pushSubscriptions || []
   },
   async createNewIdentity() {
-    const encryptionKey = crypto.randomBytes(32).toString('hex')
+    // generate some extra material
+    // in case we need it later (like we did when we added the hmacKey)
+    const encryptionMaterial = crypto.randomBytes(ENC_KEY_LENGTH_IN_BYTES * 10)
     // const globalSalt = crypto.randomBytes(32).toString('hex')
 
     this.setBusyWith('generatingKeys')
@@ -9539,11 +9553,11 @@ if (!res[SIG]  &&  res._message)
         this.setBusyWith('setting encryption key')
       }
 
-      await utils.setPassword(ENCRYPTION_KEY, encryptionKey)
+      await utils.setPassword(ENCRYPTION_MATERIAL, encryptionMaterial.toString('hex'))
       this.setBusyWith(null)
       return {
-        encryptionKey,
-        identityInfo
+        identityInfo,
+        encryptionMaterial,
       }
     } catch (err) {
       if (!/authentication failed/.test(err.message)) {
@@ -9590,10 +9604,11 @@ if (!res[SIG]  &&  res._message)
     })
   },
   monitorTim() {
-    this._keeper = {}
-    ;['get', 'put', 'batch', 'del'].forEach(method => {
-      this._keeper[method] = promisify(meDriver.keeper[method].bind(meDriver.keeper))
-    })
+    this._keeper = promisifyKeeper(meDriver.keeper)
+    // this._keeper = {}
+    // ;['get', 'put', 'batch', 'del'].forEach(method => {
+    //   this._keeper[method] = promisify(meDriver.keeper[method].bind(meDriver.keeper))
+    // })
 
     this.monitorLog()
   },
@@ -11341,6 +11356,18 @@ await fireRefresh(val.from.organization)
 // );
 
 module.exports = Store;
+
+const parseEncryptionMaterial = encryptionMaterial => {
+  const length = Buffer.isBuffer(encryptionMaterial) ? ENC_KEY_LENGTH_IN_BYTES : ENC_KEY_LENGTH_IN_BYTES * 2
+  const encryptionKey = encryptionMaterial.slice(0, length)
+  // sorry, old users
+  let hmacKey
+  if (encryptionMaterial.length > length * 2) {
+    hmacKey = encryptionMaterial.slice(length, length * 2)
+  }
+
+  return { encryptionKey, hmacKey }
+}
 
 function getProviderUrl (provider) {
   return provider.url

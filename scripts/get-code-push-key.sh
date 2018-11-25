@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+# set -euo pipefail
 
 PLATFORM=${1-ios}
 DEPLOYMENT=${2-Staging}
@@ -11,6 +11,8 @@ if [ "$DEPLOYMENT" == "Debug" ];
 then
   echo ""
 else
-  KEY=$(code-push deployment ls "tim-$PLATFORM" -k --format json | jq -r ".[] | select(.name==\"$DEPLOYMENT\").key")
+  CODE_PUSH_JSON=$(cat $(dirname $0)/../code-push.json)
+  KEY=$(echo $CODE_PUSH_JSON | jq -r ".$PLATFORM.$DEPLOYMENT")
+  # KEY=$(code-push deployment ls "tim-$PLATFORM" -k --format json | jq -r ".[] | select(.name==\"$DEPLOYMENT\").key")
   echo "$KEY"
 fi

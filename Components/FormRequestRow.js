@@ -1,6 +1,5 @@
 
 import {
-  Image,
   // Text,
   TouchableOpacity,
   Alert,
@@ -38,6 +37,7 @@ import StyleSheet from '../StyleSheet'
 import { circled } from '../styles/utils'
 
 import chatStyles from '../styles/chatStyles'
+import Image from './Image'
 
 const MY_PRODUCT = 'tradle.MyProduct'
 const PHOTO = 'tradle.Photo'

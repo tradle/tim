@@ -261,6 +261,9 @@ repositories {
 }
 
 dependencies {
+    implementation project(':react-native-image-store')
+    implementation project(':react-native-tradle-keeper')
+    implementation project(':rn-fetch-blob')
     implementation project(':blinkid-react-native')
     implementation project(':react-native-awesome-card-io')
     implementation 'com.android.support:multidex:1.0.1'
@@ -270,7 +273,7 @@ dependencies {
     implementation project(':react-native-exception-handler')
     implementation project(':react-native-splash-screen')
     implementation project(':react-native-fabric')
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.6.6@aar') {
         transitive = true
     }
     implementation project(':react-native-async-storage-snappy')
@@ -281,7 +284,7 @@ dependencies {
     implementation project(':react-native-vector-icons')
     implementation project(':react-native-udp')
     implementation project(':react-native-randombytes')
-    compile(project(':react-native-push-notification'))
+    implementation(project(':react-native-push-notification'))
     {
         exclude group: 'com.google.android.gms'
     }
@@ -289,7 +292,7 @@ dependencies {
     implementation project(':react-native-linear-gradient')
     implementation project(':react-native-keychain')
     implementation project(':react-native-image-picker')
-    compile(project(':react-native-device-info')) {
+    implementation(project(':react-native-device-info')) {
         exclude group: 'com.google.android.gms'
     }
     implementation "com.google.android.gms:play-services-base:${googlePlayServicesVersion}"
@@ -308,6 +311,9 @@ dependencies {
     // implementation ("com.google.android.gms:play-services-vision:${googlePlayServicesVersion}") {
     //   force = true;
     // }
+
+    implementation project(':react-native-regula-document-reader')
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:${supportLibVersion}"
     implementation "com.facebook.react:react-native:+"  // From node_modules

@@ -1,14 +1,15 @@
 import typeforce from 'typeforce'
+import promisify from 'pify'
 import * as ec from 'react-native-ecc'
+import nkeyECDSA from 'nkey-ecdsa'
 import utils from './utils'
 import { serviceID, accessGroup } from './env'
 ec.setServiceID(serviceID)
 if (accessGroup) ec.setAccessGroup(accessGroup)
 
 import { utils as tradleUtils } from '@tradle/engine'
-import promisify from 'pify'
 import nkeySE from './nkey-se'
-import nkeyECDSA from 'nkey-ecdsa'
+import { tryWithExponentialBackoff } from './backoff'
 
 if (!utils.isWeb()) {
   // 3 aliases for the same curve
@@ -62,15 +63,17 @@ export function lookupKeys (keys) {
 
 function lookupKeyUntilFound (pubKey, delay) {
   delay = delay || 1000
-  return utils.tryWithExponentialBackoff(() => {
-    return lookupKey(pubKey)
-      .catch(err => {
-        debug('key not found, will retry', err)
-        throw err
-     })
+  return tryWithExponentialBackoff(async () => {
+    try {
+      return await lookupKey(pubKey)
+    } catch (err) {
+      debug('key not found, will retry', err)
+      throw err
+    }
   }, {
     intialDelay: 1000,
-    maxDelay: 20000
+    maxDelay: 1000,
+    maxAttempts: 5,
   })
 }
 

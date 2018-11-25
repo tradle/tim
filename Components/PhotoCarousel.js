@@ -4,12 +4,12 @@ import { makeResponsive } from 'react-native-orient'
 
 import {
   StyleSheet,
-  Image,
   View,
 } from 'react-native'
 
 import React, { Component } from 'react'
 import utils from '../utils/utils'
+import Image from './Image'
 
 class PhotoCarousel extends Component {
   static displayName = 'PhotoCarousel'

@@ -72,12 +72,11 @@ const merged = extend({
     // // `http://${LOCAL_IP}:21013`,
     // hats
     // 'https://ho0ys6dppg.execute-api.us-east-1.amazonaws.com/dev',
-    // // friendly.io
     'https://tv5n42vd5f.execute-api.us-east-1.amazonaws.com/dev',
     // // tradle.io
     // 'https://t22ju1ga5c.execute-api.us-east-1.amazonaws.com/dev',
-    // safere.io
-    'https://a87crkepec.execute-api.us-east-1.amazonaws.com/dev',
+    // // safere.io
+    // 'https://a87crkepec.execute-api.us-east-1.amazonaws.com/dev',
     // // easybank.io
     'https://m6rpwdztvk.execute-api.us-east-1.amazonaws.com/dev',
     // // perpetualguardian.co.nz
@@ -169,7 +168,7 @@ const merged = extend({
     'tradle.AssignRelationshipManager',
   ],
   // JPEG compression
-  imageQuality: 0.2,
+  imageQuality: 1, //0.2,
 }, environment)
 
 merged.splashBackground = splash[merged.splashBackground]

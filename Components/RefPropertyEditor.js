@@ -3,7 +3,6 @@ import {
   View,
   // Text,
   TouchableOpacity,
-  Image,
   Alert,
 } from 'react-native'
 import _ from 'lodash'
@@ -35,6 +34,7 @@ import GridList from './GridList'
 import NewResource from './NewResource'
 import { capture } from '../utils/camera'
 import Errors from '@tradle/errors'
+import Image from './Image'
 
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
@@ -323,8 +323,8 @@ class RefPropertyEditor extends Component {
 
     let { prop } = params
     if (prop.ref === PHOTO) {
-      let { width, height, dataUrl } = data
-      let d = { width, height, url: dataUrl }
+      let { width, height, url } = data
+      let d = { width, height, url }
       this.onSetMediaProperty(prop.name, d)
     }
     else {
