@@ -6357,7 +6357,7 @@
     "react-native-image-store": {
       "version": "1.0.0",
       "from": "tradle/react-native-image-store",
-      "resolved": "git://github.com/tradle/react-native-image-store.git#43094843deb12ea96ac8f1881724a7938a9abfc6"
+      "resolved": "git://github.com/tradle/react-native-image-store.git#513dd262f9631cedeb9860275b83d39cdc574e65"
     },
     "react-native-infinite-scroll-view": {
       "version": "0.4.3",
