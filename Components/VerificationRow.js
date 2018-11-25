@@ -8,8 +8,11 @@ import {
 import PropTypes from 'prop-types';
 import {
   LazyloadView as View,
-  LazyloadImage as Image
+  // LazyloadImage as Image
 } from 'react-native-lazyload'
+
+// import ImageComponent from './Image'
+import Image from './Image'
 
 import React, { Component } from 'react'
 import _ from 'lodash'
@@ -112,8 +115,10 @@ class VerificationRow extends Component {
         photo = photos  &&  photos.length ? photos[0] : null
       }
     }
-    if (photo)
-      photo = <Image host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+    if (photo) {
+      // photo = <Image imageComponent={ImageComponent} host={lazy} resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+      photo = <Image resizeMode='cover' placeholder={IMAGE_PLACEHOLDER} source={{uri: utils.getImageUri(photo.url), position: 'absolute', left: 10}}  style={styles.cellImage} />
+    }
     else if (model.icon  ||  isForm) {
       let icon = model.icon
       if (!icon)

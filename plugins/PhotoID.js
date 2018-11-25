@@ -1,7 +1,9 @@
 import { TYPE } from '@tradle/constants'
 import utils, { translate, isWeb, isSimulator } from '../utils/utils'
+import ENV from '../utils/env'
 const COUNTRY = 'tradle.Country'
 const PHOTO_ID = 'tradle.PhotoID'
+
 
 const sideToSnap = {
   US: {
@@ -26,32 +28,36 @@ module.exports = function PhotoID ({ models }) {
     }) {
       if (form[TYPE] !== PHOTO_ID)
         return
+
       if (!form.documentType  ||  Array.isArray(form.documentType))
         return
-
-      if (!isWeb()  &&  !isSimulator()  &&  !form.scanJson)
+      let isOther = form.documentType.id !== 'other'
+      if (!isWeb()  &&  !isSimulator()  &&  !form.scanJson  &&  !isOther)
         return
 
-      if (isWeb())
+      if (isWeb()  ||  isOther)
         form.uploaded = true
       let scan = form.scanJson
 
       const model = models[form[TYPE]]
       // Check if there is a need to clean the form
-      if (scan  &&  currentResource) {
+      if (currentResource) {
         if ((currentResource.documentType  &&  currentResource.documentType.id !== form.documentType.id)  ||
             (currentResource.country  &&  currentResource.country.id !== form.country.id)) {
-          let requestedProperties = cleanupValues(form, scan, model)
-          if (!isWeb())
+          let requestedProperties = scan  &&  cleanupValues(form, scan, model)
+          form.scan = null
+          if (!isWeb()  &&  !isOther)
             return requestedProperties
           scan = null
         }
       }
+
+
       console.log('PhotoID: requesting additional properties for Driver Licence')
 
       let isLicence = form.documentType.title.indexOf('Licence') !== -1
       let isPassport = !isLicence  &&  form.documentType.title.indexOf('Passport') !== -1
-      let countryId = form.country.id.split('_')[1]
+      let countryId = form.country  &&  form.country.id.split('_')[1]
       if (scan) {
         let { document } = scan
         let countryCCA
@@ -154,13 +160,18 @@ function prefillValues(form, values, model) {
 function getRequestedProps({scan, model, requestedProperties, form}) {
   if (!requestedProperties)
     requestedProperties = []
-  let isLicence = form.documentType.title.indexOf('Licence') !== -1
-  let isID = !isLicence  &&  form.documentType.title.indexOf('ID') !== -1
+  let { documentType } = form
+
+  let isLicence = documentType.title.indexOf('Licence') !== -1
+  let isOther = documentType.id.indexOf('other') !== -1
+  let isID = !isLicence  &&  documentType.title.indexOf('ID') !== -1
   if (!scan) {
     if (isLicence)
-      requestedProperties = [{name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
+      requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
     else {
       if (isID)
+        requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
+      else if (isOther)
         requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
       else
         requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
@@ -218,7 +229,7 @@ function cleanupValues(form, values, model) {
   delete form.scan
   delete form.scanJson
   let requestedProperties
-  if (isWeb()  ||  isSimulator()) {
+  if (isWeb()  ||  isSimulator()  ||  form.documentType.id === 'other') {
     let isLicence = form.documentType.title.indexOf('Licence') !== -1
     if (isLicence)
       requestedProperties = [{name: 'personal_group'}, {name: 'document_group'}, {name: 'address_group'}]

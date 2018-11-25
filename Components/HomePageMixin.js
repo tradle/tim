@@ -243,13 +243,16 @@ var HomePageMixin = {
   sort(prop) {
     let order = this.state.order || {}
     let curOrder = order[prop]
+    let { resource } = this.state
 
     order[prop] = curOrder ? false : true
     this.setState({order: order, sortProperty: prop, list: []})
 
     let params = { modelName: this.props.modelName, sortProperty: prop, asc: order[prop]}
-    if (this.props.search)
-      _.extend(params, {search: true, filterResource: this.state.resource, limit: this.limit, first: true})
+    if (this.props.search) {
+console.log('HomePageMixin: filterResource', resource)
+      _.extend(params, {search: true, filterResource: resource, limit: this.limit, first: true})
+    }
     Actions.list(params)
   },
   showRefResources({resource, prop, component}) {
