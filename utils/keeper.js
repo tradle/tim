@@ -36,9 +36,10 @@ const keeperMethodsToPromisify = [
 ]
 
 const toHex = hexStrOrBuf => Buffer.isBuffer(hexStrOrBuf) ? hexStrOrBuf.toString('hex') : hexStrOrBuf
-const isFallbackKeeperNeeded = opts => NativeKeeper && !opts.encryption.hmacKey
+const isFallbackKeeperNeeded = opts => haveNativeKeeper && !opts.encryption.hmacKey
 
 const DIGEST_ALGORITHM = 'sha256'
+const haveNativeKeeper = typeof NativeKeeper === 'function'
 const createNativeKeeper = ({ hmacKey, encryptionKey }) => new NativeKeeper({
   encryptionKey: toHex(encryptionKey),
   hmacKey: toHex(hmacKey || encryptionKey), // old users don't have hmacKey
@@ -324,7 +325,7 @@ const addFallback = ({
 }
 
 const createKeeper = ({ caching, ...opts }) => {
-  let keeper = NativeKeeper
+  let keeper = haveNativeKeeper
     ? wrapNativeKeeper(createNativeKeeper(opts.encryption))
     : createOldKeeper(opts)
 

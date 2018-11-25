@@ -2056,7 +2056,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\nif [ \"$CONFIGURATION\" != \"Debug\" ]; then\n  export NODE_BINARY=node\n  ../scripts/install-ios-app.sh\n  PATH=$(bash -l -c 'echo $PATH') ../scripts/save-release.sh\nfi";
+			shellScript = "set -euo pipefail\nif [ \"$CONFIGURATION\" != \"Debug\" ]; then\n  export NODE_BINARY=node\n  ../scripts/install-ios-app.sh\n  PATH=$(bash -l -c 'echo $PATH') ../scripts/save-release.sh\nfi\n";
 		};
 		1C8E6EEA354CD283DCEE4BFD /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2106,7 +2106,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Debug\" ]; then\n    echo \"HEYEEYE\"\n    set -euo pipefail\n    ../scripts/set-local-ip.sh\nfi\n";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Debug\" ]; then\n    set -euo pipefail\n    ../scripts/set-local-ip.sh\nfi\n";
 		};
 		7379F7D01EDA14430093535C /* Fabric / Crashlytics */ = {
 			isa = PBXShellScriptBuildPhase;

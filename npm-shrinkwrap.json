@@ -31,9 +31,9 @@
       }
     },
     "@tradle/aws-client": {
-      "version": "2.1.1",
-      "from": "tradle/aws-client#dev",
-      "resolved": "git://github.com/tradle/aws-client.git#d4bd23b8184aa1c1163088e5d18168f1dfff0d06",
+      "version": "3.0.0",
+      "from": "@tradle/aws-client@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/aws-client/-/aws-client-3.0.0.tgz",
       "dependencies": {
         "pify": {
           "version": "3.0.0",
@@ -243,9 +243,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/promise-utils/-/promise-utils-1.1.0.tgz"
     },
     "@tradle/protocol": {
-      "version": "5.0.0",
+      "version": "5.0.1",
       "from": "@tradle/protocol@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-5.0.0.tgz"
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-5.0.1.tgz"
     },
     "@tradle/qr-schema": {
       "version": "2.0.0",
