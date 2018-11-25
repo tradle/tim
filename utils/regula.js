@@ -1,6 +1,6 @@
 import promisify from 'pify'
 import Regula from 'react-native-regula-document-reader'
-import { replaceDataUrls } from './image-utils'
+import { importFromImageStore } from './image-utils'
 import { validate as validateType, types } from './validate-type'
 import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
@@ -70,11 +70,8 @@ export const scan = async (opts={}) => {
 const normalizeResult = async result => {
   result = normalizeJSON(result)
   // not necessary as long as imageStore changes are merged on the native side
-  result = await replaceDataUrls(result)
+  const image = await importFromImageStore(result.image)
   const results = result.jsonResult.map(normalizeJSON)
   // see dummy response in data/sample-regula-result.json
-  return {
-    results,
-    image: result.image,
-  }
+  return { results, image }
 }
