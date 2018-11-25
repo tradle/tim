@@ -34,21 +34,30 @@ allprojects {
         }
         // for react-native-camera
         maven { url "https://jitpack.io" }
+        maven {
+            url "http://maven.regulaforensics.com/RegulaDocumentReader"
+        }
         flatDir {
             dirs 'libs'
         }
         google()
     }
-    configurations.all {
-        resolutionStrategy.force "com.android.support:support-v4:26.0.2"
-    }
+     configurations.all {
+         resolutionStrategy.force "com.android.support:support-v4:${supportLibVersion}"
+         resolutionStrategy.force "com.android.support:appcompat-v7:${supportLibVersion}"
+     }
 }
 
 ext {
     compileSdkVersion           = 27
     targetSdkVersion            = 26
     buildToolsVersion           = "27.0.3"
-    supportLibVersion           = "27.1.0"
+    supportLibVersion           = "27.1.1"
     googlePlayServicesVersion   = "11.8.0"
     minSdkVersion               = 19
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.4'
+    distributionUrl = distributionUrl.replace("bin", "all")
 }
