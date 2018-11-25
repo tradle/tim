@@ -40,7 +40,7 @@ const DEFAULTS = {
   functionality: {
     showTorchButton: true,
     showCloseButton: true,
-    showCaptureButton: true,
+    showCaptureButton: false,
   },
   customization: {
     showHintMessages: true,
@@ -70,8 +70,10 @@ export const scan = async (opts={}) => {
 const normalizeResult = async result => {
   result = normalizeJSON(result)
   // not necessary as long as imageStore changes are merged on the native side
-  const image = await importFromImageStore(result.image)
+  const imageFront = await importFromImageStore(result.imageFront)
+  const imageBack = result.imageBack && await importFromImageStore(result.imageBack)
+
   const results = result.jsonResult.map(normalizeJSON)
   // see dummy response in data/sample-regula-result.json
-  return { results, image }
+  return { results, imageFront, imageBack }
 }
