@@ -261,6 +261,7 @@ repositories {
 }
 
 dependencies {
+    compile project(':react-native-regula-document-reader')
     implementation project(':react-native-image-store')
     implementation project(':react-native-tradle-keeper')
     implementation project(':rn-fetch-blob')
