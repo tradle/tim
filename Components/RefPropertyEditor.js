@@ -29,6 +29,7 @@ import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
 import Actions from '../Actions/Actions'
 import BlinkID from './BlinkID'
+import Regula from './Regula'
 import Navigator from './Navigator'
 import GridList from './GridList'
 import NewResource from './NewResource'
@@ -39,6 +40,7 @@ import Image from './Image'
 const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
+const PHOTO_ID = 'tradle.PhotoID'
 
 class RefPropertyEditor extends Component {
   constructor(props) {
@@ -151,15 +153,7 @@ class RefPropertyEditor extends Component {
                     </TouchableOpacity>
     else if (isVideo ||  isPhoto) {
       // HACK
-      const isScan = pName === 'scan'
-      let useImageInput
-      if (isWeb()  ||  isSimulator()) {
-        useImageInput = isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
-      } else {
-        useImageInput = prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
-      }
-
-      if (useImageInput) {
+      if (useImageInput({resource, prop})) {
         let aiStyle = {flex: 7, paddingTop: resource[pName] &&  10 || 0}
         actionItem = <ImageInput nonImageAllowed={isVideo} cameraType={prop.cameraType} allowPicturesFromLibrary={prop.allowPicturesFromLibrary} style={aiStyle} onImage={item => this.onSetMediaProperty(pName, item)}>
                        {content}
@@ -275,7 +269,6 @@ class RefPropertyEditor extends Component {
     //     translate('noScanningOnAndroid')
     //   )
     // }
-
     let { resource, model, prop } = this.props
     let pName = prop.name
     let props = model.properties
@@ -284,7 +277,8 @@ class RefPropertyEditor extends Component {
       if (scanner === 'id-document') {
         if (pName === 'scan')  {
           if (resource.documentType  &&  resource.country) {
-            this.showBlinkIDScanner(pName)
+            this.showRegulaScanner(params)
+            // this.showBlinkIDScanner(pName)
           }
           else
             Alert.alert('Please choose country and document type first')
@@ -337,7 +331,48 @@ class RefPropertyEditor extends Component {
     else
       return '#b1b1b1'
   }
+  async showRegulaScanner(params) {
+    let { resource, model, prop, navigator } = this.props
+    const type = getDocumentTypeFromTitle(resource.documentType.title)
+    Analytics.sendEvent({
+      category: 'widget',
+      action: 'scan_document',
+      label: `regula:${type}`
+    })
+    let bothSides = type !== 'passport'  &&  type !== 'other'
+    let result
+    try {
+      result = await Regula.regulaScan({bothSides})
+    } catch (err) {
+      debug('regula scan failed:', err.message)
+      debugger
+    }
+    if (!result)
+      return
+    const r = _.cloneDeep(resource)
+    r.scanJson = result.scanJson
+    // r.documentType = result.documentType
+    r.country = result.country
 
+    if (result.imageFront) {
+      r[prop.name] = {
+        url: result.imageFront,
+      }
+    }
+    if (result.imageBack) {
+      // HACK
+      if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
+        r.otherSideScan = {
+          url: result.imageBack,
+        }
+      }
+    }
+
+    let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
+    if (docScannerProps  &&  docScannerProps.length)
+      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'regula')
+    this.afterScan(r, prop.name)
+  }
   async showBlinkIDScanner(prop) {
     let { resource } = this.props
     const { documentType, country } = resource
@@ -446,10 +481,6 @@ class RefPropertyEditor extends Component {
         r.signatureImage = { url: signatureImage }
     }
 
-    let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
-    if (docScannerProps  &&  docScannerProps.length)
-      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
-
     let dateOfExpiry //, dateOfBirth, documentNumber
     ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl', 'australiaFront'].some(docType => {
       const scan = result[docType]
@@ -487,6 +518,9 @@ class RefPropertyEditor extends Component {
     //   chipScan = await this.scanPassport({documentNumber, dateOfBirth, dateOfExpiry})
     // }
 
+    let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
+    if (docScannerProps  &&  docScannerProps.length)
+      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
     this.afterScan(r, prop)
   }
 
@@ -610,9 +644,21 @@ class RefPropertyEditor extends Component {
     Actions.getIdentity({prop, ...result.data })
   }
 }
+function useImageInput({resource, prop}) {
+  let pName = prop.name
+  const isScan = pName === 'scan'
+  let rtype = utils.getType(resource)
+  let { documentType } = resource
+  if (isWeb()  ||  isSimulator())
+    return isScan || !ENV.canUseWebcam || prop.allowPicturesFromLibrary
+  else if (rtype === PHOTO_ID  &&  isScan  &&  documentType  &&  documentType.id.indexOf('other') !== -1)
+    return true
+  else
+    return prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
+}
 function getDocumentTypeFromTitle (title='') {
   title = title.toLowerCase()
-  const match = title.match(/(licen[cs]e|passport|card)/)
+  const match = title.match(/(licen[cs]e|passport|card|other)/)
   if (!match) return
   switch (match[1]) {
   case 'passport':
@@ -622,6 +668,8 @@ function getDocumentTypeFromTitle (title='') {
     return 'license'
   case 'card':
     return 'card'
+  case 'other':
+    return 'other'
   }
 }
 module.exports = RefPropertyEditor;
