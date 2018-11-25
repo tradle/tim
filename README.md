@@ -178,6 +178,47 @@ Deploy a production release:
 fastlane release_prod
 ```
 
+### Web
+
+#### Build
+
+To understand what to build, you should know where the web build will live.
+
+Web builds currently live in several places:
+- staging (appdev.tradle.io): 
+- production (app.tradle.io): same as staging, but hopefully more thoroughly tested
+- packaged in docker images 
+  - `tradle/web-app:cloud` same as the staging/production build
+  - `tradle/web-app:localstack` same as staging/production build, with the exception that it has different default chat channels. This image isn't really used often.
+
+To run a development server, simply run `npm start` and open `localhost:3001`
+
+To make a production build: `npm run build:prod`
+
+To make a production build image: `npm run build:prod:image`
+
+#### Deploy
+
+**WARNING**: before you deploy, you must create a build. Otherwise you might deploy an empty bundle.
+
+##### Sanity check
+
+Once you've created a build, you can give it a short test run. Run `npm run prod` and open `localhost:3000` (3000=prod, 3001=dev).
+
+##### Staging
+
+To deploy the latest build to staging (appdev.tradle.io), run `npm run deploy:dev`
+
+It will ask you several questions, to which you can say `y` (but only after reading them)
+
+It may take a few minutes for staging to be updated. You can check the git hash on the home page to see if it updated or not.
+
+##### Production
+
+To promote the build from staging to production (appdev.tradle.io -> app.tradle.io), run `npm run deploy:promote`
+
+It will ask you several questions, and may take a few minutes to be updated. Check the git hash on the home page.
+
 # Troubleshooting
 
 This is a complex app. Sometimes things go wrong. Have a good cry, then read on.

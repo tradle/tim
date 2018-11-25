@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./hooks/update_version.sh
+"$(dirname $0)/../hooks/update_version.sh"
 
 if [ -z "$1" ]; then
   echo "specify an image tag"
