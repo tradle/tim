@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+# set -euo pipefail
 
 PLATFORM=${1-ios}
 DEPLOYMENT=${2-Staging}

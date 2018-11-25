@@ -311,6 +311,9 @@ dependencies {
     // implementation ("com.google.android.gms:play-services-vision:${googlePlayServicesVersion}") {
     //   force = true;
     // }
+
+    implementation project(':react-native-regula-document-reader')
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:${supportLibVersion}"
     implementation "com.facebook.react:react-native:+"  // From node_modules

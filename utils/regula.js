@@ -1,19 +1,9 @@
 import promisify from 'pify'
-import { NativeModules } from 'react-native'
-import { replaceDataUrls } from './image-utils'
+import Regula from 'react-native-regula-document-reader'
+import { importFromImageStore } from './image-utils'
 import { validate as validateType, types } from './validate-type'
 import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
-import memoize from 'lodash/memoize'
-
-const Regula = NativeModules.RNRegulaDocumentReaderBeta
-const _init = memoize(promisify(Regula.initialize.bind(Regula)))
-export const init = memoize(_init)
-
-// export const setScenario = async (name) => {
-//   await init()
-//   Regula.setScenario(name)
-// }
 
 export const Scenario = {
   mrz: 'Mrz',
@@ -62,7 +52,6 @@ const DEFAULTS = {
 }
 
 const normalizeJSON = obj => typeof obj === 'string' ? JSON.parse(obj) : obj
-const _scan = promisify(Regula.showScanner.bind(Regula))
 export const scan = async (opts={}) => {
   opts = defaultsDeep(opts, DEFAULTS)
 
@@ -72,20 +61,17 @@ export const scan = async (opts={}) => {
     allowExtraProps: false,
   })
 
-  await init()
+  await Regula.initialize()
   // opts will be supported soon
-  const result = await _scan(opts)
+  const result = await Regula.scan(opts)
   return normalizeResult(result)
 }
 
 const normalizeResult = async result => {
   result = normalizeJSON(result)
   // not necessary as long as imageStore changes are merged on the native side
-  result = await replaceDataUrls(result)
+  const image = await importFromImageStore(result.image)
   const results = result.jsonResult.map(normalizeJSON)
   // see dummy response in data/sample-regula-result.json
-  return {
-    results,
-    image: result.image,
-  }
+  return { results, image }
 }

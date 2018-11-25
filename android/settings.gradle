@@ -1,4 +1,6 @@
 include ':app'
+include ':react-native-regula-document-reader'
+project(':react-native-regula-document-reader').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-regula-document-reader/android')
 rootProject.name = 'Tradle'
 include ':react-native-image-store'
 project(':react-native-image-store').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-image-store/android')
