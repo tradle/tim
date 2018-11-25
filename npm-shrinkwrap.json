@@ -621,9 +621,9 @@
       "resolved": "https://registry.npmjs.org/@tradle/promise-utils/-/promise-utils-1.1.0.tgz"
     },
     "@tradle/protocol": {
-      "version": "5.0.0",
+      "version": "5.0.1",
       "from": "@tradle/protocol@latest",
-      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-5.0.0.tgz"
+      "resolved": "https://registry.npmjs.org/@tradle/protocol/-/protocol-5.0.1.tgz"
     },
     "@tradle/qr-schema": {
       "version": "2.0.0",
@@ -6447,7 +6447,7 @@
     "react-native-regula-document-reader": {
       "version": "1.0.0",
       "from": "tradle/react-native-regula-document-reader",
-      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#30dfc203ced980f3d8291e84b5ed4d62d761c84a"
+      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#bc51459df97fdfa538f3e1558d48e62355f6870e"
     },
     "react-native-scrollable-mixin": {
       "version": "1.0.1",
