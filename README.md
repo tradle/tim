@@ -195,3 +195,6 @@ watchman watch-del-all
 npm start -- --reset-cache # start packager with clean cache
 ```
 
+## Troubleshooting iOS builds
+
+- if you're building Staging and see an error during archive that mentions Pods, try running: `./scripts/fix-staging.js` and then trying again
