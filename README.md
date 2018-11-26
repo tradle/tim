@@ -8,7 +8,7 @@ Welcome to the main repo for the Tradle app! On mobile we use React Native (RN),
 ## Prerequisites
 
 - node 8.10
-- npm 3.10
+- npm 3.10 (if you have a newer one, downgrade it: npm install -g npm@3.10
 - [React Native Debugger](https://github.com/jhen0409/react-native-debugger)
 
 ### iOS
