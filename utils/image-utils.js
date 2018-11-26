@@ -32,10 +32,10 @@ export const normalizeImageCaptureData = async ({ extension, base64, imageTag, .
 
 export const replaceDataUrls = async obj => {
   const keeper = getGlobalKeeper()
-  return keeper ? keeper.replaceDataUrls(obj) : obj
+  return keeper && keeper.importFromImageStore ? keeper.replaceDataUrls(obj) : obj
 }
 
 export const importFromImageStore = async imageTag => {
   const keeper = getGlobalKeeper()
-  return keeper ? await keeper.importFromImageStore(imageTag) : imageTag
+  return keeper && keeper.importFromImageStore ? await keeper.importFromImageStore(imageTag) : imageTag
 }
