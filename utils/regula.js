@@ -5,10 +5,9 @@ import { validate as validateType, types } from './validate-type'
 import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
 
-export const Scenario = {
-  mrz: 'Mrz',
-  ocr: 'Ocr',
-}
+const { Scenario } = Regula
+
+export { Scenario }
 
 const OptsTypeSpec = {
   processParams: {
