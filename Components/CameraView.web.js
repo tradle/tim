@@ -44,7 +44,7 @@ class CameraView extends Component {
     const canvas = this.refs.cam.getCanvas()
     const { width, height } = canvas
     const base64 = canvas.toDataURL(this.props.screenshotFormat)
-    const photo = normalizeImageCaptureData({ base64, width, height })
+    const photo = await normalizeImageCaptureData({ base64, width, height })
     this.setState({ photo })
   }
   renderShootButtons() {
@@ -117,8 +117,8 @@ class CameraView extends Component {
 
     let media
     if (this.state.photo) {
-      const { dataUrl, width, height } = this.state.photo
-      media = <Image source={{uri: dataUrl}} style={{width, height}} />
+      const { url, width, height } = this.state.photo
+      media = <Image source={{uri: url}} style={{width, height}} />
     } else {
       media = this.renderCamera()
     }
