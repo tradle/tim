@@ -6,7 +6,7 @@ import { requestCameraAccess } from '../utils/camera'
 import { getGlobalKeeper } from '../utils/keeper'
 import { getModel, buildStubByEnumTitleOrId } from '../utils/utils'
 import { scan, Scenario } from '../utils/regula'
-import regulaVisualFieldTypes from './regulaVisualFieldTypes'
+// import regulaVisualFieldTypes from '../utils/regulaVisualFieldTypes'
 
 const COUNTRY = 'tradle.Country'
 
@@ -34,35 +34,39 @@ const regulaScan = (function () {
       console.log('regula scan failed', err)
       return
     }
-    let { imageFront, imageBack } = result
-    let { scanResult, country } = normalizeResult(result.results)
+    if (!result)
+      return
+    let { imageFront, imageBack, results, json } = result
+    let { scanResult, country } = normalizeResult({results, json})
     return postProcessResult({result: scanResult, imageFront, imageBack, country})
   }
 }());
 
 export default { regulaScan }
 
-const normalizeResult = (results) => {
-  let result = results[0].ListVerifiedFields
-  let fields = result.pFieldMaps
-  let json = {}
+const normalizeResult = ({results, json}) => {
+  // let result = results[0].ListVerifiedFields
+  // if (!result)
+  //   return {}
+  // let fields = result.pFieldMaps
+  // let json = {}
 
-  fields.forEach((f, i) => {
-    let fieldTypeID = f.FieldType
-    let val = f.Field_Visual || f.Field_MRZ
-    let fName
-    if (val) {
-      fName = regulaVisualFieldTypes[fieldTypeID]
-      json[fName] = val
-    }
-    else {
-      val = f.GraphicField
-    }
-  })
-  result = {
+  // fields.forEach((f, i) => {
+  //   let fieldTypeID = f.FieldType
+  //   let val = f.Field_Visual || f.Field_MRZ
+  //   let fName
+  //   if (val) {
+  //     fName = regulaVisualFieldTypes[fieldTypeID]
+  //     json[fName] = val
+  //   }
+  //   else {
+  //     val = f.GraphicField
+  //   }
+  // })
+  let result = {
     personal: {
-      firstName: json.ft_Given_Names,
-      lastName: json.ft_Surname,
+      firstName: json.ft_Given_Names || json.ft_Surname_And_Given_Names,
+      lastName: json.ft_Surname || json.ft_Fathers_Name,
       address: json.ft_Address,
       country: json.ft_Country,
       birthData: json.ft_Date_of_Birth,
@@ -70,8 +74,9 @@ const normalizeResult = (results) => {
     document: {
       dateOfExpiry: json.ft_Date_of_Expiry,
       dateOfIssue: json.ft_Date_of_Issue,
-      issuer: json.ft_Place_of_Issue,
+      issuer: json.ft_Place_of_Issue || json.ft_Authority,
       documentNumber: json.ft_Document_Number,
+      documentVersion: json.ft_DL_Restriction_Code
     }
   }
   // debugger

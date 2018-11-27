@@ -4,6 +4,8 @@ import { importFromImageStore } from './image-utils'
 import { validate as validateType, types } from './validate-type'
 import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
+import regulaVisualFieldTypes from './regulaVisualFieldTypes'
+import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
 
 export const Scenario = {
   mrz: 'Mrz',
@@ -74,6 +76,42 @@ const normalizeResult = async result => {
   const imageBack = result.imageBack && await importFromImageStore(result.imageBack)
 
   const results = result.jsonResult.map(normalizeJSON)
+  const json = processListVerifiedFields(results)
   // see dummy response in data/sample-regula-result.json
-  return { results, imageFront, imageBack }
+  return { json, results, imageFront, imageBack }
+}
+
+const processListVerifiedFields = results => {
+  let fields, fieldTypes
+  let result = results.filter(r => r.ListVerifiedFields)
+  if (!result.length)
+    return
+  // result = results[0].ListVerifiedFields
+  // let result = results.ListVerifiedFields
+  fields = results[0].ListVerifiedFields.pFieldMaps
+  if (!fields)
+    return {}
+  fieldTypes = regulaVisualFieldTypes
+  let json = {}
+
+  fields.forEach((f, i) => {
+    let fieldTypeID = f.FieldType
+    let val = f.Field_Visual || f.Field_MRZ
+    let fName
+    if (val) {
+      for (let p in regulaVisualFieldTypes) {
+        if (regulaVisualFieldTypes[p] === fieldTypeID) {
+          fName = p
+          break
+        }
+      }
+
+      // fName = regulaVisualFieldTypes[fieldTypeID]
+      json[fName] = val
+    }
+    else {
+      val = f.GraphicField
+    }
+  })
+  return json
 }

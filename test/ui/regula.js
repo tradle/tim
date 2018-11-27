@@ -26,26 +26,41 @@ class App extends Component {
 
   async componentDidMount() {
     if (this.state.results) return
+    let scanOpts = {
+      processParams: {
+        scenario: Scenario.fullProcess,
+        multipageProcessing: true
+      },
+      functionality: {
+        showCaptureButton: true
+      }
+    }
 
-    const result = await scan()
+    // if (bothSides)
+    //   scanOpts.processParams.multipageProcessing = true
+
+    const result = await scan(scanOpts)
     this.setState(result)
   }
 
   render() {
-    let { results, image } = this.state
+    let { results, imageFront, imageBack, json } = this.state
     if (!results) {
       return <View/>
     }
-
-    if (image.startsWith('/')) {
+    if (imageFront.startsWith('/')) {
       // data uri
-      image = 'data:image/jpeg;base64,' + image
+      imageFront = 'data:image/jpeg;base64,' + imageFront
     }
-
+    if (imageBack) {
+      imageBack = 'data:image/jpeg;base64,' + imageBack
+      imageBack = <Image source={{uri:imageBack}} style={styles.image} />
+    }
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Image source={{uri:image}} style={styles.image} />
-        <Text>{JSON.stringify(results, null, 2)}</Text>
+        <Image source={{uri:imageFront}} style={styles.image} />
+        {imageBack}
+        <Text>{JSON.stringify(json, null, 2)}</Text>
       </ScrollView>
     )
   }
@@ -55,7 +70,7 @@ const dimensions = Dimensions.get('window')
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    // flex: 1,
   },
   image: {
     resizeMode: 'contain',
