@@ -347,8 +347,10 @@ class RefPropertyEditor extends Component {
       debug('regula scan failed:', err.message)
       debugger
     }
-    if (!result)
+    if (!result) {
+      Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
       return
+    }
     const r = _.cloneDeep(resource)
     r.scanJson = result.scanJson
     // r.documentType = result.documentType
