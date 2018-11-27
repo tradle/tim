@@ -59,14 +59,13 @@ npm install
 # install more dependencies via CocoaPods
 cd iOS
 pod install
-cd fastlane
 bundle install # install fastlane and other gems
-cd ../../
+cd ../
 
 # Android
-cd android/fastlane
+cd android
 bundle install
-cd ../../
+cd ../
 ```
 
 ### Web
@@ -185,13 +184,7 @@ fastlane release
 
 ##### Android
 
-Build + deploy a staging release to Crashlytics (Fabric):
-
-```sh
-fastlane beta
-```
-
-Deploy a release to the Google Play Store alpha/beta track:
+Deploy a release to the Google Play Store closed alpha or open beta tracks:
 
 ```sh
 fastlane release_alpha
