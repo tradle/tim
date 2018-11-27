@@ -184,6 +184,12 @@ fastlane release
 
 ##### Android
 
+Deploy a release to the Google Play Store internal track (private to Tradle devs and individually added users).
+
+```sh
+fastlane release_staging
+```
+
 Deploy a release to the Google Play Store closed alpha or open beta tracks:
 
 ```sh
