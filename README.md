@@ -8,7 +8,7 @@ Welcome to the main repo for the Tradle app! On mobile we use React Native (RN),
 ## Prerequisites
 
 - node 8.10
-- npm 3.10
+- npm 3.10 (if you have a newer one, downgrade it: npm install -g npm@3.10
 - [React Native Debugger](https://github.com/jhen0409/react-native-debugger)
 
 ### iOS
@@ -195,3 +195,6 @@ watchman watch-del-all
 npm start -- --reset-cache # start packager with clean cache
 ```
 
+## Troubleshooting iOS builds
+
+- if you're building Staging and see an error during archive that mentions Pods, try running: `./scripts/fix-staging.js` and then trying again

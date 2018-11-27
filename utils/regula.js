@@ -7,10 +7,9 @@ import defaultsDeep from 'lodash/defaultsDeep'
 import regulaVisualFieldTypes from './regulaVisualFieldTypes'
 import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
 
-export const Scenario = {
-  mrz: 'Mrz',
-  ocr: 'Ocr',
-}
+const { Scenario } = Regula
+
+export { Scenario }
 
 const OptsTypeSpec = {
   processParams: {

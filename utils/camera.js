@@ -7,8 +7,11 @@ import { translate } from './utils'
 import platformUtils from './platformUtils'
 import { getGlobalKeeper } from './keeper'
 
-const USE_IMAGE_PICKER = true//Platform.OS === 'android'
-const CameraImpl = USE_IMAGE_PICKER ? CameraViaImagePicker : CameraViaRNCamera
+const CameraImpl = Platform.select({
+  default: CameraViaImagePicker,
+  web: CameraViaRNCamera,
+})
+
 const RN_CAMERA_ONLY = [
   'navigator',
   'backButtonTitle',
@@ -20,7 +23,7 @@ const IMAGE_PICKER_ONLY = [
   'cancelButtonTitle'
 ]
 
-const OMIT_PROPS = USE_IMAGE_PICKER ? RN_CAMERA_ONLY : IMAGE_PICKER_ONLY
+const OMIT_PROPS = CameraImpl === CameraViaImagePicker ? RN_CAMERA_ONLY : IMAGE_PICKER_ONLY
 
 const getPlatformProps = props => omit(props, OMIT_PROPS)
 const isDataUrl = url => url.startsWith('data:image/')
