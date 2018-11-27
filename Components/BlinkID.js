@@ -253,7 +253,7 @@ function normalizeNZDLResult (result) {
 
   const document = {
     documentNumber: result.licenseNumber,
-    cardVersion: result.cardVersion,
+    documentVersion: result.cardVersion,
     // this is scanned incorrectly as dateOfBirth sometimes
     // and is not present on most licenses' front sides
     // dateOfIssue: result[NZDLKeys.IssueDate],
