@@ -15,6 +15,7 @@ fastlane_version "2.28.2"
 
 default_platform :android
 
+require 'dotenv'
 platform :android do
   before_all do
     # weird to have them declared here, but .env is loaded from s3
