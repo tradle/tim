@@ -1,3 +1,29 @@
+# Tradle App
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Development](#development)
+  - [Prerequisites](#prerequisites)
+    - [iOS](#ios)
+  - [Install](#install)
+    - [Mobile](#mobile)
+    - [Web](#web)
+  - [Run in Dev Mode](#run-in-dev-mode)
+    - [Mobile](#mobile-1)
+      - [Web](#web-1)
+  - [Release](#release)
+    - [Prerequisites](#prerequisites-1)
+    - [Mobile](#mobile-2)
+      - [Version and tag](#version-and-tag)
+      - [Code Push](#code-push)
+      - [App Store](#app-store)
+        - [iOS](#ios-1)
+        - [Android](#android)
+- [Troubleshooting](#troubleshooting)
+  - [Troubleshooting iOS builds](#troubleshooting-ios-builds)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 *tim = Trust in Motion*
 
@@ -33,14 +59,13 @@ npm install
 # install more dependencies via CocoaPods
 cd iOS
 pod install
-cd fastlane
 bundle install # install fastlane and other gems
-cd ../../
+cd ../
 
 # Android
-cd android/fastlane
+cd android
 bundle install
-cd ../../
+cd ../
 ```
 
 ### Web
@@ -159,13 +184,7 @@ fastlane release
 
 ##### Android
 
-Build + deploy a staging release to Crashlytics (Fabric):
-
-```sh
-fastlane beta
-```
-
-Deploy a release to the Google Play Store alpha/beta track:
+Deploy a release to the Google Play Store closed alpha or open beta tracks:
 
 ```sh
 fastlane release_alpha
