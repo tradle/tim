@@ -1,7 +1,7 @@
 import { Platform, Alert } from 'react-native'
 import _ from 'lodash'
 
-import { isSimulator, sanitize } from '../utils/utils'
+import { isSimulator, sanitize, isEmpty } from '../utils/utils'
 import { requestCameraAccess } from '../utils/camera'
 import { getGlobalKeeper } from '../utils/keeper'
 import { getModel, buildStubByEnumTitleOrId } from '../utils/utils'
@@ -20,7 +20,10 @@ const regulaScan = (function () {
     let scanOpts = {
       processParams: {
         scenario: Scenario.ocr,
-      }
+      },
+      // functionality: {
+      //   showCaptureButton: true
+      // }
     }
 
     if (bothSides)
@@ -45,6 +48,8 @@ const regulaScan = (function () {
 export default { regulaScan }
 
 const normalizeResult = ({results, json}) => {
+  if (isEmpty(json))
+    return {}
   // let result = results[0].ListVerifiedFields
   // if (!result)
   //   return {}
@@ -69,16 +74,18 @@ const normalizeResult = ({results, json}) => {
       lastName: json.ft_Surname || json.ft_Fathers_Name,
       address: json.ft_Address,
       country: json.ft_Country,
-      birthData: json.ft_Date_of_Birth,
+      dateOfBirth: json.ft_Date_of_Birth,
+      nationality: json.ft_Nationality_Code,
     },
     document: {
       dateOfExpiry: json.ft_Date_of_Expiry,
       dateOfIssue: json.ft_Date_of_Issue,
-      issuer: json.ft_Place_of_Issue || json.ft_Authority,
+      issuer: json.ft_Place_of_Issue || json.ft_Authority || json.ft_Issuing_State_Code,
       documentNumber: json.ft_Document_Number,
       documentVersion: json.ft_DL_Restriction_Code
     }
   }
+
   // debugger
   normalizeDates(result, parseDate)
   // let docType
@@ -95,18 +102,29 @@ const normalizeResult = ({results, json}) => {
 
   // let docTypeM = getModel('tradle.IDCardType')
   // let documentType = buildStubByEnumTitleOrId(docTypeM, docType)
-  let country
+  let country, countryId
   let countryCode = json.ft_Issuing_State_Code
   if (countryCode) {
     country = getModel(COUNTRY).enum.find(c => c.cca3 === countryCode)
-    if (country)
+    if (country) {
+      countryId = country.id
       country = buildStubByEnumTitleOrId(getModel(COUNTRY), country.id)
+    }
+  }
+  if (countryId === 'NZ') {
+    let names = result.personal.firstName && result.personal.firstName.split('^')
+    if (names  &&  names.length > 1) {
+      result.personal.firstName = names[0]
+      result.personal.middleName = names[1]
+    }
   }
 
   return { scanResult: result, country }
 }
 
 const postProcessResult = ({ result, imageFront, imageBack, country }) => {
+  if (!result)
+    return
   let ret = {
     scanJson: result,
     imageFront,
