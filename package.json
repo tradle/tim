@@ -184,7 +184,7 @@
     "react-native-push-notification": "github:zo0r/react-native-push-notification#5b34f15",
     "react-native-qrcode": "^0.2.6",
     "react-native-randombytes": "^3.5.1",
-    "react-native-regula-document-reader": "git://github.com/tradle/react-native-regula-document-reader.git#a5384fd41d2d9f68c77df4cc8a6d180ec5ea7499",
+    "react-native-regula-document-reader": "github:tradle/react-native-regula-document-reader",
     "react-native-scrollable-tab-view": "github:tradle/react-native-scrollable-tab-view#fixes_android",
     "react-native-search-bar": "^3.4.0",
     "react-native-signature-pad": "github:tradle/react-native-signature-pad",
