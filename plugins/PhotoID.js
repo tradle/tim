@@ -56,6 +56,8 @@ module.exports = function PhotoID ({ models }) {
 
       console.log('PhotoID: requesting additional properties for Driver Licence')
 
+      let message = ''
+
       let isLicence = documentType.title.indexOf('Licence') !== -1
       let isPassport = !isLicence  &&  documentType.title.indexOf('Passport') !== -1
       let countryId = form.country  &&  form.country.id.split('_')[1]
@@ -71,6 +73,8 @@ module.exports = function PhotoID ({ models }) {
         if (countryCCA) {
           let countryModel = getModel(COUNTRY)
           let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
+          if (!country)
+            message += translate('invalidCountryInTheDocument', countryCCA)
           if (!country  ||  country.id !== countryId) {
             cleanupValues(form, scan, model)
             scan = null
@@ -83,7 +87,7 @@ module.exports = function PhotoID ({ models }) {
       if (dateOfExpiry) {
         if (dateOfExpiry < new Date().getTime()) {
           let ret = cleanupValues(form, scan, model)
-          ret.message += '. The document has expired'
+          ret.message += message + '. The document has expired'
           return ret
         }
       }
@@ -93,19 +97,18 @@ module.exports = function PhotoID ({ models }) {
           let age = new Date().getYear() - new Date(dateOfBirth).getYear()
           if (age < 18) {
             let ret = cleanupValues(form, scan, model)
-            ret.message += '. The document has invalid date of birth'
+            ret.message += message + '. The document has invalid date of birth'
             return ret
           }
         }
       }
-      let message
       let prop = !isPassport  &&  (isLicence && 'licence' || 'id')
       if (ENV.documentScanner === 'blinkid'  ||  isOther) {
         let doOtherSide = prop  &&  sideToSnap[countryId]  &&  sideToSnap[countryId][prop]
         if (doOtherSide  &&  !otherSideScan)
-          message = translate('reviewScannedPropertiesAndSecondSideSnapshot', sideToSnap[countryId][prop])
+          message += ' ' + translate('reviewScannedPropertiesAndSecondSideSnapshot', sideToSnap[countryId][prop])
         else
-          message = translate('reviewScannedProperties')
+          message += ' ' + translate('reviewScannedProperties')
         if (doOtherSide)
           form.otherSideToScan = sideToSnap[countryId][prop]
       }
