@@ -2,7 +2,8 @@
 
 set -euo pipefail
 
-source $(dirname $0)/env.sh
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+source "$SCRIPTS_DIR/env.sh"
 
 clean() {
   echo "removing placed secrets"

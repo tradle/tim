@@ -1,11 +1,11 @@
 #!/bin/bash
 
-DIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
-cd "$DIR/../"
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+cd "$SCRIPTS_DIR/../"
 
-if [ -f "$DIR/.env.sh" ]
+if [ -f "$SCRIPTS_DIR/.env.sh" ]
 then
-  source "$DIR/.env.sh"
+  source "$SCRIPTS_DIR/.env.sh"
 else
   YELLOW='\033[0;33m'
   NC='\033[0m' # No Color
