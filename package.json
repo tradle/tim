@@ -287,6 +287,7 @@
     "./Components/PasswordCheck.js": "./web/shims/PasswordCheck.js",
     "./Components/ImageInput.js": "./Components/ImageInput.web.js",
     "./Components/Image.js": "./Components/Image.web.js",
+    "./Components/ImageBackground.js": "./Components/ImageBackground.web.js",
     "./Components/QRCodeScanner.js": false,
     "./utils/push.js": "./web/shims/push.js",
     "./img/bg.png": "./web/shims/bg.js",
