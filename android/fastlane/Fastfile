@@ -19,7 +19,7 @@ default_platform :android
 platform :android do
   before_all do
     # weird to have them declared here, but .env is loaded from s3
-    ENV['CODE_PUSH_APP_NAME_ANDROID'] = 'tim-android'
+    ENV['CODE_PUSH_APP_NAME_ANDROID'] = 'mark-zz43-07/tim-android'
     ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
     # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
     sh "../../hooks/update_version.sh"
