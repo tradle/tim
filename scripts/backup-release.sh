@@ -33,7 +33,6 @@ then
 fi
 
 TARGET_FOLDER="$BUCKET/$PLATFORM/$RELEASE_TYPE/$VERSION"
-SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
 cd "$SCRIPTS_DIR/../"
 
