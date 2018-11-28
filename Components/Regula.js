@@ -20,14 +20,14 @@ const regulaScan = (function () {
     let scanOpts = {
       processParams: {
         scenario: Scenario.ocr,
+        multipageProcessing: bothSides
       },
       // functionality: {
       //   showCaptureButton: true
       // }
     }
 
-    if (bothSides)
-      scanOpts.processParams.multipageProcessing = true
+
 
     let result
     try {
