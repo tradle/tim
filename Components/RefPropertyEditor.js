@@ -23,7 +23,7 @@ const {
 } = constants.TYPES
 
 import { Text } from './Text'
-import utils, { translate, translateEnum, isWeb, isSimulator } from '../utils/utils'
+import utils, { translate, translateEnum, isWeb, isSimulator, buildStubByEnumTitleOrId } from '../utils/utils'
 import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
@@ -41,6 +41,7 @@ const PHOTO = 'tradle.Photo'
 const COUNTRY = 'tradle.Country'
 const DOCUMENT_SCANNER = 'tradle.DocumentScanner'
 const PHOTO_ID = 'tradle.PhotoID'
+const ID_CARD = 'tradle.IDCardType'
 
 class RefPropertyEditor extends Component {
   constructor(props) {
@@ -351,6 +352,22 @@ class RefPropertyEditor extends Component {
       Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
       return
     }
+
+    if (result.documentType  &&  type !== 'other') {
+      let docTypeModel = utils.getModel(ID_CARD)
+      let documentType
+      if (result.documentType === 'P')
+        documentType = buildStubByEnumTitleOrId(docTypeModel, 'passport')
+      else if (result.documentType === 'I')
+        documentType = buildStubByEnumTitleOrId(docTypeModel, 'id')
+      else if (result.documentType === 'DL')
+        documentType = buildStubByEnumTitleOrId(docTypeModel, 'license')
+      if (documentType.id !== resource.documentType.id) {
+        Alert.alert(translate('wrongDocumentTypePleaseTryAgain'))
+        return
+      }
+    }
+
     const r = _.cloneDeep(resource)
     r.scanJson = result.scanJson
     // r.documentType = result.documentType
@@ -369,10 +386,9 @@ class RefPropertyEditor extends Component {
         }
       }
     }
-
     let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
     if (docScannerProps  &&  docScannerProps.length)
-      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'regula')
+      r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'regula')
     this.afterScan(r, prop.name)
   }
   async showBlinkIDScanner(prop) {
@@ -522,7 +538,7 @@ class RefPropertyEditor extends Component {
 
     let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
     if (docScannerProps  &&  docScannerProps.length)
-      r[docScannerProps[0].name] = utils.buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
+      r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
     this.afterScan(r, prop)
   }
 

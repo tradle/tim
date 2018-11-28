@@ -41,7 +41,7 @@ const regulaScan = (function () {
       return
     let { imageFront, imageBack, results, json } = result
     let { scanResult, country } = normalizeResult({results, json})
-    return postProcessResult({result: scanResult, imageFront, imageBack, country})
+    return postProcessResult({result: scanResult, imageFront, imageBack, country, json})
   }
 }());
 
@@ -122,14 +122,15 @@ const normalizeResult = ({results, json}) => {
   return { scanResult: result, country }
 }
 
-const postProcessResult = ({ result, imageFront, imageBack, country }) => {
+const postProcessResult = ({ result, imageFront, imageBack, country, json }) => {
   if (!result)
     return
   let ret = {
     scanJson: result,
     imageFront,
     imageBack,
-    country
+    country,
+    documentType: json.ft_DL_Class && 'DL' || json.ft_Document_Class_Code
   }
   return sanitize(ret)
 }

@@ -74,7 +74,7 @@ module.exports = function PhotoID ({ models }) {
           let countryModel = getModel(COUNTRY)
           let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
           if (!country)
-            message += translate('invalidCountryInTheDocument', countryCCA)
+            message += translate('invalidCountry', countryCCA)
           if (!country  ||  country.id !== countryId) {
             cleanupValues(form, scan, model)
             scan = null

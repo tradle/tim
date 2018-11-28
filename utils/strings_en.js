@@ -280,6 +280,8 @@ module.exports = {
     "afterRefresh": "You are cleared to use our services without interruption",
     "newCustomer": "New customer",
     "areYouSureYouAreDone": "Are you sure you wan to finish this session?",
+    "wrongDocumentTypePleaseTryAgain": "Wrong document type. Please try again",
+    "invalidCountry": "Invalid country scanned",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",
