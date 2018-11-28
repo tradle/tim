@@ -3,6 +3,8 @@
 set -x
 set -euo pipefail
 
+source $(dirname $0)/env.sh
+
 BUCKET="tradle-app-releases"
 APP_NAME="Tradle"
 PLATFORM="$1"
