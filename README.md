@@ -155,9 +155,9 @@ fastlane inc_major
 ```sh
 # in iOS/ or android/
 # dry run
-fastlane codepush 
+fastlane codepush dry_run:true 
 # actually build and push
-fastlane codepush dry_run:false 
+fastlane codepush 
 # promote from Staging to Release
 fastlane codepush_promote_to_release
 ```
