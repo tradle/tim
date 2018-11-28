@@ -60,11 +60,15 @@ npm install
 cd iOS
 pod install
 bundle install # install fastlane and other gems
-cd ../
+cd fastlane
+fastlane install_plugins
+cd ../../
 
 # Android
 cd android
 bundle install
+cd fastlane
+fastlane install_plugins
 cd ../
 ```
 
