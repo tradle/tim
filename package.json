@@ -271,7 +271,6 @@
     "react-native-signature-pad": "react-signature-pad",
     "react-native-awesome-card-io": false,
     "react-native-push-notification": false,
-    "react-native-image-picker": false,
     "react-native-image-store": false,
     "react-native-regula-document-reader": false,
     "react-native-tradle-keeper": false,
