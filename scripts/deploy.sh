@@ -3,6 +3,9 @@
 set -euo pipefail
 set -x
 
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+source "$SCRIPTS_DIR/env.sh"
+
 get_project_root() {
   cd "$(dirname $0)/../"
   printf $(pwd)
