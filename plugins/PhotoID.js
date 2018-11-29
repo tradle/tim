@@ -180,7 +180,7 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
     if (isLicence) {
       requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
       if (countryId === 'NZ')
-        requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'document_group'}, {name: 'documentVersion'}]
+        requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
       else
         requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}, {name: 'issuer'}]
     }
