@@ -33,9 +33,9 @@ const regulaScan = (function () {
     try {
       result = await scan(scanOpts)
     } catch (err) {
-      debugger
+      // debugger
       console.log('regula scan failed', err)
-      return
+      return { canceled: err.message === 'Canceled by user' }
     }
     if (!result)
       return
