@@ -78,6 +78,8 @@ const merged = extend({
     // 'https://hkooibqf60.execute-api.us-east-1.amazonaws.com/dev',
     // // r3.com
     // 'https://9xzhlnx5fb.execute-api.us-east-1.amazonaws.com/dev',
+    // lenka
+    // 'https://xt2n679eyk.execute-api.us-east-1.amazonaws.com/dev',
   ],
   pushServerURL: PROD_PUSH_SERVER,
   isAndroid: function () {
@@ -115,6 +117,7 @@ const merged = extend({
     language: DeviceInfo.getDeviceLocale(),
     country: DeviceInfo.getDeviceCountry()
   },
+  // documentScanner: 'blinkid',
   // timeout after partial scan results have been processed
   blinkIDScanTimeoutInternal: 10000,
   // timeout from beginning to end of scan operation
