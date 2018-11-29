@@ -23,9 +23,11 @@ fi
 
 # Xcode project file for React Native apps is located in ios/ subfolder
 
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
 buildPlist="Tradle/$plistName.plist"
 bundleVersion=$(/usr/libexec/PlistBuddy -c "Print CFBundleVersion" $buildPlist)
-gitHash=`$(dirname $0)/get-short-commit-hash.sh`
+gitHash=`"$SCRIPTS_DIR/get-short-commit-hash.sh"`
 RELEASES_DIR="$(pwd)/../release/ios" # up from iOS
 THIS_RELEASE_DIR="$RELEASES_DIR/$bundleVersion/$gitHash"
 

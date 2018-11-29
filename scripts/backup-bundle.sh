@@ -14,7 +14,8 @@ then
   exit 1
 fi
 
-cd "$(dirname $0)/.."
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+cd "$SCRIPTS_DIR/../"
 
 if [[ ! -d "$BUNDLE_DIR" ]];
 then

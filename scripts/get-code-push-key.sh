@@ -11,7 +11,8 @@ if [ "$DEPLOYMENT" == "Debug" ];
 then
   echo ""
 else
-  CODE_PUSH_JSON=$(cat $(dirname $0)/../code-push.json)
+  SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+  CODE_PUSH_JSON=$(cat "$SCRIPTS_DIR/../code-push.json")
   KEY=$(echo $CODE_PUSH_JSON | jq -r ".$PLATFORM.$DEPLOYMENT")
   # KEY=$(code-push deployment ls "tim-$PLATFORM" -k --format json | jq -r ".[] | select(.name==\"$DEPLOYMENT\").key")
   echo "$KEY"

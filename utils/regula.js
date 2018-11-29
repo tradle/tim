@@ -82,12 +82,11 @@ const normalizeResult = async result => {
 
 const processListVerifiedFields = results => {
   let fields, fieldTypes
-  let result = results.filter(r => r.ListVerifiedFields)
-  if (!result.length)
+  let result = results.find(r => r.ListVerifiedFields)
+  if (!result)
     return
-  // result = results[0].ListVerifiedFields
-  // let result = results.ListVerifiedFields
-  fields = results[0].ListVerifiedFields.pFieldMaps
+
+  fields = result.ListVerifiedFields.pFieldMaps
   if (!fields)
     return {}
   fieldTypes = regulaVisualFieldTypes

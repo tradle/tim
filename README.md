@@ -59,14 +59,17 @@ npm install
 # install more dependencies via CocoaPods
 cd iOS
 pod install
-cd fastlane
 bundle install # install fastlane and other gems
+cd fastlane
+fastlane install_plugins
 cd ../../
 
 # Android
-cd android/fastlane
+cd android
 bundle install
-cd ../../
+cd fastlane
+fastlane install_plugins
+cd ../
 ```
 
 ### Web
@@ -156,9 +159,9 @@ fastlane inc_major
 ```sh
 # in iOS/ or android/
 # dry run
-fastlane codepush 
+fastlane codepush dry_run:true 
 # actually build and push
-fastlane codepush dry_run:false 
+fastlane codepush 
 # promote from Staging to Release
 fastlane codepush_promote_to_release
 ```
@@ -185,13 +188,13 @@ fastlane release
 
 ##### Android
 
-Build + deploy a staging release to Crashlytics (Fabric):
+Deploy a release to the Google Play Store internal track (private to Tradle devs and individually added users).
 
 ```sh
-fastlane beta
+fastlane release_staging
 ```
 
-Deploy a release to the Google Play Store alpha/beta track:
+Deploy a release to the Google Play Store closed alpha or open beta tracks:
 
 ```sh
 fastlane release_alpha

@@ -29,7 +29,7 @@ platform :ios do
     ENV['GYM_XCCONFIG'] = "./release.xcconfig"
     ENV['PROJECT'] = "./Tradle.xcodeproj"
     ENV['WORKSPACE'] = "./Tradle.xcworkspace"
-    ENV['CODE_PUSH_APP_NAME_IOS'] = 'tim-ios'
+    ENV['CODE_PUSH_APP_NAME_IOS'] = 'mark-zz43-07/tim-ios'
     ENV['DEFAULT_TESTER_EMAIL'] = 'mark@tradle.io'
     ENV['APP_NAME'] = 'Tradle'
   end

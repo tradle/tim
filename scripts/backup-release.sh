@@ -3,6 +3,9 @@
 set -x
 set -euo pipefail
 
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+source "$SCRIPTS_DIR/env.sh"
+
 BUCKET="tradle-app-releases"
 APP_NAME="Tradle"
 PLATFORM="$1"
@@ -31,7 +34,7 @@ fi
 
 TARGET_FOLDER="$BUCKET/$PLATFORM/$RELEASE_TYPE/$VERSION"
 
-cd "$(dirname $0)/../"
+cd "$SCRIPTS_DIR/../"
 
 echo "backing up $RELEASE_TYPE version $VERSION to $TARGET_FOLDER"
 
