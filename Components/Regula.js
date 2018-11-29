@@ -33,9 +33,9 @@ const regulaScan = (function () {
     try {
       result = await scan(scanOpts)
     } catch (err) {
-      debugger
+      // debugger
       console.log('regula scan failed', err)
-      return
+      return { canceled: err.message === 'Canceled by user' }
     }
     if (!result)
       return
@@ -68,11 +68,18 @@ const normalizeResult = ({results, json}) => {
   //     val = f.GraphicField
   //   }
   // })
+  let address, city
+  if (json.ft_Address) {
+    let arr = json.ft_Address.split('^')
+    address = arr[0]
+    city = arr.length > 1  &&  arr[1]
+  }
   let result = {
     personal: {
       firstName: json.ft_Given_Names || json.ft_Surname_And_Given_Names,
       lastName: json.ft_Surname || json.ft_Fathers_Name,
-      address: json.ft_Address,
+      full: address,
+      city,
       country: json.ft_Country,
       dateOfBirth: json.ft_Date_of_Birth,
       nationality: json.ft_Nationality_Code,
@@ -85,7 +92,6 @@ const normalizeResult = ({results, json}) => {
       documentVersion: json.ft_DL_Restriction_Code
     }
   }
-
   // debugger
   normalizeDates(result, parseDate)
   // let docType

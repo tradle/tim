@@ -74,7 +74,7 @@ module.exports = function PhotoID ({ models }) {
           let countryModel = getModel(COUNTRY)
           let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
           if (!country)
-            message += translate('invalidCountry', countryCCA)
+            message = translate('invalidCountry', countryCCA)
           if (!country  ||  country.id !== countryId) {
             cleanupValues(form, scan, model)
             scan = null
@@ -87,7 +87,7 @@ module.exports = function PhotoID ({ models }) {
       if (dateOfExpiry) {
         if (dateOfExpiry < new Date().getTime()) {
           let ret = cleanupValues(form, scan, model)
-          ret.message += message + '. The document has expired'
+          ret.message = 'The document has expired. ' + message
           return ret
         }
       }
@@ -97,7 +97,7 @@ module.exports = function PhotoID ({ models }) {
           let age = new Date().getYear() - new Date(dateOfBirth).getYear()
           if (age < 18) {
             let ret = cleanupValues(form, scan, model)
-            ret.message += message + '. The document has invalid date of birth'
+            ret.message = 'The document has invalid date of birth. ' + message
             return ret
           }
         }
@@ -180,7 +180,7 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
     if (isLicence) {
       requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}]
       if (countryId === 'NZ')
-        requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'document_group'}, {name: 'documentVersion'}]
+        requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
       else
         requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}, {name: 'issuer'}]
     }
