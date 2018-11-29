@@ -9,6 +9,7 @@ import _ from 'lodash'
 const debug = require('debug')('tradle:app:blinkid')
 import Icon from 'react-native-vector-icons/Ionicons';
 import { CardIOModule, CardIOUtilities } from 'react-native-awesome-card-io';
+import debounce from 'p-debounce'
 
 import constants from '@tradle/constants'
 const {
@@ -49,6 +50,7 @@ class RefPropertyEditor extends Component {
     this.state = {
       isRegistration: !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH])
     }
+    this.regulaScan = debounce(Regula.regulaScan.bind(this), 500, { leading: true })
   }
   shouldComponentUpdate(nextProps, nextState) {
     let prop = this.props.prop
@@ -343,7 +345,7 @@ class RefPropertyEditor extends Component {
     let bothSides = type !== 'passport'  &&  type !== 'other'
     let result
     try {
-      result = await Regula.regulaScan({bothSides})
+      result = await this.regulaScan({bothSides}) //Regula.regulaScan({bothSides})
     } catch (err) {
       debug('regula scan failed:', err.message)
       debugger
