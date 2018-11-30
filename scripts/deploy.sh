@@ -191,13 +191,13 @@ get_prev_folder() {
     exit 1
   fi
 
+  LIVE=$(get_live_folder "$DIST_ID")
   if [[ ! $LIVE =~ releases/[0-9]+$ ]]
   then
     echo "there is no previous release!"
     exit 1
   fi
 
-  LIVE=$(get_live_folder "$DIST_ID")
   SUFFIX=${LIVE:9} # cut off releases/
   PREV="releases/$(($SUFFIX - 1))"
   printf "$PREV"
