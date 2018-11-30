@@ -17,4 +17,7 @@
     <string name="strReadingRFID">Reading RFID chip data</string>
     <string name="strReadingRFIDDG">Reading RFID %s data</string>
     <string name="RSDT_RFID_READING_FINISHED">RFID data reading is finished</string>
+    <string name="strCameraUnavailable">Camera unavailable</string>
+    <string name="strTorchUnavailable">Torch unavailable</string>
+    <string name="strNfcTagNotFound">NFC tag not detected! Please move your phone closer to the NFC tag</string>
 </resources>
