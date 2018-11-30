@@ -1,0 +1,4 @@
+<resources>
+    <string name="strLookingDocument">Ищу документ…</string>
+    <string name="strProcessingDocument">Обрабатываю документ…</string>
+</resources>
