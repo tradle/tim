@@ -20,9 +20,11 @@ const OptsTypeSpec = {
     debugSaveImages: types.bool,
     debugSaveLogs: types.bool,
   },
+  // https://github.com/regulaforensics/DocumentReader-iOS/wiki/Customization
   customization: {
     showHelpAnimation: types.bool,
     showHintMessages: types.bool,
+    status: types.string,
   },
   functionality: {
     showTorchButton: types.bool,
