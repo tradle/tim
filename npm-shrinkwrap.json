@@ -460,7 +460,7 @@
     "@tradle/custom-models": {
       "version": "4.10.10",
       "from": "tradle/custom-models",
-      "resolved": "git://github.com/tradle/custom-models.git#85b5e612e692104016f4df6e3fefea538bfa7a95"
+      "resolved": "git://github.com/tradle/custom-models.git#b1276225296e353ee15a02579a53bb8fa7adf2bd"
     },
     "@tradle/embed": {
       "version": "1.2.4",
