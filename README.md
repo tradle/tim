@@ -236,4 +236,4 @@ npm start -- --reset-cache # start packager with clean cache
 
 **Symptom**: red screen of death: Unexpected character '*'
 **Cause**: iOS and Android (in dev mode) need different .babelrc settings
-**Fix**: in .babelrc, the "development" block, find `generators: false`, and set to `true`. Please don't commit .babelrc with this change
+**Fix**: in .babelrc, the "development" block, find `generators: false`, and set to `true`. Then restart your packager with `--reset-cache`. Please don't commit .babelrc with this change
