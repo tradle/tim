@@ -230,10 +230,10 @@ npm start -- --reset-cache # start packager with clean cache
 
 ## Android dev
 
-**Symptom**: red screen of death: 'Unable to load script from assets main.jsbundle...'
-**Causes**: your Android device is not connected, or can't reach your React Native packager's local http server
-**Fix**: Check your device is connected: `adb devices`. Once you see it there, run `adb reverse tcp:8081 tcp:8081` and then refresh on your device
+**Symptom**: red screen of death: 'Unable to load script from assets main.jsbundle...' or 'Could not connect to development server'  
+**Causes**: your Android device is not connected, or can't reach your React Native packager's local http server  
+**Fix**: Check your device is connected: `adb devices`. Once you see it there, run `adb reverse tcp:8081 tcp:8081` and then refresh on your device  
 
-**Symptom**: red screen of death: Unexpected character '*'
-**Cause**: iOS and Android (in dev mode) need different .babelrc settings
-**Fix**: in .babelrc, the "development" block, find `generators: false`, and set to `true`. Then restart your packager with `--reset-cache`. Please don't commit .babelrc with this change
+**Symptom**: red screen of death: Unexpected character '*'  
+**Cause**: iOS and Android (in dev mode) need different .babelrc settings  
+**Fix**: in .babelrc, the "development" block, find `generators: false`, and set to `true`. Then restart your packager with `--reset-cache`. Please don't commit .babelrc with this change  
