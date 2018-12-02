@@ -238,5 +238,5 @@ npm start -- --reset-cache # start packager with clean cache
 **Cause**: iOS and Android (in dev mode) need different .babelrc settings  
 **Fix**: in .babelrc, the "development" block, find `generators: false`, and set to `true`. Then restart your packager with `--reset-cache`. Please don't commit .babelrc with this change  
 
-**Symptom**: adb devices does returns empty list when the device is USB connected.
+**Symptom**: **adb devices** command returns empty list when the device is USB connected.
 **Fix**: Make sure your device is not connected as a media device. On your Android phone got Settings -> Developer options -> Networking -> Select USB Configuration
