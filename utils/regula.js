@@ -1,4 +1,6 @@
 import promisify from 'pify'
+import get from 'lodash/get'
+import { Platform } from 'react-native'
 import Regula from 'react-native-regula-document-reader'
 import { importFromImageStore } from './image-utils'
 import { validate as validateType, types } from './validate-type'
@@ -6,10 +8,23 @@ import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
 import regulaVisualFieldTypes from './regulaVisualFieldTypes'
 import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
+// kind of a shame to have this here
+// would be better to just call setLicenseKey from the outside
+import {
+  regula as regulaAuth,
+} from './env'
 
 const { Scenario } = Regula
 
+const initializeOpts = {
+  licenseKey: get(regulaAuth || {}, ['licenseKey', Platform.OS]),
+}
+
 export { Scenario }
+
+export const setLicenseKey = licenseKey => {
+  initializeOpts.licenseKey = licenseKey
+}
 
 const OptsTypeSpec = {
   processParams: {
@@ -64,7 +79,7 @@ export const scan = async (opts={}) => {
     allowExtraProps: false,
   })
 
-  await Regula.initialize()
+  await Regula.initialize(initializeOpts)
   // opts will be supported soon
   const result = await Regula.scan(opts)
   return normalizeResult(result)
