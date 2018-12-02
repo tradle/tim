@@ -14,7 +14,6 @@ import PropTypes from 'prop-types'
 import _ from 'lodash'
 import TimerMixin from 'react-timer-mixin'
 import Reflux from 'reflux'
-import DeviceInfo from 'react-native-device-info'
 import GiftedMessenger from 'react-native-gifted-messenger'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
@@ -42,9 +41,7 @@ import ResourceList from './ResourceList'
 import ChatContext from './ChatContext'
 import ContextChooser from './ContextChooser'
 import NewResourceMixin from './NewResourceMixin'
-import utils, {
-  translate
-} from '../utils/utils'
+import utils, { translate, isIphone10orMore } from '../utils/utils'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -836,8 +833,6 @@ class MessageList extends Component {
       // content = <GiftedMessenger style={{paddingHorizontal: 10, marginBottom: Platform.OS === 'android' ? 0 : 20}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
       // Hide TextInput for shared context since it is read-only
 
-      const deviceID = DeviceInfo.getDeviceId()
-      const isIphone10 = deviceID  &&  deviceID.indexOf('iPhone10') === 0
       content = <GiftedMessenger style={{paddingHorizontal: 10}} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={loadEarlierMessages}
@@ -852,7 +847,7 @@ class MessageList extends Component {
         handleSend={this.onSubmitEditing}
         submitOnReturn={true}
         underlineColorAndroid='transparent'
-        textInputHeight={isIphone10 ? 60 : 45}
+        textInputHeight={isIphone10orMore() ? 60 : 45}
         menu={this.generateMenu}
         keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}
