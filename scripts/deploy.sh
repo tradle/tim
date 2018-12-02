@@ -152,12 +152,21 @@ set_cloudfront_origin_path() {
   clear_cache "$DIST_ID"
 }
 
+set_live_folder() {
+  local DIST_ID
+  local FOLDER
+
+  DIST_ID="$1"
+  FOLDER="$2"
+  set_cloudfront_origin_path "$DIST_ID" "$FOLDER"
+}
+
 set_live_folder_dev() {
-  set_cloudfront_origin_path "$DEV_DIST_ID" "$1"
+  set_live_folder "$DEV_DIST_ID" "$1"
 }
 
 set_live_folder_prod() {
-  set_cloudfront_origin_path "$PROD_DIST_ID" "$1"
+  set_live_folder "$PROD_DIST_ID" "$1"
 }
 
 get_live_folder() {
@@ -393,6 +402,49 @@ rollback_prod() {
   set_live_folder_prod "$PREV"
 }
 
+get_roll_fwd_folder() {
+  local DIST_ID
+  local HOST
+  local NEXT
+
+  DIST_ID="$1"
+  HOST="$2"
+  if [[ ! $DIST_ID ]] || [[ ! $HOST ]]
+  then
+    echo "expected cloudfront distribution id and hostname as arguments, got: $DIST_ID, $HOST"
+    exit 1
+  fi
+
+  NEXT=$(get_next_folder $DIST_ID)
+  HAVE=$(aws s3api head-object --bucket "$HOST" --key "$NEXT/index.html" || echo '')
+  if [[ $HAVE ]]
+  then
+    printf "$NEXT"
+  fi
+}
+
+rollfwd() {
+  local DIST_ID
+  local HOST
+  local NEXT
+
+  DIST_ID="$1"
+  HOST="$2"
+  NEXT=$(get_roll_fwd_folder $DIST_ID $HOST)
+  if [[ $NEXT ]]
+  then
+    set_live_folder "$DIST_ID" "$NEXT"
+  fi
+}
+
+rollfwd_dev() {
+  rollfwd "$DEV_DIST_ID" "$DEV_BUCKET"
+}
+
+rollfwd_prod() {
+  rollfwd "$PROD_DIST_ID" "$PROD_BUCKET"
+}
+
 clear_cache() {
   local DIST_ID
   local INVALIDATION_ID
@@ -413,9 +465,11 @@ clear_cache_prod() {
 
 if [[ $COMMAND != "deploy_dev" ]] && \
   [[ $COMMAND != "rollback_dev" ]] && \
+  [[ $COMMAND != "rollfwd_dev" ]] && \
   [[ $COMMAND != "deploy_prod" ]] && \
   [[ $COMMAND != "promote_dev" ]] && \
-  [[ $COMMAND != "rollback_prod" ]]
+  [[ $COMMAND != "rollback_prod" ]] && \
+  [[ $COMMAND != "rollfwd_prod" ]]
 then
   cd "$PROJECT_ROOT"
   confirm_or_abort "will eval passed in command from"
