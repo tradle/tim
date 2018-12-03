@@ -242,11 +242,15 @@ It will ask you several questions, to which you can say `y` (but only after read
 
 It may take a few minutes for staging to be updated. You can check the git hash on the home page to see if it updated or not.
 
+To rollback the staging build to the previous staging build you need to run `npm run rollback:dev`
+
 ##### Production
 
 To promote the build from staging to production (appdev.tradle.io -> app.tradle.io), run `npm run deploy:promote`
 
 It will ask you several questions, and may take a few minutes to be updated. Check the git hash on the home page.
+
+To rollback the production build to the previous production build you need to run `npm run rollback:prod`
 
 # Troubleshooting
 
