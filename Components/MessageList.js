@@ -14,7 +14,6 @@ import PropTypes from 'prop-types'
 import _ from 'lodash'
 import TimerMixin from 'react-timer-mixin'
 import Reflux from 'reflux'
-import DeviceInfo from 'react-native-device-info'
 import GiftedMessenger from 'react-native-gifted-messenger'
 import Icon from 'react-native-vector-icons/Ionicons'
 import reactMixin from 'react-mixin'
@@ -866,8 +865,6 @@ class MessageList extends Component {
 
       // Hide TextInput for shared context since it is read-only
 
-      const deviceID = DeviceInfo.getDeviceId()
-      const isIphone10 = deviceID  &&  deviceID.indexOf('iPhone10') === 0
       content = <GiftedMessenger style={{ marginLeft, marginRight, width, alignSelf }} //, marginTop: Platform.OS === 'android' ?  0 : -5}}
         ref={(c) => this._GiftedMessenger = c}
         loadEarlierMessagesButton={loadEarlierMessages}
@@ -882,7 +879,7 @@ class MessageList extends Component {
         handleSend={this.onSubmitEditing}
         submitOnReturn={true}
         underlineColorAndroid='transparent'
-        textInputHeight={isIphone10 ? 60 : 45}
+        textInputHeight={45}
         menu={this.generateMenu}
         keyboardShouldPersistTaps={utils.isWeb() ? 'never' : 'always'}
         keyboardDismissMode={utils.isWeb() ? 'none' : 'on-drag'}

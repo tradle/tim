@@ -1,11 +1,9 @@
 
-import DeviceInfo from 'react-native-device-info'
 import StyleSheet from '../StyleSheet'
 import { circled } from './utils'
-import { dimensions } from '../utils/utils'
+import { dimensions, isIphone10orMore } from '../utils/utils'
 
-const deviceID = DeviceInfo.getDeviceId()
-const isIphone10 = deviceID  &&  deviceID.indexOf('iPhone10') === 0
+const isIphone10 = isIphone10orMore()
 
 const footerButton = {
   ...circled(50),

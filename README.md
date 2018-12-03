@@ -283,4 +283,19 @@ SDK_DIR=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Dev
 ```
 ## Troubleshooting iOS builds
 
+## iOS builds
+
 - if you're building Staging and see an error during archive that mentions Pods, try running: `./scripts/fix-staging.js` and then trying again
+
+## Android dev
+
+**Symptom**: red screen of death: 'Unable to load script from assets main.jsbundle...' or 'Could not connect to development server'  
+**Causes**: your Android device is not connected, or can't reach your React Native packager's local http server  
+**Fix**: Check your device is connected: `adb devices`. Once you see it there, run `adb reverse tcp:8081 tcp:8081` and then refresh on your device  
+
+**Symptom**: red screen of death: Unexpected character '*'  
+**Cause**: iOS and Android (in dev mode) need different .babelrc settings  
+**Fix**: in .babelrc, the "development" block, find `generators: false`, and set to `true`. Then restart your packager with `--reset-cache`. Please don't commit .babelrc with this change  
+
+**Symptom**: **adb devices** command returns empty list when the device is USB connected.
+**Fix**: Make sure your device is not connected as a media device. On your Android phone got Settings -> Developer options -> Networking -> Select USB Configuration

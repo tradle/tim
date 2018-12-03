@@ -3,6 +3,11 @@
 set -x
 set -euo pipefail
 
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+source "$SCRIPTS_DIR/env.sh"
+
+cd "$SCRIPTS_DIR/../"
+
 BUCKET="tradle-app-releases"
 APP_NAME="Tradle"
 PLATFORM="$1"
@@ -13,9 +18,6 @@ then
   echo "expected 1st argument to be 'ios' or 'android'"
   exit 1
 fi
-
-SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-cd "$SCRIPTS_DIR/../"
 
 if [[ ! -d "$BUNDLE_DIR" ]];
 then

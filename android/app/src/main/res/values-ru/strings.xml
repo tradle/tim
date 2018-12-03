@@ -2,9 +2,9 @@
     <string name="app_name">Tradle</string>
     <string name="branch_app_link">link.tradle.io</string>
     <string name="branch_path_prefix">/HvsP</string>
-    <string name="strLookingDocument">Searching for a document…</string>
-    <string name="strApplicationDoNotHavePermission">The application doesn\'t have permission to use the camera, please change the privacy settings</string>
-    <string name="strProcessingDocument">Document processing...</string>
+    <string name="strLookingDocument">Ищу документ…</string>
+    <string name="strApplicationDoNotHavePermission">Приложение не имеет разрешения на использование камеры, пожалуйста, измените настройки конфиденциальности</string>
+    <string name="strProcessingDocument">Обрабатываю документ…</string>
     <string name="strPhotoProcessing">Photo processing…</string>
     <string name="strKeepDeviceStill">Hold the device still</string>
     <string name="strHoldDocumentStraight">Hold the document straight</string>

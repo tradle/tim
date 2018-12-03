@@ -1021,6 +1021,10 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
     // let format = 'MMMM Do, YYYY h:MMA'
     // return valueMoment && valueMoment.format(format)
   },
+  isIphone10orMore() {
+    const deviceID = DeviceInfo.getDeviceId()
+    return deviceID  &&  deviceID.indexOf('iPhone') === 0 && parseInt(deviceID.substring(6).split(',')[0]) >= 10
+  },
   getPropStringValue(prop, resource) {
     let p = prop.name
     if (!resource[p]  &&  prop.displayAs)

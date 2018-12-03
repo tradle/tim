@@ -875,7 +875,9 @@ var NavigationBarRouteMapper = {
       if (width  &&  height)
         width = width * LOGO_HEIGHT / height
       else
-        width = LOGO_HEIGHT * 2
+        width = bankStyle.barLogo ? LOGO_HEIGHT * 1.7 : LOGO_HEIGHT
+        // width = LOGO_HEIGHT * 2
+
       height = LOGO_HEIGHT
       if (logoNeedsText)
         photo = <Image source={{uri: uri}} style={[styles.msgImage, platformStyles.logo, {width, height}]} />

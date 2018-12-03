@@ -1,13 +1,15 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+import org.gradle.util.VersionNumber;
+
 buildscript {
     repositories {
+        google()
         jcenter()
         maven {
             url 'https://maven.google.com/'
             name 'Google'
         }
-        google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.2'
@@ -20,6 +22,7 @@ buildscript {
 
 allprojects {
     repositories {
+        google()
         mavenLocal()
         jcenter()
         maven {
@@ -40,7 +43,6 @@ allprojects {
         flatDir {
             dirs 'libs'
         }
-        google()
     }
      configurations.all {
          resolutionStrategy.force "com.android.support:support-v4:${supportLibVersion}"
@@ -60,4 +62,15 @@ ext {
 task wrapper(type: Wrapper) {
     gradleVersion = '4.4'
     distributionUrl = distributionUrl.replace("bin", "all")
+}
+
+subprojects {
+    afterEvaluate {project ->
+        if (project.hasProperty("android") && VersionNumber.parse(project.property("android").compileSdkVersion) < VersionNumber.parse("27.0.0")) {
+            android {
+                compileSdkVersion rootProject.ext.compileSdkVersion
+                buildToolsVersion rootProject.ext.buildToolsVersion
+            }
+        }
+    }
 }

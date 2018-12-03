@@ -11341,15 +11341,42 @@ await fireRefresh(val.from.organization)
       return
     }
 
-    const keyPath = `microblink.licenseKey.${Platform.OS}`
-    const key = _.get(env, keyPath)
-    if (key && key !== _.get(ENV, keyPath)) {
-      _.set(ENV, keyPath, key)
-      let blinkId = require('../Components/BlinkID')
-      if (blinkId)
-        blinkId.setLicenseKey(key)
+    const keyConfs = [
+      {
+        path: `microblink.licenseKey.${Platform.OS}`,
+        get component() {
+          return require('../Components/BlinkID')
+        },
+      },
+      {
+        path: `regula.licenseKey.${Platform.OS}`,
+        get component() {
+          return require('../utils/regula')
+        },
+      },
+    ]
+
+    const updateLicenseKey = conf => {
+      const { path } = conf
+      const key = _.get(env, path)
+      if (!key || key === _.get(ENV, path)) return
+
+      _.set(ENV, path, key)
+      const { component } = conf
+      if (component) {
+        component.setLicenseKey(key)
+      }
+
       ENV.dateModified = env.dateModified
     }
+
+    keyConfs.forEach(conf => {
+      try {
+        updateLicenseKey(conf)
+      } catch (err) {
+        debug(`failed to update ${conf.path} in env`)
+      }
+    })
   },
 
 })

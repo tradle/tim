@@ -29,7 +29,6 @@
 		7333B05421A1AE4700CD6374 /* libRNFetchBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7333B05321A1AE4200CD6374 /* libRNFetchBlob.a */; };
 		7333B06621A1C21800CD6374 /* libRNTradleKeeper.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7333B04821A1ADF300CD6374 /* libRNTradleKeeper.a */; };
 		7333B06721A1C21D00CD6374 /* libRNImageStore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7333B04D21A1ADF300CD6374 /* libRNImageStore.a */; };
-		734D71E121A8EA970072F7C9 /* regula.license in Resources */ = {isa = PBXBuildFile; fileRef = 734D719821A8EA970072F7C9 /* regula.license */; };
 		734D71E221A8EA970072F7C9 /* db.dat in Resources */ = {isa = PBXBuildFile; fileRef = 734D71E021A8EA970072F7C9 /* db.dat */; };
 		736290AF1EDE460D007E4DE1 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 736290AE1EDE460D007E4DE1 /* CoreTelephony.framework */; };
 		736290B11EDE4614007E4DE1 /* CoreSpotlight.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */; };
@@ -56,6 +55,7 @@
 		7379FC471EDA619A0093535C /* libRNECC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B64451ED9FF7C0056F4BF /* libRNECC.a */; };
 		7379FC491EDA61A20093535C /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63E11ED9FF670056F4BF /* libCodePush.a */; };
 		7379FC4D1EDA61BB0093535C /* libRCTAsyncRocksDBStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 732B63BD1ED9FF670056F4BF /* libRCTAsyncRocksDBStorage.a */; };
+		7380570221B3747A000A927F /* RegulaSDK.strings in Resources */ = {isa = PBXBuildFile; fileRef = 7380570421B3747A000A927F /* RegulaSDK.strings */; };
 		73834C3820D1B462000C9AFC /* libRNCardIO.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73834C3720D1B44F000C9AFC /* libRNCardIO.a */; };
 		73BDD36320C2DBBD00FD92A1 /* staging.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */; };
 		73EF39BD20CC7077009EDE8B /* libRNDeviceInfo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 73EF39BA20CC7071009EDE8B /* libRNDeviceInfo.a */; };
@@ -638,7 +638,6 @@
 		732B67802060213500B16D6F /* RNCamera.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCamera.xcodeproj; path = "../node_modules/react-native-camera/ios/RNCamera.xcodeproj"; sourceTree = "<group>"; };
 		732B9D4C1EDA8A4C00FF957D /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		7333B04E21A1AE4200CD6374 /* RNFetchBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNFetchBlob.xcodeproj; path = "../node_modules/rn-fetch-blob/ios/RNFetchBlob.xcodeproj"; sourceTree = "<group>"; };
-		734D719821A8EA970072F7C9 /* regula.license */ = {isa = PBXFileReference; lastKnownFileType = file; path = regula.license; sourceTree = "<group>"; };
 		734D71E021A8EA970072F7C9 /* db.dat */ = {isa = PBXFileReference; lastKnownFileType = file; path = db.dat; sourceTree = "<group>"; };
 		736290AE1EDE460D007E4DE1 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		736290B01EDE4614007E4DE1 /* CoreSpotlight.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreSpotlight.framework; path = System/Library/Frameworks/CoreSpotlight.framework; sourceTree = SDKROOT; };
@@ -649,6 +648,8 @@
 		7379F84B1EDA19630093535C /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = "Launch Screen.storyboard"; path = "Tradle/Launch Screen.storyboard"; sourceTree = "<group>"; };
 		7379FAD01EDA5AEC0093535C /* Crashlytics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Crashlytics.framework; sourceTree = "<group>"; };
 		7379FAD11EDA5AEC0093535C /* Fabric.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fabric.framework; sourceTree = "<group>"; };
+		7380570321B3747A000A927F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/RegulaSDK.strings; sourceTree = "<group>"; };
+		7380570721B377D8000A927F /* bn-BD */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "bn-BD"; path = "bn-BD.lproj/RegulaSDK.strings"; sourceTree = "<group>"; };
 		73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = staging.xcconfig; sourceTree = "<group>"; };
 		73EF39B420CC7071009EDE8B /* RNDeviceInfo.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNDeviceInfo.xcodeproj; path = "../node_modules/react-native-device-info/ios/RNDeviceInfo.xcodeproj"; sourceTree = "<group>"; };
 		73F1B858205F5A89004E96E2 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
@@ -813,7 +814,6 @@
 			isa = PBXGroup;
 			children = (
 				734D71E021A8EA970072F7C9 /* db.dat */,
-				734D719821A8EA970072F7C9 /* regula.license */,
 				73BDD31F20C2DBBD00FD92A1 /* staging.xcconfig */,
 				7379F84B1EDA19630093535C /* Launch Screen.storyboard */,
 				7379F7CE1EDA14030093535C /* splash1536x2048.png */,
@@ -1257,6 +1257,7 @@
 		AB0700E270F64F0AB32A72E0 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				7380570421B3747A000A927F /* RegulaSDK.strings */,
 				4C80CE90233C4E8EAE48AFFF /* Entypo.ttf */,
 				266D99AA90E74766BFCEC86B /* EvilIcons.ttf */,
 				E512A7388D2D4884A7CD858B /* FontAwesome.ttf */,
@@ -1321,6 +1322,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"bn-BD",
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
@@ -2028,6 +2030,7 @@
 				13B07FBF1A68108700A75B9A /* Assets.xcassets in Resources */,
 				73F1D0971EDA10EE00D4AB5B /* release.xcconfig in Resources */,
 				73BDD36320C2DBBD00FD92A1 /* staging.xcconfig in Resources */,
+				7380570221B3747A000A927F /* RegulaSDK.strings in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 				7379F84E1EDA19630093535C /* Launch Screen.storyboard in Resources */,
 				73F1D0981EDA10EE00D4AB5B /* tradle.ttf in Resources */,
@@ -2037,7 +2040,6 @@
 				73F1D0951EDA10EE00D4AB5B /* debug.xcconfig in Resources */,
 				DCFA2F9E52F04D73AD1335E2 /* branch.json in Resources */,
 				734D71E221A8EA970072F7C9 /* db.dat in Resources */,
-				734D71E121A8EA970072F7C9 /* regula.license in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2174,6 +2176,16 @@
 				13B07FB21A68108700A75B9A /* Base */,
 			);
 			name = LaunchScreen.xib;
+			path = Tradle;
+			sourceTree = "<group>";
+		};
+		7380570421B3747A000A927F /* RegulaSDK.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7380570321B3747A000A927F /* en */,
+				7380570721B377D8000A927F /* bn-BD */,
+			);
+			name = RegulaSDK.strings;
 			path = Tradle;
 			sourceTree = "<group>";
 		};
@@ -2336,6 +2348,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -2449,6 +2462,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -2489,6 +2503,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
