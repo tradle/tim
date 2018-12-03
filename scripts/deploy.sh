@@ -124,6 +124,9 @@ set_cloudfront_origin_path() {
   local DIST_NAME
   local INVALIDATION_ID
 
+  echo "sleeping for 30 seconds to give S3 time to digest"
+  sleep 30
+
   DIST_ID="$1"
   ORIGIN_PATH="$2"
   if [[ ! $DIST_ID ]] || [[ ! $ORIGIN_PATH ]]
