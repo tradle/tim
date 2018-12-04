@@ -50,7 +50,7 @@ class RefPropertyEditor extends Component {
     this.state = {
       isRegistration: !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH])
     }
-    this.regulaScan = debounce(Regula.regulaScan.bind(this), 500, { leading: true })
+    this.regulaScan = !isSimulator() && !isWeb()  &&  debounce(Regula.regulaScan.bind(this), 500, { leading: true })
   }
   shouldComponentUpdate(nextProps, nextState) {
     let prop = this.props.prop
