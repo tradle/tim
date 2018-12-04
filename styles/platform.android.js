@@ -30,6 +30,9 @@ export default StyleSheet.create({
     paddingRight: 10,
     marginTop: 7
   },
+  navBarRightIcon: {
+    marginTop: -2
+  },
   // menuButtonNarrow: {
   //   marginTop: 2,
   //   paddingHorizontal: 5
@@ -51,7 +54,7 @@ export default StyleSheet.create({
     alignSelf: 'flex-start'
   },
   logo: {
-    marginTop: 18
+    marginTop: 16
   },
   navBarMultiRowTitle: {
     flexDirection: 'column',

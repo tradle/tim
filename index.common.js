@@ -684,7 +684,7 @@ var NavigationBarRouteMapper = {
         if (isAndroid)
           viewStyle = {paddingTop: 14}
       }
-      style = {marginTop: isAndroid ? 2 : -2}
+      style = {marginTop: -2} //isAndroid ? 0 : -2}
       // style = {marginTop: 5, transform: [
       //     {rotate: '45deg'}
       //   ]}
