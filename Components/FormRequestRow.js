@@ -858,19 +858,14 @@ class FormRequestRow extends Component {
               useImageInput = utils.isSimulator()  ||  (prop.allowPicturesFromLibrary  &&  !isScan)
 
             let actionItem
-                             // <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
             if (useImageInput)
               actionItem = this.makeButtonLink({form, isMyMessage, prop, styles, msg: addMessage, onPress: (item) => this.onSetMediaProperty(prop.name, item), useImageInput})
             else
-              actionItem = <TouchableOpacity underlayColor='transparent' onPress={() => this.showCamera({prop: prop})}>
-                             <Text style={[chatStyles.resourceTitle, resource._documentCreated ? {color: bankStyle.incomingMessageOpaqueTextColor} : {}]}>{addMessage}</Text>
-                           </TouchableOpacity>
-
+              actionItem = this.makeButtonLink({form, isMyMessage, prop, styles, msg: addMessage, onPress: () => this.showCamera({prop: prop}), useImageInput})
 
             msg = <View key={this.getNextKey()}>
                    <View style={styles.thumbView}>
                      {actionItem}
-                     {resource._documentCreated ||  useImageInput ? null : icon}
                    </View>
                  </View>
           }
@@ -1282,29 +1277,3 @@ reactMixin(FormRequestRow.prototype, OnePropFormMixin)
 FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;
-/*
-  showSignatureView1(prop) {
-    const { navigator, bankStyle } = this.props
-    let sigView
-    navigator.push({
-      title: translate(prop), //m.title,
-      // titleTextColor: '#7AAAC3',
-      id: 32,
-      component: SignatureView,
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
-      onRightButtonPress: () => {
-        const sig = sigView.getSignature()
-        navigator.pop()
-        this.onSetSignatureProperty(prop, sig.url)
-      },
-      passProps: {
-        ref: ref => {
-          sigView = ref
-        },
-        bankStyle,
-        sigViewStyle: bankStyle
-      }
-    })
-  }
-*/
