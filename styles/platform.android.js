@@ -5,7 +5,7 @@ import { dimensions } from '../utils/utils'
 export default StyleSheet.create({
   container: {
     backgroundColor: '#f7f7f7',
-    marginTop: 60, //56,
+    marginTop: 56,
     flex: 1,
   },
   // navBarText: {
