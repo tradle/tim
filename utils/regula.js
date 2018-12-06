@@ -24,6 +24,7 @@ export { Scenario }
 
 export const setLicenseKey = licenseKey => {
   initializeOpts.licenseKey = licenseKey
+  initialize()
 }
 
 const OptsTypeSpec = {
@@ -56,7 +57,7 @@ const OptsTypeSpec = {
 
 const DEFAULTS = {
   functionality: {
-    showTorchButton: true,
+    showTorchButton: false,
     showCloseButton: true,
     showCaptureButton: false,
   },
@@ -79,12 +80,16 @@ export const scan = async (opts={}) => {
     allowExtraProps: false,
   })
 
-  await Regula.initialize(initializeOpts)
+  // await initialize(initializeOpts)
   // opts will be supported soon
   const result = await Regula.scan(opts)
+
   return normalizeResult(result)
 }
-
+export const initialize = async () => {
+  // debugger
+  await Regula.initialize(initializeOpts)
+}
 const normalizeResult = async result => {
   result = normalizeJSON(result)
   // not necessary as long as imageStore changes are merged on the native side
@@ -111,7 +116,7 @@ const processListVerifiedFields = results => {
 
   fields.forEach((f, i) => {
     let fieldTypeID = f.FieldType
-    let val = f.Field_Visual || f.Field_MRZ
+    let val =  f.Field_MRZ || f.Field_Barcode ||  f.Field_Visual
     let fName
     if (val) {
       for (let p in regulaVisualFieldTypes) {
