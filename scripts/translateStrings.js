@@ -87,7 +87,7 @@ async function writeRegulaFile(stringsDir, lang, forceGen) {
     strings += `\n<string name="${s}">${stringsEN[s]}</string>`
   )
   for (let s in stringsLang) {
-    strings += `\n<string name="${s}">${stringsLang[s]}</string>`
+    strings += `\n<string name="${s}">${stringsLang[s].replace(/'/g, "\\'")}</string>`
   }
   strings += '\n</resources>'
   writeFileAtomic(langStrings, strings, console.log)
