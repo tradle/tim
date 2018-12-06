@@ -19,8 +19,14 @@ const regulaScan = (function () {
     let { bothSides } = opts
     let scanOpts = {
       processParams: {
-        scenario: Scenario.ocr,
-        multipageProcessing: bothSides
+        scenario: Scenario.fullProcess,
+        multipageProcessing: bothSides,
+        dateFormat:'mm/dd/yyyy',
+        logs: true,
+        debugSaveImages: true,
+        debugSaveLogs: true,
+        // rfidScenario: true,
+        // sessionLogFolder: '.'
       },
       // functionality: {
       //   showCaptureButton: true
@@ -83,6 +89,7 @@ const normalizeResult = ({results, json}) => {
       country: json.ft_Country,
       dateOfBirth: json.ft_Date_of_Birth,
       nationality: json.ft_Nationality_Code,
+      sec: json.ft_Sex
     },
     document: {
       dateOfExpiry: json.ft_Date_of_Expiry,
