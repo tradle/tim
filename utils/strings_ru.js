@@ -324,5 +324,9 @@ module.exports = {
   "afterRefresh": "Вы очищены, чтобы использовать наши услуги без перерыва",
   "requestMyData": "Запрос моих данных",
   "newCustomer": "Новый покупатель",
-  "areYouSureYouAreDone": "Вы уверены, что хотите завершить эту сессию?"
+  "areYouSureYouAreDone": "Вы уверены, что хотите завершить эту сессию?",
+  "scanYourDocument": "Сканируйте свой документ",
+  "wrongDocumentTypePleaseTryAgain": "Неверный тип документа. Пожалуйста, попробуйте еще раз",
+  "resetApp": "Сбросить приложение",
+  "invalidCountry": "Неверная страна, отсканированная"
 }

@@ -279,9 +279,10 @@ module.exports = {
     "doYouWantToContinue": "Do you want to switch to it and continue from there?",
     "afterRefresh": "You are cleared to use our services without interruption",
     "newCustomer": "New customer",
-    "areYouSureYouAreDone": "Are you sure you wan to finish this session?",
+    "areYouSureYouAreDone": "Are you sure you want to finish this session?",
     "wrongDocumentTypePleaseTryAgain": "Wrong document type. Please try again",
     "invalidCountry": "Invalid country scanned",
+    "scanYourDocument": "Please scan your document",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

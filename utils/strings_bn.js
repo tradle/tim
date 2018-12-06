@@ -324,5 +324,9 @@ module.exports = {
   "afterRefresh": "আপনি বাধা ছাড়া আমাদের সেবা ব্যবহার করার জন্য সাফ করা হয়",
   "requestMyData": "আমার তথ্য অনুরোধ",
   "newCustomer": "নতুন গ্রাহক",
-  "areYouSureYouAreDone": "আপনি এই সেশন শেষ করতে চান নিশ্চিত?"
+  "areYouSureYouAreDone": "আপনি এই সেশন শেষ করতে চান নিশ্চিত?",
+  "resetApp": "অ্যাপ রিসেট করুন",
+  "wrongDocumentTypePleaseTryAgain": "ভুল নথি টাইপ। অনুগ্রহপূর্বক আবার চেষ্টা করুন",
+  "invalidCountry": "অবৈধ দেশ স্ক্যান করা হয়েছে",
+  "scanYourDocument": "আপনার নথি স্ক্যান করুন"
 }

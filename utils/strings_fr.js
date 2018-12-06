@@ -324,5 +324,9 @@ module.exports = {
   "afterRefresh": "Vous êtes autorisé à utiliser nos services sans interruption",
   "requestMyData": "Demander mes données",
   "newCustomer": "Nouveau client",
-  "areYouSureYouAreDone": "Êtes-vous sûr de vouloir terminer cette session?"
+  "areYouSureYouAreDone": "Êtes-vous sûr de vouloir terminer cette session?",
+  "resetApp": "Réinitialiser l'application",
+  "invalidCountry": "Pays invalide scanné",
+  "scanYourDocument": "Veuillez numériser votre document",
+  "wrongDocumentTypePleaseTryAgain": "Mauvais type de document. Veuillez réessayer"
 }

@@ -324,5 +324,9 @@ module.exports = {
   "reviewData": "Gegevens bekijken",
   "requestMyData": "Mijn gegevens opvragen",
   "newCustomer": "Nieuwe klant",
-  "areYouSureYouAreDone": "Weet je zeker dat je deze sessie wilt beëindigen?"
+  "areYouSureYouAreDone": "Weet je zeker dat je deze sessie wilt beëindigen?",
+  "scanYourDocument": "Scan alstublieft uw document",
+  "wrongDocumentTypePleaseTryAgain": "Verkeerd documenttype. Probeer het opnieuw",
+  "invalidCountry": "Ongeldig land gescand",
+  "resetApp": "Reset app"
 }
