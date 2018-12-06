@@ -85,7 +85,6 @@ import HomePageMixin from './Components/HomePageMixin'
 import MatchImages from './Components/MatchImages'
 
 import utils, { isWeb } from './utils/utils'
-
 import Actions from './Actions/Actions'
 import AutomaticUpdates from './utils/automaticUpdates';
 import Store from './Store/Store'
@@ -627,13 +626,11 @@ var NavigationBarRouteMapper = {
     // if (route.component === ResourceList  &&  index === 1 &&  navigator.getCurrentRoutes().length === 2)
     //   Actions.cleanup()
 
-    let status = <View/>
     return (
       <TouchableOpacity
         hitSlop={HIT_SLOP}
         onPress={route.passProps.onLeftButtonPress || goBack.bind(null, navigator)}>
         <View style={platformStyles.navBarLeftButton}>
-          {status}
           {title}
         </View>
       </TouchableOpacity>
@@ -803,8 +800,6 @@ var NavigationBarRouteMapper = {
           //   org = <Image source={{uri: route.passProps.resource.organization.photo}} style={styles.orgImage} />
           // if (route.passProps.resource.organization)
       org = <Text style={style}> - {resource.organization.title}</Text>
-    else
-      org = <View />;
     let photo, uri
     let photoObj
     // let noLogo = route.id === RESOURCE_VIEW  &&  route.passProps.resource[TYPE] === PROFILE
