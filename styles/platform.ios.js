@@ -25,7 +25,7 @@ export default StyleSheet.create({
     height: isIphone10 ? 15 : 0
   },
   navBarMargin: {
-    marginTop: isIphone10 ? 15 : 0,
+    marginTop: isIphone10 ? 15 : 1,
   },
   navBarText: {
     marginTop: 8,
@@ -64,7 +64,7 @@ export default StyleSheet.create({
     height: 25,
   }
 })
-
+export const chatTextInputHeight = isIphone10 ? 60 : 45
 export const menuButtonObject = {
   ...footerButton,
   backgroundColor: 'red'
