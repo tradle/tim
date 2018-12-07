@@ -21,10 +21,6 @@ const regulaScan = (function () {
       processParams: {
         scenario: Scenario.fullProcess,
         multipageProcessing: bothSides,
-        dateFormat:'mm/dd/yyyy',
-        logs: true,
-        debugSaveImages: true,
-        debugSaveLogs: true,
         // rfidScenario: true,
         // sessionLogFolder: '.'
       },
@@ -95,6 +91,7 @@ const normalizeResult = ({results, json}) => {
       dateOfExpiry: json.ft_Date_of_Expiry,
       dateOfIssue: json.ft_Date_of_Issue,
       issuer: json.ft_Place_of_Issue || json.ft_Authority || json.ft_Issuing_State_Code,
+      country: json.ft_Issuing_State_Code,
       documentNumber: json.ft_Document_Number,
       documentVersion: json.ft_DL_Restriction_Code
     }

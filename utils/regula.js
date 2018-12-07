@@ -67,6 +67,10 @@ const DEFAULTS = {
   },
   processParams: {
     scenario: Scenario.mrz,
+    dateFormat:'mm/dd/yyyy',
+    logs: false,
+    debugSaveImages: false,
+    debugSaveLogs: false,
   },
 }
 
@@ -80,7 +84,7 @@ export const scan = async (opts={}) => {
     allowExtraProps: false,
   })
 
-  // await initialize(initializeOpts)
+  await initialize(initializeOpts)
   // opts will be supported soon
   const result = await Regula.scan(opts)
 
