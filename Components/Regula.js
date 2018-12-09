@@ -72,9 +72,14 @@ const normalizeResult = ({results, json}) => {
   // })
   let address, city
   if (json.ft_Address) {
-    let arr = json.ft_Address.split('^')
-    address = arr[0]
-    city = arr.length > 1  &&  arr[1]
+    if (json.ft_Issuing_State_Code === 'NZL') {
+      let arr = json.ft_Address.split('^')
+      address = arr[0]
+      city = arr.length > 1  &&  arr[1]
+    }
+    else
+      address = json.ft_Address.replace('^', ' ')
+      // address = json.ft_Address
   }
   let result = {
     personal: {
