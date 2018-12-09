@@ -13,7 +13,6 @@ import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
 import {
   regula as regulaAuth,
 } from './env'
-
 const { Scenario } = Regula
 
 const initializeOpts = {
@@ -120,8 +119,8 @@ const processListVerifiedFields = results => {
 
   fields.forEach((f, i) => {
     let fieldTypeID = f.FieldType
-    let val =  f.Field_MRZ || f.Field_Barcode ||  f.Field_Visual
     let fName
+    let val =  f.Field_Barcode  ||  f.Field_MRZ  ||  f.Field_Visual
     if (val) {
       for (let p in regulaVisualFieldTypes) {
         if (regulaVisualFieldTypes[p] === fieldTypeID) {
