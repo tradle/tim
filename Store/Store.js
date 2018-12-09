@@ -216,8 +216,8 @@ const DATA_CLAIM          = 'tradle.DataClaim'
 const LEGAL_ENTITY        = 'tradle.legal.LegalEntity'
 const LANGUAGE            = 'tradle.Language'
 const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
-const CUSTOMER_ONBOARDING = 'bd.nagad.CustomerKYC'
-
+const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
+const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const MY_ENVIRONMENT      = 'environment.json'
 
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
@@ -5753,7 +5753,7 @@ if (!res[SIG]  &&  res._message)
       if (!context) {
         let pr = {
           [TYPE]: PRODUCT_REQUEST,
-          requestFor: CUSTOMER_ONBOARDING,
+          requestFor: utils.getModel(CUSTOMER_KYC) ? CUSTOMER_KYC : CUSTOMER_ONBOARDING,
           from: me,
           to: this.getRepresentative(to)
         }
@@ -5979,7 +5979,7 @@ if (!res[SIG]  &&  res._message)
     let list = []
     for (let c in contextIdToResourceId) {
       let pr = this._getItem(contextIdToResourceId[c])
-      if (pr  &&  pr.requestFor === CUSTOMER_ONBOARDING)
+      if (pr  &&  (pr.requestFor === CUSTOMER_ONBOARDING || pr.requestFor === CUSTOMER_KYC))
         list.push(pr)
     }
     if (!list  ||  list.length <= MAX_CUSTOMERS_ON_DEVICE)
@@ -8091,7 +8091,7 @@ if (!res[SIG]  &&  res._message)
     let {foundResources, to, context, filter} = params
     if (!foundResources)
       return
-    if (me.isAgent  &&  context.requestFor === CUSTOMER_ONBOARDING)
+    if (me.isAgent  &&  (context.requestFor === CUSTOMER_ONBOARDING ||  context.requestFor === CUSTOMER_KYC))
       return
     if (me.isEmployee)
       return await this.getShareableResourcesForEmployee(params)
@@ -11270,11 +11270,12 @@ await fireRefresh(val.from.organization)
   },
 
   updateEnvironmentInMemory(env) {
+    if (utils.isSimulator())
+      return
     if (env.dateModified < ENV.dateModified) {
       debug('not updating ENV from storage, stored ENV is out of date')
       return
     }
-
     const keyConfs = [
       {
         path: `microblink.licenseKey.${Platform.OS}`,
