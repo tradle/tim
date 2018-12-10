@@ -4,8 +4,10 @@ import _ from 'lodash'
 import { isSimulator, sanitize, isEmpty } from '../utils/utils'
 import { requestCameraAccess } from '../utils/camera'
 import { getGlobalKeeper } from '../utils/keeper'
-import { getModel, buildStubByEnumTitleOrId } from '../utils/utils'
+import { getModel, buildStubByEnumTitleOrId, isAndroid } from '../utils/utils'
 import { scan, Scenario } from '../utils/regula'
+import DeviceInfo from 'react-native-device-info'
+
 // import regulaVisualFieldTypes from '../utils/regulaVisualFieldTypes'
 
 const COUNTRY = 'tradle.Country'
@@ -16,10 +18,16 @@ const regulaScan = (function () {
     if (!await requestCameraAccess()) {
       throw new Error('user denied camera access')
     }
+    let isLowEndDevice
+    if (isAndroid()) {
+      let totalMem = DeviceInfo.getTotalMemory() / 1000000000
+      isLowEndDevice = totalMem < 2
+    }
+      // phone = DeviceInfo.getPhoneNumber()
     let { bothSides } = opts
     let scanOpts = {
       processParams: {
-        scenario: Scenario.fullProcess,
+        scenario: isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
         multipageProcessing: bothSides,
         // rfidScenario: true,
         // sessionLogFolder: '.'
@@ -28,8 +36,11 @@ const regulaScan = (function () {
       //   showCaptureButton: true
       // }
     }
-
-
+    if (isLowEndDevice) {
+      scanOpts.functionality = {
+        pictureOnBoundsReady: true
+      }
+    }
 
     let result
     try {
