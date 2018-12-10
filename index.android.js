@@ -8,4 +8,5 @@ AsyncSnappyStorage.encrypt()
 
 // require('./utils/perf')
 require('./index.common')
+// require('./test/ui/regula.js')
 // require('./test/ui/image-store')
