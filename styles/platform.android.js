@@ -15,10 +15,11 @@ export default StyleSheet.create({
   navBarSeparator: {
   },
   navBarMargin: {
+    marginTop: 1
   },
   navBarText: {
     fontSize: 17,
-    marginTop: 14,
+    marginTop: 15,
   },
   navBarLeftButton: {
     paddingLeft: 10,
