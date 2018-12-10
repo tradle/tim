@@ -21,9 +21,9 @@ const initializeOpts = {
 
 export { Scenario }
 
-export const setLicenseKey = licenseKey => {
+export const setLicenseKey = async (licenseKey) => {
   initializeOpts.licenseKey = licenseKey
-  initialize()
+  await initialize()
 }
 
 const OptsTypeSpec = {
@@ -51,6 +51,8 @@ const OptsTypeSpec = {
     videoCaptureMotionControl: types.bool,
     isOnlineMode: types.bool,
     singleResult: types.bool,
+    orientation: types.number,
+    pictureOnBoundsReady: types.bool
   },
 }
 
@@ -59,6 +61,8 @@ const DEFAULTS = {
     showTorchButton: false,
     showCloseButton: true,
     showCaptureButton: false,
+    skipFocusingFrames: true,
+    orientation: 2,
   },
   customization: {
     showHintMessages: true,
