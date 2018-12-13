@@ -119,7 +119,7 @@ class RefPropertyEditor extends Component {
     else {
       let img = photo
       if (img) {
-        propView = <View style={{flexDirection: 'row'}}>
+        propView = <View style={{flexDirection: 'row', marginTop: 15, marginBottom: 5}}>
                       <Image source={{uri: img.url}} style={styles.thumb} />
                       <Text style={[styles.input, color]}>{' ' + label}</Text>
                    </View>
