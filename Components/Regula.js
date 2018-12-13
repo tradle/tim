@@ -36,11 +36,12 @@ const regulaScan = (function () {
       //   showCaptureButton: true
       // }
     }
-    if (isLowEndDevice) {
-      scanOpts.functionality = {
-        pictureOnBoundsReady: true
-      }
-    }
+    // if (isLowEndDevice) {
+    //  if set then as soon as doc is located the picture is taken and processed as a single frame
+    //   scanOpts.functionality = {
+    //     pictureOnBoundsReady: true
+    //   }
+    // }
 
     let result
     try {

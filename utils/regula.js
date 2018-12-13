@@ -14,6 +14,8 @@ import {
   regula as regulaAuth,
 } from './env'
 const { Scenario } = Regula
+const LANDSCAPE_RIGHT_IOS = 8
+const LANDSCAPE_ANDROID = 2
 
 const initializeOpts = {
   licenseKey: get(regulaAuth || {}, ['licenseKey', Platform.OS]),
@@ -23,6 +25,9 @@ export { Scenario }
 
 export const setLicenseKey = async (licenseKey) => {
   initializeOpts.licenseKey = licenseKey
+  // let ret = await Regula.prepareDatabase({dbID: 'Full', licenseKey})
+  await Regula.prepareDatabase({dbID: 'Full'})
+  // debugger
   await initialize()
 }
 
@@ -62,7 +67,7 @@ const DEFAULTS = {
     showCloseButton: true,
     showCaptureButton: false,
     skipFocusingFrames: true,
-    orientation: 2,
+    orientation: Platform.OS === 'android' && LANDSCAPE_ANDROID || LANDSCAPE_RIGHT_IOS,
   },
   customization: {
     showHintMessages: true,
@@ -71,7 +76,7 @@ const DEFAULTS = {
   processParams: {
     scenario: Scenario.mrz,
     dateFormat:'mm/dd/yyyy',
-    logs: false,
+    logs: true,
     debugSaveImages: false,
     debugSaveLogs: false,
   },

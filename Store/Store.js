@@ -11291,7 +11291,7 @@ await fireRefresh(val.from.organization)
       },
     ]
 
-    const updateLicenseKey = conf => {
+    const updateLicenseKey = async (conf) => {
       const { path } = conf
       const key = _.get(env, path)
       if (!key || key === _.get(ENV, path)) return
@@ -11299,15 +11299,15 @@ await fireRefresh(val.from.organization)
       _.set(ENV, path, key)
       const { component } = conf
       if (component) {
-        component.setLicenseKey(key)
+        await component.setLicenseKey(key)
       }
 
       ENV.dateModified = env.dateModified
     }
 
-    keyConfs.forEach(conf => {
+    keyConfs.forEach(async (conf) => {
       try {
-        updateLicenseKey(conf)
+        await updateLicenseKey(conf)
       } catch (err) {
         debug(`failed to update ${conf.path} in env`)
       }
