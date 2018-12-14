@@ -26,7 +26,7 @@ export { Scenario }
 export const setLicenseKey = async (licenseKey) => {
   initializeOpts.licenseKey = licenseKey
   // let ret = await Regula.prepareDatabase({dbID: 'Full', licenseKey})
-  await Regula.prepareDatabase({dbID: 'Full'})
+  // await Regula.prepareDatabase({dbID: 'Full'})
   // debugger
   await initialize()
 }
