@@ -11,7 +11,7 @@ import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
 // kind of a shame to have this here
 // would be better to just call setLicenseKey from the outside
 import {
-  regula as regulaAuth,
+  regula as regulaAuth
 } from './env'
 const { Scenario } = Regula
 const LANDSCAPE_RIGHT_IOS = 8
@@ -27,6 +27,10 @@ export const setLicenseKey = async (licenseKey) => {
   initializeOpts.licenseKey = licenseKey
   // let ret = await Regula.prepareDatabase({dbID: 'Full', licenseKey})
   // await Regula.prepareDatabase({dbID: 'Full'})
+  if (Platform.OS === 'android')
+    await Regula.prepareDatabase({dbID: 'Full'})
+    // await Regula.prepareDatabase({dbID: 'BGD'})
+
   // debugger
   await initialize()
 }
