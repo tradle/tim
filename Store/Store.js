@@ -2327,9 +2327,16 @@ var Store = Reflux.createStore({
         break
       }
     }
-    if (!oldSp)
+    if (!oldSp) {
       SERVICE_PROVIDERS.push(newSp)
-
+    }
+    if (ENV.regula) {
+      if (ENV.regula.dbID)
+        return
+      let dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
+      _.set(ENV, 'regula.dbID', dbID)
+      require('../utils/regula').prepareDatabase(dbID)
+    }
     // promises.push(self.addInfo(sp, originalUrl, newServer))
   },
   async addInfo(sp, url, newServer) {

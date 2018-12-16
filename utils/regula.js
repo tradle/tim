@@ -25,16 +25,12 @@ export { Scenario }
 
 export const setLicenseKey = async (licenseKey) => {
   initializeOpts.licenseKey = licenseKey
-  // let ret = await Regula.prepareDatabase({dbID: 'Full', licenseKey})
   // await Regula.prepareDatabase({dbID: 'Full'})
-  if (Platform.OS === 'android')
-    await Regula.prepareDatabase({dbID: 'Full'})
-    // await Regula.prepareDatabase({dbID: 'BGD'})
-
-  // debugger
   await initialize()
 }
-
+export const prepareDatabase = async (dbID) => {
+  await Regula.prepareDatabase({dbID})
+}
 const OptsTypeSpec = {
   processParams: {
     scenario: types.oneOf(getValues(Scenario)),
