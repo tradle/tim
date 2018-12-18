@@ -68,9 +68,8 @@ module.exports = function PhotoID ({ models }) {
         let { document } = scan
         let countryCCA
         if (document) {
-          if (isLicence)
-            countryCCA =  document.country
-          else
+          countryCCA = document.country
+          if (!countryCCA  && !isLicence)
             countryCCA = document.issuer
         }
         if (countryCCA) {
