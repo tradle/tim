@@ -26,10 +26,10 @@ export { Scenario }
 export const setLicenseKey = async (licenseKey) => {
   initializeOpts.licenseKey = licenseKey
   // await Regula.prepareDatabase({dbID: 'Full'})
-  await initialize()
 }
 export const prepareDatabase = async (dbID) => {
   await Regula.prepareDatabase({dbID})
+  await initialize()
 }
 const OptsTypeSpec = {
   processParams: {
