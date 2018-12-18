@@ -1026,7 +1026,7 @@ class TimHome extends Component {
     )
   }
 
-  getSplashScreen() {
+  getSplashScreen(h) {
     const version = __DEV__ && this.renderVersion()
     const updateIndicator = this.getUpdateIndicator()
     const submitLogButton = this.getSubmitLogButton()
@@ -1046,7 +1046,7 @@ class TimHome extends Component {
       <View style={styles.container}>
         <BackgroundImage source={BG_IMAGE} />
         <Wrapper { ...wrapperProps }>
-          <View style={styles.flexGrow}/>
+          <View style={h ? {height: h} : styles.flexGrow}/>
           <View style={styles.bottom}>
             {spinner}
             {busyReason}
@@ -1100,12 +1100,6 @@ var styles = (function () {
       // padding: 30,
       // marginTop: height / 4,
       alignItems: 'center',
-    },
-    tradle: {
-      // color: '#7AAAC3',
-      color: FOOTER_TEXT_COLOR,
-      fontSize: height > 450 ? 35 : 25,
-      alignSelf: 'center',
     },
     updateIndicator: {
       color: FOOTER_TEXT_COLOR,
