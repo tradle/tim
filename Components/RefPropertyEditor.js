@@ -357,12 +357,13 @@ class RefPropertyEditor extends Component {
 
     if (result.documentType  &&  type !== 'other') {
       let docTypeModel = utils.getModel(ID_CARD)
+      let rDocumentType = result.documentType.charAt(0)
       let documentType
-      if (result.documentType === 'P')
+      if (rDocumentType === 'P')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'passport')
-      else if (result.documentType === 'I')
+      else if (rDocumentType === 'I')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'id')
-      else if (result.documentType === 'DL')
+      else if (rDocumentType === 'D')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'license')
       if (documentType.id !== resource.documentType.id) {
         Alert.alert(translate('wrongDocumentTypePleaseTryAgain'))
