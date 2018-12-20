@@ -50,7 +50,7 @@ class RefPropertyEditor extends Component {
     this.state = {
       isRegistration: !utils.getMe()  && this.props.model.id === PROFILE  &&  (!this.props.resource || !this.props.resource[ROOT_HASH])
     }
-    this.regulaScan = debounce(Regula.regulaScan.bind(this), 500, { leading: true })
+    this.regulaScan = !isSimulator() && !isWeb()  &&  debounce(Regula.regulaScan.bind(this), 500, { leading: true })
   }
   shouldComponentUpdate(nextProps, nextState) {
     let prop = this.props.prop
@@ -122,9 +122,9 @@ class RefPropertyEditor extends Component {
     else {
       let img = photo
       if (img) {
-        propView = <View style={{flexDirection: 'row'}}>
+        propView = <View style={{flexDirection: 'row', marginTop: 15, marginBottom: 5}}>
                       <Image source={{uri: img.url}} style={styles.thumb} />
-                      <Text style={[styles.input, color]}>{' ' + label}</Text>
+                      <Text style={[styles.input, {color}]}>{' ' + label}</Text>
                    </View>
       }
       else {
@@ -360,12 +360,13 @@ class RefPropertyEditor extends Component {
 
     if (result.documentType  &&  type !== 'other') {
       let docTypeModel = utils.getModel(ID_CARD)
+      let rDocumentType = result.documentType.charAt(0)
       let documentType
-      if (result.documentType === 'P')
+      if (rDocumentType === 'P')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'passport')
-      else if (result.documentType === 'I')
+      else if (rDocumentType === 'I')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'id')
-      else if (result.documentType === 'DL')
+      else if (rDocumentType === 'D')
         documentType = buildStubByEnumTitleOrId(docTypeModel, 'license')
       if (documentType.id !== resource.documentType.id) {
         Alert.alert(translate('wrongDocumentTypePleaseTryAgain'))

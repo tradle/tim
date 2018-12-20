@@ -47,8 +47,11 @@ module.exports = function PhotoID ({ models }) {
             (currentResource.country  &&  currentResource.country.id !== form.country.id)) {
           let requestedProperties = scan  &&  cleanupValues(form, scan, model)
           form.scan = null
-          if (!isWeb()  &&  !isOther)
+          if (!isWeb()  &&  !isOther) {
+            cleanupValues(form, scan, model)
             return requestedProperties
+          }
+
           scan = null
         }
       }
@@ -65,9 +68,8 @@ module.exports = function PhotoID ({ models }) {
         let { document } = scan
         let countryCCA
         if (document) {
-          if (isLicence)
-            countryCCA =  document.country
-          else
+          countryCCA = document.country
+          if (!countryCCA  && !isLicence)
             countryCCA = document.issuer
         }
         if (countryCCA) {
@@ -255,7 +257,7 @@ function cleanupValues(form, values, model) {
   else
     requestedProperties = []
   return {
-    message: translate('Please scan your document'),
+    message: translate('scanYourDocument'),
     // deleteProperties: ['scan', 'scanJson'],
     requestedProperties
   }

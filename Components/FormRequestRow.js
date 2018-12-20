@@ -1021,7 +1021,7 @@ class FormRequestRow extends Component {
     let content = <View style={[styles.row, isAnother ? {paddingBottom: 5} : {}]}>
                     <Animated.View style={zoomIn}>
                       <View style={hasSharables  && styles.addButton  ||  styles.shareButton}>
-                        <Icon name='md-add' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'} style={{marginTop: utils.isWeb() ? 0 : 2}}/>
+                        <Icon name='md-add' size={20} color={hasSharables && bankStyle.linkColor || '#ffffff'} style={{marginTop: utils.isIOS() ? 2 : 0}}/>
                       </View>
                     </Animated.View>
                      <View style={{justifyContent: 'center'}}>
@@ -1293,29 +1293,3 @@ reactMixin(FormRequestRow.prototype, OnePropFormMixin)
 FormRequestRow = makeResponsive(FormRequestRow)
 
 module.exports = FormRequestRow;
-/*
-  showSignatureView1(prop) {
-    const { navigator, bankStyle } = this.props
-    let sigView
-    navigator.push({
-      title: translate(prop), //m.title,
-      // titleTextColor: '#7AAAC3',
-      id: 32,
-      component: SignatureView,
-      backButtonTitle: 'Back',
-      rightButtonTitle: 'Done',
-      onRightButtonPress: () => {
-        const sig = sigView.getSignature()
-        navigator.pop()
-        this.onSetSignatureProperty(prop, sig.url)
-      },
-      passProps: {
-        ref: ref => {
-          sigView = ref
-        },
-        bankStyle,
-        sigViewStyle: bankStyle
-      }
-    })
-  }
-*/

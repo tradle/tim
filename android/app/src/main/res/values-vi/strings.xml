@@ -1,0 +1,23 @@
+<resources>
+<string name="app_name">Tradle</string>
+<string name="branch_app_link">link.tradle.io</string>
+<string name="branch_path_prefix">/HvsP</string>
+<string name="strValue">Giá trị</string>
+<string name="strReadingRFIDDG">Đọc dữ liệu RFID% s</string>
+<string name="strPhotoProcessing">Xử lý ảnh…</string>
+<string name="strPrepareCamera">Đang chuẩn bị máy ảnh…</string>
+<string name="strProcessingDocument">Xử lý văn bản...</string>
+<string name="strUnableCaptureMedia">Không thể định cấu hình máy ảnh</string>
+<string name="strKeepDeviceStill">Giữ thiết bị vẫn</string>
+<string name="strTorchUnavailable">Không có đèn</string>
+<string name="strHoldDocumentStraight">Giữ tài liệu thẳng</string>
+<string name="RSDT_RFID_READING_FINISHED">Đọc dữ liệu RFID đã hoàn thành</string>
+<string name="strNfcTagNotFound">Không tìm thấy thẻ NFC! Vui lòng di chuyển điện thoại của bạn gần thẻ NFC hơn</string>
+<string name="strPlacePhoneOnDoc">Đặt điện thoại lên tài liệu</string>
+<string name="strApplicationDoNotHavePermission">Ứng dụng không có quyền sử dụng máy ảnh, vui lòng thay đổi cài đặt bảo mật</string>
+<string name="strDocumentTooSmall">Phù hợp với tài liệu vào khung</string>
+<string name="strLookingDocument">Đang tìm kiếm tài liệu…</string>
+<string name="strGlaresOnDocument">Tránh ánh sáng chói trên tài liệu</string>
+<string name="strCameraUnavailable">Máy ảnh không khả dụng</string>
+<string name="strReadingRFID">Đọc dữ liệu chip RFID</string>
+</resources>

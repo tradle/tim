@@ -52,7 +52,7 @@ const recognizers = {
 
 let licenseKey
 
-const setLicenseKey = value => licenseKey = value
+const setLicenseKey = async (value) => licenseKey = value
 
 const scan = (function () {
   if (isSimulator()) return

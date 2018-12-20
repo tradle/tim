@@ -324,5 +324,9 @@ module.exports = {
   "reviewData": "ពិនិត្យទិន្នន័យឡើងវិញ",
   "requestMyData": "ស្នើសុំទិន្នន័យរបស់ខ្ញុំ",
   "newCustomer": "អតិថិជន​ថ្មី",
-  "areYouSureYouAreDone": "តើអ្នកប្រាកដថាអ្នកនឹងបញ្ចប់វគ្គនេះមែនទេ?"
+  "areYouSureYouAreDone": "តើអ្នកប្រាកដថាអ្នកនឹងបញ្ចប់វគ្គនេះមែនទេ?",
+  "wrongDocumentTypePleaseTryAgain": "ប្រភេទឯកសារមិនត្រឹមត្រូវ។ សូម​ព្យាយាម​ម្តង​ទៀត",
+  "invalidCountry": "ប្រទេសមិនត្រឹមត្រូវបានស្កេន",
+  "resetApp": "កំណត់កម្មវិធីឡើងវិញ",
+  "scanYourDocument": "សូមស្កេនឯកសាររបស់អ្នក"
 }

@@ -920,7 +920,7 @@ class MessageList extends Component {
         </PageView>
     )
     let {width, height} = utils.dimensions(MessageList)
-    let image = { width, height: height - 1, marginTop: 1 }
+    let image = [{ width, height: height - 1 }, platformStyles.navBarMargin]
 
     return (
       <PageView style={[platformStyles.container, bgStyle]} separator={separator} bankStyle={bankStyle}>
@@ -1266,15 +1266,6 @@ MessageList = makeResponsive(MessageList)
 MessageList = makeStylish(MessageList)
 
 var styles = StyleSheet.create({
-  imageOutline: {
-    width: 25,
-    height: 25,
-    borderRadius: 13,
-    borderColor: '#aaaaaa',
-    paddingLeft: 6,
-    borderWidth: StyleSheet.hairlineWidth,
-    color: '#79AAF2'
-  },
   footer: {
     flexDirection: 'row',
     flexWrap: 'nowrap',

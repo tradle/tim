@@ -36,7 +36,7 @@ class ChatContext extends Component {
 
   render() {
     let { context, application, allContexts, bankStyle, chat, contextChooser, shareWith } = this.props
-    if (!context  ||  context.requestFor === REMEDIATION)
+    if (!context  ||  !context.requestFor  ||  context.requestFor === REMEDIATION)
       return <View/>
     let m = utils.getModel(context.requestFor)
     if (!m)

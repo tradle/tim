@@ -11,10 +11,11 @@ import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
 // kind of a shame to have this here
 // would be better to just call setLicenseKey from the outside
 import {
-  regula as regulaAuth,
+  regula as regulaAuth
 } from './env'
-
 const { Scenario } = Regula
+const LANDSCAPE_RIGHT_IOS = 8
+const LANDSCAPE_ANDROID = 2
 
 const initializeOpts = {
   licenseKey: get(regulaAuth || {}, ['licenseKey', Platform.OS]),
@@ -22,10 +23,14 @@ const initializeOpts = {
 
 export { Scenario }
 
-export const setLicenseKey = licenseKey => {
+export const setLicenseKey = async (licenseKey) => {
   initializeOpts.licenseKey = licenseKey
+  // await Regula.prepareDatabase({dbID: 'Full'})
 }
-
+export const prepareDatabase = async (dbID) => {
+  await Regula.prepareDatabase({dbID})
+  await initialize()
+}
 const OptsTypeSpec = {
   processParams: {
     scenario: types.oneOf(getValues(Scenario)),
@@ -51,14 +56,18 @@ const OptsTypeSpec = {
     videoCaptureMotionControl: types.bool,
     isOnlineMode: types.bool,
     singleResult: types.bool,
+    orientation: types.number,
+    pictureOnBoundsReady: types.bool
   },
 }
 
 const DEFAULTS = {
   functionality: {
-    showTorchButton: true,
+    showTorchButton: false,
     showCloseButton: true,
     showCaptureButton: false,
+    skipFocusingFrames: true,
+    orientation: Platform.OS === 'android' && LANDSCAPE_ANDROID || LANDSCAPE_RIGHT_IOS,
   },
   customization: {
     showHintMessages: true,
@@ -66,6 +75,10 @@ const DEFAULTS = {
   },
   processParams: {
     scenario: Scenario.mrz,
+    dateFormat:'mm/dd/yyyy',
+    logs: true,
+    debugSaveImages: false,
+    debugSaveLogs: false,
   },
 }
 
@@ -79,12 +92,16 @@ export const scan = async (opts={}) => {
     allowExtraProps: false,
   })
 
-  await Regula.initialize(initializeOpts)
+  await initialize(initializeOpts)
   // opts will be supported soon
   const result = await Regula.scan(opts)
+
   return normalizeResult(result)
 }
-
+export const initialize = async () => {
+  // debugger
+  await Regula.initialize(initializeOpts)
+}
 const normalizeResult = async result => {
   result = normalizeJSON(result)
   // not necessary as long as imageStore changes are merged on the native side
@@ -111,8 +128,8 @@ const processListVerifiedFields = results => {
 
   fields.forEach((f, i) => {
     let fieldTypeID = f.FieldType
-    let val = f.Field_Visual || f.Field_MRZ
     let fName
+    let val =  f.Field_Barcode  ||  f.Field_MRZ  ||  f.Field_Visual
     if (val) {
       for (let p in regulaVisualFieldTypes) {
         if (regulaVisualFieldTypes[p] === fieldTypeID) {

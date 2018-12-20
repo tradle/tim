@@ -210,12 +210,12 @@
     "@tradle/models-cloud": {
       "version": "1.0.0",
       "from": "tradle/models-cloud",
-      "resolved": "git://github.com/tradle/models-cloud.git#c336cffd2b61a341e3fa767de644c5ab6a4516f3"
+      "resolved": "git://github.com/tradle/models-cloud.git#0f63d2cc4c0f5a798f48d5dddb91524da9bb10a4"
     },
     "@tradle/models-corporate-onboarding": {
       "version": "1.0.0",
       "from": "tradle/models-corporate-onboarding",
-      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#47fcdfe179726e75973a0684a90bd265d2970304"
+      "resolved": "git://github.com/tradle/models-corporate-onboarding.git#47a825e4359efdc450baebbae7c876c2022afe42"
     },
     "@tradle/models-nz": {
       "version": "1.0.0",
@@ -4906,6 +4906,24 @@
       "version": "1.0.0",
       "from": "next-tick@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/next-tick/-/next-tick-1.0.0.tgz"
+    },
+    "nimn_schema_builder": {
+      "version": "1.1.0",
+      "from": "nimn_schema_builder@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/nimn_schema_builder/-/nimn_schema_builder-1.1.0.tgz",
+      "dev": true
+    },
+    "nimn-date-parser": {
+      "version": "1.0.0",
+      "from": "nimn-date-parser@>=1.0.0 <2.0.0",
+      "resolved": "http://registry.npmjs.org/nimn-date-parser/-/nimn-date-parser-1.0.0.tgz",
+      "dev": true
+    },
+    "nimnjs": {
+      "version": "1.3.2",
+      "from": "nimnjs@>=1.3.2 <2.0.0",
+      "resolved": "http://registry.npmjs.org/nimnjs/-/nimnjs-1.3.2.tgz",
+      "dev": true
     },
     "nkey": {
       "version": "2.0.2",

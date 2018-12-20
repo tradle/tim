@@ -324,5 +324,9 @@ module.exports = {
   "afterRefresh": "Bạn được xóa sử dụng dịch vụ của chúng tôi mà không bị gián đoạn",
   "requestMyData": "Yêu cầu dữ liệu của tôi",
   "newCustomer": "Khách hàng mới",
-  "areYouSureYouAreDone": "Bạn có chắc chắn muốn kết thúc phiên này không?"
+  "areYouSureYouAreDone": "Bạn có chắc chắn muốn kết thúc phiên này không?",
+  "scanYourDocument": "Vui lòng quét tài liệu của bạn",
+  "wrongDocumentTypePleaseTryAgain": "Loại tài liệu sai. Vui lòng thử lại",
+  "resetApp": "Đặt lại ứng dụng",
+  "invalidCountry": "Quốc gia được quét không hợp lệ"
 }

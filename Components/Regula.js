@@ -4,8 +4,10 @@ import _ from 'lodash'
 import { isSimulator, sanitize, isEmpty } from '../utils/utils'
 import { requestCameraAccess } from '../utils/camera'
 import { getGlobalKeeper } from '../utils/keeper'
-import { getModel, buildStubByEnumTitleOrId } from '../utils/utils'
+import { getModel, buildStubByEnumTitleOrId, isAndroid } from '../utils/utils'
 import { scan, Scenario } from '../utils/regula'
+import DeviceInfo from 'react-native-device-info'
+
 // import regulaVisualFieldTypes from '../utils/regulaVisualFieldTypes'
 
 const COUNTRY = 'tradle.Country'
@@ -16,18 +18,30 @@ const regulaScan = (function () {
     if (!await requestCameraAccess()) {
       throw new Error('user denied camera access')
     }
+    let isLowEndDevice
+    if (isAndroid()) {
+      let totalMem = DeviceInfo.getTotalMemory() / 1000000000
+      isLowEndDevice = totalMem < 2
+    }
+      // phone = DeviceInfo.getPhoneNumber()
     let { bothSides } = opts
     let scanOpts = {
       processParams: {
-        scenario: Scenario.ocr,
-        multipageProcessing: bothSides
+        scenario: isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
+        multipageProcessing: bothSides,
+        // rfidScenario: true,
+        // sessionLogFolder: '.'
       },
       // functionality: {
       //   showCaptureButton: true
       // }
     }
-
-
+    // if (isLowEndDevice) {
+    //  if set then as soon as doc is located the picture is taken and processed as a single frame
+    //   scanOpts.functionality = {
+    //     pictureOnBoundsReady: true
+    //   }
+    // }
 
     let result
     try {
@@ -70,9 +84,14 @@ const normalizeResult = ({results, json}) => {
   // })
   let address, city
   if (json.ft_Address) {
-    let arr = json.ft_Address.split('^')
-    address = arr[0]
-    city = arr.length > 1  &&  arr[1]
+    if (json.ft_Issuing_State_Code === 'NZL') {
+      let arr = json.ft_Address.split('^')
+      address = arr[0]
+      city = arr.length > 1  &&  arr[1]
+    }
+    else
+      address = json.ft_Address.replace('^', ' ')
+      // address = json.ft_Address
   }
   let result = {
     personal: {
@@ -83,11 +102,13 @@ const normalizeResult = ({results, json}) => {
       country: json.ft_Country,
       dateOfBirth: json.ft_Date_of_Birth,
       nationality: json.ft_Nationality_Code,
+      sec: json.ft_Sex
     },
     document: {
       dateOfExpiry: json.ft_Date_of_Expiry,
       dateOfIssue: json.ft_Date_of_Issue,
       issuer: json.ft_Place_of_Issue || json.ft_Authority || json.ft_Issuing_State_Code,
+      country: json.ft_Issuing_State_Code,
       documentNumber: json.ft_Document_Number,
       documentVersion: json.ft_DL_Restriction_Code
     }

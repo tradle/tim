@@ -324,5 +324,9 @@ module.exports = {
   "reviewData": "Revisar datos",
   "requestMyData": "Solicitando mis datos",
   "newCustomer": "Nuevo cliente",
-  "areYouSureYouAreDone": "¿Estás seguro de que quieres terminar esta sesión?"
+  "areYouSureYouAreDone": "¿Estás seguro de que quieres terminar esta sesión?",
+  "resetApp": "Restablecer la aplicación",
+  "scanYourDocument": "Por favor escanea tu documento",
+  "invalidCountry": "País no válido escaneado",
+  "wrongDocumentTypePleaseTryAgain": "Tipo de documento incorrecto. Inténtalo de nuevo"
 }

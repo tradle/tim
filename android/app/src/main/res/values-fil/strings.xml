@@ -1,0 +1,23 @@
+<resources>
+<string name="app_name">Tradle</string>
+<string name="branch_app_link">link.tradle.io</string>
+<string name="branch_path_prefix">/HvsP</string>
+<string name="strProcessingDocument">Pagpoproseso ng dokumento ...</string>
+<string name="strTorchUnavailable">Hindi magagamit ang tanglaw</string>
+<string name="strDocumentTooSmall">Pagkasyahin ang dokumento sa frame</string>
+<string name="strNfcTagNotFound">NFC tag ay hindi nakita! Mangyaring ilipat ang iyong telepono nang mas malapit sa tag ng NFC</string>
+<string name="strPhotoProcessing">Pagpoproseso ng Larawan ...</string>
+<string name="strLookingDocument">Naghahanap ng isang dokumento ...</string>
+<string name="strValue">Halaga</string>
+<string name="strCameraUnavailable">Hindi magagamit ang camera</string>
+<string name="strReadingRFID">Pagbabasa ng RFID chip data</string>
+<string name="strPrepareCamera">Inihanda ang camera ...</string>
+<string name="strApplicationDoNotHavePermission">Ang application ay walang pahintulot na gamitin ang camera, mangyaring baguhin ang mga setting ng privacy</string>
+<string name="RSDT_RFID_READING_FINISHED">Natapos ang pagbabasa ng data ng RFID</string>
+<string name="strGlaresOnDocument">Iwasan ang pandidilat sa dokumento</string>
+<string name="strUnableCaptureMedia">Nabigo ang pagsasaayos ng kamera</string>
+<string name="strPlacePhoneOnDoc">Ilagay ang telepono sa dokumento mangyaring</string>
+<string name="strKeepDeviceStill">I-hold pa rin ang device</string>
+<string name="strReadingRFIDDG">Binabasa ang data ng RFID% s</string>
+<string name="strHoldDocumentStraight">Hawakan ang dokumento nang diretso</string>
+</resources>

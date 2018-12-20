@@ -1,0 +1,23 @@
+<resources>
+<string name="app_name">Tradle</string>
+<string name="branch_app_link">link.tradle.io</string>
+<string name="branch_path_prefix">/HvsP</string>
+<string name="strReadingRFID">Lectura de datos del chip RFID</string>
+<string name="strPhotoProcessing">Procesamiento de fotos ...</string>
+<string name="strApplicationDoNotHavePermission">La aplicación no tiene permiso para usar la cámara, cambia la configuración de privacidad</string>
+<string name="strPlacePhoneOnDoc">Coloque el teléfono en el documento por favor</string>
+<string name="strPrepareCamera">Preparando la cámara ...</string>
+<string name="strGlaresOnDocument">Evita los reflejos en el documento.</string>
+<string name="strHoldDocumentStraight">Mantenga el documento recto</string>
+<string name="strCameraUnavailable">Cámara no disponible</string>
+<string name="RSDT_RFID_READING_FINISHED">La lectura de datos RFID ha finalizado.</string>
+<string name="strTorchUnavailable">Antorcha no disponible</string>
+<string name="strUnableCaptureMedia">La configuración de la cámara falló</string>
+<string name="strKeepDeviceStill">Mantenga el dispositivo quieto</string>
+<string name="strProcessingDocument">Procesamiento de documentos...</string>
+<string name="strValue">Valor</string>
+<string name="strReadingRFIDDG">Leyendo los datos de RFID% s</string>
+<string name="strLookingDocument">Buscando un documento ...</string>
+<string name="strNfcTagNotFound">Etiqueta NFC no detectada! Por favor, mueva su teléfono más cerca de la etiqueta NFC</string>
+<string name="strDocumentTooSmall">Encaja el documento en el marco</string>
+</resources>

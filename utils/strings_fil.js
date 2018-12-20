@@ -324,5 +324,9 @@ module.exports = {
   "reviewData": "Suriin ang data",
   "requestMyData": "Humihiling ng aking data",
   "newCustomer": "Bagong customer",
-  "areYouSureYouAreDone": "Sigurado ka ba na ikaw ay tapusin ang sesyon na ito?"
+  "areYouSureYouAreDone": "Sigurado ka ba na ikaw ay tapusin ang sesyon na ito?",
+  "scanYourDocument": "Mangyaring i-scan ang iyong dokumento",
+  "resetApp": "I-reset ang App",
+  "invalidCountry": "Di-wastong na-scan ang bansa",
+  "wrongDocumentTypePleaseTryAgain": "Maling uri ng dokumento. Ulitin mo ulit"
 }
