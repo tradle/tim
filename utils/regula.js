@@ -77,7 +77,7 @@ const DEFAULTS = {
     showHelpAnimation: true,
   },
   processParams: {
-    scenario: Scenario.mrz,
+    scenario: Scenario.ocr,
     dateFormat:'mm/dd/yyyy',
     logs: true,
     debugSaveImages: false,
