@@ -31,7 +31,6 @@ module.exports = {
   "asVerifiedBy": "Tulad ng napatunayan ng {1}",
   "switchTouchIdOff": "Lumipat ang touch ID off",
   "help": "Tulong",
-  "wipeTheDevice": "Punasan ang aparato",
   "homePage": "Bahay",
   "typeMessage": "Mag-type ng mensahe",
   "confirmAllItems": "Tapikin ang OK upang kumpirmahin ang lahat ng ito, o Kanselahin upang magpatuloy sa pagsusuri",
@@ -176,7 +175,6 @@ module.exports = {
   "add": "Magdagdag ng {1}",
   "pairingRequest": "Kahilingan sa pagpapares",
   "invalidPairingRequest": "Di-wastong Kahilingan sa Pag-pair",
-  "enterPasswordOrWipeOutTheDevice": "Ipasok ang password o tanggalin ang aparato",
   "issuedBy": "Naibigay sa pamamagitan ng {1}",
   "youShallNotPass": "Hindi ka dapat pumasa!",
   "newContactRequest": "{1} ay nagpadala sa iyo ng kahilingan sa pakikipag-ugnay",
@@ -328,5 +326,7 @@ module.exports = {
   "scanYourDocument": "Mangyaring i-scan ang iyong dokumento",
   "resetApp": "I-reset ang App",
   "invalidCountry": "Di-wastong na-scan ang bansa",
-  "wrongDocumentTypePleaseTryAgain": "Maling uri ng dokumento. Ulitin mo ulit"
+  "wrongDocumentTypePleaseTryAgain": "Maling uri ng dokumento. Ulitin mo ulit",
+  "wipeTheAppData": "Linisan ang data ng app",
+  "enterPasswordOrWipeOutTheAppData": "Ipasok ang password o punasan ang data ng app"
 }

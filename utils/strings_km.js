@@ -37,7 +37,6 @@ module.exports = {
   "areYouSureYouWantToServeThisCustomer": "តើអ្នកប្រាកដថាអ្នកចង់បម្រើអតិថិជននេះទេ?",
   "youAreAboutToShare": "អ្នករៀបនឹងចែករំលែក\n '{1}'\n ឯកសារ",
   "correctGesture": "លំនាំត្រឹមត្រូវត្រូវបានរកឃើញ",
-  "enterPasswordOrWipeOutTheDevice": "បញ្ចូលពាក្យសម្ងាត់ឬលុបចោលឧបករណ៍",
   "invalidProperty": "មិនត្រឹមត្រូវ {1}",
   "fillTheFormWithAttachments": "សូមបំពេញទម្រង់នេះ ** {1} **",
   "willBeAvailable": "មុខងារនេះនឹងអាចរកបានក្នុងពេលឆាប់ៗនេះ",
@@ -89,7 +88,6 @@ module.exports = {
   "details": "ព័ត៌មានលម្អិត",
   "textPasswordLimitations": "ត្រូវមានតួអក្សរ 10+ តួអក្សរយ៉ាងហោចណាស់មានអក្សរធំអក្សរតូចលេខនិងតួអក្សរពិសេស",
   "invalidPattern": "លំនាំមិនត្រឹមត្រូវ",
-  "wipeTheDevice": "ជូតចេញឧបករណ៍",
   "theMinValueBiggerThenMaxValue": "តម្លៃ min សម្រាប់ជួរគួរតែតូចជាងតម្លៃអតិបរមា",
   "enablePassword": "បើកពាក្យសម្ងាត់",
   "importDataPrompt": "អ្នករៀបនឹងនាំចូលទិន្នន័យរបស់អ្នក",
@@ -328,5 +326,7 @@ module.exports = {
   "wrongDocumentTypePleaseTryAgain": "ប្រភេទឯកសារមិនត្រឹមត្រូវ។ សូម​ព្យាយាម​ម្តង​ទៀត",
   "invalidCountry": "ប្រទេសមិនត្រឹមត្រូវបានស្កេន",
   "resetApp": "កំណត់កម្មវិធីឡើងវិញ",
-  "scanYourDocument": "សូមស្កេនឯកសាររបស់អ្នក"
+  "scanYourDocument": "សូមស្កេនឯកសាររបស់អ្នក",
+  "enterPasswordOrWipeOutTheAppData": "បញ្ចូលពាក្យសម្ងាត់ឬលុបទិន្នន័យកម្មវិធី",
+  "wipeTheAppData": "លុបទិន្នន័យកម្មវិធី"
 }

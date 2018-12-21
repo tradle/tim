@@ -198,7 +198,6 @@ module.exports = {
   "learnMore": "Apprendre encore plus",
   "passwordOn": "Le mot de passe gestuel est activé",
   "fillRequiredFields": "S'il-vous-plaît remplissez tous les champs requis",
-  "enterPasswordOrWipeOutTheDevice": "Entrez le mot de passe ou effacez l'appareil",
   "drawYourPassword": "Dessine ton motif",
   "installingUpdate": "Installation de mise à jour",
   "noAccessToServer": "Le serveur n'est pas accessible. Essayer plus tard.",
@@ -221,7 +220,6 @@ module.exports = {
   "details": "Détails",
   "authenticationFailed": "Authentification échouée",
   "validationErrors": "Veuillez corriger les champs de validation échoués",
-  "wipeTheDevice": "Effacer le périphérique",
   "centerID": "Centre ID dans le cadre",
   "gestureNotRecognized": "Mauvais modèle",
   "changePassword": "Changer le mot de passe",
@@ -328,5 +326,7 @@ module.exports = {
   "resetApp": "Réinitialiser l'application",
   "invalidCountry": "Pays invalide scanné",
   "scanYourDocument": "Veuillez numériser votre document",
-  "wrongDocumentTypePleaseTryAgain": "Mauvais type de document. Veuillez réessayer"
+  "wrongDocumentTypePleaseTryAgain": "Mauvais type de document. Veuillez réessayer",
+  "wipeTheAppData": "Effacer les données de l'application",
+  "enterPasswordOrWipeOutTheAppData": "Entrez le mot de passe ou effacez les données de l'application"
 }

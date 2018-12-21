@@ -202,7 +202,6 @@ module.exports = {
   "bothOn": "Beide zijn AAN",
   "formRequest": "Verzoek om {1}",
   "denyApplicationFor": "Weigeren aanvraag voor {1}",
-  "wipeTheDevice": "Wis het apparaat",
   "willBeAvailable": "Deze functionaliteit is binnenkort beschikbaar",
   "nothingChanged": "Er is niets veranderd",
   "unreadMessages": "U hebt ongelezen berichten",
@@ -234,7 +233,6 @@ module.exports = {
   "invalidDocument": "ongeldig document",
   "enableCameraAccess": "{appName} heeft momenteel geen toestemming om de camera te gebruiken. Als u toegang wilt verlenen, kiest u Instellingen en zorgt u ervoor dat Camera is ingeschakeld.",
   "pleaseClickOnAddButton": "Klik hieronder op '+' om '{1}' toe te voegen",
-  "enterPasswordOrWipeOutTheDevice": "Voer een wachtwoord in of veeg het apparaat uit",
   "cancelItem": "U staat op het punt {1} te annuleren. Tik op OK om te bevestigen",
   "invalidDeepLink": "Het lijkt erop dat je op een ongeldige link hebt geklikt!",
   "submitting": "Het indienen",
@@ -328,5 +326,7 @@ module.exports = {
   "scanYourDocument": "Scan alstublieft uw document",
   "wrongDocumentTypePleaseTryAgain": "Verkeerd documenttype. Probeer het opnieuw",
   "invalidCountry": "Ongeldig land gescand",
-  "resetApp": "Reset app"
+  "resetApp": "Reset app",
+  "wipeTheAppData": "Wis de app-gegevens",
+  "enterPasswordOrWipeOutTheAppData": "Voer een wachtwoord in of wis de app-gegevens"
 }

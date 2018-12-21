@@ -32,7 +32,6 @@ module.exports = {
   "holdPhoneToPassport": "Giữ mặt sau của điện thoại với bìa trước của hộ chiếu",
   "testProviders": "Sandbox",
   "contactUs": "Liên hệ chúng tôi",
-  "enterPasswordOrWipeOutTheDevice": "Nhập mật khẩu hoặc xóa thiết bị",
   "setDateValue": "Bộ",
   "trustedProviders": "Nhà cung cấp đáng tin cậy",
   "useTouchId": "Bật Touch ID",
@@ -235,7 +234,6 @@ module.exports = {
   "enablePasscodeFirst": "Có vẻ như bạn chưa bật mã khóa thiết bị. Nếu không có nó, ứng dụng này không thể bảo vệ dữ liệu của bạn! Vui lòng kích hoạt nó trước khi nhấn OK",
   "nl": "Người hà lan",
   "documentExpiredMessage": "Vui lòng quét tài liệu hợp lệ",
-  "wipeTheDevice": "Xóa sạch thiết bị",
   "importDataPrompt": "Bạn sắp nhập dữ liệu của mình từ",
   "shareOne1": "{1}, đây là trợ lý bảo mật cá nhân của bạn. Tôi thấy bạn đã có {2} xác minh của mình. Bạn có thể nhấn vào bên dưới để chia sẻ nó với {3}.",
   "learnMoreDescriptionTo": "Bạn vẫn có thể viết tin nhắn ở Chế độ ngoại tuyến ngay cả khi thiết bị của bạn không được kết nối. Khi bạn kết nối lại tất cả các tin nhắn của bạn sẽ được tự động gửi đến {1}.",
@@ -328,5 +326,7 @@ module.exports = {
   "scanYourDocument": "Vui lòng quét tài liệu của bạn",
   "wrongDocumentTypePleaseTryAgain": "Loại tài liệu sai. Vui lòng thử lại",
   "resetApp": "Đặt lại ứng dụng",
-  "invalidCountry": "Quốc gia được quét không hợp lệ"
+  "invalidCountry": "Quốc gia được quét không hợp lệ",
+  "enterPasswordOrWipeOutTheAppData": "Nhập mật khẩu hoặc xóa dữ liệu ứng dụng",
+  "wipeTheAppData": "Xóa dữ liệu ứng dụng"
 }

@@ -156,7 +156,6 @@ module.exports = {
   "correctGesture": "Исправлен паттерн",
   "theMinValueBiggerThenMaxValue": "Минимальное значение для диапазона должно быть меньше, чем максимальное значение",
   "approveApplicationFor": "Утвердить заявку на {1}",
-  "wipeTheDevice": "Вытрите устройство",
   "confirmForgetMe": "Вы действительно хотите «{1}» забыть о вас",
   "nothingChanged": "Ничего не изменилось",
   "cancelHideResource": "Отменить Скрыть {1}",
@@ -221,7 +220,6 @@ module.exports = {
   "acceptingTermsAndConditions": "Нажимая «ОК», вы принимаете Условия использования",
   "nothingToShare": "Нечего делиться",
   "resetRequired": "Требуется перезагрузка",
-  "enterPasswordOrWipeOutTheDevice": "Введите пароль или уничтожьте устройство",
   "denyApplicationFor": "Запретить приложение для {1}",
   "receiveNotifications?": "Вы хотите получать уведомления?",
   "pleaseCorrect": "Пожалуйста исправьте",
@@ -328,5 +326,7 @@ module.exports = {
   "scanYourDocument": "Сканируйте свой документ",
   "wrongDocumentTypePleaseTryAgain": "Неверный тип документа. Пожалуйста, попробуйте еще раз",
   "resetApp": "Сбросить приложение",
-  "invalidCountry": "Неверная страна, отсканированная"
+  "invalidCountry": "Неверная страна, отсканированная",
+  "wipeTheAppData": "Сотрите данные приложения",
+  "enterPasswordOrWipeOutTheAppData": "Введите пароль или стереть данные приложения"
 }
