@@ -28,8 +28,11 @@ export const setLicenseKey = async (licenseKey) => {
   // await Regula.prepareDatabase({dbID: 'Full'})
 }
 export const prepareDatabase = async (dbID) => {
+  console.log('Prepare Regula DB')
   await Regula.prepareDatabase({dbID})
+  console.log('Prepare Regula DB - completed')
   await initialize()
+  console.log('Initialization Regula DB - completed')
 }
 const OptsTypeSpec = {
   processParams: {
