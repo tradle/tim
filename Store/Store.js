@@ -12,7 +12,6 @@ const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 
 import Analytics from '../utils/analytics'
-import { prepareDatabase } from '../utils/regula'
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
