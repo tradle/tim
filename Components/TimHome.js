@@ -418,10 +418,10 @@ class TimHome extends Component {
     case 'offerKillSwitchAfterApplication':
       if (utils.isWeb()) {
         Alert.alert(
-          translate('enterPasswordOrWipeOutTheDevice'),
+          translate('enterPasswordOrWipeOutTheAppData'),
           null,
           [
-            {text: translate('wipeTheDevice'), onPress: () => Actions.requestWipe()},
+            {text: translate('wipeTheAppData'), onPress: () => Actions.requestWipe()},
             {text: translate('enterPassword'), onPress: () => {
               signIn(nav, null, true)
                 .then(() => nav.pop())
