@@ -110,7 +110,7 @@ var OnePropFormMixin = {
       navigator,
       title: isWeb() &&  translate(prop, model),
       backButtonTitle: translate('back'),
-      cameraType: prop.cameraType,
+      cameraType: utils.getMe().isAgent  ? 'back' : prop.cameraType,
       quality: utils.getCaptureImageQualityForModel(model),
     })
 
