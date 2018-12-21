@@ -12,6 +12,7 @@ const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 
 import Analytics from '../utils/analytics'
+import { prepareDatabase } from '../utils/regula'
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
@@ -171,7 +172,6 @@ const REMEDIATION_SIMPLE_MESSAGE = 'tradle.RemediationSimpleMessage'
 const LENS                = 'tradle.Lens'
 const SEAL                = 'tradle.Seal'
 const INTERSECTION        = 'tradle.Intersection'
-const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const INTRODUCTION        = 'tradle.Introduction'
 const PRODUCT_REQUEST     = 'tradle.ProductRequest'
 const CONTEXT             = 'tradle.Context'
@@ -186,7 +186,9 @@ const NEXT_FORM_REQUEST   = 'tradle.NextFormRequest'
 const PAIRING_REQUEST     = 'tradle.PairingRequest'
 // const PAIRING_RESPONSE    = 'tradle.PairingResponse'
 // const PAIRING_DATA        = 'tradle.PairingData'
+const MY_IDENTITIES_TYPE  = 'tradle.MyIdentities'
 const MY_IDENTITIES       = MY_IDENTITIES_TYPE + '_1'
+
 const REMEDIATION         = 'tradle.Remediation'
 const CONFIRM_PACKAGE_REQUEST = 'tradle.ConfirmPackageRequest'
 const VERIFIABLE          = 'tradle.Verifiable'
@@ -675,7 +677,7 @@ var Store = Reflux.createStore({
         await this.putInDb(obj, true)
         this.triggerReceivedMessage(msg)
       } catch (err) {
-        console.error('1. failed to process received message', err)
+        console.error('1. failed to process received message', err.stack)
       }
 
       return
@@ -744,7 +746,7 @@ var Store = Reflux.createStore({
       this.triggerReceivedMessage(msg)
     } catch (err) {
       debugger
-      console.error('2. failed to process received message', err)
+      console.error('2. failed to process received message', err.stack)
     }
   },
 
@@ -1567,7 +1569,7 @@ var Store = Reflux.createStore({
     let newServer = params.newServer
     let maxAttempts = params.maxAttempts
     debug('fetching provider info from', serverUrls)
-    return await Q.allSettled(serverUrls.map(async (url) => {
+    let result = await Q.allSettled(serverUrls.map(async (url) => {
       let providers
       try {
         providers = await this.getServiceProviders({url: url, hash: params.hash, retry: retry, id: id, newServer: newServer})
@@ -1592,6 +1594,10 @@ var Store = Reflux.createStore({
       this.subscribeForPushNotifications(providers.map(p => p.hash))
       return providers
     }))
+    debug('end fetching provider info from', serverUrls)
+    if (result.some(r => r.state === 'fulfilled'))
+      await this.afterGetInfo()
+    return result
   },
   // addYuki() {
   //   const sp =  utils.clone(yukiConfig)
@@ -2277,6 +2283,35 @@ var Store = Reflux.createStore({
     //   debugger
     // })
   },
+  async afterGetInfo() {
+    let env
+    try {
+      env = await db.get(MY_ENVIRONMENT)
+      // some props like api keys may have been updated
+    } catch (err) {
+      debugger
+      return
+    }
+    debugger
+    if (!env.regula  ||  env.regula.dbID)
+      return
+
+    let dbID
+    if (SERVICE_PROVIDERS.length > 1)
+      dbID = 'Full'
+    else {
+      let newSp = SERVICE_PROVIDERS[0]
+      dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
+    }
+
+    _.set(env, 'regula.dbID', dbID)
+
+    // // Check is DB was already prepared
+    const reg = require('../utils/regula')
+
+    await reg.prepareDatabase(dbID)
+    await db.put(MY_ENVIRONMENT, env)
+  },
   parseProvider(sp, params, providerIds, newProviders) {
     if (!params)
       params = {}
@@ -2330,14 +2365,14 @@ var Store = Reflux.createStore({
     if (!oldSp) {
       SERVICE_PROVIDERS.push(newSp)
     }
-    if (ENV.regula) {
-      if (ENV.regula.dbID)
-        return
-      let dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
-      _.set(ENV, 'regula.dbID', dbID)
-      require('../utils/regula').prepareDatabase(dbID)
-    }
-    // promises.push(self.addInfo(sp, originalUrl, newServer))
+    // if (ENV.regula) {
+    //   debugger
+    //   if (ENV.regula.dbID)
+    //     return
+    //   let dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
+    //   _.set(ENV, 'regula.dbID', dbID)
+    //   require('../utils/regula').prepareDatabase(dbID)
+    // }    // promises.push(self.addInfo(sp, originalUrl, newServer))
   },
   async addInfo(sp, url, newServer) {
     // TODO: evaluate security of this
@@ -6406,7 +6441,8 @@ if (!res[SIG]  &&  res._message)
     if (refs) {
       for (let p in refs) {
         if (rr[p]  &&  (refs[p].inlined  ||  utils.getModel(refs[p].ref).inlined))
-          rr[p][TYPE] = refs[p].ref
+          if (!rr[p][TYPE])
+            rr[p][TYPE] = refs[p].ref
       }
     }
 
@@ -11319,6 +11355,10 @@ await fireRefresh(val.from.organization)
         debug(`failed to update ${conf.path} in env`)
       }
     })
+    const regulaDbPath = 'regula.dbID'
+    let dbID = _.get(env, regulaDbPath)
+    if (dbID)
+      _.set(ENV, regulaDbPath, dbID)
   },
 
 })
