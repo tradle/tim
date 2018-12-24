@@ -112,6 +112,7 @@
     "graphql-tag": "^2.4.2",
     "https-browserify": "0.0.1",
     "inherits": "^2.0.1",
+    "jsc-android": "^236355.1.1",
     "json-stringify-safe": "^5.0.1",
     "level-change-processor": "github:mvayngrib/level-change-processor#7100404",
     "levelup": "^0.18.6",

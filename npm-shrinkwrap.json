@@ -4217,6 +4217,11 @@
       "dev": true,
       "optional": true
     },
+    "jsc-android": {
+      "version": "236355.1.1",
+      "from": "jsc-android@latest",
+      "resolved": "https://registry.npmjs.org/jsc-android/-/jsc-android-236355.1.1.tgz"
+    },
     "jsesc": {
       "version": "1.3.0",
       "from": "jsesc@>=1.3.0 <2.0.0",
