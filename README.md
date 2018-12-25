@@ -236,6 +236,10 @@ Once you've created a build, you can give it a short test run. Run `npm run prod
 
 ##### Staging
 
+Run `git describe --abbrev=0 --tags` and make sure that the tag has format `x.x.x.x-web`
+
+If it does not create tag manually.
+
 To deploy the latest build to staging (appdev.tradle.io), run `npm run deploy:dev`
 
 It will ask you several questions, to which you can say `y` (but only after reading them)
