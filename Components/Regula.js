@@ -27,7 +27,7 @@ const regulaScan = (function () {
     let { bothSides } = opts
     let scanOpts = {
       processParams: {
-        scenario: isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
+        scenario: Scenario.ocr, // isLowEndDevice  &&  Scenario.ocr  ||  Scenario.fullProcess,
         multipageProcessing: bothSides,
         // rfidScenario: true,
         // sessionLogFolder: '.'

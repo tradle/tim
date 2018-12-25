@@ -36,6 +36,7 @@
   "dependencies": {
     "@tradle/aws-client": "^3.0.0",
     "@tradle/bitcoin-adapter": "github:tradle/bitcoin-adapter",
+    "@tradle/bitcoinjs-lib": "^1.6.1",
     "@tradle/biz-plugins": "github:tradle/biz-plugins",
     "@tradle/build-resource": "^4.0.2",
     "@tradle/cb-blockr": "^3.2.1",
@@ -101,6 +102,7 @@
     "history": "^1.12.6",
     "https-browserify": "0.0.1",
     "inherits": "^2.0.1",
+    "jsc-android": "^236355.1.1",
     "json-stringify-safe": "^5.0.1",
     "level-change-processor": "github:mvayngrib/level-change-processor#7100404",
     "level-js": "github:mvayngrib/level.js#ie11",

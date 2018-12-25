@@ -80,7 +80,6 @@ module.exports = {
   "areYouSureYouWantToServeThisCustomer": "¿Estás seguro de que quieres servir a este cliente?",
   "authenticationFailed": "Autenticación fallida",
   "pairingRequestWasProcesseed": "La solicitud de emparejamiento se procesó",
-  "wipeTheDevice": "Limpie el dispositivo",
   "loadingModels": "cargando modelos",
   "pleaseCorrectTheErrors": "Corrija el error en el formulario",
   "drawYourPasswordAgain": "Dibuja tu patrón de nuevo",
@@ -169,7 +168,6 @@ module.exports = {
   "wrongPattern": "Patrón incorrecto",
   "denyApplicationFor": "Denegar aplicación para {1}",
   "updateAppTitle": "Actualización de la aplicación disponible",
-  "enterPasswordOrWipeOutTheDevice": "Ingresa la contraseña o elimina el dispositivo",
   "pleaseCorrectFields": "Por favor corrija los siguientes campos: {1}",
   "independentBlockchainViewer": "Visor de blockchain independiente",
   "turnTouchIdOn": "Activar ID táctil",
@@ -328,5 +326,7 @@ module.exports = {
   "resetApp": "Restablecer la aplicación",
   "scanYourDocument": "Por favor escanea tu documento",
   "invalidCountry": "País no válido escaneado",
-  "wrongDocumentTypePleaseTryAgain": "Tipo de documento incorrecto. Inténtalo de nuevo"
+  "wrongDocumentTypePleaseTryAgain": "Tipo de documento incorrecto. Inténtalo de nuevo",
+  "wipeTheAppData": "Borrar los datos de la aplicación",
+  "enterPasswordOrWipeOutTheAppData": "Introduzca la contraseña o borre los datos de la aplicación"
 }
