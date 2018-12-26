@@ -6888,9 +6888,9 @@
       "resolved": "https://registry.npmjs.org/rn-markdown/-/rn-markdown-1.2.1.tgz"
     },
     "rn-nodeify": {
-      "version": "10.0.1",
+      "version": "8.2.0",
       "from": "tradle/rn-nodeify#mangle",
-      "resolved": "git://github.com/tradle/rn-nodeify.git#f044c748d90ec98e9d3e3f11b25d443bbb86c51f",
+      "resolved": "git://github.com/tradle/rn-nodeify.git#82d1d0524b4ccee0b55403fa9423a99eb50e2cad",
       "dev": true,
       "dependencies": {
         "fs-extra": {
