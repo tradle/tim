@@ -426,9 +426,9 @@
       "resolved": "git://github.com/tradle/bitcoin-adapter.git#b1d6f09e1ff9acd865d71a5945938cbe50d1fa99"
     },
     "@tradle/bitcoinjs-lib": {
-      "version": "1.6.0",
-      "from": "@tradle/bitcoinjs-lib@>=1.6.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@tradle/bitcoinjs-lib/-/bitcoinjs-lib-1.6.0.tgz",
+      "version": "1.6.1",
+      "from": "@tradle/bitcoinjs-lib@latest",
+      "resolved": "https://registry.npmjs.org/@tradle/bitcoinjs-lib/-/bitcoinjs-lib-1.6.1.tgz",
       "dependencies": {
         "bs58check": {
           "version": "1.3.4",
@@ -703,9 +703,9 @@
       "optional": true
     },
     "@yarnpkg/lockfile": {
-      "version": "1.0.2",
+      "version": "1.1.0",
       "from": "@yarnpkg/lockfile@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/@yarnpkg/lockfile/-/lockfile-1.0.2.tgz",
+      "resolved": "https://registry.npmjs.org/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz",
       "dev": true
     },
     "abbrev": {
@@ -4217,6 +4217,11 @@
       "dev": true,
       "optional": true
     },
+    "jsc-android": {
+      "version": "236355.1.1",
+      "from": "jsc-android@latest",
+      "resolved": "https://registry.npmjs.org/jsc-android/-/jsc-android-236355.1.1.tgz"
+    },
     "jsesc": {
       "version": "1.3.0",
       "from": "jsesc@>=1.3.0 <2.0.0",
@@ -6883,9 +6888,9 @@
       "resolved": "https://registry.npmjs.org/rn-markdown/-/rn-markdown-1.2.1.tgz"
     },
     "rn-nodeify": {
-      "version": "8.2.0",
-      "from": "tradle/rn-nodeify#dev",
-      "resolved": "git://github.com/tradle/rn-nodeify.git#f223a6a51a637bd2f6d30abd3526c6f214ada2db",
+      "version": "10.0.1",
+      "from": "tradle/rn-nodeify#mangle",
+      "resolved": "git://github.com/tradle/rn-nodeify.git#f044c748d90ec98e9d3e3f11b25d443bbb86c51f",
       "dev": true,
       "dependencies": {
         "fs-extra": {

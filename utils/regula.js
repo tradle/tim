@@ -107,7 +107,7 @@ export const scan = async (opts={}) => {
     allowExtraProps: false,
   })
 
-  await initialize(initializeOpts)
+  await initialize()
   // opts will be supported soon
   const result = await Regula.scan(opts)
 
