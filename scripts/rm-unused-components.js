@@ -19,6 +19,7 @@ const unused = [
   "node_modules/react-native/Libraries/Experimental/WindowedListView.js",
   "node_modules/react-native/Libraries/Experimental/SwipeableRow/*",
   "node_modules/react-native/Libraries/CameraRoll/*",
+  "node_modules/react-native/Libraries/ART/*",
 ].map(relPath => path.resolve(__dirname, '../', relPath))
 
 const replaceContents = async (arr) => {
