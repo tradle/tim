@@ -1,11 +1,13 @@
 import promisify from 'pify'
 import get from 'lodash/get'
-import { Platform } from 'react-native'
-import Regula from 'react-native-regula-document-reader'
-import { importFromImageStore } from './image-utils'
-import { validate as validateType, types } from './validate-type'
 import getValues from 'lodash/values'
 import defaultsDeep from 'lodash/defaultsDeep'
+import { Platform } from 'react-native'
+import Regula from 'react-native-regula-document-reader'
+import Q from 'q'
+
+import { importFromImageStore } from './image-utils'
+import { validate as validateType, types } from './validate-type'
 import regulaVisualFieldTypes from './regulaVisualFieldTypes'
 import regulaGraphicFieldTypes from './regulaGraphicFieldTypes'
 // kind of a shame to have this here
@@ -20,7 +22,7 @@ const LANDSCAPE_ANDROID = 2
 const initializeOpts = {
   licenseKey: get(regulaAuth || {}, ['licenseKey', Platform.OS]),
 }
-
+var prepDB
 export { Scenario }
 
 export const setLicenseKey = async (licenseKey) => {
@@ -28,8 +30,16 @@ export const setLicenseKey = async (licenseKey) => {
   // await Regula.prepareDatabase({dbID: 'Full'})
 }
 export const prepareDatabase = async (dbID) => {
+  prepDB = new Q.defer()
   console.log('Prepare Regula DB')
-  await Regula.prepareDatabase({dbID})
+  try {
+    await Regula.prepareDatabase({dbID})
+    prepDB.resolve()
+  } catch (err) {
+    prepDB.reject()
+    debugger
+    return
+  }
   console.log('Prepare Regula DB - completed')
   await initialize()
   console.log('Initialization Regula DB - completed')
@@ -46,11 +56,11 @@ const OptsTypeSpec = {
   // https://github.com/regulaforensics/DocumentReader-iOS/wiki/Customization
   customization: {
     showHelpAnimation: types.bool,
-    showHintMessages: types.bool,
+    showStatusMessages: types.bool,
     status: types.string,
   },
   functionality: {
-    showTorchButton: types.bool,
+    // showTorchButton: types.bool,
     showCloseButton: types.bool,
     showCaptureButton: types.bool,
     showChangeFrameButton: types.bool,
@@ -66,14 +76,14 @@ const OptsTypeSpec = {
 
 const DEFAULTS = {
   functionality: {
-    showTorchButton: false,
+    // showTorchButton: false,
     showCloseButton: true,
     showCaptureButton: false,
     skipFocusingFrames: true,
     orientation: Platform.OS === 'android' && LANDSCAPE_ANDROID || LANDSCAPE_RIGHT_IOS,
   },
   customization: {
-    showHintMessages: true,
+    showStatusMessages: true,
     showHelpAnimation: true,
   },
   processParams: {
@@ -87,6 +97,8 @@ const DEFAULTS = {
 
 const normalizeJSON = obj => typeof obj === 'string' ? JSON.parse(obj) : obj
 export const scan = async (opts={}) => {
+  prepDB  &&  await prepDB.promise
+
   opts = defaultsDeep(opts, DEFAULTS)
 
   validateType({
