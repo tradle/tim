@@ -907,12 +907,8 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
       return displayName
     // Construct display name from viewCols
     let vCols = resourceModel.viewCols || utils.getViewCols(resourceModel)
-    if (!vCols || !vCols.length) {
-      vCols = resourceModel.required
-      if (!vCols)
-        return displayName
-    }
-      // return displayName
+    if (!vCols || !vCols.length)
+      return displayName
 
     let excludeProps = []
     if (utils.isMessage(resourceModel))
