@@ -280,8 +280,8 @@ class RefPropertyEditor extends Component {
       if (scanner === 'id-document') {
         if (pName === 'scan')  {
           if (resource.documentType  &&  resource.country) {
-            this.showRegulaScanner(params)
-            // this.showBlinkIDScanner(pName)
+            // this.showRegulaScanner(params)
+            this.showBlinkIDScanner(pName)
           }
           else
             Alert.alert('Please choose country and document type first')
