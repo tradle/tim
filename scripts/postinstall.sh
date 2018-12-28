@@ -11,9 +11,9 @@ npm run loadsecrets
 ./fbdedupe.sh
 ./hooks/update_version.sh
 npm run fixasyncstorage
-./scripts/rm-unused-components.js
-./scripts/fix-node_modules.js
-./scripts/dedupe-deps.js
+node ./scripts/rm-unused-components.js
+node ./scripts/fix-node_modules.js
+node ./scripts/dedupe-deps.js
 npm run clean:node_modules
 
 sed -i '' "s/EMULATOR_LOCALHOST = \"10\.0\.2\.2\";/EMULATOR_LOCALHOST = \"localhost\";/" "./node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/systeminfo/AndroidInfoHelpers.java"

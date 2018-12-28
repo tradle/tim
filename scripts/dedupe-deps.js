@@ -119,7 +119,7 @@ const replaceWithCanonical = async ({ name, canonical, duplicate }) => {
     return fs.writeFile(absDupPath, `module.exports = require('${canPath}')`)
   }
 
-  const jsFiles = await findJsFiles
+  const jsFiles = await findJsFiles(dupDir)
   await Promise.map(jsFiles, remapFile, {
     concurrency: 100
   })

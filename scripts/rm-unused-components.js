@@ -55,4 +55,8 @@ ${REPLACEMENT_MARKER}`
   }))
 }
 
-replaceContents(unused)
+debugger
+replaceContents(unused).catch(err => {
+  process.exitCode = 1
+  console.error(err.stack)
+})
