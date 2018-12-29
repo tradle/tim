@@ -62,7 +62,7 @@
         "to-fast-properties": {
           "version": "2.0.0",
           "from": "to-fast-properties@>=2.0.0 <3.0.0",
-          "resolved": "http://registry.npmjs.org/to-fast-properties/-/to-fast-properties-2.0.0.tgz"
+          "resolved": "https://registry.npmjs.org/to-fast-properties/-/to-fast-properties-2.0.0.tgz"
         }
       }
     },
@@ -614,7 +614,7 @@
         "to-fast-properties": {
           "version": "2.0.0",
           "from": "to-fast-properties@^2.0.0",
-          "resolved": "https://registry.npmjs.org/to-fast-properties/-/to-fast-properties-2.0.0.tgz"
+          "resolved": "http://registry.npmjs.org/to-fast-properties/-/to-fast-properties-2.0.0.tgz"
         }
       }
     },
@@ -1886,9 +1886,9 @@
       }
     },
     "blinkid-react-native": {
-      "version": "4.3.0",
-      "from": "git+https://github.com/tradle/blinkid-react-native-dist.git",
-      "resolved": "git+https://github.com/tradle/blinkid-react-native-dist.git#3a10ad02f86cd9daaa02fbe4b68cb76dbe93e33c"
+      "version": "4.5.0",
+      "from": "tradle/blinkid-react-native-dist",
+      "resolved": "git://github.com/tradle/blinkid-react-native-dist.git#1d0c67f2a8409a2d8b065a7cedf8fae49cb65239"
     },
     "bluebird": {
       "version": "2.11.0",
@@ -3973,7 +3973,7 @@
     },
     "ini": {
       "version": "1.3.5",
-      "from": "ini@>=1.3.0 <1.4.0",
+      "from": "ini@>=1.3.4 <2.0.0",
       "resolved": "https://registry.npmjs.org/ini/-/ini-1.3.5.tgz",
       "optional": true
     },
@@ -6296,7 +6296,7 @@
     },
     "react-native": {
       "version": "0.55.4",
-      "from": "http://registry.npmjs.org/react-native/-/react-native-0.55.4.tgz",
+      "from": "react-native@0.55.4",
       "resolved": "http://registry.npmjs.org/react-native/-/react-native-0.55.4.tgz",
       "dependencies": {
         "base64-js": {
@@ -6662,7 +6662,7 @@
     "react-native-regula-document-reader": {
       "version": "1.0.0",
       "from": "tradle/react-native-regula-document-reader",
-      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#e10134a99256feb8b64f89e2dbcd0d91f82eab63"
+      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#e56b6f4d3de4606cfb042725556816a9058e3bc7"
     },
     "react-native-scrollable-mixin": {
       "version": "1.0.1",
