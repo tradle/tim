@@ -26,4 +26,4 @@ fi
 # to be able to debug the packager, add this line:
 # LINE="$LINE --max-workers 0"
 
-eval "$LINE"
+eval "$LINE $@"
