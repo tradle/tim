@@ -22,7 +22,7 @@ const LANDSCAPE_ANDROID = 2
 const initializeOpts = {
   licenseKey: get(regulaAuth || {}, ['licenseKey', Platform.OS]),
 }
-var prepDB
+var prepDB //, databaseID
 export { Scenario }
 
 export const setLicenseKey = async (licenseKey) => {
@@ -30,13 +30,15 @@ export const setLicenseKey = async (licenseKey) => {
   // await Regula.prepareDatabase({dbID: 'Full'})
 }
 export const prepareDatabase = async (dbID) => {
+  // databaseID = dbID
   prepDB = new Q.defer()
+  debugger
   console.log('Prepare Regula DB')
   try {
     await Regula.prepareDatabase({dbID})
     prepDB.resolve()
   } catch (err) {
-    prepDB.reject()
+    prepDB.reject(err)
     debugger
     return
   }
@@ -97,8 +99,13 @@ const DEFAULTS = {
 
 const normalizeJSON = obj => typeof obj === 'string' ? JSON.parse(obj) : obj
 export const scan = async (opts={}) => {
-  prepDB  &&  await prepDB.promise
-
+  try {
+    prepDB  &&  await prepDB.promise
+  } catch (err) {
+    console.log('Something went wrong', err)
+    // this.prepareDatabase(databaseID)
+    debugger
+  }
   opts = defaultsDeep(opts, DEFAULTS)
 
   validateType({
