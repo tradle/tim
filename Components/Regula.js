@@ -1,15 +1,11 @@
 import { Platform, Alert } from 'react-native'
 import _ from 'lodash'
 
-import { isSimulator, sanitize, isEmpty } from '../utils/utils'
 import { requestCameraAccess } from '../utils/camera'
 import { getGlobalKeeper } from '../utils/keeper'
-import { getModel, buildStubByEnumTitleOrId, isAndroid } from '../utils/utils'
+import { isSimulator, sanitize, isEmpty, getModel, buildStubByEnumTitleOrId, isAndroid } from '../utils/utils'
 import { scan, Scenario } from '../utils/regula'
-import DeviceInfo from 'react-native-device-info'
-
-// import regulaVisualFieldTypes from '../utils/regulaVisualFieldTypes'
-
+// import DeviceInfo from 'react-native-device-info'
 const COUNTRY = 'tradle.Country'
 
 const regulaScan = (function () {
@@ -18,12 +14,7 @@ const regulaScan = (function () {
     if (!await requestCameraAccess()) {
       throw new Error('user denied camera access')
     }
-    let isLowEndDevice
-    if (isAndroid()) {
-      let totalMem = DeviceInfo.getTotalMemory() / 1000000000
-      isLowEndDevice = totalMem < 2
-    }
-      // phone = DeviceInfo.getPhoneNumber()
+
     let { bothSides } = opts
     let scanOpts = {
       processParams: {
@@ -36,19 +27,21 @@ const regulaScan = (function () {
       //   showCaptureButton: true
       // }
     }
-    // if (isLowEndDevice) {
-    //  if set then as soon as doc is located the picture is taken and processed as a single frame
-    //   scanOpts.functionality = {
-    //     pictureOnBoundsReady: true
+    // if (isAndroid()) {
+    //   let totalMem = DeviceInfo.getTotalMemory() / 1000000000
+    //   if (totalMem < 2) {
+    //    if set then as soon as doc is located the picture is taken and processed as a single frame
+    //     scanOpts.functionality = {
+    //       pictureOnBoundsReady: true
+    //     }
     //   }
     // }
-
     let result
     try {
       result = await scan(scanOpts)
     } catch (err) {
       // debugger
-      console.log('regula scan failed', err)
+      console.log('regula scan failed: ' + JSON.stringify(scanOpts, 0, 2), err.stack)
       return { canceled: err.message === 'Canceled by user' }
     }
     if (!result)
@@ -64,24 +57,6 @@ export default { regulaScan }
 const normalizeResult = ({results, json}) => {
   if (isEmpty(json))
     return {}
-  // let result = results[0].ListVerifiedFields
-  // if (!result)
-  //   return {}
-  // let fields = result.pFieldMaps
-  // let json = {}
-
-  // fields.forEach((f, i) => {
-  //   let fieldTypeID = f.FieldType
-  //   let val = f.Field_Visual || f.Field_MRZ
-  //   let fName
-  //   if (val) {
-  //     fName = regulaVisualFieldTypes[fieldTypeID]
-  //     json[fName] = val
-  //   }
-  //   else {
-  //     val = f.GraphicField
-  //   }
-  // })
   let address, city
   if (json.ft_Address) {
     if (json.ft_Issuing_State_Code === 'NZL') {
