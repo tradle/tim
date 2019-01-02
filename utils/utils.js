@@ -58,6 +58,8 @@ import Alert from '../Components/Alert'
 import dictionaries from './dictionaries'
 import { tryWithExponentialBackoff } from './backoff'
 
+import { getDictionary } from '../Store/utils/storeUtils'
+
 const collect = Promise.promisify(_collect)
 const getStore = () => require('../Store/Store')
 
@@ -173,8 +175,11 @@ var utils = {
     language = lang
     Strings.setLanguage(lang)
     let d = dictionaries(lang)
-    if (d)
-      dictionary = _.extend({}, dictionaries('en'), d)
+    if (d) {
+      const enD = getDictionary()
+      dictionary = _.extend({}, enD, d)
+      // dictionary = _.extend({}, dictionaries('en'), d)
+    }
   },
   getMe() {
     return me;

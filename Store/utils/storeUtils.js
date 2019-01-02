@@ -14,7 +14,7 @@ var constants = require('@tradle/constants');
 
 import AsyncStorage from '../Storage'
 import voc from '../voc'
-import utils from '../../utils/utils'
+import { makeLabel, isEnum, getModel } from '../../utils/utils'
 
 // var models = {};
 
@@ -28,6 +28,7 @@ const MSG_LINK = '_msg'
 
 const { FORM, IDENTITY, VERIFICATION, MESSAGE } = constants.TYPES
 const ObjectModel = voc['tradle.Object']
+var dictionary
 
 var storeUtils = {
   addModels({models, enums}) {
@@ -35,11 +36,75 @@ var storeUtils = {
       let m = voc[id]
       // if (!m[ROOT_HASH])
       //   m[ROOT_HASH] = sha(m);
-      this.parseOneModel(m, models, enums)
+      storeUtils.parseOneModel(m, models, enums)
+    }
+    dictionary = storeUtils.makeDictionary(models)
+    debugger
+  },
+  getDictionary() {
+    return dictionary
+  },
+  makeDictionary(models) {
+    let modelNames = {}
+    let propNames = {}
+    let enums = {}
+    Object.keys(models).forEach(id => {
+      const m = models[id].value
+      modelNames[m.id] = modelNames[m.id]  ||  m.title
+      for (let p in m.properties) {
+        if (p.charAt(0) === '_')
+          continue
+        if (propNames[p]) {
+          if (m.properties[p].title) {
+            if (!propNames[p][m.id])
+              propNames[p][m.id] = m.properties[p].title
+          }
+
+          continue
+        }
+
+        propNames[p] = {}
+
+        if (m.properties[p].title)
+          propNames[p][m.id] = m.properties[p].title
+        else {
+          let title = makeLabel(p)
+          propNames[p].Default = title
+        }
+        if (m.enum) {
+          enums[m.id] = {}
+          m.enum.forEach(e => enums[m.id][e.id] = e.title)
+        }
+        if (m.properties[p].type === 'array'  &&  m.properties[p].items.properties) {
+          let props = m.properties[p].items.properties
+          propNames[p].items = {}
+          for (let pp in props) {
+            if (props[pp].title)
+              propNames[p].items[pp] = props[pp].title
+            else {
+              let title = makeLabel(pp)
+              propNames[p].items[pp] = title
+            }
+          }
+        }
+      }
+    })
+    return {
+      enums,
+      properties: propNames,
+      models: modelNames
     }
   },
+  // makeLabel(label) {
+  //   return label
+  //         // insert a space before all caps
+  //         .replace(/([A-Z])/g, ' $1')
+  //         // uppercase the first character
+  //         .replace(/^./, str => str.toUpperCase()).trim()
+  // },
+
   parseOneModel(m, models, enums) {
-    // this.addNameAndTitleProps(m)
+    // storeUtils.addNameAndTitleProps(m)
     models[m.id] = {
       key: m.id,
       value: m
@@ -58,7 +123,7 @@ var storeUtils = {
     }
   },
   addOns(m, models, enums) {
-    this.addNameAndTitleProps(m)
+    storeUtils.addNameAndTitleProps(m)
     // models[m.id] = {
     //   key: m.id,
     //   value: m
@@ -74,13 +139,13 @@ var storeUtils = {
 
     // if (isProductList  &&  m.subClassOf === FINANCIAL_PRODUCT)
     //   org.products.push(m.id)
-    if (utils.isEnum(m))
-      this.createEnumResources(m, enums)
+    if (isEnum(m))
+      storeUtils.createEnumResources(m, enums)
 
     // if (utils.isMessage(m)) {
     if (m.subClassOf === FORM) {
-      this.addVerificationsToFormModel(m)
-      this.addFromAndTo(m)
+      storeUtils.addVerificationsToFormModel(m)
+      storeUtils.addFromAndTo(m)
     }
   },
   addNameAndTitleProps(m, aprops) {
@@ -91,11 +156,11 @@ var storeUtils = {
       if (!mprops[p].name)
         mprops[p].name = p
       if (!mprops[p].title)
-        mprops[p].title = utils.makeLabel(p)
+        mprops[p].title = makeLabel(p)
       if (mprops[p].type === 'array') {
         var aprops = mprops[p].items.properties
         if (aprops)
-          this.addNameAndTitleProps(m, aprops)
+          storeUtils.addNameAndTitleProps(m, aprops)
       }
     }
   },
@@ -131,7 +196,7 @@ var storeUtils = {
     }
   },
   createEnumResources(model, enums) {
-    if (!utils.isEnum(model)  ||  !model.enum)
+    if (!isEnum(model)  ||  !model.enum)
       return
     let eProp
     for (let p in model.properties) {
@@ -146,7 +211,7 @@ var storeUtils = {
         [ROOT_HASH]: r.id,
         [eProp]: r.title
       }
-      this.loadStaticItem(enumItem, enums)
+      storeUtils.loadStaticItem(enumItem, enums)
     })
   },
   loadStaticItem(r, enums) {
@@ -257,7 +322,7 @@ var storeUtils = {
   toStylesPack(oldStylesFormat) {
     if (oldStylesFormat[TYPE] === STYLES_PACK) return oldStylesFormat
 
-    const { properties } = utils.getModel(STYLES_PACK)
+    const { properties } = getModel(STYLES_PACK)
     const pack = {
       [TYPE]: STYLES_PACK
     }
