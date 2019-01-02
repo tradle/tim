@@ -614,7 +614,7 @@
         "to-fast-properties": {
           "version": "2.0.0",
           "from": "to-fast-properties@^2.0.0",
-          "resolved": "http://registry.npmjs.org/to-fast-properties/-/to-fast-properties-2.0.0.tgz"
+          "resolved": "https://registry.npmjs.org/to-fast-properties/-/to-fast-properties-2.0.0.tgz"
         }
       }
     },
@@ -990,12 +990,6 @@
         }
       }
     },
-    "@types/graphql": {
-      "version": "0.10.2",
-      "from": "@types/graphql@0.10.2",
-      "resolved": "https://registry.npmjs.org/@types/graphql/-/graphql-0.10.2.tgz",
-      "optional": true
-    },
     "@yarnpkg/lockfile": {
       "version": "1.1.0",
       "from": "@yarnpkg/lockfile@>=1.0.0 <2.0.0",
@@ -1136,16 +1130,6 @@
       "from": "anymatch@>=1.3.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/anymatch/-/anymatch-1.3.2.tgz",
       "dev": true
-    },
-    "apollo-client": {
-      "version": "1.9.3",
-      "from": "apollo-client@>=1.9.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/apollo-client/-/apollo-client-1.9.3.tgz"
-    },
-    "apollo-link-core": {
-      "version": "0.5.4",
-      "from": "apollo-link-core@>=0.5.0 <0.6.0",
-      "resolved": "https://registry.npmjs.org/apollo-link-core/-/apollo-link-core-0.5.4.tgz"
     },
     "aproba": {
       "version": "1.2.0",
@@ -1490,6 +1474,12 @@
       "version": "6.22.0",
       "from": "babel-plugin-external-helpers@>=6.18.0 <7.0.0",
       "resolved": "https://registry.npmjs.org/babel-plugin-external-helpers/-/babel-plugin-external-helpers-6.22.0.tgz"
+    },
+    "babel-plugin-inline-package-json": {
+      "version": "2.0.0",
+      "from": "babel-plugin-inline-package-json@latest",
+      "resolved": "https://registry.npmjs.org/babel-plugin-inline-package-json/-/babel-plugin-inline-package-json-2.0.0.tgz",
+      "dev": true
     },
     "babel-plugin-lodash": {
       "version": "3.3.4",
@@ -3689,25 +3679,10 @@
       "resolved": "https://registry.npmjs.org/graceful-readlink/-/graceful-readlink-1.0.1.tgz",
       "dev": true
     },
-    "graphql": {
-      "version": "0.10.5",
-      "from": "graphql@>=0.10.0 <0.11.0",
-      "resolved": "https://registry.npmjs.org/graphql/-/graphql-0.10.5.tgz"
-    },
-    "graphql-anywhere": {
-      "version": "3.1.0",
-      "from": "graphql-anywhere@>=3.0.1 <4.0.0",
-      "resolved": "https://registry.npmjs.org/graphql-anywhere/-/graphql-anywhere-3.1.0.tgz"
-    },
     "graphql-request": {
       "version": "1.8.2",
       "from": "graphql-request@>=1.8.2 <2.0.0",
       "resolved": "https://registry.npmjs.org/graphql-request/-/graphql-request-1.8.2.tgz"
-    },
-    "graphql-tag": {
-      "version": "2.9.2",
-      "from": "graphql-tag@>=2.4.2 <3.0.0",
-      "resolved": "https://registry.npmjs.org/graphql-tag/-/graphql-tag-2.9.2.tgz"
     },
     "growl": {
       "version": "1.9.2",
@@ -3973,7 +3948,7 @@
     },
     "ini": {
       "version": "1.3.5",
-      "from": "ini@>=1.3.4 <2.0.0",
+      "from": "ini@>=1.3.0 <1.4.0",
       "resolved": "https://registry.npmjs.org/ini/-/ini-1.3.5.tgz",
       "optional": true
     },
@@ -4276,11 +4251,6 @@
       "from": "isstream@>=0.1.2 <0.2.0",
       "resolved": "https://registry.npmjs.org/isstream/-/isstream-0.1.2.tgz",
       "dev": true
-    },
-    "iterall": {
-      "version": "1.2.2",
-      "from": "iterall@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/iterall/-/iterall-1.2.2.tgz"
     },
     "jest-docblock": {
       "version": "22.4.0",
@@ -4856,11 +4826,6 @@
       "version": "4.17.10",
       "from": "lodash@>=4.17.10 <5.0.0",
       "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.10.tgz"
-    },
-    "lodash-es": {
-      "version": "4.17.10",
-      "from": "lodash-es@>=4.2.1 <5.0.0",
-      "resolved": "https://registry.npmjs.org/lodash-es/-/lodash-es-4.17.10.tgz"
     },
     "lodash._baseassign": {
       "version": "3.2.0",
@@ -6296,7 +6261,7 @@
     },
     "react-native": {
       "version": "0.55.4",
-      "from": "react-native@0.55.4",
+      "from": "http://registry.npmjs.org/react-native/-/react-native-0.55.4.tgz",
       "resolved": "http://registry.npmjs.org/react-native/-/react-native-0.55.4.tgz",
       "dependencies": {
         "base64-js": {
@@ -6662,7 +6627,7 @@
     "react-native-regula-document-reader": {
       "version": "1.0.0",
       "from": "tradle/react-native-regula-document-reader",
-      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#e56b6f4d3de4606cfb042725556816a9058e3bc7"
+      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#e10134a99256feb8b64f89e2dbcd0d91f82eab63"
     },
     "react-native-scrollable-mixin": {
       "version": "1.0.1",
@@ -6920,11 +6885,6 @@
           "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-1.0.34.tgz"
         }
       }
-    },
-    "redux": {
-      "version": "3.7.2",
-      "from": "redux@>=3.4.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/redux/-/redux-3.7.2.tgz"
     },
     "reflux": {
       "version": "0.4.1",
@@ -7947,11 +7907,6 @@
       "from": "supports-color@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-2.0.0.tgz"
     },
-    "symbol-observable": {
-      "version": "1.2.0",
-      "from": "symbol-observable@>=1.0.2 <2.0.0",
-      "resolved": "http://registry.npmjs.org/symbol-observable/-/symbol-observable-1.2.0.tgz"
-    },
     "table": {
       "version": "3.8.3",
       "from": "table@>=3.7.8 <4.0.0",
@@ -8562,11 +8517,6 @@
       "version": "2.4.3",
       "from": "yazl@>=2.4.1 <3.0.0",
       "resolved": "https://registry.npmjs.org/yazl/-/yazl-2.4.3.tgz"
-    },
-    "zen-observable-ts": {
-      "version": "0.4.4",
-      "from": "zen-observable-ts@>=0.4.4 <0.5.0",
-      "resolved": "https://registry.npmjs.org/zen-observable-ts/-/zen-observable-ts-0.4.4.tgz"
     }
   }
 }

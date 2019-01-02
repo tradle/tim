@@ -23,7 +23,7 @@ const analyze = bundle => {
       ? lines.length - 1
       : raw[i + 1].start - 1
 
-    node.lines = node.end - node.start
+    node.lines = node.end - node.start + 1
     const lastLine = lines[node.end]
     const nameMatch = lastLine.match(/\"(.*)\"/)
     if (!nameMatch) {
@@ -70,6 +70,6 @@ const analyze = bundle => {
 
 const { raw, grouped } = analyze(bundle)
 // console.log(_.sortBy(grouped, 'lines').reverse())
-console.log(_.sortBy(raw, 'lines').reverse().map(info => _.pick(info, ['name', 'lines', 'chars'])))
+console.log(_.sortBy(raw.filter(r => r.chars), 'chars').reverse().map(info => _.pick(info, ['name', 'lines', 'chars'])))
 // const sorted = _.sortBy(raw, 'lines').reverse()
 // console.log(JSON.stringify(sorted, null, 2))
