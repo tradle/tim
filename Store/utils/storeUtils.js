@@ -39,7 +39,6 @@ var storeUtils = {
       storeUtils.parseOneModel(m, models, enums)
     }
     dictionary = storeUtils.makeDictionary(models)
-    debugger
   },
   getDictionary() {
     return dictionary
