@@ -20,6 +20,7 @@ const unused = [
   "node_modules/react-native/Libraries/Experimental/SwipeableRow/*",
   "node_modules/react-native/Libraries/CameraRoll/*",
   "node_modules/react-native/Libraries/ART/*",
+  "node_modules/react-native-tcp/*",
 ].map(relPath => path.resolve(__dirname, '../', relPath))
 
 const replaceContents = async (arr) => {
@@ -55,7 +56,6 @@ ${REPLACEMENT_MARKER}`
   }))
 }
 
-debugger
 replaceContents(unused).catch(err => {
   process.exitCode = 1
   console.error(err.stack)

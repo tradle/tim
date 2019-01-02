@@ -50,6 +50,7 @@
         // iOS 9+
         ['transform-es2015-for-of', { loose: true }],
         'lodash',
+        'inline-package-json',
       ]
     },
     development: {
@@ -89,68 +90,7 @@
         // }],
         ['transform-es2015-for-of', { loose: true }],
         'lodash',
-        // ['module-resolver', {
-        //   extensions: ['.ios.js', '.android.js', '.js', '.json'],
-        //   alias: {
-        //     // 2.3.6
-        //     'node_modules/bl/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules//duplexify/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/static-module/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/code-push/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/get-uri/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/stream-combiner2/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/merkle-tree-stream/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/feed-indexer/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/merge-stream/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/through2/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/are-we-there-yet/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-
-        //     // 1.0.34
-        //     'node_modules/mqtt-connection/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/levelup/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/fwd-stream/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/level-sublevel/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/mqtt/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/reduplexer/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //   }
-        // }]
-
-        // ['rewrite-require', {
-        //   aliases: {
-        //     // 2.3.6
-        //     'node_modules/bl/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules//duplexify/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/static-module/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/code-push/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/get-uri/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/stream-combiner2/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/merkle-tree-stream/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/feed-indexer/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/merge-stream/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/through2/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-        //     'node_modules/are-we-there-yet/node_modules/readable-stream/readable.js': './readable-stream-236.js',
-
-        //     'node_modules/bl/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules//duplexify/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules/static-module/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules/code-push/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules/get-uri/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules/stream-combiner2/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules/merkle-tree-stream/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules/feed-indexer/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules/merge-stream/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules/through2/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-        //     'node_modules/are-we-there-yet/node_modules/readable-stream/readable-browser.js': './readable-stream-236.js',
-
-        //     // 1.0.34
-        //     'node_modules/mqtt-connection/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/levelup/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/fwd-stream/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/level-sublevel/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/mqtt/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //     'node_modules/reduplexer/node_modules/readable-stream/readable.js': './readable-stream-1034.js',
-        //   }
-        // }]
+        'inline-package-json',
       ]
     }
   }

@@ -3,12 +3,12 @@
 import omit from 'lodash/omit'
 import isEmpty from 'lodash/isEmpty'
 import getPropertyAtPath from 'lodash/get'
-import gql from 'graphql-tag'
+// import gql from 'graphql-tag'
 import { utils as tradleUtils } from '@tradle/engine'
-import { ApolloClient, createNetworkInterface } from 'apollo-client'
+// import { ApolloClient, createNetworkInterface } from 'apollo-client'
 import { GraphQLClient } from 'graphql-request'
 import constants from '@tradle/constants'
-import { print as printQuery } from 'graphql/language/printer'
+// import { print as printQuery } from 'graphql/language/printer'
 import utils from '../../utils/utils'
 const {
   TYPE,
@@ -36,73 +36,73 @@ const useApollo = false
 var search = {
   initClient(meDriver, url) {
     // debugger
-    if (useApollo)
-      return this.initClientApollo(meDriver, url)
-    else
+    // if (useApollo)
+    //   return this.initClientApollo(meDriver, url)
+    // else
       return this.initClientGraphQLRequest(meDriver, url)
   },
 
-  initClientApollo(meDriver, url) {
-    // let graphqlEndpoint
-    // let orgId = me.organization.id
-    // let url = me.organization.url
-    // if (!url)
-    //   url =  SERVICE_PROVIDERS.filter((sp) => sp.org === orgId)[0].url
-    // if (url)
-    let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
-    // else
-    //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
-    if (!graphqlEndpoint)
-      return
+  // initClientApollo(meDriver, url) {
+  //   // let graphqlEndpoint
+  //   // let orgId = me.organization.id
+  //   // let url = me.organization.url
+  //   // if (!url)
+  //   //   url =  SERVICE_PROVIDERS.filter((sp) => sp.org === orgId)[0].url
+  //   // if (url)
+  //   let graphqlEndpoint = `${url.replace(/[/]+$/, '')}/graphql`
+  //   // else
+  //   //   graphqlEndpoint = `${ENV.LOCAL_TRADLE_SERVER.replace(/[/]+$/, '')}/graphql`
+  //   if (!graphqlEndpoint)
+  //     return
 
-    // graphqlEndpoint = `http://localhost:21012/graphql`
-    const networkInterface = createNetworkInterface({
-      uri: graphqlEndpoint
-    })
+  //   // graphqlEndpoint = `http://localhost:21012/graphql`
+  //   const networkInterface = createNetworkInterface({
+  //     uri: graphqlEndpoint
+  //   })
 
-    networkInterface.use([{
-      applyMiddleware: async (req, next) => {
-        const body = tradleUtils.stringify({
-          ...req.request,
-          query: printQuery(req.request.query)
-        })
+  //   networkInterface.use([{
+  //     applyMiddleware: async (req, next) => {
+  //       const body = tradleUtils.stringify({
+  //         ...req.request,
+  //         query: printQuery(req.request.query)
+  //       })
 
-        const result = await meDriver.sign({
-          object: {
-            [TYPE]: 'tradle.GraphQLQuery',
-            body,
-            _time: Date.now()
-          }
-        })
+  //       const result = await meDriver.sign({
+  //         object: {
+  //           [TYPE]: 'tradle.GraphQLQuery',
+  //           body,
+  //           _time: Date.now()
+  //         }
+  //       })
 
-        if (!req.options.headers) {
-          req.options.headers = {}
-        }
+  //       if (!req.options.headers) {
+  //         req.options.headers = {}
+  //       }
 
-        req.options.headers['x-tradle-auth'] = JSON.stringify(omit(result.object, ['body', TYPE]))
-        next()
-      }
-    }])
+  //       req.options.headers['x-tradle-auth'] = JSON.stringify(omit(result.object, ['body', TYPE]))
+  //       next()
+  //     }
+  //   }])
 
-    // networkInterface.useAfter([
-    //   {
-    //     applyAfterware(result, next) {
-    //       const { response } = result
-    //       if (response.status > 300) {
-    //         const err = Error('request failed')
-    //         err.status = response.status
-    //         err.statusText = response.statusText
-    //         err.response = response
-    //         throw err
-    //       }
+  //   // networkInterface.useAfter([
+  //   //   {
+  //   //     applyAfterware(result, next) {
+  //   //       const { response } = result
+  //   //       if (response.status > 300) {
+  //   //         const err = Error('request failed')
+  //   //         err.status = response.status
+  //   //         err.statusText = response.statusText
+  //   //         err.response = response
+  //   //         throw err
+  //   //       }
 
-    //       next()
-    //     }
-    //   }
-    // ])
+  //   //       next()
+  //   //     }
+  //   //   }
+  //   // ])
 
-    return new ApolloClient({ networkInterface })
-  },
+  //   return new ApolloClient({ networkInterface })
+  // },
 
   initClientGraphQLRequest(meDriver, url, headers) {
     // debugger
@@ -921,23 +921,23 @@ var search = {
 
     return results[0]
   },
-  async executeApollo({client, query, table, versionId}) {
-let start = Date.now()
-    try {
-      let data = await client.query({
-          fetchPolicy: 'network-only',
-          errorPolicy: 'all',
-          query: gql(`${query}`),
-          variables: versionId  &&  {modelsVersionId: versionId}
-        })
-console.log('searchServer.apollo ' + (Date.now() - start))
-      return { result: data.data[table] }
-    } catch(error) {
-      // debugger
-      console.log(error)
-      return { error }
-    }
-  },
+//   async executeApollo({client, query, table, versionId}) {
+// let start = Date.now()
+//     try {
+//       let data = await client.query({
+//           fetchPolicy: 'network-only',
+//           errorPolicy: 'all',
+//           query: gql(`${query}`),
+//           variables: versionId  &&  {modelsVersionId: versionId}
+//         })
+// console.log('searchServer.apollo ' + (Date.now() - start))
+//       return { result: data.data[table] }
+//     } catch(error) {
+//       // debugger
+//       console.log(error)
+//       return { error }
+//     }
+//   },
 
   async execute(params) {
     if (useApollo)

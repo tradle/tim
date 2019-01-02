@@ -123,33 +123,6 @@ const replaceWithCanonical = async ({ name, canonical, duplicate }) => {
   await Promise.map(jsFiles, remapFile, {
     concurrency: 100
   })
-
-  // const pending = []
-  // const addRemapFile = relDupPath => pending.push(remapFile(relDupPath))
-
-  // addRemapFile(pkg.main || './index.js')
-
-  // ;['browser', 'react-native'].forEach(field => {
-  //   const replacements = pkg[field]
-  //   if (!replacements) return
-
-  //   const dupReplacements = dupPkg[field]
-  //   if (typeof replacements === 'string') {
-  //     addRemapFile(replacements)
-  //     return
-  //   }
-
-  //   for (let key in replacements) {
-  //     if (key.startsWith('.')) {
-  //       let replacement = replacements[key]
-  //       if (replacement !== false) {
-  //         addRemapFile(replacement)
-  //       }
-  //     }
-  //   }
-  // })
-
-  // return Promise.all(pending)
 }
 
 const dedupeNodeModules = async ({ dir }) => {
