@@ -44,7 +44,7 @@ consoleMethods.forEach(method => {
 
   const namespace = 'console.' + method
   rawConsole[method] = orig.bind(console)
-  console[method] = debug(namespace)
+  // console[method] = debug(namespace)
 })
 
 EventEmitter.call(debug)

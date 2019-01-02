@@ -44,7 +44,7 @@ import * as promiseUtils from '@tradle/promise-utils'
 import { Errors as ValidateResourceErrors } from '@tradle/validate-resource'
 
 import AsyncStorage from '../Store/Storage'
-import Store from '../Store/Store'
+// import Store from '../Store/Store'
 import ENV from './env'
 
 import platformUtils from './platformUtils'
@@ -59,6 +59,7 @@ import dictionaries from './dictionaries'
 import { tryWithExponentialBackoff } from './backoff'
 
 const collect = Promise.promisify(_collect)
+const getStore = () => require('../Store/Store')
 
 // import Orientation from 'react-native-orientation'
 
@@ -304,6 +305,7 @@ var utils = {
     return { type, permalink, link }
   },
   getLensedModel(fr, lensId) {
+    const Store = getStore()
     const form = utils.getRequestedFormType(fr)
     let model = Store.getOriginalModel(form)
     lensId = lensId  ||  fr.lens
@@ -386,7 +388,7 @@ var utils = {
     return lens || resource._lens
   },
   getModel(modelName) {
-    return Store.getModel(modelName)
+    return getStore().getModel(modelName)
     // const model = models ? models[modelName] : null
     // // if (!model) debug(`missing model: ${modelName}`)
     // return model
@@ -914,12 +916,8 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
       return displayName
     // Construct display name from viewCols
     let vCols = resourceModel.viewCols || utils.getViewCols(resourceModel)
-    if (!vCols || !vCols.length) {
-      vCols = resourceModel.required
-      if (!vCols)
-        return displayName
-    }
-      // return displayName
+    if (!vCols || !vCols.length)
+      return displayName
 
     let excludeProps = []
     if (utils.isMessage(resourceModel))

@@ -12,7 +12,6 @@ const noop = () => {}
 const promiseIdle = () => InteractionManager.runAfterInteractions(noop)
 
 import Analytics from '../utils/analytics'
-import { prepareDatabase } from '../utils/regula'
 import AsyncStorage from './Storage'
 import * as LocalAuth from '../utils/localAuth'
 import Push from '../utils/push'
@@ -213,6 +212,7 @@ const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
 const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const MY_ENVIRONMENT      = 'environment.json'
+const MY_REGULA           = 'regula.json'
 
 const MIN_SIZE_FOR_PROGRESS_BAR = 30000
 const MAX_CUSTOMERS_ON_DEVICE = 3
@@ -2310,15 +2310,15 @@ var Store = Reflux.createStore({
   async afterGetInfo() {
     let env
     try {
-      env = await db.get(MY_ENVIRONMENT)
+      env = await db.get(MY_REGULA)
       // some props like api keys may have been updated
     } catch (err) {
-      debugger
-      return
+      env = {}
     }
-    debugger
-    if (!env.regula  ||  env.regula.dbID)
+    if (env.dbID)
       return
+    // if (!env.regula  ||  env.regula.dbID)
+    //   return
 
     let dbID
     if (SERVICE_PROVIDERS.length > 1)
@@ -2328,13 +2328,18 @@ var Store = Reflux.createStore({
       dbID = newSp.id === 'nagad' ? 'BDG' : 'Full'
     }
 
-    _.set(env, 'regula.dbID', dbID)
-
     // // Check is DB was already prepared
     const reg = require('../utils/regula')
-
-    await reg.prepareDatabase(dbID)
-    await db.put(MY_ENVIRONMENT, env)
+    // let defer = Q.defer()
+    reg.prepareDatabase(dbID) //, defer.promise)
+    .then(() => {
+      _.set(env, 'dbID', dbID)
+      return db.put(MY_REGULA, env)
+    })
+    .catch((err) => {
+      debug('Error preparing Regula DB')
+      // debugger
+    })
   },
   parseProvider(sp, params, providerIds, newProviders) {
     if (!params)
@@ -2868,49 +2873,7 @@ var Store = Reflux.createStore({
         isWelcome = false
       // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
       // prevent the not needed duplicate expensive operations for obtaining ProductList
-      return self.getDriver(me)
-      .then(() => {
-        if (!self.isConnected  ||  publishRequestSent[orgId])
-          return
-        // TODO:
-        // do we need identity publish status anymore
-        return meDriver.identityPublishStatus()
-      })
-      .then((status) => {
-        if (!status/* || !self.isConnected*/)
-          return
-        publishRequestSent[orgId] = true
-        if (!status.watches.link  &&  !status.link  &&  !me.isEmployee) {
-          if (isCustomerWaiting)
-            noCustomerWaiting = true
-          return self.publishMyIdentity(orgRep)
-        }
-        else {
-          let id = to.organization ? utils.getId(to.organization) : utils.getId(to)
-          if (chatMessages[id]  &&  chatMessages[id].length)
-            return
-          var allMyIdentities = self._getItem(MY_IDENTITIES)
-          var all = allMyIdentities.allIdentities
-          var curId = allMyIdentities.currentIdentity
-
-          let identity = all.filter((id) => id.id === curId)
-          console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
-          var msg = {
-            message: me.firstName + ' is waiting for the response',
-            [TYPE]: SELF_INTRODUCTION,
-            identity: identity[0].publishedIdentity,
-            name: me.firstName,
-            profile: {
-              firstName: me.firstName
-            },
-            from: me,
-            to: r.to
-          }
-          if (isCustomerWaiting)
-            noCustomerWaiting = true
-          return self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
-        }
-      })
+      return checkForCustomerWaiting()
     })
     .then(() => {
       if (isWelcome  &&  utils.isEmpty(welcomeMessage))
@@ -3022,12 +2985,55 @@ var Store = Reflux.createStore({
         return this.getModelsPack(to)
     })
     .catch((err) => {
+      debug('Something went wrong', err.stack)
       debugger
     })
     .finally(() => {
       if (cb)
         cb(rr)
     })
+
+    async function checkForCustomerWaiting() {
+      // Avoid sending CustomerWaiting request after SelfIntroduction or IdentityPublishRequest to
+      // prevent the not needed duplicate expensive operations for obtaining ProductList
+      await self.getDriver(me)
+      if (!self.isConnected  ||  publishRequestSent[orgId])
+        return
+      // TODO:
+      // do we need identity publish status anymore
+      let status = await meDriver.identityPublishStatus()
+      if (!status/* || !self.isConnected*/)
+        return
+      publishRequestSent[orgId] = true
+      if (!status.watches.link  &&  !status.link  &&  !me.isEmployee) {
+        if (isCustomerWaiting)
+          noCustomerWaiting = true
+        return self.publishMyIdentity(orgRep)
+      }
+      let id = to.organization ? utils.getId(to.organization) : utils.getId(to)
+      if (chatMessages[id]  &&  chatMessages[id].length)
+        return
+      var allMyIdentities = self._getItem(MY_IDENTITIES)
+      var all = allMyIdentities.allIdentities
+      var curId = allMyIdentities.currentIdentity
+
+      let identity = all.filter((id) => id.id === curId)
+      console.log('Store.onAddMessage: type = ' + r[TYPE] + '; to = ' + r.to.title)
+      var msg = {
+        message: me.firstName + ' is waiting for the response',
+        [TYPE]: SELF_INTRODUCTION,
+        identity: identity[0].publishedIdentity,
+        name: me.firstName,
+        profile: {
+          firstName: me.firstName
+        },
+        from: me,
+        to: r.to
+      }
+      if (isCustomerWaiting)
+        noCustomerWaiting = true
+      return self.onAddMessage({msg: msg, disableAutoResponse: disableAutoResponse})
+    }
   },
   async getModelsPack(to) {
     let type = utils.getType(to)
@@ -4296,6 +4302,7 @@ if (!res[SIG]  &&  res._message)
     }
     // Add items properties if they were created
     var json = utils.clone(value) // maybe not the best way to copy, try `clone`?
+    var prefill = disableFormRequest  &&  disableFormRequest.prefill
     for (let p in resource) {
       if (!props[p])
         continue
@@ -4306,8 +4313,11 @@ if (!res[SIG]  &&  res._message)
       let ref = props[p].ref
       // Check if valid enum value
       if (ref  &&  utils.isEnum(ref)) {
-        if (!json[p])
+        if (!json[p]) {
+          if (prefill  &&  prefill[p])
+            json[p] = prefill[p]
           continue
+        }
         if ((typeof json[p] === 'string')  ||  !this._getItem(utils.getId(json[p]))) {
           let enumList = this.searchNotMessages({modelName: ref})
           let eprop = utils.getEnumProperty(this.getModel(ref))
@@ -11319,29 +11329,55 @@ await fireRefresh(val.from.organization)
       let productToForms = {[product]: {[form]: res.list.map((r) => utils.getId(r))}}
       return productToForms
     }
-    let allFormRequests = await this.searchMessages({modelName: FORM_REQUEST, to: to, context: context})
-    if (!allFormRequests)
+    let allForms = await this.searchMessages({modelName: FORM, to: to, context: context})
+    if (!allForms)
       return
     let productToForms = {}
     let hasMultiEntry
-    allFormRequests.forEach((r) => {
-      if (!multiEntryForms.includes(r.form) || !r._documentCreated  ||  !r._document  ||  !r.product)
+    let requestFor = context.requestFor
+    allForms.forEach((r) => {
+      let rtype = r[TYPE]
+      if (!multiEntryForms.includes(rtype))
         return
       hasMultiEntry = true
-      var l = productToForms[r.product]
+      var l = productToForms[requestFor]
       if (!l) {
         l = {}
-        productToForms[r.product] = l
+        productToForms[requestFor] = l
       }
-      let forms = l[r.form]
+      let forms = l[rtype]
       if (!forms) {
         forms = []
-        l[r.form] = forms
+        l[rtype] = forms
       }
-      forms.push(r._document)
+      forms.push(utils.getId(r))
     })
     if (hasMultiEntry)
       return productToForms
+
+    // let allFormRequests = await this.searchMessages({modelName: FORM, to: to, context: context})
+    // if (!allFormRequests)
+    //   return
+    // let productToForms = {}
+    // let hasMultiEntry
+    // allFormRequests.forEach((r) => {
+    //   if (!multiEntryForms.includes(r.form) || !r._documentCreated  ||  !r._document  ||  !r.product)
+    //     return
+    //   hasMultiEntry = true
+    //   var l = productToForms[r.product]
+    //   if (!l) {
+    //     l = {}
+    //     productToForms[r.product] = l
+    //   }
+    //   let forms = l[r.form]
+    //   if (!forms) {
+    //     forms = []
+    //     l[r.form] = forms
+    //   }
+    //   forms.push(r._document)
+    // })
+    // if (hasMultiEntry)
+    //   return productToForms
   },
 
   onViewChat({ permalink }) {

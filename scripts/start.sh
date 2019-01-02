@@ -23,4 +23,7 @@ then
   LINE="$LINE --reset-cache"
 fi
 
-eval "$LINE"
+# to be able to debug the packager, add this line:
+# LINE="$LINE --max-workers 0"
+
+eval "$LINE $@"

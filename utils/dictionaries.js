@@ -1,4 +1,4 @@
-const _ = require('lodash')
+import _ from 'lodash'
 
 const dictionariesM = require('@tradle/models').dictionaries
 const dictionariesCM = require('@tradle/custom-models').dictionaries
