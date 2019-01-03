@@ -114,7 +114,7 @@ var common = {
       // blacklist: ['Libraries']
       // nodeModules: ['react-web']
     }),
-    // new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.DedupePlugin(),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
       __DEV__: isProd ? false : true
@@ -253,14 +253,14 @@ if (NODE_ENV === 'development') {
       ].concat(getMaybeLoaders())
     },
     plugins: [
-      new webpack.optimize.DedupePlugin(),
+      // new webpack.optimize.DedupePlugin(),
       new webpack.optimize.UglifyJsPlugin({
         compress: {
           warnings: false
         },
         sourceMap: genSourceMap,
         mangle: {
-          keep_fnames: true,
+          keep_fnames: false,
           screw_ie8: true
         },
         beautify: false,
