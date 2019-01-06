@@ -6627,7 +6627,7 @@
     "react-native-regula-document-reader": {
       "version": "1.0.0",
       "from": "tradle/react-native-regula-document-reader",
-      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#e10134a99256feb8b64f89e2dbcd0d91f82eab63"
+      "resolved": "git://github.com/tradle/react-native-regula-document-reader.git#e56b6f4d3de4606cfb042725556816a9058e3bc7"
     },
     "react-native-scrollable-mixin": {
       "version": "1.0.1",
