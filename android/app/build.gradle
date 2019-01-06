@@ -179,7 +179,8 @@ android {
             reset()
             enable enableSeparateBuildPerCPUArchitecture
             universalApk false  // If true, also generate a universal APK
-            include "armeabi-v7a", "x86"
+            // https://android.stackexchange.com/questions/186334/what-percentage-of-android-devices-runs-on-x86-architecture
+            include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
     }
     buildTypes {
@@ -211,19 +212,6 @@ android {
             def codePushKey = getCodePushKey("Staging")
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
             matchingFallbacks = ['release']
-        }
-    }
-    // applicationVariants are e.g. debug, release
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            // For each separate APK per architecture, set a unique version code as described here:
-            // http://tools.android.com/tech-docs/new-build-system/user-guide/apk-splits
-            def versionCodes = ["armeabi-v7a":1, "x86":2]
-            def abi = output.getFilter(OutputFile.ABI)
-            if (abi != null) {  // null for the universal-debug, universal-release variants
-                output.versionCodeOverride =
-                        versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
-            }
         }
     }
 
@@ -338,7 +326,8 @@ task copyDownloadableDepsToLibs(type: Copy) {
 // source: https://developer.android.com/studio/build/configure-apk-splits
 //
 // Map for the version code that gives each ABI a value.
-ext.abiCodes = ['armeabi-v7a':1, x86:2, x86_64:3]
+// must match android.splits.abi above
+ext.abiCodes = ['armeabi-v7a':1, 'arm64-v8a':2, 'x86':3, 'x86_64':4]
 
 // For each APK output variant, override versionCode with a combination of
 // ext.abiCodes * 1000 + variant.versionCode. In this example, variant.versionCode
