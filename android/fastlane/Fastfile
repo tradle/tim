@@ -114,21 +114,21 @@ platform :android do
   end
 
   lane :backup_release do |options|
-    usage = """e.g. backup_release stage:release apk_dir:/path/to/ or
-  backup_release stage:release apk_dir:/path/to/"""
+    usage = """e.g. backup_release stage:release aab_path:/path/to/app.aab or
+  backup_release stage:release aab_path:/path/to/app.aab"""
 
     stage = options[:stage]
     if stage.nil?
       UI.user_error!("expected 'stage', #{usage}")
     end
 
-    apk_dir = options[:apk_dir]
-    if apk_dir.nil?
-      UI.user_error!("expected 'apk_dir', #{usage}")
+    aab_path = options[:aab_path]
+    if aab_path.nil?
+      UI.user_error!("expected 'aab_path', #{usage}")
     end
 
     version = (sh "../../scripts/get-android-version.sh full").strip
-    sh "../../scripts/backup-release.sh android #{stage} #{version} #{apk_dir}"
+    sh "../../scripts/backup-release.sh android #{stage} #{version} #{aab_path}"
   end
 
   private_lane :releaseit do |options|
@@ -159,20 +159,20 @@ platform :android do
       stage = "releaseStaging"
     end
 
-    apk_paths_from_proj = Dir.glob("app/build/outputs/apk/#{stage}/*.apk")
-    apk_dir_from_root = "android/app/build/outputs/apk/#{stage}"
+    aab_path_from_proj = "app/build/outputs/bundle/#{stage}/app.aab"
+    aab_path_from_root = "android/#{aab_path_from_proj}"
     backup_release(
-      apk_dir: apk_dir_from_root,
+      aab_path: aab_path_from_root,
       stage: stage
     )
 
     unless options[:dry_run]
-      UI.message("uploading apk #{apk_paths_from_proj}".green)
+      UI.message("uploading apk #{aab_path_from_proj}".green)
       upload_to_play_store(
         track: track,
         skip_upload_screenshots: options[:skip_upload_screenshots] != false,
         skip_upload_images: options[:skip_upload_images] != false,
-        apk_paths: apk_paths_from_proj
+        aab: aab_path_from_proj
       )
     end
   end

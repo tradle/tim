@@ -12,7 +12,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.2'
+        classpath 'com.android.tools.build:gradle:3.2.1'
         classpath 'com.google.gms:google-services:4.0.1' // Needed for Firebase Analytics
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -57,14 +57,14 @@ allprojects {
 ext {
     compileSdkVersion           = 27
     targetSdkVersion            = 26
-    buildToolsVersion           = "27.0.3"
+    buildToolsVersion           = "28.0.2"
     supportLibVersion           = "27.1.1"
     googlePlayServicesVersion   = "11.8.0"
     minSdkVersion               = 19
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.4'
+    gradleVersion = '4.6'
     distributionUrl = distributionUrl.replace("bin", "all")
 }
 

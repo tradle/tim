@@ -11,7 +11,7 @@ APP_NAME="Tradle"
 PLATFORM="$1"
 RELEASE_TYPE="$2"
 VERSION="$3"
-APK_DIR=${4-""}
+AAB_PATH=${4-""}
 BUILD_PATH="$PLATFORM"
 
 if [[ "$PLATFORM" != "ios" ]] && [[ "$PLATFORM" != "android" ]];
@@ -44,11 +44,11 @@ then
   aws s3 cp "$BUILD_PATH/$APP_NAME.app.dSYM.zip" "s3://$TARGET_FOLDER/"
 elif [[ "$PLATFORM" == "android" ]]
 then
-  if [[ ! "$APK_DIR" ]]
+  if [[ ! "$AAB_PATH" ]]
   then
-    echo "expected 4th argument to be path to apk dir"
+    echo "expected 4th argument to be path to the .aab file"
     exit 1
   fi
 
-  aws s3 cp --recursive --exclude "*" --include "app-*-release.apk" "$APK_DIR" "s3://$TARGET_FOLDER/"
+  aws s3 cp "$AAB_PATH" "s3://$TARGET_FOLDER/"
 fi
