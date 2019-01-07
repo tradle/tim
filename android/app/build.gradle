@@ -179,7 +179,7 @@ android {
         abi {
             reset()
             enable enableSeparateBuildPerCPUArchitecture
-            universalApk true  // If true, also generate a universal APK
+            universalApk false  // If true, also generate a universal APK
             // https://android.stackexchange.com/questions/186334/what-percentage-of-android-devices-runs-on-x86-architecture
             include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
