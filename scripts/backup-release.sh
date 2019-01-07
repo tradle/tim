@@ -50,5 +50,5 @@ then
     exit 1
   fi
 
-  aws s3 cp --recursive --exclude "*" --include "app-*-release.apk" "$APK_DIR" "s3://$TARGET_FOLDER/"
+  aws s3 cp --recursive --exclude "*" --include "app-*-release*.apk" "$APK_DIR" "s3://$TARGET_FOLDER/"
 fi
