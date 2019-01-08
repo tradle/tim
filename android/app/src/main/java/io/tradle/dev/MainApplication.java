@@ -11,7 +11,7 @@ import com.bitgo.randombytes.RandomBytesPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.facebook.react.ReactApplication;
 import com.regula.documentreader.RNRegulaDocumentReaderPackage;
-import com.microblink.reactnative.MicroblinkReactPackage;
+// import com.microblink.reactnative.MicroblinkReactPackage;
 import com.cardio.RNCardIOPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -72,7 +72,7 @@ public class MainApplication extends Application implements ReactApplication {
         new ImageStorePackage(),
         new RNFetchBlobPackage(),
         new RNTradleKeeperPackage(),
-        new MicroblinkReactPackage(),
+        // new MicroblinkReactPackage(),
         new RNCardIOPackage(),
         new SplashScreenReactPackage(),
         new RNBranchPackage(),

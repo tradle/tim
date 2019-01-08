@@ -1875,11 +1875,6 @@
         }
       }
     },
-    "blinkid-react-native": {
-      "version": "4.5.0",
-      "from": "tradle/blinkid-react-native-dist",
-      "resolved": "git://github.com/tradle/blinkid-react-native-dist.git#1d0c67f2a8409a2d8b065a7cedf8fae49cb65239"
-    },
     "bluebird": {
       "version": "2.11.0",
       "from": "bluebird@2.11.0",

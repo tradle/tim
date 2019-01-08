@@ -8,8 +8,8 @@ include ':rn-fetch-blob'
 project(':rn-fetch-blob').projectDir = new File(rootProject.projectDir, '../node_modules/rn-fetch-blob/android')
 include ':react-native-tradle-keeper'
 project(':react-native-tradle-keeper').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-tradle-keeper/android')
-include ':blinkid-react-native'
-project(':blinkid-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/blinkid-react-native/src/android')
+// include ':blinkid-react-native'
+// project(':blinkid-react-native').projectDir = new File(rootProject.projectDir, '../node_modules/blinkid-react-native/src/android')
 include ':react-native-awesome-card-io'
 project(':react-native-awesome-card-io').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-awesome-card-io/android')
 include ':react-native-splash-screen'

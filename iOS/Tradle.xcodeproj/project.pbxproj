@@ -69,7 +69,6 @@
 		73F1D0981EDA10EE00D4AB5B /* tradle.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73F1D0941EDA10EE00D4AB5B /* tradle.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		8C736C6F8FA64018866A2A0C /* Ionicons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 09E311D0387D4764923D9B71 /* Ionicons.ttf */; };
-		9B44A9482179665B00C8E0B0 /* libMicroblinkModule.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9B44A9472179662500C8E0B0 /* libMicroblinkModule.a */; };
 		C8C7DC4BE45D05EEEEA0D6E9 /* libPods-Tradle.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 866225A0083F67269536F0F0 /* libPods-Tradle.a */; };
 		DCFA2F9E52F04D73AD1335E2 /* branch.json in Resources */ = {isa = PBXBuildFile; fileRef = 1447D734074D4C7BBD023C62 /* branch.json */; };
 /* End PBXBuildFile section */
@@ -586,13 +585,6 @@
 			remoteGlobalIDString = 58B5119B1A9E6C1200147676;
 			remoteInfo = RCTText;
 		};
-		9B44A9462179662500C8E0B0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9B44A9422179662500C8E0B0 /* MicroblinkModule.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = A27CCA2B1E9E57A500BED675;
-			remoteInfo = MicroblinkModule;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -668,7 +660,6 @@
 		8CED00630DD148F6B0CB7123 /* RNRegulaDocumentReader.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRegulaDocumentReader.xcodeproj; path = "../node_modules/react-native-regula-document-reader/ios/RNRegulaDocumentReader.xcodeproj"; sourceTree = "<group>"; };
 		97F331FA96224F67B61B074E /* RNKeychain.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNKeychain.xcodeproj; path = "../node_modules/react-native-keychain/RNKeychain.xcodeproj"; sourceTree = "<group>"; };
 		9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNCardIO.xcodeproj; path = "../node_modules/react-native-awesome-card-io/ios/RNCardIO.xcodeproj"; sourceTree = "<group>"; };
-		9B44A9422179662500C8E0B0 /* MicroblinkModule.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MicroblinkModule.xcodeproj; path = "../node_modules/blinkid-react-native/src/ios/MicroblinkModule/MicroblinkModule.xcodeproj"; sourceTree = "<group>"; };
 		9BCD8E87C35843E585CC6AE5 /* Feather.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Feather.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Feather.ttf"; sourceTree = "<group>"; };
 		A0A85E13466544EEB68DCF78 /* RNRandomBytes.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNRandomBytes.xcodeproj; path = "../node_modules/react-native-randombytes/RNRandomBytes.xcodeproj"; sourceTree = "<group>"; };
 		B737CD8910F6403BAF14A485 /* RCTAsyncRocksDBStorage.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTAsyncRocksDBStorage.xcodeproj; path = "../node_modules/react-native-async-storage-rocks/ios/RCTAsyncRocksDBStorage.xcodeproj"; sourceTree = "<group>"; };
@@ -733,7 +724,6 @@
 				73113FFB205F4D55000C04F6 /* libRCTBlob.a in Frameworks */,
 				73F1B89F205F5ABD004E96E2 /* libTcpSockets.a in Frameworks */,
 				73F1B8A0205F5AC8004E96E2 /* libreact-native-branch.a in Frameworks */,
-				9B44A9482179665B00C8E0B0 /* libMicroblinkModule.a in Frameworks */,
 				73834C3820D1B462000C9AFC /* libRNCardIO.a in Frameworks */,
 				C8C7DC4BE45D05EEEEA0D6E9 /* libPods-Tradle.a in Frameworks */,
 				7333B06721A1C21D00CD6374 /* libRNImageStore.a in Frameworks */,
@@ -1148,7 +1138,6 @@
 			isa = PBXGroup;
 			children = (
 				7333B04E21A1AE4200CD6374 /* RNFetchBlob.xcodeproj */,
-				9B44A9422179662500C8E0B0 /* MicroblinkModule.xcodeproj */,
 				9B2795B320D17E94000E7A07 /* RNCardIO.xcodeproj */,
 				73EF39B420CC7071009EDE8B /* RNDeviceInfo.xcodeproj */,
 				732B67802060213500B16D6F /* RNCamera.xcodeproj */,
@@ -1226,14 +1215,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		9B44A9432179662500C8E0B0 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				9B44A9472179662500C8E0B0 /* libMicroblinkModule.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		9BEAADF51FAA3D3A004D61E5 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
@@ -1285,7 +1266,6 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				7379F7D01EDA14430093535C /* Fabric / Crashlytics */,
 				785003D2BB1DC37AFBF63652 /* [CP] Embed Pods Frameworks */,
-				1C8E6EEA354CD283DCEE4BFD /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1332,10 +1312,6 @@
 				{
 					ProductGroup = 732B63DD1ED9FF670056F4BF /* Products */;
 					ProjectRef = 5533C47B56414D49AC0BA942 /* CodePush.xcodeproj */;
-				},
-				{
-					ProductGroup = 9B44A9432179662500C8E0B0 /* Products */;
-					ProjectRef = 9B44A9422179662500C8E0B0 /* MicroblinkModule.xcodeproj */;
 				},
 				{
 					ProductGroup = 00C302A81ABCB8CE00DB3ED1 /* Products */;
@@ -2010,13 +1986,6 @@
 			remoteRef = 832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		9B44A9472179662500C8E0B0 /* libMicroblinkModule.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libMicroblinkModule.a;
-			remoteRef = 9B44A9462179662500C8E0B0 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -2055,24 +2024,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "set -euo pipefail\nif [ \"$CONFIGURATION\" != \"Debug\" ]; then\n  export NODE_BINARY=node\n  ../scripts/install-ios-app.sh\n  PATH=$(bash -l -c 'echo $PATH') ../scripts/save-release.sh\nfi\n";
-		};
-		1C8E6EEA354CD283DCEE4BFD /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-resources.sh",
-				"${PODS_ROOT}/PPBlinkID/MicroBlink.bundle",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/MicroBlink.bundle",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-resources.sh\"\n";
-			showEnvVarsInLog = 0;
 		};
 		4BBFF921091261D59E0BC3D4 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2129,13 +2080,11 @@
 				"${SRCROOT}/Pods/Target Support Files/Pods-Tradle/Pods-Tradle-frameworks.sh",
 				"${PODS_ROOT}/DocumentReader/DocumentReader.framework",
 				"${PODS_ROOT}/DocumentReaderFull/DocumentReaderCore.framework",
-				"${PODS_ROOT}/PPBlinkID/MicroBlink.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DocumentReader.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/DocumentReaderCore.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MicroBlink.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -2205,7 +2154,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2243,12 +2192,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -2280,7 +2224,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2318,12 +2262,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -2392,7 +2331,7 @@
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					$PROJECT_DIR,
+					"$PROJECT_DIR",
 					"\"$PODS_CONFIGURATION_BUILD_DIR\"/**",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2431,12 +2370,7 @@
 				INFOPLIST_FILE = Tradle/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-					"\"$(SRCROOT)/Tradle\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

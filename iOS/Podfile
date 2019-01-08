@@ -4,7 +4,7 @@ target 'Tradle' do
   # otherwise get errors like: 'duplicate symbol _GTMNSDataZlibRemainingBytesKey in: ...libGoogleToolboxForMac.a'
   # use_frameworks!
 
-  pod 'PPBlinkID', '4.5.0'
+#  pod 'PPBlinkID', '4.5.0'
   pod 'DocumentReader', '~> 4.1'
   pod 'DocumentReaderFull', '~> 4.1'
 

@@ -83,7 +83,6 @@
     "asyncstorage-down": "^3.2.1",
     "aws-iot-device-sdk": "github:mvayngrib/aws-iot-device-sdk-js",
     "backoff": "^2.4.1",
-    "blinkid-react-native": "github:tradle/blinkid-react-native-dist",
     "bluebird": "2.11.0",
     "bluebird-q": "1.0.3",
     "browserify-sign": "^4.0.4",

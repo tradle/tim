@@ -29,7 +29,7 @@ import ENV from '../utils/env'
 import Analytics from '../utils/analytics'
 import ImageInput from './ImageInput'
 import Actions from '../Actions/Actions'
-import BlinkID from './BlinkID'
+// import BlinkID from './BlinkID'
 import Regula from './Regula'
 import Navigator from './Navigator'
 import GridList from './GridList'
@@ -397,156 +397,156 @@ class RefPropertyEditor extends Component {
       r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'regula')
     this.afterScan(r, prop.name)
   }
-  async showBlinkIDScanner(prop) {
-    let { resource } = this.props
-    const { documentType, country } = resource
-    const type = getDocumentTypeFromTitle(documentType.title)
-    let recognizers
-    let tooltip
-    let firstSideInstructions, secondSideInstructions
-    let scanBothSides
-    // let isPassport
-    // HACK
-    if (!recognizers  &&  prop === 'otherSideScan')
-      recognizers = BlinkID.recognizers.documentFace
-    else {
-      switch (type) {
-      case 'passport':
-        tooltip = translate('centerPassport')
-        // isPassport = true
-        // machine readable travel documents (passport)
-        recognizers = BlinkID.recognizers.mrtd
-        firstSideInstructions = translate('scanPassport')
-        break
-      case 'card':
-        firstSideInstructions = translate('centerIdCard')
-        // machine readable travel documents (passport)
-        // should be combined
-        // if (country.title === 'Bangladesh')
-        //   recognizers = BlinkID.recognizers.mrtd
-        //   // recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
-        // else if (country.title === "Philippines")
-        //   recognizers = BlinkID.recognizers.pdf417
-        // else
-          // recognizers = BlinkID.recognizers.mrtd
-        recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
-        break
-      case 'license':
-      case 'licence':
-        firstSideInstructions = translate('centerLicence')
-        if (country.title === 'United States') {
-          secondSideInstructions = translate('documentBackSide')
-          recognizers = BlinkID.recognizers.usdlCombined
-          // recognizers = BlinkID.recognizers.usdl
-        }
-        else if (country.title === 'New Zealand')
-          recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
-        else if (country.title === 'Australia') {
-          scanBothSides = true
-          recognizers = [BlinkID.recognizers.australiaFront, BlinkID.recognizers.australiaBack]
-        }
-        else {
-          recognizers = BlinkID.recognizers.eudl
-        }
-        break
-      default:
-        tooltip = translate('centerID')
-        break
-      }
-    }
+  // async showBlinkIDScanner(prop) {
+  //   let { resource } = this.props
+  //   const { documentType, country } = resource
+  //   const type = getDocumentTypeFromTitle(documentType.title)
+  //   let recognizers
+  //   let tooltip
+  //   let firstSideInstructions, secondSideInstructions
+  //   let scanBothSides
+  //   // let isPassport
+  //   // HACK
+  //   if (!recognizers  &&  prop === 'otherSideScan')
+  //     recognizers = BlinkID.recognizers.documentFace
+  //   else {
+  //     switch (type) {
+  //     case 'passport':
+  //       tooltip = translate('centerPassport')
+  //       // isPassport = true
+  //       // machine readable travel documents (passport)
+  //       recognizers = BlinkID.recognizers.mrtd
+  //       firstSideInstructions = translate('scanPassport')
+  //       break
+  //     case 'card':
+  //       firstSideInstructions = translate('centerIdCard')
+  //       // machine readable travel documents (passport)
+  //       // should be combined
+  //       // if (country.title === 'Bangladesh')
+  //       //   recognizers = BlinkID.recognizers.mrtd
+  //       //   // recognizers = [BlinkID.recognizers.documentFace, BlinkID.recognizers.mrtd]
+  //       // else if (country.title === "Philippines")
+  //       //   recognizers = BlinkID.recognizers.pdf417
+  //       // else
+  //         // recognizers = BlinkID.recognizers.mrtd
+  //       recognizers = BlinkID.recognizers.mrtdCombined //[BlinkID.recognizers.mrtd, BlinkID.recognizers.pdf417]
+  //       break
+  //     case 'license':
+  //     case 'licence':
+  //       firstSideInstructions = translate('centerLicence')
+  //       if (country.title === 'United States') {
+  //         secondSideInstructions = translate('documentBackSide')
+  //         recognizers = BlinkID.recognizers.usdlCombined
+  //         // recognizers = BlinkID.recognizers.usdl
+  //       }
+  //       else if (country.title === 'New Zealand')
+  //         recognizers = BlinkID.recognizers.nzdl //[BlinkID.recognizers.nzdl, BlinkID.recognizers.documentFace]
+  //       else if (country.title === 'Australia') {
+  //         scanBothSides = true
+  //         recognizers = [BlinkID.recognizers.australiaFront, BlinkID.recognizers.australiaBack]
+  //       }
+  //       else {
+  //         recognizers = BlinkID.recognizers.eudl
+  //       }
+  //       break
+  //     default:
+  //       tooltip = translate('centerID')
+  //       break
+  //     }
+  //   }
 
-    const blinkIDOpts = {
-      // quality: 0.2,
-      // base64: true,
-      // timeout: ENV.blinkIDScanTimeoutInternal,
-      documentType,
-      country,
-      firstSideInstructions,
-      secondSideInstructions,
-      scanBothSides,
-      recognizers: recognizers ? [].concat(recognizers) : [BlinkID.recognizers.documentFace]
-    }
+  //   const blinkIDOpts = {
+  //     // quality: 0.2,
+  //     // base64: true,
+  //     // timeout: ENV.blinkIDScanTimeoutInternal,
+  //     documentType,
+  //     country,
+  //     firstSideInstructions,
+  //     secondSideInstructions,
+  //     scanBothSides,
+  //     recognizers: recognizers ? [].concat(recognizers) : [BlinkID.recognizers.documentFace]
+  //   }
 
-    Analytics.sendEvent({
-      category: 'widget',
-      action: 'scan_document',
-      label: `blinkid:${type}`
-    })
+  //   Analytics.sendEvent({
+  //     category: 'widget',
+  //     action: 'scan_document',
+  //     label: `blinkid:${type}`
+  //   })
 
-    let result
-    try {
-      result = await BlinkID.scan(blinkIDOpts)
-    } catch (err) {
-      debug('scan failed:', err.message)
-      debugger
-    }
-    if (!result)
-      return
+  //   let result
+  //   try {
+  //     result = await BlinkID.scan(blinkIDOpts)
+  //   } catch (err) {
+  //     debug('scan failed:', err.message)
+  //     debugger
+  //   }
+  //   if (!result)
+  //     return
 
-    const r = _.cloneDeep(resource)
-    if (result.image) {
-      r[prop] = {
-        url: result.image.base64,
-      }
-    }
-    if (result.backImage) {
-      // HACK
-      if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
-        r.otherSideScan = {
-          url: result.backImage.base64,
-        }
-      }
-    }
-    if (result.images) {
-      let { faceImage, signatureImage } = result.images
-      if (faceImage)
-        r.faceImage = { url: faceImage }
-      if (signatureImage)
-        r.signatureImage = { url: signatureImage }
-    }
+  //   const r = _.cloneDeep(resource)
+  //   if (result.image) {
+  //     r[prop] = {
+  //       url: result.image.base64,
+  //     }
+  //   }
+  //   if (result.backImage) {
+  //     // HACK
+  //     if (utils.getModel(utils.getType(resource)).properties.otherSideScan) {
+  //       r.otherSideScan = {
+  //         url: result.backImage.base64,
+  //       }
+  //     }
+  //   }
+  //   if (result.images) {
+  //     let { faceImage, signatureImage } = result.images
+  //     if (faceImage)
+  //       r.faceImage = { url: faceImage }
+  //     if (signatureImage)
+  //       r.signatureImage = { url: signatureImage }
+  //   }
 
-    let dateOfExpiry //, dateOfBirth, documentNumber
-    ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl', 'australiaFront'].some(docType => {
-      const scan = result[docType]
-      if (!scan) return
+  //   let dateOfExpiry //, dateOfBirth, documentNumber
+  //   ;['mrtd', 'mrtdCombined', 'usdl', 'usdlCombined', 'eudl', 'nzdl', 'australiaFront'].some(docType => {
+  //     const scan = result[docType]
+  //     if (!scan) return
 
-      // const { personal, document } = scan
-      // documentNumber = document.documentNumber
-      // if (personal.dateOfBirth)
-      //   dateOfBirth = personal.dateOfBirth
-      // if (document.dateOfIssue) {
-      //   document.dateOfIssue = formatDate(document.dateOfIssue)
-      // }
-      const { document } = scan
-      if (document.dateOfExpiry)
-        dateOfExpiry = document.dateOfExpiry
+  //     // const { personal, document } = scan
+  //     // documentNumber = document.documentNumber
+  //     // if (personal.dateOfBirth)
+  //     //   dateOfBirth = personal.dateOfBirth
+  //     // if (document.dateOfIssue) {
+  //     //   document.dateOfIssue = formatDate(document.dateOfIssue)
+  //     // }
+  //     const { document } = scan
+  //     if (document.dateOfExpiry)
+  //       dateOfExpiry = document.dateOfExpiry
 
-      r[prop + 'Json'] = scan
-      return
-    })
+  //     r[prop + 'Json'] = scan
+  //     return
+  //   })
 
-    if (dateOfExpiry && dateOfExpiry < Date.now()) {
-      // give the BlinkID view time to disappear
-      // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
-      await utils.promiseDelay(800)
-      Alert.alert(
-        translate('documentExpiredTitle'),
-        translate('documentExpiredMessage')
-      )
+  //   if (dateOfExpiry && dateOfExpiry < Date.now()) {
+  //     // give the BlinkID view time to disappear
+  //     // 800ms is a bit long, but if BlinkID view is still up, Alert will just not show
+  //     await utils.promiseDelay(800)
+  //     Alert.alert(
+  //       translate('documentExpiredTitle'),
+  //       translate('documentExpiredMessage')
+  //     )
 
-      return
-    }
-    // let chipScan
-    // if (isPassport  &&  Platform.OS === 'android') {
-    //   Alert.alert('Please press the back of your android phone against the passport')
-    //   chipScan = await this.scanPassport({documentNumber, dateOfBirth, dateOfExpiry})
-    // }
+  //     return
+  //   }
+  //   // let chipScan
+  //   // if (isPassport  &&  Platform.OS === 'android') {
+  //   //   Alert.alert('Please press the back of your android phone against the passport')
+  //   //   chipScan = await this.scanPassport({documentNumber, dateOfBirth, dateOfExpiry})
+  //   // }
 
-    let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
-    if (docScannerProps  &&  docScannerProps.length)
-      r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
-    this.afterScan(r, prop)
-  }
+  //   let docScannerProps = utils.getPropertiesWithRef(DOCUMENT_SCANNER, utils.getModel(r[TYPE]))
+  //   if (docScannerProps  &&  docScannerProps.length)
+  //     r[docScannerProps[0].name] = buildStubByEnumTitleOrId(utils.getModel(DOCUMENT_SCANNER), 'blinkId')
+  //   this.afterScan(r, prop)
+  // }
 
   afterScan(resource, prop) {
     this.props.floatingProps[prop] = resource[prop]
@@ -678,7 +678,8 @@ function useImageInput({resource, prop}) {
   else if (rtype === PHOTO_ID  &&  isScan  &&  documentType  &&  documentType.id.indexOf('other') !== -1)
     return true
   else
-    return prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
+    return prop.allowPicturesFromLibrary  &&  (!isScan  ||  !prop.scanner)
+    // return prop.allowPicturesFromLibrary  &&  (!isScan || (!BlinkID  &&  !prop.scanner))
 }
 function getDocumentTypeFromTitle (title='') {
   title = title.toLowerCase()
