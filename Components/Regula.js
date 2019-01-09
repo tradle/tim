@@ -89,6 +89,15 @@ const normalizeResult = ({results, json}) => {
       documentVersion: json.ft_DL_Restriction_Code
     }
   }
+  let { personal, document } = result
+  if (document.issuer === 'VNM'  &&  !personal.lastName) {
+    let parts = personal.firstName  &&  personal.firstName.split(' ') || []
+    if (parts.length > 2) {
+      personal.lastName = parts[0]
+      personal.middleName = parts.slice(1, parts.length - 1).join(' ')
+      personal.firstName = parts[parts.length - 1]
+    }
+  }
   // debugger
   normalizeDates(result, parseDate)
   // let docType
