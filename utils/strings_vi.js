@@ -328,5 +328,6 @@ module.exports = {
   "resetApp": "Đặt lại ứng dụng",
   "invalidCountry": "Quốc gia được quét không hợp lệ",
   "enterPasswordOrWipeOutTheAppData": "Nhập mật khẩu hoặc xóa dữ liệu ứng dụng",
-  "wipeTheAppData": "Xóa dữ liệu ứng dụng"
+  "wipeTheAppData": "Xóa dữ liệu ứng dụng",
+  "pleaseChooseCountryAndDT": "Vui lòng chọn quốc gia và loại tài liệu trước"
 }

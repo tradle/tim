@@ -328,5 +328,6 @@ module.exports = {
   "invalidCountry": "অবৈধ দেশ স্ক্যান করা হয়েছে",
   "scanYourDocument": "আপনার নথি স্ক্যান করুন",
   "wipeTheAppData": "অ্যাপ্লিকেশন তথ্য মুছা",
-  "enterPasswordOrWipeOutTheAppData": "পাসওয়ার্ড প্রবেশ করুন বা অ্যাপ্লিকেশন তথ্য মুছে ফেলুন"
+  "enterPasswordOrWipeOutTheAppData": "পাসওয়ার্ড প্রবেশ করুন বা অ্যাপ্লিকেশন তথ্য মুছে ফেলুন",
+  "pleaseChooseCountryAndDT": "প্রথমে দেশ এবং নথি টাইপ নির্বাচন করুন"
 }

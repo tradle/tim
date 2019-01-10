@@ -283,6 +283,7 @@ module.exports = {
     "wrongDocumentTypePleaseTryAgain": "Wrong document type. Please try again",
     "invalidCountry": "Invalid country scanned",
     "scanYourDocument": "Please scan your document",
+    "pleaseChooseCountryAndDT": "Please choose country and document type first",
     // Buttons
     "Submit": "Submit",
     "Clear": "Clear",

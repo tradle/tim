@@ -328,5 +328,6 @@ module.exports = {
   "resetApp": "Сбросить приложение",
   "invalidCountry": "Неверная страна, отсканированная",
   "wipeTheAppData": "Сотрите данные приложения",
-  "enterPasswordOrWipeOutTheAppData": "Введите пароль или стереть данные приложения"
+  "enterPasswordOrWipeOutTheAppData": "Введите пароль или стереть данные приложения",
+  "pleaseChooseCountryAndDT": "Пожалуйста, сначала выберите страну и тип документа"
 }

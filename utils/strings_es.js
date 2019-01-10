@@ -328,5 +328,6 @@ module.exports = {
   "invalidCountry": "País no válido escaneado",
   "wrongDocumentTypePleaseTryAgain": "Tipo de documento incorrecto. Inténtalo de nuevo",
   "wipeTheAppData": "Borrar los datos de la aplicación",
-  "enterPasswordOrWipeOutTheAppData": "Introduzca la contraseña o borre los datos de la aplicación"
+  "enterPasswordOrWipeOutTheAppData": "Introduzca la contraseña o borre los datos de la aplicación",
+  "pleaseChooseCountryAndDT": "Por favor, elija el país y el tipo de documento primero"
 }
