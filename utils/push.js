@@ -13,6 +13,37 @@ import PushImpl from './push-impl'
 import { constants } from '@tradle/engine'
 import Actions from '../Actions/Actions'
 
+// class Pusher extends EventEmitter {
+//   constructor() {
+//     super()
+//     this._promiseInitialized = new Promise(resolve => {
+//       this.once('init', resolve)
+//     })
+
+//     this._promiseRegistered = new Promise(resolve => {
+//       this.once('register', resolve)
+//     })
+//   }
+
+//   register = async () => {
+//     // make sure initialization is done first
+//     await this._promiseInitialized
+//     // register
+//     this.emit('register')
+//   }
+
+//   subscribe = async () => {
+//     // make sure registration has already been done
+//     await this._promiseRegistered
+//     // subscribe
+//   }
+
+//   init = once(async () => {
+//     // do init stuff
+//     this.emit('init')
+//   })
+// }
+
 const { translate, waitsFor } = utils
 const TYPE = constants.TYPE
 const pushServerURL = ENV.pushServerURL

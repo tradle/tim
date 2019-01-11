@@ -120,7 +120,7 @@ $NODE_BINARY $CLI_PATH $BUNDLE_COMMAND \
   --dev $DEV \
   --reset-cache \
   --bundle-output "$BUNDLE_FILE" \
-  --sourcemap-output "$BUNDLE_FILE.map" \
+  # --sourcemap-output "$BUNDLE_FILE.map" \
   --assets-dest "$DEST"
 
 if [[ $DEV != true && ! -f "$BUNDLE_FILE" ]]; then
