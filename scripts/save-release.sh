@@ -44,8 +44,15 @@ fi
 echo "copying bundle and assets to $THIS_RELEASE_DIR"
 mkdir -p "$THIS_RELEASE_DIR"
 cp "$DEST/main.jsbundle" "$THIS_RELEASE_DIR/"
-cp "$DEST/main.jsbundle.map" "$THIS_RELEASE_DIR/"
-cp "$DEST/main.jsbundle.meta" "$THIS_RELEASE_DIR/"
+if [[ -f $DEST/main.jsbundle.map ]]
+then
+  cp "$DEST/main.jsbundle.map" "$THIS_RELEASE_DIR/"
+fi
+if [[ -f $DEST/main.jsbundle.meta ]]
+then
+  cp "$DEST/main.jsbundle.meta" "$THIS_RELEASE_DIR/"
+fi
+
 cp -r "$DEST/assets" "$THIS_RELEASE_DIR/"
 rm -rf "$RELEASES_DIR/latest"
 cp -r "$THIS_RELEASE_DIR" "$RELEASES_DIR/latest"

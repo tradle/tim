@@ -328,5 +328,6 @@ module.exports = {
   "invalidCountry": "Ongeldig land gescand",
   "resetApp": "Reset app",
   "wipeTheAppData": "Wis de app-gegevens",
-  "enterPasswordOrWipeOutTheAppData": "Voer een wachtwoord in of wis de app-gegevens"
+  "enterPasswordOrWipeOutTheAppData": "Voer een wachtwoord in of wis de app-gegevens",
+  "pleaseChooseCountryAndDT": "Kies eerst het land en documenttype"
 }

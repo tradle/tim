@@ -72,6 +72,7 @@ const normalizeResult = ({results, json}) => {
     personal: {
       firstName: json.ft_Given_Names || json.ft_Surname_And_Given_Names,
       lastName: json.ft_Surname || json.ft_Fathers_Name,
+      middleName: json.ft_Middle_Name,
       full: address,
       city,
       country: json.ft_Country,
@@ -81,11 +82,20 @@ const normalizeResult = ({results, json}) => {
     },
     document: {
       dateOfExpiry: json.ft_Date_of_Expiry,
-      dateOfIssue: json.ft_Date_of_Issue,
+      dateOfIssue: json.ft_Date_of_Issue || json.ft_Date_of_Registration,
       issuer: json.ft_Place_of_Issue || json.ft_Authority || json.ft_Issuing_State_Code,
       country: json.ft_Issuing_State_Code,
-      documentNumber: json.ft_Document_Number,
+      documentNumber: json.ft_Document_Number || json.ft_RegCert_RegNumber,
       documentVersion: json.ft_DL_Restriction_Code
+    }
+  }
+  let { personal, document } = result
+  if (document.issuer === 'VNM'  &&  !personal.lastName) {
+    let parts = personal.firstName  &&  personal.firstName.split(' ') || []
+    if (parts.length > 2) {
+      personal.lastName = parts[0]
+      personal.middleName = parts.slice(1, parts.length - 1).join(' ')
+      personal.firstName = parts[parts.length - 1]
     }
   }
   // debugger

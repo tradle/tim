@@ -149,7 +149,7 @@ const processListVerifiedFields = results => {
   let json = {}
 
   fields.forEach((f, i) => {
-    let fieldTypeID = f.FieldType
+    let fieldTypeID = f.wFieldType
     let fName
     let val =  f.Field_Barcode  ||  f.Field_MRZ  ||  f.Field_Visual
     if (val) {

@@ -1619,7 +1619,7 @@ var Store = Reflux.createStore({
       return providers
     }))
     debug('end fetching provider info from', serverUrls)
-    if (result.some(r => r.state === 'fulfilled'))
+    if (!utils.isWeb()  &&  result.some(r => r.state === 'fulfilled'))
       await this.afterGetInfo()
     return result
   },

@@ -184,11 +184,14 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
       if (countryId === 'NZ')
         requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
       else
-        requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'address_group'}, {name: 'document_group'}, {name: 'issuer'}]
+        requestedProperties.push({name: 'issuer'})
     }
     else {
-      if (isID)
+      if (isID) {
         requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
+        if (form.middleName)
+          requestedProperties.splice(2, 0, {name: 'middleName'})
+      }
       else if (isOther)
         requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
       else

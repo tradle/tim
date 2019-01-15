@@ -1,3 +1,4 @@
+/*
 import { Platform, Alert } from 'react-native'
 // import withDefaults from 'lodash/defaults'
 // import groupBy from 'lodash/groupBy'
@@ -305,7 +306,7 @@ function normalizeMRTDResult (result) {
       mrzText: mrzResult.mrzText,
       mrzParsed: mrzResult.mrzParsed,
       mrzVerified: mrzResult.mrzVerified,
-      /*
+
        * Document code. Document code contains two characters. For MRTD the first character shall
        * be A, C or I. The second character shall be discretion of the issuing State or organization except
        * that V shall not be used, and `C` shall not be used after `A` except in the crew member certificate.
@@ -313,7 +314,7 @@ function normalizeMRTDResult (result) {
        * letter may be used, at the discretion of the issuing State or organization, to designate a particular
        * MRP. If the second character position is not used for this purpose, it shall be filled by the filter
        * character '<'.
-       */
+
       documentCode: mrzResult.documentCode,
       // US Green Card only
       applicationReceiptNumber: mrzResult.applicationReceiptNumber,
@@ -535,9 +536,9 @@ function parseUSDate (str) {
   return dateFromParts({ day, month, year })
 }
 
-/**
+**
  * @return {Number} UTC millis
- */
+ *
 function dateFromParts ({ day, month, year }) {
   year = Number(year)
   month = Number(month) - 1
@@ -563,6 +564,7 @@ const normalizeWhitespace = str => {
   // normalize spaces
   return str.replace(/[\s]+/g, ' ').trim()
 }
+*/
 /*
 const scan1 = (function () {
   if (isSimulator()) return

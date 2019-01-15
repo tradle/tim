@@ -114,19 +114,21 @@ platform :android do
   end
 
   lane :backup_release do |options|
-    usage = "e.g. backup_release stage:release apk_path:/path/to/app-release.apk"
+    usage = """e.g. backup_release stage:release apk_dir:/path/to/ or
+  backup_release stage:release apk_dir:/path/to/"""
+
     stage = options[:stage]
     if stage.nil?
       UI.user_error!("expected 'stage', #{usage}")
     end
 
-    apk_path = options[:apk_path]
-    if apk_path.nil?
-      UI.user_error!("expected 'apk_path', #{usage}")
+    apk_dir = options[:apk_dir]
+    if apk_dir.nil?
+      UI.user_error!("expected 'apk_dir', #{usage}")
     end
 
     version = (sh "../../scripts/get-android-version.sh full").strip
-    sh "../../scripts/backup-release.sh android #{stage} #{version} #{apk_path}"
+    sh "../../scripts/backup-release.sh android #{stage} #{version} #{apk_dir}"
   end
 
   private_lane :releaseit do |options|
@@ -157,22 +159,32 @@ platform :android do
       stage = "releaseStaging"
     end
 
-    apk_path_from_proj = "app/build/outputs/apk/#{stage}/app-#{stage}.apk"
-    apk_path_from_root = "android/#{apk_path_from_proj}"
+    # apk_paths_from_proj = Dir.glob("app/build/outputs/apk/#{stage}/*.apk")
+    apk_dir = "app/build/outputs/apk/#{stage}"
+    apk_dir_from_root = "android/#{apk_dir}"
     backup_release(
-      apk_path: apk_path_from_root,
+      apk_dir: apk_dir_from_root,
       stage: stage
     )
 
     unless options[:dry_run]
-      UI.message("uploading apk #{apk_path_from_proj}".green)
-      upload_to_play_store(
+      push_to_play_store(
         track: track,
-        skip_upload_screenshots: options[:skip_upload_screenshots] != false,
-        skip_upload_images: options[:skip_upload_images] != false,
-        apk: apk_path_from_proj
+        dir: apk_dir
       )
     end
+  end
+
+  lane :push_to_play_store do |options|
+    # Dir.pwd() returns "android/fastlane"
+    apk_paths = Dir.glob("../#{options[:dir]}/*.apk").map{ |p| File.expand_path(p) }
+    UI.message("uploading apks from dir #{options[:dir]}: #{apk_paths.join(',')}".green)
+    upload_to_play_store(
+      track: options[:track],
+      skip_upload_screenshots: options[:skip_upload_screenshots] != false,
+      skip_upload_images: options[:skip_upload_images] != false,
+      apk_paths: apk_paths
+    )
   end
 
   desc "Deploy a new version to the Google Play internal track"

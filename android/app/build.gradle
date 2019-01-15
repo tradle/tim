@@ -68,7 +68,8 @@ import com.android.build.OutputFile
 project.ext.react = [
   // the name of the generated asset file containing your JS bundle
   bundleAssetName: "main.jsbundle",
-  extraPackagerArgs: ["--sourcemap-output", "$buildDir/intermediates/assets/release/main.jsbundle.map"],
+  // don't know how to exclude from apk
+  // extraPackagerArgs: ["--sourcemap-output", "$buildDir/intermediates/assets/release/main.jsbundle.map"],
   // bundleInDebug: false,
   nodeExecutableAndArgs: ["/usr/local/bin/node"],
   // bundleCommand: "ram-bundle",
@@ -120,7 +121,7 @@ def pass = getPassword("tradle", "android_keystore")
  * Upload all the APKs to the Play Store and people will download
  * the correct one based on the CPU architecture of their device.
  */
-def enableSeparateBuildPerCPUArchitecture = false
+def enableSeparateBuildPerCPUArchitecture = true
 
 /**
  * Run Proguard to shrink the Java bytecode in release builds.
@@ -151,9 +152,9 @@ android {
         targetSdkVersion project.targetSdkVersion
         versionCode vbuild
         versionName vmajor + "." + vminor + "." + vpatch
-        ndk {
-            abiFilters "armeabi-v7a", "x86"
-        }
+        // ndk {
+        //     abiFilters "armeabi-v7a", "x86"
+        // }
 
         multiDexEnabled true
     }
@@ -176,10 +177,15 @@ android {
     }
     splits {
         abi {
-            reset()
             enable enableSeparateBuildPerCPUArchitecture
+            reset()
             universalApk false  // If true, also generate a universal APK
-            include "armeabi-v7a", "x86"
+            // https://android.stackexchange.com/questions/186334/what-percentage-of-android-devices-runs-on-x86-architecture
+            // include "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            //
+            // Before allowing 64-bit apks, see that react native supports it
+            // https://github.com/facebook/react-native/issues/2814
+            // include "armeabi-v7a", "x86"
         }
     }
     buildTypes {
@@ -190,7 +196,9 @@ android {
             // applicationIdSuffix ".debug"
         }
         release {
-            shrinkResources enableProguardInReleaseBuilds
+            // setting to true breaks require()'d images in JS
+            // can probably set to true after figuring this out: https://developer.android.com/studio/build/shrink-code
+            shrinkResources false
             zipAlignEnabled enableProguardInReleaseBuilds
             minifyEnabled enableProguardInReleaseBuilds
             // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
@@ -201,7 +209,9 @@ android {
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
         }
         releaseStaging {
-            shrinkResources enableProguardInReleaseBuilds
+            // setting to true breaks require()'d images in JS
+            // can probably set to true after figuring this out: https://developer.android.com/studio/build/shrink-code
+            shrinkResources false
             zipAlignEnabled enableProguardInReleaseBuilds
             minifyEnabled enableProguardInReleaseBuilds
             // proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
@@ -211,19 +221,6 @@ android {
             def codePushKey = getCodePushKey("Staging")
             buildConfigField "String", "CODEPUSH_KEY", "\"${codePushKey}\""
             matchingFallbacks = ['release']
-        }
-    }
-    // applicationVariants are e.g. debug, release
-    applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            // For each separate APK per architecture, set a unique version code as described here:
-            // http://tools.android.com/tech-docs/new-build-system/user-guide/apk-splits
-            def versionCodes = ["armeabi-v7a":1, "x86":2]
-            def abi = output.getFilter(OutputFile.ABI)
-            if (abi != null) {  // null for the universal-debug, universal-release variants
-                output.versionCodeOverride =
-                        versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
-            }
         }
     }
 
@@ -238,8 +235,11 @@ android {
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/license'
         exclude 'META-INF/license.txt'
-        pickFirst 'lib/armeabi-v7a/libgnustl_shared.so'
-        pickFirst 'lib/x86/libgnustl_shared.so'
+        // exclude '**/*.jsbundle.map'  // doesn't work
+        exclude 'assets/Regula/*.dat'
+        // added when working with anyline:
+        // pickFirst 'lib/armeabi-v7a/libgnustl_shared.so'
+        // pickFirst 'lib/x86/libgnustl_shared.so'
     }
 }
 
@@ -270,7 +270,7 @@ dependencies {
     implementation project(':react-native-image-store')
     implementation project(':react-native-tradle-keeper')
     implementation project(':rn-fetch-blob')
-    implementation project(':blinkid-react-native')
+    // implementation project(':blinkid-react-native')
     implementation project(':react-native-awesome-card-io')
     implementation 'com.android.support:multidex:1.0.1'
     implementation project(':react-native-branch')
@@ -332,5 +332,44 @@ task copyDownloadableDepsToLibs(type: Copy) {
     from configurations.compile
     into 'libs'
 }
+
+// START(APK per arch)
+//
+// source: https://developer.android.com/studio/build/configure-apk-splits
+//
+// Map for the version code that gives each ABI a value.
+// must match android.splits.abi above
+ext.abiCodes = ['armeabi-v7a':1, 'arm64-v8a':2, 'x86':3, 'x86_64':4]
+
+// For each APK output variant, override versionCode with a combination of
+// ext.abiCodes * 1000 + variant.versionCode. In this example, variant.versionCode
+// is equal to defaultConfig.versionCode. If you configure product flavors that
+// define their own versionCode, variant.versionCode uses that value instead.
+android.applicationVariants.all { variant ->
+  // Assigns a different version code for each output APK
+  // other than the universal APK.
+  variant.outputs.each { output ->
+
+    // Stores the value of ext.abiCodes that is associated with the ABI for this variant.
+    def baseAbiVersionCode =
+            // Determines the ABI for this variant and returns the mapped value.
+            project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
+
+    // Because abiCodes.get() returns null for ABIs that are not mapped by ext.abiCodes,
+    // the following code does not override the version code for universal APKs.
+    // However, because we want universal APKs to have the lowest version code,
+    // this outcome is desirable.
+    if (baseAbiVersionCode != null) {
+
+      // Assigns the new version code to versionCodeOverride, which changes the version code
+      // for only the output APK, not for the variant itself. Skipping this step simply
+      // causes Gradle to use the value of variant.versionCode for the APK.
+      output.versionCodeOverride =
+              baseAbiVersionCode * 1000 + variant.versionCode
+    }
+  }
+}
+
+// END(APK per arch)
 
 apply plugin: 'com.google.gms.google-services'
