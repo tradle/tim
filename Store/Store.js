@@ -441,7 +441,7 @@ var Store = Reflux.createStore({
     })
 
     this._pushSemaphore = createSemaphore().go()
-
+debugger
     if (ENV.registerForPushNotifications) {
       this.setupPushNotifications()
     }
@@ -4979,6 +4979,7 @@ if (!res[SIG]  &&  res._message)
           id: utils.makeId(LEGAL_ENTITY, params.legalEntity)
         }//await this._getItemFromServer(utils.makeId(LEGAL_ENTITY, params.legalEntity))
         let meId = utils.getId(me)
+        utils.setMe(me)
         await db.put(meId, me)
         this._setItem(meId, me)
       }
@@ -5805,7 +5806,8 @@ if (!res[SIG]  &&  res._message)
       if (!context) {
         let pr = {
           [TYPE]: PRODUCT_REQUEST,
-          requestFor: utils.getModel(CUSTOMER_KYC) ? CUSTOMER_KYC : CUSTOMER_ONBOARDING,
+          requestFor: CUSTOMER_ONBOARDING,
+          // requestFor: utils.getModel(CUSTOMER_KYC) ? CUSTOMER_KYC : CUSTOMER_ONBOARDING,
           from: me,
           to: this.getRepresentative(to)
         }
