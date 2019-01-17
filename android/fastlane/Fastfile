@@ -107,7 +107,7 @@ platform :android do
     if !remote.nil?
       UI.message("Current Build: #{local}".green)
       UI.message("Current Build in Play Store \"#{track}\" track: #{remote}".green)
-      unless local.to_i > remote.to_i
+      if local.to_i == remote.to_i
         UI.user_error!("this build already exists in the Play Store \"#{track}\" track!")
       end
     end

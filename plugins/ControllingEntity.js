@@ -1,6 +1,5 @@
 import { TYPE } from '@tradle/constants'
 
-// const LEGAL_ENTITY_PRODUCT = 'tradle.legal.LegalEntityProduct'
 const CONTROLLING_ENTITY = 'tradle.legal.LegalEntityControllingPerson'
 const OWNERSHIP = 'tradle.legal.Ownership'
 
@@ -27,17 +26,21 @@ module.exports = function LegalEntity ({ models }) {
 function getPropsForControllingEntity(form) {
   let typeOfControllingEntity = form.typeOfControllingEntity
   if (!typeOfControllingEntity)
-    return {}
+    return {
+      requestedProperties: [
+        {name: 'typeOfControllingEntity'},
+      ]
+    }
   let id = typeOfControllingEntity.id.split('_')[1].toLowerCase()
   switch (id) {
   case 'person':
     return {
       requestedProperties: [
-        {name: 'typeOfControllingPerson'},
+        // {name: 'typeOfControllingPerson'},
         // {name: 'controllingPerson'},
-        {name: 'emailAddress'},
-        {name: 'phone'},
-        {name: 'legalEntity'}
+        // {name: 'emailAddress'},
+        // {name: 'phone'},
+        // {name: 'legalEntity'}
       ]
     }
   case 'legalentity':
@@ -52,7 +55,9 @@ function getPropsForControllingEntity(form) {
 function getPropsForOwnership(form) {
   let typeOfLegalEntity = form.typeOfEntity
   if (!typeOfLegalEntity)
-    return {}
+    return {
+      requestedProperties: ['typeOfEntity']
+    }
   let id = typeOfLegalEntity.id.split('_')[1].toLowerCase()
   switch (id) {
   case 'subsidiary':

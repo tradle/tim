@@ -19,6 +19,8 @@ import { Text } from './Text'
 const MAX_PROPS_IN_FORM = 1
 const PHOTO = 'tradle.Photo'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
+const EMPLOYEE_ONBOARDING = 'tradle.EmployeeOnboarding'
+const AGENT_ONBOARDING = 'tradle.AgentOnboarding'
 // const SENT = 'Sent'
 
 const { IDENTITY, ENUM } = constants.TYPES
@@ -237,6 +239,7 @@ class FormMessageRow extends Component {
     let isShared = this.isShared()
     if (viewCols)
       viewCols = utils.ungroup(model, viewCols)
+    let isProductRequest = resource[TYPE] === PRODUCT_REQUEST
 
     viewCols.forEach((v) => {
       if (vCols.length >= MAX_PROPS_IN_FORM)
@@ -282,8 +285,12 @@ class FormMessageRow extends Component {
           val = resource[v] ? dateformat(new Date(resource[v]), 'mmm d, yyyy') : null
         else if (properties[v].displayAs)
           val = utils.templateIt(properties[v], resource)
-        else if (properties[v].range === 'model')
-          val = translate(utils.getModel(resource[v]))//utils.makeModelTitle(utils.getModel(resource[v]))
+        else if (properties[v].range === 'model') {
+          let pValue = resource[v]
+          if (isProductRequest  &&  utils.getMe().isAgent  &&  resource[v] === EMPLOYEE_ONBOARDING)
+            pValue = AGENT_ONBOARDING
+          val = translate(utils.getModel(pValue))//utils.makeModelTitle(utils.getModel(resource[v]))
+        }
         else
           val = properties[v].type === 'boolean' ? (resource[v] ? 'Yes' : 'No') : resource[v];
 
