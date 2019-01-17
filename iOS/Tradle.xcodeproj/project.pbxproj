@@ -1287,7 +1287,8 @@
 				ORGANIZATIONNAME = Tradle;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						ProvisioningStyle = Manual;
+						DevelopmentTeam = 94V7783F74;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -2146,10 +2147,10 @@
 				CODE_PUSH_KEY = "";
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "";
 				DEAD_CODE_STRIPPING = NO;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 94V7783F74;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2217,9 +2218,9 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 94V7783F74;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -2324,7 +2325,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CODE_SIGN_ENTITLEMENTS = Tradle.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "";
 				DEVELOPMENT_TEAM = 94V7783F74;
 				ENABLE_BITCODE = NO;
@@ -2380,7 +2381,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.tradle.dev.tim;
 				PRODUCT_NAME = Tradle;
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = "match Development io.tradle.dev.tim";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REACT_HEADERS_PATH = "$(BUILD_DIR)/Release-$(PLATFORM_NAME)/include";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "";
