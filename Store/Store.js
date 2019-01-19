@@ -218,6 +218,7 @@ const LEGAL_ENTITY        = 'tradle.legal.LegalEntity'
 const LANGUAGE            = 'tradle.Language'
 const REFRESH_PRODUCT     = 'tradle.RefreshProduct'
 const CUSTOMER_KYC        = 'bd.nagad.CustomerKYC'
+const CP_ONBOARDING       = 'tradle.legal.ControllingPersonOnboarding'
 const CUSTOMER_ONBOARDING = 'tradle.CustomerOnboarding'
 const MY_ENVIRONMENT      = 'environment.json'
 const MY_REGULA           = 'regula.json'
@@ -441,7 +442,7 @@ var Store = Reflux.createStore({
     })
 
     this._pushSemaphore = createSemaphore().go()
-debugger
+// debugger
     if (ENV.registerForPushNotifications) {
       this.setupPushNotifications()
     }
@@ -4290,12 +4291,14 @@ if (!res[SIG]  &&  res._message)
         json[p] = resource[p];
       let ref = props[p].ref
       // Check if valid enum value
-      if (ref  &&  utils.isEnum(ref)) {
-        if (!json[p]) {
-          if (prefill  &&  prefill[p])
-            json[p] = prefill[p]
-          continue
-        }
+      if (!ref)
+        continue
+      if (!json[p]) {
+        if (prefill  &&  prefill[p])
+          json[p] = prefill[p]
+        continue
+      }
+      if (utils.isEnum(ref)) {
         if ((typeof json[p] === 'string')  ||  !this._getItem(utils.getId(json[p]))) {
           let enumList = this.searchNotMessages({modelName: ref})
           let eprop = utils.getEnumProperty(this.getModel(ref))
@@ -4982,6 +4985,9 @@ if (!res[SIG]  &&  res._message)
         utils.setMe(me)
         await db.put(meId, me)
         this._setItem(meId, me)
+      }
+      else if (product === CP_ONBOARDING) {
+        resource.associatedResource = params.application
       }
 
       await this.insurePublishingIdentity(org)
@@ -5802,7 +5808,7 @@ if (!res[SIG]  &&  res._message)
         debugger
       }
     }
-    else if (params.newCustomer &&  me.isAgent  &&  me.organization.id === utils.getId(to)) {
+    else if (params.newCustomer &&  utils.isAgent()  &&  me.organization.id === utils.getId(to)) {
       if (!context) {
         let pr = {
           [TYPE]: PRODUCT_REQUEST,
@@ -6027,7 +6033,7 @@ if (!res[SIG]  &&  res._message)
     this.trigger(retParams)
   },
   async deleteCustomersOnDevice() {
-    if (!me.isAgent)
+    if (!utils.isAgent())
       return
     // let list = await this.searchMessages({modelName: PRODUCT_REQUEST, to: me.organization, noTrigger: true, filterProps: {requestFor: CUSTOMER_ONBOARDING}})
     let list = []
@@ -7256,7 +7262,7 @@ if (!res[SIG]  &&  res._message)
       resource[p] = this.makeStub(stub)
     }
     if (type === FORM_REQUEST  ||  type === FORM_ERROR) {
-      if (resource.prefill  &&  !utils.isStub(resource.prefill))
+      if (resource.prefill  &&  !resource[ROOT_HASH] && !resource.id)//  !utils.isStub(resource.prefill))
         this.rewriteStubs(resource.prefill)
     }
   },
@@ -8146,7 +8152,7 @@ if (!res[SIG]  &&  res._message)
     let {foundResources, to, context, filter} = params
     if (!foundResources)
       return
-    if (me.isAgent  &&  (context.requestFor === CUSTOMER_ONBOARDING ||  context.requestFor === CUSTOMER_KYC))
+    if (utils.isAgent()  &&  (context.requestFor === CUSTOMER_ONBOARDING ||  context.requestFor === CUSTOMER_KYC))
       return
     if (me.isEmployee)
       return await this.getShareableResourcesForEmployee(params)
@@ -9842,7 +9848,7 @@ if (!res[SIG]  &&  res._message)
         if (utils.isContext(val.form)) {
           this.onGetProductList({resource: val.from})
           let dataClaim = await this.searchMessages({modelName: DATA_CLAIM, to: val.from.organization})
-          if (dataClaim  &&  dataClaim.length  ||  me.isAgent)
+          if (dataClaim  &&  dataClaim.length  ||  utils.isAgent())
             this.deleteMessageFromChat(utils.getId(val.from.organization), val)
           else
             this.trigger({action: 'addItem', resource: val})
@@ -10288,12 +10294,12 @@ await fireRefresh(val.from.organization)
     }
     if (!isReadOnly) {
       if (type === MY_EMPLOYEE_PASS) {
-        if (me.isAgent)
+        if (utils.isAgent())
           await setupAgent()
         else
           await setupEmployee()
         this.client = graphQL.initClient(meDriver, me.organization.url)
-        if (me.isAgent)
+        if (utils.isAgent())
            me.entity = await this._getItemFromServer(me.entity.id)
       }
       else if (type === MY_AGENT_PASS) {
@@ -11155,6 +11161,8 @@ await fireRefresh(val.from.organization)
     debug(`running deferred job (delayed ${delay})`)
   },
   buildSendRef(resource, noValidation) {
+    // if (resource._link  &&  resource._permalink)
+    //   return resource
     let type = utils.getType(resource)
     if (utils.isEnum(type))
       return utils.buildRef(resource)
