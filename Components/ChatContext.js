@@ -57,12 +57,13 @@ class ChatContext extends Component {
     let isShareContext = utils.isContext(ctype) && isReadOnlyChat
     let product = context.requestFor
     // HACK
-    if (me.isAgent  &&  product === EMPLOYEE_ONBOARDING)
+    let isAgent = utils.isAgent()
+    if (isAgent  &&  product === EMPLOYEE_ONBOARDING)
       product = AGENT_ONBOARDING
 
     let content = <Text style={[{color: allContexts ? bankStyle.currentContextTextColor : bankStyle.shareContextTextColor}, styles.text]}>{translate(utils.getModel(product))}</Text>
     let chooser
-    if (me.isAgent  ||  (context  &&  isShareContext || application))
+    if (isAgent  ||  (context  &&  isShareContext || application))
       chooser = <View style={styles.contextBar}>{content}</View>
     else
       chooser = <TouchableOpacity onPress={contextChooser} style={styles.contextBar}>

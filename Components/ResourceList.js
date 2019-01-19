@@ -1277,7 +1277,7 @@ class ResourceList extends Component {
     let search
     let me = utils.getMe()
     if (isProfile) {
-      if (me.isAgent) {
+      if (utils.isAgent()) {
         let color = '#1F59A3'
         newCustomer = <View style={styles.newCustomerRow}>
           <TouchableOpacity onPress={this.newCustomer.bind(this)}>
