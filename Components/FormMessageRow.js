@@ -290,7 +290,7 @@ class FormMessageRow extends Component {
           val = utils.templateIt(properties[v], resource)
         else if (properties[v].range === 'model') {
           let pValue = resource[v]
-          if (isProductRequest  &&  utils.getMe().isAgent  &&  resource[v] === EMPLOYEE_ONBOARDING)
+          if (isProductRequest  &&  utils.isAgent()  &&  resource[v] === EMPLOYEE_ONBOARDING)
             pValue = AGENT_ONBOARDING
           val = translate(utils.getModel(pValue))//utils.makeModelTitle(utils.getModel(resource[v]))
         }

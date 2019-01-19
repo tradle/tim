@@ -1547,7 +1547,7 @@ label = label.replace(/([a-z])([A-Z])/g, '$1 $2')
   },
   isAgent(resource) {
     let me = utils.getMe()
-    if (!me.isAgent)
+    if (!me.isAgent  ||  !me.isEmployee)
       return false
     return utils.compareOrg(me.organization, resource)
   },

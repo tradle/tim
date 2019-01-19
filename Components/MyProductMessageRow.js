@@ -81,7 +81,7 @@ class MyProductMessageRow extends Component {
                             </View>
                             );
     // HACK
-    if (utils.getMe().isAgent  &&   model.id === 'tradle.MyEmployeeOnboarding')
+    if (utils.isAgent()  &&   model.id === 'tradle.MyEmployeeOnboarding')
       model = utils.getModel('tradle.MyAgentOnboarding')
     // end Hack
     let title = translate(model)
