@@ -435,8 +435,15 @@ var utils = {
     let rtype = utils.getType(resource)
     let e = dictionary.enums[rtype]
     if (utils.isStub(resource))  {
-      if (!e)
+      if (!e) {
+        if (resource.title)
+          return resource.title
+        let [type, id] = resource.id.split('_')
+        let val = utils.getModel(rtype).enum.find(r => r.id === id)
+
+        resource.title = val  &&  val.title
         return resource.title
+      }
       let [type, id] = resource.id.split('_')
       return e[id]  ||  resource.title
     }

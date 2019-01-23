@@ -36,7 +36,7 @@ function getPropsForControllingEntity(form) {
   case 'person':
     return {
       requestedProperties: [
-        // {name: 'typeOfControllingPerson'},
+        {name: 'typeOfControllingPerson'},
         // {name: 'controllingPerson'},
         // {name: 'emailAddress'},
         // {name: 'phone'},

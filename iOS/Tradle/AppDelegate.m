@@ -17,7 +17,7 @@
 #import <React/RCTEventEmitter.h>
 #import <Fabric/Fabric.h>
 #import <Crashlytics/Crashlytics.h>
-//#import "QTouchposeApplication.h"
+#import "QTouchposeApplication.h"
 #import "Orientation.h"
 #import <asl.h>
 #import "SplashScreen.h"
@@ -47,8 +47,8 @@ NSString *const RNTradleSecurityOverlayImage = @"splash1536x2048.png";
    * on the same Wi-Fi network.
    */
 
-//  QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
-//  touchposeApplication.alwaysShowTouches = YES;
+  QTouchposeApplication *touchposeApplication = (QTouchposeApplication *)application;
+  touchposeApplication.alwaysShowTouches = YES;
 
 #ifdef DEBUG
   jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
