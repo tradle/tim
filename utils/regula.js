@@ -31,8 +31,10 @@ export const setLicenseKey = async (licenseKey) => {
 }
 export const prepareDatabase = async (dbID) => {
   // databaseID = dbID
+  if (prepDB)
+    return
   prepDB = new Q.defer()
-  debugger
+  // debugger
   console.log('Prepare Regula DB')
   try {
     await Regula.prepareDatabase({dbID})
