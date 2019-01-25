@@ -7262,7 +7262,8 @@ if (!res[SIG]  &&  res._message)
       resource[p] = this.makeStub(stub)
     }
     if (type === FORM_REQUEST  ||  type === FORM_ERROR) {
-      if (resource.prefill  &&  !resource[ROOT_HASH] && !resource.id)//  !utils.isStub(resource.prefill))
+      if (resource.prefill  &&  (!utils.isStub(resource.prefill) ||  !resource.prefill.id))
+      // if (resource.prefill  &&  !resource.prefill[ROOT_HASH] && !resource.prefill.id)//  !utils.isStub(resource.prefill))
         this.rewriteStubs(resource.prefill)
     }
   },
