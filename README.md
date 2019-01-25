@@ -309,9 +309,9 @@ That means you have left over APK files.
 
 run command
 ```
-find ./app/build/ -name *.apk
+rm -rf android/app/build
 ```
-remove the apk files and run `fastlane release`  or  `fastlane release_staging` again.
+and run `fastlane release`  or  `fastlane release_staging` again.
 
 ## Android dev
 
