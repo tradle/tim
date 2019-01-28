@@ -463,7 +463,7 @@ class ResourceView extends Component {
     }
 
     if (ENV.allowWipe) {
-      buttons.push(translate('wipeTheAppDate'))
+      buttons.push(translate('wipeTheAppData'))
       actions.push(WIPE_DEVICE)
     }
 
