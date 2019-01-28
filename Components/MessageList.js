@@ -41,7 +41,7 @@ import ResourceList from './ResourceList'
 import ChatContext from './ChatContext'
 import ContextChooser from './ContextChooser'
 import NewResourceMixin from './NewResourceMixin'
-import utils, { translate, isIphone10orMore } from '../utils/utils'
+import utils, { translate, isIphone10orMore, isAndroid } from '../utils/utils'
 import Store from '../Store/Store'
 import Actions from '../Actions/Actions'
 import NetworkInfoProvider from './NetworkInfoProvider'
@@ -203,7 +203,7 @@ class MessageList extends Component {
     }
     if (action === 'assignRM_Confirmed') {
       if (application[ROOT_HASH] === params.application[ROOT_HASH]) {
-        let r = utils.clone(application)
+        let r = _.cloneDeep(application)
         this.setState({application: r})
       }
       return
@@ -337,7 +337,7 @@ class MessageList extends Component {
         // not fulfilled form request for multi-entry form will have it's own ID set
         // as fulfilled document
         if (!r._document || utils.getId(r) === r._document) {
-          let l = utils.clone(list)
+          let l = _.cloneDeep(list)
           l.splice(l.length - 1 , 1)
           this.setState({list: l})
         }
@@ -403,7 +403,7 @@ class MessageList extends Component {
     else if (utils.getModel(rtype).subClassOf === FORM  &&  resource._context) {
       let product = resource._context.requestFor
       if (this.state.productToForms)
-        productToForms = utils.clone(this.state.productToForms)
+        productToForms = _.cloneDeep(this.state.productToForms)
       else
         productToForms = {}
 
@@ -751,6 +751,12 @@ class MessageList extends Component {
 
   componentDidUpdate() {
     clearTimeout(this._scrollTimeout)
+    // Android HACK - when first time in CHAT and message goes beyond the visible area
+    // the event is emitted that is the same as if the PULLDOWN action was requested
+    // that causes the confusion as if we requested the previous resources
+    if (isAndroid()  &&  this.state.allLoaded  &&  this.state.list  &&  this.state.list.length < LIMIT)
+      this.state.allLoaded = false
+    // end HACK
     if (this.state.allLoaded  ||  this.state.noScroll)
       this.state.noScroll = false
     else {
@@ -759,7 +765,7 @@ class MessageList extends Component {
         // inspired by http://stackoverflow.com/a/34838513/1385109
         console.log('MessageList: scrollToBottom started')
         this._GiftedMessenger  &&  this._GiftedMessenger.scrollToBottom()
-      }, 700)
+      }, isAndroid() && 2000 || 1000)
     }
   }
 
