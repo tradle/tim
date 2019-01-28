@@ -22,6 +22,8 @@
         - [Android](#android)
 - [Troubleshooting](#troubleshooting)
   - [Troubleshooting iOS builds](#troubleshooting-ios-builds)
+  - [Troubleshooting android builds](#troubleshooting-android-builds)
+
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -294,6 +296,22 @@ SDK_DIR=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Dev
 ## iOS builds
 
 - if you're building Staging and see an error during archive that mentions Pods, try running: `./scripts/fix-staging.js` and then trying again
+
+## Troubleshooting Android builds
+
+## Android builds
+
+- if you're building Staging or Release and see an error 
+```
+[!] Google Api Error: apkUpgradeVersionConflict: APK specifies a version code that has already been used.
+```
+That means you have left over APK files.
+
+run command
+```
+rm -rf android/app/build
+```
+and run `fastlane release`  or  `fastlane release_staging` again.
 
 ## Android dev
 
