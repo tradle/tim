@@ -942,38 +942,51 @@ class TimHome extends Component {
                 {version}
               </View>
 
-    let regView = !ENV.autoRegister &&
-                  <View  style={styles.center}>
-                    <FadeInView>
-                      <TouchableOpacity  onPress={() => {
-                        this.register(this.showFirstPage.bind(this))
-                        }}>
-                        <View style={styles.signIn}>
-                          <Text style={styles.signInText}>{translate('getStarted')}</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </FadeInView>
-                 </View>
+    let regView
+    if (!ENV.autoRegister)
+      regView = <View  style={styles.center}>
+                  <FadeInView>
+                    <TouchableOpacity  onPress={() => {
+                      this.register(this.showFirstPage.bind(this))
+                      }}>
+                      <View style={styles.signIn}>
+                        <Text style={styles.signInText}>{translate('getStarted')}</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </FadeInView>
+               </View>
 
     return (
       <View style={styles.container}>
         <BackgroundImage testID="homeBG" source={BG_IMAGE} />
         <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
           <View style={styles.flexGrow} />
-          { utils.getMe()
-            ? <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
-                  onPress={() => this._pressHandler()}>
-                <View style={styles.getStarted}>
-                   <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
-                </View>
-              </TouchableOpacity>
-            : regView
-          }
+          {regView}
           <Text style={errStyle}>{err}</Text>
           {dev}
         </TouchableOpacity>
       </View>
     );
+
+    // return (
+    //   <View style={styles.container}>
+    //     <BackgroundImage testID="homeBG" source={BG_IMAGE} />
+    //     <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
+    //       <View style={styles.flexGrow} />
+    //       { utils.getMe()
+    //         ? <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
+    //               onPress={() => this._pressHandler()}>
+    //             <View style={styles.getStarted}>
+    //                <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
+    //             </View>
+    //           </TouchableOpacity>
+    //         : regView
+    //       }
+    //       <Text style={errStyle}>{err}</Text>
+    //       {dev}
+    //     </TouchableOpacity>
+    //   </View>
+    // );
   }
 
         // <TouchableOpacity style={styles.splashLayout} onPress={() => this._pressHandler()}>
@@ -1130,8 +1143,7 @@ reactMixin(TimHome.prototype, TimerMixin)
 reactMixin(TimHome.prototype, HomePageMixin)
 
 var styles = (function () {
-  var dimensions = utils.dimensions(TimHome)
-  var { width, height } = dimensions
+  var { width, height } = utils.dimensions(TimHome)
   var thumb = width > 1000 ? 250 : Math.floor(width > 400 ? width / 2.5 : 170)
   return StyleSheet.create({
     container: {
