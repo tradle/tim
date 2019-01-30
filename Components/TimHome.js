@@ -943,7 +943,7 @@ class TimHome extends Component {
               </View>
 
     let regView
-    if (!ENV.autoRegister)
+    if (!ENV.autoRegister) {
       regView = <View  style={styles.center}>
                   <FadeInView>
                     <TouchableOpacity  onPress={() => {
@@ -955,6 +955,15 @@ class TimHome extends Component {
                     </TouchableOpacity>
                   </FadeInView>
                </View>
+    }
+    else if (utils.getMe()) {
+      regView = <TouchableOpacity testID='getStarted' style={[styles.thumbButton, {opacity: me ? 1 : 0}]}
+                  onPress={() => this._pressHandler()}>
+                  <View style={styles.getStarted}>
+                     <Text style={styles.getStartedText}>{translate('getStarted')}</Text>
+                  </View>
+                </TouchableOpacity>
+    }
 
     return (
       <View style={styles.container}>

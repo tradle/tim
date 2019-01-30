@@ -40,6 +40,6 @@ const styles = StyleSheet.create({
     top: 0
   }
 })
-BackgroundImage = makeStylish(BackgroundImage)
 
+BackgroundImage = makeStylish(BackgroundImage)
 module.exports = makeResponsive(BackgroundImage)
