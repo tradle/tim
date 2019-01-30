@@ -119,7 +119,7 @@ class ResourceList extends Component {
       let resource = this.props.resource
       let prop = this.props.prop
       if (prop  &&  resource[prop.name])
-        resource[prop.name].forEach((r) => this.state.chosen[utils.getId(r)] = r)
+        resource[prop.name].forEach(r => this.state.chosen[utils.getId(r)] = r)
     }
     let isRegistration = this.props.isRegistration ||  (this.props.resource  &&  this.props.resource[TYPE] === PROFILE  &&  !this.props.resource[ROOT_HASH]);
     if (isRegistration)
@@ -280,7 +280,7 @@ class ResourceList extends Component {
       return
     }
     let { modelName, officialAccounts, isDeepLink } = this.props
-    if (action == 'newStyles'  &&  modelName === ORGANIZATION) {
+    if (action === 'newStyles'  &&  modelName === ORGANIZATION) {
       this.setState({newStyles: params.resource})
       return
     }
@@ -296,12 +296,12 @@ class ResourceList extends Component {
       if (resource._inactive  &&  modelName === ORGANIZATION) {
         let r
         if (resource._isTest)
-          r = this.state.testProviders.find(r => r[ROOT_HASH] === resource[ROOT_HASH])
+          r = this.state.testProviders.find(rr => rr[ROOT_HASH] === resource[ROOT_HASH])
         else
-          r = this.state.list.find(r => r[ROOT_HASH] === resource[ROOT_HASH])
+          r = this.state.list.find(rr => rr[ROOT_HASH] === resource[ROOT_HASH])
 
         if (r) {
-          let l = this.state.list.filter(r => r[ROOT_HASH] !== resource[ROOT_HASH])
+          let l = this.state.list.filter(rr => rr[ROOT_HASH] !== resource[ROOT_HASH])
           this.setState({list: l, dataSource: this.state.dataSource.cloneWithRows(l)})
           return
         }
@@ -442,7 +442,7 @@ class ResourceList extends Component {
       let type = list[0][TYPE];
       if (type  !== modelName) {
         let m = utils.getModel(type);
-        if (!m.subClassOf  ||  m.subClassOf != modelName)
+        if (!m.subClassOf  ||  m.subClassOf !== modelName)
           return;
       }
       if (this.props.multiChooser  &&  !this.props.isChooser) {

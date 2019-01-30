@@ -692,9 +692,9 @@ var NavigationBarRouteMapper = {
       if (!icon) {
         icon = 'ios-send'
         iconSize = 28
-        if (isAndroid)
-          viewStyle = {paddingTop: 14}
       }
+      if (isAndroid)
+        viewStyle = {paddingTop: 14}
       style = {marginTop: -2} //isAndroid ? 0 : -2}
       // style = {marginTop: 5, transform: [
       //     {rotate: '45deg'}
