@@ -1010,7 +1010,7 @@ class NewResource extends Component {
                 dismissKeyboard();
             }
           }}>
-          <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 10}}>
+          <View style={isRegistration ? {marginHorizontal: height > 1000 ? 50 : 30} : {marginHorizontal: 0}}>
             <Form ref='form' type={Model} options={options} value={data} onChange={this.onChange}/>
             {formsToSign}
             {button}
@@ -1420,6 +1420,7 @@ var createStyles = utils.styleFactory(NewResource, function ({ dimensions, bankS
     },
     photoStrip: {
       paddingBottom: 5,
+      marginHorizontal: 5,
       marginTop: 0
     },
     row: {

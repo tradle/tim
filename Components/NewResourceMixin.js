@@ -713,12 +713,12 @@ var NewResourceMixin = {
   },
   paintHelp(prop) {
     if (!prop.description)
-      return <View style={styles.help}/>
+      return <View style={styles.help1}/>
 
     // borderBottomColor: '#cccccc',
     return (
       <View style={styles.help}>
-        <Markdown markdownStyles={utils.getMarkdownStyles(this.props.bankStyle, true)}>
+        <Markdown markdownStyles={utils.getMarkdownStyles(this.props.bankStyle, false)}>
           {prop.description}
         </Markdown>
       </View>
@@ -755,9 +755,10 @@ var NewResourceMixin = {
     let addStyle = {
       paddingVertical: 3,
       marginTop: prop.type === 'object' ||  prop.type === 'date' ||  prop.items ? 0 : 2,
-      backgroundColor: bankStyle.errorBgColor  ||  '#990000'
+      backgroundColor: bankStyle.errorBgColor  ||  '#990000',
+      paddingHorizontal: 10,
     }
-    return <View style={[styles.err, {paddingHorizontal: 10}]} key={this.getNextKey()}>
+    return <View style={[styles.err]} key={this.getNextKey()}>
              <View style={addStyle}>
                <Text style={styles.font14, {paddingLeft: 5, color: bankStyle.errorColor ||  '#eeeeee'}}>{err}</Text>
              </View>
@@ -866,7 +867,7 @@ var NewResourceMixin = {
 
     if (!value)
       value = translate(params.prop, utils.getModel(resource[TYPE]))  + (!search  &&  required  ?  ' *' : '')
-    let st = utils.isWeb() ? {marginHorizontal: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {}
+    let st = utils.isWeb() ? {marginHorizontal: 15, borderWidth: StyleSheet.hairlineWidth, borderColor: 'transparent', borderBottomColor: '#cccccc'} : {marginHorizontal: 5}
 
     // convert from UTC date to local, so DatePicker displays it correctly
     // e.g. 1999-04-13 UTC -> 1999-04-13 EDT
@@ -882,7 +883,7 @@ var NewResourceMixin = {
         <View style={[st, {paddingBottom: this.hasError(params.errors, prop.name) || utils.isWeb() ?  0 : 10}]}>
           {propLabel}
           <DatePicker
-            style={[styles.datePicker, {width: utils.dimensions(component).width - 30}]}
+            style={[styles.datePicker, {width: utils.dimensions(component).width - 20}]}
             mode="date"
             placeholder={value}
             format={format}
@@ -1504,7 +1505,7 @@ var styles= StyleSheet.create({
     // borderBottomColor: '#cccccc',
     // borderBottomWidth: 1,
     justifyContent: 'center',
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     // marginBottom: 10,
     flex: 1
   },
@@ -1528,7 +1529,7 @@ var styles= StyleSheet.create({
     borderColor: '#ffffff',
     // borderBottomColor: '#cccccc',
     // borderBottomWidth: 1,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     // justifyContent: 'center',
     position: 'relative',
     // marginBottom: 10,
@@ -1554,7 +1555,7 @@ var styles= StyleSheet.create({
   formInput: {
     // borderBottomWidth: 1,
     // borderBottomColor: '#eeeeee',
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     paddingLeft: 0,
     // borderColor: '#cccccc',
   },
@@ -1580,7 +1581,7 @@ var styles= StyleSheet.create({
     borderRadius: 5
   },
   err: {
-    paddingLeft: 10,
+    // paddingLeft: 10,
     // backgroundColor: 'transparent'
   },
   element: {
@@ -1595,7 +1596,8 @@ var styles= StyleSheet.create({
   },
   labelDirty: {
     marginTop: 21,
-    marginLeft: 10,
+    // marginLeft: 10,
+    paddingLeft: 15,
     color: '#AAA',
     position: 'absolute',
     fontSize: 12,
@@ -1650,7 +1652,8 @@ var styles= StyleSheet.create({
     borderColor: 'transparent',
     borderWidth: 1.5,
     marginTop: 10,
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
+    paddingHorizontal: 10,
     marginBottom: 5
   },
   dividerText: {
@@ -1688,18 +1691,30 @@ var styles= StyleSheet.create({
   markdown: {
     backgroundColor: '#f7f7f7',
     paddingVertical: 10,
-    marginHorizontal: -10,
-    paddingHorizontal: 20,
+    // marginHorizontal: -10,
+    // paddingHorizontal: 20,
   },
   container: {
     flex: 1
   },
+  help1: {
+    backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
+    // marginHorizontal: 10,
+    paddingHorizontal: 15,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc'
+  },
   help: {
-    backgroundColor: utils.isAndroid() ? '#efefef' : '#f7f7f7',
-    marginHorizontal: 10,
-    paddingHorizontal: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc'
+    backgroundColor: utils.isAndroid() ? '#eeeeee' : '#efefef',
+    // marginHorizontal: 10,
+    paddingHorizontal: 15,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: utils.isAndroid() ?  '#bbbbbb' : '#cccccc',
+    paddingBottom: 15
   },
   bottom10: {
     paddingBottom: 10
