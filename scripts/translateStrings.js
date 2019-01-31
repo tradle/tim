@@ -41,7 +41,7 @@ async function writeStrings(stringsDir, lang, forceGen) {
   }
   let langs = lang.split(',')
   let isRegulaXml = stringsDir === './android/app/src/main/res/values'
-  await Promise.all(langs.map(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile(stringsDir, lang)))
+  await Promise.all(langs.map(lang => isRegulaXml ? writeRegulaFile(stringsDir, lang, forceGen) : writeFile(stringsDir, lang, forceGen)))
 }
 async function writeRegulaFile(stringsDir, lang, forceGen) {
   if (lang === 'en')
@@ -115,7 +115,7 @@ async function writeRegulaFile(stringsDir, lang, forceGen) {
     <string name="strNfcTagNotFound">NFC tag not detected! Please move your phone closer to the NFC tag</string>
 */
 }
-async function writeFile(stringsDir, lang) {
+async function writeFile(stringsDir, lang, forceGen) {
   if (lang === 'en')
     return
   let fn = 'strings_' + lang + '.js'
@@ -138,14 +138,14 @@ async function writeFile(stringsDir, lang) {
   }
   let promises = []
   for (let p in stringsEN) {
-    if (!stringsLang[p])
+    if (!stringsLang[p] || forceGen)
       promises.push(translateText({strings: stringsLang, lang, key: p, text: stringsEN[p]}))
   }
   await Promise.all(promises, { concurrency: 20 })
 
   // Check if some models/props were deleted
   let hasChanged = promises.length
-  if (!currentIds)
+  if (!currentIds  ||  forceGen)
     hasChanged = true
   else {
     for (let p in currentIds) {
