@@ -111,7 +111,7 @@ class RefPropertyEditor extends Component {
     if (isRegistration)
       color = '#eeeeee'
     else if (val)
-      color = isImmutable  &&  linkColor || '#757575'
+      color = isImmutable  &&  linkColor || '#555555'
     else
       color = '#AAAAAA'
     let propView
