@@ -1746,7 +1746,7 @@ var styles= StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#cccccc',
     borderBottomWidth: 1,
-    borderBottomColor: '#cccccc'
+    borderBottomColor: '#cccccc',
     paddingBottom: 15
   },
   bottom10: {
