@@ -85,7 +85,7 @@ module.exports = {
     "pleaseCorrectTheErrors": "Please correct error in the form",
     "verifierHelp": "Click 'Done' button after reviewing the form. If some fields require correction check them them first and then click the 'Done' button",
     "errorNotification": "Error notification has been sent to the customer to correct",
-    "areYouSureAboutNextForm": "Are you sure you are done with {1}?",
+    "areYouSureAboutNextForm": "Have you finished adding {1}?",
     "formChooser": "Form list",
     "showQR": "My QR code",
     "useTouchId": "Enable Touch ID",
