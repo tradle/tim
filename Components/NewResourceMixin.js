@@ -1682,7 +1682,7 @@ var styles= StyleSheet.create({
     borderColor: 'transparent',
     borderWidth: 1.5,
     marginTop: 10,
-    marginHorizontal: 10,
+    marginHorizontal: 15,
     marginBottom: 5
   },
   dividerText: {
@@ -1728,9 +1728,12 @@ var styles= StyleSheet.create({
     flex: 1
   },
   help: {
-    backgroundColor: utils.isAndroid() ? '#efefef' : '#f7f7f7',
+    backgroundColor: '#efefef',
     marginHorizontal: 10,
+    paddingVertical: 7,
     paddingHorizontal: 5,
+    borderTopWidth: 1,
+    borderTopColor: '#cccccc',
     borderBottomWidth: 1,
     borderBottomColor: '#cccccc'
   },
