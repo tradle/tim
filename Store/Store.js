@@ -1589,15 +1589,12 @@ var Store = Reflux.createStore({
     let serverUrls = params.serverUrls
     if (!serverUrls.length)
       return
-    let retry = params.retry
-    let id = params.id
-    let newServer = params.newServer
-    let maxAttempts = params.maxAttempts
+    let { retry, id, newServer, hash, maxAttempts, notTestProvider } = params
     debug('fetching provider info from', serverUrls)
     let result = await Q.allSettled(serverUrls.map(async (url) => {
       let providers
       try {
-        providers = await this.getServiceProviders({url: url, hash: params.hash, retry: retry, id: id, newServer: newServer})
+        providers = await this.getServiceProviders({url, hash, retry, id, newServer, notTestProvider})
       } catch (err) {
         Errors.rethrow(err, 'developer')
 
@@ -2222,9 +2219,7 @@ var Store = Reflux.createStore({
   // Gets info about companies in this app, their bot representatives and their styles
   async getServiceProviders(params) {
     let originalUrl = params.url
-    let retry = params.retry
-    let id = params.id
-    let newServer = params.newServer
+    let { retry, id, newServer, notTestProvider } = params
     // return Q.race([
     //   fetch(utils.joinURL(url, 'info'), { headers: { cache: 'no-cache' } }),
     //   Q.Promise(function (resolve, reject) {
@@ -2284,7 +2279,7 @@ var Store = Reflux.createStore({
     var promises = []
     json.providers.forEach(sp => {
       this.parseProvider(sp, params, providerIds, newProviders)
-      promises.push(this.addInfo(sp, originalUrl, newServer))
+      promises.push(this.addInfo({sp, originalUrl, newServer, notTestProvider}))
     })
     if (utils.getMe())
       this.setMe(utils.getMe())
@@ -2404,7 +2399,7 @@ var Store = Reflux.createStore({
     //   require('../utils/regula').prepareDatabase(dbID)
     // }    // promises.push(self.addInfo(sp, originalUrl, newServer))
   },
-  async addInfo(sp, url, newServer) {
+  async addInfo({sp, url, newServer, notTestProvider}) {
     // TODO: evaluate security of this
     await this.addContactIdentity({
       identity: sp.bot.pub
@@ -2426,7 +2421,11 @@ var Store = Reflux.createStore({
       if (newServer  &&  org._inactive)
         org._inactive = false
       delete org._noSplash
-      if (!org._isTest  &&  sp.sandbox === true)
+      if (notTestProvider) {
+        org._notTest = true
+        org._isTest = false
+      }
+      else if (!org._isTest  &&  sp.sandbox === true  &&  !org._notTest)
         org._isTest = true
       this._mergeItem(okey, sp.org)
     }
@@ -2555,7 +2554,7 @@ var Store = Reflux.createStore({
     if (!config)
       return
     let orgId = utils.getId(org)
-    org._isTest = sp.sandbox
+    org._isTest = sp.sandbox  &&  !org._notTest
     for (let p in config)
       org['_' + p] = config[p]
 
@@ -5064,7 +5063,7 @@ if (!res[SIG]  &&  res._message)
   },
   async onAddApp({ url, permalink, noTrigger, addSettings }) {
     try {
-      await this.getInfo({serverUrls: [url], retry: false}) //, hash: permalink })
+      await this.getInfo({serverUrls: [url], retry: false, notTestProvider: true}) //, hash: permalink })
     } catch (err) {
       if (!noTrigger)
         this.trigger({
@@ -6838,7 +6837,7 @@ if (!res[SIG]  &&  res._message)
       })
       // Allow all providers in chooser
       if (!params.prop  &&  !all)
-        result = retOrgs.filter((r) => r._isTest === isTest)
+        result = retOrgs.filter((r) => r._isTest === isTest  ||  (!r._isTest  &&  !isTest))
       // result = retOrgs
     }
     if (result.length === 1  ||  !sortProp)
