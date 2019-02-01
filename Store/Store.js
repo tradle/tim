@@ -2255,7 +2255,7 @@ var Store = Reflux.createStore({
     var promises = []
     json.providers.forEach(sp => {
       this.parseProvider(sp, params, providerIds, newProviders)
-      promises.push(this.addInfo({sp, originalUrl, newServer, notTestProvider}))
+      promises.push(this.addInfo({sp, url: originalUrl, newServer, notTestProvider}))
     })
     if (utils.getMe())
       this.setMe(utils.getMe())
@@ -2401,7 +2401,8 @@ var Store = Reflux.createStore({
         org._notTest = true
         org._isTest = false
       }
-      else if (!org._isTest  &&  sp.sandbox === true  &&  !org._notTest)
+      else
+      if (!org._isTest  &&  sp.sandbox === true  &&  !org._notTest)
         org._isTest = true
       this._mergeItem(okey, sp.org)
     }
