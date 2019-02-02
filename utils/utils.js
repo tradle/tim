@@ -1565,13 +1565,15 @@ var utils = {
   },
   isAgent(resource) {
     let me = utils.getMe()
-    if (!me.isAgent  ||  !me.isEmployee)
+    if (!me.isAgent)
       return false
-    return utils.compareOrg(me.organization, resource)
+    if (!me.isEmployee)
+      return false
+    return resource  &&  utils.compareOrg(me.organization, resource)
   },
   compareOrg(org, resource) {
     let orgId = utils.getId(org)
-    if (resource[TYPE] === ORGANIZATION)
+    if (utils.getType(resource) === ORGANIZATION)
       return utils.getId(resource) === orgId ? true : false
     if (!resource.organization)
       return true

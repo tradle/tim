@@ -4989,6 +4989,11 @@ if (!res[SIG]  &&  res._message)
     //   await this.onAddMessage({msg: msg, isWelcome: true})
     //   return
     // }
+
+    // let parts = product.split('.')
+    // parts[parts.length - 1] = 'My' + parts[parts.length - 1]
+    // let myProductID = parts.join('.')
+    // let myProduct = await this.searchNotMessages({modelName: myProductID, to: org})
     let resource = {
       [TYPE]: PRODUCT_REQUEST,
       requestFor: product,
@@ -8394,6 +8399,9 @@ if (!res[SIG]  &&  res._message)
   async getShareableResourcesForEmployee(params) {
     let {foundResources, to, context} = params
     if (!foundResources)
+      return
+    // no shareable for employee in his employee chat
+    if (me.isEmployee  &&  utils.compareOrg(me.organization, to.organization || to))
       return
     if (context) {
       if (context._appSubmitted)
