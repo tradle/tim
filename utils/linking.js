@@ -30,7 +30,11 @@ const matchURI = uri => {
 async function getInitialURL() {
   const params = await Branch.getLatestReferringParams()
   const url = getUrlFromBundle({ params })
-  if (url) return url
+  if (url) {
+    // prevent entering the chat with the same url after refresh
+    Branch.logout()
+    return url
+  }
 
   return await Linking.getInitialURL()
 }
