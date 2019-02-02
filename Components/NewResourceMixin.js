@@ -1546,7 +1546,7 @@ var styles= StyleSheet.create({
   datePicker: {
     // width: dimensions.width - 30,
     // marginLeft: 10,
-    paddingLeft: utils.isWeb() ? 0 : 10,
+    paddingLeft: 5, //utils.isWeb() ? 0 : 10,
     justifyContent: 'flex-start',
     // borderColor: '#cccccc',
     alignSelf: 'stretch'
@@ -1684,7 +1684,7 @@ var styles= StyleSheet.create({
     borderColor: 'transparent',
     borderWidth: 1.5,
     marginTop: 10,
-    marginHorizontal: 15,
+    paddingHorizontal: 10,
     marginBottom: 5
   },
   dividerText: {
@@ -1707,7 +1707,7 @@ var styles= StyleSheet.create({
     fontSize: 20
   },
   dateLabel: {
-    marginLeft: 10,
+    marginLeft: 15,
     fontSize: 12,
     marginTop: 5,
     // marginVertical: 5,
@@ -1740,9 +1740,9 @@ var styles= StyleSheet.create({
   },
   help: {
     backgroundColor: '#efefef',
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
+    paddingHorizontal: 15,
     paddingTop: 7,
-    paddingHorizontal: 5,
     borderTopWidth: 1,
     borderTopColor: '#cccccc',
     borderBottomWidth: 1,
