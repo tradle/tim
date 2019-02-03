@@ -111,7 +111,7 @@ class RefPropertyEditor extends Component {
     if (isRegistration)
       color = '#eeeeee'
     else if (val)
-      color = isImmutable  &&  linkColor || '#555555'
+      color = /*isImmutable  &&  linkColor ||*/ '#555555'
     else
       color = '#AAAAAA'
     let propView
@@ -134,7 +134,13 @@ class RefPropertyEditor extends Component {
       }
     }
 
-    let iconColor = isRegistration && '#eeeeee' || linkColor
+    let iconColor
+    if (isRegistration)
+      iconColor =  '#eeeeee'
+    else if (isImmutable)
+      iconColor = '#555'
+    else
+      iconColor = linkColor
     let icon
     if (!isImmutable) {
       if (isVideo)
@@ -144,8 +150,10 @@ class RefPropertyEditor extends Component {
       else if (isIdentity)
         icon = <Icon name='ios-qr-scanner' size={25}  color={linkColor} style={val && styles.photoIcon || styles.photoIconEmpty}/>
       else
-        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor}  style={styles.customIcon} />
+        icon = <Icon name='ios-arrow-down'  size={15}  color={iconColor} style={styles.customIcon} />
     }
+    else
+      icon = <Icon name='ios-lock-outline' size={25} color={iconColor} style={styles.immutable} />
     let content = <View  style={[styles.chooserContainer, {flexDirection: 'row', justifyContent: 'space-between'}]}>
                     {propView}
                     {icon}
@@ -153,7 +161,9 @@ class RefPropertyEditor extends Component {
 
     let help = paintHelp(prop)
     let actionItem
-    if (isIdentity && !isWeb())
+    if (isImmutable)
+      actionItem = content
+    else if (isIdentity && !isWeb())
        actionItem = <TouchableOpacity onPress={() => this.scanQRAndSet(prop)}>
                       {content}
                     </TouchableOpacity>
@@ -170,8 +180,6 @@ class RefPropertyEditor extends Component {
                        {content}
                      </TouchableOpacity>
     }
-    else if (isImmutable)
-      actionItem = content
     else if (!utils.isEnum(prop.ref  ||  prop.items.ref)  && (prop.inlined  ||  utils.getModel(prop.ref).inlined)) {
       actionItem = <TouchableOpacity onPress={this.createNew.bind(this, prop)}>
                      {content}
@@ -282,7 +290,7 @@ class RefPropertyEditor extends Component {
     if (scanner) {
       if (scanner === 'id-document') {
         if (pName === 'scan')  {
-          if (resource.documentType  &&  resource.country) {
+          if (resource.documentType) { //  &&  resource.country) {
             this.showRegulaScanner(params)
             // this.showBlinkIDScanner(pName)
           }
@@ -353,6 +361,8 @@ class RefPropertyEditor extends Component {
       debug('regula scan failed:', err.message)
       debugger
     }
+    if (result.canceled)
+      return
     if (!result) {
       Alert.alert(translate('retryScanning', translateEnum(resource.documentType)))
       return
