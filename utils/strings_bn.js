@@ -329,5 +329,6 @@ module.exports = {
   "scanYourDocument": "আপনার নথি স্ক্যান করুন",
   "wipeTheAppData": "অ্যাপ্লিকেশন তথ্য মুছা",
   "enterPasswordOrWipeOutTheAppData": "পাসওয়ার্ড প্রবেশ করুন বা অ্যাপ্লিকেশন তথ্য মুছা",
-  "pleaseChooseCountryAndDT": "প্রথমে দেশ এবং নথি টাইপ নির্বাচন করুন"
+  "pleaseChooseCountryAndDT": "প্রথমে দেশ এবং নথি টাইপ নির্বাচন করুন",
+  "dateInTheFutureError": "{1} ভবিষ্যতে"
 }
