@@ -329,5 +329,6 @@ module.exports = {
   "wrongDocumentTypePleaseTryAgain": "Tipo de documento incorrecto. Inténtalo de nuevo",
   "wipeTheAppData": "Borrar los datos de la aplicación",
   "enterPasswordOrWipeOutTheAppData": "Introduzca la contraseña o borre los datos de la aplicación",
-  "pleaseChooseCountryAndDT": "Por favor, elija el país y el tipo de documento primero"
+  "pleaseChooseCountryAndDT": "Por favor, elija el país y el tipo de documento primero",
+  "dateInTheFutureError": "{1} está en el futuro"
 }

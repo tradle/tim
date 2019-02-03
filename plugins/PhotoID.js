@@ -29,7 +29,7 @@ module.exports = function PhotoID ({ models }) {
       if (form[TYPE] !== PHOTO_ID)
         return
 
-      const { documentType, scanJson, otherSideScan, otherSideToScan, dateOfExpiry, dateOfBirth } = form
+      const { documentType, scanJson, otherSideScan, otherSideToScan, dateOfExpiry, dateOfBirth, dateOfIssue } = form
       if (!documentType  ||  Array.isArray(documentType))
         return
       let isOther = form.documentType.id.indexOf('_other') !== -1
@@ -106,6 +106,13 @@ module.exports = function PhotoID ({ models }) {
             cleanedup.message = 'The document has invalid date of birth. ' + message
             return cleanedup
           }
+        }
+      }
+      if (dateOfIssue) {
+        if (dateOfIssue > Date.now()) {
+          if (message.length)
+            message += ' '
+          message += translate('dateInTheFutureError', translate(model.properties.dateOfIssue))
         }
       }
       let prop = !isPassport  &&  (isLicence && 'licence' || 'id')
