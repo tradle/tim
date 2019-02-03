@@ -1613,6 +1613,9 @@ var styles= StyleSheet.create({
     right: 0,
     marginTop: 12
   },
+  immutable: {
+    marginTop: 15
+  },
   input: {
     backgroundColor: 'transparent',
     color: '#aaaaaa',
