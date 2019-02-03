@@ -42,7 +42,7 @@ const regulaScan = (function () {
     } catch (err) {
       // debugger
       console.log('regula scan failed: ' + JSON.stringify(scanOpts, 0, 2), err.stack)
-      return { canceled: err.message === 'Canceled by user' }
+      return { canceled: err.message === 'Cancelled by user' || err.message === 'Canceled by user'}
     }
     if (!result)
       return
