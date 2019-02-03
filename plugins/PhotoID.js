@@ -56,7 +56,6 @@ module.exports = function PhotoID ({ models }) {
         }
       }
 
-
       console.log('PhotoID: requesting additional properties for Driver Licence')
 
       let message = ''
@@ -64,6 +63,7 @@ module.exports = function PhotoID ({ models }) {
       let isLicence = documentType.title.indexOf('Licence') !== -1
       let isPassport = !isLicence  &&  documentType.title.indexOf('Passport') !== -1
       let countryId = form.country  &&  form.country.id.split('_')[1]
+      let cleanedup
       if (scan) {
         let { document } = scan
         let countryCCA
@@ -77,8 +77,10 @@ module.exports = function PhotoID ({ models }) {
           let country = countryModel.enum.find(country => country.id === countryCCA || country.cca3 === countryCCA)
           if (!country)
             message = translate('invalidCountry', countryCCA)
+
           if (!country  ||  country.id !== countryId) {
-            cleanupValues(form, scan, model)
+            message = translate('invalidCountry', countryCCA)
+            cleanedup = cleanupValues(form, scan, model)
             scan = null
           }
         }
@@ -88,9 +90,10 @@ module.exports = function PhotoID ({ models }) {
       let requestedProperties = getRequestedProps({scan, model, form, countryId})
       if (dateOfExpiry) {
         if (dateOfExpiry < new Date().getTime()) {
-          let ret = cleanupValues(form, scan, model)
-          ret.message = 'The document has expired. ' + message
-          return ret
+          if (!cleanedup)
+            cleanedup = cleanupValues(form, scan, model)
+          cleanedup.message = 'The document has expired. ' + message
+          return cleanedup
         }
       }
       if (dateOfBirth) {
@@ -98,9 +101,10 @@ module.exports = function PhotoID ({ models }) {
         if (isLicence) {
           let age = new Date().getYear() - new Date(dateOfBirth).getYear()
           if (age < 18) {
-            let ret = cleanupValues(form, scan, model)
-            ret.message = 'The document has invalid date of birth. ' + message
-            return ret
+            if (!cleanedup)
+              cleanedup = cleanupValues(form, scan, model)
+            cleanedup.message = 'The document has invalid date of birth. ' + message
+            return cleanedup
           }
         }
       }
@@ -185,17 +189,22 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
         requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'middleName'}, {name: 'address_group'}, {name: 'city'}, {name: 'document_group'}, {name: 'documentVersion'}]
       else
         requestedProperties.push({name: 'issuer'})
+      requestedProperties.splice(1, 0, {name: 'country'})
     }
     else {
       if (isID) {
         requestedProperties = [{name: 'otherSideScan'}, {name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
         if (form.middleName)
           requestedProperties.splice(2, 0, {name: 'middleName'})
+        requestedProperties.splice(1, 0, {name: 'country'})
       }
-      else if (isOther)
-        requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
-      else
-        requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
+      else {
+        if (isOther)
+          requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'idCardDocument_group'}]
+        else
+          requestedProperties = [{name: 'personal_group'}, {name: 'nationality'}, {name: 'sex'}, {name: 'document_group'}]
+        requestedProperties.splice(0, 0, {name: 'country'})
+      }
     }
     return requestedProperties
   // }
@@ -233,13 +242,13 @@ function getRequestedProps({scan, model, requestedProperties, form, countryId}) 
 }
 function cleanupValues(form, values, model) {
   let props = model.properties
-  let exclude = [ 'country' ]
+  let exclude = []
   for (let p in values) {
     if (exclude.includes(p))
       continue
     let val = values[p]
     if (typeof val === 'object')
-      cleanupValues(form, val, model)
+      cleanupValues(form, val, model, exclude)
     else if (!props[p]) {
       if (p === 'birthData')
         delete form[p]
