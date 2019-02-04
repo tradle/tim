@@ -78,7 +78,7 @@ const normalizeResult = ({results, json}) => {
       country: json.ft_Country,
       dateOfBirth: json.ft_Date_of_Birth,
       nationality: json.ft_Nationality_Code,
-      sec: json.ft_Sex
+      sex: json.ft_Sex
     },
     document: {
       dateOfExpiry: json.ft_Date_of_Expiry,
