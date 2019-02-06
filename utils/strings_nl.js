@@ -329,6 +329,6 @@ module.exports = {
   "resetApp": "Reset app",
   "wipeTheAppData": "Wis de app-gegevens",
   "enterPasswordOrWipeOutTheAppData": "Voer een wachtwoord in of wis de app-gegevens",
-  "pleaseChooseCountryAndDT": "Kies eerst het land en het documenttype",
-  "dateInTheFutureError": "{1} is in de toekomst"
+  "dateInTheFutureError": "{1} is in de toekomst",
+  "pleaseChooseDT": "Kies eerst het documenttype"
 }

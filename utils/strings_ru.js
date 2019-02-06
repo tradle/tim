@@ -329,6 +329,6 @@ module.exports = {
   "invalidCountry": "Неверная страна отсканирована",
   "wipeTheAppData": "Протрите данные приложения",
   "enterPasswordOrWipeOutTheAppData": "Введите пароль или стереть данные приложения",
-  "pleaseChooseCountryAndDT": "Пожалуйста, сначала выберите страну и тип документа",
-  "dateInTheFutureError": "{1} в будущем"
+  "dateInTheFutureError": "{1} в будущем",
+  "pleaseChooseDT": "Пожалуйста, сначала выберите тип документа"
 }
