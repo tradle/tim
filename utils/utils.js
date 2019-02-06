@@ -1598,9 +1598,10 @@ var utils = {
   isRM(application) {
     if (!application)
       return
-    let myIdentity = utils.getId(utils.getMe()).replace(PROFILE, IDENTITY)
+    let myIdentity = utils.getRootHash(utils.getMe()) //utils.getId(utils.getMe()).replace(PROFILE, IDENTITY)
+    // let permalink = utils.getRootHash(myIdentity)
     if (application.relationshipManagers)
-      return application.relationshipManagers.some((r) => utils.getId(r) === myIdentity)
+      return application.relationshipManagers.some((r) => utils.getRootHash(r) === myIdentity)
   },
   scrollComponentIntoView (container, component) {
     const handle = platformUtils.getNode(component)
