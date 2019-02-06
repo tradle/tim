@@ -277,7 +277,7 @@ class ShowPropertiesView extends Component {
           return
         val = <Text style={styles.title}>{NOT_SPECIFIED}</Text>
       }
-      let checkForCorrection = this.getCheckForCorrection(pMeta)
+      let checkForCorrection = !model.notEditable  && !pMeta.immutable &&  !pMeta.readOnly  &&  this.getCheckForCorrection(pMeta)
       if (!isRef) {
         if (isPartial  &&  p === 'leaves') {
           viewCols.push(this.addForPartial(val, styles))
