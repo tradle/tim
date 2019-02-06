@@ -69,6 +69,7 @@ const NEXT_FORM_REQUEST = 'tradle.NextFormRequest'
 const PRODUCT_REQUEST = 'tradle.ProductRequest'
 const TOUR = 'tradle.Tour'
 const REFRESH = 'tradle.Refresh'
+const SELFIE = 'tradle.Selfie'
 
 const NAV_BAR_HEIGHT = ENV.navBarHeight
 var currentMessageTime
@@ -82,19 +83,23 @@ class MessageList extends Component {
   constructor(props) {
     super(props);
     currentMessageTime = null;
+    let { resource, filter, application, navigator } = props
     this.state = {
       isLoading: true,
       // selectedAssets: {},
-      isConnected: props.navigator.isConnected,
+      isConnected: navigator.isConnected,
       // onlineStatus: props.resource._online,
       allContexts: true,  // true - for the full chat; false - filtered chat for specific context.
-      isEmployee:  props.resource  &&  utils.isEmployee(props.resource),
-      filter: props.filter,
+      isEmployee:  resource  &&  utils.isEmployee(resource),
+      filter: filter,
       userInput: '',
       list: [],
       limit: LIMIT,
-      hasProducts: props.resource  &&  this.hasProducts(props.resource),
+      hasProducts: resource  &&  this.hasProducts(resource),
       allLoaded: false
+    }
+    if (application  &&  utils.isRM(application)) {
+      this.state.additionalForms = this.getAdditionalForms(application)
     }
     this.onLoadEarlierMessages = debounce(this.onLoadEarlierMessages.bind(this), 200)
     this.shareWith = this.shareWith.bind(this)
@@ -599,7 +604,10 @@ class MessageList extends Component {
     // let newTitle = title + (dn ? ' -- ' + dn : '');
     let newTitle = (dn ? dn + ' -- '  : '') + title;
     // Check if I am a customer or a verifier and if I already verified this resource
-    let isVerifier = application ? utils.isRM(application) : !verification && utils.isVerifier(r)
+    let isVerifier
+    if (!model.notEditable) {
+      isVerifier = application  ? utils.isRM(application) : !verification && utils.isVerifier(r)
+    }
     let { resource, bankStyle, currency } = this.props
     let lensId = utils.getLensId(r, resource)
     if (!verification  &&  utils.getType(resource) === VERIFICATION)
@@ -949,7 +957,7 @@ class MessageList extends Component {
     const push = btn => buttons.push({ ...btn, index: buttons.length })
 
     if (application) {
-      if (!utils.isRM(application)  ||  !this.hasAdditionalForms(application))
+      if (!utils.isRM(application)  ||  !this.state.additionalForms)//this.hasAdditionalForms(application))
         return
 
       push({
@@ -996,7 +1004,7 @@ class MessageList extends Component {
       backButtonTitle: 'Back',
       sceneConfig: Navigator.SceneConfigs.FloatFromBottom,
       passProps: {
-        strings:   model.additionalForms,
+        strings:   this.state.additionalForms, // model.additionalForms,
         bankStyle: this.props.bankStyle,
         callback:  (val) => {
           let m = utils.getModel(val)
@@ -1140,17 +1148,35 @@ class MessageList extends Component {
   paintMenuButton() {
     let { application } = this.props
     if (application) {
-      if (!utils.isRM(application)  ||  !this.hasAdditionalForms(application))
+      if (!utils.isRM(application)  ||  this.state.additionalForms) // !this.hasAdditionalForms(application))
         return
     }
     return  <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
               <Icon name={MenuIcon.name}  size={33}  color={MenuIcon.color} />
             </View>
   }
-  hasAdditionalForms(application) {
+  getAdditionalForms(application) {
     let m = utils.getModel(application.requestFor)
-    return m.additionalForms != null
+    if (m.additionalForms != null)
+      return m.additionalForms
+    let additionalForms = m.forms.filter(f => {
+      if (f === SELFIE)
+        return true
+      let m = utils.getModel(f)
+      let scanner = utils.getPropertiesWithAnnotation(m, 'scanner')
+      if (Object.keys(scanner))
+        return true
+      let signature = utils.getPropertiesWithAnnotation(m, 'signature')
+      if (Object.keys(signature))
+        return true
+      return false
+    })
+    return additionalForms.length  &&  additionalForms
   }
+  // hasAdditionalForms(application) {
+  //   let m = utils.getModel(application.requestFor)
+  //   return m.additionalForms != null
+  // }
   onLoadEarlierMessages(oldestMessage = {}, callback = () => {}) {
     if (this.state.allLoaded)
       return

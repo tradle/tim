@@ -329,6 +329,6 @@ module.exports = {
   "invalidCountry": "Quốc gia không hợp lệ được quét",
   "enterPasswordOrWipeOutTheAppData": "Nhập mật khẩu hoặc xóa dữ liệu ứng dụng",
   "wipeTheAppData": "Xóa dữ liệu ứng dụng",
-  "pleaseChooseCountryAndDT": "Vui lòng chọn quốc gia và loại tài liệu trước",
-  "dateInTheFutureError": "{1} là trong tương lai"
+  "dateInTheFutureError": "{1} là trong tương lai",
+  "pleaseChooseDT": "Vui lòng chọn loại tài liệu đầu tiên"
 }

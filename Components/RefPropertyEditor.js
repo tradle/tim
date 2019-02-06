@@ -298,7 +298,7 @@ class RefPropertyEditor extends Component {
             // this.showBlinkIDScanner(pName)
           }
           else
-            Alert.alert(translate('pleaseChooseCountryAndDT'))
+            Alert.alert(translate('pleaseChooseDT'))
           return
         }
       }

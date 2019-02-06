@@ -329,6 +329,6 @@ module.exports = {
   "wrongDocumentTypePleaseTryAgain": "Maling uri ng dokumento. Ulitin mo ulit",
   "wipeTheAppData": "Linisan ang data ng app",
   "enterPasswordOrWipeOutTheAppData": "Ipasok ang password o punasan ang data ng app",
-  "pleaseChooseCountryAndDT": "Mangyaring pumili ng bansa at uri ng dokumento muna",
-  "dateInTheFutureError": "{1} ay sa hinaharap"
+  "dateInTheFutureError": "{1} ay sa hinaharap",
+  "pleaseChooseDT": "Mangyaring pumili ng uri ng dokumento muna"
 }

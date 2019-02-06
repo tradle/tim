@@ -329,6 +329,6 @@ module.exports = {
   "scanYourDocument": "សូមវិភាគឯកសាររបស់អ្នក",
   "enterPasswordOrWipeOutTheAppData": "បញ្ចូលពាក្យសម្ងាត់ឬលុបទិន្នន័យកម្មវិធី",
   "wipeTheAppData": "លុបទិន្នន័យកម្មវិធី",
-  "pleaseChooseCountryAndDT": "សូមជ្រើសរើសប្រទេសនិងប្រភេទឯកសារជាមុន",
-  "dateInTheFutureError": "{1} គឺនាពេលអនាគត"
+  "dateInTheFutureError": "{1} គឺនាពេលអនាគត",
+  "pleaseChooseDT": "សូមជ្រើសរើសប្រភេទឯកសារជាមុនសិន"
 }

@@ -295,10 +295,10 @@ class MessageView extends Component {
       parentMeta: model,
       passProps: {
         bankStyle: this.state.bankStyle || this.props.bankStyle,
-        resource: resource,
+        resource,
         currency: this.props.currency,
-        document: document,
-        isVerifier: isVerifier
+        document,
+        isVerifier
       }
     }
     this.props.navigator.push(route);
@@ -356,6 +356,9 @@ class MessageView extends Component {
                                         showVerification={this.showVerification}/>
     // Don't show photostrip on backlink tab
     let photoStrip
+    let checkProps
+    if (!isVerification && isVerifier) /* && !utils.isReadOnlyChat(resource)*/
+      checkProps = this.onCheck
     if (!checkProps) {
       let photoList
       if (!backlink && photos  &&  photos.length > 1) {
@@ -375,9 +378,6 @@ class MessageView extends Component {
                     {verificationTxID}
                   </View>
 
-    let checkProps
-    if (!isVerification && isVerifier) /* && !utils.isReadOnlyChat(resource)*/
-      checkProps = this.onCheck
     let actionPanel, allowToAddBacklink
     if (/*this.props.isReview  || */ isVerificationTree)
       actionPanel = content

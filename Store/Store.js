@@ -524,15 +524,14 @@ var Store = Reflux.createStore({
   //   // this.postHistory()
   // },
 
-  onAcceptTermsAndChat(params) {
+  async onAcceptTermsAndChat(params) {
     me._termsAccepted = true;
-    return this.dbPut(utils.getId(me), me)
-    .then(() =>  {
-      this.setMe(me)
-      let bot = this._getItem(utils.makeId(PROFILE, params.bot))
-      let provider = this._getItem(bot.organization)
-      this.trigger({action: 'getProvider', provider: provider, termsAccepted: true})
-    })
+    await this.dbPut(utils.getId(me), me)
+
+    this.setMe(me)
+    let bot = this._getItem(utils.makeId(PROFILE, params.bot))
+    let provider = this._getItem(bot.organization)
+    this.trigger({action: 'getProvider', provider: provider, termsAccepted: true})
   },
   async getReady() {
     let me
@@ -609,7 +608,7 @@ var Store = Reflux.createStore({
     if (!objId)
       return
     let r = this._getItem(objId)
-
+debug('sent:', r)
     if (r && r._sendStatus !== SENT) {
       r._msg = link
       r._sendStatus = SENT
@@ -622,9 +621,9 @@ var Store = Reflux.createStore({
       this.rewriteStubs(res)
       this.addVisualProps(res)
       this.trigger({action: 'updateItem', sendStatus: SENT, resource: res})
-      this.dbPut(objId, r)
+      await this.dbPut(objId, r)
     }
-    let msg = await meDriver.objects.get(link)
+    // let msg = await meDriver.objects.get(link)
     // this.maybeWatchSeal(msg)
   },
   async newObject (msg) {
@@ -891,47 +890,36 @@ var Store = Reflux.createStore({
     // Alert.alert('Store: ' + isConnected)
   },
 
-  getMe() {
-    return db.get(MY_IDENTITIES)
-    .then((value) => {
-      if (value) {
-        let key = MY_IDENTITIES
-        this._setItem(key, value)
-        return db.get(value.currentIdentity.replace(PROFILE, IDENTITY))
-      }
-    })
-    .then ((value) => {
-      this._setItem(utils.getId(value), value)
-      return db.get(utils.getId(value).replace(IDENTITY, PROFILE))
-    })
-    .then((value) => {
-      me = value
-      let changed
-      if (me.isAuthenticated) {
-        // if (Date.now() - me.dateAuthenticated > AUTHENTICATION_TIMEOUT) {
-        delete me.isAuthenticated
-        delete me.dateAuthenticated
-        changed = true
-        // }
-      }
-      // HACK for the case if employee removed
-      if (me.isEmployee  &&  !me.organization) {
-        delete me.isEmployee
-        changed = true
-      }
+  async getMe() {
+    let value = await db.get(MY_IDENTITIES)
+    if (!value)
+      return
 
-      if (changed)
-        this.dbPut(utils.getId(me), me)
+    this._setItem(MY_IDENTITIES, value)
+    value = await db.get(value.currentIdentity.replace(PROFILE, IDENTITY))
 
-      this.setMe(me)
-      let key = utils.getId(me)
-      this._setItem(key, me)
-      return me
-    })
-    // .catch(function(err) {
-      // debugger
-      // return self.loadModels()
-    // })
+    this._setItem(utils.getId(value), value)
+    value = await db.get(utils.getId(value).replace(IDENTITY, PROFILE))
+
+    me = value
+    let changed
+    if (me.isAuthenticated) {
+      delete me.isAuthenticated
+      delete me.dateAuthenticated
+      changed = true
+    }
+    // HACK for the case if employee removed
+    if (me.isEmployee  &&  !me.organization) {
+      delete me.isEmployee
+      changed = true
+    }
+
+    if (changed)
+      await this.dbPut(utils.getId(me), me)
+
+    this.setMe(me)
+    this._setItem(utils.getId(me), me)
+    return me
   },
   setMe(newMe) {
     me = newMe
@@ -953,23 +941,23 @@ var Store = Reflux.createStore({
     utils.setMe(me)
     this._resolveWithMe(me)
   },
-  onUpdateMe(params) {
+  async onUpdateMe(params) {
     let r = _.clone(me)
     _.extend(r, params)
     this.setMe(r)
     let meId = utils.getId(r)
     this._setItem(meId, r)
-    return this.dbPut(meId, r)
+    await this.dbPut(meId, r)
       // .then(() => {
       //   if (params.registered) {
       //     this.trigger({action: 'registered'})
       //   } else if (params)
       // })
   },
-  onSetAuthenticated(authenticated) {
+  async onSetAuthenticated(authenticated) {
     if (!authenticated && meDriver) meDriver.pause()
 
-    this.onUpdateMe({
+    await this.onUpdateMe({
       isAuthenticated: authenticated,
       dateAuthenticated: Date.now()
     })
@@ -1168,7 +1156,7 @@ var Store = Reflux.createStore({
         })
         SERVICE_PROVIDERS_BASE_URLS = urls
         if (updateSettings)
-          this.dbPut(settingsId, settings)
+          await this.dbPut(settingsId, settings)
       }
       else {
         SERVICE_PROVIDERS_BASE_URLS = SERVICE_PROVIDERS_BASE_URL_DEFAULTS ? SERVICE_PROVIDERS_BASE_URL_DEFAULTS.slice() : []
@@ -1181,7 +1169,7 @@ var Store = Reflux.createStore({
           urlToId: {}
         }
         this._setItem(settingsId, settings)
-        this.dbPut(settingsId, settings)
+        await this.dbPut(settingsId, settings)
       }
     }
 
@@ -1377,7 +1365,7 @@ var Store = Reflux.createStore({
           if (this.client) {
             c = await this._getItemFromServer(cId)
             if (r[TYPE] === ASSIGN_RM) {
-              this.dbPut(cId, c)
+              await this.dbPut(cId, c)
               this._setItem(cId, c)
             }
           }
@@ -1785,7 +1773,7 @@ var Store = Reflux.createStore({
   onVerifyOrCorrect({resource}) {
     this.trigger({action: 'verifyOrCorrect', resource})
   },
-  addToSettings(provider) {
+  async addToSettings(provider) {
     let r = this._getItem(SETTINGS + '_1')
     if (!r.hashToUrl)
       r.hashToUrl = {}
@@ -1793,7 +1781,7 @@ var Store = Reflux.createStore({
     // save provider's employee
     // if (!hashToUrl[provider.hash]) {
     r.hashToUrl[provider.hash] = getProviderUrl(provider)
-    return this.dbPut(SETTINGS + '_1', r)
+    await this.dbPut(SETTINGS + '_1', r)
     // }
   },
 
@@ -2313,9 +2301,6 @@ var Store = Reflux.createStore({
     }
     if (env.dbID)
       return
-    // if (!env.regula  ||  env.regula.dbID)
-    //   return
-
     let dbID
     if (SERVICE_PROVIDERS.length > 1)
       dbID = 'Full'
@@ -2326,16 +2311,13 @@ var Store = Reflux.createStore({
 
     // // Check is DB was already prepared
     const reg = require('../utils/regula')
-    // let defer = Q.defer()
-    reg.prepareDatabase(dbID) //, defer.promise)
-    .then(() => {
+    try {
+      await reg.prepareDatabase(dbID)
       _.set(env, 'dbID', dbID)
-      return db.put(MY_REGULA, env)
-    })
-    .catch((err) => {
+      await db.put(MY_REGULA, env)
+    } catch(err) {
       debug('Error preparing Regula DB')
-      // debugger
-    })
+    }
   },
   parseProvider(sp, params, providerIds, newProviders) {
     if (!params)
@@ -2443,8 +2425,8 @@ var Store = Reflux.createStore({
     if (sp.tour)
       org._tour = sp.tour
 
-    this.configProvider(sp, org)
-    this.resetForEmployee(me, org)
+    await this.configProvider(sp, org)
+    await this.resetForEmployee(me, org)
     batch.push({type: 'put', key: okey, value: org})
 
     org._online = true
@@ -2538,7 +2520,7 @@ var Store = Reflux.createStore({
     let orgSp = SERVICE_PROVIDERS.filter((r) => utils.getId(r.org) === okey)[0]
     return { ...common, id: orgSp.id, url: orgSp.url, identity: sp.bot.pub}
   },
-  resetForEmployee(me, org) {
+  async resetForEmployee(me, org) {
     if (!me  ||  !me.isEmployee  ||  utils.getId(me.organization) !== utils.getId(org))
       return
     let myOrg = me.organization
@@ -2548,9 +2530,9 @@ var Store = Reflux.createStore({
     myOrg._canShareContext = org._canShareContext
     myOrg._hasSupportLine = org._hasSupportLine
     this.setMe(me)
-    this.dbPut(utils.getId(me), me)
+    await this.dbPut(utils.getId(me), me)
   },
-  configProvider(sp, org) {
+  async configProvider(sp, org) {
     let config = sp.publicConfig
     if (!config)
       return
@@ -2591,7 +2573,7 @@ var Store = Reflux.createStore({
           }
         }
         this._setItem(orgId, org)
-        this.dbPut(orgId, org)
+        await this.dbPut(orgId, org)
       }
     }
     if (org._hidePropertyInEdit)
@@ -2680,7 +2662,7 @@ var Store = Reflux.createStore({
     }
 
     if (batch.length)
-      return db.batch(batch)
+      await db.batch(batch)
   },
   findKey (keys, where) {
     var match
@@ -2931,20 +2913,23 @@ var Store = Reflux.createStore({
       }
     })
     .then((pubkeys) => {
-      if (pubkeys) {
+      if (pubkeys)
+        return self.packMessage(toChain, r.from, r.to, context)
+    })
+    .then((sendParams) => {
+      if (!sendParams)
+        return
         // let sendParams = self.packMessage(r, toChain)
-        let sendParams = self.packMessage(toChain, r.from, r.to, context)
-        if (disableAutoResponse) {
-          if (!sendParams.other)
-            sendParams.other = {}
-          sendParams.other.disableAutoResponse = true
-        }
-        const method = toChain[SIG] ? 'send' : 'signAndSend'
-        return self.meDriverExec(method, sendParams)
-        .catch(function (err) {
-          debugger
-        })
+      if (disableAutoResponse) {
+        if (!sendParams.other)
+          sendParams.other = {}
+        sendParams.other.disableAutoResponse = true
       }
+      const method = toChain[SIG] ? 'send' : 'signAndSend'
+      return self.meDriverExec(method, sendParams)
+      .catch(function (err) {
+        debugger
+      })
     })
     .then((result) => {
       if (!requestForForm  &&  isWelcome)
@@ -3058,7 +3043,7 @@ var Store = Reflux.createStore({
     await db.batch(batch)
     this.addMessagesToChat(utils.getId(to), r)
   },
-  packMessage(toChain, from, to, context) {
+  async packMessage(toChain, from, to, context) {
     var sendParams = {}
     if (toChain[CUR_HASH]) {
       sendParams.link = toChain[CUR_HASH]
@@ -3144,7 +3129,7 @@ var Store = Reflux.createStore({
         if (c) {
           c.lastMessageTime = new Date().getTime()
           c._formsCount = c._formsCount ? ++c._formsCount : 1
-          this.dbPut(utils.getId(context), c)
+          await this.dbPut(utils.getId(context), c)
         }
       }
     }
@@ -3511,17 +3496,17 @@ var Store = Reflux.createStore({
       if (!isReadOnly) {
         doc._verificationsCount = !doc._verificationsCount ? 1 : ++doc._verificationsCount
         this.dbBatchPut(docId, doc, batch);
-        this.addBacklinksTo(ADD, me, r, batch)
+        await this.addBacklinksTo(ADD, me, r, batch)
         this.setMe(me)
         this.trigger({action: 'addItem', resource: utils.clone(me)})
-        this.addBacklinksTo(ADD, this._getItem(r.from), r, batch)
+        await this.addBacklinksTo(ADD, this._getItem(r.from), r, batch)
       }
       if (r.sources) {
         let docs = []
         getDocs(r.sources, docId, docs)
         let supportingDocs = docs.map((r) => this.buildRef(r, dontSend))
         doc._supportingDocuments = supportingDocs
-        this.dbPut(docId, doc)
+        await this.dbPut(docId, doc)
         this._setItem(docId, doc)
       }
     }
@@ -4081,7 +4066,7 @@ if (!res[SIG]  &&  res._message)
     let r = this._getItem(rId)
     r._documentCreated = true
     this.trigger({action: 'addItem', resource: r})
-    this.dbPut(rId, r)
+    await this.dbPut(rId, r)
     let context = resource._context
     // prepare some whitespace
     const numRows = 5
@@ -4490,7 +4475,7 @@ if (!res[SIG]  &&  res._message)
     //       fr._document = utils.getId(returnVal)//resource) /// NEW
           let key = utils.getId(fr)
           self._setItem(key, fr)
-          self.dbPut(key, fr)
+          await self.dbPut(key, fr)
     //       self.trigger({action: 'addItem', resource: fr})
         }
     //   }
@@ -4797,7 +4782,7 @@ if (!res[SIG]  &&  res._message)
 
         if (!isSavedItem  &&  !isBookmark) {
           if (!doNotSend) {
-            let sendParams = self.packMessage(returnVal)
+            let sendParams = await self.packMessage(returnVal)
             await self.meDriverSend(sendParams)
           }
         }
@@ -4881,7 +4866,7 @@ if (!res[SIG]  &&  res._message)
           // Draft project
           // self.trigger({action: 'getItem', resource: returnVal, to: org})
           self.trigger({action: 'updateItem', resource: prevResCached, to: org})
-          self.dbPut(prevResId, prevResCached)
+          await self.dbPut(prevResId, prevResCached)
           self._setItem(prevResId, prevRes)
         }
         if (!isNew  ||  self.getModel(rtype).subClassOf !== FORM)
@@ -4922,18 +4907,18 @@ if (!res[SIG]  &&  res._message)
         return
       // Check the current form request as fulfilled since there is going
       // to be a fresh one after updating the resource
+      let promises = []
       allFormRequests.forEach((r) => {
-        if (!r._documentCreated) {
-          if (r.product === REFRESH_PRODUCT)
-            return
-          r._documentCreated = true
-          self._getItem(r)._documentCreated = true
-          self.addVisualProps(r)
-          self.dbPut(utils.getId(r), r)
-          self.trigger({action: 'updateItem', resource: r})
-          // self.trigger({action: 'addItem', resource: r})
-        }
+        if (r._documentCreated  ||  r.product === REFRESH_PRODUCT)
+          return
+        r._documentCreated = true
+        self._getItem(r)._documentCreated = true
+        self.addVisualProps(r)
+        promises.push(self.dbPut(utils.getId(r), r))
+        self.trigger({action: 'updateItem', resource: r})
       })
+      if (promises.length)
+        await Q.all(promises)
     }
     async function save(returnVal, noTrigger, lens) {
       let r = {
@@ -5301,9 +5286,9 @@ if (!res[SIG]  &&  res._message)
         permalink = originatingResource[TYPE] === ORGANIZATION
                   ?  this.getRepresentative(originatingResource)[ROOT_HASH]
                   :  originatingResource[ROOT_HASH]
+      try {
+        let data = await this.createObject(msg)
 
-      return this.createObject(msg)
-      .then((data) => {
         let shareContext = utils.clone(msg)
         shareContext.from = this.buildRef(me)
         let time = new Date().getTime()
@@ -5314,7 +5299,7 @@ if (!res[SIG]  &&  res._message)
         let hash = data.link
         shareContext[ROOT_HASH] = shareContext[CUR_HASH] = hash
         let key = utils.getId(shareContext)
-        this.dbPut(key, shareContext)
+        await this.dbPut(key, shareContext)
         this._setItem(key, shareContext)
         this.addMessagesToChat(shareContext.to.id, shareContext, false, time)
         this.trigger({action: 'addMessage', resource: shareContext})
@@ -5325,11 +5310,10 @@ if (!res[SIG]  &&  res._message)
             context: resource.contextId //resource[ROOT_HASH]
           }      // let sendParams = {
         }
-        return this.meDriverSend(sendParams)
-      })
-      .catch((err) => {
+        await this.meDriverSend(sendParams)
+      } catch(err) {
         debugger
-      })
+      }
     }
     let document = resource.document
     if (document  &&  document[TYPE] === LEGAL_ENTITY) {
@@ -5405,7 +5389,7 @@ if (!res[SIG]  &&  res._message)
         id: utils.makeId(IDENTITY, to[ROOT_HASH], to[CUR_HASH]),
       }]
     }
-    let msg = this.packMessage(sr, me, to)
+    let msg = await this.packMessage(sr, me, to)
     if (!msg.other)
       msg.other = {}
     msg.other.context = formRequest._context.contextId
@@ -5955,7 +5939,7 @@ if (!res[SIG]  &&  res._message)
         let to = this._getItem(toId)
         if (!to.bot) {
           to._unread = 0
-          this.dbPut(toId, to)
+          await this.dbPut(toId, to)
           .then(() => {
             this.trigger({action: 'updateRow', resource: to})
           })
@@ -8858,7 +8842,7 @@ if (!res[SIG]  &&  res._message)
     if (isMessage  &&  isNew) {
       if (isForm)
         this.addLastMessage(value, batch)
-      this.addBacklinksTo(ADD, me, value, batch)
+      await this.addBacklinksTo(ADD, me, value, batch)
       if (value[TYPE] === SELFIE) {
         me = utils.clone(me)
         if (!me.photos)
@@ -8879,7 +8863,7 @@ if (!res[SIG]  &&  res._message)
               : this._getItem(value.from)
       if (toR.organization) {
         this.addVisualProps(value)
-        this.addBacklinksTo(ADD, this._getItem(toR.organization), value, batch)
+        await this.addBacklinksTo(ADD, this._getItem(toR.organization), value, batch)
       }
     }
     if (iKey === meId) {
@@ -8926,7 +8910,7 @@ if (!res[SIG]  &&  res._message)
 
           me.language = lang
           me.languageCode = lang[ROOT_HASH]
-          this.dbPut(iKey, value)
+          await this.dbPut(iKey, value)
           this.setMe(me)
           var urls = []
           // if (SERVICE_PROVIDERS.length) {
@@ -9082,7 +9066,7 @@ if (!res[SIG]  &&  res._message)
     this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION, isTest}), isTest, forceUpdate: true})
   },
 
-  addBacklinksTo(action, resource, msg, batch) {
+  async addBacklinksTo(action, resource, msg, batch) {
     let msgModel = this.getModel(utils.getType(msg))
 
     // if (!msgModel.interfaces  ||  msgModel.interfaces.indexOf(MESSAGE) === -1)
@@ -9153,7 +9137,7 @@ if (!res[SIG]  &&  res._message)
     if (batch)
       this.dbBatchPut(rId, resource, batch);
     else
-      this.dbPut(rId, resource)
+      await this.dbPut(rId, resource)
     if (!isProfile)
       this.trigger({action: 'updateRow', resource: resource, forceUpdate: true})
   },
@@ -9510,16 +9494,15 @@ if (!res[SIG]  &&  res._message)
     }
   },
 
-  getDriver(me) {
+  async getDriver(me) {
     if (this._loadingEngine) return this._enginePromise
 
     this._loadingEngine = true
 
     if (me.language)
       language = list[utils.getId(me.language)] && this._getItem(utils.getId(me.language))
-
-    return this.loadIdentityAndKeys(me)
-    .then(result => {
+    try {
+      let result = await this.loadIdentityAndKeys(me)
       const { identity, keys, encryptionMaterial } = result
       if (!Keychain) {
         let privkeys = keys.map(k => {
@@ -9532,7 +9515,7 @@ if (!res[SIG]  &&  res._message)
              if (r.id === currentIdentity)
                r.privkeys = privkeys
           })
-          this.dbPut(MY_IDENTITIES, myIdentities)
+          await this.dbPut(MY_IDENTITIES, myIdentities)
         }
         else
           me.privkeys = privkeys
@@ -9549,10 +9532,10 @@ if (!res[SIG]  &&  res._message)
         keys,
         encryption: parseEncryptionMaterial(encryptionMaterial),
       })
-    }, err => {
+    } catch (err) {
       debugger
       throw err
-    })
+    }
   },
   async setupPushNotifications() {
     const node = await this._enginePromise
@@ -9682,9 +9665,9 @@ if (!res[SIG]  &&  res._message)
 
     this.monitorLog()
   },
-  dbPut(key, value) {
+  async dbPut(key, value) {
     let v = utils.isMessage(value)  &&  value[TYPE] !== CONFIRM_PACKAGE_REQUEST ? utils.optimizeResource(value, true) : value
-    return db.put(key, v)
+    await db.put(key, v)
   },
   dbBatchPut(key, value, batch) {
     let v = utils.isMessage(value)  &&  value[TYPE] !== CONFIRM_PACKAGE_REQUEST ? utils.optimizeResource(value, true) : value
@@ -9876,7 +9859,7 @@ if (!res[SIG]  &&  res._message)
             let notMe = this._getItem(notMeId)
             if (notMe  &&  !notMe.bot) {
               ++notMe._unread
-              this.dbPut(utils.getId(notMe), notMe)
+              await this.dbPut(utils.getId(notMe), notMe)
               // this.trigger({action: 'updateRow', resource: notMe})
             }
             if (isReadOnlyChat  &&  context) {
@@ -9888,7 +9871,7 @@ if (!res[SIG]  &&  res._message)
                 context.from = this.buildRef(contact)
                 let contextId = utils.getId(context)
                 this._setItem(contextId, context)
-                this.dbPut(contextId, context)
+                await this.dbPut(contextId, context)
                 this.trigger({action: 'updateRow', resource: context, forceUpdate: true})
               }
             }
@@ -10585,7 +10568,7 @@ await fireRefresh(val.from.organization)
       this._setItem(msgId, msg)
       this.addMessagesToChat(utils.getId(org), msg)
       this.trigger({action: 'addMessage', resource: msg})
-      db.put(msgId, msg)
+      await db.put(msgId, msg)
     }
     this.onAddMessage({
       msg: {
@@ -11054,6 +11037,7 @@ await fireRefresh(val.from.organization)
       // let forms = await this.searchMessages({modelName: MESSAGE, to: r})
     }
     let pa = await Q.all(promises)
+    let putPromises = []
     pa.forEach((forms, i) => {
       let r = l[i]
       if (!forms  ||  r._approved)
@@ -11061,14 +11045,15 @@ await fireRefresh(val.from.organization)
       let result = forms.map((rr) => {
         if (rr[TYPE] === APPLICATION_SUBMITTED) {
           r._appSubmitted = true
-          this.dbPut(utils.getId(r), r)
+          putPromises.push(this.dbPut(utils.getId(r), r))
         }
         else if (this.getModel(rr[TYPE]).subClassOf === MY_PRODUCT) {
           r._approved = true
-          this.dbPut(utils.getId(r), r)
+          putPromises.push(this.dbPut(utils.getId(r), r))
         }
       })
     })
+    await Q.all(putPromises)
     l.sort((a, b) => b._sentTime - a._sentTime)
     return l
   },
@@ -11094,7 +11079,7 @@ await fireRefresh(val.from.organization)
       err = err
     })
   },
-  onForgetMe(resource, noTrigger) {
+  async onForgetMe(resource, noTrigger) {
     // var me = utils.getMe()
     var msg = {
       [TYPE]: FORGET_ME,
@@ -11111,7 +11096,7 @@ await fireRefresh(val.from.organization)
       let id = utils.makeId(IDENTITY, rep[ROOT_HASH])
       let r = this._getItem(id)
 
-      let sendParams = this.packMessage(msg, me, r)
+      let sendParams = await this.packMessage(msg, me, r)
       promises.push(this.meDriverSignAndSend(sendParams)
 
       // promises.push(this.meDriverSignAndSend({
@@ -11120,44 +11105,40 @@ await fireRefresh(val.from.organization)
       // })
     )}
 
-    return Q.all(promises)
-    .then((results) => {
-      if (noTrigger)
-        return
-      // var result = this.searchMessages({to: resource, modelName: MESSAGE});
-      msg[ROOT_HASH] = results[0].object.permalink
-      msg[CUR_HASH] = results[0].object.link
-      msg.message = translate('inProgress')
-      // reverse to and from to display as from assistent
-      let pid = utils.makeId(PROFILE, results[0].message.recipient)
-      msg.from = this.buildRef(list[pid].value)
-      msg.to = this.buildRef(me)
-      msg[IS_MESSAGE] = true
+    let results = await Q.all(promises)
 
-      let mId = utils.getId(msg)
-      list[mId] = {
-        key: mId,
-        value: msg
-      }
-      let batch = []
+    if (noTrigger)
+      return
+    // var result = this.searchMessages({to: resource, modelName: MESSAGE});
+    msg[ROOT_HASH] = results[0].object.permalink
+    msg[CUR_HASH] = results[0].object.link
+    msg.message = translate('inProgress')
+    // reverse to and from to display as from assistent
+    let pid = utils.makeId(PROFILE, results[0].message.recipient)
+    msg.from = this.buildRef(list[pid].value)
+    msg.to = this.buildRef(me)
+    msg[IS_MESSAGE] = true
 
-      this.addMessagesToChat(utils.getId(rId), msg)
+    let mId = utils.getId(msg)
+    list[mId] = {
+      key: mId,
+      value: msg
+    }
+    let batch = []
 
-      batch.push({type: 'put', key: mId, value: msg})
-      // result.push(msg)
-      this.trigger({action: 'addMessage', to: resource, resource: msg, isChat: true})
+    this.addMessagesToChat(utils.getId(rId), msg)
 
-      resource.lastMessage = translate('requestedForgetMe')
-      resource.lastMessageTime = new Date().getTime()
-      resource.lastMessageType = FORGET_ME
-      this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
+    batch.push({type: 'put', key: mId, value: msg})
+    // result.push(msg)
+    this.trigger({action: 'addMessage', to: resource, resource: msg, isChat: true})
 
-      batch.push({type: 'put', key: rId, value: resource})
-      db.batch(batch)
-    })
-    .catch(function (err) {
-      debugger
-    })
+    resource.lastMessage = translate('requestedForgetMe')
+    resource.lastMessageTime = new Date().getTime()
+    resource.lastMessageType = FORGET_ME
+    this.trigger({action: 'list', modelName: ORGANIZATION, list: this.searchNotMessages({modelName: ORGANIZATION}), forceUpdate: true})
+
+    batch.push({type: 'put', key: rId, value: resource})
+    await db.batch(batch)
   },
 
   getModels() {
