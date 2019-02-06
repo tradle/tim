@@ -1118,7 +1118,7 @@ class MessageList extends Component {
   paintMenuButton() {
     let { application } = this.props
     if (application) {
-      if (!utils.isRM(application)  ||  this.state.additionalForms) // !this.hasAdditionalForms(application))
+      if (!utils.isRM(application)  ||  !this.state.additionalForms) // !this.hasAdditionalForms(application))
         return
     }
     return  <View style={[buttonStyles.menuButton, {opacity: 0.4}]}>
