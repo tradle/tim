@@ -99,7 +99,9 @@ class MessageList extends Component {
       allLoaded: false
     }
     if (application  &&  utils.isRM(application)) {
-      this.state.additionalForms = this.getAdditionalForms(application)
+      let additionalForms = this.getAdditionalForms(application)
+      if (additionalForms.length)
+        this.state.additionalForms = additionalForms.map(f => ({id: f}))
     }
     this.onLoadEarlierMessages = debounce(this.onLoadEarlierMessages.bind(this), 200)
     this.shareWith = this.shareWith.bind(this)
