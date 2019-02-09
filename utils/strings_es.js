@@ -6,7 +6,6 @@ module.exports = {
   "invalidPropertyValue": "valor no válido",
   "confirmRevoke": "¿Pedir {1} para eliminar este documento de sus registros?",
   "useTouchIdAndGesturePassword": "Habilitar la identificación táctil y el gesto",
-  "formChooser": "Lista de formularios",
   "submittingForm": "Enviado {1}",
   "viewTerms": "Por favor vea los Términos y Condiciones",
   "addServerUrl": "Añadir URL del servidor",
@@ -330,5 +329,6 @@ module.exports = {
   "wipeTheAppData": "Borrar los datos de la aplicación",
   "enterPasswordOrWipeOutTheAppData": "Introduzca la contraseña o borre los datos de la aplicación",
   "dateInTheFutureError": "{1} está en el futuro",
-  "pleaseChooseDT": "Por favor, elija el tipo de documento primero"
+  "pleaseChooseDT": "Por favor, elija el tipo de documento primero",
+  "formChooser": "Solicitar un formulario"
 }

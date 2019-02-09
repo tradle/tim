@@ -190,7 +190,6 @@ module.exports = {
   "viewTerms": "Mangyaring tingnan ang Mga Tuntunin at Kundisyon",
   "errorNotification": "Ang abiso ng error ay ipinadala sa customer upang itama",
   "useTouchId": "Paganahin ang Touch ID",
-  "formChooser": "Listahan ng form",
   "providerIsOffline": "{1} ay offline",
   "receiveNotifications?": "Gusto mo bang makatanggap ng mga notification?",
   "independentBlockchainViewer": "Independent viewer blockchain",
@@ -330,5 +329,6 @@ module.exports = {
   "wipeTheAppData": "Linisan ang data ng app",
   "enterPasswordOrWipeOutTheAppData": "Ipasok ang password o punasan ang data ng app",
   "dateInTheFutureError": "{1} ay sa hinaharap",
-  "pleaseChooseDT": "Mangyaring pumili ng uri ng dokumento muna"
+  "pleaseChooseDT": "Mangyaring pumili ng uri ng dokumento muna",
+  "formChooser": "Humiling ng isang Form"
 }

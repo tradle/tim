@@ -131,7 +131,6 @@ module.exports = {
   "customerWaiting": "{1} is de chat binnengekomen",
   "deviceDoesNotHaveMyKeys": "De ontvangen identiteit heeft mijn sleutels niet",
   "passwordsDontMatch": "Wachtwoorden komen niet overeen",
-  "formChooser": "Lijst met formulieren",
   "neverMissAMessage": "Mis nooit meer een bericht",
   "changePassword": "Wachtwoord wijzigen",
   "nl": "Nederlands",
@@ -330,5 +329,6 @@ module.exports = {
   "wipeTheAppData": "Wis de app-gegevens",
   "enterPasswordOrWipeOutTheAppData": "Voer een wachtwoord in of wis de app-gegevens",
   "dateInTheFutureError": "{1} is in de toekomst",
-  "pleaseChooseDT": "Kies eerst het documenttype"
+  "pleaseChooseDT": "Kies eerst het documenttype",
+  "formChooser": "Vraag een formulier aan"
 }

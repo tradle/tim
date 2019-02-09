@@ -240,7 +240,6 @@ module.exports = {
   "noConnectionForNewProduct": "{1}, {appName} требует работающего подключения к Интернету для заполнения заявки {2}.",
   "createNext": "Заполните еще одну форму \"{1}\"",
   "pairingRequestWasProcesseed": "Запрос на сопряжение обработан",
-  "formChooser": "Список форм",
   "enablePasscodeFirst": "Похоже, у вас не включен пароль устройства. Без этого это приложение не сможет защитить ваши данные! Пожалуйста, включите его, прежде чем нажимать ОК",
   "turnTouchIdOn": "Включить Touch ID",
   "irrefutableProofs": "Неопровержимые доказательства",
@@ -330,5 +329,6 @@ module.exports = {
   "wipeTheAppData": "Протрите данные приложения",
   "enterPasswordOrWipeOutTheAppData": "Введите пароль или стереть данные приложения",
   "dateInTheFutureError": "{1} в будущем",
-  "pleaseChooseDT": "Пожалуйста, сначала выберите тип документа"
+  "pleaseChooseDT": "Пожалуйста, сначала выберите тип документа",
+  "formChooser": "Запросить форму"
 }

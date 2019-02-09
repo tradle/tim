@@ -121,7 +121,6 @@ module.exports = {
   "done": "Làm xong",
   "noScanningOnAndroid": "Sắp có tài liệu trên Android.",
   "unreadMessages": "Bạn có tin nhắn chưa đọc",
-  "formChooser": "Danh sách mẫu",
   "showQR": "Mã QR của tôi",
   "iproovFailedTitle": "Rất tiếc! Đã xảy ra lỗi",
   "importingData": "Nhập tài liệu {1} từ {2}",
@@ -330,5 +329,6 @@ module.exports = {
   "enterPasswordOrWipeOutTheAppData": "Nhập mật khẩu hoặc xóa dữ liệu ứng dụng",
   "wipeTheAppData": "Xóa dữ liệu ứng dụng",
   "dateInTheFutureError": "{1} là trong tương lai",
-  "pleaseChooseDT": "Vui lòng chọn loại tài liệu đầu tiên"
+  "pleaseChooseDT": "Vui lòng chọn loại tài liệu đầu tiên",
+  "formChooser": "Yêu cầu một hình thức"
 }

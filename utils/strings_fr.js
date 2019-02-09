@@ -25,7 +25,6 @@ module.exports = {
   "typeMessage": "Tapez un message",
   "shareOneOfMany": "Sinon, partagez ci-dessous",
   "useTouchIdAndGesturePassword": "Activer Touch ID et Gesture",
-  "formChooser": "Liste de formulaire",
   "formListError": "Indisponible",
   "restartApp": "Redémarrer l'application",
   "learnMoreServerIsDown": "Tous les messages que vous écrivez seront automatiquement envoyés à {1} lorsqu'ils seront mis en ligne.",
@@ -330,5 +329,6 @@ module.exports = {
   "wipeTheAppData": "Effacer les données de l'application",
   "enterPasswordOrWipeOutTheAppData": "Entrez le mot de passe ou effacez les données de l'application",
   "dateInTheFutureError": "{1} est dans le futur",
-  "pleaseChooseDT": "Choisissez d'abord le type de document"
+  "pleaseChooseDT": "Choisissez d'abord le type de document",
+  "formChooser": "Demander un formulaire"
 }

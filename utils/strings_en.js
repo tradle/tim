@@ -86,7 +86,7 @@ module.exports = {
     "verifierHelp": "Click 'Done' button after reviewing the form. If some fields require correction check them them first and then click the 'Done' button",
     "errorNotification": "Error notification has been sent to the customer to correct",
     "areYouSureAboutNextForm": "Have you finished adding {1}?",
-    "formChooser": "Form list",
+    "formChooser": "Request a Form",
     "showQR": "My QR code",
     "useTouchId": "Enable Touch ID",
     "useGesturePassword": "Enable Gesture Password",
