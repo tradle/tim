@@ -98,16 +98,16 @@ debug.lineToPlainText = line => debug.stripColors(line)
   .map(line => Array.isArray(line) ? line.join(' ') : line)
   .join('\n')
 
-debug.post = function (url) {
-  const body = debug.getText()
-  return fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'text'
-    },
-    body
+debug.post = (url, data) => fetch(url, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    ...data,
+    log: data.log || debug.getText()
   })
-}
+})
 
 debug.getColor = function (line) {
   let color
