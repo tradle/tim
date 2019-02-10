@@ -2238,11 +2238,16 @@ var utils = {
   },
   submitLog: async function (noAlert) {
     const me = utils.getMe() || { firstName: '[unknown]', lastName: '[unknown]' }
+    const postOpts = { headers: {} }
+    if (ENV.userLogEndpointAPIKey) {
+      postOpts.headers['x-api-key'] = ENV.userLogEndpointAPIKey
+    }
+
     try {
-      const res = await submitLog(ENV.serverToSendLog + '?' + querystring.stringify({
+      const res = await submitLog(ENV.userLogEndpoint + '?' + querystring.stringify({
         firstName: me.firstName,
         lastName: me.lastName
-      }))
+      }), postOpts)
 
       if (res.status > 300) {
         const why = await res.text()

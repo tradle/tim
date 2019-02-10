@@ -100,7 +100,9 @@ const merged = extend({
 
     return __DEV__
   },
-  serverToSendLog: 'https://azure1.tradle.io/userlog',
+  // userLogEndpoint: 'https://azure1.tradle.io/userlog',
+  userLogEndpoint: 'https://mc84jjb1a6.execute-api.us-east-1.amazonaws.com/dev/logs/userlog',
+  userLogEndpointAPIKey: null,
   showMyQRCode: true,
   homePage: true,
   useKeychain: true,
