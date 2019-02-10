@@ -2239,10 +2239,10 @@ var utils = {
   submitLog: async function (noAlert) {
     const me = utils.getMe() || { firstName: '[unknown]', lastName: '[unknown]' }
     try {
-      const res = await submitLog(ENV.userLogEndpoint, {
+      const res = await submitLog(ENV.userLogEndpoint + '?' + querystring.stringify({
         firstName: me.firstName,
         lastName: me.lastName
-      })
+      }))
 
       if (res.status > 300) {
         const why = await res.text()
