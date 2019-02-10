@@ -97,12 +97,14 @@ debug.getText = () => debug
 debug.lineToPlainText = line => debug.stripColors(line)
   .map(line => Array.isArray(line) ? line.join(' ') : line)
 
-debug.post = url => {
+debug.post = (url, opts={}) => {
   const log = debug.getText()
+  const { headers={} } = opts
   return fetch(url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'text/plain'
+      'Content-Type': 'text/plain',
+      ...headers,
     },
     body: log
   })
